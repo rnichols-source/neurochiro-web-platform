@@ -18,6 +18,7 @@ function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const errorParam = searchParams.get("error");
+  const redirectParam = searchParams.get("redirect");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -100,7 +101,7 @@ function LoginContent() {
         <form 
           action={async (formData) => {
             setIsPending(true);
-            await login(formData);
+            await login(formData, redirectParam);
             setIsPending(false);
           }} 
           className="space-y-4"

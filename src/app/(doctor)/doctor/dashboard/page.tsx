@@ -28,6 +28,7 @@ import { twMerge } from "tailwind-merge";
 import { useDoctorTier } from "@/context/DoctorTierContext";
 import { getDoctorDashboardStats } from "./actions";
 import OnboardingTracker from "@/components/doctor/OnboardingTracker";
+import ProductTutorial from "@/components/dashboard/ProductTutorial";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -106,6 +107,7 @@ export default function DoctorDashboard() {
 
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">
+      <ProductTutorial />
       {/* Welcome & Global Stats */}
       <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>

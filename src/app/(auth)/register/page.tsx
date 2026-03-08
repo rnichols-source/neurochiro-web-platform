@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, Suspense } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRegion } from "@/context/RegionContext";
@@ -19,375 +19,512 @@ import {
   Check,
   Trophy,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Lock,
+  Mail,
+  MapPin,
+  Globe,
+  Stethoscope,
+  ChevronRight,
+  Info
 } from "lucide-react";
-import { Suspense } from "react";
-import { register, signInWithProvider } from "../actions/auth";
+import { createAccountAction, updateProfileAction, signInWithProvider } from "../actions/auth";
+import { STRIPE_PAYMENT_LINKS } from "@/lib/stripe-links";
+import { createClient } from "@/lib/supabase";
 
-type Role = "student" | "doctor" | "patient" | "admin";
-type Tier = "free" | "foundation" | "professional" | "accelerator" | "starter" | "growth" | "pro";
+type Role = "student" | "doctor" | "patient" | "vendor";
+type Step = "account" | "profile" | "payment";
 
 function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const errorParam = searchParams.get("error");
   const { region } = useRegion();
-  const [step, setStep] = useState(1);
-  const [role, setRole] = useState<Role | null>(null);
-  const [tier, setTier] = useState<Tier>("free");
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
-  const [formData, setBaseFormData] = useState({
+
+  // Params from pricing page
+  const initialRole = (searchParams.get("role") as Role) || "doctor";
+  const initialTier = searchParams.get("tier") || "starter";
+  const initialBilling = (searchParams.get("billing") as "monthly" | "annual") || "monthly";
+
+  const [step, setStep] = useState<Step>("account");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Check for existing session on mount
+  useEffect(() => {
+    const checkUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        // If logged in, skip Step 1 but stay on Step 2 (Profile)
+        setStep("profile");
+      }
+    };
+    checkUser();
+  }, []);
+
+  // Restore session if available
+  useEffect(() => {
+    const draft = localStorage.getItem('nc_registration_draft');
+    if (draft) {
+      const parsed = JSON.parse(draft);
+      if (parsed.userId && parsed.role === initialRole && parsed.tier === initialTier) {
+        setUserId(parsed.userId);
+        setStep(parsed.step as Step);
+      }
+    }
+  }, [initialRole, initialTier]);
+
+  // Form States
+  const [accountData, setAccountData] = useState({
     name: "",
     email: "",
     password: "",
+  });
+
+  const [profileData, setProfileData] = useState({
+    clinicName: "",
+    website: "",
+    city: "",
+    specialty: "",
     school: "",
     gradYear: "",
-    clinicName: "",
   });
-  const [isPending, setIsPending] = useState(false);
 
-  const handleRoleSelect = (selectedRole: Role) => {
-    setRole(selectedRole);
-    if (selectedRole === "patient") {
-      setTier("free");
-      setStep(3); // Skip tier selection for patients as they are all free
-    } else if (selectedRole === "student") {
-      setTier("professional");
-      setStep(2);
-    } else if (selectedRole === "doctor") {
-      setTier("growth");
-      setStep(2);
+  const steps = [
+    { id: "account", label: "Create Account", icon: User },
+    { id: "profile", label: "Profile Setup", icon: Stethoscope },
+    { id: "payment", label: "Payment", icon: ShieldCheck },
+  ];
+
+  const currentStepIndex = steps.findIndex(s => s.id === step);
+
+  // --- Step 1: Create Account ---
+  const handleCreateAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsPending(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("name", accountData.name);
+    formData.append("email", accountData.email);
+    formData.append("password", accountData.password);
+
+    const result = await createAccountAction(formData, initialRole, initialTier, initialBilling);
+
+    if (result.error) {
+      setError(result.error);
+      setIsPending(false);
     } else {
-      router.push("/");
+      // Result success, user established
+      setUserId(result.user.id);
+      setStep("profile");
+      setIsPending(false);
+      // Optional: Store draft progress in local storage
+      localStorage.setItem('nc_registration_draft', JSON.stringify({
+        userId: result.user.id,
+        role: initialRole,
+        tier: initialTier,
+        billing: initialBilling,
+        step: "profile"
+      }));
     }
   };
 
-  const handleTierSelect = (selectedTier: Tier) => {
-    setTier(selectedTier);
-    setStep(3);
+  // --- Step 2: Save Profile ---
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsPending(true);
+    
+    if (userId) {
+      const result = await updateProfileAction(userId, {
+        ...profileData,
+        role: initialRole,
+        tier: initialTier
+      });
+      if (result.error) {
+        setError(result.error);
+        setIsPending(false);
+        return;
+      }
+    }
+
+    setStep("payment");
+    setIsPending(false);
+    
+    // Update local storage
+    const draft = localStorage.getItem('nc_registration_draft');
+    if (draft) {
+      const parsed = JSON.parse(draft);
+      localStorage.setItem('nc_registration_draft', JSON.stringify({ ...parsed, step: "payment" }));
+    }
   };
 
-  const studentTiers = [
-    {
-      id: "free",
-      name: "Free",
-      price: "0",
-      desc: "Basic entry into the student ecosystem.",
-      icon: Target,
-      features: ["Basic Student Profile", "Browse Clinic Directory", "Browse Global Seminars", "Public Community Access"],
-      color: "bg-white",
-      border: "border-gray-100",
-      featured: false
-    },
-    {
-      id: "foundation",
-      name: "Foundation",
-      price: region.pricing.student.foundation[billingCycle],
-      desc: "Explore the ecosystem and find your path.",
-      icon: Trophy,
-      features: ["Advanced Profile Features", "Save Clinics & Seminars", "Direct Messaging Basics", "Basic Progress Tracking"],
-      color: "bg-white",
-      border: "border-gray-100",
-      featured: false
-    },
-    {
-      id: "professional",
-      name: "Professional",
-      price: region.pricing.student.professional[billingCycle],
-      desc: "The core career operating system for students.",
-      icon: Zap,
-      features: ["Full Profile Visibility", "Unlimited Direct Messaging", "Job & Preceptorship Apps", "Intro Video & Resume Upload", "Career Readiness Tracking"],
-      color: "bg-neuro-navy text-white",
-      border: "border-neuro-orange",
-      featured: true,
-      tag: "Most Popular"
-    },
-    {
-      id: "accelerator",
-      name: "Accelerator",
-      price: region.pricing.student.accelerator[billingCycle],
-      desc: "A premium advantage for serious career builders.",
-      icon: Sparkles,
-      features: ["Priority Clinic Matching", "Advanced Contract Lab", "Offer Evaluation Tool", "Featured Student Profile", "Direct Mentorship Requests"],
-      color: "bg-white",
-      border: "border-gray-100",
-      featured: false
+  // --- Step 3: Redirect to Stripe ---
+  const handleFinalizePayment = () => {
+    setIsPending(true);
+    
+    // For free tiers, go straight to success
+    if (initialTier === "free") {
+      router.push(`/payment-success?role=${initialRole}&tier=${initialTier}`);
+      return;
     }
-  ];
 
-  const doctorTiers = [
-    {
-      id: "starter",
-      name: "Starter",
-      price: region.pricing.doctor.starter[billingCycle],
-      desc: "Establish your presence in the community.",
-      icon: Target,
-      features: ["Standard Directory Listing", "Basic Practice Profile", "Referral Network Access", "Basic Profile Analytics"],
-      color: "bg-white",
-      border: "border-gray-100",
-      featured: false
-    },
-    {
-      id: "growth",
-      name: "Growth",
-      price: region.pricing.doctor.growth[billingCycle],
-      desc: "The complete toolkit for expanding clinical influence.",
-      icon: Zap,
-      features: ["Verified Badge", "Student Recruiting Tools", "Seminar Hosting (Public)", "Mentorship Listing", "Traffic Source Analytics"],
-      color: "bg-neuro-navy text-white",
-      border: "border-neuro-orange",
-      featured: true,
-      tag: "Most Popular"
-    },
-    {
-      id: "pro",
-      name: "Pro",
-      price: region.pricing.doctor.pro[billingCycle],
-      desc: "Dominant visibility and advanced clinical leadership.",
-      icon: Sparkles,
-      features: ["Featured Placement", "Priority Seminar Visibility", "Unlimited Job Postings", "Candidate Search Access", "Advanced Analytics Suite"],
-      color: "bg-white",
-      border: "border-gray-100",
-      featured: false
-    }
-  ];
+    // Get the correct Stripe link
+    const links = initialRole === "doctor" ? STRIPE_PAYMENT_LINKS.doctor : STRIPE_PAYMENT_LINKS.student;
+    const stripeUrl = (links as any)[initialTier][initialBilling];
+    
+    // Append user_id to stripe metadata if possible, or just redirect
+    // Stripe links are static in this demo, so we redirect.
+    window.location.href = stripeUrl;
+  };
 
   return (
     <div className="min-h-screen bg-neuro-cream flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-neuro-orange/5 blur-[120px] -mr-48 -mt-48"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-neuro-navy/5 blur-[120px] -ml-48 -mb-48"></div>
+      {/* Background elements */}
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-neuro-orange/5 blur-[160px] -mr-40 -mt-40 rounded-full animate-pulse-slow"></div>
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-neuro-navy/5 blur-[140px] -ml-32 -mb-32 rounded-full"></div>
 
-      <div className={`w-full ${step === 2 ? 'max-w-7xl' : 'max-w-xl'} bg-white rounded-[3rem] shadow-2xl border border-gray-100 p-10 relative z-10 transition-all duration-500`}>
-
-        <div className="flex justify-center gap-2 mb-10">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${step >= i ? 'w-8 bg-neuro-orange' : 'w-2 bg-gray-100'}`}></div>
+      <div className="w-full max-w-2xl bg-white rounded-[4rem] shadow-[0_48px_96px_-16px_rgba(0,0,0,0.12)] border border-white/40 backdrop-blur-sm p-8 md:p-16 relative z-10">
+        
+        {/* Progress Navigation */}
+        <div className="flex items-center justify-between mb-16 relative px-4">
+          <div className="absolute left-10 right-10 top-5 h-0.5 bg-gray-100 -z-10"></div>
+          <div 
+            className="absolute left-10 top-5 h-0.5 bg-neuro-orange transition-all duration-700 ease-in-out -z-10"
+            style={{ width: `${(currentStepIndex / (steps.length - 1)) * (steps.length > 1 ? 84 : 0)}%` }}
+          ></div>
+          
+          {steps.map((s, i) => (
+            <div key={s.id} className="flex flex-col items-center gap-3 relative">
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 bg-white ${
+                currentStepIndex >= i ? "border-neuro-orange text-neuro-orange shadow-[0_0_20px_rgba(214,104,41,0.2)]" : "border-gray-100 text-gray-300"
+              }`}>
+                {currentStepIndex > i ? (
+                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                    <CheckCircle2 className="w-6 h-6 fill-neuro-orange text-white" />
+                  </motion.div>
+                ) : <s.icon className="w-5 h-5" />}
+              </div>
+              <span className={`text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap ${currentStepIndex >= i ? "text-neuro-navy" : "text-gray-300"}`}>
+                Step {i + 2} of 4: {s.label}
+              </span>
+            </div>
           ))}
         </div>
 
-        {step === 1 && (
-          <div className="space-y-8">
-            <div className="text-center">
-              <h1 className="text-3xl font-heading font-black text-neuro-navy mb-2">Welcome to NeuroChiro</h1>
-              <p className="text-gray-500">Choose your entry point into the ecosystem.</p>
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }} 
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-10 p-5 bg-red-50 border border-red-100 rounded-[2rem] flex items-center gap-4 text-red-600 text-sm font-bold"
+          >
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-red-500 shadow-sm">
+              <AlertCircle className="w-4 h-4" />
             </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              <button 
-                onClick={() => handleRoleSelect("student")}
-                className="flex items-center gap-6 p-6 rounded-[2rem] border-2 border-gray-50 hover:border-neuro-orange hover:bg-neuro-orange/5 transition-all group text-left"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                  <GraduationCap className="w-8 h-8" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-neuro-navy">I am a Student</h3>
-                  <p className="text-sm text-gray-500">Access seminars and career tools.</p>
-                </div>
-                <ArrowRight className="w-5 h-5 ml-auto text-gray-300 group-hover:text-neuro-orange group-hover:translate-x-1 transition-all" />
-              </button>
-
-              <button 
-                onClick={() => handleRoleSelect("patient")}
-                className="flex items-center gap-6 p-6 rounded-[2rem] border-2 border-gray-50 hover:border-neuro-orange hover:bg-neuro-orange/5 transition-all group text-left"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-green-600 group-hover:text-white transition-all">
-                  <User className="w-8 h-8" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-neuro-navy">I am a Patient</h3>
-                  <p className="text-sm text-gray-500">Track your clinical progress for free.</p>
-                </div>
-                <ArrowRight className="w-5 h-5 ml-auto text-gray-300 group-hover:text-neuro-orange group-hover:translate-x-1 transition-all" />
-              </button>
-
-              <button 
-                onClick={() => handleRoleSelect("doctor")}
-                className="flex items-center gap-6 p-6 rounded-[2rem] border-2 border-gray-50 hover:border-neuro-orange hover:bg-neuro-orange/5 transition-all group text-left"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-orange-50 flex items-center justify-center text-neuro-orange group-hover:bg-neuro-orange group-hover:text-white transition-all">
-                  <Building2 className="w-8 h-8" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-neuro-navy">I am a Doctor</h3>
-                  <p className="text-sm text-gray-500">List your practice and recruit talent.</p>
-                </div>
-                <ArrowRight className="w-5 h-5 ml-auto text-gray-300 group-hover:text-neuro-orange group-hover:translate-x-1 transition-all" />
-              </button>
-            </div>
-          </div>
+            {error}
+          </motion.div>
         )}
 
-        {step === 2 && (
-          <div className="space-y-8">
-            <button onClick={() => setStep(1)} className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest hover:text-neuro-navy transition-colors">
-              <ChevronLeft className="w-4 h-4" /> Back
-            </button>
-            <div className="text-center">
-              <h2 className="text-3xl font-heading font-black text-neuro-navy mb-2">Choose your membership</h2>
-              <p className="text-gray-500 mb-8">Select the level of access you need.</p>
-              
-              {/* Billing Cycle Toggle */}
-              <div className="flex items-center justify-center gap-4 mb-10">
-                <span className={`text-xs font-black uppercase tracking-widest transition-colors ${billingCycle === 'monthly' ? 'text-neuro-navy' : 'text-gray-400'}`}>Monthly</span>
-                <button 
-                  type="button"
-                  onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
-                  className="w-14 h-7 bg-neuro-navy rounded-full relative p-1 transition-colors hover:bg-neuro-navy-light shadow-inner"
-                >
-                  <motion.div 
-                    animate={{ x: billingCycle === 'monthly' ? 0 : 28 }}
-                    className="w-5 h-5 bg-white rounded-full shadow-lg"
-                  />
-                </button>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs font-black uppercase tracking-widest transition-colors ${billingCycle === 'annual' ? 'text-neuro-navy' : 'text-gray-400'}`}>Annual</span>
-                  <span className="bg-green-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter shadow-sm">2 Months Free</span>
-                </div>
-              </div>
-            </div>
-
-            <div className={`grid grid-cols-1 ${role === "student" ? "md:grid-cols-4" : "md:grid-cols-3"} gap-6`}>
-              {(role === "student" ? studentTiers : doctorTiers).map((t) => (
-                <div 
-                  key={t.id}
-                  onClick={() => handleTierSelect(t.id as Tier)}
-                  className={`${t.color} p-8 rounded-[2rem] border-2 ${t.border} hover:scale-[1.02] cursor-pointer transition-all relative group flex flex-col h-full ${t.featured ? 'shadow-2xl scale-105 z-20' : 'shadow-sm'}`}
-                >
-                  {t.featured && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-neuro-orange text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
-                      {t.tag}
-                    </div>
-                  )}
-                  <div className="mb-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${t.featured ? 'bg-white/10 text-neuro-orange' : 'bg-neuro-orange/10 text-neuro-orange'}`}>
-                      <t.icon className="w-6 h-6" />
-                    </div>
-                    <h3 className={`text-xl font-black ${t.featured ? 'text-white' : 'text-neuro-navy'}`}>{t.name}</h3>
-                    <div className="flex flex-col mt-1">
-                      <div className="flex items-baseline gap-1">
-                        <span className={`text-lg font-black ${t.featured ? 'text-white' : 'text-neuro-navy'}`}>{region.currency.symbol}{t.price}</span>
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${t.featured ? 'text-white/50' : 'text-gray-400'}`}>
-                          / {billingCycle === 'monthly' ? 'month' : 'year'}
-                        </span>
-                      </div>
-                      {billingCycle === 'annual' && t.id !== 'free' && (
-                        <span className="text-[9px] font-bold text-green-500 uppercase tracking-tighter">
-                          Save {region.currency.symbol}{(Number(t.price) / 10) * 2} per year
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <p className={`text-xs mb-6 ${t.featured ? 'text-gray-300' : 'text-gray-500'}`}>{t.desc}</p>
-                  <ul className="space-y-3 mb-8 flex-1">
-                    {t.features.map((f, i) => (
-                      <li key={i} className={`flex items-start gap-2 text-[10px] font-bold ${t.featured ? 'text-gray-200' : 'text-gray-400'}`}>
-                        <div className={`mt-0.5 w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${t.featured ? 'bg-neuro-orange/20 text-neuro-orange' : 'bg-green-50 text-green-500'}`}>
-                          <Check className="w-2.5 h-2.5 stroke-[4px]" />
-                        </div>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className={`w-full py-3 font-black rounded-xl text-xs text-center transition-all ${t.featured ? 'bg-neuro-orange text-white hover:bg-neuro-orange-light shadow-lg' : 'bg-gray-50 text-neuro-navy group-hover:bg-gray-100'}`}>
-                    Select {t.name}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="space-y-8">
-            <button onClick={() => role === "patient" ? setStep(1) : setStep(2)} className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest hover:text-neuro-navy transition-colors">
-              <ChevronLeft className="w-4 h-4" /> Back
-            </button>
-            <div className="text-center">
-              <h2 className="text-3xl font-heading font-black text-neuro-navy mb-2">Create your account</h2>
-              <p className="text-gray-500">You're joining as a <span className="font-bold text-neuro-orange capitalize">{role === "patient" ? "Free Patient" : `${billingCycle} ${tier} ${role}`}</span>.</p>
-            </div>
-
-            <div className="space-y-3 mb-8">
-              <button 
-                onClick={() => signInWithProvider('google')}
-                className="w-full py-4 px-6 border-2 border-gray-100 rounded-2xl flex items-center justify-center gap-3 text-sm font-bold text-neuro-navy hover:bg-gray-50 transition-all"
-              >
-                <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
-                Sign up with Google
-              </button>
-            </div>
-
-            <div className="relative flex items-center gap-4 mb-8">
-              <div className="flex-1 h-px bg-gray-100"></div>
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Or create with email</span>
-              <div className="flex-1 h-px bg-gray-100"></div>
-            </div>
-
-            {errorParam && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 text-sm font-bold">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                {decodeURIComponent(errorParam)}
-              </div>
-            )}
-
-            <form 
-              action={async (formData) => {
-                setIsPending(true);
-                await register(formData, role as string, tier as string, billingCycle);
-                setIsPending(false);
-              }} 
-              className="space-y-4"
+        <AnimatePresence mode="wait">
+          {/* STEP 1: ACCOUNT CREATION */}
+          {step === "account" && (
+            <motion.div
+              key="account"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.5 }}
+              className="space-y-10"
             >
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Full Name</label>
-                <input name="name" type="text" required autoComplete="name" placeholder="John Doe" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20" value={formData.name} onChange={(e) => setBaseFormData({...formData, name: e.target.value})} />
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-neuro-orange/10 rounded-full mb-6">
+                  <Sparkles className="w-4 h-4 text-neuro-orange fill-current" />
+                  <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest">Step 1: Identity</span>
+                </div>
+                <h1 className="text-4xl md:text-5xl font-heading font-black text-neuro-navy mb-4 tracking-tight leading-tight">Create Your Account</h1>
+                <p className="text-gray-500 text-lg font-medium">First, let's establish your NeuroChiro credentials.</p>
               </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Email Address</label>
-                <input name="email" type="email" required autoComplete="email" placeholder="john@example.com" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20" value={formData.email} onChange={(e) => setBaseFormData({...formData, email: e.target.value})} />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button 
+                  onClick={() => signInWithProvider('google')}
+                  className="py-4 px-6 border-2 border-gray-100 rounded-[2rem] flex items-center justify-center gap-3 text-sm font-bold text-neuro-navy hover:bg-gray-50 transition-all hover:border-neuro-navy/20"
+                >
+                  <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
+                  Google
+                </button>
+                <button 
+                  onClick={() => signInWithProvider('apple')}
+                  className="py-4 px-6 border-2 border-gray-100 rounded-[2rem] flex items-center justify-center gap-3 text-sm font-bold text-neuro-navy hover:bg-gray-50 transition-all hover:border-neuro-navy/20"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+                  Apple
+                </button>
               </div>
-              
-              {role === "student" && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">School</label>
-                    <input name="school" type="text" placeholder="Life University" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20" value={formData.school} onChange={(e) => setBaseFormData({...formData, school: e.target.value})} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Grad Year</label>
-                    <input name="gradYear" type="text" placeholder="2027" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20" value={formData.gradYear} onChange={(e) => setBaseFormData({...formData, gradYear: e.target.value})} />
+
+              <div className="relative flex items-center gap-6">
+                <div className="flex-1 h-px bg-gray-100"></div>
+                <span className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">Or use email</span>
+                <div className="flex-1 h-px bg-gray-100"></div>
+              </div>
+
+              <form onSubmit={handleCreateAccount} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Full Name</label>
+                  <div className="relative group">
+                    <User className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-neuro-orange transition-colors" />
+                    <input 
+                      type="text" required placeholder="Dr. Raymond Nichols"
+                      className="w-full pl-16 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
+                      value={accountData.name}
+                      onChange={(e) => setAccountData({...accountData, name: e.target.value})}
+                    />
                   </div>
                 </div>
-              )}
-
-              {role === "doctor" && (
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Clinic Name</label>
-                  <input name="clinicName" type="text" placeholder="Neuro-Life Wellness" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20" value={formData.clinicName} onChange={(e) => setBaseFormData({...formData, clinicName: e.target.value})} />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Email Address</label>
+                  <div className="relative group">
+                    <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-neuro-orange transition-colors" />
+                    <input 
+                      type="email" required placeholder="raymond@neurochiro.co"
+                      className="w-full pl-16 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
+                      value={accountData.email}
+                      onChange={(e) => setAccountData({...accountData, email: e.target.value})}
+                    />
+                  </div>
                 </div>
-              )}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Create Password</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-neuro-orange transition-colors" />
+                    <input 
+                      type="password" required placeholder="••••••••"
+                      className="w-full pl-16 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
+                      value={accountData.password}
+                      onChange={(e) => setAccountData({...accountData, password: e.target.value})}
+                    />
+                  </div>
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Password</label>
-                <input name="password" type="password" required autoComplete="new-password" placeholder="••••••••" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20" value={formData.password} onChange={(e) => setBaseFormData({...formData, password: e.target.value})} />
+                <button 
+                  type="submit" disabled={isPending}
+                  className="w-full py-6 bg-neuro-navy text-white font-black rounded-[2rem] hover:bg-neuro-navy-light transition-all shadow-2xl shadow-neuro-navy/20 mt-8 uppercase tracking-[0.2em] text-sm disabled:opacity-70 flex items-center justify-center gap-3 group"
+                >
+                  {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                    <>
+                      Establish Account
+                      <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </button>
+              </form>
+            </motion.div>
+          )}
+
+          {/* STEP 2: PROFILE SETUP */}
+          {step === "profile" && (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              className="space-y-10"
+            >
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-neuro-orange/10 rounded-full mb-6">
+                  <Stethoscope className="w-4 h-4 text-neuro-orange fill-current" />
+                  <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest">Step 2: Profile</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-heading font-black text-neuro-navy mb-4 tracking-tight leading-tight">Tell us about yourself</h2>
+                <p className="text-gray-500 text-lg font-medium">This helps us customize your {initialRole} experience.</p>
               </div>
 
-              <button 
-                type="submit" 
-                disabled={isPending}
-                className="w-full py-5 bg-neuro-navy text-white font-black rounded-2xl hover:bg-neuro-navy-light transition-all shadow-xl shadow-neuro-navy/20 mt-6 uppercase tracking-widest disabled:opacity-70 flex items-center justify-center gap-2"
-              >
-                {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Registration"}
-              </button>
-            </form>
-          </div>
-        )}
+              <form onSubmit={handleSaveProfile} className="space-y-6">
+                {initialRole === "doctor" ? (
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Clinic Name</label>
+                      <div className="relative group">
+                        <Building2 className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-neuro-orange transition-colors" />
+                        <input 
+                          type="text" required placeholder="Neuro-Life Wellness"
+                          className="w-full pl-16 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
+                          value={profileData.clinicName}
+                          onChange={(e) => setProfileData({...profileData, clinicName: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">City</label>
+                        <div className="relative group">
+                          <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-neuro-orange transition-colors" />
+                          <input 
+                            type="text" required placeholder="Austin"
+                            className="w-full pl-16 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
+                            value={profileData.city}
+                            onChange={(e) => setProfileData({...profileData, city: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Website</label>
+                        <div className="relative group">
+                          <Globe className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-neuro-orange transition-colors" />
+                          <input 
+                            type="text" placeholder="https://..."
+                            className="w-full pl-16 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
+                            value={profileData.website}
+                            onChange={(e) => setProfileData({...profileData, website: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Chiropractic School</label>
+                      <div className="relative group">
+                        <GraduationCap className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-neuro-orange transition-colors" />
+                        <input 
+                          type="text" required placeholder="Life University"
+                          className="w-full pl-16 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
+                          value={profileData.school}
+                          onChange={(e) => setProfileData({...profileData, school: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Expected Graduation Year</label>
+                      <input 
+                        type="text" required placeholder="2027"
+                        className="w-full px-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
+                        value={profileData.gradYear}
+                        onChange={(e) => setProfileData({...profileData, gradYear: e.target.value})}
+                      />
+                    </div>
+                  </>
+                )}
 
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-400">Already have an account? <Link href="/login" className="text-neuro-orange font-bold hover:underline">Log In</Link></p>
+                <button 
+                  type="submit" disabled={isPending}
+                  className="w-full py-6 bg-neuro-navy text-white font-black rounded-[2rem] hover:bg-neuro-navy-light transition-all shadow-2xl shadow-neuro-navy/20 mt-8 uppercase tracking-[0.2em] text-sm disabled:opacity-70 flex items-center justify-center gap-3 group"
+                >
+                  {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                    <>
+                      Save & Continue
+                      <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </button>
+              </form>
+            </motion.div>
+          )}
+
+          {/* STEP 3: PAYMENT CONFIRMATION */}
+          {step === "payment" && (
+            <motion.div
+              key="payment"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="space-y-10"
+            >
+              <div className="text-center">
+                <div className="w-24 h-24 bg-neuro-orange/10 rounded-[2.5rem] flex items-center justify-center text-neuro-orange mx-auto mb-8 shadow-inner">
+                  <Sparkles className="w-12 h-12 fill-current" />
+                </div>
+                <h2 className="text-4xl md:text-5xl font-heading font-black text-neuro-navy mb-4 tracking-tight leading-tight">Secure Your Spot</h2>
+                <p className="text-gray-500 text-lg font-medium">Join the elite network of neuro-focused leaders.</p>
+              </div>
+
+              <div className="bg-gray-50 rounded-[3rem] p-10 border border-gray-100 shadow-inner">
+                <div className="flex justify-between items-start mb-8 pb-8 border-b border-gray-200">
+                  <div>
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Selected Membership</span>
+                    <h4 className="text-3xl font-black text-neuro-navy capitalize">{initialTier} {initialRole}</h4>
+                    <div className="flex items-center gap-2 mt-2">
+                       <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                       <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Verified Program</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">{initialBilling} billing</span>
+                    <p className="text-4xl font-black text-neuro-orange">
+                      {region.currency.symbol}{initialRole === "doctor" 
+                        ? (region.pricing.doctor as any)[initialTier][initialBilling] 
+                        : (region.pricing.student as any)[initialTier][initialBilling]
+                      }
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {[
+                    "Instant access to clinical playbooks",
+                    "Global directory verified placement",
+                    "Priority seminar visibility",
+                    "Cancel or upgrade at any time"
+                  ].map((text, i) => (
+                    <div key={i} className="flex items-center gap-4 text-sm font-bold text-neuro-navy/70">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 flex-shrink-0">
+                        <Check className="w-3 h-3" strokeWidth={4} />
+                      </div>
+                      {text}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <button 
+                  onClick={handleFinalizePayment}
+                  disabled={isPending}
+                  className="w-full py-7 bg-neuro-orange text-white font-black rounded-[2rem] hover:bg-neuro-orange-dark transition-all shadow-[0_20px_40px_rgba(214,104,41,0.3)] uppercase tracking-[0.25em] text-sm flex items-center justify-center gap-4 transform hover:-translate-y-1"
+                >
+                  {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+                    <>
+                      <Lock className="w-5 h-5" />
+                      Proceed to Secure Payment
+                    </>
+                  )}
+                </button>
+                <div className="flex flex-col items-center gap-4">
+                   <div className="flex items-center gap-2 text-gray-400">
+                      <Info className="w-4 h-4" />
+                      <p className="text-[10px] font-black uppercase tracking-widest">
+                        Redirecting to Stripe for secure checkout
+                      </p>
+                   </div>
+                   <div className="flex gap-4 opacity-30 grayscale">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-5" />
+                   </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="mt-12 text-center pt-8 border-t border-gray-50">
+          <p className="text-sm text-gray-400 font-medium">
+            Already have an account? <Link href={`/login?redirect=/register&role=${initialRole}&tier=${initialTier}&billing=${initialBilling}`} className="text-neuro-orange font-black hover:underline ml-1">Log In & Continue</Link>
+          </p>
         </div>
       </div>
+      
+      {/* Testimonial Quote */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+        className="mt-12 max-w-lg text-center"
+      >
+        <p className="text-gray-400 italic text-sm">"Joining NeuroChiro was the single best decision for my practice growth this year. The network is unmatched."</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-neuro-navy mt-2">— Dr. Sarah Chen, Life Chiropractic</p>
+      </motion.div>
     </div>
   );
 }
@@ -395,8 +532,9 @@ function RegisterContent() {
 export default function RegisterPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-neuro-cream flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-neuro-orange" />
+      <div className="min-h-screen bg-neuro-cream flex flex-col items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-neuro-orange mb-4" />
+        <p className="text-[10px] font-black text-neuro-navy uppercase tracking-[0.3em]">Initializing Core...</p>
       </div>
     }>
       <RegisterContent />

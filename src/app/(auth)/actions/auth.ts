@@ -3,19 +3,15 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { Automations } from '@/lib/automations'
-
 import { cookies } from 'next/headers'
 
-export async function login(formData: FormData) {
+export async function login(formData: FormData, redirectUrl?: string | null) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const supabase = createServerSupabase()
 
-  // 🛡️ Perspective Bypass Logic (For UX Demo & Audit)
-  // This allows viewing the site from different roles using the sandbox buttons
+  // 🛡️ Perspective Bypass Logic
   if (email.endsWith('@neurochiro.com')) {
-    console.log("[DEMO MODE] Activating perspective bypass for:", email);
-    
     let role = 'public';
     if (email.includes('admin')) role = 'admin';
     else if (email.includes('vendor')) role = 'vendor';
@@ -26,14 +22,15 @@ export async function login(formData: FormData) {
     else if (email.includes('doctor_growth')) role = 'doctor_growth';
     else if (email.includes('doctor')) role = 'doctor_member';
 
-    // Set a secure demo cookie that the proxy will respect
     const cookieStore = await cookies();
     cookieStore.set('nc_demo_role', role, { 
       path: '/', 
       httpOnly: true, 
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 2 // 2 hours
+      maxAge: 60 * 60 * 2
     });
+
+    if (redirectUrl) return redirect(redirectUrl);
 
     if (role === "admin") return redirect("/admin/dashboard");
     if (role === "vendor") return redirect("/vendor/dashboard");
@@ -44,15 +41,14 @@ export async function login(formData: FormData) {
     return redirect("/doctor/dashboard");
   }
 
-  // 🚀 Production Logic (Standard Supabase Auth)
   const { error, data } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
 
-  if (error) {
-    return redirect(`/login?error=auth_failed`)
-  }
+  if (error) return redirect(`/login?error=auth_failed`)
+
+  if (redirectUrl) return redirect(redirectUrl);
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -73,33 +69,30 @@ export async function login(formData: FormData) {
 
 export async function signInWithProvider(provider: 'google' | 'apple') {
   const supabase = createServerSupabase()
-  
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
       redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/callback`,
     },
   })
-
-  if (error) {
-    return redirect(`/login?error=${encodeURIComponent(error.message)}`)
-  }
-
-  if (data.url) {
-    return redirect(data.url)
-  }
+  if (error) return redirect(`/login?error=${encodeURIComponent(error.message)}`)
+  if (data.url) return redirect(data.url)
 }
 
-export async function register(formData: FormData, role: string, tier: string, billingCycle: string = 'monthly') {
+/**
+ * Updated Register Action:
+ * Creates the auth account but doesn't redirect yet.
+ * Returns the user data so the client can continue to Profile Setup.
+ */
+export async function createAccountAction(formData: FormData, role: string, tier: string, billingCycle: string) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const name = formData.get('name') as string
   const supabase = createServerSupabase()
 
+  // Handle local development without Supabase
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    if (role === "doctor") return redirect("/doctor/dashboard")
-    if (role === "student") return redirect("/student/dashboard")
-    return redirect("/")
+    return { success: true, user: { id: 'mock-id', email, name } };
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -115,18 +108,29 @@ export async function register(formData: FormData, role: string, tier: string, b
     }
   })
 
-  if (error) {
-    return redirect(`/register?error=${encodeURIComponent(error.message)}`)
-  }
+  if (error) return { error: error.message };
 
-  // Trigger Welcome Automation
   if (data?.user) {
     Automations.onSignup(data.user.id, email, name);
+    return { success: true, user: data.user };
   }
+
+  return { error: "Failed to create account" };
+}
+
+/**
+ * Saves profile information after account creation but before payment.
+ */
+export async function updateProfileAction(userId: string, profileData: any) {
+  const supabase = createServerSupabase();
   
-  if (role === "doctor") return redirect("/doctor/dashboard")
-  if (role === "student") return redirect("/student/dashboard")
-  if (role === "patient") return redirect("/portal/dashboard")
-  
-  return redirect("/")
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return { success: true };
+
+  const { error } = await supabase
+    .from('profiles')
+    .update(profileData)
+    .eq('id', userId);
+
+  if (error) return { error: error.message };
+  return { success: true };
 }
