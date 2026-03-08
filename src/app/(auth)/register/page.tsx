@@ -316,13 +316,6 @@ function RegisterContent() {
                 <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
                 Sign up with Google
               </button>
-              <button 
-                onClick={() => signInWithProvider('apple')}
-                className="w-full py-4 px-6 bg-black text-white rounded-2xl flex items-center justify-center gap-3 text-sm font-bold hover:bg-gray-900 transition-all"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.152 6.896c-.548 0-1.411-.516-1.411-1.354 0-.772.803-1.355 1.411-1.355.592 0 1.411.583 1.411 1.355 0 .838-.819 1.354-1.411 1.354zm2.322 7.654c0 2.01 1.736 2.7 1.762 2.713-.013.046-.274.945-.933 1.898-.565.827-1.152 1.651-2.082 1.668-.913.016-1.207-.535-2.25-.535-1.044 0-1.37.519-2.233.551-.897.031-1.565-.89-2.133-1.717-1.158-1.673-2.045-4.731-.853-6.792.592-1.023 1.645-1.668 2.776-1.684.864-.016 1.676.582 2.203.582.527 0 1.511-.733 2.543-.63.433.018 1.647.174 2.427 1.21-.061.037-1.452.845-1.452 2.518z"/></svg>
-                Sign up with Apple
-              </button>
             </div>
 
             <div className="relative flex items-center gap-4 mb-8">
