@@ -2,14 +2,15 @@
 
 import Sidebar from "./Sidebar";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
-import { LayoutDashboard, MessageSquare, Bell, User, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Bell, User, ShieldCheck, Menu } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 const navItems = [
   { name: "Home", href: "/student/dashboard", icon: LayoutDashboard },
   { name: "Messages", href: "/student/messages", icon: MessageSquare },
   { name: "Alerts", href: "/student/notifications", icon: Bell },
-  { name: "Profile", href: "/student/profile", icon: User },
+  { name: "Menu", href: "#", icon: Menu, isMenuTrigger: true },
 ];
 
 export default function StudentLayout({
@@ -17,9 +18,11 @@ export default function StudentLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
     <div className="flex flex-col md:flex-row h-screen bg-neuro-cream overflow-hidden">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       {/* Mobile Top Bar */}
       <div className="md:hidden bg-neuro-navy p-4 flex items-center justify-between z-50">
@@ -52,7 +55,10 @@ export default function StudentLayout({
           {children}
         </main>
       </div>
-      <MobileBottomNav items={navItems} />
+      <MobileBottomNav 
+        items={navItems} 
+        onMenuClick={() => setIsSidebarOpen(true)}
+      />
     </div>
   );
 }

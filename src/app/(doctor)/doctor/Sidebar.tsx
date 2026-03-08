@@ -18,18 +18,25 @@ import {
   BarChart3,
   Network,
   Lock,
-  Store
+  Store,
+  X
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useState } from "react";
 import { useDoctorTier } from "@/context/DoctorTierContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 type DoctorTier = "starter" | "growth" | "pro";
+
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
 
 const navItems = [
   { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard, minTier: "starter" },
@@ -46,16 +53,16 @@ const eliteItems = [
   { name: "The Mastermind", href: "https://www.neurochiromastermind.com", icon: Star, highlight: "text-purple-400" },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { tier, setTier } = useDoctorTier();
 
   const tierWeight = { starter: 1, growth: 2, pro: 3 };
 
-  return (
-    <aside className="hidden md:flex w-64 h-screen bg-neuro-navy flex-col border-r border-white/10 shrink-0 relative overflow-y-auto">
+  const SidebarContent = (
+    <div className="flex flex-col h-full bg-neuro-navy">
       {/* Dev Toggle - Only visible on desktop or when sidebar is visible */}
-      <div className="absolute -right-20 top-40 -rotate-90 origin-left z-50">
+      <div className="absolute -right-20 top-40 -rotate-90 origin-left z-50 hidden md:block">
         <div className="bg-neuro-orange p-1 rounded-t-lg flex gap-1 border-x border-t border-white/20 shadow-2xl">
           {(["starter", "growth", "pro"] as DoctorTier[]).map((t) => (
             <button 
@@ -94,6 +101,9 @@ export default function Sidebar() {
             <div key={item.name} className="relative group">
               <Link
                 href={isLocked ? "#" : item.href}
+                onClick={() => {
+                   if (!isLocked && onClose) onClose();
+                }}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200",
                   isActive 
@@ -129,6 +139,7 @@ export default function Sidebar() {
           <Link
             key={item.name}
             href={item.href}
+            onClick={onClose}
             className="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group text-gray-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/5"
           >
             <item.icon className={cn("w-5 h-5", item.highlight)} />
@@ -151,7 +162,10 @@ export default function Sidebar() {
               List your clinic publicly and unlock full recruiting tools.
             </p>
             <button 
-              onClick={() => setTier("growth")}
+              onClick={() => {
+                setTier("growth");
+                if (onClose) onClose();
+              }}
               className="w-full py-2 bg-neuro-orange hover:bg-neuro-orange-light text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               Join Growth
@@ -195,6 +209,45 @@ export default function Sidebar() {
           </button>
         </div>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-64 h-screen flex-col border-r border-white/10 shrink-0 relative overflow-y-auto">
+        {SidebarContent}
+      </aside>
+
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {isOpen && (
+          <div className="fixed inset-0 z-[200] md:hidden">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+              className="absolute inset-0 bg-neuro-navy/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="relative w-64 h-full bg-neuro-navy flex flex-col shadow-2xl overflow-y-auto"
+            >
+              <button 
+                onClick={onClose}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white z-50"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              {SidebarContent}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
