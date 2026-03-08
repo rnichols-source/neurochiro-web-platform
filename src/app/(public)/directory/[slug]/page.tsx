@@ -61,11 +61,6 @@ export default function DoctorProfile() {
     }
   };
 
-  const breadcrumbs = [
-    { label: "Directory", href: "/directory" },
-    { label: doctor.clinic_name, href: `/directory/${doctor.slug}`, active: true }
-  ];
-
   return (
     <div className="min-h-screen bg-neuro-cream pb-32">
       <div className="bg-neuro-navy pt-32 pb-20 px-6 relative overflow-hidden">
@@ -75,7 +70,7 @@ export default function DoctorProfile() {
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="mb-10">
-            <Breadcrumbs items={breadcrumbs} light />
+            <Breadcrumbs light />
           </div>
 
           <div className="flex flex-col lg:flex-row gap-12 items-start text-white">
