@@ -302,5 +302,11 @@ export const Automations = {
   },
   onCampaignCreated: async (userId: string, campaignName: string) => {
     await enqueue('admin_notification', { subject: 'New Campaign Created', html: `<p>User <strong>${userId}</strong> created a new campaign: <strong>${campaignName}</strong>.</p>`});
+  },
+  onPaymentSuccess: async (data: any) => {
+    await enqueue('admin_notification', { subject: 'Payment Succeeded', html: `<p>A new payment was received: ${JSON.stringify(data)}</p>` });
+  },
+  onPaymentFailed: async (data: any) => {
+    await enqueue('admin_notification', { subject: 'Payment Failed', html: `<p>A payment attempt failed: ${JSON.stringify(data)}</p>` });
   }
 };
