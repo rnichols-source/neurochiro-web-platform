@@ -9,7 +9,7 @@ import { useUserPreferences } from "@/context/UserPreferencesContext";
 
 export default function SeminarHub() {
   const { region } = useRegion();
-  const { lastLocation, toggleSave, isSaved } = useUserPreferences();
+  const { lastLocation, setLastLocation, toggleSave, isSaved } = useUserPreferences();
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState(lastLocation || "");
 

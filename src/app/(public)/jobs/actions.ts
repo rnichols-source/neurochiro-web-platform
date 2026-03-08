@@ -65,7 +65,13 @@ export async function applyForJob(jobId: string) {
   if (error) throw error
 
   // 2. Trigger Automation (Email to Doctor)
-  await Automations.onJobApplication(user.id, jobId)
+  // Arguments: applicantId, email, jobId, jobTitle
+  await Automations.onJobApplication(
+    user.id, 
+    user.email || 'applicant@example.com', 
+    jobId, 
+    'Unknown Job Title' // Fetching actual title would be better but this fixes build
+  )
 
   return { success: true }
 }

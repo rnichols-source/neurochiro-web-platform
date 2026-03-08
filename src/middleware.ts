@@ -15,7 +15,7 @@ const MAX_AUTH_REQUESTS = 10; // Strict for login/signup
 const ipCache = new Map<string, { count: number, start: number }>();
 
 export async function middleware(request: NextRequest) {
-  const ip = request.ip || '127.0.0.1';
+  const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
   const now = Date.now();
   const { pathname } = request.nextUrl;
   
@@ -75,7 +75,6 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { pathname } = request.nextUrl
   const matchedBase = Object.keys(routePermissions).find(path => pathname.startsWith(path))
 
   if (matchedBase) {

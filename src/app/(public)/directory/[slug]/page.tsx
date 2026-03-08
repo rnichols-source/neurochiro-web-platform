@@ -1,7 +1,7 @@
 "use client";
 
 import { MOCK_DOCTORS } from "@/lib/mock-data";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -45,7 +45,15 @@ export default function DoctorProfile() {
   };
 
   const handleReferral = async () => {
-    await Automations.onReferralSent("Public_User", doctor.id, "Demo Patient");
+    // Arguments: referrerId, referrerName, doctorId, doctorEmail, phone, patientName
+    await Automations.onReferralSent(
+      "Public_User", 
+      "Public Visitor", 
+      doctor.id, 
+      "doctor@example.com", // Placeholder
+      "000-000-0000", // Placeholder
+      "Demo Patient"
+    );
     triggerModal("Referral Sent Successfully", "The doctor has been notified and will reach out to the patient shortly.");
   };
 

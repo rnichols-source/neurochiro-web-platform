@@ -397,15 +397,15 @@ export default function ProfilePage() {
                   <div className="p-10 space-y-6">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Full Name</label>
-                      <input name="name" type="text" autocomplete="name" defaultValue={profile.name} required className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-neuro-orange/20 outline-none" />
+                      <input name="name" type="text" autoComplete="name" defaultValue={profile.name} required className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-neuro-orange/20 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Chiropractic School</label>
-                      <input name="school" type="text" autocomplete="organization" defaultValue={profile.school} required className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-neuro-orange/20 outline-none" />
+                      <input name="school" type="text" autoComplete="organization" defaultValue={profile.school} required className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-neuro-orange/20 outline-none" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Graduation Year</label>
-                      <input name="gradYear" type="text" autocomplete="off" defaultValue={profile.gradYear} required className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-neuro-orange/20 outline-none" />
+                      <input name="gradYear" type="text" autoComplete="off" defaultValue={profile.gradYear} required className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-neuro-orange/20 outline-none" />
                     </div>
                     <button type="submit" className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-light shadow-xl shadow-neuro-orange/20 transition-all uppercase tracking-widest text-sm">Save Changes</button>
                   </div>

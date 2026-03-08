@@ -81,7 +81,7 @@ export async function register(formData: FormData, role: string, tier: string, b
     return redirect("/")
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {

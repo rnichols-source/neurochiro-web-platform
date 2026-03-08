@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, 
@@ -24,12 +25,14 @@ import { Automations } from "@/lib/automations";
 import { useStudentTier } from "@/context/StudentTierContext";
 
 export default function JobsPage() {
+  const router = useRouter();
   const { tier, isProfessional, isFoundation, isAccelerator } = useStudentTier();
   const [toast, setToast] = useState<{isOpen: boolean, message: string}>({ isOpen: false, message: "" });
 
   const handleApply = async (jobTitle: string, clinicName: string) => {
     if (!isProfessional) return; // Safeguard
-    await Automations.onJobApplication("Student_User", jobTitle, clinicName);
+    // Arguments: applicantId, email, jobId, jobTitle
+    await Automations.onJobApplication("Student_User", "student@example.com", "MOCK_JOB_ID", jobTitle);
     setToast({ isOpen: true, message: `Application sent to ${clinicName} for the ${jobTitle} position!` });
     setTimeout(() => setToast({ isOpen: false, message: "" }), 3000);
   };

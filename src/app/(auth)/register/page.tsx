@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRegion } from "@/context/RegionContext";
@@ -20,12 +21,13 @@ import {
   Loader2,
   AlertCircle
 } from "lucide-react";
+import { Suspense } from "react";
 import { register, signInWithProvider } from "../actions/auth";
 
 type Role = "student" | "doctor" | "patient" | "admin";
 type Tier = "free" | "foundation" | "professional" | "accelerator" | "starter" | "growth" | "pro";
 
-export default function RegisterPage() {
+function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const errorParam = searchParams.get("error");
@@ -345,11 +347,11 @@ export default function RegisterPage() {
             >
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Full Name</label>
-                <input name="name" type="text" required autocomplete="name" placeholder="John Doe" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20" value={formData.name} onChange={(e) => setBaseFormData({...formData, name: e.target.value})} />
+                <input name="name" type="text" required autoComplete="name" placeholder="John Doe" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20" value={formData.name} onChange={(e) => setBaseFormData({...formData, name: e.target.value})} />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Email Address</label>
-                <input name="email" type="email" required autocomplete="email" placeholder="john@example.com" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20" value={formData.email} onChange={(e) => setBaseFormData({...formData, email: e.target.value})} />
+                <input name="email" type="email" required autoComplete="email" placeholder="john@example.com" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20" value={formData.email} onChange={(e) => setBaseFormData({...formData, email: e.target.value})} />
               </div>
               
               {role === "student" && (
@@ -374,7 +376,7 @@ export default function RegisterPage() {
 
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Password</label>
-                <input name="password" type="password" required autocomplete="new-password" placeholder="••••••••" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20" value={formData.password} onChange={(e) => setBaseFormData({...formData, password: e.target.value})} />
+                <input name="password" type="password" required autoComplete="new-password" placeholder="••••••••" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20" value={formData.password} onChange={(e) => setBaseFormData({...formData, password: e.target.value})} />
               </div>
 
               <button 
@@ -393,5 +395,17 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-neuro-cream flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-neuro-orange" />
+      </div>
+    }>
+      <RegisterContent />
+    </Suspense>
   );
 }

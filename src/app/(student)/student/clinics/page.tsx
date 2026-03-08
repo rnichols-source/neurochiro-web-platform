@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { 
   MapPin, 
   Search, 
@@ -22,6 +23,7 @@ import { useStudentTier } from "@/context/StudentTierContext";
 import { motion } from "framer-motion";
 
 export default function CareerMapPage() {
+  const router = useRouter();
   const { tier, isAccelerator, isProfessional, isFoundation } = useStudentTier();
 
   const clinics = [

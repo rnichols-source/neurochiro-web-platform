@@ -100,7 +100,7 @@ function LoginContent() {
                 name="email"
                 type="email" 
                 required
-                autocomplete="email"
+                autoComplete="email"
                 placeholder="email@neurochiro.com"
                 className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20"
                 value={email}
@@ -120,7 +120,7 @@ function LoginContent() {
                 name="password"
                 type="password" 
                 required
-                autocomplete="current-password"
+                autoComplete="current-password"
                 placeholder="••••••••"
                 className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20"
                 value={password}

@@ -428,7 +428,7 @@ export default function IdentityPage() {
                       </div>
                    </section>
                 </motion.div>
-              ) : (
+              ) : null}
            </AnimatePresence>
         </div>
 

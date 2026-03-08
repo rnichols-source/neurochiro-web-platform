@@ -5,10 +5,27 @@ import { createClient } from '@supabase/supabase-js';
 export const resend = new Resend(process.env.RESEND_API_KEY || 're_mock_key');
 
 // Admin client for backend operations
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const getSupabaseAdmin = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !key) {
+    return new Proxy({}, {
+      get: () => () => ({ 
+        from: () => ({ 
+          insert: () => ({ 
+            select: () => ({ 
+              single: async () => ({ data: null, error: { message: 'Supabase keys missing' } }) 
+            }) 
+          }),
+          update: () => ({ eq: async () => ({ data: null, error: null }) })
+        }) 
+      })
+    }) as any;
+  }
+
+  return createClient(url, key);
+};
 
 /**
  * ROBUST QUEUING WRAPPER
@@ -17,6 +34,7 @@ const supabaseAdmin = createClient(
  */
 const enqueue = async (eventType: string, payload: Record<string, unknown>) => {
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     // 1. Persist to DB Queue
     const { data, error } = await supabaseAdmin
       .from('automation_queue')
@@ -72,6 +90,7 @@ const sendAdminAlert = async (subject: string, html: string) => {
 
 const executeAutomation = async (queueId: string, eventType: string, payload: Record<string, any>) => {
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     // 0. Fetch User Preferences (if userId is available)
     let prefs = null;
     if (payload.userId) {
@@ -219,14 +238,16 @@ const executeAutomation = async (queueId: string, eventType: string, payload: Re
       .update({ status: 'completed', updated_at: new Date().toISOString() })
       .eq('id', queueId);
 
-  } catch (err: any) {
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : 'Unknown error';
     console.error(`Automation execution failed for ${queueId}:`, err);
     // Update queue with error for retry worker to find
+    const supabaseAdmin = getSupabaseAdmin();
     await supabaseAdmin
       .from('automation_queue')
       .update({ 
         status: 'failed', 
-        last_error: err.message,
+        last_error: errorMsg,
         retry_count: 1, 
         updated_at: new Date().toISOString() 
       })
@@ -292,5 +313,49 @@ export const Automations = {
 
   onFlaggedContent: async (contentId: string, reason: string) => {
     await enqueue('admin_notification', { subject: 'Content Flagged', html: `<p>Content ID <strong>${contentId}</strong> has been flagged for: ${reason}.</p>`});
+  },
+
+  onBroadcastDispatched: async (adminId: string, data: any) => {
+    await enqueue('admin_notification', { subject: 'Broadcast Dispatched', html: `<p>Admin <strong>${adminId}</strong> dispatched a new broadcast: ${data.title}.</p>`});
+  },
+
+  onBroadcastScheduled: async (adminId: string, data: any) => {
+    await enqueue('admin_notification', { subject: 'Broadcast Scheduled', html: `<p>Admin <strong>${adminId}</strong> scheduled a new broadcast: ${data.title}.</p>`});
+  },
+
+  onModerationAction: async (adminId: string, action: string, type: string, target: string) => {
+    await enqueue('admin_notification', { subject: 'Moderation Action', html: `<p>Admin <strong>${adminId}</strong> performed <strong>${action}</strong> on <strong>${type}</strong>: ${target}.</p>`});
+  },
+
+  onSettingsToggle: async (adminId: string, setting: string, value: boolean) => {
+    await enqueue('admin_notification', { subject: 'Settings Toggle', html: `<p>Admin <strong>${adminId}</strong> toggled <strong>${setting}</strong> to <strong>${value}</strong>.</p>`});
+  },
+
+  onSeminarHosted: async (doctorId: string, data: any) => {
+    await enqueue('admin_notification', { subject: 'Seminar Hosted', html: `<p>Doctor <strong>${doctorId}</strong> hosted a new seminar: ${data.title}.</p>`});
+  },
+
+  onSeminarRegistration: async (userId: string, email: string, phone: string, seminarName: string) => {
+    await enqueue('event_registration', { userId, email, phone, eventName: seminarName, eventDetails: 'General Registration', calendarLink: '#' });
+  },
+
+  onCampaignCreated: async (doctorId: string, campaignName: string) => {
+    await enqueue('admin_notification', { subject: 'Campaign Created', html: `<p>Doctor <strong>${doctorId}</strong> created a new campaign: ${campaignName}.</p>`});
+  },
+
+  onProfileUpdate: async (userId: string, data: any) => {
+    await enqueue('admin_notification', { subject: 'Profile Updated', html: `<p>User <strong>${userId}</strong> updated their profile: ${JSON.stringify(data)}.</p>`});
+  },
+
+  onPaymentSuccess: async (data: any) => {
+    await enqueue('admin_notification', { subject: 'Payment Success', html: `<p>Payment succeeded: ${JSON.stringify(data)}.</p>`});
+  },
+
+  onPaymentFailed: async (data: any) => {
+    await enqueue('admin_notification', { subject: 'Payment Failed', html: `<p>Payment failed: ${JSON.stringify(data)}.</p>`});
+  },
+
+  onSubscriptionCanceled: async (data: any) => {
+    await enqueue('admin_notification', { subject: 'Subscription Canceled', html: `<p>Subscription canceled: ${JSON.stringify(data)}.</p>`});
   }
 };

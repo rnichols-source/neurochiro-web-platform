@@ -173,19 +173,19 @@ export default function CareersPage() {
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">First Name</label>
-                           <input type="text" autocomplete="given-name" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange transition-colors" placeholder="Jane" />
+                           <input type="text" autoComplete="given-name" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange transition-colors" placeholder="Jane" />
                         </div>
                         <div className="space-y-2">
                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Last Name</label>
-                           <input type="text" autocomplete="family-name" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange transition-colors" placeholder="Doe" />
+                           <input type="text" autoComplete="family-name" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange transition-colors" placeholder="Doe" />
                         </div>
                         <div className="space-y-2 sm:col-span-2">
                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Email Address</label>
-                           <input type="email" autocomplete="email" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange transition-colors" placeholder="jane@example.com" />
+                           <input type="email" autoComplete="email" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange transition-colors" placeholder="jane@example.com" />
                         </div>
                         <div className="space-y-2 sm:col-span-2">
                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Phone Number</label>
-                           <input type="tel" autocomplete="tel" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange transition-colors" placeholder="(555) 123-4567" />
+                           <input type="tel" autoComplete="tel" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange transition-colors" placeholder="(555) 123-4567" />
                         </div>
                      </div>
 

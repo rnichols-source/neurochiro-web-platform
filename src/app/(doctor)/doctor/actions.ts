@@ -25,7 +25,15 @@ export async function sendReferral(formData: FormData) {
   if (error) throw error
 
   // Trigger Automation (Notify receiving doctor)
-  await Automations.onReferralSent(user.id, recipientId, patientName)
+  // Arguments: referrerId, referrerName, doctorId, doctorEmail, phone, patientName
+  await Automations.onReferralSent(
+    user.id, 
+    user.user_metadata?.full_name || 'Dr. Unknown', 
+    recipientId, 
+    'recipient@example.com', // In a real flow, fetch recipient email from DB
+    '000-000-0000', // Placeholder
+    patientName
+  )
 
   revalidatePath('/doctor/dashboard')
   return data

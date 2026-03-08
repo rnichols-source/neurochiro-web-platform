@@ -21,7 +21,14 @@ async function testAutomations() {
 
   // 3. Test Referral
   console.log("\n--- Testing: onReferralSent ---");
-  await Automations.onReferralSent('referrer_1', 'doctor_2', 'Jane Doe');
+  await Automations.onReferralSent(
+    'referrer_1', 
+    'Dr. Referrer', 
+    'doctor_2', 
+    'doctor2@example.com', 
+    '555-555-5555', 
+    'Jane Doe'
+  );
 
   console.log("\n✅ AUTOMATION UNIT TEST COMPLETE.");
 }

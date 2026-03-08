@@ -22,7 +22,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Tonal"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "AU",
@@ -48,7 +48,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -74,7 +74,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -103,7 +103,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -132,7 +132,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -158,7 +158,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -187,7 +187,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -216,7 +216,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -246,7 +246,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -274,7 +274,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -303,7 +303,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -330,7 +330,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -359,7 +359,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -389,7 +389,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -417,7 +417,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -444,7 +444,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -473,7 +473,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -502,7 +502,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -531,7 +531,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -559,7 +559,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -587,7 +587,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -614,7 +614,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -643,7 +643,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -671,7 +671,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -697,7 +697,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -727,7 +727,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -756,7 +756,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -786,7 +786,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -813,7 +813,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -839,7 +839,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -867,7 +867,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -893,7 +893,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -921,7 +921,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -948,7 +948,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -975,7 +975,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1005,7 +1005,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1034,7 +1034,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1060,7 +1060,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "General NeuroChiro"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1086,7 +1086,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1113,7 +1113,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1141,7 +1141,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1168,7 +1168,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1195,7 +1195,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1221,7 +1221,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "General NeuroChiro"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1248,7 +1248,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Pediatrics",
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1277,7 +1277,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1307,7 +1307,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1337,7 +1337,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1367,7 +1367,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1396,7 +1396,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1426,7 +1426,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1452,7 +1452,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1479,7 +1479,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1506,7 +1506,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1536,7 +1536,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1565,7 +1565,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1595,7 +1595,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1622,7 +1622,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1651,7 +1651,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1679,7 +1679,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1708,7 +1708,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1737,7 +1737,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1765,7 +1765,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1793,7 +1793,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1821,7 +1821,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1847,7 +1847,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "General NeuroChiro"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1876,7 +1876,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1903,7 +1903,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1932,7 +1932,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1962,7 +1962,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -1992,7 +1992,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2021,7 +2021,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2050,7 +2050,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2080,7 +2080,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2107,7 +2107,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2136,7 +2136,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2165,7 +2165,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2195,7 +2195,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2225,7 +2225,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2254,7 +2254,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2284,7 +2284,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2313,7 +2313,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2342,7 +2342,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2370,7 +2370,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2398,7 +2398,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2425,7 +2425,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2452,7 +2452,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2481,7 +2481,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2509,7 +2509,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2539,7 +2539,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2566,7 +2566,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2592,7 +2592,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2619,7 +2619,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2645,7 +2645,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Tonal"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2674,7 +2674,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2702,7 +2702,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2730,7 +2730,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2757,7 +2757,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2784,7 +2784,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Pediatrics",
       "Prenatal"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2811,7 +2811,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2839,7 +2839,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2869,7 +2869,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2898,7 +2898,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2926,7 +2926,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2955,7 +2955,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -2983,7 +2983,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3013,7 +3013,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3040,7 +3040,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3069,7 +3069,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3099,7 +3099,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3127,7 +3127,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3154,7 +3154,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Pediatrics",
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3184,7 +3184,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3212,7 +3212,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3240,7 +3240,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3266,7 +3266,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3295,7 +3295,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3322,7 +3322,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Pediatrics",
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3348,7 +3348,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3375,7 +3375,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Pediatrics",
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3405,7 +3405,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3431,7 +3431,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3460,7 +3460,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3486,7 +3486,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3515,7 +3515,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3544,7 +3544,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3574,7 +3574,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3602,7 +3602,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3632,7 +3632,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3660,7 +3660,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3686,7 +3686,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3715,7 +3715,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3742,7 +3742,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3769,7 +3769,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3799,7 +3799,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3828,7 +3828,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3854,7 +3854,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "General NeuroChiro"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3883,7 +3883,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3909,7 +3909,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3937,7 +3937,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",
@@ -3966,7 +3966,7 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "verification_status": "verified",
+    "membership_tier": "pro", "verification_status": "verified",
     "is_hiring": false,
     "is_mentoring": true,
     "region_code": "US",

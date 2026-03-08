@@ -33,7 +33,8 @@ export default function SeminarsPage() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   const handleRegister = async (title: string) => {
-    await Automations.onSeminarRegistration("Student_User", title);
+    // Arguments: userId, email, phone, seminarName
+    await Automations.onSeminarRegistration("Student_User", "student@example.com", "000-000-0000", title);
     setToast({ isOpen: true, message: `Successfully registered for ${title}!` });
     setSelectedSeminar(null);
     setTimeout(() => setToast({ isOpen: false, message: "" }), 3000);
