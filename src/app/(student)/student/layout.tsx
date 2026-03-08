@@ -2,7 +2,7 @@
 
 import Sidebar from "./Sidebar";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
-import { LayoutDashboard, MessageSquare, Bell, User } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Bell, User, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 const navItems = [
