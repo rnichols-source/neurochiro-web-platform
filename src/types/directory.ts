@@ -37,6 +37,7 @@ export interface Doctor {
   is_hiring: boolean;
   is_mentoring: boolean;
   region_code: string;
+  email?: string;
   photo_url?: string;
   created_at: string;
   updated_at: string;
