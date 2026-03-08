@@ -9,18 +9,14 @@ export async function getDoctorDashboardStats() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
-    // Fetch real analytics from Supabase
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role, subscription_status, full_name')
-      .eq('id', user.id)
-      .single()
+    // Parallelize fetches for profile and practice info
+    const [profileRes, doctorRes] = await Promise.all([
+      supabase.from('profiles').select('role, subscription_status, full_name').eq('id', user.id).single(),
+      supabase.from('doctors').select('clinic_name').eq('id', user.id).single()
+    ]);
 
-    const { data: doctor } = await supabase
-      .from('doctors')
-      .select('clinic_name')
-      .eq('id', user.id)
-      .single()
+    const profile = profileRes.data;
+    const doctor = doctorRes.data;
 
     // Base stats with fallback logic
     return {
