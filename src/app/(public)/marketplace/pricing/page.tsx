@@ -146,14 +146,11 @@ export default function MarketplacePricingPage() {
                    ))}
                 </div>
 
-                <Link 
-                  href={
-                    plan.id === 'partner' 
-                      ? STRIPE_PAYMENT_LINKS.vendor.partner.one_time 
-                      : STRIPE_PAYMENT_LINKS.vendor.basic[billingCycle]
-                  } 
+                <Link
+                  href={`/register?role=vendor&tier=${plan.id}&billing=${billingCycle}`}
                   className={`w-full py-5 rounded-2xl text-center font-black uppercase tracking-widest text-xs transition-all shadow-xl ${plan.popular ? 'bg-neuro-orange text-white hover:bg-neuro-orange-dark shadow-neuro-orange/20' : 'bg-neuro-navy text-white hover:bg-neuro-navy-light shadow-neuro-navy/20'}`}
                 >
+
                    {plan.cta}
                 </Link>
              </motion.div>

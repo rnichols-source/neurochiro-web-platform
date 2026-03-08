@@ -115,7 +115,7 @@ export default function DoctorPricing() {
             </div>
 
             <Link 
-              href={STRIPE_PAYMENT_LINKS.doctor[tier.id as keyof typeof STRIPE_PAYMENT_LINKS.doctor][billingCycle]}
+              href={`/register?role=doctor&tier=${tier.id}&billing=${billingCycle}`}
               className={cn(
                 "w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2",
                 tier.featured 
