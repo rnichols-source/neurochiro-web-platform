@@ -229,19 +229,20 @@ function RegisterContent() {
               
               {/* Billing Cycle Toggle */}
               <div className="flex items-center justify-center gap-4 mb-10">
-                <span className={`text-xs font-black uppercase tracking-widest ${billingCycle === 'monthly' ? 'text-neuro-navy' : 'text-gray-400'}`}>Monthly</span>
+                <span className={`text-xs font-black uppercase tracking-widest transition-colors ${billingCycle === 'monthly' ? 'text-neuro-navy' : 'text-gray-400'}`}>Monthly</span>
                 <button 
+                  type="button"
                   onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
-                  className="w-14 h-7 bg-gray-100 rounded-full relative p-1 transition-colors hover:bg-gray-200"
+                  className="w-14 h-7 bg-neuro-navy rounded-full relative p-1 transition-colors hover:bg-neuro-navy-light shadow-inner"
                 >
                   <motion.div 
                     animate={{ x: billingCycle === 'monthly' ? 0 : 28 }}
-                    className="w-5 h-5 bg-neuro-orange rounded-full shadow-sm"
+                    className="w-5 h-5 bg-white rounded-full shadow-lg"
                   />
                 </button>
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs font-black uppercase tracking-widest ${billingCycle === 'annual' ? 'text-neuro-navy' : 'text-gray-400'}`}>Annual</span>
-                  <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">2 Months Free</span>
+                  <span className={`text-xs font-black uppercase tracking-widest transition-colors ${billingCycle === 'annual' ? 'text-neuro-navy' : 'text-gray-400'}`}>Annual</span>
+                  <span className="bg-green-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter shadow-sm">2 Months Free</span>
                 </div>
               </div>
             </div>
