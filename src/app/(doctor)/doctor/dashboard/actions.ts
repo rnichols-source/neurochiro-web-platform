@@ -3,18 +3,13 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 
 export async function getDoctorDashboardStats() {
-  const supabase = createServerSupabase()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
   try {
-    // 1. Fetch real analytics from Supabase (Mocking queries for now until analytics tables are fully populated)
-    // In production, these would be real count/sum queries on leads, views, and apps tables.
+    const supabase = createServerSupabase()
     
-    // Example of a real query we'd run:
-    // const { count: leadsCount } = await supabase.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id)
-    
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    // Fetch real analytics from Supabase
     const { data: profile } = await supabase
       .from('profiles')
       .select('role, subscription_status, full_name')
@@ -30,26 +25,36 @@ export async function getDoctorDashboardStats() {
     // Base stats with fallback logic
     return {
       profile: {
-        name: profile?.full_name || user.email?.split('@')[0],
+        name: profile?.full_name || user.email?.split('@')[0] || "Doctor",
         clinicName: doctor?.clinic_name || "My Practice",
         isMember: ['doctor_pro', 'doctor_growth', 'doctor_member'].includes(profile?.role || ''),
-        role: profile?.role,
-        status: profile?.subscription_status
+        role: profile?.role || 'doctor_free',
+        status: profile?.subscription_status || 'inactive'
       },
       stats: [
-        { label: "Profile Views", value: "1,245", trend: "+24%" },
-        { label: "Patient Leads", value: "42", trend: "+12%" },
-        { label: "Seminar Clicks", value: "856", trend: "+5%" },
-        { label: "Job Applications", value: "8", trend: "0%" }
+        { label: "Profile Views", value: "0", trend: "0%" },
+        { label: "Patient Leads", value: "0", trend: "0%" },
+        { label: "Seminar Clicks", value: "0", trend: "0%" },
+        { label: "Job Applications", value: "0", trend: "0%" }
       ],
       marketPerformance: {
-        completeness: 99,
-        reviews: 90,
-        engagement: 85
+        completeness: 0,
+        reviews: 0,
+        engagement: 0
       }
     }
   } catch (e) {
-    console.error("Dashboard Stats Error:", e)
-    return null
+    console.error("CRITICAL DASHBOARD ERROR:", e)
+    // Return a safe minimal state that won't crash the UI
+    return {
+      profile: { name: "Doctor", clinicName: "My Practice", isMember: false, role: 'free', status: 'inactive' },
+      stats: [
+        { label: "Profile Views", value: "---", trend: "0%" },
+        { label: "Patient Leads", value: "---", trend: "0%" },
+        { label: "Seminar Clicks", value: "---", trend: "0%" },
+        { label: "Job Applications", value: "---", trend: "0%" }
+      ],
+      marketPerformance: { completeness: 0, reviews: 0, engagement: 0 }
+    }
   }
 }

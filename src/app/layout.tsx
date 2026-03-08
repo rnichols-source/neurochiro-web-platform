@@ -18,7 +18,6 @@ export const metadata: Metadata = {
   title: "NeuroChiro | Nervous-System-First Chiropractic",
   description: "The global ecosystem for nervous-system-focused chiropractic. Find doctors, educational resources, and career opportunities.",
   manifest: "/manifest.json",
-  themeColor: "#0B1118",
   icons: {
     icon: [
       { url: "/logo.png", sizes: "32x32", type: "image/png" },
@@ -55,6 +54,10 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "NeuroChiro",
   },
+};
+
+export const viewport = {
+  themeColor: "#0B1118",
 };
 
 import { RegionProvider } from "@/context/RegionContext";

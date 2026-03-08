@@ -26,6 +26,11 @@ export default function Error({
         <h1 className="text-3xl font-heading font-black text-neuro-navy mb-4">Something went wrong</h1>
         <p className="text-gray-500 mb-8 leading-relaxed">
           The NeuroChiro node encountered an unexpected state. Our developers have been notified.
+          {error.digest && (
+            <span className="block mt-2 text-[10px] text-gray-400 font-mono">
+              Error ID: {error.digest}
+            </span>
+          )}
         </p>
 
         <div className="space-y-3">

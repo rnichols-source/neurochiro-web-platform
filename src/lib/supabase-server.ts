@@ -5,43 +5,63 @@ export function createServerSupabase() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl || !supabaseKey) {
-    // Return a comprehensive proxy that mimics the supabase client to prevent crashes during dev
-    return new Proxy({
-      auth: {
-        getUser: async () => ({ data: { user: null }, error: null }),
-        getSession: async () => ({ data: { session: null }, error: null }),
-        signInWithPassword: async () => ({ data: { user: { id: 'mock-id' } }, error: null }),
-        signUp: async () => ({ data: { user: { id: 'mock-id' } }, error: null }),
-        signOut: async () => ({ error: null }),
-      }
-    }, {
-      get: (target, prop) => {
-        if (prop in target) return (target as any)[prop];
-        return () => ({
-          select: () => ({ 
-            eq: () => ({ 
-              single: async () => ({ data: { role: 'doctor_pro', subscription_status: 'active' }, error: null }),
-              order: () => ({ limit: async () => ({ data: [], error: null }) })
-            }), 
-            single: async () => ({ data: { role: 'doctor_pro' }, error: null }) 
-          }),
-          insert: () => ({ 
-            select: () => ({ 
-              single: async () => ({ data: { id: 'mock-inserted-id' }, error: null }) 
-            }) 
-          }),
-          upsert: async () => ({ data: null, error: null }),
-          update: () => ({ eq: async () => ({ data: null, error: null }) }),
-          delete: () => ({ eq: async () => ({ data: null, error: null }) }),
-        });
-      }
-    }) as any;
+  // Check if we have valid production-ready environment variables
+  const isInvalidUrl = !supabaseUrl || supabaseUrl.includes('your-project-url');
+  const isInvalidKey = !supabaseKey || supabaseKey.includes('your-anon-key');
+
+  if (isInvalidUrl || isInvalidKey) {
+    // Return a comprehensive recursive proxy that mimics the supabase client to prevent crashes during dev or pre-rendering
+    const createRecursiveProxy = (mockResponse: any = { data: null, error: null }): any => {
+      const proxy = () => createRecursiveProxy(mockResponse);
+      
+      // Make it thenable so it can be awaited
+      (proxy as any).then = (resolve: any) => resolve(mockResponse);
+
+      return new Proxy(proxy, {
+        get: (target, prop) => {
+          // Special cases for common properties
+          if (prop === 'then') return (target as any).then;
+
+          if (prop === 'auth') {
+            return {
+              getUser: async () => ({ data: { user: null }, error: null }),
+              getSession: async () => ({ data: { session: null }, error: null }),
+              onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+              signInWithPassword: async () => ({ data: { user: { id: 'mock-id' } }, error: null }),
+              signUp: async () => ({ data: { user: { id: 'mock-id' } }, error: null }),
+              signOut: async () => ({ error: null }),
+            };
+          }
+
+          if (prop === 'storage') {
+            return {
+              from: () => ({
+                upload: async () => ({ data: null, error: null }),
+                getPublicUrl: () => ({ data: { publicUrl: '' } }),
+              })
+            };
+          }
+
+          // Handle common return patterns for .single() or .maybeSingle()
+          const singleMockData = { data: { role: 'doctor_pro', subscription_status: 'active' }, error: null };
+          if (prop === 'single' || prop === 'maybeSingle') {
+            return createRecursiveProxy(singleMockData);
+          }
+
+          return createRecursiveProxy(mockResponse);
+        },
+        apply: (target, thisArg, argArray) => {
+          return createRecursiveProxy(mockResponse);
+        }
+      }) as any;
+    };
+
+    return createRecursiveProxy();
   }
 
   return createServerClient(
-    supabaseUrl,
-    supabaseKey,
+    supabaseUrl!,
+    supabaseKey!,
     {
       cookies: {
         async get(name: string) {

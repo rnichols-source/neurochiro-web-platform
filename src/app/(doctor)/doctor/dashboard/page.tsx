@@ -42,11 +42,24 @@ export default function DoctorDashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getDoctorDashboardStats();
-      if (data) {
-        setDashboardData(data);
+      try {
+        const data = await getDoctorDashboardStats();
+        // Even if data is null, we want a base object to prevent UI crashes if some checks fail
+        setDashboardData(data || { 
+          profile: { name: "Doctor", clinicName: "Practice", isMember: false },
+          stats: [],
+          marketPerformance: { completeness: 0, reviews: 0, engagement: 0 }
+        });
+      } catch (err) {
+        console.error("Failed to fetch dashboard data:", err);
+        setDashboardData({
+          profile: { name: "Doctor", clinicName: "Practice", isMember: false },
+          stats: [],
+          marketPerformance: { completeness: 0, reviews: 0, engagement: 0 }
+        });
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchData();
   }, []);
