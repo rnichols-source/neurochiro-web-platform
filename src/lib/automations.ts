@@ -308,5 +308,8 @@ export const Automations = {
   },
   onPaymentFailed: async (data: any) => {
     await enqueue('admin_notification', { subject: 'Payment Failed', html: `<p>A payment attempt failed: ${JSON.stringify(data)}</p>` });
+  },
+  onSubscriptionCanceled: async (data: any) => {
+    await enqueue('admin_notification', { subject: 'Subscription Canceled', html: `<p>A subscription was canceled: ${JSON.stringify(data)}</p>` });
   }
 };
