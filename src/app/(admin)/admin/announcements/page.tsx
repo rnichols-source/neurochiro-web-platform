@@ -1,7 +1,7 @@
 "use client";
 
 import AnnouncementBuilder from "@/components/admin/AnnouncementBuilder";
-import { Megaphone, History, Trash2, Eye, BarChart3 } from "lucide-react";
+import { Megaphone, History, Trash2, Eye, BarChart3, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
