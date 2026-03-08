@@ -1,16 +1,16 @@
 export const STRIPE_PAYMENT_LINKS = {
   doctor: {
     starter: {
-      monthly: "https://buy.stripe.com/eVq9AV2AD8g4fT0fas7wA0r", // Inferred pattern
+      monthly: "https://buy.stripe.com/4gM14p3EHeEs8qyfas7wA0q", // Confirmed (A0q)
       annual: "https://buy.stripe.com/6oUeVfb798g40Y6d2k7wA0s", // Confirmed (A0s)
     },
     growth: {
       monthly: "https://buy.stripe.com/7sYfZj5MP8g4gX4fas7wA0p", // Confirmed (A0p)
-      annual: "https://buy.stripe.com/4gM14p3EHeEs8qyfas7wA0q", // Inferred pattern
+      annual: "#", // Needs confirmation
     },
     pro: {
       monthly: "https://buy.stripe.com/eVq9AV2AD8g4fT0fas7wA0r", // Confirmed (A0r)
-      annual: "https://buy.stripe.com/aFa28t6QT9k836ee6o7wA0t", // Inferred pattern
+      annual: "#", // Needs confirmation
     },
   },
   student: {
