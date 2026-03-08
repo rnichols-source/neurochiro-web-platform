@@ -4,15 +4,19 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, User, Stethoscope, GraduationCap, Zap, MapPin, BookOpen, Crown, Users, Briefcase, Store, Calendar, Sparkles } from "lucide-react";
+import { Menu, X, ChevronDown, User, Stethoscope, GraduationCap, Zap, MapPin, BookOpen, Crown, Users, Briefcase, Store, Calendar, Sparkles, Bell } from "lucide-react";
 import RegionSwitcher from "./RegionSwitcher";
 import GetStartedModal from "./GetStartedModal";
+import NotificationBell from "./NotificationBell";
+import { createClient } from "@/lib/supabase";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isGetStartedOpen, setIsGetStartedOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const pathname = usePathname();
+  const supabase = createClient();
 
   // Handle scroll effect for glass-morphism
   useEffect(() => {
@@ -22,6 +26,21 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Check auth status
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -107,18 +126,35 @@ export default function Navbar() {
           {/* Auth Actions */}
           <div className="hidden lg:flex items-center gap-4">
             <RegionSwitcher />
-            <Link 
-              href="/login" 
-              className={`text-sm font-bold transition-colors hover:text-neuro-orange ${useWhiteText ? "text-white" : "text-neuro-navy"}`}
-            >
-              Log In
-            </Link>
-            <button 
-              onClick={() => setIsGetStartedOpen(true)}
-              className="px-6 py-2.5 bg-neuro-orange hover:bg-neuro-orange-light text-white font-black text-xs uppercase tracking-widest rounded-full shadow-lg shadow-neuro-orange/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2"
-            >
-              <Sparkles className="w-3.5 h-3.5" /> Join Network
-            </button>
+            
+            {user ? (
+              <div className="flex items-center gap-4">
+                <NotificationBell />
+                <Link 
+                  href="/dashboard" 
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+                    useWhiteText ? 'border-white/20 hover:border-white bg-white/10' : 'border-gray-200 hover:border-neuro-navy bg-gray-50'
+                  }`}
+                >
+                  <User className={`w-5 h-5 ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`} />
+                </Link>
+              </div>
+            ) : (
+              <>
+                <Link 
+                  href="/login" 
+                  className={`text-sm font-bold transition-colors hover:text-neuro-orange ${useWhiteText ? "text-white" : "text-neuro-navy"}`}
+                >
+                  Log In
+                </Link>
+                <button 
+                  onClick={() => setIsGetStartedOpen(true)}
+                  className="px-6 py-2.5 bg-neuro-orange hover:bg-neuro-orange-light text-white font-black text-xs uppercase tracking-widest rounded-full shadow-lg shadow-neuro-orange/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2"
+                >
+                  <Sparkles className="w-3.5 h-3.5" /> Join Network
+                </button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Toggle */}
