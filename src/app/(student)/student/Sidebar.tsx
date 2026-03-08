@@ -55,8 +55,8 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 h-screen bg-neuro-navy flex flex-col border-r border-white/10 shrink-0 relative overflow-y-auto">
-      {/* Dev Toggle */}
+    <aside className="hidden md:flex w-64 h-screen bg-neuro-navy flex-col border-r border-white/10 shrink-0 relative overflow-y-auto">
+      {/* Dev Toggle - Only visible on desktop or when sidebar is visible */}
       <div className="absolute -right-12 top-1/2 -rotate-90 origin-left z-50">
         <button 
           onClick={() => {

@@ -27,8 +27,24 @@ export default function DoctorLayout({
           <div className="w-8 h-8 rounded-lg bg-neuro-orange flex items-center justify-center font-bold text-white text-xl">N</div>
           <span className="text-white font-heading font-bold text-lg tracking-tight">NeuroChiro</span>
         </Link>
-        <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-xs">
-          DN
+        <div className="flex items-center gap-3">
+          {/* We'll use a client-side component or just check localStorage here */}
+          <button 
+            onClick={() => {
+              const event = new KeyboardEvent('keydown', {
+                key: 'p',
+                altKey: true,
+                bubbles: true
+              });
+              window.dispatchEvent(event);
+            }}
+            className="w-8 h-8 rounded-lg bg-neuro-orange flex items-center justify-center text-white shadow-lg"
+          >
+            <ShieldCheck className="w-5 h-5" />
+          </button>
+          <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-xs">
+            DN
+          </div>
         </div>
       </div>
 

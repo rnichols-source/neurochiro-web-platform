@@ -66,6 +66,7 @@ import { StudentTierProvider } from "@/context/StudentTierContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import PWAInstallPrompt from "@/components/layout/PWAInstallPrompt";
 import AdminQuickNav from "@/components/admin/AdminQuickNav";
+import PerspectiveSwitcher from "@/components/admin/PerspectiveSwitcher";
 
 export default function RootLayout({
   children,
@@ -84,6 +85,7 @@ export default function RootLayout({
                 {children}
                 <PWAInstallPrompt />
                 <AdminQuickNav />
+                <PerspectiveSwitcher />
                 <script
                   dangerouslySetInnerHTML={{
                     __html: `

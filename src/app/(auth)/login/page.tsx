@@ -36,6 +36,10 @@ function LoginContent() {
     setPassword("password123");
 
     // Sync client-side state for tiers before redirecting
+    if (roleEmail.includes("admin")) {
+      localStorage.setItem("nc_dev_mode", "true");
+    }
+
     if (roleEmail.includes("doctor_pro")) {
       localStorage.setItem("nc_doctor_tier", "pro");
     } else if (roleEmail.includes("doctor_growth")) {
