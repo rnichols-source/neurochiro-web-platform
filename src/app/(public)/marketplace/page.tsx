@@ -168,8 +168,8 @@ export default function MarketplacePage() {
                           </div>
                        </div>
                        
-                       <h3 className="text-3xl font-black mb-4 group-hover:text-neuro-orange transition-colors">{vendor.name}</h3>
-                       <p className="text-gray-400 font-medium mb-8 line-clamp-2">{vendor.short_description}</p>
+                       <h3 className="text-3xl font-black mb-4 text-white group-hover:text-neuro-orange transition-colors">{vendor.name}</h3>
+                       <p className="text-gray-300 font-medium mb-8 line-clamp-2">{vendor.short_description}</p>
                        
                        <div className="mt-auto flex flex-wrap gap-3">
                           {vendor.benefits.map(b => (
