@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Share, X, Download, Smartphone } from "lucide-react";
+import { Share, X, Download, Smartphone, Info } from "lucide-react";
 
 export default function PWAInstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const [isSafari, setIsSafari] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [debugInfo, setDebugInfo] = useState<string>("");
 
   useEffect(() => {
     // Check if already installed
@@ -18,12 +20,20 @@ export default function PWAInstallPrompt() {
     
     setIsStandalone(isStandaloneMode);
 
-    // Check if iOS
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    // Check if iOS (including modern iPads)
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     setIsIOS(isIOSDevice);
+
+    // Check if Safari (to show "Add to Home Screen/Dock" instructions)
+    const isSafariBrowser = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    setIsSafari(isSafariBrowser);
+
+    console.log("[PWA] Status:", { isStandaloneMode, isIOSDevice, isSafariBrowser });
 
     // Capture the install prompt event
     const handleBeforeInstallPrompt = (e: any) => {
+      console.log("[PWA] beforeinstallprompt event fired");
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
       // Stash the event so it can be triggered later.
@@ -32,41 +42,51 @@ export default function PWAInstallPrompt() {
       // Logic to show prompt (e.g., after 5 seconds)
       const hasSeenPrompt = localStorage.getItem('nc_pwa_prompt_seen');
       if (!isStandaloneMode && !hasSeenPrompt) {
+        console.log("[PWA] Scheduling prompt display in 5s");
         setTimeout(() => setShowPrompt(true), 5000);
       }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // If it's iOS, we show the prompt anyway because we can't capture the event
-    if (isIOSDevice && !isStandaloneMode && !localStorage.getItem('nc_pwa_prompt_seen')) {
+    // If it's a device where we can't capture the event (iOS or Safari MacOS)
+    // we show the instructions anyway because we can't trigger the native prompt
+    if ((isIOSDevice || isSafariBrowser) && !isStandaloneMode && !localStorage.getItem('nc_pwa_prompt_seen')) {
+      console.log("[PWA] iOS or Safari detected, scheduling manual instructions in 5s");
       setTimeout(() => setShowPrompt(true), 5000);
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, [isStandalone]);
+  }, []); // Run once on mount
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-
-    // Show the install prompt
-    deferredPrompt.prompt();
-
-    // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-      console.log('User accepted the PWA install');
-    } else {
-      console.log('User dismissed the PWA install');
+    if (!deferredPrompt) {
+      console.warn("[PWA] handleInstallClick called but deferredPrompt is null");
+      setDebugInfo("Please use your browser's menu to 'Install' or 'Add to Home Screen'.");
+      return;
     }
 
-    // Clear the deferred prompt so it can be used only once
+    try {
+      // Show the install prompt
+      console.log("[PWA] Triggering native install prompt");
+      deferredPrompt.prompt();
+
+      // Wait for the user to respond to the prompt
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`[PWA] User responded to the install prompt: ${outcome}`);
+      
+      if (outcome === 'accepted') {
+        setShowPrompt(false);
+        localStorage.setItem('nc_pwa_prompt_seen', 'true');
+      }
+    } catch (err) {
+      console.error("[PWA] Error during installation:", err);
+    }
+
+    // Clear the deferred prompt
     setDeferredPrompt(null);
-    setShowPrompt(false);
-    localStorage.setItem('nc_pwa_prompt_seen', 'true');
   };
 
   const closePrompt = () => {
@@ -109,16 +129,32 @@ export default function PWAInstallPrompt() {
 
             <div className="mt-6 p-4 bg-white/5 rounded-2xl border border-white/10">
               {isIOS ? (
-                <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-gray-300">
-                  Tap <Share className="w-4 h-4 text-neuro-orange" /> then <span className="text-white">"Add to Home Screen"</span>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-gray-300">
+                    Tap <Share className="w-4 h-4 text-neuro-orange" /> then <span className="text-white">"Add to Home Screen"</span>
+                  </div>
+                </div>
+              ) : isSafari ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-gray-300">
+                    Go to <span className="text-white">File</span> menu then <span className="text-white">"Add to Dock..."</span>
+                  </div>
                 </div>
               ) : (
-                <button 
-                  onClick={handleInstallClick}
-                  className="w-full py-3 bg-neuro-orange text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-neuro-orange/20 active:scale-95 transition-transform"
-                >
-                  Install App
-                </button>
+                <div className="space-y-3">
+                  <button 
+                    onClick={handleInstallClick}
+                    className="w-full py-3 bg-neuro-orange text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-neuro-orange/20 active:scale-95 transition-transform"
+                  >
+                    Install App
+                  </button>
+                  {debugInfo && (
+                    <div className="flex items-center gap-2 text-[10px] text-neuro-orange font-bold uppercase tracking-wider animate-pulse">
+                      <Info className="w-3 h-3" />
+                      {debugInfo}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>

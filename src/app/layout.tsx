@@ -65,6 +65,7 @@ import { DoctorTierProvider } from "@/context/DoctorTierContext";
 import { StudentTierProvider } from "@/context/StudentTierContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import PWAInstallPrompt from "@/components/layout/PWAInstallPrompt";
+import AdminQuickNav from "@/components/admin/AdminQuickNav";
 
 export default function RootLayout({
   children,
@@ -82,6 +83,7 @@ export default function RootLayout({
               <UserPreferencesProvider>
                 {children}
                 <PWAInstallPrompt />
+                <AdminQuickNav />
                 <script
                   dangerouslySetInnerHTML={{
                     __html: `
