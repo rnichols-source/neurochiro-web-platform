@@ -18,6 +18,18 @@ export default async function proxy(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
   const now = Date.now();
   const { pathname } = request.nextUrl;
+  const hostname = request.headers.get('host') || '';
+
+  // 🌐 MULTI-DOMAIN ROUTING
+  // If the user visits neurochiromastermind.com, rewrite them to the /mastermind route internally
+  if (hostname.includes('neurochiromastermind.com')) {
+    // Prevent infinite loops if they already are on a /mastermind path
+    if (!pathname.startsWith('/mastermind') && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/mastermind${pathname === '/' ? '' : pathname}`;
+      return NextResponse.rewrite(url);
+    }
+  }
   
   const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.includes('/auth');
   const limit = isAuthRoute ? MAX_AUTH_REQUESTS : MAX_GENERAL_REQUESTS;
@@ -122,6 +134,7 @@ export default async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/',
     '/admin/:path*',
     '/doctor/:path*',
     '/student/:path*',
