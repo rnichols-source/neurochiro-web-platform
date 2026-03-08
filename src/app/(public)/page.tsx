@@ -42,10 +42,11 @@ export default function Home() {
           <div className="space-y-8 relative z-10">
             <div className="relative">
               <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-[10px] mb-4 block drop-shadow-sm">Interactive Exhibit</span>
-              <h2 className="text-5xl md:text-6xl font-heading font-black leading-[1.1] drop-shadow-2xl">
+              <h2 className="text-5xl md:text-6xl font-heading font-black leading-[1.1] drop-shadow-2xl text-white">
                 Explore Your <br />
                 <span className="text-neuro-orange">Nervous System</span>
               </h2>
+
             </div>
             <p className="text-gray-200 text-lg md:text-xl leading-relaxed max-w-xl font-medium drop-shadow-md">
               Understand how your body processes stress, adapts to the environment, and how clinical regulation can transform your health. Launch our flagship interactive educational experience.

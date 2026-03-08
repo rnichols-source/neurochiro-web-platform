@@ -25,8 +25,9 @@ export default function BentoGrid() {
               <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mb-6 border border-white/20">
                 <Search className="w-6 h-6 text-neuro-orange" />
               </div>
-              <h3 className="text-3xl font-heading font-bold mb-2">Global Directory</h3>
+              <h3 className="text-3xl font-heading font-bold mb-2 text-white">Global Directory</h3>
               <p className="text-gray-300 max-w-md text-lg">
+
                 The world's most trusted network of nervous system focused chiropractors. Verified, elite, and accessible.
               </p>
             </div>
