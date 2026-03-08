@@ -8,6 +8,7 @@ export default function PWAInstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
     // Check if already installed
@@ -21,16 +22,52 @@ export default function PWAInstallPrompt() {
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
 
-    // Logic to show prompt (e.g., after 30 seconds or on second visit)
-    const hasSeenPrompt = localStorage.getItem('nc_pwa_prompt_seen');
-    
-    if (!isStandaloneMode && !hasSeenPrompt) {
-      const timer = setTimeout(() => {
-        setShowPrompt(true);
-      }, 5000); // Show after 5 seconds for now
-      return () => clearTimeout(timer);
+    // Capture the install prompt event
+    const handleBeforeInstallPrompt = (e: any) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      setDeferredPrompt(e);
+      
+      // Logic to show prompt (e.g., after 5 seconds)
+      const hasSeenPrompt = localStorage.getItem('nc_pwa_prompt_seen');
+      if (!isStandaloneMode && !hasSeenPrompt) {
+        setTimeout(() => setShowPrompt(true), 5000);
+      }
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // If it's iOS, we show the prompt anyway because we can't capture the event
+    if (isIOSDevice && !isStandaloneMode && !localStorage.getItem('nc_pwa_prompt_seen')) {
+      setTimeout(() => setShowPrompt(true), 5000);
     }
-  }, []);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, [isStandalone]);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+
+    // Show the install prompt
+    deferredPrompt.prompt();
+
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      console.log('User accepted the PWA install');
+    } else {
+      console.log('User dismissed the PWA install');
+    }
+
+    // Clear the deferred prompt so it can be used only once
+    setDeferredPrompt(null);
+    setShowPrompt(false);
+    localStorage.setItem('nc_pwa_prompt_seen', 'true');
+  };
 
   const closePrompt = () => {
     setShowPrompt(false);
@@ -76,7 +113,10 @@ export default function PWAInstallPrompt() {
                   Tap <Share className="w-4 h-4 text-neuro-orange" /> then <span className="text-white">"Add to Home Screen"</span>
                 </div>
               ) : (
-                <button className="w-full py-3 bg-neuro-orange text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-neuro-orange/20">
+                <button 
+                  onClick={handleInstallClick}
+                  className="w-full py-3 bg-neuro-orange text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-neuro-orange/20 active:scale-95 transition-transform"
+                >
                   Install App
                 </button>
               )}
