@@ -105,7 +105,7 @@ export default function DoctorDashboard() {
   }
 
   return (
-    <div className="p-10 max-w-7xl mx-auto space-y-10">
+    <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">
       {/* Welcome & Global Stats */}
       <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
@@ -133,9 +133,9 @@ export default function DoctorDashboard() {
             </div>
           </div>
         ) : (
-          <Link href="/pricing" className="bg-neuro-navy text-white px-8 py-4 rounded-2xl shadow-xl hover:bg-neuro-navy-light transition-all transform hover:scale-105 flex items-center gap-3">
+          <Link href="/pricing" className="bg-neuro-navy text-white px-6 md:px-8 py-4 rounded-2xl shadow-xl hover:bg-neuro-navy-light transition-all transform hover:scale-105 flex items-center gap-3 whitespace-nowrap">
             <Sparkles className="w-5 h-5 text-neuro-orange" />
-            <span className="font-black uppercase tracking-widest text-sm">Become a Member</span>
+            <span className="font-black uppercase tracking-widest text-xs md:text-sm">Become a Member</span>
           </Link>
         )}
       </header>
