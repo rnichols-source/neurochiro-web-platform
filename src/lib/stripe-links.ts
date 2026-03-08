@@ -5,7 +5,7 @@ export const STRIPE_PAYMENT_LINKS = {
       annual: "https://buy.stripe.com/6oUeVfb798g40Y6d2k7wA0s", // Confirmed (A0s)
     },
     growth: {
-      monthly: "https://buy.stripe.com/7sYfZj5MP8g4gX4fas7wa0p", // Confirmed (a0p)
+      monthly: "https://buy.stripe.com/7sYfZj5MP8g4gX4fas7wA0p", // Confirmed (A0p)
       annual: "https://buy.stripe.com/4gM14p3EHeEs8qyfas7wA0q", // Inferred pattern
     },
     pro: {
