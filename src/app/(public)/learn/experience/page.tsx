@@ -43,8 +43,9 @@ export default function ExperiencePage() {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-neuro-orange/10 blur-[120px] rounded-full -mr-64 -mt-64"></div>
         <div className="max-w-4xl mx-auto relative z-10 text-center space-y-6">
           <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-xs">Path 03: The Journey</span>
-          <h1 className="text-5xl md:text-7xl font-heading font-black">The Clinic Experience</h1>
+          <h1 className="text-5xl md:text-7xl font-heading font-black text-white">The Clinic Experience</h1>
           <p className="text-gray-300 text-xl font-medium max-w-2xl mx-auto">
+
             Step-by-step transparency. Here is exactly what to expect when you walk into a NeuroChiro clinic.
           </p>
         </div>

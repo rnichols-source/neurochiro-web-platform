@@ -223,7 +223,7 @@ export default function SeminarHub() {
         <section className="mt-32 bg-neuro-navy rounded-[4rem] p-12 md:p-20 text-white relative overflow-hidden text-center shadow-2xl">
            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-neuro-orange/10 blur-[100px] -mr-48 -mt-48 rounded-full"></div>
            <div className="relative z-10 max-w-2xl mx-auto space-y-8">
-              <h2 className="text-4xl md:text-5xl font-heading font-black">Want to host a seminar?</h2>
+              <h2 className="text-4xl md:text-5xl font-heading font-black text-white">Want to host a seminar?</h2>
               <p className="text-gray-400 text-lg md:text-xl font-medium">
                 Verified Doctors in {region.label} can host and manage public seminars directly through the NeuroChiro ecosystem.
               </p>

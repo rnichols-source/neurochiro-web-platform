@@ -36,9 +36,10 @@ export default function FAQPage() {
       <header className="bg-neuro-navy text-white pt-32 pb-24 px-8 relative overflow-hidden text-center">
         <div className="max-w-4xl mx-auto relative z-10 space-y-6">
           <HelpCircle className="w-16 h-16 text-neuro-orange mx-auto mb-4" />
-          <h1 className="text-5xl md:text-7xl font-heading font-black">Common Questions</h1>
+          <h1 className="text-5xl md:text-7xl font-heading font-black text-white">Common Questions</h1>
           <p className="text-gray-300 text-xl font-medium">Clarity and transparency regarding your care.</p>
         </div>
+
       </header>
 
       <main className="max-w-4xl mx-auto px-8 -mt-12 relative z-20 space-y-12">

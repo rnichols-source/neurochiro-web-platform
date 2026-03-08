@@ -36,7 +36,7 @@ export default function Navbar() {
   ];
 
   // Determine if we should use white text based on scroll state and current page
-  const isDarkPage = pathname === "/" || pathname.startsWith("/learn") || pathname === "/directory" || pathname.startsWith("/nervous-system");
+  const isDarkPage = pathname === "/" || pathname.startsWith("/learn") || pathname === "/directory" || pathname.startsWith("/nervous-system") || pathname.startsWith("/seminars") || pathname.startsWith("/marketplace");
   const useWhiteText = isScrolled || isDarkPage;
 
   return (
