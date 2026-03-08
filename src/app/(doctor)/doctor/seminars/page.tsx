@@ -21,7 +21,7 @@ import {
   PieChart
 } from "lucide-react";
 import { useState } from "react";
-import { Automations } from "@/lib/automations";
+import { onSeminarHostedAction, onCampaignCreatedAction } from "@/app/actions/automations";
 
 export default function SeminarsPage() {
   const [isHostingOpen, setIsHostingOpen] = useState(false);
@@ -51,7 +51,7 @@ export default function SeminarsPage() {
   const handleHostSeminar = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    Automations.onSeminarHosted("dr-natalie", { title: formData.get('title') });
+    onSeminarHostedAction("dr-natalie", { title: formData.get('title') });
     setSuccessState("seminar");
     setTimeout(() => {
       setIsHostingOpen(false);
@@ -61,7 +61,7 @@ export default function SeminarsPage() {
 
   const handleCreateCampaign = (e: React.FormEvent) => {
     e.preventDefault();
-    Automations.onCampaignCreated("dr-natalie", "Holiday Promotion");
+    onCampaignCreatedAction("dr-natalie", "Holiday Promotion");
     setSuccessState("campaign");
     setTimeout(() => {
       setIsCampaignOpen(false);

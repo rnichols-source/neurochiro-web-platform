@@ -20,7 +20,7 @@ import {
   Zap
 } from "lucide-react";
 import Link from "next/link";
-import { Automations } from "@/lib/automations";
+import { onReferralSentAction } from "@/app/actions/automations";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 export default function DoctorProfile() {
@@ -28,277 +28,184 @@ export default function DoctorProfile() {
   const router = useRouter();
   const doctor = MOCK_DOCTORS.find(d => d.slug === slug);
   const [modalState, setModalState] = useState<{isOpen: boolean, title: string, message: string}>({ isOpen: false, title: "", message: "" });
-
-  const handleClaimProfile = () => {
-    // Redirect to register with origin path so it can return after auth
-    const currentPath = window.location.pathname;
-    router.push(`/register?role=doctor&redirect=${encodeURIComponent(currentPath)}`);
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!doctor) {
     notFound();
   }
 
-  const triggerModal = (title: string, message: string) => {
-    setModalState({ isOpen: true, title, message });
-    setTimeout(() => setModalState({ isOpen: false, title: "", message: "" }), 3000);
-  };
-
-  const handleReferral = async () => {
-    // Arguments: referrerId, referrerName, doctorId, doctorEmail, phone, patientName
-    await Automations.onReferralSent(
-      "Public_User", 
-      "Public Visitor", 
-      doctor.id, 
-      "doctor@example.com", // Placeholder
-      "000-000-0000", // Placeholder
-      "Demo Patient"
-    );
-    triggerModal("Referral Sent Successfully", "The doctor has been notified and will reach out to the patient shortly.");
-  };
-
-  const handleContact = async () => {
-    triggerModal("Inquiry Delivered", `Your message has been securely sent to ${doctor.clinic_name}. Expect a response within 24 hours.`);
-  };
-
-  const handleBooking = () => {
-    triggerModal("Redirecting...", "Connecting you to the clinic's secure booking portal.");
-    setTimeout(() => {
-      if (doctor.website_url) {
-        window.open(doctor.website_url, "_blank");
+  const handleReferral = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      if (doctor) {
+        await onReferralSentAction(
+          "current-user-id",
+          "Dr. Referrer",
+          doctor.id,
+          doctor.email || "doctor@example.com",
+          "555-0199",
+          "Patient Name"
+        );
       }
-    }, 1500);
+      setModalState({
+        isOpen: true,
+        title: "Referral Sent",
+        message: `Your referral for ${doctor?.first_name} ${doctor?.last_name} has been processed successfully.`
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const breadcrumbs = [
+    { label: "Directory", href: "/directory" },
+    { label: doctor.clinic_name, href: `/directory/${doctor.slug}`, active: true }
+  ];
 
   return (
-    <div className="min-h-screen bg-neuro-cream relative">
-      
-      {/* Toast Modal */}
+    <div className="min-h-screen bg-neuro-cream pb-32">
+      <div className="bg-neuro-navy pt-32 pb-20 px-6 relative overflow-hidden">
+        {/* Background Orbs */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-neuro-orange/10 blur-[120px] -mr-48 -mt-48"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 blur-[120px] -ml-48 -mb-48"></div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="mb-10">
+            <Breadcrumbs items={breadcrumbs} light />
+          </div>
+
+          <div className="flex flex-col lg:flex-row gap-12 items-start text-white">
+            {/* Avatar / Identity */}
+            <div className="w-full lg:w-1/3">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white/10 backdrop-blur-md rounded-[3rem] p-8 border border-white/10 shadow-2xl"
+              >
+                <div className="relative mb-8 group">
+                  <div className="absolute inset-0 bg-neuro-orange blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                  <div className="w-48 h-48 rounded-[2.5rem] bg-neuro-navy border-4 border-neuro-orange/30 mx-auto flex items-center justify-center text-neuro-orange font-heading font-black text-7xl relative z-10">
+                    {doctor.first_name[0]}{doctor.last_name[0]}
+                  </div>
+                  <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-neuro-orange text-white px-6 py-2 rounded-full font-black text-xs uppercase tracking-widest shadow-xl flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4" /> Verified Doctor
+                  </div>
+                </div>
+
+                <div className="text-center space-y-2 mb-8">
+                  <h1 className="text-4xl font-heading font-black">{doctor.first_name} {doctor.last_name}</h1>
+                  <p className="text-neuro-orange font-bold text-lg uppercase tracking-wider">{doctor.clinic_name}</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <MapPin className="w-5 h-5 text-neuro-orange" />
+                    <span className="text-sm font-medium">{doctor.city}, {doctor.state}</span>
+                  </div>
+                  <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <Globe className="w-5 h-5 text-neuro-orange" />
+                    <span className="text-sm font-medium">Verified Website</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 mt-8">
+                  <button className="flex-1 py-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-all flex items-center justify-center gap-2 border border-white/10">
+                    <Instagram className="w-5 h-5" />
+                  </button>
+                  <button className="flex-1 py-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-all flex items-center justify-center gap-2 border border-white/10">
+                    <Facebook className="w-5 h-5" />
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Profile Content */}
+            <div className="w-full lg:w-2/3 space-y-10">
+              <section className="bg-white/5 backdrop-blur-sm rounded-[3rem] p-10 border border-white/10 shadow-xl">
+                <h3 className="text-2xl font-heading font-black mb-6 flex items-center gap-3">
+                  <Zap className="w-6 h-6 text-neuro-orange fill-current" />
+                  Clinical Excellence
+                </h3>
+                <p className="text-lg text-gray-300 leading-relaxed mb-8 italic">"{doctor.bio}"</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-gray-500">Core Focus</h4>
+                    <div className="flex flex-wrap gap-3">
+                      {doctor.specialties.map((s, i) => (
+                        <span key={i} className="px-4 py-2 bg-neuro-orange/10 border border-neuro-orange/20 text-neuro-orange rounded-xl text-xs font-black uppercase tracking-widest">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-gray-500">Infrastructure</h4>
+                    <div className="flex items-center gap-3 text-sm font-bold text-gray-300">
+                      <CheckCircle2 className="w-5 h-5 text-neuro-orange" /> Nervous System Scanning Active
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-neuro-navy border-2 border-neuro-orange/30 rounded-[2.5rem] p-8 relative group overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/5 blur-3xl group-hover:bg-neuro-orange/10 transition-all"></div>
+                  <h4 className="text-xl font-black mb-2 flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-neuro-orange" />
+                    Book an Exam
+                  </h4>
+                  <p className="text-gray-400 text-sm mb-6 leading-relaxed">Secure your clinical neuro-developmental assessment directly with the office.</p>
+                  <button className="w-full py-4 bg-neuro-orange text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-neuro-orange-light transition-all shadow-lg shadow-neuro-orange/20">Check Availability</button>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 group">
+                  <h4 className="text-xl font-black mb-2 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-blue-500" />
+                    Refer a Patient
+                  </h4>
+                  <p className="text-gray-400 text-sm mb-6 leading-relaxed">Secure HIPAA-compliant referral for nervous-system-first collaborative care.</p>
+                  <button 
+                    onClick={handleReferral}
+                    disabled={isLoading}
+                    className="w-full py-4 bg-white/10 text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-white/20 transition-all border border-white/10 flex items-center justify-center gap-2"
+                  >
+                    {isLoading ? <span className="animate-pulse">Processing...</span> : "Send Secure Referral"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Success Modal */}
       <AnimatePresence>
         {modalState.isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.9 }}
-            className="fixed top-24 left-1/2 -translate-x-1/2 z-[200] bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 flex items-start gap-4 min-w-[320px] max-w-md"
-          >
-            <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-5 h-5 text-green-500" />
-            </div>
-            <div>
-              <h4 className="font-bold text-neuro-navy">{modalState.title}</h4>
-              <p className="text-xs text-gray-500 mt-1 leading-relaxed">{modalState.message}</p>
-            </div>
-            <button onClick={() => setModalState({ ...modalState, isOpen: false })} className="text-gray-400 hover:text-gray-600 ml-auto">
-              <X className="w-4 h-4" />
-            </button>
-          </motion.div>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-xl bg-neuro-navy/60">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-[3rem] p-12 max-w-md w-full shadow-2xl border border-gray-100 text-center"
+            >
+              <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
+                <CheckCircle2 className="w-10 h-10" />
+              </div>
+              <h3 className="text-3xl font-heading font-black text-neuro-navy mb-4">{modalState.title}</h3>
+              <p className="text-gray-500 font-medium leading-relaxed mb-10">{modalState.message}</p>
+              <button 
+                onClick={() => setModalState({ ...modalState, isOpen: false })}
+                className="w-full py-5 bg-neuro-navy text-white rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-2xl shadow-neuro-navy/20 active:scale-95 transition-all"
+              >
+                Continue Exploring
+              </button>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
-
-      {/* Navigation Header */}
-      <nav className="p-6 bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/directory" className="flex items-center gap-2 text-neuro-navy font-bold hover:text-neuro-orange transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Back to Directory
-          </Link>
-          <div className="flex items-center gap-4">
-             <button 
-               onClick={handleBooking}
-               className="px-6 py-2 bg-neuro-navy text-white font-bold rounded-xl text-sm hover:bg-neuro-navy-light transition-colors"
-             >
-               Book Appointment
-             </button>
-          </div>
-        </div>
-      </nav>
-
-      {/* Claim Profile Banner - High Prominence for Acquisition */}
-      <div className="bg-neuro-navy py-4 relative overflow-hidden group">
-        <div className="absolute inset-0 bg-gradient-to-r from-neuro-orange/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8 relative z-10">
-          <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-neuro-orange rounded-xl flex items-center justify-center text-white shadow-lg shadow-neuro-orange/20">
-                <ShieldCheck className="w-6 h-6" />
-             </div>
-             <p className="text-sm font-black text-white uppercase tracking-widest">Is this your clinical profile?</p>
-          </div>
-          <div className="flex items-center gap-4">
-             <p className="text-xs text-gray-400 font-medium hidden lg:block">Verify your clinic to manage reviews, update hours, and receive direct patient referrals.</p>
-             <button 
-               onClick={handleClaimProfile}
-               className="px-6 py-2.5 bg-neuro-orange hover:bg-neuro-orange-light text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-xl transition-all transform hover:-translate-y-0.5"
-             >
-                Claim & Verify Now
-             </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-8 pt-8">
-        <Breadcrumbs />
-      </div>
-
-      <div className="max-w-7xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/* Profile Info */}
-        <div className="lg:col-span-2 space-y-8">
-          <section className="bg-white rounded-[3rem] p-10 shadow-sm border border-gray-100 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/5 rounded-bl-[8rem]"></div>
-            
-            <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
-              <div className="relative">
-                <div className="w-40 h-40 rounded-[3rem] bg-neuro-navy flex items-center justify-center text-white text-5xl font-black shadow-2xl">
-                  {doctor.first_name[0]}{doctor.last_name[0]}
-                </div>
-                {doctor.verification_status === 'verified' && (
-                  <div className="absolute -bottom-2 -right-2 bg-neuro-orange text-white p-3 rounded-2xl shadow-xl border-4 border-white">
-                    <ShieldCheck className="w-6 h-6" />
-                  </div>
-                )}
-              </div>
-              
-              <div className="text-center md:text-left flex-1">
-                <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                  <span className="px-3 py-1 bg-neuro-navy/5 text-neuro-navy text-[10px] font-black uppercase tracking-widest rounded-full">
-                    NeuroChiro Verified
-                  </span>
-                </div>
-                <h1 className="text-4xl font-heading font-black text-neuro-navy mb-2">
-                  Dr. {doctor.first_name} {doctor.last_name}
-                </h1>
-                <p className="text-xl font-bold text-neuro-orange mb-4">{doctor.clinic_name}</p>
-                <div className="flex flex-wrap justify-center md:justify-start gap-4 text-gray-500 font-medium">
-                  <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-neuro-orange" /> {doctor.city}, {doctor.state}</span>
-                  <span className="flex items-center gap-1.5"><Briefcase className="w-4 h-4" /> {doctor.is_hiring ? 'Hiring Associate' : 'Practice Full'}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-12 pt-10 border-t border-gray-50">
-              <h2 className="text-xl font-heading font-black text-neuro-navy mb-4">Clinical Philosophy</h2>
-              <p className="text-gray-600 text-lg leading-relaxed">
-                {doctor.bio} This clinic focuses on the foundational principles of NeuroChiro, ensuring every patient receives nervous-system-first care that addresses the root cause of their health challenges.
-              </p>
-            </div>
-
-            <div className="mt-10">
-              <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">Core Specialties</h3>
-              <div className="flex flex-wrap gap-2">
-                {doctor.specialties.map((s, i) => (
-                  <span key={i} className="px-5 py-2 bg-neuro-cream text-neuro-navy font-bold rounded-2xl border border-neuro-navy/5 shadow-sm">
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* Social & Contact Card */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {doctor.instagram_url && (
-              <a href={doctor.instagram_url} target="_blank" className="bg-white p-6 rounded-[2rem] border border-gray-100 flex flex-col items-center justify-center gap-3 hover:border-neuro-orange transition-all group">
-                <div className="p-3 bg-pink-50 rounded-2xl text-pink-600 group-hover:bg-pink-600 group-hover:text-white transition-all">
-                  <Instagram className="w-6 h-6" />
-                </div>
-                <span className="text-xs font-black uppercase tracking-widest text-neuro-navy">Instagram</span>
-              </a>
-            )}
-            {doctor.facebook_url && (
-              <a href={doctor.facebook_url} target="_blank" className="bg-white p-6 rounded-[2rem] border border-gray-100 flex flex-col items-center justify-center gap-3 hover:border-neuro-orange transition-all group">
-                <div className="p-3 bg-blue-50 rounded-2xl text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                  <Facebook className="w-6 h-6" />
-                </div>
-                <span className="text-xs font-black uppercase tracking-widest text-neuro-navy">Facebook</span>
-              </a>
-            )}
-            {doctor.website_url && (
-              <a href={doctor.website_url} target="_blank" className="bg-white p-6 rounded-[2rem] border border-gray-100 flex flex-col items-center justify-center gap-3 hover:border-neuro-orange transition-all group">
-                <div className="p-3 bg-neuro-orange/5 rounded-2xl text-neuro-orange group-hover:bg-neuro-orange group-hover:text-white transition-all">
-                  <Globe className="w-6 h-6" />
-                </div>
-                <span className="text-xs font-black uppercase tracking-widest text-neuro-navy">Website</span>
-              </a>
-            )}
-          </div>
-        </div>
-
-        {/* Sidebar Cards */}
-        <div className="space-y-8">
-          <section className="bg-neuro-navy rounded-[3rem] p-8 text-white relative overflow-hidden shadow-2xl">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl"></div>
-            <div className="relative z-10">
-              <h3 className="text-2xl font-heading font-black mb-6">Patient Inquiries</h3>
-              <div className="space-y-4">
-                <button 
-                  onClick={handleReferral}
-                  className="w-full py-4 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-light transition-all shadow-lg text-sm uppercase tracking-widest"
-                >
-                  Refer a Patient
-                </button>
-                <button 
-                  onClick={handleContact}
-                  className="w-full py-4 bg-white/10 text-white font-black rounded-2xl hover:bg-white/20 transition-all border border-white/10 text-sm uppercase tracking-widest"
-                >
-                  Contact Clinic
-                </button>
-              </div>
-              <p className="text-[10px] text-gray-400 mt-6 text-center uppercase font-bold tracking-widest leading-relaxed">
-                Response time: Usually within 24 hours
-              </p>
-            </div>
-          </section>
-
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
-            <h3 className="font-heading font-black text-lg text-neuro-navy mb-6">Nervous System Focus</h3>
-            <div className="space-y-6">
-              {[
-                { label: "Vagus Nerve Support", value: "High", color: "text-purple-500", bg: "bg-purple-50" },
-                { label: "Autonomic Regulation", value: "Expert", color: "text-green-500", bg: "bg-green-50" },
-                { label: "Tonal Optimization", value: "Advanced", color: "text-neuro-orange", bg: "bg-neuro-orange/10" }
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50/50 border border-gray-100">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg ${item.bg} ${item.color} flex items-center justify-center`}>
-                      <Zap className="w-4 h-4 fill-current" />
-                    </div>
-                    <span className="text-sm font-bold text-neuro-navy">{item.label}</span>
-                  </div>
-                  <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md bg-white border border-gray-100 shadow-sm ${item.color}`}>{item.value}</span>
-                </div>
-              ))}
-            </div>
-            <p className="mt-6 text-[10px] text-gray-400 leading-relaxed italic">
-              This clinic utilizes advanced neurological assessment tools to measure and track your progress.
-            </p>
-          </section>
-
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
-            <h3 className="font-heading font-black text-lg text-neuro-navy mb-6">Practice Details</h3>
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="p-2 bg-gray-50 rounded-xl text-neuro-orange">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Address</p>
-                  <p className="text-sm font-bold text-neuro-navy">{doctor.address}</p>
-                  <p className="text-sm text-gray-500">{doctor.city}, {doctor.state} {doctor.country}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="p-2 bg-gray-50 rounded-xl text-neuro-orange">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Opportunities</p>
-                  <p className="text-sm font-bold text-neuro-navy">{doctor.is_mentoring ? 'Open to Mentorship' : 'Mentorship Full'}</p>
-                  <p className="text-sm text-gray-500">{doctor.is_hiring ? 'Active Hiring for Associate' : 'No Active Job Openings'}</p>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
     </div>
   );
 }

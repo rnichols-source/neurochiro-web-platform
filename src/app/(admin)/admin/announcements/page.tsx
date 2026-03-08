@@ -19,7 +19,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useState } from "react";
-import { Automations } from "@/lib/automations";
+import { dispatchBroadcastAction, scheduleBroadcastAction } from "./actions";
 
 export default function PlatformAnnouncements() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -43,7 +43,7 @@ export default function PlatformAnnouncements() {
   const handleDispatch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const data = { title: draftTitle, audience: draftAudience, content: draftContent, logic: switches };
-    Automations.onBroadcastDispatched("super-admin", data);
+    dispatchBroadcastAction(data);
     setSuccessState("dispatched");
     setTimeout(() => {
       setSuccessState(null);
@@ -55,7 +55,7 @@ export default function PlatformAnnouncements() {
 
   const handleSchedule = () => {
     const data = { title: draftTitle, audience: draftAudience, content: draftContent, logic: switches };
-    Automations.onBroadcastScheduled("super-admin", data);
+    scheduleBroadcastAction(data);
     setSuccessState("scheduled");
     setTimeout(() => {
       setSuccessState(null);

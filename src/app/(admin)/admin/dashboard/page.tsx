@@ -29,7 +29,6 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRegion } from "@/context/RegionContext";
 import { REGIONS } from "@/lib/regions";
-import { Automations } from "@/lib/automations";
 import { getAdminDashboardStats } from "./actions";
 
 export default function AdminDashboard() {
@@ -52,281 +51,259 @@ export default function AdminDashboard() {
     fetchData();
   }, [viewRegion]);
 
-  return (
-    <div className="p-10 max-w-[1600px] mx-auto space-y-10 text-white">
-      {/* Header & Global Control */}
-      <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-2 mb-2 text-neuro-orange">
-            <Activity className="w-5 h-5" />
-            <span className="text-xs font-black uppercase tracking-[0.3em]">System Live</span>
-          </div>
-          <h1 className="text-4xl font-heading font-black leading-tight tracking-tight">
-            Platform Command Center
-          </h1>
-          <p className="text-gray-400 mt-2 text-lg font-medium">Real-time telemetry for the NeuroChiro ecosystem.</p>
-        </div>
-        
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Dashboard Region Filter */}
-          <div className="bg-white/5 border border-white/10 p-1.5 rounded-2xl flex items-center gap-1">
-             <button 
-               onClick={() => setViewRegion("ALL")}
-               className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewRegion === "ALL" ? "bg-white text-neuro-navy shadow-lg" : "text-gray-500 hover:text-white"}`}
-             >
-               Global
-             </button>
-             {Object.values(REGIONS).map(r => (
-               <button 
-                 key={r.code}
-                 onClick={() => setViewRegion(r.code)}
-                 className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${viewRegion === r.code ? "bg-white text-neuro-navy shadow-lg" : "text-gray-500 hover:text-white"}`}
-               >
-                 <span>{r.flag}</span>
-                 {r.code}
-               </button>
-             ))}
-          </div>
+  const toggleAutomationLogic = () => {
+    alert("Automation logic updated globally.");
+  };
 
+  return (
+    <div className="p-8 max-w-[1600px] mx-auto space-y-10">
+      {/* 1. Global Infrastructure Header */}
+      <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 text-white">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-neuro-orange">
+            <Globe className="w-5 h-5 animate-pulse" />
+            <span className="text-xs font-black uppercase tracking-[0.4em]">Global Operations Console</span>
+          </div>
+          <h1 className="text-5xl font-heading font-black tracking-tight">NeuroChiro Command</h1>
+          <p className="text-gray-400 text-lg font-medium">Real-time governance across all regional nodes.</p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4 bg-white/5 p-2 rounded-[2rem] border border-white/5 backdrop-blur-md">
           <button 
-            onClick={() => setIsAutomationModalOpen(true)}
-            className="bg-neuro-orange text-white px-8 py-4 rounded-2xl shadow-xl hover:bg-neuro-orange-light transition-all transform hover:scale-105 flex items-center gap-3"
+            onClick={() => setViewRegion("ALL")}
+            className={`px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${viewRegion === 'ALL' ? 'bg-neuro-orange text-white shadow-xl' : 'text-gray-500 hover:text-white'}`}
           >
-            <Zap className="w-5 h-5 fill-current" />
-            <span className="font-black uppercase tracking-widest text-sm text-shadow">Automation Center</span>
+            All Regions
           </button>
+          {Object.entries(REGIONS).map(([code, reg]) => (
+            <button 
+              key={code}
+              onClick={() => setViewRegion(code)}
+              className={`px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${viewRegion === code ? 'bg-neuro-navy border border-neuro-orange/30 text-white shadow-xl' : 'text-gray-500 hover:text-white'}`}
+            >
+              {reg.name}
+            </button>
+          ))}
         </div>
       </header>
 
-      {/* Global Telemetry Grid */}
+      {/* 2. Critical System Pulse */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Total Users", value: stats?.users?.toLocaleString() || "14,245", trend: "+12%", icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
-          { label: `Revenue (${viewRegion === "ALL" ? "USD" : REGIONS[viewRegion as keyof typeof REGIONS].currency.code})`, value: viewRegion === "AU" ? `A$${(stats?.revenue * 0.6).toLocaleString()}` : `$${stats?.revenue?.toLocaleString() || "428,500"}`, trend: "+18%", icon: DollarSign, color: "text-green-500", bg: "bg-green-500/10" },
-          { label: "Seminar GMV", value: viewRegion === "AU" ? `A$${(stats?.gmv * 0.6).toLocaleString()}` : `$${stats?.gmv?.toLocaleString() || "124,200"}`, trend: "+24%", icon: Calendar, color: "text-orange-500", bg: "bg-orange-500/10" },
-          { label: "Active Jobs", value: stats?.jobs || "156", trend: "+5%", icon: Briefcase, color: "text-purple-500", bg: "bg-purple-500/10" }
-        ].map((stat, i) => (
-          <div key={i} className="bg-white/5 border border-white/5 rounded-[2rem] p-6 group hover:border-white/10 transition-all relative overflow-hidden">
-            {loading && (
-              <div className="absolute inset-0 bg-neuro-navy/20 backdrop-blur-[1px] flex items-center justify-center z-10">
-                <Loader2 className="w-4 h-4 animate-spin text-neuro-orange" />
+          { label: "Total Revenue", value: stats?.revenue || "$---", trend: "+14.2%", icon: DollarSign, color: "text-green-500" },
+          { label: "Active Doctors", value: stats?.doctors || "---", trend: "+8.1%", icon: ShieldCheck, color: "text-neuro-orange" },
+          { label: "Talent Network", value: stats?.students || "---", trend: "+22.4%", icon: Users, color: "text-blue-500" },
+          { label: "Market Health", value: stats?.engagement || "--%", trend: "+5.6%", icon: Activity, color: "text-purple-500" }
+        ].map((item, i) => (
+          <section key={i} className="bg-[#0A0D14] border border-white/5 rounded-[2.5rem] p-8 relative overflow-hidden group hover:border-white/10 transition-all">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 blur-3xl -mr-12 -mt-12 transition-all group-hover:bg-neuro-orange/10"></div>
+            <div className="flex justify-between items-start mb-6">
+              <div className={`w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center ${item.color}`}>
+                <item.icon className="w-6 h-6" />
               </div>
-            )}
-            <div className="flex justify-between items-start mb-4">
-              <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color}`}>
-                <stat.icon className="w-6 h-6" />
-              </div>
-              <span className="text-xs font-black text-green-500 flex items-center gap-1 bg-green-500/10 px-2 py-1 rounded-lg">
-                <TrendingUp className="w-3 h-3" /> {stat.trend}
-              </span>
+              <span className="text-[10px] font-black text-green-500 bg-green-500/10 px-2 py-1 rounded-lg">{item.trend}</span>
             </div>
-            <div>
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{stat.label}</p>
-              <p className="text-2xl font-black text-white">{stat.value}</p>
-              <p className="text-[10px] text-gray-500 mt-1 font-bold">LIVE TELEMETRY</p>
-            </div>
-          </div>
+            <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">{item.label}</p>
+            <p className="text-3xl font-black text-white">{item.value}</p>
+          </section>
         ))}
       </div>
 
-      {/* REST OF ADMIN UI (The complex charts and tables) - STAYS FROM ORIGINAL */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
-         <div className="lg:col-span-2 space-y-8">
-            {/* Real-time Health Monitor */}
-            <section className="bg-[#131B24] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
-               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <Database className="w-32 h-32 text-white" />
-               </div>
-               <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-8">
-                     <div>
-                        <h3 className="text-xl font-bold">Node Health & Traffic</h3>
-                        <p className="text-sm text-gray-500">Regional distribution of active sessions.</p>
-                     </div>
-                     <div className="flex items-center gap-2">
-                        <div className="px-3 py-1 bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest rounded-full flex items-center gap-2">
-                           <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                           Operational
-                        </div>
-                     </div>
+      {/* 3. Operational Logic & Data Visuals */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Core Control Matrix */}
+        <div className="lg:col-span-2 space-y-8">
+          <section className="bg-white/5 border border-white/5 rounded-[3rem] p-10">
+            <div className="flex items-center justify-between mb-10">
+              <div>
+                <h3 className="text-2xl font-heading font-black text-white">System Governance</h3>
+                <p className="text-gray-500 text-sm mt-1">Global logic overrides and regional isolation settings.</p>
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setIsAuditModalOpen(true)}
+                  className="p-3 bg-white/5 rounded-xl border border-white/5 text-gray-400 hover:text-white transition-all"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+                <button 
+                  onClick={() => setIsAutomationModalOpen(true)}
+                  className="px-6 py-3 bg-neuro-orange text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-neuro-orange-light transition-all shadow-lg"
+                >
+                  Automation Config
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="p-8 bg-neuro-navy rounded-[2.5rem] border border-white/5 space-y-6 group cursor-pointer hover:border-neuro-orange/30 transition-all">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-neuro-orange">
+                    <Database className="w-6 h-6" />
                   </div>
+                  <div>
+                    <h4 className="text-white font-bold">Data Sovereignty</h4>
+                    <p className="text-[10px] text-gray-500 uppercase font-black">Active Nodes: 4</p>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 leading-relaxed">Regional data centers are currently isolated. Strict GDPR/AU compliance enforced.</p>
+                <Link href="/admin/regions" className="flex items-center gap-2 text-[10px] font-black uppercase text-neuro-orange group-hover:gap-4 transition-all">
+                  Manage Infrastructure <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                     <div className="space-y-6">
-                        {Object.values(REGIONS).map((r, i) => (
-                          <div key={i} className="space-y-2">
-                             <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                                <span className="text-gray-400">{r.label} Node</span>
-                                <span className="text-neuro-orange">{80 + (i * 5)}% Load</span>
-                             </div>
-                             <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                <div className="h-full bg-neuro-orange transition-all duration-1000" style={{ width: `${80 + (i * 5)}%` }}></div>
-                             </div>
-                          </div>
-                        ))}
-                     </div>
-                     <div className="bg-white/5 rounded-3xl p-6 border border-white/5 flex flex-col justify-center text-center space-y-4">
-                                 <BarChart3 className="w-8 h-8 text-blue-500 mx-auto" />
-                                 <div>
-                                    <p className="text-3xl font-black">1,452</p>
-                                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Active Concurrent Users</p>
-                                 </div>
-                                 <button className="text-[10px] font-black text-blue-500 uppercase tracking-widest hover:underline">View Load Balancer</button>
-                              </div>
-                           </div>
-                        </div>
-                     </section>
+              <div className="p-8 bg-white/5 rounded-[2.5rem] border border-white/5 space-y-6 group cursor-pointer hover:border-blue-500/30 transition-all">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-blue-500">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold">Member Verification</h4>
+                    <p className="text-[10px] text-gray-500 uppercase font-black">Pending: 14</p>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 leading-relaxed">Manual review queue for doctor credentials and marketplace listings.</p>
+                <Link href="/admin/moderation" className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-500 group-hover:gap-4 transition-all">
+                  Review Queue <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+          </section>
 
-                     {/* Billing Cycle Distribution */}
-                     <section className="bg-[#131B24] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl overflow-hidden relative group">
-                        <div className="flex items-center justify-between mb-8">
-                           <div>
-                             <h3 className="text-xl font-bold flex items-center gap-3">
-                               <CreditCard className="w-6 h-6 text-green-500" /> Billing Infrastructure
-                             </h3>
-                             <p className="text-sm text-gray-500">Distribution of subscription intervals.</p>
-                           </div>
-                           <div className="flex items-center gap-2">
-                             <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest rounded-full">
-                               Conversion +5.2%
-                             </span>
-                           </div>
-                        </div>
+          {/* Activity Pulse */}
+          <section className="bg-white/5 border border-white/5 rounded-[3rem] overflow-hidden">
+            <div className="p-8 border-b border-white/5 flex items-center justify-between">
+              <h3 className="text-xl font-heading font-black text-white">Recent Admin Actions</h3>
+              <button className="text-[10px] font-black text-gray-500 uppercase tracking-widest hover:text-white underline underline-offset-8 transition-colors">View Audit Log</button>
+            </div>
+            <div className="divide-y divide-white/5">
+              {[
+                { action: "Settings Toggle", user: "Admin_US", target: "Price Sync", time: "2m ago" },
+                { action: "User Verified", user: "Admin_AU", target: "Dr. Sarah Chen", time: "14m ago" },
+                { action: "Global Broadcast", user: "Super_Admin", target: "System Maintenance", time: "1h ago" }
+              ].map((log, i) => (
+                <div key={i} className="p-6 flex items-center justify-between hover:bg-white/5 transition-all">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-500">
+                      <Zap className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white">{log.action}</p>
+                      <p className="text-[10px] text-gray-500">{log.user} → {log.target}</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold text-gray-600">{log.time}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                           <div className="space-y-6">
-                             <div className="p-6 bg-white/5 rounded-3xl border border-white/5">
-                               <div className="flex justify-between items-end mb-2">
-                                 <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Monthly Members</p>
-                                 <p className="text-xl font-black">65%</p>
-                               </div>
-                               <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                 <div className="h-full bg-blue-500" style={{ width: '65%' }}></div>
-                               </div>
-                             </div>
-                             <div className="p-6 bg-white/5 rounded-3xl border border-white/5">
-                               <div className="flex justify-between items-end mb-2">
-                                 <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Annual Members</p>
-                                 <p className="text-xl font-black text-neuro-orange">35%</p>
-                               </div>
-                               <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                 <div className="h-full bg-neuro-orange" style={{ width: '35%' }}></div>
-                               </div>
-                             </div>
-                           </div>
-                           <div className="flex flex-col justify-center space-y-6 p-6 border-l border-white/5">
-                             <div>
-                               <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Annual LTV Advantage</p>
-                               <p className="text-2xl font-black text-green-500">+42%</p>
-                             </div>
-                             <div>
-                               <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Churn Reduction</p>
-                               <p className="text-2xl font-black text-blue-500">-15%</p>
-                             </div>
-                           </div>
-                        </div>
-                     </section>
+        {/* Intelligence Sidebar */}
+        <div className="space-y-8">
+          <section className="bg-neuro-navy rounded-[3rem] p-10 shadow-2xl relative overflow-hidden text-white border border-white/5">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl -mr-16 -mt-16"></div>
+            <h3 className="text-2xl font-heading font-black mb-8">System Health</h3>
+            
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                  <span className="text-xs font-bold text-gray-400">Database Engine</span>
+                </div>
+                <span className="text-xs font-black uppercase text-green-500">Optimal</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                  <span className="text-xs font-bold text-gray-400">Auth Gateway</span>
+                </div>
+                <span className="text-xs font-black uppercase text-green-500">Optimal</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-neuro-orange"></div>
+                  <span className="text-xs font-bold text-gray-400">Automation Queue</span>
+                </div>
+                <span className="text-xs font-black uppercase text-neuro-orange">Processing</span>
+              </div>
 
-                     {/* Verification Queue */}
-            <section className="bg-[#131B24] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl overflow-hidden">
-               <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-xl font-bold flex items-center gap-3">
-                     <ShieldCheck className="w-6 h-6 text-neuro-orange" /> Doctor Verification Queue
-                  </h3>
-                  <span className="px-3 py-1 bg-neuro-orange text-white text-[10px] font-black uppercase tracking-widest rounded-full">
-                     12 Pending
-                  </span>
-               </div>
-
-               <div className="space-y-4">
-                  {[
-                    { name: "Dr. Sarah Mitchell", clinic: "Nervous System Chiro", region: "US", date: "2h ago" },
-                    { name: "Dr. James Wilson", clinic: "Peak Neuro-Life", region: "AU", date: "5h ago" },
-                    { name: "Dr. Elena Rossi", clinic: "Atlas Spinal Health", region: "US", date: "Yesterday" }
-                  ].map((doc, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-all group">
-                       <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center font-bold">
-                             {doc.name[4]}
-                          </div>
-                          <div>
-                             <h4 className="text-sm font-bold">{doc.name}</h4>
-                             <p className="text-[10px] text-gray-500 font-medium">{doc.clinic} • {doc.region}</p>
-                          </div>
-                       </div>
-                       <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="px-4 py-2 bg-neuro-orange text-white text-[10px] font-black uppercase tracking-widest rounded-lg">Approve</button>
-                          <button className="p-2 text-gray-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
-                       </div>
+              <div className="pt-8 border-t border-white/10 space-y-6">
+                <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Revenue Velocity</h4>
+                <div className="flex items-end gap-2">
+                  {[40, 70, 55, 90, 60, 85, 100].map((h, i) => (
+                    <div key={i} className="flex-1 bg-white/5 rounded-t-md relative group">
+                      <div 
+                        className="w-full bg-neuro-orange/40 group-hover:bg-neuro-orange transition-all rounded-t-md" 
+                        style={{ height: `${h}%` }}
+                      ></div>
                     </div>
                   ))}
-               </div>
-               <button className="w-full mt-6 py-4 border border-white/10 rounded-2xl text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] hover:bg-white/5 hover:text-white transition-all">
-                  Access Full Identity Vault
-               </button>
-            </section>
-         </div>
+                </div>
+              </div>
 
-         <div className="space-y-8">
-            {/* System Events / Automations Feed */}
-            <section className="bg-neuro-navy rounded-[2.5rem] border border-white/5 p-8 shadow-2xl">
-               <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-neuro-orange" /> System Orchestration
-               </h3>
-               <div className="space-y-6">
-                  {[
-                    { event: "Subscription Created", target: "user_8923", status: "success" },
-                    { event: "Email Broadcast Sent", target: "AU Region", status: "success" },
-                    { event: "License Check", target: "sys_cron", status: "pending" },
-                    { event: "Payment Failed", target: "user_4412", status: "alert" }
-                  ].map((ev, i) => (
-                    <div key={i} className="flex items-start gap-4">
-                       <div className={`mt-1 w-2 h-2 rounded-full ${ev.status === 'success' ? 'bg-green-500' : ev.status === 'alert' ? 'bg-red-500' : 'bg-orange-500'}`}></div>
-                       <div>
-                          <h4 className="text-xs font-bold">{ev.event}</h4>
-                          <p className="text-[9px] text-gray-500 uppercase tracking-widest font-black">{ev.target}</p>
-                       </div>
-                    </div>
-                  ))}
-               </div>
-               <button className="w-full mt-8 py-3 bg-white/5 hover:bg-white/10 text-white font-black text-[10px] uppercase tracking-widest rounded-xl transition-all border border-white/5">
-                  Audit Automation Logs
-               </button>
-            </section>
+              <button className="w-full py-5 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/10 transition-all">
+                <BarChart3 className="w-5 h-5 text-neuro-orange" />
+                <span className="text-xs font-black uppercase tracking-widest">Intelligence Report</span>
+              </button>
+            </div>
+          </section>
 
-            {/* Global Marketplace Activity */}
-            <section className="bg-[#131B24] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl">
-               <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                  <Network className="w-5 h-5 text-blue-500" /> Marketplace Pulse
-               </h3>
-               <div className="space-y-6 text-center">
-                  <div className="grid grid-cols-2 gap-4">
-                     <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                        <p className="text-2xl font-black">42</p>
-                        <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">New Vendors</p>
-                     </div>
-                     <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                        <p className="text-2xl font-black">856</p>
-                        <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Offers Clipped</p>
-                     </div>
-                  </div>
-                  <button className="text-[10px] font-black text-blue-500 uppercase tracking-widest hover:underline">
-                     Partner Portal Admin
-                  </button>
-               </div>
-            </section>
-
-            {/* Quick Support / Feedback */}
-            <section className="bg-gradient-to-br from-neuro-orange to-neuro-orange-dark rounded-[2.5rem] p-8 text-white text-center shadow-xl">
-               <Bell className="w-8 h-8 mx-auto mb-4 animate-bounce" />
-               <h3 className="font-bold mb-2">Technical Alert</h3>
-               <p className="text-xs text-white/80 mb-6">Database maintenance scheduled for 02:00 GMT. 14 node restarts queued.</p>
-               <button className="w-full py-3 bg-white text-neuro-navy font-black text-[10px] uppercase tracking-widest rounded-xl shadow-lg">
-                  Notify Developers
-               </button>
-            </section>
-         </div>
+          <section className="bg-white/5 border border-white/5 rounded-[2.5rem] p-8 text-white">
+            <h3 className="text-lg font-black mb-6">Internal Alerts</h3>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-4">
+                <AlertCircle className="w-5 h-5 text-red-500" />
+                <div>
+                  <p className="text-xs font-bold">API Latency Spike</p>
+                  <p className="text-[9px] text-gray-500">Node: Admin_UK • 2m ago</p>
+                </div>
+              </div>
+              <div className="p-4 bg-neuro-orange/10 border border-neuro-orange/20 rounded-2xl flex items-center gap-4">
+                <Bell className="w-5 h-5 text-neuro-orange" />
+                <div>
+                  <p className="text-xs font-bold">System Maintenance</p>
+                  <p className="text-[9px] text-gray-500">Scheduled: Oct 20th</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
+
+      {/* AUTOMATION MODAL */}
+      {isAutomationModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
+          <div className="bg-[#0A0D14] rounded-[3rem] w-full max-w-xl shadow-2xl overflow-hidden border border-white/10 p-10 text-white">
+            <div className="flex justify-between items-center mb-10">
+              <h3 className="text-3xl font-black">Global Automation</h3>
+              <button onClick={() => setIsAutomationModalOpen(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors"><X /></button>
+            </div>
+            
+            <div className="space-y-8">
+              <div className="flex items-center justify-between p-6 bg-white/5 rounded-[2rem] border border-white/5">
+                <div>
+                  <p className="font-bold">Real-time Lead Notifications</p>
+                  <p className="text-xs text-gray-500 mt-1">Triggers immediately on referral capture.</p>
+                </div>
+                <div className="w-12 h-6 bg-neuro-orange rounded-full relative cursor-pointer" onClick={toggleAutomationLogic}>
+                  <div className="absolute top-1 right-1 w-4 h-4 bg-white rounded-full"></div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-6 bg-white/5 rounded-[2rem] border border-white/5">
+                <div>
+                  <p className="font-bold">Automated Member Invoicing</p>
+                  <p className="text-xs text-gray-500 mt-1">Managed via global Stripe account.</p>
+                </div>
+                <div className="w-12 h-6 bg-neuro-orange rounded-full relative cursor-pointer" onClick={toggleAutomationLogic}>
+                  <div className={`absolute top-1 right-1 w-4 h-4 bg-white rounded-full`}></div>
+                </div>
+              </div>
+              <button className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-sm shadow-xl shadow-neuro-orange/20 mt-4">Sync Configuration</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

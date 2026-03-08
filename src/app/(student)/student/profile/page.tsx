@@ -31,7 +31,7 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Automations } from "@/lib/automations";
+import { onProfileUpdateAction } from "@/app/actions/automations";
 import { useStudentTier } from "@/context/StudentTierContext";
 
 export default function ProfilePage() {
@@ -53,7 +53,7 @@ export default function ProfilePage() {
     const formData = new FormData(e.currentTarget);
     const updatedData = Object.fromEntries(formData.entries());
     setProfile(prev => ({ ...prev, ...updatedData }));
-    Automations.onProfileUpdate("std-1", updatedData);
+    onProfileUpdateAction("std-1", updatedData);
     triggerSuccess("Profile updated successfully!");
     setActiveModal(null);
   };
@@ -68,7 +68,7 @@ export default function ProfilePage() {
     const interest = new FormData(e.currentTarget).get('interest') as string;
     if (interest && !profile.interests.includes(interest)) {
       setProfile(prev => ({ ...prev, interests: [...prev.interests, interest] }));
-      Automations.onProfileUpdate("std-1", { addedInterest: interest });
+      onProfileUpdateAction("std-1", { addedInterest: interest });
       triggerSuccess("Specialty added!");
     }
     setActiveModal(null);
@@ -76,7 +76,7 @@ export default function ProfilePage() {
 
   const removeInterest = (interest: string) => {
     setProfile(prev => ({ ...prev, interests: prev.interests.filter(i => i !== interest) }));
-    Automations.onProfileUpdate("std-1", { removedInterest: interest });
+    onProfileUpdateAction("std-1", { removedInterest: interest });
   };
 
   const getTierIcon = (t: string) => {

@@ -1,36 +1,41 @@
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
-import twilio from 'twilio';
 
 // Initialize the Resend SDK
 export const resend = new Resend(process.env.RESEND_API_KEY || 're_mock_key');
 
-// Initialize Twilio
-const TWILIO_SID = process.env.TWILIO_ACCOUNT_SID;
-const TWILIO_AUTH = process.env.TWILIO_AUTH_TOKEN;
+/**
+ * DYNAMIC TWILIO LOADER
+ * This prevents the 'twilio' library (which requires Node.js 'fs', 'net', 'tls')
+ * from being bundled for the client side during Next.js compilation.
+ */
+const getTwilioClient = async () => {
+  if (typeof window !== 'undefined') return null; // Never run on client
+  
+  const TWILIO_SID = process.env.TWILIO_ACCOUNT_SID;
+  const TWILIO_AUTH = process.env.TWILIO_AUTH_TOKEN;
+  
+  if (!TWILIO_SID || !TWILIO_AUTH) return null;
+  
+  try {
+    const twilio = (await import('twilio')).default;
+    return twilio(TWILIO_SID, TWILIO_AUTH);
+  } catch (err) {
+    console.error("Failed to load Twilio:", err);
+    return null;
+  }
+};
+
 const TWILIO_FROM = process.env.TWILIO_PHONE;
-const twilioClient = TWILIO_SID && TWILIO_AUTH ? twilio(TWILIO_SID, TWILIO_AUTH) : null;
 
 // Admin client for backend operations
 const getSupabaseAdmin = () => {
+  if (typeof window !== 'undefined') return null;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!url || !key) {
-    return new Proxy({}, {
-      get: () => () => ({ 
-        from: () => ({ 
-          insert: () => ({ 
-            select: () => ({ 
-              single: async () => ({ data: null, error: { message: 'Supabase keys missing' } }) 
-            }) 
-          }),
-          update: () => ({ eq: async () => ({ data: null, error: null }) })
-        }) 
-      })
-    }) as any;
-  }
-
+  if (!url || !key) return null;
   return createClient(url, key);
 };
 
@@ -90,6 +95,11 @@ const sendPremiumEmail = async (options: { to: string, subject: string, title: s
 const enqueue = async (eventType: string, payload: Record<string, unknown>) => {
   try {
     const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) {
+      console.log(`[AUTOMATION QUEUE MOCK] ${eventType}`, payload);
+      return;
+    }
+
     const { data, error } = await supabaseAdmin
       .from('automation_queue')
       .insert({
@@ -111,12 +121,13 @@ const enqueue = async (eventType: string, payload: Record<string, unknown>) => {
  * SMS SENDER (TWILIO)
  */
 const sendSMS = async (phone: string, message: string) => {
-  if (!twilioClient || !TWILIO_FROM) {
+  const client = await getTwilioClient();
+  if (!client || !TWILIO_FROM) {
     console.log(`[SMS MOCK] To ${phone}: ${message}`);
     return;
   }
   try {
-    await twilioClient.messages.create({ body: message, from: TWILIO_FROM, to: phone });
+    await client.messages.create({ body: message, from: TWILIO_FROM, to: phone });
     console.log(`[SMS SENT] To ${phone}`);
   } catch (err) {
     console.error("[SMS FAILED]", err);
@@ -127,7 +138,7 @@ const executeAutomation = async (queueId: string, eventType: string, payload: Re
   try {
     const supabaseAdmin = getSupabaseAdmin();
     let prefs = null;
-    if (payload.userId) {
+    if (supabaseAdmin && payload.userId) {
       const { data } = await supabaseAdmin
         .from('notification_preferences')
         .select('*')
@@ -186,6 +197,32 @@ const executeAutomation = async (queueId: string, eventType: string, payload: Re
           }
         }
         break;
+
+      case 'event_registration':
+        if (emailEnabled && payload.email) {
+          await sendPremiumEmail({
+            to: payload.email,
+            subject: `Registration Confirmed: ${payload.eventName}`,
+            title: 'Event Confirmed',
+            body: `<p>You are confirmed for <strong>${payload.eventName}</strong>.</p><p>Check your dashboard for full event details and access links.</p>`,
+            ctaText: 'View My Events',
+            ctaUrl: 'https://neurochiro.co/dashboard'
+          });
+        }
+        break;
+
+      case 'job_application':
+        if (emailEnabled && payload.email) {
+          await sendPremiumEmail({
+            to: payload.email,
+            subject: 'Application Submitted Successfully',
+            title: 'Talent Marketplace',
+            body: `<p>Your application for <strong>${payload.jobTitle}</strong> has been successfully submitted. The clinic will review your profile and reach out directly.</p>`,
+            ctaText: 'Explore More Jobs',
+            ctaUrl: 'https://neurochiro.co/marketplace'
+          });
+        }
+        break;
         
       case 'admin_notification':
         if (process.env.NODE_ENV !== 'development') {
@@ -195,22 +232,28 @@ const executeAutomation = async (queueId: string, eventType: string, payload: Re
             subject: `[ADMIN] ${payload.subject}`,
             html: payload.html
           });
+        } else {
+          console.log(`[ADMIN MOCK] ${payload.subject}`, payload.html);
         }
         break;
     }
 
-    await supabaseAdmin
-      .from('automation_queue')
-      .update({ status: 'completed', updated_at: new Date().toISOString() })
-      .eq('id', queueId);
+    if (supabaseAdmin) {
+      await supabaseAdmin
+        .from('automation_queue')
+        .update({ status: 'completed', updated_at: new Date().toISOString() })
+        .eq('id', queueId);
+    }
 
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : 'Unknown error';
     const supabaseAdmin = getSupabaseAdmin();
-    await supabaseAdmin
-      .from('automation_queue')
-      .update({ status: 'failed', last_error: errorMsg, updated_at: new Date().toISOString() })
-      .eq('id', queueId);
+    if (supabaseAdmin) {
+      await supabaseAdmin
+        .from('automation_queue')
+        .update({ status: 'failed', last_error: errorMsg, updated_at: new Date().toISOString() })
+        .eq('id', queueId);
+    }
   }
 };
 
@@ -226,5 +269,38 @@ export const Automations = {
   },
   onJobPosted: async (clinicName: string) => {
     await enqueue('admin_notification', { subject: 'New Job Posted', html: `<p>A new job was posted by: <strong>${clinicName}</strong>.</p>`});
+  },
+  onBroadcastDispatched: async (adminId: string, data: any) => {
+    await enqueue('admin_notification', { subject: 'Broadcast Dispatched', html: `<p>Admin <strong>${adminId}</strong> dispatched a new broadcast: ${data.title}.</p>`});
+  },
+  onBroadcastScheduled: async (adminId: string, data: any) => {
+    await enqueue('admin_notification', { subject: 'Broadcast Scheduled', html: `<p>Admin <strong>${adminId}</strong> scheduled a new broadcast: ${data.title}.</p>`});
+  },
+  onProfileUpdate: async (userId: string, data: any) => {
+    await enqueue('admin_notification', { subject: 'Profile Updated', html: `<p>User <strong>${userId}</strong> updated their profile: ${JSON.stringify(data)}.</p>`});
+  },
+  onSeminarRegistration: async (userId: string, email: string, phone: string, seminarName: string) => {
+    await enqueue('event_registration', { userId, email, phone, eventName: seminarName });
+  },
+  onJobApplication: async (applicantId: string, email: string, jobId: string, jobTitle: string) => { 
+    await enqueue('job_application', { userId: applicantId, email, jobId, jobTitle });
+  },
+  onVendorSignup: async (vendorName: string) => {
+    await enqueue('admin_notification', { subject: 'New Vendor Application', html: `<p>New vendor applied: <strong>${vendorName}</strong>.</p>`});
+  },
+  onMastermindApplication: async (applicantName: string) => {
+    await enqueue('admin_notification', { subject: 'New Mastermind Application', html: `<p>New application received from: <strong>${applicantName}</strong>.</p>`});
+  },
+  onModerationAction: async (adminId: string, action: string, type: string, target: string) => {
+    await enqueue('admin_notification', { subject: 'Moderation Action', html: `<p>Admin <strong>${adminId}</strong> performed <strong>${action}</strong> on <strong>${type}</strong>: ${target}.</p>`});
+  },
+  onSettingsToggle: async (adminId: string, setting: string, value: boolean) => {
+    await enqueue('admin_notification', { subject: 'Settings Toggle', html: `<p>Admin <strong>${adminId}</strong> toggled <strong>${setting}</strong> to <strong>${value}</strong>.</p>`});
+  },
+  onSeminarHosted: async (userId: string, data: any) => {
+    await enqueue('admin_notification', { subject: 'New Seminar Hosted', html: `<p>User <strong>${userId}</strong> hosted a new seminar: ${JSON.stringify(data)}.</p>`});
+  },
+  onCampaignCreated: async (userId: string, campaignName: string) => {
+    await enqueue('admin_notification', { subject: 'New Campaign Created', html: `<p>User <strong>${userId}</strong> created a new campaign: <strong>${campaignName}</strong>.</p>`});
   }
 };

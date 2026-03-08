@@ -21,7 +21,7 @@ import {
   Lock
 } from "lucide-react";
 import Link from "next/link";
-import { Automations } from "@/lib/automations";
+import { onJobApplicationAction } from "@/app/actions/automations";
 import { useStudentTier } from "@/context/StudentTierContext";
 
 export default function JobsPage() {
@@ -32,7 +32,7 @@ export default function JobsPage() {
   const handleApply = async (jobTitle: string, clinicName: string) => {
     if (!isProfessional) return; // Safeguard
     // Arguments: applicantId, email, jobId, jobTitle
-    await Automations.onJobApplication("Student_User", "student@example.com", "MOCK_JOB_ID", jobTitle);
+    await onJobApplicationAction("Student_User", "student@example.com", "MOCK_JOB_ID", jobTitle);
     setToast({ isOpen: true, message: `Application sent to ${clinicName} for the ${jobTitle} position!` });
     setTimeout(() => setToast({ isOpen: false, message: "" }), 3000);
   };

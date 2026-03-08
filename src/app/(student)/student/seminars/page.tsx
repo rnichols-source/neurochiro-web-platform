@@ -22,7 +22,7 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Automations } from "@/lib/automations";
+import { onSeminarRegistrationAction } from "@/app/actions/automations";
 
 export default function SeminarsPage() {
   const [savedSeminars, setSavedSeminars] = useState<string[]>([]);
@@ -34,7 +34,7 @@ export default function SeminarsPage() {
 
   const handleRegister = async (title: string) => {
     // Arguments: userId, email, phone, seminarName
-    await Automations.onSeminarRegistration("Student_User", "student@example.com", "000-000-0000", title);
+    await onSeminarRegistrationAction("Student_User", "student@example.com", "000-000-0000", title);
     setToast({ isOpen: true, message: `Successfully registered for ${title}!` });
     setSelectedSeminar(null);
     setTimeout(() => setToast({ isOpen: false, message: "" }), 3000);
