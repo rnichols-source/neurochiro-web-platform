@@ -34,6 +34,22 @@ function LoginContent() {
   const quickLogin = (roleEmail: string) => {
     setEmail(roleEmail);
     setPassword("password123");
+
+    // Sync client-side state for tiers before redirecting
+    if (roleEmail.includes("doctor_pro")) {
+      localStorage.setItem("nc_doctor_tier", "pro");
+    } else if (roleEmail.includes("doctor_growth")) {
+      localStorage.setItem("nc_doctor_tier", "growth");
+    } else if (roleEmail.includes("doctor")) {
+      localStorage.setItem("nc_doctor_tier", "starter");
+    }
+
+    if (roleEmail.includes("student_paid")) {
+      localStorage.setItem("nc_student_tier", "Professional");
+    } else if (roleEmail.includes("student")) {
+      localStorage.setItem("nc_student_tier", "Free");
+    }
+
     // Trigger login slightly after to allow state to update visually
     setTimeout(() => {
       const form = document.querySelector('form');
