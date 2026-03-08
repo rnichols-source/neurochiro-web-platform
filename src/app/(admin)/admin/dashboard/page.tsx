@@ -81,7 +81,7 @@ export default function AdminDashboard() {
               onClick={() => setViewRegion(code)}
               className={`px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${viewRegion === code ? 'bg-neuro-navy border border-neuro-orange/30 text-white shadow-xl' : 'text-gray-500 hover:text-white'}`}
             >
-              {reg.name}
+              {reg.label}
             </button>
           ))}
         </div>

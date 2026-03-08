@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { onSettingsToggleAction } from "@/app/actions/automations";
+import { REGIONS } from "@/lib/regions";
 
 export default function RegionalControl() {
   const [isAddRegionModalOpen, setIsAddRegionModalOpen] = useState(false);
@@ -24,11 +25,11 @@ export default function RegionalControl() {
   const [strictIsolation, setStrictIsolation] = useState(true);
   const [crossBorder, setCrossBorder] = useState(false);
 
-  const regions = [
-    { name: "North America", admin: "Admin_US", users: "8.4k", revenue: "$240k", status: "Active" },
-    { name: "Australia", admin: "Admin_AU", users: "2.1k", revenue: "$85k", status: "Active" },
-    { name: "United Kingdom", admin: "Admin_UK", users: "1.2k", revenue: "$42k", status: "Pending" }
-  ];
+  // Mocked stats for the regions from our config
+  const regionalStats: Record<string, any> = {
+    US: { admin: "Admin_US", users: "8.4k", revenue: "$240k", status: "Active" },
+    AU: { admin: "Admin_AU", users: "2.1k", revenue: "$85k", status: "Active" }
+  };
 
   const handleToggleIsolation = () => {
     const newValue = !strictIsolation;
@@ -72,38 +73,41 @@ export default function RegionalControl() {
               <span className="px-4 py-1 bg-green-500/10 text-green-500 rounded-full text-[10px] font-black uppercase tracking-widest">All Nodes Online</span>
             </div>
             <div className="divide-y divide-white/5">
-              {regions.map((region, i) => (
-                <div key={i} className="p-8 flex items-center justify-between hover:bg-white/5 transition-all group">
-                  <div className="flex items-center gap-8">
-                    <div className="w-16 h-16 rounded-3xl bg-neuro-navy flex items-center justify-center text-neuro-orange shadow-lg">
-                      <MapPin className="w-8 h-8" />
-                    </div>
-                    <div>
-                      <h4 className="text-2xl font-black text-white mb-1">{region.name}</h4>
-                      <div className="flex items-center gap-4">
-                        <span className="text-xs font-bold text-gray-500 flex items-center gap-1">
-                          <ShieldCheck className="w-3 h-3" /> Admin: {region.admin}
-                        </span>
-                        <span className="text-xs font-bold text-gray-500 flex items-center gap-1">
-                          <Users className="w-3 h-3" /> {region.users} Users
-                        </span>
+              {Object.entries(REGIONS).map(([code, config], i) => {
+                const stats = regionalStats[code] || { admin: "None", users: "0", revenue: "$0", status: "Inactive" };
+                return (
+                  <div key={i} className="p-8 flex items-center justify-between hover:bg-white/5 transition-all group">
+                    <div className="flex items-center gap-8">
+                      <div className="w-16 h-16 rounded-3xl bg-neuro-navy flex items-center justify-center text-neuro-orange shadow-lg">
+                        <MapPin className="w-8 h-8" />
+                      </div>
+                      <div>
+                        <h4 className="text-2xl font-black text-white mb-1">{config.label}</h4>
+                        <div className="flex items-center gap-4">
+                          <span className="text-xs font-bold text-gray-500 flex items-center gap-1">
+                            <ShieldCheck className="w-3 h-3" /> Admin: {stats.admin}
+                          </span>
+                          <span className="text-xs font-bold text-gray-500 flex items-center gap-1">
+                            <Users className="w-3 h-3" /> {stats.users} Users
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-8">
-                    <div className="text-right">
-                      <p className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Mtd Revenue</p>
-                      <p className="text-xl font-black text-white">{region.revenue}</p>
+                    <div className="flex items-center gap-8">
+                      <div className="text-right">
+                        <p className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Mtd Revenue</p>
+                        <p className="text-xl font-black text-white">{stats.revenue}</p>
+                      </div>
+                      <button 
+                        onClick={() => setSelectedRegion({ ...config, ...stats })}
+                        className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white hover:bg-neuro-orange hover:text-white transition-all active:scale-90"
+                      >
+                        <ChevronRight className="w-6 h-6" />
+                      </button>
                     </div>
-                    <button 
-                      onClick={() => setSelectedRegion(region)}
-                      className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white hover:bg-neuro-orange hover:text-white transition-all active:scale-90"
-                    >
-                      <ChevronRight className="w-6 h-6" />
-                    </button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -235,7 +239,7 @@ export default function RegionalControl() {
           <div className="bg-[#0A0D14] rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/10">
             <div className="p-10 border-b border-white/5 bg-white/5 flex items-center justify-between">
               <div>
-                <h3 className="text-3xl font-black text-white">{selectedRegion.name}</h3>
+                <h3 className="text-3xl font-black text-white">{selectedRegion.label}</h3>
                 <p className="text-xs font-black text-neuro-orange uppercase tracking-[0.2em] mt-1">Regional Management</p>
               </div>
               <button onClick={() => setSelectedRegion(null)}><X className="text-gray-500" /></button>
