@@ -28,12 +28,13 @@ export default function DoctorProfile() {
   const slug = params?.slug as string;
   const router = useRouter();
   
-  // Robust lookup: check exact slug, then check without 'dr-' prefix
-  const cleanSlug = slug?.replace(/^dr-/, '');
+  // Normalize a slug for comparison: remove 'dr-', lowercase, and remove non-alphanumeric
+  const normalize = (s: string) => s?.toLowerCase().replace(/^dr-/, '').replace(/[^a-z0-9]/g, '');
+  
+  const targetSlug = normalize(slug);
   const doctor = MOCK_DOCTORS.find(d => 
-    d.slug === slug || 
-    d.slug === cleanSlug ||
-    d.slug?.replace(/^dr-/, '') === cleanSlug
+    normalize(d.slug) === targetSlug || 
+    normalize(`${d.first_name}-${d.last_name}`) === targetSlug
   );
   const [modalState, setModalState] = useState<{isOpen: boolean, title: string, message: string}>({ isOpen: false, title: "", message: "" });
   const [isLoading, setIsLoading] = useState(false);
