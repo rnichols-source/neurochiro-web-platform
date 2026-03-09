@@ -2,7 +2,7 @@
 
 import { MOCK_DOCTORS } from "@/lib/mock-data";
 import { notFound, useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   MapPin, 
@@ -27,6 +27,13 @@ export default function DoctorProfile() {
   const params = useParams();
   const slug = params?.slug as string;
   const router = useRouter();
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    title: "",
+    message: ""
+  });
   
   // Normalize a slug for comparison: remove 'dr-', lowercase, and remove non-alphanumeric
   const normalize = (s: string) => s?.toLowerCase()?.replace(/^dr-/, '')?.replace(/[^a-z0-9]/g, '') || '';
