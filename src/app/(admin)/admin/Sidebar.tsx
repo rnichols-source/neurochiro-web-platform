@@ -15,7 +15,11 @@ import {
   BarChart3,
   Activity,
   AppWindow,
-  Megaphone
+  Megaphone,
+  CreditCard,
+  MessageSquare,
+  History,
+  X
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -31,22 +35,48 @@ const navItems = [
   { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert },
   { name: "Announcements", href: "/admin/announcements", icon: Megaphone },
   { name: "Regions & Licensing", href: "/admin/regions", icon: Globe },
+  { name: "Revenue & Payments", href: "/admin/revenue", icon: CreditCard },
+  { name: "Communication", href: "/admin/inbox", icon: MessageSquare },
+  { name: "System Logs", href: "/admin/logs", icon: History },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 h-screen bg-[#0F172A] flex flex-col border-r border-white/5 shrink-0">
-      <div className="p-6">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-neuro-orange flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-neuro-orange/20">N</div>
-          <div className="flex flex-col">
-            <span className="text-white font-heading font-bold text-lg leading-none">NeuroChiro</span>
-            <span className="text-neuro-orange text-[10px] font-black uppercase tracking-widest mt-1">Admin OS</span>
-          </div>
-        </Link>
-      </div>
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      <aside className={cn(
+        "fixed lg:static inset-y-0 left-0 w-64 h-screen bg-[#0F172A] flex flex-col border-r border-white/5 shrink-0 z-[200] transition-transform duration-300 transform",
+        isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      )}>
+        <div className="p-6 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-neuro-orange flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-neuro-orange/20">N</div>
+            <div className="flex flex-col">
+              <span className="text-white font-heading font-bold text-lg leading-none">NeuroChiro</span>
+              <span className="text-neuro-orange text-[10px] font-black uppercase tracking-widest mt-1">Admin OS</span>
+            </div>
+          </Link>
+          <button 
+            onClick={onClose}
+            className="lg:hidden p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
       <nav className="flex-1 px-4 space-y-1">
         <div className="mb-4 px-2">
