@@ -35,8 +35,16 @@ export default function DoctorProfile() {
     message: ""
   });
   
-  // Normalize a slug for comparison: remove leading 'dr' if it's a prefix, lowercase, and remove non-alphanumeric
-  const normalize = (s: string) => s?.toLowerCase()?.replace(/^dr(\.|\-|\s+|$)/, '')?.replace(/[^a-z0-9]/g, '') || '';
+  // Normalize a slug for comparison: decode, remove leading 'dr' if it's a prefix, lowercase, and remove non-alphanumeric
+  const normalize = (s: string) => {
+    if (!s) return '';
+    try {
+      const decoded = decodeURIComponent(s);
+      return decoded.toLowerCase()?.replace(/^dr(\.|\-|\s+|$)/, '')?.replace(/[^a-z0-9]/g, '') || '';
+    } catch (e) {
+      return s.toLowerCase()?.replace(/^dr(\.|\-|\s+|$)/, '')?.replace(/[^a-z0-9]/g, '') || '';
+    }
+  };
   
   const targetSlug = normalize(slug);
   
