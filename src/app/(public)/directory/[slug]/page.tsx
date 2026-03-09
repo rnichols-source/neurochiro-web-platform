@@ -24,9 +24,17 @@ import { onReferralSentAction } from "@/app/actions/automations";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 export default function DoctorProfile() {
-  const { slug } = useParams();
+  const params = useParams();
+  const slug = params?.slug as string;
   const router = useRouter();
-  const doctor = MOCK_DOCTORS.find(d => d.slug === slug);
+  
+  // Robust lookup: check exact slug, then check without 'dr-' prefix
+  const cleanSlug = slug?.replace(/^dr-/, '');
+  const doctor = MOCK_DOCTORS.find(d => 
+    d.slug === slug || 
+    d.slug === cleanSlug ||
+    d.slug?.replace(/^dr-/, '') === cleanSlug
+  );
   const [modalState, setModalState] = useState<{isOpen: boolean, title: string, message: string}>({ isOpen: false, title: "", message: "" });
   const [isLoading, setIsLoading] = useState(false);
 

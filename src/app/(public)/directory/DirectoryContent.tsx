@@ -291,7 +291,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                         <div>
                             <div className="flex items-center gap-1.5 mb-0.5">
                               <h3 className="font-bold text-lg text-neuro-navy group-hover:text-neuro-orange transition-colors">
-                                Dr. {doc.first_name} {doc.last_name}
+                                {doc.last_name?.startsWith('Dr.') ? doc.last_name : `Dr. ${doc.first_name} ${doc.last_name}`.trim().replace(/\s+/g, ' ')}
                               </h3>
                               <ShieldCheck className="w-4 h-4 text-blue-500" />
                             </div>
