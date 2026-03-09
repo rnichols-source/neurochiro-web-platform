@@ -29,18 +29,38 @@ export default function DoctorProfile() {
   const router = useRouter();
   
   // Normalize a slug for comparison: remove 'dr-', lowercase, and remove non-alphanumeric
-  const normalize = (s: string) => s?.toLowerCase().replace(/^dr-/, '').replace(/[^a-z0-9]/g, '');
+  const normalize = (s: string) => s?.toLowerCase()?.replace(/^dr-/, '')?.replace(/[^a-z0-9]/g, '') || '';
   
   const targetSlug = normalize(slug);
-  const doctor = MOCK_DOCTORS.find(d => 
-    normalize(d.slug) === targetSlug || 
-    normalize(`${d.first_name}-${d.last_name}`) === targetSlug
-  );
-  const [modalState, setModalState] = useState<{isOpen: boolean, title: string, message: string}>({ isOpen: false, title: "", message: "" });
-  const [isLoading, setIsLoading] = useState(false);
+  
+  // Attempt to find doctor in MOCK_DOCTORS
+  const doctor = MOCK_DOCTORS.find(d => {
+    const mockSlug = normalize(d.slug);
+    const nameSlug = normalize(`${d.first_name}-${d.last_name}`);
+    return mockSlug === targetSlug || nameSlug === targetSlug || d.id === slug;
+  });
+
+  // Debug logging for the user to see in their console
+  useEffect(() => {
+    console.log("🔍 Doctor Profile Lookup:", {
+      requestedSlug: slug,
+      normalizedTarget: targetSlug,
+      found: !!doctor,
+      doctorId: doctor?.id
+    });
+  }, [slug, targetSlug, doctor]);
 
   if (!doctor) {
-    notFound();
+    console.error("❌ Doctor not found for slug:", slug);
+    return (
+      <div className="min-h-screen bg-neuro-cream flex flex-col items-center justify-center p-6 text-center">
+        <h1 className="text-4xl font-black text-neuro-navy mb-4">PROFILE NOT FOUND</h1>
+        <p className="text-gray-500 mb-8">We couldn't find a doctor profile matching "{slug}".</p>
+        <Link href="/directory" className="px-8 py-4 bg-neuro-navy text-white rounded-2xl font-black uppercase tracking-widest text-xs">
+          Return to Directory
+        </Link>
+      </div>
+    );
   }
 
   const handleReferral = async (e: React.FormEvent) => {
