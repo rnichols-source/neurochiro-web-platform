@@ -32,6 +32,9 @@ export interface Doctor {
   website_url?: string;
   bio: string;
   specialties: string[];
+  google_place_id?: string;
+  rating?: number;
+  review_count?: number;
   verification_status: 'pending' | 'verified' | 'hidden';
   membership_tier: MembershipTier;
   is_hiring: boolean;

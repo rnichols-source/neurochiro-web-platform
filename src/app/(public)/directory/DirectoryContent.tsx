@@ -333,7 +333,10 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                           </button>
                           <div className="flex items-center gap-1 text-neuro-orange">
                               <Star className="w-3.5 h-3.5 fill-current" />
-                              <span className="text-sm font-black text-neuro-navy">4.9</span>
+                              <span className="text-sm font-black text-neuro-navy">{doc.rating || "5.0"}</span>
+                              {doc.review_count && (
+                                <span className="text-[10px] text-gray-400 font-bold ml-1">({doc.review_count})</span>
+                              )}
                           </div>
                         </div>
                     </div>

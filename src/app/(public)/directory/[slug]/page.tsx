@@ -20,11 +20,13 @@ import {
   Zap,
   Mail,
   ExternalLink,
-  PhoneCall
+  PhoneCall,
+  MessageSquare
 } from "lucide-react";
 import Link from "next/link";
 import { onReferralSentAction } from "@/app/actions/automations";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
+import GoogleReviews from "@/components/directory/GoogleReviews";
 
 export default function DoctorProfile() {
   const params = useParams();
@@ -286,6 +288,20 @@ export default function DoctorProfile() {
                     </div>
                   </div>
                 </div>
+              </section>
+
+              {/* Patient Reviews Section */}
+              <section className="space-y-8">
+                <h3 className="text-3xl font-heading font-black text-white flex items-center gap-4">
+                  <div className="p-3 bg-white/10 rounded-xl">
+                    <MessageSquare className="w-6 h-6 text-blue-400" />
+                  </div>
+                  Patient Experience
+                </h3>
+                <GoogleReviews 
+                  placeId={doctor.google_place_id} 
+                  doctorName={`${doctor.first_name} ${doctor.last_name}`} 
+                />
               </section>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
