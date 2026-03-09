@@ -20,6 +20,8 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function AdminInbox() {
   const [selectedThread, setSelectedThread] = useState<any>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [message, setMessage] = useState("");
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
 
   // Handle window resize to detect mobile breakpoint
   useEffect(() => {
@@ -31,6 +33,20 @@ export default function AdminInbox() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Initialize chat messages when thread is selected
+  useEffect(() => {
+    if (selectedThread) {
+      setChatMessages([
+        {
+          id: 'initial-msg',
+          sender: 'user',
+          text: `Hello Admin, I've been trying to update my clinical profile for ${selectedThread.subject} but the verification badge isn't appearing. I've uploaded my latest credentials.`,
+          time: '10:42 AM'
+        }
+      ]);
+    }
+  }, [selectedThread]);
+
   const threads = [
     { id: 1, user: "Dr. Patrick McDonnell", subject: "Verification Issue", lastMsg: "I've uploaded my credentials again, please check.", time: "2m ago", unread: true, type: "Verification" },
     { id: 2, user: "Sarah Miller (Student)", subject: "Mastermind Access", lastMsg: "How do I join the upcoming seminar?", time: "14m ago", unread: false, type: "Support" },
@@ -39,6 +55,24 @@ export default function AdminInbox() {
 
   const handleBack = () => {
     setSelectedThread(null);
+  };
+
+  const handleSendMessage = () => {
+    if (!message.trim() || !selectedThread) return;
+
+    // Optimistic UI update
+    const newMessage = {
+      id: Date.now().toString(),
+      sender: 'admin',
+      text: message,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setChatMessages(prev => [...prev, newMessage]);
+    setMessage(""); // Clear input
+
+    console.log(`✅ Message sent to ${selectedThread.user}: ${message}`);
+    // In a real app, this would be an API call to Supabase or your backend
   };
 
   return (
@@ -121,31 +155,45 @@ export default function AdminInbox() {
               </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto p-4 lg:p-10 space-y-8 scroll-smooth">
-              <div className="flex flex-col gap-6">
-                <div className="max-w-[85%] lg:max-w-[70%] bg-white/5 border border-white/5 rounded-3xl p-4 lg:p-6 rounded-tl-none">
-                  <p className="text-sm text-gray-300 leading-relaxed">
-                    Hello Admin, I've been trying to update my clinical profile but the verification badge isn't appearing. I've uploaded my latest credentials.
-                  </p>
-                  <span className="text-[10px] text-gray-600 font-bold mt-4 block">10:42 AM</span>
+            <div className="flex-1 overflow-y-auto p-4 lg:p-10 space-y-8 scroll-smooth flex flex-col">
+              {chatMessages.map((msg) => (
+                <div 
+                  key={msg.id}
+                  className={`max-w-[85%] lg:max-w-[70%] p-4 lg:p-6 rounded-3xl ${
+                    msg.sender === 'admin' 
+                      ? 'bg-neuro-orange text-white rounded-tr-none self-end shadow-xl shadow-neuro-orange/10' 
+                      : 'bg-white/5 border border-white/5 text-gray-300 rounded-tl-none self-start'
+                  }`}
+                >
+                  <p className="text-sm leading-relaxed">{msg.text}</p>
+                  <span className={`text-[10px] mt-4 block uppercase tracking-widest ${
+                    msg.sender === 'admin' ? 'text-white/60 text-right' : 'text-gray-600'
+                  }`}>
+                    {msg.sender === 'admin' ? `Sent • ${msg.time}` : msg.time}
+                  </span>
                 </div>
-                
-                <div className="max-w-[85%] lg:max-w-[70%] bg-neuro-orange text-white rounded-3xl p-4 lg:p-6 rounded-tr-none self-end shadow-xl shadow-neuro-orange/10">
-                  <p className="text-sm font-medium leading-relaxed">
-                    Checking that for you now, Dr. {selectedThread.user.includes(' ') ? selectedThread.user.split(' ').pop() : selectedThread.user}. It looks like the image was slightly blurry. Can you re-upload the PDF version?
-                  </p>
-                  <span className="text-[10px] text-white/60 font-black mt-4 block uppercase tracking-widest text-right">Sent • Just now</span>
-                </div>
-              </div>
+              ))}
             </div>
 
             <footer className="p-4 lg:p-6 bg-white/[0.02] border-t border-white/5 sticky bottom-0 z-20 backdrop-blur-md">
               <div className="relative">
                 <textarea 
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
                   placeholder="Type your secure response..."
                   className="w-full bg-white/5 border border-white/10 rounded-3xl lg:rounded-[2rem] px-6 lg:px-8 py-4 lg:py-5 pr-16 lg:pr-20 text-sm focus:outline-none focus:border-neuro-orange text-white resize-none h-20 lg:h-32"
                 />
-                <button className="absolute bottom-3 right-3 lg:bottom-4 lg:right-4 bg-neuro-orange p-3 lg:p-4 rounded-2xl text-white shadow-xl hover:bg-neuro-orange-light transition-all active:scale-95">
+                <button 
+                  onClick={handleSendMessage}
+                  disabled={!message.trim()}
+                  className="absolute bottom-3 right-3 lg:bottom-4 lg:right-4 bg-neuro-orange p-3 lg:p-4 rounded-2xl text-white shadow-xl hover:bg-neuro-orange-light transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <Send className="w-4 h-4 lg:w-5 lg:h-5" />
                 </button>
               </div>
