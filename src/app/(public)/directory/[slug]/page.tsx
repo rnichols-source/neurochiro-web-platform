@@ -145,8 +145,8 @@ export default function DoctorProfile() {
                   </div>
                 </div>
 
-                <div className="text-center space-y-3 mb-10">
-                  <h1 className="text-4xl font-heading font-black leading-tight">{doctor.first_name} {doctor.last_name}</h1>
+                <div className="text-center space-y-3 mb-10 text-white">
+                  <h1 className="text-4xl font-heading font-black leading-tight text-white">{doctor.first_name} {doctor.last_name}</h1>
                   <p className="text-neuro-orange font-black text-sm uppercase tracking-[0.15em] opacity-90">{doctor.clinic_name}</p>
                 </div>
 
@@ -195,7 +195,7 @@ export default function DoctorProfile() {
               <section className="bg-white/5 backdrop-blur-sm rounded-[3rem] p-10 border border-white/10 shadow-xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/5 blur-[80px] -mr-32 -mt-32 transition-all group-hover:bg-neuro-orange/10"></div>
                 
-                <h3 className="text-2xl font-heading font-black mb-8 flex items-center gap-4">
+                <h3 className="text-2xl font-heading font-black mb-8 flex items-center gap-4 text-white">
                   <div className="p-3 bg-neuro-orange rounded-2xl shadow-lg shadow-neuro-orange/20">
                     <Zap className="w-6 h-6 text-white fill-current" />
                   </div>
@@ -236,7 +236,7 @@ export default function DoctorProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="bg-neuro-navy border-2 border-neuro-orange/30 rounded-[2.5rem] p-10 relative group overflow-hidden shadow-2xl">
                   <div className="absolute top-0 right-0 w-40 h-40 bg-neuro-orange/10 blur-3xl group-hover:bg-neuro-orange/20 transition-all duration-500"></div>
-                  <h4 className="text-2xl font-black mb-4 flex items-center gap-3">
+                  <h4 className="text-2xl font-black mb-4 flex items-center gap-3 text-white">
                     <Calendar className="w-6 h-6 text-neuro-orange" />
                     Book an Exam
                   </h4>
@@ -251,7 +251,7 @@ export default function DoctorProfile() {
 
                 <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 group relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/5 blur-3xl group-hover:bg-blue-500/10 transition-all duration-500"></div>
-                  <h4 className="text-2xl font-black mb-4 flex items-center gap-3">
+                  <h4 className="text-2xl font-black mb-4 flex items-center gap-3 text-white">
                     <Users className="w-6 h-6 text-blue-400" />
                     Refer a Patient
                   </h4>
