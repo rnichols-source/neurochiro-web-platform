@@ -52,7 +52,7 @@ export default function NotificationBell() {
 
     if (notifs) {
       setNotifications(notifs);
-      setUnreadCount(notifs.filter(n => !n.read_at).length);
+      setUnreadCount(notifs.filter((n: Notification) => !n.read_at).length);
     }
 
     // Fetch global announcements not dismissed
@@ -73,8 +73,8 @@ export default function NotificationBell() {
       .select('announcement_id')
       .eq('user_id', user.id);
     
-    const dismissedIds = dismissals?.map(d => d.announcement_id) || [];
-    const activeAnncs = anncs?.filter(a => !dismissedIds.includes(a.id)) || [];
+    const dismissedIds = dismissals?.map((d: any) => d.announcement_id) || [];
+    const activeAnncs = anncs?.filter((a: Announcement) => !dismissedIds.includes(a.id)) || [];
     
     setAnnouncements(activeAnncs);
     setUnreadCount(prev => prev + activeAnncs.length);
@@ -91,7 +91,7 @@ export default function NotificationBell() {
         event: 'INSERT', 
         schema: 'public', 
         table: 'notifications' 
-      }, (payload) => {
+      }, (payload: any) => {
         setNotifications(prev => [payload.new as Notification, ...prev]);
         setUnreadCount(prev => prev + 1);
         // Play sound or show toast if needed
