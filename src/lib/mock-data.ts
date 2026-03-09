@@ -2,36 +2,36 @@ import { Doctor } from "@/types/directory";
 
 export const MOCK_DOCTORS: Doctor[] = [
   {
-    "id": "bgahsu",
+    "id": "l5m1ye",
     "slug": "amy-anthony",
     "first_name": "Amy",
     "last_name": "Anthony",
-    "clinic_name": "Sydney Neuro-Life",
-    "city": "Sydney",
-    "state": "New South Wales",
-    "country": "Australia",
-    "address": "Sydney, NSW, 2000",
-    "latitude": -33.8688,
-    "longitude": 151.2093,
-    "instagram_url": "https://www.instagram.com/sydneyfamilychiro",
-    "facebook_url": "https://www.facebook.com/sydneyfamilychiro",
-    "website_url": "https://www.sydneyfamilychiro.com",
-    "bio": "Sydney Neuro-Life is Australia's premier nervous-system-first clinic. We specialize in complex pediatric cases and family wellness.",
+    "clinic_name": "Oly Family Chiropractic",
+    "city": "Olympia",
+    "state": "Washington",
+    "country": "United States",
+    "address": "Olympia, WA, 98516",
+    "latitude": 0,
+    "longitude": 0,
+    "instagram_url": "https://www.instagram.com/olyfamilychiro",
+    "facebook_url": "https://www.facebook.com/olyfamilychiro",
+    "website_url": "https://www.olyfamilychiro.com",
+    "bio": "Oly Family Chiropractic is highly praised for its customer-focused care, gentle yet effective adjustments, and expertise in chiropractic health. Clients appreciate the knowledgeable staff, personalized attention, and valuable health information provided, making it a trusted choice for chiropractic needs.",
     "specialties": [
       "Pediatrics",
       "Prenatal",
       "Tonal"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "AU",
-    "created_at": "2026-03-06T13:41:31.926Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "9hm4ee",
+    "id": "8p1lbs",
     "slug": "blain-segura",
     "first_name": "Blain",
     "last_name": "Segura",
@@ -49,16 +49,16 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "x4flb5",
+    "id": "deuchi",
     "slug": "canaan-andrews",
     "first_name": "Canaan",
     "last_name": "Andrews",
@@ -76,16 +76,16 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "mkozoic",
+    "id": "yv8a98",
     "slug": "chandler-boggs",
     "first_name": "Chandler",
     "last_name": "Boggs",
@@ -106,17 +106,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "uab6el",
-    "slug": "alexis-taylor",
+    "id": "qh5hxe",
+    "slug": "dr-alexis-taylor",
     "first_name": "Alexis",
     "last_name": "Taylor",
     "clinic_name": "Connected Nutrition and Chiropractic",
@@ -136,17 +136,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "hvwxq7",
-    "slug": "ashley-trueblood",
+    "id": "t84w7",
+    "slug": "dr-ashley-trueblood",
     "first_name": "Ashley",
     "last_name": "Trueblood",
     "clinic_name": "True Life Chiropractic",
@@ -163,17 +163,17 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "5aj22k",
-    "slug": "breanna-rodriguez",
+    "id": "nwjgb",
+    "slug": "dr-breanna-rodriguez",
     "first_name": "Breanna",
     "last_name": "Rodriguez",
     "clinic_name": "Wild Sage Chiropractic",
@@ -193,17 +193,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "wy22qa",
-    "slug": "brooke-galbiati",
+    "id": "nzbun8",
+    "slug": "dr-brooke-galbiati",
     "first_name": "Brooke",
     "last_name": "Galbiati",
     "clinic_name": "Serenityspineandwellness@gmail.com",
@@ -223,17 +223,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "iguqz",
-    "slug": "elle-klink",
+    "id": "nfwmdq",
+    "slug": "dr-elle-klink",
     "first_name": "Elle",
     "last_name": "Klink",
     "clinic_name": "Klink Chiropractic",
@@ -254,17 +254,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "fzl3qm",
-    "slug": "james-huang",
+    "id": "l25krj",
+    "slug": "dr-james-huang",
     "first_name": "James",
     "last_name": "Huang",
     "clinic_name": "Holistic Chiropractic and Kinesiology",
@@ -283,17 +283,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "nzucc",
-    "slug": "keitza-garavito",
+    "id": "krepxv",
+    "slug": "dr-keitza-garavito",
     "first_name": "Keitza",
     "last_name": "Garavito",
     "clinic_name": "Healing Lab Chiropractic Studio",
@@ -313,17 +313,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "hgm3gj",
-    "slug": "kengee-ehrlich",
+    "id": "zlfrju",
+    "slug": "dr-kengee-ehrlich",
     "first_name": "KenGee",
     "last_name": "Ehrlich",
     "clinic_name": "The Good Chiropractor House of Healing & Disc Center",
@@ -341,17 +341,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "14j7o",
-    "slug": "kevin-leblanc",
+    "id": "q88ez",
+    "slug": "dr-kevin-leblanc",
     "first_name": "Kevin",
     "last_name": "LeBlanc",
     "clinic_name": "Rooted Chiropractic",
@@ -371,17 +371,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "n6q5a",
-    "slug": "kurtis-fischer",
+    "id": "mucusq",
+    "slug": "dr-kurtis-fischer",
     "first_name": "Kurtis",
     "last_name": "Fischer",
     "clinic_name": "Ponoka Family Chiropractic",
@@ -402,17 +402,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "o0ftj",
-    "slug": "kyle-denos",
+    "id": "q1lkr",
+    "slug": "dr-kyle-denos",
     "first_name": "Kyle",
     "last_name": "Denos",
     "clinic_name": "The Haven Chiropractic",
@@ -431,17 +431,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "2cw6g",
-    "slug": "maggie-benham",
+    "id": "wymn58",
+    "slug": "dr-maggie-benham",
     "first_name": "Maggie",
     "last_name": "Benham",
     "clinic_name": "Chosen Spot Chiropractic & Wellness",
@@ -459,17 +459,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "2aa8u",
-    "slug": "megan-gomez",
+    "id": "4fpjbt",
+    "slug": "dr-megan-gomez",
     "first_name": "Megan",
     "last_name": "Gomez",
     "clinic_name": "Vital Spine and Health Studio",
@@ -489,17 +489,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "60i6bp",
-    "slug": "preston-cook",
+    "id": "ce1g67",
+    "slug": "dr-preston-cook",
     "first_name": "Preston",
     "last_name": "Cook",
     "clinic_name": "Native Chiropractic",
@@ -519,17 +519,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "ssubzr",
-    "slug": "stanton-hom",
+    "id": "caap7h",
+    "slug": "dr-stanton-hom",
     "first_name": "Stanton",
     "last_name": "Hom",
     "clinic_name": "Future Generations Clinic of Chiropractic",
@@ -549,17 +549,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "reip9oa",
-    "slug": "todd-countee",
+    "id": "e48khh",
+    "slug": "dr-todd-countee",
     "first_name": "Todd",
     "last_name": "Countee",
     "clinic_name": "Armonia Chiropractic",
@@ -578,16 +578,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "vgz6y",
+    "id": "dmijhw",
     "slug": "andrew-burd",
     "first_name": "Andrew",
     "last_name": "Burd",
@@ -607,16 +607,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "ugvarc",
+    "id": "pvfjt9",
     "slug": "ashley-saylor",
     "first_name": "Ashley",
     "last_name": "Saylor",
@@ -635,16 +635,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "adia8c",
+    "id": "qif2ki",
     "slug": "bailey-backhuus",
     "first_name": "Bailey",
     "last_name": "Backhuus",
@@ -665,16 +665,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "0yt6ct",
+    "id": "6rbo1h",
     "slug": "bethany-alleman-dc",
     "first_name": "Bethany",
     "last_name": "Alleman, DC",
@@ -694,16 +694,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "xus91",
+    "id": "vs18y8",
     "slug": "brittany-perez",
     "first_name": "Brittany",
     "last_name": "Perez",
@@ -721,16 +721,16 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.956Z",
+    "updated_at": "2026-03-09T00:49:16.956Z"
   },
   {
-    "id": "6gildd",
+    "id": "l8w5xo",
     "slug": "colten-nevel",
     "first_name": "Colten",
     "last_name": "Nevel",
@@ -752,19 +752,19 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "xz2aac",
+    "id": "6xjxcf",
     "slug": "dr-devin-dicenzo",
-    "first_name": "Dr",
-    "last_name": "Devin DiCenzo",
+    "first_name": "Devin",
+    "last_name": "DiCenzo",
     "clinic_name": "Lighthouse Family Chiropractic",
     "city": "Queen Creek",
     "state": "Arizona",
@@ -782,17 +782,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "bwntp",
-    "slug": "aaron-whitaker",
+    "id": "u9ri8b",
+    "slug": "dr-aaron-whitaker",
     "first_name": "Aaron",
     "last_name": "Whitaker",
     "clinic_name": "Kauri Chiropractic",
@@ -813,17 +813,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "tkplpa",
-    "slug": "adam-coats",
+    "id": "0ddt1w",
+    "slug": "dr-adam-coats",
     "first_name": "Adam",
     "last_name": "Coats",
     "clinic_name": "Empowered Origins Chiropractic",
@@ -841,17 +841,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.928Z",
-    "updated_at": "2026-03-06T13:41:31.928Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "m9laau",
-    "slug": "alex-lee",
+    "id": "j313hp",
+    "slug": "dr-alex-lee",
     "first_name": "Alex",
     "last_name": "Lee",
     "clinic_name": "Circadian Chiropractic & Sport",
@@ -868,17 +868,17 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "1z3dz",
-    "slug": "alisha-davis",
+    "id": "eymdiv",
+    "slug": "dr-alisha-davis",
     "first_name": "Alisha",
     "last_name": "Davis",
     "clinic_name": "Davis Family Chiropractic",
@@ -897,17 +897,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "8m3xwi",
-    "slug": "andrew-quick",
+    "id": "j16s26",
+    "slug": "dr-andrew-quick",
     "first_name": "Andrew",
     "last_name": "Quick",
     "clinic_name": "AlignLife of Goose Creek",
@@ -924,17 +924,17 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "54x4o",
-    "slug": "andrew-rupp",
+    "id": "zfyjn",
+    "slug": "dr-andrew-rupp",
     "first_name": "Andrew",
     "last_name": "Rupp",
     "clinic_name": "Thrive Chiropractic",
@@ -953,17 +953,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "ifazsu",
-    "slug": "ashley-steele",
+    "id": "u9ff9w",
+    "slug": "dr-ashley-steele",
     "first_name": "Ashley",
     "last_name": "Steele",
     "clinic_name": "Apex Chiropractic",
@@ -981,17 +981,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "dgb6sk",
-    "slug": "zachary-soufl",
+    "id": "8ktq4a",
+    "slug": "dr-zachary-soufl",
     "first_name": "Zachary",
     "last_name": "Soufl",
     "clinic_name": "Connected Chiropractic",
@@ -1009,16 +1009,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "ednbwh",
+    "id": "9ouwhh",
     "slug": "jake-schumann",
     "first_name": "Jake",
     "last_name": "Schumann",
@@ -1040,16 +1040,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "2sfosp",
+    "id": "vj4818",
     "slug": "kyle-rodriguez",
     "first_name": "Kyle",
     "last_name": "Rodriguez",
@@ -1070,16 +1070,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "4u02jq",
+    "id": "amxnc",
     "slug": "malori-tinsley",
     "first_name": "Malori",
     "last_name": "Tinsley",
@@ -1097,16 +1097,16 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "General NeuroChiro"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "xx6vfa",
+    "id": "9ktiae",
     "slug": "mickey-mondragon",
     "first_name": "Mickey",
     "last_name": "Mondragon",
@@ -1124,16 +1124,16 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "l9089",
+    "id": "7jn46g",
     "slug": "ronnie-bolar",
     "first_name": "Ronnie",
     "last_name": "Bolar",
@@ -1152,17 +1152,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "pbcnlg",
-    "slug": "benjamin-benulis",
+    "id": "dpre5e",
+    "slug": "dr-benjamin-benulis",
     "first_name": "Benjamin",
     "last_name": "Benulis",
     "clinic_name": "Life Unfolds Chiropractic",
@@ -1181,17 +1181,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "nq65vp",
-    "slug": "brad-burgess",
+    "id": "8kuk6d",
+    "slug": "dr-brad-burgess",
     "first_name": "Brad",
     "last_name": "Burgess",
     "clinic_name": "Keystone Chiropractic and Wellness",
@@ -1209,17 +1209,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "y1ia4b",
-    "slug": "brad-hutt",
+    "id": "4b3m8c",
+    "slug": "dr-brad-hutt",
     "first_name": "Brad",
     "last_name": "Hutt",
     "clinic_name": "Revival Chiropractic",
@@ -1237,17 +1237,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "g53ysj",
-    "slug": "brian-anderson",
+    "id": "5c3h4r",
+    "slug": "dr-brian-anderson",
     "first_name": "Brian",
     "last_name": "Anderson",
     "clinic_name": "Premier Health of Summit",
@@ -1264,17 +1264,17 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "General NeuroChiro"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "05jj65",
-    "slug": "brian-mcgregor",
+    "id": "bdw1f",
+    "slug": "dr-brian-mcgregor",
     "first_name": "Brian",
     "last_name": "McGregor",
     "clinic_name": "AlignLife - Chiropractic & Natural Health Center",
@@ -1292,17 +1292,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Pediatrics",
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "nyj8kb",
-    "slug": "brittany-wetzel",
+    "id": "w79kyu",
+    "slug": "dr-brittany-wetzel",
     "first_name": "Brittany",
     "last_name": "Wetzel",
     "clinic_name": "Native Chiropractic",
@@ -1322,17 +1322,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "75p75n",
-    "slug": "bryan-pries",
+    "id": "hsl9ik",
+    "slug": "dr-bryan-pries",
     "first_name": "Bryan",
     "last_name": "Pries",
     "clinic_name": "Revival Family Chiropractic",
@@ -1353,17 +1353,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "uhr82",
-    "slug": "caitlin-reimer",
+    "id": "qqouks",
+    "slug": "dr-caitlin-reimer",
     "first_name": "Caitlin",
     "last_name": "Reimer",
     "clinic_name": "White Horse Family Wellness",
@@ -1384,17 +1384,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "viabta",
-    "slug": "chantal-shelstad",
+    "id": "u43j4e",
+    "slug": "dr-chantal-shelstad",
     "first_name": "Chantal",
     "last_name": "Shelstad",
     "clinic_name": "StartWell Chiropractic",
@@ -1415,17 +1415,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "iz32q",
-    "slug": "chris-hopkins",
+    "id": "vgm3uq",
+    "slug": "dr-chris-hopkins",
     "first_name": "Chris",
     "last_name": "Hopkins",
     "clinic_name": "Harmony Family Chiropractic",
@@ -1445,17 +1445,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "wdalc",
-    "slug": "colton-wood",
+    "id": "q8p2ug",
+    "slug": "dr-colton-wood",
     "first_name": "Colton",
     "last_name": "Wood",
     "clinic_name": "True Light Chiropractic",
@@ -1476,17 +1476,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "gkrc9",
-    "slug": "dakota-turgeon",
+    "id": "61yw7t",
+    "slug": "dr-dakota-turgeon",
     "first_name": "Dakota",
     "last_name": "Turgeon",
     "clinic_name": "Envision Chiropractic",
@@ -1503,17 +1503,17 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "3ieh9s",
-    "slug": "dan-wallis",
+    "id": "y42hgn",
+    "slug": "dr-dan-wallis",
     "first_name": "Dan",
     "last_name": "Wallis",
     "clinic_name": "Elevate Chiropractic",
@@ -1531,17 +1531,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "qvm2h",
-    "slug": "daniel-mendez",
+    "id": "ffngth",
+    "slug": "dr-daniel-mendez",
     "first_name": "Daniel",
     "last_name": "Mendez",
     "clinic_name": "Whole Body Wellness Chiropractic",
@@ -1559,17 +1559,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "obkolj",
-    "slug": "danielle-fleming",
+    "id": "u7dzyv",
+    "slug": "dr-danielle-fleming",
     "first_name": "Danielle",
     "last_name": "Fleming",
     "clinic_name": "Vibrant Life Center",
@@ -1590,17 +1590,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "evp4on",
-    "slug": "danika-phillips",
+    "id": "bh0iha",
+    "slug": "dr-danika-phillips",
     "first_name": "Danika",
     "last_name": "Phillips",
     "clinic_name": "Fika Chiropractic",
@@ -1620,17 +1620,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "41ky6c",
-    "slug": "daxon-jones",
+    "id": "7djmdua",
+    "slug": "dr-daxon-jones",
     "first_name": "Daxon",
     "last_name": "Jones",
     "clinic_name": "Burnaby Chiropractic",
@@ -1651,17 +1651,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "9a85t8",
-    "slug": "dean-peters",
+    "id": "hvg1ur",
+    "slug": "dr-dean-peters",
     "first_name": "Dean",
     "last_name": "Peters",
     "clinic_name": "Milton Spine & Wellness",
@@ -1679,17 +1679,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "rfhzf",
-    "slug": "diego-montes",
+    "id": "etehpr",
+    "slug": "dr-diego-montes",
     "first_name": "Diego",
     "last_name": "Montes",
     "clinic_name": "In8life",
@@ -1709,17 +1709,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "scpncp",
-    "slug": "dylan-jones",
+    "id": "l29jf",
+    "slug": "dr-dylan-jones",
     "first_name": "Dylan",
     "last_name": "Jones",
     "clinic_name": "Main St. Chiropractic",
@@ -1738,17 +1738,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "3kq1kf",
-    "slug": "elise-rigney",
+    "id": "gv30h",
+    "slug": "dr-elise-rigney",
     "first_name": "Elise",
     "last_name": "Rigney",
     "clinic_name": "Impact Chiropractic",
@@ -1768,17 +1768,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "z5gjn9",
-    "slug": "gena-bofshever",
+    "id": "pa94t",
+    "slug": "dr-gena-bofshever",
     "first_name": "Gena",
     "last_name": "Bofshever",
     "clinic_name": "Dr. Gena Chiropractic",
@@ -1798,17 +1798,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "m01xpe",
-    "slug": "gretchen-rachuy",
+    "id": "pbun1v",
+    "slug": "dr-gretchen-rachuy",
     "first_name": "Gretchen",
     "last_name": "Rachuy",
     "clinic_name": "Homegrown Family Chiropractic",
@@ -1827,17 +1827,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "r6ncq6",
-    "slug": "haley-turpin",
+    "id": "o8v2co",
+    "slug": "dr-haley-turpin",
     "first_name": "Haley",
     "last_name": "Turpin",
     "clinic_name": "Blue Oak Family Chiropractic",
@@ -1856,17 +1856,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "o5puujg",
-    "slug": "hayden-richau",
+    "id": "vxxt6i",
+    "slug": "dr-hayden-richau",
     "first_name": "Hayden",
     "last_name": "Richau",
     "clinic_name": "Pinnacle Chiropractic",
@@ -1885,17 +1885,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "s9zb2",
-    "slug": "howard-",
+    "id": "i8ebvk",
+    "slug": "dr-howard",
     "first_name": "Howard",
     "last_name": "",
     "clinic_name": "Foresight Chiropractic",
@@ -1912,17 +1912,17 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "General NeuroChiro"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "2bjc2i",
-    "slug": "jared-spitz",
+    "id": "mryy7l",
+    "slug": "dr-jared-spitz",
     "first_name": "Jared",
     "last_name": "Spitz",
     "clinic_name": "Apex Chiropractic",
@@ -1942,17 +1942,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "yirty8",
-    "slug": "jennifer-hastings",
+    "id": "ue0chl",
+    "slug": "dr-jennifer-hastings",
     "first_name": "Jennifer",
     "last_name": "Hastings",
     "clinic_name": "Cafe of Life Chiropractic & Wellness",
@@ -1970,17 +1970,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "ru8jb",
-    "slug": "jennifer-loveday",
+    "id": "h8u1a",
+    "slug": "dr-jennifer-loveday",
     "first_name": "Jennifer",
     "last_name": "Loveday",
     "clinic_name": "HoneyBee Chiropractic",
@@ -2000,17 +2000,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "stj1rr",
-    "slug": "jessica-hudson",
+    "id": "lm26ni",
+    "slug": "dr-jessica-hudson",
     "first_name": "Jessica",
     "last_name": "Hudson",
     "clinic_name": "Body in Balance Chiropractic",
@@ -2031,17 +2031,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "jxftov",
-    "slug": "jodi-wiechman",
+    "id": "49xwtc",
+    "slug": "dr-jodi-wiechman",
     "first_name": "Jodi",
     "last_name": "Wiechman",
     "clinic_name": "Radiant Waves Chiropractic",
@@ -2062,17 +2062,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "6gjr9l",
-    "slug": "john-caruso",
+    "id": "pfrlz",
+    "slug": "dr-john-caruso",
     "first_name": "John",
     "last_name": "Caruso",
     "clinic_name": "Haven Family Chiropractic",
@@ -2092,17 +2092,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "pvczna",
-    "slug": "jordan-wolff",
+    "id": "0desf",
+    "slug": "dr-jordan-wolff",
     "first_name": "Jordan",
     "last_name": "Wolff",
     "clinic_name": "Sutton Place Chiropractic",
@@ -2122,17 +2122,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "83b9xe",
-    "slug": "joseph-benne",
+    "id": "eopkt",
+    "slug": "dr-joseph-benne",
     "first_name": "Joseph",
     "last_name": "Benne",
     "clinic_name": "Atone Chiropractic",
@@ -2153,17 +2153,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "ahw1csb",
-    "slug": "kai-bennett",
+    "id": "yg43n",
+    "slug": "dr-kai-bennett",
     "first_name": "Kai",
     "last_name": "Bennett",
     "clinic_name": "Optimal Health and Performance",
@@ -2181,17 +2181,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "pdmfwp",
-    "slug": "kara-zuleg",
+    "id": "dhwzox",
+    "slug": "dr-kara-zuleg",
     "first_name": "Kara",
     "last_name": "Zuleg",
     "clinic_name": "Hand In Hand Chiropractic",
@@ -2211,17 +2211,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "t2pbr",
-    "slug": "katie-schlein",
+    "id": "oc43bc",
+    "slug": "dr-katie-schlein",
     "first_name": "Katie",
     "last_name": "Schlein",
     "clinic_name": "Family Connection Chiropractic",
@@ -2241,17 +2241,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "yij6c6",
-    "slug": "kaylee-conlan",
+    "id": "7t8y6f",
+    "slug": "dr-kaylee-conlan",
     "first_name": "Kaylee",
     "last_name": "Conlan",
     "clinic_name": "Salt + Light Waco",
@@ -2272,17 +2272,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "49mylc",
-    "slug": "kelli-richard",
+    "id": "dt54in",
+    "slug": "dr-kelli-richard",
     "first_name": "Kelli",
     "last_name": "Richard",
     "clinic_name": "The Reservoir Chiropractic",
@@ -2303,17 +2303,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "md8srj",
-    "slug": "kirsten-spitz",
+    "id": "xvqrye",
+    "slug": "dr-kirsten-spitz",
     "first_name": "Kirsten",
     "last_name": "Spitz",
     "clinic_name": "Apex Chiropractic",
@@ -2333,17 +2333,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "gbq3xd",
-    "slug": "lindsey-liles",
+    "id": "otza3g",
+    "slug": "dr-lindsey-liles",
     "first_name": "Lindsey",
     "last_name": "Liles",
     "clinic_name": "Fortitude Chiropractic and Wellness",
@@ -2364,17 +2364,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "er3rm",
-    "slug": "liv-",
+    "id": "7ulohj",
+    "slug": "dr-liv",
     "first_name": "Liv",
     "last_name": "",
     "clinic_name": "Lighthouse Family Chiropractic",
@@ -2394,17 +2394,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "esix6o",
-    "slug": "logan-pastor",
+    "id": "t2agva",
+    "slug": "dr-logan-pastor",
     "first_name": "Logan",
     "last_name": "Pastor",
     "clinic_name": "Cadence Chiropractic",
@@ -2424,17 +2424,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "ig21a",
-    "slug": "mackenzie-hoy",
+    "id": "cxsnp7",
+    "slug": "dr-mackenzie-hoy",
     "first_name": "Mackenzie",
     "last_name": "Hoy",
     "clinic_name": "Vibrant Family Chiropractic",
@@ -2453,17 +2453,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "8b05w8",
-    "slug": "margie-smith",
+    "id": "17mga8",
+    "slug": "dr-margie-smith",
     "first_name": "Margie",
     "last_name": "Smith",
     "clinic_name": "Granite Bay Chiropractic and Wellness",
@@ -2482,17 +2482,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "ip2f7",
-    "slug": "marian-ortiz",
+    "id": "6qtlui",
+    "slug": "dr-marian-ortiz",
     "first_name": "Marian",
     "last_name": "Ortiz",
     "clinic_name": "AlignLife of Preston",
@@ -2510,17 +2510,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "a74he",
-    "slug": "matthew-lawrence",
+    "id": "wes23l",
+    "slug": "dr-matthew-lawrence",
     "first_name": "Matthew",
     "last_name": "Lawrence",
     "clinic_name": "AlignLife of Preston",
@@ -2538,17 +2538,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "cb9t9p",
-    "slug": "megan-sujo",
+    "id": "q19mtn",
+    "slug": "dr-megan-sujo",
     "first_name": "Megan",
     "last_name": "Sujo",
     "clinic_name": "Vital Spine and Health Studio",
@@ -2568,17 +2568,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "955eap",
-    "slug": "michael-cohen",
+    "id": "0yh3m9d",
+    "slug": "dr-michael-cohen",
     "first_name": "Michael",
     "last_name": "Cohen",
     "clinic_name": "Graceful Spinal Care",
@@ -2597,17 +2597,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "8nn3hk",
-    "slug": "michael-kehoe",
+    "id": "89u597",
+    "slug": "dr-michael-kehoe",
     "first_name": "Michael",
     "last_name": "Kehoe",
     "clinic_name": "Health From Within Orland Park",
@@ -2628,17 +2628,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "0shhc",
-    "slug": "michelle-coats",
+    "id": "s7y6op",
+    "slug": "dr-michelle-coats",
     "first_name": "Michelle",
     "last_name": "Coats",
     "clinic_name": "Empowered Origins Chiropractic",
@@ -2656,17 +2656,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "f42zn",
-    "slug": "mike-silvestri",
+    "id": "dttio9",
+    "slug": "dr-mike-silvestri",
     "first_name": "Mike",
     "last_name": "Silvestri",
     "clinic_name": "Silvestri Chiropractic & Wellness",
@@ -2683,17 +2683,17 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "y9dw",
-    "slug": "natalie-rosenzweig",
+    "id": "ddaa9",
+    "slug": "dr-natalie-rosenzweig",
     "first_name": "Natalie",
     "last_name": "Rosenzweig",
     "clinic_name": "Above Down Chiropractic",
@@ -2711,17 +2711,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "zqu3zb",
-    "slug": "nicole-czech",
+    "id": "048s5f",
+    "slug": "dr-nicole-czech",
     "first_name": "Nicole",
     "last_name": "Czech",
     "clinic_name": "Atlas Spinal Care",
@@ -2738,17 +2738,17 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Tonal"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "hwc3sc",
-    "slug": "patience-canty",
+    "id": "g0ds5",
+    "slug": "dr-patience-canty",
     "first_name": "Patience",
     "last_name": "Canty",
     "clinic_name": "Flourish Wellness Center",
@@ -2768,17 +2768,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "kbh50l",
-    "slug": "patrick-mcdonnell",
+    "id": "01q6nx",
+    "slug": "dr-patrick-mcdonnell",
     "first_name": "Patrick",
     "last_name": "McDonnell",
     "clinic_name": "Proper Chiropractic",
@@ -2797,17 +2797,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "20ed2p",
-    "slug": "raymond-nichols",
+    "id": "hbah5",
+    "slug": "dr-raymond-nichols",
     "first_name": "Raymond",
     "last_name": "Nichols",
     "clinic_name": "AlignLife of Pelham Falls",
@@ -2826,17 +2826,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "igkne",
-    "slug": "rebecca-saunders",
+    "id": "hfj9s",
+    "slug": "dr-rebecca-saunders",
     "first_name": "Rebecca",
     "last_name": "Saunders",
     "clinic_name": "Peak Path Chiropractic",
@@ -2854,17 +2854,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "2vpaem",
-    "slug": "roger-brady",
+    "id": "8qjlve",
+    "slug": "dr-roger-brady",
     "first_name": "Roger",
     "last_name": "Brady",
     "clinic_name": "Optimal Life Chiropractic",
@@ -2882,17 +2882,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Pediatrics",
       "Prenatal"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "17shje",
-    "slug": "russel-myers",
+    "id": "kcvl9j",
+    "slug": "dr-russel-myers",
     "first_name": "Russel",
     "last_name": "Myers",
     "clinic_name": "Whole Body Wellness Chiropractic",
@@ -2910,17 +2910,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "8ku09k",
-    "slug": "sadie-hirschfield",
+    "id": "iqryg",
+    "slug": "dr-sadie-hirschfield",
     "first_name": "Sadie",
     "last_name": "Hirschfield",
     "clinic_name": "Essence of Life Wellness Care",
@@ -2939,17 +2939,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "9t1avr",
-    "slug": "samantha-happold",
+    "id": "t9z81m",
+    "slug": "dr-samantha-happold",
     "first_name": "Samantha",
     "last_name": "Happold",
     "clinic_name": "Happy Family Chiropractic",
@@ -2970,17 +2970,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "8kriw7",
-    "slug": "sara-nelson",
+    "id": "qjsc9",
+    "slug": "dr-sara-nelson",
     "first_name": "Sara",
     "last_name": "Nelson",
     "clinic_name": "Freedom Chiropractic",
@@ -3000,17 +3000,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "frq71h",
-    "slug": "sara-richa",
+    "id": "ksla88",
+    "slug": "dr-sara-richa",
     "first_name": "Sara",
     "last_name": "Richa",
     "clinic_name": "MaxLiving Chiropractic Tech Ridge",
@@ -3029,17 +3029,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.929Z",
-    "updated_at": "2026-03-06T13:41:31.929Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "not4h",
-    "slug": "shea-kramer",
+    "id": "0hinys",
+    "slug": "dr-shea-kramer",
     "first_name": "Shea",
     "last_name": "Kramer",
     "clinic_name": "Tree of Life Chiropractic",
@@ -3059,17 +3059,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "2nngkp",
-    "slug": "stephen-zwart",
+    "id": "xae9l5",
+    "slug": "dr-stephen-zwart",
     "first_name": "Stephen",
     "last_name": "Zwart",
     "clinic_name": "Generations Family Chiropractic",
@@ -3088,17 +3088,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "0t179",
-    "slug": "sura-corrigan",
+    "id": "qyfou",
+    "slug": "dr-sura-corrigan",
     "first_name": "Sura",
     "last_name": "Corrigan",
     "clinic_name": "Far Hills Family Chiropractic",
@@ -3119,17 +3119,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "2ds4ex",
-    "slug": "sydney-oberstein-tyrrell",
+    "id": "lib8s",
+    "slug": "dr-sydney-oberstein-tyrrell",
     "first_name": "Sydney",
     "last_name": "Oberstein-Tyrrell",
     "clinic_name": "Wellness Wave Chiropractic",
@@ -3147,17 +3147,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "lwjhdl",
-    "slug": "taylor-cox",
+    "id": "5td4q",
+    "slug": "dr-taylor-cox",
     "first_name": "Taylor",
     "last_name": "Cox",
     "clinic_name": "Hometown Chiropractic",
@@ -3177,17 +3177,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "imo7m6",
-    "slug": "taylor-dietz",
+    "id": "a1xrqc",
+    "slug": "dr-taylor-dietz",
     "first_name": "Taylor",
     "last_name": "Dietz",
     "clinic_name": "Renegade Chiropractic",
@@ -3208,17 +3208,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "0g36ut",
-    "slug": "tiffany-johnson",
+    "id": "1xjpx",
+    "slug": "dr-tiffany-johnson",
     "first_name": "Tiffany",
     "last_name": "Johnson",
     "clinic_name": "Healing Touch Chiropractic",
@@ -3237,17 +3237,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "d5avjp",
-    "slug": "tom-niemela",
+    "id": "q1pcfm",
+    "slug": "dr-tom-niemela",
     "first_name": "Tom",
     "last_name": "Niemela",
     "clinic_name": "Arbor Vitae Chiropractic",
@@ -3265,17 +3265,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Pediatrics",
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "qluo4",
-    "slug": "tracey-norman",
+    "id": "tqocj",
+    "slug": "dr-tracey-norman",
     "first_name": "Tracey",
     "last_name": "Norman",
     "clinic_name": "Sanctuary of Life",
@@ -3296,17 +3296,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "trsw5j",
-    "slug": "tucker-kilgo",
+    "id": "embx2",
+    "slug": "dr-tucker-kilgo",
     "first_name": "Tucker",
     "last_name": "Kilgo",
     "clinic_name": "Sunrise Pediatric & Family Chiropractic",
@@ -3325,17 +3325,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "02459m",
-    "slug": "wade-cole",
+    "id": "rz75u",
+    "slug": "dr-wade-cole",
     "first_name": "Wade",
     "last_name": "Cole",
     "clinic_name": "Weatherford Family Chiropractic",
@@ -3354,16 +3354,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "kbxw39",
+    "id": "qfmbgj",
     "slug": "felix-periard",
     "first_name": "Felix",
     "last_name": "Periard",
@@ -3381,16 +3381,16 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "qjuhfa",
+    "id": "u6mja",
     "slug": "flint-sparks",
     "first_name": "Flint",
     "last_name": "Sparks",
@@ -3411,16 +3411,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "cdxwf",
+    "id": "4va4ge",
     "slug": "heidi-wroebel",
     "first_name": "Heidi",
     "last_name": "Wroebel",
@@ -3439,17 +3439,17 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Pediatrics",
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "3nv42a",
-    "slug": "i-keith-lavender-dc",
+    "id": "qdujtm",
+    "slug": "i-keith-lavender-d-c",
     "first_name": "I.",
     "last_name": "Keith Lavender D.C.",
     "clinic_name": "Foresight Chiropractic Wellness Center",
@@ -3466,16 +3466,16 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "9ykwea",
+    "id": "twpnal",
     "slug": "jacob-duvall",
     "first_name": "Jacob",
     "last_name": "Duvall",
@@ -3494,16 +3494,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Pediatrics",
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "jo61r",
+    "id": "kcangq",
     "slug": "jessica-brown",
     "first_name": "Jessica",
     "last_name": "Brown",
@@ -3525,16 +3525,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "v6vmea",
+    "id": "7qu6eg",
     "slug": "jessica-dietrich-marsh",
     "first_name": "Jessica",
     "last_name": "Dietrich-Marsh",
@@ -3552,16 +3552,16 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "jb0nkp",
+    "id": "0n1176",
     "slug": "joe-trovato",
     "first_name": "Joe",
     "last_name": "Trovato",
@@ -3582,16 +3582,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "y9jfc4",
+    "id": "ig4cw",
     "slug": "jordan-bonham",
     "first_name": "Jordan",
     "last_name": "Bonham",
@@ -3609,16 +3609,16 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Family Care"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "x70a4",
+    "id": "lyonvd",
     "slug": "justin-sujo",
     "first_name": "Justin",
     "last_name": "Sujo",
@@ -3639,16 +3639,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "jpisf",
+    "id": "wozmah",
     "slug": "kristine-schmierer",
     "first_name": "Kristine",
     "last_name": "Schmierer",
@@ -3669,16 +3669,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "zl5ha",
+    "id": "psqv3g",
     "slug": "lacey-nevel",
     "first_name": "Lacey",
     "last_name": "Nevel",
@@ -3700,16 +3700,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.957Z",
+    "updated_at": "2026-03-09T00:49:16.957Z"
   },
   {
-    "id": "fyhyws",
+    "id": "o06oma",
     "slug": "maryanne-shiozawa",
     "first_name": "MaryAnne",
     "last_name": "Shiozawa",
@@ -3729,16 +3729,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Tonal"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   },
   {
-    "id": "vz6vzp",
+    "id": "py4djq",
     "slug": "michelle-arietta-dc",
     "first_name": "Michelle",
     "last_name": "Arietta, DC",
@@ -3760,16 +3760,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   },
   {
-    "id": "k8rloc",
+    "id": "0gbqw",
     "slug": "morgan-ruddiman",
     "first_name": "Morgan",
     "last_name": "Ruddiman",
@@ -3789,16 +3789,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   },
   {
-    "id": "05g05i",
+    "id": "h60yg",
     "slug": "nikolai-a-young",
     "first_name": "Nikolai",
     "last_name": "A. Young",
@@ -3816,16 +3816,16 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   },
   {
-    "id": "qtme8",
+    "id": "h9arnk",
     "slug": "rachel-boggs",
     "first_name": "Rachel",
     "last_name": "Boggs",
@@ -3846,16 +3846,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   },
   {
-    "id": "61scg",
+    "id": "4lzxga",
     "slug": "reid-doyle",
     "first_name": "Reid",
     "last_name": "Doyle",
@@ -3874,16 +3874,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   },
   {
-    "id": "6e3cf9",
+    "id": "fifodbk",
     "slug": "rekha-rampersad",
     "first_name": "Rekha",
     "last_name": "Rampersad",
@@ -3902,16 +3902,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Family Care",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   },
   {
-    "id": "y30ju",
+    "id": "x695a7",
     "slug": "ryan-maxwell",
     "first_name": "Ryan",
     "last_name": "Maxwell",
@@ -3933,16 +3933,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   },
   {
-    "id": "cigwqh9",
+    "id": "lv9upn",
     "slug": "trey-rodriguez",
     "first_name": "Trey",
     "last_name": "Rodriguez",
@@ -3963,16 +3963,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   },
   {
-    "id": "ypsfwr",
+    "id": "pg68lv",
     "slug": "trystan-wertley",
     "first_name": "Trystan",
     "last_name": "wertley",
@@ -3990,16 +3990,16 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "General NeuroChiro"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   },
   {
-    "id": "e5vyd",
+    "id": "x30mb9",
     "slug": "tyler-shearer",
     "first_name": "Tyler",
     "last_name": "Shearer",
@@ -4020,16 +4020,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   },
   {
-    "id": "d2ffzji",
+    "id": "lc251m",
     "slug": "waldo-amadeo-dc",
     "first_name": "Waldo",
     "last_name": "Amadeo DC",
@@ -4047,16 +4047,16 @@ export const MOCK_DOCTORS: Doctor[] = [
     "specialties": [
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   },
   {
-    "id": "vdxk0q",
+    "id": "i8amei",
     "slug": "wes-mcdermott",
     "first_name": "Wes",
     "last_name": "McDermott",
@@ -4076,16 +4076,16 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Prenatal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   },
   {
-    "id": "fdgk9t",
+    "id": "qp3d5q",
     "slug": "zach-thomas",
     "first_name": "Zach",
     "last_name": "Thomas",
@@ -4106,12 +4106,12 @@ export const MOCK_DOCTORS: Doctor[] = [
       "Tonal",
       "Diversified"
     ],
-    "membership_tier": "pro",
     "verification_status": "verified",
+    "membership_tier": "pro",
+    "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "region_code": "US",
-    "created_at": "2026-03-06T13:41:31.930Z",
-    "updated_at": "2026-03-06T13:41:31.930Z"
+    "created_at": "2026-03-09T00:49:16.958Z",
+    "updated_at": "2026-03-09T00:49:16.958Z"
   }
 ];

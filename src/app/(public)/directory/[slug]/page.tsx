@@ -35,8 +35,8 @@ export default function DoctorProfile() {
     message: ""
   });
   
-  // Normalize a slug for comparison: remove 'dr-', lowercase, and remove non-alphanumeric
-  const normalize = (s: string) => s?.toLowerCase()?.replace(/^dr-/, '')?.replace(/[^a-z0-9]/g, '') || '';
+  // Normalize a slug for comparison: remove leading 'dr' with any separator, lowercase, and remove non-alphanumeric
+  const normalize = (s: string) => s?.toLowerCase()?.replace(/^dr[^a-z0-9]*/, '')?.replace(/[^a-z0-9]/g, '') || '';
   
   const targetSlug = normalize(slug);
   
