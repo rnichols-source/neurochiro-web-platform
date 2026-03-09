@@ -1,0 +1,34 @@
+import { Doctor } from "@/types/directory";
+
+export const MOCK_DOCTORS: Doctor[] = [
+  {
+    "id": "bgahsu",
+    "slug": "amy-anthony",
+    "first_name": "Amy",
+    "last_name": "Anthony",
+    "clinic_name": "Sydney Neuro-Life",
+    "city": "Sydney",
+    "state": "New South Wales",
+    "country": "Australia",
+    "address": "Sydney, NSW, 2000",
+    "latitude": -33.8688,
+    "longitude": 151.2093,
+    "instagram_url": "https://www.instagram.com/sydneyfamilychiro",
+    "facebook_url": "https://www.facebook.com/sydneyfamilychiro",
+    "website_url": "https://www.sydneyfamilychiro.com",
+    "bio": "Sydney Neuro-Life is Australia's premier nervous-system-first clinic. We specialize in complex pediatric cases and family wellness.",
+    "specialties": [
+      "Pediatrics",
+      "Prenatal",
+      "Tonal"
+    ],
+    "membership_tier": "pro",
+    "verification_status": "verified",
+    "is_hiring": false,
+    "is_mentoring": true,
+    "region_code": "AU",
+    "created_at": "2026-03-06T13:41:31.926Z",
+    "updated_at": "2026-03-06T13:41:31.928Z"
+  }
+  // ... more doctors
+];
