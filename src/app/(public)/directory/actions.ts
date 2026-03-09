@@ -10,7 +10,7 @@ export async function getDoctors(options: {
   limit?: number;
   searchQuery?: string;
 } = {}) {
-  const { regionCode, bounds, page = 1, limit = 20, searchQuery } = options;
+  const { regionCode, bounds, page = 1, limit = 100, searchQuery } = options;
   const supabase = createServerSupabase()
 
   try {
@@ -38,7 +38,13 @@ export async function getDoctors(options: {
         .lte('latitude', bounds[3]);
     }
 
-    // 3. Apply Pagination
+    // 3. Apply Ranking & Order
+    // Live Supabase query: Order by tier (pro > growth > starter) then created_at
+    query = query
+      .order('membership_tier', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    // 4. Apply Pagination
     const from = (page - 1) * limit;
     const to = from + limit - 1;
     query = query.range(from, to);
@@ -47,12 +53,39 @@ export async function getDoctors(options: {
 
     if (error || !data || data.length === 0) {
       console.log("No DB results, returning mock subset")
-      // Return a slice of mock data to simulate pagination/filtering
+      
+      // Filter mock data
+      let filteredMock = regionCode 
+        ? MOCK_DOCTORS.filter(d => d.region_code === regionCode)
+        : MOCK_DOCTORS;
+
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        filteredMock = filteredMock.filter(d => 
+          d.first_name.toLowerCase().includes(q) || 
+          d.last_name.toLowerCase().includes(q) || 
+          d.clinic_name.toLowerCase().includes(q)
+        );
+      }
+
+      // Tiered Ranking + Daily Rotation for Mock Data
+      const today = new Date().toISOString().split('T')[0];
+      const seed = today.split('-').reduce((a, b) => a + parseInt(b), 0);
+      
+      const sortedMock = [...filteredMock].sort((a, b) => {
+        const tiers: Record<string, number> = { pro: 3, growth: 2, starter: 1 };
+        if (tiers[b.membership_tier] !== tiers[a.membership_tier]) {
+          return tiers[b.membership_tier] - tiers[a.membership_tier];
+        }
+        // Daily pseudo-random rotation within tiers
+        const valA = (parseInt(a.id, 36) || 0) + seed;
+        const valB = (parseInt(b.id, 36) || 0) + seed;
+        return (valA % 100) - (valB % 100);
+      });
+
       return {
-        doctors: regionCode 
-          ? MOCK_DOCTORS.filter(d => d.region_code === regionCode).slice(0, limit)
-          : MOCK_DOCTORS.slice(0, limit),
-        total: count || MOCK_DOCTORS.length
+        doctors: sortedMock.slice(from, from + limit),
+        total: sortedMock.length
       };
     }
 
@@ -62,6 +95,6 @@ export async function getDoctors(options: {
     };
   } catch (e) {
     console.error("Error fetching doctors:", e)
-    return { doctors: MOCK_DOCTORS.slice(0, 20), total: MOCK_DOCTORS.length };
+    return { doctors: MOCK_DOCTORS.slice(0, 100), total: MOCK_DOCTORS.length };
   }
 }

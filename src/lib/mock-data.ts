@@ -2,7 +2,7 @@ import { Doctor } from "@/types/directory";
 
 export const MOCK_DOCTORS: Doctor[] = [
   {
-    "id": "yiczll",
+    "id": "zz31rk",
     "slug": "amy-anthony",
     "first_name": "Amy",
     "last_name": "Anthony",
@@ -16,6 +16,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/olyfamilychiro",
     "facebook_url": "https://www.facebook.com/olyfamilychiro",
     "website_url": "https://www.olyfamilychiro.com",
+    "email": "Hello@olyfamilychiro.com",
     "bio": "Oly Family Chiropractic is highly praised for its customer-focused care, gentle yet effective adjustments, and expertise in chiropractic health. Clients appreciate the knowledgeable staff, personalized attention, and valuable health information provided, making it a trusted choice for chiropractic needs.",
     "specialties": [
       "Pediatrics",
@@ -27,11 +28,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.299Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.704Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "wj9iy4",
+    "id": "ayyve",
     "slug": "blain-segura",
     "first_name": "Blain",
     "last_name": "Segura",
@@ -45,6 +46,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/segurafamilychiro/",
     "facebook_url": "https://www.facebook.com/SeguraFamilyChiro",
     "website_url": "https://www.rackncrackchiropractic.com/contact-us/",
+    "email": "info@rackncrackchiropractic.com",
     "bio": "Patients praise Dr. Blain Segura for his thorough, caring, and professional approach to chiropractic care. He takes time to understand individual needs, asks insightful questions, and provides precise, effective treatments. His background in sports medicine and attention to detail, including therapeutic massage, set him apart. Highly recommended for his compassionate and expert care.",
     "specialties": [
       "Family Care"
@@ -54,11 +56,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "kwmnbf3",
+    "id": "yq9g9",
     "slug": "canaan-andrews",
     "first_name": "Canaan",
     "last_name": "Andrews",
@@ -72,6 +74,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/thewellnesswaysouthsarasota?igsh=MTE5ZnltazZ3ZHdmdQ==",
     "facebook_url": "https://www.facebook.com/share/1RkSeQJ6Py/?mibextid=wwXIfr",
     "website_url": "https://www.thewellnessway.com/clinics/fl/south-sarasota/wellness-center/",
+    "email": "southsarasota@thewellnessway.com",
     "bio": "Patients praise Dr. Canaan for her thorough, individualized approach, clear communication, and ability to deliver noticeable improvements in well-being, making them feel confident and supported in their care.",
     "specialties": [
       "Family Care"
@@ -81,11 +84,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "v65llf",
+    "id": "4c2gtl",
     "slug": "chandler-boggs",
     "first_name": "Chandler",
     "last_name": "Boggs",
@@ -99,6 +102,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/thewell.fw",
     "facebook_url": "https://www.facebook.com/thewell.fw",
     "website_url": "https://www.thewellfw.com",
+    "email": "Info@thewellfw.com",
     "bio": "Patients consistently praise the Boggs for their holistic, nervous system-focused approach to care, noting significant improvements in physical and mental well-being during pregnancy and postpartum. The welcoming, family-friendly office environment and supportive staff help patients feel comfortable and cared for throughout their wellness journey. Many highlight benefits such as reduced swelling, stable blood sugars, increased mental clarity, and a smooth transition into motherhood, expressing strong confidence and satisfaction with their experience.",
     "specialties": [
       "Pediatrics",
@@ -111,11 +115,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "l4xhmne",
+    "id": "roewks",
     "slug": "dr-alexis-taylor",
     "first_name": "Alexis",
     "last_name": "Taylor",
@@ -129,6 +133,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/cnchiropractic",
     "facebook_url": "https://www.facebook.com/cnchiropractic",
     "website_url": "https://www.Connectednutrition.co",
+    "email": "Info@connectednutrition.co",
     "bio": "Patients consistently praise Dr. Lexie for her attentive, compassionate care and ability to truly listen to their concerns. She is recognized for her expertise in addressing a range of health issues, from hormone imbalances to children&rsquo;s digestive and sleep problems, and for creating personalized treatment plans that deliver noticeable improvements. Families appreciate her warm, welcoming approach, especially with children, and many describe their experiences as life-changing. Dr. Lexie is highly recommended for anyone seeking a knowledgeable and caring chiropractor who makes a meaningful difference in her patients&rsquo; lives.",
     "specialties": [
       "Pediatrics",
@@ -141,11 +146,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "tkdnq2",
+    "id": "6u0cnh",
     "slug": "dr-ashley-trueblood",
     "first_name": "Ashley",
     "last_name": "Trueblood",
@@ -159,6 +164,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/truelifechiropractic",
     "facebook_url": "https://www.facebook.com/truelifechiropractic",
     "website_url": "https://www.gettruelife.com",
+    "email": "Drashleymohr@gmail.com",
     "bio": "These testimonials highlight the transformative impact of chiropractic care on both pregnancy and athletic performance. One mother credits regular chiropractic adjustments for providing relief from sciatica during pregnancy and helping her achieve a successful, unmedicated VBAC after a previous C-section. Another family shares how chiropractic care has been essential for their sons, Logan and Quentin, both dedicated athletes. Regular adjustments have supported their physical health, enhanced athletic performance, improved recovery, and promoted overall well-being. Additionally, Dr. Austin&rsquo;s genuine care and mentorship have positively influenced their personal growth and leadership, both on and off the court.",
     "specialties": [
       "Family Care"
@@ -168,11 +174,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "fe9ty",
+    "id": "9z7208",
     "slug": "dr-breanna-rodriguez",
     "first_name": "Breanna",
     "last_name": "Rodriguez",
@@ -186,6 +192,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/wildsagechiro",
     "facebook_url": "https://www.facebook.com/wildsagechiro",
     "website_url": "https://www.wildsagechiro.com",
+    "email": "hello@wildsagechiro.com",
     "bio": "Bree and Kyle at Wild Sage are highly skilled, compassionate professionals who provide exceptional care for both adults and children. They are deeply committed to their patients&rsquo; well-being, making everyone feel heard, supported, and genuinely cared for. Their expertise has led to remarkable improvements in their patients&rsquo; health and quality of life, and their warm, friendly approach creates a welcoming environment for families. Highly recommended for their dedication and positive impact.",
     "specialties": [
       "Pediatrics",
@@ -198,11 +205,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "yf1rw",
+    "id": "qf8hfr",
     "slug": "dr-brooke-galbiati",
     "first_name": "Brooke",
     "last_name": "Galbiati",
@@ -216,6 +223,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/Serenity_spine",
     "facebook_url": "https://www.facebook.com/Serenity_spine",
     "website_url": "https://www.Serenityspinenj.com",
+    "email": "Serenityspineandwellness@gmail.com",
     "bio": "Patients consistently praise Dr. Brooke Galbiati for her compassionate, thorough, and patient-centered care. They highlight her ability to listen attentively, explain treatments clearly, and provide gentle yet effective adjustments that offer immediate relief. Dr. Brooke is commended for her thoughtful follow-up, including personalized exercises and helpful resources, as well as her genuine dedication to her patients&rsquo; overall well-being. Her friendly and welcoming approach helps patients feel comfortable, informed, and supported throughout their care.",
     "specialties": [
       "Pediatrics",
@@ -228,11 +236,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "zhfajq",
+    "id": "f10j2r",
     "slug": "dr-elle-klink",
     "first_name": "Elle",
     "last_name": "Klink",
@@ -246,6 +254,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/klinkchiropractic",
     "facebook_url": "https://www.facebook.com/klinkchiropractic",
     "website_url": "https://www.klinkchiropractic.com",
+    "email": "klinkchiropractic@gmail.com",
     "bio": "Patients consistently praise Dr. Elle and her team for their warm, welcoming atmosphere and genuine care. Many highlight the positive impact of her chiropractic care on pregnancy, postpartum health, and overall family well-being. Clients appreciate her holistic approach, helpful recommendations, and the noticeable improvements in their health, making her highly recommended for anyone seeking chiropractic care.",
     "specialties": [
       "Pediatrics",
@@ -259,11 +268,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "dl2dqf",
+    "id": "mu1ufs",
     "slug": "dr-james-huang",
     "first_name": "James",
     "last_name": "Huang",
@@ -277,6 +286,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/drjameshuang/",
     "facebook_url": "https://www.instagram.com/drjameshuang/",
     "website_url": "http://www.drjameshuang.com/home/",
+    "email": "Drjameshuangdc@gmail.com",
     "bio": "Pediatric + Developmental Care Prenatal + Perinatal Support Performance + Adaptation Care",
     "specialties": [
       "Pediatrics",
@@ -288,11 +298,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "26wzma",
+    "id": "9hy7fl",
     "slug": "dr-keitza-garavito",
     "first_name": "Keitza",
     "last_name": "Garavito",
@@ -306,6 +316,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/healinglab.chiro",
     "facebook_url": "https://www.facebook.com/healinglab.chiro",
     "website_url": "https://www.Healinglabchiro.com",
+    "email": "Healinglabchiro@gmail.com",
     "bio": "Patients consistently praise Dr. Keitza for her warm, caring approach and expertise. Families feel welcomed and at ease in her office, noting significant improvements in pain relief, energy, and overall well-being. Dr. Keitza is especially appreciated for her gentle manner with children and her ability to provide immediate relief, even for pregnancy-related discomfort. Her friendly, attentive care and positive energy make her highly recommended by those she treats.",
     "specialties": [
       "Prenatal",
@@ -318,11 +329,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "aek04e",
+    "id": "yevdq",
     "slug": "dr-kengee-ehrlich",
     "first_name": "KenGee",
     "last_name": "Ehrlich",
@@ -336,6 +347,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/Thegoodchiropractor",
     "facebook_url": "https://www.facebook.com/Thegoodchiropractor",
     "website_url": "https://www.Thegoodchiropractor.com",
+    "email": "Goodchirohouse@gmail.com",
     "bio": "The Good Chiropractor is highly praised for its welcoming atmosphere, caring staff, and comprehensive approach to healing. Clients appreciate the combination of advanced therapy tools, holistic techniques, and attention to both physical and emotional well-being. The team, including Candace, Kenji, and Nicole, is recognized for their professionalism and dedication to helping clients achieve lasting health and a better lifestyle.",
     "specialties": [
       "Family Care",
@@ -346,11 +358,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "pbl6s8",
+    "id": "7obmec",
     "slug": "dr-kevin-leblanc",
     "first_name": "Kevin",
     "last_name": "LeBlanc",
@@ -364,6 +376,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/Rooted.chiropractic",
     "facebook_url": "https://www.facebook.com/Rooted.chiropractic",
     "website_url": "https://www.Rootedchiropracticaz.com",
+    "email": "Rootedchiropracticaz@gmail.com",
     "bio": "Parents brought their newborn son to Dr. Kevin after a difficult start, including a long birth and NICU stay, with concerns about tension, limited head movement, and sleep issues. After just two gentle adjustments, they saw significant improvements in his comfort, mobility, sleep, and digestion. They praise Dr. Kevin&rsquo;s patient, knowledgeable, and intentional care, and highly recommend him to other parents seeking support for their babies.",
     "specialties": [
       "Pediatrics",
@@ -376,11 +389,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "qfwv9m",
+    "id": "pv109na",
     "slug": "dr-kurtis-fischer",
     "first_name": "Kurtis",
     "last_name": "Fischer",
@@ -394,6 +407,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/ponokachiropractic",
     "facebook_url": "https://www.facebook.com/ponokachiropractic",
     "website_url": "https://www.ponokachiropractic.com",
+    "email": "hello@ponokachiropractic.com",
     "bio": "Patients praise Ponoka Family Chiropractor for their welcoming, friendly staff, excellent customer service, and knowledgeable, professional chiropractors. Many note significant positive results from care and appreciate the accommodating and prompt appointment scheduling.",
     "specialties": [
       "Pediatrics",
@@ -407,11 +421,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "bgk72x",
+    "id": "0yhkxn",
     "slug": "dr-kyle-denos",
     "first_name": "Kyle",
     "last_name": "Denos",
@@ -425,6 +439,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/TheHavenChiroNJ",
     "facebook_url": "https://www.facebook.com/TheHavenChiroNJ",
     "website_url": "https://www.thehavenchironj.com",
+    "email": "Hello@thehavenchironj.com",
     "bio": "Parents praise The Haven Chiropractic and Dr. Kyle for delivering outstanding results, especially for children with unique needs. They highlight his expertise, genuine care, and attentive listening, noting that he exceeded their expectations and provided hope beyond traditional medical options. The office environment and Dr. Kyle&rsquo;s compassionate approach further contribute to a positive, supportive experience for families.",
     "specialties": [
       "Pediatrics",
@@ -436,11 +451,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "bnb1x",
+    "id": "7ma2bi",
     "slug": "dr-maggie-benham",
     "first_name": "Maggie",
     "last_name": "Benham",
@@ -454,6 +469,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/chosenspotchiro",
     "facebook_url": "https://www.facebook.com/chosenspotchiro",
     "website_url": "https://www.chosenspotchiropractic.com",
+    "email": "Drmaggiebenham@gmail.com",
     "bio": "The testimonials highlight Chosen Spot Chiropractic&rsquo;s compassionate, patient-centered care and transformative results. Patients describe significant improvements in chronic conditions such as migraines, fatigue, numbness, and even seizures, after years of limited progress elsewhere. The doctors are praised for their gentle, precise approach, thorough diagnostics, and genuine empathy. The supportive staff and welcoming environment make patients feel valued and cared for, fostering a sense of family and trust. Many credit Chosen Spot Chiropractic with dramatically improving their quality of life and well-being.",
     "specialties": [
       "Prenatal",
@@ -464,11 +480,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "wyrp7u",
+    "id": "zmala",
     "slug": "dr-megan-gomez",
     "first_name": "Megan",
     "last_name": "Gomez",
@@ -482,6 +498,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/vitalspinestudio/",
     "facebook_url": "https://www.facebook.com/vitalspinestudio",
     "website_url": "https://vitalspinestudio.com/",
+    "email": "Info@vitalspinestudio.con",
     "bio": "Patients consistently praise Vital Spine &amp; Health Studio for its welcoming atmosphere, professional staff, and personalized care. Dr. Justin Sujo is commended for his thorough assessments and clear communication, while Dr. Megan Gomez is recognized for her gentle, effective care during pregnancy and for newborns. The clinic&rsquo;s modern facilities, compassionate approach, and high hygiene standards make it a trusted choice for families seeking expert chiropractic support.",
     "specialties": [
       "Pediatrics",
@@ -494,11 +511,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "7amwo8",
+    "id": "mz1dfb",
     "slug": "dr-preston-cook",
     "first_name": "Preston",
     "last_name": "Cook",
@@ -512,6 +529,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/native_chiropractic",
     "facebook_url": "https://www.facebook.com/native_chiropractic",
     "website_url": "https://www.gonativechiro.com",
+    "email": "Team@gonativechiro.com",
     "bio": "Native Chiropractic is a highly recommended, family-centered clinic known for its compassionate, knowledgeable, and supportive care. Their team provides holistic chiropractic services for all ages, from infants to adults, addressing unique needs such as infant tongue tie tension, back pain, and ongoing maintenance care. Patients appreciate the friendly staff, clean facility with a playroom for kids, and the clinic&rsquo;s dedication to supporting mothers, babies, and families in a welcoming, non-pushy environment.",
     "specialties": [
       "Pediatrics",
@@ -524,11 +542,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "45iqql",
+    "id": "869t9p",
     "slug": "dr-stanton-hom",
     "first_name": "Stanton",
     "last_name": "Hom",
@@ -542,6 +560,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/drstantonhom",
     "facebook_url": "https://www.facebook.com/thefuturegenSD",
     "website_url": "https://www.futuregenerationsSD.com",
+    "email": "drstan@thefuturegen.com",
     "bio": "Patients consistently praise Dr. Stanton and the team at Future Generations for their compassionate, holistic approach to care. Many highlight feeling genuinely heard, supported, and cared for, not just physically but emotionally as well. Families appreciate the welcoming, knowledgeable environment and the positive impact on their overall health and wellbeing. The practice is described as a valuable investment in long-term health, with staff who go above and beyond to create a safe and supportive space for all.",
     "specialties": [
       "Pediatrics",
@@ -554,11 +573,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "1ilhyc",
+    "id": "20mek",
     "slug": "dr-todd-countee",
     "first_name": "Todd",
     "last_name": "Countee",
@@ -572,6 +591,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/Armonia_Chiropractic",
     "facebook_url": "https://www.facebook.com/Armonia_Chiropractic",
     "website_url": "https://www.armoniachirotx.com",
+    "email": "Info@armoniachirotx.com",
     "bio": "Expectant mothers consistently praise Armonia Chiropractic for their knowledgeable, compassionate, and specialized prenatal care. Patients report significant relief from back, hip, and pelvic pain, improved mobility, and better sleep after just a few sessions. The team, especially Dr. Todd and Dr. Harley, is commended for their thorough explanations, use of safe pregnancy-specific techniques, and genuine support throughout pregnancy. Many moms-to-be highlight how the care they received became an essential part of their self-care routine, helping them feel stronger, healthier, and more prepared for motherhood. Armonia Chiropractic is highly recommended for anyone seeking expert, attentive prenatal chiropractic care.",
     "specialties": [
       "Pediatrics",
@@ -583,11 +603,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "60iwv",
+    "id": "f9cz0s",
     "slug": "andrew-burd",
     "first_name": "Andrew",
     "last_name": "Burd",
@@ -601,6 +621,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/thefoundrychiropractic",
     "facebook_url": "",
     "website_url": "https://www.foundrychiropractic.com",
+    "email": "andrew@foundrychiropractic.com",
     "bio": "Katie T. shares that her family has been seeing Dr. Burd for nearly eight years and has experienced exceptional care. She highlights his attentive listening, clear explanations, and expertise, noting that he has played a vital role in their family&rsquo;s wellness, from treating acute issues to supporting overall health and prevention. Katie appreciates his impact on their lives and highly recommends him to others.",
     "specialties": [
       "Family Care",
@@ -612,11 +633,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "6q2w3k",
+    "id": "t0dct",
     "slug": "ashley-saylor",
     "first_name": "Ashley",
     "last_name": "Saylor",
@@ -630,6 +651,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/dr.ashleysaylor",
     "facebook_url": "https://www.facebook.com/dr.ashleysaylor",
     "website_url": "https://www.saylorchiropractic.com",
+    "email": "asaylordc@gmail.com",
     "bio": "Patients praise Dr. Saylor for her exceptional chiropractic care, compassionate bedside manner, and extensive knowledge. She provides effective, personalized treatments that relieve pain and improve well-being, even for those with chronic conditions or long-term chiropractic experience. Patients appreciate her responsiveness, thorough approach, and unique techniques, confidently recommending her to others.",
     "specialties": [
       "Family Care",
@@ -640,11 +662,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "j670h",
+    "id": "t8mcnp",
     "slug": "bailey-backhuus",
     "first_name": "Bailey",
     "last_name": "Backhuus",
@@ -658,6 +680,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/Reclaimedchiropractic",
     "facebook_url": "https://www.facebook.com/Reclaimedchiropractic",
     "website_url": "https://www.reclaimedchiropractic.com",
+    "email": "Reclaimedchiropractic@gmail.com",
     "bio": "Patients praise Dr. Bailey at Reclaimed for her knowledgeable, holistic approach and genuine care. She provides effective relief for a range of issues, from pregnancy discomfort to sinus problems and children&rsquo;s ear infections. Families appreciate her personalized treatments, expertise in supplements, and dedication to only recommending necessary care, making her a trusted resource for their health and wellness needs.",
     "specialties": [
       "Pediatrics",
@@ -670,11 +693,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "sb3hxv",
+    "id": "xnnwwt",
     "slug": "bethany-alleman-dc",
     "first_name": "Bethany",
     "last_name": "Alleman, DC",
@@ -688,6 +711,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/aurachiropractic_",
     "facebook_url": "https://www.facebook.com/aurachiropractic_",
     "website_url": "https://www.aura-chiropractic.net",
+    "email": "bethanydc@aurachiropractic.net",
     "bio": "Patients praise Dr. Bethany for her compassionate, personalized care and expertise in managing complex conditions like endometriosis, degenerative disc disease, and prenatal needs. They highlight her ability to listen, provide effective relief, and support both physical and mental well-being, making her highly recommended for individuals and families alike.",
     "specialties": [
       "Pediatrics",
@@ -699,11 +723,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "u7cc",
+    "id": "dfsmu9",
     "slug": "brittany-perez",
     "first_name": "Brittany",
     "last_name": "Perez",
@@ -717,6 +741,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/alignlifewellington?igsh=MXV3OGw4Z29wbzY3cg&utm_source=qr",
     "facebook_url": "https://www.Facebook.com/AlignLifeWellington",
     "website_url": "https://www.alignlifewellington.com",
+    "email": "wellington@alignlife.com",
     "bio": "Patients consistently praise Dr. Brittany Perez for her expertise, thorough approach, and genuine care. She takes time to address individual needs, including analyzing bloodwork for comprehensive health, and is highly effective with both adults and children. Many note significant improvements in mobility, overall well-being, and quality of life under her care. Her warm personality, dedication, and beautiful office environment contribute to an outstanding patient experience.",
     "specialties": [
       "Family Care"
@@ -726,11 +751,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "q2ehyr",
+    "id": "rj9znf",
     "slug": "colten-nevel",
     "first_name": "Colten",
     "last_name": "Nevel",
@@ -744,6 +769,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/freespiritchiropractic",
     "facebook_url": "https://www.facebook.com/freespiritchiropractic",
     "website_url": "https://www.freespiritchiropractic.com",
+    "email": "info@freespiritchiropractic.com",
     "bio": "These testimonials highlight Free Spirit Chiropractic as a welcoming, family-oriented practice where patients feel genuinely cared for and supported. Clients praise the team&rsquo;s warmth, compassion, and commitment to holistic wellness, noting that the environment feels like home. Many families have trusted Free Spirit Chiropractic for years, valuing the personalized care and positive atmosphere that help them thrive through all stages of life.",
     "specialties": [
       "Pediatrics",
@@ -757,11 +783,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "if9was",
+    "id": "6yt5uh",
     "slug": "dr-devin-dicenzo",
     "first_name": "Devin",
     "last_name": "DiCenzo",
@@ -775,6 +801,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/lighthousefamchiromtp",
     "facebook_url": "https://www.facebook.com/lighthousefamchiromtp",
     "website_url": "https://www.lighthousefamilychiro.com/",
+    "email": "Info@lighthousefamilychiro.com",
     "bio": "Clients consistently praise the exceptional staff and welcoming atmosphere, highlighting thorough care and a genuine commitment to patient comfort and well-being. Many report life-changing results, including improved mood, sleep, energy, and overall health. Families appreciate the holistic approach and feel confident they&rsquo;ve found the best chiropractic care for themselves and their children. Positive changes such as better stress management, enhanced physical alignment, and improved daily functioning are commonly mentioned, with gratitude expressed for the positive impact on their lives.",
     "specialties": [
       "Pediatrics",
@@ -787,11 +814,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "wznkil",
+    "id": "arx63g",
     "slug": "dr-aaron-whitaker",
     "first_name": "Aaron",
     "last_name": "Whitaker",
@@ -805,6 +832,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/kaurichiropractic/",
     "facebook_url": "https://www.facebook.com/kaurichiropractic",
     "website_url": "https://kaurichiropractic.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnVjqAuA4K9VwrlxwuDkpFujA8-DmDQRRSCERiElOTh3F9HcQevVjqbeJ3WHU_aem_a74K6uhByf7vhd3EpeNipg",
+    "email": "Reception@kaurichiropractic.com",
     "bio": "Parents are thrilled with the care their child with ASD and SPD has received at Kauri, noting significant improvements in sensory issues, anxiety, and daily activities like eating and haircuts. They appreciate the knowledgeable, compassionate staff and child-friendly environment, and credit the neurologically based chiropractic treatments for helping their child make meaningful progress and feel more comfortable trying new things.",
     "specialties": [
       "Pediatrics",
@@ -818,11 +846,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "vp1mco",
+    "id": "sgbmyh",
     "slug": "dr-adam-coats",
     "first_name": "Adam",
     "last_name": "Coats",
@@ -836,6 +864,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/empowered_origins",
     "facebook_url": "https://www.facebook.com/empowered_origins",
     "website_url": "https://empoweredoriginschiro.com/",
+    "email": "hello@empoweredoriginschiro.com",
     "bio": "Clients consistently praise Empowered Origins for its welcoming and supportive environment, knowledgeable and caring staff, and the ease of scheduling appointments. Many highlight significant improvements in their health and well-being, including positive results for both adults and children. The practice is especially valued for its family-centered approach and commitment to nervous-system based chiropractic care, with several clients expressing deep gratitude for the positive impact on their lives.",
     "specialties": [
       "Tonal",
@@ -846,11 +875,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "aitrwe",
+    "id": "jg7oog",
     "slug": "dr-alex-lee",
     "first_name": "Alex",
     "last_name": "Lee",
@@ -864,6 +893,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/circadianSRQ",
     "facebook_url": "https://www.facebook.com/circadianSRQ",
     "website_url": "https://www.sarasota-chiropractor.com",
+    "email": "info@circadiansrq.com",
     "bio": "Patients praise Dr. Alex, Joy, and the staff for their exceptional care, expertise in chiropractic and nervous system health, and approachable, supportive manner, noting significant improvements in their well-being over several years.",
     "specialties": [
       "Diversified"
@@ -873,11 +903,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "yj3p17",
+    "id": "wbh7zu",
     "slug": "dr-alisha-davis",
     "first_name": "Alisha",
     "last_name": "Davis",
@@ -891,6 +921,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/davischironc",
     "facebook_url": "https://www.facebook.com/davischironc",
     "website_url": "https://www.davischironc.com",
+    "email": "davischironc@gmail.com",
     "bio": "Patients praise Davis Family Chiropractic for their compassionate, personalized care and effective treatment, especially for pregnancy-related pain. The doctors are commended for their genuine interest in patient wellbeing, and the friendly, helpful staff contribute to a welcoming environment. Many families trust and highly recommend their services.",
     "specialties": [
       "Pediatrics",
@@ -902,11 +933,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "wkdtfb",
+    "id": "2mf2w",
     "slug": "dr-andrew-quick",
     "first_name": "Andrew",
     "last_name": "Quick",
@@ -920,6 +951,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/alignlifegoosecreek/",
     "facebook_url": "https://www.facebook.com/AlignLifeGooseCreek",
     "website_url": "https://alignlife.com/locations/goose-creek-sc-chiropractor/",
+    "email": "Aquick@alignlife.com",
     "bio": "Family Nervous System Wellness Structural + Postural Restoration",
     "specialties": [
       "Family Care"
@@ -929,11 +961,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "9e46h",
+    "id": "5tbhb3",
     "slug": "dr-andrew-rupp",
     "first_name": "Andrew",
     "last_name": "Rupp",
@@ -947,6 +979,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/thrivechiropa",
     "facebook_url": "https://www.facebook.com/SparkLifeChiropractic",
     "website_url": "https://www.thrivechiropa.com",
+    "email": "team@thrivechiropa.com",
     "bio": "Patients consistently praise the team for their exceptional care, attentiveness, and genuine concern for overall health. They appreciate the thorough, personalized approach, including detailed assessments and progress tracking. Families feel welcomed and supported, noting that both adults and children are treated with compassion and respect. The positive, collaborative environment and noticeable health improvements make this practice highly recommended.",
     "specialties": [
       "Pediatrics",
@@ -958,11 +991,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "m554r9",
+    "id": "d2g3c5",
     "slug": "dr-ashley-steele",
     "first_name": "Ashley",
     "last_name": "Steele",
@@ -976,6 +1009,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/_apexchiroak/",
     "facebook_url": "https://www.facebook.com/profile.php?id=61573178877774",
     "website_url": "https://apexchiroak.squarespace.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGni9w1XeEZWPUtfvqswAxaIbjr6KMGsGmonp79TdGFdiE6hEyLwDUFaSGFWiY_aem_jJ2mPgtycM8nwdUj4OOCJA",
+    "email": "awomanofsteele@gmail.com",
     "bio": "Patients consistently praise Apex Chiro for its compassionate, personalized care and exceptional professionalism. The team, led by Dr. Steele and supported by Steven, is recognized for their deep understanding of individual needs&mdash;especially for veterans and those with chronic pain. They combine advanced chiropractic techniques with a holistic approach, resulting in significant improvements in pain, mobility, and overall well-being. The office environment is welcoming, efficient, and supportive, with staff who genuinely care about each patient&rsquo;s health and recovery. Many reviewers highlight the team&rsquo;s ability to address issues that others could not, and express deep gratitude for the restored quality of life and independence they&rsquo;ve experienced.",
     "specialties": [
       "Family Care",
@@ -986,11 +1020,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "oxx2nb",
+    "id": "howu5h",
     "slug": "dr-zachary-soufl",
     "first_name": "Zachary",
     "last_name": "Soufl",
@@ -1004,6 +1038,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/Drzacksoufl",
     "facebook_url": "https://www.facebook.com/Drzacksoufl",
     "website_url": "https://www.Connectedchirosouthbay.com",
+    "email": "Connectedchirosouthbay@gmail.com",
     "bio": "Patients consistently praise Dr. Zack Soufl for his personalized, gentle, and effective chiropractic care. They highlight his thoughtful approach, advanced techniques like the drop table, and use of nervous system monitoring to track progress. Dr. Soufl is commended for building trust, genuinely caring about his patients&rsquo; well-being, and delivering noticeable relief&mdash;even for those previously skeptical about chiropractic treatment. His professionalism, attention to detail, and warm demeanor make him highly recommended by those he treats.",
     "specialties": [
       "Tonal",
@@ -1014,11 +1049,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "wscveb",
+    "id": "85e5zg",
     "slug": "jake-schumann",
     "first_name": "Jake",
     "last_name": "Schumann",
@@ -1032,6 +1067,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "http://instagram.com/restoration.chiropractic",
     "facebook_url": "http://instagram.com/restoration.chiropractic",
     "website_url": "https://gorestorationtx.com/",
+    "email": "team@GoRestorationTX.com",
     "bio": "Patients praise Restoration Chiropractic for its friendly, helpful staff who go above and beyond, and for providing excellent, caring service that makes them feel well cared for and confident in their treatment.",
     "specialties": [
       "Pediatrics",
@@ -1045,11 +1081,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "thds0u",
+    "id": "qaf0lo",
     "slug": "kyle-rodriguez",
     "first_name": "Kyle",
     "last_name": "Rodriguez",
@@ -1063,6 +1099,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/wildsagechiro",
     "facebook_url": "https://www.facebook.com/wildsagechiro",
     "website_url": "https://www.wildsagechiro.com",
+    "email": "hello@wildsagechiro.com",
     "bio": "Bree and Kyle at Wild Sage are highly skilled, compassionate professionals who provide exceptional care for both adults and children. They are deeply committed to their patients&rsquo; well-being, making everyone feel heard, supported, and genuinely cared for. Their expertise has led to remarkable improvements in their patients&rsquo; health and quality of life, and their warm, friendly approach creates a welcoming environment for families. Highly recommended for their dedication and positive impact.",
     "specialties": [
       "Pediatrics",
@@ -1075,11 +1112,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "ovpnot",
+    "id": "aqrgx",
     "slug": "malori-tinsley",
     "first_name": "Malori",
     "last_name": "Tinsley",
@@ -1093,6 +1130,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/wellbalancedbody.com",
     "facebook_url": "https://www.facebook.com/wellbalancedbody.com",
     "website_url": "https://www.wellbalancedbody.com",
+    "email": "Supposrt@wellbalancedbody.com",
     "bio": "Patients consistently praise Dr. Tinsley for her exceptional chiropractic care, highlighting her expertise, compassion, and holistic approach to health and wellness. Many note significant improvements in their overall well-being, even after other treatments were unsuccessful. Her thorough assessments and unique, full-body techniques have helped patients regain vitality and experience lasting relief. Dr. Tinsley is highly recommended for her dedication and outstanding results.",
     "specialties": [
       "General NeuroChiro"
@@ -1102,11 +1140,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "1nuqyf",
+    "id": "mqka27",
     "slug": "mickey-mondragon",
     "first_name": "Mickey",
     "last_name": "Mondragon",
@@ -1120,6 +1158,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/chiro_mick",
     "facebook_url": "https://www.facebook.com/chiro_mick",
     "website_url": "https://www.rootstemchiro.com",
+    "email": "mickmondragon@gmail.com",
     "bio": "Consistently praised for their friendly professionalism and supportive approach to healing.",
     "specialties": [
       "Diversified"
@@ -1129,11 +1168,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "kytpn",
+    "id": "dqntx",
     "slug": "ronnie-bolar",
     "first_name": "Ronnie",
     "last_name": "Bolar",
@@ -1147,6 +1186,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/vitallifechiro",
     "facebook_url": "https://facebook.com/VitalLifeChiro/",
     "website_url": "https://www.livingvitallife.com",
+    "email": "info@livingvitallife.com",
     "bio": "Patients consistently praise Dr. Bolar and his staff for their exceptional care, personalized attention, and outstanding customer service. The team takes time to understand each individual&rsquo;s needs, making patients feel valued and welcomed from the very first visit. Many highlight the warm, family-like atmosphere and Dr. Bolar&rsquo;s genuine commitment to their well-being, setting this practice apart from others.",
     "specialties": [
       "Family Care",
@@ -1157,11 +1197,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "3633ob",
+    "id": "l3x5vg",
     "slug": "dr-benjamin-benulis",
     "first_name": "Benjamin",
     "last_name": "Benulis",
@@ -1175,6 +1215,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/lifeunfoldschiropractic/",
     "facebook_url": "https://www.facebook.com/lifeunfoldschiropractic",
     "website_url": "https://www.lifeunfolds.co/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnet7HaFgbI4zf42VrvE42uDOM4G9o-McU93qrP2EjtBLXOaIonJNPjAyIrvk_aem_xBQJ6RvWyNjpxXoGFruagg",
+    "email": "drben@fastmail.com",
     "bio": "Patients describe Dr. Ben as a compassionate and holistic healer who takes the time to understand both physical and emotional aspects of their health. Many have experienced significant, even life-changing relief from chronic pain after years of unsuccessful treatments elsewhere. His thoughtful, individualized approach and genuine care for long-term wellbeing leave patients feeling better both physically and emotionally. Highly recommended for those seeking true healing.",
     "specialties": [
       "Prenatal",
@@ -1186,11 +1227,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "do5fog",
+    "id": "sqgwlh",
     "slug": "dr-brad-burgess",
     "first_name": "Brad",
     "last_name": "Burgess",
@@ -1204,6 +1245,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/keystonecaw/",
     "facebook_url": "https://www.facebook.com/keystonecaw",
     "website_url": "https://keystonecaw.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGn1F14torghThwsYnFajvd1DKn9EPbT2FbYmu23wmO4pPzMdZqZGKDA__-4-s_aem_uVu_ps8yqWL3iI8BtDRo-g",
+    "email": "Keystonecaw@gmail.com",
     "bio": "Patients praise Dr. Brad Burgess for his exceptional knowledge, compassion, and wide range of effective techniques. They highlight his genuine care, holistic approach, and ability to provide lasting relief, noting that he consistently helps them feel at ease and pain-free.",
     "specialties": [
       "Family Care",
@@ -1214,11 +1256,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "mdc4m",
+    "id": "tl4l2",
     "slug": "dr-brad-hutt",
     "first_name": "Brad",
     "last_name": "Hutt",
@@ -1232,6 +1274,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/revivalchiroatx/",
     "facebook_url": "https://www.facebook.com/revivalchiroatx",
     "website_url": "https://www.revivalchiroatx.com/",
+    "email": "drbrad@revivalchiroatx.com",
     "bio": "Revival Chiropractic offers a unique and transformative approach to care, focusing on the nervous system and delivering results that stand out from traditional recommendations. Families have experienced remarkable improvements in health and well-being, supported by a warm, welcoming atmosphere and a genuinely caring team. Many wish they had started their journey with Revival Chiropractic sooner, highlighting the exceptional and life-changing impact of their services.",
     "specialties": [
       "Family Care",
@@ -1242,11 +1285,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "9eep7j",
+    "id": "dr0jgr",
     "slug": "dr-brian-anderson",
     "first_name": "Brian",
     "last_name": "Anderson",
@@ -1260,6 +1303,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/totalhealthrevive/",
     "facebook_url": "https://www.facebook.com/totalhealthrevive",
     "website_url": "www.drbriananderson.com",
+    "email": "brian@drbriananderson.com",
     "bio": "Patients highly recommend Dr. Anderson at Premier Health of Summit for his holistic, individualized approach to complex conditions like peripheral neuropathy, chronic fatigue, fibromyalgia, and IBS. Many report significant improvements in symptoms, mobility, energy, and overall quality of life after following his personalized treatment plans, which include supplements, dietary changes, exercise, and in-office therapies. Patients also praise Dr. Anderson and his staff for their knowledge, compassion, and dedication to patient wellness.",
     "specialties": [
       "General NeuroChiro"
@@ -1269,11 +1313,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "pllpy",
+    "id": "xxg1oh",
     "slug": "dr-brian-mcgregor",
     "first_name": "Brian",
     "last_name": "McGregor",
@@ -1287,6 +1331,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/alignlifespringfield/?hl=en",
     "facebook_url": "https://www.facebook.com/AlignLifeSpringfield/",
     "website_url": "https://alignlife.com/locations/springfield-il-chiropractor/",
+    "email": "sserena@alignlife.com",
     "bio": "AlignLife is a warm, family-oriented chiropractic clinic known for its expert care, personalized wellness plans, and genuine commitment to patients&rsquo; overall health. Beyond chiropractic adjustments, they offer functional nutrition programs, health seminars, and supplements, all in a welcoming environment where patients feel valued and supported. The staff goes above and beyond with thoughtful gestures, community involvement, and convenient communication, making every visit positive and impactful. AlignLife stands out for its focus on long-term healing, education, and treating every patient like family.",
     "specialties": [
       "Pediatrics",
@@ -1297,11 +1342,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "wpklz",
+    "id": "gbkzu",
     "slug": "dr-brittany-wetzel",
     "first_name": "Brittany",
     "last_name": "Wetzel",
@@ -1315,6 +1360,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/native_chiropractic",
     "facebook_url": "https://www.facebook.com/native_chiropractic",
     "website_url": "https://www.gonativechiro.com",
+    "email": "Team@gonativechiro.com",
     "bio": "Native Chiropractic is a highly recommended, family-centered clinic known for its compassionate, knowledgeable, and supportive care. Their team provides holistic chiropractic services for all ages, from infants to adults, addressing unique needs such as infant tongue tie tension, back pain, and ongoing maintenance care. Patients appreciate the friendly staff, clean facility with a playroom for kids, and the clinic&rsquo;s dedication to supporting mothers, babies, and families in a welcoming, non-pushy environment.",
     "specialties": [
       "Pediatrics",
@@ -1327,11 +1373,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "38tngb",
+    "id": "pkkat",
     "slug": "dr-bryan-pries",
     "first_name": "Bryan",
     "last_name": "Pries",
@@ -1345,6 +1391,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/revivalfamilychiro/",
     "facebook_url": "https://www.facebook.com/revivalfamilychiropractic",
     "website_url": "https://www.revivalchirocharlotte.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGn6WLA6lkDP9xlKJaX8GMwCPbWsyqbE_HjUKwxBuD2v58DjvUjWX728HSIiyM_aem_C7-mkjDiQsteyW5b_tPldg",
+    "email": "drbryan@chirobryan.com",
     "bio": "Patients appreciate Dr. P&rsquo;s attentive and comprehensive care, especially for families with multiple health concerns, and feel grateful to have him as their practitioner.",
     "specialties": [
       "Pediatrics",
@@ -1358,11 +1405,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "ynxly",
+    "id": "no8ijh",
     "slug": "dr-caitlin-reimer",
     "first_name": "Caitlin",
     "last_name": "Reimer",
@@ -1376,6 +1423,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/whitehorsefamilywellness/",
     "facebook_url": "https://www.facebook.com/whitehorsefamilywellness",
     "website_url": "https://www.whitehorsefamilywellness.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnWSgwLDPSMn1mrYBP5LJRNqn3CeHd6Mbftvok8aZVWlmdVlcWdvS2wpvQZoQ_aem_6zWEgVJ4B_UU7nl9SWJ3UA",
+    "email": "hello@whitehorsefamilywellness.com",
     "bio": "Patients consistently praise Dr. Caitlin for her expertise, professionalism, and the significant positive impact she has on their health and well-being. Even those initially skeptical of chiropractic care have experienced remarkable improvements after her treatments, highlighting her ability to earn trust and deliver effective results. Dr. Caitlin&rsquo;s personalized approach and dedication leave a lasting impression on both her patients and their families.",
     "specialties": [
       "Pediatrics",
@@ -1389,11 +1437,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "82181p",
+    "id": "5ofz0b",
     "slug": "dr-chantal-shelstad",
     "first_name": "Chantal",
     "last_name": "Shelstad",
@@ -1407,6 +1455,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/startwellchiro/",
     "facebook_url": "https://www.facebook.com/profile.php?id=61573419377305&ref=pl_edit_xav_ig_profile_page_web#",
     "website_url": "https://startwellchiropractic.com/",
+    "email": "welcome@startwellchiropractic.com",
     "bio": "Patients praise Dr. Chantal for her expertise, warm approach, and positive impact on both prenatal and pediatric care. They highlight noticeable improvements, easier pregnancy experiences, and life-changing results for themselves and their children.",
     "specialties": [
       "Pediatrics",
@@ -1420,11 +1469,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "3dn7v",
+    "id": "mnz12b",
     "slug": "dr-chris-hopkins",
     "first_name": "Chris",
     "last_name": "Hopkins",
@@ -1438,6 +1487,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/harmonyfamilychironc/",
     "facebook_url": "https://www.facebook.com/harmonyfamilychironc",
     "website_url": "https://www.harmonychironc.com/",
+    "email": "dc@harmonychironc.com",
     "bio": "Dr. Chris and the Harmony team have significantly improved our child&apos;s and family&apos;s quality of life, addressing both physical and emotional challenges with care and expertise. We are deeply grateful for their support.",
     "specialties": [
       "Pediatrics",
@@ -1450,11 +1500,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "6j4avl",
+    "id": "rsjcon",
     "slug": "dr-colton-obrien",
     "first_name": "Colton",
     "last_name": "O'Brien",
@@ -1468,6 +1518,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/trinitylifechiropractic/",
     "facebook_url": "https://www.facebook.com/profile.php?id=100086571492813",
     "website_url": "https://trinitylifechiro.com/",
+    "email": "Drobrien@trinitylifechiro.com",
     "bio": "Patients consistently praise Dr. Colton, Dr. Joanna, and the team at Trinity Life for their exceptional care, gentle approach, and welcoming, peaceful office environment. Many highlight significant improvements in their health, from newborns experiencing relief from discomfort to adults finding lasting solutions for chronic pain, vertigo, and mobility issues. The doctors are described as patient, compassionate, and highly skilled, creating a supportive atmosphere that fosters trust and healing. Trinity Life is highly recommended for anyone seeking effective, personalized chiropractic care.",
     "specialties": [
       "Pediatrics",
@@ -1481,11 +1532,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "fbar3",
+    "id": "v9yad",
     "slug": "dr-colton-wood",
     "first_name": "Colton",
     "last_name": "Wood",
@@ -1499,6 +1550,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/truelightchiropractic/",
     "facebook_url": "https://www.facebook.com/truelightchiropractic",
     "website_url": "https://truelightchiropractic.com/",
+    "email": "Info@truelightchiropractic.com",
     "bio": "True Light Chiropractic is highly praised for its compassionate and family-centered care. Patients report significant improvements in issues like infant reflux and back pain, with many noting positive impacts on sleep, recovery, and overall well-being. The doctors are described as kind, supportive, and attentive, creating a welcoming environment for both adults and children. Families appreciate the thoughtful touches, such as toys for children and inclusive care during visits, making True Light Chiropractic a trusted and valued part of their health journey.",
     "specialties": [
       "Pediatrics",
@@ -1512,11 +1564,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "y0lqyr",
+    "id": "29kycn",
     "slug": "dr-dakota-turgeon",
     "first_name": "Dakota",
     "last_name": "Turgeon",
@@ -1530,6 +1582,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/envisionchiropractic/",
     "facebook_url": "https://www.facebook.com/profile.php?id=61563859875509",
     "website_url": "https://www.envision-chiropractic.com/",
+    "email": "drdakota@envision-chiropractic.com",
     "bio": "Patients consistently praise Envision Chiropractic for its exceptional care, modern approach, and welcoming atmosphere. Dr. Dakota and Rosemary are highlighted for their professionalism, warmth, and dedication to patient wellness. Many note significant improvements in their health and appreciate the personalized attention and friendly environment.",
     "specialties": [
       "Diversified"
@@ -1539,11 +1592,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "qd15y",
+    "id": "s9ghmn",
     "slug": "dr-dan-wallis",
     "first_name": "Dan",
     "last_name": "Wallis",
@@ -1557,6 +1610,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/drdanielwallis",
     "facebook_url": "https://www.facebook.com/elevatechiro",
     "website_url": "https://www.elevatetolife.com/",
+    "email": "drwallis@elevatetolife.com",
     "bio": "Patients consistently praise Dr. Dan and his team for their professionalism, family-focused care, and welcoming atmosphere. Reviews highlight the staff&rsquo;s thoughtfulness, patience, and genuine concern for patient well-being, with special attention given to both children and adults. Many note significant health improvements and appreciate the thorough, attentive approach. The positive, encouraging environment and excellent front desk staff make patients feel valued and supported throughout their care.",
     "specialties": [
       "Family Care",
@@ -1567,11 +1621,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "bau8a9",
+    "id": "027m2w",
     "slug": "dr-daniel-mendez",
     "first_name": "Daniel",
     "last_name": "Mendez",
@@ -1585,6 +1639,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/wholebodywellnesschiro/",
     "facebook_url": "https://www.facebook.com/wholebodywellnesschiro",
     "website_url": "https://wbwchiro.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnGCDnKI1nZmEZRzXm5DndmDC-BR9OmqaFRFPcaua06rHDglkdej-bGVrNgbo_aem_v2y6UpsRSW5nTQWAWJMj-g",
+    "email": "info@wbwchiro.com",
     "bio": "Patients praise Whole Body Wellness for its effective treatments, advanced technology, and caring staff. Many note significant improvements in pain, posture, and overall well-being, highlighting therapies like spinal decompression and red light therapy. The clinic is commended for its welcoming atmosphere, knowledgeable chiropractors, and flexible financial options, making quality care accessible and worthwhile.",
     "specialties": [
       "Tonal",
@@ -1595,11 +1650,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "5h2xz2",
+    "id": "h1jhon",
     "slug": "dr-danielle-fleming",
     "first_name": "Danielle",
     "last_name": "Fleming",
@@ -1613,6 +1668,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/DrDanielle.DC",
     "facebook_url": "https://www.facebook.com/DrDanielle.DC",
     "website_url": "https://www.VibrantLifeCenter.com",
+    "email": "VibrantLifeCenter@gmail.com",
     "bio": "Patients express deep gratitude for Dr. Fleming&rsquo;s compassionate care, expertise, and dedication to healing. They highlight significant improvements in their health, such as increased energy, reduced symptoms, and overall well-being, attributing their recovery to her personalized approach and support. The testimonials emphasize her genuine concern for patients and her commitment to educating and empowering them on their health journeys.",
     "specialties": [
       "Pediatrics",
@@ -1626,11 +1682,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "3kmh94",
+    "id": "x7wv6j",
     "slug": "dr-danika-phillips",
     "first_name": "Danika",
     "last_name": "Phillips",
@@ -1644,6 +1700,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/fikachiropractic/",
     "facebook_url": "https://www.facebook.com/profile.php?id=61576005908743",
     "website_url": "https://www.fikachiropractic.com/",
+    "email": "hello@fikachiropractic.com",
     "bio": "Parents praise Dr. Danika for her personalized, thoughtful, and nurturing approach to pediatric chiropractic care, noting significant improvements in their children&apos;s health, including better sleep, weight gain, speech, and overall regulation. Families feel supported and grateful, highlighting her ability to connect with children and adapt care to their individual needs. Many recommend her services, especially for children with developmental delays.",
     "specialties": [
       "Pediatrics",
@@ -1656,11 +1713,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "336t7",
+    "id": "blhn8",
     "slug": "dr-daxon-jones",
     "first_name": "Daxon",
     "last_name": "Jones",
@@ -1674,6 +1731,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/burnabychiropractic/",
     "facebook_url": "https://www.facebook.com/BurnabyChiropractic",
     "website_url": "https://www.burnaby-chiropractic.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnUxnw6hWlFuqPHZ-FbF2dS9bf33UUl3PZGaRFS6MSs4FpzXDS4AWgCIIPRGM_aem_ucgaaj_CW-eYuaXiOG2bgw",
+    "email": "hello@burnaby-chiropractic.com",
     "bio": "Patients consistently praise Dr. Daxon and the Burnaby Chiropractic team for their life-changing care, compassion, and expertise. Many highlight dramatic improvements in both their own and their children&rsquo;s health, including relief from pain, better sleep, and greater comfort. The team is described as warm, supportive, and family-oriented, going above and beyond to make every visit welcoming and stress-free. Patients feel genuinely cared for and highly recommend the clinic for its positive impact on their well-being.",
     "specialties": [
       "Pediatrics",
@@ -1687,11 +1745,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "utsr3s",
+    "id": "tflvym",
     "slug": "dr-dean-peters",
     "first_name": "Dean",
     "last_name": "Peters",
@@ -1705,6 +1763,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/miltonspine/",
     "facebook_url": "https://www.facebook.com/profile.php?id=61554635883629",
     "website_url": "https://www.miltonspine.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGneBVbZMgbiKgrXR_4vl0mFId_T-Qm_itJLg_QqGpKiHLVN4vp5a-MCWaJ4po_aem_pcVcmozV_kzI0OKk0FAtBQ",
+    "email": "drdean@miltonspine.com",
     "bio": "Patients consistently praise Dr. Dean and the team at Milton Spine for their professionalism, expertise, and compassionate care. Reviewers highlight significant improvements in conditions like sciatica, post-surgical knee rehab, and chronic arthritis, noting that treatment plans are thorough, effective, and focused on long-term wellness. Many express deep gratitude for the personalized attention, clear communication, and supportive environment, crediting the clinic with helping them regain mobility, energy, and quality of life.",
     "specialties": [
       "Family Care",
@@ -1715,11 +1774,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "d0d7l",
+    "id": "cbbxd",
     "slug": "dr-diego-montes",
     "first_name": "Diego",
     "last_name": "Montes",
@@ -1733,6 +1792,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/drdiegomontesdc/",
     "facebook_url": "https://www.facebook.com/drdiegomontesdc",
     "website_url": "https://in8life.com/",
+    "email": "Dr.diegomontesdc@gmail.com",
     "bio": "Patients consistently praise Dr. Diego Montes and the team at In8Life for their compassionate, family-centered care and effective, personalized treatment plans. Families have seen significant improvements in issues such as headaches, sleep disturbances, breathing, speech, and digestive concerns in their children. Adult patients report relief from chronic pain, improved mobility, and even positive changes in overall health markers like cholesterol and triglycerides. The staff&rsquo;s professionalism, thorough approach&mdash;including diagnostics and in-house rehab&mdash;and Dr. Montes&rsquo; excellent bedside manner create a welcoming environment where patients feel genuinely cared for and experience life-changing results.",
     "specialties": [
       "Pediatrics",
@@ -1745,11 +1805,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "swkjo",
+    "id": "irpb9",
     "slug": "dr-dylan-jones",
     "first_name": "Dylan",
     "last_name": "Jones",
@@ -1763,6 +1823,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/mainstchiropractic/",
     "facebook_url": "https://www.facebook.com/MainStChiropractic/",
     "website_url": "http://www.mainstchiropractic.ca",
+    "email": "info@mainstchiropractic.ca",
     "bio": "Main St Chiropractic receives outstanding praise from families, especially those with autistic children, for their compassionate, patient, and attentive care. Parents report remarkable improvements in their children&rsquo;s sensory processing, behavior, and communication since starting care, including better sleep, calmer moods, increased openness to new experiences, and enhanced social engagement. Dr. Dylan is highlighted for his gentle, child-centered approach, while Max and Alex are commended for their welcoming and supportive presence. The team&rsquo;s dedication, flexibility, and genuine kindness create a comfortable, family-friendly environment that makes every visit positive. Many highly recommend Main St Chiropractic for their transformative impact and exceptional service.",
     "specialties": [
       "Pediatrics",
@@ -1774,11 +1835,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "94ds5m",
+    "id": "9o5l2",
     "slug": "dr-elise-rigney",
     "first_name": "Elise",
     "last_name": "Rigney",
@@ -1792,6 +1853,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/impactchiropractic/",
     "facebook_url": "https://www.facebook.com/FortCollinsChiropractor",
     "website_url": "https://www.impact-chiropractic.com",
+    "email": "Drheather@impact-chiropractic.com",
     "bio": "Clients praise Impact for its knowledgeable, friendly, and professional team, personalized care, and enjoyable atmosphere. They report noticeable health improvements and appreciate flexible, interest-free payment plans. Highly recommended for those seeking improved well-being.",
     "specialties": [
       "Pediatrics",
@@ -1804,11 +1866,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "p5b8lc",
+    "id": "f8il7j",
     "slug": "dr-gena-bofshever",
     "first_name": "Gena",
     "last_name": "Bofshever",
@@ -1822,6 +1884,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/doctorgena/",
     "facebook_url": "https://www.facebook.com/DoctorGena",
     "website_url": "https://www.drgenachiropractic.com/#",
+    "email": "Drgena@drgenachiropractic.com",
     "bio": "Patients consistently praise the warm, welcoming atmosphere and caring staff at Dr. Gena Chiropractic. Reviewers highlight the team&rsquo;s professionalism, thoroughness, and genuine concern for patient well-being. The doctors are described as attentive, compassionate, and dedicated, often going above and beyond to support patients, including accommodating urgent needs and providing extra care during important life moments. Many feel informed, comfortable, and confident in their treatment plans, highly recommending the practice to others.",
     "specialties": [
       "Pediatrics",
@@ -1834,11 +1897,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "6t7gtj",
+    "id": "sjxhhf",
     "slug": "dr-gretchen-rachuy",
     "first_name": "Gretchen",
     "last_name": "Rachuy",
@@ -1852,6 +1915,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/Homegrownfamilychiro",
     "facebook_url": "https://www.facebook.com/Homegrownfamilychiro",
     "website_url": "https://www.homegrownfamilychiro.com",
+    "email": "Drgretchen@homegrownfamilychiro.com",
     "bio": "Dr. Gretchen provides exceptional, compassionate care, making both children and parents feel comfortable and informed throughout the process. Her thorough approach, including detailed nervous system assessments and clear explanations, has led to significant progress for her young patients in just a few months. She creates a welcoming, supportive environment where children feel at ease and valued.",
     "specialties": [
       "Pediatrics",
@@ -1863,11 +1927,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "ezor2j",
+    "id": "no5qo8",
     "slug": "dr-haley-turpin",
     "first_name": "Haley",
     "last_name": "Turpin",
@@ -1881,6 +1945,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/blueoak_familychiro",
     "facebook_url": "https://www.facebook.com/blueoak_familychiro",
     "website_url": "https://www.blueoakfamilychiro.com",
+    "email": "Info@blueoakfamilychiro.com",
     "bio": "These testimonials highlight Dr. Haley&rsquo;s exceptional care, expertise, and passion for pediatric chiropractic. Parents describe her as patient, gentle, and deeply committed to her clients&rsquo; well-being. They share significant improvements in their children&rsquo;s health, including better sleep, behavior, digestion, and relief from headaches and tantrums. Dr. Haley&rsquo;s ability to educate and support families, even those initially hesitant about chiropractic care, has made a meaningful difference in their lives.",
     "specialties": [
       "Pediatrics",
@@ -1892,11 +1957,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "n1x4jo",
+    "id": "r5zce",
     "slug": "dr-hayden-richau",
     "first_name": "Hayden",
     "last_name": "Richau",
@@ -1910,6 +1975,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/pinnaclechiropracticsarasota",
     "facebook_url": "https://www.facebook.com/pinnaclechiropracticsarasota",
     "website_url": "https://www.pinnaclebradenton.com",
+    "email": "Contact@pinnaclebradenton.com",
     "bio": "Patients consistently praise Pinnacle for its exceptional, individualized chiropractic care, especially during pregnancy and for children. Reviewers highlight the doctors&rsquo; attention to detail, genuine compassion, and ability to address both physical and behavioral concerns. Many note significant improvements in comfort, well-being, and family dynamics, with some describing Pinnacle as the best chiropractic experience they&rsquo;ve ever had. The welcoming atmosphere and dedicated staff make patients feel supported and valued, fostering long-term trust and loyalty.",
     "specialties": [
       "Pediatrics",
@@ -1921,11 +1987,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "jipe7",
+    "id": "993noi",
     "slug": "dr-howard",
     "first_name": "Howard",
     "last_name": "",
@@ -1939,6 +2005,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "",
     "facebook_url": "",
     "website_url": "https://www.foresightchiropractic.com",
+    "email": "connect@foresightchiropractic.com",
     "bio": "",
     "specialties": [
       "General NeuroChiro"
@@ -1948,11 +2015,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "n8dyf",
+    "id": "1e3lmx",
     "slug": "dr-dr-healthy-families",
     "first_name": "Healthy",
     "last_name": "Families",
@@ -1966,6 +2033,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/healthyfamilieschiro",
     "facebook_url": "https://www.facebook.com/healthyfamilieschiro",
     "website_url": "https://www.healthyfamilieschiro.co.nz/",
+    "email": "Info@healthyfamilieschiro.co.nz",
     "bio": "Parents praise the supportive and understanding care their children received, noting improvements in emotional well-being, focus, and physical health. They highlight the reassurance of finding someone who truly understands and helps children, resulting in better sleep, reduced congestion, and a positive impact on the whole family.",
     "specialties": [
       "Tonal",
@@ -1976,11 +2044,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "c80dpf",
+    "id": "nih5tq",
     "slug": "dr-jared-spitz",
     "first_name": "Jared",
     "last_name": "Spitz",
@@ -1994,6 +2062,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/apexchiropracticwa/",
     "facebook_url": "https://www.facebook.com/ApexChiropracticWa",
     "website_url": "https://www.apexchiropracticwa.com/?utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnBdM2v7zZI5DI1l05kS1ZIULev1jwSnfPzRuFQw7pBzeh7XzGAVTolNaoEjA_aem_Hs3P2o6oHQXpMzSe2R8q3Q",
+    "email": "Apexchiropracticwa@gmail.com",
     "bio": "These testimonials highlight the exceptional care and welcoming environment provided by the team at Apex. Patients consistently feel heard, supported, and comfortable, with staff going above and beyond to ensure a positive experience for both parents and children. Families have seen significant improvements in their well-being, including smoother pregnancies, easier infant adjustment, and enhanced emotional regulation, sleep, and mood in children. The genuine compassion and expertise of the staff make Apex highly recommended by those who have experienced their care.",
     "specialties": [
       "Pediatrics",
@@ -2006,11 +2075,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "p9uzrq",
+    "id": "61osoa",
     "slug": "dr-jennifer-hastings",
     "first_name": "Jennifer",
     "last_name": "Hastings",
@@ -2024,6 +2093,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "",
     "facebook_url": "",
     "website_url": "https://www.CafeofLifeWellness.com",
+    "email": "SpineDoctor777@gmail.com",
     "bio": "Patients appreciate Dr. Jen&rsquo;s thorough, caring approach and the friendly, welcoming staff, making office visits a positive experience.",
     "specialties": [
       "Family Care",
@@ -2034,11 +2104,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "ppic5m",
+    "id": "2x9mz8",
     "slug": "dr-jennifer-loveday",
     "first_name": "Jennifer",
     "last_name": "Loveday",
@@ -2052,6 +2122,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/honeybee_chiropractic/",
     "facebook_url": "https://www.instagram.com/honeybee_chiropractic/",
     "website_url": "https://honeybeechiropractic.com/",
+    "email": "thehive@honeybeechiropractic.com",
     "bio": "Patients praise Dr. Jen and the Honeybee Chiropractic team for their exceptional care, highlighting effective treatment for back pain, pregnancy-related discomfort, and pediatric issues. They appreciate Dr. Jen&rsquo;s kindness, attentive listening, and expertise, noting improvements in family health and well-being. The clinic is highly recommended for its welcoming atmosphere and comprehensive care for all ages, especially during pregnancy and postpartum.",
     "specialties": [
       "Pediatrics",
@@ -2064,11 +2135,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "uhbb3",
+    "id": "fd9x8",
     "slug": "dr-jessica-hudson",
     "first_name": "Jessica",
     "last_name": "Hudson",
@@ -2082,6 +2153,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/binbchiropractic/",
     "facebook_url": "https://www.facebook.com/bbwellnesscenter",
     "website_url": "https://www.binbchiro.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGns3taurvwgW9GT8ltU3md--R6F8i4LsYKXrj4ElQ2titkqirotIxrbEEodwA_aem_TsR_zpogbKDJ7hQx4THRNA",
+    "email": "info@bbwellnesscenter.com",
     "bio": "Clients praise the team for their welcoming environment, clear communication, and rapid progress. Dr. Guthrie and Dr. Hudson are recognized for their expertise, holistic approach to wellness, and genuine care for their clients, fostering a sense of trust and family-like connection.",
     "specialties": [
       "Pediatrics",
@@ -2095,11 +2167,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.705Z",
+    "updated_at": "2026-03-09T01:16:04.705Z"
   },
   {
-    "id": "xujg4",
+    "id": "zrkt9c",
     "slug": "dr-jodi-wiechman",
     "first_name": "Jodi",
     "last_name": "Wiechman",
@@ -2113,6 +2185,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.facebook.com/radiantwaveschiro",
     "facebook_url": "https://www.facebook.com/radiantwaveschiro",
     "website_url": "https://www.radiantwaveschiro.com/",
+    "email": "Hello@radiantwaveschiro.com",
     "bio": "These testimonials highlight the caring and knowledgeable team at RWC, emphasizing their thorough approach, clear communication, and genuine dedication to patient well-being. Patients appreciate the welcoming environment, attentive staff, and the doctors&rsquo; willingness to listen and address concerns. The addition of new team members is seen as a positive enhancement, reinforcing RWC&rsquo;s reputation as a supportive and compassionate practice.",
     "specialties": [
       "Pediatrics",
@@ -2126,11 +2199,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "j2ha52",
+    "id": "q2pzf",
     "slug": "dr-john-caruso",
     "first_name": "John",
     "last_name": "Caruso",
@@ -2144,6 +2217,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/havenfamilychiro/",
     "facebook_url": "https://www.facebook.com/Havenfamilychiro",
     "website_url": "https://havenfamilychiro.com/",
+    "email": "frontdesk@havenfamilychiro.com",
     "bio": "A parent, initially skeptical about chiropractic care, shares that after trying various therapies for their son&apos;s emotional dysregulation and challenging behaviors, they saw remarkable improvements following treatment with Dr. John. Their son is now better able to regulate his emotions and demonstrate self-control. The parent praises Dr. John&rsquo;s caring and patient approach with children, the supportive staff, and the welcoming environment, highly recommending the practice to others facing similar challenges.",
     "specialties": [
       "Pediatrics",
@@ -2156,11 +2230,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "9jrg54",
+    "id": "l5619",
     "slug": "dr-jordan-wolff",
     "first_name": "Jordan",
     "last_name": "Wolff",
@@ -2174,6 +2248,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/chironyc/",
     "facebook_url": "https://www.facebook.com/SuttonPlaceChiropractic",
     "website_url": "https://suttonplacechiropractic.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGn8EEvPNf90mCcrCvLELNJR9OazeUGlAmNGDjkU2fB1z6nVBZOzR5VCavAcY8_aem_BLn-QlbzFIy5zrLaPDmFbQ",
+    "email": "suttonplacechiro@gmail.com",
     "bio": "Patients praise Dr. Jordan for his exceptional care, thorough explanations of the mind-body connection, and emphasis on self-care. He is especially appreciated for his support during pregnancy, helping to relieve pain and improve overall well-being. Patients value his attentive approach and look forward to continuing care with him.",
     "specialties": [
       "Pediatrics",
@@ -2186,11 +2261,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "iaosmk",
+    "id": "191ri",
     "slug": "dr-joseph-benne",
     "first_name": "Joseph",
     "last_name": "Benne",
@@ -2204,6 +2279,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/atonechiropractic",
     "facebook_url": "https://www.facebook.com/atonechiropractic",
     "website_url": "https://www.Atonechiropractic.com",
+    "email": "Team@atonechiropractic.com",
     "bio": "Families have experienced significant positive changes at Atone, noting improvements in their children&rsquo;s behavior, sensory challenges, and overall happiness. Parents highlight the caring, supportive staff and Dr. Benny&rsquo;s exceptional connection with children. Many report reduced meltdowns, better communication, and a calmer home environment. The personalized, family-friendly care and welcoming atmosphere have made a meaningful difference in their lives, leading them to highly recommend Atone.",
     "specialties": [
       "Pediatrics",
@@ -2217,11 +2293,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "5ut0d4",
+    "id": "4k04pt",
     "slug": "dr-kai-bennett",
     "first_name": "Kai",
     "last_name": "Bennett",
@@ -2235,6 +2311,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/optimal_health_performance/",
     "facebook_url": "https://www.facebook.com/profile.php?id=61550593564444",
     "website_url": "https://prescottoptimalhealth.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnOnzbIdvr0vJEX4-JxFJPS2hIq0rYKqf6eexRpcSJEs2TEu9bGfkU93IIlEk_aem_EZxNg6bF9CouYGAuFlHH5Q",
+    "email": "optimizeyourlife@gmail.com",
     "bio": "Patients consistently praise Optimal Health and Performance for their personalized, caring, and professional approach. Dr. Kai, Jessica, and Dr. Bennett are recognized for genuinely understanding each patient&rsquo;s unique needs, creating a welcoming environment, and delivering tailored treatments that support both physical and emotional well-being. Their expertise helps patients&mdash;from families to athletes&mdash;achieve peak performance, recover from injuries, and maintain overall health, earning high recommendations and gratitude from those they serve.",
     "specialties": [
       "Family Care",
@@ -2245,11 +2322,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "mu4a9q",
+    "id": "kktvxd",
     "slug": "dr-kara-zuleg",
     "first_name": "Kara",
     "last_name": "Zuleg",
@@ -2263,6 +2340,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/handinhandchiro/",
     "facebook_url": "https://www.facebook.com/profile.php?id=100090114967774",
     "website_url": "https://handinhandchiro.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGn6m-FuFEiEsKa8htD0XF6XD74FCQCH0KkHsVtcQUyXNlwbA3A6y9sUUM8F0k_aem_FYA2UGnl9q4OmV-gxiKeFA",
+    "email": "Drkara@handinhandchiro.com",
     "bio": "Patients praise Dr. Kara for her knowledge, compassion, and clear communication, noting significant improvements in pain relief, overall well-being, and quality of life. They appreciate her holistic approach, which has led to better sleep, digestion, and inner peace. The friendly and welcoming staff, Vanessa and Carlie, also contribute to the positive experience at the practice.",
     "specialties": [
       "Pediatrics",
@@ -2275,11 +2353,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "4aueih",
+    "id": "wxct4",
     "slug": "dr-katie-schlein",
     "first_name": "Katie",
     "last_name": "Schlein",
@@ -2293,6 +2371,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/familyconnectionchiropractic/",
     "facebook_url": "https://www.facebook.com/FamilyConnectionChiropractic",
     "website_url": "https://familyconnectionchiropractic.com/",
+    "email": "hello@drkatieschlein.com",
     "bio": "Patients consistently praise Dr. Katie and the Family Connection clinic for their compassionate, personalized care and supportive environment. Testimonials highlight significant improvements in health concerns such as infant constipation, breastfeeding challenges, hypertension, and pregnancy discomfort. Patients appreciate Dr. Katie&rsquo;s gentle, holistic approach and the welcoming, community-focused atmosphere created by both Dr. Katie and her staff. Many express gratitude for finding a place that truly supports mothers and families through every stage.",
     "specialties": [
       "Pediatrics",
@@ -2305,11 +2384,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "enx11",
+    "id": "a80338",
     "slug": "dr-kaylee-conlan",
     "first_name": "Kaylee",
     "last_name": "Conlan",
@@ -2323,6 +2402,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/saltandlightwaco",
     "facebook_url": "https://www.facebook.com/saltandlightwaco",
     "website_url": "https://saltandlightwaco.com/",
+    "email": "hello@saltandlightwaco.com",
     "bio": "Patients consistently praise Dr. Kaylee and Salt and Light for their attentive, compassionate care and expertise. Many highlight Dr. Kaylee&rsquo;s ability to truly listen, provide thorough explanations, and offer effective solutions that address the root causes of their concerns. Families appreciate her skill in caring for both adults and children, noting significant improvements in symptoms and overall well-being. The practice is especially valued for its support during pregnancy, postpartum, and for pediatric care, with patients expressing deep gratitude for the positive impact on their health and family life.",
     "specialties": [
       "Pediatrics",
@@ -2336,11 +2416,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "qhbvxb",
+    "id": "gf2g2",
     "slug": "dr-kelli-richard",
     "first_name": "Kelli",
     "last_name": "Richard",
@@ -2354,6 +2434,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/thereservoirchiropractic/",
     "facebook_url": "https://www.facebook.com/thereservoirchiro/",
     "website_url": "https://www.thereservoirchiropractic.com/",
+    "email": "Drkelli@thereservoirchiropractic.com",
     "bio": "Patients highly recommend Dr. Kelli for her compassionate, skillful care and dedication to her work. Many have experienced significant improvements in their quality of life, including relief from chronic issues like headaches and migraines, thanks to her unique and effective approach. Her commitment to her patients is evident, making her a trusted choice for individuals and families alike.",
     "specialties": [
       "Pediatrics",
@@ -2367,11 +2448,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "xg6o9e",
+    "id": "ysvuik",
     "slug": "dr-kirsten-spitz",
     "first_name": "Kirsten",
     "last_name": "Spitz",
@@ -2385,6 +2466,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/apexchiropracticwa/",
     "facebook_url": "https://www.facebook.com/ApexChiropracticWa",
     "website_url": "https://www.apexchiropracticwa.com/?utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnBdM2v7zZI5DI1l05kS1ZIULev1jwSnfPzRuFQw7pBzeh7XzGAVTolNaoEjA_aem_Hs3P2o6oHQXpMzSe2R8q3Q",
+    "email": "apexchiropracticwa@gmail.com",
     "bio": "These testimonials highlight the exceptional care provided at Apex, especially for families and children. Patients share transformative experiences, including improved comfort and well-being during pregnancy, smoother deliveries, and significant positive changes in their children&rsquo;s health and development. Parents note remarkable improvements in their children&rsquo;s behavior, speech, emotional regulation, and overall happiness after chiropractic care. The reviews emphasize a welcoming, supportive environment where families feel seen, respected, and truly cared for, with many expressing deep gratitude for the positive impact on their lives.",
     "specialties": [
       "Pediatrics",
@@ -2397,11 +2479,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "gqhr6",
+    "id": "r3drj",
     "slug": "dr-lindsey-liles",
     "first_name": "Lindsey",
     "last_name": "Liles",
@@ -2415,6 +2497,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/fortitudechiroms/",
     "facebook_url": "https://www.facebook.com/fortitudechiroms",
     "website_url": "https://fortitudechiroms.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnBNV2wkNoVEYnyHVnLgoBjq3y-iWAQomndPg4theJz-6v-k0CDAWXRpXhnsI_aem_TzEKIBQ5H4bMfvMMRGawUw",
+    "email": "hello@fortitudechiroms.com",
     "bio": "Patients report significant improvements in their child&apos;s health, including relief from colic and chronic ear infections, after receiving care at Fortitude Chiropractic and Wellness. They express deep gratitude for Dr. Lindsey&apos;s expertise and highly recommend chiropractic care for children&apos;s overall well-being.",
     "specialties": [
       "Pediatrics",
@@ -2428,11 +2511,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "wxrbj8",
+    "id": "l7hja6",
     "slug": "dr-liv",
     "first_name": "Liv",
     "last_name": "",
@@ -2446,6 +2529,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/lighthousefamchiromtp",
     "facebook_url": "https://www.facebook.com/lighthousefamchiromtp",
     "website_url": "https://www.lighthousefamilychiro.com/",
+    "email": "Info@lighthousefamilychiro.com",
     "bio": "Clients consistently praise the exceptional staff and welcoming atmosphere, highlighting thorough care and a genuine commitment to patient comfort and well-being. Many report life-changing results, including improved mood, sleep, energy, and overall health. Families appreciate the holistic approach and feel confident they&rsquo;ve found the best chiropractic care for themselves and their children. Positive changes such as better stress management, enhanced physical alignment, and improved daily functioning are commonly mentioned, with gratitude expressed for the positive impact on their lives.",
     "specialties": [
       "Pediatrics",
@@ -2458,11 +2542,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "k77vg",
+    "id": "kh3wd",
     "slug": "dr-logan-pastor",
     "first_name": "Logan",
     "last_name": "Pastor",
@@ -2476,6 +2560,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/cadencechiro/",
     "facebook_url": "https://www.facebook.com/cadencechirobham",
     "website_url": "https://www.cadencechirobham.com/",
+    "email": "connect@cadencechirobham.com",
     "bio": "Parents have shared heartfelt testimonials about the positive impact of chiropractic care on their children, noting remarkable improvements in their well-being and development. They describe their children as happier, more balanced, and healthier, with noticeable progress in areas such as emotional regulation, recovery from illness, mobility, communication, and overall quality of life. Families express deep gratitude for the compassionate, neurological approach and the transformative results they have experienced.",
     "specialties": [
       "Pediatrics",
@@ -2488,11 +2573,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "x5svz",
+    "id": "8kk1j7",
     "slug": "dr-mackenzie-hoy",
     "first_name": "Mackenzie",
     "last_name": "Hoy",
@@ -2506,6 +2591,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/vibrant_family_chiropractic/",
     "facebook_url": "https://www.facebook.com/mnfamilychiro",
     "website_url": "https://vibrantfamchiro.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnTMt3QA3tFEHn5JynsYmrRjr_wPBftjPUsUuzgc1h_-YuijMOhc2scL1Z6bI_aem_Ep0QNKoeK5PHqch_nPC3EA",
+    "email": "vibrantfamchiropractic@gmail.com",
     "bio": "Patients consistently praise Dr. Mackenzie for her exceptional chiropractic skills, genuine care, and dedication to her patients&rsquo; well-being. They highlight the respectful, caring environment and note that she goes above and beyond, making a lasting positive impact on their health and lives.",
     "specialties": [
       "Family Care",
@@ -2517,11 +2603,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "k5gie8",
+    "id": "rha6gi",
     "slug": "dr-margie-smith",
     "first_name": "Margie",
     "last_name": "Smith",
@@ -2535,6 +2621,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/drmargiechiro",
     "facebook_url": "https://www.facebook.com/drmargiechiro",
     "website_url": "https://www.granitebaychiro.com",
+    "email": "admin@granitebaychiro.com",
     "bio": "Patients praise Dr. Margie for her exceptional care, highlighting significant improvements in postpartum recovery and relief from chronic neck pain. Families appreciate her thorough assessments, personalized approach, and the positive impact on their overall health, especially for children. Dr. Margie is described as knowledgeable, compassionate, and dedicated to her patients&rsquo; well-being.",
     "specialties": [
       "Pediatrics",
@@ -2546,11 +2633,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.300Z",
-    "updated_at": "2026-03-09T01:10:48.300Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "lyyi6",
+    "id": "f1bdks",
     "slug": "dr-marian-ortiz",
     "first_name": "Marian",
     "last_name": "Ortiz",
@@ -2564,6 +2651,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/alignlifepreston/",
     "facebook_url": "https://www.facebook.com/AlignLifePreston",
     "website_url": "https://alignlife.com/locations/cary-nc-chiropractor/",
+    "email": "mortiz@alignlife.com",
     "bio": "Patients praise Dr. Matt for his expertise, gentle approach, and genuine care. He provides personalized, effective treatment and takes time to listen, making patients feel comfortable and valued. Many highly recommend him for chiropractic care.",
     "specialties": [
       "Family Care",
@@ -2574,11 +2662,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "2bqyh",
+    "id": "gqnpp",
     "slug": "dr-matthew-lawrence",
     "first_name": "Matthew",
     "last_name": "Lawrence",
@@ -2592,6 +2680,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/alignlifepreston/",
     "facebook_url": "https://www.facebook.com/AlignLifePreston",
     "website_url": "https://alignlife.com/locations/cary-nc-chiropractor/",
+    "email": "Mlawrence@alignlife.com",
     "bio": "Patients praise Dr. Matt for his expertise, gentle approach, and genuine care. He provides personalized, effective treatment and takes time to listen, making patients feel comfortable and valued. Many highly recommend him for chiropractic care.",
     "specialties": [
       "Family Care",
@@ -2602,11 +2691,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "0abzqj",
+    "id": "baiooe",
     "slug": "dr-megan-sujo",
     "first_name": "Megan",
     "last_name": "Sujo",
@@ -2620,6 +2709,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/vitalspinestudio/",
     "facebook_url": "https://www.facebook.com/vitalspinestudio",
     "website_url": "https://vitalspinestudio.com/",
+    "email": "Info@vitalspinestudio.com",
     "bio": "Dr. Megan and Dr. Justin are compassionate, knowledgeable, and dedicated family chiropractors who provide gentle, patient-centered care. They create a positive experience for every visit and are highly recommended for their genuine commitment to their patients&rsquo; well-being.",
     "specialties": [
       "Pediatrics",
@@ -2632,11 +2722,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "75sb8o",
+    "id": "j21x1f",
     "slug": "dr-michael-cohen",
     "first_name": "Michael",
     "last_name": "Cohen",
@@ -2650,6 +2740,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/gracefulspinalcafe",
     "facebook_url": "https://www.facebook.com/gracefulspinalcafe",
     "website_url": "https://www.gracefulspinalcare.com",
+    "email": "info@gracefulspinalcare.com",
     "bio": "Patients deeply appreciate Dr. Michael and the Graceful Spinal Care team for their genuine care, professionalism, and dedication to patient wellbeing. They report significant improvements in their health and value the increased understanding they gain about their bodies and nervous systems.",
     "specialties": [
       "Pediatrics",
@@ -2661,11 +2752,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "0ve47",
+    "id": "ih0p5",
     "slug": "dr-michael-kehoe",
     "first_name": "Michael",
     "last_name": "Kehoe",
@@ -2679,6 +2770,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/hxfromwithin/?hl=en",
     "facebook_url": "https://www.facebook.com/HxFromWithin",
     "website_url": "https://www.healthfromwithinop.net/",
+    "email": "drkehoe@healthfromwithinop.net",
     "bio": "Patients consistently praise Health From Within for its caring and knowledgeable staff, especially Dr. Kehoe, noting significant improvements in health concerns like anxiety. They appreciate the clinic&rsquo;s focus on addressing root causes rather than just symptoms, and value the supportive environment, including staff members who help with children during appointments. The team is recognized for truly listening to patients and providing thoughtful, personalized care.",
     "specialties": [
       "Pediatrics",
@@ -2692,11 +2784,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "klxdyoq",
+    "id": "vwsrd",
     "slug": "dr-michelle-coats",
     "first_name": "Michelle",
     "last_name": "Coats",
@@ -2710,6 +2802,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/empowered_origins",
     "facebook_url": "https://www.facebook.com/empowered_origins",
     "website_url": "https://empoweredoriginschiro.com/",
+    "email": "hello@empoweredoriginschiro.com",
     "bio": "Clients consistently praise Empowered Origins for its welcoming and supportive environment, knowledgeable and caring staff, and the ease of scheduling appointments. Many highlight significant improvements in their health and well-being, including positive results for both adults and children. The practice is especially valued for its family-centered approach and commitment to nervous-system based chiropractic care, with several clients expressing deep gratitude for the positive impact on their lives.",
     "specialties": [
       "Tonal",
@@ -2720,11 +2813,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "zdbgla",
+    "id": "ozhucc",
     "slug": "dr-mike-silvestri",
     "first_name": "Mike",
     "last_name": "Silvestri",
@@ -2738,6 +2831,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/drmikesilvestri/",
     "facebook_url": "https://www.facebook.com/silvestrichiro",
     "website_url": "https://www.silvestrichiro.com/",
+    "email": "silvestrichiro@gmail.com",
     "bio": "Patients consistently praise Dr. Mike for his knowledge, professionalism, and genuine care. They highlight his ability to create personalized treatment plans, explain procedures clearly, and foster a comfortable, supportive environment. Many report significant improvements in their health and quality of life, even after initial hesitations about chiropractic care. Dr. Mike&rsquo;s dedication to ongoing learning and patient results stands out, making him highly recommended for anyone seeking compassionate and effective chiropractic treatment.",
     "specialties": [
       "Diversified"
@@ -2747,11 +2841,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "bu3z7",
+    "id": "5jal6m",
     "slug": "dr-natalie-rosenzweig",
     "first_name": "Natalie",
     "last_name": "Rosenzweig",
@@ -2765,6 +2859,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/abovedownchiro/",
     "facebook_url": "https://www.facebook.com/abovedownchiro",
     "website_url": "https://www.abovedownchiropractic.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnlGrn6YjHFxMoLLbhEfrmtJXF9QWJfvJvghOq_PS2Si2ynXK4cOQ-j31l6FA_aem_Z0bMOyvRjMyQ1nHniEMqgg",
+    "email": "Drnatalie@abovedownchiro.com",
     "bio": "Patients consistently praise Dr. Natalie and Above Down Chiropractic for her attentiveness, expertise, and genuine care. They highlight her intuitive and empowering approach, noting significant improvements in their well-being and relief from chronic issues. Many recommend her highly, appreciating both her knowledge and the positive, supportive experience she provides at every visit.",
     "specialties": [
       "Family Care",
@@ -2775,11 +2870,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "28okr",
+    "id": "v43j5",
     "slug": "dr-nicole-czech",
     "first_name": "Nicole",
     "last_name": "Czech",
@@ -2793,6 +2888,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/atlasspinalcare_vancouver/",
     "facebook_url": "https://www.facebook.com/AtlasSpinalCareVancouver",
     "website_url": "https://www.ascvancouver.com/?utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnEdtlotfUJykdj0UgXEVJ08-WS72L-sDM2qKyQ08fs-4-CS6H_gzY_olFks4_aem_8B-uZuu_4bK8cznBsmC9-Q",
+    "email": "Drnicole.asc@gmail.com",
     "bio": "Patients praise Atlas Spine/Atlas Spinal Care for its knowledgeable and personable doctors, especially Dr. Nicole and Dr. Tim, as well as its friendly, positive, and efficient staff. Many highlight significant improvements in pain and overall well-being after gentle, effective treatments, and appreciate the clinic&rsquo;s cutting-edge technology and organized, welcoming environment. The practice is highly recommended for chiropractic care in Vancouver, WA.",
     "specialties": [
       "Tonal"
@@ -2802,11 +2898,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "w19hh",
+    "id": "1fv7dlm",
     "slug": "dr-patience-canty",
     "first_name": "Patience",
     "last_name": "Canty",
@@ -2820,6 +2916,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/flourish_wellness_center/",
     "facebook_url": "",
     "website_url": "https://www.flourishwellnesssc.com/",
+    "email": "Drpatience@flourishwellnesschiro.com",
     "bio": "Clients praise Dr. Patience Canty for her comprehensive, compassionate care and effective treatments, noting significant relief from pain and improvement in both physical and mental well-being. Patients appreciate her clear communication, genuine attentiveness, and holistic approach, including chiropractic adjustments and NET sessions. Many highlight her professionalism, fair pricing, and the lasting positive impact she has had on their health, making her a trusted and highly recommended provider.",
     "specialties": [
       "Pediatrics",
@@ -2832,11 +2929,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "lvxx1s",
+    "id": "pilh7n",
     "slug": "dr-patrick-mcdonnell",
     "first_name": "Patrick",
     "last_name": "McDonnell",
@@ -2850,6 +2947,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/properchiropractic/",
     "facebook_url": "https://www.facebook.com/ProperChiropractic",
     "website_url": "https://properchiro.com/",
+    "email": "drpatrick@properchiro.com",
     "bio": "Patients consistently praise Dr. Patrick and the team at Proper Chiropractic for their compassionate, effective care. Families have experienced significant improvements in behavioral, sleep, and pain issues, with special mention of positive outcomes for children with unique needs and those recovering from difficult births. Many highlight the ongoing support and preventative care provided, expressing strong trust and high recommendations for the practice.",
     "specialties": [
       "Pediatrics",
@@ -2861,11 +2959,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "w7vzsi",
+    "id": "bi1c4",
     "slug": "dr-raymond-nichols",
     "first_name": "Raymond",
     "last_name": "Nichols",
@@ -2879,6 +2977,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/dr.raymondnichols/",
     "facebook_url": "",
     "website_url": "https://www.alignlife.com",
+    "email": "pelhamfalls@alignlife.com",
     "bio": "Patients consistently praise Dr. Ray and his team for their compassionate, attentive care and expertise. Many highlight significant improvements in issues such as vertigo, anxiety, insomnia, sinus problems, and pain after treatment. The staff is described as welcoming, knowledgeable, and detail-oriented, always making special accommodations for patient comfort and well-being. Patients appreciate the personalized approach, with doctors tailoring treatments to individual needs and concerns. The supportive environment and genuine care from both doctors and staff have led to positive health outcomes and high satisfaction, with many recommending the practice to others seeking effective, patient-centered chiropractic care.",
     "specialties": [
       "Pediatrics",
@@ -2890,11 +2989,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "posp5",
+    "id": "bpg8pn",
     "slug": "dr-rebecca-saunders",
     "first_name": "Rebecca",
     "last_name": "Saunders",
@@ -2908,6 +3007,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/peakpathchiropractic/",
     "facebook_url": "https://www.facebook.com/peakpathchiro",
     "website_url": "https://www.peakpathchiro.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnR08K5mN-ZoCQ014EhJaGwv5XHItzMB_SGhs428RjuPJrliYohFpWP1iGo7c_aem_HLePeaz-_GYziasCLOVPog",
+    "email": "peakpathoffice@gmail.com",
     "bio": "Patients at Peak Path Chiropractic in Macon consistently praise Dr. Rebecca and her team for their compassionate, thorough, and transformative care. Testimonials highlight significant improvements in both physical and emotional well-being, from relief of chronic pain and anxiety to enhanced sleep, energy, and overall quality of life. Families also note the practice&rsquo;s welcoming atmosphere and the positive impact on children&rsquo;s health, especially after challenging birth experiences. The team&rsquo;s dedication, including support for dietary needs, leaves patients feeling grateful and confident in their healing journey.",
     "specialties": [
       "Family Care",
@@ -2918,11 +3018,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "uf7f54",
+    "id": "wu59u",
     "slug": "dr-roger-brady",
     "first_name": "Roger",
     "last_name": "Brady",
@@ -2936,6 +3036,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/optimallifechiropractic",
     "facebook_url": "https://www.facebook.com/optimallifechiropractic",
     "website_url": "https://www.optimallifemn.com",
+    "email": "info@optimallifemn.com",
     "bio": "These testimonials highlight the exceptional care and expertise provided at Optimal Life. Patients express deep gratitude for the knowledgeable and compassionate team, noting significant improvements in their health and well-being after struggling with unresolved issues elsewhere. The reviews emphasize the effectiveness of treatments, clear communication, and supportive staff, creating a welcoming and positive environment. Many recommend Optimal Life for its personalized approach, especially for specialized needs such as IIH, vagal tone, and prenatal care.",
     "specialties": [
       "Pediatrics",
@@ -2946,11 +3047,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "17fdg",
+    "id": "l9v7mu",
     "slug": "dr-russel-myers",
     "first_name": "Russel",
     "last_name": "Myers",
@@ -2964,6 +3065,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/wholebodywellnesschiro",
     "facebook_url": "https://www.facebook.com/wholebodywellnesschiro",
     "website_url": "https://wbwchiro.com/",
+    "email": "media.wbw@gmail.com",
     "bio": "Patients praise Whole Body Wellness for its welcoming staff, top-tier chiropractors, and advanced treatment options like red light therapy and decompression machines. Reviews highlight the clinic&rsquo;s thorough, informative approach, clean environment, and the caring, energetic team that ensures a positive and supportive experience.",
     "specialties": [
       "Tonal",
@@ -2974,11 +3076,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "kvicod",
+    "id": "7hcclg",
     "slug": "dr-sadie-hirschfield",
     "first_name": "Sadie",
     "last_name": "Hirschfield",
@@ -2992,6 +3094,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/drsadiechiro/",
     "facebook_url": "https://www.facebook.com/essenceoflifetoronto",
     "website_url": "https://www.eolwellness.com/",
+    "email": "drsadie@eolwellness.com",
     "bio": "Patients describe Dr. Sadie as attentive, caring, and warm, making them feel comfortable, safe, and at ease. Her thoughtful approach and effective adjustments have had a positive, life-changing impact, leaving patients feeling lighter and brighter after each visit.",
     "specialties": [
       "Family Care",
@@ -3003,11 +3106,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "dkiz6b",
+    "id": "nkxzbw",
     "slug": "dr-samantha-happold",
     "first_name": "Samantha",
     "last_name": "Happold",
@@ -3021,6 +3124,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/happy.family.chiropractic/",
     "facebook_url": "https://www.facebook.com/p/Happy-Family-Chiropractic-61561947534895/",
     "website_url": "https://happyfamchiro.com/",
+    "email": "Info@happyfamchiro.com",
     "bio": "Patients consistently praise Dr. Sam for her compassionate, knowledgeable, and individualized care, especially for postpartum mothers and newborns. She is recognized for her gentle approach, clear communication, and focus on addressing root causes rather than just symptoms. Families appreciate her expertise in pediatric and prenatal chiropractic care, noting significant improvements in both mothers&rsquo; and babies&rsquo; well-being, including relief from pain, tension, and nursing difficulties. Dr. Sam&rsquo;s professionalism, punctuality, and holistic approach make her highly recommended for families seeking supportive, specialized chiropractic care.",
     "specialties": [
       "Pediatrics",
@@ -3034,11 +3138,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "vlipw",
+    "id": "v07lg",
     "slug": "dr-sara-nelson",
     "first_name": "Sara",
     "last_name": "Nelson",
@@ -3052,6 +3156,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/freedomknox/?hl=en",
     "facebook_url": "https://www.facebook.com/Freedom.Knoxville/",
     "website_url": "www.freedomknox.com",
+    "email": "info@freedomknox.com",
     "bio": "Clients describe transformative experiences at Freedom Chiro, highlighting significant improvements in emotional well-being, family communication, and physical health. They appreciate the supportive, inclusive, and family-friendly environment, as well as the thorough and informative care provided by the doctors. Many feel hopeful and grateful for the positive changes they&rsquo;ve experienced.",
     "specialties": [
       "Pediatrics",
@@ -3064,11 +3169,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "5ncia",
+    "id": "tybfnp",
     "slug": "dr-sara-richa",
     "first_name": "Sara",
     "last_name": "Richa",
@@ -3082,6 +3187,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/maxlivingtechridge/",
     "facebook_url": "https://www.facebook.com/maxlivingtechridge",
     "website_url": "https://www.maxliving.com/clinic/maxliving-chiropractic-tech-ridge",
+    "email": "Drsara@maxlivingtechridge.com",
     "bio": "Clients consistently praise the clinic for its professional, knowledgeable, and caring staff. Many highlight the welcoming atmosphere, thorough explanations, and effective treatments. Patients feel listened to and supported, often noting significant improvements in their health and well-being. The team&rsquo;s dedication and genuine concern for each individual&rsquo;s needs stand out in the reviews.",
     "specialties": [
       "Family Care",
@@ -3093,11 +3199,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "tq8lh",
+    "id": "n1rlpj",
     "slug": "dr-shea-kramer",
     "first_name": "Shea",
     "last_name": "Kramer",
@@ -3111,6 +3217,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/treeoflifeseattle/",
     "facebook_url": "https://www.facebook.com/treeoflifeSeattle",
     "website_url": "https://www.treeoflifeseattle.com/",
+    "email": "staff.treeoflifenw@gmail.com",
     "bio": "Tree of Life Chiropractic receives glowing praise for its knowledgeable, compassionate care, especially for mothers, babies, and families. Patients highlight the team&rsquo;s expertise in pediatric and prenatal chiropractic, gentle and effective adjustments, and thoughtful touches like a cozy nursing area and family-friendly amenities. Dr. Shea and her team are commended for their support through pregnancy, postpartum, and beyond, consistently going above and beyond to ensure comfort and well-being. The welcoming, clean, and positive environment makes every visit a great experience, earning enthusiastic recommendations and 5-star reviews from families.",
     "specialties": [
       "Pediatrics",
@@ -3123,11 +3230,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "90a0nl",
+    "id": "unpn9",
     "slug": "dr-stephen-zwart",
     "first_name": "Stephen",
     "last_name": "Zwart",
@@ -3141,6 +3248,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/generationschiro_yyc/",
     "facebook_url": "https://www.facebook.com/profile.php?id=61571694575596",
     "website_url": "https://www.generationsfamilychiro.ca/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGn2EJRYAxsuEb-z3FK0ISzbMxiU3uSyxVVIirAto5SJXnj1dR33UmaqjU4ZEc_aem_HzRzkyGur3kM-Iayi0TJiQ",
+    "email": "Drstephen@generationsfamilychiro.ca",
     "bio": "This review highlights the clinic&rsquo;s exceptional warmth and accommodating approach, especially for children with special needs. The staff greeted the family with kindness, and Dr. Stephen went above and beyond by adapting the appointment to the child&rsquo;s comfort, even performing tests and an adjustment outside. The family felt genuinely cared for and appreciated Dr. Stephen&rsquo;s expertise and compassion.",
     "specialties": [
       "Family Care",
@@ -3152,11 +3260,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "l4kath",
+    "id": "k6nf7d",
     "slug": "dr-sura-corrigan",
     "first_name": "Sura",
     "last_name": "Corrigan",
@@ -3170,6 +3278,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/drsuracorrigan/",
     "facebook_url": "https://www.facebook.com/surafamilychiropractic",
     "website_url": "https://suracorrigan.com/",
+    "email": "sura@naluchiro.com",
     "bio": "Patients consistently praise Dr. Sura for her compassionate care, effective and gentle chiropractic adjustments, and her ability to address a range of concerns for both mothers and children. Many highlight life-changing improvements, such as relief from chronic pain, better sleep for their children, and smoother pregnancies and deliveries. Dr. Sura is described as caring, attentive, and a true source of hope and healing, with several patients expressing deep gratitude for her support and expertise throughout their prenatal and postpartum journeys.",
     "specialties": [
       "Pediatrics",
@@ -3183,11 +3292,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "mtxiyq",
+    "id": "mevpon",
     "slug": "dr-sydney-oberstein-tyrrell",
     "first_name": "Sydney",
     "last_name": "Oberstein-Tyrrell",
@@ -3201,6 +3310,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/wellnesswavechiro?igsh=NTc4MTIwNjQ2YQ==",
     "facebook_url": "",
     "website_url": "https://www.wellnesswavechiropractic.com/",
+    "email": "hello@wellnesswavechiropractic.com",
     "bio": "Dr. Sydney is highly praised for her compassionate, personalized care and holistic approach, especially during challenging times such as cancer treatment. Patients appreciate her ability to tailor treatments to individual needs, her genuine concern for their well-being, and the positive, welcoming atmosphere of her office. Families trust her with their ongoing care, noting improvements in both physical health and overall mood. Dr. Sydney is described as not only a skilled professional but also a healer who makes a lasting, positive impact on her patients&rsquo; lives.",
     "specialties": [
       "Family Care",
@@ -3211,11 +3321,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "t222uo",
+    "id": "wki41p",
     "slug": "dr-taylor-cox",
     "first_name": "Taylor",
     "last_name": "Cox",
@@ -3229,6 +3339,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/hometown.chiropractic/",
     "facebook_url": "https://www.facebook.com/Dr.TaylorCoxDC",
     "website_url": "https://hometownchiropracticnc.com/",
+    "email": "Hometownchironc@gmail.com",
     "bio": "Patients praise Hometown Chiropractic for its personalized, attentive care and family-friendly environment. Many note significant improvements in their children&rsquo;s health, especially with issues like reflux and colic, and appreciate the tailored treatments at each visit. The staff and doctors are described as professional, knowledgeable, and welcoming, making the practice highly recommended for families.",
     "specialties": [
       "Prenatal",
@@ -3241,11 +3352,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "9vl8ou",
+    "id": "ea85x",
     "slug": "dr-taylor-dietz",
     "first_name": "Taylor",
     "last_name": "Dietz",
@@ -3259,6 +3370,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/renegade_chiropractic/",
     "facebook_url": "https://www.facebook.com/renegade_chiropractic",
     "website_url": "https://renegadechiroutah.com/",
+    "email": "team@renegadechiroutah.com",
     "bio": "Patients consistently praise Dr. Taylor Dietz for providing noticeable, immediate, and lasting relief through precise chiropractic adjustments. Families appreciate the welcoming, kid-friendly office and the kindness of the entire staff. Many report significant improvements in chronic pain, posture, and overall well-being, with some experiencing life-changing results for both adults and children, including newborns. Dr. Dietz is highly recommended for his effective, compassionate care and positive impact on patients&rsquo; lives.",
     "specialties": [
       "Pediatrics",
@@ -3272,11 +3384,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "gjud3v",
+    "id": "e96by",
     "slug": "dr-tiffany-johnson",
     "first_name": "Tiffany",
     "last_name": "Johnson",
@@ -3290,6 +3402,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/drtiffjohnson",
     "facebook_url": "https://www.facebook.com/drtiffanyjohnson",
     "website_url": "http://www.htchiro.com",
+    "email": "Drtiffany@htchiro.com",
     "bio": "Clients consistently praise Healing Touch for its welcoming, family-like atmosphere and genuine, holistic care. Many note significant improvements in their well-being and that of their families, including reduced stress, emotional balance, and support through pregnancy. The team, especially Dr. Tiff, is recognized for their expertise, compassion, and positive impact, making Healing Touch highly recommended for anyone seeking transformative chiropractic care.",
     "specialties": [
       "Family Care",
@@ -3301,11 +3414,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "sc0f9",
+    "id": "hzvh4",
     "slug": "dr-tom-niemela",
     "first_name": "Tom",
     "last_name": "Niemela",
@@ -3319,6 +3432,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/arborvitaechiropractic/",
     "facebook_url": "https://www.instagram.com/arborvitaechiropractic/",
     "website_url": "https://www.arborvitaechiropractic.com/",
+    "email": "info@arborvitaechiropractic.com",
     "bio": "Parents consistently praise Arbor Vitae Chiropractor for their compassionate, family-oriented care and the significant positive changes they&apos;ve seen in their children&rsquo;s health and development. Testimonials highlight improvements in areas such as speech, digestion, sleep, focus, and overall well-being, with many expressing deep gratitude for the gentle, effective treatments and the supportive, welcoming environment provided by the staff and doctors.",
     "specialties": [
       "Pediatrics",
@@ -3329,11 +3443,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "uvynrh",
+    "id": "hlgto",
     "slug": "dr-tracey-norman",
     "first_name": "Tracey",
     "last_name": "Norman",
@@ -3347,6 +3461,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/drtraceynorman",
     "facebook_url": "https://www.facebook.com/drtraceynorman",
     "website_url": "https://www.Drtraceynorman.com",
+    "email": "Drtraceynorman@gmail.com",
     "bio": "Patients praise Dr. Tracy for her effective care during pregnancy and postpartum, noting her ability to help with breech presentation and alignment, which contributed to a positive birth experience. She is described as wonderful, with patients highly recommending her to others.",
     "specialties": [
       "Pediatrics",
@@ -3360,11 +3475,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "bey5e",
+    "id": "bav5fs",
     "slug": "dr-tucker-kilgo",
     "first_name": "Tucker",
     "last_name": "Kilgo",
@@ -3378,6 +3493,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/sunrisepfchiro/",
     "facebook_url": "https://www.facebook.com/profile.php?id=61574364965450",
     "website_url": "https://sunrisepfc.com/",
+    "email": "info@sunrisepfc.com",
     "bio": "Dr. Saturn and Dr. Tucker are highly regarded for their compassionate, attentive approach and dedication to personalized care. Patients appreciate their commitment to understanding individual concerns, addressing root causes, and creating effective treatment plans. Their expertise has made a significant positive impact on patients&rsquo; health and well-being, earning them strong recommendations and heartfelt gratitude.",
     "specialties": [
       "Pediatrics",
@@ -3389,11 +3505,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "0r8qli",
+    "id": "l017qu",
     "slug": "dr-wade-cole",
     "first_name": "Wade",
     "last_name": "Cole",
@@ -3407,6 +3523,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/WeatherfordFamilyChiro",
     "facebook_url": "https://www.facebook.com/profile.php?id=61571499360191",
     "website_url": "https://www.weatherfordfamilychiro.com/",
+    "email": "Info@weatherfordfamilychiro.com",
     "bio": "Patients praise Dr. Wade Cole for his expertise, compassionate care, and ability to deliver significant pain relief, even for those who were initially skeptical or facing serious discomfort. They highlight his attentive listening, welcoming atmosphere, and the transformative improvement in their quality of life after treatment, expressing deep gratitude for his humble and effective approach.",
     "specialties": [
       "Family Care",
@@ -3418,11 +3535,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "0zlloy",
+    "id": "c2f79",
     "slug": "felix-periard",
     "first_name": "Felix",
     "last_name": "Periard",
@@ -3436,6 +3553,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/atlascarechs",
     "facebook_url": "",
     "website_url": "https://www.aospinalcare.com",
+    "email": "info@aospinalcare.com",
     "bio": "Patients consistently praise Dr. Felix for his gentle, effective chiropractic approach, noting significant relief from pain and improved quality of life. His treatments are described as non-invasive and comfortable, with many experiencing lasting results and enhanced well-being. Dr. Felix is commended for his sincerity, thoroughness, and dedication to patient care, making him highly recommended for those seeking a compassionate and skilled chiropractor.",
     "specialties": [
       "Family Care"
@@ -3445,11 +3563,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "zfqspg",
+    "id": "dr61p",
     "slug": "flint-sparks",
     "first_name": "Flint",
     "last_name": "Sparks",
@@ -3463,6 +3581,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/sparklifechirotx/",
     "facebook_url": "https://www.facebook.com/SparkLifeChiropractic",
     "website_url": "https://www.sparklifechiro.com",
+    "email": "Info@sparklifechiro.com",
     "bio": "Patients consistently praise Dr. Sparks for his genuine care, attentive listening, and personalized approach to treatment. Families appreciate his dedication to understanding individual needs and his ability to create a welcoming environment for both children and adults. Many have experienced significant improvements in their overall well-being and highly recommend Dr. Sparks and his staff for their professionalism and compassionate care.",
     "specialties": [
       "Pediatrics",
@@ -3475,11 +3594,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "zkaw6p",
+    "id": "2jtvmj",
     "slug": "heidi-wroebel",
     "first_name": "Heidi",
     "last_name": "Wroebel",
@@ -3493,6 +3612,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "HTTPS://Instagram.com/drheidiwroebel",
     "facebook_url": "HTTPS://facebook.com/wombtowisdomnaplesfl",
     "website_url": "https://www.wombtowisdom.com",
+    "email": "drheidi@wombtowisdom.com",
     "bio": "Patients consistently praise Dr. Heidi for her compassionate care, expertise, and ability to provide significant relief from pain, especially during pregnancy and for young children. They highlight her personalized approach, gentle techniques, and clear communication, noting improvements in issues like sciatica, neck pain, and childhood constipation. Many feel her positive energy and dedication contribute to smooth recoveries and overall well-being, making her highly recommended for both adults and children.",
     "specialties": [
       "Pediatrics",
@@ -3503,11 +3623,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "la2wta",
+    "id": "51a2pj",
     "slug": "i-keith-lavender-d-c",
     "first_name": "I.",
     "last_name": "Keith Lavender D.C.",
@@ -3521,6 +3641,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/foresightwellness",
     "facebook_url": "https://www.facebook.com/foresightwellness",
     "website_url": "https://www.foresightchiropractic.com",
+    "email": "connect@foresightchiropractic.com",
     "bio": "Patients consistently praise Foresight Chiropractic for their compassionate, thorough care and effective treatments. Dr. Howard and Dr. Lavender are commended for their attentive listening, personalized treatment plans, and genuine concern for patient well-being. Many report significant improvements in pain and overall health, expressing deep gratitude and strong recommendations for the entire team.",
     "specialties": [
       "Family Care"
@@ -3530,11 +3651,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "552o7g",
+    "id": "tsk7co",
     "slug": "jacob-duvall",
     "first_name": "Jacob",
     "last_name": "Duvall",
@@ -3548,6 +3669,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/insideoutchiropractic",
     "facebook_url": "https://www.facebook.com/insideoutchiropractic",
     "website_url": "https://www.goiochiro.com",
+    "email": "info@goiochiro.com",
     "bio": "Patients consistently praise Inside Out Chiropractic for its warm, professional atmosphere and personalized care. Reviews highlight the team&rsquo;s genuine attentiveness, commitment to addressing root causes, and the positive impact on family health. Many feel welcomed like family and appreciate the long-term benefits and support provided to all ages, from newborns to adults.",
     "specialties": [
       "Pediatrics",
@@ -3558,11 +3680,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "xtc7ue",
+    "id": "m94fyq",
     "slug": "jessica-brown",
     "first_name": "Jessica",
     "last_name": "Brown",
@@ -3576,6 +3698,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/ResilientChiropractic",
     "facebook_url": "https://www.facebook.com/ResilientChiropractic",
     "website_url": "https://www.resilientchiroyukon.com",
+    "email": "Info@resilientchiroyukon.com",
     "bio": "These testimonials highlight a warm, family-oriented practice that welcomes patients of all ages, from infants to grandparents. The team is described as professional, caring, and attentive, taking time to explain treatments and ensure everyone feels comfortable and valued. Patients report significant improvements in their well-being and appreciate the personalized, supportive approach that makes them feel like more than just a number. The environment is safe, inviting, and highly recommended for families seeking compassionate, effective care.",
     "specialties": [
       "Pediatrics",
@@ -3589,11 +3712,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "o1ar5j",
+    "id": "ncqwn9",
     "slug": "jessica-dietrich-marsh",
     "first_name": "Jessica",
     "last_name": "Dietrich-Marsh",
@@ -3607,6 +3730,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/Healthinc_",
     "facebook_url": "https://www.facebook.com/Healthinc_",
     "website_url": "https://www.healthinc.org",
+    "email": "Service@healthinc.org",
     "bio": "Patients praise Dr. Jessica and her team for their individualized, comprehensive, and respectful care. They highlight her attentive listening, expertise, and supportive approach, which led to effective treatment plans and significant improvements in their family&apos;s health and well-being. Families feel genuinely cared for and supported, making them confident to recommend her to others.",
     "specialties": [
       "Family Care"
@@ -3616,11 +3740,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "u4tzgj",
+    "id": "ij0hp",
     "slug": "joe-trovato",
     "first_name": "Joe",
     "last_name": "Trovato",
@@ -3634,6 +3758,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/deeprootedchiro",
     "facebook_url": "https://www.facebook.com/deeprootedchiro",
     "website_url": "https://www.deeprootedchiro.com",
+    "email": "Drjoe@deeprootedchiro.com",
     "bio": "Parents are deeply grateful for Deep Rooted Chiropractic, highlighting transformative improvements in their children&rsquo;s well-being, including increased confidence, independence, and relief from health challenges like constipation. They praise the caring, supportive doctors and staff, and highly recommend the practice for its exceptional, family-centered care.",
     "specialties": [
       "Pediatrics",
@@ -3646,11 +3771,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "i5yaqb",
+    "id": "km0mq",
     "slug": "jordan-bonham",
     "first_name": "Jordan",
     "last_name": "Bonham",
@@ -3664,6 +3789,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/centeredchiro/",
     "facebook_url": "https://www.facebook.com/centeredchiro",
     "website_url": "https://www.centeredchiropractic.com/",
+    "email": "info@centeredchiropractic.com",
     "bio": "Patients consistently praise Centered Chiropractic for its exceptional, holistic care and supportive team. Many highlight the life-changing results, personalized treatment plans, and the welcoming atmosphere created by both the doctors and staff. The clinic is described as a hidden gem, with a focus on patient well-being, comfort, and a positive, inviting environment. Patients appreciate the attentive service, expertise of providers like Dr. Bonham and Dr. Birdsey, and the genuine care shown by the entire team, making each visit something to look forward to.",
     "specialties": [
       "Family Care"
@@ -3673,11 +3799,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "vkbqql",
+    "id": "rijmjb",
     "slug": "justin-sujo",
     "first_name": "Justin",
     "last_name": "Sujo",
@@ -3691,6 +3817,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/vitalspinestudio",
     "facebook_url": "https://www.facebook.com/vitalspinestudio",
     "website_url": "https://www.vitalspinestudio.com",
+    "email": "Info@vitalspinestudio.con",
     "bio": "Patients consistently praise Vital Spine &amp; Health Studio for its welcoming atmosphere, professional staff, and personalized care. Dr. Justin Sujo is commended for his thorough assessments and clear communication, while Dr. Megan Gomez is recognized for her gentle, effective care during pregnancy and for newborns. The clinic&rsquo;s modern facilities, compassionate approach, and high hygiene standards make it a trusted choice for families seeking expert chiropractic support.",
     "specialties": [
       "Pediatrics",
@@ -3703,11 +3830,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "eogc9",
+    "id": "93cvrh",
     "slug": "kristine-schmierer",
     "first_name": "Kristine",
     "last_name": "Schmierer",
@@ -3721,6 +3848,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/Inspire_family_health",
     "facebook_url": "https://www.facebook.com/Inspire_family_health",
     "website_url": "https://www.Inspirefamilyhealth.com",
+    "email": "Drkristine@inspirefamilyhealth.com",
     "bio": "Patients describe Inspire Family Chiropractic as a warm, family-like environment where Dr. Kristine and her team provide caring, knowledgeable, and restorative care. Many highlight significant improvements in their health, including relief from gut and skin issues, and appreciate the holistic approach that includes education on nutrition, toxin avoidance, and wellness. The office atmosphere is welcoming and supportive, with a strong focus on patient growth and healing. Workshops and high-quality supplements further enhance the healing journey, making Inspire Family Chiropractic highly recommended by its community.",
     "specialties": [
       "Prenatal",
@@ -3733,11 +3861,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "8pmyur",
+    "id": "9bokop",
     "slug": "lacey-nevel",
     "first_name": "Lacey",
     "last_name": "Nevel",
@@ -3751,6 +3879,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/freespiritchiropractic",
     "facebook_url": "https://www.facebook.com/freespiritchiropractic",
     "website_url": "https://www.freespiritchiropractic.com",
+    "email": "info@freespiritchiropractic.com",
     "bio": "These testimonials highlight Free Spirit Chiropractic as a welcoming, family-oriented practice where patients feel genuinely cared for and supported. Clients praise the team&rsquo;s warmth, compassion, and commitment to holistic wellness, noting that the environment feels like home. Many families have trusted Free Spirit Chiropractic for years, valuing the personalized care and positive atmosphere that help them thrive through all stages of life.",
     "specialties": [
       "Pediatrics",
@@ -3764,11 +3893,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "ieqc4",
+    "id": "dg94hm",
     "slug": "maryanne-shiozawa",
     "first_name": "MaryAnne",
     "last_name": "Shiozawa",
@@ -3782,6 +3911,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/dr_maryanne",
     "facebook_url": "https://www.facebook.com/dr_maryanne",
     "website_url": "https://www.shiozawawellness.com/",
+    "email": "dr.maryanne@shiozawawellness.com",
     "bio": "The testimonials highlight a deep appreciation for MaryAnne&rsquo;s unique and personalized approach to network chiropractic care. Clients, including those with extensive experience in this healing modality, describe her sessions as profoundly transformative, both physically and emotionally. MaryAnne&rsquo;s ability to facilitate significant emotional release and openness is especially valued, with clients noting her exceptional skill in customizing care to individual needs. Her compassionate and effective style leaves a lasting positive impact, inspiring heartfelt gratitude and a strong desire for similar care elsewhere.",
     "specialties": [
       "Pediatrics",
@@ -3793,11 +3923,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "bvri6b",
+    "id": "bqumgp",
     "slug": "michelle-arietta-dc",
     "first_name": "Michelle",
     "last_name": "Arietta, DC",
@@ -3811,6 +3941,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/myfavoritechiro",
     "facebook_url": "https://www.facebook.com/myfavoritechiro",
     "website_url": "https://www.myfavoritechiro.com",
+    "email": "drmichelle@myfavoritechiro.com",
     "bio": "Clients praise Dr. Michelle and her team for their attentive, supportive care during pregnancy and postpartum recovery. They highlight her expertise in addressing specific health concerns, such as previous injuries and digestive issues in children, and appreciate her encouragement and ability to boost confidence throughout the birthing process. Families value her warm, professional approach and highly recommend her services for both mothers and children.",
     "specialties": [
       "Pediatrics",
@@ -3824,11 +3955,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "sh2e8",
+    "id": "90xm1q",
     "slug": "morgan-ruddiman",
     "first_name": "Morgan",
     "last_name": "Ruddiman",
@@ -3842,6 +3973,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/Doctor__morgan",
     "facebook_url": "https://www.facebook.com/Doctor__morgan",
     "website_url": "https://www.myadvantagechiro.con",
+    "email": "Pleasanthillchiro1@gmail.com",
     "bio": "Patients consistently praise Dr. Morgan for his genuine care, thorough explanations, and attentive listening. They appreciate his transparency, honesty, and the noticeable improvements they experience under his treatment. Dr. Morgan&rsquo;s compassionate approach and dedication to patient well-being make him highly recommended.",
     "specialties": [
       "Pediatrics",
@@ -3853,11 +3985,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "uh9v3j",
+    "id": "z8ofea",
     "slug": "nikolai-a-young",
     "first_name": "Nikolai",
     "last_name": "A. Young",
@@ -3871,6 +4003,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/pdxspecificchiro",
     "facebook_url": "https://www.facebook.com/pdxspecificchiro",
     "website_url": "https://www.pdxspecificchiro.com",
+    "email": "info@pdxspecificchiro.com",
     "bio": "Patients consistently praise Dr. Young for timely appointments, thorough care, and effective treatments, highlighting a professional and positive experience with each visit.",
     "specialties": [
       "Diversified"
@@ -3880,11 +4013,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "bytot",
+    "id": "2rhs9",
     "slug": "rachel-boggs",
     "first_name": "Rachel",
     "last_name": "Boggs",
@@ -3898,6 +4031,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/thewell.fw",
     "facebook_url": "https://www.facebook.com/thewell.fw",
     "website_url": "https://www.thewellfw.com",
+    "email": "Info@thewellfw.com",
     "bio": "Patients consistently praise the Boggs for their holistic, nervous system-focused approach to care, noting significant improvements in physical and mental well-being during pregnancy and postpartum. The welcoming, family-friendly office environment and supportive staff help patients feel comfortable and cared for throughout their wellness journey. Many highlight benefits such as reduced swelling, stable blood sugars, increased mental clarity, and a smooth transition into motherhood, expressing strong confidence and satisfaction with their experience.",
     "specialties": [
       "Pediatrics",
@@ -3910,11 +4044,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "gc35fg",
+    "id": "4xd5en",
     "slug": "reid-doyle",
     "first_name": "Reid",
     "last_name": "Doyle",
@@ -3928,6 +4062,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/monarchchiropractic",
     "facebook_url": "https://www.facebook.com/monarchchiropractic",
     "website_url": "https://www.monarchchiro.com",
+    "email": "monarchchiropractic@gmail.com",
     "bio": "Patients highly recommend Dr. Reid at Monarch Chiropractic for his intuitive, knowledgeable, and gentle approach to care, noting significant relief from pain and improved quality of life. Both Dr. Reid and his assistant Jill are praised for their professionalism, warmth, and dedication to patient well-being, with special appreciation for their veteran-friendly environment and accommodating service.",
     "specialties": [
       "Family Care",
@@ -3938,11 +4073,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "2gctmg",
+    "id": "kiuuur",
     "slug": "rekha-rampersad",
     "first_name": "Rekha",
     "last_name": "Rampersad",
@@ -3956,6 +4091,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/functionalwellnessuk",
     "facebook_url": "https://www.facebook.com/functionalwellnessuk",
     "website_url": "https://www.chiropracticwellnesscentre.co.uk",
+    "email": "Info@chiropracticwellnesscentre.co.uk",
     "bio": "Patients consistently praise Rekha for her expertise, compassionate care, and holistic approach to treatment. She is highly recommended for her ability to address complex conditions such as slipped discs and autoimmune diseases, combining effective adjustments with advice on posture, nutrition, and lifestyle changes. Her supportive team and ongoing maintenance plans help patients achieve lasting improvements in their health and wellbeing.",
     "specialties": [
       "Family Care",
@@ -3966,11 +4102,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "nq0yhe",
+    "id": "hmzmos",
     "slug": "ryan-maxwell",
     "first_name": "Ryan",
     "last_name": "Maxwell",
@@ -3984,6 +4120,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/Silverliningchiro",
     "facebook_url": "https://www.facebook.com/Silverliningchiro",
     "website_url": "https://www.gosilverliningchiro.com/",
+    "email": "Drmaxwell@gosilverliningchiro.com",
     "bio": "Silver Lining Chiropractic is highly praised for its compassionate, individualized care and dedicated team. Patients appreciate the doctors&rsquo; genuine investment in their families&rsquo; well-being, attentive listening, and thorough, patient-centered approach. The staff is described as warm, welcoming, and flexible, creating a supportive environment where both children and parents feel valued and empowered. Many consider Silver Lining Chiropractic to be the best in Chicago, noting life-changing results and a strong sense of partnership in their health journey.",
     "specialties": [
       "Pediatrics",
@@ -3997,11 +4134,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "axxgm9",
+    "id": "juyh8h",
     "slug": "trey-rodriguez",
     "first_name": "Trey",
     "last_name": "Rodriguez",
@@ -4015,6 +4152,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/paxchiro",
     "facebook_url": "https://www.facebook.com/paxchiro",
     "website_url": "https://paxchiro.com/",
+    "email": "connect@paxchiro.com",
     "bio": "Patients consistently praise Pax Chiropractic, highlighting Dr. Gabrielle and Dr. Trey&rsquo;s expertise, compassion, and holistic approach to care. Families appreciate their clear communication, personalized treatment plans, and focus on both physical and nervous system health. Many note significant improvements in well-being, from infant development to relief from anxiety and stress. The doctors are described as knowledgeable, supportive, and genuinely invested in their patients&rsquo; overall health, making Pax Chiropractic a trusted resource for comprehensive, family-centered care.",
     "specialties": [
       "Pediatrics",
@@ -4027,11 +4165,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "1kgnr",
+    "id": "exs2fc",
     "slug": "trystan-wertley",
     "first_name": "Trystan",
     "last_name": "wertley",
@@ -4045,6 +4183,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/Keystoneuppercervical",
     "facebook_url": "https://www.facebook.com/Keystoneuppercervical",
     "website_url": "https://www.Keystoneucc.com",
+    "email": "Info@keystoneucc.com",
     "bio": "Patients praise Dr. Wertley for his genuine passion and effective care, noting significant improvements in their quality of life and relief from long-term headaches after treatment. Many express gratitude and wish they had sought his help sooner.",
     "specialties": [
       "General NeuroChiro"
@@ -4054,11 +4193,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "qtrr3n",
+    "id": "vsqkn",
     "slug": "tyler-shearer",
     "first_name": "Tyler",
     "last_name": "Shearer",
@@ -4072,6 +4211,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/idealfamilychiropractic",
     "facebook_url": "https://www.facebook.com/idealfamilychiropractic",
     "website_url": "https://www.idealfamilychiro.com",
+    "email": "idealfamilychiropractic@gmail.com",
     "bio": "Clients consistently praise Ideal Family Chiropractic for their compassionate, personalized care and positive results for both children and parents. Many highlight significant improvements in sensory integration, behavioral regulation, and physical comfort during pregnancy. Dr. Tyler and his team are commended for their kindness, attentiveness, and willingness to answer questions, creating a welcoming environment. Families have seen benefits such as reduced overstimulation, better cooperation, and even improvements in conditions like alopecia. Both chiropractic treatments and educational classes are highly recommended for children and parents alike.",
     "specialties": [
       "Pediatrics",
@@ -4084,11 +4224,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "xu2ae",
+    "id": "vcttmk",
     "slug": "waldo-amadeo-dc",
     "first_name": "Waldo",
     "last_name": "Amadeo DC",
@@ -4102,6 +4242,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/heal.thyself.swfl",
     "facebook_url": "https://www.facebook.com/heal.thyself.swfl",
     "website_url": "https://www.healthyselfswfl.com",
+    "email": "support@healthyselfswfl.com",
     "bio": "Patients praise Dr. Amadeo for his expertise, insightful consultations, and ability to address long-standing health concerns. Both he and Alyssa are described as knowledgeable and kind, creating a welcoming environment. Families appreciate the effective, personalized care and practical guidance provided, leading to positive experiences and improvements.",
     "specialties": [
       "Diversified"
@@ -4111,11 +4252,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "3td54e",
+    "id": "ehpdu",
     "slug": "wes-mcdermott",
     "first_name": "Wes",
     "last_name": "McDermott",
@@ -4129,6 +4270,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/valleyfamilychiro",
     "facebook_url": "https://www.facebook.com/valleyfamilychiro",
     "website_url": "https://www.valleyfamilychiroaz.com",
+    "email": "Valleyfamilychiro@gmail.com",
     "bio": "Patients highly recommend Valley Family Chiropractic and Dr. Wes for their expertise, gentle care, and welcoming environment. Expectant mothers and parents appreciate the effective treatments, especially for prenatal and pediatric care, and praise the knowledgeable, kind approach of Dr. Wes and the supportive staff. Many have seen significant improvements and feel truly cared for throughout their experience.",
     "specialties": [
       "Pediatrics",
@@ -4140,11 +4282,11 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   },
   {
-    "id": "fsu0bj",
+    "id": "uckvf9",
     "slug": "zach-thomas",
     "first_name": "Zach",
     "last_name": "Thomas",
@@ -4158,6 +4300,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "instagram_url": "https://www.instagram.com/luminousgranville",
     "facebook_url": "https://www.facebook.com/luminousgranville",
     "website_url": "https://www.luminousgranville.com",
+    "email": "Luminousgranville@gmail.com",
     "bio": "Patients consistently praise Dr. Zach and the team at Luminous Chiropractic for their expertise, kindness, and family-centered care. Many highlight significant improvements in pregnancy-related discomfort, as well as benefits for their children&rsquo;s nervous system, immune health, sleep, and digestion. The practice is highly recommended for newborns, children, and adults alike, with special appreciation for Dr. Zach&rsquo;s gentle approach and genuine compassion. Families feel welcomed and supported, and are grateful for the positive impact Luminous Chiropractic has had on their lives.",
     "specialties": [
       "Pediatrics",
@@ -4170,7 +4313,7 @@ export const MOCK_DOCTORS: Doctor[] = [
     "region_code": "US",
     "is_hiring": false,
     "is_mentoring": true,
-    "created_at": "2026-03-09T01:10:48.301Z",
-    "updated_at": "2026-03-09T01:10:48.301Z"
+    "created_at": "2026-03-09T01:16:04.706Z",
+    "updated_at": "2026-03-09T01:16:04.706Z"
   }
 ];

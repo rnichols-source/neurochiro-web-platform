@@ -44,7 +44,7 @@ export default function GlobalNetworkMap() {
         properties: { 
           cluster: false, 
           doctorId: doc.id,
-          name: `Dr. ${doc.last_name}`,
+          name: doc.last_name?.startsWith('Dr.') ? doc.last_name : `Dr. ${doc.first_name} ${doc.last_name}`.trim().replace(/\s+/g, ' '),
           clinic: doc.clinic_name,
           slug: doc.slug,
           isHiring: doc.is_hiring,
@@ -182,7 +182,7 @@ export default function GlobalNetworkMap() {
 
               <div className="relative z-20 -mt-16 mb-4 flex items-end gap-4">
                 <div className="w-20 h-20 bg-neuro-orange rounded-2xl border-4 border-[#131B24] flex items-center justify-center text-white text-2xl font-black shadow-xl">
-                  {selectedPin.name[4]}
+                  {selectedPin.name.replace(/^Dr\.\s*/i, '').split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
                 </div>
                 <div className="flex items-center gap-1 text-[10px] font-black text-neuro-orange uppercase tracking-widest bg-neuro-orange/10 px-2 py-1 rounded-lg border border-neuro-orange/20 mb-2">
                   <ShieldCheck className="w-3 h-3" /> Verified

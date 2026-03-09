@@ -35,19 +35,37 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [locationQuery, setLocationQuery] = useState(searchParams.get("location") || lastLocation || "");
   const [isLocating, setIsLocating] = useState(false);
+  
   const [doctors, setDoctors] = useState<any[]>(initialData.doctors);
   const [totalCount, setTotalCount] = useState(initialData.total);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(initialData.doctors.length < initialData.total);
 
-  const fetchDoctors = async (query?: string) => {
+  const fetchDoctors = async (query?: string, isLoadMore = false) => {
     setLoading(true);
+    const nextPage = isLoadMore ? page + 1 : 1;
+    const limit = 20; // Chunk size for manageable loading
+    
     try {
       const result = await getDoctors({ 
         regionCode: region.code,
-        searchQuery: query || searchQuery
+        searchQuery: query || searchQuery,
+        limit: limit,
+        page: nextPage
       });
-      setDoctors(result.doctors);
+      
+      if (isLoadMore) {
+        setDoctors(prev => [...prev, ...result.doctors]);
+      } else {
+        setDoctors(result.doctors);
+      }
+      
       setTotalCount(result.total);
+      setPage(nextPage);
+      // Determine if more remain using the result total
+      const currentLoadedCount = isLoadMore ? (doctors.length + result.doctors.length) : result.doctors.length;
+      setHasMore(currentLoadedCount < result.total);
     } catch (error) {
       console.error("Error fetching doctors:", error);
     } finally {
@@ -57,14 +75,16 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
 
   // Re-fetch if region changes
   useEffect(() => {
-    if (region.code && region.code !== 'US') {
-      fetchDoctors();
+    if (region.code) {
+      setPage(1);
+      fetchDoctors(searchQuery, false);
     }
   }, [region.code]);
 
   // Handle Search Execution
   const handleSearch = () => {
-    fetchDoctors(searchQuery);
+    setPage(1);
+    fetchDoctors(searchQuery, false);
   };
 
   // Sync with context if location query changes
@@ -191,6 +211,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                   className="w-full pl-14 pr-4 py-5 bg-transparent border-none focus:outline-none text-neuro-navy font-medium text-lg"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 />
               </div>
               <div className="w-px h-10 bg-gray-100 self-center hidden md:block"></div>
@@ -202,6 +223,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                   className="w-full pl-14 pr-16 py-5 bg-transparent border-none focus:outline-none text-neuro-navy font-medium text-lg"
                   value={locationQuery}
                   onChange={(e) => setLocationQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 />
                 <button 
                   onClick={handleUseLocation}
@@ -274,69 +296,89 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
           {/* Listings Section */}
           <div className="lg:col-span-5 space-y-6">
             <div className="flex items-center justify-between mb-2">
-               <h2 className="text-xl font-heading font-black text-neuro-navy">Verified Clinics in {region.label}</h2>
+               <div>
+                 <h2 className="text-xl font-heading font-black text-neuro-navy">Verified Clinics in {region.label}</h2>
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Showing {doctors.length} of {totalCount} specialists</p>
+               </div>
                <button className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-neuro-navy transition-colors">
-                  <Filter className="w-4 h-4" /> Filter Results
+                  <Filter className="w-4 h-4" /> Filter
                </button>
             </div>
 
             {filteredDoctors.length > 0 ? (
-              filteredDoctors.map((doc, i) => (
-                <div key={i} className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden">
-                  <div className="flex items-start justify-between mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-neuro-navy flex items-center justify-center text-white font-black text-xl shadow-lg">
-                            {doc.first_name[0]}{doc.last_name[0]}
+              <>
+                {filteredDoctors.map((doc, i) => (
+                  <div key={`${doc.id}-${i}`} className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden">
+                    <div className="flex items-start justify-between mb-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 rounded-2xl bg-neuro-navy flex items-center justify-center text-white font-black text-xl shadow-lg">
+                              {doc.first_name[0]}{doc.last_name[0]}
+                          </div>
+                          <div>
+                              <div className="flex items-center gap-1.5 mb-0.5">
+                                <h3 className="font-bold text-lg text-neuro-navy group-hover:text-neuro-orange transition-colors">
+                                  {`Dr. ${doc.first_name} ${doc.last_name}`.replace(/^Dr\.\s+Dr\./i, 'Dr.').trim().replace(/\s+/g, ' ')}
+                                </h3>
+                                <ShieldCheck className="w-4 h-4 text-blue-500" />
+                              </div>
+                              <p className="text-xs text-gray-500 font-medium">{doc.clinic_name}</p>
+                          </div>
                         </div>
-                        <div>
-                            <div className="flex items-center gap-1.5 mb-0.5">
-                              <h3 className="font-bold text-lg text-neuro-navy group-hover:text-neuro-orange transition-colors">
-                                {doc.last_name?.startsWith('Dr.') ? doc.last_name : `Dr. ${doc.first_name} ${doc.last_name}`.trim().replace(/\s+/g, ' ')}
-                              </h3>
-                              <ShieldCheck className="w-4 h-4 text-blue-500" />
-                            </div>
-                            <p className="text-xs text-gray-500 font-medium">{doc.clinic_name}</p>
+                        <div className="flex flex-col items-end gap-2">
+                          <button 
+                            onClick={() => toggleSave(doc.id)}
+                            className={`p-2 rounded-full transition-colors ${isSaved("doctors", doc.id) ? 'bg-neuro-orange/10 text-neuro-orange' : 'bg-gray-50 text-gray-300 hover:text-neuro-orange'}`}
+                          >
+                              <Heart className={`w-5 h-5 ${isSaved("doctors", doc.id) ? 'fill-current' : ''}`} />
+                          </button>
+                          <div className="flex items-center gap-1 text-neuro-orange">
+                              <Star className="w-3.5 h-3.5 fill-current" />
+                              <span className="text-sm font-black text-neuro-navy">4.9</span>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <button 
-                          onClick={() => toggleSave(doc.id)}
-                          className={`p-2 rounded-full transition-colors ${isSaved("doctors", doc.id) ? 'bg-neuro-orange/10 text-neuro-orange' : 'bg-gray-50 text-gray-300 hover:text-neuro-orange'}`}
-                        >
-                            <Heart className={`w-5 h-5 ${isSaved("doctors", doc.id) ? 'fill-current' : ''}`} />
-                        </button>
-                        <div className="flex items-center gap-1 text-neuro-orange">
-                            <Star className="w-3.5 h-3.5 fill-current" />
-                            <span className="text-sm font-black text-neuro-navy">4.9</span>
-                        </div>
-                      </div>
-                  </div>
+                    </div>
 
-                  <div className="space-y-4">
-                      <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
-                        {doc.bio}
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {doc.specialties.slice(0, 2).map((s: string, j: number) => (
-                          <span key={j} className="px-3 py-1 bg-neuro-cream rounded-full text-[9px] font-black uppercase text-neuro-navy border border-neuro-navy/5">
-                              {s}
+                    <div className="space-y-4">
+                        <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+                          {doc.bio}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {doc.specialties.slice(0, 2).map((s: string, j: number) => (
+                            <span key={j} className="px-3 py-1 bg-neuro-cream rounded-full text-[9px] font-black uppercase text-neuro-navy border border-neuro-navy/5">
+                                {s}
+                            </span>
+                          ))}
+                          {doc.specialties.length > 2 && (
+                            <span className="px-3 py-1 bg-gray-50 rounded-full text-[9px] font-black uppercase text-gray-400">
+                                +{doc.specialties.length - 2} More
                           </span>
-                        ))}
-                        {doc.specialties.length > 2 && (
-                          <span className="px-3 py-1 bg-gray-50 rounded-full text-[9px] font-black uppercase text-gray-400">
-                              +{doc.specialties.length - 2} More
-                          </span>
-                        )}
-                      </div>
-                      <Link 
-                        href={`/directory/${(doc.slug || `${doc.first_name}-${doc.last_name}`).toLowerCase().replace(/^dr-/, '').replace(/\s+/g, '-')}`}
-                        className="w-full py-4 bg-gray-50 group-hover:bg-neuro-navy group-hover:text-white text-neuro-navy font-black rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 border border-gray-100 group-hover:border-neuro-navy"
-                      >
-                        View Profile <ArrowRight className="w-4 h-4" />
-                      </Link>
+                          )}
+                        </div>
+                        <Link 
+                          href={`/directory/${(doc.slug || `${doc.first_name}-${doc.last_name}`).toLowerCase().replace(/^dr-/, '').replace(/\s+/g, '-')}`}
+                          className="w-full py-4 bg-gray-50 group-hover:bg-neuro-navy group-hover:text-white text-neuro-navy font-black rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 border border-gray-100 group-hover:border-neuro-navy"
+                        >
+                          View Profile <ArrowRight className="w-4 h-4" />
+                        </Link>
+                    </div>
                   </div>
-                </div>
-              ))
+                ))}
+
+                {hasMore && (
+                  <button 
+                    onClick={() => fetchDoctors(searchQuery, true)}
+                    disabled={loading}
+                    className="w-full py-6 border-2 border-neuro-navy/10 rounded-[2.5rem] flex items-center justify-center gap-3 text-neuro-navy font-black uppercase tracking-widest text-[10px] hover:bg-neuro-navy hover:text-white transition-all disabled:opacity-50 group shadow-sm hover:shadow-xl"
+                  >
+                    {loading ? (
+                      <div className="w-4 h-4 border-2 border-neuro-navy group-hover:border-white border-t-transparent animate-spin rounded-full"></div>
+                    ) : (
+                      <Sparkles className="w-4 h-4 text-neuro-orange" />
+                    )}
+                    {loading ? "Syncing Global Nodes..." : "Show More Specialists"}
+                  </button>
+                )}
+              </>
             ) : (
               <div className="bg-white rounded-[2.5rem] border border-dashed border-gray-200 p-12 text-center">
                 <Globe className="w-12 h-12 text-gray-200 mx-auto mb-4" />

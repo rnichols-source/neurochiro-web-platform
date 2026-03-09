@@ -3,7 +3,7 @@ import DirectoryContent from "./DirectoryContent";
 import { getDoctors } from "./actions";
 
 export default async function PublicDirectory() {
-  const initialData = await getDoctors({ regionCode: 'US', limit: 20 });
+  const initialData = await getDoctors({ regionCode: 'US', limit: 100 });
 
   return (
     <Suspense fallback={

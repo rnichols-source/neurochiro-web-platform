@@ -18,6 +18,19 @@
             background: #D66829;
             box-shadow: 0 0 15px rgba(214, 104, 41, 0.6);
             cursor: pointer;
+            position: relative;
+        }
+
+        /* Larger tap area for mobile */
+        .custom-marker::after {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: -12px;
+            right: -12px;
+            bottom: -12px;
+            border-radius: 50%;
+            background: transparent;
         }
         
         /* Cluster Styling */
@@ -59,7 +72,10 @@
 <script>
     const map = L.map('map', {
         zoomControl: false,
-        attributionControl: false
+        attributionControl: false,
+        tap: true, // Recommended for some mobile browsers
+        touchZoom: true,
+        dragging: true
     }).setView([38, -98], 4);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
