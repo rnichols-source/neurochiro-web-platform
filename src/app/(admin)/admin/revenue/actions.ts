@@ -64,7 +64,7 @@ export async function getRevenueData(timeRange: string) {
     // 5. Failed Payments Accuracy
     const currentFailed = currentCharges.data.filter(c => c.status === 'failed').length;
     const previousFailed = previousCharges.data.filter(c => c.status === 'failed').length;
-    const failedTrend = currentFailed - previousFailed;
+    const failedPaymentsTrend = currentFailed - previousFailed;
 
     // 6. Revenue Attribution (Real Data)
     let breakdownRaw: Record<string, number> = {
