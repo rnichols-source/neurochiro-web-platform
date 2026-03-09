@@ -23,8 +23,8 @@ export async function getDoctorDashboardStats() {
       profile: {
         name: profile?.full_name || user.email?.split('@')[0] || "Doctor",
         clinicName: doctor?.clinic_name || "My Practice",
-        isMember: ['doctor_pro', 'doctor_growth', 'doctor_member'].includes(profile?.role || ''),
-        role: profile?.role || 'doctor_free',
+        isMember: ['doctor_pro', 'doctor_growth', 'doctor_starter', 'doctor_member'].includes(profile?.role || ''),
+        role: profile?.role || 'doctor_starter',
         status: profile?.subscription_status || 'inactive'
       },
       stats: [

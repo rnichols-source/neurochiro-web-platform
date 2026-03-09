@@ -21,9 +21,12 @@ import {
   Award
 } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useDoctorTier } from "@/context/DoctorTierContext";
 
 export default function StudentDiscovery() {
-  const [isMember, setIsMember] = useState(true);
+  const { isMember } = useDoctorTier();
   const [selectedStudentForMessage, setSelectedStudentForMessage] = useState<any>(null);
   const [selectedStudentForProfile, setSelectedStudentForProfile] = useState<any>(null);
   const [messageSent, setMessageSent] = useState(false);
@@ -107,16 +110,9 @@ export default function StudentDiscovery() {
               </div>
               <h3 className="text-xl font-heading font-black text-neuro-navy mb-2">Unlock Talent Intelligence</h3>
               <p className="text-gray-500 max-w-sm mb-6 text-sm">Members see detailed analytics, regional trends, and high-performance student metrics.</p>
-              <button className="px-8 py-3 bg-neuro-navy text-white font-black rounded-xl text-xs uppercase tracking-widest shadow-xl">Join the Network</button>
+              <Link href="/pricing" className="px-8 py-3 bg-neuro-navy text-white font-black rounded-xl text-xs uppercase tracking-widest shadow-xl transition-all hover:scale-105">Join the Network</Link>
            </div>
          )}
-         {/* Dev Toggle */}
-         <button 
-           onClick={() => setIsMember(!isMember)}
-           className="absolute top-4 right-4 z-30 text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-neuro-orange text-white rounded-full opacity-50 hover:opacity-100 transition-opacity"
-         >
-           Gating: {isMember ? "OFF" : "ON"}
-         </button>
 
          <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-heading font-black text-neuro-navy flex items-center gap-2">

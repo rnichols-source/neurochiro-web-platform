@@ -1,9 +1,14 @@
+"use client";
+
 import { CreditCard, CheckCircle2, ShieldCheck, Zap, History, Download, DollarSign, TrendingUp } from "lucide-react";
+import { useDoctorTier } from "@/context/DoctorTierContext";
 
 export default function DoctorBilling() {
+  const { tier } = useDoctorTier();
+  
   const subscription = {
-    plan: "Doctor Membership",
-    price: "$199",
+    plan: tier === 'starter' ? "Starter Doctor Membership" : tier === 'growth' ? "Growth Practice Membership" : "Pro Clinical Membership",
+    price: tier === 'starter' ? "$199" : tier === 'growth' ? "$499" : "$999",
     billingCycle: "monthly",
     status: "Active",
     nextBilling: "Nov 01, 2026"
@@ -60,7 +65,7 @@ export default function DoctorBilling() {
                   </div>
                   <div>
                     <h4 className="font-black text-neuro-navy">Upgrade to Annual</h4>
-                    <p className="text-xs text-gray-500">Switch to yearly billing and get <span className="text-neuro-orange font-bold">2 months free</span> ($398 savings).</p>
+                    <p className="text-xs text-gray-500">Switch to yearly billing and get <span className="text-neuro-orange font-bold">2 months free</span>.</p>
                   </div>
                 </div>
                 <button className="px-6 py-3 bg-neuro-navy text-white font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-neuro-navy-light transition-all shadow-xl">
@@ -86,9 +91,9 @@ export default function DoctorBilling() {
             </h3>
             <div className="space-y-2">
               {[
-                { date: "Oct 01, 2026", desc: "Monthly Membership", amount: "-$199.00", type: "debit" },
+                { date: "Oct 01, 2026", desc: "Monthly Membership", amount: `-${subscription.price}.00`, type: "debit" },
                 { date: "Sep 15, 2026", desc: "Seminar Payout - PHX", amount: "+$3,240.00", type: "credit" },
-                { date: "Sep 01, 2026", desc: "Monthly Membership", amount: "-$199.00", type: "debit" }
+                { date: "Sep 01, 2026", desc: "Monthly Membership", amount: `-${subscription.price}.00`, type: "debit" }
               ].map((tx, i) => (
                 <div key={i} className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-2xl transition-colors group cursor-pointer border-b border-gray-50 last:border-0">
                   <div className="flex items-center gap-4">

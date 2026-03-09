@@ -22,10 +22,11 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDoctorTier } from "@/context/DoctorTierContext";
 
 export default function PracticeProfile() {
   const router = useRouter();
-  const [isMember, setIsMember] = useState(false);
+  const { tier, isMember, isGrowth, isPro } = useDoctorTier();
   const [isVerified, setIsVerified] = useState(false);
   const [photoUploaded, setPhotoUploaded] = useState(false);
 
@@ -35,6 +36,8 @@ export default function PracticeProfile() {
     location: "Phoenix, AZ",
     specialties: ["Pediatrics", "Structural Correction"],
   };
+
+  const membershipLabel = tier.charAt(0).toUpperCase() + tier.slice(1);
 
   const handleApply = () => {
     router.push("/pricing");
@@ -58,7 +61,7 @@ export default function PracticeProfile() {
         </div>
         <div className="bg-white/50 border border-neuro-navy/10 px-4 py-2 rounded-full flex items-center gap-2">
           <span className={cn("w-2 h-2 rounded-full", isMember ? "bg-green-500 animate-pulse" : "bg-gray-400")}></span>
-          <span className="text-sm font-bold text-neuro-navy">Status: {isMember ? 'Pro Member' : 'Non-Member'}</span>
+          <span className="text-sm font-bold text-neuro-navy">Status: {isMember ? `${membershipLabel} Member` : 'Non-Member'}</span>
         </div>
       </header>
 

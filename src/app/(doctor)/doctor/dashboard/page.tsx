@@ -35,7 +35,7 @@ function cn(...inputs: ClassValue[]) {
 }
 
 export default function DoctorDashboard() {
-  const { tier, isGrowth, isPro } = useDoctorTier();
+  const { tier, isMember, isGrowth, isPro } = useDoctorTier();
   const [isBoosting, setIsBoosting] = useState(false);
   const [boosted, setBoosted] = useState(false);
   const [dashboardData, setDashboardData] = useState<any>(null);
@@ -65,8 +65,8 @@ export default function DoctorDashboard() {
     fetchData();
   }, []);
 
-  // Consider a doctor "isMember" if they are Growth or Pro for general dashboard access
-  const isMember = dashboardData?.profile?.isMember || isGrowth;
+  // Consider a doctor "hasAccess" if they are any paid member tier (Starter, Growth, Pro)
+  const hasAccess = isMember || dashboardData?.profile?.isMember;
 
   const handleBoost = () => {
     setIsBoosting(true);
@@ -112,27 +112,42 @@ export default function DoctorDashboard() {
       <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
           <h1 className="text-4xl font-heading font-black text-neuro-navy leading-tight">
-            {isMember ? "Practice Command Center" : "Doctor Dashboard"}
+            {hasAccess ? "Practice Command Center" : "Doctor Dashboard"}
           </h1>
-          <p className="text-neuro-gray mt-2 text-lg">
-            {isMember ? (
-              <>Live insights for <span className="font-bold text-neuro-orange">{dashboardData?.profile?.clinicName || "West Side Neuro-Life"}</span>.</>
+          <div className="text-neuro-gray mt-2 text-lg">
+            {hasAccess ? (
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <span>Live insights for <span className="font-bold text-neuro-orange">{dashboardData?.profile?.clinicName || "West Side Neuro-Life"}</span>.</span>
+                <span className="px-3 py-1 bg-neuro-orange/10 text-neuro-orange text-[10px] font-black uppercase tracking-widest rounded-full border border-neuro-orange/20">
+                  {tier} Tier Active
+                </span>
+              </div>
             ) : (
               "Non-Member Portal • Practice Visibility: Limited"
             )}
-          </p>
+          </div>
         </div>
         
-        {isMember ? (
+        {hasAccess ? (
           <div className="flex flex-wrap gap-4">
             <div className="bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center min-w-[120px]">
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Visibility</span>
-              <span className="text-2xl font-black text-neuro-navy">Top 5%</span>
+              <span className="text-2xl font-black text-neuro-navy">
+                {tier === 'starter' ? 'Basic' : tier === 'growth' ? 'Enhanced' : 'Top 5%'}
+              </span>
             </div>
-            <div className="bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center min-w-[120px]">
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Opt Score</span>
-              <span className="text-2xl font-black text-neuro-orange">98/100</span>
-            </div>
+            {tier !== 'starter' && (
+              <div className="bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center min-w-[120px]">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Opt Score</span>
+                <span className="text-2xl font-black text-neuro-orange">98/100</span>
+              </div>
+            )}
+            {tier !== 'pro' && (
+              <Link href="/pricing" className="bg-neuro-navy text-white px-6 py-4 rounded-2xl shadow-lg hover:bg-neuro-navy-light transition-all flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-neuro-orange" />
+                <span className="font-black uppercase tracking-widest text-[10px]">Upgrade to {tier === 'starter' ? 'Growth' : 'Pro'}</span>
+              </Link>
+            )}
           </div>
         ) : (
           <Link href="/pricing" className="bg-neuro-navy text-white px-6 md:px-8 py-4 rounded-2xl shadow-xl hover:bg-neuro-navy-light transition-all transform hover:scale-105 flex items-center gap-3 whitespace-nowrap">
@@ -151,7 +166,7 @@ export default function DoctorDashboard() {
           { label: "Job Applications", value: dashboardData?.stats?.[3]?.value || "8", trend: dashboardData?.stats?.[3]?.trend || "0%", icon: Briefcase, color: "text-green-600", bg: "bg-green-50" }
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between group hover:border-neuro-orange/30 transition-all relative overflow-hidden">
-            {!isMember && i > 0 && (
+            {!hasAccess && i > 0 && (
               <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-4">
                 <Lock className="w-5 h-5 text-gray-300 mb-2" />
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight">Member<br />Only</p>
@@ -161,7 +176,7 @@ export default function DoctorDashboard() {
               <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color}`}>
                  <stat.icon className="w-6 h-6" />
               </div>
-              {isMember && (
+              {hasAccess && (
                 <span className="text-xs font-black text-green-500 flex items-center gap-1 bg-green-50 px-2 py-1 rounded-lg">
                    <TrendingUp className="w-3 h-3" /> {stat.trend}
                 </span>
@@ -179,7 +194,7 @@ export default function DoctorDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Feed / Insights */}
         <div className="lg:col-span-2 space-y-8">
-           {!isMember ? (
+           {!hasAccess ? (
              <section className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
                <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[100px] -mr-32 -mt-32"></div>
                <div className="relative z-10">

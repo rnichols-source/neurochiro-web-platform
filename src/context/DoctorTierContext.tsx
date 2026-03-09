@@ -6,6 +6,7 @@ import { MembershipTier } from '@/types/directory';
 interface DoctorTierContextType {
   tier: MembershipTier;
   setTier: (tier: MembershipTier) => void;
+  isMember: boolean;
   isGrowth: boolean;
   isPro: boolean;
 }
@@ -25,11 +26,12 @@ export function DoctorTierProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("nc_doctor_tier", t);
   };
 
+  const isMember = tier === 'starter' || tier === 'growth' || tier === 'pro';
   const isGrowth = tier === 'growth' || tier === 'pro';
   const isPro = tier === 'pro';
 
   return (
-    <DoctorTierContext.Provider value={{ tier, setTier, isGrowth, isPro }}>
+    <DoctorTierContext.Provider value={{ tier, setTier, isMember, isGrowth, isPro }}>
       {children}
     </DoctorTierContext.Provider>
   );
