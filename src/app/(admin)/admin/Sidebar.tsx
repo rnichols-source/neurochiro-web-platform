@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   Users, 
@@ -19,25 +19,33 @@ import {
   CreditCard,
   MessageSquare,
   History,
-  X
+  X,
+  ShieldCheck,
+  AlertTriangle,
+  Loader2
 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import AdminSettingsModal from "@/components/admin/AdminSettingsModal";
+import { getSystemHealth, logoutAdmin, triggerEmergencyLockdown } from "./SidebarActions";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const navItems = [
-  { name: "System Control", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Talent Intelligence", href: "/admin/users", icon: Users },
-  { name: "Programs & LMS", href: "/admin/programs", icon: GraduationCap },
-  { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert },
-  { name: "Announcements", href: "/admin/announcements", icon: Megaphone },
-  { name: "Regions & Licensing", href: "/admin/regions", icon: Globe },
-  { name: "Revenue & Payments", href: "/admin/revenue", icon: CreditCard },
-  { name: "Communication", href: "/admin/inbox", icon: MessageSquare },
-  { name: "System Logs", href: "/admin/logs", icon: History },
+// Full set of nav items
+const allNavItems = [
+  { name: "System Control", href: "/admin/dashboard", icon: LayoutDashboard, roles: ['super_admin'] },
+  { name: "Talent Intelligence", href: "/admin/users", icon: Users, roles: ['super_admin', 'regional_admin'] },
+  { name: "Programs & LMS", href: "/admin/programs", icon: GraduationCap, roles: ['super_admin'] },
+  { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert, roles: ['super_admin', 'support_admin'] },
+  { name: "Announcements", href: "/admin/announcements", icon: Megaphone, roles: ['super_admin'] },
+  { name: "Regions & Licensing", href: "/admin/regions", icon: Globe, roles: ['super_admin'] },
+  { name: "Revenue & Payments", href: "/admin/revenue", icon: CreditCard, roles: ['super_admin'] },
+  { name: "Communication", href: "/admin/inbox", icon: MessageSquare, roles: ['super_admin', 'support_admin', 'regional_admin'] },
+  { name: "System Logs", href: "/admin/logs", icon: History, roles: ['super_admin'] },
 ];
 
 interface SidebarProps {
@@ -47,9 +55,55 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  
+  // States
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [health, setHealth] = useState<any>(null);
+  const [userRole, setUserRole] = useState('super_admin'); // Default for now, in prod fetch from Supabase
+  const [isLockingDown, setIsLockingDown] = useState(false);
+
+  // Filter items based on role
+  const filteredNavItems = allNavItems.filter(item => item.roles.includes(userRole));
+
+  // Fetch health data
+  useEffect(() => {
+    async function loadHealth() {
+      const data = await getSystemHealth();
+      setHealth(data);
+    }
+    loadHealth();
+    const interval = setInterval(loadHealth, 30000); // Check every 30s
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleLogout = async () => {
+    if (confirm("Are you sure you want to log out of Admin OS?")) {
+      await logoutAdmin();
+      router.push('/login');
+    }
+  };
+
+  const handleEmergencyLockdown = async () => {
+    if (confirm("CRITICAL ACTION: This will revoke all active sessions and place the platform in maintenance mode. Proceed?")) {
+      setIsLockingDown(true);
+      await triggerEmergencyLockdown();
+      setTimeout(() => {
+        setIsLockingDown(false);
+        setIsSettingsOpen(false);
+        alert("Emergency Lockdown Protocol Active.");
+      }, 2000);
+    }
+  };
 
   return (
     <>
+      <AdminSettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        onEmergencyLockdown={handleEmergencyLockdown}
+      />
+
       {/* Mobile Overlay */}
       {isOpen && (
         <div 
@@ -63,8 +117,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         <div className="p-6 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-neuro-orange flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-neuro-orange/20">N</div>
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded-lg bg-neuro-orange flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-neuro-orange/20 group-hover:scale-110 transition-transform">N</div>
             <div className="flex flex-col">
               <span className="text-white font-heading font-bold text-lg leading-none">NeuroChiro</span>
               <span className="text-neuro-orange text-[10px] font-black uppercase tracking-widest mt-1">Admin OS</span>
@@ -78,63 +132,126 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </button>
         </div>
 
-        <nav className="flex-1 px-4 space-y-1">
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pt-4">
           <div className="mb-4 px-2">
             <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Platform Control</span>
           </div>
-          {navItems.map((item) => {
+          {filteredNavItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 group",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
                   isActive 
-                    ? "bg-neuro-orange text-white" 
+                    ? "bg-neuro-orange text-white shadow-lg shadow-neuro-orange/20" 
                     : "text-gray-400 hover:text-white hover:bg-white/5"
                 )}
               >
-                <item.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-gray-400 group-hover:text-neuro-orange-light")} />
+                <item.icon className={cn("w-5 h-5 transition-colors", isActive ? "text-white" : "text-gray-400 group-hover:text-neuro-orange-light")} />
                 <span className="font-medium text-sm">{item.name}</span>
-                {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
+                {isActive && (
+                  <motion.div 
+                    layoutId="active-pill"
+                    className="absolute right-2 w-1.5 h-1.5 bg-white rounded-full"
+                  />
+                )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 mt-auto">
-          <div className="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold text-gray-500 uppercase">System Health</span>
-              <span className="text-[10px] font-bold text-green-500">OPTIMAL</span>
+        <div className="p-4 mt-auto space-y-4">
+          {/* System Health Panel */}
+          <div className="bg-white/[0.02] rounded-2xl p-4 border border-white/5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Activity className="w-3 h-3 text-neuro-orange" />
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Live Engine</span>
+              </div>
+              <span className={cn(
+                "text-[9px] font-black px-2 py-0.5 rounded border",
+                health?.status === 'OPTIMAL' ? "text-green-500 border-green-500/20 bg-green-500/10" : "text-amber-500 border-amber-500/20 bg-amber-500/10"
+              )}>
+                {health?.status || "SYNCING..."}
+              </span>
             </div>
-            <div className="flex gap-1">
-              {[1,2,3,4,5,6,7,8].map(i => (
-                <div key={i} className="h-4 w-full bg-green-500/20 rounded-sm overflow-hidden relative">
-                  <div className="absolute inset-0 bg-green-500 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}></div>
+            <div className="flex gap-1.5">
+              {(health?.services || [1,2,3,4,5]).map((s: any, i: number) => (
+                <div 
+                  key={i} 
+                  title={s.name ? `${s.name}: ${s.status} (${s.latency})` : "Syncing..."}
+                  className="h-5 w-full bg-white/5 rounded-sm overflow-hidden relative cursor-help group"
+                >
+                  <div 
+                    className={cn(
+                      "absolute inset-0 transition-colors duration-500",
+                      health ? "bg-green-500" : "bg-gray-700 animate-pulse"
+                    )}
+                    style={{ 
+                      opacity: health ? 0.4 + (Math.random() * 0.4) : 1,
+                      animationDelay: `${i * 0.1}s` 
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-green-500 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse" />
                 </div>
               ))}
             </div>
           </div>
 
+          {/* Profile Actions */}
           <div className="flex items-center gap-3 px-3 py-3 border-t border-white/5">
-            <div className="w-8 h-8 rounded-full bg-neuro-navy-light flex items-center justify-center text-white font-bold text-xs border border-white/10">
-              AD
-            </div>
+            <button 
+              onClick={() => setIsSettingsOpen(true)}
+              className="w-10 h-10 rounded-xl bg-neuro-navy-light flex items-center justify-center text-white font-bold text-sm border border-white/10 hover:border-neuro-orange/50 transition-all shadow-xl active:scale-95 overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-neuro-orange opacity-0 group-hover:opacity-10 transition-opacity" />
+              RN
+            </button>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-white truncate">Super Admin</p>
               <p className="text-[10px] text-gray-500 truncate flex items-center gap-1">
-                <Activity className="w-2 h-2 text-green-500" />
-                Global Access
+                <ShieldCheck className="w-2 h-2 text-blue-500" />
+                Root Access
               </p>
             </div>
-            <button className="text-gray-500 hover:text-white">
-              <Settings className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button 
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-2 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                title="Admin Settings"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </aside>
+
+      {/* Global Lockdown Overlay */}
+      <AnimatePresence>
+        {isLockingDown && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[1000] bg-red-950 flex flex-col items-center justify-center text-white text-center p-10"
+          >
+            <AlertTriangle className="w-24 h-24 text-white animate-bounce mb-8" />
+            <h1 className="text-6xl font-black mb-4">EMERGENCY LOCKDOWN</h1>
+            <p className="text-red-200 text-xl max-w-2xl font-medium">All platform services are being suspended. Security tokens are being revoked across all nodes. Stand by for encrypted confirmation.</p>
+            <Loader2 className="w-10 h-10 animate-spin mt-12 text-white/50" />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
