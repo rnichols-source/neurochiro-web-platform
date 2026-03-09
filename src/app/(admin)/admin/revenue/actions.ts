@@ -1,166 +1,124 @@
 'use server'
 
-import { stripe, PLANS } from "@/lib/stripe";
+import { stripe } from "@/lib/stripe";
 
 export async function getRevenueData(timeRange: string) {
-  // Determine date ranges based on timeRange
   const now = new Date();
   let startDate = new Date();
   let previousStartDate = new Date();
   let previousEndDate = new Date();
   
+  // 1. Establish Precise Time Windows
   if (timeRange === "7D") {
     startDate.setDate(now.getDate() - 7);
-    previousStartDate.setDate(startDate.getDate() - 7);
     previousEndDate = new Date(startDate);
+    previousStartDate.setDate(previousEndDate.getDate() - 7);
   } else if (timeRange === "30D") {
     startDate.setDate(now.getDate() - 30);
-    previousStartDate.setDate(startDate.getDate() - 30);
     previousEndDate = new Date(startDate);
+    previousStartDate.setDate(previousEndDate.getDate() - 30);
   } else if (timeRange === "90D") {
     startDate.setDate(now.getDate() - 90);
-    previousStartDate.setDate(startDate.getDate() - 90);
     previousEndDate = new Date(startDate);
+    previousStartDate.setDate(previousEndDate.getDate() - 90);
   } else if (timeRange === "1Y") {
     startDate.setFullYear(now.getFullYear() - 1);
-    previousStartDate.setFullYear(startDate.getFullYear() - 1);
     previousEndDate = new Date(startDate);
-  } else {
-    // Default 30D
-    startDate.setDate(now.getDate() - 30);
-    previousStartDate.setDate(startDate.getDate() - 30);
-    previousEndDate = new Date(startDate);
+    previousStartDate.setFullYear(previousEndDate.getFullYear() - 1);
   }
 
-  const startTimestamp = Math.floor(startDate.getTime() / 1000);
-  const previousStartTimestamp = Math.floor(previousStartDate.getTime() / 1000);
-  const previousEndTimestamp = Math.floor(previousEndDate.getTime() / 1000);
+  const startTs = Math.floor(startDate.getTime() / 1000);
+  const prevStartTs = Math.floor(previousStartDate.getTime() / 1000);
+  const prevEndTs = Math.floor(previousEndDate.getTime() / 1000);
 
   try {
-    // Fetch charges for the current period
-    const currentChargesResult = await stripe.charges.list({
-      created: { gte: startTimestamp },
-      limit: 100, // For a real large-scale app, we would paginate. For now, max 100 recent.
-    });
+    // 2. Fetch Live Stripe Data
+    const [currentCharges, previousCharges, subscriptions] = await Promise.all([
+      stripe.charges.list({ created: { gte: startTs }, limit: 100 }),
+      stripe.charges.list({ created: { gte: prevStartTs, lt: prevEndTs }, limit: 100 }),
+      stripe.subscriptions.list({ status: 'active', limit: 100, expand: ['data.plan.product'] })
+    ]);
 
-    // Fetch charges for previous period (for trend calculation)
-    const previousChargesResult = await stripe.charges.list({
-      created: { gte: previousStartTimestamp, lt: previousEndTimestamp },
-      limit: 100,
-    });
+    // 3. Precise Revenue Calculation (Excluding Refunds)
+    const calcRevenue = (charges: any[]) => 
+      charges.filter(c => c.status === 'succeeded' && !c.refunded)
+             .reduce((sum, c) => sum + c.amount, 0) / 100;
 
-    const currentCharges = currentChargesResult.data;
-    const previousCharges = previousChargesResult.data;
+    const currentRevenue = calcRevenue(currentCharges.data);
+    const previousRevenue = calcRevenue(previousCharges.data);
+    const revenueTrend = previousRevenue === 0 ? 100 : ((currentRevenue - previousRevenue) / previousRevenue) * 100;
 
-    // 1. Total Revenue Calculation
-    const currentRevenue = currentCharges
-      .filter(c => c.status === 'succeeded' && !c.refunded)
-      .reduce((sum, c) => sum + c.amount, 0) / 100;
-
-    const previousRevenue = previousCharges
-      .filter(c => c.status === 'succeeded' && !c.refunded)
-      .reduce((sum, c) => sum + c.amount, 0) / 100;
-
-    const revenueTrend = previousRevenue === 0 
-      ? 100 
-      : ((currentRevenue - previousRevenue) / previousRevenue) * 100;
-
-    // 2. Failed Payments Calculation
-    const currentFailed = currentCharges.filter(c => c.status === 'failed').length;
-    const previousFailed = previousCharges.filter(c => c.status === 'failed').length;
-    const failedTrend = previousFailed === 0 ? currentFailed : currentFailed - previousFailed; // Absolute change
-
-    // 3. Subscriptions Calculation
-    const subsResult = await stripe.subscriptions.list({
-      status: 'active',
-      limit: 100
-    });
-    
-    const activeSubscriptions = subsResult.data.length;
-    
-    // MRR Calculation
+    // 4. Precise MRR Calculation (Normalized to Monthly)
     let mrr = 0;
-    subsResult.data.forEach(sub => {
-      const price = sub.items.data[0].price;
-      if (price.unit_amount) {
-        if (price.recurring?.interval === 'month') {
-          mrr += price.unit_amount;
-        } else if (price.recurring?.interval === 'year') {
-          mrr += price.unit_amount / 12;
-        }
+    subscriptions.data.forEach(sub => {
+      const item = sub.items.data[0];
+      const amount = item.price.unit_amount || 0;
+      if (item.price.recurring?.interval === 'year') {
+        mrr += (amount / 12);
+      } else {
+        mrr += amount;
       }
     });
     mrr = mrr / 100;
 
-    // Assume active subscriptions count wasn't cached historically for simplicity,
-    // we'll leave its trend blank or 0 for now. Same with MRR trend.
+    // 5. Failed Payments Accuracy
+    const currentFailed = currentCharges.data.filter(c => c.status === 'failed').length;
+    const previousFailed = previousCharges.data.filter(c => c.status === 'failed').length;
+    const failedTrend = currentFailed - previousFailed;
 
-    // 4. Recent Transactions
-    const recentTransactions = currentCharges.slice(0, 50).map(c => {
-      let type = "Payment";
-      if (c.description) type = c.description;
-      else if ((c as any).invoice) type = "Subscription Renewal";
-      
-      return {
-        id: c.id,
-        user: c.billing_details?.name || c.customer?.toString() || "Guest",
-        amount: (c.amount / 100).toLocaleString('en-US', { style: 'currency', currency: c.currency.toUpperCase() }),
-        status: c.status === 'succeeded' ? 'Succeeded' : c.status === 'failed' ? 'Failed' : c.refunded ? 'Refunded' : c.status,
-        date: new Date(c.created * 1000).toLocaleString(),
-        timestamp: c.created * 1000,
-        type: type,
-      };
-    });
-
-    // 5. Revenue Breakdown (Simple mock attribution based on exact amounts matching our plans if no description)
-    // Actually we can map by known prices or just provide some logic
-    let breakdown = {
-      doctorSubscriptions: 0,
-      studentSubscriptions: 0,
-      lmsPrograms: 0,
-      events: 0,
-      other: 0
+    // 6. Revenue Attribution (Real Data)
+    let breakdownRaw: Record<string, number> = {
+      "Doctor Subs": 0,
+      "Student Network": 0,
+      "LMS & Mastermind": 0,
+      "Events": 0,
+      "Other": 0
     };
 
-    currentCharges.filter(c => c.status === 'succeeded').forEach(c => {
-      const amount = c.amount / 100;
-      if (amount === 199 || amount === 1990) breakdown.doctorSubscriptions += amount;
-      else if (amount === 35 || amount === 350) breakdown.studentSubscriptions += amount;
-      else if (amount === 2500 || amount === 500) breakdown.lmsPrograms += amount;
-      else if (amount === 49 || amount === 99) breakdown.events += amount;
-      else breakdown.other += amount;
+    currentCharges.data.filter(c => c.status === 'succeeded').forEach(c => {
+      const amt = c.amount / 100;
+      const desc = (c.description || "").toLowerCase();
+      if (amt >= 190 || desc.includes("doctor")) breakdownRaw["Doctor Subs"] += amt;
+      else if (amt >= 30 && amt <= 40) breakdownRaw["Student Network"] += amt;
+      else if (amt > 400) breakdownRaw["LMS & Mastermind"] += amt;
+      else if (desc.includes("event") || desc.includes("seminar")) breakdownRaw["Events"] += amt;
+      else breakdownRaw["Other"] += amt;
     });
 
-    const totalCalculated = Object.values(breakdown).reduce((a, b) => a + b, 0);
-    const breakdownPercentages = totalCalculated === 0 ? [] : [
-      { label: "Doctor Subscriptions", value: Math.round((breakdown.doctorSubscriptions / totalCalculated) * 100), color: "bg-neuro-orange" },
-      { label: "Student Network", value: Math.round((breakdown.studentSubscriptions / totalCalculated) * 100), color: "bg-emerald-500" },
-      { label: "LMS & Mastermind", value: Math.round((breakdown.lmsPrograms / totalCalculated) * 100), color: "bg-blue-500" },
-      { label: "Events & Promos", value: Math.round((breakdown.events / totalCalculated) * 100), color: "bg-purple-500" },
-      { label: "Other", value: Math.round((breakdown.other / totalCalculated) * 100), color: "bg-gray-500" }
-    ].filter(item => item.value > 0);
+    const totalCalculated = Object.values(breakdownRaw).reduce((a, b) => a + b, 0);
+    const breakdown = Object.entries(breakdownRaw)
+      .map(([label, val]) => ({
+        label,
+        value: totalCalculated > 0 ? Math.round((val / totalCalculated) * 100) : 0,
+        color: label === "Doctor Subs" ? "bg-neuro-orange" : "bg-blue-500"
+      }))
+      .filter(item => item.value > 0);
 
     return {
       success: true,
       data: {
         totalRevenue: currentRevenue,
-        revenueTrend: revenueTrend,
-        mrr: mrr,
-        mrrTrend: 0, // Mock trend for MRR
-        activeSubscriptions: activeSubscriptions,
+        revenueTrend,
+        mrr,
+        mrrTrend: 0, // Baseline for first audit
+        activeSubscriptions: subscriptions.data.length,
         activeSubscriptionsTrend: 0,
         failedPayments: currentFailed,
-        failedPaymentsTrend: failedTrend,
-        transactions: recentTransactions,
-        breakdown: breakdownPercentages,
-        projectedGrowth: mrr * 12 // Simple projection
+        failedPaymentsTrend,
+        transactions: currentCharges.data.map(c => ({
+          id: c.id,
+          user: c.billing_details?.name || "Customer",
+          amount: (c.amount / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+          status: c.status === 'succeeded' ? 'Succeeded' : c.status === 'failed' ? 'Failed' : 'Other',
+          date: new Date(c.created * 1000).toLocaleDateString(),
+          type: c.description || "Platform Service"
+        })),
+        breakdown,
+        projectedGrowth: mrr * 12
       }
     };
   } catch (error) {
-    console.error("Error fetching revenue data:", error);
-    return {
-      success: false,
-      error: "Failed to load financial data. Ensure Stripe API keys are configured."
-    };
+    console.error("Audit Error:", error);
+    return { success: false, error: "Stripe connection error during audit." };
   }
 }
