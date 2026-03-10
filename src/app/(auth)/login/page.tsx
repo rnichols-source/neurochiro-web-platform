@@ -34,6 +34,14 @@ function LoginContent() {
 
   const quickLogin = (roleEmail: string) => {
     setEmail(roleEmail);
+    
+    // For founder, don't fill a fake password or auto-submit
+    if (roleEmail === "drray@neurochirodirectory.com") {
+      setPassword("");
+      localStorage.setItem("nc_dev_mode", "true");
+      return;
+    }
+
     setPassword("password123");
 
     // Sync client-side state for tiers before redirecting
@@ -239,10 +247,10 @@ function LoginContent() {
           <div className="space-y-2 pt-4">
             <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2 block">Administrative</span>
             <button 
-              onClick={() => quickLogin("admin@neurochiro.com")}
+              onClick={() => quickLogin("drray@neurochirodirectory.com")}
               className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors group border border-neuro-orange/30"
             >
-              <span className="text-xs font-bold text-neuro-orange">Platform Admin</span>
+              <span className="text-xs font-bold text-neuro-orange">Founder Login</span>
               <ArrowRight className="w-4 h-4 text-neuro-orange opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
             </button>
           </div>
