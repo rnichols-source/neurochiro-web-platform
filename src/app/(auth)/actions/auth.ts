@@ -126,11 +126,45 @@ export async function updateProfileAction(userId: string, profileData: any) {
   
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return { success: true };
 
-  const { error } = await supabase
+  const { role, tier, clinicName, graduationYear, school, city, website, ...rest } = profileData;
+
+  // 1. Update main profile
+  const { error: profileError } = await supabase
     .from('profiles')
-    .update(profileData)
+    .update({ ...rest, role, subscription_tier: tier })
     .eq('id', userId);
 
-  if (error) return { error: error.message };
+  if (profileError) return { error: profileError.message };
+
+  // 2. Role specific updates
+  if (role === 'doctor') {
+    const { error: doctorError } = await supabase
+      .from('doctors')
+      .update({ clinic_name: clinicName, location_city: city, website })
+      .eq('id', userId);
+      
+    if (doctorError) {
+      console.error("Failed to update doctor profile:", doctorError);
+    } else if (city) {
+      // Enqueue geocoding to automatically resolve lat/lng
+      const supabaseAdmin = createServerSupabase(); // Admin privileges if possible, or just queue
+      await supabaseAdmin.from('automation_queue').insert({
+        event_type: 'geocode_profile',
+        payload: { userId, city }
+      });
+    }
+  } else if (role === 'student') {
+    const { error: studentError } = await supabase
+      .from('students')
+      .update({ 
+        school: school,
+        graduation_year: graduationYear ? parseInt(graduationYear, 10) : null,
+        location_city: city
+      })
+      .eq('id', userId);
+      
+    if (studentError) console.error("Failed to update student profile:", studentError);
+  }
+
   return { success: true };
 }

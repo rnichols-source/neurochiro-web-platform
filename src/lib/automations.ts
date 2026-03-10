@@ -134,7 +134,7 @@ const sendSMS = async (phone: string, message: string) => {
   }
 };
 
-const executeAutomation = async (queueId: string, eventType: string, payload: Record<string, any>) => {
+export const executeAutomation = async (queueId: string, eventType: string, payload: Record<string, any>) => {
   try {
     const supabaseAdmin = getSupabaseAdmin();
     let prefs = null;
@@ -151,19 +151,70 @@ const executeAutomation = async (queueId: string, eventType: string, payload: Re
     const smsEnabled = prefs?.sms_enabled ?? false;
 
     switch (eventType) {
+      case 'geocode_profile':
+        if (supabaseAdmin && payload.userId && payload.city) {
+          try {
+            // Very basic mock for actual geocoding API (e.g., Mapbox/Google)
+            // In a real app you'd do: fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${payload.city}.json?access_token=${...}`)
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(payload.city)}`);
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+              const lat = parseFloat(data[0].lat);
+              const lng = parseFloat(data[0].lon);
+              
+              await supabaseAdmin.from('doctors').update({
+                location_lat: lat,
+                location_lng: lng
+              }).eq('id', payload.userId);
+            }
+          } catch (e) {
+            console.error("Geocoding failed for:", payload.city, e);
+          }
+        }
+        break;
+
       case 'welcome_email':
         if (emailEnabled && payload.email) {
-          await sendPremiumEmail({
-            to: payload.email,
-            subject: 'Welcome to NeuroChiro! 🧠',
-            title: 'Account Activated',
-            body: `<h1>Hello ${payload.name},</h1><p>Your journey into nervous-system-first chiropractic starts here. Explore the global directory and connect with elite practitioners today.</p>`,
-            ctaText: 'Enter Dashboard',
-            ctaUrl: 'https://neurochiro.co/login'
-          });
+          let subject = 'Welcome to NeuroChiro! 🧠';
+          let title = 'Account Activated';
+          let body = `<h1>Hello ${payload.name || payload.full_name || 'there'},</h1><p>Your journey into nervous-system-first chiropractic starts here. Explore the global directory and connect with elite practitioners today.</p>`;
+          let ctaText = 'Enter Dashboard';
+          let ctaUrl = 'https://neurochiro.co/login';
+
+          if (payload.role === 'doctor') {
+            subject = 'Welcome to the NeuroChiro Network 🌍';
+            title = 'Doctor Account Created';
+            body = `<h1>Welcome Dr. ${payload.name || payload.full_name || ''},</h1><p>Your directory profile has been created. To start receiving referrals and join the global map, complete your clinic profile and select a membership tier.</p>`;
+            ctaText = 'Setup My Profile';
+            ctaUrl = 'https://neurochiro.co/doctor/settings';
+          } else if (payload.role === 'student') {
+            subject = 'Welcome to NeuroChiro Student Network 🎓';
+            title = 'Student Account Created';
+            body = `<h1>Welcome ${payload.name || payload.full_name || ''},</h1><p>You are now part of the global talent pool. Top clinics are looking for nervous-system focused associates. Complete your resume and explore the job board.</p>`;
+            ctaText = 'Explore Job Board';
+            ctaUrl = 'https://neurochiro.co/student/jobs';
+          } else if (payload.role === 'vendor') {
+            subject = 'Welcome to NeuroChiro Marketplace 🏢';
+            title = 'Vendor Account Created';
+            body = `<h1>Welcome ${payload.name || payload.full_name || ''},</h1><p>Set up your vendor profile to start offering products and services to thousands of specialized chiropractors.</p>`;
+            ctaText = 'Vendor Dashboard';
+            ctaUrl = 'https://neurochiro.co/vendor/dashboard';
+          } else {
+            // Patient / Public
+            subject = 'Your Journey to Health Starts Here 🌱';
+            title = 'Patient Account Activated';
+            body = `<h1>Welcome ${payload.name || payload.full_name || ''},</h1>
+                    <p>Understanding your nervous system is the first step to true healing. We've curated educational resources to help you understand chiropractic care.</p>
+                    <p>Use our directory to find a verified practitioner near you.</p>`;
+            ctaText = 'Find a Doctor';
+            ctaUrl = 'https://neurochiro.co/directory';
+          }
+
+          await sendPremiumEmail({ to: payload.email, subject, title, body, ctaText, ctaUrl });
         }
         if (smsEnabled && payload.phone) {
-          await sendSMS(payload.phone, `Welcome to NeuroChiro, ${payload.name}! Your account is active. Log in at neurochiro.co/login`);
+          await sendSMS(payload.phone, `Welcome to NeuroChiro! Your account is active. Log in at neurochiro.co/login`);
         }
         break;
 
@@ -224,6 +275,75 @@ const executeAutomation = async (queueId: string, eventType: string, payload: Re
         }
         break;
         
+      case 'payment_success':
+        if (supabaseAdmin && payload.stripeData) {
+          const session = payload.stripeData;
+          const customerId = session.customer;
+          const userId = session.client_reference_id;
+          
+          if (userId) {
+            await supabaseAdmin.from('profiles').update({
+              stripe_customer_id: customerId,
+              subscription_status: 'active'
+            }).eq('id', userId);
+            
+            const { data: profile } = await supabaseAdmin.from('profiles').select('role, full_name, email').eq('id', userId).single();
+            if (profile?.role === 'doctor') {
+               await supabaseAdmin.from('doctors').update({ is_verified: true }).eq('id', userId);
+               
+               if (emailEnabled && profile.email) {
+                  await sendPremiumEmail({
+                    to: profile.email,
+                    subject: 'Your Directory Listing is Live! 🌍',
+                    title: 'Directory Activated',
+                    body: `<p>Congratulations Dr. ${profile.full_name || 'Doctor'}, your profile is now live on the global NeuroChiro map. You can now start receiving patient referrals.</p>`,
+                    ctaText: 'View Dashboard',
+                    ctaUrl: 'https://neurochiro.co/doctor/dashboard'
+                  });
+               }
+            }
+          }
+        }
+        break;
+
+      case 'payment_failed':
+        if (supabaseAdmin && payload.stripeData) {
+          const customerId = payload.stripeData.customer;
+          if (customerId) {
+            const { data: profile } = await supabaseAdmin.from('profiles').select('id, email, full_name').eq('stripe_customer_id', customerId).single();
+            if (profile) {
+              await supabaseAdmin.from('profiles').update({ subscription_status: 'past_due' }).eq('id', profile.id);
+              if (emailEnabled && profile.email) {
+                await sendPremiumEmail({
+                  to: profile.email,
+                  subject: 'Action Required: Payment Failed',
+                  title: 'Payment Issue',
+                  body: `<p>Hi ${profile.full_name || 'Member'}, your recent payment attempt failed. Please update your billing information to maintain access to your tier benefits.</p>`,
+                  ctaText: 'Update Billing',
+                  ctaUrl: 'https://neurochiro.co/doctor/settings'
+                });
+              }
+            }
+          }
+        }
+        break;
+
+      case 'subscription_canceled':
+        if (supabaseAdmin && payload.stripeData) {
+          const customerId = payload.stripeData.customer;
+          if (customerId) {
+            const { data: profile } = await supabaseAdmin.from('profiles').select('id, role').eq('stripe_customer_id', customerId).single();
+            if (profile) {
+              await supabaseAdmin.from('profiles').update({ subscription_status: 'canceled' }).eq('id', profile.id);
+              // Hide from directory
+              if (profile.role === 'doctor') {
+                await supabaseAdmin.from('doctors').update({ is_verified: false }).eq('id', profile.id);
+              }
+            }
+          }
+        }
+        break;
+
       case 'admin_notification':
         if (process.env.NODE_ENV !== 'development') {
           await resend.emails.send({
@@ -304,12 +424,12 @@ export const Automations = {
     await enqueue('admin_notification', { subject: 'New Campaign Created', html: `<p>User <strong>${userId}</strong> created a new campaign: <strong>${campaignName}</strong>.</p>`});
   },
   onPaymentSuccess: async (data: any) => {
-    await enqueue('admin_notification', { subject: 'Payment Succeeded', html: `<p>A new payment was received: ${JSON.stringify(data)}</p>` });
+    await enqueue('payment_success', { stripeData: data });
   },
   onPaymentFailed: async (data: any) => {
-    await enqueue('admin_notification', { subject: 'Payment Failed', html: `<p>A payment attempt failed: ${JSON.stringify(data)}</p>` });
+    await enqueue('payment_failed', { stripeData: data });
   },
   onSubscriptionCanceled: async (data: any) => {
-    await enqueue('admin_notification', { subject: 'Subscription Canceled', html: `<p>A subscription was canceled: ${JSON.stringify(data)}</p>` });
+    await enqueue('subscription_canceled', { stripeData: data });
   }
 };
