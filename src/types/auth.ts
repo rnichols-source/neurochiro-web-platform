@@ -19,11 +19,11 @@ export interface UserSession {
 }
 
 export const PROTECTED_ROUTES: Record<string, UserRole[]> = {
-  '/admin': ['admin', 'regional_admin'],
-  '/doctor': ['doctor_member', 'doctor_non_member', 'admin'],
-  '/student': ['student_paid', 'student_free', 'admin'],
-  '/portal': ['patient', 'admin'],
-  '/mastermind': ['mastermind_member', 'admin'],
+  '/admin': ['admin', 'regional_admin', 'founder', 'super_admin'],
+  '/doctor': ['doctor_member', 'doctor_non_member', 'admin', 'founder', 'super_admin'],
+  '/student': ['student_paid', 'student_free', 'admin', 'founder', 'super_admin'],
+  '/portal': ['patient', 'admin', 'founder', 'super_admin'],
+  '/mastermind': ['mastermind_member', 'admin', 'founder', 'super_admin'],
 };
 
 // Sub-permissions/feature access (for client-side UI checks)
@@ -35,6 +35,8 @@ export const FEATURE_ACCESS: Record<UserRole, string[]> = {
   'doctor_non_member': ['directory:search', 'seminars:view', 'doctor:dashboard'],
   'doctor_member': ['directory:search', 'seminars:view', 'doctor:dashboard', 'network:access', 'jobs:post', 'seminars:host'],
   'admin': ['*'],
+  'super_admin': ['*'],
+  'founder': ['*'],
   'regional_admin': ['admin:dashboard', 'admin:users', 'admin:approvals'],
   'mastermind_member': ['mastermind:dashboard'],
 };
