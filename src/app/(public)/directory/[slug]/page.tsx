@@ -24,7 +24,7 @@ import {
   MessageSquare
 } from "lucide-react";
 import Link from "next/link";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase";
 import { onReferralSentAction } from "@/app/actions/automations";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import GoogleReviews from "@/components/directory/GoogleReviews";
@@ -36,7 +36,7 @@ export default function DoctorProfile() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [session, setSession] = useState<any>(null);
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const [modalState, setModalState] = useState({
     isOpen: false,
     title: "",

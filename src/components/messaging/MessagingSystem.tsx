@@ -10,7 +10,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase";
 
 export default function MessagingSystem({ currentUserId, userRole, initialOtherUserId }: { currentUserId: string, userRole: string, initialOtherUserId?: string }) {
   const [conversations, setConversations] = useState<any[]>([]);
@@ -21,7 +21,7 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
