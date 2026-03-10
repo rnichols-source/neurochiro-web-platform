@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Send, Eye, Users, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Mail, Send, Eye, Users, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
+import { sendBroadcastAction } from "../../actions/comms-actions";
 
 export default function AdminBroadcastsPage() {
   const [loading, setLoading] = useState(false);
@@ -14,61 +15,29 @@ export default function AdminBroadcastsPage() {
     body: "",
     ctaText: "",
     ctaUrl: "",
-    audience: "all",
+    audience: "all_doctors",
   });
-
-  const supabase = createClient();
 
   const handleAction = async (actionType: 'test' | 'send') => {
     setLoading(true);
     setStatus(null);
+
+    const formData = new FormData();
+    formData.append("subject", form.subject);
+    formData.append("title", form.title);
+    formData.append("body", form.body);
+    formData.append("segment", actionType === 'test' ? 'admin_test' : form.audience);
+
     try {
-      // 1. Check for real Supabase session
-      const { data: { session } } = await supabase.auth.getSession();
-      let user = session?.user;
-      
-      // 2. Check for Demo Perspective if real session is missing
-      if (!user) {
-        const isDemo = document.cookie.includes('nc_demo_role=admin');
-        if (isDemo) {
-          // Simulate a user for the automation payload
-          user = { 
-            id: 'demo-admin-id', 
-            email: 'admin@neurochiro.com',
-            user_metadata: { full_name: 'Demo Admin' }
-          } as any;
-        }
-      }
+      const result = await sendBroadcastAction(formData);
 
-      if (!user) {
-        throw new Error("Your session has expired. Please log in again.");
-      }
-
-      // Queue the email to be processed by background worker
-      const payload = {
-        ...form,
-        senderId: user.id,
-        isTest: actionType === 'test',
-        testEmail: user.email // if test, send to admin's email
-      };
-
-      // In demo mode, we might hit RLS issues if we try to insert directly from client
-      // For a true test, we try the insert, but catch if it's an RLS failure in demo mode
-      const { error } = await supabase.from('automation_queue').insert({
-        event_type: 'mass_email_broadcast',
-        payload: payload
-      });
-
-      if (error) {
-        if (error.code === '42501' && document.cookie.includes('nc_demo_role')) {
-           throw new Error("Demo Mode: You don't have database write permissions. Please log in with a real admin account to send actual emails.");
-        }
-        throw error;
+      if (result.error) {
+        throw new Error(result.error);
       }
       
       setStatus({ 
         type: 'success', 
-        msg: actionType === 'test' ? 'Test email queued. Check your inbox.' : 'Broadcast queued for delivery!' 
+        msg: actionType === 'test' ? 'Test email sent to your admin address.' : `Success! Broadcast sent to ${result.count} recipients.` 
       });
       
       if (actionType === 'send') {

@@ -56,15 +56,15 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     .eq('id', data.user.id)
     .single()
 
-  const role = profile?.role || 'public'
+  const role = profile?.role || 'doctor' // Default to doctor if missing
 
   if (role === "admin") return redirect("/admin/dashboard")
-  if (role.startsWith("doctor")) return redirect("/doctor/dashboard")
-  if (role.startsWith("student")) return redirect("/student/dashboard")
+  if (role === "doctor") return redirect("/doctor/dashboard")
+  if (role === "student") return redirect("/student/dashboard")
   if (role === "patient") return redirect("/portal/dashboard")
   if (role === "vendor") return redirect("/vendor/dashboard")
   
-  return redirect("/")
+  return redirect("/doctor/dashboard")
 }
 
 export async function signInWithProvider(provider: 'google') {
