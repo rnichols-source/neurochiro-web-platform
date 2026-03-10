@@ -17,7 +17,12 @@ export default async function DashboardRedirect() {
     .eq('id', user.id)
     .single();
 
-  const role = profile?.role || 'doctor';
+  let role = profile?.role || 'doctor';
+
+  // 🛡️ FOUNDER OVERRIDE
+  if (user.email === 'drray@neurochirodirectory.com') {
+    role = 'founder';
+  }
 
   const isAdmin = ['admin', 'regional_admin', 'founder', 'super_admin'].includes(role);
 

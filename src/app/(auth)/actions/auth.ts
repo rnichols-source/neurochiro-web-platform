@@ -25,7 +25,12 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     .eq('id', data.user.id)
     .single()
 
-  const role = profile?.role || 'doctor'
+  let role = profile?.role || 'doctor'
+  
+  // 🛡️ FOUNDER OVERRIDE
+  if (email === 'drray@neurochirodirectory.com') {
+    role = 'founder';
+  }
 
   // Standardize the dashboard routes
   const dashboardMap: Record<string, string> = {
