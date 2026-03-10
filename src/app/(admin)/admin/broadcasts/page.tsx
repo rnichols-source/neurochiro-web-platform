@@ -23,8 +23,13 @@ export default function AdminBroadcastsPage() {
     setLoading(true);
     setStatus(null);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      // Use getSession first as a fallback for getUser which can sometimes be strict in client components
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
+      
+      if (!user) {
+        throw new Error("Your session has expired. Please log in again.");
+      }
 
       // Queue the email to be processed by background worker
       const payload = {
@@ -50,7 +55,8 @@ export default function AdminBroadcastsPage() {
         setForm({ ...form, subject: "", title: "", body: "", ctaText: "", ctaUrl: "" });
       }
     } catch (err: any) {
-      setStatus({ type: 'error', msg: err.message });
+      console.error("Broadcast Error:", err);
+      setStatus({ type: 'error', msg: err.message || "An unexpected error occurred" });
     } finally {
       setLoading(false);
     }
@@ -177,9 +183,7 @@ export default function AdminBroadcastsPage() {
             <div className="flex-1 overflow-y-auto bg-gray-100 p-4">
               <div className="bg-white rounded-xl shadow-sm overflow-hidden max-w-md mx-auto">
                 <div className="bg-[#1E2D3B] p-6 text-center">
-                  <div className="w-12 h-12 bg-neuro-orange rounded-xl mx-auto flex items-center justify-center">
-                    <span className="text-white font-black text-xl">N</span>
-                  </div>
+                  <img src="/logo-white.png" alt="NeuroChiro" className="h-10 mx-auto object-contain" />
                   {form.title && <h2 className="mt-4 text-white font-bold text-lg uppercase tracking-tight">{form.title}</h2>}
                 </div>
                 <div className="p-8 space-y-6">
