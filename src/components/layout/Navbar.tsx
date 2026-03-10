@@ -140,19 +140,29 @@ export default function Navbar() {
                     <User className={`w-5 h-5 ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`} />
                   </Link>
                   {/* Dropdown for Logged In User */}
-                  <div className="absolute top-full right-0 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover/user:opacity-100 group-hover/user:translate-y-0 group-hover/user:pointer-events-auto transition-all">
-                    <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 w-48 overflow-hidden">
-                      <Link href="/dashboard" className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors text-sm font-bold text-neuro-navy">
-                        <Zap className="w-4 h-4 text-neuro-orange" /> My Dashboard
+                  <div className="absolute top-full right-0 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover/user:opacity-100 group-hover/user:translate-y-0 group-hover/user:pointer-events-auto transition-all z-[110]">
+                    <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 w-52 overflow-hidden">
+                      <Link 
+                        href="/dashboard" 
+                        className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-xl transition-all text-sm font-bold text-neuro-navy active:scale-95"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-neuro-orange/10 flex items-center justify-center text-neuro-orange">
+                          <Zap className="w-4 h-4" />
+                        </div>
+                        My Dashboard
                       </Link>
                       <button 
                         onClick={async () => {
+                          console.log("Signing out...");
                           await supabase.auth.signOut();
-                          window.location.href = '/';
+                          window.location.replace('/');
                         }}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-red-50 rounded-xl transition-colors text-sm font-bold text-red-600 border-t border-gray-50 mt-1"
+                        className="w-full flex items-center gap-3 p-4 hover:bg-red-50 rounded-xl transition-all text-sm font-bold text-red-600 border-t border-gray-50 mt-1 active:scale-95"
                       >
-                        <X className="w-4 h-4" /> Sign Out
+                        <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
+                          <X className="w-4 h-4" />
+                        </div>
+                        Sign Out
                       </button>
                     </div>
                   </div>
