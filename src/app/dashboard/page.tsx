@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createServerSupabase } from '@/lib/supabase-server';
+import { cookies } from 'next/headers';
 
 export default async function DashboardRedirect() {
   const supabase = createServerSupabase();
@@ -18,7 +19,14 @@ export default async function DashboardRedirect() {
 
   const role = profile?.role || 'doctor';
 
-  if (role === 'admin' || role === 'regional_admin' || role === 'founder' || role === 'super_admin') redirect('/admin/dashboard');
+  const isAdmin = ['admin', 'regional_admin', 'founder', 'super_admin'].includes(role);
+
+  if (isAdmin) {
+    const cookieStore = await cookies();
+    cookieStore.delete('nc_demo_role');
+    redirect('/admin/dashboard');
+  }
+  
   if (role.startsWith('doctor') || role === 'doctor') redirect('/doctor/dashboard');
   if (role.startsWith('student') || role === 'student') redirect('/student/dashboard');
   if (role === 'patient') redirect('/portal/dashboard');

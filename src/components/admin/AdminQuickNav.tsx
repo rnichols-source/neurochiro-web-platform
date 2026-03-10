@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase";
 
 const NAV_ITEMS = [
   {
@@ -69,12 +70,30 @@ export default function AdminQuickNav() {
 
   useEffect(() => {
     // Check if user is admin (check both cookie and potential supabase session)
-    const checkAdmin = () => {
+    const checkAdmin = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        const role = profile?.role;
+        if (['admin', 'founder', 'super_admin', 'regional_admin'].includes(role)) {
+          setIsAdmin(true);
+          return;
+        }
+      }
+
+      // Fallback to cookie check for perspective mode if they simulated admin
       const cookies = document.cookie.split('; ');
       const demoRole = cookies.find(row => row.startsWith('nc_demo_role='));
-      const role = demoRole ? demoRole.split('=')[1] : null;
+      const cookieRole = demoRole ? demoRole.split('=')[1] : null;
       
-      if (role === 'admin') {
+      if (cookieRole === 'admin') {
         setIsAdmin(true);
       }
     };

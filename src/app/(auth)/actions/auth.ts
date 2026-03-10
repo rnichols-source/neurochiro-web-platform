@@ -49,6 +49,12 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     destination = '/student/dashboard';
   }
 
+  // Clear any existing demo role cookie for admin logins
+  const cookieStore = await cookies();
+  if (['admin', 'founder', 'super_admin', 'regional_admin'].includes(role)) {
+    cookieStore.delete('nc_demo_role');
+  }
+
   return redirect(destination)
 }
 
