@@ -1,4 +1,4 @@
-export type UserRole = 'patient' | 'student' | 'doctor' | 'admin';
+export type UserRole = 'patient' | 'student' | 'doctor' | 'admin' | 'founder' | 'super_admin';
 export type SubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'trialing' | 'free';
 export type MembershipTier = 'starter' | 'growth' | 'pro';
 

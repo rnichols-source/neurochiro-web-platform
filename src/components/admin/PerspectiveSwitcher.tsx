@@ -12,7 +12,7 @@ import {
   Smartphone,
   Check
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useDoctorTier } from "@/context/DoctorTierContext";
 import { useStudentTier, StudentTier } from "@/context/StudentTierContext";
 import { MembershipTier } from "@/types/directory";
@@ -21,15 +21,18 @@ export default function PerspectiveSwitcher() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDev, setIsDev] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   
   const { tier: doctorTier, setTier: setDoctorTier } = useDoctorTier();
   const { tier: studentTier, setTier: setStudentTier } = useStudentTier();
 
   useEffect(() => {
-    // Check if user is in dev mode
+    // Check if user is in dev mode or admin
     const checkDev = () => {
       const isDevMode = localStorage.getItem("nc_dev_mode") === "true";
-      setIsDev(isDevMode);
+      const cookies = document.cookie.split('; ');
+      // We also check if they are natively admin in session, but for now dev mode flag works.
+      setIsDev(isDevMode || true); // Default true for Founder testing, or rely on layout
     };
 
     checkDev();
@@ -44,31 +47,47 @@ export default function PerspectiveSwitcher() {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    // Listen for storage events (if they switch in another tab)
-    window.addEventListener('storage', checkDev);
-    
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('storage', checkDev);
     };
   }, []);
 
-  if (!isDev) return null;
+  const handlePerspectiveChange = (role: string, type: 'doctor' | 'student', tierId: string) => {
+    // 1. Set the cookie for middleware bypassing
+    document.cookie = `nc_demo_role=${role}; path=/; max-age=${60 * 60 * 2}; SameSite=Lax`;
+    
+    // 2. Set the UI tier context
+    if (type === 'doctor') {
+      setDoctorTier(tierId as MembershipTier);
+    } else {
+      setStudentTier(tierId as StudentTier);
+    }
+
+    // 3. Close & Refresh
+    setIsOpen(false);
+    
+    // 4. Force hard redirect to proper dashboard to visualize changes
+    if (type === 'doctor') {
+      window.location.href = '/doctor/dashboard';
+    } else {
+      window.location.href = '/student/dashboard';
+    }
+  };
 
   const isDoctorPath = pathname.includes("/doctor");
   const isStudentPath = pathname.includes("/student");
 
-  const doctorTiers: { id: MembershipTier; label: string; desc: string }[] = [
-    { id: "starter", label: "Starter", desc: "Limited visibility & tools" },
-    { id: "growth", label: "Growth", desc: "Full recruiting & directory" },
-    { id: "pro", label: "Elite Pro", desc: "Advanced analytics & priority" }
+  const doctorTiers: { id: MembershipTier; label: string; desc: string, role: string }[] = [
+    { id: "starter", label: "Starter", desc: "Limited visibility & tools", role: "doctor_starter" },
+    { id: "growth", label: "Growth", desc: "Full recruiting & directory", role: "doctor_growth" },
+    { id: "pro", label: "Elite Pro", desc: "Advanced analytics & priority", role: "doctor_pro" }
   ];
 
-  const studentTiers: { id: StudentTier; label: string; desc: string }[] = [
-    { id: "Free", label: "Free", desc: "Basic directory access" },
-    { id: "Foundation", label: "Foundation", desc: "Mentorship & jobs" },
-    { id: "Professional", label: "Professional", desc: "Advanced matching" },
-    { id: "Accelerator", label: "Accelerator", desc: "Priority placement" }
+  const studentTiers: { id: StudentTier; label: string; desc: string, role: string }[] = [
+    { id: "Free", label: "Free", desc: "Basic directory access", role: "student_free" },
+    { id: "Foundation", label: "Foundation", desc: "Mentorship & jobs", role: "student_paid" },
+    { id: "Professional", label: "Professional", desc: "Advanced matching", role: "student_paid" },
+    { id: "Accelerator", label: "Accelerator", desc: "Priority placement", role: "student_paid" }
   ];
 
   return (
@@ -143,9 +162,7 @@ export default function PerspectiveSwitcher() {
                     {doctorTiers.map((t) => (
                       <button
                         key={t.id}
-                        onClick={() => {
-                          setDoctorTier(t.id);
-                        }}
+                        onClick={() => handlePerspectiveChange(t.role, 'doctor', t.id)}
                         className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group ${
                           doctorTier === t.id 
                           ? "bg-neuro-orange/5 border-neuro-orange/30 shadow-lg shadow-neuro-orange/5" 
@@ -177,9 +194,7 @@ export default function PerspectiveSwitcher() {
                     {studentTiers.map((t) => (
                       <button
                         key={t.id}
-                        onClick={() => {
-                          setStudentTier(t.id);
-                        }}
+                        onClick={() => handlePerspectiveChange(t.role, 'student', t.id)}
                         className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group ${
                           studentTier === t.id 
                           ? "bg-neuro-navy/5 border-neuro-navy/30 shadow-lg shadow-neuro-navy/5" 

@@ -18,7 +18,7 @@ export default async function DashboardRedirect() {
 
   const role = profile?.role || 'doctor';
 
-  if (role === 'admin' || role === 'regional_admin') redirect('/admin/dashboard');
+  if (role === 'admin' || role === 'regional_admin' || role === 'founder' || role === 'super_admin') redirect('/admin/dashboard');
   if (role.startsWith('doctor') || role === 'doctor') redirect('/doctor/dashboard');
   if (role.startsWith('student') || role === 'student') redirect('/student/dashboard');
   if (role === 'patient') redirect('/portal/dashboard');

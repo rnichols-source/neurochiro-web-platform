@@ -2,11 +2,11 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const routePermissions: Record<string, string[]> = {
-  '/admin': ['admin', 'regional_admin'],
-  '/doctor': ['doctor', 'doctor_pro', 'doctor_growth', 'doctor_starter', 'doctor_member', 'doctor_non_member', 'admin'],
-  '/student': ['student', 'student_paid', 'student_free', 'admin'],
-  '/portal': ['patient', 'admin'],
-  '/marketplace/dashboard': ['vendor', 'admin'],
+  '/admin': ['admin', 'regional_admin', 'founder', 'super_admin'],
+  '/doctor': ['doctor', 'doctor_pro', 'doctor_growth', 'doctor_starter', 'doctor_member', 'doctor_non_member', 'admin', 'founder', 'super_admin'],
+  '/student': ['student', 'student_paid', 'student_free', 'admin', 'founder', 'super_admin'],
+  '/portal': ['patient', 'admin', 'founder', 'super_admin'],
+  '/marketplace/dashboard': ['vendor', 'admin', 'founder', 'super_admin'],
 };
 // 🛡️ Rate Limiting Config
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
@@ -118,15 +118,15 @@ export default async function proxy(request: NextRequest) {
 
     // 🛡️ Safe Perspective Mode logic
     // Admins are allowed everywhere.
-    if (userRole === 'admin' || userRole === 'regional_admin') {
+    if (userRole === 'admin' || userRole === 'regional_admin' || userRole === 'founder' || userRole === 'super_admin') {
       return response;
     }
 
     if (!allowedRoles.includes(userRole)) {
       // Determine logical redirect based on role
       let targetPath = '/';
-      if (userRole.startsWith('doctor') || userRole === 'doctor') targetPath = '/doctor/dashboard';
-      else if (userRole.startsWith('student') || userRole === 'student') targetPath = '/student/dashboard';
+      if (userRole === 'admin' || userRole === 'regional_admin' || userRole === 'founder' || userRole === 'super_admin') targetPath = '/admin/dashboard';
+      else if (userRole.startsWith('doctor') || userRole === 'doctor') targetPath = '/doctor/dashboard';
       else if (userRole === 'vendor') targetPath = '/marketplace/dashboard';
       else if (userRole === 'patient') targetPath = '/portal/dashboard';
 

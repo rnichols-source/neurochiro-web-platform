@@ -6,6 +6,8 @@ export type UserRole =
   | 'doctor_non_member'
   | 'doctor_member'
   | 'admin'
+  | 'super_admin'
+  | 'founder'
   | 'regional_admin'
   | 'mastermind_member';
 

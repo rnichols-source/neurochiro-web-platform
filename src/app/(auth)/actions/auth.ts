@@ -10,37 +10,6 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   const password = formData.get('password') as string
   const supabase = createServerSupabase()
 
-  // 🛡️ Perspective Bypass Logic
-  if (email.endsWith('@neurochiro.com')) {
-    let role = 'public';
-    if (email.includes('admin')) role = 'admin';
-    else if (email.includes('vendor')) role = 'vendor';
-    else if (email.includes('patient')) role = 'patient';
-    else if (email.includes('student_paid')) role = 'student_paid';
-    else if (email.includes('student')) role = 'student_free';
-    else if (email.includes('doctor_pro')) role = 'doctor_pro';
-    else if (email.includes('doctor_growth')) role = 'doctor_growth';
-    else if (email.includes('doctor')) role = 'doctor_member';
-
-    const cookieStore = await cookies();
-    cookieStore.set('nc_demo_role', role, { 
-      path: '/', 
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 2
-    });
-
-    if (redirectUrl) return redirect(redirectUrl);
-
-    if (role === "admin") return redirect("/admin/dashboard");
-    if (role === "vendor") return redirect("/vendor/dashboard");
-    if (role === "patient") return redirect("/portal/dashboard");
-    if (role.startsWith("student")) return redirect("/student/dashboard");
-    if (role.startsWith("doctor")) return redirect("/doctor/dashboard");
-    
-    return redirect("/doctor/dashboard");
-  }
-
   const { error, data } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -61,13 +30,25 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   // Standardize the dashboard routes
   const dashboardMap: Record<string, string> = {
     'admin': '/admin/dashboard',
+    'founder': '/admin/dashboard',
+    'super_admin': '/admin/dashboard',
+    'regional_admin': '/admin/dashboard',
     'doctor': '/doctor/dashboard',
     'student': '/student/dashboard',
     'patient': '/portal/dashboard',
     'vendor': '/vendor/dashboard'
   }
 
-  const destination = dashboardMap[role] || '/doctor/dashboard'
+  // Handle tiered roles (doctor_pro, student_free, etc)
+  let destination = '/doctor/dashboard'; // Default
+  if (dashboardMap[role]) {
+    destination = dashboardMap[role];
+  } else if (role.startsWith('doctor')) {
+    destination = '/doctor/dashboard';
+  } else if (role.startsWith('student')) {
+    destination = '/student/dashboard';
+  }
+
   return redirect(destination)
 }
 
