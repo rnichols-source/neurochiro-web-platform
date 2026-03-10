@@ -56,15 +56,19 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     .eq('id', data.user.id)
     .single()
 
-  const role = profile?.role || 'doctor' // Default to doctor if missing
+  const role = profile?.role || 'doctor'
 
-  if (role === "admin") return redirect("/admin/dashboard")
-  if (role === "doctor") return redirect("/doctor/dashboard")
-  if (role === "student") return redirect("/student/dashboard")
-  if (role === "patient") return redirect("/portal/dashboard")
-  if (role === "vendor") return redirect("/vendor/dashboard")
-  
-  return redirect("/doctor/dashboard")
+  // Standardize the dashboard routes
+  const dashboardMap: Record<string, string> = {
+    'admin': '/admin/dashboard',
+    'doctor': '/doctor/dashboard',
+    'student': '/student/dashboard',
+    'patient': '/portal/dashboard',
+    'vendor': '/vendor/dashboard'
+  }
+
+  const destination = dashboardMap[role] || '/doctor/dashboard'
+  return redirect(destination)
 }
 
 export async function signInWithProvider(provider: 'google') {
