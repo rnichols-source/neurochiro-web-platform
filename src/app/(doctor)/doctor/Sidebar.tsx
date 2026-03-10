@@ -24,8 +24,10 @@ import {
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useDoctorTier } from "@/context/DoctorTierContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { createClient } from "@/lib/supabase";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -55,9 +57,21 @@ const eliteItems = [
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { tier, setTier } = useDoctorTier();
 
   const tierWeight = { starter: 1, growth: 2, pro: 3 };
+
+  const handleLogout = async () => {
+    if (confirm("Are you sure you want to log out?")) {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      // Clear demo role cookie if it exists
+      document.cookie = "nc_demo_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      router.push("/login");
+      router.refresh();
+    }
+  };
 
   const SidebarContent = (
     <div className="flex flex-col h-full bg-neuro-navy">
@@ -186,25 +200,31 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
         )}
 
-        <div className="flex items-center gap-3 px-3 py-3 border-t border-white/10">
-          <div className="relative">
-            <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-xs">
-              DN
-            </div>
-            {tierWeight[tier] >= 2 && (
-              <div className="absolute -top-1 -right-1 bg-neuro-orange rounded-full p-0.5 border border-neuro-navy">
-                <Star className="w-2 h-2 text-white fill-current" />
+        <div className="flex items-center gap-3 px-3 py-3 border-t border-white/10 group/profile">
+          <Link href="/doctor/profile" className="flex items-center gap-3 flex-1 min-w-0" onClick={onClose}>
+            <div className="relative">
+              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-xs group-hover/profile:bg-neuro-orange transition-colors">
+                DN
               </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-white truncate">Dr. Natalie West</p>
-            <p className="text-[10px] text-gray-400 truncate flex items-center gap-1 capitalize">
-              <ShieldCheck className="w-2 h-2 text-gray-500" />
-              {tier} Member
-            </p>
-          </div>
-          <button className="text-gray-400 hover:text-white">
+              {tierWeight[tier as DoctorTier] >= 2 && (
+                <div className="absolute -top-1 -right-1 bg-neuro-orange rounded-full p-0.5 border border-neuro-navy">
+                  <Star className="w-2 h-2 text-white fill-current" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-white truncate group-hover/profile:text-neuro-orange transition-colors">Dr. Natalie West</p>
+              <p className="text-[10px] text-gray-400 truncate flex items-center gap-1 capitalize">
+                <ShieldCheck className="w-2 h-2 text-gray-500" />
+                {tier} Member
+              </p>
+            </div>
+          </Link>
+          <button 
+            onClick={handleLogout}
+            className="text-gray-400 hover:text-red-400 p-2 rounded-lg hover:bg-white/5 transition-all"
+            title="Logout"
+          >
             <LogOut className="w-4 h-4" />
           </button>
         </div>
