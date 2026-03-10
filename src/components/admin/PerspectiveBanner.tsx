@@ -20,7 +20,8 @@ export default function PerspectiveBanner() {
     // Clear the cookie
     document.cookie = "nc_demo_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     setDemoRole(null);
-    router.refresh();
+    // Force redirect to the main dashboard redirector which will now see them as real admin
+    window.location.href = '/dashboard';
   };
 
   if (!demoRole) return null;

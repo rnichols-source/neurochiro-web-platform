@@ -59,6 +59,27 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { tier, setTier } = useDoctorTier();
+  const [isRealAdmin, setIsRealAdmin] = useState(false);
+
+  // Check for real admin session to show emergency exit
+  useState(() => {
+    const checkRealRole = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        if (['admin', 'founder', 'super_admin'].includes(profile?.role)) {
+          setIsRealAdmin(true);
+        }
+      }
+    };
+    checkRealRole();
+  });
 
   const tierWeight = { starter: 1, growth: 2, pro: 3 };
 
@@ -142,6 +163,24 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
           );
         })}
+
+        {/* 🛡️ EMERGENCY ADMIN EXIT */}
+        {isRealAdmin && (
+          <div className="pt-4 mt-4 border-t border-white/5">
+            <Link
+              href="/admin/dashboard"
+              onClick={() => {
+                document.cookie = "nc_demo_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                if (onClose) onClose();
+              }}
+              className="flex items-center gap-3 px-3 py-2 bg-neuro-orange/10 text-neuro-orange rounded-lg hover:bg-neuro-orange/20 transition-all border border-neuro-orange/20"
+            >
+              <ShieldCheck className="w-5 h-5" />
+              <span className="font-bold text-sm">Admin Control</span>
+              <ChevronRight className="w-4 h-4 ml-auto" />
+            </Link>
+          </div>
+        )}
       </nav>
 
       {/* Elite Programs Section */}
