@@ -46,7 +46,7 @@ export async function sendBroadcastAction(formData: FormData) {
   }
 
   // 3. Prepare Batch Payload
-  const batchEmails = recipients.map(r => ({
+  const batchEmails = recipients.map((r: any) => ({
     from: "NeuroChiro <support@neurochirodirectory.com>",
     to: r.email,
     subject: subject,
@@ -56,7 +56,7 @@ export async function sendBroadcastAction(formData: FormData) {
   try {
     // 4. Send via Resend Batch API
     // (Resend supports up to 100 emails per batch call)
-    const { data, error: resendError } = await resend.batches.send(batchEmails);
+    const { data, error: resendError } = await resend.batch.send(batchEmails);
 
     if (resendError) throw resendError;
 

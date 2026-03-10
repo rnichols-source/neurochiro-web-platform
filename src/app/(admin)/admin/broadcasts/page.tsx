@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Mail, Send, Eye, Users, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
-import { sendBroadcastAction } from "../../actions/comms-actions";
+import { sendBroadcastAction } from "@/app/actions/comms-actions";
 
 export default function AdminBroadcastsPage() {
   const [loading, setLoading] = useState(false);
