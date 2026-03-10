@@ -23,10 +23,23 @@ export default function AdminBroadcastsPage() {
     setLoading(true);
     setStatus(null);
     try {
-      // Use getSession first as a fallback for getUser which can sometimes be strict in client components
+      // 1. Check for real Supabase session
       const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
+      let user = session?.user;
       
+      // 2. Check for Demo Perspective if real session is missing
+      if (!user) {
+        const isDemo = document.cookie.includes('nc_demo_role=admin');
+        if (isDemo) {
+          // Simulate a user for the automation payload
+          user = { 
+            id: 'demo-admin-id', 
+            email: 'admin@neurochiro.com',
+            user_metadata: { full_name: 'Demo Admin' }
+          } as any;
+        }
+      }
+
       if (!user) {
         throw new Error("Your session has expired. Please log in again.");
       }
@@ -39,12 +52,19 @@ export default function AdminBroadcastsPage() {
         testEmail: user.email // if test, send to admin's email
       };
 
+      // In demo mode, we might hit RLS issues if we try to insert directly from client
+      // For a true test, we try the insert, but catch if it's an RLS failure in demo mode
       const { error } = await supabase.from('automation_queue').insert({
         event_type: 'mass_email_broadcast',
         payload: payload
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '42501' && document.cookie.includes('nc_demo_role')) {
+           throw new Error("Demo Mode: You don't have database write permissions. Please log in with a real admin account to send actual emails.");
+        }
+        throw error;
+      }
       
       setStatus({ 
         type: 'success', 
