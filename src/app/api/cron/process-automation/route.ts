@@ -32,14 +32,14 @@ export async function GET(req: Request) {
     }
 
     // 3. Mark them as processing immediately to prevent race conditions
-    const itemIds = queueItems.map(item => item.id);
+    const itemIds = queueItems.map((item: any) => item.id);
     await supabase
       .from('automation_queue')
       .update({ status: 'processing', updated_at: new Date().toISOString() })
       .in('id', itemIds);
 
     // 4. Process all items (in parallel with Promise.allSettled)
-    const processingPromises = queueItems.map(item => 
+    const processingPromises = queueItems.map((item: any) => 
       executeAutomation(item.id, item.event_type, item.payload)
     );
 
