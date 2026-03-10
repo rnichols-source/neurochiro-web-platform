@@ -38,22 +38,24 @@ function cn(...inputs: ClassValue[]) {
 
 // Full set of nav items
 const allNavItems = [
-  { name: "System Control", href: "/admin/dashboard", icon: LayoutDashboard, roles: ['super_admin'] },
-  { name: "Talent Intelligence", href: "/admin/users", icon: Users, roles: ['super_admin', 'regional_admin'] },
-  { name: "Programs & LMS", href: "/admin/programs", icon: GraduationCap, roles: ['super_admin'] },
-  { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert, roles: ['super_admin', 'support_admin'] },
-  { name: "Announcements", href: "/admin/announcements", icon: Megaphone, roles: ['super_admin'] },
-  { name: "Broadcasts", href: "/admin/broadcasts", icon: Mail, roles: ['super_admin'] },
-  { name: "Regions & Licensing", href: "/admin/regions", icon: Globe, roles: ['super_admin'] },
-  { name: "Revenue & Payments", href: "/admin/revenue", icon: CreditCard, roles: ['super_admin'] },
-  { name: "Communication", href: "/admin/inbox", icon: MessageSquare, roles: ['super_admin', 'support_admin', 'regional_admin'] },
-  { name: "System Logs", href: "/admin/logs", icon: History, roles: ['super_admin'] },
+  { name: "System Control", href: "/admin/dashboard", icon: LayoutDashboard, roles: ['super_admin', 'founder', 'admin'] },
+  { name: "Talent Intelligence", href: "/admin/users", icon: Users, roles: ['super_admin', 'founder', 'admin', 'regional_admin'] },
+  { name: "Programs & LMS", href: "/admin/programs", icon: GraduationCap, roles: ['super_admin', 'founder', 'admin'] },
+  { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert, roles: ['super_admin', 'founder', 'admin', 'support_admin'] },
+  { name: "Announcements", href: "/admin/announcements", icon: Megaphone, roles: ['super_admin', 'founder', 'admin'] },
+  { name: "Broadcasts", href: "/admin/broadcasts", icon: Mail, roles: ['super_admin', 'founder', 'admin'] },
+  { name: "Regions & Licensing", href: "/admin/regions", icon: Globe, roles: ['super_admin', 'founder', 'admin'] },
+  { name: "Revenue & Payments", href: "/admin/revenue", icon: CreditCard, roles: ['super_admin', 'founder', 'admin'] },
+  { name: "Communication", href: "/admin/inbox", icon: MessageSquare, roles: ['super_admin', 'founder', 'admin', 'support_admin', 'regional_admin'] },
+  { name: "System Logs", href: "/admin/logs", icon: History, roles: ['super_admin', 'founder', 'admin'] },
 ];
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+import { createClient } from "@/lib/supabase";
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
@@ -62,20 +64,38 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   // States
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [health, setHealth] = useState<any>(null);
-  const [userRole, setUserRole] = useState('super_admin'); // Default for now, in prod fetch from Supabase
+  const [userRole, setUserRole] = useState('super_admin'); 
   const [isLockingDown, setIsLockingDown] = useState(false);
 
-  // Filter items based on role
-  const filteredNavItems = allNavItems.filter(item => item.roles.includes(userRole));
-
-  // Fetch health data
+  // Fetch real role and health data
   useEffect(() => {
-    async function loadHealth() {
+    async function loadData() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        let role = profile?.role || 'admin';
+        if (user.email === 'drray@neurochirodirectory.com') {
+          role = 'founder';
+        }
+        setUserRole(role);
+      }
+
+      const healthData = await getSystemHealth();
+      setHealth(healthData);
+    }
+    
+    loadData();
+    const interval = setInterval(async () => {
       const data = await getSystemHealth();
       setHealth(data);
-    }
-    loadHealth();
-    const interval = setInterval(loadHealth, 30000); // Check every 30s
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -212,13 +232,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               className="w-10 h-10 rounded-xl bg-neuro-navy-light flex items-center justify-center text-white font-bold text-sm border border-white/10 hover:border-neuro-orange/50 transition-all shadow-xl active:scale-95 overflow-hidden group"
             >
               <div className="absolute inset-0 bg-neuro-orange opacity-0 group-hover:opacity-10 transition-opacity" />
-              RN
+              {userRole === 'founder' ? 'RN' : 'AD'}
             </button>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-white truncate">Super Admin</p>
-              <p className="text-[10px] text-gray-500 truncate flex items-center gap-1">
+              <p className="text-xs font-bold text-white truncate">
+                {userRole === 'founder' ? 'Raymond Nichols' : 'Administrator'}
+              </p>
+              <p className="text-[10px] text-gray-500 truncate flex items-center gap-1 capitalize">
                 <ShieldCheck className="w-2 h-2 text-blue-500" />
-                Root Access
+                {userRole.replace('_', ' ')}
               </p>
             </div>
             <div className="flex items-center gap-1">
