@@ -101,7 +101,7 @@ export default function PerspectiveSwitcher() {
       </button>
 
       {/* Desktop Toggle Trigger */}
-      <div className="fixed bottom-6 left-6 z-[9998] hidden md:block">
+      <div className="fixed bottom-6 right-6 z-[9998] hidden md:block">
         <button 
           onClick={() => setIsOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-neuro-navy text-white rounded-full shadow-2xl border border-white/10 hover:bg-neuro-navy-light transition-all group"
