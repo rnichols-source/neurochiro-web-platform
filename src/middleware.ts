@@ -125,11 +125,15 @@ export default async function proxy(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
-    const userRole = profile?.role || 'public'
+    const userRole = profile?.role || 'doctor' // Default to doctor if missing to allow dashboard access
     const allowedRoles = routePermissions[matchedBase]
 
     if (!allowedRoles.includes(userRole) && userRole !== 'admin') {
-      return NextResponse.redirect(new URL('/', request.url))
+      // If they are a doctor trying to access /admin, send them to /doctor instead of home
+      if (userRole === 'doctor' && pathname.startsWith('/admin')) {
+        return NextResponse.redirect(new URL('/doctor/dashboard', request.url))
+      }
+      return NextResponse.redirect(new URL('/doctor/dashboard', request.url))
     }
     
     const isPaidRoute = ['doctor_pro', 'doctor_growth', 'student_paid'].includes(userRole)

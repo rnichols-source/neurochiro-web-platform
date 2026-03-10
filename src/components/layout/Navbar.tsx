@@ -130,14 +130,33 @@ export default function Navbar() {
             {user ? (
               <div className="flex items-center gap-4">
                 <NotificationBell />
-                <Link 
-                  href="/dashboard" 
-                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
-                    useWhiteText ? 'border-white/20 hover:border-white bg-white/10' : 'border-gray-200 hover:border-neuro-navy bg-gray-50'
-                  }`}
-                >
-                  <User className={`w-5 h-5 ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`} />
-                </Link>
+                <div className="relative group/user">
+                  <Link 
+                    href="/dashboard" 
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+                      useWhiteText ? 'border-white/20 hover:border-white bg-white/10' : 'border-gray-200 hover:border-neuro-navy bg-gray-50'
+                    }`}
+                  >
+                    <User className={`w-5 h-5 ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`} />
+                  </Link>
+                  {/* Dropdown for Logged In User */}
+                  <div className="absolute top-full right-0 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover/user:opacity-100 group-hover/user:translate-y-0 group-hover/user:pointer-events-auto transition-all">
+                    <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 w-48 overflow-hidden">
+                      <Link href="/dashboard" className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors text-sm font-bold text-neuro-navy">
+                        <Zap className="w-4 h-4 text-neuro-orange" /> My Dashboard
+                      </Link>
+                      <button 
+                        onClick={async () => {
+                          await supabase.auth.signOut();
+                          window.location.href = '/';
+                        }}
+                        className="w-full flex items-center gap-3 p-3 hover:bg-red-50 rounded-xl transition-colors text-sm font-bold text-red-600 border-t border-gray-50 mt-1"
+                      >
+                        <X className="w-4 h-4" /> Sign Out
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               <>
