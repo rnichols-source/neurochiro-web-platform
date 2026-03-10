@@ -10,8 +10,8 @@ const routePermissions: Record<string, string[]> = {
 };
 // 🛡️ Rate Limiting Config
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const MAX_GENERAL_REQUESTS = 100;
-const MAX_AUTH_REQUESTS = 10; // Strict for login/signup
+const MAX_GENERAL_REQUESTS = 1000; // Increased from 100
+const MAX_AUTH_REQUESTS = 100; // Increased from 10
 const ipCache = new Map<string, { count: number, start: number }>();
 
 export default async function proxy(request: NextRequest) {
@@ -19,6 +19,15 @@ export default async function proxy(request: NextRequest) {
   const now = Date.now();
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get('host') || '';
+
+  // 🛡️ Skip rate limiting for static assets and system paths
+  const isStatic = pathname.startsWith('/_next') || 
+                   pathname.includes('/favicon.ico') || 
+                   pathname.match(/\.(png|jpg|jpeg|svg|webp|gif|css|js)$/);
+  
+  if (isStatic) {
+    return NextResponse.next();
+  }
 
   // 🌐 MULTI-DOMAIN ROUTING
   // If the user visits neurochiromastermind.com, rewrite them to the /mastermind route internally
