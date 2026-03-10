@@ -3,8 +3,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 const routePermissions: Record<string, string[]> = {
   '/admin': ['admin', 'regional_admin'],
-  '/doctor': ['doctor_pro', 'doctor_growth', 'doctor_member', 'doctor_non_member', 'admin'],
-  '/student': ['student_paid', 'student_free', 'admin'],
+  '/doctor': ['doctor', 'doctor_pro', 'doctor_growth', 'doctor_starter', 'doctor_member', 'doctor_non_member', 'admin'],
+  '/student': ['student', 'student_paid', 'student_free', 'admin'],
   '/portal': ['patient', 'admin'],
   '/marketplace/dashboard': ['vendor', 'admin'],
 };
@@ -129,11 +129,22 @@ export default async function proxy(request: NextRequest) {
     const allowedRoles = routePermissions[matchedBase]
 
     if (!allowedRoles.includes(userRole) && userRole !== 'admin') {
-      // If they are a doctor trying to access /admin, send them to /doctor instead of home
-      if (userRole === 'doctor' && pathname.startsWith('/admin')) {
-        return NextResponse.redirect(new URL('/doctor/dashboard', request.url))
+      // Determine logical redirect based on role
+      let targetPath = '/';
+      if (userRole === 'admin' || userRole === 'regional_admin') targetPath = '/admin/dashboard';
+      else if (userRole.startsWith('doctor') || userRole === 'doctor') targetPath = '/doctor/dashboard';
+      else if (userRole.startsWith('student') || userRole === 'student') targetPath = '/student/dashboard';
+      else if (userRole === 'vendor') targetPath = '/marketplace/dashboard';
+      else if (userRole === 'patient') targetPath = '/portal/dashboard';
+
+      // 🛡️ Loop Protection: If they are already ON the target path and it failed permission check, 
+      // do NOT redirect them back to it. Send them to home.
+      if (pathname.startsWith(targetPath)) {
+        console.warn(`[MIDDLEWARE] Redirect loop prevented for ${userRole} on ${pathname}`);
+        return NextResponse.redirect(new URL('/', request.url));
       }
-      return NextResponse.redirect(new URL('/doctor/dashboard', request.url))
+
+      return NextResponse.redirect(new URL(targetPath, request.url))
     }
     
     const isPaidRoute = ['doctor_pro', 'doctor_growth', 'student_paid'].includes(userRole)
