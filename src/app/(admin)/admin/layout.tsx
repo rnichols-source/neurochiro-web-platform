@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 import { Menu, Bell, Search, User } from "lucide-react";
+import PerspectiveBanner from "@/components/admin/PerspectiveBanner";
 
 export default function AdminLayout({
   children,
@@ -19,11 +20,13 @@ export default function AdminLayout({
   }, [pathname]);
 
   return (
-    <div className="flex h-screen bg-[#020617] overflow-hidden">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Admin Header */}
+    <div className="flex flex-col h-screen bg-[#020617] overflow-hidden">
+      <PerspectiveBanner />
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          {/* Admin Header */}
         <header className="h-16 lg:h-20 bg-[#0F172A] border-b border-white/5 flex items-center justify-between px-4 lg:px-8 shrink-0 z-40">
           <div className="flex items-center gap-4">
             <button 

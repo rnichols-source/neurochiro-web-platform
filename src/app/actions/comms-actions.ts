@@ -21,32 +21,48 @@ export async function sendBroadcastAction(formData: FormData) {
     id, 
     email, 
     full_name,
-    email_preferences!inner(marketing_opt_in, has_bounced, has_complained)
+    email_preferences(marketing_opt_in, has_bounced, has_complained)
   `);
 
   // --- SEGMENT LOGIC ---
   if (segment === "admin_test") {
     // Only send to the logged-in admin
     query = query.eq("id", user.id);
-  } else if (segment === "all_doctors") query = query.eq("role", "doctor");
-  else if (segment === "all_students") query = query.eq("role", "student");
+  } else if (segment === "all") {
+    // No role filter needed for all active users
+  } else if (segment === "doctor") query = query.eq("role", "doctor");
+  else if (segment === "student") query = query.eq("role", "student");
+  else if (segment === "patient") query = query.eq("role", "patient");
   else if (segment === "paid_doctors") query = query.eq("role", "doctor").in("subscription_tier", ["pro", "elite"]);
   else if (segment === "incomplete_profiles") query = query.eq("is_verified", false);
+  else if (segment === "all_doctors") query = query.eq("role", "doctor"); // Legacy fallback
+  else if (segment === "all_students") query = query.eq("role", "student"); // Legacy fallback
   
   // 🛡️ REPUTATION FILTER: Always exclude bounces, complaints, and opt-outs
-  query = query
-    .eq("email_preferences.marketing_opt_in", true)
-    .eq("email_preferences.has_bounced", false)
-    .eq("email_preferences.has_complained", false);
-
+  // Note: Using a left join allows users who haven't explicitly set preferences to still receive emails.
+  // We check that they haven't opted out or bounced explicitly.
   const { data: recipients, error: dbError } = await query;
 
   if (dbError || !recipients || recipients.length === 0) {
     return { error: "No eligible recipients found for this segment." };
   }
 
+  // Filter in memory to handle the case where email_preferences might be null
+  const validRecipients = recipients.filter((r: any) => {
+    const prefs = r.email_preferences || {};
+    // If prefs exist, ensure they haven't opted out, bounced, or complained
+    if (prefs.marketing_opt_in === false) return false;
+    if (prefs.has_bounced === true) return false;
+    if (prefs.has_complained === true) return false;
+    return true;
+  });
+
+  if (validRecipients.length === 0) {
+    return { error: "No eligible recipients found for this segment after applying reputation filters." };
+  }
+
   // 3. Prepare Batch Payload
-  const batchEmails = recipients.map((r: any) => ({
+  const batchEmails = validRecipients.map((r: any) => ({
     from: "NeuroChiro <support@neurochirodirectory.com>",
     to: r.email,
     subject: subject,

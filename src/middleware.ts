@@ -99,18 +99,6 @@ export default async function proxy(request: NextRequest) {
   const matchedBase = Object.keys(routePermissions).find(path => pathname.startsWith(path))
 
   if (matchedBase) {
-    // 🛡️ Demo Perspective Bypass
-    const demoRole = request.cookies.get('nc_demo_role')?.value;
-    
-    if (demoRole) {
-      console.log(`[PROXY] Demo Mode Active: Simulated Role = ${demoRole}`);
-      const allowedRoles = routePermissions[matchedBase];
-      if (allowedRoles.includes(demoRole) || demoRole === 'admin') {
-        return response; // Allow access
-      }
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -128,11 +116,16 @@ export default async function proxy(request: NextRequest) {
     const userRole = profile?.role || 'doctor' // Default to doctor if missing to allow dashboard access
     const allowedRoles = routePermissions[matchedBase]
 
-    if (!allowedRoles.includes(userRole) && userRole !== 'admin') {
+    // 🛡️ Safe Perspective Mode logic
+    // Admins are allowed everywhere.
+    if (userRole === 'admin' || userRole === 'regional_admin') {
+      return response;
+    }
+
+    if (!allowedRoles.includes(userRole)) {
       // Determine logical redirect based on role
       let targetPath = '/';
-      if (userRole === 'admin' || userRole === 'regional_admin') targetPath = '/admin/dashboard';
-      else if (userRole.startsWith('doctor') || userRole === 'doctor') targetPath = '/doctor/dashboard';
+      if (userRole.startsWith('doctor') || userRole === 'doctor') targetPath = '/doctor/dashboard';
       else if (userRole.startsWith('student') || userRole === 'student') targetPath = '/student/dashboard';
       else if (userRole === 'vendor') targetPath = '/marketplace/dashboard';
       else if (userRole === 'patient') targetPath = '/portal/dashboard';
