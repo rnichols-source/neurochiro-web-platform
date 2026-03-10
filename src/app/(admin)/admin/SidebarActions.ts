@@ -21,9 +21,11 @@ export async function getSystemHealth() {
   };
 }
 
+import { createServerSupabase } from "@/lib/supabase-server";
+
 export async function logoutAdmin() {
-  // Logic to sign out via Supabase
-  console.log("Admin logging out...");
+  const supabase = createServerSupabase();
+  await supabase.auth.signOut();
   return { success: true };
 }
 

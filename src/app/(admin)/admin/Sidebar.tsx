@@ -82,7 +82,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const handleLogout = async () => {
     if (confirm("Are you sure you want to log out of Admin OS?")) {
       await logoutAdmin();
+      // Clear demo role cookie if it exists
+      document.cookie = "nc_demo_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       router.push('/login');
+      router.refresh();
     }
   };
 
