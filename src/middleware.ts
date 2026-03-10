@@ -109,15 +109,23 @@ export default async function proxy(request: NextRequest) {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role, subscription_status')
+      .select('role, subscription_status, email')
       .eq('id', user.id)
       .single()
 
-    const userRole = profile?.role || 'doctor' // Default to doctor if missing to allow dashboard access
+    let userRole = profile?.role || 'doctor'
+    const userEmail = user.email;
+
+    // 🛡️ MASTER FOUNDER OVERRIDE
+    // If this is the founder, grant universal access regardless of DB role
+    if (userEmail === 'drray@neurochirodirectory.com') {
+      userRole = 'founder';
+    }
+
     const allowedRoles = routePermissions[matchedBase]
 
     // 🛡️ Safe Perspective Mode logic
-    // Admins are allowed everywhere.
+    // Admins and Founders are allowed everywhere.
     if (userRole === 'admin' || userRole === 'regional_admin' || userRole === 'founder' || userRole === 'super_admin') {
       return response;
     }
