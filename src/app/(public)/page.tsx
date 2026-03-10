@@ -15,29 +15,6 @@ import Link from "next/link";
 import { Zap, Activity, Brain as BrainIcon, BookOpen, Stethoscope } from "lucide-react";
 
 export default function Home() {
-  const router = useRouter();
-  const supabase = createClient();
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-        
-        const role = profile?.role || 'doctor';
-        if (role === 'admin') router.push('/admin/dashboard');
-        else if (role === 'doctor') router.push('/doctor/dashboard');
-        else if (role === 'student') router.push('/student/dashboard');
-        else if (role === 'patient') router.push('/portal/dashboard');
-      }
-    };
-    checkUser();
-  }, [router, supabase]);
-
   return (
     <div className="flex flex-col min-h-screen bg-neuro-cream overflow-x-hidden">
       
