@@ -231,7 +231,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
               ctaUrl: payload.ctaUrl
             });
           }
-        } else {
+        } else if (supabaseAdmin) {
           // Fetch target audience
           let query = supabaseAdmin.from('profiles').select('email, role, subscription_tier');
           

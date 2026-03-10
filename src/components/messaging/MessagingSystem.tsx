@@ -81,7 +81,7 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
             table: 'messages',
             filter: `conversation_id=eq.${selectedConversation.id}`
           }, 
-          (payload) => {
+          (payload: any) => {
             setMessages(prev => [...prev, payload.new]);
             scrollToBottom();
           }
@@ -116,7 +116,7 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
       if (error) throw error;
       
       // Format conversations for UI
-      const formatted = data.map(conv => {
+      const formatted = data.map((conv: any) => {
         const otherUser = conv.participant_one.id === currentUserId ? conv.participant_two : conv.participant_one;
         return {
           id: conv.id,
@@ -132,6 +132,32 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
       return [];
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMessages = async (conversationId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setMessages(data || []);
+      
+      // Mark as read
+      const unreadMessages = data?.filter((m: any) => m.recipient_id === currentUserId && !m.read_at);
+      if (unreadMessages && unreadMessages.length > 0) {
+        await supabase
+          .from('messages')
+          .update({ read_at: new Date().toISOString() })
+          .in('id', unreadMessages.map((m: any) => m.id));
+      }
+      
+      setTimeout(scrollToBottom, 100);
+    } catch (err) {
+      console.error("Error fetching messages:", err);
     }
   };
 
