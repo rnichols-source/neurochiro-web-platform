@@ -24,6 +24,7 @@ import {
   MessageSquare
 } from "lucide-react";
 import Link from "next/link";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { onReferralSentAction } from "@/app/actions/automations";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import GoogleReviews from "@/components/directory/GoogleReviews";
@@ -34,11 +35,21 @@ export default function DoctorProfile() {
   const router = useRouter();
   
   const [isLoading, setIsLoading] = useState(false);
+  const [session, setSession] = useState<any>(null);
+  const supabase = createClientComponentClient();
   const [modalState, setModalState] = useState({
     isOpen: false,
     title: "",
     message: ""
   });
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+    };
+    fetchSession();
+  }, [supabase]);
   
   // Normalize a slug for comparison: decode, remove leading 'dr' if it's a prefix, lowercase, and remove non-alphanumeric
   const normalize = (s: string) => {
@@ -213,17 +224,28 @@ export default function DoctorProfile() {
                     </div>
                   </Link>
 
-                  <button 
-                    onClick={handleEmail}
-                    className="w-full flex items-center gap-4 p-5 bg-white/5 rounded-3xl border border-white/10 group hover:bg-white/10 hover:border-white/20 transition-all text-left"
-                  >
-                    <div className="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400 group-hover:bg-emerald-500/30 transition-all">
-                      <Mail className="w-5 h-5" />
-                    </div>
-                    <span className="text-sm font-bold text-slate-100">Contact via Email</span>
-                  </button>
-                </div>
-
+                  {session ? (
+                    <Link
+                      href={`/doctor/messages?to=${doctor.id}`}
+                      className="w-full flex items-center gap-4 p-5 bg-white/5 rounded-3xl border border-white/10 group hover:bg-white/10 hover:border-white/20 transition-all text-left"
+                    >
+                      <div className="p-2.5 bg-neuro-orange/20 rounded-xl text-neuro-orange group-hover:bg-neuro-orange/30 transition-all">
+                        <MessageSquare className="w-5 h-5" />
+                      </div>
+                      <span className="text-sm font-bold text-slate-100 block">Direct Message</span>
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={handleEmail}
+                      className="w-full flex items-center gap-4 p-5 bg-white/5 rounded-3xl border border-white/10 group hover:bg-white/10 hover:border-white/20 transition-all text-left"
+                    >
+                      <div className="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400 group-hover:bg-emerald-500/30 transition-all">
+                        <Mail className="w-5 h-5" />
+                      </div>
+                      <span className="text-sm font-bold text-slate-100 block">Contact via Email</span>
+                    </button>
+                  )}
+                  </div>
                 <div className="flex gap-4 mt-10">
                   <Link 
                     href={doctor.instagram_url || "https://instagram.com"} 

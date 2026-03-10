@@ -22,7 +22,8 @@ import {
   X,
   ShieldCheck,
   AlertTriangle,
-  Loader2
+  Loader2,
+  Mail
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -42,6 +43,7 @@ const allNavItems = [
   { name: "Programs & LMS", href: "/admin/programs", icon: GraduationCap, roles: ['super_admin'] },
   { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert, roles: ['super_admin', 'support_admin'] },
   { name: "Announcements", href: "/admin/announcements", icon: Megaphone, roles: ['super_admin'] },
+  { name: "Broadcasts", href: "/admin/broadcasts", icon: Mail, roles: ['super_admin'] },
   { name: "Regions & Licensing", href: "/admin/regions", icon: Globe, roles: ['super_admin'] },
   { name: "Revenue & Payments", href: "/admin/revenue", icon: CreditCard, roles: ['super_admin'] },
   { name: "Communication", href: "/admin/inbox", icon: MessageSquare, roles: ['super_admin', 'support_admin', 'regional_admin'] },

@@ -218,6 +218,53 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         }
         break;
 
+      case 'mass_email_broadcast':
+        if (payload.isTest) {
+          // Send only to the test email
+          if (payload.testEmail) {
+            await sendPremiumEmail({
+              to: payload.testEmail,
+              subject: `[TEST] ${payload.subject}`,
+              title: payload.title,
+              body: payload.body,
+              ctaText: payload.ctaText,
+              ctaUrl: payload.ctaUrl
+            });
+          }
+        } else {
+          // Fetch target audience
+          let query = supabaseAdmin.from('profiles').select('email, role, subscription_tier');
+          
+          if (payload.audience !== 'all') {
+            if (payload.audience === 'paid_doctors') {
+              query = query.eq('role', 'doctor').in('subscription_tier', ['pro', 'elite']);
+            } else {
+              query = query.eq('role', payload.audience);
+            }
+          }
+          
+          const { data: users } = await query;
+          
+          if (users && users.length > 0) {
+            // For production, consider bulk sending via Resend API
+            for (const u of users) {
+              if (u.email) {
+                // To avoid rate limits in this loop, a real system would chunk or enqueue individual emails.
+                // We'll send them here for now, assuming small initial batches.
+                await sendPremiumEmail({
+                  to: u.email,
+                  subject: payload.subject,
+                  title: payload.title,
+                  body: payload.body,
+                  ctaText: payload.ctaText,
+                  ctaUrl: payload.ctaUrl
+                });
+              }
+            }
+          }
+        }
+        break;
+
       case 'membership_upgrade':
         if (emailEnabled && payload.email) {
           await sendPremiumEmail({
