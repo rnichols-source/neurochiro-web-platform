@@ -82,7 +82,7 @@ const sendPremiumEmail = async (options: { to: string, subject: string, title: s
   `;
 
   return resend.emails.send({
-    from: 'NeuroChiro <team@neurochiro.co>',
+    from: 'NeuroChiro <support@neurochirodirectory.com>',
     to: [options.to],
     subject: options.subject,
     html: html,
@@ -394,8 +394,8 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
       case 'admin_notification':
         if (process.env.NODE_ENV !== 'development') {
           await resend.emails.send({
-            from: 'NeuroChiro System <alerts@neurochiro.com>',
-            to: 'admin@neurochiro.com',
+            from: 'NeuroChiro System <support@neurochirodirectory.com>',
+            to: 'support@neurochirodirectory.com',
             subject: `[ADMIN] ${payload.subject}`,
             html: payload.html
           });

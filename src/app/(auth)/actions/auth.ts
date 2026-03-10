@@ -67,7 +67,7 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   return redirect("/")
 }
 
-export async function signInWithProvider(provider: 'google' | 'apple') {
+export async function signInWithProvider(provider: 'google') {
   const supabase = createServerSupabase()
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,

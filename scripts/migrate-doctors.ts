@@ -3,6 +3,10 @@ import path from 'path';
 import { Resend } from 'resend';
 import { parse } from 'csv-parse/sync';
 import twilio from 'twilio';
+import * as dotenv from 'dotenv';
+
+// Load .env from the root of neurochiro-web-platform
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 // --- CONFIGURATION ---
 const CSV_PATH = path.resolve(process.cwd(), '../Downloads/Chiropractors-Grid view.csv');
@@ -131,13 +135,13 @@ async function sendInvitation(to: string, name: string, practice: string) {
     </html>
   `;
 
-  await resend.emails.send({
-    from: 'NeuroChiro <onboarding@resend.dev>',
+  const response = await resend.emails.send({
+    from: 'NeuroChiro <support@neurochirodirectory.com>',
     to: [to],
     subject: subject,
     html: html,
   });
-  console.log(`✅ Branded Email Sent to ${to}`);
+  console.log(`✅ Branded Email Sent to ${to}. Response:`, JSON.stringify(response, null, 2));
 }
 
 migrate();

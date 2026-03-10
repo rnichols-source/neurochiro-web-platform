@@ -117,7 +117,7 @@ async function sendSecondChanceEmail(to: string, name: string) {
 
   try {
     await resend.emails.send({
-      from: 'NeuroChiro <onboarding@resend.dev>',
+      from: 'NeuroChiro <support@neurochirodirectory.com>',
       to: [to],
       subject: subject,
       html: html,
