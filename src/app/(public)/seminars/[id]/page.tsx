@@ -140,15 +140,62 @@ export default function SeminarDetailsPage() {
               </div>
             </div>
 
-            {/* What You Will Learn */}
-            <div className="bg-white/5 border border-white/10 rounded-[3.5rem] p-12 space-y-10 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/5 blur-[80px] -mr-32 -mt-32 transition-all duration-1000 group-hover:bg-neuro-orange/10"></div>
-              <h2 className="text-3xl font-heading font-black">What You Will Learn</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {(seminar.tags || []).map((topic: string, i: number) => (
-                  <div key={i} className="flex items-start gap-4 p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-neuro-orange/30 transition-all">
-                    <CheckCircle2 className="w-6 h-6 text-neuro-orange mt-0.5" />
-                    <span className="font-bold text-gray-200">{topic}</span>
+            {/* Curriculum Split */}
+            <div className="space-y-12">
+              <h2 className="text-3xl font-heading font-black flex items-center gap-4 text-white">
+                <div className="p-3 bg-neuro-orange/10 rounded-xl text-neuro-orange">
+                  <Zap className="w-6 h-6 fill-current" />
+                </div>
+                2 Days of Transformation
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Day 1 */}
+                <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 space-y-8">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-4xl font-black text-white/20 uppercase tracking-tighter">Day 1</h3>
+                    <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest bg-neuro-orange/10 px-3 py-1 rounded-lg">Foundations</span>
+                  </div>
+                  <div className="space-y-4">
+                    {(seminar.tags || []).filter((t: string) => t.includes('Day 1')).map((topic: string, i: number) => (
+                      <div key={i} className="flex items-start gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <div className="w-6 h-6 rounded-full bg-neuro-orange/20 flex items-center justify-center text-neuro-orange font-black text-[10px] mt-0.5">{i+1}</div>
+                        <span className="font-bold text-gray-200 text-sm">{topic.replace('Day 1: ', '')}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Day 2 */}
+                <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 space-y-8">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-4xl font-black text-white/20 uppercase tracking-tighter">Day 2</h3>
+                    <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest bg-blue-400/10 px-3 py-1 rounded-lg">Advanced</span>
+                  </div>
+                  <div className="space-y-4">
+                    {(seminar.tags || []).filter((t: string) => t.includes('Day 2')).map((topic: string, i: number) => (
+                      <div key={i} className="flex items-start gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <div className="w-6 h-6 rounded-full bg-blue-400/20 flex items-center justify-center text-blue-400 font-black text-[10px] mt-0.5">{i+1}</div>
+                        <span className="font-bold text-gray-200 text-sm">{topic.replace('Day 2: ', '')}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Audience Section */}
+            <div className="space-y-8">
+              <h2 className="text-2xl font-black uppercase tracking-widest text-gray-500 text-center">Who This Is Designed For</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  { title: "Students", desc: "Bridge the gap between academic theory and clinical reality." },
+                  { title: "New Graduates", desc: "Accelerate your first 2 years. Install systems that build high-value practices." },
+                  { title: "Practising Doctors", desc: "Refine your clinical neurology and upgrade your practice OS." }
+                ].map((item, i) => (
+                  <div key={i} className="text-center p-8 bg-white/5 border border-white/10 rounded-[2rem] hover:border-neuro-orange/30 transition-all">
+                    <h4 className="text-lg font-black text-white mb-3 uppercase tracking-tight">{item.title}</h4>
+                    <p className="text-xs text-gray-400 leading-relaxed font-medium">{item.desc}</p>
                   </div>
                 ))}
               </div>
