@@ -103,11 +103,14 @@ export default async function proxy(request: NextRequest) {
     const devSession = request.cookies.get('nc_dev_session')?.value;
     let userRole = '';
     let userEmail = '';
+    let profile: any = null;
 
     if (devSession) {
       userRole = devSession;
       // Mock values for dev session
       if (userRole === 'founder') userEmail = 'drray@neurochirodirectory.com';
+      // Bypass subscription check for dev sessions
+      profile = { subscription_status: 'active' };
     } else {
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -117,12 +120,13 @@ export default async function proxy(request: NextRequest) {
         return NextResponse.redirect(loginUrl)
       }
 
-      const { data: profile } = await supabase
+      const { data: profileData } = await supabase
         .from('profiles')
         .select('role, subscription_status, email')
         .eq('id', user.id)
         .single()
 
+      profile = profileData;
       userRole = profile?.role || 'doctor'
       userEmail = user.email || '';
     }
