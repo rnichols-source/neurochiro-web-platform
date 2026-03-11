@@ -134,6 +134,27 @@ const sendSMS = async (phone: string, message: string) => {
   }
 };
 
+/**
+ * IN-APP NOTIFICATION HELPER
+ */
+const insertNotification = async (userId: string, title: string, body: string, type: string, link?: string, priority: string = 'info') => {
+  try {
+    const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) return;
+
+    await supabaseAdmin.from('notifications').insert({
+      user_id: userId,
+      title: title,
+      body: body,
+      type: type,
+      link: link,
+      priority: priority
+    });
+  } catch (err) {
+    console.error("Failed to insert in-app notification:", err);
+  }
+};
+
 export const executeAutomation = async (queueId: string, eventType: string, payload: Record<string, any>) => {
   try {
     const supabaseAdmin = getSupabaseAdmin();
@@ -175,6 +196,17 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         break;
 
       case 'welcome_email':
+        // 🛡️ PHASE 2: In-App Notification
+        if (payload.userId) {
+          await insertNotification(
+            payload.userId, 
+            'Welcome to NeuroChiro! 🧠', 
+            'Your account is active. Complete your profile to get the most out of the platform.',
+            'system',
+            '/settings'
+          );
+        }
+
         if (emailEnabled && payload.email) {
           let subject = 'Welcome to NeuroChiro! 🧠';
           let title = 'Account Activated';
@@ -233,7 +265,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           }
         } else if (supabaseAdmin) {
           // Fetch target audience
-          let query = supabaseAdmin.from('profiles').select('email, role, subscription_tier');
+          let query = supabaseAdmin.from('profiles').select('email, role, subscription_tier, id');
           
           if (payload.audience !== 'all') {
             if (payload.audience === 'paid_doctors') {
@@ -259,6 +291,9 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                   ctaText: payload.ctaText,
                   ctaUrl: payload.ctaUrl
                 });
+
+                // 🛡️ PHASE 2: In-App Announcement
+                await insertNotification(u.id, payload.subject, 'A new announcement has been published.', 'announcement', '/announcements');
               }
             }
           }
@@ -266,6 +301,11 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         break;
 
       case 'membership_upgrade':
+        // 🛡️ PHASE 2: In-App Notification
+        if (payload.userId) {
+          await insertNotification(payload.userId, 'Tier Upgraded! 🎉', `Welcome to ${payload.tierName}. Your new tools are now unlocked.`, 'system', '/doctor/dashboard', 'important');
+        }
+
         if (emailEnabled && payload.email) {
           await sendPremiumEmail({
             to: payload.email,
@@ -279,6 +319,11 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         break;
 
       case 'referral_received':
+        // 🛡️ PHASE 2: In-App Notification
+        if (payload.userId) {
+          await insertNotification(payload.userId, 'New Referral Received! 📍', `Dr. ${payload.referrerName} sent you a new patient referral: ${payload.patientName}.`, 'referral', '/doctor/messages', 'urgent');
+        }
+
         if (prefs?.referral_alerts ?? true) {
           if (emailEnabled && payload.doctorEmail) {
             await sendPremiumEmail({
@@ -297,6 +342,11 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         break;
 
       case 'event_registration':
+        // 🛡️ PHASE 2: In-App Notification
+        if (payload.userId) {
+          await insertNotification(payload.userId, 'Registration Confirmed', `You are confirmed for ${payload.eventName}. Check your dashboard for access details.`, 'system', '/dashboard');
+        }
+
         if (emailEnabled && payload.email) {
           await sendPremiumEmail({
             to: payload.email,
@@ -310,7 +360,21 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         break;
 
       case 'job_application':
+        // 🛡️ PHASE 2: In-App Notifications for Applicant and Doctor
+        if (payload.userId) {
+          await insertNotification(payload.userId, 'Application Sent Successfully', `Your application for ${payload.jobTitle} has been submitted.`, 'job', '/student/jobs');
+        }
+        
+        // Find doctor userId if possible (in production we'd pass doctorUserId in payload)
+        if (payload.doctorEmail && supabaseAdmin) {
+           const { data: doctorProfile } = await supabaseAdmin.from('profiles').select('id').eq('email', payload.doctorEmail).single();
+           if (doctorProfile) {
+              await insertNotification(doctorProfile.id, 'New Applicant! 🧠', `A candidate has applied for your ${payload.jobTitle} position.`, 'job', '/doctor/jobs', 'important');
+           }
+        }
+
         if (emailEnabled && payload.email) {
+          // Notify Applicant
           await sendPremiumEmail({
             to: payload.email,
             subject: 'Application Submitted Successfully',
@@ -318,6 +382,36 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             body: `<p>Your application for <strong>${payload.jobTitle}</strong> has been successfully submitted. The clinic will review your profile and reach out directly.</p>`,
             ctaText: 'Explore More Jobs',
             ctaUrl: 'https://neurochiro.co/marketplace'
+          });
+
+          // 🛡️ PHASE 1: Notify Hiring Doctor
+          if (payload.doctorEmail) {
+            await sendPremiumEmail({
+              to: payload.doctorEmail,
+              subject: 'New Job Application Received! 🧠',
+              title: 'Hiring Update',
+              body: `<p>A candidate has applied for your position: <strong>${payload.jobTitle}</strong>.</p><p>Review their profile and clinical experience in your Talent Command center.</p>`,
+              ctaText: 'Review Applicant',
+              ctaUrl: 'https://neurochiro.co/doctor/jobs'
+            });
+          }
+        }
+        break;
+
+      case 'payment_warning':
+        // 🛡️ PHASE 2: In-App Notification
+        if (payload.userId) {
+          await insertNotification(payload.userId, 'Payment Overdue ⚠️', 'Your directory listing is at risk. Update your billing immediately.', 'system', '/doctor/settings', 'urgent');
+        }
+
+        if (emailEnabled && payload.email) {
+          await sendPremiumEmail({
+            to: payload.email,
+            subject: 'Action Required: Your directory listing is at risk',
+            title: 'Payment Warning',
+            body: `<p>Hi ${payload.name || 'Doctor'}, your payment is now 3 days past due. To prevent your clinic from being hidden on the global map, please update your billing information immediately.</p>`,
+            ctaText: 'Secure My Listing',
+            ctaUrl: 'https://neurochiro.co/doctor/settings'
           });
         }
         break;
@@ -449,8 +543,11 @@ export const Automations = {
   onSeminarRegistration: async (userId: string, email: string, phone: string, seminarName: string) => {
     await enqueue('event_registration', { userId, email, phone, eventName: seminarName });
   },
-  onJobApplication: async (applicantId: string, email: string, jobId: string, jobTitle: string) => { 
-    await enqueue('job_application', { userId: applicantId, email, jobId, jobTitle });
+  onJobApplication: async (applicantId: string, email: string, jobId: string, jobTitle: string, doctorEmail: string) => { 
+    await enqueue('job_application', { userId: applicantId, email, jobId, jobTitle, doctorEmail });
+  },
+  onPaymentWarning: async (userId: string, email: string, name: string) => {
+    await enqueue('payment_warning', { userId, email, name });
   },
   onVendorSignup: async (vendorName: string) => {
     await enqueue('admin_notification', { subject: 'New Vendor Application', html: `<p>New vendor applied: <strong>${vendorName}</strong>.</p>`});
@@ -478,5 +575,25 @@ export const Automations = {
   },
   onSubscriptionCanceled: async (data: any) => {
     await enqueue('subscription_canceled', { stripeData: data });
+  },
+  retryAutomation: async (queueId: string) => {
+    const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) return { error: "No Supabase Admin Client" };
+
+    const { data: job, error: fetchError } = await supabaseAdmin
+      .from('automation_queue')
+      .update({ status: 'processing', updated_at: new Date().toISOString() })
+      .eq('id', queueId)
+      .select()
+      .single();
+
+    if (fetchError || !job) return { error: fetchError?.message || "Job not found" };
+
+    try {
+      await executeAutomation(job.id, job.event_type, job.payload);
+      return { success: true };
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : 'Unknown error' };
+    }
   }
 };

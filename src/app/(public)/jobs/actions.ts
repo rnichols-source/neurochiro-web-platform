@@ -56,22 +56,31 @@ export async function applyForJob(jobId: string) {
   if (!user) throw new Error("Unauthorized")
 
   // 1. Insert Application
+  const { data: jobInfo } = await supabase
+    .from('jobs')
+    .select('title, doctor_id, profiles!doctor_id(email)')
+    .eq('id', jobId)
+    .single();
+
   const { error } = await supabase.from('job_applications').insert({
     job_id: jobId,
     applicant_id: user.id,
     status: 'pending'
-  })
+  });
 
-  if (error) throw error
+  if (error) throw error;
 
-  // 2. Trigger Automation (Email to Doctor)
-  // Arguments: applicantId, email, jobId, jobTitle
+  // 2. Trigger Automation (Email to Applicant AND Doctor)
+  const doctorEmail = (jobInfo?.profiles as any)?.email;
+  const jobTitle = jobInfo?.title || 'Unknown Position';
+
   await Automations.onJobApplication(
     user.id, 
     user.email || 'applicant@example.com', 
     jobId, 
-    'Unknown Job Title' // Fetching actual title would be better but this fixes build
-  )
+    jobTitle,
+    doctorEmail || 'support@neurochirodirectory.com'
+  );
 
-  return { success: true }
+  return { success: true };
 }

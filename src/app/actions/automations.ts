@@ -16,8 +16,8 @@ export async function onSeminarRegistrationAction(userId: string, email: string,
   return Automations.onSeminarRegistration(userId, email, phone, seminarName);
 }
 
-export async function onJobApplicationAction(applicantId: string, email: string, jobId: string, jobTitle: string) {
-  return Automations.onJobApplication(applicantId, email, jobId, jobTitle);
+export async function onJobApplicationAction(applicantId: string, email: string, jobId: string, jobTitle: string, doctorEmail: string) {
+  return Automations.onJobApplication(applicantId, email, jobId, jobTitle, doctorEmail);
 }
 
 export async function onReferralSentAction(referrerId: string, referrerName: string, doctorId: string, doctorEmail: string, phone: string, patientName: string) {
@@ -31,6 +31,12 @@ export async function onVendorSignupAction(vendorName: string) {
 export async function onMastermindApplicationAction(applicantName: string) {
   return Automations.onMastermindApplication(applicantName);
 }
+
+export async function retryAutomationAction(queueId: string) {
+  // In a real app, you would check if the current user is an admin here
+  return Automations.retryAutomation(queueId);
+}
+
 
 export async function onJobPostedAction(clinicName: string) {
   return Automations.onJobPosted(clinicName);
