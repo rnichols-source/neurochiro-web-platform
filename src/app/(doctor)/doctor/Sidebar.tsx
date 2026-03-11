@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useDoctorTier } from "@/context/DoctorTierContext";
 import { motion, AnimatePresence } from "framer-motion";
