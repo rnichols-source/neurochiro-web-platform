@@ -278,7 +278,7 @@ export default function DoctorProfile() {
                   <div className="space-y-6">
                     <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 border-b border-white/10 pb-4">Core Focus Areas</h4>
                     <div className="flex flex-wrap gap-3">
-                      {doctor.specialties.map((s, i) => (
+                      {(doctor.specialties || []).map((s: string, i: number) => (
                         <span key={i} className="px-6 py-3 bg-neuro-orange/10 border border-neuro-orange/20 text-neuro-orange rounded-2xl text-[12px] font-black uppercase tracking-wider hover:bg-neuro-orange/20 transition-all hover:-translate-y-0.5">
                           {s}
                         </span>
