@@ -67,6 +67,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [userRole, setUserRole] = useState('super_admin'); 
   const [isLockingDown, setIsLockingDown] = useState(false);
 
+  // Filter items based on role
+  const filteredNavItems = allNavItems.filter(item => item.roles.includes(userRole));
+
   // Fetch real role and health data
   useEffect(() => {
     async function loadData() {
