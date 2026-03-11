@@ -39,9 +39,9 @@ export async function getDoctors(options: {
     }
 
     // 3. Apply Ranking & Order
-    // Live Supabase query: Order by tier (pro > growth > starter) then created_at
+    // Live Supabase query: Order by is_featured then created_at
     query = query
-      .order('membership_tier', { ascending: false })
+      .order('is_featured', { ascending: false })
       .order('created_at', { ascending: false });
 
     // 4. Apply Pagination

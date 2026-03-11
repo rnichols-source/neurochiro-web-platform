@@ -164,23 +164,23 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
     return doctors.filter(doc => {
       // 1. If smart match criteria exists, prioritize those tags
       if (matchCriteria && matchCriteria.length > 0) {
-        const hasTag = doc.specialties.some((s: any) => 
-          matchCriteria.some(c => s.toLowerCase().includes(c.toLowerCase()))
+        const hasTag = (doc.specialties || []).some((s: any) => 
+          matchCriteria.some(c => (s || "").toLowerCase().includes(c.toLowerCase()))
         );
         if (!hasTag) return false;
       }
 
       const matchesName = 
-        doc.first_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        doc.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doc.clinic_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doc.specialties.some((s: any) => s.toLowerCase().includes(searchQuery.toLowerCase()));
+        (doc.first_name || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
+        (doc.last_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (doc.clinic_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (doc.specialties || []).some((s: any) => (s || "").toLowerCase().includes(searchQuery.toLowerCase()));
       
       const matchesLocation = 
-        doc.city.toLowerCase().includes(locationQuery.toLowerCase()) ||
-        doc.state.toLowerCase().includes(locationQuery.toLowerCase()) ||
-        doc.zip_code?.includes(locationQuery) ||
-        doc.address.toLowerCase().includes(locationQuery.toLowerCase());
+        (doc.city || "").toLowerCase().includes(locationQuery.toLowerCase()) ||
+        (doc.state || "").toLowerCase().includes(locationQuery.toLowerCase()) ||
+        (doc.zip_code || "").includes(locationQuery) ||
+        (doc.address || "").toLowerCase().includes(locationQuery.toLowerCase());
 
       const nameCondition = searchQuery === "" ? true : matchesName;
       const locationCondition = locationQuery === "" ? true : matchesLocation;
@@ -332,16 +332,16 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                     <div className="flex items-start justify-between mb-6">
                         <div className="flex items-center gap-4">
                           <div className="w-14 h-14 rounded-2xl bg-neuro-navy flex items-center justify-center text-white font-black text-xl shadow-lg">
-                              {doc.first_name[0]}{doc.last_name[0]}
+                              {(doc.first_name?.[0] || 'D')}{(doc.last_name?.[0] || 'R')}
                           </div>
                           <div>
                               <div className="flex items-center gap-1.5 mb-0.5">
                                 <h3 className="font-bold text-lg text-neuro-navy group-hover:text-neuro-orange transition-colors">
-                                  {`Dr. ${doc.first_name} ${doc.last_name}`.replace(/^Dr\.\s+Dr\./i, 'Dr.').trim().replace(/\s+/g, ' ')}
+                                  {`Dr. ${doc.first_name || ''} ${doc.last_name || ''}`.replace(/^Dr\.\s+Dr\./i, 'Dr.').trim().replace(/\s+/g, ' ') || 'Neuro Specialist'}
                                 </h3>
                                 <ShieldCheck className="w-4 h-4 text-blue-500" />
                               </div>
-                              <p className="text-xs text-gray-500 font-medium">{doc.clinic_name}</p>
+                              <p className="text-xs text-gray-500 font-medium">{doc.clinic_name || 'Private Practice'}</p>
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-2">
@@ -366,19 +366,19 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                           {doc.bio}
                         </p>
                         <div className="flex flex-wrap gap-2">
-                          {doc.specialties.slice(0, 2).map((s: string, j: number) => (
+                          {(doc.specialties || []).slice(0, 2).map((s: string, j: number) => (
                             <span key={j} className="px-3 py-1 bg-neuro-cream rounded-full text-[9px] font-black uppercase text-neuro-navy border border-neuro-navy/5">
                                 {s}
                             </span>
                           ))}
-                          {doc.specialties.length > 2 && (
+                          {doc.specialties?.length > 2 && (
                             <span className="px-3 py-1 bg-gray-50 rounded-full text-[9px] font-black uppercase text-gray-400">
                                 +{doc.specialties.length - 2} More
                           </span>
                           )}
                         </div>
                         <Link 
-                          href={`/directory/${(doc.slug || `${doc.first_name}-${doc.last_name}`).toLowerCase().replace(/^dr-/, '').replace(/\s+/g, '-')}`}
+                          href={`/directory/${(doc.slug || `${doc.first_name || 'neuro'}-${doc.last_name || 'chiro'}`).toLowerCase().replace(/^dr-/, '').replace(/\s+/g, '-')}`}
                           className="w-full py-4 bg-gray-50 group-hover:bg-neuro-navy group-hover:text-white text-neuro-navy font-black rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 border border-gray-100 group-hover:border-neuro-navy"
                         >
                           View Profile <ArrowRight className="w-4 h-4" />
