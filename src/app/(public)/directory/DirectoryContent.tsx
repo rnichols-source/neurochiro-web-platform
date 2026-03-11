@@ -378,7 +378,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                           )}
                         </div>
                         <Link 
-                          href={`/directory/${(doc.slug || `${doc.first_name || 'neuro'}-${doc.last_name || 'chiro'}`).toLowerCase().replace(/^dr-/, '').replace(/\s+/g, '-')}`}
+                          href={`/directory/${doc.slug || doc.id}`}
                           className="w-full py-4 bg-gray-50 group-hover:bg-neuro-navy group-hover:text-white text-neuro-navy font-black rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 border border-gray-100 group-hover:border-neuro-navy"
                         >
                           View Profile <ArrowRight className="w-4 h-4" />

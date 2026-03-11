@@ -203,7 +203,7 @@ export default function GlobalNetworkMap() {
 
             <div className="p-6 border-t border-white/10 bg-[#131B24]">
               <button 
-                onClick={() => router.push(`/directory/${selectedPin.slug}`)}
+                onClick={() => router.push(`/directory/${selectedPin.slug || selectedPin.doctorId}`)}
                 className="w-full py-4 bg-neuro-orange hover:bg-neuro-orange-light text-white font-black uppercase tracking-widest text-sm rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-neuro-orange/20"
               >
                 View Full Profile <ArrowRight className="w-4 h-4" />
