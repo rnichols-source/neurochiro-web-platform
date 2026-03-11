@@ -115,6 +115,18 @@ export default function DoctorProfile() {
     );
   }
 
+  if (!doctor) {
+    return (
+      <div className="min-h-screen bg-neuro-cream flex flex-col items-center justify-center p-6 text-center">
+        <h1 className="text-4xl font-black text-neuro-navy mb-4 tracking-tighter">PROFILE NOT FOUND</h1>
+        <p className="text-gray-500 mb-8 font-medium">We couldn't find the requested doctor profile.</p>
+        <Link href="/directory" className="px-10 py-4 bg-neuro-navy text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-xl shadow-neuro-navy/20">
+          Return to Directory
+        </Link>
+      </div>
+    );
+  }
+
   const handleBooking = () => {
     if (doctor.website_url) {
       window.open(doctor.website_url, '_blank', 'noopener,noreferrer');
@@ -166,11 +178,11 @@ export default function DoctorProfile() {
                     {doctor.photo_url ? (
                       <img 
                         src={doctor.photo_url} 
-                        alt={`${doctor.first_name} ${doctor.last_name}`}
+                        alt={`${doctor.first_name || ''} ${doctor.last_name || ''}`}
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span aria-hidden="true">{doctor.first_name[0]}{doctor.last_name[0]}</span>
+                      <span aria-hidden="true">{(doctor.first_name?.[0] || 'D')}{(doctor.last_name?.[0] || 'R')}</span>
                     )}
                   </div>
                   
@@ -181,11 +193,11 @@ export default function DoctorProfile() {
 
                 <div className="text-center space-y-4 mb-10">
                   <h1 className="text-5xl font-heading font-black leading-tight text-white tracking-tight">
-                    {doctor.first_name} <br/> {doctor.last_name}
+                    {doctor.first_name || 'Neuro'} <br/> {doctor.last_name || 'Clinician'}
                   </h1>
                   <div className="inline-block">
                     <p className="text-neuro-orange font-black text-[10px] uppercase tracking-[0.3em] bg-neuro-orange/10 py-2.5 px-6 rounded-full border border-neuro-orange/20">
-                      {doctor.clinic_name}
+                      {doctor.clinic_name || 'Private Practice'}
                     </p>
                   </div>
                 </div>
@@ -195,7 +207,9 @@ export default function DoctorProfile() {
                     <div className="p-2.5 bg-neuro-orange/20 rounded-xl text-neuro-orange group-hover:bg-neuro-orange/30 transition-colors">
                       <MapPin className="w-5 h-5" />
                     </div>
-                    <span className="text-sm font-bold text-slate-100 tracking-wide">{doctor.city}, {doctor.state}</span>
+                    <span className="text-sm font-bold text-slate-100 tracking-wide">
+                      {doctor.city || 'Global'}{doctor.state ? `, ${doctor.state}` : ''}
+                    </span>
                   </div>
                   
                   <Link 
