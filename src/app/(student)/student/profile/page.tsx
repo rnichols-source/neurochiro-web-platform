@@ -29,7 +29,7 @@ import {
   Trophy
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { onProfileUpdateAction } from "@/app/actions/automations";
 import { useStudentTier } from "@/context/StudentTierContext";
