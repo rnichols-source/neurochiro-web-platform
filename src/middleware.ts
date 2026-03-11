@@ -1,5 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 const routePermissions: Record<string, string[]> = {
   '/admin': ['admin', 'regional_admin', 'founder', 'super_admin'],
@@ -8,11 +10,28 @@ const routePermissions: Record<string, string[]> = {
   '/portal': ['patient', 'admin', 'founder', 'super_admin'],
   '/marketplace/dashboard': ['vendor', 'admin', 'founder', 'super_admin'],
 };
+
 // 🛡️ Rate Limiting Config
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const MAX_GENERAL_REQUESTS = 1000; // Increased from 100
-const MAX_AUTH_REQUESTS = 100; // Increased from 10
+const MAX_GENERAL_REQUESTS = 1000;
+const MAX_AUTH_REQUESTS = 100;
 const ipCache = new Map<string, { count: number, start: number }>();
+
+// 🌐 Initialize Upstash Redis if available
+let ratelimit: Ratelimit | null = null;
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+
+  ratelimit = new Ratelimit({
+    redis: redis,
+    limiter: Ratelimit.slidingWindow(MAX_GENERAL_REQUESTS, "60 s"),
+    analytics: true,
+    prefix: "@upstash/ratelimit",
+  });
+}
 
 export default async function proxy(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
@@ -31,9 +50,7 @@ export default async function proxy(request: NextRequest) {
   }
 
   // 🌐 MULTI-DOMAIN ROUTING
-  // If the user visits neurochiromastermind.com, rewrite them to the /mastermind route internally
   if (hostname.includes('neurochiromastermind.com')) {
-    // Prevent infinite loops if they already are on a /mastermind path
     if (!pathname.startsWith('/mastermind') && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
       const url = request.nextUrl.clone();
       url.pathname = `/mastermind${pathname === '/' ? '' : pathname}`;
@@ -44,19 +61,26 @@ export default async function proxy(request: NextRequest) {
   const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.includes('/auth');
   const limit = isAuthRoute ? MAX_AUTH_REQUESTS : MAX_GENERAL_REQUESTS;
 
-  const entry = ipCache.get(ip);
-
-  // Simple IP-based rate limiting (In-memory, for production use Redis/Upstash)
-  if (entry) {
-    if (now - entry.start > RATE_LIMIT_WINDOW) {
-      ipCache.set(ip, { count: 1, start: now });
-    } else if (entry.count >= limit) {
+  // 🛡️ Apply Rate Limiting
+  if (ratelimit) {
+    const { success } = await ratelimit.limit(ip);
+    if (!success) {
       return new NextResponse('Too Many Requests', { status: 429 });
-    } else {
-      entry.count++;
     }
   } else {
-    ipCache.set(ip, { count: 1, start: now });
+    // Fallback to simple IP-based rate limiting (In-memory)
+    const entry = ipCache.get(ip);
+    if (entry) {
+      if (now - entry.start > RATE_LIMIT_WINDOW) {
+        ipCache.set(ip, { count: 1, start: now });
+      } else if (entry.count >= limit) {
+        return new NextResponse('Too Many Requests', { status: 429 });
+      } else {
+        entry.count++;
+      }
+    } else {
+      ipCache.set(ip, { count: 1, start: now });
+    }
   }
 
   let response = NextResponse.next({
