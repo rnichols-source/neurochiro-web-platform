@@ -15,6 +15,7 @@ import Link from "next/link";
 import { Zap, Activity, Brain as BrainIcon, BookOpen, Stethoscope } from "lucide-react";
 
 export default function Home() {
+  const router = useRouter();
   return (
     <div className="flex flex-col min-h-screen bg-neuro-cream overflow-x-hidden">
       
