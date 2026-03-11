@@ -32,20 +32,12 @@ function LoginContent() {
     }
   }, [errorParam]);
 
-  const quickLogin = (roleEmail: string) => {
-    setEmail(roleEmail);
-    
-    // For founder, don't fill a fake password or auto-submit
-    if (roleEmail === "drray@neurochirodirectory.com") {
-      setPassword("");
-      localStorage.setItem("nc_dev_mode", "true");
-      return;
-    }
-
-    setPassword("password123");
+  const quickLogin = async (roleEmail: string) => {
+    setIsPending(true);
+    setErrorMsg(null);
 
     // Sync client-side state for tiers before redirecting
-    if (roleEmail.includes("admin")) {
+    if (roleEmail === "drray@neurochirodirectory.com" || roleEmail.includes("admin")) {
       localStorage.setItem("nc_dev_mode", "true");
     }
 
@@ -63,11 +55,21 @@ function LoginContent() {
       localStorage.setItem("nc_student_tier", "Free");
     }
 
-    // Trigger login slightly after to allow state to update visually
-    setTimeout(() => {
-      const form = document.querySelector('form');
-      if (form) form.requestSubmit();
-    }, 100);
+    try {
+      const formData = new FormData();
+      formData.append("email", roleEmail);
+      formData.append("password", "password123");
+
+      await login(formData, redirectParam);
+    } catch (err) {
+      // login() uses redirect() which throws an error, Next.js handles this.
+      if (!(err instanceof Error && err.message === 'NEXT_REDIRECT')) {
+        console.error("Login Error:", err);
+        setErrorMsg("Development login failed. Please try again.");
+      }
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (

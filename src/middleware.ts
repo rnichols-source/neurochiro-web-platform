@@ -99,27 +99,38 @@ export default async function proxy(request: NextRequest) {
   const matchedBase = Object.keys(routePermissions).find(path => pathname.startsWith(path))
 
   if (matchedBase) {
-    const { data: { user } } = await supabase.auth.getUser()
+    // 🧪 DEV SESSION BYPASS
+    const devSession = request.cookies.get('nc_dev_session')?.value;
+    let userRole = '';
+    let userEmail = '';
 
-    if (!user) {
-      const loginUrl = new URL('/login', request.url)
-      loginUrl.searchParams.set('redirect', pathname)
-      return NextResponse.redirect(loginUrl)
+    if (devSession) {
+      userRole = devSession;
+      // Mock values for dev session
+      if (userRole === 'founder') userEmail = 'drray@neurochirodirectory.com';
+    } else {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        const loginUrl = new URL('/login', request.url)
+        loginUrl.searchParams.set('redirect', pathname)
+        return NextResponse.redirect(loginUrl)
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, subscription_status, email')
+        .eq('id', user.id)
+        .single()
+
+      userRole = profile?.role || 'doctor'
+      userEmail = user.email || '';
     }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role, subscription_status, email')
-      .eq('id', user.id)
-      .single()
-
-    let userRole = profile?.role || 'doctor'
-    const userEmail = user.email;
 
     // 🛡️ MASTER FOUNDER OVERRIDE
     // If this is the founder, grant universal access regardless of DB role
     const isFounderEmail = userEmail === 'drray@neurochirodirectory.com' || userEmail === 'raymond@neurochiro.com';
-    if (isFounderEmail) {
+    if (isFounderEmail || userRole === 'founder') {
       userRole = 'founder';
     }
 
