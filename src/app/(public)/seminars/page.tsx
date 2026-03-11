@@ -1,80 +1,55 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar, MapPin, Users, ArrowRight, Search, Zap, Clock, Star, Filter, Heart } from "lucide-react";
+import { Calendar, MapPin, Users, ArrowRight, Search, Zap, Clock, Star, Filter, Heart, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRegion } from "@/context/RegionContext";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
+import { getSeminars, registerForSeminar } from "./actions";
 
 export default function SeminarHub() {
   const { region } = useRegion();
   const { lastLocation, setLastLocation, toggleSave, isSaved } = useUserPreferences();
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState(lastLocation || "");
+  const [seminars, setSeminars] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [registering, setRegistering] = useState<string | null>(null);
 
-  const seminars = useMemo(() => [
-    {
-      id: 1,
-      title: "Clinical Mastery: Pediatric Neurology",
-      date: "Oct 24-25, 2026",
-      location: "Denver, CO",
-      instructor: "Dr. Sarah Johnson",
-      attendees: "124/150",
-      category: "clinical",
-      price: 497,
-      image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800",
-      featured: true,
-      region_code: "US"
-    },
-    {
-      id: 2,
-      title: "Nervous System Centered Marketing",
-      date: "Nov 12, 2026",
-      location: "Austin, TX",
-      instructor: "Dr. Raymond Nichols",
-      attendees: "42/60",
-      category: "business",
-      price: 297,
-      image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=800",
-      featured: false,
-      region_code: "US"
-    },
-    {
-      id: 3,
-      title: "Australian Clinical Intensive",
-      date: "Dec 05, 2026",
-      location: "Melbourne, VIC",
-      instructor: "Dr. Michael Chen",
-      attendees: "12/50",
-      category: "clinical",
-      price: 397,
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800",
-      featured: true,
-      region_code: "AU"
-    },
-    {
-      id: 4,
-      title: "Patient Experience & Regulation",
-      date: "Jan 15, 2027",
-      location: "Sydney, NSW",
-      instructor: "Dr. Natalie West",
-      attendees: "18/50",
-      category: "experience",
-      price: 197,
-      image: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=800",
-      featured: false,
-      region_code: "AU"
+  useEffect(() => {
+    async function loadSeminars() {
+      const data = await getSeminars();
+      if (data && data.length > 0) {
+        setSeminars(data);
+      }
+      setLoading(false);
     }
-  ], []);
+    loadSeminars();
+  }, []);
+
+  const handleRegister = async (seminarId: string) => {
+    setRegistering(seminarId);
+    const result = await registerForSeminar(seminarId);
+    if (result.success) {
+        alert("Registration successful!");
+    } else {
+        alert(result.error || "Registration failed");
+    }
+    setRegistering(null);
+  };
 
   const filteredSeminars = useMemo(() => {
     return seminars.filter(s => {
-      const regionMatch = s.region_code === region.code;
-      const categoryMatch = filter === "all" || s.category === filter;
-      return regionMatch && categoryMatch;
+      // If we have a region_code column in DB, we'd use it here. 
+      // For now, let's assume we show all or filter by text if available.
+      const categoryMatch = filter === "all" || (s.categories && s.categories.includes(filter));
+      const searchMatch = !searchQuery || 
+                         s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         s.location.toLowerCase().includes(searchQuery.toLowerCase());
+      return categoryMatch && searchMatch;
     });
-  }, [filter, region.code, seminars]);
+  }, [filter, searchQuery, seminars]);
 
   return (
     <div className="min-h-screen bg-neuro-cream pb-32">
@@ -141,16 +116,16 @@ export default function SeminarHub() {
                >
                   <div className="relative aspect-[4/3] overflow-hidden">
                      <img 
-                       src={seminar.image} 
+                       src={seminar.image_url || "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800"} 
                        alt={seminar.title}
                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                      />
                      <div className="absolute inset-0 bg-gradient-to-t from-neuro-navy/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                      <div className="absolute top-6 left-6 flex flex-col gap-2">
                         <span className="px-4 py-2 bg-white/90 backdrop-blur-md text-neuro-navy text-[10px] font-black rounded-xl uppercase tracking-widest shadow-lg">
-                          {seminar.category}
+                          {seminar.categories?.[0] || 'Clinical'}
                         </span>
-                        {seminar.featured && (
+                        {seminar.tier === 'Featured' && (
                           <span className="px-4 py-2 bg-neuro-orange text-white text-[10px] font-black rounded-xl uppercase tracking-widest shadow-lg flex items-center gap-1">
                             <Star className="w-3 h-3 fill-current" /> Featured
                           </span>
@@ -172,7 +147,7 @@ export default function SeminarHub() {
                   <div className="p-8 flex-1 flex flex-col">
                      <div className="flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">
                         <div className="flex items-center gap-1 text-neuro-orange">
-                           <Calendar className="w-3.5 h-3.5" /> {seminar.date}
+                           <Calendar className="w-3.5 h-3.5" /> {seminar.dates}
                         </div>
                         <div className="flex items-center gap-1">
                            <MapPin className="w-3.5 h-3.5" /> {seminar.location}
@@ -185,27 +160,38 @@ export default function SeminarHub() {
 
                      <div className="flex items-center gap-3 mb-8">
                         <div className="w-10 h-10 rounded-full bg-neuro-cream flex items-center justify-center text-neuro-navy font-bold text-xs border border-gray-100">
-                           {seminar.instructor[4]}
+                           {(seminar.host?.full_name || 'H').charAt(0)}
                         </div>
                         <div>
-                           <p className="text-xs font-bold text-neuro-navy">{seminar.instructor}</p>
+                           <p className="text-xs font-bold text-neuro-navy">{seminar.host?.full_name || 'NeuroChiro Host'}</p>
                            <p className="text-[10px] text-gray-500 uppercase tracking-tighter">Instructor</p>
                         </div>
                      </div>
 
-                     <div className="mt-auto pt-8 border-t border-gray-50 flex items-center justify-between">
-                        <div>
-                           <p className="text-2xl font-black text-neuro-navy">{region.currency.symbol}{seminar.price}</p>
-                           <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                              <Users className="w-3 h-3" /> {seminar.attendees} Registered
-                           </p>
-                        </div>
-                        <Link 
-                          href={`/seminars/${seminar.id}`}
-                          className="p-4 bg-neuro-navy text-white rounded-2xl group-hover:bg-neuro-orange transition-all shadow-xl shadow-neuro-navy/10 group-hover:shadow-neuro-orange/20"
+                     <div className="flex flex-col gap-4">
+                        <button 
+                          onClick={() => handleRegister(seminar.id)}
+                          disabled={registering === seminar.id}
+                          className="w-full py-4 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-[10px] hover:bg-neuro-orange-dark transition-all disabled:opacity-50 shadow-lg shadow-neuro-orange/20 flex items-center justify-center gap-2"
                         >
-                           <ArrowRight className="w-6 h-6" />
-                        </Link>
+                           {registering === seminar.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                           Register Now
+                        </button>
+                        
+                        <div className="pt-4 border-t border-gray-50 flex items-center justify-between">
+                            <div>
+                               <p className="text-2xl font-black text-neuro-navy">{region.currency.symbol}{seminar.price}</p>
+                               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                                  <Users className="w-3 h-3" /> {seminar.registrations?.[0]?.count || 0} Registered
+                               </p>
+                            </div>
+                            <Link 
+                              href={`/seminars/${seminar.id}`}
+                              className="p-4 bg-neuro-navy text-white rounded-2xl hover:bg-neuro-orange transition-all shadow-xl shadow-neuro-navy/10 hover:shadow-neuro-orange/20"
+                            >
+                               <ArrowRight className="w-6 h-6" />
+                            </Link>
+                        </div>
                      </div>
                   </div>
                </motion.div>

@@ -45,8 +45,16 @@ export async function POST(req: Request) {
       case "checkout.session.completed":
         Automations.onPaymentSuccess(event.data.object);
         break;
+      case "invoice.payment_succeeded":
+        // Handle successful renewals
+        Automations.onPaymentSuccess(event.data.object);
+        break;
       case "invoice.payment_failed":
         Automations.onPaymentFailed(event.data.object);
+        break;
+      case "customer.subscription.updated":
+        // Handle tier upgrades/downgrades
+        Automations.onSubscriptionUpdated(event.data.object);
         break;
       case "customer.subscription.deleted":
         Automations.onSubscriptionCanceled(event.data.object);

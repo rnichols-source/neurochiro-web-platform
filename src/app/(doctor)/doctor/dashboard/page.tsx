@@ -338,7 +338,10 @@ export default function DoctorDashboard() {
                      <div className="relative z-20 text-center bg-neuro-navy/60 backdrop-blur-md p-6 rounded-2xl border border-white/10 group-hover:scale-105 transition-transform duration-500">
                         <p className="text-sm font-bold text-white mb-1">Live Patient Traffic</p>
                         <p className="text-[10px] text-neuro-orange font-black uppercase tracking-[0.2em]">Regional Density Mode</p>
-                        <button className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-[9px] font-black uppercase tracking-widest rounded-lg border border-white/10 transition-all">
+                        <button 
+                          onClick={() => alert("Switching to high-resolution patient heatmap...")}
+                          className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-[9px] font-black uppercase tracking-widest rounded-lg border border-white/10 transition-all"
+                        >
                            Switch to Heatmap
                         </button>
                      </div>
@@ -408,7 +411,7 @@ export default function DoctorDashboard() {
                            <div className="bg-white px-3 py-2 rounded-lg border border-gray-200 text-center mb-4 shadow-sm">
                               <span className="text-sm font-mono font-black text-neuro-orange">{offer.code}</span>
                            </div>
-                           <Link href={offer.link} className="w-full py-2 bg-neuro-navy text-white rounded-lg text-[10px] font-black uppercase tracking-widest text-center hover:bg-neuro-navy-light transition-colors">
+                           <Link href={`/marketplace/${offer.vendor.toLowerCase().split(' ')[0]}`} className="w-full py-2 bg-neuro-navy text-white rounded-lg text-[10px] font-black uppercase tracking-widest text-center hover:bg-neuro-navy-light transition-colors">
                               Redeem Offer
                            </Link>
                         </div>

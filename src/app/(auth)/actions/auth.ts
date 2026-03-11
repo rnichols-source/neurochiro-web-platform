@@ -11,6 +11,8 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   const supabase = createServerSupabase()
 
   // 🧪 DEVELOPMENT BYPASS (For E2E Tests & Sandbox)
+  // CRITICAL: This bypass is only available in non-production environments.
+  const isDevEnvironment = process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_SITE_URL?.includes('localhost');
   const isDevEmail = [
     'doctor@neurochiro.com', 
     'doctor_growth@neurochiro.com', 
@@ -23,7 +25,7 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     'raymond@neurochiro.com'
   ].includes(email);
 
-  if (isDevEmail && password === 'password123') {
+  if (isDevEnvironment && isDevEmail && password === 'password123') {
     // Determine role from email
     let devRole = 'doctor';
     if (email.includes('student')) devRole = 'student';
@@ -120,11 +122,12 @@ export async function createAccountAction(formData: FormData, role: string, tier
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const name = formData.get('name') as string
+  const phone = formData.get('phone') as string
   const supabase = createServerSupabase()
 
   // Handle local development without Supabase
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    return { success: true, user: { id: 'mock-id', email, name } };
+    return { success: true, user: { id: 'mock-id', email, name, phone } };
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -135,7 +138,8 @@ export async function createAccountAction(formData: FormData, role: string, tier
         full_name: name,
         role: role,
         tier: tier,
-        billing_cycle: billingCycle
+        billing_cycle: billingCycle,
+        phone: phone
       }
     }
   })
@@ -143,7 +147,7 @@ export async function createAccountAction(formData: FormData, role: string, tier
   if (error) return { error: error.message };
 
   if (data?.user) {
-    Automations.onSignup(data.user.id, email, name);
+    Automations.onSignup(data.user.id, email, name, phone);
     return { success: true, user: data.user };
   }
 

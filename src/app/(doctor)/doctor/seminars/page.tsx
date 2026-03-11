@@ -18,45 +18,53 @@ import {
   Mail,
   DollarSign,
   Globe,
-  PieChart
+  PieChart,
+  Loader2
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { onSeminarHostedAction, onCampaignCreatedAction } from "@/app/actions/automations";
+import { getDoctorSeminars, createSeminarAction } from "./actions";
 
 export default function SeminarsPage() {
   const [isHostingOpen, setIsHostingOpen] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState<any>(null);
   const [isCampaignOpen, setIsCampaignOpen] = useState(false);
   const [successState, setSuccessState] = useState<string | null>(null);
+  const [mySeminars, setMySeminars] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const mySeminars = [
-    {
-      id: "sem-1",
-      title: "Foundations of Neural Mapping",
-      date: "Nov 15, 2026",
-      location: "Phoenix, AZ",
-      status: "Published",
-      registrations: 24,
-      revenue: "$7,176",
-      views: 856,
-      details: {
-        attendees: 24,
-        conversions: "2.8%",
-        avgWatchTime: "42m",
-        regionalInterest: "Southwest"
-      }
+  useEffect(() => {
+    async function load() {
+      const data = await getDoctorSeminars();
+      if (data && data.length > 0) setMySeminars(data);
+      setLoading(false);
     }
-  ];
+    load();
+  }, []);
 
-  const handleHostSeminar = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleHostSeminar = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
-    onSeminarHostedAction("dr-natalie", { title: formData.get('title') });
-    setSuccessState("seminar");
-    setTimeout(() => {
-      setIsHostingOpen(false);
-      setSuccessState(null);
-    }, 2000);
+    
+    try {
+      await createSeminarAction(formData);
+      setSuccessState("seminar");
+      
+      // Reload data
+      const data = await getDoctorSeminars();
+      setMySeminars(data);
+
+      setTimeout(() => {
+        setIsHostingOpen(false);
+        setSuccessState(null);
+        setIsSubmitting(false);
+      }, 2000);
+    } catch (err) {
+      alert("Failed to create seminar");
+      setIsSubmitting(false);
+    }
   };
 
   const handleCreateCampaign = (e: React.FormEvent) => {
@@ -129,10 +137,10 @@ export default function SeminarsPage() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
                    <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                         <span className="px-2 py-0.5 bg-green-50 text-green-600 text-[9px] font-black rounded uppercase tracking-widest border border-green-100">
-                            {sem.status}
+                         <span className={`px-2 py-0.5 ${sem.is_approved ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-neuro-orange'} text-[9px] font-black rounded uppercase tracking-widest border ${sem.is_approved ? 'border-green-100' : 'border-neuro-orange/20'}`}>
+                            {sem.is_approved ? 'Published' : 'Awaiting Approval'}
                          </span>
-                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{sem.date}</span>
+                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{sem.dates}</span>
                       </div>
                       <h3 className="text-2xl font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">{sem.title}</h3>
                       <div className="flex items-center gap-4 text-xs text-gray-500">
@@ -141,16 +149,16 @@ export default function SeminarsPage() {
                    </div>
                    <div className="flex gap-6 md:border-l md:border-gray-50 md:pl-6">
                       <div className="text-center">
-                         <p className="text-xl font-black text-neuro-navy">{sem.registrations}</p>
+                         <p className="text-xl font-black text-neuro-navy">{sem.registrations?.[0]?.count || 0}</p>
                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Sold</p>
                       </div>
                       <div className="text-center">
-                         <p className="text-xl font-black text-neuro-navy">{sem.views}</p>
+                         <p className="text-xl font-black text-neuro-navy">0</p>
                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Views</p>
                       </div>
                       <div className="text-center">
-                         <p className="text-xl font-black text-green-600">{sem.revenue}</p>
-                         <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Net</p>
+                         <p className="text-xl font-black text-green-600">${(sem.registrations?.[0]?.count || 0) * (sem.price || 0)}</p>
+                         <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Revenue</p>
                       </div>
                    </div>
                 </div>

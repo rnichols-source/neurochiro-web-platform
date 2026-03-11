@@ -85,6 +85,18 @@ BEGIN
   FROM public.profiles
   WHERE id = NEW.recipient_id;
 
+  -- Queue an email notification
+  INSERT INTO public.automation_queue (event_type, payload)
+  SELECT 
+    'unread_message_email',
+    jsonb_build_object(
+      'recipient_id', NEW.recipient_id,
+      'sender_id', NEW.sender_id,
+      'message_id', NEW.id
+    )
+  FROM public.profiles
+  WHERE id = NEW.recipient_id;
+
   RETURN NEW;
 END;
 $$;

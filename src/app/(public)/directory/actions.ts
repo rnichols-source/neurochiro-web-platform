@@ -16,7 +16,7 @@ export async function getDoctors(options: {
   try {
     let query = supabase
       .from('doctors')
-      .select('*', { count: 'exact' })
+      .select('*, profiles!user_id(full_name, email, role, subscription_status)', { count: 'exact' })
       .eq('verification_status', 'verified')
 
     // 1. Search Query (Simple ILIKE on name/clinic)
@@ -97,4 +97,30 @@ export async function getDoctors(options: {
     console.error("Error fetching doctors:", e)
     return { doctors: MOCK_DOCTORS.slice(0, 100), total: MOCK_DOCTORS.length };
   }
+}
+
+export async function getDoctorBySlug(slug: string) {
+  const supabase = createServerSupabase()
+  
+  // Try to find by slug first
+  let { data, error } = await supabase
+    .from('doctors')
+    .select('*, profiles!user_id(full_name, email, role, subscription_status)')
+    .eq('slug', slug)
+    .single()
+
+  // Fallback to finding by ID if slug is actually a UUID
+  if (error || !data) {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+    if (isUuid) {
+        const { data: byId, error: errorId } = await supabase
+            .from('doctors')
+            .select('*, profiles!user_id(full_name, email, role, subscription_status)')
+            .eq('id', slug)
+            .single()
+        data = byId
+    }
+  }
+
+  return { doctor: data as Doctor | null, error }
 }

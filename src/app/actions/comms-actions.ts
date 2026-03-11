@@ -66,7 +66,7 @@ export async function sendBroadcastAction(formData: FormData) {
     from: "NeuroChiro <support@neurochirodirectory.com>",
     to: r.email,
     subject: subject,
-    html: wrapEmail(r.full_name, title, bodyHtml)
+    html: wrapEmail(r.full_name, title, bodyHtml, r.role)
   }));
 
   try {
@@ -95,7 +95,8 @@ export async function sendBroadcastAction(formData: FormData) {
 }
 
 // Re-using our premium branded wrapper
-function wrapEmail(name: string, title: string, body: string) {
+function wrapEmail(name: string, title: string, body: string, role?: string) {
+  const greeting = role === 'doctor' ? `Dr. ${name}` : name;
   return `
     <!DOCTYPE html>
     <html>
@@ -119,7 +120,7 @@ function wrapEmail(name: string, title: string, body: string) {
         </div>
         <div class="content">
           <div style="text-transform: uppercase; color: #D66829; font-weight: 900; letter-spacing: 3px; font-size: 12px; margin-bottom: 15px;">${title}</div>
-          <h1>Hello Dr. ${name},</h1>
+          <h1>Hello ${greeting},</h1>
           ${body}
         </div>
         <div class="footer">

@@ -41,3 +41,53 @@ export async function getStudentDashboardData() {
     return null
   }
 }
+
+export async function transitionToDoctorAction() {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) throw new Error("Unauthorized")
+
+  try {
+    // 1. Update Profile Role
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ role: 'doctor' })
+      .eq('id', user.id)
+
+    if (profileError) throw profileError
+
+    // 2. Fetch full name for the doctor record
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single()
+        
+    const fullName = profile?.full_name || "New Doctor"
+    const nameParts = fullName.split(' ')
+    const firstName = nameParts[0]
+    const lastName = nameParts.slice(1).join(' ') || "Doctor"
+
+    // 3. Create Doctor Record (if not exists)
+    const baseSlug = `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9]/g, '-')
+    const slug = `${baseSlug}-${Math.floor(Math.random() * 10000)}`
+
+    const { error: doctorError } = await supabase
+      .from('doctors')
+      .upsert({ 
+        user_id: user.id, 
+        first_name: firstName,
+        last_name: lastName,
+        slug: slug,
+        verification_status: 'pending' 
+      }, { onConflict: 'user_id' })
+
+    if (doctorError) throw doctorError
+    
+    return { success: true }
+  } catch (error) {
+    console.error("Failed to transition to doctor:", error)
+    return { error: "Failed to transition account." }
+  }
+}

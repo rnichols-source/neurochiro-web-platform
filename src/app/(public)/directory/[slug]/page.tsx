@@ -29,12 +29,16 @@ import { onReferralSentAction } from "@/app/actions/automations";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import GoogleReviews from "@/components/directory/GoogleReviews";
 
+import { getDoctorBySlug } from "../actions";
+
 export default function DoctorProfile() {
   const params = useParams();
   const slug = params?.slug as string;
   const router = useRouter();
   
-  const [isLoading, setIsLoading] = useState(false);
+  const [doctor, setDoctor] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [referring, setReferring] = useState(false);
   const [session, setSession] = useState<any>(null);
   const supabase = createClient();
   const [modalState, setModalState] = useState({
@@ -50,81 +54,65 @@ export default function DoctorProfile() {
     };
     fetchSession();
   }, [supabase]);
-  
-  // Normalize a slug for comparison: decode, remove leading 'dr' if it's a prefix, lowercase, and remove non-alphanumeric
-  const normalize = (s: string) => {
-    if (!s) return '';
-    try {
-      const decoded = decodeURIComponent(s);
-      return decoded.toLowerCase()?.replace(/^dr(\.|\-|\s+|$)/, '')?.replace(/[^a-z0-9]/g, '') || '';
-    } catch (e) {
-      return s.toLowerCase()?.replace(/^dr(\.|\-|\s+|$)/, '')?.replace(/[^a-z0-9]/g, '') || '';
-    }
-  };
-  
-  const targetSlug = normalize(slug);
-  
-  // Attempt to find doctor in MOCK_DOCTORS
-  const doctor = MOCK_DOCTORS.find(d => {
-    const mockSlug = normalize(d.slug);
-    const nameSlug = normalize(`${d.first_name}-${d.last_name}`);
-    return mockSlug === targetSlug || nameSlug === targetSlug || d.id === slug;
-  });
 
-  // Debug logging for the user to see in their console
   useEffect(() => {
-    console.log("🔍 Doctor Profile Lookup:", {
-      requestedSlug: slug,
-      normalizedTarget: targetSlug,
-      found: !!doctor,
-      doctorId: doctor?.id
-    });
-  }, [slug, targetSlug, doctor]);
-
-  if (!doctor) {
-    console.error("❌ Doctor not found for slug:", slug);
-    return (
-      <div className="min-h-screen bg-neuro-cream flex flex-col items-center justify-center p-6 text-center">
-        <h1 className="text-4xl font-black text-neuro-navy mb-4 tracking-tighter">PROFILE NOT FOUND</h1>
-        <p className="text-gray-500 mb-8 font-medium">We couldn't find a doctor profile matching "{slug}".</p>
-        <Link href="/directory" className="px-10 py-4 bg-neuro-navy text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-xl shadow-neuro-navy/20">
-          Return to Directory
-        </Link>
-      </div>
-    );
-  }
+    async function loadDoctor() {
+      setIsLoading(true);
+      const { doctor: dbDoctor } = await getDoctorBySlug(slug);
+      
+      if (dbDoctor) {
+        setDoctor(dbDoctor);
+      } else {
+        // Fallback to mock for testing if slug matches
+        const normalize = (s: string) => s?.toLowerCase()?.replace(/[^a-z0-9]/g, '') || '';
+        const targetSlug = normalize(slug);
+        const mock = MOCK_DOCTORS.find(d => normalize(d.slug) === targetSlug || d.id === slug);
+        if (mock) setDoctor(mock);
+      }
+      setIsLoading(false);
+    }
+    loadDoctor();
+  }, [slug]);
 
   const handleReferral = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    
+    setReferring(true);
     try {
       if (doctor) {
         await onReferralSentAction(
-          "current-user-id",
-          "Dr. Referrer",
+          session?.user?.id || "guest",
+          session?.user?.user_metadata?.full_name || "Guest User",
           doctor.id,
           doctor.email || "doctor@example.com",
-          "555-0199",
-          "Patient Name"
+          doctor.phone || "555-0199",
+          "Patient Referral"
         );
       }
       setModalState({
         isOpen: true,
         title: "Referral Sent",
-        message: `Your referral for ${doctor?.first_name} ${doctor?.last_name} has been processed successfully and sent to their clinic via secure delivery.`
+        message: `Your referral for ${doctor?.first_name} ${doctor?.last_name} has been processed successfully.`
       });
     } catch (err) {
       console.error(err);
       setModalState({
         isOpen: true,
         title: "Error",
-        message: "There was an issue processing your referral. Please try again later or contact the clinic directly."
+        message: "There was an issue processing your referral."
       });
     } finally {
-      setIsLoading(false);
+      setReferring(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-neuro-cream flex flex-col items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-neuro-orange mb-4" />
+        <p className="text-[10px] font-black uppercase tracking-widest text-neuro-navy">Syncing Specialist Profile...</p>
+      </div>
+    );
+  }
 
   const handleBooking = () => {
     if (doctor.website_url) {

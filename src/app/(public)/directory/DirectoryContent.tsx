@@ -12,22 +12,34 @@ import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { getDoctors } from "./actions";
+import { submitLeadAction } from "@/app/actions/leads";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Dynamically import the map with SSR disabled to prevent server-side crashes
-const GlobalNetworkMap = dynamic(() => import("@/components/map/GlobalNetworkMap"), { 
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center">
-      <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Initializing Global Map...</p>
-    </div>
-  )
-});
+// ... rest of imports ...
 
 export default function DirectoryContent({ initialData }: { initialData: { doctors: any[], total: number } }) {
+  // ... state ...
+  const [notifying, setNotifying] = useState(false);
+  const [notifySuccess, setNotifySuccess] = useState(false);
+
+  // ... fetchDoctors ...
+
+  const handleNotifyMe = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setNotifying(true);
+    const formData = new FormData(e.currentTarget);
+    formData.append('location', locationQuery || "Unknown");
+    formData.append('source', 'directory_zero_state');
+    
+    const result = await submitLeadAction(formData);
+    if (result.success) {
+      setNotifySuccess(true);
+    }
+    setNotifying(false);
+  };
   const { region } = useRegion();
   const searchParams = useSearchParams();
   const { toggleSave: globalToggleSave, isSaved, lastLocation, setLastLocation } = useUserPreferences();
@@ -386,7 +398,34 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
               <div className="bg-white rounded-[2.5rem] border border-dashed border-gray-200 p-12 text-center">
                 <Globe className="w-12 h-12 text-gray-200 mx-auto mb-4" />
                 <h3 className="font-bold text-neuro-navy mb-2">No Clinics in this Area</h3>
-                <p className="text-gray-400 text-sm">We are expanding rapidly. Check back soon or try another region.</p>
+                <p className="text-gray-400 text-sm mb-8">We are expanding rapidly. Be the first to know when a specialist opens near you.</p>
+                
+                {notifySuccess ? (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="p-6 bg-emerald-50 text-emerald-700 rounded-3xl border border-emerald-100 font-bold"
+                  >
+                    Success! We'll notify you soon.
+                  </motion.div>
+                ) : (
+                  <form onSubmit={handleNotifyMe} className="max-w-md mx-auto space-y-4">
+                    <input 
+                      type="email" 
+                      name="email"
+                      required 
+                      placeholder="Your Email Address"
+                      className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-neuro-orange/20 outline-none"
+                    />
+                    <button 
+                      type="submit"
+                      disabled={notifying}
+                      className="w-full py-4 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-[10px] hover:bg-neuro-orange-dark transition-all disabled:opacity-50"
+                    >
+                      {notifying ? "Subscribing..." : "Notify Me via Email"}
+                    </button>
+                  </form>
+                )}
               </div>
             )}
 

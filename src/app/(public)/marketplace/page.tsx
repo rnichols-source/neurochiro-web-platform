@@ -23,6 +23,8 @@ import { useRouter } from "next/navigation";
 import { Vendor, VendorCategory } from "@/types/vendor";
 import VendorOnboarding from "@/components/vendor/VendorOnboarding";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
+import { getVendors, trackVendorClick } from "./actions";
+import { useEffect } from "react";
 
 const MOCK_VENDORS: Vendor[] = [
   {
@@ -85,15 +87,33 @@ export default function MarketplacePage() {
   const [activeCategory, setActiveFilter] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [vendors, setVendors] = useState<Vendor[]>(MOCK_VENDORS);
+  const [loading, setLoading] = useState(true);
 
-  const filteredVendors = MOCK_VENDORS.filter(v => {
-    const matchesCategory = activeCategory === "All" || v.categories.includes(activeCategory as any);
+  useEffect(() => {
+    async function loadVendors() {
+      const data = await getVendors();
+      if (data && data.length > 0) {
+        setVendors(data as any);
+      }
+      setLoading(false);
+    }
+    loadVendors();
+  }, []);
+
+  const handleTrackClick = async (vendorId: string, type: 'website' | 'discount' | 'profile') => {
+    await trackVendorClick(vendorId, type);
+  };
+
+  const filteredVendors = vendors.filter(v => {
+    const categories = v.categories || [];
+    const matchesCategory = activeCategory === "All" || categories.includes(activeCategory as any);
     const matchesSearch = v.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         v.short_description.toLowerCase().includes(searchQuery.toLowerCase());
+                         (v.short_description || "").toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  const featuredPartners = MOCK_VENDORS.filter(v => v.tier === 'featured_partner');
+  const featuredPartners = vendors.filter(v => v.tier === 'featured_partner');
 
   return (
     <div className="min-h-screen bg-neuro-cream pt-24 pb-20 overflow-x-hidden">

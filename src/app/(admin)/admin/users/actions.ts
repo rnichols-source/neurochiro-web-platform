@@ -29,48 +29,76 @@ export async function getTalentUsers(options: {
   const { type, search, status, page = 1, limit = 10 } = options;
   const from = (page - 1) * limit;
   const to = from + limit - 1;
+  const supabase = createServerSupabase();
 
   try {
-    // In production, this would query Supabase profiles table
-    // For now, we simulate with mock data logic
-    
-    let baseData: any[] = [];
-    if (type === 'Students') baseData = MOCK_STUDENTS;
-    else if (type === 'Doctors') {
-      baseData = MOCK_DOCTORS.map(d => ({
-        id: d.id,
-        name: `${d.first_name} ${d.last_name}`,
-        entity: d.clinic_name,
-        context: `${d.city}, ${d.state}`,
-        status: d.membership_tier === 'pro' ? 'Paid' : 'Free',
-        engagement: 90 + Math.floor(Math.random() * 10),
-        matches: 5 + Math.floor(Math.random() * 20),
-        joined: "Verified",
-        email: d.email || "doctor@example.com",
-        role: 'doctor'
-      }));
-    } else if (type === 'Vendors') baseData = MOCK_VENDORS;
+    const roleMap: Record<UserType, string> = {
+      'Students': 'student',
+      'Doctors': 'doctor',
+      'Vendors': 'vendor'
+    };
 
-    let filtered = [...baseData];
+    let query = supabase
+      .from('profiles')
+      .select('*, doctors(clinic_name, city, state, verification_status), students(school, graduation_year)', { count: 'exact' })
+      .eq('role', roleMap[type]);
 
     if (search) {
-      const q = search.toLowerCase();
-      filtered = filtered.filter(u => 
-        u.name.toLowerCase().includes(q) || 
-        u.entity.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q)
-      );
+      query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
     }
 
     if (status && status !== 'All Statuses') {
-      const s = status.split(' ')[0]; // Handle 'Paid (Premium)' -> 'Paid'
-      filtered = filtered.filter(u => u.status === s);
+      // Map frontend status to backend status
+      if (status.includes('Paid')) {
+        query = query.eq('subscription_status', 'active');
+      } else if (status.includes('Free')) {
+        query = query.eq('subscription_status', 'free');
+      } else if (status.includes('Pending')) {
+        // For doctors, pending might mean verification_status
+        if (type === 'Doctors') {
+            // Need to handle filter on joined table or separate query
+        }
+      }
     }
 
+    const { data, count, error } = await query
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (error) throw error;
+
+    const formattedUsers = (data || []).map(u => {
+      let entity = "";
+      let context = "";
+      if (type === 'Students') {
+        entity = u.students?.[0]?.school || "N/A";
+        context = `Class of ${u.students?.[0]?.graduation_year || "N/A"}`;
+      } else if (type === 'Doctors') {
+        entity = u.doctors?.[0]?.clinic_name || "N/A";
+        context = `${u.doctors?.[0]?.city || ""}, ${u.doctors?.[0]?.state || ""}`;
+      } else if (type === 'Vendors') {
+        entity = "Vendor Partner";
+        context = "Marketplace";
+      }
+
+      return {
+        id: u.id,
+        name: u.full_name,
+        email: u.email,
+        entity,
+        context,
+        status: u.subscription_status === 'active' ? 'Paid' : 'Free',
+        engagement: 0, // Would need actual analytics table
+        matches: 0,
+        joined: new Date(u.created_at).toLocaleDateString(),
+        role: u.role
+      };
+    });
+
     return {
-      users: filtered.slice(from, from + limit),
-      total: filtered.length,
-      hasMore: from + limit < filtered.length
+      users: formattedUsers,
+      total: count || 0,
+      hasMore: (count || 0) > to + 1
     };
   } catch (e) {
     console.error("Error fetching talent users:", e);
@@ -79,16 +107,34 @@ export async function getTalentUsers(options: {
 }
 
 export async function getTalentAuditStats() {
-  // CEO-level metrics
-  return {
-    totalStudents: MOCK_STUDENTS.length + 1240, // Simulated scale
-    totalDoctors: MOCK_DOCTORS.length,
-    totalVendors: MOCK_VENDORS.length + 12,
-    paidRatio: 68, // 68% paid
-    verificationRate: 92,
-    newThisMonth: 142,
-    activeMatches: 458
-  };
+  const supabase = createServerSupabase();
+  
+  try {
+    const { count: students } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student');
+    const { count: doctors } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'doctor');
+    const { count: vendors } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'vendor');
+    const { count: paid } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_status', 'active');
+
+    return {
+      totalStudents: students || 0,
+      totalDoctors: doctors || 0,
+      totalVendors: vendors || 0,
+      paidRatio: (paid || 0) / ((students || 0) + (doctors || 0) + (vendors || 0) || 1) * 100,
+      verificationRate: 0, // Would need to query doctors table specifically
+      newThisMonth: 0,
+      activeMatches: 0
+    };
+  } catch (e) {
+    return {
+        totalStudents: 0,
+        totalDoctors: 0,
+        totalVendors: 0,
+        paidRatio: 0,
+        verificationRate: 0,
+        newThisMonth: 0,
+        activeMatches: 0
+    };
+  }
 }
 
 export async function dispatchTalentBroadcast(target: string, data: any) {

@@ -31,11 +31,13 @@ DECLARE
   user_role text;
   user_tier text;
   user_full_name text;
+  user_phone text;
 BEGIN
   -- Extract metadata provided during signup
   user_role := NEW.raw_user_meta_data->>'role';
   user_tier := NEW.raw_user_meta_data->>'tier';
   user_full_name := NEW.raw_user_meta_data->>'full_name';
+  user_phone := NEW.raw_user_meta_data->>'phone';
 
   -- Default to 'patient' if no role provided
   IF user_role IS NULL THEN
@@ -44,18 +46,19 @@ BEGIN
 
   -- 1. Upsert into public.profiles
   -- We cast user_role to user_role enum if applicable, else text. We assume role is a text or enum in profiles.
-  INSERT INTO public.profiles (id, email, full_name, role)
-  VALUES (NEW.id, NEW.email, user_full_name, user_role::public.user_role)
+  INSERT INTO public.profiles (id, email, full_name, role, phone)
+  VALUES (NEW.id, NEW.email, user_full_name, user_role::public.user_role, user_phone)
   ON CONFLICT (id) DO UPDATE SET 
     email = EXCLUDED.email, 
-    full_name = COALESCE(EXCLUDED.full_name, public.profiles.full_name);
+    full_name = COALESCE(EXCLUDED.full_name, public.profiles.full_name),
+    phone = COALESCE(EXCLUDED.phone, public.profiles.phone);
 
   -- 2. Role-specific provisioning logic
   IF user_role = 'doctor' THEN
-    -- Provision doctor profile (hidden/unverified by default)
-    INSERT INTO public.doctors (id, is_verified)
-    VALUES (NEW.id, false)
-    ON CONFLICT (id) DO NOTHING;
+    -- Provision doctor profile (hidden/pending by default)
+    INSERT INTO public.doctors (user_id, verification_status)
+    VALUES (NEW.id, 'pending')
+    ON CONFLICT (user_id) DO NOTHING;
     
   ELSIF user_role = 'student' THEN
     -- Provision student profile for talent pool access

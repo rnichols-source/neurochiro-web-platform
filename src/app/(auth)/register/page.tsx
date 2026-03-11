@@ -81,6 +81,8 @@ function RegisterContent() {
     name: "",
     email: "",
     password: "",
+    phone: "",
+    acceptedTerms: false,
   });
 
   const [profileData, setProfileData] = useState({
@@ -103,6 +105,12 @@ function RegisterContent() {
   // --- Step 1: Create Account ---
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!accountData.acceptedTerms) {
+      setError("You must accept the Terms of Service and Privacy Policy.");
+      return;
+    }
+
     setIsPending(true);
     setError(null);
 
@@ -110,6 +118,7 @@ function RegisterContent() {
     formData.append("name", accountData.name);
     formData.append("email", accountData.email);
     formData.append("password", accountData.password);
+    formData.append("phone", accountData.phone);
 
     const result = await createAccountAction(formData, initialRole, initialTier, initialBilling);
 
@@ -127,7 +136,8 @@ function RegisterContent() {
         role: initialRole,
         tier: initialTier,
         billing: initialBilling,
-        step: "profile"
+        step: "profile",
+        email: accountData.email
       }));
     }
   };
@@ -173,10 +183,12 @@ function RegisterContent() {
 
     // Get the correct Stripe link
     const links = initialRole === "doctor" ? STRIPE_PAYMENT_LINKS.doctor : STRIPE_PAYMENT_LINKS.student;
-    const stripeUrl = (links as any)[initialTier][initialBilling];
+    const baseUrl = (links as any)[initialTier][initialBilling];
     
-    // Append user_id to stripe metadata if possible, or just redirect
-    // Stripe links are static in this demo, so we redirect.
+    // CRITICAL: Append user_id to stripe metadata via client_reference_id
+    // This allows the webhook to identify the user and activate their profile.
+    const stripeUrl = `${baseUrl}?client_reference_id=${userId}&prefilled_email=${encodeURIComponent(accountData.email || "")}`;
+    
     window.location.href = stripeUrl;
   };
 
@@ -208,7 +220,7 @@ function RegisterContent() {
                 ) : <s.icon className="w-5 h-5" />}
               </div>
               <span className={`text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap ${currentStepIndex >= i ? "text-neuro-navy" : "text-gray-300"}`}>
-                Step {i + 2} of 4: {s.label}
+                Step {i + 1} of 3: {s.label}
               </span>
             </div>
           ))}
@@ -249,6 +261,7 @@ function RegisterContent() {
 
               <div className="space-y-4">
                 <button 
+                  type="button"
                   onClick={() => signInWithProvider('google')}
                   className="w-full py-4 px-6 border-2 border-gray-100 rounded-[2rem] flex items-center justify-center gap-3 text-sm font-bold text-neuro-navy hover:bg-gray-50 transition-all hover:border-neuro-navy/20"
                 >
@@ -276,16 +289,30 @@ function RegisterContent() {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Email Address</label>
-                  <div className="relative group">
-                    <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-neuro-orange transition-colors" />
-                    <input 
-                      type="email" required placeholder="raymond@neurochiro.co"
-                      className="w-full pl-16 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
-                      value={accountData.email}
-                      onChange={(e) => setAccountData({...accountData, email: e.target.value})}
-                    />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Email Address</label>
+                    <div className="relative group">
+                      <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-neuro-orange transition-colors" />
+                      <input 
+                        type="email" required placeholder="raymond@neurochiro.co"
+                        className="w-full pl-16 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
+                        value={accountData.email}
+                        onChange={(e) => setAccountData({...accountData, email: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Phone Number</label>
+                    <div className="relative group">
+                      <Zap className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-neuro-orange transition-colors" />
+                      <input 
+                        type="tel" required placeholder="(555) 000-0000"
+                        className="w-full pl-16 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
+                        value={accountData.phone}
+                        onChange={(e) => setAccountData({...accountData, phone: e.target.value})}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -299,6 +326,18 @@ function RegisterContent() {
                       onChange={(e) => setAccountData({...accountData, password: e.target.value})}
                     />
                   </div>
+                </div>
+
+                <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                  <input 
+                    type="checkbox" required id="terms"
+                    className="mt-1.5 w-5 h-5 rounded border-gray-300 text-neuro-orange focus:ring-neuro-orange transition-all cursor-pointer"
+                    checked={accountData.acceptedTerms}
+                    onChange={(e) => setAccountData({...accountData, acceptedTerms: e.target.checked})}
+                  />
+                  <label htmlFor="terms" className="text-xs font-medium text-gray-500 leading-relaxed cursor-pointer">
+                    I agree to the <Link href="/terms" className="text-neuro-navy font-bold hover:underline">Terms of Service</Link> and <Link href="/privacy" className="text-neuro-navy font-bold hover:underline">Privacy Policy</Link>. I understand that I can cancel my subscription at any time.
+                  </label>
                 </div>
 
                 <button 

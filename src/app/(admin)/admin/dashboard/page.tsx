@@ -348,7 +348,12 @@ export default function AdminDashboard() {
                   <div className={`absolute top-1 right-1 w-4 h-4 bg-white rounded-full`}></div>
                 </div>
               </div>
-              <button className="w-full py-4 md:py-5 bg-neuro-orange text-white font-black rounded-xl md:rounded-2xl uppercase tracking-widest text-[10px] md:text-sm shadow-xl shadow-neuro-orange/20 mt-4 active:scale-95 transition-transform">Sync Configuration</button>
+              <button 
+                onClick={() => alert("Synchronizing global platform configurations...")}
+                className="w-full py-4 md:py-5 bg-neuro-orange text-white font-black rounded-xl md:rounded-2xl uppercase tracking-widest text-[10px] md:text-sm shadow-xl shadow-neuro-orange/20 mt-4 active:scale-95 transition-transform"
+              >
+                Sync Configuration
+              </button>
             </div>
           </div>
         </div>

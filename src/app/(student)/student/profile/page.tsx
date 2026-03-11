@@ -34,28 +34,63 @@ import { motion, AnimatePresence } from "framer-motion";
 import { onProfileUpdateAction } from "@/app/actions/automations";
 import { useStudentTier } from "@/context/StudentTierContext";
 
+import { getStudentProfile, updateStudentProfile } from "./actions";
+
 export default function ProfilePage() {
   const { tier, isFoundation, isProfessional, isAccelerator } = useStudentTier();
   const [profile, setProfile] = useState({
-    name: "Raymond Nichols",
-    email: "raymond.nichols@life.edu",
-    school: "Life University",
-    gradYear: "2027",
-    interests: ["Pediatrics", "Clinical Neurology", "Practice Management", "Neuro-Scanning"],
-    readinessScore: 85
+    name: "",
+    email: "",
+    school: "",
+    gradYear: "",
+    interests: [] as string[],
+    readinessScore: 85,
+    isLookingForMentorship: false
   });
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleUpdateProfile = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    async function loadProfile() {
+      const data = await getStudentProfile();
+      if (data) {
+        setProfile({
+          name: data.full_name || "",
+          email: data.email || "",
+          school: data.school || "",
+          gradYear: data.graduation_year?.toString() || "",
+          interests: data.interests || [],
+          readinessScore: data.engagement_score || 85,
+          isLookingForMentorship: data.is_looking_for_mentorship || false
+        });
+      }
+      setLoading(false);
+    }
+    loadProfile();
+  }, []);
+
+  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const updatedData = Object.fromEntries(formData.entries());
-    setProfile(prev => ({ ...prev, ...updatedData }));
-    onProfileUpdateAction("std-1", updatedData);
-    triggerSuccess("Profile updated successfully!");
-    setActiveModal(null);
+    formData.append('interests', profile.interests.join(','));
+    formData.append('is_looking_for_mentorship', profile.isLookingForMentorship.toString());
+
+    try {
+      await updateStudentProfile(formData);
+      setProfile(prev => ({ 
+        ...prev, 
+        name: formData.get('full_name') as string,
+        school: formData.get('school') as string,
+        gradYear: formData.get('gradYear') as string,
+      }));
+      triggerSuccess("Profile updated successfully!");
+      setActiveModal(null);
+    } catch (err) {
+      console.error(err);
+      triggerSuccess("Failed to update profile.");
+    }
   };
 
   const triggerSuccess = (msg: string) => {
@@ -63,20 +98,53 @@ export default function ProfilePage() {
     setTimeout(() => setSuccessToast(null), 3000);
   };
 
-  const handleAddInterest = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleAddInterest = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const interest = new FormData(e.currentTarget).get('interest') as string;
     if (interest && !profile.interests.includes(interest)) {
-      setProfile(prev => ({ ...prev, interests: [...prev.interests, interest] }));
-      onProfileUpdateAction("std-1", { addedInterest: interest });
+      const newInterests = [...profile.interests, interest];
+      setProfile(prev => ({ ...prev, interests: newInterests }));
+      
+      const formData = new FormData();
+      formData.append('full_name', profile.name);
+      formData.append('school', profile.school);
+      formData.append('gradYear', profile.gradYear);
+      formData.append('is_looking_for_mentorship', profile.isLookingForMentorship.toString());
+      formData.append('interests', newInterests.join(','));
+      
+      await updateStudentProfile(formData);
       triggerSuccess("Specialty added!");
     }
     setActiveModal(null);
   };
 
-  const removeInterest = (interest: string) => {
-    setProfile(prev => ({ ...prev, interests: prev.interests.filter(i => i !== interest) }));
-    onProfileUpdateAction("std-1", { removedInterest: interest });
+  const removeInterest = async (interest: string) => {
+    const newInterests = profile.interests.filter(i => i !== interest);
+    setProfile(prev => ({ ...prev, interests: newInterests }));
+    
+    const formData = new FormData();
+    formData.append('full_name', profile.name);
+    formData.append('school', profile.school);
+    formData.append('gradYear', profile.gradYear);
+    formData.append('is_looking_for_mentorship', profile.isLookingForMentorship.toString());
+    formData.append('interests', newInterests.join(','));
+    
+    await updateStudentProfile(formData);
+  };
+
+  const toggleMentorship = async () => {
+    const newVal = !profile.isLookingForMentorship;
+    setProfile(prev => ({ ...prev, isLookingForMentorship: newVal }));
+    
+    const formData = new FormData();
+    formData.append('full_name', profile.name);
+    formData.append('school', profile.school);
+    formData.append('gradYear', profile.gradYear);
+    formData.append('is_looking_for_mentorship', newVal.toString());
+    formData.append('interests', profile.interests.join(','));
+    
+    await updateStudentProfile(formData);
+    triggerSuccess(`Mentorship matching ${newVal ? 'activated' : 'paused'}`);
   };
 
   const getTierIcon = (t: string) => {
@@ -87,6 +155,8 @@ export default function ProfilePage() {
       default: return null;
     }
   };
+
+  if (loading) return null;
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 relative">
@@ -301,6 +371,15 @@ export default function ProfilePage() {
                  <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest p-5 bg-white/5 rounded-2xl border border-white/10">
                     <span className="text-gray-400">Monthly Mentorships</span>
                     <span className={!isAccelerator ? 'text-gray-500' : 'text-neuro-orange'}>{isAccelerator ? 'Unlimited' : '0 / 0'}</span>
+                 </div>
+                 <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest p-5 bg-white/5 rounded-2xl border border-white/10">
+                    <span className="text-gray-400">Open to Mentorship</span>
+                    <button 
+                      onClick={toggleMentorship}
+                      className={`w-12 h-6 rounded-full transition-colors relative ${profile.isLookingForMentorship ? 'bg-neuro-orange' : 'bg-gray-500'}`}
+                    >
+                      <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${profile.isLookingForMentorship ? 'left-7' : 'left-1'}`} />
+                    </button>
                  </div>
                  <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest p-5 bg-white/5 rounded-2xl border border-white/10">
                     <span className="text-gray-400">Clinical Playbooks</span>

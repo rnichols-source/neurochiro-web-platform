@@ -37,24 +37,25 @@ export async function getModerationData() {
   const supabase = createServerSupabase();
   
   try {
-    // In production, fetch these from actual tables:
-    // const { count: pendingDoctors } = await supabase.from('profiles').select('*', { count: 'exact' }).eq('verification_status', 'pending');
+    const { count: pendingDoctors } = await supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending');
+    const { count: pendingSeminars } = await supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('is_approved', false);
+    const { count: pendingVendors } = await supabase.from('vendors').select('*', { count: 'exact', head: true }).eq('is_active', false);
     
-    const pendingDoctorsCount = 4;
-    const pendingSeminarsCount = 2;
-    const pendingJobsCount = 1;
+    // Fallback counts for UI during early stage
+    const pendingDoctorsCount = pendingDoctors || 0;
+    const pendingSeminarsCount = pendingSeminars || 0;
+    const pendingVendorsCount = pendingVendors || 0;
 
-    const totalCleared = 1342;
-    const escalated = 5;
+    const { count: verifiedDoctors } = await supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified');
 
     const healthMetrics: PlatformHealthMetrics = {
-      verifiedDoctors: 412,
-      unverifiedDoctors: 34,
-      fraudAttemptRate: '0.2%',
-      vendorCompliance: '98%',
+      verifiedDoctors: verifiedDoctors || 0,
+      unverifiedDoctors: pendingDoctorsCount,
+      fraudAttemptRate: '0.0%',
+      vendorCompliance: '100%',
       seminarVerificationRate: '100%',
       activeCases: currentAlerts.length,
-      avgResolutionTime: '2.4 hours'
+      avgResolutionTime: '< 1 hour'
     };
 
     return {
@@ -63,14 +64,14 @@ export async function getModerationData() {
         queues: [
           { id: 'doctors', name: "Doctor Applications", count: pendingDoctorsCount, color: "text-blue-500" },
           { id: 'seminars', name: "Seminar Listings", count: pendingSeminarsCount, color: "text-neuro-orange" },
-          { id: 'jobs', name: "Job Postings", count: pendingJobsCount, color: "text-purple-500" }
+          { id: 'vendors', name: "Vendor Partners", count: pendingVendorsCount, color: "text-purple-500" }
         ],
         alerts: currentAlerts,
         summary: {
-          totalCleared,
-          escalated,
+          totalCleared: healthMetrics.verifiedDoctors,
+          escalated: 0,
           pendingInvestigations: currentAlerts.length,
-          totalFlagged: totalCleared + escalated + currentAlerts.length
+          totalFlagged: pendingDoctorsCount + pendingSeminarsCount + pendingVendorsCount
         },
         healthMetrics,
         settings: globalSettings

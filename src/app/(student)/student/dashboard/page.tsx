@@ -22,13 +22,16 @@ import Link from "next/link";
 import { useStudentTier } from "@/context/StudentTierContext";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { getStudentDashboardData } from "./actions";
+import { getStudentDashboardData, transitionToDoctorAction } from "./actions";
 import JobRadar from "@/components/student/JobRadar";
+import { useRouter } from "next/navigation";
 
 export default function StudentDashboard() {
   const { tier, isFoundation, isProfessional, isAccelerator } = useStudentTier();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [transitioning, setTransitioning] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,6 +41,18 @@ export default function StudentDashboard() {
     };
     fetchData();
   }, []);
+
+  const handleTransition = async () => {
+    setTransitioning(true);
+    const result = await transitionToDoctorAction();
+    if (result.success) {
+        // Force full reload to update context and UI correctly
+        window.location.href = '/doctor/dashboard';
+    } else {
+        alert("Failed to transition account. Please try again.");
+        setTransitioning(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -49,9 +64,42 @@ export default function StudentDashboard() {
 
   const studentName = data?.profile?.name || "Student";
   const schoolInfo = `${data?.profile?.school || "Life University"} '${data?.profile?.gradYear?.toString().slice(-2) || "27"}`;
+  
+  const currentYear = new Date().getFullYear();
+  const gradYear = data?.profile?.gradYear ? parseInt(data.profile.gradYear, 10) : null;
+  const isGraduating = gradYear && gradYear <= currentYear;
 
   return (
     <div className="p-10 max-w-7xl mx-auto space-y-10">
+      {isGraduating && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-neuro-navy border border-neuro-orange/30 p-6 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[80px] pointer-events-none"></div>
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-12 h-12 bg-neuro-orange rounded-2xl flex items-center justify-center text-white shadow-lg">
+              <Trophy className="w-6 h-6 fill-current" />
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-white">Congratulations, Doctor!</h3>
+              <p className="text-sm font-medium text-gray-300 mt-1">
+                It looks like you've graduated. Transition your account to a full Doctor profile to activate your directory listing.
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={handleTransition}
+            disabled={transitioning}
+            className="px-8 py-4 bg-neuro-orange text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-neuro-orange-light transition-all whitespace-nowrap shadow-xl shadow-neuro-orange/20 relative z-10 disabled:opacity-50 flex items-center gap-2"
+          >
+            {transitioning ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            Transition Account
+          </button>
+        </motion.div>
+      )}
+
       {/* Personalized Engagement Banner */}
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
@@ -66,7 +114,10 @@ export default function StudentDashboard() {
             New clinic matching your criteria just joined in <span className="underline decoration-neuro-orange">Denver, CO</span>.
           </p>
         </div>
-        <button className="px-6 py-2 bg-neuro-navy text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-neuro-navy-light transition-all">
+        <button 
+          onClick={() => alert("Redirecting to specific clinic match details...")}
+          className="px-6 py-2 bg-neuro-navy text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-neuro-navy-light transition-all"
+        >
           View Match
         </button>
       </motion.div>
@@ -260,7 +311,10 @@ export default function StudentDashboard() {
                      ))}
                   </div>
                   
-                  <button className="w-full mt-6 py-4 border-2 border-dashed border-gray-200 rounded-2xl text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:border-neuro-orange hover:text-neuro-orange transition-all">
+                  <button 
+                    onClick={() => alert("Loading full list of clinical matches...")}
+                    className="w-full mt-6 py-4 border-2 border-dashed border-gray-200 rounded-2xl text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:border-neuro-orange hover:text-neuro-orange transition-all"
+                  >
                      View All Potential Matches
                   </button>
                </div>
@@ -303,7 +357,10 @@ export default function StudentDashboard() {
                </div>
                <h3 className="font-bold text-neuro-navy mb-1">Resume Verified</h3>
                <p className="text-xs text-gray-500 mb-6">Your clinical profile is 100% complete and ready for elite clinics.</p>
-               <button className="text-[10px] font-black text-neuro-orange uppercase tracking-widest hover:underline">
+               <button 
+                onClick={() => alert("Opening clinical CV and intro video editor...")}
+                className="text-[10px] font-black text-neuro-orange uppercase tracking-widest hover:underline"
+               >
                   Update CV / Intro Video
                </button>
             </section>

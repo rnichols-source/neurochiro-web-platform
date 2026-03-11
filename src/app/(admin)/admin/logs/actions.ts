@@ -1,22 +1,7 @@
 'use server'
 
 import { AuditLog, LogCategory } from "@/types/admin";
-
-// In a real production app, this would query a 'audit_logs' table in Supabase/PostgreSQL.
-// For now, we simulate a database with some initial "real" data and a generation logic.
-
-const MOCK_DB_LOGS: AuditLog[] = [
-  { id: "1", category: "SECURITY", event: "Admin Login Succeeded", user: "Super_Admin", target: "Auth_Gateway", timestamp: new Date(Date.now() - 1000 * 60 * 2).toISOString(), status: "Success", severity: "Low" },
-  { id: "2", category: "AUTOMATION", event: "Broadcast Dispatched", user: "Admin_US", target: "All Students", timestamp: new Date(Date.now() - 1000 * 60 * 14).toISOString(), status: "Success", severity: "Medium" },
-  { id: "3", category: "SYSTEM", event: "API Rate Limit Warning", user: "System", target: "Google_Places_Proxy", timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(), status: "Warning", severity: "High" },
-  { id: "4", category: "DATA", event: "Doctor Profile Updated", user: "Dr. Chris Brown", target: "Profile_ID_902", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(), status: "Success", severity: "Low" },
-  { id: "5", category: "SECURITY", event: "Failed Verification Attempt", user: "Guest_User", target: "Verification_Portal", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), status: "Failed", severity: "High" },
-  { id: "6", category: "DATA", event: "New Doctor Registered", user: "Dr. Amanda White", target: "Directory", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(), status: "Success", severity: "Medium" },
-  { id: "7", category: "AUTOMATION", event: "Daily Backup Completed", user: "System", target: "S3_Bucket_Global", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(), status: "Success", severity: "Low" },
-  { id: "8", category: "SYSTEM", event: "Stripe Webhook Received", user: "Stripe_Internal", target: "Payment_Gateway", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 15).toISOString(), status: "Success", severity: "Low" },
-  { id: "9", category: "SECURITY", event: "User Role Escalated", user: "Admin_US", target: "User_ID_442", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 20).toISOString(), status: "Warning", severity: "Critical" },
-  { id: "10", category: "AUTOMATION", event: "Email Campaign Started", user: "Marketing_Bot", target: "Active_Leads", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), status: "Success", severity: "Low" },
-];
+import { createServerSupabase } from "@/lib/supabase-server";
 
 export async function getAuditLogs(options: { 
   category?: string; 
@@ -24,26 +9,72 @@ export async function getAuditLogs(options: {
   limit?: number;
 } = {}) {
   const { category, search, limit = 50 } = options;
+  const supabase = createServerSupabase();
 
-  let filtered = [...MOCK_DB_LOGS];
+  try {
+    let query = supabase
+      .from('audit_logs')
+      .select('*');
 
-  if (category && category !== "All") {
-    filtered = filtered.filter(log => log.category.toLowerCase() === category.toLowerCase());
+    if (category && category !== "All") {
+      query = query.eq('category', category.toUpperCase());
+    }
+
+    if (search) {
+      query = query.or(`event.ilike.%${search}%,user_name.ilike.%${search}%,target.ilike.%${search}%`);
+    }
+
+    const { data, error } = await query
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+
+    return (data || []).map(log => ({
+      id: log.id,
+      category: log.category as LogCategory,
+      event: log.event,
+      user: log.user_name || "System",
+      target: log.target,
+      timestamp: log.created_at,
+      status: log.status,
+      severity: log.severity
+    }));
+  } catch (err) {
+    console.error("Error fetching audit logs:", err);
+    return [];
   }
+}
 
-  if (search) {
-    const q = search.toLowerCase();
-    filtered = filtered.filter(log => 
-      log.event.toLowerCase().includes(q) || 
-      log.user.toLowerCase().includes(q) || 
-      log.target.toLowerCase().includes(q)
-    );
-  }
+export async function logAuditAction(params: {
+    category: LogCategory;
+    event: string;
+    target: string;
+    status: string;
+    severity: string;
+    metadata?: any;
+}) {
+    const supabase = createServerSupabase();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let userName = "System";
+    if (user) {
+        const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
+        userName = profile?.full_name || user.email || "Unknown User";
+    }
 
-  // Sort by timestamp descending
-  filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const { error } = await supabase.from('audit_logs').insert({
+        category: params.category,
+        event: params.event,
+        user_name: userName,
+        user_id: user?.id,
+        target: params.target,
+        status: params.status,
+        severity: params.severity,
+        metadata: params.metadata || {}
+    });
 
-  return filtered.slice(0, limit);
+    return { success: !error };
 }
 
 /**

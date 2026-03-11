@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, ChevronDown, Sparkles } from "lucide-react";
+import LandingSearch from "./LandingSearch";
 
 export default function Hero() {
   const { scrollY } = useScroll();
@@ -53,19 +54,10 @@ export default function Hero() {
           First Ecosystem.
         </motion.h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-xl md:text-2xl text-gray-200 max-w-3xl mb-12 font-light leading-relaxed drop-shadow-sm drop-shadow-sm"
-        >
-          Connect with elite practitioners. Access world-class education.<br className="hidden md:block" />
-          Join the movement redefining global healthcare.
-        </motion.p>
-        </div>
+        <LandingSearch />
+      </div>
 
-        {/* Floating Elements (Parallax) */}
-
+      {/* Floating Elements (Parallax) */}
       <motion.div style={{ y: y1 }} className="absolute top-[20%] left-[5%] opacity-20 hidden lg:block">
         <div className="w-24 h-24 border border-white/20 rounded-full flex items-center justify-center">
           <div className="w-16 h-16 border border-neuro-orange/30 rounded-full" />

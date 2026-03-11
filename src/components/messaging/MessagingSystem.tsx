@@ -7,7 +7,10 @@ import {
   Send, 
   MoreVertical, 
   ShieldCheck, 
-  AlertCircle
+  AlertCircle,
+  Check,
+  CheckCheck,
+  Zap
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase";
@@ -22,6 +25,12 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const supabase = createClient();
+
+  const doctorCannedReplies = [
+    "Yes, we are currently accepting new patients.",
+    "Please call our office to schedule an appointment.",
+    "I focus specifically on neurologically-based care."
+  ];
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -312,9 +321,16 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
                     }`}
                   >
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.body}</p>
-                    <span className={`text-[10px] mt-2 block ${isMine ? 'text-white/70 text-right' : 'text-gray-500'}`}>
-                      {new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                    </span>
+                    <div className={`flex items-center gap-1 mt-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
+                      <span className={`text-[10px] ${isMine ? 'text-white/70' : 'text-gray-500'}`}>
+                        {new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </span>
+                      {isMine && (
+                        msg.read_at ? 
+                          <CheckCheck className="w-3 h-3 text-white" /> : 
+                          <Check className="w-3 h-3 text-white/50" />
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -322,6 +338,19 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
             </div>
 
             <footer className="p-4 bg-white/[0.02] border-t border-white/5">
+              {userRole === 'doctor' && (
+                <div className="flex gap-2 overflow-x-auto no-scrollbar mb-3 pb-1">
+                  {doctorCannedReplies.map((reply, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setNewMessage(reply)}
+                      className="whitespace-nowrap px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] text-gray-300 font-bold flex items-center gap-1.5 transition-colors"
+                    >
+                      <Zap className="w-3 h-3 text-neuro-orange" /> {reply}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="relative">
                 <textarea 
                   value={newMessage}

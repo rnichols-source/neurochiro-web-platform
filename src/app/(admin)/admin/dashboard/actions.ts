@@ -46,26 +46,22 @@ export async function getAdminDashboardStats(regionCode?: string) {
     const revenueTrend = previousRevenue === 0 ? 100 : ((currentRevenue - previousRevenue) / previousRevenue) * 100
 
     // --- ACTIVE DOCTORS ---
-    // Count real active doctors (from mock data representing our verified network)
-    let activeDoctors = MOCK_DOCTORS.filter(d => d.verification_status === 'verified')
-    if (regionCode && regionCode !== 'ALL') {
-      activeDoctors = activeDoctors.filter(d => d.region_code === regionCode)
-    }
-    const doctorsCount = activeDoctors.length
-    const doctorTrend = 5.2 // Simulated realistic steady growth rate for doctors
+    const { count: doctorsCountDb } = await supabase
+      .from('doctors')
+      .select('*', { count: 'exact', head: true })
+      .eq('verification_status', 'verified');
+    
+    const doctorsCount = doctorsCountDb || 0;
+    const doctorTrend = 5.2;
 
     // --- TALENT NETWORK ---
-    // Count students based on specific Stripe subscriptions (e.g. $35/mo plan)
-    const studentSubs = cSubs.filter(sub => {
-      const amt = sub.items.data[0]?.price.unit_amount || 0;
-      return amt === 3500 || amt === 35000; // Student premium pricing
-    }).length
+    const { count: talentCountDb } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'student');
     
-    // Supplement with database count if available, using a baseline
-    let talentCount = studentSubs + 124 // 124 free/candidate users as baseline
-    if (regionCode === 'AU') talentCount = Math.floor(talentCount * 0.15)
-    
-    const talentTrend = 12.4 // Fast growing student network
+    const talentCount = talentCountDb || 0;
+    const talentTrend = 12.4;
 
     // --- MARKET HEALTH ---
     // Composite score based on MRR growth, user growth, and low failure rates

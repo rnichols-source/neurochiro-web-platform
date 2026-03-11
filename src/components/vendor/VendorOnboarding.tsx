@@ -18,6 +18,7 @@ import {
   Lock
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { submitVendorApplication } from "@/app/actions/vendors";
 
 interface VendorOnboardingProps {
   onClose?: () => void;
@@ -26,6 +27,7 @@ interface VendorOnboardingProps {
 export default function VendorOnboarding({ onClose }: VendorOnboardingProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     companyName: "",
     website: "",
@@ -41,9 +43,14 @@ export default function VendorOnboarding({ onClose }: VendorOnboardingProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    router.push("/vendor/dashboard");
+    setIsSubmitting(true);
+    const result = await submitVendorApplication(formData);
+    if (result.success) {
+        router.push("/vendor/dashboard");
+    } else {
+        alert(result.error || "Submission failed");
+        setIsSubmitting(false);
+    }
   };
 
   const steps = [
@@ -252,9 +259,10 @@ export default function VendorOnboarding({ onClose }: VendorOnboardingProps) {
         ) : (
           <button 
             onClick={handleSubmit}
-            className="px-10 py-4 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-dark transition-all shadow-xl flex items-center gap-3 uppercase tracking-widest text-[10px]"
+            disabled={isSubmitting}
+            className="px-10 py-4 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-dark transition-all shadow-xl flex items-center gap-3 uppercase tracking-widest text-[10px] disabled:opacity-50"
           >
-            Submit Application <CheckCircle2 className="w-4 h-4" />
+            {isSubmitting ? "Submitting..." : "Submit Application"} <CheckCircle2 className="w-4 h-4" />
           </button>
         )}
       </div>

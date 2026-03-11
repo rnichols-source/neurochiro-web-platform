@@ -418,9 +418,11 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         
       case 'payment_success':
         if (supabaseAdmin && payload.stripeData) {
-          const session = payload.stripeData;
-          const customerId = session.customer;
-          const userId = session.client_reference_id;
+          const data = payload.stripeData;
+          // In checkout.session, userId is in client_reference_id
+          // In invoice, we usually find customer, and might have subscription metadata
+          const customerId = data.customer;
+          const userId = data.client_reference_id; // For checkout session
           
           if (userId) {
             await supabaseAdmin.from('profiles').update({
@@ -430,7 +432,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             
             const { data: profile } = await supabaseAdmin.from('profiles').select('role, full_name, email').eq('id', userId).single();
             if (profile?.role === 'doctor') {
-               await supabaseAdmin.from('doctors').update({ is_verified: true }).eq('id', userId);
+               await supabaseAdmin.from('doctors').update({ verification_status: 'verified' }).eq('user_id', userId);
                
                if (emailEnabled && profile.email) {
                   await sendPremiumEmail({
@@ -443,6 +445,25 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                   });
                }
             }
+          } else if (customerId) {
+            // Handle renewal via customerId
+            await supabaseAdmin.from('profiles').update({
+              subscription_status: 'active'
+            }).eq('stripe_customer_id', customerId);
+          }
+        }
+        break;
+
+      case 'subscription_updated':
+        if (supabaseAdmin && payload.stripeData) {
+          const sub = payload.stripeData;
+          const customerId = sub.customer;
+          // You would typically map Stripe Price IDs to your internal tiers here
+          // For now we update the status
+          if (customerId) {
+            await supabaseAdmin.from('profiles').update({
+              subscription_status: sub.status
+            }).eq('stripe_customer_id', customerId);
           }
         }
         break;
@@ -478,9 +499,29 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
               await supabaseAdmin.from('profiles').update({ subscription_status: 'canceled' }).eq('id', profile.id);
               // Hide from directory
               if (profile.role === 'doctor') {
-                await supabaseAdmin.from('doctors').update({ is_verified: false }).eq('id', profile.id);
+                await supabaseAdmin.from('doctors').update({ verification_status: 'hidden' }).eq('user_id', profile.id);
               }
             }
+          }
+        }
+        break;
+
+      case 'unread_message_email':
+        if (supabaseAdmin && emailEnabled) {
+          const { recipient_id, sender_id } = payload;
+          const { data: recipient } = await supabaseAdmin.from('profiles').select('email, full_name, role').eq('id', recipient_id).single();
+          const { data: sender } = await supabaseAdmin.from('profiles').select('full_name').eq('id', sender_id).single();
+          
+          if (recipient?.email) {
+            const dashboardUrl = recipient.role === 'student' ? 'https://neurochiro.co/student/messages' : 'https://neurochiro.co/doctor/messages';
+            await sendPremiumEmail({
+              to: recipient.email,
+              subject: `New Message from ${sender?.full_name || 'a member'}`,
+              title: 'New Message',
+              body: `<p>Hi ${recipient.full_name || 'Member'}, you have a new unread message from ${sender?.full_name || 'someone in the network'}. Please log in to reply to keep the conversation active.</p>`,
+              ctaText: 'View Message',
+              ctaUrl: dashboardUrl
+            });
           }
         }
         break;
@@ -572,6 +613,9 @@ export const Automations = {
   },
   onPaymentFailed: async (data: any) => {
     await enqueue('payment_failed', { stripeData: data });
+  },
+  onSubscriptionUpdated: async (data: any) => {
+    await enqueue('subscription_updated', { stripeData: data });
   },
   onSubscriptionCanceled: async (data: any) => {
     await enqueue('subscription_canceled', { stripeData: data });

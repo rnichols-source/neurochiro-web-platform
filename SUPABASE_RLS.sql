@@ -16,10 +16,13 @@ create policy "Public profiles are viewable by everyone"
   on public.profiles for select
   using ( true );
 
--- Users can update their own profiles
+-- Users can update their own profiles (Restrict to non-sensitive fields in production via a trigger or specific columns if Supabase supported it directly in 'using', but typically handled via API/RPC)
+-- For now, we ensure they only update their own record. 
+-- SECURITY NOTE: In a real production app, use a service-role-only function to update roles/tiers.
 create policy "Users can update their own profiles"
   on public.profiles for update
-  using ( auth.uid() = id );
+  using ( auth.uid() = id )
+  with check ( auth.uid() = id );
 
 -- Admins can do everything
 create policy "Admins have full access to profiles"
@@ -38,7 +41,7 @@ create policy "Doctors are viewable by everyone"
 -- Doctors can update their own practice details
 create policy "Doctors can update their own info"
   on public.doctors for update
-  using ( auth.uid() = id );
+  using ( auth.uid() = user_id );
 
 -- Admins can manage all doctors
 create policy "Admins can manage all doctors"
