@@ -18,7 +18,15 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// ... rest of imports ...
+// Dynamically import the map with SSR disabled to prevent server-side crashes
+const GlobalNetworkMap = dynamic(() => import("@/components/map/GlobalNetworkMap"), { 
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center">
+      <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Initializing Global Map...</p>
+    </div>
+  )
+});
 
 export default function DirectoryContent({ initialData }: { initialData: { doctors: any[], total: number } }) {
   // ... state ...
