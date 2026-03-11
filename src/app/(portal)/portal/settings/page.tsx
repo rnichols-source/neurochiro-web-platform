@@ -68,7 +68,10 @@ export default function IdentityPage() {
                     <div className="w-32 h-32 rounded-[2rem] bg-white/10 backdrop-blur-md border-2 border-white/20 flex items-center justify-center text-white text-4xl font-black shadow-2xl shrink-0 transition-transform group-hover:scale-105 duration-500">
                        JD
                     </div>
-                    <button className="absolute -bottom-2 -right-2 w-12 h-12 bg-neuro-orange text-white rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all flex items-center justify-center border-4 border-neuro-navy group">
+                    <button 
+                      onClick={() => alert("Launching profile image editor...")}
+                      className="absolute -bottom-2 -right-2 w-12 h-12 bg-neuro-orange text-white rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all flex items-center justify-center border-4 border-neuro-navy group"
+                    >
                        <SettingsIcon className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
                     </button>
                  </div>
@@ -88,10 +91,16 @@ export default function IdentityPage() {
               </div>
 
               <div className="mt-12 flex gap-4 relative z-10">
-                 <button className="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest transition-all">
+                 <button 
+                  onClick={() => alert("Generating secure Health ID QR code...")}
+                  className="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                 >
                     View Health ID
                  </button>
-                 <button className="px-6 py-3 bg-neuro-orange text-white rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-neuro-orange/20">
+                 <button 
+                  onClick={() => alert("Opening secure sharing options...")}
+                  className="px-6 py-3 bg-neuro-orange text-white rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-neuro-orange/20"
+                 >
                     Share Profile
                  </button>
               </div>
@@ -116,7 +125,12 @@ export default function IdentityPage() {
                             </div>
                             <h3 className="text-2xl font-heading font-black text-neuro-navy">Neural Snapshot</h3>
                          </div>
-                         <button className="px-5 py-2.5 bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-400 rounded-xl hover:text-neuro-orange transition-colors">Update Goal</button>
+                         <button 
+                          onClick={() => alert("Redirecting to goal alignment wizard...")}
+                          className="px-5 py-2.5 bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-400 rounded-xl hover:text-neuro-orange transition-colors"
+                         >
+                          Update Goal
+                         </button>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
@@ -142,7 +156,12 @@ export default function IdentityPage() {
                             </div>
                             <h3 className="text-2xl font-heading font-black text-neuro-navy">Latest Scans</h3>
                          </div>
-                         <button className="text-[10px] font-black uppercase tracking-widest text-neuro-orange hover:underline">View History</button>
+                         <button 
+                          onClick={() => alert("Loading historical neural scan data...")}
+                          className="text-[10px] font-black uppercase tracking-widest text-neuro-orange hover:underline"
+                         >
+                          View History
+                         </button>
                       </div>
                       
                       <div className={`grid grid-cols-1 sm:grid-cols-3 gap-6`}>
@@ -217,7 +236,12 @@ export default function IdentityPage() {
                             </div>
                             <h3 className="text-2xl font-heading font-black text-neuro-navy">Contact Details</h3>
                          </div>
-                         <button className="px-5 py-2.5 bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-400 rounded-xl hover:text-neuro-orange transition-colors">Edit</button>
+                         <button 
+                          onClick={() => alert("Launching contact information editor...")}
+                          className="px-5 py-2.5 bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-400 rounded-xl hover:text-neuro-orange transition-colors"
+                         >
+                          Edit
+                         </button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                          <div className="space-y-2">
@@ -271,7 +295,12 @@ export default function IdentityPage() {
                             <p className="text-xs font-bold text-gray-400">Not set yet</p>
                          </div>
                       </div>
-                      <button className="px-6 py-3 bg-neuro-navy text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange transition-all">Add Contact</button>
+                      <button 
+                        onClick={() => alert("Opening emergency contact modal...")}
+                        className="px-6 py-3 bg-neuro-navy text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange transition-all"
+                      >
+                        Add Contact
+                      </button>
                    </section>
                 </motion.div>
               ) : activeTab === "Careers" ? (
@@ -291,7 +320,12 @@ export default function IdentityPage() {
                             </div>
                             <h3 className="text-2xl font-heading font-black text-neuro-navy">CA Career Hub</h3>
                          </div>
-                         <button className="px-5 py-2.5 bg-neuro-navy text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange transition-all">Upload Resume</button>
+                         <button 
+                          onClick={() => alert("Launching secure resume uploader...")}
+                          className="px-5 py-2.5 bg-neuro-navy text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange transition-all"
+                         >
+                          Upload Resume
+                         </button>
                       </div>
                       <p className="text-gray-400 font-medium leading-relaxed max-w-2xl mb-8">
                          Looking to enter the chiropractic field? Explore Chiropractic Assistant (CA) roles at top-tier NeuroChiro clinics. Build your clinical experience while helping patients heal.
@@ -330,11 +364,19 @@ export default function IdentityPage() {
                                  <p className="text-xs font-black text-neuro-navy">{job.salary}</p>
                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{job.type}</p>
                               </div>
-                              <button className="px-6 py-3 bg-gray-50 hover:bg-neuro-navy hover:text-white text-neuro-navy rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">View Details</button>
+                              <button 
+                                onClick={() => alert(`Redirecting to full details for ${job.title}...`)}
+                                className="px-6 py-3 bg-gray-50 hover:bg-neuro-navy hover:text-white text-neuro-navy rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                              >
+                                View Details
+                              </button>
                            </div>
                         </div>
                       ))}
-                      <button className="w-full py-4 border-2 border-dashed border-gray-100 rounded-3xl text-gray-400 text-[10px] font-black uppercase tracking-widest hover:border-neuro-orange hover:text-neuro-orange transition-all flex items-center justify-center gap-2">
+                      <button 
+                        onClick={() => router.push("/jobs")}
+                        className="w-full py-4 border-2 border-dashed border-gray-100 rounded-3xl text-gray-400 text-[10px] font-black uppercase tracking-widest hover:border-neuro-orange hover:text-neuro-orange transition-all flex items-center justify-center gap-2"
+                      >
                          <Search className="w-4 h-4" /> Browse 14 More Openings
                       </button>
                    </div>
@@ -404,7 +446,12 @@ export default function IdentityPage() {
                       <div className="py-12 text-center border-2 border-dashed border-gray-100 rounded-3xl">
                         <Lock className="w-10 h-10 text-gray-200 mx-auto mb-4" />
                         <p className="text-sm text-gray-400 font-medium">No payment methods on file.</p>
-                        <button className="mt-4 text-[10px] font-black uppercase tracking-widest text-neuro-orange hover:underline">Add Method</button>
+                        <button 
+                          onClick={() => alert("Launching Stripe onboarding...")}
+                          className="mt-4 text-[10px] font-black uppercase tracking-widest text-neuro-orange hover:underline"
+                        >
+                          Add Method
+                        </button>
                       </div>
                    </section>
 

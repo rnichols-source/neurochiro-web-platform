@@ -67,7 +67,7 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="relative group cursor-pointer" onClick={() => window.location.href='/nervous-system'}>
+          <div className="relative group cursor-pointer" onClick={() => router.push('/nervous-system')}>
             <div className="absolute inset-0 bg-gradient-to-tr from-neuro-orange/30 to-blue-500/10 rounded-[3rem] blur-2xl group-hover:blur-[100px] transition-all opacity-50"></div>
             <div className="bg-white/5 border border-white/10 rounded-[3rem] p-12 relative z-10 backdrop-blur-2xl aspect-square flex flex-col items-center justify-center text-center shadow-2xl group-hover:border-white/20 transition-all">
                <div className="w-32 h-32 bg-neuro-orange/30 rounded-full flex items-center justify-center mb-8 relative">

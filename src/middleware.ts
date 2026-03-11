@@ -23,6 +23,7 @@ export default async function proxy(request: NextRequest) {
   // 🛡️ Skip rate limiting for static assets and system paths
   const isStatic = pathname.startsWith('/_next') || 
                    pathname.includes('/favicon.ico') || 
+                   pathname.includes('/sw.js') ||
                    pathname.match(/\.(png|jpg|jpeg|svg|webp|gif|css|js)$/);
   
   if (isStatic) {

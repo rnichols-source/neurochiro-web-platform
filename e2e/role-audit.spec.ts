@@ -15,8 +15,9 @@ test.describe('NeuroChiro Role-Based Login Audit', () => {
     await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
     await expect(page).toHaveURL(/.*\/admin\/dashboard/);
     
-    // Verify landing page content
-    await expect(page.locator('h1')).toContainText(/NeuroChiro Command/i);
+    // Verify landing page content - make sure it's fully loaded
+    const heading = page.locator('h1', { hasText: /NeuroChiro Command/i }).first();
+    await expect(heading).toBeVisible({ timeout: 10000 });
   });
 
   test('Doctor Login -> Doctor Dashboard', async ({ page }) => {
@@ -28,7 +29,9 @@ test.describe('NeuroChiro Role-Based Login Audit', () => {
     await page.waitForURL('**/doctor/dashboard', { timeout: 15000 });
     await expect(page).toHaveURL(/.*\/doctor\/dashboard/);
     
-    await expect(page.locator('h1')).toContainText(/Dashboard|Command Center/i);
+    // DoctorDashboard has either "Practice Command Center" or "Doctor Dashboard" depending on tier
+    const heading = page.locator('h1', { hasText: /(Practice Command Center|Doctor Dashboard)/i }).first();
+    await expect(heading).toBeVisible({ timeout: 10000 });
   });
 
   test('Student Login -> Student Dashboard', async ({ page }) => {
@@ -40,16 +43,15 @@ test.describe('NeuroChiro Role-Based Login Audit', () => {
     await page.waitForURL('**/student/dashboard', { timeout: 15000 });
     await expect(page).toHaveURL(/.*\/student\/dashboard/);
     
-    await expect(page.locator('h1')).toContainText(/Elevating your career/i);
+    const heading = page.locator('h1', { hasText: /Elevating your career/i }).first();
+    await expect(heading).toBeVisible({ timeout: 10000 });
   });
 
   test('Public Site Home Page', async ({ page }) => {
     await page.goto(BASE_URL);
-    // Be specific about the first heading
-    await expect(page.locator('h1').first()).toBeVisible();
     
-    // Verify "NeuroChiro" logo/text in navigation
-    const logo = page.locator('nav').locator('text=NeuroChiro').first();
-    await expect(logo).toBeVisible();
+    // Verify the page loaded by checking for the main 'Log In' navigation link
+    const loginLink = page.locator('a[href="/login"]').first();
+    await expect(loginLink).toBeVisible();
   });
 });

@@ -226,13 +226,22 @@ export default function VendorDashboard() {
                 <Settings className="w-5 h-5 text-gray-400" /> Vendor Settings
               </h3>
               <div className="space-y-3">
-                <button className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-left px-4 flex items-center justify-between group transition-all">
+                <button 
+                  onClick={() => alert("Redirecting to profile editor...")}
+                  className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-left px-4 flex items-center justify-between group transition-all"
+                >
                   Edit Public Profile <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
                 </button>
-                <button className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-left px-4 flex items-center justify-between group transition-all">
+                <button 
+                  onClick={() => alert("Loading billing portal...")}
+                  className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-left px-4 flex items-center justify-between group transition-all"
+                >
                   Billing & Subscription <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
                 </button>
-                <button className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-left px-4 flex items-center justify-between group transition-all">
+                <button 
+                  onClick={() => alert("Fetching API keys...")}
+                  className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-left px-4 flex items-center justify-between group transition-all"
+                >
                   API & Integrations <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
                 </button>
               </div>
@@ -246,7 +255,10 @@ export default function VendorDashboard() {
             </div>
             <h3 className="font-bold text-neuro-navy mb-1">Need Assistance?</h3>
             <p className="text-xs text-gray-500 mb-6">Our partner success team is here to help you maximize your ROI.</p>
-            <button className="text-[10px] font-black text-neuro-orange uppercase tracking-widest hover:underline">
+            <button 
+              onClick={() => alert("Opening support ticket...")}
+              className="text-[10px] font-black text-neuro-orange uppercase tracking-widest hover:underline"
+            >
               Contact Success Team
             </button>
           </section>

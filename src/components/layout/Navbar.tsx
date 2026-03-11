@@ -209,7 +209,7 @@ export default function Navbar() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[200] bg-neuro-navy text-white flex flex-col"
+            className="fixed inset-0 z-[300] bg-neuro-navy text-white flex flex-col"
           >
             <div className="p-6 flex justify-between items-center border-b border-white/10">
               <div className="flex items-center gap-3">

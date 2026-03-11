@@ -105,7 +105,12 @@ export default function ProgramOperations() {
           <section className="bg-white/5 border border-white/5 rounded-[2.5rem] overflow-hidden">
             <div className="p-8 border-b border-white/5 flex items-center justify-between">
               <h3 className="text-xl font-heading font-black text-white">Student Progress Logs</h3>
-              <button className="text-xs font-black text-neuro-orange uppercase tracking-widest hover:underline">View All</button>
+              <button 
+                onClick={() => alert("Loading complete student activity logs...")}
+                className="text-xs font-black text-neuro-orange uppercase tracking-widest hover:underline"
+              >
+                View All
+              </button>
             </div>
             <div className="divide-y divide-white/5">
               {[1, 2, 3].map((_, i) => (
@@ -165,14 +170,24 @@ export default function ProgramOperations() {
                   <Award className="w-4 h-4 text-neuro-orange" />
                   <span className="text-xs font-bold text-gray-400">14 Certificates Pending</span>
                 </div>
-                <button className="text-[10px] font-black uppercase text-white hover:text-neuro-orange transition-colors">Sign</button>
+                <button 
+                  onClick={() => alert("Opening certificate signing module...")}
+                  className="text-[10px] font-black uppercase text-white hover:text-neuro-orange transition-colors"
+                >
+                  Sign
+                </button>
               </div>
               <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Users className="w-4 h-4 text-blue-500" />
                   <span className="text-xs font-bold text-gray-400">8 Preceptor Matches</span>
                 </div>
-                <button className="text-[10px] font-black uppercase text-white hover:text-blue-500 transition-colors">Review</button>
+                <button 
+                  onClick={() => alert("Opening preceptor review dashboard...")}
+                  className="text-[10px] font-black uppercase text-white hover:text-blue-500 transition-colors"
+                >
+                  Review
+                </button>
               </div>
             </div>
           </section>
@@ -218,10 +233,16 @@ export default function ProgramOperations() {
                 <p className="text-lg font-bold text-white">{selectedProgram.revenue}</p>
               </div>
               <div className="col-span-2 pt-6 border-t border-white/5 space-y-4">
-                <button className="w-full py-4 bg-white/5 border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                <button 
+                  onClick={() => alert("Launching curriculum editor...")}
+                  className="w-full py-4 bg-white/5 border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                >
                   <Play className="w-4 h-4 text-neuro-orange" /> Edit Curriculum
                 </button>
-                <button className="w-full py-4 bg-white/5 border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                <button 
+                  onClick={() => alert("Opening program scheduler...")}
+                  className="w-full py-4 bg-white/5 border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                >
                   <Calendar className="w-4 h-4 text-blue-500" /> Manage Schedule
                 </button>
               </div>

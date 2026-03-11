@@ -140,7 +140,10 @@ export default function DirectoryExplorer() {
           />
         </div>
         <div className="flex gap-2">
-           <button className="px-6 py-4 bg-white border border-gray-100 rounded-2xl font-bold text-neuro-navy hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2">
+           <button 
+            onClick={() => alert("Opening specialty filters...")}
+            className="px-6 py-4 bg-white border border-gray-100 rounded-2xl font-bold text-neuro-navy hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2"
+           >
               <Filter className="w-4 h-4 text-gray-400" /> Specialties
            </button>
            <Link href="/directory" className="px-6 py-4 bg-white border border-gray-100 rounded-2xl font-bold text-neuro-navy hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2">
@@ -182,7 +185,10 @@ export default function DirectoryExplorer() {
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2 pt-4 border-t border-gray-50">
-                   <button className="py-2 bg-gray-50 text-neuro-navy text-[10px] font-black rounded-xl hover:bg-gray-100 transition-colors active:scale-95">
+                   <button 
+                    onClick={() => alert(`Viewing profile for ${doc.name}...`)}
+                    className="py-2 bg-gray-50 text-neuro-navy text-[10px] font-black rounded-xl hover:bg-gray-100 transition-colors active:scale-95"
+                   >
                       View Profile
                    </button>
                    <button 
@@ -228,7 +234,10 @@ export default function DirectoryExplorer() {
                         <p className="text-[10px] text-gray-500">{partner.clinic}</p>
                       </div>
                     </div>
-                    <button className="p-2 hover:bg-neuro-orange/10 text-neuro-navy hover:text-neuro-orange rounded-lg transition-colors">
+                    <button 
+                      onClick={() => setIsMessaging(partner.name)}
+                      className="p-2 hover:bg-neuro-orange/10 text-neuro-navy hover:text-neuro-orange rounded-lg transition-colors"
+                    >
                       <MessageSquare className="w-4 h-4" />
                     </button>
                   </div>

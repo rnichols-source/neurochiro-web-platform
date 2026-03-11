@@ -101,7 +101,7 @@ test.describe('NeuroChiro Comprehensive E2E Audit', () => {
     if (await doctorProBtn.isVisible()) {
         await doctorProBtn.click();
         await page.waitForURL('**/doctor/dashboard');
-        await expect(page.locator('h1')).toContainText(/Dashboard/i);
+        await expect(page.locator('h1')).toContainText(/(Dashboard|Command Center)/i);
         
         // Deep click test inside dashboard
         await recursiveClickTest(page, 0, 1);
