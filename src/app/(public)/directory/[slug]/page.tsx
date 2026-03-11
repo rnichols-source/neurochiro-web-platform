@@ -21,7 +21,8 @@ import {
   Mail,
   ExternalLink,
   PhoneCall,
-  MessageSquare
+  MessageSquare,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
