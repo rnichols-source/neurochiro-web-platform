@@ -35,7 +35,7 @@ export async function createSeminarAction(formData: FormData) {
   const location = formData.get('location') as string
   const dates = formData.get('dates') as string
   const price = parseFloat(formData.get('price') as string || '0')
-  const categories = formData.get('categories')?.toString().split(',').map(c => c.trim()) || []
+  const categories = formData.get('categories')?.toString().split(',').map((c: string) => c.trim()) || []
 
   const { data, error } = await supabase
     .from('seminars')

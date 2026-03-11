@@ -31,7 +31,7 @@ export async function getRegionalStats() {
     const revenueByRegion: Record<string, number> = { US: 0, AU: 0 };
     let totalUsersByRegion: Record<string, number> = { US: 0, AU: 0 };
 
-    chargesResult.data.forEach(charge => {
+    chargesResult.data.forEach((charge: any) => {
       if (charge.status === 'succeeded' && !charge.refunded) {
         // Mock attribution based on currency if metadata isn't present
         const region = charge.currency === 'aud' ? 'AU' : 'US'; 
@@ -52,7 +52,7 @@ export async function getRegionalStats() {
     // 3. Format the stats
     const stats: Record<string, any> = {};
     
-    dynamicRegions.forEach(region => {
+    dynamicRegions.forEach((region: any) => {
       const code = region.code;
       stats[code] = {
         admin: region.admin,

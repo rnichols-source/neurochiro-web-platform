@@ -41,8 +41,8 @@ export async function getRevenueData(timeRange: string) {
 
     // 3. Precise Revenue Calculation (Excluding Refunds)
     const calcRevenue = (charges: any[]) => 
-      charges.filter(c => c.status === 'succeeded' && !c.refunded)
-             .reduce((sum, c) => sum + c.amount, 0) / 100;
+      charges.filter((c: any) => c.status === 'succeeded' && !c.refunded)
+             .reduce((sum: number, c: any) => sum + c.amount, 0) / 100;
 
     const currentRevenue = calcRevenue(currentCharges.data);
     const previousRevenue = calcRevenue(previousCharges.data);
@@ -50,7 +50,7 @@ export async function getRevenueData(timeRange: string) {
 
     // 4. Precise MRR Calculation (Normalized to Monthly)
     let mrr = 0;
-    subscriptions.data.forEach(sub => {
+    subscriptions.data.forEach((sub: any) => {
       const item = sub.items.data[0];
       const amount = item.price.unit_amount || 0;
       if (item.price.recurring?.interval === 'year') {
@@ -62,8 +62,8 @@ export async function getRevenueData(timeRange: string) {
     mrr = mrr / 100;
 
     // 5. Failed Payments Accuracy
-    const currentFailed = currentCharges.data.filter(c => c.status === 'failed').length;
-    const previousFailed = previousCharges.data.filter(c => c.status === 'failed').length;
+    const currentFailed = currentCharges.data.filter((c: any) => c.status === 'failed').length;
+    const previousFailed = previousCharges.data.filter((c: any) => c.status === 'failed').length;
     const failedPaymentsTrend = currentFailed - previousFailed;
 
     // 6. Revenue Attribution (Real Data)
@@ -75,7 +75,7 @@ export async function getRevenueData(timeRange: string) {
       "Other": 0
     };
 
-    currentCharges.data.filter(c => c.status === 'succeeded').forEach(c => {
+    currentCharges.data.filter((c: any) => c.status === 'succeeded').forEach((c: any) => {
       const amt = c.amount / 100;
       const desc = (c.description || "").toLowerCase();
       if (amt >= 190 || desc.includes("doctor")) breakdownRaw["Doctor Subs"] += amt;
@@ -85,9 +85,9 @@ export async function getRevenueData(timeRange: string) {
       else breakdownRaw["Other"] += amt;
     });
 
-    const totalCalculated = Object.values(breakdownRaw).reduce((a, b) => a + b, 0);
+    const totalCalculated = Object.values(breakdownRaw).reduce((a: number, b: number) => a + b, 0);
     const breakdown = Object.entries(breakdownRaw)
-      .map(([label, val]) => ({
+      .map(([label, val]: [string, number]) => ({
         label,
         value: totalCalculated > 0 ? Math.round((val / totalCalculated) * 100) : 0,
         color: label === "Doctor Subs" ? "bg-neuro-orange" : "bg-blue-500"
@@ -105,7 +105,7 @@ export async function getRevenueData(timeRange: string) {
         activeSubscriptionsTrend: 0,
         failedPayments: currentFailed,
         failedPaymentsTrend,
-        transactions: currentCharges.data.map(c => ({
+        transactions: currentCharges.data.map((c: any) => ({
           id: c.id,
           user: c.billing_details?.name || "Customer",
           amount: (c.amount / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' }),

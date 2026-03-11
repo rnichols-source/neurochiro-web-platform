@@ -56,12 +56,12 @@ export async function getDoctors(options: {
       
       // Filter mock data
       let filteredMock = regionCode 
-        ? MOCK_DOCTORS.filter(d => d.region_code === regionCode)
+        ? MOCK_DOCTORS.filter((d: any) => d.region_code === regionCode)
         : MOCK_DOCTORS;
 
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        filteredMock = filteredMock.filter(d => 
+        filteredMock = filteredMock.filter((d: any) => 
           d.first_name.toLowerCase().includes(q) || 
           d.last_name.toLowerCase().includes(q) || 
           d.clinic_name.toLowerCase().includes(q)
@@ -72,7 +72,7 @@ export async function getDoctors(options: {
       const today = new Date().toISOString().split('T')[0];
       const seed = today.split('-').reduce((a, b) => a + parseInt(b), 0);
       
-      const sortedMock = [...filteredMock].sort((a, b) => {
+      const sortedMock = [...filteredMock].sort((a: any, b: any) => {
         const tiers: Record<string, number> = { pro: 3, growth: 2, starter: 1 };
         if (tiers[b.membership_tier] !== tiers[a.membership_tier]) {
           return tiers[b.membership_tier] - tiers[a.membership_tier];

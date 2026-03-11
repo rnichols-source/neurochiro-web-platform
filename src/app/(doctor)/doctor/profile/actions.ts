@@ -37,7 +37,7 @@ export async function updateDoctorProfile(formData: FormData) {
   const clinicName = formData.get('clinic_name') as string
   const city = formData.get('city') as string
   const website = formData.get('website') as string
-  const specialties = formData.get('specialties')?.toString().split(',').map(s => s.trim()) || []
+  const specialties = formData.get('specialties')?.toString().split(',').map((s: string) => s.trim()) || []
 
   // 1. Update Profile (Name)
   const { error: profileError } = await supabase

@@ -67,7 +67,7 @@ export async function getTalentUsers(options: {
 
     if (error) throw error;
 
-    const formattedUsers = (data || []).map(u => {
+    const formattedUsers = (data || []).map((u: any) => {
       let entity = "";
       let context = "";
       if (type === 'Students') {
