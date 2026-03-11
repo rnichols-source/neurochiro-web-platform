@@ -75,6 +75,12 @@ export default function AdminQuickNav() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
+        // 🛡️ MASTER FOUNDER OVERRIDE - If it's the founder, they are always admin
+        if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com') {
+          setIsAdmin(true);
+          return;
+        }
+
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
@@ -82,6 +88,7 @@ export default function AdminQuickNav() {
           .single();
         
         const role = profile?.role;
+        // Check for any elevated admin role
         if (['admin', 'founder', 'super_admin', 'regional_admin'].includes(role)) {
           setIsAdmin(true);
           return;
@@ -93,7 +100,7 @@ export default function AdminQuickNav() {
       const demoRole = cookies.find(row => row.startsWith('nc_demo_role='));
       const cookieRole = demoRole ? demoRole.split('=')[1] : null;
       
-      if (cookieRole === 'admin') {
+      if (cookieRole === 'admin' || cookieRole === 'super_admin' || cookieRole === 'founder') {
         setIsAdmin(true);
       }
     };

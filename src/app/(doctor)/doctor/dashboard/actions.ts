@@ -18,13 +18,17 @@ export async function getDoctorDashboardStats() {
     const profile = profileRes.data;
     const doctor = doctorRes.data;
 
+    const userRole = profile?.role || 'doctor_starter';
+    const isFounder = user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com';
+    const isAdmin = ['admin', 'super_admin', 'founder', 'regional_admin'].includes(userRole);
+
     // Base stats with fallback logic
     return {
       profile: {
         name: profile?.full_name || user.email?.split('@')[0] || "Doctor",
         clinicName: doctor?.clinic_name || "My Practice",
-        isMember: ['doctor_pro', 'doctor_growth', 'doctor_starter', 'doctor_member'].includes(profile?.role || ''),
-        role: profile?.role || 'doctor_starter',
+        isMember: isFounder || isAdmin || ['doctor_pro', 'doctor_growth', 'doctor_starter', 'doctor_member'].includes(userRole),
+        role: userRole,
         status: profile?.subscription_status || 'inactive'
       },
       stats: [

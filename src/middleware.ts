@@ -118,7 +118,8 @@ export default async function proxy(request: NextRequest) {
 
     // 🛡️ MASTER FOUNDER OVERRIDE
     // If this is the founder, grant universal access regardless of DB role
-    if (userEmail === 'drray@neurochirodirectory.com') {
+    const isFounderEmail = userEmail === 'drray@neurochirodirectory.com' || userEmail === 'raymond@neurochiro.com';
+    if (isFounderEmail) {
       userRole = 'founder';
     }
 
@@ -126,14 +127,15 @@ export default async function proxy(request: NextRequest) {
 
     // 🛡️ Safe Perspective Mode logic
     // Admins and Founders are allowed everywhere.
-    if (userRole === 'admin' || userRole === 'regional_admin' || userRole === 'founder' || userRole === 'super_admin') {
+    const isAdminRole = ['admin', 'regional_admin', 'founder', 'super_admin'].includes(userRole);
+    if (isAdminRole) {
       return response;
     }
 
     if (!allowedRoles.includes(userRole)) {
       // Determine logical redirect based on role
       let targetPath = '/';
-      if (userRole === 'admin' || userRole === 'regional_admin' || userRole === 'founder' || userRole === 'super_admin') targetPath = '/admin/dashboard';
+      if (isAdminRole) targetPath = '/admin/dashboard';
       else if (userRole.startsWith('doctor') || userRole === 'doctor') targetPath = '/doctor/dashboard';
       else if (userRole === 'vendor') targetPath = '/marketplace/dashboard';
       else if (userRole === 'patient') targetPath = '/portal/dashboard';

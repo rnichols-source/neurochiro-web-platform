@@ -62,24 +62,30 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [isRealAdmin, setIsRealAdmin] = useState(false);
 
   // Check for real admin session to show emergency exit
-  useState(() => {
+  useEffect(() => {
     const checkRealRole = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // 🛡️ MASTER FOUNDER OVERRIDE
+        if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com') {
+          setIsRealAdmin(true);
+          return;
+        }
+
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)
           .single();
         
-        if (['admin', 'founder', 'super_admin'].includes(profile?.role)) {
+        if (['admin', 'founder', 'super_admin', 'regional_admin'].includes(profile?.role)) {
           setIsRealAdmin(true);
         }
       }
     };
     checkRealRole();
-  });
+  }, []);
 
   const tierWeight = { starter: 1, growth: 2, pro: 3 };
 

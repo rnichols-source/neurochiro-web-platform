@@ -24,7 +24,7 @@ create policy "Users can update their own profiles"
 -- Admins can do everything
 create policy "Admins have full access to profiles"
   on public.profiles for all
-  using ( exists (select 1 from public.profiles where id = auth.uid() and role = 'admin') );
+  using ( exists (select 1 from public.profiles where id = auth.uid() and role in ('admin', 'founder', 'super_admin', 'regional_admin')) );
 
 
 --------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ create policy "Doctors can update their own info"
 -- Admins can manage all doctors
 create policy "Admins can manage all doctors"
   on public.doctors for all
-  using ( exists (select 1 from public.profiles where id = auth.uid() and role = 'admin') );
+  using ( exists (select 1 from public.profiles where id = auth.uid() and role in ('admin', 'founder', 'super_admin', 'regional_admin')) );
 
 
 --------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ create policy "Student content access"
   on public.content for select
   using ( 
     access_level in ('student_free', 'student_paid') 
-    and exists (select 1 from public.profiles where id = auth.uid() and role in ('student_free', 'student_paid', 'admin'))
+    and exists (select 1 from public.profiles where id = auth.uid() and role in ('student_free', 'student_paid', 'admin', 'founder', 'super_admin'))
   );
 
 -- Paid Student content
@@ -67,7 +67,7 @@ create policy "Paid student content access"
   on public.content for select
   using ( 
     access_level = 'student_paid' 
-    and exists (select 1 from public.profiles where id = auth.uid() and role in ('student_paid', 'admin'))
+    and exists (select 1 from public.profiles where id = auth.uid() and role in ('student_paid', 'admin', 'founder', 'super_admin'))
   );
 
 
@@ -83,7 +83,7 @@ create policy "Jobs are viewable by everyone"
 create policy "Doctors can post jobs"
   on public.jobs for insert
   with check ( 
-    exists (select 1 from public.profiles where id = auth.uid() and role in ('doctor_member', 'admin'))
+    exists (select 1 from public.profiles where id = auth.uid() and role in ('doctor_member', 'doctor_growth', 'doctor_pro', 'admin', 'founder', 'super_admin'))
   );
 
 -- Only job owner (doctor) can update their jobs

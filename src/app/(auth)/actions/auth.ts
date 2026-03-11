@@ -28,7 +28,7 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   let role = profile?.role || 'doctor'
   
   // 🛡️ FOUNDER OVERRIDE
-  if (email === 'drray@neurochirodirectory.com') {
+  if (email === 'drray@neurochirodirectory.com' || email === 'raymond@neurochiro.com') {
     role = 'founder';
   }
 

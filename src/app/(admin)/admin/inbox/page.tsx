@@ -16,7 +16,11 @@ export default async function AdminInboxPage({ searchParams }: { searchParams: {
     .eq('id', user.id)
     .single();
 
-  if (profile?.role !== 'admin') {
+  const userRole = profile?.role;
+  const isFounder = user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com';
+  const isAdmin = ['admin', 'super_admin', 'founder', 'regional_admin'].includes(userRole);
+
+  if (!isFounder && !isAdmin) {
     redirect("/login");
   }
 

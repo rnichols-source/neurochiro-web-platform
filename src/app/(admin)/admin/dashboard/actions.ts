@@ -137,7 +137,20 @@ export async function getAdminDashboardStats(regionCode?: string) {
 
   } catch (e) {
     console.error("Admin Dashboard Error:", e)
-    return null
+    // Return a safe fallback state so the UI doesn't hang forever
+    return {
+      revenue: 0,
+      revenueTrend: 0,
+      doctors: 0,
+      doctorTrend: 0,
+      talent: 0,
+      talentTrend: 0,
+      marketHealth: 0,
+      marketTrend: 0,
+      adminLogs: [],
+      alerts: [{ type: 'System', severity: 'High', title: 'Data Fetch Error', description: 'Failed to synchronize with backend services.', time: 'Just now' }],
+      velocity: [0, 0, 0, 0, 0, 0, 0]
+    }
   }
 }
 

@@ -84,7 +84,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           .single();
         
         let role = profile?.role || 'admin';
-        if (user.email === 'drray@neurochirodirectory.com') {
+        // 🛡️ MASTER FOUNDER OVERRIDE
+        if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com') {
           role = 'founder';
         }
         setUserRole(role);

@@ -20,7 +20,7 @@ export default async function DashboardRedirect() {
   let role = profile?.role || 'doctor';
 
   // 🛡️ FOUNDER OVERRIDE
-  if (user.email === 'drray@neurochirodirectory.com') {
+  if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com') {
     role = 'founder';
   }
 
