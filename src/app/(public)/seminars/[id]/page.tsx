@@ -19,15 +19,26 @@ import {
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { getSeminarById } from "../actions";
+import { useRegion } from "@/context/RegionContext";
 
 export default function SeminarDetailsPage() {
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
+  const { region } = useRegion();
+  
   const [seminar, setSeminar] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedTier, setSelectedTier] = useState<'student' | 'grad' | 'doctor'>('student');
+
+  const pricingMap = {
+    student: { label: 'Student', price: 395 },
+    grad: { label: 'New Graduate', price: 595 },
+    doctor: { label: 'Practising Doctor', price: 895 }
+  };
 
   useEffect(() => {
+// ... existing load logic ...
     async function load() {
       const data = await getSeminarById(id);
       setSeminar(data);
@@ -263,10 +274,34 @@ export default function SeminarDetailsPage() {
                 </div>
               </div>
 
+              <div className="space-y-4">
+                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Select Your Category</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {(Object.keys(pricingMap) as Array<keyof typeof pricingMap>).map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setSelectedTier(t)}
+                      className={`py-3 px-2 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all border ${
+                        selectedTier === t 
+                          ? 'bg-neuro-orange border-neuro-orange text-white shadow-lg shadow-neuro-orange/20' 
+                          : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/30'
+                      }`}
+                    >
+                      {pricingMap[t].label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="pt-8 border-t border-white/10 space-y-6">
                 <div className="flex items-end justify-between">
                   <p className="text-sm font-bold text-gray-400">Total Investment</p>
-                  <p className="text-4xl font-black text-neuro-orange">${seminar.price}</p>
+                  <div className="text-right">
+                    <p className="text-4xl font-black text-neuro-orange">
+                      {region.currency.symbol}{pricingMap[selectedTier].price}
+                    </p>
+                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{region.currency.code}</p>
+                  </div>
                 </div>
                 <a 
                   href={seminar.registration_link}
