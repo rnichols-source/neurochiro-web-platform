@@ -2,25 +2,48 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 
-export async function getSeminars(regionCode?: string) {
+export interface SeminarFilterOptions {
+  country?: string;
+  city?: string;
+  instructor?: string;
+  eventType?: string;
+  showPast?: boolean;
+}
+
+export async function getSeminars(options: SeminarFilterOptions = {}) {
   const supabase = createServerSupabase()
   
   let query = supabase
     .from('seminars')
     .select(`
       *,
-      host:profiles!host_id(full_name),
       registrations:seminar_registrations(count)
     `)
     .eq('is_approved', true)
-    .order('created_at', { ascending: false })
 
-  if (regionCode) {
-    // Assuming location text might contain region or we add a region_code column
-    // For now we'll just filter in memory or assume all are global if no column
+  if (options.country && options.country !== 'All') {
+    query = query.eq('country', options.country)
+  }
+  
+  if (options.city && options.city !== 'All') {
+    query = query.eq('city', options.city)
   }
 
-  const { data, error } = await query
+  if (options.instructor && options.instructor !== 'All') {
+    query = query.ilike('instructor_name', `%${options.instructor}%`)
+  }
+
+  if (options.eventType && options.eventType !== 'All') {
+    query = query.eq('event_type', options.eventType)
+  }
+
+  if (options.showPast) {
+    query = query.eq('is_past', true)
+  } else {
+    query = query.eq('is_past', false)
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false })
 
   if (error) {
     console.error("Error fetching seminars:", error)
@@ -28,6 +51,21 @@ export async function getSeminars(regionCode?: string) {
   }
 
   return data
+}
+
+export async function getSeminarById(id: string) {
+    const supabase = createServerSupabase()
+    const { data, error } = await supabase
+        .from('seminars')
+        .select('*')
+        .eq('id', id)
+        .single()
+    
+    if (error) {
+        console.error("Error fetching seminar:", error)
+        return null
+    }
+    return data
 }
 
 export async function registerForSeminar(seminarId: string) {

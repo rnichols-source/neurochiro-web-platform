@@ -83,6 +83,36 @@ export async function getModerationData() {
   }
 }
 
+export async function getPendingSeminars() {
+  const supabase = createServerSupabase();
+  const { data, error } = await supabase
+    .from('seminars')
+    .select('*, host:profiles!host_id(full_name)')
+    .eq('is_approved', false);
+  
+  return { data: data || [], error };
+}
+
+export async function approveSeminar(id: string) {
+  const supabase = createServerSupabase();
+  const { error } = await supabase
+    .from('seminars')
+    .update({ is_approved: true })
+    .eq('id', id);
+  
+  return { success: !error };
+}
+
+export async function markSeminarAsPast(id: string) {
+  const supabase = createServerSupabase();
+  const { error } = await supabase
+    .from('seminars')
+    .update({ is_past: true })
+    .eq('id', id);
+  
+  return { success: !error };
+}
+
 export async function resolveAlert(alertId: string, action: 'Dismiss' | 'Escalate' | 'Resolve') {
   console.log(`[AUDIT] Alert ${alertId} processed with action: ${action} by Super_Admin`);
   
