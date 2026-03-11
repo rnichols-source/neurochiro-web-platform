@@ -85,8 +85,8 @@ export async function getAdminDashboardStats(regionCode?: string) {
       })
     }
 
-    const highSeverityLogs = recentLogs.filter(log => log.severity === 'High' || log.severity === 'Critical')
-    highSeverityLogs.forEach(log => {
+    const highSeverityLogs = recentLogs.filter((log: AuditLog) => log.severity === 'High' || log.severity === 'Critical')
+    highSeverityLogs.forEach((log: AuditLog) => {
       alerts.push({
         type: log.category,
         severity: log.severity,
