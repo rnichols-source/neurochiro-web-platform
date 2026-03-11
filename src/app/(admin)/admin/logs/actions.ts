@@ -30,7 +30,7 @@ export async function getAuditLogs(options: {
 
     if (error) throw error;
 
-    return (data || []).map(log => ({
+    return (data || []).map((log: any) => ({
       id: log.id,
       category: log.category as LogCategory,
       event: log.event,
