@@ -45,6 +45,13 @@ export default function StudentDiscovery() {
       readinessScore: 98,
       status: "Available",
       isFavorite: true,
+      isElite: true,
+      clinicalStats: {
+        adjusted: "480+",
+        certification: "Level 3 scanning",
+        volumeCapacity: "120+ visits/week"
+      },
+      projectedROI: "$220k/year",
       bio: "Focusing on the intersection of pediatric development and neurological integrity. Experience with Insight Scanning technology and chiropractic neurology principles.",
       achievements: ["Dean's List", "Neurology Club President"],
       location: "Marietta, GA"
@@ -58,6 +65,13 @@ export default function StudentDiscovery() {
       readinessScore: 94,
       status: "Looking",
       isFavorite: false,
+      isElite: true,
+      clinicalStats: {
+        adjusted: "350+",
+        certification: "TBI Protocol Cert",
+        volumeCapacity: "100+ visits/week"
+      },
+      projectedROI: "$185k/year",
       bio: "Passionate about high-performance athletics and traumatic brain injury recovery. Looking for a clinical setting that prioritizes objective neuro-functional testing.",
       achievements: ["Sports Council Lead", "Research Assistant"],
       location: "Davenport, IA"
@@ -71,6 +85,13 @@ export default function StudentDiscovery() {
       readinessScore: 88,
       status: "Mentorship",
       isFavorite: true,
+      isElite: false,
+      clinicalStats: {
+        adjusted: "120+",
+        certification: "HRV Mastery",
+        volumeCapacity: "60+ visits/week"
+      },
+      projectedROI: "$140k/year",
       bio: "Incoming clinical intern with a strong foundation in heart rate variability and autonomic nervous system regulation. Seeking long-term mentorship in family-based neuro-wellness.",
       achievements: ["Student Ambassador", "HRV Certified"],
       location: "Dallas, TX"
@@ -193,8 +214,14 @@ export default function StudentDiscovery() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {students.map((student, i) => (
           <div key={i} className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm hover:shadow-xl transition-all group flex flex-col relative overflow-hidden">
-             {student.isFavorite && (
-                <div className="absolute top-0 right-0 bg-neuro-orange text-white p-2 rounded-bl-2xl shadow-md">
+             {student.isElite && (
+                <div className="absolute top-0 right-0 bg-gradient-to-br from-neuro-orange to-orange-600 text-white px-4 py-2 rounded-bl-2xl shadow-lg z-10 flex items-center gap-2">
+                   <ShieldCheck className="w-4 h-4" />
+                   <span className="text-[10px] font-black uppercase tracking-widest">Elite Certified</span>
+                </div>
+             )}
+             {!student.isElite && student.isFavorite && (
+                <div className="absolute top-0 right-0 bg-neuro-orange text-white p-2 rounded-bl-2xl shadow-md z-10">
                    <Star className="w-4 h-4 fill-current" />
                 </div>
              )}
@@ -209,15 +236,26 @@ export default function StudentDiscovery() {
                 </div>
              </div>
 
-             <div className="space-y-4 flex-1">
-                <div>
-                   <div className="flex flex-wrap gap-2">
-                      {student.interests.map((interest, j) => (
-                        <span key={j} className="px-3 py-1 bg-neuro-cream rounded-full text-[9px] font-black uppercase text-neuro-navy">
-                           {interest}
-                        </span>
-                      ))}
+             <div className="space-y-6 flex-1">
+                {/* Clinical Stats - Proof of ROI */}
+                <div className="grid grid-cols-2 gap-3">
+                   <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Adjusted</p>
+                      <p className="text-sm font-black text-neuro-navy">{(student as any).clinicalStats.adjusted}</p>
                    </div>
+                   <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Capacity</p>
+                      <p className="text-sm font-black text-neuro-navy">{(student as any).clinicalStats.volumeCapacity}</p>
+                   </div>
+                </div>
+
+                <div className="p-4 bg-neuro-orange/5 rounded-2xl border border-neuro-orange/10">
+                   <div className="flex items-center justify-between mb-1">
+                      <p className="text-[10px] font-black text-neuro-orange uppercase tracking-widest">Projected Practice ROI</p>
+                      <Sparkles className="w-3 h-3 text-neuro-orange" />
+                   </div>
+                   <p className="text-xl font-black text-neuro-navy">{(student as any).projectedROI}</p>
+                   <p className="text-[9px] text-gray-500 font-bold uppercase mt-1">Based on readiness & clinical stats</p>
                 </div>
 
                 <div className="pt-6 border-t border-gray-50 space-y-4 mt-auto">

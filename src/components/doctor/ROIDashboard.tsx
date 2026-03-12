@@ -346,6 +346,65 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
 
         {/* Action Center */}
         <div className="space-y-6">
+          {/* Verification Queue - Friction Reduction */}
+          <AnimatePresence>
+            {pendingPatients.length > 0 && (
+              <motion.section 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white rounded-[2.5rem] p-8 border-2 border-neuro-orange/20 shadow-lg relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-neuro-orange/5 rounded-full -mr-12 -mt-12"></div>
+                <div className="flex items-center justify-between mb-6 relative z-10">
+                    <h4 className="font-heading font-black text-neuro-navy flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-neuro-orange" /> Verification Queue
+                    </h4>
+                    <span className="bg-neuro-orange text-white text-[9px] font-black px-2 py-1 rounded-full">{pendingPatients.length} PENDING</span>
+                </div>
+                
+                <div className="space-y-3 relative z-10">
+                    {pendingPatients.map(patient => (
+                      <motion.div 
+                        key={patient.id} 
+                        layout
+                        exit={{ opacity: 0, x: -20 }}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100"
+                      >
+                        <div>
+                            <p className="text-xs font-black text-neuro-navy">{patient.name}</p>
+                            <p className="text-[9px] text-gray-400 font-bold uppercase">{patient.date} • Booking Link</p>
+                        </div>
+                        <div className="flex gap-2">
+                            <button 
+                              onClick={() => handleConfirm(patient.id)}
+                              className="p-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-sm"
+                              title="Confirm Show"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button 
+                              onClick={() => handleConfirm(patient.id)} // In mock, just removes it
+                              className="p-1.5 bg-white text-gray-400 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
+                              title="No Show"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                </div>
+                
+                <button 
+                  onClick={handleBatchConfirm}
+                  className="w-full mt-6 py-3 bg-neuro-navy text-white text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-neuro-navy-light transition-all shadow-md active:scale-95"
+                >
+                    One-Click Batch Confirm
+                </button>
+              </motion.section>
+            )}
+          </AnimatePresence>
+
           <section className="bg-neuro-cream rounded-[2.5rem] p-8 border border-neuro-navy/5">
             <h4 className="font-heading font-black text-neuro-navy mb-4">ROI Accelerator</h4>
             <p className="text-xs text-gray-500 mb-6 leading-relaxed">
@@ -357,22 +416,22 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
           </section>
 
           {tier === 'growth' ? (
-            <section className="bg-gradient-to-br from-neuro-orange to-neuro-orange-dark rounded-[2.5rem] p-8 text-white relative overflow-hidden group shadow-xl">
+            <section className="bg-gradient-to-br from-neuro-orange to-neuro-orange-dark rounded-[2.5rem] p-8 text-white relative overflow-hidden group shadow-xl border-t-4 border-white/20">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl"></div>
               <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-3">
-                  <Lock className="w-4 h-4" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Pro Insight Locked</span>
+                <div className="flex items-center gap-2 mb-4">
+                  <Lock className="w-4 h-4 text-white/80" />
+                  <span className="text-[10px] font-black uppercase tracking-widest bg-white/10 px-2 py-1 rounded-full">The 80/20 Leak</span>
                 </div>
-                <h4 className="font-heading font-black text-lg mb-2">Deep Referral Tracking</h4>
-                <p className="text-xs text-white/70 mb-6 leading-relaxed">
-                  Unlock exact traffic source tracking and referral network insights.
+                <h4 className="font-heading font-black text-xl mb-3">Deep Referral Tracking</h4>
+                <p className="text-xs text-white/90 mb-8 leading-relaxed font-bold">
+                  You have <span className="underline decoration-white/40 decoration-2 underline-offset-4">{stats.confirmed_patients} patients</span>, but you don't know which source sent the 2 who actually paid. Stop guessing. <span className="text-white">Unlock Pro to see your Money-Makers.</span>
                 </p>
                 <button 
                   onClick={onUpgrade}
-                  className="w-full py-4 bg-white text-neuro-orange font-black rounded-2xl hover:bg-white/90 transition-all text-[10px] uppercase tracking-widest shadow-lg"
+                  className="w-full py-4 bg-white text-neuro-orange font-black rounded-2xl hover:bg-white/95 transition-all text-[10px] uppercase tracking-widest shadow-2xl active:scale-95 flex items-center justify-center gap-2"
                 >
-                  Upgrade to Pro
+                  Plug the Leak: Upgrade to Pro <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
             </section>
@@ -419,9 +478,9 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-5 h-5 bg-green-50 rounded-full flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="w-3 h-3 text-green-500" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
                 </div>
-                <p className="text-[10px] text-gray-500 font-medium">Manual confirmation of patients in your practice portal.</p>
+                <p className="text-[10px] text-neuro-orange font-bold uppercase tracking-tight">One-click verification of patients in your queue (Zero Friction).</p>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-5 h-5 bg-green-50 rounded-full flex items-center justify-center shrink-0">
