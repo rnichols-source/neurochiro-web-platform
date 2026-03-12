@@ -26,7 +26,8 @@ import {
   Calculator,
   Percent,
   Zap,
-  Loader2
+  Loader2,
+  Award
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -59,6 +60,7 @@ export default function JobsPage() {
     "Practice Growth Mindset": 0
   });
   const [savingScorecard, setSavingScorecard] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const averageScore = Object.values(scores).reduce((a, b) => a + b, 0) / Object.keys(scores).length;
   const hiringVerdict = averageScore >= 4.5 ? "STRONG HIRE" : averageScore >= 3.5 ? "POTENTIAL" : averageScore > 0 ? "PASS" : "AWAITING DATA";
@@ -492,14 +494,21 @@ export default function JobsPage() {
                               setSavingScorecard(true);
                               setTimeout(() => {
                                  setSavingScorecard(false);
-                                 closeModal();
+                                 setSaveSuccess(true);
+                                 setTimeout(() => {
+                                    setSaveSuccess(false);
+                                    closeModal();
+                                 }, 1000);
                               }, 1500);
                            }}
-                           disabled={savingScorecard}
-                           className="flex-[2] py-5 bg-neuro-navy text-white font-black rounded-2xl shadow-xl hover:bg-neuro-navy-light transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2"
+                           disabled={savingScorecard || saveSuccess}
+                           className={cn(
+                              "flex-[2] py-5 font-black rounded-2xl shadow-xl transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2",
+                              saveSuccess ? "bg-green-500 text-white" : "bg-neuro-navy text-white hover:bg-neuro-navy-light"
+                           )}
                         >
-                           {savingScorecard ? <Zap className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                           {savingScorecard ? "Saving Assessment..." : "Save to Candidate Profile"}
+                           {savingScorecard ? <Loader2 className="w-4 h-4 animate-spin" /> : saveSuccess ? <CheckCircle2 className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
+                           {savingScorecard ? "Saving Assessment..." : saveSuccess ? "Saved Successfully" : "Save to Candidate Profile"}
                         </button>
                      </div>
                   </div>
@@ -950,26 +959,32 @@ export default function JobsPage() {
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div 
                 onClick={() => setActiveModal('Interview-Scorecards')}
-                className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-start gap-4 hover:border-neuro-orange transition-all cursor-pointer group hover:shadow-lg"
+                className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-start gap-4 hover:border-neuro-orange transition-all cursor-pointer group hover:shadow-lg relative overflow-hidden"
               >
+                 <div className="absolute top-4 right-4 bg-neuro-orange/10 text-neuro-orange text-[8px] font-black px-2 py-1 rounded-full flex items-center gap-1 border border-neuro-orange/20">
+                    <Award className="w-2 h-2" /> ELITE FEATURE
+                 </div>
                  <div className="p-4 bg-neuro-navy rounded-2xl text-white group-hover:bg-neuro-orange transition-colors shadow-lg">
                     <FileText className="w-6 h-6" />
                  </div>
                  <div>
                     <h4 className="font-bold text-neuro-navy text-lg">Interview Scorecards</h4>
-                    <p className="text-xs text-gray-500 mt-1">Standardize your hiring process.</p>
+                    <p className="text-xs text-gray-500 mt-1">Standardize your hiring process with AI-driven scoring.</p>
                  </div>
               </div>
               <div 
                 onClick={() => setActiveModal('90-Day-Success-Plan')}
-                className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-start gap-4 hover:border-neuro-orange transition-all cursor-pointer group hover:shadow-lg"
+                className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-start gap-4 hover:border-neuro-orange transition-all cursor-pointer group hover:shadow-lg relative overflow-hidden"
               >
+                 <div className="absolute top-4 right-4 bg-neuro-orange/10 text-neuro-orange text-[8px] font-black px-2 py-1 rounded-full flex items-center gap-1 border border-neuro-orange/20">
+                    <Award className="w-2 h-2" /> ELITE FEATURE
+                 </div>
                  <div className="p-4 bg-neuro-navy rounded-2xl text-white group-hover:bg-neuro-orange transition-colors shadow-lg">
                     <Calendar className="w-6 h-6" />
                  </div>
                  <div>
                     <h4 className="font-bold text-neuro-navy text-lg">90-Day Success Plan</h4>
-                    <p className="text-xs text-gray-500 mt-1">Generate onboarding roadmaps.</p>
+                    <p className="text-xs text-gray-500 mt-1">Generate clinical onboarding blueprints for your staff.</p>
                  </div>
               </div>
            </div>

@@ -173,7 +173,12 @@ export default function StudentDashboard() {
                 <Users className="w-6 h-6 text-blue-600 group-hover:text-white" />
               </div>
               <h3 className="font-bold text-neuro-navy mb-1">Mentorship</h3>
-              <p className="text-xs text-gray-500">{isAccelerator ? "2 active mentor connections" : "You missed 14 elite clinic connections"}</p>
+              <p className="text-[10px] text-gray-500 leading-tight">
+                {isAccelerator 
+                  ? "2 active mentor connections" 
+                  : "14 High-Volume Doctors in your region looked for an associate this week. Your profile was hidden."
+                }
+              </p>
               <div className="mt-4 flex items-center gap-1 text-[10px] font-black text-blue-600 uppercase tracking-widest">
                 {isAccelerator ? "View Network" : "Unlock Connections"} <ChevronRight className="w-3 h-3" />
               </div>
@@ -192,7 +197,12 @@ export default function StudentDashboard() {
                 <Briefcase className="w-6 h-6 text-neuro-orange group-hover:text-white" />
               </div>
               <h3 className="font-bold text-neuro-navy mb-1">Applications</h3>
-              <p className="text-xs text-gray-500">{isProfessional ? `${data?.stats?.applications || 0} active job applications` : "3 doctors viewed your profile (hidden)"}</p>
+              <p className="text-[10px] text-gray-500 leading-tight">
+                {isProfessional 
+                  ? `${data?.stats?.applications || 0} active job applications` 
+                  : "3 'Elite' Tier jobs were posted in Denver today. Paid members already have interviews scheduled."
+                }
+              </p>
               <div className="mt-4 flex items-center gap-1 text-[10px] font-black text-neuro-orange uppercase tracking-widest">
                 {isProfessional ? "Track Status" : "Reveal Views"} <ChevronRight className="w-3 h-3" />
               </div>
@@ -211,7 +221,12 @@ export default function StudentDashboard() {
                 <Trophy className="w-6 h-6 text-purple-600 group-hover:text-white" />
               </div>
               <h3 className="font-bold text-neuro-navy mb-1">Neuro Academy</h3>
-              <p className="text-xs text-gray-500">{isFoundation ? "12 modules in progress" : "Est. Starting Salary: $85k (Unoptimized)"}</p>
+              <p className="text-[10px] text-gray-500 leading-tight">
+                {isFoundation 
+                  ? "12 modules in progress" 
+                  : "Current Market Value: $85k (Unoptimized). Elite Associate Potential: $145k+."
+                }
+              </p>
               <div className="mt-4 flex items-center gap-1 text-[10px] font-black text-purple-600 uppercase tracking-widest">
                 {isFoundation ? "Continue Learning" : "Optimize Salary"} <ChevronRight className="w-3 h-3" />
               </div>
