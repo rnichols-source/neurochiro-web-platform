@@ -5,6 +5,8 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import SchemaMarkup from "@/components/seo/SchemaMarkup";
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: { region: string };
 }

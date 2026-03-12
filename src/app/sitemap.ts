@@ -2,6 +2,8 @@ import { MetadataRoute } from 'next';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { REGIONS } from '@/lib/regions';
 
+export const dynamic = 'force-dynamic';
+
 const BASE_URL = 'https://neurochiro.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

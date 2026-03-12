@@ -120,6 +120,20 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
     }
   }, [activeLayer]);
 
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data.type === 'map-move') {
+        currentBounds.current = e.data.bounds;
+        updateMapData(e.data.bounds, e.data.zoom);
+      } else if (e.data.type === 'marker-click') {
+        setSelectedPin(e.data.data);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [updateMapData]);
+
   return (
     <div className="relative w-full h-full bg-[#0B1118] overflow-hidden rounded-[2.5rem]">
       {loading && (

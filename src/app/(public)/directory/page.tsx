@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import DirectoryContent from "./DirectoryContent";
 import { getDoctors } from "./actions";
 
+export const dynamic = 'force-dynamic';
+
 export default async function PublicDirectory() {
   const initialData = await getDoctors({ regionCode: 'US', limit: 100 });
 
