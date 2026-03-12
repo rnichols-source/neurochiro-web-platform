@@ -23,7 +23,8 @@ import {
   Globe,
   User,
   Save,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
