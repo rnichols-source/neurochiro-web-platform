@@ -156,20 +156,44 @@ Generated on ${new Date().toLocaleDateString()}
         )}
       </AnimatePresence>
 
-      <header>
-        <h1 className="text-4xl font-heading font-black text-neuro-navy flex items-center gap-3">
-          <Briefcase className="w-8 h-8 text-neuro-orange" />
-          Offer Evaluation
-        </h1>
-        <p className="text-neuro-gray mt-2 text-lg max-w-2xl">
-          Don't just look at the salary. Use our proprietary scorecard to evaluate the true clinical and financial value of your offers.
-        </p>
+      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="px-2 py-1 bg-neuro-orange/10 text-neuro-orange text-[8px] font-black uppercase tracking-widest rounded-md border border-neuro-orange/20">
+              Elite Content
+            </div>
+            <div className="px-2 py-1 bg-green-500/10 text-green-500 text-[8px] font-black uppercase tracking-widest rounded-md border border-green-500/20">
+              $100k Value Tool
+            </div>
+            <div className="px-2 py-1 bg-blue-500/10 text-blue-500 text-[8px] font-black uppercase tracking-widest rounded-md border border-blue-500/20">
+              Proprietary Algorithm
+            </div>
+          </div>
+          <h1 className="text-4xl font-heading font-black text-neuro-navy flex items-center gap-4">
+            The Contract ROI Audit
+          </h1>
+          <p className="text-neuro-gray mt-4 text-xl max-w-2xl leading-relaxed">
+            Don't just look at the salary. Our proprietary algorithm evaluates the <span className="text-neuro-navy font-black">lifetime career value</span> of your associate offers.
+          </p>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-4">
+           <div className="bg-white px-6 py-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center min-w-[140px]">
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Market Leverage</span>
+              <span className="text-2xl font-black text-neuro-navy">High</span>
+           </div>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Input Form */}
         <section className="lg:col-span-2 bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm space-y-8">
-          <h2 className="text-2xl font-black text-neuro-navy">The Scorecard</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-2xl font-black text-neuro-navy">The Scorecard</h2>
+            <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+               <ShieldCheck className="w-4 h-4 text-green-500" /> Fully Encrypted Data
+            </div>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
