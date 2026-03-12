@@ -22,6 +22,7 @@ import {
   Loader2
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { onSeminarHostedAction, onCampaignCreatedAction } from "@/app/actions/automations";
 import { getDoctorSeminars, createSeminarAction } from "./actions";
 
@@ -84,14 +85,13 @@ export default function SeminarsPage() {
           <h1 className="text-4xl font-heading font-black text-neuro-navy">Seminar Hub</h1>
           <p className="text-neuro-gray mt-2 text-lg">Your event command center: host, track, and grow.</p>
         </div>
-        <button 
-          onClick={() => setIsHostingOpen(true)}
+        <Link
+          href="/host-a-seminar"
           className="bg-neuro-orange text-white px-8 py-4 rounded-2xl shadow-xl hover:bg-neuro-orange-light transition-all transform hover:scale-105 flex items-center gap-3"
         >
           <Plus className="w-5 h-5" />
           <span className="font-black uppercase tracking-widest text-sm">Host a Seminar</span>
-        </button>
-      </header>
+        </Link>      </header>
 
       {/* Seminar Analytics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
