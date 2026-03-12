@@ -31,7 +31,8 @@ export default function Footer() {
             <li><Link href="/directory" className="text-gray-400 hover:text-neuro-orange transition-colors">Global Directory</Link></li>
             <li><Link href="/register?role=student" className="text-gray-400 hover:text-neuro-orange transition-colors">For Students</Link></li>
             <li><Link href="/register?role=doctor" className="text-gray-400 hover:text-neuro-orange transition-colors">For Doctors</Link></li>
-            <li><Link href="/seminars" className="text-gray-400 hover:text-neuro-orange transition-colors">Seminars</Link></li>
+            <li><Link href="/seminars" className="text-gray-400 hover:text-neuro-orange transition-colors">Seminars Hub</Link></li>
+            <li><Link href="/host-a-seminar" className="text-gray-400 hover:text-neuro-orange transition-colors">Host a Seminar</Link></li>
           </ul>
         </div>
 

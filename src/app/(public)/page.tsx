@@ -171,6 +171,56 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 6.7 SEMINAR PREVIEW SECTION */}
+      <section className="py-24 px-6 bg-neuro-navy text-white relative overflow-hidden border-t border-white/5">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-neuro-orange/5 blur-[120px] rounded-full pointer-events-none"></div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-16">
+            <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">Elite Workshops</span>
+            <h2 className="text-5xl md:text-6xl font-heading font-black leading-tight mb-6">
+              Hands-On <span className="text-neuro-orange">Clinical Mastery.</span>
+            </h2>
+            <p className="text-gray-400 text-xl max-w-2xl mx-auto font-medium leading-relaxed">
+              Join the world's most advanced clinical seminars. Master the technique, neurology, and communication required for a high-volume neuro-practice.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {[
+              { title: "NeuroChiro LIVE — Adelaide", city: "Adelaide, AU", date: "May 2026", instructor: "Dr. Raymond Nichols" },
+              { title: "Pediatric Neurology Intensive", city: "Dallas, TX", date: "June 2026", instructor: "NeuroChiro Faculty" },
+              { title: "The Adjusting Artistry", city: "London, UK", date: "August 2026", instructor: "Dr. Raymond Nichols" }
+            ].map((sem, i) => (
+              <div key={i} className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] hover:border-neuro-orange/50 transition-all group">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="px-3 py-1 bg-neuro-orange/10 border border-neuro-orange/20 text-neuro-orange text-[9px] font-black rounded-lg uppercase tracking-widest">Upcoming</div>
+                  <Calendar className="w-5 h-5 text-gray-600" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4 group-hover:text-neuro-orange transition-colors">{sem.title}</h3>
+                <div className="space-y-2 mb-8">
+                  <div className="flex items-center gap-2 text-sm text-gray-400 font-bold">
+                    <MapPin className="w-4 h-4 text-neuro-orange" /> {sem.city}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-400 font-bold">
+                    <Users className="w-4 h-4 text-neuro-orange" /> {sem.instructor}
+                  </div>
+                </div>
+                <Link href="/seminars" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white group-hover:text-neuro-orange transition-colors">
+                  View Details <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link href="/seminars" className="inline-flex items-center gap-3 px-10 py-5 bg-white text-neuro-navy font-black uppercase tracking-widest text-sm rounded-2xl shadow-xl hover:bg-neuro-orange hover:text-white transition-all transform hover:scale-105">
+              Explore All Seminars <Calendar className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* 7. CALL TO ACTION */}
       <CallToAction />
 

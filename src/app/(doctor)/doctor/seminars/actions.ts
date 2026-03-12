@@ -2,6 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
+import { onSeminarHostedAction } from '@/app/actions/automations'
 
 export async function getDoctorSeminars() {
   const supabase = createServerSupabase()
@@ -79,7 +80,9 @@ export async function createSeminarAction(formData: FormData) {
       tags,
       payment_status: 'pending', 
       is_approved: false, // ALWAYS false until Admin reviews
-      host_type_at_submission: isVerified ? 'doctor' : 'external'
+      host_type_at_submission: isVerified ? 'doctor' : 'external',
+      latitude: 0,
+      longitude: 0
     })
     .select()
     .single()
@@ -88,6 +91,15 @@ export async function createSeminarAction(formData: FormData) {
     console.error("Error creating seminar:", error)
     throw new Error("Failed to create seminar")
   }
+
+  // Trigger Automation (Notify Admin)
+  await onSeminarHostedAction(user.id, {
+    title,
+    location,
+    dates,
+    tier,
+    amount
+  })
 
   revalidatePath('/doctor/seminars')
 

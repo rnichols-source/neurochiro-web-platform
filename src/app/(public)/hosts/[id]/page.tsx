@@ -12,7 +12,11 @@ import {
   CheckCircle2,
   ShieldCheck,
   Loader2,
-  ChevronLeft
+  ChevronLeft,
+  Instagram,
+  Linkedin,
+  Twitter,
+  Mail
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -107,7 +111,7 @@ export default function HostProfilePage() {
                          <span className="px-3 py-1 bg-white/10 text-white text-[9px] font-black rounded uppercase tracking-widest">
                             {sem.listing_tier}
                          </span>
-                         <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{sem.dates}</span>
+                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{sem.dates}</span>
                       </div>
                       <h3 className="text-xl font-bold mb-4 group-hover:text-neuro-orange transition-colors">{sem.title}</h3>
                       <div className="flex items-center gap-3 text-xs text-gray-500">
@@ -142,6 +146,25 @@ export default function HostProfilePage() {
                 >
                   Visit Website
                 </a>
+                
+                <div className="flex gap-2">
+                  {profile.instagram_url && (
+                    <a href={profile.instagram_url} target="_blank" className="flex-1 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl flex items-center justify-center transition-all">
+                      <Instagram className="w-4 h-4" />
+                    </a>
+                  )}
+                  {profile.linkedin_url && (
+                    <a href={profile.linkedin_url} target="_blank" className="flex-1 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl flex items-center justify-center transition-all">
+                      <Linkedin className="w-4 h-4" />
+                    </a>
+                  )}
+                  {profile.twitter_url && (
+                    <a href={profile.twitter_url} target="_blank" className="flex-1 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl flex items-center justify-center transition-all">
+                      <Twitter className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
+
                 <button className="w-full py-5 bg-neuro-orange text-white rounded-2xl flex items-center justify-center gap-3 text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-neuro-orange/20 hover:scale-[1.02] transition-all">
                   Follow Educator
                 </button>

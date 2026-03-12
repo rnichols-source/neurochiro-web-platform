@@ -62,6 +62,14 @@ export async function onSeminarHostedAction(userId: string, data: any) {
   return Automations.onSeminarHosted(userId, data);
 }
 
+export async function onSeminarApprovedAction(userId: string, email: string, seminarTitle: string) {
+  return Automations.onSeminarApproved(userId, email, seminarTitle);
+}
+
+export async function onSeminarRejectedAction(userId: string, email: string, seminarTitle: string, notes: string) {
+  return Automations.onSeminarRejected(userId, email, seminarTitle, notes);
+}
+
 export async function onCampaignCreatedAction(userId: string, campaignName: string) {
   return Automations.onCampaignCreated(userId, campaignName);
 }

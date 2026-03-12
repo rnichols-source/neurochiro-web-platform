@@ -267,15 +267,28 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
               </button>
             </div>
 
-            <div className="flex flex-col items-center gap-4">
-              <p className="text-white/60 font-black uppercase tracking-[0.3em] text-[10px] drop-shadow-sm">Or try our clinical concierge</p>
-              <button 
-                onClick={() => setIsWizardOpen(true)}
-                className="group flex items-center gap-3 px-8 py-4 bg-neuro-orange text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-neuro-orange-light transition-all shadow-xl shadow-neuro-orange/20 transform hover:-translate-y-1"
-              >
-                <Sparkles className="w-4 h-4 fill-current" />
-                Start Smart Match Wizard
-              </button>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+              <div className="flex flex-col items-center gap-4">
+                <p className="text-white/60 font-black uppercase tracking-[0.3em] text-[10px] drop-shadow-sm">Clinical concierge</p>
+                <button 
+                  onClick={() => setIsWizardOpen(true)}
+                  className="group flex items-center gap-3 px-8 py-4 bg-neuro-orange text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-neuro-orange-light transition-all shadow-xl shadow-neuro-orange/20 transform hover:-translate-y-1"
+                >
+                  <Sparkles className="w-4 h-4 fill-current" />
+                  Start Smart Match Wizard
+                </button>
+              </div>
+              <div className="hidden md:block w-px h-12 bg-white/10 mx-4"></div>
+              <div className="flex flex-col items-center gap-4">
+                <p className="text-white/60 font-black uppercase tracking-[0.3em] text-[10px] drop-shadow-sm">For Educators</p>
+                <Link 
+                  href="/host-a-seminar"
+                  className="group flex items-center gap-3 px-8 py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all shadow-xl transform hover:-translate-y-1"
+                >
+                  <Calendar className="w-4 h-4 text-neuro-orange" />
+                  Promote Your Seminar
+                </Link>
+              </div>
             </div>
           </div>
         </div>

@@ -20,45 +20,49 @@ import Link from "next/link";
 export default function HostLandingPage() {
   const tiers = [
     {
-      name: "Basic Listing",
-      price: { doctor: "$49", external: "$99" },
-      description: "Establish your presence in the global NeuroChiro directory.",
+      name: "Single Event Listing",
+      price: { doctor: "$149", external: "$299" },
+      description: "Best for doctors running a single seminar or workshop.",
       features: [
-        "Full Seminar Listing Page",
-        "Search Indexing",
-        "Registration Link Integration",
-        "Basic View Tracking",
-        "Clinical Tags & Filters"
+        "Marketplace Listing",
+        "Event Description Page",
+        "Location + Map Integration",
+        "Instructor Profile Link",
+        "CTA Registration Link",
+        "Visibility for 30 Days"
       ],
       cta: "Get Started",
       featured: false
     },
     {
-      name: "Featured Event",
-      price: { doctor: "$149", external: "$249" },
-      description: "Increase velocity with highlighted placement and email promotion.",
+      name: "Multi Event Package",
+      price: { doctor: "$599", external: "$899" },
+      description: "For educators hosting multiple seminars annually.",
       features: [
-        "Top of Feed Placement",
-        "Featured Badge & Highlighting",
-        "1x Newsletter Mention",
-        "Student Network Promotion",
-        "Advanced Click Analytics"
+        "Up to 5 Seminar Listings",
+        "Listings Live for 6 Months",
+        "Featured Placement in Search",
+        "Email Highlight to Audience",
+        "Analytics Dashboard Access",
+        "Bulk Management Tools"
       ],
-      cta: "Boost Visibility",
+      cta: "Scale Your Reach",
       featured: true
     },
     {
-      name: "Premium Promotion",
-      price: { doctor: "$399", external: "$599" },
-      description: "Maximum exposure across the entire NeuroChiro ecosystem.",
+      name: "Educator Network",
+      price: { doctor: "$1,200", external: "$2,500" },
+      description: "Annual membership for regular seminar companies.",
       features: [
-        "Homepage Hero Placement",
-        "Instagram Story Feature",
-        "Dedicated Email Blast",
-        "Priority Search Ranking",
-        "Full Intelligence Dashboard"
+        "Unlimited Seminar Listings",
+        "Priority Placement Globally",
+        "Featured Educator Profile",
+        "Marketing & Design Support",
+        "Advanced Analytics Suite",
+        "Recruitment Integration",
+        "Monthly Email Promotion"
       ],
-      cta: "Dominate Marketplace",
+      cta: "Join the Network",
       featured: false
     }
   ];

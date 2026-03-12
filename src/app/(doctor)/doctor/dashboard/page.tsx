@@ -130,6 +130,10 @@ export default function DoctorDashboard() {
         
         {hasAccess ? (
           <div className="flex flex-wrap gap-4">
+            <Link href="/host-a-seminar" className="bg-neuro-orange text-white px-6 py-4 rounded-2xl shadow-lg hover:bg-neuro-orange-light transition-all flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              <span className="font-black uppercase tracking-widest text-[10px]">List a Seminar</span>
+            </Link>
             <div className="bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center min-w-[120px]">
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Visibility</span>
               <span className="text-2xl font-black text-neuro-navy">

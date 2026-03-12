@@ -359,6 +359,38 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         }
         break;
 
+      case 'seminar_approved':
+        if (payload.userId) {
+          await insertNotification(payload.userId, 'Seminar Approved! 🚀', `Your seminar "${payload.seminarTitle}" is now live in the marketplace.`, 'system', '/doctor/seminars', 'important');
+        }
+        if (emailEnabled && payload.email) {
+          await sendPremiumEmail({
+            to: payload.email,
+            subject: `Your Seminar is LIVE! 🚀`,
+            title: 'Seminar Approved',
+            body: `<p>Congratulations! Your seminar <strong>${payload.seminarTitle}</strong> has been approved and is now live in the NeuroChiro marketplace.</p>`,
+            ctaText: 'View My Seminars',
+            ctaUrl: 'https://neurochiro.co/doctor/seminars'
+          });
+        }
+        break;
+
+      case 'seminar_rejected':
+        if (payload.userId) {
+          await insertNotification(payload.userId, 'Seminar Submission Update', `Your seminar submission requires changes. Check admin notes.`, 'system', '/doctor/seminars', 'urgent');
+        }
+        if (emailEnabled && payload.email) {
+          await sendPremiumEmail({
+            to: payload.email,
+            subject: `Action Required: Seminar Submission Update`,
+            title: 'Seminar Update',
+            body: `<p>Your seminar submission for <strong>${payload.seminarTitle}</strong> requires some changes before it can be approved.</p><p><strong>Admin Notes:</strong> ${payload.notes || 'No notes provided.'}</p>`,
+            ctaText: 'Edit Submission',
+            ctaUrl: 'https://neurochiro.co/doctor/seminars'
+          });
+        }
+        break;
+
       case 'job_application':
         // 🛡️ PHASE 2: In-App Notifications for Applicant and Doctor
         if (payload.userId) {
@@ -604,6 +636,12 @@ export const Automations = {
   },
   onSeminarHosted: async (userId: string, data: any) => {
     await enqueue('admin_notification', { subject: 'New Seminar Hosted', html: `<p>User <strong>${userId}</strong> hosted a new seminar: ${JSON.stringify(data)}.</p>`});
+  },
+  onSeminarApproved: async (userId: string, email: string, seminarTitle: string) => {
+    await enqueue('seminar_approved', { userId, email, seminarTitle });
+  },
+  onSeminarRejected: async (userId: string, email: string, seminarTitle: string, notes: string) => {
+    await enqueue('seminar_rejected', { userId, email, seminarTitle, notes });
   },
   onCampaignCreated: async (userId: string, campaignName: string) => {
     await enqueue('admin_notification', { subject: 'New Campaign Created', html: `<p>User <strong>${userId}</strong> created a new campaign: <strong>${campaignName}</strong>.</p>`});

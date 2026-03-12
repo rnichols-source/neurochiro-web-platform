@@ -153,8 +153,12 @@ export default function SeminarsPage() {
                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Sold</p>
                       </div>
                       <div className="text-center">
-                         <p className="text-xl font-black text-neuro-navy">0</p>
+                         <p className="text-xl font-black text-neuro-navy">{sem.page_views || 0}</p>
                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Views</p>
+                      </div>
+                      <div className="text-center">
+                         <p className="text-xl font-black text-neuro-orange">{sem.clicks || 0}</p>
+                         <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Clicks</p>
                       </div>
                       <div className="text-center">
                          <p className="text-xl font-black text-green-600">${(sem.registrations?.[0]?.count || 0) * (sem.price || 0)}</p>

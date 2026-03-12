@@ -111,6 +111,13 @@ export default function Navbar() {
                       <p className="text-xs text-gray-500">Live Clinical Training</p>
                     </div>
                   </Link>
+                  <Link href="/host-a-seminar" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">
+                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600"><Users className="w-4 h-4" /></div>
+                    <div>
+                      <p className="text-sm font-bold text-blue-900">Host a Seminar</p>
+                      <p className="text-xs text-gray-500">Join Educator Network</p>
+                    </div>
+                  </Link>
                   <Link href="https://www.neurochiromastermind.com" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">
                     <div className="p-2 bg-purple-50 rounded-lg text-purple-600"><Crown className="w-4 h-4" /></div>
                     <div>

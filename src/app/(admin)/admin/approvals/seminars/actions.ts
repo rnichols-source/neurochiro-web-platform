@@ -2,6 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
+import { onSeminarApprovedAction, onSeminarRejectedAction } from '@/app/actions/automations'
 
 export async function getPendingSeminars() {
   const supabase = createServerSupabase()
@@ -29,12 +30,23 @@ export async function getPendingSeminars() {
 export async function approveSeminarAction(id: string) {
   const supabase = createServerSupabase()
   
+  const { data: seminar, error: fetchError } = await supabase
+    .from('seminars')
+    .select('*, host:host_id(email, full_name)')
+    .eq('id', id)
+    .single()
+
+  if (fetchError) throw new Error("Seminar not found")
+
   const { error } = await supabase
     .from('seminars')
     .update({ is_approved: true })
     .eq('id', id)
 
   if (error) throw new Error("Failed to approve seminar")
+
+  // Trigger Automation (Notify Host)
+  await onSeminarApprovedAction(seminar.host_id, seminar.host.email, seminar.title)
 
   revalidatePath('/admin/approvals/seminars')
   revalidatePath('/seminars')
@@ -44,6 +56,14 @@ export async function approveSeminarAction(id: string) {
 export async function rejectSeminarAction(id: string, notes: string) {
   const supabase = createServerSupabase()
   
+  const { data: seminar, error: fetchError } = await supabase
+    .from('seminars')
+    .select('*, host:host_id(email, full_name)')
+    .eq('id', id)
+    .single()
+
+  if (fetchError) throw new Error("Seminar not found")
+
   const { error } = await supabase
     .from('seminars')
     .update({ 
@@ -54,6 +74,9 @@ export async function rejectSeminarAction(id: string, notes: string) {
     .eq('id', id)
 
   if (error) throw new Error("Failed to reject seminar")
+
+  // Trigger Automation (Notify Host)
+  await onSeminarRejectedAction(seminar.host_id, seminar.host.email, seminar.title, notes)
 
   revalidatePath('/admin/approvals/seminars')
   return { success: true }

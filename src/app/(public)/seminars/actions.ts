@@ -64,6 +64,43 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
   return sortedData;
 }
 
+export async function getSeminarsForMap(bounds?: [number, number, number, number]) {
+  const supabase = createServerSupabase()
+  
+  let query = supabase
+    .from('seminars')
+    .select(`
+      id,
+      title,
+      city,
+      country,
+      dates,
+      instructor_name,
+      latitude,
+      longitude,
+      listing_tier
+    `)
+    .eq('is_approved', true)
+    .eq('is_past', false)
+
+  if (bounds) {
+    query = query
+      .gte('longitude', bounds[0])
+      .lte('longitude', bounds[2])
+      .gte('latitude', bounds[1])
+      .lte('latitude', bounds[3])
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error("Error fetching map seminars:", error)
+    return []
+  }
+
+  return data || []
+}
+
 export async function incrementSeminarStats(id: string, column: 'page_views' | 'clicks') {
   const supabase = createServerSupabase()
   const { error } = await supabase.rpc('increment_seminar_stats', {

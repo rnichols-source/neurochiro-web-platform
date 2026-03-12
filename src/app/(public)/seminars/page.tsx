@@ -23,6 +23,16 @@ import Link from "next/link";
 import { useRegion } from "@/context/RegionContext";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { getSeminars, SeminarFilterOptions } from "./actions";
+import dynamic from "next/dynamic";
+
+const GlobalNetworkMap = dynamic(() => import("@/components/map/GlobalNetworkMap"), { 
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full bg-white/5 animate-pulse flex items-center justify-center rounded-[2.5rem] border border-white/10">
+      <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Initializing Seminar Map...</p>
+    </div>
+  )
+});
 
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -91,15 +101,34 @@ export default function SeminarHub() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-gray-400 text-xl max-w-2xl font-medium"
+            className="text-gray-400 text-xl max-w-2xl font-medium mb-12"
           >
             Master the clinical certainty and communication architecture required for a nervous-system-first practice.
           </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Link 
+              href="/host-a-seminar"
+              className="px-8 py-4 bg-neuro-orange text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-neuro-orange-light transition-all shadow-xl shadow-neuro-orange/20 flex items-center gap-2 group"
+            >
+              Host Your Seminar <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </motion.div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-8">
         
+        {/* Global Seminar Map */}
+        <div className="w-full h-[500px] mb-16 relative">
+          <div className="absolute inset-0 bg-neuro-orange/5 blur-[100px] rounded-full pointer-events-none"></div>
+          <GlobalNetworkMap defaultLayer="seminar" />
+        </div>
+
         {/* Discovery Bar */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-4 rounded-[2.5rem] flex flex-wrap items-center gap-4 mb-16 shadow-2xl">
           <div className="flex-1 min-w-[200px] relative group">

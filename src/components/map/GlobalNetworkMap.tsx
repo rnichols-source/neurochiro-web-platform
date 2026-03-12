@@ -17,15 +17,21 @@ import {
   Loader2
 } from "lucide-react";
 import { getDoctors } from "@/app/(public)/directory/actions";
+import { getSeminarsForMap } from "@/app/(public)/seminars/actions";
 import { Doctor } from "@/types/directory";
 
-export default function GlobalNetworkMap() {
+interface GlobalNetworkMapProps {
+  defaultLayer?: "all" | "student" | "seminar";
+}
+
+export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetworkMapProps) {
   const router = useRouter();
   const { region } = useRegion();
-  const [activeLayer, setActiveLayer] = useState<"all" | "student" | "seminar">("all");
+  const [activeLayer, setActiveLayer] = useState<"all" | "student" | "seminar">(defaultLayer);
   const [selectedPin, setSelectedPin] = useState<Record<string, any> | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [seminars, setSeminars] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const currentBounds = useRef<[number, number, number, number] | null>(null);
@@ -37,33 +43,63 @@ export default function GlobalNetworkMap() {
       maxZoom: 16
     });
 
-    const points = doctors
-      .filter(doc => doc.latitude !== 0 && doc.longitude !== 0)
-      .map(doc => ({
-        type: 'Feature' as const,
-        properties: { 
-          cluster: false, 
-          doctorId: doc.id,
-          name: doc.last_name?.startsWith('Dr.') ? doc.last_name : `Dr. ${doc.first_name} ${doc.last_name}`.trim().replace(/\s+/g, ' '),
-          clinic: doc.clinic_name,
-          slug: doc.slug,
-          isHiring: doc.is_hiring,
-          isMentoring: doc.is_mentoring
-        },
-        geometry: {
-          type: 'Point' as const,
-          coordinates: [doc.longitude, doc.latitude]
-        }
-      }));
+    let points: any[] = [];
+
+    if (activeLayer === 'seminar') {
+      points = seminars
+        .filter(sem => sem.latitude !== 0 && sem.longitude !== 0)
+        .map(sem => ({
+          type: 'Feature' as const,
+          properties: { 
+            cluster: false, 
+            seminarId: sem.id,
+            name: sem.title,
+            city: sem.city,
+            instructor: sem.instructor_name,
+            dates: sem.dates,
+            type: 'seminar'
+          },
+          geometry: {
+            type: 'Point' as const,
+            coordinates: [Number(sem.longitude), Number(sem.latitude)]
+          }
+        }));
+    } else {
+      points = doctors
+        .filter(doc => doc.latitude !== 0 && doc.longitude !== 0)
+        .map(doc => ({
+          type: 'Feature' as const,
+          properties: { 
+            cluster: false, 
+            doctorId: doc.id,
+            name: doc.last_name?.startsWith('Dr.') ? doc.last_name : `Dr. ${doc.first_name} ${doc.last_name}`.trim().replace(/\s+/g, ' '),
+            clinic: doc.clinic_name,
+            slug: doc.slug,
+            isHiring: doc.is_hiring,
+            isMentoring: doc.is_mentoring,
+            type: 'doctor'
+          },
+          geometry: {
+            type: 'Point' as const,
+            coordinates: [doc.longitude, doc.latitude]
+          }
+        }));
+    }
 
     cluster.load(points as Supercluster.PointFeature<Supercluster.AnyProps>[]);
     return cluster;
-  }, [doctors]);
+  }, [doctors, seminars, activeLayer]);
 
   const updateMapData = useCallback(async (bounds: [number, number, number, number], zoom: number) => {
-    // 1. Fetch only visible markers for the current viewport
-    const result = await getDoctors({ bounds, limit: 100 });
-    setDoctors(result.doctors);
+    setLoading(true);
+    if (activeLayer === 'seminar') {
+      const result = await getSeminarsForMap(bounds);
+      setSeminars(result);
+    } else {
+      const result = await getDoctors({ bounds, limit: 100 });
+      setDoctors(result.doctors);
+    }
+    setLoading(false);
 
     if (!iframeRef.current?.contentWindow) return;
 
@@ -72,24 +108,17 @@ export default function GlobalNetworkMap() {
 
     iframeRef.current.contentWindow.postMessage({ 
       type: 'update-clusters', 
-      data: clusters 
+      data: clusters,
+      layer: activeLayer
     }, '*');
-  }, [index]);
+  }, [index, activeLayer]);
 
-  // Listen for messages from the standalone map engine
+  // Re-fetch when layer changes
   useEffect(() => {
-    const handleMessage = (e: MessageEvent) => {
-      if (e.data.type === 'marker-click') {
-        setSelectedPin(e.data.data as Record<string, any>);
-      }
-      if (e.data.type === 'map-move') {
-        currentBounds.current = e.data.bounds;
-        updateMapData(e.data.bounds, e.data.zoom);
-      }
-    };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [updateMapData]);
+    if (currentBounds.current) {
+      updateMapData(currentBounds.current, 1); // Zoom is approximate here
+    }
+  }, [activeLayer]);
 
   return (
     <div className="relative w-full h-full bg-[#0B1118] overflow-hidden rounded-[2.5rem]">
@@ -190,23 +219,43 @@ export default function GlobalNetworkMap() {
               </div>
 
               <h2 className="text-2xl font-heading font-black text-white">{selectedPin.name}</h2>
-              <p className="text-gray-400 font-medium">{selectedPin.clinic}</p>
+              <p className="text-gray-400 font-medium">{selectedPin.type === 'seminar' ? selectedPin.city : selectedPin.clinic}</p>
               
               <div className="flex items-center gap-2 text-sm text-gray-500 mt-2 mb-8">
-                <MapPin className="w-4 h-4" /> Global Node Active
+                {selectedPin.type === 'seminar' ? (
+                  <>
+                    <CalendarDays className="w-4 h-4 text-neuro-orange" />
+                    {selectedPin.dates}
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="w-4 h-4" />
+                    Global Node Active
+                  </>
+                )}
               </div>
 
               <div className="space-y-6 text-gray-300 text-sm leading-relaxed">
-                Expert in nervous-system-first chiropractic care. View the full clinical profile to see techniques, patient reviews, and clinic hours.
+                {selectedPin.type === 'seminar' ? (
+                  <p>Instructor: <span className="text-white font-bold">{selectedPin.instructor || 'NeuroChiro Faculty'}</span></p>
+                ) : (
+                  "Expert in nervous-system-first chiropractic care. View the full clinical profile to see techniques, patient reviews, and clinic hours."
+                )}
               </div>
             </div>
 
             <div className="p-6 border-t border-white/10 bg-[#131B24]">
               <button 
-                onClick={() => router.push(`/directory/${selectedPin.slug || selectedPin.doctorId}`)}
+                onClick={() => {
+                  if (selectedPin.type === 'seminar') {
+                    router.push(`/seminars/${selectedPin.seminarId}`);
+                  } else {
+                    router.push(`/directory/${selectedPin.slug || selectedPin.doctorId}`);
+                  }
+                }}
                 className="w-full py-4 bg-neuro-orange hover:bg-neuro-orange-light text-white font-black uppercase tracking-widest text-sm rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-neuro-orange/20"
               >
-                View Full Profile <ArrowRight className="w-4 h-4" />
+                {selectedPin.type === 'seminar' ? 'View Event Details' : 'View Full Profile'} <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </motion.div>
