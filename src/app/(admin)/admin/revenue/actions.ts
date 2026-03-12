@@ -43,11 +43,11 @@ export async function getRevenueData(timeRange: string) {
   const prevEndTs = Math.floor(previousEndDate.getTime() / 1000);
 
   try {
-    // 2. Fetch Live Stripe Data (Using async iteration to get ALL records)
-    const [currentCharges, previousCharges, allSubscriptions] = await Promise.all([
+    // 2. Fetch Live Stripe Data
+    const [currentCharges, previousCharges, allSubs] = await Promise.all([
       fetchAll<any>(stripe.charges.list({ created: { gte: startTs }, limit: 100 })),
       fetchAll<any>(stripe.charges.list({ created: { gte: prevStartTs, lt: prevEndTs }, limit: 100 })),
-      fetchAll<any>(stripe.subscriptions.list({ status: 'active', limit: 100 }))
+      fetchAll<any>(stripe.subscriptions.list({ status: 'all', limit: 100 })) // Fetch all to calculate trends
     ]);
 
     // 3. Precise Revenue Calculation (Excluding Refunds)
@@ -59,37 +59,66 @@ export async function getRevenueData(timeRange: string) {
     const previousRevenue = calcRevenue(previousCharges);
     const revenueTrend = previousRevenue === 0 ? 100 : ((currentRevenue - previousRevenue) / previousRevenue) * 100;
 
-    // 4. Precise MRR Calculation (Normalized to Monthly)
-    let mrrCents = 0;
-    allSubscriptions.forEach((sub: any) => {
-      sub.items.data.forEach((item: any) => {
-        const recurring = item.price.recurring;
-        if (!recurring) return; 
-
-        const amount = (item.price.unit_amount || 0) * (item.quantity || 1);
-        let monthlyAmount = 0;
-
-        if (recurring.interval === 'month') {
-          monthlyAmount = amount / recurring.interval_count;
-        } else if (recurring.interval === 'year') {
-          monthlyAmount = amount / (recurring.interval_count * 12);
-        } else if (recurring.interval === 'week') {
-          monthlyAmount = (amount * 4.333333) / recurring.interval_count;
-        } else if (recurring.interval === 'day') {
-          monthlyAmount = (amount * 30.41666) / recurring.interval_count;
-        }
+    // 4. Real MRR & Active Subscriptions Trend Calculation
+    const getMrrAt = (timestamp: number) => {
+      let mrrCents = 0;
+      allSubs.forEach((sub: any) => {
+        // Was this subscription active at the given timestamp?
+        const isCreatedBefore = sub.created <= timestamp;
+        const isNotCanceledYet = !sub.canceled_at || sub.canceled_at > timestamp;
+        const isCurrentlyActive = ['active', 'past_due', 'trialing'].includes(sub.status);
         
-        mrrCents += monthlyAmount;
+        // At historical timestamp, we only care about created/canceled dates
+        // For 'now' (if timestamp is current), we also check status
+        const isActive = isCreatedBefore && isNotCanceledYet && (timestamp < Math.floor(Date.now()/1000) || isCurrentlyActive);
+
+        if (isActive) {
+          sub.items.data.forEach((item: any) => {
+            const recurring = item.price.recurring;
+            if (!recurring) return;
+
+            const amount = (item.price.unit_amount || 0) * (item.quantity || 1);
+            let monthlyAmount = 0;
+
+            if (recurring.interval === 'month') {
+              monthlyAmount = amount / recurring.interval_count;
+            } else if (recurring.interval === 'year') {
+              monthlyAmount = amount / (recurring.interval_count * 12);
+            } else if (recurring.interval === 'week') {
+              monthlyAmount = (amount * 4.333333) / recurring.interval_count;
+            } else if (recurring.interval === 'day') {
+              monthlyAmount = (amount * 30.41666) / recurring.interval_count;
+            }
+            mrrCents += monthlyAmount;
+          });
+        }
       });
-    });
-    const mrr = mrrCents / 100;
+      return mrrCents / 100;
+    };
+
+    const countActiveAt = (timestamp: number) => {
+      return allSubs.filter((sub: any) => {
+        const isCreatedBefore = sub.created <= timestamp;
+        const isNotCanceledYet = !sub.canceled_at || sub.canceled_at > timestamp;
+        const isCurrentlyActive = ['active', 'past_due', 'trialing'].includes(sub.status);
+        return isCreatedBefore && isNotCanceledYet && (timestamp < Math.floor(Date.now()/1000) || isCurrentlyActive);
+      }).length;
+    };
+
+    const currentMrr = getMrrAt(Math.floor(now.getTime() / 1000));
+    const previousMrr = getMrrAt(prevEndTs);
+    const mrrTrend = previousMrr === 0 ? (currentMrr > 0 ? 100 : 0) : ((currentMrr - previousMrr) / previousMrr) * 100;
+
+    const currentActiveCount = countActiveAt(Math.floor(now.getTime() / 1000));
+    const previousActiveCount = countActiveAt(prevEndTs);
+    const activeSubscriptionsTrend = currentActiveCount - previousActiveCount;
 
     // 5. Failed Payments Accuracy
     const currentFailed = currentCharges.filter((c: any) => c.status === 'failed').length;
     const previousFailed = previousCharges.filter((c: any) => c.status === 'failed').length;
     const failedPaymentsTrend = currentFailed - previousFailed;
 
-    // 6. Revenue Attribution (Fixed logic for $29/$39 transactions)
+    // 6. Revenue Attribution (Real Data)
     let breakdownRaw: Record<string, number> = {
       "Doctor Subs": 0,
       "Student Network": 0,
@@ -102,7 +131,6 @@ export async function getRevenueData(timeRange: string) {
       const amt = c.amount / 100;
       const desc = (c.description || "").toLowerCase();
       
-      // Robust categorization based on common amounts and keywords
       if (amt >= 140 || desc.includes("doctor")) {
         breakdownRaw["Doctor Subs"] += amt;
       } else if ((amt >= 20 && amt <= 60) || desc.includes("student") || desc.includes("council") || desc.includes("network")) {
@@ -138,10 +166,10 @@ export async function getRevenueData(timeRange: string) {
       data: {
         totalRevenue: currentRevenue,
         revenueTrend,
-        mrr,
-        mrrTrend: 0, 
-        activeSubscriptions: allSubscriptions.length,
-        activeSubscriptionsTrend: 0,
+        mrr: currentMrr,
+        mrrTrend,
+        activeSubscriptions: currentActiveCount,
+        activeSubscriptionsTrend,
         failedPayments: currentFailed,
         failedPaymentsTrend,
         transactions: currentCharges.slice(0, 50).map((c: any) => ({
@@ -153,7 +181,7 @@ export async function getRevenueData(timeRange: string) {
           type: c.description || "Subscription update"
         })),
         breakdown,
-        projectedGrowth: mrr * 12
+        projectedGrowth: currentMrr * 12
       }
     };
   } catch (error) {
