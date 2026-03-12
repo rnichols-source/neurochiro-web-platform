@@ -13,7 +13,10 @@ import {
   ShieldCheck,
   Star,
   MessageSquare,
-  BarChart3
+  BarChart3,
+  Clock,
+  X,
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -21,6 +24,7 @@ import { createClient } from "@/lib/supabase";
 
 export default function HostLandingPage() {
   const [user, setUser] = useState<any>(null);
+  const [isCloneModalOpen, setIsCloneModalOpen] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -30,6 +34,23 @@ export default function HostLandingPage() {
     };
     checkUser();
   }, []);
+
+  const templates = [
+    {
+      title: "The Neuro-Scanning Blueprint",
+      description: "Master the architecture of clinical certainty through objective scanning technology.",
+      demandHook: "150 students in your region ready for this topic",
+      estimatedRevenue: "$30,000",
+      timeToSet: "45 seconds"
+    },
+    {
+      title: "Pediatric Practice ROI",
+      description: "How to build a high-volume pediatric practice that runs on neurological integrity.",
+      demandHook: "85 students viewing similar events this week",
+      estimatedRevenue: "$22,000",
+      timeToSet: "30 seconds"
+    }
+  ];
 
   const tiers = [
     {
@@ -90,6 +111,33 @@ export default function HostLandingPage() {
 
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-8 relative z-10 text-center mb-32">
+        {user && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-12 inline-block p-1 rounded-3xl bg-gradient-to-r from-neuro-orange/20 via-orange-500/20 to-neuro-orange/20 border border-neuro-orange/30"
+          >
+            <div className="bg-[#0B1118] px-8 py-4 rounded-[1.4rem] flex flex-col md:flex-row items-center gap-6">
+               <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-neuro-orange/10 flex items-center justify-center text-neuro-orange">
+                     <Zap className="w-6 h-6 fill-current" />
+                  </div>
+                  <div className="text-left">
+                     <p className="text-xs font-black uppercase tracking-widest text-neuro-orange">Growth Perk Unlocked</p>
+                     <p className="text-sm font-bold text-white">Seminar-in-a-Box Access</p>
+                  </div>
+               </div>
+               <div className="h-px md:h-10 w-full md:w-px bg-white/10" />
+               <button 
+                onClick={() => setIsCloneModalOpen(true)}
+                className="px-6 py-3 bg-white text-neuro-navy font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-gray-100 transition-all flex items-center gap-2"
+               >
+                  Clone Your Last Sell-Out <ArrowRight className="w-3 h-3" />
+               </button>
+            </div>
+          </motion.div>
+        )}
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -128,7 +176,7 @@ export default function HostLandingPage() {
             href={destination}
             className="px-12 py-6 bg-neuro-orange text-white rounded-3xl font-black uppercase tracking-widest text-xs hover:bg-neuro-orange-light transition-all shadow-2xl shadow-neuro-orange/30 flex items-center gap-3 group"
           >
-            Start Hosting Now
+            {user ? "Host Your Next Event" : "Start Hosting Now"}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link 
@@ -139,6 +187,78 @@ export default function HostLandingPage() {
           </Link>
         </motion.div>
       </section>
+
+      {/* CLONE TEMPLATES MODAL */}
+      {isCloneModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-[#0B1118]/80">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-[#151C26] rounded-[3rem] w-full max-w-4xl shadow-2xl overflow-hidden border border-white/10"
+          >
+            <div className="p-10 border-b border-white/5 flex items-center justify-between">
+              <div>
+                <h3 className="text-3xl font-black text-white mb-2">Seminar-in-a-Box</h3>
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Set up your next $30k event in 45 seconds</p>
+              </div>
+              <button 
+                onClick={() => setIsCloneModalOpen(false)}
+                className="p-4 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-white"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+               {templates.map((template, i) => (
+                 <div key={i} className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] group hover:border-neuro-orange transition-all relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity">
+                       <Sparkles className="w-12 h-12 text-neuro-orange" />
+                    </div>
+                    <div className="flex items-center gap-2 mb-4">
+                       <div className="px-3 py-1 bg-neuro-orange/20 text-neuro-orange rounded-full text-[8px] font-black uppercase tracking-widest">
+                          1-Click Template
+                       </div>
+                       <div className="px-3 py-1 bg-green-500/20 text-green-500 rounded-full text-[8px] font-black uppercase tracking-widest">
+                          High Conversion
+                       </div>
+                    </div>
+                    <h4 className="text-xl font-black text-white mb-3">{template.title}</h4>
+                    <p className="text-sm text-gray-400 leading-relaxed mb-6">{template.description}</p>
+                    
+                    <div className="space-y-4 mb-8">
+                       <div className="flex items-center gap-3">
+                          <Target className="w-4 h-4 text-neuro-orange" />
+                          <p className="text-xs font-bold text-white">{template.demandHook}</p>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <TrendingUp className="w-4 h-4 text-green-500" />
+                          <p className="text-xs font-bold text-gray-400">Est. Revenue: <span className="text-white">{template.estimatedRevenue}</span></p>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <Clock className="w-4 h-4 text-blue-400" />
+                          <p className="text-xs font-bold text-gray-400">Setup Time: <span className="text-white">{template.timeToSet}</span></p>
+                       </div>
+                    </div>
+
+                    <Link 
+                      href="/doctor/seminars?clone=true"
+                      className="w-full py-4 bg-neuro-orange text-white font-black rounded-2xl text-xs uppercase tracking-widest hover:bg-neuro-orange-light transition-all flex items-center justify-center gap-2"
+                    >
+                       Deploy Template <Zap className="w-3 h-3 fill-current" />
+                    </Link>
+                 </div>
+               ))}
+            </div>
+
+            <div className="p-10 bg-white/[0.02] border-t border-white/5 text-center">
+               <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">
+                  Harvesting pre-existing demand in your region
+               </p>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {/* Pricing Tiers */}
       <section className="max-w-7xl mx-auto px-8 relative z-10 mb-40">

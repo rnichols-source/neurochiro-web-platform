@@ -478,6 +478,98 @@ export default function JobsPage() {
                      </button>
                   </div>
                 )}
+
+                {activeModal === 'Generate-Pitch-Deck' && selectedApplicant && (
+                  <div className="space-y-6">
+                    {!showPitchPreview ? (
+                      <div className="py-12 flex flex-col items-center justify-center text-center">
+                        <motion.div 
+                          animate={{ rotate: [0, 10, -10, 0] }}
+                          transition={{ duration: 1, repeat: Infinity }}
+                          className="w-20 h-20 bg-neuro-orange/10 rounded-3xl flex items-center justify-center mb-6 border border-neuro-orange/20"
+                        >
+                          <Sparkles className="w-10 h-10 text-neuro-orange" />
+                        </motion.div>
+                        <h4 className="text-2xl font-heading font-black text-neuro-navy mb-2">Architecting the Dream.</h4>
+                        <p className="text-xs text-gray-500 max-w-sm mb-8">We're pulling your practice ROI data to show {selectedApplicant.name.split(' ')[0]} exactly how they win at your clinic.</p>
+                        
+                        {isGeneratingPitch ? (
+                          <div className="space-y-4 w-full max-w-xs">
+                             <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                <motion.div 
+                                  initial={{ width: 0 }}
+                                  animate={{ width: "100%" }}
+                                  transition={{ duration: 2.5 }}
+                                  className="h-full bg-neuro-orange"
+                                />
+                             </div>
+                             <p className="text-[9px] font-black text-neuro-orange uppercase animate-pulse">Calculating Projected Earnings...</p>
+                          </div>
+                        ) : (
+                          <button 
+                            onClick={handleGeneratePitch}
+                            className="px-8 py-4 bg-neuro-navy text-white font-black rounded-2xl shadow-xl hover:bg-neuro-orange transition-all uppercase tracking-widest text-xs"
+                          >
+                            Build Success Roadmap
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="space-y-8"
+                      >
+                         <div className="bg-neuro-navy p-8 rounded-[2.5rem] text-white relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-48 h-48 bg-neuro-orange/10 blur-3xl -mr-24 -mt-24"></div>
+                            <h4 className="text-xl font-heading font-black mb-1 relative z-10 flex items-center gap-2">
+                               <TrendingUp className="w-5 h-5 text-neuro-orange" /> The Success Roadmap
+                            </h4>
+                            <p className="text-[10px] text-gray-400 uppercase tracking-widest relative z-10">Prepared for {selectedApplicant.name}</p>
+                            
+                            <div className="mt-10 grid grid-cols-2 gap-8 relative z-10">
+                               <div>
+                                  <p className="text-[9px] font-black text-gray-500 uppercase mb-1">Month 1 Earnings</p>
+                                  <p className="text-3xl font-black text-white">${(calcBase/12).toLocaleString(undefined, {maximumFractionDigits: 0})}<span className="text-xs text-gray-400">/mo</span></p>
+                               </div>
+                               <div>
+                                  <p className="text-[9px] font-black text-neuro-orange uppercase mb-1">Month 12 Projected</p>
+                                  <p className="text-3xl font-black text-neuro-orange">${((calcBase + (calcBonus * 150 * 50))/12).toLocaleString(undefined, {maximumFractionDigits: 0})}<span className="text-xs text-gray-400">/mo</span></p>
+                               </div>
+                            </div>
+                         </div>
+
+                         <div className="space-y-4">
+                            <h5 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Career Milestones</h5>
+                            <div className="relative pl-8 space-y-8 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-px before:bg-gray-100">
+                               {[
+                                 { label: "Systems Mastery", detail: "Learning the NeuroChiro clinical workflow & scripts.", icon: <ShieldCheck className="w-3 h-3" /> },
+                                 { label: "Lead Associate", detail: "Managing 100+ visits/week & leading internal talks.", icon: <Zap className="w-3 h-3" /> },
+                                 { label: "Clinical Authority", detail: "Full autonomy & maximum performance bonuses.", icon: <Target className="w-3 h-3" /> }
+                               ].map((m, i) => (
+                                 <div key={i} className="relative">
+                                    <div className="absolute -left-[29px] top-0 w-6 h-6 bg-white border border-gray-100 rounded-lg flex items-center justify-center shadow-sm z-10">
+                                       <div className="text-neuro-orange">{m.icon}</div>
+                                    </div>
+                                    <h6 className="text-sm font-black text-neuro-navy">{m.label}</h6>
+                                    <p className="text-xs text-gray-500">{m.detail}</p>
+                                 </div>
+                               ))}
+                            </div>
+                         </div>
+
+                         <div className="flex gap-4">
+                            <button className="flex-1 py-5 bg-neuro-orange text-white font-black rounded-2xl shadow-xl hover:bg-neuro-orange-dark transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-3">
+                               Send to {selectedApplicant.name.split(' ')[0]} <MessageSquare className="w-4 h-4" />
+                            </button>
+                            <button className="px-6 py-5 bg-white border border-gray-200 text-neuro-navy font-black rounded-2xl hover:bg-gray-50 transition-all">
+                               <Plus className="w-5 h-5 rotate-45" />
+                            </button>
+                         </div>
+                      </motion.div>
+                    )}
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>
