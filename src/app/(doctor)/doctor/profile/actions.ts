@@ -96,7 +96,7 @@ export async function uploadAvatar(formData: FormData) {
 
     const { error: updateError } = await supabase
         .from('doctors')
-        .update({ avatar_url: publicUrl })
+        .update({ photo_url: publicUrl })
         .eq('user_id', user.id)
 
     if (updateError) throw updateError

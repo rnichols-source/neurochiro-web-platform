@@ -52,7 +52,7 @@ export default function PracticeProfile() {
     website: "",
     bio: "",
     specialties: [] as string[],
-    avatar_url: "",
+    photo_url: "",
     subscription_status: ""
   });
 
@@ -65,7 +65,7 @@ export default function PracticeProfile() {
     if (profileData.website) score += 10;
     if (profileData.bio && profileData.bio.length > 50) score += 20;
     if (profileData.specialties.length > 0) score += 10;
-    if (profileData.avatar_url) score += 20;
+    if (profileData.photo_url) score += 20;
     return score;
   };
 
@@ -82,7 +82,7 @@ export default function PracticeProfile() {
           website: data.website_url || data.website || "",
           bio: data.bio || "",
           specialties: data.specialties || [],
-          avatar_url: data.avatar_url || data.photo_url || "",
+          photo_url: data.photo_url || data.avatar_url || "",
           subscription_status: data.subscription_status || ""
         });
         // Sync context tier if it differs
@@ -142,8 +142,9 @@ export default function PracticeProfile() {
       const formData = new FormData();
       formData.append('file', file);
       const result = await uploadAvatar(formData);
-      setProfileData(prev => ({ ...prev, avatar_url: result.publicUrl }));
+      setProfileData(prev => ({ ...prev, photo_url: result.publicUrl }));
       setSuccess(true);
+      setError(null);
     } catch (err: any) {
       setError(err.message || "Failed to upload photo");
     } finally {
@@ -224,14 +225,24 @@ export default function PracticeProfile() {
               </motion.div>
             )}
 
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute top-0 left-0 right-0 p-4 bg-red-500 text-white text-center text-[10px] font-black uppercase tracking-[0.3em] z-20"
+              >
+                {error}
+              </motion.div>
+            )}
+
             <div className="flex flex-col md:flex-row items-center gap-8 mb-12">
               <div 
                 onClick={() => fileInputRef.current?.click()}
                 className="relative w-32 h-32 rounded-[2.5rem] bg-gray-50 flex items-center justify-center text-gray-300 border-2 border-dashed border-gray-200 cursor-pointer hover:border-neuro-orange transition-all group overflow-hidden"
               >
-                {profileData.avatar_url ? (
+                {profileData.photo_url ? (
                   <>
-                    <img src={profileData.avatar_url} alt="Clinic" className="w-full h-full object-cover" />
+                    <img src={profileData.photo_url} alt="Clinic" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-neuro-navy/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <Camera className="w-8 h-8 text-white" />
                     </div>
