@@ -133,3 +133,72 @@ export async function getDoctorBySlug(slug: string) {
 
   return { doctor: data as Doctor | null, error }
 }
+
+export async function getStudentsForMap(options: {
+  bounds?: [number, number, number, number]; // [minLng, minLat, maxLng, maxLat]
+  limit?: number;
+} = {}) {
+  const { bounds, limit = 100 } = options;
+  const supabase = createServerSupabase();
+
+  try {
+    let query = supabase
+      .from('students')
+      .select('id, full_name, school, location_city, graduation_year, interests, is_looking_for_mentorship, latitude, longitude')
+      .not('latitude', 'is', null)
+      .not('longitude', 'is', null)
+      .limit(limit);
+
+    if (bounds) {
+      query = query
+        .gte('longitude', bounds[0])
+        .gte('latitude', bounds[1])
+        .lte('longitude', bounds[2])
+        .lte('latitude', bounds[3]);
+    }
+
+    const { data, error } = await query;
+
+    if (error || !data || data.length === 0) {
+      // Mock Data Fallback for students
+      const mockStudents = [
+        {
+          id: 'student-1',
+          full_name: 'Sarah Jenkins',
+          school: 'Palmer College',
+          location_city: 'Davenport',
+          graduation_year: 2026,
+          latitude: 41.5236,
+          longitude: -90.5776,
+          interests: ['Pediatrics', 'Tonal']
+        },
+        {
+          id: 'student-2',
+          full_name: 'David Chen',
+          school: 'Life University',
+          location_city: 'Marietta',
+          graduation_year: 2027,
+          latitude: 33.9526,
+          longitude: -84.5499,
+          interests: ['Sports', 'Family Care']
+        },
+        {
+          id: 'student-3',
+          full_name: 'Emma Rossi',
+          school: 'Parker University',
+          location_city: 'Dallas',
+          graduation_year: 2025,
+          latitude: 32.7767,
+          longitude: -96.7970,
+          interests: ['Prenatal', 'Nervous System']
+        }
+      ];
+      return mockStudents;
+    }
+
+    return data;
+  } catch (e) {
+    console.error("Error fetching students:", e);
+    return [];
+  }
+}

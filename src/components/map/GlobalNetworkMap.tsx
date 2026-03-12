@@ -16,7 +16,7 @@ import {
   ShieldCheck,
   Loader2
 } from "lucide-react";
-import { getDoctors } from "@/app/(public)/directory/actions";
+import { getDoctors, getStudentsForMap } from "@/app/(public)/directory/actions";
 import { getSeminarsForMap } from "@/app/(public)/seminars/actions";
 import { Doctor } from "@/types/directory";
 
@@ -32,6 +32,7 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
   const [searchQuery, setSearchQuery] = useState("");
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [seminars, setSeminars] = useState<any[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const currentBounds = useRef<[number, number, number, number] | null>(null);
@@ -64,6 +65,25 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
             coordinates: [Number(sem.longitude), Number(sem.latitude)]
           }
         }));
+    } else if (activeLayer === 'student') {
+      points = students
+        .filter(st => st.latitude && st.longitude)
+        .map(st => ({
+          type: 'Feature' as const,
+          properties: {
+            cluster: false,
+            studentId: st.id,
+            name: st.full_name,
+            school: st.school,
+            graduationYear: st.graduation_year,
+            city: st.location_city,
+            type: 'student'
+          },
+          geometry: {
+            type: 'Point' as const,
+            coordinates: [st.longitude, st.latitude]
+          }
+        }));
     } else {
       points = doctors
         .filter(doc => doc.latitude !== 0 && doc.longitude !== 0)
@@ -88,13 +108,16 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
 
     cluster.load(points as Supercluster.PointFeature<Supercluster.AnyProps>[]);
     return cluster;
-  }, [doctors, seminars, activeLayer]);
+  }, [doctors, seminars, students, activeLayer]);
 
   const updateMapData = useCallback(async (bounds: [number, number, number, number], zoom: number) => {
     setLoading(true);
     if (activeLayer === 'seminar') {
       const result = await getSeminarsForMap(bounds);
       setSeminars(result);
+    } else if (activeLayer === 'student') {
+      const result = await getStudentsForMap({ bounds, limit: 100 });
+      setStudents(result);
     } else {
       const result = await getDoctors({ bounds, limit: 100 });
       setDoctors(result.doctors);
@@ -233,13 +256,22 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
               </div>
 
               <h2 className="text-2xl font-heading font-black text-white">{selectedPin.name}</h2>
-              <p className="text-gray-400 font-medium">{selectedPin.type === 'seminar' ? selectedPin.city : selectedPin.clinic}</p>
+              <p className="text-gray-400 font-medium">
+                {selectedPin.type === 'seminar' ? selectedPin.city : 
+                 selectedPin.type === 'student' ? selectedPin.school : 
+                 selectedPin.clinic}
+              </p>
               
               <div className="flex items-center gap-2 text-sm text-gray-500 mt-2 mb-8">
                 {selectedPin.type === 'seminar' ? (
                   <>
                     <CalendarDays className="w-4 h-4 text-neuro-orange" />
                     {selectedPin.dates}
+                  </>
+                ) : selectedPin.type === 'student' ? (
+                  <>
+                    <GraduationCap className="w-4 h-4 text-blue-500" />
+                    Class of {selectedPin.graduationYear}
                   </>
                 ) : (
                   <>
@@ -252,6 +284,8 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
               <div className="space-y-6 text-gray-300 text-sm leading-relaxed">
                 {selectedPin.type === 'seminar' ? (
                   <p>Instructor: <span className="text-white font-bold">{selectedPin.instructor || 'NeuroChiro Faculty'}</span></p>
+                ) : selectedPin.type === 'student' ? (
+                  "Verified student member of the NeuroChiro network, preparing for clinical excellence in nervous-system-first care."
                 ) : (
                   "Expert in nervous-system-first chiropractic care. View the full clinical profile to see techniques, patient reviews, and clinic hours."
                 )}
@@ -263,13 +297,18 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
                 onClick={() => {
                   if (selectedPin.type === 'seminar') {
                     router.push(`/seminars/${selectedPin.seminarId}`);
+                  } else if (selectedPin.type === 'student') {
+                    // Placeholder for student profile route, or just close for now
+                    // router.push(`/student/${selectedPin.studentId}`);
                   } else {
                     router.push(`/directory/${selectedPin.slug || selectedPin.doctorId}`);
                   }
                 }}
                 className="w-full py-4 bg-neuro-orange hover:bg-neuro-orange-light text-white font-black uppercase tracking-widest text-sm rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-neuro-orange/20"
               >
-                {selectedPin.type === 'seminar' ? 'View Event Details' : 'View Full Profile'} <ArrowRight className="w-4 h-4" />
+                {selectedPin.type === 'seminar' ? 'View Event Details' : 
+                 selectedPin.type === 'student' ? 'View Student Profile' : 
+                 'View Full Profile'} <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </motion.div>

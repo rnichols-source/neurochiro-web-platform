@@ -56,6 +56,8 @@ export interface Student {
   interests: string[];
   is_looking_for_mentorship: boolean;
   region_code: string;
+  latitude?: number;
+  longitude?: number;
   match_rate?: number; // Calculated field
   engagement_score?: number; // Calculated field
 }
