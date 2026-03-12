@@ -1,13 +1,25 @@
 "use client";
 
-import { Search, MapPin, Filter, Star, ShieldCheck, ArrowRight, Sparkles, Network, UserPlus, MessageSquare, X, Check, Mail, User } from "lucide-react";
+import { Search, MapPin, Filter, Star, ShieldCheck, ArrowRight, Sparkles, Network, UserPlus, MessageSquare, X, Check, Mail, User, Zap, Handshake } from "lucide-react";
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useDoctorTier } from "@/context/DoctorTierContext";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export default function DirectoryExplorer() {
+  const { tier } = useDoctorTier();
   const [searchQuery, setSearchQuery] = useState("");
   const [isMessaging, setIsMessaging] = useState<string | null>(null);
   const [messageSent, setMessageSent] = useState(false);
+  
+  // New States for handshakes
+  const [handshakesRemaining, setHandshakesRemaining] = useState(3);
+  const [handshakeSentTo, setHandshakeSentTo] = useState<string | null>(null);
   
   // New States for requested buttons
   const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -23,7 +35,8 @@ export default function DirectoryExplorer() {
       specialties: ["Pediatrics", "Sports"],
       rating: 4.9,
       isVerified: true,
-      isPartner: true
+      isPartner: true,
+      lookingForPartners: true
     },
     {
       id: "dr-2",
@@ -33,7 +46,8 @@ export default function DirectoryExplorer() {
       specialties: ["Prenatal", "Neuro-Dev"],
       rating: 5.0,
       isVerified: true,
-      isPartner: false
+      isPartner: false,
+      lookingForPartners: true
     },
     {
       id: "dr-3",
@@ -43,9 +57,28 @@ export default function DirectoryExplorer() {
       specialties: ["Neurology", "TBI"],
       rating: 4.8,
       isVerified: true,
-      isPartner: true
+      isPartner: true,
+      lookingForPartners: false
     }
   ];
+
+  const partnersLooking = useMemo(() => doctors.filter(d => d.lookingForPartners), []);
+
+  const handleHandshake = (docName: string) => {
+    if (tier === 'starter' && handshakesRemaining <= 0) {
+      alert("You've used all your Golden Handshakes for this month. Upgrade to Growth for unlimited connections!");
+      return;
+    }
+    
+    setHandshakeSentTo(docName);
+    if (tier === 'starter') {
+      setHandshakesRemaining(prev => prev - 1);
+    }
+    
+    setTimeout(() => {
+      setHandshakeSentTo(null);
+    }, 2000);
+  };
 
   const filteredDoctors = useMemo(() => {
     return doctors.filter(doc => 
@@ -95,6 +128,67 @@ export default function DirectoryExplorer() {
            </button>
         </div>
       </header>
+
+      {/* Reciprocity Loop / Golden Handshakes */}
+      <section className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
+         <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[100px] -mr-32 -mt-32"></div>
+         <div className="relative z-10">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-8">
+               <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-neuro-orange">
+                     <Sparkles className="w-5 h-5" />
+                     <span className="text-[10px] font-black uppercase tracking-[0.3em]">Reciprocity Loop</span>
+                  </div>
+                  <h2 className="text-3xl font-heading font-black text-white">3 Doctors in your region are looking for referral partners.</h2>
+                  <p className="text-gray-400 text-sm max-w-lg">One-click handshakes send a neuro-centric introduction to local docs to jumpstart your clinical network.</p>
+               </div>
+               
+               {tier === 'starter' && (
+                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-md flex items-center gap-6">
+                     <div className="text-center">
+                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Golden Handshakes</p>
+                        <div className="flex items-center gap-2 justify-center">
+                           <span className="text-3xl font-black text-neuro-orange">{handshakesRemaining}</span>
+                           <span className="text-xs font-bold text-gray-400">/ 3 Left</span>
+                        </div>
+                     </div>
+                     <div className="h-10 w-px bg-white/10"></div>
+                     <Link href="/pricing" className="text-[10px] font-black text-neuro-orange uppercase tracking-widest hover:underline flex items-center gap-1">
+                        Get Unlimited <Zap className="w-3 h-3 fill-neuro-orange" />
+                     </Link>
+                  </div>
+               )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+               {partnersLooking.map((partner) => (
+                  <div key={partner.id} className="p-5 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-between group hover:bg-white/10 transition-all">
+                     <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-neuro-navy border border-white/10 flex items-center justify-center font-black text-neuro-orange">
+                           {partner.name.split(' ').slice(1).map(n => n[0]).join('')}
+                        </div>
+                        <div>
+                           <p className="text-sm font-bold text-white group-hover:text-neuro-orange transition-colors">{partner.name}</p>
+                           <p className="text-[10px] text-gray-500">{partner.location}</p>
+                        </div>
+                     </div>
+                     <button 
+                        onClick={() => handleHandshake(partner.name)}
+                        disabled={handshakeSentTo === partner.name}
+                        className={cn(
+                           "p-3 rounded-xl transition-all active:scale-90",
+                           handshakeSentTo === partner.name 
+                              ? "bg-green-500 text-white" 
+                              : "bg-neuro-orange/10 text-neuro-orange hover:bg-neuro-orange hover:text-white"
+                        )}
+                     >
+                        {handshakeSentTo === partner.name ? <Check className="w-5 h-5" /> : <Handshake className="w-5 h-5" />}
+                     </button>
+                  </div>
+               ))}
+            </div>
+         </div>
+      </section>
 
       {/* Network Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
