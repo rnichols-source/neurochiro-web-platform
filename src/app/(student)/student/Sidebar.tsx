@@ -117,7 +117,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
         {careerToolItems.map((item) => {
           const isActive = pathname === item.href;
-          const isLocked = (item.minTier === "Professional" && !isProfessional) || (item.minTier === "Accelerator" && !isAccelerator);
+          const isLocked = item.minTier === "Accelerator" ? !isAccelerator : !isProfessional;
           
           return (
             <Link
