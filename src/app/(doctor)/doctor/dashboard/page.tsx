@@ -270,29 +270,46 @@ export default function DoctorDashboard() {
                         <Sparkles className="w-5 h-5 text-neuro-orange" />
                         <span className="text-xs font-black uppercase tracking-widest text-neuro-orange">Smart Recommendation</span>
                      </div>
-                     <h3 className="text-2xl font-bold mb-2">Boost your Associate listing visibility.</h3>
-                     <p className="text-gray-400 mb-6 max-w-lg">
-                        {boosted 
-                          ? "Listing successfully boosted! Your job is now appearing at the top of the student marketplace."
-                          : "Applications for your 'Associate Chiropractor' role have slowed this week. Promoting this job could increase applicants by 3x."
-                        }
-                     </p>
-                     <button 
-                        onClick={handleBoost}
-                        disabled={isBoosting || boosted}
-                        className={cn(
-                          "px-6 py-3 text-white font-black rounded-xl transition-all shadow-lg flex items-center gap-2",
-                          boosted ? "bg-green-600 cursor-default" : "bg-neuro-orange hover:bg-neuro-orange-light active:scale-95"
-                        )}
-                     >
-                        {isBoosting ? (
-                          <>Boosting... <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /></>
-                        ) : boosted ? (
-                          <>Boost Active <ShieldCheck className="w-4 h-4" /></>
-                        ) : (
-                          <>Boost Job Listing <ArrowRight className="w-4 h-4" /></>
-                        )}
-                     </button>
+                     {(dashboardData?.marketPerformance?.completeness || 0) < 80 ? (
+                        <>
+                           <h3 className="text-2xl font-bold mb-2">Your profile is currently hidden from 85% of local searches.</h3>
+                           <p className="text-gray-400 mb-6 max-w-lg">
+                              Complete your "Conversion Engine" setup to start appearing in patient search results. Adding 3 clinic photos increases reach by 30%.
+                           </p>
+                           <Link 
+                              href="/doctor/profile"
+                              className="inline-flex px-8 py-4 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-light transition-all transform hover:scale-105 flex items-center gap-3 shadow-xl shadow-neuro-orange/20 uppercase tracking-widest text-xs"
+                           >
+                              Fix Profile Now <ArrowRight className="w-4 h-4" />
+                           </Link>
+                        </>
+                     ) : (
+                        <>
+                           <h3 className="text-2xl font-bold mb-2">Boost your Associate listing visibility.</h3>
+                           <p className="text-gray-400 mb-6 max-w-lg">
+                              {boosted 
+                                ? "Listing successfully boosted! Your job is now appearing at the top of the student marketplace."
+                                : "Applications for your 'Associate Chiropractor' role have slowed this week. Promoting this job could increase applicants by 3x."
+                              }
+                           </p>
+                           <button 
+                              onClick={handleBoost}
+                              disabled={isBoosting || boosted}
+                              className={cn(
+                                "px-6 py-3 text-white font-black rounded-xl transition-all shadow-lg flex items-center gap-2",
+                                boosted ? "bg-green-600 cursor-default" : "bg-neuro-orange hover:bg-neuro-orange-light active:scale-95"
+                              )}
+                           >
+                              {isBoosting ? (
+                                <>Boosting... <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /></>
+                              ) : boosted ? (
+                                <>Boost Active <ShieldCheck className="w-4 h-4" /></>
+                              ) : (
+                                <>Boost Job Listing <ArrowRight className="w-4 h-4" /></>
+                              )}
+                           </button>
+                        </>
+                     )}
                   </div>
                </section>
 
@@ -314,17 +331,24 @@ export default function DoctorDashboard() {
                         </div>
                         <div className="h-12 w-px bg-gray-200 hidden md:block mb-1"></div>
                         <div className="flex-1">
-                           <p className="text-sm text-neuro-navy font-medium leading-relaxed mb-4">
-                              Your practice is currently performing <span className="font-bold text-neuro-orange">above average</span> for your region. 
-                           </p>
                            {!isPro ? (
-                              <Link href="/pricing" className="inline-flex items-center gap-2 text-xs font-black text-neuro-orange uppercase tracking-widest group/link">
-                                 Upgrade to Pro to see detailed metrics <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                              </Link>
+                              <div className="space-y-3">
+                                 <p className="text-sm text-neuro-navy font-medium leading-relaxed">
+                                    <span className="font-bold text-neuro-orange">14 People</span> in {dashboardData?.doctor?.city || "your city"} are currently looking for a Nervous System Specialist.
+                                 </p>
+                                 <Link href="/pricing" className="inline-flex items-center gap-2 text-[10px] font-black text-neuro-orange uppercase tracking-widest hover:underline group/bribe">
+                                    <Zap className="w-3 h-3 fill-neuro-orange" /> Upgrade to Growth to appear at the top of their search <ChevronRight className="w-4 h-4 group-hover/bribe:translate-x-1 transition-transform" />
+                                 </Link>
+                              </div>
                            ) : (
-                              <Link href="/doctor/analytics" className="inline-flex items-center gap-2 text-xs font-black text-neuro-navy uppercase tracking-widest group/link">
-                                 View Detailed Performance Reports <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                              </Link>
+                              <>
+                                 <p className="text-sm text-neuro-navy font-medium leading-relaxed mb-4">
+                                    Your practice is currently performing <span className="font-bold text-neuro-orange">above average</span> for your region. 
+                                 </p>
+                                 <Link href="/doctor/analytics" className="inline-flex items-center gap-2 text-xs font-black text-neuro-navy uppercase tracking-widest group/link">
+                                    View Detailed Performance Reports <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                 </Link>
+                              </>
                            )}
                         </div>
                      </div>

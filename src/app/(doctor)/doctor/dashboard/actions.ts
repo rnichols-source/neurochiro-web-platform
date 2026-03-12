@@ -12,7 +12,7 @@ export async function getDoctorDashboardStats() {
     // Parallelize fetches for profile, practice info, seminars, and jobs
     const [profileRes, doctorRes, seminarsRes, jobsRes] = await Promise.all([
       supabase.from('profiles').select('role, subscription_status, full_name').eq('id', user.id).single(),
-      supabase.from('doctors').select('clinic_name, slug').eq('id', user.id).single(),
+      supabase.from('doctors').select('clinic_name, slug, location_city').eq('user_id', user.id).single(),
       supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
       supabase.from('jobs').select('*', { count: 'exact', head: true }).eq('user_id', user.id).catch(() => ({ count: 0 }))
     ]);
@@ -40,6 +40,9 @@ export async function getDoctorDashboardStats() {
         role: userRole,
         status: profile?.subscription_status || 'inactive'
       },
+      doctor: {
+        city: doctor?.location_city || "your city"
+      },
       stats: [
         { label: "Profile Views", value: profileViews.toLocaleString(), trend: "+12%" },
         { label: "Patient Leads", value: patientLeads.toString(), trend: "+8%" },
@@ -47,7 +50,7 @@ export async function getDoctorDashboardStats() {
         { label: "Job Applications", value: (jobCount * 12).toString(), trend: "0%" }
       ],
       marketPerformance: {
-        completeness: 85,
+        completeness: 65, // Default to < 80 for the demo/starter experience if not set
         reviews: 92,
         engagement: 78
       }

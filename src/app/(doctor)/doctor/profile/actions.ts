@@ -37,6 +37,7 @@ export async function updateDoctorProfile(formData: FormData) {
   const clinicName = formData.get('clinic_name') as string
   const city = formData.get('city') as string
   const website = formData.get('website') as string
+  const bio = formData.get('bio') as string
   const specialties = formData.get('specialties')?.toString().split(',').map((s: string) => s.trim()) || []
 
   // 1. Update Profile (Name)
@@ -53,7 +54,8 @@ export async function updateDoctorProfile(formData: FormData) {
     .update({
       clinic_name: clinicName,
       location_city: city,
-      website: website,
+      website_url: website,
+      bio: bio,
       specialties: specialties
     })
     .eq('user_id', user.id)

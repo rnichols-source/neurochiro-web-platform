@@ -10,10 +10,10 @@ export default function OnboardingTracker() {
   const [progress, setProgress] = useState(60);
 
   const steps = [
-    { id: 1, label: "Basic Info", completed: true, icon: CheckCircle2 },
+    { id: 1, label: "Clinic Visibility", completed: true, icon: CheckCircle2 },
     { id: 2, label: "Clinic Verification", completed: true, icon: CheckCircle2 },
-    { id: 3, label: "Clinic Photos", completed: false, icon: Camera, bonus: "+30% Visibility" },
-    { id: 4, label: "Clinical Bio", completed: false, icon: FileText, bonus: "+15% Conversion" },
+    { id: 3, label: "The Trust Multiplier", completed: false, icon: Camera, bonus: "+30% Visibility" },
+    { id: 4, label: "The Patient Magnet Script", completed: false, icon: FileText, bonus: "+15% Conversion" },
   ];
 
   if (!isVisible) return null;
@@ -38,7 +38,7 @@ export default function OnboardingTracker() {
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-neuro-orange">
               <Sparkles className="w-5 h-5" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Profile Optimizer</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Conversion Engine</span>
             </div>
             <h2 className="text-3xl font-heading font-black">Your profile is <span className="text-neuro-orange">{progress}%</span> complete.</h2>
             <p className="text-gray-400 text-sm max-w-md">Complete these high-impact steps to reach the top of local search results.</p>

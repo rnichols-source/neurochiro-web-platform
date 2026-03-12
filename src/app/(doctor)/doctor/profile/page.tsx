@@ -48,6 +48,7 @@ export default function PracticeProfile() {
     clinic_name: "",
     location_city: "",
     website: "",
+    bio: "",
     specialties: [] as string[],
     avatar_url: "",
     subscription_status: ""
@@ -61,9 +62,10 @@ export default function PracticeProfile() {
           full_name: data.full_name || "",
           clinic_name: data.clinic_name || "",
           location_city: data.location_city || "",
-          website: data.website || "",
+          website: data.website_url || data.website || "",
+          bio: data.bio || "",
           specialties: data.specialties || [],
-          avatar_url: data.avatar_url || "",
+          avatar_url: data.avatar_url || data.photo_url || "",
           subscription_status: data.subscription_status || ""
         });
         // Sync context tier if it differs
@@ -80,6 +82,13 @@ export default function PracticeProfile() {
     setSuccess(false);
   };
 
+  const handleGenerateBio = () => {
+    const clinic = profileData.clinic_name || "our clinic";
+    const name = profileData.full_name || "Dr. Chiropractic";
+    const generatedBio = `${name} at ${clinic} specializes in nervous system-centric care. We focus on optimizing the master controller of the body to help our patients achieve extraordinary health outcomes. By addressing the root cause of neurological interference, we empower our community to live without limits and express their full potential.`;
+    handleInputChange('bio', generatedBio);
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -92,6 +101,7 @@ export default function PracticeProfile() {
       formData.append('clinic_name', profileData.clinic_name);
       formData.append('city', profileData.location_city);
       formData.append('website', profileData.website);
+      formData.append('bio', profileData.bio);
       formData.append('specialties', profileData.specialties.join(','));
 
       await updateDoctorProfile(formData);
@@ -265,6 +275,30 @@ export default function PracticeProfile() {
                   placeholder="https://..."
                 />
               </div>
+
+              {/* Bio Section with AI Magic Button */}
+              <div className="space-y-2 md:col-span-2">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest flex items-center gap-2 ml-1">
+                    <FileText className="w-3 h-3" /> The Patient Magnet Script (Bio)
+                  </label>
+                  <button 
+                    type="button"
+                    onClick={handleGenerateBio}
+                    className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-neuro-orange hover:text-neuro-orange-light transition-colors bg-neuro-orange/5 px-3 py-1.5 rounded-lg border border-neuro-orange/20"
+                  >
+                    <Sparkles className="w-3 h-3" /> AI Magic Write
+                  </button>
+                </div>
+                <textarea 
+                  value={profileData.bio}
+                  onChange={(e) => handleInputChange('bio', e.target.value)}
+                  className="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 font-medium text-neuro-navy focus:ring-2 focus:ring-neuro-orange/20 focus:border-neuro-orange/30 outline-none transition-all min-h-[150px]"
+                  placeholder="Share your clinical philosophy and how you help patients reach their outcomes..."
+                />
+                <p className="text-[9px] text-gray-400 italic">Pro Tip: Focus on outcomes, not just techniques. Patients want results.</p>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest flex items-center gap-2 ml-1">
                    Clinical Focus
