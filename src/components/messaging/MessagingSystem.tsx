@@ -10,10 +10,15 @@ import {
   AlertCircle,
   Check,
   CheckCheck,
-  Zap
+  Zap,
+  Plus,
+  X,
+  User as UserIcon,
+  Loader2
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function MessagingSystem({ currentUserId, userRole, initialOtherUserId }: { currentUserId: string, userRole: string, initialOtherUserId?: string }) {
   const [conversations, setConversations] = useState<any[]>([]);
@@ -22,8 +27,14 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
   const [newMessage, setNewMessage] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState(true);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   
+  // Compose States
+  const [isComposeOpen, setIsComposeOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
   const doctorCannedReplies = [
@@ -39,77 +50,7 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  useEffect(() => {
-    fetchConversations().then(async (fetchedConvs) => {
-      // If we passed an initial user id to message, auto-select or create that conversation
-      if (initialOtherUserId && fetchedConvs) {
-        let existingConv = fetchedConvs.find((c: any) => c.otherUser.id === initialOtherUserId);
-        if (existingConv) {
-          setSelectedConversation(existingConv);
-        } else {
-          // Verify other user exists
-          const { data: otherUser } = await supabase.from('profiles').select('id, full_name, role').eq('id', initialOtherUserId).single();
-          if (otherUser) {
-            // Create temporary UI conversation
-            const tempConv = {
-              id: 'temp-' + Date.now(),
-              otherUser: otherUser,
-              last_message_at: new Date().toISOString(),
-              isTemp: true
-            };
-            setConversations(prev => [tempConv, ...prev]);
-            setSelectedConversation(tempConv);
-          }
-        }
-      }
-    });
-    
-    // Subscribe to new conversations
-    const convChannel = supabase
-      .channel('conversations_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => {
-        fetchConversations();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(convChannel);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (selectedConversation && !selectedConversation.isTemp) {
-      fetchMessages(selectedConversation.id);
-      
-      // Subscribe to new messages in this conversation
-      const msgChannel = supabase
-        .channel(`messages_${selectedConversation.id}`)
-        .on('postgres_changes', { 
-            event: 'INSERT', 
-            schema: 'public', 
-            table: 'messages',
-            filter: `conversation_id=eq.${selectedConversation.id}`
-          }, 
-          (payload: any) => {
-            setMessages(prev => [...prev, payload.new]);
-            scrollToBottom();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(msgChannel);
-      };
-    } else if (selectedConversation?.isTemp) {
-      setMessages([]);
-    }
-  }, [selectedConversation]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('conversations')
@@ -124,7 +65,6 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
 
       if (error) throw error;
       
-      // Format conversations for UI
       const formatted = data.map((conv: any) => {
         const otherUser = conv.participant_one.id === currentUserId ? conv.participant_two : conv.participant_one;
         return {
@@ -142,9 +82,9 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase, currentUserId]);
 
-  const fetchMessages = async (conversationId: string) => {
+  const fetchMessages = useCallback(async (conversationId: string) => {
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -155,7 +95,6 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
       if (error) throw error;
       setMessages(data || []);
       
-      // Mark as read
       const unreadMessages = data?.filter((m: any) => m.recipient_id === currentUserId && !m.read_at);
       if (unreadMessages && unreadMessages.length > 0) {
         await supabase
@@ -168,18 +107,82 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
     } catch (err) {
       console.error("Error fetching messages:", err);
     }
+  }, [supabase, currentUserId]);
+
+  useEffect(() => {
+    fetchConversations().then(async (fetchedConvs) => {
+      if (initialOtherUserId && fetchedConvs) {
+        let existingConv = fetchedConvs.find((c: any) => c.otherUser.id === initialOtherUserId);
+        if (existingConv) {
+          setSelectedConversation(existingConv);
+        } else {
+          const { data: otherUser } = await supabase.from('profiles').select('id, full_name, role').eq('id', initialOtherUserId).single();
+          if (otherUser) {
+            const tempConv = {
+              id: 'temp-' + Date.now(),
+              otherUser: otherUser,
+              last_message_at: new Date().toISOString(),
+              isTemp: true
+            };
+            setConversations(prev => [tempConv, ...prev]);
+            setSelectedConversation(tempConv);
+          }
+        }
+      }
+    });
+    
+    const convChannel = supabase
+      .channel('conversations_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => {
+        fetchConversations();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(convChannel);
+    };
+  }, [fetchConversations, initialOtherUserId, supabase]);
+
+  useEffect(() => {
+    if (selectedConversation && !selectedConversation.isTemp) {
+      fetchMessages(selectedConversation.id);
+      
+      const msgChannel = supabase
+        .channel(`messages_${selectedConversation.id}`)
+        .on('postgres_changes', { 
+            event: 'INSERT', 
+            schema: 'public', 
+            table: 'messages',
+            filter: `conversation_id=eq.${selectedConversation.id}`
+          }, 
+          (payload: any) => {
+            setMessages(prev => [...prev, payload.new]);
+            setTimeout(scrollToBottom, 100);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(msgChannel);
+      };
+    } else if (selectedConversation?.isTemp) {
+      setMessages([]);
+    }
+  }, [selectedConversation, fetchMessages, supabase]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
     const messageText = newMessage;
-    setNewMessage(""); // Optimistic clear
+    setNewMessage("");
 
     try {
       let convId = selectedConversation.id;
 
-      // If it's a temp conversation, we need to insert it to DB first
       if (selectedConversation.isTemp) {
         const { data: newConv, error: convError } = await supabase
           .from('conversations')
@@ -191,7 +194,6 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
           .single();
 
         if (convError) {
-          // Maybe it was created in the background by the other user just now
           const { data: existing } = await supabase
             .from('conversations')
             .select('*')
@@ -208,10 +210,7 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
           convId = newConv.id;
         }
 
-        // Update selected conversation to have real ID and remove isTemp
         setSelectedConversation({ ...selectedConversation, id: convId, isTemp: false });
-        
-        // Remove temp from list and fetch fresh
         fetchConversations();
       }
 
@@ -231,11 +230,53 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
       }
     } catch (err) {
       console.error("Error sending message:", err);
-      // Could show toast error here
     }
   };
 
   const handleBack = () => setSelectedConversation(null);
+
+  const handleSearchUsers = useCallback(async (query: string) => {
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setSearching(true);
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, full_name, role')
+      .neq('id', currentUserId)
+      .ilike('full_name', `%${query}%`)
+      .limit(5);
+    
+    if (data) setSearchResults(data);
+    setSearching(false);
+  }, [supabase, currentUserId]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) handleSearchUsers(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, handleSearchUsers]);
+
+  const startNewConversation = (otherUser: any) => {
+    let existing = conversations.find(c => c.otherUser.id === otherUser.id);
+    if (existing) {
+      setSelectedConversation(existing);
+    } else {
+      const tempConv = {
+        id: 'temp-' + Date.now(),
+        otherUser: otherUser,
+        last_message_at: new Date().toISOString(),
+        isTemp: true
+      };
+      setConversations(prev => [tempConv, ...prev]);
+      setSelectedConversation(tempConv);
+    }
+    setIsComposeOpen(false);
+    setSearchQuery("");
+    setSearchResults([]);
+  };
 
   return (
     <div className="flex h-[calc(100vh-6rem)] lg:h-[80vh] bg-[#020617] border border-white/10 rounded-2xl overflow-hidden relative shadow-2xl">
@@ -245,13 +286,22 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
         w-full lg:w-96 border-r border-white/5 flex-col bg-[#0A0D14] h-full
       `}>
         <div className="p-6 border-b border-white/5 space-y-4">
-          <h1 className="text-xl font-black text-white flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-neuro-orange" /> Messages
-          </h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-black text-white flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-neuro-orange" /> Messages
+            </h1>
+            <button 
+              onClick={() => setIsComposeOpen(true)}
+              className="p-2 bg-neuro-orange hover:bg-neuro-orange-light text-white rounded-xl shadow-lg shadow-neuro-orange/20 transition-all active:scale-95"
+              title="Compose Message"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <input 
-              placeholder="Search..." 
+              placeholder="Search conversations..." 
               className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs focus:outline-none focus:border-neuro-orange text-white" 
             />
           </div>
@@ -386,6 +436,78 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
           </div>
         )}
       </div>
+
+      {/* Compose Modal */}
+      <AnimatePresence>
+        {isComposeOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsComposeOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-md bg-[#0A0D14] rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden"
+            >
+              <div className="p-8 border-b border-white/5">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-black text-white uppercase tracking-tight">New Message</h3>
+                  <button onClick={() => setIsComposeOpen(false)} className="text-gray-500 hover:text-white transition-colors">
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <input 
+                    autoFocus
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search users by name..." 
+                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:outline-none focus:border-neuro-orange text-white" 
+                  />
+                </div>
+              </div>
+              
+              <div className="p-4 max-h-96 overflow-y-auto">
+                {searching ? (
+                  <div className="p-8 text-center text-gray-500">
+                    <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+                    Searching...
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <div className="space-y-2">
+                    {searchResults.map(user => (
+                      <button
+                        key={user.id}
+                        onClick={() => startNewConversation(user)}
+                        className="w-full p-4 hover:bg-white/5 rounded-2xl transition-all text-left flex items-center gap-4 group"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-neuro-navy flex items-center justify-center text-neuro-orange font-black group-hover:scale-110 transition-transform">
+                          {user.full_name.charAt(0)}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-bold text-white">{user.full_name}</p>
+                          <p className="text-[10px] text-gray-500 uppercase tracking-widest">{user.role}</p>
+                        </div>
+                        <Plus className="w-4 h-4 text-gray-600 group-hover:text-neuro-orange transition-colors" />
+                      </button>
+                    ))}
+                  </div>
+                ) : searchQuery.length >= 2 ? (
+                  <div className="p-8 text-center text-gray-500 text-sm">No users found.</div>
+                ) : (
+                  <div className="p-8 text-center text-gray-500 text-sm italic">Type at least 2 characters to search.</div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

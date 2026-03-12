@@ -2,7 +2,6 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { stripe } from "@/lib/stripe"
-import { MOCK_DOCTORS } from "@/lib/mock-data"
 import { getAuditLogs } from "../logs/actions"
 import { AuditLog } from "@/types/admin"
 

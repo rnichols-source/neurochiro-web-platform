@@ -19,9 +19,10 @@ import {
   FileText
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
-import { getAuditLogs, generateLiveEvent } from "./actions";
+import { getAuditLogs } from "./actions";
 import { AuditLog } from "@/types/admin";
 import { formatDistanceToNow } from "date-fns";
+import { createClient } from "@/lib/supabase";
 
 export default function AdminLogs() {
   const [filter, setFilter] = useState("All");
@@ -41,18 +42,47 @@ export default function AdminLogs() {
     loadLogs();
   }, [filter, searchQuery]);
 
-  // Simulate Live Stream
+  // Real-time Subscription for Live Event Stream
   useEffect(() => {
-    const interval = setInterval(async () => {
-      // 30% chance of a new event appearing every 5 seconds
-      if (Math.random() > 0.7) {
-        const newEvent = await generateLiveEvent();
-        setLogs(prev => [newEvent, ...prev].slice(0, 100));
-      }
-    }, 5000);
+    const supabase = createClient();
+    
+    const channel = supabase
+      .channel('realtime_audit_logs')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'audit_logs' 
+      }, (payload: any) => {
+        const newLog = {
+          id: payload.new.id,
+          category: payload.new.category,
+          event: payload.new.event,
+          user: payload.new.user_name || "System",
+          target: payload.new.target,
+          timestamp: payload.new.created_at,
+          status: payload.new.status,
+          severity: payload.new.severity
+        };
 
-    return () => clearInterval(interval);
-  }, []);
+        // Prepend new log if it matches current filter/search (simplified filter check)
+        setLogs(prev => {
+          const matchesFilter = filter === "All" || newLog.category === filter.toUpperCase();
+          const matchesSearch = !searchQuery || 
+            newLog.event.toLowerCase().includes(searchQuery.toLowerCase()) || 
+            newLog.user.toLowerCase().includes(searchQuery.toLowerCase());
+
+          if (matchesFilter && matchesSearch) {
+            return [newLog as AuditLog, ...prev].slice(0, 100);
+          }
+          return prev;
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [filter, searchQuery]);
 
   const handleExport = (format: 'csv' | 'json') => {
     setIsExporting(true);

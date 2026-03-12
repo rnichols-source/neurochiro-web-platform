@@ -76,34 +76,3 @@ export async function logAuditAction(params: {
 
     return { success: !error };
 }
-
-/**
- * Simulates a real-time event generator for the dashboard
- */
-export async function generateLiveEvent(): Promise<AuditLog> {
-  const categories: LogCategory[] = ["SECURITY", "AUTOMATION", "SYSTEM", "DATA", "GENERAL"];
-  const events = [
-    "User Login Succeeded", 
-    "Profile Image Uploaded", 
-    "Failed API Request", 
-    "New Referral Captured", 
-    "Subscription Canceled",
-    "Admin Configuration Updated"
-  ];
-  const statuses: any[] = ["Success", "Warning", "Failed", "Info"];
-  const users = ["System", "Super_Admin", "Dr. Emily Taylor", "Stripe_Internal", "Guest_User"];
-
-  const category = categories[Math.floor(Math.random() * categories.length)];
-  const status = statuses[Math.floor(Math.random() * statuses.length)];
-  
-  return {
-    id: Math.random().toString(36).substring(7),
-    category,
-    event: events[Math.floor(Math.random() * events.length)],
-    user: users[Math.floor(Math.random() * users.length)],
-    target: "Real-time Node",
-    timestamp: new Date().toISOString(),
-    status,
-    severity: status === "Failed" ? "High" : status === "Warning" ? "Medium" : "Low"
-  };
-}

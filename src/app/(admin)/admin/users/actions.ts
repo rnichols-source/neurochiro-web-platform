@@ -1,23 +1,8 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
-import { MOCK_DOCTORS } from '@/lib/mock-data'
 
 export type UserType = 'Students' | 'Doctors' | 'Vendors';
-
-// Mock student data for demonstration when DB is empty
-const MOCK_STUDENTS = [
-  { id: "s1", name: "Raymond Nichols", entity: "Life University", context: "Class of 2027", status: "Paid", engagement: 98, matches: 12, joined: "Jan 2024", email: "ray@example.com", role: 'student' },
-  { id: "s2", name: "Sarah Miller", entity: "Palmer College", context: "Class of 2026", status: "Free", engagement: 85, matches: 8, joined: "Mar 2024", email: "sarah@example.com", role: 'student' },
-  { id: "s3", name: "James Wilson", entity: "Logan University", context: "Class of 2025", status: "Paid", engagement: 92, matches: 15, joined: "Feb 2024", email: "james@example.com", role: 'student' },
-  { id: "s4", name: "Emma Thompson", entity: "Life West", context: "Class of 2026", status: "Paid", engagement: 78, matches: 5, joined: "Apr 2024", email: "emma@example.com", role: 'student' },
-  { id: "s5", name: "Michael Chen", entity: "Parker University", context: "Class of 2027", status: "Pending", engagement: 45, matches: 2, joined: "May 2024", email: "michael@example.com", role: 'student' },
-];
-
-const MOCK_VENDORS = [
-  { id: "v1", name: "Neurolum", entity: "Neuro-Tech Solutions", context: "Equipment Provider", status: "Paid", engagement: 95, matches: 42, joined: "Dec 2023", email: "contact@neurolum.com", role: 'vendor' },
-  { id: "v2", name: "SpineFlow", entity: "SpineFlow Analytics", context: "Software SaaS", status: "Paid", engagement: 88, matches: 28, joined: "Jan 2024", email: "info@spineflow.io", role: 'vendor' },
-];
 
 export async function getTalentUsers(options: {
   type: UserType;

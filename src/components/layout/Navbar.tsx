@@ -15,8 +15,23 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isGetStartedOpen, setIsGetStartedOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [logoClicks, setLogoClicks] = useState(0);
   const pathname = usePathname();
   const supabase = createClient();
+
+  // Secret Handshake: Triple click logo to toggle dev mode
+  useEffect(() => {
+    if (logoClicks >= 3) {
+      const current = localStorage.getItem('nc_dev_mode') === 'true';
+      localStorage.setItem('nc_dev_mode', current ? 'false' : 'true');
+      setLogoClicks(0);
+      window.location.reload(); 
+    }
+    const timer = setTimeout(() => {
+      if (logoClicks > 0) setLogoClicks(0);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [logoClicks]);
 
   // Handle scroll effect for glass-morphism
   useEffect(() => {
@@ -70,16 +85,27 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-6 md:px-8 flex items-center justify-between">
           
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <img 
-              src={useWhiteText ? "/logo-white.png" : "/logo.png"} 
-              alt="NeuroChiro Logo" 
-              className="w-10 h-10 object-contain group-hover:scale-105 transition-transform"
-            />
-            <span className={`font-heading font-black text-xl tracking-tight transition-colors ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`}>
-              NEURO<span className="text-neuro-orange">CHIRO</span>
-            </span>
-          </Link>
+          <div 
+            onClick={() => {
+              setLogoClicks(prev => prev + 1);
+              if (logoClicks === 0) {
+                // On first click, we also allow the normal navigation behavior
+                // But we don't want to use <Link> directly if we want to intercept
+              }
+            }}
+            className="cursor-pointer select-none"
+          >
+            <Link href="/" className="flex items-center gap-3 group">
+              <img 
+                src={useWhiteText ? "/logo-white.png" : "/logo.png"} 
+                alt="NeuroChiro Logo" 
+                className="w-10 h-10 object-contain group-hover:scale-105 transition-transform"
+              />
+              <span className={`font-heading font-black text-xl tracking-tight transition-colors ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`}>
+                NEURO<span className="text-neuro-orange">CHIRO</span>
+              </span>
+            </Link>
+          </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
