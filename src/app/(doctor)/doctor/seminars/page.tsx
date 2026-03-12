@@ -194,12 +194,18 @@ export default function SeminarsPage() {
                 </div>
                 
                 <div className="grid grid-cols-3 gap-3">
-                   <button className="py-3 bg-gray-50 text-neuro-navy font-bold rounded-xl text-xs hover:bg-gray-100 transition-colors">
+                   <Link 
+                    href={`/doctor/seminars/edit/${sem.id}`}
+                    className="py-3 bg-gray-50 text-neuro-navy font-bold rounded-xl text-xs hover:bg-gray-100 transition-colors flex items-center justify-center"
+                   >
                       Edit Details
-                   </button>
-                   <button className="py-3 bg-gray-50 text-neuro-navy font-bold rounded-xl text-xs hover:bg-gray-100 transition-colors">
+                   </Link>
+                   <Link 
+                    href={`/doctor/seminars/attendees/${sem.id}`}
+                    className="py-3 bg-gray-50 text-neuro-navy font-bold rounded-xl text-xs hover:bg-gray-100 transition-colors flex items-center justify-center"
+                   >
                       Manage Attendees
-                   </button>
+                   </Link>
                    <button 
                     onClick={() => setIsAnalyticsOpen(sem)}
                     className="py-3 bg-neuro-navy text-white font-bold rounded-xl text-xs hover:bg-neuro-navy-light transition-colors shadow-lg shadow-neuro-navy/10"
@@ -219,9 +225,12 @@ export default function SeminarsPage() {
                        See how your events compare to top-performing NeuroChiro seminars globally.
                     </p>
                  </div>
-                 <button className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black uppercase tracking-widest transition-colors backdrop-blur-md">
+                 <Link 
+                  href="/doctor/analytics?tab=seminars"
+                  className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black uppercase tracking-widest transition-colors backdrop-blur-md flex items-center justify-center"
+                 >
                     View Rankings
-                 </button>
+                 </Link>
               </div>
            </div>
         </div>
@@ -237,7 +246,11 @@ export default function SeminarsPage() {
                    { name: "15-25 Target Student Leads", price: "$75/once", icon: Mail, discount: "Estimated ROI: 12x", badge: "90% of Sell-Outs Use This" },
                    { name: "Global Push", price: "$149/wk", icon: TrendingUp, discount: "Max ROI Multiplier", badge: null }
                  ].map((opt, i) => (
-                   <div key={i} className="relative p-4 bg-gray-50 rounded-2xl border border-gray-100 group cursor-pointer hover:border-neuro-orange transition-all">
+                   <div 
+                    key={i} 
+                    onClick={() => setIsCampaignOpen(true)}
+                    className="relative p-4 bg-gray-50 rounded-2xl border border-gray-100 group cursor-pointer hover:border-neuro-orange transition-all"
+                   >
                       {opt.badge && (
                         <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-neuro-navy text-white text-[7px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-full shadow-lg z-10 whitespace-nowrap">
                            {opt.badge}
