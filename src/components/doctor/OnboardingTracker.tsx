@@ -46,7 +46,7 @@ export default function OnboardingTracker() {
 
           <div className="flex-shrink-0">
             <Link 
-              href="/doctor/profile/edit" 
+              href="/doctor/profile" 
               className="px-8 py-4 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-light transition-all transform hover:scale-105 flex items-center gap-3 shadow-xl shadow-neuro-orange/20 uppercase tracking-widest text-xs"
             >
               Finish Setup <ArrowRight className="w-4 h-4" />
@@ -56,11 +56,12 @@ export default function OnboardingTracker() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {steps.map((step) => (
-            <div 
+            <Link
+              href="/doctor/profile"
               key={step.id}
-              className={`p-5 rounded-[2rem] border transition-all ${
+              className={`p-5 rounded-[2rem] border transition-all block ${
                 step.completed 
-                  ? "bg-white/5 border-white/10 opacity-60" 
+                  ? "bg-white/5 border-white/10 opacity-60 cursor-default pointer-events-none" 
                   : "bg-white/10 border-neuro-orange/30 hover:border-neuro-orange hover:bg-white/15 cursor-pointer"
               }`}
             >
@@ -78,7 +79,7 @@ export default function OnboardingTracker() {
               <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 mt-1">
                 {step.completed ? "Completed" : "Action Required"}
               </p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
