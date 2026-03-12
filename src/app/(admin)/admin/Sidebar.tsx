@@ -42,6 +42,7 @@ const allNavItems = [
   { name: "Talent Intelligence", href: "/admin/users", icon: Users, roles: ['super_admin', 'founder', 'admin', 'regional_admin'] },
   { name: "Programs & LMS", href: "/admin/programs", icon: GraduationCap, roles: ['super_admin', 'founder', 'admin'] },
   { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert, roles: ['super_admin', 'founder', 'admin', 'support_admin'] },
+  { name: "Seminar Approvals", href: "/admin/approvals/seminars", icon: ShieldCheck, roles: ['super_admin', 'founder', 'admin'] },
   { name: "Announcements", href: "/admin/announcements", icon: Megaphone, roles: ['super_admin', 'founder', 'admin'] },
   { name: "Broadcasts", href: "/admin/broadcasts", icon: Mail, roles: ['super_admin', 'founder', 'admin'] },
   { name: "Regions & Licensing", href: "/admin/regions", icon: Globe, roles: ['super_admin', 'founder', 'admin'] },

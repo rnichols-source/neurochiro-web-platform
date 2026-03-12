@@ -24,6 +24,13 @@ import { useRegion } from "@/context/RegionContext";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { getSeminars, SeminarFilterOptions } from "./actions";
 
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
 export default function SeminarHub() {
   const { region } = useRegion();
   const { toggleSave, isSaved } = useUserPreferences();
@@ -151,18 +158,31 @@ export default function SeminarHub() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="group bg-white/5 border border-white/10 rounded-[3rem] overflow-hidden hover:border-neuro-orange/50 transition-all hover:shadow-[0_32px_64px_-16px_rgba(214,104,41,0.15)] flex flex-col relative"
+                  className={cn(
+                    "group bg-white/5 border border-white/10 rounded-[3rem] overflow-hidden transition-all flex flex-col relative",
+                    seminar.listing_tier === 'premium' ? "border-neuro-orange/40 shadow-[0_32px_64px_-16px_rgba(214,104,41,0.2)] hover:border-neuro-orange" : "hover:border-neuro-orange/50 hover:shadow-[0_32px_64px_-16px_rgba(214,104,41,0.15)]"
+                  )}
                 >
+                  {/* Tier Badge */}
+                  {seminar.listing_tier !== 'basic' && (
+                    <div className={cn(
+                      "absolute top-6 left-1/2 -translate-x-1/2 z-20 px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-[0.2em] backdrop-blur-md border",
+                      seminar.listing_tier === 'premium' ? "bg-neuro-orange text-white border-white/20" : "bg-white/10 text-white border-white/10"
+                    )}>
+                      {seminar.listing_tier === 'premium' ? 'Premium Event' : 'Featured Seminar'}
+                    </div>
+                  )}
+
                   {/* Card Image Section */}
                   <div className="relative aspect-[16/10] overflow-hidden">
                     <img 
-                      src={seminar.image_url} 
+                      src={seminar.image_url || '/placeholder-seminar.jpg'} 
                       alt={seminar.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0B1118] via-[#0B1118]/20 to-transparent" />
                     
-                    {/* Country Badge */}
+                    {/* Location Badge */}
                     <div className="absolute top-6 left-6">
                       <div className="px-4 py-2 bg-[#0B1118]/80 backdrop-blur-md border border-white/10 rounded-full flex items-center gap-2">
                         <span className="text-sm">{seminar.country === 'Australia' ? '🇦🇺' : '🇺🇸'}</span>
@@ -175,7 +195,7 @@ export default function SeminarHub() {
                         e.preventDefault();
                         toggleSave("seminars", seminar.id);
                       }}
-                      className={`absolute top-6 right-6 p-3 rounded-2xl backdrop-blur-md border border-white/10 transition-all ${isSaved("seminars", seminar.id) ? 'bg-neuro-orange text-white' : 'bg-white/10 text-white/60 hover:text-white'}`}
+                      className={`absolute top-6 right-6 p-3 rounded-2xl backdrop-blur-md border border-white/10 transition-all z-20 ${isSaved("seminars", seminar.id) ? 'bg-neuro-orange text-white' : 'bg-white/10 text-white/60 hover:text-white'}`}
                     >
                       <Heart className={`w-5 h-5 ${isSaved("seminars", seminar.id) ? 'fill-current' : ''}`} />
                     </button>
@@ -185,11 +205,15 @@ export default function SeminarHub() {
                   <div className="p-10 flex-1 flex flex-col">
                     <div className="flex items-center gap-3 mb-6">
                       <span className="px-3 py-1 bg-neuro-orange/10 border border-neuro-orange/20 text-neuro-orange text-[9px] font-black rounded-lg uppercase tracking-widest">
-                        {seminar.event_type}
+                        {seminar.event_type || 'Clinical Workshop'}
                       </span>
-                      <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5" /> {seminar.start_time}
-                      </span>
+                      <div className="flex gap-1.5">
+                        {seminar.target_audience?.map((target: string) => (
+                          <span key={target} className="text-[8px] font-black text-gray-500 uppercase tracking-widest border border-white/5 px-2 py-0.5 rounded">
+                            {target}
+                          </span>
+                        ))}
+                      </div>
                     </div>
 
                     <h3 className="text-2xl font-bold mb-4 leading-tight group-hover:text-neuro-orange transition-colors">
@@ -203,15 +227,15 @@ export default function SeminarHub() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 mb-10 pt-6 border-t border-white/5">
-                      <div className="w-10 h-10 rounded-full bg-neuro-orange flex items-center justify-center text-white font-black text-xs">
-                        {seminar.instructor_name?.charAt(4) || 'RN'}
+                    <Link href={`/hosts/${seminar.host_id}`} className="flex items-center gap-3 mb-10 pt-6 border-t border-white/5 group/host">
+                      <div className="w-10 h-10 rounded-full bg-neuro-orange flex items-center justify-center text-white font-black text-xs overflow-hidden">
+                        {seminar.logo_url ? <img src={seminar.logo_url} className="w-full h-full object-cover" /> : (seminar.instructor_name?.charAt(0) || 'RN')}
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-white">{seminar.instructor_name}</p>
-                        <p className="text-[9px] text-gray-500 uppercase tracking-widest font-black">Lead Instructor</p>
+                        <p className="text-xs font-bold text-white group-hover/host:text-neuro-orange transition-colors">{seminar.instructor_name || 'NeuroChiro Faculty'}</p>
+                        <p className="text-[9px] text-gray-500 uppercase tracking-widest font-black">View Educator Profile</p>
                       </div>
-                    </div>
+                    </Link>
 
                     <div className="mt-auto">
                       <Link 

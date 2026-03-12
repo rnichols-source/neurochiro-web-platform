@@ -43,14 +43,37 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
     query = query.eq('is_past', false)
   }
 
-  const { data, error } = await query.order('created_at', { ascending: false })
+  const { data, error } = await query
+    .order('listing_tier', { ascending: false }) // This is simplified, real SQL would need more complex ordering for Premium > Featured > Basic
+    .order('created_at', { ascending: false })
+
+  // Manual sorting to ensure Premium > Featured > Basic
+  const sortedData = (data || []).sort((a, b) => {
+    const tierMap: any = { 'premium': 3, 'featured': 2, 'basic': 1 };
+    const tierA = tierMap[a.listing_tier] || 1;
+    const tierB = tierMap[b.listing_tier] || 1;
+    if (tierA !== tierB) return tierB - tierA;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
 
   if (error) {
     console.error("Error fetching seminars:", error)
     return []
   }
 
-  return data
+  return sortedData;
+}
+
+export async function incrementSeminarStats(id: string, column: 'page_views' | 'clicks') {
+  const supabase = createServerSupabase()
+  const { error } = await supabase.rpc('increment_seminar_stats', {
+    seminar_id: id,
+    stat_column: column
+  })
+  
+  if (error) {
+    console.error(`Error incrementing ${column}:`, error)
+  }
 }
 
 export async function getSeminarById(id: string) {

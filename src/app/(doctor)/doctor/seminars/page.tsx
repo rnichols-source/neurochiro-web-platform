@@ -273,37 +273,134 @@ export default function SeminarsPage() {
                   <p className="text-gray-500">Your seminar has been saved to your drafts.</p>
                 </div>
               ) : (
-                <form onSubmit={handleHostSeminar} className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Seminar Title</label>
-                    <input 
-                      name="title"
-                      required
-                      placeholder="e.g. Advanced Vagal Assessment"
-                      className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleHostSeminar} className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 no-scrollbar">
+                  {/* Step 1: Event Details */}
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-neuro-navy border-b border-gray-100 pb-2">1. Event Details</h4>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Date</label>
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Seminar Title</label>
                       <input 
-                        type="date"
+                        name="title"
                         required
+                        placeholder="e.g. Advanced Vagal Assessment"
                         className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Price ($)</label>
-                      <input 
-                        type="number"
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Description</label>
+                      <textarea 
+                        name="description"
                         required
-                        placeholder="495"
+                        rows={3}
+                        placeholder="What will attendees learn?"
+                        className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all resize-none"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">City & Country</label>
+                        <input 
+                          name="location"
+                          required
+                          placeholder="e.g. London, UK"
+                          className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Dates</label>
+                        <input 
+                          name="dates"
+                          required
+                          placeholder="Oct 12-14, 2026"
+                          className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Registration Link</label>
+                      <input 
+                        type="url"
+                        name="registration_link"
+                        required
+                        placeholder="https://..."
+                        className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all"
+                      />
+                    </div>
+
+                    <div className="space-y-4 pt-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Target Audience</label>
+                      <div className="flex gap-4 px-2">
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                          <input type="checkbox" name="target_audience" value="Doctors" className="w-4 h-4 accent-neuro-orange" defaultChecked />
+                          <span className="text-sm font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">Doctors</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                          <input type="checkbox" name="target_audience" value="Students" className="w-4 h-4 accent-neuro-orange" defaultChecked />
+                          <span className="text-sm font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">Students</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Clinical Tags (Comma separated)</label>
+                      <input 
+                        name="tags"
+                        placeholder="e.g. Pediatrics, Neurology, Vagus Nerve"
                         className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all"
                       />
                     </div>
                   </div>
-                  <button className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-light transition-all shadow-xl shadow-neuro-orange/20 uppercase tracking-widest text-sm">
-                    Publish Seminar
+
+                  {/* Step 2: Promotional Tier Selection */}
+                  <div className="space-y-4 pt-4">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-neuro-navy border-b border-gray-100 pb-2">2. Select Promotional Tier</h4>
+                    <p className="text-[11px] text-neuro-orange font-bold mb-4">You are currently receiving discounted MEMBER PRICING.</p>
+                    
+                    <div className="space-y-3">
+                      <label className="flex items-start gap-4 p-4 border-2 border-gray-100 rounded-2xl cursor-pointer hover:border-neuro-orange transition-all has-[:checked]:border-neuro-orange has-[:checked]:bg-neuro-orange/5">
+                        <input type="radio" name="tier" value="basic" className="mt-1 accent-neuro-orange w-4 h-4" defaultChecked />
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-bold text-neuro-navy">Basic Listing</span>
+                            <span className="font-black text-neuro-orange">$49</span>
+                          </div>
+                          <p className="text-[10px] text-gray-500 uppercase tracking-widest">Standard directory appearance.</p>
+                        </div>
+                      </label>
+
+                      <label className="flex items-start gap-4 p-4 border-2 border-gray-100 rounded-2xl cursor-pointer hover:border-neuro-orange transition-all has-[:checked]:border-neuro-orange has-[:checked]:bg-neuro-orange/5 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 bg-blue-500 text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-bl-lg">Recommended</div>
+                        <input type="radio" name="tier" value="featured" className="mt-1 accent-neuro-orange w-4 h-4" />
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-bold text-neuro-navy">Featured Event</span>
+                            <span className="font-black text-neuro-orange">$149</span>
+                          </div>
+                          <p className="text-[10px] text-gray-500 uppercase tracking-widest">Highlighted placement + Email blast.</p>
+                        </div>
+                      </label>
+
+                      <label className="flex items-start gap-4 p-4 border-2 border-gray-100 rounded-2xl cursor-pointer hover:border-neuro-orange transition-all has-[:checked]:border-neuro-orange has-[:checked]:bg-neuro-orange/5 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 bg-neuro-navy text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-bl-lg">Maximum Reach</div>
+                        <input type="radio" name="tier" value="premium" className="mt-1 accent-neuro-orange w-4 h-4" />
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-bold text-neuro-navy">Premium Promotion</span>
+                            <span className="font-black text-neuro-orange">$399</span>
+                          </div>
+                          <p className="text-[10px] text-gray-500 uppercase tracking-widest">Homepage Carousel + Instagram Story.</p>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <button 
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-light transition-all shadow-xl shadow-neuro-orange/20 uppercase tracking-widest text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                    Proceed to Payment Checkout
                   </button>
                 </form>
               )}

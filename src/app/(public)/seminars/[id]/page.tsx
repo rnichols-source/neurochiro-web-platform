@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { getSeminarById } from "../actions";
+import { getSeminarById, incrementSeminarStats } from "../actions";
 import { useRegion } from "@/context/RegionContext";
 
 export default function SeminarDetailsPage() {
@@ -38,14 +38,24 @@ export default function SeminarDetailsPage() {
   };
 
   useEffect(() => {
-// ... existing load logic ...
     async function load() {
       const data = await getSeminarById(id);
       setSeminar(data);
       setLoading(false);
+      
+      // Track Page View
+      if (id) {
+        incrementSeminarStats(id, 'page_views');
+      }
     }
     load();
   }, [id]);
+
+  const handleRegisterClick = () => {
+    if (id) {
+      incrementSeminarStats(id, 'clicks');
+    }
+  };
 
   if (loading) {
     return (
@@ -123,6 +133,7 @@ export default function SeminarDetailsPage() {
                 href={seminar.registration_link}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={handleRegisterClick}
                 className="w-full py-6 bg-neuro-orange text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs hover:bg-neuro-orange-light transition-all shadow-2xl shadow-neuro-orange/30 flex items-center justify-center gap-3 hover:scale-[1.03] active:scale-95"
                >
                  Register for Seminar <ExternalLink className="w-4 h-4" />
