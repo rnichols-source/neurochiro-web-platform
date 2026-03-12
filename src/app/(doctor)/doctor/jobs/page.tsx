@@ -374,14 +374,14 @@ export default function JobsPage() {
                   </div>
                 )}
 
-                {activeModal === 'Interview-Scorecards' && (
+                 {activeModal === 'Interview-Scorecards' && (
                   <div className="space-y-8">
                      <div className="p-8 bg-neuro-navy text-white rounded-[2.5rem] relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl"></div>
                         <div className="relative z-10 flex justify-between items-center">
                            <div>
-                              <h4 className="text-xl font-heading font-black mb-1">Elite Standardized Scorecard</h4>
-                              <p className="text-[10px] text-gray-400 uppercase tracking-widest">Objectively evaluate clinical and cultural alignment.</p>
+                              <h4 className="text-xl font-heading font-black mb-1 text-white">Elite Standardized Scorecard</h4>
+                              <p className="text-[10px] text-gray-200 uppercase tracking-widest">Objectively evaluate clinical and cultural alignment.</p>
                            </div>
                            <div className="text-right">
                               <p className="text-[10px] font-black text-neuro-orange uppercase mb-1 tracking-widest">Hiring Verdict</p>
@@ -389,7 +389,7 @@ export default function JobsPage() {
                                  "text-lg font-black italic",
                                  hiringVerdict === "STRONG HIRE" ? "text-green-400" : 
                                  hiringVerdict === "POTENTIAL" ? "text-blue-400" : 
-                                 hiringVerdict === "PASS" ? "text-red-400" : "text-gray-500"
+                                 hiringVerdict === "PASS" ? "text-red-400" : "text-gray-100"
                               )}>{hiringVerdict}</p>
                            </div>
                         </div>
@@ -562,20 +562,20 @@ export default function JobsPage() {
                                   <CheckCircle2 className="w-5 h-5 text-neuro-orange" />
                                   <span className="text-[10px] font-black uppercase tracking-widest text-neuro-orange">Plan Generated Successfully</span>
                                </div>
-                               <h4 className="text-3xl font-heading font-black mb-2">12-Week Success Roadmap</h4>
-                               <p className="text-xs text-gray-400 max-w-md">14 pages of clinical systems, scripts, and KPI tracking ready for your new Associate.</p>
+                               <h4 className="text-3xl font-heading font-black mb-2 text-white">12-Week Success Roadmap</h4>
+                               <p className="text-xs text-gray-200 max-w-md">14 pages of clinical systems, scripts, and KPI tracking ready for your new Associate.</p>
                                
                                <div className="mt-8 grid grid-cols-3 gap-4">
                                   <div className="bg-white/5 p-4 rounded-2xl border border-white/10 text-center">
-                                     <p className="text-[8px] font-black text-gray-500 uppercase mb-1">Modules</p>
+                                     <p className="text-[8px] font-black text-gray-200 uppercase mb-1">Modules</p>
                                      <p className="text-xl font-black text-white">12</p>
                                   </div>
                                   <div className="bg-white/5 p-4 rounded-2xl border border-white/10 text-center">
-                                     <p className="text-[8px] font-black text-gray-500 uppercase mb-1">KPI Targets</p>
+                                     <p className="text-[8px] font-black text-gray-200 uppercase mb-1">KPI Targets</p>
                                      <p className="text-xl font-black text-white">36</p>
                                   </div>
                                   <div className="bg-white/5 p-4 rounded-2xl border border-white/10 text-center">
-                                     <p className="text-[8px] font-black text-gray-500 uppercase mb-1">Scripts</p>
+                                     <p className="text-[8px] font-black text-gray-200 uppercase mb-1">Scripts</p>
                                      <p className="text-xl font-black text-white">4</p>
                                   </div>
                                </div>
