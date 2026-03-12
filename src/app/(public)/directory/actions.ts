@@ -16,7 +16,7 @@ export async function getDoctors(options: {
   try {
     let query = supabase
       .from('doctors')
-      .select('*, profiles!user_id(full_name, email, role, subscription_status)', { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('verification_status', 'verified')
 
     // 1. Search Query (Simple ILIKE on name/clinic)
@@ -29,7 +29,7 @@ export async function getDoctors(options: {
       query = query.eq('region_code', regionCode)
     }
 
-    // 2. Filter by Bounding Box (Map Viewport)
+    // 3. Filter by Bounding Box (Map Viewport)
     if (bounds) {
       query = query
         .gte('longitude', bounds[0])
@@ -38,21 +38,42 @@ export async function getDoctors(options: {
         .lte('latitude', bounds[3]);
     }
 
-    // 3. Apply Ranking & Order
-    // Live Supabase query: Order by is_featured then created_at
+    // 4. Apply Ranking & Order
     query = query
       .order('is_featured', { ascending: false })
       .order('created_at', { ascending: false });
 
-    // 4. Apply Pagination
+    // 5. Apply Pagination
     const from = (page - 1) * limit;
     const to = from + limit - 1;
     query = query.range(from, to);
     
     const { data, error, count } = await query
 
-    if (error || !data || data.length === 0) {
-      console.log("No DB results, returning mock subset for region:", regionCode)
+    // Determine if we should fall back to mock data
+    let shouldFallback = !!error || !data;
+    
+    if (!shouldFallback && data.length === 0) {
+      if (!bounds) {
+        // If no bounds were provided and we got 0, definitely fall back
+        shouldFallback = true;
+      } else {
+        // If bounds WERE provided, check if the ENTIRE region is empty
+        const { count: regionTotal } = await supabase
+          .from('doctors')
+          .select('*', { count: 'exact', head: true })
+          .eq('region_code', regionCode || 'US')
+          .eq('verification_status', 'verified');
+        
+        if (!regionTotal || regionTotal === 0) {
+          shouldFallback = true;
+        }
+      }
+    }
+    
+    if (shouldFallback) {
+      if (error) console.error("Database query error:", error);
+      console.log("Returning mock data fallback for region:", regionCode)
       
       // Filter mock data
       let filteredMock = regionCode 
@@ -141,7 +162,7 @@ export async function getDoctorBySlug(slug: string) {
   // Try to find by slug first
   let { data, error } = await supabase
     .from('doctors')
-    .select('*, profiles!user_id(full_name, email, role, subscription_status)')
+    .select('*')
     .eq('slug', slug)
     .single()
 
@@ -151,7 +172,7 @@ export async function getDoctorBySlug(slug: string) {
     if (isUuid) {
         const { data: byId, error: errorId } = await supabase
             .from('doctors')
-            .select('*, profiles!user_id(full_name, email, role, subscription_status)')
+            .select('*')
             .eq('id', slug)
             .single()
         data = byId

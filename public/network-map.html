@@ -97,6 +97,8 @@
 
     cartoLayer.addTo(map);
 
+    window.parent.postMessage({ type: 'map-ready' }, '*');
+
     let markers = [];
 
     function notifyParent() {
@@ -166,6 +168,12 @@
     window.addEventListener('message', (e) => {
         if (e.data.type === 'update-clusters') {
             updateMarkers(e.data.data);
+        } else if (e.data.type === 'set-view') {
+            const { center, zoom } = e.data;
+            // Leaflet expects [lat, lng], but NC context provides [lng, lat] for centers
+            // Let's handle both or assume standard NC format [lng, lat]
+            const [lng, lat] = center;
+            map.setView([lat, lng], zoom);
         }
     });
 </script>

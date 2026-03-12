@@ -19,22 +19,62 @@ import {
 import { getDoctors, getStudentsForMap } from "@/app/(public)/directory/actions";
 import { getSeminarsForMap } from "@/app/(public)/seminars/actions";
 import { Doctor } from "@/types/directory";
-
 interface GlobalNetworkMapProps {
   defaultLayer?: "all" | "student" | "seminar";
+  externalSearchQuery?: string;
+  externalLocationQuery?: string;
 }
 
-export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetworkMapProps) {
+export default function GlobalNetworkMap({ 
+  defaultLayer = "all",
+  externalSearchQuery = "",
+  externalLocationQuery = ""
+}: GlobalNetworkMapProps) {
   const router = useRouter();
   const { region } = useRegion();
   const [activeLayer, setActiveLayer] = useState<"all" | "student" | "seminar">(defaultLayer);
   const [selectedPin, setSelectedPin] = useState<Record<string, any> | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [internalSearchQuery, setInternalSearchQuery] = useState("");
+
+  const searchQuery = externalSearchQuery || internalSearchQuery;
+
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [seminars, setSeminars] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Handle location centering
+  useEffect(() => {
+    if (!externalLocationQuery || !iframeRef.current?.contentWindow) return;
+
+    // Simple geocoding fallback (MapBox/Google would be better, but we can try bigdatacloud or similar)
+    const geocode = async () => {
+        try {
+            // Using a free geocoding service for the demo/prototype
+            const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?localityName=${encodeURIComponent(externalLocationQuery)}&localityLanguage=en`);
+            // Actually BigDataCloud reverse geocode doesn't do forward geocode well.
+            // Let's use OpenStreetMap Nominatim
+            const osmResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(externalLocationQuery)}&limit=1`);
+            const data = await osmResponse.json();
+
+            if (data && data.length > 0) {
+                const { lat, lon } = data[0];
+                iframeRef.current?.contentWindow?.postMessage({
+                    type: 'set-view',
+                    center: [Number(lon), Number(lat)],
+                    zoom: 12
+                }, '*');
+            }
+        } catch (e) {
+            console.error("Geocoding error:", e);
+        }
+    };
+
+    const timeout = setTimeout(geocode, 1000); // Debounce
+    return () => clearTimeout(timeout);
+  }, [externalLocationQuery]);
+
   const currentBounds = useRef<[number, number, number, number] | null>(null);
   const currentZoom = useRef<number>(4);
 
@@ -87,7 +127,12 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
         }));
     } else {
       points = doctors
-        .filter(doc => doc.latitude !== 0 && doc.longitude !== 0)
+        .filter(doc => 
+          typeof doc.latitude === 'number' && doc.latitude !== 0 && 
+          typeof doc.longitude === 'number' && doc.longitude !== 0 &&
+          (!searchQuery || 
+            `${doc.first_name} ${doc.last_name} ${doc.clinic_name}`.toLowerCase().includes(searchQuery.toLowerCase()))
+        )
         .map(doc => ({
           type: 'Feature' as const,
           properties: { 
@@ -109,7 +154,7 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
 
     cluster.load(points as Supercluster.PointFeature<Supercluster.AnyProps>[]);
     return cluster;
-  }, [doctors, seminars, students, activeLayer]);
+  }, [doctors, seminars, students, activeLayer, searchQuery]);
 
   const updateMapData = useCallback(async (bounds: [number, number, number, number], zoom: number) => {
     currentBounds.current = bounds;
@@ -132,11 +177,24 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
     } finally {
       setLoading(false);
     }
-  }, [activeLayer]);
+  }, [activeLayer, region.code]);
+
+  const [mapReady, setMapReady] = useState(false);
+
+  // Initial map centering
+  useEffect(() => {
+    if (mapReady && iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({
+        type: 'set-view',
+        center: region.mapDefaults.center,
+        zoom: region.mapDefaults.zoom
+      }, '*');
+    }
+  }, [mapReady, region.code]);
 
   // Re-sync markers when index (data) or layer changes
   useEffect(() => {
-    if (!currentBounds.current || !iframeRef.current?.contentWindow) return;
+    if (!currentBounds.current || !iframeRef.current?.contentWindow || !mapReady) return;
     
     try {
       const clusters = index.getClusters(currentBounds.current, Math.round(currentZoom.current));
@@ -148,12 +206,14 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
     } catch (e) {
       console.error("Error calculating/sending clusters:", e);
     }
-  }, [index, activeLayer]);
+  }, [index, activeLayer, mapReady]);
 
   // Handle iframe messages
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
-      if (e.data.type === 'map-move') {
+      if (e.data.type === 'map-ready') {
+        setMapReady(true);
+      } else if (e.data.type === 'map-move') {
         updateMapData(e.data.bounds, e.data.zoom);
       } else if (e.data.type === 'marker-click') {
         setSelectedPin(e.data.data);
@@ -163,6 +223,14 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [updateMapData]);
+
+  const activeCount = activeLayer === 'seminar' ? seminars.length : 
+                      activeLayer === 'student' ? students.length : 
+                      doctors.length;
+
+  const activeLabel = activeLayer === 'seminar' ? "Active Seminars" : 
+                      activeLayer === 'student' ? "Clinical Students" : 
+                      "Verified Clinics";
 
   return (
     <div className="relative w-full h-full bg-[#0B1118] overflow-hidden rounded-[2.5rem]">
@@ -189,7 +257,7 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
           <Search className="w-5 h-5 text-gray-400 ml-2" />
           <input 
             type="text" 
-            placeholder="Search doctors, cities, specialties..." 
+            placeholder="Search within map..." 
             className="bg-transparent border-none focus:outline-none text-white w-full placeholder:text-gray-400 text-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -202,7 +270,7 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
         <div className="bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl inline-flex items-center gap-2">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">
-            {region.label} Node Active: <span className="text-white">{doctors.length} Verified Clinics</span>
+            {region.label} Node Active: <span className="text-white">{activeCount} {activeLabel}</span>
           </span>
         </div>
       </div>
