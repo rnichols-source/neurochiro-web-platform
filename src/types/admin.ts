@@ -7,8 +7,10 @@ export interface AuditLog {
   category: LogCategory;
   event: string;
   user: string;
+  user_name?: string; // Optional DB field
   target: string;
   timestamp: string;
+  created_at?: string; // Optional DB field
   status: LogStatus;
   severity: LogSeverity;
   metadata?: Record<string, any>;

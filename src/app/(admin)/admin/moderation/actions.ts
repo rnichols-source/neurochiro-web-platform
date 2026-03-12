@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server';
+import { AuditLog } from '@/types/admin';
 
 export interface ModerationAlert {
   id: string;
@@ -59,12 +60,12 @@ export async function getModerationData() {
     const verifiedDoctorsCount = verifiedDoctors || 0;
 
     // 2. Map real audit logs to ModerationAlerts
-    const alerts: ModerationAlert[] = (recentAuditAlerts || []).map(log => ({
+    const alerts: ModerationAlert[] = (recentAuditAlerts || []).map((log: AuditLog) => ({
       id: log.id,
       type: log.category,
       source: log.user_name || "System",
       reason: log.event,
-      date: log.created_at,
+      date: log.created_at || log.timestamp,
       status: log.severity === 'Critical' ? 'Critical' : 'Warning'
     }));
 
