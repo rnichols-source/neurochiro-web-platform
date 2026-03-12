@@ -23,9 +23,9 @@ import Link from "next/link";
 import { useRegion } from "@/context/RegionContext";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { getSeminars, SeminarFilterOptions } from "./actions";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 
-const GlobalNetworkMap = dynamic(() => import("@/components/map/GlobalNetworkMap"), { 
+const GlobalNetworkMap = nextDynamic(() => import("@/components/map/GlobalNetworkMap"), { 
   ssr: false,
   loading: () => (
     <div className="w-full h-full bg-white/5 animate-pulse flex items-center justify-center rounded-[2.5rem] border border-white/10">
