@@ -55,6 +55,21 @@ export default function PracticeProfile() {
     subscription_status: ""
   });
 
+  // Calculate real-time profile strength
+  const calculateStrength = () => {
+    let score = 0;
+    if (profileData.full_name) score += 15;
+    if (profileData.clinic_name) score += 15;
+    if (profileData.location_city) score += 10;
+    if (profileData.website) score += 10;
+    if (profileData.bio && profileData.bio.length > 50) score += 20;
+    if (profileData.specialties.length > 0) score += 10;
+    if (profileData.avatar_url) score += 20;
+    return score;
+  };
+
+  const strengthScore = calculateStrength();
+
   useEffect(() => {
     async function loadProfile() {
       const data = await getDoctorProfile();
@@ -154,9 +169,26 @@ export default function PracticeProfile() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
+        <div className="flex-1">
           <h1 className="text-4xl font-heading font-black text-neuro-navy">Practice Profile</h1>
           <p className="text-neuro-gray mt-2 text-lg">Manage your clinic details and network status.</p>
+          
+          {/* Profile Strength Gamification */}
+          <div className="mt-6 max-w-xs">
+            <div className="flex justify-between items-center mb-2">
+               <span className="text-[10px] font-black text-neuro-navy uppercase tracking-widest flex items-center gap-2">
+                 <Target className="w-3 h-3 text-neuro-orange" /> Profile Strength
+               </span>
+               <span className={cn("text-xs font-black", strengthScore > 80 ? "text-green-500" : "text-neuro-orange")}>{strengthScore}%</span>
+            </div>
+            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+               <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${strengthScore}%` }}
+                className={cn("h-full transition-all duration-500", strengthScore > 80 ? "bg-green-500" : "bg-neuro-orange")}
+               />
+            </div>
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <AnimatePresence>
@@ -219,7 +251,12 @@ export default function PracticeProfile() {
               </div>
               <div className="flex-1 text-center md:text-left space-y-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Practitioner Name</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Practitioner Name</label>
+                    <span className="text-[9px] font-black text-neuro-orange uppercase bg-neuro-orange/5 px-2 py-0.5 rounded-md border border-neuro-orange/10 animate-pulse">
+                      Profiles with 5+ photos get 400% more clicks
+                    </span>
+                  </div>
                   <input 
                     type="text"
                     value={profileData.full_name}
@@ -338,8 +375,8 @@ export default function PracticeProfile() {
                 disabled={saving || !hasChanges}
                 className="px-8 py-4 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-[10px] hover:bg-neuro-orange-dark transition-all disabled:opacity-50 flex items-center gap-3 shadow-lg shadow-neuro-orange/20"
               >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Save Practice Profile
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                Go Live & Get Found
               </button>
             </div>
           </section>
