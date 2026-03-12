@@ -558,6 +558,47 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         }
         break;
 
+      case 'daily_talent_drop':
+        if (supabaseAdmin) {
+          // 1. Get all Growth & Pro Tier Doctors
+          const { data: doctors } = await supabaseAdmin
+            .from('profiles')
+            .select('id, full_name, phone, subscription_tier')
+            .eq('role', 'doctor')
+            .in('subscription_tier', ['growth', 'pro', 'elite']);
+
+          if (doctors && doctors.length > 0) {
+            for (const doc of doctors) {
+              // 2. Get 3 top matching students (simplified logic: top readiness scores)
+              const { data: students } = await supabaseAdmin
+                .from('students')
+                .select('name, school, interests')
+                .order('readiness_score', { ascending: false })
+                .limit(3);
+
+              if (students && students.length > 0 && doc.phone) {
+                const studentNames = students.map(s => `${s.name} (${s.school.split(' ')[0]})`).join(', ');
+                const primaryInterest = students[0].interests[0] || "Neuro-Chiropractic";
+                
+                const message = `Dr. ${doc.full_name.split(' ').pop()}, 3 new 90%+ readiness candidates entered the 'Graduating Soon' window. ${students[0].name} is a perfect match for your ${primaryInterest} focus. View & Invite: neurochiro.co/doctor/students`;
+                
+                await sendSMS(doc.phone, message);
+                
+                // Also send in-app notification
+                await insertNotification(
+                  doc.id,
+                  'New Talent Drop! 🧠',
+                  `We found ${students.length} high-readiness candidates matching your clinic profile.`,
+                  'job',
+                  '/doctor/students',
+                  'important'
+                );
+              }
+            }
+          }
+        }
+        break;
+
       case 'admin_notification':
         if (process.env.NODE_ENV !== 'development') {
           await resend.emails.send({
@@ -645,6 +686,9 @@ export const Automations = {
   },
   onCampaignCreated: async (userId: string, campaignName: string) => {
     await enqueue('admin_notification', { subject: 'New Campaign Created', html: `<p>User <strong>${userId}</strong> created a new campaign: <strong>${campaignName}</strong>.</p>`});
+  },
+  triggerDailyTalentDrop: async () => {
+    await enqueue('daily_talent_drop', {});
   },
   onPaymentSuccess: async (data: any) => {
     await enqueue('payment_success', { stripeData: data });
