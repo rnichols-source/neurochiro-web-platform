@@ -34,7 +34,7 @@ export default function HostLandingPage() {
   const tiers = [
     {
       name: "Single Event Listing",
-      price: { doctor: "$149", external: "$299" },
+      price: { doctor: "$149", external: "$299", label: "/ event" },
       description: "Best for doctors running a single seminar or workshop.",
       features: [
         "Marketplace Listing",
@@ -49,7 +49,7 @@ export default function HostLandingPage() {
     },
     {
       name: "Multi Event Package",
-      price: { doctor: "$599", external: "$899" },
+      price: { doctor: "$599", external: "$899", label: "/ package" },
       description: "For educators hosting multiple seminars annually.",
       features: [
         "Up to 5 Seminar Listings",
@@ -64,7 +64,7 @@ export default function HostLandingPage() {
     },
     {
       name: "Educator Network",
-      price: { doctor: "$1,200", external: "$2,500" },
+      price: { doctor: "$1,200", external: "$2,500", label: "/ year" },
       description: "Annual membership for regular seminar companies.",
       features: [
         "Unlimited Seminar Listings",
@@ -171,7 +171,8 @@ export default function HostLandingPage() {
               <div className="mb-10 space-y-2">
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl font-black text-white">{tier.price.doctor}</span>
-                  <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest">Member Price</span>
+                  <span className="text-lg font-bold text-gray-500">{tier.price.label}</span>
+                  <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest ml-2">Member Price</span>
                 </div>
                 <div className="flex items-baseline gap-2 opacity-50">
                   <span className="text-xl font-bold text-gray-500">{tier.price.external}</span>
