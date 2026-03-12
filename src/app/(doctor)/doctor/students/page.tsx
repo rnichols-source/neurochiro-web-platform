@@ -21,7 +21,8 @@ import {
   Award,
   Zap,
   Calendar,
-  Clock
+  Clock,
+  Gift
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
