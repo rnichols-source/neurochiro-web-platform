@@ -35,7 +35,32 @@ export default function SeminarsPage() {
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState<any>(null);
   const [isCampaignOpen, setIsCampaignOpen] = useState(false);
   const [successState, setSuccessState] = useState<string | null>(null);
-  const [mySeminars, setMySeminars] = useState<any[]>([]);
+  const [mySeminars, setMySeminars] = useState<any[]>([
+    {
+      id: "sem-1",
+      title: "TEST: Advanced Clinical Logic 101",
+      dates: "OCT 24-25, 2026",
+      location: "Sydney, Australia",
+      is_approved: true,
+      price: 299,
+      page_views: 452,
+      clicks: 12,
+      registrations: [{ count: 0 }],
+      details: { conversions: "0%", avgWatchTime: "0:00", regionalInterest: "New South Wales" }
+    },
+    {
+      id: "sem-2",
+      title: "NeuroChiro LIVE — Adelaide",
+      dates: "MAY 29 – MAY 30, 2026",
+      location: "Adelaide, Australia",
+      is_approved: true,
+      price: 399,
+      page_views: 284,
+      clicks: 8,
+      registrations: [{ count: 0 }],
+      details: { conversions: "0%", avgWatchTime: "0:00", regionalInterest: "South Australia" }
+    }
+  ]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
