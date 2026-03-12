@@ -121,13 +121,20 @@ export default function PracticeProfile() {
       formData.append('bio', profileData.bio);
       formData.append('specialties', profileData.specialties.join(','));
 
-      await updateDoctorProfile(formData);
+      const result = await updateDoctorProfile(formData);
+      
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+
       setSuccess(true);
       setHasChanges(false);
+      setError(null);
       
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
-      setError(err.message || "Failed to update profile");
+      setError("A critical error occurred while saving. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -142,11 +149,19 @@ export default function PracticeProfile() {
       const formData = new FormData();
       formData.append('file', file);
       const result = await uploadAvatar(formData);
-      setProfileData(prev => ({ ...prev, photo_url: result.publicUrl }));
-      setSuccess(true);
-      setError(null);
+      
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+
+      if (result.success && result.publicUrl) {
+        setProfileData(prev => ({ ...prev, photo_url: result.publicUrl }));
+        setSuccess(true);
+        setError(null);
+      }
     } catch (err: any) {
-      setError(err.message || "Failed to upload photo");
+      setError("A critical error occurred while uploading. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -401,8 +416,7 @@ export default function PracticeProfile() {
                   { title: "Public Directory", desc: "Your profile is optimized for patient search traffic.", icon: Search, link: "/directory" },
                   { title: "Elite Recruiting", desc: "Connect with students who have high readiness scores.", icon: Users, link: "/doctor/students" },
                   { title: "Global Referrals", desc: "Get high-intent referrals from other network doctors.", icon: Zap, link: "/doctor/directory" },
-                  { title: "Exclusive Events", desc: "Member-only rates for masterminds and seminars.", icon: Calendar, link: "/doctor/seminars" }
-                ].map((item, i) => (
+                  { title: "Exclusive Events", desc: "Member-only rates for masterminds and seminars.", icon: Calendar, link: "/host-a-seminar" }                ].map((item, i) => (
                   <Link href={item.link} key={i} className="bg-white p-6 rounded-3xl border border-gray-50 shadow-sm flex items-start gap-4 hover:border-neuro-orange/30 transition-all group">
                      <div className="p-3 bg-neuro-orange/5 rounded-2xl text-neuro-orange group-hover:bg-neuro-orange group-hover:text-white transition-colors">
                         <item.icon className="w-5 h-5" />

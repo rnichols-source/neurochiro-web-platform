@@ -130,7 +130,7 @@ export default function DoctorDashboard() {
         
         {hasAccess ? (
           <div className="flex flex-wrap gap-4">
-            <Link href="/doctor/seminars" className="bg-neuro-orange text-white px-6 py-4 rounded-2xl shadow-lg hover:bg-neuro-orange-light transition-all flex items-center gap-2">
+            <Link href="/host-a-seminar" className="bg-neuro-orange text-white px-6 py-4 rounded-2xl shadow-lg hover:bg-neuro-orange-light transition-all flex items-center gap-2">
               <Plus className="w-4 h-4" />
               <span className="font-black uppercase tracking-widest text-[10px]">List a Seminar</span>
             </Link>
@@ -489,7 +489,7 @@ export default function DoctorDashboard() {
                       <span className="block text-[10px] text-gray-500 uppercase tracking-widest">Global Directory</span>
                     </div>
                  </Link>
-                 <Link href="/doctor/seminars" className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors group">
+                 <Link href="/host-a-seminar" className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors group">
                     <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors">
                        <Calendar className="w-4 h-4" />
                     </div>
