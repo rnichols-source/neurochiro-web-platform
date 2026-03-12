@@ -261,12 +261,13 @@ export default function SeminarsPage() {
                        See how your events compare to top-performing NeuroChiro seminars globally.
                     </p>
                  </div>
-                 <Link 
-                  href="/doctor/analytics?tab=seminars"
-                  className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black uppercase tracking-widest transition-colors backdrop-blur-md flex items-center justify-center"
+                 <Link
+                  href="/doctor/analytics"
+                  className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black uppercase tracking-widest transition-all backdrop-blur-md flex items-center justify-center"
                  >
                     View Rankings
                  </Link>
+
               </div>
            </div>
         </div>
@@ -665,11 +666,11 @@ export default function SeminarsPage() {
                   </div>
                   <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Conv. Rate</p>
-                     <p className="text-xl font-black text-green-600">{isAnalyticsOpen.details.conversions}</p>
+                     <p className="text-xl font-black text-green-600">{isAnalyticsOpen.details?.conversions || "0%"}</p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Avg Watch</p>
-                     <p className="text-xl font-black text-blue-600">{isAnalyticsOpen.details.avgWatchTime}</p>
+                     <p className="text-xl font-black text-blue-600">{isAnalyticsOpen.details?.avgWatchTime || "0:00"}</p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Views</p>
@@ -680,9 +681,8 @@ export default function SeminarsPage() {
                <div className="bg-gray-50 p-8 rounded-[2rem] border border-gray-100 flex flex-col items-center justify-center min-h-[200px] text-center">
                   <PieChart className="w-12 h-12 text-gray-200 mb-4" />
                   <h4 className="font-bold text-neuro-navy">Regional Interest</h4>
-                  <p className="text-xs text-gray-500 mt-1">Most interest from the <span className="text-neuro-orange font-bold">{isAnalyticsOpen.details.regionalInterest}</span> region.</p>
+                  <p className="text-xs text-gray-500 mt-1">Most interest from the <span className="text-neuro-orange font-bold">{isAnalyticsOpen.details?.regionalInterest || "N/A"}</span> region.</p>
                </div>
-
                <button 
                 onClick={() => setIsAnalyticsOpen(null)}
                 className="w-full py-4 bg-neuro-navy text-white font-black rounded-xl hover:bg-neuro-navy-light transition-colors"
