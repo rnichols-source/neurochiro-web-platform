@@ -12,11 +12,8 @@ export async function getDoctorDashboardStats() {
     // Parallelize fetches for profile, practice info, seminars, and jobs
     const [profileRes, doctorRes, seminarsRes, jobsRes] = await Promise.all([
       supabase.from('profiles').select('role, subscription_status, full_name').eq('id', user.id).single(),
-      supabase.from('doctors').select('clinic_name').eq('id', user.id).single(),
+      supabase.from('doctors').select('clinic_name, slug').eq('id', user.id).single(),
       supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
-      // We'll assume jobs are linked via doctor_id or profile_id (user.id)
-      // Since I don't see a jobs table explicitly yet in my research but it's referenced, 
-      // I'll try to count them if the table exists or return 0.
       supabase.from('jobs').select('*', { count: 'exact', head: true }).eq('user_id', user.id).catch(() => ({ count: 0 }))
     ]);
 
@@ -37,6 +34,7 @@ export async function getDoctorDashboardStats() {
     return {
       profile: {
         name: profile?.full_name || user.email?.split('@')[0] || "Doctor",
+        slug: doctor?.slug || "",
         clinicName: doctor?.clinic_name || "My Practice",
         isMember: isFounder || isAdmin || ['doctor_pro', 'doctor_growth', 'doctor_starter', 'doctor_member'].includes(userRole),
         role: userRole,
@@ -57,7 +55,7 @@ export async function getDoctorDashboardStats() {
   } catch (e) {
     console.error("CRITICAL DASHBOARD ERROR:", e)
     return {
-      profile: { name: "Doctor", clinicName: "My Practice", isMember: false, role: 'free', status: 'inactive' },
+      profile: { name: "Doctor", slug: "", clinicName: "My Practice", isMember: false, role: 'free', status: 'inactive' },
       stats: [
         { label: "Profile Views", value: "---", trend: "0%" },
         { label: "Patient Leads", value: "---", trend: "0%" },

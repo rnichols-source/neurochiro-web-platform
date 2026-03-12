@@ -29,6 +29,7 @@ import { useDoctorTier } from "@/context/DoctorTierContext";
 import { getDoctorDashboardStats } from "./actions";
 import OnboardingTracker from "@/components/doctor/OnboardingTracker";
 import ProductTutorial from "@/components/dashboard/ProductTutorial";
+import VerifiedBadge from "@/components/doctor/VerifiedBadge";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -295,6 +296,12 @@ export default function DoctorDashboard() {
                      </div>
                   </div>
                </section>
+
+               {/* Trust & Authority Badge (Backlink Loop) */}
+               <VerifiedBadge 
+                 doctorSlug={dashboardData?.profile?.slug || "profile"} 
+                 doctorName={dashboardData?.profile?.name || "Doctor"} 
+               />
 
                {/* Geographic Traffic */}
                <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
