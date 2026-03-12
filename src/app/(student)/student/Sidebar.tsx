@@ -144,7 +144,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </nav>
 
       <div className="p-4 mt-auto shrink-0">
-        {tier === "Free" ? (
+        {!isAccelerator ? (
           <div className="bg-gradient-to-br from-neuro-navy-light to-neuro-navy p-4 rounded-xl border border-white/10 shadow-lg mb-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="p-1 bg-neuro-orange/20 rounded-md">
@@ -153,20 +153,22 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <span className="text-xs font-bold text-white uppercase tracking-wider">Upgrade Path</span>
             </div>
             <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
-              Unlock scan tracking, job applications, and mentorship.
+              {tier === "Free" && "Unlock scan tracking, job applications, and mentorship."}
+              {tier === "Foundation" && "Unlock clinical modules and elite track roadmap."}
+              {tier === "Professional" && "Unlock the final tier: Elite associate mentorship."}
             </p>
             <Link 
               href="/pricing"
               onClick={onClose}
               className="w-full py-2 bg-neuro-orange hover:bg-neuro-orange-light text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
             >
-              Start Foundation
+              {tier === "Free" ? "Start Foundation" : `Upgrade to ${tier === "Foundation" ? "Professional" : "Accelerator"}`}
             </Link>
           </div>
         ) : (
           <div className="bg-white/5 p-4 rounded-xl border border-white/5 mb-4">
              <p className="text-[10px] font-black text-neuro-orange uppercase mb-2">{tier} Active</p>
-             <p className="text-[11px] text-gray-400 mb-2 leading-relaxed">Experience the portal as a {tier} student.</p>
+             <p className="text-[11px] text-gray-400 mb-2 leading-relaxed">Experience the full power of the NeuroChiro platform.</p>
           </div>
         )}
 

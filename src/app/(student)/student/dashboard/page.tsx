@@ -214,24 +214,24 @@ export default function StudentDashboard() {
             )}
           </div>
 
-          {/* Academy - Foundation */}
+          {/* Academy - Accelerator */}
           <div className="relative group">
-            <Link href={isFoundation ? "/student/academy" : "/pricing"} className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group block h-full ${!isFoundation ? 'opacity-60 grayscale-[0.5]' : ''}`}>
+            <Link href={isAccelerator ? "/student/academy" : "/pricing"} className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group block h-full ${!isAccelerator ? 'opacity-60 grayscale-[0.5]' : ''}`}>
               <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-purple-600 transition-colors">
                 <Trophy className="w-6 h-6 text-purple-600 group-hover:text-white" />
               </div>
               <h3 className="font-bold text-neuro-navy mb-1">Neuro Academy</h3>
               <p className="text-[10px] text-gray-500 leading-tight">
-                {isFoundation 
+                {isAccelerator 
                   ? "12 modules in progress" 
                   : "Current Market Value: $85k (Unoptimized). Elite Associate Potential: $145k+."
                 }
               </p>
               <div className="mt-4 flex items-center gap-1 text-[10px] font-black text-purple-600 uppercase tracking-widest">
-                {isFoundation ? "Continue Learning" : "Optimize Salary"} <ChevronRight className="w-3 h-3" />
+                {isAccelerator ? "Continue Learning" : "Unlock Academy"} <ChevronRight className="w-3 h-3" />
               </div>
             </Link>
-            {!isFoundation && (
+            {!isAccelerator && (
                <div className="absolute top-4 right-4">
                   <Lock className="w-4 h-4 text-neuro-orange" />
                </div>
