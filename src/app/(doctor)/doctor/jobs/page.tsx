@@ -45,7 +45,9 @@ export default function JobsPage() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedApplicant, setSelectedApplicant] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingPitch, setIsGeneratingPitch] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showPitchPreview, setShowPitchPreview] = useState(false);
   const [activeTab, setActiveTab] = useState<'associate' | 'support'>('associate');
 
   // Calculator State
@@ -55,6 +57,20 @@ export default function JobsPage() {
 
   const [isZapping, setIsZapping] = useState(false);
   const [zapSuccess, setZapSuccess] = useState(false);
+
+  const openPitchDeck = (applicant: any) => {
+    setSelectedApplicant(applicant);
+    setActiveModal('Generate-Pitch-Deck');
+    setShowPitchPreview(false);
+  };
+
+  const handleGeneratePitch = () => {
+    setIsGeneratingPitch(true);
+    setTimeout(() => {
+      setIsGeneratingPitch(false);
+      setShowPitchPreview(true);
+    }, 2500);
+  };
 
   const handleZap = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -668,22 +684,27 @@ export default function JobsPage() {
                     ].map((student, i) => (
                       <div 
                         key={i} 
-                        onClick={() => setActiveModal('Review-Applicants')}
-                        className="flex items-center justify-between p-4 bg-white/10 rounded-2xl border border-white/5 cursor-pointer hover:bg-white/20 transition-all group"
+                        className="p-4 bg-white/10 rounded-2xl border border-white/5 group relative"
                       >
-                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-bold text-xs">
-                               {student.name[0]}
+                         <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                               <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-bold text-xs">
+                                  {student.name[0]}
+                               </div>
+                               <div>
+                                  <p className="text-sm font-bold group-hover:text-neuro-orange transition-colors">{student.name}</p>
+                                  <p className="text-[9px] text-gray-400 uppercase tracking-widest font-black">{student.school}</p>
+                               </div>
                             </div>
-                            <div>
-                               <p className="text-sm font-bold group-hover:text-neuro-orange transition-colors">{student.name}</p>
-                               <p className="text-[9px] text-gray-400 uppercase tracking-widest font-black">{student.school}</p>
-                            </div>
-                         </div>
-                         <div className="flex items-center gap-2">
                             <span className="text-xs font-black text-neuro-orange">{student.match}</span>
-                            <ChevronRight className="w-3 h-3 text-white/20 group-hover:text-white transition-all" />
                          </div>
+                         
+                         <button 
+                           onClick={() => openPitchDeck(student)}
+                           className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[8px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all group/btn"
+                         >
+                            <Sparkles className="w-3 h-3 text-neuro-orange group-hover/btn:scale-125 transition-transform" /> Generate Dream Pitch
+                         </button>
                       </div>
                     ))}
                  </div>

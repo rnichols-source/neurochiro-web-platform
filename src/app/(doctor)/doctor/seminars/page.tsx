@@ -22,7 +22,8 @@ import {
   Loader2,
   Star,
   Eye,
-  Zap
+  Zap,
+  Target
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -267,24 +268,41 @@ export default function SeminarsPage() {
            <section className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
               <h4 className="font-bold text-neuro-navy mb-2 text-sm uppercase tracking-widest">Student Insights</h4>
               <p className="text-xs text-gray-500 leading-relaxed mb-6">
-                 Top interests of students viewing your seminars:
+                 Demand Harvest: Use these "answer keys" to sell out your next event.
               </p>
-              <div className="flex flex-wrap gap-2 mb-8">
-                 {["Pediatrics", "Scanning", "Business"].map((tag, i) => (
-                   <span key={i} className="px-3 py-1 bg-neuro-cream rounded-full text-[9px] font-black uppercase text-neuro-navy">
-                      {tag}
-                   </span>
-                 ))}
+              
+              <div className="space-y-4">
+                 <div className="p-5 bg-neuro-orange/5 rounded-2xl border border-neuro-orange/10 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                       <Sparkles className="w-8 h-8 text-neuro-orange" />
+                    </div>
+                    <p className="text-[9px] font-black text-neuro-orange uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                       <Zap className="w-3 h-3 fill-current" /> Sell-Out Hack #1
+                    </p>
+                    <p className="text-xs font-bold text-neuro-navy leading-relaxed italic">
+                       "82% of students viewing your events are searching for 'Clinical Certainty.' Rename your 2:00 PM slot to 'The Certainty Architecture' to increase conversion by 30%."
+                    </p>
+                 </div>
+
+                 <div className="p-5 bg-blue-50/50 rounded-2xl border border-blue-100 relative overflow-hidden group">
+                    <p className="text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                       <Target className="w-3 h-3 fill-current" /> Sell-Out Hack #2
+                    </p>
+                    <p className="text-xs font-bold text-neuro-navy leading-relaxed italic">
+                       "Top interest in your region is 'Neuro-Scanning.' Add a 30-min 'Live Scan Demo' to your morning session to capture the 45 students currently on your watchlist."
+                    </p>
+                 </div>
               </div>
 
-              <div className="p-5 bg-neuro-orange/5 rounded-2xl border border-neuro-orange/10 relative overflow-hidden group">
-                 <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <Sparkles className="w-8 h-8 text-neuro-orange" />
+              <div className="mt-8 pt-6 border-t border-gray-50">
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Core Demand Tags</p>
+                 <div className="flex flex-wrap gap-2">
+                    {["Pediatrics", "Scanning", "Business", "Certainty", "Autonomics"].map((tag, i) => (
+                      <span key={i} className="px-3 py-1 bg-neuro-cream rounded-full text-[9px] font-black uppercase text-neuro-navy">
+                         {tag}
+                      </span>
+                    ))}
                  </div>
-                 <p className="text-[10px] font-black text-neuro-orange uppercase tracking-[0.2em] mb-2">Hormozi Sell-Out Hack</p>
-                 <p className="text-xs font-bold text-neuro-navy leading-relaxed italic">
-                    "82% of students viewing your events are searching for 'Clinical Certainty.' Rename your 2:00 PM slot to 'The Certainty Architecture' to increase conversion by 30%."
-                 </p>
               </div>
            </section>
         </div>
