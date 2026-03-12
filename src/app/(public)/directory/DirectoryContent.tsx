@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Search, MapPin, Filter, Star, ShieldCheck, ArrowRight, Zap, Globe, Heart, Sparkles, X, Target } from "lucide-react";
+import { Search, MapPin, Filter, Star, ShieldCheck, ArrowRight, Zap, Globe, Heart, Sparkles, X, Target, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
