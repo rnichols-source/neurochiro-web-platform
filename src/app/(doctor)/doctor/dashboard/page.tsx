@@ -273,7 +273,7 @@ export default function DoctorDashboard() {
                      </div>
                      {(dashboardData?.marketPerformance?.completeness || 0) < 80 ? (
                         <>
-                           <h3 className="text-2xl font-bold mb-2">Your profile is currently hidden from 85% of local searches.</h3>
+                           <h3 className="text-2xl font-bold mb-2 text-white">Your profile is currently hidden from 85% of local searches.</h3>
                            <p className="text-gray-400 mb-6 max-w-lg">
                               Complete your "Conversion Engine" setup to start appearing in patient search results. Adding 3 clinic photos increases reach by 30%.
                            </p>
@@ -286,7 +286,7 @@ export default function DoctorDashboard() {
                         </>
                      ) : (
                         <>
-                           <h3 className="text-2xl font-bold mb-2">Boost your Associate listing visibility.</h3>
+                           <h3 className="text-2xl font-bold mb-2 text-white">Boost your Associate listing visibility.</h3>
                            <p className="text-gray-400 mb-6 max-w-lg">
                               {boosted 
                                 ? "Listing successfully boosted! Your job is now appearing at the top of the student marketplace."

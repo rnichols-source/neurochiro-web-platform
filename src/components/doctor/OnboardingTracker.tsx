@@ -40,7 +40,7 @@ export default function OnboardingTracker() {
               <Sparkles className="w-5 h-5" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em]">Conversion Engine</span>
             </div>
-            <h2 className="text-3xl font-heading font-black">Your profile is <span className="text-neuro-orange">{progress}%</span> complete.</h2>
+            <h2 className="text-3xl font-heading font-black text-white">Your profile is <span className="text-neuro-orange">{progress}%</span> complete.</h2>
             <p className="text-gray-400 text-sm max-w-md">Complete these high-impact steps to reach the top of local search results.</p>
           </div>
 
