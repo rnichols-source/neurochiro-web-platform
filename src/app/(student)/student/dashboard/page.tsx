@@ -274,11 +274,19 @@ export default function StudentDashboard() {
            </div>
            
            <div className="space-y-3 relative z-10">
-              <Link href="/student/academy" className="block w-full py-4 bg-neuro-orange text-white font-black text-[11px] uppercase tracking-widest rounded-2xl text-center hover:bg-neuro-orange-light transition-all shadow-xl shadow-neuro-orange/20 active:scale-[0.98]">
-                 Accelerate My Path
+              <Link 
+                href={isAccelerator ? "/student/academy" : "/pricing"} 
+                className={`block w-full py-4 font-black text-[11px] uppercase tracking-widest rounded-2xl text-center transition-all shadow-xl active:scale-[0.98] flex items-center justify-center gap-2 ${
+                  isAccelerator 
+                    ? "bg-neuro-orange text-white hover:bg-neuro-orange-light shadow-neuro-orange/20" 
+                    : "bg-white/10 text-gray-400 border border-white/10 hover:bg-white/20"
+                }`}
+              >
+                 {!isAccelerator && <Lock className="w-3.5 h-3.5 text-neuro-orange" />}
+                 {isAccelerator ? "Accelerate My Path" : "Unlock Accelerator"}
               </Link>
               <p className="text-[9px] text-gray-500 text-center font-bold uppercase tracking-tighter">
-                 Unlocks the 2026 Associate Placement Roadmap
+                 {isAccelerator ? "Unlocks the 2026 Associate Placement Roadmap" : "Accelerator Only: Placement Roadmap"}
               </p>
            </div>
         </div>
