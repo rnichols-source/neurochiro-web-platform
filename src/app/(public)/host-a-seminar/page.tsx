@@ -131,9 +131,12 @@ export default function HostLandingPage() {
             Start Hosting Now
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
-          <button className="px-12 py-6 bg-white/5 border border-white/10 text-white rounded-3xl font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all">
+          <Link 
+            href="/learn"
+            className="px-12 py-6 bg-white/5 border border-white/10 text-white rounded-3xl font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all flex items-center gap-3"
+          >
             View Case Studies
-          </button>
+          </Link>
         </motion.div>
       </section>
 
