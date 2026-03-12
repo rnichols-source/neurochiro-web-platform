@@ -15,8 +15,12 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://neurochiro.com"),
   title: "NeuroChiro | Nervous-System-First Chiropractic",
   description: "The global ecosystem for nervous-system-focused chiropractic. Find doctors, educational resources, and career opportunities.",
+  alternates: {
+    canonical: "/",
+  },
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -73,8 +77,27 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "NeuroChiro",
+    "url": "https://neurochiro.com",
+    "logo": "https://neurochiro.com/logo.png",
+    "sameAs": [
+      "https://facebook.com/neurochiro",
+      "https://instagram.com/neurochiro"
+    ],
+    "description": "The global ecosystem for nervous-system-focused chiropractic."
+  };
+
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+      </head>
       <body
         className={`${lato.variable} ${montserrat.variable} antialiased font-body bg-neuro-cream text-neuro-black`}
       >

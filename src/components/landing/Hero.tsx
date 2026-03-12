@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, ChevronDown, Sparkles } from "lucide-react";
 import LandingSearch from "./LandingSearch";
+import Image from "next/image";
 
 export default function Hero() {
   const { scrollY } = useScroll();
@@ -28,8 +29,16 @@ export default function Hero() {
         />
       </div>
 
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] z-0 pointer-events-none" />
+      {/* Grid Pattern Overlay Optimized */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]">
+        <Image 
+          src="/grid.svg" 
+          alt="" 
+          fill 
+          className="object-cover" 
+          priority 
+        />
+      </div>
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 flex flex-col items-center text-center">

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Twitter, Instagram, Linkedin, Github } from "lucide-react";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -10,8 +11,10 @@ export default function Footer() {
         
         {/* Brand */}
         <div className="space-y-6">
-          <Link href="/" className="text-2xl font-heading font-black tracking-tight flex items-center gap-3">
-            <img src="/logo-white.png" alt="NeuroChiro" className="w-10 h-10 object-contain" />
+          <Link href="/" className="text-2xl font-heading font-black tracking-tight flex items-center gap-3 hover:text-neuro-orange transition-colors">
+            <div className="relative w-10 h-10">
+              <Image src="/logo-white.png" alt="NeuroChiro" fill className="object-contain" />
+            </div>
             <span>NEURO<span className="text-neuro-orange">CHIRO</span></span>
           </Link>
           <p className="text-gray-400 leading-relaxed max-w-sm">

@@ -1,18 +1,26 @@
-"use client";
-
+import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import Hero from "@/components/landing/Hero";
-import BentoGrid from "@/components/landing/BentoGrid";
 import FeatureSection from "@/components/landing/FeatureSection";
 import SectionHeader from "@/components/landing/SectionHeader";
 import IntentGateway from "@/components/landing/IntentGateway";
-import NeuralPulse from "@/components/landing/NeuralPulse";
 import CallToAction from "@/components/landing/CallToAction";
 import Footer from "@/components/landing/Footer";
 import Link from "next/link";
-import { Zap, Activity, Brain as BrainIcon, BookOpen, Stethoscope, Calendar, MapPin, Users, ArrowRight } from "lucide-react";
+import { Zap, Activity, Brain as BrainIcon, BookOpen, Stethoscope, Calendar, MapPin, Users, ArrowRight, Loader2 } from "lucide-react";
+
+// Lazy load heavy components
+const BentoGrid = dynamic(() => import("@/components/landing/BentoGrid"), {
+  loading: () => <div className="h-[600px] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-neuro-orange" /></div>,
+  ssr: true
+});
+
+const NeuralPulse = dynamic(() => import("@/components/landing/NeuralPulse"), {
+  loading: () => <div className="h-[400px] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-neuro-orange" /></div>,
+  ssr: false // This is very heavy and uses canvas/animation, best loaded on client
+});
 
 export default function Home() {
   const router = useRouter();
