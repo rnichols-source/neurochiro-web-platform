@@ -1,21 +1,60 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, Clock, Zap, ShieldCheck, CheckCircle2, MapPin, Brain, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useParams, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { ARTICLES } from "@/lib/articles";
+import { Metadata } from "next";
+import SchemaMarkup from "@/components/seo/SchemaMarkup";
 
-export default function ArticlePage() {
-  const { slug } = useParams();
+interface Props {
+  params: { slug: string };
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const article = ARTICLES.find(a => a.slug === params.slug);
+
+  if (!article) {
+    return { title: "Article Not Found | NeuroChiro" };
+  }
+
+  return {
+    title: `${article.title} | NeuroChiro Learn`,
+    description: article.intro,
+    openGraph: {
+      title: article.title,
+      description: article.intro,
+      images: [article.img],
+    },
+  };
+}
+
+export default function ArticlePage({ params }: Props) {
+  const { slug } = params;
   const article = ARTICLES.find(a => a.slug === slug);
 
   if (!article) {
     notFound();
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": article.title,
+    "image": article.img,
+    "description": article.intro,
+    "publisher": {
+      "@type": "Organization",
+      "name": "NeuroChiro",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://neurochiro.com/logo.png"
+      }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-white pb-32">
+    <>
+      <SchemaMarkup data={jsonLd} />
+      <div className="min-h-screen bg-white pb-32">
       {/* Article Header */}
       <header className="bg-neuro-cream pt-32 pb-16 px-8 border-b border-gray-100">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -52,6 +91,29 @@ export default function ArticlePage() {
                 <p className="text-gray-600 text-lg leading-relaxed whitespace-pre-line">
                   {section.body}
                 </p>
+                {/* Contextual In-Content CTA after the 2nd section */}
+                {i === 1 && (article.category === 'Business' || article.category === 'Communication' || article.category === 'Education') && (
+                  <div className="my-8 p-8 bg-blue-50 border border-blue-100 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div>
+                      <h4 className="font-bold text-neuro-navy mb-2 text-xl">Ready to scale your practice?</h4>
+                      <p className="text-gray-600 text-sm">Join the NeuroChiro Mastermind and get the exact blueprints to build a high-profit, cash-based clinic.</p>
+                    </div>
+                    <Link href="/programs/mastermind" className="shrink-0 px-6 py-3 bg-neuro-navy text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange transition-all">
+                      Explore Mastermind
+                    </Link>
+                  </div>
+                )}
+                {i === 1 && (article.category === 'Basics' || article.category === 'Foundations' || article.category === 'Recovery' || article.category === 'Pediatrics') && (
+                  <div className="my-8 p-8 bg-neuro-orange/5 border border-neuro-orange/10 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div>
+                      <h4 className="font-bold text-neuro-navy mb-2 text-xl">Find the Root Cause.</h4>
+                      <p className="text-gray-600 text-sm">Stop chasing symptoms. Find a verified nervous-system chiropractor near you today.</p>
+                    </div>
+                    <Link href="/directory" className="shrink-0 px-6 py-3 bg-neuro-orange text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-neuro-navy transition-all">
+                      Search Directory
+                    </Link>
+                  </div>
+                )}
               </div>
             ))}
 
@@ -106,5 +168,6 @@ export default function ArticlePage() {
         </section>
       </main>
     </div>
+    </>
   );
 }

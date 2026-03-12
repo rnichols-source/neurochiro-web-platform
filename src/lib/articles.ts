@@ -158,5 +158,170 @@ export const ARTICLES: Article[] = [
       "Better posture leads to higher energy and improved mental clarity.",
       "Alignment allows the brain to divert resources from survival to thriving."
     ]
+  },
+  {
+    slug: "what-is-nervous-system-chiropractic",
+    title: "What is Nervous System Chiropractic? (Definitive Guide)",
+    category: "Foundations",
+    readTime: "10 min",
+    img: "https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&q=80&w=800",
+    intro: "The definitive guide to understanding why neuro-centric chiropractic is the foundation of true health.",
+    sections: [
+      {
+        heading: "Beyond Pain Relief",
+        body: "Traditional chiropractic is often associated with pain relief, specifically back and neck pain. While effective for symptom management, Nervous System Chiropractic shifts the focus entirely. We don't just treat the structural symptoms; we analyze and optimize the master control system of your entire body: the nervous system."
+      },
+      {
+        heading: "The Autonomic Nervous System (ANS)",
+        body: "Your ANS controls everything you don't have to think about: heart rate, digestion, immune response, and sleep cycles. It has two main modes: Sympathetic (Fight or Flight) and Parasympathetic (Rest and Digest). In modern society, chronic stress locks us in the sympathetic state. Nervous System Chiropractic aims to release this lock, restoring autonomic balance."
+      },
+      {
+        heading: "The Role of the Spine",
+        body: "The spine is not just a stack of bones; it is the armor for your spinal cord and the primary pathway for neurological communication. Subluxations (misalignments or tension in the spine) act like static on a radio line. By delivering specific, neurological adjustments, we clear the static, allowing the brain and body to communicate flawlessly."
+      }
+    ],
+    takeaways: [
+      "Nervous System Chiropractic focuses on regulation, not just pain relief.",
+      "Chronic stress locks the body in a sympathetic 'Fight or Flight' state.",
+      "Spinal adjustments remove neurological interference, restoring balance."
+    ]
+  },
+  {
+    slug: "traditional-vs-nervous-system-chiropractic",
+    title: "Why Traditional Chiropractic Might Not Be Fixing Your Issue",
+    category: "Education",
+    readTime: "7 min",
+    img: "https://images.unsplash.com/photo-1600607686527-6fb886090705?auto=format&fit=crop&q=80&w=800",
+    intro: "If you constantly need adjusting, the root neurological cause hasn't been addressed.",
+    sections: [
+      {
+        heading: "The Hamster Wheel of Symptom Management",
+        body: "If you find yourself needing to get your neck 'cracked' every week just to get by, you are managing a symptom, not fixing a cause. Traditional chiropractic often relies on gross manipulation to mobilize stiff joints, providing temporary relief but failing to address the underlying neurological tension that caused the stiffness in the first place."
+      },
+      {
+        heading: "Tension as a Neurological Output",
+        body: "Muscles do not decide to be tight on their own; they are commanded by the nervous system. When the brain senses instability or stress, it commands muscles to lock down as a protective mechanism. Forcing a tight joint to move without down-regulating the nervous system is fighting against the body's own protective software."
+      }
+    ],
+    takeaways: [
+      "Frequent, repetitive adjustments without progress indicate unaddressed neurological tension.",
+      "Muscle tightness is a protective output from a stressed brain.",
+      "NeuroChiro focuses on upgrading the 'software' rather than just moving the 'hardware'."
+    ]
+  },
+  {
+    slug: "signs-of-nervous-system-dysregulation",
+    title: "Signs Your Nervous System is Dysregulated",
+    category: "Basics",
+    readTime: "8 min",
+    img: "https://images.unsplash.com/photo-1493836512294-502baa1986e2?auto=format&fit=crop&q=80&w=800",
+    intro: "Learn to identify the subtle and overt signs that your body is stuck in survival mode.",
+    sections: [
+      {
+        heading: "The Overwhelmed System",
+        body: "Dysregulation occurs when your nervous system loses its flexibility to bounce back from stress. It gets 'stuck' on the gas pedal. Common signs include chronic fatigue even after sleeping, digestive issues like IBS, high resting heart rate, brain fog, and an inability to emotionally self-regulate (quick to anger or easily overwhelmed)."
+      },
+      {
+        heading: "The Physical Manifestations",
+        body: "Beyond emotional symptoms, dysregulation manifests physically. Chronic forward head posture, shallow chest breathing, teeth grinding (bruxism), and tension headaches are all physical indicators of a sympathetic-dominant nervous system. Your body is physically bracing for an impact that never comes."
+      }
+    ],
+    takeaways: [
+      "Dysregulation means losing the ability to recover from stress.",
+      "Symptoms include chronic fatigue, brain fog, and digestive distress.",
+      "Physical signs include poor posture, shallow breathing, and teeth grinding."
+    ]
+  },
+  {
+    slug: "how-to-build-cash-based-chiropractic-practice",
+    title: "How to Build a Cash-Based Chiropractic Practice",
+    category: "Business",
+    readTime: "12 min",
+    img: "https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&q=80&w=800",
+    intro: "Step away from insurance constraints and build a highly profitable, outcome-driven practice.",
+    sections: [
+      {
+        heading: "The Trap of the Insurance Model",
+        body: "The insurance model forces chiropractors into high-volume, low-quality care. It dictates what you can treat, how long you can spend with a patient, and what you get paid. Building a cash-based practice is the ultimate path to clinical freedom, allowing you to focus purely on neurological outcomes rather than billing codes."
+      },
+      {
+        heading: "Value Over Volume",
+        body: "In a cash practice, your patients are paying for a transformation, not just an adjustment. You must communicate the high value of nervous system regulation. This involves comprehensive Day 1 and Day 2 procedures, utilizing heart rate variability (HRV) scans, and offering structured care plans that promise long-term changes rather than quick fixes."
+      }
+    ],
+    takeaways: [
+      "Insurance models restrict clinical freedom and limit patient outcomes.",
+      "Cash practices require shifting focus from 'volume' to 'value'.",
+      "Objective metrics like HRV justify premium care plans."
+    ]
+  },
+  {
+    slug: "why-chiropractic-school-fails-business",
+    title: "Why Chiropractic School Fails to Prepare You for Business",
+    category: "Education",
+    readTime: "9 min",
+    img: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800",
+    intro: "The missing curriculum: Sales, marketing, and the real-world economics of running a clinic.",
+    sections: [
+      {
+        heading: "Great Clinician, Broke Business Owner",
+        body: "Chiropractic colleges are excellent at teaching anatomy, physiology, and adjusting techniques. However, they almost universally fail to teach the mechanics of running a profitable business. You can be the best adjuster in the world, but if you cannot communicate your value, market your services, or manage your overhead, your practice will fail."
+      },
+      {
+        heading: "The Business OS",
+        body: "A successful clinic requires an Operating System (OS). This includes patient acquisition funnels, retention strategies, team training, and financial tracking. NeuroChiro bridges this gap by providing the exact blueprints required to scale a six and seven-figure practice while maintaining clinical integrity."
+      }
+    ],
+    takeaways: [
+      "Clinical excellence alone does not guarantee business success.",
+      "Chiropractic schools lack comprehensive business, sales, and marketing training.",
+      "Implementing a robust 'Business OS' is critical for scaling."
+    ]
+  },
+  {
+    slug: "chiropractic-communication-explaining-care-plans",
+    title: "Chiropractic Communication Training: Explaining Care Plans",
+    category: "Communication",
+    readTime: "11 min",
+    img: "https://images.unsplash.com/photo-1552581234-26160f608093?auto=format&fit=crop&q=80&w=800",
+    intro: "Master the art of the Report of Findings to increase patient commitment and compliance.",
+    sections: [
+      {
+        heading: "The Report of Findings (ROF)",
+        body: "The ROF is the most critical interaction you have with a patient. It is where you translate complex neurological data into an understandable narrative. If a patient does not understand 'why' they need a 6-month care plan, they will drop out as soon as their pain goes away."
+      },
+      {
+        heading: "The Neuro-Narrative",
+        body: "Stop talking about 'bones out of place.' Start talking about stress, adaptation, and capacity. Explain how their current symptoms are a result of a nervous system that has lost its ability to adapt. When you frame the care plan as a process of 'retraining the brain' rather than 'cracking the back,' compliance skyrockets."
+      }
+    ],
+    takeaways: [
+      "The Report of Findings determines your retention rate.",
+      "Shift the conversation from structural pain to neurological adaptation.",
+      "Patients invest in long-term care when they understand the 'why'."
+    ]
+  },
+  {
+    slug: "how-to-retain-chiropractic-patients",
+    title: "How to Retain Chiropractic Patients Long-Term",
+    category: "Business",
+    readTime: "10 min",
+    img: "https://images.unsplash.com/photo-1573164574572-cb89e39749b4?auto=format&fit=crop&q=80&w=800",
+    intro: "Turn acute pain patients into lifelong wellness advocates.",
+    sections: [
+      {
+        heading: "The Post-Pain Drop-Off",
+        body: "The biggest challenge in chiropractic is the drop-off that occurs once a patient is out of pain. If your entire practice model is built on symptom relief, your patients will logically leave when the symptom is relieved. Retention requires a paradigm shift."
+      },
+      {
+        heading: "Education as Retention",
+        body: "True retention is built on education. Patients must understand that feeling good is not the same as functioning optimally. By continuously educating them on the role of the nervous system in immunity, sleep, and performance, you transition them from 'Relief Care' to 'Wellness Care.'"
+      }
+    ],
+    takeaways: [
+      "Symptom-based models naturally lead to high patient churn.",
+      "Continuous education is the ultimate retention tool.",
+      "Transition patients from 'Relief Care' to lifelong 'Wellness Care'."
+    ]
   }
 ];
