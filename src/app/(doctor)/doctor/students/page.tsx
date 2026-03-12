@@ -18,7 +18,10 @@ import {
   Mail,
   ArrowRight,
   ShieldCheck,
-  Award
+  Award,
+  Zap,
+  Calendar,
+  Clock
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
@@ -30,6 +33,7 @@ export default function StudentDiscovery() {
   const [selectedStudentForMessage, setSelectedStudentForMessage] = useState<any>(null);
   const [selectedStudentForProfile, setSelectedStudentForProfile] = useState<any>(null);
   const [messageSent, setMessageSent] = useState(false);
+  const [isInterviewRequest, setIsInterviewRequest] = useState(false);
 
   const students = [
     {
@@ -73,13 +77,25 @@ export default function StudentDiscovery() {
     }
   ];
 
+  const getInterviewTemplate = (student: any) => {
+    const firstName = student.name.split(' ')[0];
+    const topInterest = student.interests[0] || "Neuro-Chiropractic";
+    return `Hey ${firstName}, saw your ${student.readinessScore}% readiness score and your focus on ${topInterest}. I'm looking for a lead associate for my clinic. You free Tuesday at 8 am for a 10-min 'Culture Fit' call?`;
+  };
+
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     setMessageSent(true);
     setTimeout(() => {
       setSelectedStudentForMessage(null);
       setMessageSent(false);
+      setIsInterviewRequest(false);
     }, 2000);
+  };
+
+  const openInterviewRequest = (student: any) => {
+    setIsInterviewRequest(true);
+    setSelectedStudentForMessage(student);
   };
 
   return (
@@ -224,10 +240,10 @@ export default function StudentDiscovery() {
                       </button>
                       {isMember ? (
                         <button 
-                          onClick={() => setSelectedStudentForMessage(student)}
-                          className="py-3 bg-neuro-navy text-white font-black rounded-xl text-[10px] hover:bg-neuro-navy-light transition-all flex items-center justify-center gap-2 shadow-lg shadow-neuro-navy/20 active:scale-95"
+                          onClick={() => openInterviewRequest(student)}
+                          className="py-3 bg-neuro-navy text-white font-black rounded-xl text-[10px] hover:bg-neuro-navy-light transition-all flex items-center justify-center gap-2 shadow-lg shadow-neuro-navy/20 active:scale-95 group"
                         >
-                           <MessageSquare className="w-3 h-3" /> Message
+                           <Zap className="w-3 h-3 text-neuro-orange fill-neuro-orange group-hover:animate-pulse" /> Send Interview Request
                         </button>
                       ) : (
                         <button className="py-3 bg-neuro-navy/5 text-gray-400 font-black rounded-xl text-[10px] flex items-center justify-center gap-2 cursor-not-allowed border border-dashed border-gray-200">
@@ -312,11 +328,11 @@ export default function StudentDiscovery() {
                   <button 
                     onClick={() => {
                       setSelectedStudentForProfile(null);
-                      setSelectedStudentForMessage(selectedStudentForProfile);
+                      openInterviewRequest(selectedStudentForProfile);
                     }}
-                    className="flex-1 py-4 bg-neuro-navy text-white font-black rounded-2xl hover:bg-neuro-navy-light transition-all shadow-xl flex items-center justify-center gap-3"
+                    className="flex-1 py-4 bg-neuro-navy text-white font-black rounded-2xl hover:bg-neuro-navy-light transition-all shadow-xl flex items-center justify-center gap-3 group"
                   >
-                     <MessageSquare className="w-5 h-5" /> Send Direct Message
+                     <Zap className="w-5 h-5 text-neuro-orange fill-neuro-orange group-hover:animate-pulse" /> Send Interview Request
                   </button>
                   <button className="px-8 py-4 bg-white border border-gray-200 text-neuro-navy font-black rounded-2xl hover:bg-gray-50 transition-all flex items-center justify-center gap-3">
                      <Star className="w-5 h-5 text-neuro-orange fill-current" /> Save to Pipeline
@@ -337,8 +353,8 @@ export default function StudentDiscovery() {
                   {selectedStudentForMessage.name.split(' ').map((n: string) => n[0]).join('')}
                 </div>
                 <div>
-                  <h3 className="font-bold">Message {selectedStudentForMessage.name}</h3>
-                  <p className="text-[10px] uppercase font-black text-white/50 tracking-widest">Student Recruitment Inquiry</p>
+                  <h3 className="font-bold">{isInterviewRequest ? "Send Interview Request" : `Message ${selectedStudentForMessage.name}`}</h3>
+                  <p className="text-[10px] uppercase font-black text-white/50 tracking-widest">{isInterviewRequest ? "Culture Fit Call Invitation" : "Student Recruitment Inquiry"}</p>
                 </div>
               </div>
               <button onClick={() => setSelectedStudentForMessage(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
@@ -352,22 +368,44 @@ export default function StudentDiscovery() {
                   <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto">
                     <Check className="w-10 h-10" />
                   </div>
-                  <h4 className="text-xl font-bold text-neuro-navy">Message Sent!</h4>
-                  <p className="text-gray-500">Your inquiry has been delivered to {selectedStudentForMessage.name.split(' ')[0]}.</p>
+                  <h4 className="text-xl font-bold text-neuro-navy">Request Sent!</h4>
+                  <p className="text-gray-500">Your invitation has been delivered to {selectedStudentForMessage.name.split(' ')[0]}.</p>
                 </div>
               ) : (
                 <form onSubmit={handleSendMessage} className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Your Message</label>
+                    <div className="flex items-center justify-between px-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">High-Converting Template</label>
+                      {isInterviewRequest && (
+                        <span className="flex items-center gap-1 text-[9px] font-black text-neuro-orange uppercase">
+                          <Zap className="w-2.5 h-2.5 fill-current" /> Optimized
+                        </span>
+                      )}
+                    </div>
                     <textarea 
                       required
+                      defaultValue={isInterviewRequest ? getInterviewTemplate(selectedStudentForMessage) : ""}
                       placeholder={`Hi ${selectedStudentForMessage.name.split(' ')[0]}, I saw your profile on the Talent Radar and would love to chat about...`}
-                      className="w-full p-6 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 min-h-[150px] transition-all"
+                      className="w-full p-6 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 min-h-[150px] transition-all text-sm leading-relaxed"
                     />
                   </div>
-                  <button className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-light transition-all shadow-xl shadow-neuro-orange/20 uppercase tracking-widest text-sm">
-                    Send Message
-                  </button>
+                  
+                  <div className="space-y-3">
+                    <button className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-light transition-all shadow-xl shadow-neuro-orange/20 uppercase tracking-widest text-xs flex items-center justify-center gap-3 group">
+                      {isInterviewRequest ? (
+                        <>
+                          <Zap className="w-4 h-4 fill-current group-hover:animate-pulse" /> Send with Smart-Invite
+                        </>
+                      ) : (
+                        "Send Message"
+                      )}
+                    </button>
+                    {isInterviewRequest && (
+                      <p className="text-[9px] text-gray-400 text-center font-bold uppercase tracking-tighter">
+                        Includes your <span className="text-neuro-orange">Calendly</span> link for 1-click scheduling
+                      </p>
+                    )}
+                  </div>
                 </form>
               )}
             </div>

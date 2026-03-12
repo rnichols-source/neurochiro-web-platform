@@ -13,7 +13,8 @@ import {
   Sparkles,
   Info,
   Calendar,
-  CheckCircle2
+  CheckCircle2,
+  X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MembershipTier } from '@/types/directory';
@@ -32,12 +33,29 @@ interface ROIDashboardProps {
 }
 
 export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProps) {
+  const [roiMode, setRoiMode] = useState<'multiplier' | 'dollars'>('multiplier');
+  const [pendingPatients, setPendingPatients] = useState([
+    { id: 1, name: "Sarah J.", date: "Feb 28" },
+    { id: 2, name: "Michael R.", date: "Mar 02" },
+    { id: 3, name: "Emma W.", date: "Mar 10" },
+  ]);
+
+  const handleConfirm = (id: number) => {
+    setPendingPatients(prev => prev.filter(p => p.id !== id));
+  };
+
+  const handleBatchConfirm = () => {
+    setPendingPatients([]);
+  };
+
   const isLocked = tier === 'starter';
   const isLimited = tier === 'growth';
   
   const stats = data.stats;
   const estimatedRevenue = stats.confirmed_patients * stats.average_case_value;
   const roiMultiplier = estimatedRevenue / stats.membership_cost;
+  const netProfit = estimatedRevenue - stats.membership_cost;
+  const NETWORK_AVG_ROI = 150;
 
   // Starter Tier Profit Teaser Calculation
   const potentialNewPatients = Math.floor(stats.profile_views * 0.05);
@@ -176,21 +194,72 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
           </div>
 
           <div className="flex justify-center lg:justify-end">
-            <div className="relative group">
-               <div className="absolute inset-0 bg-neuro-orange blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-               <div className="relative w-56 h-56 rounded-full border-[12px] border-white/5 flex flex-col items-center justify-center text-center p-8">
-                  <span className="text-6xl font-black text-neuro-orange">{Math.round(roiMultiplier)}x</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-1">Return on Cost</span>
-               </div>
-               <div className="absolute -bottom-4 -right-4 bg-white text-neuro-navy p-4 rounded-2xl shadow-2xl border border-gray-100 flex items-center gap-3">
-                  <div className="p-2 bg-green-50 rounded-lg">
-                    <TrendingUp className="w-5 h-5 text-green-500" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Efficiency</p>
-                    <p className="text-sm font-black text-neuro-navy">Dominant</p>
-                  </div>
-               </div>
+            <div className="flex flex-col items-center">
+              {/* ROI Display Toggle */}
+              <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 w-fit mb-6 relative z-20">
+                <button 
+                  onClick={() => setRoiMode('multiplier')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
+                    roiMode === 'multiplier' ? "bg-neuro-orange text-white shadow-lg" : "text-gray-400 hover:text-white"
+                  )}
+                >
+                  Multiplier
+                </button>
+                <button 
+                  onClick={() => setRoiMode('dollars')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
+                    roiMode === 'dollars' ? "bg-neuro-orange text-white shadow-lg" : "text-gray-400 hover:text-white"
+                  )}
+                >
+                  Profit ($)
+                </button>
+              </div>
+
+              <div className="relative group">
+                <div className="absolute inset-0 bg-neuro-orange blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                <div className="relative w-56 h-56 rounded-full border-[12px] border-white/5 flex flex-col items-center justify-center text-center p-8">
+                    <span className={cn(
+                      "font-black text-neuro-orange leading-none transition-all",
+                      roiMode === 'multiplier' ? "text-6xl" : "text-3xl"
+                    )}>
+                      {roiMode === 'multiplier' ? `${Math.round(roiMultiplier)}x` : `$${netProfit.toLocaleString()}`}
+                    </span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2">
+                      {roiMode === 'multiplier' ? "Return on Cost" : "Monthly Profit"}
+                    </span>
+                    
+                    {/* Network Average Comparison */}
+                    <div className="mt-4 pt-4 border-t border-white/5 w-full">
+                      <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest mb-1">Network Avg: {NETWORK_AVG_ROI}x</p>
+                      <div className="flex items-center justify-center gap-1">
+                        {roiMultiplier >= NETWORK_AVG_ROI ? (
+                          <>
+                            <TrendingUp className="w-2 h-2 text-green-400" />
+                            <span className="text-[9px] font-black text-green-400">+{Math.round(((roiMultiplier - NETWORK_AVG_ROI) / NETWORK_AVG_ROI) * 100)}%</span>
+                          </>
+                        ) : (
+                          <>
+                            <TrendingUp className="w-2 h-2 text-red-400 rotate-180" />
+                            <span className="text-[9px] font-black text-red-400">-{Math.round(((NETWORK_AVG_ROI - roiMultiplier) / NETWORK_AVG_ROI) * 100)}%</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                </div>
+                <div className="absolute -bottom-4 -right-4 bg-white text-neuro-navy p-4 rounded-2xl shadow-2xl border border-gray-100 flex items-center gap-3">
+                    <div className="p-2 bg-green-50 rounded-lg">
+                      <TrendingUp className="w-5 h-5 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Efficiency</p>
+                      <p className="text-sm font-black text-neuro-navy">
+                        {roiMultiplier >= NETWORK_AVG_ROI ? 'Dominant' : 'Improving'}
+                      </p>
+                    </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -228,25 +297,50 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
             <h3 className="text-xl font-heading font-black flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-neuro-orange" /> Growth Trajectory
             </h3>
-            <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-              <span>Estimated Monthly Revenue</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-neuro-navy rounded-full"></div>
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Your Practice</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 border-2 border-dashed border-neuro-orange/40 rounded-full"></div>
+                <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest">Network Target</span>
+              </div>
             </div>
           </div>
           
-          <div className="h-64 flex items-end justify-between gap-4 px-4 border-b border-gray-50">
+          <div className="h-64 flex items-end justify-between gap-4 px-4 border-b border-gray-50 relative">
+            {/* Target Trajectory Line (SVG Overlay) */}
+            <svg className="absolute inset-x-0 bottom-0 h-full w-full pointer-events-none px-4" preserveAspectRatio="none">
+              <path 
+                d={`M 0 ${256 - (256 * 0.2)} L ${100} ${256 - (256 * 0.35)} L ${200} ${256 - (256 * 0.45)} L ${300} ${256 - (256 * 0.6)} L ${400} ${256 - (256 * 0.8)} L ${500} ${256 - (256 * 0.95)}`}
+                className="stroke-neuro-orange/30 stroke-[3] fill-none"
+                strokeDasharray="8 6"
+                style={{ vectorEffect: 'non-scaling-stroke' }}
+              />
+              {/* Target Labels */}
+              <text x="95%" y="15%" className="fill-neuro-orange text-[9px] font-black uppercase tracking-tighter opacity-60">Top Performer Path</text>
+            </svg>
+
             {data.historical_revenue.map((rev, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center group relative">
+              <div key={i} className="flex-1 flex flex-col items-center group relative z-10">
                 <div 
-                  className="w-full bg-neuro-navy rounded-t-xl transition-all group-hover:bg-neuro-orange"
-                  style={{ height: `${(rev.amount / Math.max(...data.historical_revenue.map(r => r.amount))) * 100}%` }}
+                  className="w-full bg-neuro-navy rounded-t-xl transition-all group-hover:bg-neuro-orange/80"
+                  style={{ height: `${(rev.amount / Math.max(...data.historical_revenue.map(r => r.amount), 30000)) * 100}%` }}
                 >
-                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-neuro-navy text-white px-2 py-1 rounded text-[10px] font-black opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-neuro-navy text-white px-2 py-1 rounded text-[10px] font-black opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                     ${rev.amount.toLocaleString()}
                   </div>
                 </div>
                 <span className="text-[9px] font-bold text-gray-400 mt-4 uppercase">{rev.date}</span>
               </div>
             ))}
+          </div>
+          <div className="mt-6 flex items-center justify-center gap-2">
+             <Sparkles className="w-3 h-3 text-neuro-orange" />
+             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+               You are pacing <span className="text-neuro-orange">12% ahead</span> of the NeuroChiro Protocol benchmark.
+             </p>
           </div>
         </section>
 
