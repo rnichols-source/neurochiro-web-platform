@@ -21,6 +21,8 @@ import { motion } from "framer-motion";
 import { getSeminarById, incrementSeminarStats } from "../actions";
 import { useRegion } from "@/context/RegionContext";
 
+export const dynamic = 'force-dynamic';
+
 export default function SeminarDetailsPage() {
   const params = useParams();
   const id = params?.id as string;

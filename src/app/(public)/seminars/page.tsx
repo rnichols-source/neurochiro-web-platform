@@ -31,6 +31,8 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const dynamic = 'force-dynamic';
+
 export default function SeminarHub() {
   const { region } = useRegion();
   const { toggleSave, isSaved } = useUserPreferences();
