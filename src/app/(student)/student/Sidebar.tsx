@@ -117,21 +117,34 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
         {careerToolItems.map((item) => {
           const isActive = pathname === item.href;
-          const isLocked = item.minTier === "Accelerator" ? !isAccelerator : !isProfessional;
           
+          let isLocked = false;
+          if (item.minTier === "Accelerator") {
+            isLocked = !isAccelerator;
+          } else if (item.minTier === "Professional") {
+            isLocked = !isProfessional;
+          } else if (item.minTier === "Foundation") {
+            isLocked = !isFoundation;
+          }
+
           return (
             <Link
               key={item.name}
               href={isLocked ? "/pricing" : item.href}
-              onClick={() => {
-                if (!isLocked && onClose) onClose();
+              onClick={(e) => {
+                if (isLocked) {
+                  // If locked, prevent default if we want to show a modal instead, 
+                  // but here it goes to /pricing.
+                } else if (onClose) {
+                  onClose();
+                }
               }}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative",
                 isActive 
                   ? "bg-white/10 text-white" 
                   : "text-gray-400 hover:text-white hover:bg-white/5",
-                isLocked && "opacity-50"
+                isLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
               )}
             >
               <item.icon className={cn("w-5 h-5", isActive ? "text-neuro-orange" : "text-gray-400 group-hover:text-neuro-orange-light")} />
