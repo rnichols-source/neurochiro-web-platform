@@ -48,7 +48,7 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
     .order('created_at', { ascending: false })
 
   // Manual sorting to ensure Premium > Featured > Basic
-  const sortedData = (data || []).sort((a, b) => {
+  const sortedData = (data || []).sort((a: any, b: any) => {
     const tierMap: any = { 'premium': 3, 'featured': 2, 'basic': 1 };
     const tierA = tierMap[a.listing_tier] || 1;
     const tierB = tierMap[b.listing_tier] || 1;
