@@ -240,28 +240,47 @@ export default function StudentDashboard() {
         </div>
 
         {/* Sidebar Mini Action - Urgency / Countdown */}
-        <div className="bg-neuro-navy rounded-3xl p-6 text-white relative overflow-hidden flex flex-col justify-between shadow-xl">
-           <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl -mr-16 -mt-16"></div>
+        <div className="bg-neuro-navy rounded-[2.5rem] p-8 text-white relative overflow-hidden flex flex-col justify-between shadow-2xl border border-white/5">
+           <div className="absolute top-0 right-0 w-48 h-48 bg-neuro-orange/20 blur-[60px] -mr-24 -mt-24"></div>
            <div className="relative z-10">
-              <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest block mb-4 flex items-center gap-2">
-                 <Clock className="w-3 h-3" /> Career Countdown
-              </span>
-              <h4 className="text-xl font-bold mb-2">Class of '27 Success Window</h4>
-              <div className="space-y-3 mb-6">
-                 <div className="flex justify-between items-center text-[10px] font-bold">
-                    <span className="text-gray-400">Days to 'Elite' Status</span>
-                    <span className="text-neuro-orange text-sm">450</span>
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest flex items-center gap-2">
+                   <Clock className="w-3 h-3" /> Success Window
+                </span>
+                <div className="px-2 py-1 bg-green-500/20 text-green-500 text-[8px] font-black uppercase tracking-widest rounded-lg border border-green-500/30">
+                   +$50k Career Premium
+                </div>
+              </div>
+
+              <h4 className="text-2xl font-black mb-2 leading-tight">Class of '27 <br />Elite Track</h4>
+              
+              <div className="space-y-4 mb-8 mt-6">
+                 <div className="space-y-1">
+                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-tighter">
+                       <span className="text-gray-400">Roadmap Status</span>
+                       <span className="text-neuro-orange">Action Required</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
+                       <div className="h-full bg-neuro-orange w-1/3 shadow-[0_0_10px_rgba(214,104,41,0.5)]" />
+                    </div>
                  </div>
-                 <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                    <p className="text-[10px] text-gray-300 leading-relaxed italic">
-                       "You need 12 clinical modules completed by Oct '26 to land a Tier 1 contract."
+
+                 <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                    <p className="text-[11px] text-gray-300 leading-relaxed font-medium">
+                       "You need <span className="text-white font-black">12 clinical modules</span> completed by Oct '26 to lock in your <span className="text-neuro-orange font-black">Tier 1 Associate Contract</span>."
                     </p>
                  </div>
               </div>
            </div>
-           <Link href="/student/learn" className="relative z-10 w-full py-3 bg-neuro-orange text-white font-black text-[10px] uppercase tracking-widest rounded-xl text-center hover:bg-neuro-orange-light transition-all shadow-lg shadow-neuro-orange/20">
-              Accelerate My Path
-           </Link>
+           
+           <div className="space-y-3 relative z-10">
+              <Link href="/student/learn" className="block w-full py-4 bg-neuro-orange text-white font-black text-[11px] uppercase tracking-widest rounded-2xl text-center hover:bg-neuro-orange-light transition-all shadow-xl shadow-neuro-orange/20 active:scale-[0.98]">
+                 Accelerate My Path
+              </Link>
+              <p className="text-[9px] text-gray-500 text-center font-bold uppercase tracking-tighter">
+                 Unlocks the 2026 Associate Placement Roadmap
+              </p>
+           </div>
         </div>
       </div>
 
