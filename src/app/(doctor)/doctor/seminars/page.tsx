@@ -225,19 +225,26 @@ export default function SeminarsPage() {
               
               <div className="space-y-4 mb-8">
                  {[
-                   { name: "Top of Feed", price: "$24/wk", icon: Sparkles, discount: "2.5x Visibility Lift" },
-                   { name: "Email Blast", price: "$75/once", icon: Calendar, discount: "Avg. 15-20 Leads" },
-                   { name: "Global Push", price: "$149/wk", icon: TrendingUp, discount: "Max ROI Multiplier" }
+                   { name: "Top of Feed", price: "$24/wk", icon: Sparkles, discount: "Estimated ROI: 8x", badge: null },
+                   { name: "15-25 Target Student Leads", price: "$75/once", icon: Mail, discount: "Estimated ROI: 12x", badge: "90% of Sell-Outs Use This" },
+                   { name: "Global Push", price: "$149/wk", icon: TrendingUp, discount: "Max ROI Multiplier", badge: null }
                  ].map((opt, i) => (
-                   <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 group cursor-pointer hover:border-neuro-orange transition-all">
-                      <div className="flex items-center gap-3">
-                         <opt.icon className="w-4 h-4 text-neuro-orange" />
-                         <div>
-                            <span className="text-sm font-bold text-neuro-navy block">{opt.name}</span>
-                            <span className="text-[9px] font-black text-green-500 uppercase tracking-widest bg-green-50 px-1 rounded">{opt.discount}</span>
-                         </div>
+                   <div key={i} className="relative p-4 bg-gray-50 rounded-2xl border border-gray-100 group cursor-pointer hover:border-neuro-orange transition-all">
+                      {opt.badge && (
+                        <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-neuro-navy text-white text-[7px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-full shadow-lg z-10 whitespace-nowrap">
+                           {opt.badge}
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                           <opt.icon className="w-4 h-4 text-neuro-orange" />
+                           <div>
+                              <span className="text-[11px] font-black text-neuro-navy block leading-tight">{opt.name}</span>
+                              <span className="text-[9px] font-black text-green-500 uppercase tracking-widest bg-green-50 px-1 rounded">{opt.discount}</span>
+                           </div>
+                        </div>
+                        <span className="text-xs font-black text-gray-400 group-hover:text-neuro-orange transition-colors">{opt.price}</span>
                       </div>
-                      <span className="text-xs font-black text-gray-400">{opt.price}</span>
                    </div>
                  ))}
               </div>
