@@ -322,7 +322,12 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
           {/* Map Section */}
           <div className="lg:col-span-7">
             <div className="bg-slate-200 rounded-[3rem] p-2 shadow-xl border border-gray-100 h-[700px] sticky top-8 overflow-hidden relative group">
-               <GlobalNetworkMap key={region.code} externalSearchQuery={searchQuery} externalLocationQuery={locationQuery} />
+               <GlobalNetworkMap 
+                 key={region.code} 
+                 externalSearchQuery={searchQuery} 
+                 onSearchChange={setSearchQuery}
+                 externalLocationQuery={locationQuery} 
+               />
             </div>
           </div>
 

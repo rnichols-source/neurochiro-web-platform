@@ -22,12 +22,14 @@ import { Doctor } from "@/types/directory";
 interface GlobalNetworkMapProps {
   defaultLayer?: "all" | "student" | "seminar";
   externalSearchQuery?: string;
+  onSearchChange?: (q: string) => void;
   externalLocationQuery?: string;
 }
 
 export default function GlobalNetworkMap({ 
   defaultLayer = "all",
   externalSearchQuery = "",
+  onSearchChange,
   externalLocationQuery = ""
 }: GlobalNetworkMapProps) {
   const router = useRouter();
@@ -37,6 +39,14 @@ export default function GlobalNetworkMap({
   const [internalSearchQuery, setInternalSearchQuery] = useState("");
 
   const searchQuery = externalSearchQuery || internalSearchQuery;
+
+  const handleSearchChange = (val: string) => {
+    if (onSearchChange) {
+      onSearchChange(val);
+    } else {
+      setInternalSearchQuery(val);
+    }
+  };
 
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [seminars, setSeminars] = useState<any[]>([]);
@@ -260,7 +270,7 @@ export default function GlobalNetworkMap({
             placeholder="Search within map..." 
             className="bg-transparent border-none focus:outline-none text-white w-full placeholder:text-gray-400 text-sm"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
           />
           <button className="p-2 bg-white/10 rounded-xl hover:bg-white/20 transition-colors">
             <Filter className="w-4 h-4 text-white" />
