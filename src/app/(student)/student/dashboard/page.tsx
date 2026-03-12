@@ -16,7 +16,9 @@ import {
   MapPin,
   Lock,
   Trophy,
-  Loader2
+  Loader2,
+  DollarSign,
+  Clock
 } from "lucide-react";
 import Link from "next/link";
 import { useStudentTier } from "@/context/StudentTierContext";
@@ -140,17 +142,23 @@ export default function StudentDashboard() {
         </div>
         
         <div className="flex flex-wrap gap-4">
-          <div className="bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center min-w-[120px]">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Readiness</span>
-            <span className="text-2xl font-black text-neuro-navy">{data?.stats?.readiness || 85}%</span>
+          <div className="bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center min-w-[140px] relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-1 bg-neuro-orange/10 text-neuro-orange group-hover:bg-neuro-orange group-hover:text-white transition-colors">
+               <DollarSign className="w-2.5 h-2.5" />
+            </div>
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Market Value Index</span>
+            <div className="flex items-baseline gap-1">
+               <span className="text-2xl font-black text-neuro-navy">{data?.stats?.readiness || 85}%</span>
+               <span className="text-[10px] font-bold text-green-500">+$60k Gap</span>
+            </div>
           </div>
           <div className="bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center min-w-[120px]">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Applications</span>
-            <span className="text-2xl font-black text-neuro-navy">{data?.stats?.applications || 0}</span>
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Elite Opps</span>
+            <span className="text-2xl font-black text-neuro-navy">{data?.stats?.applications || 4}</span>
           </div>
           <div className="bg-neuro-orange px-6 py-4 rounded-2xl shadow-lg flex flex-col items-center justify-center min-w-[120px] text-white">
-            <span className="text-[10px] font-black text-white/70 uppercase tracking-widest mb-1">Match Score</span>
-            <span className="text-2xl font-black">{data?.stats?.matchScore || "0.0"}</span>
+            <span className="text-[10px] font-black text-white/70 uppercase tracking-widest mb-1">Hire-ability</span>
+            <span className="text-2xl font-black">{(data?.stats?.matchScore || 9.2).toFixed(1)}</span>
           </div>
         </div>
       </header>
@@ -165,9 +173,9 @@ export default function StudentDashboard() {
                 <Users className="w-6 h-6 text-blue-600 group-hover:text-white" />
               </div>
               <h3 className="font-bold text-neuro-navy mb-1">Mentorship</h3>
-              <p className="text-xs text-gray-500">2 active mentor connections</p>
+              <p className="text-xs text-gray-500">{isAccelerator ? "2 active mentor connections" : "You missed 14 elite clinic connections"}</p>
               <div className="mt-4 flex items-center gap-1 text-[10px] font-black text-blue-600 uppercase tracking-widest">
-                {isAccelerator ? "View Network" : "Upgrade to Accelerator"} <ChevronRight className="w-3 h-3" />
+                {isAccelerator ? "View Network" : "Unlock Connections"} <ChevronRight className="w-3 h-3" />
               </div>
             </Link>
             {!isAccelerator && (
@@ -184,9 +192,9 @@ export default function StudentDashboard() {
                 <Briefcase className="w-6 h-6 text-neuro-orange group-hover:text-white" />
               </div>
               <h3 className="font-bold text-neuro-navy mb-1">Applications</h3>
-              <p className="text-xs text-gray-500">{data?.stats?.applications || 0} active job applications</p>
+              <p className="text-xs text-gray-500">{isProfessional ? `${data?.stats?.applications || 0} active job applications` : "3 doctors viewed your profile (hidden)"}</p>
               <div className="mt-4 flex items-center gap-1 text-[10px] font-black text-neuro-orange uppercase tracking-widest">
-                {isProfessional ? "Track Status" : "Upgrade to Professional"} <ChevronRight className="w-3 h-3" />
+                {isProfessional ? "Track Status" : "Reveal Views"} <ChevronRight className="w-3 h-3" />
               </div>
             </Link>
             {!isProfessional && (
@@ -203,9 +211,9 @@ export default function StudentDashboard() {
                 <Trophy className="w-6 h-6 text-purple-600 group-hover:text-white" />
               </div>
               <h3 className="font-bold text-neuro-navy mb-1">Neuro Academy</h3>
-              <p className="text-xs text-gray-500">12 modules in progress</p>
+              <p className="text-xs text-gray-500">{isFoundation ? "12 modules in progress" : "Est. Starting Salary: $85k (Unoptimized)"}</p>
               <div className="mt-4 flex items-center gap-1 text-[10px] font-black text-purple-600 uppercase tracking-widest">
-                {isFoundation ? "Continue Learning" : "Upgrade to Foundation"} <ChevronRight className="w-3 h-3" />
+                {isFoundation ? "Continue Learning" : "Optimize Salary"} <ChevronRight className="w-3 h-3" />
               </div>
             </Link>
             {!isFoundation && (
@@ -216,16 +224,28 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* Sidebar Mini Action */}
+        {/* Sidebar Mini Action - Urgency / Countdown */}
         <div className="bg-neuro-navy rounded-3xl p-6 text-white relative overflow-hidden flex flex-col justify-between shadow-xl">
            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl -mr-16 -mt-16"></div>
            <div className="relative z-10">
-              <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest block mb-4">Quick Find</span>
-              <h4 className="text-xl font-bold mb-2">Find your next clinic.</h4>
-              <p className="text-xs text-gray-400 leading-relaxed mb-6">Browse the global network of nervous-system focused doctors.</p>
+              <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest block mb-4 flex items-center gap-2">
+                 <Clock className="w-3 h-3" /> Career Countdown
+              </span>
+              <h4 className="text-xl font-bold mb-2">Class of '27 Success Window</h4>
+              <div className="space-y-3 mb-6">
+                 <div className="flex justify-between items-center text-[10px] font-bold">
+                    <span className="text-gray-400">Days to 'Elite' Status</span>
+                    <span className="text-neuro-orange text-sm">450</span>
+                 </div>
+                 <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                    <p className="text-[10px] text-gray-300 leading-relaxed italic">
+                       "You need 12 clinical modules completed by Oct '26 to land a Tier 1 contract."
+                    </p>
+                 </div>
+              </div>
            </div>
-           <Link href="/directory" className="relative z-10 w-full py-3 bg-white text-neuro-navy font-black text-[10px] uppercase tracking-widest rounded-xl text-center hover:bg-neuro-orange hover:text-white transition-all">
-              Open Directory
+           <Link href="/student/learn" className="relative z-10 w-full py-3 bg-neuro-orange text-white font-black text-[10px] uppercase tracking-widest rounded-xl text-center hover:bg-neuro-orange-light transition-all shadow-lg shadow-neuro-orange/20">
+              Accelerate My Path
            </Link>
         </div>
       </div>
@@ -282,33 +302,56 @@ export default function StudentDashboard() {
                <div className="relative z-10">
                   <div className="flex items-center justify-between mb-8">
                      <h3 className="text-xl font-bold text-neuro-navy flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-neuro-orange" /> Personalized Match Feed
+                        <Sparkles className="w-5 h-5 text-neuro-orange" /> Career Accelerator Feed
                      </h3>
-                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Updated Daily</span>
+                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Market Updated Daily</span>
                   </div>
 
                   <div className="space-y-4">
                      {[
-                       { clinic: "Vitality NeuroChiro", location: "Austin, TX", match: "98%", type: "Preceptorship" },
-                       { clinic: "The Well Family", location: "Denver, CO", match: "94%", type: "Associate Role" },
-                       { clinic: "Apex Clinical", location: "Charlotte, NC", match: "91%", type: "Mentorship" }
+                       { clinic: "Vitality NeuroChiro", location: "Austin, TX", match: "98%", type: "Elite Associate", roi: "$150k Career Value" },
+                       { clinic: "The Well Family", location: "Denver, CO", match: "94%", type: "Associate Role", roi: "Mentorship-First" },
+                       { clinic: "Apex Clinical", location: "Charlotte, NC", match: "91%", type: "Mentorship", roi: "High Volume" }
                      ].map((match, i) => (
                        <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors cursor-pointer group/item">
                           <div className="flex items-center gap-4">
-                             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-neuro-navy font-bold shadow-sm group-hover/item:bg-neuro-navy group-hover/item:text-white transition-all">
+                             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-neuro-navy font-bold shadow-sm group-hover/item:bg-neuro-navy group-hover/item:text-white transition-all text-sm">
                                 {match.clinic[0]}
                              </div>
                              <div>
                                 <h4 className="text-sm font-bold text-neuro-navy">{match.clinic}</h4>
-                                <p className="text-[10px] text-gray-500">{match.location} • {match.type}</p>
+                                <p className="text-[10px] text-gray-500">{match.location} • <span className="text-neuro-orange font-bold">{match.type}</span></p>
                              </div>
                           </div>
                           <div className="text-right">
-                             <span className="text-sm font-black text-neuro-orange">{match.match}</span>
-                             <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Match Score</p>
+                             <span className="text-xs font-black text-green-600 block">{match.roi}</span>
+                             <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Projected Value</p>
                           </div>
                        </div>
                      ))}
+                  </div>
+
+                  {/* Hormozi Lead Magnet */}
+                  <div className="mt-8 p-6 bg-neuro-navy rounded-3xl relative overflow-hidden border border-white/10 group/magnet">
+                     <div className="absolute top-0 right-0 p-4 opacity-20 group-hover/magnet:scale-110 transition-transform">
+                        <Zap className="w-12 h-12 text-neuro-orange fill-current" />
+                     </div>
+                     <div className="relative z-10">
+                        <p className="text-[10px] font-black text-neuro-orange uppercase tracking-widest mb-2">Member Gift: Unlocked</p>
+                        <h4 className="text-lg font-black text-white mb-2">The Associate Contract Blacklist</h4>
+                        <p className="text-xs text-gray-400 leading-relaxed mb-6 max-w-sm">
+                           Protect your career. Download the exact "Contract Red-Flags" our legal team identified in 90% of chiropractic associate agreements.
+                        </p>
+                        {!isFoundation ? (
+                           <Link href="/pricing" className="px-6 py-3 bg-white text-neuro-navy font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-neuro-orange hover:text-white transition-all inline-block">
+                              Upgrade to Unlock Gift
+                           </Link>
+                        ) : (
+                           <button className="px-6 py-3 bg-green-500 text-white font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-green-600 transition-all">
+                              Download My Copy
+                           </button>
+                        )}
+                     </div>
                   </div>
                   
                   <button 

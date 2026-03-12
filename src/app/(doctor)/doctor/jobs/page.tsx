@@ -25,7 +25,8 @@ import {
   Globe,
   Calculator,
   Percent,
-  Zap
+  Zap,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -49,6 +50,18 @@ export default function JobsPage() {
   const [showPreview, setShowPreview] = useState(false);
   const [showPitchPreview, setShowPitchPreview] = useState(false);
   const [activeTab, setActiveTab] = useState<'associate' | 'support'>('associate');
+
+  // Elite Scorecard State
+  const [scores, setScores] = useState<Record<string, number>>({
+    "Nervous System Proficiency": 0,
+    "Communication Skills": 0,
+    "Adjusting Artistry": 0,
+    "Practice Growth Mindset": 0
+  });
+  const [savingScorecard, setSavingScorecard] = useState(false);
+
+  const averageScore = Object.values(scores).reduce((a, b) => a + b, 0) / Object.keys(scores).length;
+  const hiringVerdict = averageScore >= 4.5 ? "STRONG HIRE" : averageScore >= 3.5 ? "POTENTIAL" : averageScore > 0 ? "PASS" : "AWAITING DATA";
 
   // Calculator State
   const [calcBase, setCalcBase] = useState(65000);
@@ -363,22 +376,233 @@ export default function JobsPage() {
                   <div className="space-y-8">
                      <div className="p-8 bg-neuro-navy text-white rounded-[2.5rem] relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl"></div>
-                        <h4 className="text-xl font-heading font-black mb-2 relative z-10">Standardized Scoring</h4>
-                        <p className="text-xs text-gray-400 relative z-10">Objectively evaluate clinical philosophy and cultural alignment.</p>
+                        <div className="relative z-10 flex justify-between items-center">
+                           <div>
+                              <h4 className="text-xl font-heading font-black mb-1">Elite Standardized Scorecard</h4>
+                              <p className="text-[10px] text-gray-400 uppercase tracking-widest">Objectively evaluate clinical and cultural alignment.</p>
+                           </div>
+                           <div className="text-right">
+                              <p className="text-[10px] font-black text-neuro-orange uppercase mb-1 tracking-widest">Hiring Verdict</p>
+                              <p className={cn(
+                                 "text-lg font-black italic",
+                                 hiringVerdict === "STRONG HIRE" ? "text-green-400" : 
+                                 hiringVerdict === "POTENTIAL" ? "text-blue-400" : 
+                                 hiringVerdict === "PASS" ? "text-red-400" : "text-gray-500"
+                              )}>{hiringVerdict}</p>
+                           </div>
+                        </div>
                      </div>
-                     <div className="space-y-4">
-                        {["Nervous System Proficiency", "Communication Skills", "Adjusting Artistry", "Practice Growth Mindset"].map((item, i) => (
-                          <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                             <span className="text-sm font-bold text-neuro-navy">{item}</span>
-                             <div className="flex gap-1">
+
+                     <div className="space-y-6">
+                        {Object.entries(scores).map(([category, value], i) => (
+                          <div key={category} className="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm hover:border-neuro-orange transition-all">
+                             <div className="flex items-center justify-between mb-4">
+                                <span className="font-black text-neuro-navy uppercase text-xs tracking-widest">{category}</span>
+                                <span className="text-sm font-black text-neuro-orange">{value > 0 ? value : "--"} / 5</span>
+                             </div>
+                             <div className="flex gap-2">
                                 {[1, 2, 3, 4, 5].map(n => (
-                                  <div key={n} className="w-6 h-6 rounded-md bg-white border border-gray-200 flex items-center justify-center text-[10px] font-black hover:bg-neuro-orange hover:text-white cursor-pointer transition-all">{n}</div>
+                                  <button 
+                                    key={n} 
+                                    onClick={() => setScores(prev => ({ ...prev, [category]: n }))}
+                                    className={cn(
+                                       "flex-1 py-3 rounded-xl border text-[10px] font-black transition-all",
+                                       value === n 
+                                          ? "bg-neuro-orange text-white border-neuro-orange shadow-lg scale-105" 
+                                          : "bg-gray-50 border-gray-100 text-gray-400 hover:bg-gray-100"
+                                    )}
+                                  >
+                                     {n === 1 ? "POOR" : n === 3 ? "AVG" : n === 5 ? "ELITE" : n}
+                                  </button>
                                 ))}
                              </div>
                           </div>
                         ))}
                      </div>
-                     <button className="w-full py-4 bg-neuro-navy text-white font-black rounded-2xl uppercase tracking-widest text-xs">Save Scorecard Template</button>
+
+                     <div className="bg-neuro-cream/50 p-6 rounded-[2rem] border border-neuro-navy/5 flex items-start gap-4">
+                        <div className="p-2 bg-white rounded-xl text-neuro-orange shadow-sm">
+                           <Sparkles className="w-4 h-4" />
+                        </div>
+                        <div>
+                           <p className="text-[10px] font-black text-neuro-navy uppercase tracking-widest mb-1">Standardized Assessment</p>
+                           <p className="text-xs text-gray-500 leading-relaxed">
+                              {hiringVerdict === "STRONG HIRE" ? "This candidate demonstrates exceptional alignment with the NeuroChiro clinical standard. Proceed to final contract stage." : 
+                               hiringVerdict === "POTENTIAL" ? "Candidate shows promise but requires additional clinical audit on Adjusting Artistry." : 
+                               hiringVerdict === "PASS" ? "Cultural or clinical misalignment detected. High risk for long-term retention." : 
+                               "Complete all categories to receive standardized hiring recommendation."}
+                           </p>
+                        </div>
+                     </div>
+
+                     <div className="flex gap-4">
+                        <button 
+                           onClick={() => {
+                              const printWindow = window.open('', '_blank');
+                              if (printWindow) {
+                                printWindow.document.write(`
+                                  <html>
+                                    <head>
+                                      <title>NeuroChiro Interview Scorecard</title>
+                                      <style>
+                                        body { font-family: 'Helvetica', sans-serif; padding: 40px; color: #0a192f; }
+                                        .header { border-bottom: 2px solid #f97316; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+                                        .logo { font-size: 24px; font-weight: bold; color: #f97316; }
+                                        .verdict { font-size: 20px; font-weight: 900; font-style: italic; }
+                                        .category { margin-bottom: 25px; padding: 20px; background: #f8fafc; border-radius: 8px; }
+                                        .cat-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+                                        .score-bar { height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; margin-top: 10px; }
+                                        .score-fill { height: 100%; background: #f97316; }
+                                      </style>
+                                    </head>
+                                    <body>
+                                      <div class="header">
+                                        <div class="logo">NEUROCHIRO ELITE SCORECARD</div>
+                                        <div class="verdict">VERDICT: ${hiringVerdict}</div>
+                                      </div>
+                                      ${Object.entries(scores).map(([cat, val]) => `
+                                        <div class="category">
+                                          <div class="cat-header">
+                                            <span>${cat}</span>
+                                            <span>${val}/5</span>
+                                          </div>
+                                          <div class="score-bar">
+                                            <div class="score-fill" style="width: ${val * 20}%"></div>
+                                          </div>
+                                        </div>
+                                      `).join('')}
+                                      <div style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
+                                        <strong>Notes:</strong>
+                                        <div style="height: 200px; border: 1px solid #eee; margin-top: 10px; border-radius: 4px;"></div>
+                                      </div>
+                                    </body>
+                                  </html>
+                                `);
+                                printWindow.document.close();
+                                printWindow.print();
+                              }
+                           }}
+                           className="flex-1 py-5 bg-white border-2 border-neuro-navy text-neuro-navy font-black rounded-2xl hover:bg-gray-50 transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2"
+                        >
+                           <FileText className="w-4 h-4" />
+                           Export Scorecard
+                        </button>
+                        <button 
+                           onClick={() => {
+                              setSavingScorecard(true);
+                              setTimeout(() => {
+                                 setSavingScorecard(false);
+                                 closeModal();
+                              }, 1500);
+                           }}
+                           disabled={savingScorecard}
+                           className="flex-[2] py-5 bg-neuro-navy text-white font-black rounded-2xl shadow-xl hover:bg-neuro-navy-light transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2"
+                        >
+                           {savingScorecard ? <Zap className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                           {savingScorecard ? "Saving Assessment..." : "Save to Candidate Profile"}
+                        </button>
+                     </div>
+                  </div>
+                )}
+
+                {activeModal === '90-Day-Success-Plan' && (
+                  <div className="space-y-8">
+                    {!showPreview ? (
+                      <div className="py-12 flex flex-col items-center justify-center text-center">
+                        <motion.div 
+                          animate={{ y: [0, -10, 0] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="w-20 h-20 bg-neuro-navy/5 rounded-[2rem] flex items-center justify-center mb-6 border border-neuro-navy/10 shadow-inner"
+                        >
+                          <Calendar className="w-10 h-10 text-neuro-navy" />
+                        </motion.div>
+                        <h4 className="text-2xl font-heading font-black text-neuro-navy mb-2">Build the 90-Day Blueprint.</h4>
+                        <p className="text-xs text-gray-500 max-w-sm mb-8">Generate a clinical mastery roadmap, weekly KPI scorecards, and a 12-week marketing schedule for your new hire.</p>
+                        
+                        {isGenerating ? (
+                          <div className="space-y-4 w-full max-w-xs">
+                             <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                <motion.div 
+                                  initial={{ width: 0 }}
+                                  animate={{ width: "100%" }}
+                                  transition={{ duration: 2.5 }}
+                                  className="h-full bg-neuro-orange"
+                                />
+                             </div>
+                             <p className="text-[9px] font-black text-neuro-orange uppercase animate-pulse">Architecting Onboarding Systems...</p>
+                          </div>
+                        ) : (
+                          <button 
+                            onClick={handleGenerate}
+                            className="px-8 py-4 bg-neuro-navy text-white font-black rounded-2xl shadow-xl hover:bg-neuro-orange transition-all uppercase tracking-widest text-xs flex items-center gap-2"
+                          >
+                            <Sparkles className="w-4 h-4" /> Generate Full Plan
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="space-y-6"
+                      >
+                         <div className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-3xl -mr-32 -mt-32"></div>
+                            <div className="relative z-10">
+                               <div className="flex items-center gap-2 mb-6">
+                                  <CheckCircle2 className="w-5 h-5 text-neuro-orange" />
+                                  <span className="text-[10px] font-black uppercase tracking-widest text-neuro-orange">Plan Generated Successfully</span>
+                               </div>
+                               <h4 className="text-3xl font-heading font-black mb-2">12-Week Success Roadmap</h4>
+                               <p className="text-xs text-gray-400 max-w-md">14 pages of clinical systems, scripts, and KPI tracking ready for your new Associate.</p>
+                               
+                               <div className="mt-8 grid grid-cols-3 gap-4">
+                                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10 text-center">
+                                     <p className="text-[8px] font-black text-gray-500 uppercase mb-1">Modules</p>
+                                     <p className="text-xl font-black text-white">12</p>
+                                  </div>
+                                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10 text-center">
+                                     <p className="text-[8px] font-black text-gray-500 uppercase mb-1">KPI Targets</p>
+                                     <p className="text-xl font-black text-white">36</p>
+                                  </div>
+                                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10 text-center">
+                                     <p className="text-[8px] font-black text-gray-500 uppercase mb-1">Scripts</p>
+                                     <p className="text-xl font-black text-white">4</p>
+                                  </div>
+                               </div>
+                            </div>
+                         </div>
+
+                         <div className="space-y-3">
+                            <h5 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Document Contents</h5>
+                            <div className="grid grid-cols-2 gap-3">
+                               {[
+                                 "Month 1: Systems & Culture",
+                                 "Month 2: Clinical Authority",
+                                 "Month 3: Retention mastery",
+                                 "Weekly KPI Scorecards",
+                                 "Internal Marketing Schedule",
+                                 "Day 1 Discovery Scripts"
+                               ].map((item, i) => (
+                                 <div key={i} className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                    <div className="w-5 h-5 rounded-full bg-green-500/10 flex items-center justify-center">
+                                       <CheckCircle2 className="w-3 h-3 text-green-500" />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-neuro-navy">{item}</span>
+                                 </div>
+                               ))}
+                            </div>
+                         </div>
+
+                         <button 
+                           onClick={initiateDownload}
+                           className="w-full py-6 bg-neuro-orange text-white font-black rounded-3xl shadow-xl hover:bg-neuro-orange-dark transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-3 group"
+                         >
+                            <FileText className="w-5 h-5 group-hover:scale-110 transition-transform" /> 
+                            Download PDF Success Plan
+                         </button>
+                      </motion.div>
+                    )}
                   </div>
                 )}
 
