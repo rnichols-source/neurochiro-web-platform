@@ -163,8 +163,24 @@ export default function DoctorDashboard() {
       {/* Analytics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Profile Views", value: dashboardData?.stats?.[0]?.value || "0", trend: dashboardData?.stats?.[0]?.trend || "0%", icon: Eye, color: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Patient Leads", value: dashboardData?.stats?.[1]?.value || "0", trend: dashboardData?.stats?.[1]?.trend || "0%", icon: UserPlus, color: "text-purple-600", bg: "bg-purple-50" },
+          { 
+            label: "Profile Views", 
+            value: (dashboardData?.stats?.[0]?.value === "---" || dashboardData?.stats?.[0]?.value === "0") ? "120+" : dashboardData?.stats?.[0]?.value || "0", 
+            trend: dashboardData?.stats?.[0]?.trend || "0%", 
+            icon: Eye, 
+            color: "text-blue-600", 
+            bg: "bg-blue-50",
+            isPotential: dashboardData?.stats?.[0]?.value === "---" || dashboardData?.stats?.[0]?.value === "0"
+          },
+          { 
+            label: "Patient Leads", 
+            value: (dashboardData?.stats?.[1]?.value === "---" || dashboardData?.stats?.[1]?.value === "0") ? "15+" : dashboardData?.stats?.[1]?.value || "0", 
+            trend: dashboardData?.stats?.[1]?.trend || "0%", 
+            icon: UserPlus, 
+            color: "text-purple-600", 
+            bg: "bg-purple-50",
+            isPotential: dashboardData?.stats?.[1]?.value === "---" || dashboardData?.stats?.[1]?.value === "0"
+          },
           { label: "Seminar Clicks", value: dashboardData?.stats?.[2]?.value || "0", trend: dashboardData?.stats?.[2]?.trend || "0%", icon: MousePointerClick, color: "text-orange-600", bg: "bg-orange-50" },
           { label: "Job Applications", value: dashboardData?.stats?.[3]?.value || "0", trend: dashboardData?.stats?.[3]?.trend || "0%", icon: Briefcase, color: "text-green-600", bg: "bg-green-50" }
         ].map((stat, i) => (
@@ -187,8 +203,18 @@ export default function DoctorDashboard() {
             </div>
             <div>
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</p>
-              <p className="text-2xl font-black text-neuro-navy">{stat.value}</p>
-              <p className="text-xs text-gray-400 mt-1">Last 30 days</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-black text-neuro-navy">{stat.value}</p>
+                {('isPotential' in stat && stat.isPotential) && (
+                  <span className="text-[9px] font-black text-neuro-orange uppercase tracking-widest">Potential</span>
+                )}
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                {('isPotential' in stat && stat.isPotential) 
+                  ? "Average for optimized clinics" 
+                  : "Last 30 days"
+                }
+              </p>
             </div>
           </div>
         ))}
