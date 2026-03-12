@@ -54,31 +54,40 @@ export async function getAdminDashboardStats(regionCode?: string) {
     const previousRevenue = pCharges.reduce((sum, c) => sum + c.amount, 0) / 100
     const revenueTrend = previousRevenue === 0 ? 100 : ((currentRevenue - previousRevenue) / previousRevenue) * 100
 
-    // --- ACTIVE DOCTORS ---
-    const { count: doctorsCountDb } = await supabase
+    // --- ACTIVE DOCTORS (With Region Filtering) ---
+    let doctorQuery = supabase
       .from('doctors')
       .select('*', { count: 'exact', head: true })
       .eq('verification_status', 'verified');
     
+    if (regionCode && regionCode !== 'ALL') {
+      doctorQuery = doctorQuery.eq('region_code', regionCode);
+    }
+    
+    const { count: doctorsCountDb } = await doctorQuery;
     const doctorsCount = doctorsCountDb || 0;
-    const doctorTrend = 5.2;
+    const doctorTrend = 0; // Baseline
 
-    // --- TALENT NETWORK ---
-    const { count: talentCountDb } = await supabase
+    // --- TALENT NETWORK (With Region Filtering) ---
+    let talentQuery = supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
       .eq('role', 'student');
+
+    if (regionCode && regionCode !== 'ALL') {
+      talentQuery = talentQuery.eq('region_code', regionCode);
+    }
     
+    const { count: talentCountDb } = await talentQuery;
     const talentCount = talentCountDb || 0;
-    const talentTrend = 12.4;
+    const talentTrend = 0; // Baseline
 
     // --- MARKET HEALTH ---
-    // Composite score based on MRR growth, user growth, and low failure rates
-    const mrrGrowthScore = Math.min(revenueTrend, 20) / 20 * 40 // Max 40 points
-    const docGrowthScore = Math.min(doctorTrend, 10) / 10 * 30 // Max 30 points
-    const talentGrowthScore = Math.min(talentTrend, 20) / 20 * 30 // Max 30 points
-    const marketHealthScore = Math.min(Math.max(mrrGrowthScore + docGrowthScore + talentGrowthScore, 65), 98) // Floor 65, Cap 98
-    const marketTrend = 1.2
+    const mrrGrowthScore = Math.min(revenueTrend, 20) / 20 * 40 
+    const docGrowthScore = Math.min(doctorTrend, 10) / 10 * 30 
+    const talentGrowthScore = Math.min(talentTrend, 20) / 20 * 30 
+    const marketHealthScore = Math.min(Math.max(mrrGrowthScore + docGrowthScore + talentGrowthScore, 65), 98) 
+    const marketTrend = 0
 
     // --- SYSTEM HEALTH & ALERTS ---
     const failedCurrent = currentCharges.filter(c => c.status === 'failed').length
