@@ -327,6 +327,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                  externalSearchQuery={searchQuery} 
                  onSearchChange={setSearchQuery}
                  externalLocationQuery={locationQuery} 
+                 initialDoctors={initialData.doctors}
                />
             </div>
           </div>

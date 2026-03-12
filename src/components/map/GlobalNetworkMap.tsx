@@ -24,13 +24,15 @@ interface GlobalNetworkMapProps {
   externalSearchQuery?: string;
   onSearchChange?: (q: string) => void;
   externalLocationQuery?: string;
+  initialDoctors?: Doctor[];
 }
 
 export default function GlobalNetworkMap({ 
   defaultLayer = "all",
   externalSearchQuery = "",
   onSearchChange,
-  externalLocationQuery = ""
+  externalLocationQuery = "",
+  initialDoctors = []
 }: GlobalNetworkMapProps) {
   const router = useRouter();
   const { region } = useRegion();
@@ -48,7 +50,7 @@ export default function GlobalNetworkMap({
     }
   };
 
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>(initialDoctors);
   const [seminars, setSeminars] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -138,8 +140,8 @@ export default function GlobalNetworkMap({
     } else {
       points = doctors
         .filter(doc => 
-          typeof doc.latitude === 'number' && doc.latitude !== 0 && 
-          typeof doc.longitude === 'number' && doc.longitude !== 0 &&
+          doc.latitude !== null && doc.latitude !== undefined && Number(doc.latitude) !== 0 && 
+          doc.longitude !== null && doc.longitude !== undefined && Number(doc.longitude) !== 0 &&
           (!searchQuery || 
             `${doc.first_name} ${doc.last_name} ${doc.clinic_name}`.toLowerCase().includes(searchQuery.toLowerCase()))
         )
@@ -157,7 +159,7 @@ export default function GlobalNetworkMap({
           },
           geometry: {
             type: 'Point' as const,
-            coordinates: [doc.longitude, doc.latitude]
+            coordinates: [Number(doc.longitude), Number(doc.latitude)]
           }
         }));
     }
@@ -232,9 +234,13 @@ export default function GlobalNetworkMap({
   // Handle iframe messages
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
+      // If we receive ANY map-related message, the iframe is clearly ready
+      if (e.data && e.data.type && e.data.type.startsWith('map-')) {
+          setMapReady(true);
+      }
+
       if (e.data.type === 'map-ready') {
         console.log("[MAP_DEBUG] Map Iframe Ready");
-        setMapReady(true);
       } else if (e.data.type === 'map-move') {
         updateMapData(e.data.bounds, e.data.zoom);
       } else if (e.data.type === 'marker-click') {
