@@ -102,24 +102,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const SidebarContent = (
     <div className="flex flex-col h-full bg-neuro-navy">
-      {/* Dev Toggle - Only visible on desktop or when sidebar is visible */}
-      <div className="absolute -right-20 top-40 -rotate-90 origin-left z-50 hidden md:block">
-        <div className="bg-neuro-orange p-1 rounded-t-lg flex gap-1 border-x border-t border-white/20 shadow-2xl">
-          {(["starter", "growth", "pro"] as DoctorTier[]).map((t) => (
-            <button 
-              key={t}
-              onClick={() => setTier(t)}
-              className={cn(
-                "text-[9px] font-black px-2 py-1 rounded uppercase tracking-tighter transition-colors",
-                tier === t ? "bg-white text-neuro-orange" : "text-white hover:bg-white/10"
-              )}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      </div>
-      
       <div className="p-6">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-neuro-orange flex items-center justify-center font-bold text-white text-xl">N</div>

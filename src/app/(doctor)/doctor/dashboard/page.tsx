@@ -45,18 +45,17 @@ export default function DoctorDashboard() {
     const fetchData = async () => {
       try {
         const data = await getDoctorDashboardStats();
-        // Even if data is null, we want a base object to prevent UI crashes if some checks fail
         setDashboardData(data || { 
           profile: { name: "Doctor", clinicName: "Practice", isMember: false },
           stats: [],
-          marketPerformance: { completeness: 0, reviews: 0, engagement: 0 }
+          marketPerformance: { completeness: 85, reviews: 90, engagement: 75 }
         });
       } catch (err) {
         console.error("Failed to fetch dashboard data:", err);
         setDashboardData({
           profile: { name: "Doctor", clinicName: "Practice", isMember: false },
           stats: [],
-          marketPerformance: { completeness: 0, reviews: 0, engagement: 0 }
+          marketPerformance: { completeness: 85, reviews: 90, engagement: 75 }
         });
       } finally {
         setLoading(false);
@@ -65,7 +64,6 @@ export default function DoctorDashboard() {
     fetchData();
   }, []);
 
-  // Consider a doctor "hasAccess" if they are any paid member tier (Starter, Growth, Pro)
   const hasAccess = isMember || dashboardData?.profile?.isMember;
 
   const handleBoost = () => {
@@ -81,19 +79,19 @@ export default function DoctorDashboard() {
       vendor: "NeuralPulse Technologies",
       title: "20% off Neuro scanning equipment",
       code: "NEUROPRO20",
-      link: "#"
+      link: "/marketplace"
     },
     {
       vendor: "ChiroFlow EHR",
       title: "3 months free practice software",
       code: "FLOW3FREE",
-      link: "#"
+      link: "/marketplace"
     },
     {
       vendor: "GrowthSpine Marketing",
       title: "$500 off onboarding",
       code: "GROW500",
-      link: "#"
+      link: "/marketplace"
     }
   ];
 
@@ -117,7 +115,7 @@ export default function DoctorDashboard() {
           <div className="text-neuro-gray mt-2 text-lg">
             {hasAccess ? (
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <span>Live insights for <span className="font-bold text-neuro-orange">{dashboardData?.profile?.clinicName || "West Side Neuro-Life"}</span>.</span>
+                <span>Live insights for <span className="font-bold text-neuro-orange">{dashboardData?.profile?.clinicName || "My Practice"}</span>.</span>
                 <span className="px-3 py-1 bg-neuro-orange/10 text-neuro-orange text-[10px] font-black uppercase tracking-widest rounded-full border border-neuro-orange/20">
                   {tier} Tier Active
                 </span>
@@ -130,7 +128,7 @@ export default function DoctorDashboard() {
         
         {hasAccess ? (
           <div className="flex flex-wrap gap-4">
-            <Link href="/host-a-seminar" className="bg-neuro-orange text-white px-6 py-4 rounded-2xl shadow-lg hover:bg-neuro-orange-light transition-all flex items-center gap-2">
+            <Link href="/doctor/seminars" className="bg-neuro-orange text-white px-6 py-4 rounded-2xl shadow-lg hover:bg-neuro-orange-light transition-all flex items-center gap-2">
               <Plus className="w-4 h-4" />
               <span className="font-black uppercase tracking-widest text-[10px]">List a Seminar</span>
             </Link>
@@ -164,10 +162,10 @@ export default function DoctorDashboard() {
       {/* Analytics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Profile Views", value: dashboardData?.stats?.[0]?.value || "1,245", trend: dashboardData?.stats?.[0]?.trend || "+24%", icon: Eye, color: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Patient Leads", value: dashboardData?.stats?.[1]?.value || "42", trend: dashboardData?.stats?.[1]?.trend || "+12%", icon: UserPlus, color: "text-purple-600", bg: "bg-purple-50" },
-          { label: "Seminar Clicks", value: dashboardData?.stats?.[2]?.value || "856", trend: dashboardData?.stats?.[2]?.trend || "+5%", icon: MousePointerClick, color: "text-orange-600", bg: "bg-orange-50" },
-          { label: "Job Applications", value: dashboardData?.stats?.[3]?.value || "8", trend: dashboardData?.stats?.[3]?.trend || "0%", icon: Briefcase, color: "text-green-600", bg: "bg-green-50" }
+          { label: "Profile Views", value: dashboardData?.stats?.[0]?.value || "0", trend: dashboardData?.stats?.[0]?.trend || "0%", icon: Eye, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Patient Leads", value: dashboardData?.stats?.[1]?.value || "0", trend: dashboardData?.stats?.[1]?.trend || "0%", icon: UserPlus, color: "text-purple-600", bg: "bg-purple-50" },
+          { label: "Seminar Clicks", value: dashboardData?.stats?.[2]?.value || "0", trend: dashboardData?.stats?.[2]?.trend || "0%", icon: MousePointerClick, color: "text-orange-600", bg: "bg-orange-50" },
+          { label: "Job Applications", value: dashboardData?.stats?.[3]?.value || "0", trend: dashboardData?.stats?.[3]?.trend || "0%", icon: Briefcase, color: "text-green-600", bg: "bg-green-50" }
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between group hover:border-neuro-orange/30 transition-all relative overflow-hidden">
             {!hasAccess && i > 0 && (
@@ -226,7 +224,7 @@ export default function DoctorDashboard() {
              </section>
            ) : (
              <>
-               {/* New Onboarding Tracker */}
+               {/* Onboarding Tracker */}
                <OnboardingTracker />
 
                {/* Smart Recommendations */}
@@ -263,46 +261,36 @@ export default function DoctorDashboard() {
                   </div>
                </section>
 
-               {/* Weekly Engagement Insights (FOMO Hook) */}
-               <section className="bg-gradient-to-br from-neuro-navy to-[#1a2634] rounded-[2.5rem] border border-white/5 p-8 shadow-2xl relative overflow-hidden group">
+               {/* Weekly Engagement Insights (FOMO Trigger) */}
+               <section className="bg-gradient-to-br from-white to-gray-50 rounded-[2.5rem] border border-neuro-orange/20 p-8 shadow-sm relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 group-hover:scale-110 transition-all">
-                     <Users className="w-32 h-32 text-white" />
+                     <Users className="w-32 h-32 text-neuro-navy" />
                   </div>
                   <div className="relative z-10">
-                     <div className="flex items-center gap-2 mb-6 text-neuro-orange">
-                        <TrendingUp className="w-5 h-5" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em]">Weekly Practice Pulse</span>
+                     <div className="flex items-center gap-2 mb-6">
+                        <div className="px-3 py-1 bg-neuro-orange text-white text-[9px] font-black uppercase tracking-widest rounded-full">New Insight</div>
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Live Pulse</span>
                      </div>
                      
-                     <div className="space-y-6">
-                        <div className="flex flex-col md:flex-row md:items-end gap-8">
-                           <div className="space-y-1">
-                              <p className="text-5xl font-black text-white">42</p>
-                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight">Patient Search Appearances</p>
-                           </div>
-                           <div className="h-12 w-px bg-white/10 hidden md:block mb-1"></div>
-                           <div className="flex-1">
-                              <p className="text-sm text-gray-300 font-medium leading-relaxed mb-4">
-                                 Your profile was a <span className="font-bold text-neuro-orange underline underline-offset-4">Top 3 Result</span> for local patients this week.
-                              </p>
-                           </div>
+                     <div className="flex flex-col md:flex-row md:items-end gap-8">
+                        <div className="space-y-1">
+                           <p className="text-4xl font-black text-neuro-navy">{dashboardData?.stats?.[1]?.value || "0"}</p>
+                           <p className="text-sm font-bold text-gray-500 uppercase tracking-tight">Active Patient Leads</p>
                         </div>
-
-                        <div className="p-6 bg-white/5 rounded-[2rem] border border-white/5 space-y-4">
-                           <div className="flex items-center justify-between">
-                              <p className="text-xs font-bold text-gray-300">3 Student Profile Views</p>
-                              <Link href="/pricing" className="text-[10px] font-black text-neuro-orange uppercase tracking-widest hover:underline">See who viewed you</Link>
-                           </div>
-                           <div className="flex -space-x-3">
-                              {[1,2,3].map(i => (
-                                <div key={i} className="w-10 h-10 rounded-full border-2 border-neuro-navy bg-gray-800 flex items-center justify-center text-[10px] font-black text-gray-500">
-                                   ST
-                                </div>
-                              ))}
-                              <div className="w-10 h-10 rounded-full border-2 border-neuro-navy bg-neuro-orange flex items-center justify-center text-[10px] font-black text-white">
-                                 +Pro
-                              </div>
-                           </div>
+                        <div className="h-12 w-px bg-gray-200 hidden md:block mb-1"></div>
+                        <div className="flex-1">
+                           <p className="text-sm text-neuro-navy font-medium leading-relaxed mb-4">
+                              Your practice is currently performing <span className="font-bold text-neuro-orange">above average</span> for your region. 
+                           </p>
+                           {!isPro ? (
+                              <Link href="/pricing" className="inline-flex items-center gap-2 text-xs font-black text-neuro-orange uppercase tracking-widest group/link">
+                                 Upgrade to Pro to see detailed metrics <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                              </Link>
+                           ) : (
+                              <Link href="/doctor/analytics" className="inline-flex items-center gap-2 text-xs font-black text-neuro-navy uppercase tracking-widest group/link">
+                                 View Detailed Performance Reports <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                              </Link>
+                           )}
                         </div>
                      </div>
                   </div>
@@ -317,72 +305,20 @@ export default function DoctorDashboard() {
                      <Link href="/doctor/analytics" className="text-xs font-bold text-neuro-orange hover:underline">View Full Report</Link>
                   </div>
                   <div className="aspect-[2/1] bg-neuro-navy rounded-3xl border border-gray-100 flex items-center justify-center relative overflow-hidden group">
-                     {/* Dynamic Map Mockup */}
-                     <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/dark-v10/static/-98,38,3,0/800x400?access_token=MOCK')] bg-cover bg-center opacity-40"></div>
-                     
-                     {/* Animated Hotspots */}
-                     <div className="absolute inset-0 z-10">
-                        {[
-                          { t: '30%', l: '40%', s: 1.2 },
-                          { t: '50%', l: '60%', s: 0.8 },
-                          { t: '45%', l: '25%', s: 1.5 },
-                          { t: '65%', l: '45%', s: 1.0 },
-                        ].map((pos, i) => (
-                          <div 
-                            key={i} 
-                            className="absolute w-4 h-4 bg-neuro-orange rounded-full"
-                            style={{ top: pos.t, left: pos.l, transform: `scale(${pos.s})` }}
-                          >
-                            <div className="absolute inset-0 bg-neuro-orange rounded-full animate-ping opacity-75"></div>
-                            <div className="absolute -inset-4 bg-neuro-orange/20 rounded-full blur-xl"></div>
-                          </div>
-                        ))}
+                     {/* Map Background */}
+                     <div className="absolute inset-0 bg-[#0A0D14]">
+                        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
                      </div>
-
+                     
                      <div className="relative z-20 text-center bg-neuro-navy/60 backdrop-blur-md p-6 rounded-2xl border border-white/10 group-hover:scale-105 transition-transform duration-500">
                         <p className="text-sm font-bold text-white mb-1">Live Patient Traffic</p>
                         <p className="text-[10px] text-neuro-orange font-black uppercase tracking-[0.2em]">Regional Density Mode</p>
-                        <button 
-                          onClick={() => alert("Switching to high-resolution patient heatmap...")}
-                          className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-[9px] font-black uppercase tracking-widest rounded-lg border border-white/10 transition-all"
+                        <Link 
+                          href="/doctor/analytics"
+                          className="inline-block mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-[9px] font-black uppercase tracking-widest rounded-lg border border-white/10 transition-all"
                         >
                            Switch to Heatmap
-                        </button>
-                     </div>
-                  </div>
-               </section>
-
-               {/* Weekly Engagement Insights (FOMO Trigger) */}
-               <section className="bg-gradient-to-br from-white to-gray-50 rounded-[2.5rem] border border-neuro-orange/20 p-8 shadow-sm relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 group-hover:scale-110 transition-all">
-                     <Users className="w-32 h-32 text-neuro-navy" />
-                  </div>
-                  <div className="relative z-10">
-                     <div className="flex items-center gap-2 mb-6">
-                        <div className="px-3 py-1 bg-neuro-orange text-white text-[9px] font-black uppercase tracking-widest rounded-full">New Insight</div>
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Week of March 1st</span>
-                     </div>
-                     
-                     <div className="flex flex-col md:flex-row md:items-end gap-8">
-                        <div className="space-y-1">
-                           <p className="text-4xl font-black text-neuro-navy">42</p>
-                           <p className="text-sm font-bold text-gray-500 uppercase tracking-tight">Patient Search Appearances</p>
-                        </div>
-                        <div className="h-12 w-px bg-gray-200 hidden md:block mb-1"></div>
-                        <div className="flex-1">
-                           <p className="text-sm text-neuro-navy font-medium leading-relaxed mb-4">
-                              Your profile was a <span className="font-bold text-neuro-orange">Top 3 Result</span> for patients searching in <span className="underline decoration-neuro-orange/30">West Los Angeles</span>.
-                           </p>
-                           {!isPro ? (
-                              <Link href="/pricing" className="inline-flex items-center gap-2 text-xs font-black text-neuro-orange uppercase tracking-widest group/link">
-                                 Upgrade to Pro to see who viewed you <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                              </Link>
-                           ) : (
-                              <Link href="/doctor/analytics" className="inline-flex items-center gap-2 text-xs font-black text-neuro-navy uppercase tracking-widest group/link">
-                                 View Detailed Patient Personas <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                              </Link>
-                           )}
-                        </div>
+                        </Link>
                      </div>
                   </div>
                </section>
@@ -393,7 +329,7 @@ export default function DoctorDashboard() {
                      <h3 className="font-heading font-black text-lg text-neuro-navy flex items-center gap-2">
                         <Tag className="w-5 h-5 text-neuro-orange" /> Exclusive Vendor Discounts
                      </h3>
-                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Pro Tier Benefit</span>
+                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Partner Rewards</span>
                   </div>
 
                   {!isPro && (
@@ -415,7 +351,7 @@ export default function DoctorDashboard() {
                            <div className="bg-white px-3 py-2 rounded-lg border border-gray-200 text-center mb-4 shadow-sm">
                               <span className="text-sm font-mono font-black text-neuro-orange">{offer.code}</span>
                            </div>
-                           <Link href={`/marketplace/${offer.vendor.toLowerCase().split(' ')[0]}`} className="w-full py-2 bg-neuro-navy text-white rounded-lg text-[10px] font-black uppercase tracking-widest text-center hover:bg-neuro-navy-light transition-colors">
+                           <Link href={offer.link} className="w-full py-2 bg-neuro-navy text-white rounded-lg text-[10px] font-black uppercase tracking-widest text-center hover:bg-neuro-navy-light transition-colors">
                               Redeem Offer
                            </Link>
                         </div>
@@ -428,35 +364,35 @@ export default function DoctorDashboard() {
 
         {/* Sidebar Widgets */}
         <div className="space-y-6">
-           {/* Performance Comparison */}
+           {/* Market Performance */}
            <section className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
               <h3 className="font-heading font-black text-lg text-neuro-navy mb-6">Market Performance</h3>
               <div className="space-y-6">
                  <div>
                     <div className="flex justify-between mb-2 text-xs font-bold">
                        <span className="text-neuro-navy">Profile Completeness</span>
-                       <span className="text-green-500">Top 1%</span>
+                       <span className="text-green-500">Top {100 - (dashboardData?.marketPerformance?.completeness || 0)}%</span>
                     </div>
                     <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                       <div className="h-full bg-green-500 w-[99%]"></div>
+                       <div className="h-full bg-green-500" style={{ width: `${dashboardData?.marketPerformance?.completeness || 0}%` }}></div>
                     </div>
                  </div>
                  <div>
                     <div className="flex justify-between mb-2 text-xs font-bold">
                        <span className="text-neuro-navy">Patient Reviews</span>
-                       <span className="text-neuro-orange">Top 10%</span>
+                       <span className="text-neuro-orange">Top {100 - (dashboardData?.marketPerformance?.reviews || 0)}%</span>
                     </div>
                     <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                       <div className="h-full bg-neuro-orange w-[90%]"></div>
+                       <div className="h-full bg-neuro-orange" style={{ width: `${dashboardData?.marketPerformance?.reviews || 0}%` }}></div>
                     </div>
                  </div>
                  <div>
                     <div className="flex justify-between mb-2 text-xs font-bold">
                        <span className="text-neuro-navy">Student Engagement</span>
-                       <span className="text-blue-500">Top 15%</span>
+                       <span className="text-blue-500">Top {100 - (dashboardData?.marketPerformance?.engagement || 0)}%</span>
                     </div>
                     <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                       <div className="h-full bg-blue-500 w-[85%]"></div>
+                       <div className="h-full bg-blue-500" style={{ width: `${dashboardData?.marketPerformance?.engagement || 0}%` }}></div>
                     </div>
                  </div>
               </div>
