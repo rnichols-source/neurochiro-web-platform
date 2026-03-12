@@ -69,7 +69,22 @@
 </head>
 <body>
 <div id="map"></div>
+<div id="error-banner" style="display:none; position:fixed; top:0; left:0; right:0; background:rgba(255,0,0,0.8); color:white; padding:10px; z-index:9999; font-family:sans-serif; font-size:12px;"></div>
 <script>
+    // Error Reporting
+    window.onerror = function(msg, url, line) {
+        const errorMsg = `Map Error: ${msg} at ${url}:${line}`;
+        console.error(errorMsg);
+        const banner = document.getElementById('error-banner');
+        if (banner) {
+            banner.style.display = 'block';
+            banner.innerText = errorMsg;
+        }
+        window.parent.postMessage({ type: 'map-error', error: errorMsg }, '*');
+    };
+
+    console.log("[MAP_IFRAME] Initializing Leaflet...");
+    
     const map = L.map('map', {
         zoomControl: false,
         attributionControl: false,
@@ -122,6 +137,7 @@
     setTimeout(notifyParent, 500);
 
     function updateMarkers(clusters) {
+        console.log(`[MAP_IFRAME] Updating markers. Cluster count: ${clusters.length}`);
         markers.forEach(m => map.removeLayer(m));
         markers = [];
 

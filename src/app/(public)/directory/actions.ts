@@ -55,10 +55,8 @@ export async function getDoctors(options: {
     
     if (!shouldFallback && data.length === 0) {
       if (!bounds) {
-        // If no bounds were provided and we got 0, definitely fall back
         shouldFallback = true;
       } else {
-        // If bounds WERE provided, check if the ENTIRE region is empty
         const { count: regionTotal } = await supabase
           .from('doctors')
           .select('*', { count: 'exact', head: true })
@@ -67,6 +65,23 @@ export async function getDoctors(options: {
         
         if (!regionTotal || regionTotal === 0) {
           shouldFallback = true;
+        } else {
+          // WIDE-ANGLE FALLBACK: If bounds returned nothing, but the region has doctors,
+          // return the region's doctors so the map isn't empty.
+          console.log(`[DIRECTORY_ACTIONS] Bounds returned 0, but region ${regionCode} has ${regionTotal}. Using wide-angle fallback.`);
+          const { data: fallbackData } = await supabase
+            .from('doctors')
+            .select('*')
+            .eq('region_code', regionCode || 'US')
+            .eq('verification_status', 'verified')
+            .limit(limit);
+          
+          if (fallbackData && fallbackData.length > 0) {
+            return {
+              doctors: fallbackData as Doctor[],
+              total: regionTotal
+            };
+          }
         }
       }
     }

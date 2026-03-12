@@ -167,6 +167,7 @@ export default function GlobalNetworkMap({
   }, [doctors, seminars, students, activeLayer, searchQuery]);
 
   const updateMapData = useCallback(async (bounds: [number, number, number, number], zoom: number) => {
+    console.log(`[MAP_DEBUG] Updating data with bounds:`, bounds, `zoom:`, zoom);
     currentBounds.current = bounds;
     currentZoom.current = zoom;
     setLoading(true);
@@ -180,6 +181,7 @@ export default function GlobalNetworkMap({
         setStudents(result);
       } else {
         const result = await getDoctors({ bounds, regionCode: region.code, limit: 100 });
+        console.log(`[MAP_DEBUG] Fetched ${result.doctors.length} doctors. Total: ${result.total}`);
         setDoctors(result.doctors);
       }
     } catch (e) {
@@ -191,7 +193,7 @@ export default function GlobalNetworkMap({
 
   const [mapReady, setMapReady] = useState(false);
 
-  // Initial map centering
+  // Initial map centering and data fetch
   useEffect(() => {
     if (mapReady && iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.postMessage({
@@ -199,15 +201,24 @@ export default function GlobalNetworkMap({
         center: region.mapDefaults.center,
         zoom: region.mapDefaults.zoom
       }, '*');
+
+      // If we haven't received bounds yet, do an initial wide fetch
+      if (!currentBounds.current) {
+        console.log("[MAP_DEBUG] Doing initial wide fetch for region:", region.code);
+        updateMapData(undefined as any, region.mapDefaults.zoom);
+      }
     }
   }, [mapReady, region.code]);
 
   // Re-sync markers when index (data) or layer changes
   useEffect(() => {
-    if (!currentBounds.current || !iframeRef.current?.contentWindow || !mapReady) return;
+    if (!iframeRef.current?.contentWindow || !mapReady) return;
     
     try {
-      const clusters = index.getClusters(currentBounds.current, Math.round(currentZoom.current));
+      // Fallback bounds if not yet moving
+      const bounds = currentBounds.current || [-180, -85, 180, 85];
+      const clusters = index.getClusters(bounds, Math.round(currentZoom.current));
+      console.log(`[MAP_DEBUG] Sending ${clusters.length} clusters to map.`);
       iframeRef.current.contentWindow.postMessage({ 
         type: 'update-clusters', 
         data: clusters,
@@ -222,11 +233,14 @@ export default function GlobalNetworkMap({
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
       if (e.data.type === 'map-ready') {
+        console.log("[MAP_DEBUG] Map Iframe Ready");
         setMapReady(true);
       } else if (e.data.type === 'map-move') {
         updateMapData(e.data.bounds, e.data.zoom);
       } else if (e.data.type === 'marker-click') {
         setSelectedPin(e.data.data);
+      } else if (e.data.type === 'map-error') {
+        console.error("[MAP_DEBUG] Iframe Error:", e.data.error);
       }
     };
 
