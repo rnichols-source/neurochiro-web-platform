@@ -222,10 +222,14 @@ export default function SeminarHub() {
                       {seminar.title}
                     </h3>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-400 mb-8">
+                    <div className="flex items-center justify-between mb-8">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-neuro-orange" />
-                        <span className="font-bold text-gray-300">{seminar.dates}</span>
+                        <span className="font-bold text-gray-300 text-sm">{seminar.dates}</span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Investment From</p>
+                        <p className="text-xl font-black text-neuro-orange">${seminar.price || '395'}</p>
                       </div>
                     </div>
 
@@ -239,12 +243,12 @@ export default function SeminarHub() {
                       </div>
                     </Link>
 
-                    <div className="mt-auto">
+                    <div className="mt-auto pt-4">
                       <Link 
                         href={`/seminars/${seminar.id}`}
-                        className="w-full py-5 bg-white/5 border border-white/10 hover:bg-neuro-orange hover:border-neuro-orange text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] transition-all flex items-center justify-center gap-3 group/btn"
+                        className="w-full py-5 bg-neuro-orange text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] transition-all flex items-center justify-center gap-3 shadow-xl shadow-neuro-orange/20 hover:bg-neuro-orange-light hover:scale-[1.02] active:scale-95 group/btn"
                       >
-                        View Details
+                        Register Now
                         <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                       </Link>
                     </div>
