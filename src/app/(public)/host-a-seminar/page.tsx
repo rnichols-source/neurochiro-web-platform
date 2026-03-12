@@ -16,8 +16,21 @@ import {
   BarChart3
 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase";
 
 export default function HostLandingPage() {
+  const [user, setUser] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    checkUser();
+  }, []);
+
   const tiers = [
     {
       name: "Single Event Listing",
@@ -67,6 +80,8 @@ export default function HostLandingPage() {
     }
   ];
 
+  const destination = user ? "/doctor/seminars" : "/register?role=doctor&redirect=/doctor/seminars";
+
   return (
     <div className="min-h-screen bg-[#0B1118] text-white pt-32 pb-40 overflow-hidden">
       {/* Background Accents */}
@@ -110,7 +125,7 @@ export default function HostLandingPage() {
           className="flex flex-wrap items-center justify-center gap-6"
         >
           <Link 
-            href="/doctor/seminars"
+            href={destination}
             className="px-12 py-6 bg-neuro-orange text-white rounded-3xl font-black uppercase tracking-widest text-xs hover:bg-neuro-orange-light transition-all shadow-2xl shadow-neuro-orange/30 flex items-center gap-3 group"
           >
             Start Hosting Now
@@ -174,7 +189,7 @@ export default function HostLandingPage() {
               </div>
 
               <Link 
-                href="/doctor/seminars"
+                href={destination}
                 className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-3 ${
                   tier.featured 
                   ? "bg-neuro-orange text-white shadow-lg shadow-neuro-orange/20 hover:bg-neuro-orange-light" 
