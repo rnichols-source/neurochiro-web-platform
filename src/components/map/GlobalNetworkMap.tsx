@@ -36,6 +36,7 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
   const [loading, setLoading] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const currentBounds = useRef<[number, number, number, number] | null>(null);
+  const currentZoom = useRef<number>(4);
 
   // Initialize Supercluster
   const index = useMemo(() => {
@@ -111,42 +112,48 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
   }, [doctors, seminars, students, activeLayer]);
 
   const updateMapData = useCallback(async (bounds: [number, number, number, number], zoom: number) => {
+    currentBounds.current = bounds;
+    currentZoom.current = zoom;
     setLoading(true);
-    if (activeLayer === 'seminar') {
-      const result = await getSeminarsForMap(bounds);
-      setSeminars(result);
-    } else if (activeLayer === 'student') {
-      const result = await getStudentsForMap({ bounds, limit: 100 });
-      setStudents(result);
-    } else {
-      const result = await getDoctors({ bounds, limit: 100 });
-      setDoctors(result.doctors);
-    }
-    setLoading(false);
-
-    if (!iframeRef.current?.contentWindow) return;
-
-    // 2. Fetch clusters and points for the current viewport
-    const clusters = index.getClusters(bounds, Math.round(zoom));
-
-    iframeRef.current.contentWindow.postMessage({ 
-      type: 'update-clusters', 
-      data: clusters,
-      layer: activeLayer
-    }, '*');
-  }, [index, activeLayer]);
-
-  // Re-fetch when layer changes
-  useEffect(() => {
-    if (currentBounds.current) {
-      updateMapData(currentBounds.current, 1); // Zoom is approximate here
+    
+    try {
+      if (activeLayer === 'seminar') {
+        const result = await getSeminarsForMap(bounds);
+        setSeminars(result);
+      } else if (activeLayer === 'student') {
+        const result = await getStudentsForMap({ bounds, limit: 100 });
+        setStudents(result);
+      } else {
+        const result = await getDoctors({ bounds, limit: 100 });
+        setDoctors(result.doctors);
+      }
+    } catch (e) {
+      console.error("Error updating map data:", e);
+    } finally {
+      setLoading(false);
     }
   }, [activeLayer]);
 
+  // Re-sync markers when index (data) or layer changes
+  useEffect(() => {
+    if (!currentBounds.current || !iframeRef.current?.contentWindow) return;
+    
+    try {
+      const clusters = index.getClusters(currentBounds.current, Math.round(currentZoom.current));
+      iframeRef.current.contentWindow.postMessage({ 
+        type: 'update-clusters', 
+        data: clusters,
+        layer: activeLayer
+      }, '*');
+    } catch (e) {
+      console.error("Error calculating/sending clusters:", e);
+    }
+  }, [index, activeLayer]);
+
+  // Handle iframe messages
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
       if (e.data.type === 'map-move') {
-        currentBounds.current = e.data.bounds;
         updateMapData(e.data.bounds, e.data.zoom);
       } else if (e.data.type === 'marker-click') {
         setSelectedPin(e.data.data);
@@ -174,9 +181,6 @@ export default function GlobalNetworkMap({ defaultLayer = "all" }: GlobalNetwork
         src="/network-map.html"
         className="absolute inset-0 w-full h-full border-none"
         title="Global Network Map"
-        onLoad={() => {
-          // Iframe will send 'map-move' on initial load to trigger first cluster calculation
-        }}
       />
 
       {/* 2. FLOATING COMMAND PALETTE */}
