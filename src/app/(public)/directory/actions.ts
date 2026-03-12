@@ -122,5 +122,14 @@ export async function getDoctorBySlug(slug: string) {
     }
   }
 
+  // Final fallback to mock data
+  if (!data) {
+    console.log("Doctor not found in DB, checking mock data for slug:", slug);
+    const mockDoctor = MOCK_DOCTORS.find(d => d.slug === slug || d.id === slug);
+    if (mockDoctor) {
+      return { doctor: mockDoctor as Doctor, error: null };
+    }
+  }
+
   return { doctor: data as Doctor | null, error }
 }
