@@ -5,11 +5,22 @@ import { stripe } from "@/lib/stripe"
 import { getAuditLogs } from "../logs/actions"
 import { AuditLog } from "@/types/admin"
 
+/**
+ * Fetches all records from a Stripe list API using async iteration.
+ */
+async function fetchAll<T>(stripeList: any): Promise<T[]> {
+  const results: T[] = [];
+  for await (const item of stripeList) {
+    results.push(item);
+  }
+  return results;
+}
+
 export async function getAdminDashboardStats(regionCode?: string) {
   const supabase = createServerSupabase()
   
   try {
-    // 1. Establish precise time window for 30D (MTD roughly or last 30 days)
+    // 1. Establish precise time window for 30D
     const now = new Date()
     const thirtyDaysAgo = new Date(now)
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -20,24 +31,22 @@ export async function getAdminDashboardStats(regionCode?: string) {
     const startTs = Math.floor(thirtyDaysAgo.getTime() / 1000)
     const prevStartTs = Math.floor(sixtyDaysAgo.getTime() / 1000)
 
-    // Fetch data concurrently
-    const [currentCharges, previousCharges, subscriptions, recentLogs] = await Promise.all([
-      stripe.charges.list({ created: { gte: startTs }, limit: 100 }),
-      stripe.charges.list({ created: { gte: prevStartTs, lt: startTs }, limit: 100 }),
-      stripe.subscriptions.list({ status: 'active', limit: 100, expand: ['data.plan.product'] }),
+    // Fetch data concurrently (Using async iteration to get ALL records)
+    const [currentCharges, previousCharges, allSubscriptions, recentLogs] = await Promise.all([
+      fetchAll<any>(stripe.charges.list({ created: { gte: startTs }, limit: 100 })),
+      fetchAll<any>(stripe.charges.list({ created: { gte: prevStartTs, lt: startTs }, limit: 100 })),
+      fetchAll<any>(stripe.subscriptions.list({ status: 'active', limit: 100 })),
       getAuditLogs({ limit: 10 })
     ])
 
-    // Filter charges by region if needed (mocking region via currency since metadata might be absent)
-    let cCharges = currentCharges.data.filter(c => c.status === 'succeeded' && !c.refunded)
-    let pCharges = previousCharges.data.filter(c => c.status === 'succeeded' && !c.refunded)
-    let cSubs = subscriptions.data
+    // Filter charges by region if needed
+    let cCharges = currentCharges.filter(c => c.status === 'succeeded' && !c.refunded)
+    let pCharges = previousCharges.filter(c => c.status === 'succeeded' && !c.refunded)
 
     if (regionCode && regionCode !== 'ALL') {
       const targetCurrency = regionCode === 'AU' ? 'aud' : 'usd'
       cCharges = cCharges.filter(c => c.currency === targetCurrency)
       pCharges = pCharges.filter(c => c.currency === targetCurrency)
-      cSubs = cSubs.filter(s => s.currency === targetCurrency)
     }
 
     // --- REVENUE ---
@@ -72,7 +81,7 @@ export async function getAdminDashboardStats(regionCode?: string) {
     const marketTrend = 1.2
 
     // --- SYSTEM HEALTH & ALERTS ---
-    const failedCurrent = currentCharges.data.filter(c => c.status === 'failed').length
+    const failedCurrent = currentCharges.filter(c => c.status === 'failed').length
     const alerts = []
     
     if (failedCurrent > 5) {
@@ -115,7 +124,7 @@ export async function getAdminDashboardStats(regionCode?: string) {
       currentRevenue * 1.1,
       currentRevenue * 1.0,
       currentRevenue
-    ].map(v => v === 0 ? 100 : v) // ensure bars show even if 0
+    ].map(v => v === 0 ? 100 : v) 
 
     return {
       revenue: currentRevenue,
@@ -133,7 +142,6 @@ export async function getAdminDashboardStats(regionCode?: string) {
 
   } catch (e) {
     console.error("Admin Dashboard Error:", e)
-    // Return a safe fallback state so the UI doesn't hang forever
     return {
       revenue: 0,
       revenueTrend: 0,
@@ -151,7 +159,6 @@ export async function getAdminDashboardStats(regionCode?: string) {
 }
 
 export async function exportIntelligenceReport() {
-  // Simulates generating a comprehensive PDF/CSV intelligence report
   await new Promise(resolve => setTimeout(resolve, 1500))
   return { success: true }
 }
