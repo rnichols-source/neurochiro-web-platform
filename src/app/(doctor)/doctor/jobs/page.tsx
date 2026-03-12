@@ -663,20 +663,33 @@ export default function JobsPage() {
                        key={idx}
                        onClick={() => setActiveModal('Review-Applicants')}
                        className={cn(
-                        "p-6 rounded-3xl border text-center cursor-pointer transition-all hover:-translate-y-1 shadow-sm relative overflow-hidden flex flex-col items-center justify-center",
+                        "p-6 rounded-3xl border text-center cursor-pointer transition-all hover:-translate-y-1 shadow-sm relative overflow-hidden flex flex-col items-center justify-center min-h-[160px]",
                         stage.color === 'blue' ? "bg-blue-50 border-blue-100 hover:bg-blue-100" :
                         stage.color === 'purple' ? "bg-purple-50 border-purple-100 hover:bg-purple-100" :
                         stage.color === 'orange' ? "bg-orange-50 border-orange-100 hover:bg-orange-100" :
                         "bg-green-50 border-green-100 hover:bg-green-100"
                        )}
                      >
+                        <p className={cn(
+                          "text-3xl font-black",
+                          stage.color === 'orange' ? "text-neuro-orange" : 
+                          stage.color === 'blue' ? "text-blue-600" :
+                          stage.color === 'purple' ? "text-purple-600" : "text-green-600"
+                        )}>{stage.count}</p>
+                        <p className={cn(
+                          "text-[10px] font-black uppercase tracking-widest mt-1",
+                          stage.color === 'orange' ? "text-orange-400" : 
+                          stage.color === 'blue' ? "text-blue-400" :
+                          stage.color === 'purple' ? "text-purple-400" : "text-green-400"
+                        )}>{stage.label}</p>
+
                         {stage.label === 'New' && (
-                          <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+                          <div className="mt-4 flex flex-col items-center gap-1">
                             <button 
                               onClick={handleZap}
                               disabled={isZapping || zapSuccess}
                               className={cn(
-                                "p-2 rounded-xl transition-all shadow-lg flex items-center gap-2",
+                                "px-3 py-1.5 rounded-xl transition-all shadow-lg flex items-center gap-2",
                                 zapSuccess ? "bg-green-500 text-white" : "bg-neuro-navy text-white hover:bg-neuro-orange"
                               )}
                             >
@@ -690,22 +703,10 @@ export default function JobsPage() {
                               </span>
                             </button>
                             {!zapSuccess && !isZapping && (
-                              <p className="text-[7px] font-black text-neuro-orange uppercase tracking-tighter animate-pulse mr-1">Speed to Lead</p>
+                              <p className="text-[7px] font-black text-neuro-orange uppercase tracking-tighter animate-pulse">Speed to Lead</p>
                             )}
                           </div>
                         )}
-                        <p className={cn(
-                          "text-3xl font-black",
-                          stage.color === 'orange' ? "text-neuro-orange" : 
-                          stage.color === 'blue' ? "text-blue-600" :
-                          stage.color === 'purple' ? "text-purple-600" : "text-green-600"
-                        )}>{stage.count}</p>
-                        <p className={cn(
-                          "text-[10px] font-black uppercase tracking-widest mt-1",
-                          stage.color === 'orange' ? "text-orange-400" : 
-                          stage.color === 'blue' ? "text-blue-400" :
-                          stage.color === 'purple' ? "text-purple-400" : "text-green-400"
-                        )}>{stage.label}</p>
                      </div>
                    ))}
                 </div>
@@ -767,7 +768,7 @@ export default function JobsPage() {
                     <Sparkles className="w-5 h-5 text-neuro-orange" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-neuro-orange">Smart Match</span>
                  </div>
-                 <h3 className="text-2xl font-heading font-black mb-6">Talent Recommendations</h3>
+                 <h3 className="text-2xl font-heading font-black mb-6 text-white">Talent Recommendations</h3>
                  
                  <div className="space-y-4 mb-10">
                     {[
