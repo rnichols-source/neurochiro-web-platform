@@ -252,7 +252,7 @@ export default function StudentDashboard() {
                 </div>
               </div>
 
-              <h4 className="text-2xl font-black mb-2 leading-tight">Class of '27 <br />Elite Track</h4>
+              <h4 className="text-[28px] font-black mb-2 leading-tight text-white drop-shadow-md">Class of '27 <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Elite Track</span></h4>
               
               <div className="space-y-4 mb-8 mt-6">
                  <div className="space-y-1">
