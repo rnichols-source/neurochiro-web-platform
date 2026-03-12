@@ -1,6 +1,7 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import * as React from "react";
+import { useRouter } from "next/navigation";
 import { 
   ArrowLeft, 
   Clock, 
@@ -71,8 +72,8 @@ const MOCK_CONTENT: Record<string, any> = {
   }
 };
 
-export default function ArticlePage() {
-  const { slug } = useParams();
+export default function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = React.use(params);
   const router = useRouter();
   const [isSaved, setIsSaved] = useState(false);
   const [liked, setLiked] = useState(false);

@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useEffect, useState } from "react";
 import { 
   Calendar, 
@@ -19,12 +20,10 @@ import {
   Mail
 } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { getHostProfile } from "./actions";
 
-export default function HostProfilePage() {
-  const params = useParams();
-  const id = params.id as string;
+export default function HostProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params);
   
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);

@@ -68,6 +68,32 @@ export async function getDoctors(options: {
         );
       }
 
+      // Ensure mock doctors have valid coordinates if they are 0
+      // This is crucial for the map display
+      filteredMock = filteredMock.map(d => {
+        if (d.latitude === 0 && d.longitude === 0) {
+          // Provide distinct fallback coordinates within the US if they are 0
+          // This avoids everything stacking at 0,0 and being filtered out
+          const seed = parseInt(d.id, 36) || 0;
+          return {
+            ...d,
+            latitude: 35 + (seed % 10),
+            longitude: -100 + (seed % 20)
+          };
+        }
+        return d;
+      });
+
+      // Filter by bounds if provided
+      if (bounds) {
+        filteredMock = filteredMock.filter(d => 
+          d.longitude >= bounds[0] && 
+          d.latitude >= bounds[1] && 
+          d.longitude <= bounds[2] && 
+          d.latitude <= bounds[3]
+        );
+      }
+
       // Tiered Ranking + Daily Rotation for Mock Data
       const today = new Date().toISOString().split('T')[0];
       const seed = today.split('-').reduce((a, b) => a + parseInt(b), 0);
@@ -157,7 +183,7 @@ export async function getStudentsForMap(options: {
         .lte('latitude', bounds[3]);
     }
 
-    const { data, error } = await query;
+    const { data, error } = await query
 
     if (error || !data || data.length === 0) {
       // Mock Data Fallback for students
@@ -193,6 +219,17 @@ export async function getStudentsForMap(options: {
           interests: ['Prenatal', 'Nervous System']
         }
       ];
+
+      // Filter by bounds if provided
+      if (bounds) {
+        return mockStudents.filter(s => 
+          s.longitude >= bounds[0] && 
+          s.latitude >= bounds[1] && 
+          s.longitude <= bounds[2] && 
+          s.latitude <= bounds[3]
+        );
+      }
+
       return mockStudents;
     }
 

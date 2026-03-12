@@ -1,7 +1,8 @@
 "use client";
 
+import * as React from "react";
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { 
   Calendar, 
   MapPin, 
@@ -23,9 +24,8 @@ import { useRegion } from "@/context/RegionContext";
 
 export const dynamic = 'force-dynamic';
 
-export default function SeminarDetailsPage() {
-  const params = useParams();
-  const id = params?.id as string;
+export default function SeminarDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params);
   const router = useRouter();
   const { region } = useRegion();
   

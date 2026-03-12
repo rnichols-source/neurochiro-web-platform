@@ -7,12 +7,13 @@ import SchemaMarkup from "@/components/seo/SchemaMarkup";
 export const dynamic = 'force-dynamic';
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 // 1. DYNAMIC SEO METADATA
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { doctor } = await getDoctorBySlug(params.slug);
+  const resolvedParams = await params;
+  const { doctor } = await getDoctorBySlug(resolvedParams.slug);
 
   if (!doctor) {
     return {
@@ -43,7 +44,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function DoctorProfilePage({ params }: Props) {
-  const { doctor } = await getDoctorBySlug(params.slug);
+  const resolvedParams = await params;
+  const { doctor } = await getDoctorBySlug(resolvedParams.slug);
 
   if (!doctor) {
     notFound();
@@ -77,7 +79,7 @@ export default async function DoctorProfilePage({ params }: Props) {
   return (
     <>
       <SchemaMarkup data={jsonLd} />
-      <DoctorProfileClient doctor={doctor} slug={params.slug} />
+      <DoctorProfileClient doctor={doctor} slug={resolvedParams.slug} />
     </>
   );
 }

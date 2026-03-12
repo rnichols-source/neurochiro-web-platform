@@ -6,11 +6,12 @@ import { Metadata } from "next";
 import SchemaMarkup from "@/components/seo/SchemaMarkup";
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const article = ARTICLES.find(a => a.slug === params.slug);
+  const { slug } = await params;
+  const article = ARTICLES.find(a => a.slug === slug);
 
   if (!article) {
     return { title: "Article Not Found | NeuroChiro" };
@@ -27,8 +28,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function ArticlePage({ params }: Props) {
-  const { slug } = params;
+export default async function ArticlePage({ params }: Props) {
+  const { slug } = await params;
   const article = ARTICLES.find(a => a.slug === slug);
 
   if (!article) {

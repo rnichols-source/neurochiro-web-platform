@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useState } from "react";
 import { 
   MessageSquare, 
@@ -22,12 +23,12 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useDoctorTier } from "@/context/DoctorTierContext";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
-export default function VendorProfilePage() {
-  const { slug } = useParams();
+export default function VendorProfilePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = React.use(params);
   const router = useRouter();
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);

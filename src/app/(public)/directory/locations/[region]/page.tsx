@@ -8,11 +8,12 @@ import SchemaMarkup from "@/components/seo/SchemaMarkup";
 export const dynamic = 'force-dynamic';
 
 interface Props {
-  params: { region: string };
+  params: Promise<{ region: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const regionKey = params.region.toUpperCase() as RegionCode;
+  const { region: regionSlug } = await params;
+  const regionKey = regionSlug.toUpperCase() as RegionCode;
   const region = REGIONS[regionKey];
 
   if (!region) {
@@ -36,7 +37,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function RegionalDirectoryPage({ params }: Props) {
-  const regionKey = params.region.toUpperCase() as RegionCode;
+  const { region: regionSlug } = await params;
+  const regionKey = regionSlug.toUpperCase() as RegionCode;
   const region = REGIONS[regionKey];
 
   if (!region) {
