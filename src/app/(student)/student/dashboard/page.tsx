@@ -216,7 +216,7 @@ export default function StudentDashboard() {
 
           {/* Academy - Foundation */}
           <div className="relative group">
-            <Link href={isFoundation ? "/student/learn" : "/pricing"} className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group block h-full ${!isFoundation ? 'opacity-60 grayscale-[0.5]' : ''}`}>
+            <Link href={isFoundation ? "/student/academy" : "/pricing"} className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group block h-full ${!isFoundation ? 'opacity-60 grayscale-[0.5]' : ''}`}>
               <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-purple-600 transition-colors">
                 <Trophy className="w-6 h-6 text-purple-600 group-hover:text-white" />
               </div>
@@ -274,7 +274,7 @@ export default function StudentDashboard() {
            </div>
            
            <div className="space-y-3 relative z-10">
-              <Link href="/student/learn" className="block w-full py-4 bg-neuro-orange text-white font-black text-[11px] uppercase tracking-widest rounded-2xl text-center hover:bg-neuro-orange-light transition-all shadow-xl shadow-neuro-orange/20 active:scale-[0.98]">
+              <Link href="/student/academy" className="block w-full py-4 bg-neuro-orange text-white font-black text-[11px] uppercase tracking-widest rounded-2xl text-center hover:bg-neuro-orange-light transition-all shadow-xl shadow-neuro-orange/20 active:scale-[0.98]">
                  Accelerate My Path
               </Link>
               <p className="text-[9px] text-gray-500 text-center font-bold uppercase tracking-tighter">
