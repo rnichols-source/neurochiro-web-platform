@@ -44,15 +44,59 @@ export default function NegotiationGuidePage() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-12">
-      <header>
-        <h1 className="text-4xl font-heading font-black text-neuro-navy flex items-center gap-3">
-          <Star className="w-8 h-8 text-neuro-orange" />
-          Negotiation Guide
-        </h1>
-        <p className="text-neuro-gray mt-2 text-lg max-w-2xl">
-          Learn the art of the clinical 'Win-Win'. Negotiate for mentorship, equity, and compensation with total professional poise.
-        </p>
+      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="px-2 py-1 bg-neuro-orange/10 text-neuro-orange text-[8px] font-black uppercase tracking-widest rounded-md border border-neuro-orange/20">
+              Elite Content
+            </div>
+            <div className="px-2 py-1 bg-green-500/10 text-green-500 text-[8px] font-black uppercase tracking-widest rounded-md border border-green-500/20">
+              $100k Value Resource
+            </div>
+          </div>
+          <h1 className="text-5xl font-heading font-black text-neuro-navy flex items-center gap-4">
+            The Negotiation Masterclass
+          </h1>
+          <p className="text-neuro-gray mt-4 text-xl max-w-2xl leading-relaxed">
+            The difference between a "Standard" contract and an "Elite" one is often <span className="text-neuro-navy font-black">$100,000 in lifetime value</span>. Don't leave your future to chance.
+          </p>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-4">
+           <button className="flex items-center gap-3 px-8 py-4 bg-neuro-navy text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-neuro-navy-light transition-all shadow-xl shadow-neuro-navy/20">
+              <FileText className="w-4 h-4 text-neuro-orange" /> Download PDF Playbook
+           </button>
+           <button className="flex items-center gap-3 px-8 py-4 bg-white border border-gray-100 text-neuro-navy font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-gray-50 transition-all shadow-sm">
+              <Star className="w-4 h-4 text-neuro-orange" /> Video Walkthrough
+           </button>
+        </div>
       </header>
+
+      {/* The $100k Swing - Value Visualization */}
+      <section className="bg-gradient-to-br from-neuro-navy to-[#1a2531] rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
+         <div className="absolute top-0 right-0 w-96 h-96 bg-neuro-orange/10 blur-[120px] -mr-48 -mt-48"></div>
+         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
+            <div className="lg:col-span-2 space-y-4">
+               <h2 className="text-3xl font-black italic">The "$100k Swing"</h2>
+               <p className="text-gray-400 text-lg max-w-2xl">
+                 A 1% difference in collections or a $1,000 monthly mentorship stipend seems small today. Over a 5-year associate term, that's the difference between a <span className="text-white font-bold">standard life</span> and a <span className="text-neuro-orange font-bold">legacy life</span>.
+               </p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm">
+               <div className="space-y-6">
+                  <div>
+                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Standard Offer</p>
+                    <p className="text-2xl font-bold text-gray-400">$85,000 /yr</p>
+                  </div>
+                  <div className="h-px bg-white/10"></div>
+                  <div>
+                    <p className="text-[10px] font-black text-neuro-orange uppercase tracking-widest mb-1">Elite Negotiated Offer</p>
+                    <p className="text-4xl font-black text-white">$105,000 <span className="text-xs text-green-500">+ Equity</span></p>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </section>
 
       {/* Strategy Tabs */}
       <section className="bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden shadow-sm">
