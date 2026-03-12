@@ -33,6 +33,8 @@ import { getDoctorSeminars, createSeminarAction } from "./actions";
 export default function SeminarsPage() {
   const [isHostingOpen, setIsHostingOpen] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState<any>(null);
+  const [isEditOpen, setIsEditOpen] = useState<any>(null);
+  const [isAttendeesOpen, setIsAttendeesOpen] = useState<any>(null);
   const [isCampaignOpen, setIsCampaignOpen] = useState(false);
   const [successState, setSuccessState] = useState<string | null>(null);
   const [mySeminars, setMySeminars] = useState<any[]>([
@@ -114,13 +116,21 @@ export default function SeminarsPage() {
           <h1 className="text-4xl font-heading font-black text-neuro-navy">Seminar Hub</h1>
           <p className="text-neuro-gray mt-2 text-lg">Your event command center: host, track, and grow.</p>
         </div>
-        <Link
-          href="/host-a-seminar"
-          className="bg-neuro-orange text-white px-8 py-4 rounded-2xl shadow-xl hover:bg-neuro-orange-light transition-all transform hover:scale-105 flex items-center gap-3"
-        >
-          <Plus className="w-5 h-5" />
-          <span className="font-black uppercase tracking-widest text-sm">Host a Seminar</span>
-        </Link>      </header>
+        <div className="flex gap-4">
+          <Link
+            href="/host-a-seminar"
+            className="px-6 py-4 bg-white border border-gray-200 text-neuro-navy font-black rounded-2xl text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center gap-2"
+          >
+            View Hosting Packages
+          </Link>
+          <button
+            onClick={() => setIsHostingOpen(true)}
+            className="bg-neuro-orange text-white px-8 py-4 rounded-2xl shadow-xl hover:bg-neuro-orange-light transition-all transform hover:scale-105 flex items-center gap-3"
+          >
+            <Plus className="w-5 h-5" />
+            <span className="font-black uppercase tracking-widest text-sm">Host a Seminar</span>
+          </button>
+        </div>      </header>
 
       {/* Seminar Analytics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -219,25 +229,26 @@ export default function SeminarsPage() {
                 </div>
                 
                 <div className="grid grid-cols-3 gap-3">
-                   <Link 
-                    href={`/doctor/seminars/edit/${sem.id}`}
+                   <button
+                    onClick={() => setIsEditOpen(sem)}
                     className="py-3 bg-gray-50 text-neuro-navy font-bold rounded-xl text-xs hover:bg-gray-100 transition-colors flex items-center justify-center"
                    >
                       Edit Details
-                   </Link>
-                   <Link 
-                    href={`/doctor/seminars/attendees/${sem.id}`}
+                   </button>
+                   <button
+                    onClick={() => setIsAttendeesOpen(sem)}
                     className="py-3 bg-gray-50 text-neuro-navy font-bold rounded-xl text-xs hover:bg-gray-100 transition-colors flex items-center justify-center"
                    >
                       Manage Attendees
-                   </Link>
-                   <button 
+                   </button>
+                   <button
                     onClick={() => setIsAnalyticsOpen(sem)}
                     className="py-3 bg-neuro-navy text-white font-bold rounded-xl text-xs hover:bg-neuro-navy-light transition-colors shadow-lg shadow-neuro-navy/10"
                    >
                       View Analytics
                    </button>
                 </div>
+
              </div>
            ))}
 
@@ -511,7 +522,123 @@ export default function SeminarsPage() {
         </div>
       )}
 
+      {/* EDIT SEMINAR MODAL */}
+      {isEditOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/20">
+            <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-neuro-orange/20 rounded-2xl flex items-center justify-center text-neuro-orange">
+                  <Target className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold">Edit Seminar - {isEditOpen.title}</h3>
+                  <p className="text-[10px] uppercase font-black text-white/50 tracking-widest">Update Listing Details</p>
+                </div>
+              </div>
+              <button onClick={() => setIsEditOpen(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-10 max-h-[70vh] overflow-y-auto space-y-6">
+               <p className="text-sm text-gray-500 mb-4">Update your seminar information to attract more students and doctors.</p>
+
+               <div className="space-y-4">
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Seminar Title</label>
+                     <input 
+                       type="text" 
+                       defaultValue={isEditOpen.title}
+                       className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all font-bold text-neuro-navy"
+                     />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Location</label>
+                        <input 
+                          type="text" 
+                          defaultValue={isEditOpen.location}
+                          className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all text-sm"
+                        />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Dates</label>
+                        <input 
+                          type="text" 
+                          defaultValue={isEditOpen.dates}
+                          className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all text-sm"
+                        />
+                     </div>
+                  </div>
+               </div>
+
+               <div className="pt-6 border-t border-gray-100 flex gap-4">
+                  <button
+                   onClick={() => setIsEditOpen(null)}
+                   className="flex-1 py-4 bg-neuro-navy text-white font-black rounded-xl hover:bg-neuro-navy-light transition-colors uppercase tracking-widest text-xs"
+                  >
+                     Save Changes
+                  </button>
+                  <button
+                   onClick={() => setIsEditOpen(null)}
+                   className="px-8 py-4 border border-gray-200 text-gray-400 font-black rounded-xl hover:bg-gray-50 transition-colors uppercase tracking-widest text-xs"
+                  >
+                     Cancel
+                  </button>
+               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MANAGE ATTENDEES MODAL */}
+      {isAttendeesOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/20">
+            <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-neuro-orange/20 rounded-2xl flex items-center justify-center text-neuro-orange">
+                  <Users className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold">Attendees - {isAttendeesOpen.title}</h3>
+                  <p className="text-[10px] uppercase font-black text-white/50 tracking-widest">Roster Management</p>
+                </div>
+              </div>
+              <button onClick={() => setIsAttendeesOpen(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-8 space-y-6">
+               <div className="bg-gray-50 p-8 rounded-[2rem] border border-gray-100 flex flex-col items-center justify-center min-h-[300px] text-center">
+                  <Users className="w-12 h-12 text-gray-200 mb-4" />
+                  <h4 className="font-bold text-neuro-navy">No registrations yet</h4>
+                  <p className="text-xs text-gray-500 mt-1 max-w-xs">Once students and doctors register for this event, they will appear in this roster for you to manage.</p>
+
+                  <button 
+                   onClick={() => { setIsAttendeesOpen(null); setIsCampaignOpen(true); }}
+                   className="mt-8 px-8 py-3 bg-neuro-orange text-white font-black rounded-xl text-[10px] uppercase tracking-widest shadow-xl hover:bg-neuro-orange-dark transition-all"
+                  >
+                     Boost Registrations
+                  </button>
+               </div>
+
+               <button
+                onClick={() => setIsAttendeesOpen(null)}
+                className="w-full py-4 bg-neuro-navy text-white font-black rounded-xl hover:bg-neuro-navy-light transition-colors uppercase tracking-widest text-xs"
+               >
+                  Close Roster
+               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* VIEW ANALYTICS MODAL */}
+
       {isAnalyticsOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
           <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/20">
@@ -534,7 +661,7 @@ export default function SeminarsPage() {
                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Registrations</p>
-                     <p className="text-xl font-black text-neuro-navy">{isAnalyticsOpen.registrations}</p>
+                     <p className="text-xl font-black text-neuro-navy">{isAnalyticsOpen.registrations?.[0]?.count || 0}</p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Conv. Rate</p>
@@ -546,7 +673,7 @@ export default function SeminarsPage() {
                   </div>
                   <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Views</p>
-                     <p className="text-xl font-black text-neuro-navy">{isAnalyticsOpen.views}</p>
+                     <p className="text-xl font-black text-neuro-navy">{isAnalyticsOpen.page_views || 0}</p>
                   </div>
                </div>
 

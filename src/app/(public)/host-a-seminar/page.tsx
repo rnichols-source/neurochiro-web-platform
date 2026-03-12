@@ -101,7 +101,7 @@ export default function HostLandingPage() {
     }
   ];
 
-  const destination = user ? "/doctor/seminars" : "/register?role=doctor&redirect=/doctor/seminars";
+  const destination = user ? "#hosting-tiers" : "/register?role=doctor&redirect=/doctor/seminars";
 
   return (
     <div className="min-h-screen bg-[#0B1118] text-white pt-32 pb-40 overflow-hidden">
@@ -261,7 +261,7 @@ export default function HostLandingPage() {
       )}
 
       {/* Pricing Tiers */}
-      <section className="max-w-7xl mx-auto px-8 relative z-10 mb-40">
+      <section id="hosting-tiers" className="max-w-7xl mx-auto px-8 relative z-10 mb-40">
         <div className="text-center mb-20">
           <h2 className="text-3xl font-heading font-black mb-4">Promotional Marketplace Tiers</h2>
           <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Verified members receive 50% discount on all listings</p>
