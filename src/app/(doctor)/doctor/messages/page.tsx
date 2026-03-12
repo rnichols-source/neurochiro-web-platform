@@ -2,6 +2,8 @@ import { createServerSupabase } from "@/lib/supabase-server";
 import MessagingSystem from "@/components/messaging/MessagingSystem";
 import { redirect } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DoctorMessagesPage({ searchParams }: { searchParams: { to?: string } }) {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();

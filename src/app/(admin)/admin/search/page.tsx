@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { 
   Search, 
@@ -20,7 +20,7 @@ import { getAuditLogs } from "../logs/actions";
 import { getTalentUsers } from "../users/actions";
 import { formatDistanceToNow } from "date-fns";
 
-export default function GlobalSearchPage() {
+function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || "";
   
@@ -153,5 +153,20 @@ export default function GlobalSearchPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function GlobalSearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-8 max-w-[1200px] mx-auto space-y-10">
+        <div className="flex flex-col items-center justify-center py-20 bg-white/5 rounded-[3rem] border border-white/5">
+          <Loader2 className="w-12 h-12 text-neuro-orange animate-spin mb-4" />
+          <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Initializing Search...</p>
+        </div>
+      </div>
+    }>
+      <SearchResults />
+    </Suspense>
   );
 }
