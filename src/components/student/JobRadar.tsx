@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, X, MapPin, Briefcase, Sparkles, Star, ArrowRight, Check } from "lucide-react";
+import { Heart, X, MapPin, Briefcase, Sparkles, Star, ArrowRight, Check, TrendingUp, Zap } from "lucide-react";
 
 const MOCK_JOBS = [
   {
@@ -13,6 +13,9 @@ const MOCK_JOBS = [
     match: "98% Match",
     tags: ["Pediatrics", "Neurology"],
     salary: "$85k - $120k",
+    roi: "400+ visits/week",
+    mentorship: "$25k/yr CE Included",
+    careerValue: "$150k Career Accelerator",
     image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=400"
   },
   {
@@ -23,6 +26,9 @@ const MOCK_JOBS = [
     match: "94% Match",
     tags: ["Sports", "Performance"],
     salary: "Stipend + Housing",
+    roi: "High-Volume Training",
+    mentorship: "Owner-Direct Mentorship",
+    careerValue: "Elite Track Internship",
     image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=400"
   },
   {
@@ -33,6 +39,9 @@ const MOCK_JOBS = [
     match: "91% Match",
     tags: ["Family", "Tonal"],
     salary: "$75k + Bonus",
+    roi: "Subluxation-Based",
+    mentorship: "Accelerator Certification",
+    careerValue: "Partner-Path Asset",
     image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&q=80&w=400"
   }
 ];
@@ -85,17 +94,28 @@ export default function JobRadar() {
 
             {/* Job Details */}
             <div className="p-6 flex-1 flex flex-col">
-              <div className="mb-4">
-                <h3 className="text-lg font-black text-neuro-navy">{currentJob.role}</h3>
-                <p className="text-sm font-bold text-gray-400">{currentJob.clinic}</p>
+              <div className="mb-4 flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-black text-neuro-navy leading-tight">{currentJob.role}</h3>
+                  <p className="text-sm font-bold text-gray-400">{currentJob.clinic}</p>
+                </div>
+                <div className="text-right">
+                   <p className="text-[10px] font-black text-green-600 uppercase tracking-widest bg-green-50 px-2 py-1 rounded-lg">{(currentJob as any).careerValue}</p>
+                </div>
               </div>
 
-              <div className="space-y-2 mb-6">
+              <div className="grid grid-cols-2 gap-3 mb-6">
                 <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
                   <MapPin className="w-3.5 h-3.5" /> {currentJob.location}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
                   <Briefcase className="w-3.5 h-3.5" /> {currentJob.salary}
+                </div>
+                <div className="flex items-center gap-2 text-[10px] text-neuro-orange font-black uppercase tracking-tighter">
+                  <TrendingUp className="w-3 h-3" /> ROI: {(currentJob as any).roi}
+                </div>
+                <div className="flex items-center gap-2 text-[10px] text-blue-600 font-black uppercase tracking-tighter">
+                  <Zap className="w-3 h-3 fill-current" /> {(currentJob as any).mentorship}
                 </div>
               </div>
 
