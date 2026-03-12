@@ -162,9 +162,16 @@ export default function SeminarsPage() {
                                <Eye className="w-2.5 h-2.5" />
                                <span className="text-[8px] font-black uppercase">42 Students Watching</span>
                             </div>
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100">
+                               <Users className="w-2.5 h-2.5" />
+                               <span className="text-[8px] font-black uppercase">85% Market Saturation</span>
+                            </div>
                          </div>
                       </div>
-                   </div>
+                      <div className="mt-4 p-3 bg-green-50 rounded-xl border border-green-100 inline-flex items-center gap-2">
+                         <TrendingUp className="w-3 h-3 text-green-600" />
+                         <p className="text-[9px] font-black text-green-700 uppercase tracking-tight">Trending 20% higher than last event. Boost now to secure sell-out.</p>
+                      </div>                   </div>
                    <div className="flex gap-6 md:border-l md:border-gray-50 md:pl-6">
                       <div className="text-center">
                          <p className="text-xl font-black text-neuro-navy">{sem.registrations?.[0]?.count || 0}</p>

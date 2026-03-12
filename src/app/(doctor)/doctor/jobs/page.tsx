@@ -22,12 +22,21 @@ import {
   TrendingUp,
   ShieldCheck,
   Clock,
-  Globe
+  Globe,
+  Calculator,
+  Percent,
+  Zap
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDoctorTier } from "@/context/DoctorTierContext";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export default function JobsPage() {
   const { tier } = useDoctorTier();
@@ -38,6 +47,29 @@ export default function JobsPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [activeTab, setActiveTab] = useState<'associate' | 'support'>('associate');
+
+  // Calculator State
+  const [calcBase, setCalcBase] = useState(65000);
+  const [calcBonus, setCalcBonus] = useState(15);
+  const [calcVolume, setCalcVolume] = useState(120);
+
+  const [isZapping, setIsZapping] = useState(false);
+  const [zapSuccess, setZapSuccess] = useState(false);
+
+  const handleZap = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsZapping(true);
+    setTimeout(() => {
+      setIsZapping(false);
+      setZapSuccess(true);
+      setTimeout(() => setZapSuccess(false), 3000);
+    }, 1500);
+  };
+
+  const yearlyBonus = calcBonus * calcVolume * 50;
+  const totalComp = calcBase + yearlyBonus;
+  const talentScore = Math.min(100, Math.round((totalComp / 100000) * 80 + (calcBonus / 20) * 20));
+  const riskScore = Math.round((calcBase / 100000) * 100);
 
   const activeJobs = activeTab === 'associate' ? [
     {
@@ -334,118 +366,100 @@ export default function JobsPage() {
                   </div>
                 )}
 
-                {activeModal === '90-Day-Success-Plan' && (
-                  <div className="space-y-6">
-                    {!showPreview ? (
-                      <>
-                        {isGenerating ? (
-                          <div className="py-20 flex flex-col items-center justify-center text-center">
-                            <motion.div 
-                              animate={{ rotate: 360 }}
-                              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                              className="w-16 h-16 border-4 border-neuro-orange border-t-transparent rounded-full mb-6"
-                            />
-                            <h4 className="text-xl font-heading font-black text-neuro-navy mb-2">Analyzing Clinical Data...</h4>
-                            <p className="text-xs text-gray-400">Building comprehensive 90-day roadmap based on practice KPIs.</p>
-                            <div className="mt-8 w-48 h-1 bg-gray-100 rounded-full overflow-hidden">
-                              <motion.div 
-                                initial={{ width: 0 }}
-                                animate={{ width: "100%" }}
-                                transition={{ duration: 2.5 }}
-                                className="h-full bg-neuro-orange"
-                              />
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <div className="flex items-center gap-4 p-6 bg-green-50 rounded-3xl border border-green-100">
-                               <div className="p-3 bg-green-500 text-white rounded-2xl shadow-lg">
-                                  <Target className="w-6 h-6" />
-                               </div>
-                               <div>
-                                  <h4 className="font-bold text-neuro-navy">Onboarding Blueprint</h4>
-                                  <p className="text-xs text-green-700">Ensure your new associate hits 100 PV by month 3.</p>
-                               </div>
-                            </div>
-                            <div className="space-y-4">
-                               {[
-                                 { week: "Month 1", focus: "Systems & Culture Alignment", task: "Shadow 50 Initial Exams" },
-                                 { week: "Month 2", focus: "Clinical Authority", task: "Lead 20 Health Talks" },
-                                 { week: "Month 3", focus: "Retention & Referral", task: "Self-generate 5 New Leads/Week" }
-                               ].map((m, i) => (
-                                 <div key={i} className="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                                    <div className="flex justify-between items-center mb-4">
-                                       <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest">{m.week}</span>
-                                       <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                    </div>
-                                    <h5 className="font-bold text-neuro-navy mb-1">{m.focus}</h5>
-                                    <p className="text-xs text-gray-500">{m.task}</p>
-                                 </div>
-                               ))}
-                            </div>
-                            <button 
-                              onClick={handleGenerate}
-                              className="w-full py-4 bg-neuro-navy text-white font-black rounded-2xl uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-neuro-navy-light transition-all shadow-xl"
-                            >
-                               Generate Comprehensive PDF Roadmap <ArrowRight className="w-4 h-4" />
-                            </button>
-                          </>
-                        )}
-                      </>
-                    ) : (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="space-y-8"
-                      >
-                         <div className="p-6 bg-neuro-navy text-white rounded-3xl flex items-center justify-between">
-                            <div>
-                               <p className="text-[10px] font-black text-neuro-orange uppercase tracking-widest mb-1">Status</p>
-                               <h4 className="text-lg font-bold">PDF Ready for Download</h4>
-                            </div>
-                            <CheckCircle2 className="w-10 h-10 text-green-500" />
-                         </div>
-                         
-                         <div className="border-2 border-dashed border-gray-200 rounded-[2rem] p-8 bg-gray-50">
-                            <div className="flex items-center gap-4 mb-6 border-b border-gray-100 pb-6">
-                               <FileText className="w-10 h-10 text-neuro-navy" />
-                               <div>
-                                  <p className="text-xs font-black text-neuro-navy uppercase">Onboarding_Blueprint_V1.pdf</p>
-                                  <p className="text-[10px] text-gray-400">14 Pages • Comprehensive Clinical Strategy</p>
-                               </div>
-                            </div>
-                            
-                            <div className="space-y-4">
-                               <h5 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Included in this document:</h5>
-                               {[
-                                 "Weekly KPI Scorecards (Week 1-12)",
-                                 "Scripts for Initial Consults & ROFs",
-                                 "Nervous-System Focused Communication Guide",
-                                 "Internal Marketing Lead Gen Schedule",
-                                 "Review Process & Promotion Milestones"
-                               ].map((item, i) => (
-                                 <div key={i} className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 bg-neuro-orange rounded-full"></div>
-                                    <span className="text-xs font-bold text-neuro-navy">{item}</span>
-                                 </div>
-                               ))}
-                            </div>
-                         </div>
+                {activeModal === 'Pay-for-Performance-Calculator' && (
+                  <div className="space-y-8">
+                     <div className="p-6 bg-neuro-navy text-white rounded-[2.5rem] relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl"></div>
+                        <h4 className="text-xl font-heading font-black mb-1 relative z-10 flex items-center gap-2">
+                           <Calculator className="w-5 h-5 text-neuro-orange" /> Talent Offer Optimizer
+                        </h4>
+                        <p className="text-[10px] text-gray-400 uppercase tracking-widest relative z-10">Stop paying for presence. Start paying for performance.</p>
+                     </div>
 
-                         <button 
-                           onClick={initiateDownload}
-                           className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl shadow-xl hover:bg-neuro-orange-dark transition-all uppercase tracking-widest flex items-center justify-center gap-3"
-                         >
-                            <Plus className="w-5 h-5 rotate-45" /> Download Comprehensive Roadmap
-                         </button>
-                         <button 
-                           onClick={() => setShowPreview(false)}
-                           className="w-full py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-neuro-navy"
-                         >
-                            Back to Settings
-                         </button>
-                      </motion.div>
-                    )}
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Sliders Area */}
+                        <div className="space-y-8">
+                           <div className="space-y-4">
+                              <div className="flex justify-between">
+                                 <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Base Salary ($)</label>
+                                 <span className="text-sm font-black text-neuro-navy">${calcBase.toLocaleString()}</span>
+                              </div>
+                              <input 
+                                 type="range" min="30000" max="120000" step="5000" value={calcBase}
+                                 onChange={(e) => setCalcBase(parseInt(e.target.value))}
+                                 className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-neuro-orange"
+                              />
+                           </div>
+                           <div className="space-y-4">
+                              <div className="flex justify-between">
+                                 <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Bonus per Visit ($)</label>
+                                 <span className="text-sm font-black text-neuro-orange">${calcBonus}</span>
+                              </div>
+                              <input 
+                                 type="range" min="0" max="50" step="1" value={calcBonus}
+                                 onChange={(e) => setCalcBonus(parseInt(e.target.value))}
+                                 className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-neuro-orange"
+                              />
+                           </div>
+                           <div className="space-y-4">
+                              <div className="flex justify-between">
+                                 <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Target Weekly Volume</label>
+                                 <span className="text-sm font-black text-neuro-navy">{calcVolume} Visits</span>
+                              </div>
+                              <input 
+                                 type="range" min="40" max="250" step="10" value={calcVolume}
+                                 onChange={(e) => setCalcVolume(parseInt(e.target.value))}
+                                 className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-neuro-navy"
+                              />
+                           </div>
+                        </div>
+
+                        {/* Results Area */}
+                        <div className="bg-gray-50 p-8 rounded-[2.5rem] border border-gray-100 space-y-6">
+                           <div>
+                              <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">Total Associate Comp</p>
+                              <p className="text-3xl font-black text-neuro-navy">${totalComp.toLocaleString()}</p>
+                           </div>
+                           
+                           <div className="space-y-3">
+                              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                 <span className="text-gray-400">Clinic Fixed Risk</span>
+                                 <span className={cn(riskScore > 70 ? "text-red-500" : "text-green-500")}>
+                                    {riskScore > 70 ? "HIGH" : "LOW"} RISK
+                                 </span>
+                              </div>
+                              <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                                 <motion.div 
+                                    className={cn("h-full", riskScore > 70 ? "bg-red-500" : "bg-green-500")}
+                                    animate={{ width: `${riskScore}%` }}
+                                 ></motion.div>
+                              </div>
+                           </div>
+
+                           <div className="space-y-3">
+                              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                 <span className="text-gray-400">Talent Attraction Score</span>
+                                 <span className="text-neuro-orange font-black">{talentScore}%</span>
+                              </div>
+                              <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                                 <motion.div 
+                                    className="h-full bg-neuro-orange"
+                                    animate={{ width: `${talentScore}%` }}
+                                 ></motion.div>
+                              </div>
+                           </div>
+
+                           <div className="pt-6 border-t border-gray-200">
+                              <p className="text-[9px] text-gray-400 font-bold uppercase leading-relaxed italic">
+                                 "The goal is a low base to keep you alive and a high bonus to keep you rich." — Alex Hormozi
+                              </p>
+                           </div>
+                        </div>
+                     </div>
+
+                     <button className="w-full py-5 bg-neuro-navy text-white font-black rounded-2xl shadow-xl hover:bg-neuro-navy-light transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2">
+                        Update Job Listing with this Offer <ChevronRight className="w-4 h-4" />
+                     </button>
                   </div>
                 )}
               </div>
@@ -530,7 +544,6 @@ export default function JobsPage() {
                    </button>
                 </div>
 
-                {/* Pipeline Stages */}
                 <div className="grid grid-cols-4 gap-4 mb-8">
                    {[
                      { label: 'New', count: job.pipeline.new, color: 'blue' },
@@ -541,10 +554,50 @@ export default function JobsPage() {
                      <div 
                        key={idx}
                        onClick={() => setActiveModal('Review-Applicants')}
-                       className={`p-6 bg-${stage.color}-50 rounded-3xl border border-${stage.color}-100 text-center cursor-pointer hover:bg-${stage.color}-100 transition-all hover:-translate-y-1 shadow-sm`}
+                       className={cn(
+                        "p-6 rounded-3xl border text-center cursor-pointer transition-all hover:-translate-y-1 shadow-sm relative overflow-hidden flex flex-col items-center justify-center",
+                        stage.color === 'blue' ? "bg-blue-50 border-blue-100 hover:bg-blue-100" :
+                        stage.color === 'purple' ? "bg-purple-50 border-purple-100 hover:bg-purple-100" :
+                        stage.color === 'orange' ? "bg-orange-50 border-orange-100 hover:bg-orange-100" :
+                        "bg-green-50 border-green-100 hover:bg-green-100"
+                       )}
                      >
-                        <p className={`text-3xl font-black text-${stage.color === 'orange' ? 'neuro-orange' : stage.color + '-600'}`}>{stage.count}</p>
-                        <p className={`text-[10px] font-black text-${stage.color === 'orange' ? 'orange-400' : stage.color + '-400'} uppercase tracking-widest mt-1`}>{stage.label}</p>
+                        {stage.label === 'New' && (
+                          <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+                            <button 
+                              onClick={handleZap}
+                              disabled={isZapping || zapSuccess}
+                              className={cn(
+                                "p-2 rounded-xl transition-all shadow-lg flex items-center gap-2",
+                                zapSuccess ? "bg-green-500 text-white" : "bg-neuro-navy text-white hover:bg-neuro-orange"
+                              )}
+                            >
+                              {zapSuccess ? (
+                                <CheckCircle2 className="w-3 h-3" />
+                              ) : (
+                                <Zap className={cn("w-3 h-3", isZapping && "animate-pulse")} />
+                              )}
+                              <span className="text-[8px] font-black uppercase tracking-tighter">
+                                {isZapping ? "Zapping..." : zapSuccess ? "Invites Sent" : "Zap to Interview"}
+                              </span>
+                            </button>
+                            {!zapSuccess && !isZapping && (
+                              <p className="text-[7px] font-black text-neuro-orange uppercase tracking-tighter animate-pulse mr-1">Speed to Lead</p>
+                            )}
+                          </div>
+                        )}
+                        <p className={cn(
+                          "text-3xl font-black",
+                          stage.color === 'orange' ? "text-neuro-orange" : 
+                          stage.color === 'blue' ? "text-blue-600" :
+                          stage.color === 'purple' ? "text-purple-600" : "text-green-600"
+                        )}>{stage.count}</p>
+                        <p className={cn(
+                          "text-[10px] font-black uppercase tracking-widest mt-1",
+                          stage.color === 'orange' ? "text-orange-400" : 
+                          stage.color === 'blue' ? "text-blue-400" :
+                          stage.color === 'purple' ? "text-purple-400" : "text-green-400"
+                        )}>{stage.label}</p>
                      </div>
                    ))}
                 </div>
@@ -685,6 +738,13 @@ export default function JobsPage() {
                        <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                           <div className="h-full bg-neuro-orange w-[30%]"></div>
                        </div>
+                       
+                       <button 
+                         onClick={() => setActiveModal('Pay-for-Performance-Calculator')}
+                         className="w-full py-3 bg-neuro-orange/10 text-neuro-orange text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange/20 transition-all flex items-center justify-center gap-2"
+                       >
+                          <Calculator className="w-3 h-3" /> Optimize Bonus Structure
+                       </button>
                     </div>
                  </div>
 
