@@ -22,7 +22,10 @@ import {
   Zap,
   Calendar,
   Clock,
-  Gift
+  Gift,
+  Flame,
+  Eye,
+  TrendingUp
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
@@ -45,7 +48,9 @@ export default function StudentDiscovery() {
       gradYear: "2027",
       interests: ["Pediatrics", "Neuro-Scanning"],
       readinessScore: 98,
-      status: "Available",
+      recentViews: 12,
+      activeTalks: 3,
+      status: "Interviewing",
       isFavorite: true,
       isElite: true,
       clinicalStats: {
@@ -65,7 +70,9 @@ export default function StudentDiscovery() {
       gradYear: "2026",
       interests: ["Sports Performance", "TBI"],
       readinessScore: 94,
-      status: "Looking",
+      recentViews: 8,
+      activeTalks: 1,
+      status: "Active Discovery",
       isFavorite: false,
       isElite: true,
       clinicalStats: {
@@ -85,6 +92,8 @@ export default function StudentDiscovery() {
       gradYear: "2028",
       interests: ["General Practice", "HRV Mastery"],
       readinessScore: 88,
+      recentViews: 4,
+      activeTalks: 0,
       status: "Mentorship",
       isFavorite: true,
       isElite: false,
@@ -241,13 +250,37 @@ export default function StudentDiscovery() {
                 </div>
              )}
              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-neuro-navy/5 flex items-center justify-center text-neuro-navy font-black text-xl">
-                   {student.name.split(' ').map(n => n[0]).join('')}
+                <div className="relative">
+                   <div className="w-16 h-16 rounded-2xl bg-neuro-navy/5 flex items-center justify-center text-neuro-navy font-black text-xl">
+                      {student.name.split(' ').map(n => n[0]).join('')}
+                   </div>
+                   {student.readinessScore >= 95 && (
+                      <div className="absolute -top-2 -left-2 bg-red-500 text-white p-1.5 rounded-xl shadow-lg animate-bounce">
+                         <Flame className="w-3 h-3 fill-current" />
+                      </div>
+                   )}
                 </div>
                 <div>
-                   <h3 className="font-bold text-lg text-neuro-navy group-hover:text-neuro-orange transition-colors">{student.name}</h3>
+                   <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-lg text-neuro-navy group-hover:text-neuro-orange transition-colors">{student.name}</h3>
+                      {(student as any).recentViews > 5 && (
+                        <div className="flex items-center gap-1 px-2 py-0.5 bg-orange-50 text-neuro-orange rounded-full border border-orange-100 animate-pulse">
+                           <Eye className="w-2.5 h-2.5" />
+                           <span className="text-[8px] font-black uppercase">{(student as any).recentViews} Views Today</span>
+                        </div>
+                      )}
+                   </div>
                    <p className="text-xs text-gray-500 font-medium">{student.school}</p>
-                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Class of {student.gradYear}</p>
+                   <div className="flex items-center gap-2 mt-1">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Class of {student.gradYear}</p>
+                      <span className="w-1 h-1 rounded-full bg-gray-300" />
+                      <span className={`text-[9px] font-black uppercase tracking-widest ${
+                        student.status === "Interviewing" ? "text-red-500" : "text-neuro-orange"
+                      }`}>
+                        {student.status}
+                        {(student as any).activeTalks > 0 && ` • ${(student as any).activeTalks} Active Talks`}
+                      </span>
+                   </div>
                 </div>
              </div>
 
