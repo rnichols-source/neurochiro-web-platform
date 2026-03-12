@@ -52,7 +52,7 @@ export async function getDoctors(options: {
     const { data, error, count } = await query
 
     if (error || !data || data.length === 0) {
-      console.log("No DB results, returning mock subset")
+      console.log("No DB results, returning mock subset for region:", regionCode)
       
       // Filter mock data
       let filteredMock = regionCode 
@@ -68,13 +68,18 @@ export async function getDoctors(options: {
         );
       }
 
-      // Ensure mock doctors have valid coordinates if they are 0
-      // This is crucial for the map display
+      // Ensure mock doctors have valid coordinates based on their region
       filteredMock = filteredMock.map(d => {
-        if (d.latitude === 0 && d.longitude === 0) {
-          // Provide distinct fallback coordinates within the US if they are 0
-          // This avoids everything stacking at 0,0 and being filtered out
-          const seed = parseInt(d.id, 36) || 0;
+        if (d.latitude === 0 || d.longitude === 0) {
+          const seed = (parseInt(d.id, 36) || 0) + (d.first_name.length * 7);
+          if (d.region_code === 'AU') {
+            return {
+              ...d,
+              latitude: -33 + (seed % 10),
+              longitude: 140 + (seed % 15)
+            };
+          }
+          // Default US Fallback
           return {
             ...d,
             latitude: 35 + (seed % 10),
@@ -84,14 +89,19 @@ export async function getDoctors(options: {
         return d;
       });
 
-      // Filter by bounds if provided
+      // Filter by bounds if provided, but if it returns nothing, return the unfiltered list 
+      // so the map isn't empty (Wide-Angle Fallback)
       if (bounds) {
-        filteredMock = filteredMock.filter(d => 
+        const boundedMock = filteredMock.filter(d => 
           d.longitude >= bounds[0] && 
           d.latitude >= bounds[1] && 
           d.longitude <= bounds[2] && 
           d.latitude <= bounds[3]
         );
+        
+        if (boundedMock.length > 0) {
+          filteredMock = boundedMock;
+        }
       }
 
       // Tiered Ranking + Daily Rotation for Mock Data
@@ -220,14 +230,18 @@ export async function getStudentsForMap(options: {
         }
       ];
 
-      // Filter by bounds if provided
+      // Filter by bounds if provided, but return all if empty (Wide-Angle Fallback)
       if (bounds) {
-        return mockStudents.filter(s => 
+        const boundedStudents = mockStudents.filter(s => 
           s.longitude >= bounds[0] && 
           s.latitude >= bounds[1] && 
           s.longitude <= bounds[2] && 
           s.latitude <= bounds[3]
         );
+        
+        if (boundedStudents.length > 0) {
+          return boundedStudents;
+        }
       }
 
       return mockStudents;

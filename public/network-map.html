@@ -73,15 +73,29 @@
     const map = L.map('map', {
         zoomControl: false,
         attributionControl: false,
-        tap: true, // Recommended for some mobile browsers
+        tap: true,
         touchZoom: true,
         dragging: true
     }).setView([38, -98], 4);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    // Primary Tile Layer (Dark Mode)
+    const cartoLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         subdomains: 'abcd',
         maxZoom: 20
-    }).addTo(map);
+    });
+
+    // Fallback Tile Layer (Standard OSM) if CartoDB fails
+    const osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+    });
+
+    cartoLayer.on('tileerror', function() {
+        console.warn("CartoDB tiles failed to load, falling back to OSM");
+        map.removeLayer(cartoLayer);
+        osmLayer.addTo(map);
+    });
+
+    cartoLayer.addTo(map);
 
     let markers = [];
 
