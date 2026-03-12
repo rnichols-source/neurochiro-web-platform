@@ -49,7 +49,7 @@ export default function VerifiedBadge({ doctorSlug, doctorName }: VerifiedBadgeP
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Code className="w-5 h-5 text-neuro-orange" />
-              <h3 className="text-2xl font-heading font-black text-neuro-navy uppercase tracking-tight">Trust & Authority Badge</h3>
+              <h3 className="text-2xl font-heading font-black text-neuro-navy uppercase tracking-tight">Your Instant Authority Kit is Ready</h3>
             </div>
             <p className="text-gray-500 text-sm leading-relaxed max-w-xl">
               Boost your SEO and build patient trust by displaying your <span className="font-bold text-neuro-navy">Verified Provider</span> badge on your clinic's website. This provides a high-authority backlink that strengthens your search ranking.

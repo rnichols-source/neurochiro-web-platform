@@ -160,6 +160,14 @@ export default function DoctorDashboard() {
         )}
       </header>
 
+      {/* Trust & Authority Badge (Backlink Loop) */}
+      {hasAccess && (
+        <VerifiedBadge 
+          doctorSlug={dashboardData?.profile?.slug || "profile"} 
+          doctorName={dashboardData?.profile?.name || "Doctor"} 
+        />
+      )}
+
       {/* Analytics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
@@ -322,12 +330,6 @@ export default function DoctorDashboard() {
                      </div>
                   </div>
                </section>
-
-               {/* Trust & Authority Badge (Backlink Loop) */}
-               <VerifiedBadge 
-                 doctorSlug={dashboardData?.profile?.slug || "profile"} 
-                 doctorName={dashboardData?.profile?.name || "Doctor"} 
-               />
 
                {/* Geographic Traffic */}
                <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
