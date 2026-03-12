@@ -54,6 +54,8 @@ export default function SeminarsPage() {
       location: "Austin, TX",
       category: "Clinical Skills",
       price: "$299",
+      doctorPrice: "$899",
+      savings: "$600",
       isRecommended: true,
       hasRecruiters: true,
       image: "bg-blue-100",
@@ -68,6 +70,8 @@ export default function SeminarsPage() {
       location: "Seattle, WA",
       category: "Pediatrics",
       price: "$199",
+      doctorPrice: "$599",
+      savings: "$400",
       isRecommended: true,
       hasRecruiters: false,
       image: "bg-orange-100",
@@ -82,6 +86,8 @@ export default function SeminarsPage() {
       location: "Miami, FL",
       category: "Business",
       price: "$349",
+      doctorPrice: "$999",
+      savings: "$650",
       isRecommended: false,
       hasRecruiters: true,
       image: "bg-green-100",
@@ -256,8 +262,13 @@ export default function SeminarsPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-black text-neuro-navy">{sem.price}</p>
-                    <p className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Special Student Rate</p>
+                    <div className="flex items-center justify-end gap-2 mb-0.5">
+                      <span className="text-[10px] text-gray-400 line-through font-bold">{sem.doctorPrice}</span>
+                      <p className="text-lg font-black text-neuro-navy">{sem.price}</p>
+                    </div>
+                    <p className="text-[9px] text-neuro-orange uppercase font-black tracking-widest">
+                       Saving you {sem.savings} today
+                    </p>
                   </div>
                 </div>
                 
@@ -459,8 +470,11 @@ export default function SeminarsPage() {
                
                <div className="pt-8 border-t border-gray-100 flex items-center justify-between gap-6 shrink-0 mt-auto">
                   <div>
-                     <p className="text-2xl font-black text-neuro-navy">{selectedSeminar.price}</p>
-                     <p className="text-[10px] font-black text-neuro-orange uppercase">Locked student rate</p>
+                     <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm text-gray-400 line-through font-bold">{selectedSeminar.doctorPrice}</span>
+                        <p className="text-2xl font-black text-neuro-navy">{selectedSeminar.price}</p>
+                     </div>
+                     <p className="text-[10px] font-black text-neuro-orange uppercase">Locked student rate: saving you {selectedSeminar.savings}</p>
                   </div>
                   <button 
                     onClick={() => handleRegister(selectedSeminar.title)}
