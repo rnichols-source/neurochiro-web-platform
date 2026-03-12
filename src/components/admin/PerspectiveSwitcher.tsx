@@ -29,10 +29,8 @@ export default function PerspectiveSwitcher() {
   useEffect(() => {
     // Check if user is in dev mode or admin
     const checkDev = () => {
-      const isDevMode = localStorage.getItem("nc_dev_mode") === "true";
-      const cookies = document.cookie.split('; ');
-      // We also check if they are natively admin in session, but for now dev mode flag works.
-      setIsDev(isDevMode || true); // Default true for Founder testing, or rely on layout
+      const isDevMode = typeof window !== 'undefined' && localStorage.getItem("nc_dev_mode") === "true";
+      setIsDev(isDevMode);
     };
 
     checkDev();
@@ -89,6 +87,8 @@ export default function PerspectiveSwitcher() {
     { id: "Professional", label: "Professional", desc: "Advanced matching", role: "student_paid" },
     { id: "Accelerator", label: "Accelerator", desc: "Priority placement", role: "student_paid" }
   ];
+
+  if (!isDev) return null;
 
   return (
     <>
