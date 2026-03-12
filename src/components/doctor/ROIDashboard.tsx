@@ -33,31 +33,107 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
   const estimatedRevenue = stats.confirmed_patients * stats.average_case_value;
   const roiMultiplier = estimatedRevenue / stats.membership_cost;
 
+  // Starter Tier Profit Teaser Calculation
+  const potentialNewPatients = Math.floor(stats.profile_views * 0.05);
+  const potentialRevenue = potentialNewPatients * stats.average_case_value;
+  const lostRevenue = potentialRevenue - estimatedRevenue;
+
   if (isLocked) {
     return (
-      <div className="relative overflow-hidden rounded-[3rem] bg-white border border-gray-100 p-12 shadow-sm text-center">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-neuro-cream/50 pointer-events-none"></div>
-        <div className="relative z-10 max-w-xl mx-auto py-12">
-          <div className="w-20 h-20 bg-neuro-orange/10 rounded-3xl flex items-center justify-center mx-auto mb-8">
-            <Target className="w-10 h-10 text-neuro-orange" />
-          </div>
-          <h2 className="text-4xl font-heading font-black text-neuro-navy mb-4">NeuroChiro ROI Engine</h2>
-          <p className="text-gray-500 text-lg mb-10 leading-relaxed">
-            Stop guessing and start measuring. Upgrade to see exactly how many patients and how much revenue NeuroChiro is driving to your clinic.
-          </p>
-          <button 
-            onClick={onUpgrade}
-            className="px-10 py-5 bg-neuro-navy text-white font-black rounded-2xl hover:bg-neuro-navy-light transition-all shadow-xl flex items-center gap-3 mx-auto uppercase tracking-widest text-sm"
-          >
-            <Sparkles className="w-5 h-5 text-neuro-orange" /> Unlock ROI Analytics
-          </button>
+      <div className="space-y-8">
+        {/* Profit Teaser Header */}
+        <section className="bg-white rounded-[3rem] border border-gray-100 p-10 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/5 blur-[100px] -mr-32 -mt-32"></div>
           
-          <div className="mt-16 grid grid-cols-3 gap-6 opacity-30 blur-[2px] pointer-events-none">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="bg-gray-50 p-6 rounded-2xl border border-gray-100 h-32"></div>
-            ))}
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <Sparkles className="w-4 h-4 text-neuro-orange" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-neuro-orange bg-neuro-orange/10 px-3 py-1 rounded-full">Shadow ROI Mode</span>
+              </div>
+              <h2 className="text-4xl font-heading font-black text-neuro-navy mb-4">Stop the Bleeding.</h2>
+              <p className="text-gray-500 text-lg mb-8 leading-relaxed max-w-md">
+                Based on your profile views, you likely missed out on <span className="font-bold text-neuro-orange">${lostRevenue.toLocaleString()}</span> in new patient value this month because your profile isn't optimized.
+              </p>
+              <button 
+                onClick={onUpgrade}
+                className="px-8 py-4 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-light transition-all shadow-xl flex items-center gap-3 uppercase tracking-widest text-xs"
+              >
+                Claim My Lost Revenue <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-neuro-navy rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
+               <div className="absolute inset-0 bg-gradient-to-br from-neuro-navy to-neuro-navy-dark"></div>
+               <div className="relative z-10">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Potential Pipeline (Blurred)</p>
+                  <div className="space-y-6">
+                     <div className="flex items-end justify-between border-b border-white/5 pb-4">
+                        <div>
+                           <p className="text-xs text-gray-400 mb-1">Missed Opportunities</p>
+                           <p className="text-3xl font-black blur-md select-none">${potentialRevenue.toLocaleString()}</p>
+                        </div>
+                        <Lock className="w-5 h-5 text-neuro-orange" />
+                     </div>
+                     <div className="flex items-end justify-between border-b border-white/5 pb-4">
+                        <div>
+                           <p className="text-xs text-gray-400 mb-1">Local Market Demand</p>
+                           <p className="text-3xl font-black blur-md select-none">148 PATIENTS</p>
+                        </div>
+                        <Lock className="w-5 h-5 text-neuro-orange" />
+                     </div>
+                  </div>
+                  <p className="text-[9px] text-gray-500 mt-6 italic">Upgrade to Growth to unblur your practice analytics and start converting these leads.</p>
+               </div>
+            </div>
           </div>
+        </section>
+
+        {/* Engagement Teaser Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { label: "Profile Views", value: stats.profile_views, icon: Users, color: "text-blue-500", bg: "bg-blue-50", blurred: false },
+            { label: "Contact Clicks", value: "84", icon: MousePointerClick, color: "text-purple-500", bg: "bg-purple-50", blurred: true },
+            { label: "Bookings", value: "42", icon: Calendar, color: "text-neuro-orange", bg: "bg-neuro-orange/10", blurred: true },
+            { label: "New Patients", value: "12", icon: CheckCircle2, color: "text-green-500", bg: "bg-green-50", blurred: true }
+          ].map((stat, i) => (
+            <div key={i} className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden group">
+              <div className={`absolute top-0 right-0 w-16 h-16 ${stat.bg} rounded-bl-[2rem] flex items-center justify-center transition-transform group-hover:scale-110`}>
+                <stat.icon className={`w-6 h-6 ${stat.color}`} />
+              </div>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{stat.label}</p>
+              <div className="flex items-end justify-between">
+                <span className={cn("text-3xl font-black text-neuro-navy", stat.blurred && "blur-sm select-none")}>{stat.value}</span>
+                {stat.blurred && <Lock className="w-3 h-3 text-gray-300 mb-2" />}
+              </div>
+            </div>
+          ))}
         </div>
+
+        {/* Lost Revenue Calculator */}
+        <section className="bg-gray-50 rounded-[3rem] p-12 border border-gray-100 flex flex-col items-center text-center">
+           <div className="p-4 bg-red-50 text-red-500 rounded-2xl mb-6">
+              <TrendingUp className="w-8 h-8 rotate-180" />
+           </div>
+           <h3 className="text-2xl font-black text-neuro-navy mb-2">The Cost of Inaction</h3>
+           <p className="text-gray-500 max-w-md mb-8">Your clinic is currently capturing less than 15% of available digital patient demand in your zip code.</p>
+           
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl">
+              <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Monthly Loss</p>
+                 <p className="text-2xl font-black text-red-500">-${(lostRevenue / 12).toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+              </div>
+              <div className="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Yearly Opportunity</p>
+                 <p className="text-2xl font-black text-neuro-navy">${lostRevenue.toLocaleString()}</p>
+              </div>
+              <div className="p-6 bg-white rounded-2xl border border-neuro-orange/20 shadow-sm relative">
+                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-neuro-orange text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest">Recommended</div>
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Recovery Plan</p>
+                 <p className="text-2xl font-black text-neuro-orange">Growth Tier</p>
+              </div>
+           </div>
+        </section>
       </div>
     );
   }
