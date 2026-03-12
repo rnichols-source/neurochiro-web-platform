@@ -48,6 +48,7 @@ export default function SeminarsPage() {
 
   const seminars = [
     {
+      id: "1",
       title: "The Neuro-Scanning Masterclass",
       host: "Dr. Sarah Johnson",
       date: "Oct 15-16, 2026",
@@ -56,6 +57,8 @@ export default function SeminarsPage() {
       price: "$299",
       doctorPrice: "$899",
       savings: "$600",
+      seatsLeft: 3,
+      hiringDocs: 8,
       isRecommended: true,
       hasRecruiters: true,
       image: "bg-blue-100",
@@ -64,6 +67,7 @@ export default function SeminarsPage() {
       attendees: 145
     },
     {
+      id: "2",
       title: "Pediatric Nervous System Development",
       host: "Dr. Marcus Chen",
       date: "Nov 03, 2026",
@@ -72,6 +76,8 @@ export default function SeminarsPage() {
       price: "$199",
       doctorPrice: "$599",
       savings: "$400",
+      seatsLeft: 7,
+      hiringDocs: 4,
       isRecommended: true,
       hasRecruiters: false,
       image: "bg-orange-100",
@@ -80,6 +86,7 @@ export default function SeminarsPage() {
       attendees: 89
     },
     {
+      id: "3",
       title: "Business of Nervous System Care",
       host: "Dr. Elizabeth Thorne",
       date: "Dec 12, 2026",
@@ -88,6 +95,8 @@ export default function SeminarsPage() {
       price: "$349",
       doctorPrice: "$999",
       savings: "$650",
+      seatsLeft: 12,
+      hiringDocs: 15,
       isRecommended: false,
       hasRecruiters: true,
       image: "bg-green-100",
@@ -236,9 +245,12 @@ export default function SeminarsPage() {
                     <Star className="w-3 h-3 fill-current" /> Recommended
                   </div>
                 )}
+                <div className="absolute top-12 left-4 bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-lg animate-pulse">
+                   <Clock className="w-3 h-3" /> Only {sem.seatsLeft} Student Seats Left
+                </div>
                 {sem.hasRecruiters && (
                   <div className="absolute bottom-4 left-4 bg-neuro-navy/80 backdrop-blur-sm text-white text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1">
-                    <Users className="w-3 h-3" /> Recruiting Clinics Present
+                    <Users className="w-3 h-3" /> {sem.hiringDocs} Hiring Doctors Attending
                   </div>
                 )}
               </div>
@@ -272,12 +284,20 @@ export default function SeminarsPage() {
                   </div>
                 </div>
                 
-                <button 
-                  onClick={() => setSelectedSeminar(sem)}
-                  className="w-full mt-8 py-4 bg-gray-50 group-hover:bg-neuro-navy group-hover:text-white text-neuro-navy font-black rounded-2xl transition-all flex items-center justify-center gap-2 active:scale-95"
-                >
-                  View Full Details <ArrowRight className="w-4 h-4" />
-                </button>
+                <div className="grid grid-cols-2 gap-3 mt-8">
+                  <button 
+                    onClick={() => setSelectedSeminar(sem)}
+                    className="py-4 bg-gray-50 group-hover:bg-neuro-navy group-hover:text-white text-neuro-navy font-black rounded-2xl transition-all flex items-center justify-center gap-2 active:scale-95 text-[10px] uppercase tracking-widest"
+                  >
+                    Details <ArrowRight className="w-3 h-3" />
+                  </button>
+                  <button 
+                    onClick={() => alert("Sending Free Study Guide to your email...")}
+                    className="py-4 bg-neuro-orange/10 text-neuro-orange font-black rounded-2xl border border-neuro-orange/20 hover:bg-neuro-orange hover:text-white transition-all text-[10px] uppercase tracking-widest active:scale-95"
+                  >
+                    Free Syllabus
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -431,7 +451,7 @@ export default function SeminarsPage() {
                            <span className="text-[10px] font-black uppercase tracking-widest">Recruitment Spotlight</span>
                         </div>
                         <p className="text-[11px] text-neuro-navy/70 leading-relaxed font-medium">
-                           3 high-volume clinics in {selectedSeminar.location.split(',')[1]} will be recruiting during the networking breaks.
+                           {selectedSeminar.hiringDocs} high-volume clinics in {selectedSeminar.location.split(',')[1]} will be recruiting during the networking breaks.
                         </p>
                      </div>
                   </div>
