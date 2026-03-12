@@ -39,6 +39,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
     { id: 2, name: "Michael R.", date: "Mar 02" },
     { id: 3, name: "Emma W.", date: "Mar 10" },
   ]);
+  const [hasVideo, setHasVideo] = useState(false);
 
   const handleConfirm = (id: number) => {
     setPendingPatients(prev => prev.filter(p => p.id !== id));
@@ -405,13 +406,47 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
             )}
           </AnimatePresence>
 
-          <section className="bg-neuro-cream rounded-[2.5rem] p-8 border border-neuro-navy/5">
-            <h4 className="font-heading font-black text-neuro-navy mb-4">ROI Accelerator</h4>
-            <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-              Profiles with introduction videos receive significantly more patient engagement.
-            </p>
-            <button className="w-full py-4 bg-white text-neuro-navy font-black rounded-2xl hover:bg-gray-50 transition-all border border-gray-200 text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
-              Add Intro Video <ArrowUpRight className="w-3 h-3" />
+          <section className="bg-neuro-cream rounded-[2.5rem] p-8 border border-neuro-navy/5 relative overflow-hidden group">
+            <div className="flex items-center justify-between mb-6">
+              <h4 className="font-heading font-black text-neuro-navy">ROI Accelerator</h4>
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-black text-neuro-navy uppercase">Profile Strength</span>
+                <span className={cn("text-xs font-black", hasVideo ? "text-green-500" : "text-neuro-orange")}>
+                  {hasVideo ? "100%" : "75%"}
+                </span>
+              </div>
+            </div>
+            
+            {/* Progress Bar */}
+            <div className="h-2 w-full bg-neuro-navy/5 rounded-full mb-8 overflow-hidden">
+              <motion.div 
+                initial={{ width: "75%" }}
+                animate={{ width: hasVideo ? "100%" : "75%" }}
+                className={cn("h-full transition-colors", hasVideo ? "bg-green-500" : "bg-neuro-orange")}
+              ></motion.div>
+            </div>
+
+            <div className="bg-white/50 rounded-2xl p-4 border border-white/80 mb-6">
+              <p className="text-[10px] text-neuro-navy font-bold leading-relaxed">
+                <Sparkles className="w-3 h-3 text-neuro-orange inline mr-1 mb-0.5" />
+                <span className="text-neuro-orange">PRO TIP:</span> Profiles with introduction videos see a <span className="underline decoration-neuro-orange/30 underline-offset-2">400% higher booking rate</span> on average.
+              </p>
+            </div>
+
+            <button 
+              onClick={() => setHasVideo(!hasVideo)}
+              className={cn(
+                "w-full py-4 font-black rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm border",
+                hasVideo 
+                  ? "bg-white text-green-500 border-green-100" 
+                  : "bg-white text-neuro-navy hover:bg-gray-50 border-gray-200"
+              )}
+            >
+              {hasVideo ? (
+                <>Video Active <CheckCircle2 className="w-3 h-3" /></>
+              ) : (
+                <>Add Intro Video <ArrowUpRight className="w-3 h-3" /></>
+              )}
             </button>
           </section>
 
