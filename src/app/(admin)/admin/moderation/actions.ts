@@ -21,40 +21,62 @@ export interface PlatformHealthMetrics {
   avgResolutionTime: string;
 }
 
-// Global settings state simulation (In production, stored in a settings table)
+// Fallback global settings if table doesn't exist yet
 let globalSettings = {
   autoApprove: false,
   outboundScan: true,
 };
 
-// Simulated mock database for alerts
-let currentAlerts: ModerationAlert[] = [
-  { id: '1', type: 'Suspicious Activity', source: 'User_456', reason: 'Rapid bulk messaging detected', date: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(), status: 'Warning' },
-  { id: '2', type: 'Domain Conflict', source: 'Clinic_789', reason: 'Website URL mismatch with verified NPI', date: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), status: 'Info' }
-];
-
 export async function getModerationData() {
   const supabase = createServerSupabase();
   
   try {
-    const { count: pendingDoctors } = await supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending');
-    const { count: pendingSeminars } = await supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('is_approved', false);
-    const { count: pendingVendors } = await supabase.from('vendors').select('*', { count: 'exact', head: true }).eq('is_active', false);
-    
-    // Fallback counts for UI during early stage
+    // 1. Fetch real-time counts from database
+    const [
+      { count: pendingDoctors },
+      { count: pendingSeminars },
+      { count: pendingVendors },
+      { count: verifiedDoctors },
+      { count: totalProfiles },
+      { data: recentAuditAlerts }
+    ] = await Promise.all([
+      supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+      supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('is_approved', false),
+      supabase.from('vendors').select('*', { count: 'exact', head: true }).eq('is_active', false),
+      supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      // Fetch real security alerts from audit_logs table
+      supabase.from('audit_logs')
+        .select('*')
+        .or('severity.eq.High,severity.eq.Critical')
+        .order('created_at', { ascending: false })
+        .limit(10)
+    ]);
+
     const pendingDoctorsCount = pendingDoctors || 0;
     const pendingSeminarsCount = pendingSeminars || 0;
     const pendingVendorsCount = pendingVendors || 0;
+    const verifiedDoctorsCount = verifiedDoctors || 0;
 
-    const { count: verifiedDoctors } = await supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified');
+    // 2. Map real audit logs to ModerationAlerts
+    const alerts: ModerationAlert[] = (recentAuditAlerts || []).map(log => ({
+      id: log.id,
+      type: log.category,
+      source: log.user_name || "System",
+      reason: log.event,
+      date: log.created_at,
+      status: log.severity === 'Critical' ? 'Critical' : 'Warning'
+    }));
 
+    // 3. Dynamic Health Metrics
+    const unverifiedCount = (totalProfiles || 0) - verifiedDoctorsCount;
     const healthMetrics: PlatformHealthMetrics = {
-      verifiedDoctors: verifiedDoctors || 0,
-      unverifiedDoctors: pendingDoctorsCount,
-      fraudAttemptRate: '0.0%',
+      verifiedDoctors: verifiedDoctorsCount,
+      unverifiedDoctors: unverifiedCount > 0 ? unverifiedCount : 0,
+      fraudAttemptRate: '0.0%', // Would need a specific table for tracking rejected fraud
       vendorCompliance: '100%',
       seminarVerificationRate: '100%',
-      activeCases: currentAlerts.length,
+      activeCases: alerts.length,
       avgResolutionTime: '< 1 hour'
     };
 
@@ -66,11 +88,11 @@ export async function getModerationData() {
           { id: 'seminars', name: "Seminar Listings", count: pendingSeminarsCount, color: "text-neuro-orange" },
           { id: 'vendors', name: "Vendor Partners", count: pendingVendorsCount, color: "text-purple-500" }
         ],
-        alerts: currentAlerts,
+        alerts: alerts,
         summary: {
-          totalCleared: healthMetrics.verifiedDoctors,
-          escalated: 0,
-          pendingInvestigations: currentAlerts.length,
+          totalCleared: verifiedDoctorsCount,
+          escalated: alerts.filter(a => a.status === 'Critical').length,
+          pendingInvestigations: alerts.length,
           totalFlagged: pendingDoctorsCount + pendingSeminarsCount + pendingVendorsCount
         },
         healthMetrics,
@@ -79,62 +101,62 @@ export async function getModerationData() {
     };
   } catch (error) {
     console.error("Moderation Data Fetch Error:", error);
-    return { success: false, error: "Failed to fetch moderation data." };
+    return { success: false, error: "Failed to fetch live moderation data." };
   }
-}
-
-export async function getPendingSeminars() {
-  const supabase = createServerSupabase();
-  const { data, error } = await supabase
-    .from('seminars')
-    .select('*, host:profiles!host_id(full_name)')
-    .eq('is_approved', false);
-  
-  return { data: data || [], error };
-}
-
-export async function approveSeminar(id: string) {
-  const supabase = createServerSupabase();
-  const { error } = await supabase
-    .from('seminars')
-    .update({ is_approved: true })
-    .eq('id', id);
-  
-  return { success: !error };
-}
-
-export async function markSeminarAsPast(id: string) {
-  const supabase = createServerSupabase();
-  const { error } = await supabase
-    .from('seminars')
-    .update({ is_past: true })
-    .eq('id', id);
-  
-  return { success: !error };
 }
 
 export async function resolveAlert(alertId: string, action: 'Dismiss' | 'Escalate' | 'Resolve') {
-  console.log(`[AUDIT] Alert ${alertId} processed with action: ${action} by Super_Admin`);
+  const supabase = createServerSupabase();
   
-  if (action === 'Dismiss' || action === 'Resolve') {
-    currentAlerts = currentAlerts.filter(a => a.id !== alertId);
-  } else if (action === 'Escalate') {
-    const alert = currentAlerts.find(a => a.id === alertId);
-    if (alert) alert.status = 'Critical';
-  }
+  // In a real system, we'd mark the log as 'resolved' or 'hidden'
+  // For now, we'll log the resolution action back into the audit trail
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  await supabase.from('audit_logs').insert({
+    category: 'SECURITY',
+    event: `Moderator ${action}: Incident ${alertId}`,
+    user_name: user?.email || "Admin",
+    target: "Moderation System",
+    status: 'Success',
+    severity: 'Low'
+  });
   
   return { success: true };
 }
 
 export async function toggleModerationSetting(setting: 'autoApprove' | 'outboundScan', value: boolean) {
+  // Update local cache
   globalSettings[setting] = value;
-  console.log(`[AUDIT] Moderation Setting '${setting}' changed to ${value} by Super_Admin`);
+  
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Log the configuration change
+  await supabase.from('audit_logs').insert({
+    category: 'SYSTEM',
+    event: `Changed Moderation Setting '${setting}' to ${value}`,
+    user_name: user?.email || "Admin",
+    target: "Platform Settings",
+    status: 'Success',
+    severity: 'Medium'
+  });
+
   return { success: true, settings: globalSettings };
 }
 
 export async function updateComplianceGuidelines(guidelines: string) {
-  console.log(`[AUDIT] Compliance Guidelines updated by Super_Admin`);
-  // Simulate delay
-  await new Promise(r => setTimeout(r, 1000));
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  await supabase.from('audit_logs').insert({
+    category: 'GENERAL',
+    event: 'Published new Compliance Guidelines',
+    user_name: user?.email || "Admin",
+    target: "Policy Gateway",
+    status: 'Success',
+    severity: 'Medium',
+    metadata: { guidelines_preview: guidelines.substring(0, 100) }
+  });
+
   return { success: true };
 }
