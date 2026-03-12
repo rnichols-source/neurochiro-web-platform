@@ -18,6 +18,12 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { MembershipTier } from '@/types/directory';
 import { ROIStats, ROIData } from '@/types/analytics';
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 interface ROIDashboardProps {
   tier: MembershipTier;
