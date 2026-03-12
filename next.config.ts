@@ -41,7 +41,7 @@ const nextConfig: NextConfig = {
     ];
   },
   turbopack: {
-    root: ".",
+    root: process.cwd(),
     resolveAlias: {
       canvas: "empty",
     },

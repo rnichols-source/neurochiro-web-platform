@@ -39,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // Dynamic doctor routes
-  const doctorRoutes = (doctors || []).map((doctor) => ({
+  const doctorRoutes = (doctors || []).map((doctor: { slug: string; updated_at: string | null }) => ({
     url: `${BASE_URL}/directory/${doctor.slug}`,
     lastModified: doctor.updated_at || new Date().toISOString(),
     changeFrequency: 'weekly' as const,
@@ -47,7 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // Dynamic seminar routes
-  const seminarRoutes = (seminars || []).map((seminar) => ({
+  const seminarRoutes = (seminars || []).map((seminar: { id: string; updated_at: string | null }) => ({
     url: `${BASE_URL}/seminars/${seminar.id}`,
     lastModified: seminar.updated_at || new Date().toISOString(),
     changeFrequency: 'weekly' as const,
