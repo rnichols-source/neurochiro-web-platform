@@ -19,7 +19,10 @@ import {
   DollarSign,
   Globe,
   PieChart,
-  Loader2
+  Loader2,
+  Star,
+  Eye,
+  Zap
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -95,30 +98,39 @@ export default function SeminarsPage() {
 
       {/* Seminar Analytics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4">
+         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-2 bg-neuro-orange/10 text-neuro-orange">
+               <TrendingUp className="w-3 h-3" />
+            </div>
             <div className="p-3 bg-blue-50 rounded-2xl">
-               <Users className="w-6 h-6 text-blue-600" />
+               <Award className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Attendees</p>
-               <p className="text-2xl font-black text-neuro-navy">124</p>
+               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Clinical Authority Index</p>
+               <div className="flex items-baseline gap-2">
+                  <p className="text-2xl font-black text-neuro-navy">124</p>
+                  <span className="text-[10px] font-bold text-green-500">+12% vs last month</span>
+               </div>
             </div>
          </div>
-         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4">
+         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 group">
             <div className="p-3 bg-green-50 rounded-2xl">
-               <TrendingUp className="w-6 h-6 text-green-600" />
+               <DollarSign className="w-6 h-6 text-green-600" />
             </div>
             <div>
-               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Revenue (YTD)</p>
-               <p className="text-2xl font-black text-neuro-navy">$32,450</p>
+               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Gross Revenue (YTD)</p>
+               <div className="flex items-baseline gap-2">
+                  <p className="text-2xl font-black text-neuro-navy">$32,450</p>
+                  <span className="text-[10px] font-bold text-neuro-orange">Est. ROI: 8.4x</span>
+               </div>
             </div>
          </div>
-         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4">
+         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 group">
             <div className="p-3 bg-purple-50 rounded-2xl">
-               <Award className="w-6 h-6 text-purple-600" />
+               <Star className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Avg Rating</p>
+               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Avg Network Rating</p>
                <p className="text-2xl font-black text-neuro-navy">4.9/5</p>
             </div>
          </div>
@@ -145,6 +157,12 @@ export default function SeminarsPage() {
                       <h3 className="text-2xl font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">{sem.title}</h3>
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                          <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {sem.location}</span>
+                         <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-orange-50 text-neuro-orange rounded-full border border-orange-100 animate-pulse">
+                               <Eye className="w-2.5 h-2.5" />
+                               <span className="text-[8px] font-black uppercase">42 Students Watching</span>
+                            </div>
+                         </div>
                       </div>
                    </div>
                    <div className="flex gap-6 md:border-l md:border-gray-50 md:pl-6">
@@ -207,9 +225,9 @@ export default function SeminarsPage() {
               
               <div className="space-y-4 mb-8">
                  {[
-                   { name: "Top of Feed", price: "$24/wk", icon: Sparkles, discount: "50% OFF" },
-                   { name: "Email Blast", price: "$75/once", icon: Calendar, discount: "50% OFF" },
-                   { name: "Global Push", price: "$149/wk", icon: TrendingUp, discount: "50% OFF" }
+                   { name: "Top of Feed", price: "$24/wk", icon: Sparkles, discount: "2.5x Visibility Lift" },
+                   { name: "Email Blast", price: "$75/once", icon: Calendar, discount: "Avg. 15-20 Leads" },
+                   { name: "Global Push", price: "$149/wk", icon: TrendingUp, discount: "Max ROI Multiplier" }
                  ].map((opt, i) => (
                    <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 group cursor-pointer hover:border-neuro-orange transition-all">
                       <div className="flex items-center gap-3">
@@ -233,16 +251,26 @@ export default function SeminarsPage() {
            </section>
 
            <section className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
-              <h4 className="font-bold text-neuro-navy mb-4 text-sm uppercase tracking-widest">Student Insights</h4>
-              <p className="text-xs text-gray-500 leading-relaxed mb-4">
+              <h4 className="font-bold text-neuro-navy mb-2 text-sm uppercase tracking-widest">Student Insights</h4>
+              <p className="text-xs text-gray-500 leading-relaxed mb-6">
                  Top interests of students viewing your seminars:
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mb-8">
                  {["Pediatrics", "Scanning", "Business"].map((tag, i) => (
                    <span key={i} className="px-3 py-1 bg-neuro-cream rounded-full text-[9px] font-black uppercase text-neuro-navy">
                       {tag}
                    </span>
                  ))}
+              </div>
+
+              <div className="p-5 bg-neuro-orange/5 rounded-2xl border border-neuro-orange/10 relative overflow-hidden group">
+                 <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Sparkles className="w-8 h-8 text-neuro-orange" />
+                 </div>
+                 <p className="text-[10px] font-black text-neuro-orange uppercase tracking-[0.2em] mb-2">Hormozi Sell-Out Hack</p>
+                 <p className="text-xs font-bold text-neuro-navy leading-relaxed italic">
+                    "82% of students viewing your events are searching for 'Clinical Certainty.' Rename your 2:00 PM slot to 'The Certainty Architecture' to increase conversion by 30%."
+                 </p>
               </div>
            </section>
         </div>
