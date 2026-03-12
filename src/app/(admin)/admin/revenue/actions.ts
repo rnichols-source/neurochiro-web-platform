@@ -62,24 +62,20 @@ export async function getRevenueData(timeRange: string) {
     // 4. Precise MRR Calculation (Normalized to Monthly)
     let mrrCents = 0;
     allSubscriptions.forEach((sub: any) => {
-      // Each subscription can have multiple items
       sub.items.data.forEach((item: any) => {
         const recurring = item.price.recurring;
-        if (!recurring) return; // Skip one-time items
+        if (!recurring) return; 
 
         const amount = (item.price.unit_amount || 0) * (item.quantity || 1);
         let monthlyAmount = 0;
 
-        // Normalize to monthly
         if (recurring.interval === 'month') {
           monthlyAmount = amount / recurring.interval_count;
         } else if (recurring.interval === 'year') {
           monthlyAmount = amount / (recurring.interval_count * 12);
         } else if (recurring.interval === 'week') {
-          // Approx 4.33 weeks per month
           monthlyAmount = (amount * 4.333333) / recurring.interval_count;
         } else if (recurring.interval === 'day') {
-          // Approx 30.42 days per month
           monthlyAmount = (amount * 30.41666) / recurring.interval_count;
         }
         
@@ -93,7 +89,7 @@ export async function getRevenueData(timeRange: string) {
     const previousFailed = previousCharges.filter((c: any) => c.status === 'failed').length;
     const failedPaymentsTrend = currentFailed - previousFailed;
 
-    // 6. Revenue Attribution (Real Data)
+    // 6. Revenue Attribution (Fixed logic for $29/$39 transactions)
     let breakdownRaw: Record<string, number> = {
       "Doctor Subs": 0,
       "Student Network": 0,
@@ -105,20 +101,36 @@ export async function getRevenueData(timeRange: string) {
     currentCharges.filter((c: any) => c.status === 'succeeded').forEach((c: any) => {
       const amt = c.amount / 100;
       const desc = (c.description || "").toLowerCase();
-      if (amt >= 190 || desc.includes("doctor")) breakdownRaw["Doctor Subs"] += amt;
-      else if (amt >= 30 && amt <= 40) breakdownRaw["Student Network"] += amt;
-      else if (amt > 400) breakdownRaw["LMS & Mastermind"] += amt;
-      else if (desc.includes("event") || desc.includes("seminar")) breakdownRaw["Events"] += amt;
-      else breakdownRaw["Other"] += amt;
+      
+      // Robust categorization based on common amounts and keywords
+      if (amt >= 140 || desc.includes("doctor")) {
+        breakdownRaw["Doctor Subs"] += amt;
+      } else if ((amt >= 20 && amt <= 60) || desc.includes("student") || desc.includes("council") || desc.includes("network")) {
+        breakdownRaw["Student Network"] += amt;
+      } else if (amt > 400 || desc.includes("mastermind") || desc.includes("lms")) {
+        breakdownRaw["LMS & Mastermind"] += amt;
+      } else if (desc.includes("event") || desc.includes("seminar") || desc.includes("promo")) {
+        breakdownRaw["Events"] += amt;
+      } else {
+        breakdownRaw["Other"] += amt;
+      }
     });
 
     const totalCalculated = Object.values(breakdownRaw).reduce((a: number, b: number) => a + b, 0);
     const breakdown = Object.entries(breakdownRaw)
-      .map(([label, val]: [string, number]) => ({
-        label,
-        value: totalCalculated > 0 ? Math.round((val / totalCalculated) * 100) : 0,
-        color: label === "Doctor Subs" ? "bg-neuro-orange" : "bg-blue-500"
-      }))
+      .map(([label, val]: [string, number]) => {
+        let color = "bg-blue-500";
+        if (label === "Doctor Subs") color = "bg-neuro-orange";
+        if (label === "Student Network") color = "bg-emerald-500";
+        if (label === "LMS & Mastermind") color = "bg-purple-500";
+        if (label === "Events") color = "bg-amber-500";
+        
+        return {
+          label,
+          value: totalCalculated > 0 ? Math.round((val / totalCalculated) * 100) : 0,
+          color
+        };
+      })
       .filter(item => item.value > 0);
 
     return {
@@ -138,7 +150,7 @@ export async function getRevenueData(timeRange: string) {
           amount: (c.amount / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
           status: c.status === 'succeeded' ? 'Succeeded' : c.status === 'failed' ? 'Failed' : 'Other',
           date: new Date(c.created * 1000).toLocaleDateString(),
-          type: c.description || "Platform Service"
+          type: c.description || "Subscription update"
         })),
         breakdown,
         projectedGrowth: mrr * 12
