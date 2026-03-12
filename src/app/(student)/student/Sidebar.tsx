@@ -63,20 +63,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const SidebarContent = (
     <div className="flex flex-col h-full bg-neuro-navy">
-      {/* Dev Toggle - Only visible on desktop or when sidebar is visible */}
-      <div className="absolute -right-12 top-1/2 -rotate-90 origin-left z-50 hidden md:block">
-        <button 
-          onClick={() => {
-            const tiers: StudentTier[] = ["Free", "Foundation", "Professional", "Accelerator"];
-            const nextIndex = (tiers.indexOf(tier) + 1) % tiers.length;
-            setTier(tiers[nextIndex]);
-          }}
-          className="bg-neuro-orange text-white text-[10px] font-black px-3 py-1 rounded-t-lg shadow-xl uppercase tracking-widest border-x border-t border-white/20"
-        >
-          Tier: {tier}
-        </button>
-      </div>
-
       <div className="p-6 shrink-0">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-neuro-orange flex items-center justify-center font-bold text-white text-xl">N</div>
