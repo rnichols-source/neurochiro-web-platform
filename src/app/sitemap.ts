@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { createServerSupabase } from '@/lib/supabase-server';
+import { REGIONS } from '@/lib/regions';
 
 const BASE_URL = 'https://neurochiro.com';
 
@@ -38,6 +39,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === '' ? 1 : 0.8,
   }));
 
+  // Regional routes
+  const regionalRoutes = Object.keys(REGIONS).map((code) => ({
+    url: `${BASE_URL}/directory/locations/${code.toLowerCase()}`,
+    lastModified: new Date().toISOString(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.9,
+  }));
+
   // Dynamic doctor routes
   const doctorRoutes = (doctors || []).map((doctor: { slug: string; updated_at: string | null }) => ({
     url: `${BASE_URL}/directory/${doctor.slug}`,
@@ -54,5 +63,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...routes, ...doctorRoutes, ...seminarRoutes];
+  return [...routes, ...regionalRoutes, ...doctorRoutes, ...seminarRoutes];
 }

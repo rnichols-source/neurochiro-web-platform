@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown, User, Stethoscope, GraduationCap, Zap, MapPin, BookOpen, Crown, Users, Briefcase, Store, Calendar, Sparkles, Bell } from "lucide-react";
@@ -96,10 +97,13 @@ export default function Navbar() {
             className="cursor-pointer select-none"
           >
             <Link href="/" className="flex items-center gap-3 group">
-              <img 
+              <Image 
                 src={useWhiteText ? "/logo-white.png" : "/logo.png"} 
                 alt="NeuroChiro Logo" 
-                className="w-10 h-10 object-contain group-hover:scale-105 transition-transform"
+                width={40}
+                height={40}
+                className="object-contain group-hover:scale-105 transition-transform"
+                priority
               />
               <span className={`font-heading font-black text-xl tracking-tight transition-colors ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`}>
                 NEURO<span className="text-neuro-orange">CHIRO</span>
@@ -246,7 +250,7 @@ export default function Navbar() {
           >
             <div className="p-6 flex justify-between items-center border-b border-white/10">
               <div className="flex items-center gap-3">
-                <img src="/logo-white.png" alt="NeuroChiro" className="w-8 h-8 object-contain" />
+                <Image src="/logo-white.png" alt="NeuroChiro" width={32} height={32} className="object-contain" />
                 <span className="font-heading font-black text-xl tracking-tight">
                   NEURO<span className="text-neuro-orange">CHIRO</span>
                 </span>

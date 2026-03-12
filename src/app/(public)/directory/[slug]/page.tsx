@@ -2,6 +2,7 @@ import { getDoctorBySlug } from "../actions";
 import { notFound } from "next/navigation";
 import DoctorProfileClient from "./DoctorProfileClient";
 import { Metadata } from "next";
+import SchemaMarkup from "@/components/seo/SchemaMarkup";
 
 interface Props {
   params: { slug: string };
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const name = `${doctor.first_name} ${doctor.last_name}`;
   const location = `${doctor.city}, ${doctor.state || doctor.country}`;
   const title = `${name} | Nervous System Chiropractor in ${location}`;
-  const description = `Connect with ${name} at ${doctor.clinic_name} in ${location}. Specializing in nervous-system-focused chiropractic care. Verified NeuroChiro provider.`;
+  const description = `Connect with ${name}, a leading nervous system chiropractor at ${doctor.clinic_name} in ${location}. Specialist in Vagus Nerve health and neuro-centric chiropractic care.`;
 
   return {
     title,
@@ -73,10 +74,7 @@ export default async function DoctorProfilePage({ params }: Props) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <SchemaMarkup data={jsonLd} />
       <DoctorProfileClient doctor={doctor} slug={params.slug} />
     </>
   );
