@@ -17,7 +17,8 @@ import {
   Info,
   ChevronRight,
   Globe,
-  Navigation
+  Navigation,
+  Clock
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
