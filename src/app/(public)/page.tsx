@@ -12,7 +12,7 @@ import NeuralPulse from "@/components/landing/NeuralPulse";
 import CallToAction from "@/components/landing/CallToAction";
 import Footer from "@/components/landing/Footer";
 import Link from "next/link";
-import { Zap, Activity, Brain as BrainIcon, BookOpen, Stethoscope } from "lucide-react";
+import { Zap, Activity, Brain as BrainIcon, BookOpen, Stethoscope, Calendar, MapPin, Users, ArrowRight } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
