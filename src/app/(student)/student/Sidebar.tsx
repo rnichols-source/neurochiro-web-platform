@@ -84,76 +84,82 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </Link>
       </div>
 
-      <nav className="px-4 space-y-1 mb-8 shrink-0">
-        <div className="mb-4 px-2 flex items-center justify-between">
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Student {tier}</span>
-          {getTierIcon(tier)}
+      <nav className="flex-1 px-4 space-y-8 overflow-y-auto pt-4 pb-8">
+        <div>
+          <div className="mb-4 px-2 flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Student {tier}</span>
+            {getTierIcon(tier)}
+          </div>
+          <div className="space-y-1">
+            {mainNavItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={onClose}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
+                    isActive 
+                      ? "bg-neuro-orange text-white" 
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
+                  )}
+                >
+                  <item.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-gray-400 group-hover:text-neuro-orange-light")} />
+                  <span className="font-medium text-sm">{item.name}</span>
+                  {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
+                </Link>
+              );
+            })}
+          </div>
         </div>
-        {mainNavItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              onClick={onClose}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
-                isActive 
-                  ? "bg-neuro-orange text-white" 
-                  : "text-gray-400 hover:text-white hover:bg-white/5"
-              )}
-            >
-              <item.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-gray-400 group-hover:text-neuro-orange-light")} />
-              <span className="font-medium text-sm">{item.name}</span>
-              {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
-            </Link>
-          );
-        })}
-      </nav>
 
-      <nav className="px-4 space-y-1 mb-8 shrink-0">
-        <div className="mb-4 px-2">
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Career Tools</span>
+        <div>
+          <div className="mb-4 px-2">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Career Tools</span>
+          </div>
+          <div className="space-y-1">
+            {careerToolItems.map((item) => {
+              const isActive = pathname === item.href;
+              
+              let isLocked = false;
+              if (item.minTier === "Accelerator") {
+                isLocked = !isAccelerator;
+              } else if (item.minTier === "Professional") {
+                isLocked = !isProfessional;
+              } else if (item.minTier === "Foundation") {
+                isLocked = !isFoundation;
+              }
+
+              return (
+                <Link
+                  key={item.name}
+                  href={isLocked ? "/pricing" : item.href}
+                  onClick={(e) => {
+                    if (isLocked) {
+                      // If locked, prevent default if we want to show a modal instead, 
+                      // but here it goes to /pricing.
+                    } else if (onClose) {
+                      onClose();
+                    }
+                  }}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative",
+                    isActive 
+                      ? "bg-white/10 text-white" 
+                      : "text-gray-400 hover:text-white hover:bg-white/5",
+                    isLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                  )}
+                >
+                  <item.icon className={cn("w-5 h-5", isActive ? "text-neuro-orange" : "text-gray-400 group-hover:text-neuro-orange-light")} />
+                  <span className="font-medium text-sm">{item.name}</span>
+                  {isLocked && <Lock className="w-3 h-3 ml-auto text-neuro-orange" />}
+                  {isActive && !isLocked && <ChevronRight className="w-4 h-4 ml-auto" />}
+                </Link>
+              );
+            })}
+          </div>
         </div>
-        {careerToolItems.map((item) => {
-          const isActive = pathname === item.href;
-          
-          let isLocked = false;
-          if (item.minTier === "Accelerator") {
-            isLocked = !isAccelerator;
-          } else if (item.minTier === "Professional") {
-            isLocked = !isProfessional;
-          } else if (item.minTier === "Foundation") {
-            isLocked = !isFoundation;
-          }
-
-          return (
-            <Link
-              key={item.name}
-              href={isLocked ? "/pricing" : item.href}
-              onClick={(e) => {
-                if (isLocked) {
-                  // If locked, prevent default if we want to show a modal instead, 
-                  // but here it goes to /pricing.
-                } else if (onClose) {
-                  onClose();
-                }
-              }}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative",
-                isActive 
-                  ? "bg-white/10 text-white" 
-                  : "text-gray-400 hover:text-white hover:bg-white/5",
-                isLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-              )}
-            >
-              <item.icon className={cn("w-5 h-5", isActive ? "text-neuro-orange" : "text-gray-400 group-hover:text-neuro-orange-light")} />
-              <span className="font-medium text-sm">{item.name}</span>
-              {isLocked && <Lock className="w-3 h-3 ml-auto text-neuro-orange" />}
-              {isActive && !isLocked && <ChevronRight className="w-4 h-4 ml-auto" />}
-            </Link>
-          );
-        })}
       </nav>
 
       <div className="p-4 mt-auto shrink-0">
@@ -214,7 +220,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 h-screen flex-col border-r border-white/10 shrink-0 relative overflow-y-auto">
+      <aside className="hidden md:flex w-64 h-screen flex-col border-r border-white/10 shrink-0 relative overflow-y-auto z-[100]">
         {SidebarContent}
       </aside>
 
