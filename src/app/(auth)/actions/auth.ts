@@ -147,7 +147,7 @@ export async function createAccountAction(formData: FormData, role: string, tier
   if (error) return { error: error.message };
 
   if (data?.user) {
-    Automations.onSignup(data.user.id, email, name, phone);
+    Automations.onSignup(data.user.id, email, name, role, phone);
     return { success: true, user: data.user };
   }
 
@@ -162,12 +162,19 @@ export async function updateProfileAction(userId: string, profileData: any) {
   
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return { success: true };
 
-  const { role, tier, clinicName, graduationYear, school, city, website, ...rest } = profileData;
+  const { role, tier, clinicName, gradYear, school, city, website, ...rest } = profileData;
 
   // 1. Update main profile
   const { error: profileError } = await supabase
     .from('profiles')
-    .update({ ...rest, role, subscription_tier: tier })
+    .update({ 
+      ...rest, 
+      role, 
+      subscription_tier: tier,
+      chiropracticSchool: school,
+      gradYear: gradYear,
+      city: city
+    })
     .eq('id', userId);
 
   if (profileError) return { error: profileError.message };
@@ -194,7 +201,7 @@ export async function updateProfileAction(userId: string, profileData: any) {
       .from('students')
       .update({ 
         school: school,
-        graduation_year: graduationYear ? parseInt(graduationYear, 10) : null,
+        graduation_year: gradYear ? parseInt(gradYear, 10) : null,
         location_city: city
       })
       .eq('id', userId);

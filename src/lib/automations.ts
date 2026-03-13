@@ -92,7 +92,7 @@ const sendPremiumEmail = async (options: { to: string, subject: string, title: s
 /**
  * ROBUST QUEUING WRAPPER
  */
-const enqueue = async (eventType: string, payload: Record<string, unknown>) => {
+const enqueue = async (eventType: string, payload: Record<string, unknown>, delayMinutes: number = 0) => {
   try {
     const supabaseAdmin = getSupabaseAdmin();
     if (!supabaseAdmin) {
@@ -100,18 +100,26 @@ const enqueue = async (eventType: string, payload: Record<string, unknown>) => {
       return;
     }
 
+    const scheduledAt = new Date();
+    scheduledAt.setMinutes(scheduledAt.getMinutes() + delayMinutes);
+
     const { data, error } = await supabaseAdmin
       .from('automation_queue')
       .insert({
         event_type: eventType,
         payload: payload,
-        status: 'pending'
+        status: 'pending',
+        scheduled_at: scheduledAt.toISOString()
       })
       .select()
       .single();
 
     if (error) throw error;
-    executeAutomation(data.id, eventType, payload);
+    
+    // Only execute immediately if not delayed
+    if (delayMinutes === 0) {
+      executeAutomation(data.id, eventType, payload);
+    }
   } catch (err) {
     console.error("Failed to enqueue automation:", err);
   }
@@ -223,9 +231,23 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           } else if (payload.role === 'student') {
             subject = 'Welcome to NeuroChiro Student Network 🎓';
             title = 'Student Account Created';
-            body = `<h1>Welcome ${payload.name || payload.full_name || ''},</h1><p>You are now part of the global talent pool. Top clinics are looking for nervous-system focused associates. Complete your resume and explore the job board.</p>`;
-            ctaText = 'Explore Job Board';
-            ctaUrl = 'https://neurochiro.co/student/jobs';
+            body = `<h1>Welcome ${payload.name || payload.full_name || ''},</h1>
+                    <p>You're now part of the NeuroChiro Student Network — a global community helping chiropractic students build powerful careers.</p>
+                    <p>Inside your dashboard you can now:</p>
+                    <ul>
+                      <li>Evaluate associate contracts</li>
+                      <li>Compare job offers</li>
+                      <li>Access negotiation tools</li>
+                      <li>Discover seminars and training events</li>
+                      <li>Connect with clinics looking for graduates</li>
+                    </ul>
+                    <p>Your next step: Complete your student profile so we can match you with the right opportunities.</p>`;
+            ctaText = 'Complete My Profile';
+            ctaUrl = 'https://neurochiro.co/student/profile';
+
+            // Enqueue subsequent emails in the sequence
+            await enqueue('student_career_accelerator', payload, 24 * 60); // 24 hours later
+            await enqueue('student_opportunity_engine', payload, 3 * 24 * 60); // 3 days later
           } else if (payload.role === 'vendor') {
             subject = 'Welcome to NeuroChiro Marketplace 🏢';
             title = 'Vendor Account Created';
@@ -297,6 +319,40 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
               }
             }
           }
+        }
+        break;
+
+      case 'student_career_accelerator':
+        if (emailEnabled && payload.email) {
+          await sendPremiumEmail({
+            to: payload.email,
+            subject: 'Accelerate Your Chiropractic Career 🚀',
+            title: 'Career Tools Unlocked',
+            body: `<h1>Ready to lead, ${payload.name || payload.full_name || ''}?</h1>
+                   <p>We've built proprietary tools to help you navigate the transition from student to elite practitioner:</p>
+                   <ul>
+                     <li><strong>Contract Lab:</strong> Decode any associate agreement in seconds.</li>
+                     <li><strong>Offer Evaluation Tool:</strong> Compare multiple offers side-by-side.</li>
+                     <li><strong>Negotiation Guide:</strong> Exact scripts to increase your starting value.</li>
+                   </ul>`,
+            ctaText: 'Explore Career Tools',
+            ctaUrl: 'https://neurochiro.co/student/dashboard'
+          });
+        }
+        break;
+
+      case 'student_opportunity_engine':
+        if (emailEnabled && payload.email) {
+          await sendPremiumEmail({
+            to: payload.email,
+            subject: 'Your Future Clinic is Waiting 🏢',
+            title: 'Opportunity Engine',
+            body: `<h1>Don't wait until graduation, ${payload.name || payload.full_name || ''}.</h1>
+                   <p>The NeuroChiro network is full of high-volume, nervous-system-focused clinics looking for their next associate.</p>
+                   <p>Maximize your visibility by uploading your resume and attending upcoming seminars.</p>`,
+            ctaText: 'View Job Board',
+            ctaUrl: 'https://neurochiro.co/student/jobs'
+          });
         }
         break;
 
@@ -633,8 +689,8 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
 };
 
 export const Automations = {
-  onSignup: async (userId: string, email: string, name: string, phone?: string) => {
-    await enqueue('welcome_email', { userId, email, name, phone });
+  onSignup: async (userId: string, email: string, name: string, role: string, phone?: string) => {
+    await enqueue('welcome_email', { userId, email, name, role, phone });
   },
   onMembershipUpgrade: async (userId: string, email: string, tierName: string) => {
     await enqueue('membership_upgrade', { userId, email, tierName });

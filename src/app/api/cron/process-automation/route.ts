@@ -17,11 +17,12 @@ export async function GET(req: Request) {
   const supabase = createServerSupabase();
   
   try {
-    // 2. Fetch pending items from the queue (limit 50 per run to prevent timeouts)
+    // 2. Fetch pending items from the queue that are scheduled for now or earlier
     const { data: queueItems, error } = await supabase
       .from('automation_queue')
       .select('*')
       .eq('status', 'pending')
+      .lte('scheduled_at', new Date().toISOString())
       .order('created_at', { ascending: true })
       .limit(50);
 
