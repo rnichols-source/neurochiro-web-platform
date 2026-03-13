@@ -672,7 +672,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             const { data: profile } = await supabaseAdmin.from('profiles').select('role, full_name, email').eq('id', userId).single();
             if (profile?.role === 'doctor') {
                await supabaseAdmin.from('doctors').update({ verification_status: 'verified' }).eq('id', userId);
-               
+
                if (emailEnabled && profile.email) {
                   await sendPremiumEmail({
                     to: profile.email,
@@ -683,9 +683,21 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                     ctaUrl: 'https://neurochiro.co/doctor/dashboard'
                   });
                }
+            } else if (profile?.role === 'vendor') {
+               if (emailEnabled && profile.email) {
+                  await sendPremiumEmail({
+                    to: profile.email,
+                    subject: 'Payment Received! Awaiting Final Approval ⏳',
+                    title: 'Vendor Partner Payment',
+                    body: `<p>Hi ${profile.full_name || 'Partner'}, your payment has been successfully processed.</p><p>Our team is reviewing your profile and will approve your listing shortly.</p>`,
+                    ctaText: 'Go to Dashboard',
+                    ctaUrl: 'https://neurochiro.co/vendor/dashboard'
+                  });
+               }
+               // Notify admins about the paid vendor
+               await enqueue('admin_notification', { subject: 'Paid Vendor Application', html: `<p>Vendor <strong>${profile.full_name} (${profile.email})</strong> completed payment and requires approval.</p>` });
             }
-          } else if (customerId) {
-            // Handle renewal via customerId
+          } else if (customerId) {            // Handle renewal via customerId
             // No action needed for now as tier is handled by subscription.updated
           }
 

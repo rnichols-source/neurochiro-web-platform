@@ -24,7 +24,10 @@ export async function getVendorDashboardData() {
     return {
       profile: {
         name: vendor?.name || profile?.full_name || user.email?.split('@')[0],
-        role: profile?.role
+        role: profile?.role,
+        website_url: vendor?.website_url || "",
+        short_description: vendor?.short_description || "",
+        categories: vendor?.categories || []
       },
       stats: {
         views: vendor?.profile_views || 0,
@@ -34,6 +37,9 @@ export async function getVendorDashboardData() {
       offer: {
         title: vendor?.discount_description?.split(' - ')[0] || "NeuroChiro Partner Discount",
         description: vendor?.discount_description?.split(' - ').slice(1).join(' - ') || "",
+        discountType: "Percentage",
+        discountValue: "15%",
+        redemptionInstructions: "Enter code at checkout",
         couponCode: vendor?.discount_code || "",
         expirationDate: "2026-12-31", // In a real app, store this in DB
         active: vendor?.is_active || false

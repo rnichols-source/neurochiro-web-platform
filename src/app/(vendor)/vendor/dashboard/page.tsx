@@ -32,7 +32,8 @@ export default function VendorDashboard() {
     discountValue: "",
     redemptionInstructions: "",
     couponCode: "",
-    expirationDate: ""
+    expirationDate: "",
+    active: true
   });
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
