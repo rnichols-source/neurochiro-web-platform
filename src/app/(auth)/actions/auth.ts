@@ -10,44 +10,6 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   const password = formData.get('password') as string
   const supabase = createServerSupabase()
 
-  // 🧪 DEVELOPMENT BYPASS (For E2E Tests & Sandbox)
-  // CRITICAL: This bypass is only available in non-production environments.
-  const isDevEnvironment = process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_SITE_URL?.includes('localhost');
-  const isDevEmail = [
-    'doctor@neurochiro.com', 
-    'doctor_growth@neurochiro.com', 
-    'doctor_pro@neurochiro.com',
-    'student@neurochiro.com',
-    'student_paid@neurochiro.com',
-    'vendor@neurochiro.com',
-    'patient@neurochiro.com',
-    'drray@neurochirodirectory.com',
-    'raymond@neurochiro.com'
-  ].includes(email);
-
-  if (isDevEnvironment && isDevEmail && password === 'password123') {
-    // Determine role from email
-    let devRole = 'doctor';
-    if (email.includes('student')) devRole = 'student';
-    if (email.includes('vendor')) devRole = 'vendor';
-    if (email.includes('patient')) devRole = 'patient';
-    if (email === 'drray@neurochirodirectory.com' || email === 'raymond@neurochiro.com') devRole = 'founder';
-
-    const dashboardMap: Record<string, string> = {
-        'doctor': '/doctor/dashboard',
-        'student': '/student/dashboard',
-        'patient': '/portal/dashboard',
-        'vendor': '/vendor/dashboard',
-        'founder': '/admin/dashboard'
-    }
-
-    // Set a dev session cookie for the middleware to respect
-    const cookieStore = await cookies();
-    cookieStore.set('nc_dev_session', devRole, { maxAge: 60 * 60, path: '/' });
-
-    return redirect(dashboardMap[devRole] || '/doctor/dashboard');
-  }
-
   const { error, data } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -131,11 +93,6 @@ export async function createAccountAction(formData: FormData, role: string, tier
   const phone = formData.get('phone') as string
   const supabase = createServerSupabase()
 
-  // Handle local development without Supabase
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    return { success: true, user: { id: 'mock-id', email, name, phone } };
-  }
-
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -169,8 +126,6 @@ export async function createAccountAction(formData: FormData, role: string, tier
  */
 export async function updateProfileAction(userId: string, profileData: any) {
   const supabase = createServerSupabase();
-  
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return { success: true };
 
   const { role, tier, clinicName, companyName, gradYear, school, city, website } = profileData;
 

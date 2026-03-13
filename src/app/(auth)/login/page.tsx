@@ -23,13 +23,6 @@ function LoginContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPending, setIsPending] = useState(false);
-  const [isDevMode, setIsDevMode] = useState(false);
-
-  useEffect(() => {
-    // Check for dev mode flag in localStorage
-    const devMode = typeof window !== 'undefined' && localStorage.getItem("nc_dev_mode") === "true";
-    setIsDevMode(devMode);
-  }, []);
 
   useEffect(() => {
     if (errorParam === "session_expired") {
@@ -41,47 +34,8 @@ function LoginContent() {
     }
   }, [errorParam]);
 
-  const quickLogin = async (roleEmail: string) => {
-    setIsPending(true);
-    setErrorMsg(null);
-
-    // Sync client-side state for tiers before redirecting
-    if (roleEmail === "drray@neurochirodirectory.com" || roleEmail.includes("admin")) {
-      localStorage.setItem("nc_dev_mode", "true");
-    }
-
-    if (roleEmail.includes("doctor_pro")) {
-      localStorage.setItem("nc_doctor_tier", "pro");
-    } else if (roleEmail.includes("doctor_growth")) {
-      localStorage.setItem("nc_doctor_tier", "growth");
-    } else if (roleEmail.includes("doctor")) {
-      localStorage.setItem("nc_doctor_tier", "starter");
-    }
-
-    if (roleEmail.includes("student_paid")) {
-      localStorage.setItem("nc_student_tier", "Professional");
-    } else if (roleEmail.includes("student")) {
-      localStorage.setItem("nc_student_tier", "Free");
-    }
-
-    try {
-      const formData = new FormData();
-      formData.append("email", roleEmail);
-      formData.append("password", "password123");
-
-      await login(formData, redirectParam);
-    } catch (err) {
-      if (!(err instanceof Error && err.message === 'NEXT_REDIRECT')) {
-        console.error("Login Error:", err);
-        setErrorMsg("Development login failed. Please try again.");
-      }
-    } finally {
-      setIsPending(false);
-    }
-  };
-
   return (
-    <div className={`flex flex-col md:flex-row gap-8 items-center justify-center max-w-4xl w-full relative z-10 transition-all duration-500 ${isDevMode ? 'md:items-start' : 'items-center'}`}>
+    <div className="flex flex-col md:flex-row gap-8 items-center justify-center max-w-4xl w-full relative z-10 transition-all duration-500 items-center">
       <div className="w-full max-w-md bg-white rounded-[3rem] shadow-2xl border border-gray-100 p-10">
         <Link href="/" className="inline-flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest hover:text-neuro-navy transition-colors mb-10">
           <ChevronLeft className="w-4 h-4" /> Back to Home
@@ -180,94 +134,6 @@ function LoginContent() {
           </Link>
         </div>
       </div>
-
-      {/* Quick Access Panel - Only visible in Dev Mode */}
-      {isDevMode && (
-        <div className="w-full max-w-sm bg-neuro-navy rounded-[3rem] p-8 text-white shadow-2xl border border-white/10 self-stretch flex flex-col animate-in fade-in slide-in-from-right-4 duration-500">
-          <div className="flex items-center gap-2 mb-8">
-            <ShieldCheck className="w-5 h-5 text-neuro-orange" />
-            <h2 className="text-lg font-heading font-bold uppercase tracking-widest">Dev Sandbox</h2>
-          </div>
-          
-          <p className="text-[11px] text-gray-400 mb-6 font-medium leading-relaxed uppercase tracking-tighter">
-            Quickly access different roles to test tier alignment and restricted features.
-          </p>
-
-          <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            <div className="space-y-2">
-              <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2 block">Doctor Tiers</span>
-              <button 
-                onClick={() => quickLogin("doctor@neurochiro.com")}
-                className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors group"
-              >
-                <span className="text-xs font-bold text-gray-300">Doctor (Starter)</span>
-                <ArrowRight className="w-4 h-4 text-neuro-orange opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
-              </button>
-              <button 
-                onClick={() => quickLogin("doctor_growth@neurochiro.com")}
-                className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors group"
-              >
-                <span className="text-xs font-bold text-gray-300">Doctor (Growth)</span>
-                <ArrowRight className="w-4 h-4 text-neuro-orange opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
-              </button>
-              <button 
-                onClick={() => quickLogin("doctor_pro@neurochiro.com")}
-                className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors group border border-neuro-orange/30"
-              >
-                <span className="text-xs font-bold text-neuro-orange">Doctor (Elite Pro)</span>
-                <ArrowRight className="w-4 h-4 text-neuro-orange opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
-              </button>
-            </div>
-
-            <div className="space-y-2 pt-4">
-              <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2 block">Student Tiers</span>
-              <button 
-                onClick={() => quickLogin("student@neurochiro.com")}
-                className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors group"
-              >
-                <span className="text-xs font-bold text-gray-300">Student (Free)</span>
-                <ArrowRight className="w-4 h-4 text-neuro-orange opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
-              </button>
-              <button 
-                onClick={() => quickLogin("student_paid@neurochiro.com")}
-                className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors group"
-              >
-                <span className="text-xs font-bold text-gray-300">Student (Paid)</span>
-                <ArrowRight className="w-4 h-4 text-neuro-orange opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
-              </button>
-            </div>
-
-            <div className="space-y-2 pt-4">
-              <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2 block">Public & Partners</span>
-              <button 
-                onClick={() => quickLogin("vendor@neurochiro.com")}
-                className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors group"
-              >
-                <span className="text-xs font-bold text-gray-300">Vendor Partner</span>
-                <ArrowRight className="w-4 h-4 text-neuro-orange opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
-              </button>
-              <button 
-                onClick={() => quickLogin("patient@neurochiro.com")}
-                className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors group"
-              >
-                <span className="text-xs font-bold text-gray-300">Patient Portal</span>
-                <ArrowRight className="w-4 h-4 text-neuro-orange opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
-              </button>
-            </div>
-
-            <div className="space-y-2 pt-4">
-              <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2 block">Administrative</span>
-              <button 
-                onClick={() => quickLogin("drray@neurochirodirectory.com")}
-                className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors group border border-neuro-orange/30"
-              >
-                <span className="text-xs font-bold text-neuro-orange">Founder Login</span>
-                <ArrowRight className="w-4 h-4 text-neuro-orange opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

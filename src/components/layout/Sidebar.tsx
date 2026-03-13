@@ -17,6 +17,10 @@ import {
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -31,6 +35,35 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    async function getProfile() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        setProfile(profileData);
+      }
+    }
+    getProfile();
+  }, []);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  };
+
+  const getInitials = (name: string) => {
+    return name?.split(" ").map(n => n[0]).join("").toUpperCase() || "NC";
+  };
 
   return (
     <aside className="w-64 h-screen bg-neuro-navy flex flex-col border-r border-white/10 shrink-0">
@@ -85,16 +118,19 @@ export default function Sidebar() {
 
         <div className="flex items-center gap-3 px-3 py-3 border-t border-white/10">
           <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-xs">
-            RN
+            {profile ? getInitials(profile.full_name) : "--"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-white truncate">Raymond Nichols</p>
+            <p className="text-xs font-bold text-white truncate">{profile?.full_name || "Loading..."}</p>
             <p className="text-[10px] text-gray-400 truncate flex items-center gap-1">
               <ShieldCheck className="w-2 h-2 text-gray-500" />
-              Student (Free)
+              {profile?.role === 'student_paid' ? 'Student (Paid)' : 'Student (Free)'}
             </p>
           </div>
-          <button className="text-gray-400 hover:text-white">
+          <button 
+            onClick={handleLogout}
+            className="text-gray-400 hover:text-white"
+          >
             <LogOut className="w-4 h-4" />
           </button>
         </div>

@@ -134,37 +134,22 @@ export default async function proxy(request: NextRequest) {
   const matchedBase = Object.keys(routePermissions).find(path => pathname.startsWith(path))
 
   if (matchedBase) {
-    // 🧪 DEV SESSION BYPASS
-    const devSession = request.cookies.get('nc_dev_session')?.value;
-    let userRole = '';
-    let userEmail = '';
-    let profile: any = null;
+    const { data: { user } } = await supabase.auth.getUser()
 
-    if (devSession) {
-      userRole = devSession;
-      // Mock values for dev session
-      if (userRole === 'founder') userEmail = 'drray@neurochirodirectory.com';
-      // Bypass subscription check for dev sessions
-      profile = { tier: 'growth' };
-    } else {
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
-        const loginUrl = new URL('/login', request.url)
-        loginUrl.searchParams.set('redirect', pathname)
-        return NextResponse.redirect(loginUrl)
-      }
-
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('role, tier, email')
-        .eq('id', user.id)
-        .single()
-
-      profile = profileData;
-      userRole = profile?.role || 'doctor'
-      userEmail = user.email || '';
+    if (!user) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(loginUrl)
     }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, tier, email')
+      .eq('id', user.id)
+      .single()
+
+    let userRole = profile?.role || 'doctor'
+    let userEmail = user.email || '';
 
     // 🛡️ MASTER FOUNDER OVERRIDE
     // If this is the founder, grant universal access regardless of DB role

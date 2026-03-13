@@ -58,8 +58,7 @@ const eliteItems = [
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { tier, setTier } = useDoctorTier();
-  const [isRealAdmin, setIsRealAdmin] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
 
   // Check for real admin session to show emergency exit
   useEffect(() => {
@@ -67,19 +66,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // 🛡️ MASTER FOUNDER OVERRIDE
-        if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com') {
-          setIsRealAdmin(true);
-          return;
-        }
-
-        const { data: profile } = await supabase
+        const { data: profileData } = await supabase
           .from('profiles')
-          .select('role')
+          .select('*')
           .eq('id', user.id)
           .single();
         
-        if (['admin', 'founder', 'super_admin', 'regional_admin'].includes(profile?.role)) {
+        setProfile(profileData);
+        const role = profileData?.role || 'doctor';
+
+        // 🛡️ MASTER FOUNDER OVERRIDE
+        if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com' || role === 'founder') {
           setIsRealAdmin(true);
         }
       }
@@ -98,6 +95,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       router.push("/login");
       router.refresh();
     }
+  };
+
+  const getInitials = (name: string) => {
+    return name?.split(" ").map(n => n[0]).join("").toUpperCase() || "NC";
   };
 
   const SidebarContent = (
@@ -159,8 +160,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               onClick={() => {
                 // Clear the cookie aggressively
                 document.cookie = "nc_demo_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-                // Clear localStorage dev mode just in case
-                localStorage.removeItem("nc_dev_mode");
                 // Hard redirect
                 window.location.href = "/admin/dashboard";
               }}
@@ -234,7 +233,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <Link href="/doctor/profile" className="flex items-center gap-3 flex-1 min-w-0" onClick={onClose}>
             <div className="relative">
               <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-xs group-hover/profile:bg-neuro-orange transition-colors">
-                DN
+                {profile ? getInitials(profile.full_name) : "--"}
               </div>
               {tierWeight[tier as DoctorTier] >= 2 && (
                 <div className="absolute -top-1 -right-1 bg-neuro-orange rounded-full p-0.5 border border-neuro-navy">
@@ -243,7 +242,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-white truncate group-hover/profile:text-neuro-orange transition-colors">Dr. Natalie West</p>
+              <p className="text-xs font-bold text-white truncate group-hover/profile:text-neuro-orange transition-colors">{profile?.full_name || "Loading..."}</p>
               <p className="text-[10px] text-gray-400 truncate flex items-center gap-1 capitalize">
                 <ShieldCheck className="w-2 h-2 text-gray-500" />
                 {tier} Member
