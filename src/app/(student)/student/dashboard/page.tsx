@@ -216,26 +216,22 @@ export default function StudentDashboard() {
 
           {/* Academy - Accelerator */}
           <div className="relative group">
-            <Link href={isAccelerator ? "/student/academy" : "/pricing"} className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group block h-full ${!isAccelerator ? 'opacity-60 grayscale-[0.5]' : ''}`}>
-              <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-purple-600 transition-colors">
-                <Trophy className="w-6 h-6 text-purple-600 group-hover:text-white" />
+            <div className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm transition-all h-full opacity-80 grayscale-[0.2]`}>
+              <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mb-4">
+                <Trophy className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="font-bold text-neuro-navy mb-1">Neuro Academy</h3>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-bold text-neuro-navy">Neuro Academy</h3>
+                <span className="px-2 py-0.5 bg-neuro-orange/10 text-neuro-orange text-[8px] font-black uppercase rounded-full">Coming Soon</span>
+              </div>
               <p className="text-[10px] text-gray-500 leading-tight">
-                {isAccelerator 
-                  ? "12 modules in progress" 
-                  : "Current Market Value: $85k (Unoptimized). Elite Associate Potential: $145k+."
-                }
+                Current Market Value: $85k (Unoptimized). Elite Associate Potential: $145k+. 
+                <br/><span className="italic mt-1 block">Curriculum deployment in progress.</span>
               </p>
-              <div className="mt-4 flex items-center gap-1 text-[10px] font-black text-purple-600 uppercase tracking-widest">
-                {isAccelerator ? "Continue Learning" : "Unlock Academy"} <ChevronRight className="w-3 h-3" />
+              <div className="mt-4 flex items-center gap-1 text-[10px] font-black text-gray-400 uppercase tracking-widest cursor-not-allowed">
+                Access Pending <Lock className="w-3 h-3" />
               </div>
-            </Link>
-            {!isAccelerator && (
-               <div className="absolute top-4 right-4">
-                  <Lock className="w-4 h-4 text-neuro-orange" />
-               </div>
-            )}
+            </div>
           </div>
         </div>
 
