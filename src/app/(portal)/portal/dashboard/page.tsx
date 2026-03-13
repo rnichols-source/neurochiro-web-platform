@@ -12,13 +12,15 @@ import {
   ArrowRight,
   Loader2
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getPatientDashboardData } from "./actions";
 
 export default function PulseDashboard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isNewPatient = searchParams.get('welcome') === 'true';
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -49,6 +51,29 @@ export default function PulseDashboard() {
 
   return (
     <div className="space-y-10 pb-20 text-neuro-navy">
+
+      {isNewPatient && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-neuro-orange p-8 md:p-12 rounded-[3rem] text-white shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8"
+        >
+          <div className="absolute top-0 right-0 p-12 opacity-10">
+            <Zap className="w-48 h-48" />
+          </div>
+          <div className="relative z-10 space-y-4 max-w-2xl">
+            <span className="inline-block px-4 py-1.5 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest">Account Active</span>
+            <h2 className="text-3xl md:text-4xl font-heading font-black">Your journey starts here.</h2>
+            <p className="text-white/80 text-lg">Connect with a nervous-system-first specialist in your area to unlock personalized tracking, care plans, and direct clinic messaging.</p>
+          </div>
+          <button 
+            onClick={() => router.push('/directory')}
+            className="relative z-10 w-full md:w-auto px-10 py-5 bg-white text-neuro-orange font-black rounded-2xl hover:bg-gray-50 transition-all shadow-xl uppercase tracking-widest text-xs whitespace-nowrap flex items-center justify-center gap-3 group"
+          >
+            Find a Doctor <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </motion.div>
+      )}
       
       {/* Top Section Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 w-full items-stretch">

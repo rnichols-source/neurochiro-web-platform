@@ -56,13 +56,17 @@ function RegisterContent() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        if (initialRole === 'patient') {
+           router.push('/portal/dashboard');
+           return;
+        }
         setUserId(user.id);
         // If logged in, skip Step 1 but stay on Step 2 (Profile)
         setStep("profile");
       }
     };
     checkUser();
-  }, []);
+  }, [initialRole, router]);
 
   // Restore session if available
   useEffect(() => {
@@ -87,6 +91,7 @@ function RegisterContent() {
 
   const [profileData, setProfileData] = useState({
     clinicName: "",
+    companyName: "",
     website: "",
     city: "",
     specialty: "",
@@ -127,6 +132,11 @@ function RegisterContent() {
       setIsPending(false);
     } else {
       // Result success, user established
+      if (initialRole === 'patient') {
+        router.push(`/portal/dashboard?welcome=true`);
+        return;
+      }
+
       setUserId(result.user.id);
       setStep("profile");
       setIsPending(false);

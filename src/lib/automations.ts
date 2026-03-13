@@ -284,12 +284,24 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             // Patient / Public / Default
             await sendPremiumEmail({
               to: payload.email,
-              subject: 'Welcome to NeuroChiro! 🧠',
+              subject: 'Your Journey to True Healing Starts Here 🌱',
               title: 'Account Activated',
-              body: `<h1>Hello ${payload.name || payload.full_name || 'there'},</h1><p>Your journey into nervous-system-first chiropractic starts here. Explore the global directory and connect with elite practitioners today.</p>`,
-              ctaText: 'Enter Dashboard',
-              ctaUrl: 'https://neurochiro.co/login'
+              body: `<h1>Welcome to NeuroChiro, ${payload.name || payload.full_name || 'there'}.</h1>
+                    <p>Understanding your nervous system is the first step to true healing. You now have access to a global network of elite, nervous-system-first chiropractors.</p>
+                    <p>Inside your patient portal, you can:</p>
+                    <ul>
+                      <li>Search the global directory for verified specialists near you.</li>
+                      <li>Access educational resources about nervous system regulation.</li>
+                      <li>Track your health journey and clinical progress.</li>
+                    </ul>
+                    <p>Your next step is to find a practitioner who can help you reach your goals.</p>`,
+              ctaText: 'Find a Doctor Now',
+              ctaUrl: 'https://neurochiro.co/directory'
             });
+
+            // Enqueue Patient Onboarding Sequence
+            await enqueue('patient_education_1', payload, 24 * 60); // 1 day later
+            await enqueue('patient_directory_reminder', payload, 3 * 24 * 60); // 3 days later
           }
         }
         if (smsEnabled && payload.phone) {
@@ -377,6 +389,36 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                    <p>Maximize your visibility by uploading your resume and attending upcoming seminars.</p>`,
             ctaText: 'View Job Board',
             ctaUrl: 'https://neurochiro.co/student/jobs'
+          });
+        }
+        break;
+
+      case 'patient_education_1':
+        if (emailEnabled && payload.email) {
+          await sendPremiumEmail({
+            to: payload.email,
+            subject: 'Why the Nervous System Matters 🧠',
+            title: 'NeuroChiro Education',
+            body: `<h1>Hi ${payload.name || payload.full_name || 'there'}, let's talk about the master controller.</h1>
+                   <p>Most people think chiropractic is just for back pain. But your spine protects your nervous system—the system that controls every cell, organ, and function in your body.</p>
+                   <p>We've put together a quick guide to help you understand how nervous-system-focused care can unlock true health.</p>`,
+            ctaText: 'Read the Guide',
+            ctaUrl: 'https://neurochiro.co/learn'
+          });
+        }
+        break;
+
+      case 'patient_directory_reminder':
+        if (emailEnabled && payload.email) {
+          await sendPremiumEmail({
+            to: payload.email,
+            subject: 'Find your clinical partner today 📍',
+            title: 'Directory Match',
+            body: `<h1>${payload.name || payload.full_name || 'Hi'}, are you ready to take the next step?</h1>
+                   <p>Our global directory is filled with rigorously vetted, nervous-system-first practitioners.</p>
+                   <p>You can search by city, condition, or clinical specialty. Don't wait to start your healing journey.</p>`,
+            ctaText: 'Search the Directory',
+            ctaUrl: 'https://neurochiro.co/directory'
           });
         }
         break;
