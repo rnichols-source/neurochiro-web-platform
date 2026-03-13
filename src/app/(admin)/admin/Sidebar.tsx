@@ -29,7 +29,6 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import AdminSettingsModal from "@/components/admin/AdminSettingsModal";
 import { getSystemHealth, logoutAdmin, triggerEmergencyLockdown } from "./SidebarActions";
 
 function cn(...inputs: ClassValue[]) {
@@ -54,16 +53,16 @@ const allNavItems = [
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  onSettingsOpen: () => void;
 }
 
 import { createClient } from "@/lib/supabase";
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   
   // States
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [health, setHealth] = useState<any>(null);
   const [userRole, setUserRole] = useState('super_admin'); 
   const [isLockingDown, setIsLockingDown] = useState(false);
@@ -117,26 +116,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     }
   };
 
-  const handleEmergencyLockdown = async () => {
-    if (confirm("CRITICAL ACTION: This will revoke all active sessions and place the platform in maintenance mode. Proceed?")) {
-      setIsLockingDown(true);
-      await triggerEmergencyLockdown();
-      setTimeout(() => {
-        setIsLockingDown(false);
-        setIsSettingsOpen(false);
-        alert("Emergency Lockdown Protocol Active.");
-      }, 2000);
-    }
-  };
-
   return (
     <>
-      <AdminSettingsModal 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-        onEmergencyLockdown={handleEmergencyLockdown}
-      />
-
       {/* Mobile Overlay */}
       {isOpen && (
         <div 
@@ -236,7 +217,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* Profile Actions */}
           <div className="flex items-center gap-3 px-3 py-3 border-t border-white/5">
             <button 
-              onClick={() => setIsSettingsOpen(true)}
+              onClick={onSettingsOpen}
               className="w-10 h-10 rounded-xl bg-neuro-navy-light flex items-center justify-center text-white font-bold text-sm border border-white/10 hover:border-neuro-orange/50 transition-all shadow-xl active:scale-95 overflow-hidden group"
             >
               <div className="absolute inset-0 bg-neuro-orange opacity-0 group-hover:opacity-10 transition-opacity" />
@@ -253,7 +234,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
             <div className="flex items-center gap-1">
               <button 
-                onClick={() => setIsSettingsOpen(true)}
+                onClick={onSettingsOpen}
                 className="p-2 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-all"
                 title="Admin Settings"
               >
@@ -271,22 +252,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
       </aside>
 
-      {/* Global Lockdown Overlay */}
-      <AnimatePresence>
-        {isLockingDown && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[1000] bg-red-950 flex flex-col items-center justify-center text-white text-center p-10"
-          >
-            <AlertTriangle className="w-24 h-24 text-white animate-bounce mb-8" />
-            <h1 className="text-6xl font-black mb-4">EMERGENCY LOCKDOWN</h1>
-            <p className="text-red-200 text-xl max-w-2xl font-medium">All platform services are being suspended. Security tokens are being revoked across all nodes. Stand by for encrypted confirmation.</p>
-            <Loader2 className="w-10 h-10 animate-spin mt-12 text-white/50" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Global Lockdown Overlay - Handled by Layout now for consistency */}
     </>
   );
 }
