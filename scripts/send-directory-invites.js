@@ -1,8 +1,9 @@
 const { Resend } = require('resend');
-require('dotenv').config({ path: './neurochiro-web-platform/.env' });
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 // Use the key from your .env or the one we just verified
-const resend = new Resend('re_9iYj94hq_3u5RpG6HeUqKKfvg3SpsnBi4');
+const resend = new Resend(process.env.RESEND_API_KEY || 're_9iYj94hq_3u5RpG6HeUqKKfvg3SpsnBi4');
 
 const args = process.argv.slice(2);
 const getArg = (name) => args.find(a => a.startsWith(name + '='))?.split('=')[1];
@@ -12,7 +13,7 @@ const email = getArg('email');
 
 if (!email) {
   console.log('❌ Error: Please provide an email.');
-  console.log('Usage: node send-directory-invites.js name="Dr. Smith" email="smith@example.com"');
+  console.log('Usage: node scripts/send-directory-invites.js name="Dr. Smith" email="smith@example.com"');
   process.exit(1);
 }
 
@@ -44,7 +45,7 @@ const html = `
           <p>We are currently testing the new <strong>Profile Claim</strong> system with a select group of chiropractors before we invite the entire network. Since you were part of our original directory, we would love for you to be among the first to try it.</p>
           
           <div style="text-align: center; margin-top: 50px; margin-bottom: 50px;">
-            <a href="https://neurochiro.co/register?role=doctor&tier=starter" class="btn">Claim Your Profile</a>
+            <a href="https://neurochiro.co/register?role=doctor&tier=starter&claim_id=legacy" class="btn">Claim Your Profile</a>
           </div>
 
           <p>By claiming your profile, you'll be able to manage your clinic's presence, access advanced analytics, and connect with top student talent immediately.</p>

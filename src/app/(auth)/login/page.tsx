@@ -103,7 +103,7 @@ function LoginContent() {
             onClick={() => signInWithProvider('google')}
             className="w-full py-4 px-6 border-2 border-gray-100 rounded-2xl flex items-center justify-center gap-3 text-sm font-bold text-neuro-navy hover:bg-gray-50 transition-all"
           >
-            <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
+            <img loading="lazy" decoding="async" src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
             Continue with Google
           </button>
         </div>

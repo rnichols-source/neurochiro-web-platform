@@ -182,7 +182,7 @@ export default function MarketplacePage() {
                     
                     <div className="relative z-10 flex flex-col h-full">
                        <div className="flex items-start justify-between mb-8">
-                          <img src={vendor.logo_url} alt={vendor.name} className="w-16 h-16 rounded-2xl object-cover bg-white" />
+                          <img loading="lazy" decoding="async" src={vendor.logo_url} alt={vendor.name} className="w-16 h-16 rounded-2xl object-cover bg-white" />
                           <div className="flex items-center gap-2 px-4 py-1.5 bg-neuro-orange text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-neuro-orange/20">
                              <Award className="w-3 h-3" /> Official Partner
                           </div>
@@ -249,7 +249,7 @@ export default function MarketplacePage() {
                           className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl hover:border-neuro-orange transition-all group h-full flex flex-col cursor-pointer"
                        >
                           <div className="flex items-center gap-4 mb-6">
-                             <img src={vendor.logo_url} alt={vendor.name} className="w-12 h-12 rounded-xl object-cover" />
+                             <img loading="lazy" decoding="async" src={vendor.logo_url} alt={vendor.name} className="w-12 h-12 rounded-xl object-cover" />
                              <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-0.5">
                                    <h4 className="font-bold text-neuro-navy text-lg group-hover:text-neuro-orange transition-colors truncate">{vendor.name}</h4>

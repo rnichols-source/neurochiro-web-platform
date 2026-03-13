@@ -3,7 +3,9 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import { MOCK_DOCTORS } from '@/lib/mock-data'
 import { Doctor } from '@/types/directory'
-export async function getDoctors(options: {
+import { cache } from 'react'
+
+export const getDoctors = cache(async function getDoctors(options: {
   regionCode?: string;
   bounds?: [number, number, number, number]; // [minLng, minLat, maxLng, maxLat]
   page?: number;
@@ -171,7 +173,7 @@ export async function getDoctors(options: {
   }
 }
 
-export async function getDoctorBySlug(slug: string) {
+export const getDoctorBySlug = cache(async function getDoctorBySlug(slug: string) {
   const supabase = createServerSupabase()
   
   // Try to find by slug first

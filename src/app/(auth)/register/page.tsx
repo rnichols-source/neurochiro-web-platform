@@ -290,7 +290,7 @@ function RegisterContent() {
                   onClick={() => signInWithProvider('google')}
                   className="w-full py-4 px-6 border-2 border-gray-100 rounded-[2rem] flex items-center justify-center gap-3 text-sm font-bold text-neuro-navy hover:bg-gray-50 transition-all hover:border-neuro-navy/20"
                 >
-                  <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
+                  <img loading="lazy" decoding="async" src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
                   Continue with Google
                 </button>
               </div>
@@ -598,7 +598,7 @@ function RegisterContent() {
                       </p>
                    </div>
                    <div className="flex gap-4 opacity-30 grayscale">
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-5" />
+                      <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-5" />
                    </div>
                 </div>
               </div>

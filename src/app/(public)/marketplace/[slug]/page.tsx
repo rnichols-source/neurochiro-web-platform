@@ -112,7 +112,7 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
             {/* Header / Brand Identity */}
             <header className="flex flex-col md:flex-row md:items-center gap-10 bg-white p-10 md:p-12 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden">
                <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/5 rounded-full blur-[100px] -mr-16 -mt-16"></div>
-               <img src={vendor.logo_url} alt={vendor.name} className="w-32 h-32 rounded-[2.5rem] object-cover border border-gray-100 shadow-2xl relative z-10" />
+               <img loading="lazy" decoding="async" src={vendor.logo_url} alt={vendor.name} className="w-32 h-32 rounded-[2.5rem] object-cover border border-gray-100 shadow-2xl relative z-10" />
                <div className="space-y-4 relative z-10">
                   <div className="flex flex-wrap items-center gap-3">
                      {vendor.tier === 'featured_partner' && (

@@ -206,7 +206,7 @@ export default function SeminarHub() {
 
                   {/* Card Image Section */}
                   <div className="relative aspect-[16/10] overflow-hidden">
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={seminar.image_url || '/placeholder-seminar.jpg'} 
                       alt={seminar.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -264,7 +264,7 @@ export default function SeminarHub() {
 
                     <Link href={`/hosts/${seminar.host_id}`} className="flex items-center gap-3 mb-10 pt-6 border-t border-white/5 group/host">
                       <div className="w-10 h-10 rounded-full bg-neuro-orange flex items-center justify-center text-white font-black text-xs overflow-hidden">
-                        {seminar.logo_url ? <img src={seminar.logo_url} className="w-full h-full object-cover" /> : (seminar.instructor_name?.charAt(0) || 'RN')}
+                        {seminar.logo_url ? <img loading="lazy" decoding="async" src={seminar.logo_url} className="w-full h-full object-cover" /> : (seminar.instructor_name?.charAt(0) || 'RN')}
                       </div>
                       <div>
                         <p className="text-xs font-bold text-white group-hover/host:text-neuro-orange transition-colors">{seminar.instructor_name || 'NeuroChiro Faculty'}</p>

@@ -277,6 +277,7 @@ export default function GlobalNetworkMap({
       <iframe 
         ref={iframeRef}
         src="/network-map.html"
+        loading="lazy"
         className="absolute inset-0 w-full h-full border-none"
         title="Global Network Map"
       />

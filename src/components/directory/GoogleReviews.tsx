@@ -92,7 +92,7 @@ export default function GoogleReviews({ placeId, doctorName }: GoogleReviewsProp
           >
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-neuro-navy border border-white/10 flex items-center justify-center text-neuro-orange font-black text-lg overflow-hidden">
-                {review.photo ? <img src={review.photo} alt={review.author} /> : review.author[0]}
+                {review.photo ? <img loading="lazy" decoding="async" src={review.photo} alt={review.author} /> : review.author[0]}
               </div>
               <div>
                 <h4 className="font-bold text-white text-sm">{review.author}</h4>

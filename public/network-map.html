@@ -46,7 +46,7 @@
             font-family: sans-serif;
             box-shadow: 0 0 20px rgba(214, 104, 41, 0.4);
             cursor: pointer;
-            backdrop-blur: 4px;
+            backdrop-filter: blur(4px);
         }
 
         .pulse {
@@ -75,39 +75,26 @@
     window.onerror = function(msg, url, line) {
         const errorMsg = `Map Error: ${msg} at ${url}:${line}`;
         console.error(errorMsg);
-        const banner = document.getElementById('error-banner');
-        if (banner) {
-            banner.style.display = 'block';
-            banner.innerText = errorMsg;
-        }
         window.parent.postMessage({ type: 'map-error', error: errorMsg }, '*');
     };
 
-    console.log("[MAP_IFRAME] Initializing Leaflet...");
+    console.log("[MAP_IFRAME] Initializing Optimized Leaflet...");
     
     const map = L.map('map', {
         zoomControl: false,
         attributionControl: false,
         tap: true,
         touchZoom: true,
-        dragging: true
+        dragging: true,
+        preferCanvas: true // Use canvas for smoother rendering
     }).setView([38, -98], 4);
 
     // Primary Tile Layer (Dark Mode)
     const cartoLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         subdomains: 'abcd',
-        maxZoom: 20
-    });
-
-    // Fallback Tile Layer (Standard OSM) if CartoDB fails
-    const osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
-    });
-
-    cartoLayer.on('tileerror', function() {
-        console.warn("CartoDB tiles failed to load, falling back to OSM");
-        map.removeLayer(cartoLayer);
-        osmLayer.addTo(map);
+        maxZoom: 20,
+        updateWhenIdle: true, // Only update tiles when zooming/panning stops
+        updateWhenZooming: false
     });
 
     cartoLayer.addTo(map);
@@ -115,38 +102,36 @@
     window.parent.postMessage({ type: 'map-ready' }, '*');
 
     let markers = [];
+    let moveTimeout;
 
     function notifyParent() {
-        const bounds = map.getBounds();
-        const zoom = map.getZoom();
-        const west = bounds.getWest();
-        const south = bounds.getSouth();
-        const east = bounds.getEast();
-        const north = bounds.getNorth();
+        if (moveTimeout) clearTimeout(moveTimeout);
         
-        window.parent.postMessage({
-            type: 'map-move',
-            bounds: [west, south, east, north],
-            zoom: zoom
-        }, '*');
+        // Debounce to prevent too many DB calls during rapid panning
+        moveTimeout = setTimeout(() => {
+            const bounds = map.getBounds();
+            const zoom = map.getZoom();
+            
+            window.parent.postMessage({
+                type: 'map-move',
+                bounds: [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
+                zoom: zoom
+            }, '*');
+        }, 150);
     }
 
     map.on('moveend', notifyParent);
     
-    // Initial notification
-    setTimeout(notifyParent, 500);
-
     function updateMarkers(clusters) {
-        console.log(`[MAP_IFRAME] Updating markers. Cluster count: ${clusters.length}`);
         markers.forEach(m => map.removeLayer(m));
         markers = [];
 
+        const fragment = [];
         clusters.forEach(feature => {
             const [longitude, latitude] = feature.geometry.coordinates;
-            const { cluster, point_count, name, clinic, doctorId } = feature.properties;
+            const { cluster, point_count } = feature.properties;
 
             if (cluster) {
-                // Render Cluster
                 const size = point_count < 10 ? 30 : point_count < 50 ? 40 : 50;
                 const icon = L.divIcon({
                     html: `<div class="cluster-marker" style="width: ${size}px; height: ${size}px; font-size: ${size/3}px;">${point_count}</div>`,
@@ -155,13 +140,9 @@
                 });
 
                 const marker = L.marker([latitude, longitude], { icon }).addTo(map);
-                marker.on('click', () => {
-                    const zoom = map.getZoom();
-                    map.setView([latitude, longitude], zoom + 2);
-                });
+                marker.on('click', () => map.setView([latitude, longitude], map.getZoom() + 2));
                 markers.push(marker);
             } else {
-                // Render Individual Point
                 const icon = L.divIcon({
                     className: '',
                     html: `<div class="custom-marker"><div class="pulse"></div></div>`,
@@ -186,10 +167,7 @@
             updateMarkers(e.data.data);
         } else if (e.data.type === 'set-view') {
             const { center, zoom } = e.data;
-            // Leaflet expects [lat, lng], but NC context provides [lng, lat] for centers
-            // Let's handle both or assume standard NC format [lng, lat]
-            const [lng, lat] = center;
-            map.setView([lat, lng], zoom);
+            map.setView([center[1], center[0]], zoom);
         }
     });
 </script>

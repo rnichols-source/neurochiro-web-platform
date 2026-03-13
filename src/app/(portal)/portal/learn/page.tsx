@@ -232,7 +232,7 @@ export default function LearnHub() {
                    className="bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden cursor-pointer group shadow-sm hover:shadow-2xl hover:border-neuro-orange/30 transition-all flex flex-col h-full"
                  >
                     <div className="h-48 relative overflow-hidden shrink-0">
-                       <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                       <img loading="lazy" decoding="async" src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                        <div className="absolute top-4 right-4 z-20">
                           <button 

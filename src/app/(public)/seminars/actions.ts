@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { cache } from 'react'
 
 export interface SeminarFilterOptions {
   country?: string;
@@ -10,9 +11,9 @@ export interface SeminarFilterOptions {
   showPast?: boolean;
 }
 
-export async function getSeminars(options: SeminarFilterOptions = {}) {
+export const getSeminars = cache(async function getSeminars(options: SeminarFilterOptions = {}) {
   const supabase = createServerSupabase()
-  
+...
   let query = supabase
     .from('seminars')
     .select(`
@@ -64,7 +65,7 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
   return sortedData;
 }
 
-export async function getSeminarsForMap(bounds?: [number, number, number, number]) {
+export const getSeminarsForMap = cache(async function getSeminarsForMap(bounds?: [number, number, number, number]) {
   const supabase = createServerSupabase()
   
   let query = supabase
@@ -88,7 +89,7 @@ export async function getSeminarsForMap(bounds?: [number, number, number, number
       .gte('longitude', bounds[0])
       .lte('longitude', bounds[2])
       .gte('latitude', bounds[1])
-      .lte('latitude', bounds[3])
+      .lte('longitude', bounds[3])
   }
 
   const { data, error } = await query
@@ -99,7 +100,7 @@ export async function getSeminarsForMap(bounds?: [number, number, number, number
   }
 
   return data || []
-}
+});
 
 export async function incrementSeminarStats(id: string, column: 'page_views' | 'clicks') {
   const supabase = createServerSupabase()
@@ -113,7 +114,7 @@ export async function incrementSeminarStats(id: string, column: 'page_views' | '
   }
 }
 
-export async function getSeminarById(id: string) {
+export const getSeminarById = cache(async function getSeminarById(id: string) {
     const supabase = createServerSupabase()
     const { data, error } = await supabase
         .from('seminars')
@@ -126,7 +127,7 @@ export async function getSeminarById(id: string) {
         return null
     }
     return data
-}
+});
 
 export async function registerForSeminar(seminarId: string) {
   const supabase = createServerSupabase()

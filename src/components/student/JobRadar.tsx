@@ -86,7 +86,7 @@ export default function JobRadar() {
           >
             {/* Job Image */}
             <div className="h-32 bg-gray-200 relative">
-              <img src={currentJob.image} className="w-full h-full object-cover opacity-80" alt={currentJob.clinic} />
+              <img loading="lazy" decoding="async" src={currentJob.image} className="w-full h-full object-cover opacity-80" alt={currentJob.clinic} />
               <div className="absolute top-4 left-4 bg-neuro-orange text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg">
                 {currentJob.match}
               </div>

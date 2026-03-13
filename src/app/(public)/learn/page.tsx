@@ -149,7 +149,7 @@ export default function EducationHub() {
               {ARTICLES.map((article, i) => (
                 <Link key={i} href={`/learn/${article.slug}`} className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all group cursor-pointer">
                   <div className="aspect-video relative overflow-hidden">
-                    <img src={article.img} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <img loading="lazy" decoding="async" src={article.img} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                     <div className="absolute top-4 left-4">
                       <span className="px-3 py-1 bg-white/90 backdrop-blur-md rounded-lg text-[9px] font-black uppercase tracking-widest text-neuro-navy">{article.category}</span>
                     </div>

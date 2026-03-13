@@ -61,7 +61,7 @@ export async function updateDoctorProfile(formData: FormData) {
       .from('doctors')
       .update({
         clinic_name: clinicName,
-        location_city: city,
+        city: city,
         website_url: website,
         bio: bio,
         specialties: specialties

@@ -172,7 +172,7 @@ export default function AdminBroadcastsPage() {
             <div className="flex-1 overflow-y-auto bg-gray-100 p-4">
               <div className="bg-white rounded-xl shadow-sm overflow-hidden max-w-md mx-auto">
                 <div className="bg-[#1E2D3B] p-6 text-center">
-                  <img src="/logo-white.png" alt="NeuroChiro" className="h-10 mx-auto object-contain" />
+                  <img loading="lazy" decoding="async" src="/logo-white.png" alt="NeuroChiro" className="h-10 mx-auto object-contain" />
                   {form.title && <h2 className="mt-4 text-white font-bold text-lg uppercase tracking-tight">{form.title}</h2>}
                 </div>
                 <div className="p-8 space-y-6">

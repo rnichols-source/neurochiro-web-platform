@@ -93,6 +93,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://vpxuzoqsnshvgtukvsqy.supabase.co" />
+        <link rel="preconnect" href="https://api.mapbox.com" />
+        <link rel="preconnect" href="https://events.mapbox.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}

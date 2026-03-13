@@ -108,7 +108,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
 
       {/* Hero Header */}
       <section className="relative rounded-[3.5rem] overflow-hidden mb-12 shadow-2xl border border-gray-100 group w-full h-[400px] md:h-[550px]">
-         <img src={article.image} alt={article.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[5s] ease-out" />
+         <img loading="lazy" decoding="async" src={article.image} alt={article.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[5s] ease-out" />
          <div className="absolute inset-0 bg-gradient-to-t from-neuro-black via-neuro-black/20 to-transparent" />
          
          <div className="absolute bottom-12 left-12 right-12 z-10">

@@ -285,7 +285,7 @@ export default function CareersPage() {
           <div className="relative hidden lg:block">
              <div className="absolute inset-0 bg-gradient-to-tr from-neuro-navy/5 to-neuro-orange/5 rounded-[3rem] blur-2xl transform rotate-3"></div>
              <div className="bg-white p-2 rounded-[3rem] shadow-2xl relative z-10 transform -rotate-2 border border-gray-100">
-                <img 
+                <img loading="lazy" decoding="async" 
                   src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
                   alt="Chiropractic Assistant interacting with patient" 
                   className="rounded-[2.5rem] w-full h-[400px] object-cover"

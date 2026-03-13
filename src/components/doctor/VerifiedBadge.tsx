@@ -12,7 +12,7 @@ export default function VerifiedBadge({ doctorSlug, doctorName }: VerifiedBadgeP
   const [copied, setCopy] = useState(false);
   
   const embedCode = `<a href="https://neurochiro.com/directory/${doctorSlug}" target="_blank" rel="noopener noreferrer">
-  <img src="https://neurochiro.com/api/badge/${doctorSlug}" alt="Verified NeuroChiro Provider - ${doctorName}" width="150" height="150" style="border:none;" />
+  <img loading="lazy" decoding="async" src="https://neurochiro.com/api/badge/${doctorSlug}" alt="Verified NeuroChiro Provider - ${doctorName}" width="150" height="150" style="border:none;" />
 </a>`;
 
   const handleCopy = () => {

@@ -212,7 +212,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
               await supabaseAdmin.from('doctors').update({
                 latitude: lat,
                 longitude: lng
-              }).eq('id', payload.userId);
+              }).eq('user_id', payload.userId);
             }
           } catch (e) {
             console.error("Geocoding failed for:", payload.city, e);
@@ -671,7 +671,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             
             const { data: profile } = await supabaseAdmin.from('profiles').select('role, full_name, email').eq('id', userId).single();
             if (profile?.role === 'doctor') {
-               await supabaseAdmin.from('doctors').update({ verification_status: 'verified' }).eq('id', userId);
+               await supabaseAdmin.from('doctors').update({ verification_status: 'verified' }).eq('user_id', userId);
 
                if (emailEnabled && profile.email) {
                   await sendPremiumEmail({
@@ -749,7 +749,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
               await supabaseAdmin.from('profiles').update({ tier: 'free' }).eq('id', profile.id);
               // Hide from directory
               if (profile.role === 'doctor') {
-                await supabaseAdmin.from('doctors').update({ verification_status: 'hidden' }).eq('id', profile.id);
+                await supabaseAdmin.from('doctors').update({ verification_status: 'hidden' }).eq('user_id', profile.id);
               }
             }
           }

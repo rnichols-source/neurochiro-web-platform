@@ -127,7 +127,7 @@ export default function HostProfilePage({ params }: { params: Promise<{ id: stri
           <div className="space-y-8">
             <div className="p-10 bg-white/5 border border-white/10 rounded-[3rem] sticky top-32">
               <div className="w-32 h-32 rounded-[2rem] bg-neuro-orange flex items-center justify-center text-5xl font-black text-white mb-8 mx-auto shadow-2xl shadow-neuro-orange/20 overflow-hidden">
-                {profile.logo_url ? <img src={profile.logo_url} className="w-full h-full object-cover" /> : profile.organization_name?.charAt(0)}
+                {profile.logo_url ? <img loading="lazy" decoding="async" src={profile.logo_url} className="w-full h-full object-cover" /> : profile.organization_name?.charAt(0)}
               </div>
               
               <div className="text-center space-y-2 mb-10">

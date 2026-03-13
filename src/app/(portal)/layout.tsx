@@ -52,7 +52,7 @@ export default function PortalLayout({
       <aside className="w-64 bg-neuro-navy text-white hidden md:flex flex-col border-r border-white/10">
         <div className="p-6">
           <Link href="/" className="flex items-center gap-3 group">
-            <img src="/logo-white.png" alt="NeuroChiro" className="w-8 h-8 object-contain" />
+            <img loading="lazy" decoding="async" src="/logo-white.png" alt="NeuroChiro" className="w-8 h-8 object-contain" />
             <span className="text-xl font-heading font-black tracking-tight text-white">
               NEURO<span className="text-neuro-orange">CHIRO</span>
             </span>

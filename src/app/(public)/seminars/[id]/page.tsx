@@ -85,7 +85,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
       {/* Hero Section */}
       <section className="relative pt-32 pb-40 px-8 overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 z-0">
-            <img src={seminar.image_url} alt="" className="w-full h-full object-cover opacity-20 blur-sm scale-110" />
+            <img loading="lazy" decoding="async" src={seminar.image_url} alt="" className="w-full h-full object-cover opacity-20 blur-sm scale-110" />
             <div className="absolute inset-0 bg-gradient-to-b from-[#0B1118] via-[#0B1118]/80 to-[#0B1118]"></div>
         </div>
 
