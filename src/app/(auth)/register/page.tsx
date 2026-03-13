@@ -152,26 +152,36 @@ function RegisterContent() {
     }
   };
 
-  // --- Step 2: Save Profile ---
-  const handleSaveProfile = async (e: React.FormEvent) => {
+  // --- Step 2: Setup Profile ---
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsPending(true);
-    
-    if (userId) {
-      const result = await updateProfileAction(userId, {
-        ...profileData,
-        role: initialRole,
-        tier: initialTier
-      });
-      if (result.error) {
-        setError(result.error);
-        setIsPending(false);
-        return;
-      }
-    }
+    setError(null);
 
-    setStep("payment");
-    setIsPending(false);
+    const result = await updateProfileAction(userId!, {
+      ...profileData,
+      role: initialRole,
+      tier: initialTier,
+    });
+
+    if (result.error) {
+      setError(result.error);
+      setIsPending(false);
+    } else {
+      // 🛡️ LEGACY CLAIM BYPASS: 
+      // If they are claiming an existing profile, they have already paid.
+      // Skip the payment step and go straight to dashboard.
+      const isClaiming = !!searchParams.get("claim_id");
+
+      if (isClaiming) {
+        localStorage.removeItem('nc_registration_draft');
+        router.push(`/${initialRole}/dashboard?claim_success=true`);
+      } else {
+        setStep("payment");
+      }
+      setIsPending(false);
+    }
+  };
     
     // Update local storage
     const draft = localStorage.getItem('nc_registration_draft');
