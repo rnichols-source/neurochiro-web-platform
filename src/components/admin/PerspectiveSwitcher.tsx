@@ -17,6 +17,8 @@ import { useDoctorTier } from "@/context/DoctorTierContext";
 import { useStudentTier, StudentTier } from "@/context/StudentTierContext";
 import { MembershipTier } from "@/types/directory";
 
+import { createClient } from "@/lib/supabase";
+
 export default function PerspectiveSwitcher() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDev, setIsDev] = useState(false);
@@ -27,13 +29,31 @@ export default function PerspectiveSwitcher() {
   const { tier: studentTier, setTier: setStudentTier } = useStudentTier();
 
   useEffect(() => {
-    // Check if user is in dev mode or admin
-    const checkDev = () => {
-      const isDevMode = typeof window !== 'undefined' && localStorage.getItem("nc_dev_mode") === "true";
-      setIsDev(isDevMode);
+    // Securely check if user is admin/founder
+    const checkAdmin = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com') {
+          setIsDev(true);
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile && ['admin', 'founder', 'super_admin', 'regional_admin'].includes(profile.role)) {
+          setIsDev(true);
+          return;
+        }
+      }
     };
 
-    checkDev();
+    checkAdmin();
     
     // Check for Alt+P shortcut
     const handleKeyDown = (e: KeyboardEvent) => {

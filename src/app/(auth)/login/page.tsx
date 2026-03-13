@@ -36,6 +36,8 @@ function LoginContent() {
       setErrorMsg("Your session has expired. Please log in again.");
     } else if (errorParam === "auth_failed") {
       setErrorMsg("Invalid email or password.");
+    } else if (errorParam === "email_not_confirmed") {
+      setErrorMsg("Please verify your email address before logging in.");
     }
   }, [errorParam]);
 

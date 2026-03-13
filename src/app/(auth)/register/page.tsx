@@ -49,6 +49,7 @@ function RegisterContent() {
   const [userId, setUserId] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -135,6 +136,9 @@ function RegisterContent() {
 
     if (result.error) {
       setError(result.error);
+      setIsPending(false);
+    } else if (result.sessionActive === false) {
+      setSuccessMsg("Your account has been created. Please check your email to verify your account before logging in.");
       setIsPending(false);
     } else {
       // Result success, user established
@@ -261,6 +265,19 @@ function RegisterContent() {
               <AlertCircle className="w-4 h-4" />
             </div>
             {error}
+          </motion.div>
+        )}
+
+        {successMsg && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }} 
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-10 p-5 bg-emerald-50 border border-emerald-100 rounded-[2rem] flex items-center gap-4 text-emerald-700 text-sm font-bold"
+          >
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-emerald-500 shadow-sm">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+            {successMsg}
           </motion.div>
         )}
 

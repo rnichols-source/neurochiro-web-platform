@@ -53,7 +53,12 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     password,
   })
 
-  if (error) return redirect(`/login?error=auth_failed`)
+  if (error) {
+    if (error.message.toLowerCase().includes('email not confirmed')) {
+      return redirect(`/login?error=email_not_confirmed`)
+    }
+    return redirect(`/login?error=auth_failed`)
+  }
 
   if (redirectUrl) return redirect(redirectUrl);
 
@@ -149,7 +154,11 @@ export async function createAccountAction(formData: FormData, role: string, tier
 
   if (data?.user) {
     Automations.onSignup(data.user.id, email, name, role, phone);
-    return { success: true, user: data.user };
+    return { 
+      success: true, 
+      user: data.user,
+      sessionActive: !!data.session
+    };
   }
 
   return { error: "Failed to create account" };
