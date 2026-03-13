@@ -1,9 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Heart, X, MapPin, Briefcase, Sparkles, Star, ArrowRight, Check, TrendingUp, Zap } from "lucide-react";
-
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, X, MapPin, Briefcase, Sparkles, Star, ArrowRight, Check, TrendingUp, Zap, Loader2 } from "lucide-react";
