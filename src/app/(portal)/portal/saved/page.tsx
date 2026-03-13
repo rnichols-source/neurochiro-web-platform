@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
-import { MOCK_DOCTORS } from "@/lib/mock-data";
 import { 
   Heart, 
   MapPin, 
@@ -24,20 +23,11 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Reuse mock data structures or create simplified ones for display
-const MOCK_JOBS = [
-  { id: "1", title: "Front Desk Patient Concierge", clinic: "Vitality NeuroChiro", location: "Denver, CO" },
-  { id: "2", title: "Clinical Tech Assistant", clinic: "Apex Neurological", location: "Austin, TX" },
-];
-
-const MOCK_VENDORS = [
-  { id: "1", name: "NeuralPulse Technologies", category: "Neurological Tech" },
-  { id: "3", name: "Apex Practice Systems", category: "EHR Systems" },
-];
-
-const MOCK_SEMINARS = [
-  { id: "1", title: "Clinical Mastery: Pediatric Neurology", date: "Oct 24-25, 2026", location: "Denver, CO" },
-];
+// Live data integration pending for saved detail fetching
+const LIVE_DOCTORS: any[] = [];
+const LIVE_JOBS: any[] = [];
+const LIVE_VENDORS: any[] = [];
+const LIVE_SEMINARS: any[] = [];
 
 export default function SavedPage() {
   const { saved, toggleSave } = useUserPreferences();
@@ -54,13 +44,13 @@ export default function SavedPage() {
   const getSavedItems = () => {
     switch (activeTab) {
       case "doctors":
-        return MOCK_DOCTORS.filter(d => saved.doctors.includes(d.id));
+        return LIVE_DOCTORS.filter(d => saved.doctors.includes(d.id));
       case "jobs":
-        return MOCK_JOBS.filter(j => saved.jobs.includes(j.id));
+        return LIVE_JOBS.filter(j => saved.jobs.includes(j.id));
       case "vendors":
-        return MOCK_VENDORS.filter(v => saved.vendors.includes(v.id));
+        return LIVE_VENDORS.filter(v => saved.vendors.includes(v.id));
       case "seminars":
-        return MOCK_SEMINARS.filter(s => saved.seminars.includes(s.id));
+        return LIVE_SEMINARS.filter(s => saved.seminars.includes(s.id));
       default:
         return [];
     }
