@@ -24,6 +24,10 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
 
   if (redirectUrl) return redirect(redirectUrl);
 
+  if (!data?.user) {
+    return redirect(`/login?error=auth_failed`)
+  }
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')

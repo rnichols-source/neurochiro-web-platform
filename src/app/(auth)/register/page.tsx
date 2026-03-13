@@ -147,18 +147,23 @@ function RegisterContent() {
         return;
       }
 
-      setUserId(result.user.id);
-      setStep("profile");
-      setIsPending(false);
-      // Optional: Store draft progress in local storage
-      localStorage.setItem('nc_registration_draft', JSON.stringify({
-        userId: result.user.id,
-        role: initialRole,
-        tier: initialTier,
-        billing: initialBilling,
-        step: "profile",
-        email: accountData.email
-      }));
+      if (result.user) {
+        setUserId(result.user.id);
+        setStep("profile");
+        setIsPending(false);
+        // Optional: Store draft progress in local storage
+        localStorage.setItem('nc_registration_draft', JSON.stringify({
+          userId: result.user.id,
+          role: initialRole,
+          tier: initialTier,
+          billing: initialBilling,
+          step: "profile",
+          email: accountData.email
+        }));
+      } else {
+        setError("Account created but failed to establish session. Please try logging in.");
+        setIsPending(false);
+      }
     }
   };
 
