@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 import { createServerSupabase } from '@/lib/supabase-server';
-import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,8 +28,6 @@ export default async function DashboardRedirect() {
   const isAdmin = ['admin', 'regional_admin', 'founder', 'super_admin'].includes(role);
 
   if (isAdmin) {
-    const cookieStore = await cookies();
-    cookieStore.delete('nc_demo_role');
     redirect('/admin/dashboard');
   }
   
