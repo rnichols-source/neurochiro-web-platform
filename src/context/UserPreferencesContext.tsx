@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 
 interface SavedItems {
   doctors: string[];
@@ -52,12 +52,12 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     localStorage.setItem("nc_saved_items", JSON.stringify(saved));
   }, [saved]);
 
-  const setLastLocation = (location: string) => {
+  const setLastLocation = useCallback((location: string) => {
     setLastLocationState(location);
     localStorage.setItem("nc_last_location", location);
-  };
+  }, []);
 
-  const toggleSave = (type: keyof SavedItems, id: string) => {
+  const toggleSave = useCallback((type: keyof SavedItems, id: string) => {
     setSaved(prev => {
       const current = prev[type];
       const next = current.includes(id) 
@@ -66,14 +66,22 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
       
       return { ...prev, [type]: next };
     });
-  };
+  }, []);
 
-  const isSaved = (type: keyof SavedItems, id: string) => {
+  const isSaved = useCallback((type: keyof SavedItems, id: string) => {
     return saved[type].includes(id);
-  };
+  }, [saved]);
+
+  const value = useMemo(() => ({
+    saved,
+    toggleSave,
+    isSaved,
+    lastLocation,
+    setLastLocation
+  }), [saved, toggleSave, isSaved, lastLocation, setLastLocation]);
 
   return (
-    <UserPreferencesContext.Provider value={{ saved, toggleSave, isSaved, lastLocation, setLastLocation }}>
+    <UserPreferencesContext.Provider value={value}>
       {children}
     </UserPreferencesContext.Provider>
   );

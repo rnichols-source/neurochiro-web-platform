@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo, useCallback } from 'react';
 import { MembershipTier } from '@/types/directory';
 
 interface DoctorTierContextType {
@@ -21,17 +21,21 @@ export function DoctorTierProvider({ children }: { children: ReactNode }) {
     if (saved) setTierState(saved);
   }, []);
 
-  const setTier = (t: MembershipTier) => {
+  const setTier = useCallback((t: MembershipTier) => {
     setTierState(t);
     localStorage.setItem("nc_doctor_tier", t);
-  };
+  }, []);
 
-  const isMember = tier === 'starter' || tier === 'growth' || tier === 'pro';
-  const isGrowth = tier === 'growth' || tier === 'pro';
-  const isPro = tier === 'pro';
+  const value = useMemo(() => ({
+    tier,
+    setTier,
+    isMember: tier === 'starter' || tier === 'growth' || tier === 'pro',
+    isGrowth: tier === 'growth' || tier === 'pro',
+    isPro: tier === 'pro'
+  }), [tier, setTier]);
 
   return (
-    <DoctorTierContext.Provider value={{ tier, setTier, isMember, isGrowth, isPro }}>
+    <DoctorTierContext.Provider value={value}>
       {children}
     </DoctorTierContext.Provider>
   );

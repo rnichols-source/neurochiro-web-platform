@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { RegionCode, RegionConfig, REGIONS, DEFAULT_REGION } from "@/lib/regions";
 
 interface RegionContextType {
@@ -21,17 +21,19 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const setRegion = (code: RegionCode) => {
+  const setRegion = useCallback((code: RegionCode) => {
     const newRegion = REGIONS[code];
     setRegionState(newRegion);
     localStorage.setItem("nc_region", code);
     
     // Optionally trigger a refresh or broadcast event for data refetching
     console.log(`[REGION] Switched to ${code}`);
-  };
+  }, []);
+
+  const value = useMemo(() => ({ region, setRegion }), [region, setRegion]);
 
   return (
-    <RegionContext.Provider value={{ region, setRegion }}>
+    <RegionContext.Provider value={value}>
       {children}
     </RegionContext.Provider>
   );
