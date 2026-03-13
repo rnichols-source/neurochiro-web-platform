@@ -185,15 +185,14 @@ function RegisterContent() {
         router.push(`/${initialRole}/dashboard?claim_success=true`);
       } else {
         setStep("payment");
+        // Update local storage
+        const draft = localStorage.getItem('nc_registration_draft');
+        if (draft) {
+          const parsed = JSON.parse(draft);
+          localStorage.setItem('nc_registration_draft', JSON.stringify({ ...parsed, step: "payment" }));
+        }
       }
       setIsPending(false);
-    }
-  };    
-    // Update local storage
-    const draft = localStorage.getItem('nc_registration_draft');
-    if (draft) {
-      const parsed = JSON.parse(draft);
-      localStorage.setItem('nc_registration_draft', JSON.stringify({ ...parsed, step: "payment" }));
     }
   };
 
@@ -399,7 +398,7 @@ function RegisterContent() {
                 <p className="text-gray-500 text-lg font-medium">This helps us customize your {initialRole} experience.</p>
               </div>
 
-              <form onSubmit={handleSaveProfile} className="space-y-6">
+              <form onSubmit={handleUpdateProfile} className="space-y-6">
                 {initialRole === "doctor" ? (
                   <>
                     <div className="space-y-2">

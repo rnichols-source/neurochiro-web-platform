@@ -47,7 +47,7 @@ async function sendInvite() {
           <p>We are currently testing the new <strong>Profile Claim</strong> system with a select group of chiropractors before we invite the entire network. Since you were part of our original directory, we would love for you to be among the first to try it.</p>
           
           <div style="text-align: center; margin-top: 50px; margin-bottom: 50px;">
-            <a href="https://neurochiro.co/register?role=doctor&tier=starter" class="btn">Claim Your Profile</a>
+            <a href="https://neurochiro.co/register?role=doctor&tier=starter&claim_id=legacy" class="btn">Claim Your Profile</a>
           </div>
 
           <p>By claiming your profile, you'll be able to manage your clinic's presence, access advanced analytics, and connect with top student talent immediately.</p>
