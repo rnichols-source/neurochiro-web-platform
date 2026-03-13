@@ -30,7 +30,8 @@ import {
   Download,
   Users,
   Target,
-  Info
+  Info,
+  Loader2
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
