@@ -15,26 +15,28 @@ export async function getVendorDashboardData() {
       .eq('id', user.id)
       .single()
 
-    // In production, we'd query vendor_offers and analytics tables
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
     return {
       profile: {
-        name: profile?.full_name || user.email?.split('@')[0],
+        name: vendor?.name || profile?.full_name || user.email?.split('@')[0],
         role: profile?.role
       },
       stats: {
-        views: 3492,
-        clicks: 845,
-        engagement: 112
+        views: vendor?.profile_views || 0,
+        clicks: vendor?.website_clicks || 0,
+        engagement: vendor?.discount_clicks || 0
       },
       offer: {
-        title: "NeuroChiro Partner Discount",
-        description: "Exclusive pricing for NeuroChiro Pro Tier doctors.",
-        discountType: "percentage",
-        discountValue: "20",
-        redemptionInstructions: "Enter the code at checkout on our site.",
-        couponCode: "NEUROCHIRO20",
-        expirationDate: "2026-12-31",
-        active: true
+        title: vendor?.discount_description?.split(' - ')[0] || "NeuroChiro Partner Discount",
+        description: vendor?.discount_description?.split(' - ').slice(1).join(' - ') || "",
+        couponCode: vendor?.discount_code || "",
+        expirationDate: "2026-12-31", // In a real app, store this in DB
+        active: vendor?.is_active || false
       }
     }
   } catch (e) {

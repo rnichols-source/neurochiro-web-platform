@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { getVendorDashboardData } from "./actions";
+import { updateVendorOffer } from "@/app/actions/vendors";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -48,11 +49,18 @@ export default function VendorDashboard() {
     fetchData();
   }, []);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveStatus("saving");
-    setTimeout(() => setSaveStatus("saved"), 1000);
-    setTimeout(() => setSaveStatus("idle"), 3000);
+    
+    const result = await updateVendorOffer(offerForm);
+    if (result.success) {
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 3000);
+    } else {
+      alert("Failed to save offer: " + result.error);
+      setSaveStatus("idle");
+    }
   };
 
   if (loading) {

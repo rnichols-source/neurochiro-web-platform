@@ -2,6 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
+import { Automations } from '@/lib/automations'
 
 export async function submitVendorApplication(formData: any) {
   const supabase = createServerSupabase()
@@ -18,8 +19,17 @@ export async function submitVendorApplication(formData: any) {
 
     if (profileError) throw profileError
 
-    // 2. Create/Update Vendor Record
-    const slug = formData.companyName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.floor(Math.random() * 1000);
+    // 2. Fetch existing vendor to avoid overwriting slug or active status
+    const { data: existingVendor } = await supabase
+      .from('vendors')
+      .select('slug, is_active, tier')
+      .eq('id', user.id)
+      .single()
+
+    const isNew = !existingVendor;
+    const slug = existingVendor?.slug || formData.companyName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.floor(Math.random() * 1000);
+    const isActive = existingVendor ? existingVendor.is_active : false;
+    const tier = existingVendor ? existingVendor.tier : 'basic';
     
     const { error: vendorError } = await supabase
       .from('vendors')
@@ -31,16 +41,46 @@ export async function submitVendorApplication(formData: any) {
         short_description: formData.techSpecs.substring(0, 160),
         full_description: formData.techSpecs + "\n\nPhilosophy: " + formData.philosophy,
         slug: slug,
-        is_active: false, // Requires admin approval
-        tier: 'basic'
+        is_active: isActive, 
+        tier: tier
       })
 
     if (vendorError) throw vendorError
+
+    if (isNew) {
+       await Automations.onVendorSignup(formData.companyName);
+    }
 
     revalidatePath('/marketplace')
     return { success: true }
   } catch (err) {
     console.error("Vendor application error:", err)
     return { error: "Failed to submit application." }
+  }
+}
+
+export async function updateVendorOffer(offerData: any) {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Unauthorized")
+
+  try {
+    // Update the offer fields in the vendors table
+    const { error } = await supabase
+      .from('vendors')
+      .update({
+        discount_code: offerData.couponCode,
+        discount_description: offerData.title + " - " + offerData.description
+      })
+      .eq('id', user.id)
+
+    if (error) throw error
+
+    revalidatePath('/vendor/dashboard')
+    revalidatePath('/marketplace')
+    return { success: true }
+  } catch (err) {
+    console.error("Failed to update offer:", err)
+    return { error: "Failed to update offer" }
   }
 }

@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Loader2
 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import { getPatientDashboardData } from "./actions";
 
