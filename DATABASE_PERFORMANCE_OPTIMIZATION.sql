@@ -27,12 +27,15 @@ CREATE INDEX IF NOT EXISTS idx_automation_queue_status ON public.automation_queu
 -- We create a security-definer function to retrieve the user role once per request session.
 
 CREATE OR REPLACE FUNCTION public.get_auth_user_role()
-RETURNS text AS $$
+RETURNS text 
+LANGUAGE sql 
+STABLE
+AS $$
   -- Using a session-level variable to cache the role lookup for the current transaction
   SELECT current_setting('request.jwt.claims', true)::jsonb->>'role' 
   -- Or fallback to a cached DB lookup if metadata isn't available
   -- NOTE: In production Supabase, standard practice is to use JWT claims for roles.
-$$ LANGUAGE sql STABLE;
+$$;
 
 -- Optimized RLS Example (Updating Job Posting Policy)
 -- Instead of a subquery on every row, we use the stable function or direct JWT check.

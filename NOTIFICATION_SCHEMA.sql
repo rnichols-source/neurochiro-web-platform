@@ -30,13 +30,16 @@ WITH CHECK (auth.uid() = user_id);
 
 -- Function to handle new user signup
 CREATE OR REPLACE FUNCTION public.handle_new_user_notifications()
-RETURNS trigger AS $$
+RETURNS trigger 
+LANGUAGE plpgsql 
+SECURITY DEFINER
+AS $$
 BEGIN
   INSERT INTO public.notification_preferences (user_id)
   VALUES (new.id);
   RETURN new;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- Trigger
 CREATE TRIGGER on_auth_user_created_notifications

@@ -14,13 +14,13 @@ export async function getDoctorDashboardStats() {
       supabase.from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
       supabase.from('doctors').select('clinic_name, slug, location_city').eq('user_id', user.id).single(),
       supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
-      supabase.from('jobs').select('*', { count: 'exact', head: true }).eq('user_id', user.id).catch(() => ({ count: 0 }))
+      supabase.from('jobs').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
     ]);
 
     const profile = profileRes.data;
     const doctor = doctorRes.data;
     const seminarCount = seminarsRes.count || 0;
-    const jobCount = (jobsRes as any)?.count || 0;
+    const jobCount = jobsRes.count || 0;
 
     const userRole = profile?.role || 'doctor_starter';
     const isFounder = user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com';
