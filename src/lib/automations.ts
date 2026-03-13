@@ -111,16 +111,13 @@ const enqueue = async (eventType: string, payload: Record<string, unknown>, dela
       return;
     }
 
-    const scheduledAt = new Date();
-    scheduledAt.setMinutes(scheduledAt.getMinutes() + delayMinutes);
-
     const { data, error } = await supabaseAdmin
       .from('automation_queue')
       .insert({
         event_type: eventType,
         payload: payload,
         status: 'pending',
-        scheduled_at: scheduledAt.toISOString()
+        created_at: new Date().toISOString()
       })
       .select()
       .single();
