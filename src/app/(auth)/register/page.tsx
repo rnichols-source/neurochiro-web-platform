@@ -70,6 +70,12 @@ function RegisterContent() {
 
   // Restore session if available
   useEffect(() => {
+    // 🛡️ PERSIST CLAIM STATUS
+    const claimId = searchParams.get("claim_id");
+    if (claimId) {
+      localStorage.setItem('nc_claim_id', claimId);
+    }
+
     const draft = localStorage.getItem('nc_registration_draft');
     if (draft) {
       const parsed = JSON.parse(draft);
@@ -78,7 +84,7 @@ function RegisterContent() {
         setStep(parsed.step as Step);
       }
     }
-  }, [initialRole, initialTier]);
+  }, [initialRole, initialTier, searchParams]);
 
   // Form States
   const [accountData, setAccountData] = useState({
@@ -110,7 +116,7 @@ function RegisterContent() {
   // --- Step 1: Create Account ---
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!accountData.acceptedTerms) {
       setError("You must accept the Terms of Service and Privacy Policy.");
       return;
@@ -171,18 +177,18 @@ function RegisterContent() {
       // 🛡️ LEGACY CLAIM BYPASS: 
       // If they are claiming an existing profile, they have already paid.
       // Skip the payment step and go straight to dashboard.
-      const isClaiming = !!searchParams.get("claim_id");
+      const isClaiming = !!searchParams.get("claim_id") || !!localStorage.getItem('nc_claim_id');
 
       if (isClaiming) {
         localStorage.removeItem('nc_registration_draft');
+        localStorage.removeItem('nc_claim_id'); // Clear after use
         router.push(`/${initialRole}/dashboard?claim_success=true`);
       } else {
         setStep("payment");
       }
       setIsPending(false);
     }
-  };
-    
+  };    
     // Update local storage
     const draft = localStorage.getItem('nc_registration_draft');
     if (draft) {
