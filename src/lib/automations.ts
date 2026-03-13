@@ -227,22 +227,25 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         }
 
         if (emailEnabled && payload.email) {
-          let subject = 'Welcome to NeuroChiro! 🧠';
-          let title = 'Account Activated';
-          let body = `<h1>Hello ${payload.name || payload.full_name || 'there'},</h1><p>Your journey into nervous-system-first chiropractic starts here. Explore the global directory and connect with elite practitioners today.</p>`;
-          let ctaText = 'Enter Dashboard';
-          let ctaUrl = 'https://neurochiro.co/login';
-
           if (payload.role === 'doctor') {
-            subject = 'Welcome to the NeuroChiro Network 🌍';
-            title = 'Doctor Account Created';
-            body = `<h1>Welcome Dr. ${payload.name || payload.full_name || ''},</h1><p>Your directory profile has been created. To start receiving referrals and join the global map, complete your clinic profile and select a membership tier.</p>`;
-            ctaText = 'Setup My Profile';
-            ctaUrl = 'https://neurochiro.co/doctor/settings';
+            await sendPremiumEmail({ 
+              to: payload.email, 
+              subject: 'Welcome to the NeuroChiro Network 🌍', 
+              title: 'Doctor Account Created', 
+              body: `<h1>Welcome Dr. ${payload.name || payload.full_name || ''},</h1><p>Your directory profile has been created. To start receiving referrals and join the global map, complete your clinic profile and finalize your membership.</p>`, 
+              ctaText: 'Setup My Profile', 
+              ctaUrl: 'https://neurochiro.co/onboarding' 
+            });
+
+            // Enqueue abandoned checkout / profile reminder
+            await enqueue('doctor_profile_reminder', payload, 2 * 60); // 2 hours later
+            await enqueue('doctor_growth_upsell', payload, 3 * 24 * 60); // 3 days later
           } else if (payload.role === 'student') {
-            subject = 'Welcome to NeuroChiro Student Network 🎓';
-            title = 'Student Account Created';
-            body = `<h1>Welcome ${payload.name || payload.full_name || ''},</h1>
+            await sendPremiumEmail({ 
+              to: payload.email, 
+              subject: 'Welcome to NeuroChiro Student Network 🎓', 
+              title: 'Student Account Created', 
+              body: `<h1>Welcome ${payload.name || payload.full_name || ''},</h1>
                     <p>You're now part of the NeuroChiro Student Network — a global community helping chiropractic students build powerful careers.</p>
                     <p>Inside your dashboard you can now:</p>
                     <ul>
@@ -252,13 +255,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                       <li>Discover seminars and training events</li>
                       <li>Connect with clinics looking for graduates</li>
                     </ul>
-                    <p>Your next step: Complete your student profile so we can match you with the right opportunities.</p>`;
-            
-            await sendPremiumEmail({ 
-              to: payload.email, 
-              subject, 
-              title, 
-              body, 
+                    <p>Your next step: Complete your student profile so we can match you with the right opportunities.</p>`, 
               ctaText: 'Complete My Profile', 
               ctaUrl: 'https://neurochiro.co/student/profile',
               secondaryCtaText: 'Explore Career Tools',
@@ -268,35 +265,26 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             // Enqueue subsequent emails in the sequence
             await enqueue('student_career_accelerator', payload, 24 * 60); // 24 hours later
             await enqueue('student_opportunity_engine', payload, 3 * 24 * 60); // 3 days later
-          } else if (payload.role === 'doctor') {
-            subject = 'Welcome to the NeuroChiro Network 🌍';
-            title = 'Doctor Account Created';
-            body = `<h1>Welcome Dr. ${payload.name || payload.full_name || ''},</h1><p>Your directory profile has been created. To start receiving referrals and join the global map, complete your clinic profile and finalize your membership.</p>`;
-            ctaText = 'Setup My Profile';
-            ctaUrl = 'https://neurochiro.co/onboarding';
-            await sendPremiumEmail({ to: payload.email, subject, title, body, ctaText, ctaUrl });
-
-            // Enqueue abandoned checkout / profile reminder
-            await enqueue('doctor_profile_reminder', payload, 2 * 60); // 2 hours later
-            await enqueue('doctor_growth_upsell', payload, 3 * 24 * 60); // 3 days later
           } else if (payload.role === 'vendor') {
-            subject = 'Welcome to NeuroChiro Marketplace 🏢';
-            title = 'Vendor Account Created';
-            body = `<h1>Welcome ${payload.name || payload.full_name || ''},</h1><p>Set up your vendor profile to start offering products and services to thousands of specialized chiropractors.</p>`;
-            ctaText = 'Vendor Dashboard';
-            ctaUrl = 'https://neurochiro.co/vendor/dashboard';
+            await sendPremiumEmail({
+              to: payload.email,
+              subject: 'Welcome to NeuroChiro Marketplace 🏢',
+              title: 'Vendor Account Created',
+              body: `<h1>Welcome ${payload.name || payload.full_name || ''},</h1><p>Set up your vendor profile to start offering products and services to thousands of specialized chiropractors.</p>`,
+              ctaText: 'Vendor Dashboard',
+              ctaUrl: 'https://neurochiro.co/vendor/dashboard'
+            });
           } else {
-            // Patient / Public
-            subject = 'Your Journey to Health Starts Here 🌱';
-            title = 'Patient Account Activated';
-            body = `<h1>Welcome ${payload.name || payload.full_name || ''},</h1>
-                    <p>Understanding your nervous system is the first step to true healing. We've curated educational resources to help you understand chiropractic care.</p>
-                    <p>Use our directory to find a verified practitioner near you.</p>`;
-            ctaText = 'Find a Doctor';
-            ctaUrl = 'https://neurochiro.co/directory';
+            // Patient / Public / Default
+            await sendPremiumEmail({
+              to: payload.email,
+              subject: 'Welcome to NeuroChiro! 🧠',
+              title: 'Account Activated',
+              body: `<h1>Hello ${payload.name || payload.full_name || 'there'},</h1><p>Your journey into nervous-system-first chiropractic starts here. Explore the global directory and connect with elite practitioners today.</p>`,
+              ctaText: 'Enter Dashboard',
+              ctaUrl: 'https://neurochiro.co/login'
+            });
           }
-
-          await sendPremiumEmail({ to: payload.email, subject, title, body, ctaText, ctaUrl });
         }
         if (smsEnabled && payload.phone) {
           await sendSMS(payload.phone, `Welcome to NeuroChiro! Your account is active. Log in at neurochiro.co/login`);
@@ -588,7 +576,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             
             const { data: profile } = await supabaseAdmin.from('profiles').select('role, full_name, email').eq('id', userId).single();
             if (profile?.role === 'doctor') {
-               await supabaseAdmin.from('doctors').update({ verification_status: 'verified' }).eq('user_id', userId);
+               await supabaseAdmin.from('doctors').update({ verification_status: 'verified' }).eq('id', userId);
                
                if (emailEnabled && profile.email) {
                   await sendPremiumEmail({
@@ -603,10 +591,9 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             }
           } else if (customerId) {
             // Handle renewal via customerId
-            await supabaseAdmin.from('profiles').update({
-              /* subscription_status: 'active' */
-            }).eq('stripe_customer_id', customerId);
+            // No action needed for now as tier is handled by subscription.updated
           }
+
         }
         break;
 
@@ -655,7 +642,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
               await supabaseAdmin.from('profiles').update({ tier: 'free' }).eq('id', profile.id);
               // Hide from directory
               if (profile.role === 'doctor') {
-                await supabaseAdmin.from('doctors').update({ verification_status: 'hidden' }).eq('user_id', profile.id);
+                await supabaseAdmin.from('doctors').update({ verification_status: 'hidden' }).eq('id', profile.id);
               }
             }
           }
