@@ -16,23 +16,8 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isGetStartedOpen, setIsGetStartedOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [logoClicks, setLogoClicks] = useState(0);
   const pathname = usePathname();
   const supabase = createClient();
-
-  // Secret Handshake: Triple click logo to toggle dev mode
-  useEffect(() => {
-    if (logoClicks >= 3) {
-      const current = localStorage.getItem('nc_dev_mode') === 'true';
-      localStorage.setItem('nc_dev_mode', current ? 'false' : 'true');
-      setLogoClicks(0);
-      window.location.reload(); 
-    }
-    const timer = setTimeout(() => {
-      if (logoClicks > 0) setLogoClicks(0);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [logoClicks]);
 
   // Handle scroll effect for glass-morphism
   useEffect(() => {
@@ -86,16 +71,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-6 md:px-8 flex items-center justify-between">
           
           {/* Logo */}
-          <div 
-            onClick={() => {
-              setLogoClicks(prev => prev + 1);
-              if (logoClicks === 0) {
-                // On first click, we also allow the normal navigation behavior
-                // But we don't want to use <Link> directly if we want to intercept
-              }
-            }}
-            className="cursor-pointer select-none"
-          >
+          <div>
             <Link href="/" className="flex items-center gap-3 group">
               <Image 
                 src={useWhiteText ? "/logo-white.png" : "/logo.png"} 
@@ -274,6 +250,9 @@ export default function Navbar() {
                 <p className="text-xs font-black uppercase tracking-widest text-gray-500">Join the Network</p>
                 <Link href="/seminars" className="flex items-center gap-4 text-xl font-bold text-gray-300">
                   <Calendar className="w-5 h-5 text-neuro-orange" /> Seminars
+                </Link>
+                <Link href="/host-a-seminar" className="flex items-center gap-4 text-xl font-bold text-gray-300">
+                  <Users className="w-5 h-5 text-blue-500" /> Host a Seminar
                 </Link>
                 <Link href="https://www.neurochiromastermind.com" className="flex items-center gap-4 text-xl font-bold text-gray-300">
                   <Crown className="w-5 h-5 text-purple-500" /> Mastermind
