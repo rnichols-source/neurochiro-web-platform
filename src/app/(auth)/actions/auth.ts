@@ -162,18 +162,15 @@ export async function updateProfileAction(userId: string, profileData: any) {
   
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return { success: true };
 
-  const { role, tier, clinicName, gradYear, school, city, website, ...rest } = profileData;
+  const { role, tier, clinicName, gradYear, school, city, website } = profileData;
 
-  // 1. Update main profile
+  // 1. Update main profile (STRICT: only standard fields)
   const { error: profileError } = await supabase
     .from('profiles')
-    .update({ 
-      ...rest, 
-      role, 
-      subscription_tier: tier,
-      chiropracticSchool: school,
-      gradYear: gradYear,
-      city: city
+    .update({
+      role,
+      tier: tier,
+      website: website
     })
     .eq('id', userId);
 
@@ -183,12 +180,13 @@ export async function updateProfileAction(userId: string, profileData: any) {
   if (role === 'doctor') {
     const { error: doctorError } = await supabase
       .from('doctors')
-      .update({ clinic_name: clinicName, location_city: city, website })
+      .update({ clinic_name: clinicName, city: city, website_url: website, membership_tier: tier })
       .eq('id', userId);
-      
+
     if (doctorError) {
       console.error("Failed to update doctor profile:", doctorError);
     } else if (city) {
+
       // Enqueue geocoding to automatically resolve lat/lng
       const supabaseAdmin = createServerSupabase(); // Admin privileges if possible, or just queue
       await supabaseAdmin.from('automation_queue').insert({
@@ -197,16 +195,19 @@ export async function updateProfileAction(userId: string, profileData: any) {
       });
     }
   } else if (role === 'student') {
+    // According to NEUROCHIRO_ARCHITECTURE.md, school and graduation_year are in the students table
     const { error: studentError } = await supabase
       .from('students')
       .update({ 
         school: school,
-        graduation_year: gradYear ? parseInt(gradYear, 10) : null,
-        location_city: city
+        graduation_year: gradYear ? parseInt(gradYear, 10) : null
       })
       .eq('id', userId);
       
-    if (studentError) console.error("Failed to update student profile:", studentError);
+    if (studentError) {
+      console.error("Failed to update student profile:", studentError);
+      return { error: studentError.message };
+    }
   }
 
   return { success: true };

@@ -11,7 +11,7 @@ export async function getDoctorDashboardStats() {
 
     // Parallelize fetches for profile, practice info, seminars, and jobs
     const [profileRes, doctorRes, seminarsRes, jobsRes] = await Promise.all([
-      supabase.from('profiles').select('role, subscription_status, full_name').eq('id', user.id).single(),
+      supabase.from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
       supabase.from('doctors').select('clinic_name, slug, location_city').eq('user_id', user.id).single(),
       supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
       supabase.from('jobs').select('*', { count: 'exact', head: true }).eq('user_id', user.id).catch(() => ({ count: 0 }))
@@ -38,7 +38,7 @@ export async function getDoctorDashboardStats() {
         clinicName: doctor?.clinic_name || "My Practice",
         isMember: isFounder || isAdmin || ['doctor_pro', 'doctor_growth', 'doctor_starter', 'doctor_member'].includes(userRole),
         role: userRole,
-        status: profile?.subscription_status || 'inactive'
+        status: (profile?.tier && profile?.tier !== 'free') ? 'active' : 'inactive'
       },
       doctor: {
         city: doctor?.location_city || "your city"

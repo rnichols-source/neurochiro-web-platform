@@ -35,9 +35,9 @@ export async function getTalentUsers(options: {
     if (status && status !== 'All Statuses') {
       // Map frontend status to backend status
       if (status.includes('Paid')) {
-        query = query.eq('subscription_status', 'active');
+        query = query.neq('tier', 'free');
       } else if (status.includes('Free')) {
-        query = query.eq('subscription_status', 'free');
+        query = query.eq('tier', 'free');
       } else if (status.includes('Pending')) {
         // For doctors, pending might mean verification_status
         if (type === 'Doctors') {
@@ -72,7 +72,7 @@ export async function getTalentUsers(options: {
         email: u.email,
         entity,
         context,
-        status: u.subscription_status === 'active' ? 'Paid' : 'Free',
+        status: u.tier !== 'free' ? 'Paid' : 'Free',
         engagement: 0, // Would need actual analytics table
         matches: 0,
         joined: new Date(u.created_at).toLocaleDateString(),
@@ -98,7 +98,7 @@ export async function getTalentAuditStats() {
     const { count: students } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student');
     const { count: doctors } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'doctor');
     const { count: vendors } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'vendor');
-    const { count: paid } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_status', 'active');
+    const { count: paid } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).neq('tier', 'free');
 
     return {
       totalStudents: students || 0,

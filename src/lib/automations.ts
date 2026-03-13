@@ -42,7 +42,16 @@ const getSupabaseAdmin = () => {
 /**
  * PREMIUM BRANDED EMAIL WRAPPER
  */
-const sendPremiumEmail = async (options: { to: string, subject: string, title: string, body: string, ctaText?: string, ctaUrl?: string }) => {
+const sendPremiumEmail = async (options: { 
+  to: string, 
+  subject: string, 
+  title: string, 
+  body: string, 
+  ctaText?: string, 
+  ctaUrl?: string,
+  secondaryCtaText?: string,
+  secondaryCtaUrl?: string
+}) => {
   const html = `
     <!DOCTYPE html>
     <html>
@@ -53,9 +62,12 @@ const sendPremiumEmail = async (options: { to: string, subject: string, title: s
         .wrapper { max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border-radius: 40px; overflow: hidden; margin-top: 40px; margin-bottom: 40px; box-shadow: 0 20px 50px rgba(11, 17, 24, 0.1); border: 1px solid #E5E7EB; }
         .header { background-color: #FFFFFF; padding: 40px; text-align: center; border-bottom: 1px solid #F3F4F6; }
         .content { padding: 60px 50px; color: #0B1118; }
-        .btn { display: inline-block; background-color: #D66829; color: #FFFFFF !important; padding: 22px 45px; text-decoration: none; border-radius: 20px; font-weight: 900; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 10px 30px rgba(214, 104, 41, 0.3); }
-        h1 { font-weight: 900; color: #0B1118; font-size: 32px; line-height: 1.2; margin-bottom: 25px; }
-        p { font-size: 18px; line-height: 1.7; color: #4B5563; }
+        .btn { display: inline-block; background-color: #D66829; color: #FFFFFF !important; padding: 20px 40px; text-decoration: none; border-radius: 18px; font-weight: 900; font-size: 15px; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 10px 30px rgba(214, 104, 41, 0.2); margin: 10px; }
+        .btn-secondary { background-color: #1E2D3B; box-shadow: 0 10px 30px rgba(30, 45, 59, 0.2); }
+        h1 { font-weight: 900; color: #0B1118; font-size: 28px; line-height: 1.2; margin-bottom: 25px; }
+        p { font-size: 17px; line-height: 1.7; color: #4B5563; }
+        ul { padding-left: 20px; color: #4B5563; }
+        li { margin-bottom: 10px; font-size: 16px; }
         .footer { text-align: center; padding: 40px; font-size: 12px; color: #9CA3AF; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
       </style>
     </head>
@@ -65,13 +77,12 @@ const sendPremiumEmail = async (options: { to: string, subject: string, title: s
           <img src="https://neurochiro.co/logo.png" alt="NeuroChiro" width="120" style="display: block; margin: 0 auto;">
         </div>
         <div class="content">
-          <div style="text-transform: uppercase; color: #D66829; font-weight: 900; letter-spacing: 3px; font-size: 12px; margin-bottom: 15px;">${options.title}</div>
+          <div style="text-transform: uppercase; color: #D66829; font-weight: 900; letter-spacing: 3px; font-size: 11px; margin-bottom: 15px;">${options.title}</div>
           ${options.body}
-          ${options.ctaText && options.ctaUrl ? `
-            <div style="text-align: center; margin-top: 50px;">
-              <a href="${options.ctaUrl}" class="btn">${options.ctaText}</a>
-            </div>
-          ` : ''}
+          <div style="text-align: center; margin-top: 50px;">
+            ${options.ctaText && options.ctaUrl ? `<a href="${options.ctaUrl}" class="btn">${options.ctaText}</a>` : ''}
+            ${options.secondaryCtaText && options.secondaryCtaUrl ? `<a href="${options.secondaryCtaUrl}" class="btn btn-secondary">${options.secondaryCtaText}</a>` : ''}
+          </div>
         </div>
         <div class="footer">
           &copy; 2026 NeuroChiro Network. All Rights Reserved.
@@ -193,8 +204,8 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
               const lng = parseFloat(data[0].lon);
               
               await supabaseAdmin.from('doctors').update({
-                location_lat: lat,
-                location_lng: lng
+                latitude: lat,
+                longitude: lng
               }).eq('id', payload.userId);
             }
           } catch (e) {
@@ -242,12 +253,32 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                       <li>Connect with clinics looking for graduates</li>
                     </ul>
                     <p>Your next step: Complete your student profile so we can match you with the right opportunities.</p>`;
-            ctaText = 'Complete My Profile';
-            ctaUrl = 'https://neurochiro.co/student/profile';
+            
+            await sendPremiumEmail({ 
+              to: payload.email, 
+              subject, 
+              title, 
+              body, 
+              ctaText: 'Complete My Profile', 
+              ctaUrl: 'https://neurochiro.co/student/profile',
+              secondaryCtaText: 'Explore Career Tools',
+              secondaryCtaUrl: 'https://neurochiro.co/student/dashboard'
+            });
 
             // Enqueue subsequent emails in the sequence
             await enqueue('student_career_accelerator', payload, 24 * 60); // 24 hours later
             await enqueue('student_opportunity_engine', payload, 3 * 24 * 60); // 3 days later
+          } else if (payload.role === 'doctor') {
+            subject = 'Welcome to the NeuroChiro Network 🌍';
+            title = 'Doctor Account Created';
+            body = `<h1>Welcome Dr. ${payload.name || payload.full_name || ''},</h1><p>Your directory profile has been created. To start receiving referrals and join the global map, complete your clinic profile and finalize your membership.</p>`;
+            ctaText = 'Setup My Profile';
+            ctaUrl = 'https://neurochiro.co/onboarding';
+            await sendPremiumEmail({ to: payload.email, subject, title, body, ctaText, ctaUrl });
+
+            // Enqueue abandoned checkout / profile reminder
+            await enqueue('doctor_profile_reminder', payload, 2 * 60); // 2 hours later
+            await enqueue('doctor_growth_upsell', payload, 3 * 24 * 60); // 3 days later
           } else if (payload.role === 'vendor') {
             subject = 'Welcome to NeuroChiro Marketplace 🏢';
             title = 'Vendor Account Created';
@@ -287,11 +318,11 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           }
         } else if (supabaseAdmin) {
           // Fetch target audience
-          let query = supabaseAdmin.from('profiles').select('email, role, subscription_tier, id');
+          let query = supabaseAdmin.from('profiles').select('email, role, tier, id');
           
           if (payload.audience !== 'all') {
             if (payload.audience === 'paid_doctors') {
-              query = query.eq('role', 'doctor').in('subscription_tier', ['pro', 'elite']);
+              query = query.eq('role', 'doctor').in('tier', ['pro', 'elite']);
             } else {
               query = query.eq('role', payload.audience);
             }
@@ -353,6 +384,43 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             ctaText: 'View Job Board',
             ctaUrl: 'https://neurochiro.co/student/jobs'
           });
+        }
+        break;
+
+      case 'doctor_profile_reminder':
+        if (supabaseAdmin && emailEnabled && payload.email && payload.userId) {
+           // Check if they already paid/completed
+           const { data: profile } = await supabaseAdmin.from('profiles').select('tier').eq('id', payload.userId).single();
+           if (!profile || profile.tier === 'free' || profile.tier === null) {
+              await sendPremiumEmail({
+                to: payload.email,
+                subject: 'Did you forget something? 🌍',
+                title: 'Incomplete Registration',
+                body: `<h1>Dr. ${payload.name || payload.full_name || ''}, your clinic is missing from the map.</h1>
+                       <p>You started setting up your NeuroChiro directory profile, but haven't finalized your membership yet.</p>
+                       <p>Patients and students are actively searching your area. Complete your setup now to secure your spot.</p>`,
+                ctaText: 'Complete Registration',
+                ctaUrl: 'https://neurochiro.co/register?role=doctor'
+              });
+           }
+        }
+        break;
+
+      case 'doctor_growth_upsell':
+        if (supabaseAdmin && emailEnabled && payload.email && payload.userId) {
+           const { data: profile } = await supabaseAdmin.from('profiles').select('tier').eq('id', payload.userId).single();
+           if (profile && profile.tier === 'starter') {
+              await sendPremiumEmail({
+                to: payload.email,
+                subject: 'Ready to expand your clinical influence? 🚀',
+                title: 'Growth Tier Unlock',
+                body: `<h1>Dr. ${payload.name || payload.full_name || ''}, level up your practice.</h1>
+                       <p>Your Starter tier gets you on the map, but the Growth tier unlocks powerful student recruiting tools, seminar hosting capabilities, and advanced analytics to track your referral sources.</p>
+                       <p>Upgrade today and see what the full network can do for your clinic.</p>`,
+                ctaText: 'View Upgrade Options',
+                ctaUrl: 'https://neurochiro.co/doctor/settings'
+              });
+           }
         }
         break;
 
@@ -515,7 +583,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           if (userId) {
             await supabaseAdmin.from('profiles').update({
               stripe_customer_id: customerId,
-              subscription_status: 'active'
+              /* subscription_status: 'active' */
             }).eq('id', userId);
             
             const { data: profile } = await supabaseAdmin.from('profiles').select('role, full_name, email').eq('id', userId).single();
@@ -536,7 +604,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           } else if (customerId) {
             // Handle renewal via customerId
             await supabaseAdmin.from('profiles').update({
-              subscription_status: 'active'
+              /* subscription_status: 'active' */
             }).eq('stripe_customer_id', customerId);
           }
         }
@@ -550,7 +618,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           // For now we update the status
           if (customerId) {
             await supabaseAdmin.from('profiles').update({
-              subscription_status: sub.status
+              /* subscription_status: sub.status */
             }).eq('stripe_customer_id', customerId);
           }
         }
@@ -562,7 +630,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           if (customerId) {
             const { data: profile } = await supabaseAdmin.from('profiles').select('id, email, full_name').eq('stripe_customer_id', customerId).single();
             if (profile) {
-              await supabaseAdmin.from('profiles').update({ subscription_status: 'past_due' }).eq('id', profile.id);
+              await supabaseAdmin.from('profiles').update({ tier: 'free' }).eq('id', profile.id);
               if (emailEnabled && profile.email) {
                 await sendPremiumEmail({
                   to: profile.email,
@@ -584,7 +652,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           if (customerId) {
             const { data: profile } = await supabaseAdmin.from('profiles').select('id, role').eq('stripe_customer_id', customerId).single();
             if (profile) {
-              await supabaseAdmin.from('profiles').update({ subscription_status: 'canceled' }).eq('id', profile.id);
+              await supabaseAdmin.from('profiles').update({ tier: 'free' }).eq('id', profile.id);
               // Hide from directory
               if (profile.role === 'doctor') {
                 await supabaseAdmin.from('doctors').update({ verification_status: 'hidden' }).eq('user_id', profile.id);
@@ -619,9 +687,9 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           // 1. Get all Growth & Pro Tier Doctors
           const { data: doctors } = await supabaseAdmin
             .from('profiles')
-            .select('id, full_name, phone, subscription_tier')
+            .select('id, full_name, phone, tier')
             .eq('role', 'doctor')
-            .in('subscription_tier', ['growth', 'pro', 'elite']);
+            .in('tier', ['growth', 'pro', 'elite']);
 
           if (doctors && doctors.length > 0) {
             for (const doc of doctors) {

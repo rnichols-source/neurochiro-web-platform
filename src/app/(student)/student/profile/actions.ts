@@ -10,7 +10,7 @@ export async function getStudentProfile() {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('full_name, email, role, subscription_status')
+    .select('full_name, email, role, tier')
     .eq('id', user.id)
     .single()
 

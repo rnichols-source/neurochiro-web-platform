@@ -145,7 +145,7 @@ export default async function proxy(request: NextRequest) {
       // Mock values for dev session
       if (userRole === 'founder') userEmail = 'drray@neurochirodirectory.com';
       // Bypass subscription check for dev sessions
-      profile = { subscription_status: 'active' };
+      profile = { tier: 'growth' };
     } else {
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -157,7 +157,7 @@ export default async function proxy(request: NextRequest) {
 
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('role, subscription_status, email')
+        .select('role, tier, email')
         .eq('id', user.id)
         .single()
 
@@ -201,7 +201,7 @@ export default async function proxy(request: NextRequest) {
     }
     
     const isPaidRoute = ['doctor_pro', 'doctor_growth', 'student_paid'].includes(userRole)
-    if (isPaidRoute && profile?.subscription_status !== 'active') {
+    if (isPaidRoute && (profile?.tier === 'free' || !profile?.tier)) {
       return NextResponse.redirect(new URL('/pricing', request.url))
     }
   }

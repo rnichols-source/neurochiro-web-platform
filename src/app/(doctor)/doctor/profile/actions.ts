@@ -10,7 +10,7 @@ export async function getDoctorProfile() {
     if (!user) return null
 
     const [profileRes, doctorRes] = await Promise.all([
-      supabase.from('profiles').select('full_name, email, role, subscription_status').eq('id', user.id).single(),
+      supabase.from('profiles').select('full_name, email, role, tier').eq('id', user.id).single(),
       supabase.from('doctors').select('*').eq('user_id', user.id).single()
     ])
 

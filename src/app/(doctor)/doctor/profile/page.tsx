@@ -53,7 +53,7 @@ export default function PracticeProfile() {
     bio: "",
     specialties: [] as string[],
     photo_url: "",
-    subscription_status: ""
+    tier: ""
   });
 
   // Calculate real-time profile strength
@@ -83,7 +83,7 @@ export default function PracticeProfile() {
           bio: data.bio || "",
           specialties: data.specialties || [],
           photo_url: data.photo_url || data.avatar_url || "",
-          subscription_status: data.subscription_status || ""
+          tier: data.tier || "free"
         });
         // Sync context tier if it differs
         if (data.subscription_tier) setTier(data.subscription_tier);
@@ -221,8 +221,8 @@ export default function PracticeProfile() {
             )}
           </AnimatePresence>
           <div className="bg-white/50 border border-neuro-navy/10 px-4 py-2 rounded-full flex items-center gap-2">
-            <span className={cn("w-2 h-2 rounded-full", profileData.subscription_status === 'active' ? "bg-green-500 animate-pulse" : "bg-gray-400")}></span>
-            <span className="text-sm font-bold text-neuro-navy">Status: {profileData.subscription_status === 'active' ? `${membershipLabel} Member` : 'Inactive'}</span>
+            <span className={cn("w-2 h-2 rounded-full", (profileData.tier && profileData.tier !== 'free') ? "bg-green-500 animate-pulse" : "bg-gray-400")}></span>
+            <span className="text-sm font-bold text-neuro-navy">Status: {(profileData.tier && profileData.tier !== 'free') ? `${membershipLabel} Member` : 'Inactive'}</span>
           </div>
         </div>
       </header>
@@ -295,9 +295,9 @@ export default function PracticeProfile() {
                 <div className="flex flex-wrap justify-center md:justify-start gap-2">
                   <span className={cn(
                     "px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-widest border",
-                    profileData.subscription_status === 'active' ? "bg-green-50 text-green-600 border-green-100" : "bg-gray-100 text-gray-400 border-gray-200"
+                    (profileData.tier && profileData.tier !== 'free') ? "bg-green-50 text-green-600 border-green-100" : "bg-gray-100 text-gray-400 border-gray-200"
                   )}>
-                    {profileData.subscription_status === 'active' ? "Verified Clinic" : "Verification Pending"}
+                    {(profileData.tier && profileData.tier !== 'free') ? "Verified Clinic" : "Verification Pending"}
                   </span>
                 </div>
               </div>
