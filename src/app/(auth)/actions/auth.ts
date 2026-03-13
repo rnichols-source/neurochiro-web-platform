@@ -164,45 +164,46 @@ export async function updateProfileAction(userId: string, profileData: any) {
 
   const { role, tier, clinicName, gradYear, school, city, website } = profileData;
 
-  // 1. Update main profile (STRICT: only standard fields)
+  // 1. Update main profile (ULTRA-STRICT: only verified core columns)
+  // Note: We avoid updating city, tier, or website here as they belong in role-specific tables
   const { error: profileError } = await supabase
     .from('profiles')
-    .update({
-      role,
-      tier: tier,
-      website: website
+    .update({ 
+      role: role 
     })
     .eq('id', userId);
 
-  if (profileError) return { error: profileError.message };
+  if (profileError) {
+    console.error("Profiles update error:", profileError);
+    return { error: profileError.message };
+  }
 
   // 2. Role specific updates
   if (role === 'doctor') {
     const { error: doctorError } = await supabase
       .from('doctors')
-      .update({ clinic_name: clinicName, city: city, website_url: website, membership_tier: tier })
-      .eq('id', userId);
-
+      .update({ 
+        clinic_name: clinicName, 
+        city: city, 
+        website_url: website, 
+        membership_tier: tier 
+      })
+      .eq('user_id', userId); // doctors table uses user_id
+      
     if (doctorError) {
       console.error("Failed to update doctor profile:", doctorError);
-    } else if (city) {
-
-      // Enqueue geocoding to automatically resolve lat/lng
-      const supabaseAdmin = createServerSupabase(); // Admin privileges if possible, or just queue
-      await supabaseAdmin.from('automation_queue').insert({
-        event_type: 'geocode_profile',
-        payload: { userId, city }
-      });
+      return { error: doctorError.message };
     }
   } else if (role === 'student') {
-    // According to NEUROCHIRO_ARCHITECTURE.md, school and graduation_year are in the students table
+    // Save student-specific data to the students table
     const { error: studentError } = await supabase
       .from('students')
       .update({ 
         school: school,
-        graduation_year: gradYear ? parseInt(gradYear, 10) : null
+        graduation_year: gradYear ? parseInt(gradYear, 10) : null,
+        location_city: city
       })
-      .eq('id', userId);
+      .eq('id', userId); // students table uses id as PK
       
     if (studentError) {
       console.error("Failed to update student profile:", studentError);

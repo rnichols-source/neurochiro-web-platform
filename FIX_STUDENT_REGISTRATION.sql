@@ -1,30 +1,35 @@
--- FIX STUDENT REGISTRATION AND AUTOMATIONS
+-- FIX STUDENT REGISTRATION AND AUTOMATIONS (ROBUST VERSION)
 
--- 1. Audit and Update Profiles Table
+-- 1. Profiles Table (Cleanup and Safety)
+-- We ensure the core profiles table only has the columns it was designed for
+-- If you added chiropracticSchool or gradYear to profiles by mistake, they can stay, 
+-- but our code will now ignore them to prevent schema cache errors.
+
+-- 2. Ensure Students Table exists and has correct columns
+CREATE TABLE IF NOT EXISTS public.students (
+    id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    school text,
+    graduation_year integer,
+    location_city text,
+    interests text[],
+    is_looking_for_mentorship boolean DEFAULT false,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
+-- Ensure columns exist in case table was already there
 DO $$ 
 BEGIN 
-    -- Add chiropracticSchool if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='profiles' AND column_name='chiropracticSchool') THEN
-        ALTER TABLE public.profiles ADD COLUMN "chiropracticSchool" text;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='students' AND column_name='location_city') THEN
+        ALTER TABLE public.students ADD COLUMN "location_city" text;
     END IF;
-
-    -- Add gradYear if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='profiles' AND column_name='gradYear') THEN
-        ALTER TABLE public.profiles ADD COLUMN "gradYear" text;
-    END IF;
-
-    -- Add country if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='profiles' AND column_name='country') THEN
-        ALTER TABLE public.profiles ADD COLUMN "country" text;
-    END IF;
-
-    -- Add city if it doesn't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='profiles' AND column_name='city') THEN
-        ALTER TABLE public.profiles ADD COLUMN "city" text;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='students' AND column_name='graduation_year') THEN
+        ALTER TABLE public.students ADD COLUMN "graduation_year" integer;
     END IF;
 END $$;
 
--- 2. Update Automation Queue to support scheduling
+-- 3. Update Automation Queue to support scheduling
 DO $$ 
 BEGIN 
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='automation_queue' AND column_name='scheduled_at') THEN
@@ -32,6 +37,5 @@ BEGIN
     END IF;
 END $$;
 
--- 3. Refresh schema cache (Supabase specific, though not directly executable via SQL here, 
--- it informs the system that schema has changed).
+-- 4. Refresh schema cache
 NOTIFY pgrst, 'reload schema';

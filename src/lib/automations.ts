@@ -1,8 +1,17 @@
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize the Resend SDK
-export const resend = new Resend(process.env.RESEND_API_KEY || 're_mock_key');
+/**
+ * LAZY RESEND LOADER
+ * Ensures environment variables are loaded before initialization
+ */
+let _resend: Resend | null = null;
+const getResendClient = () => {
+  if (!_resend) {
+    _resend = new Resend(process.env.RESEND_API_KEY || 're_mock_key');
+  }
+  return _resend;
+};
 
 /**
  * DYNAMIC TWILIO LOADER
@@ -92,7 +101,7 @@ const sendPremiumEmail = async (options: {
     </html>
   `;
 
-  return resend.emails.send({
+  return getResendClient().emails.send({
     from: 'NeuroChiro <support@neurochirodirectory.com>',
     to: [options.to],
     subject: options.subject,
@@ -709,7 +718,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
 
       case 'admin_notification':
         if (process.env.NODE_ENV !== 'development') {
-          await resend.emails.send({
+          await getResendClient().emails.send({
             from: 'NeuroChiro System <support@neurochirodirectory.com>',
             to: 'support@neurochirodirectory.com',
             subject: `[ADMIN] ${payload.subject}`,
