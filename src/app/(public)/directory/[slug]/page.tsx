@@ -1,4 +1,4 @@
-import { getDoctorBySlug } from "../actions";
+import { getDoctorBySlug, incrementDoctorViews } from "../actions";
 import { notFound } from "next/navigation";
 import DoctorProfileClient from "./DoctorProfileClient";
 import { Metadata } from "next";
@@ -50,6 +50,9 @@ export default async function DoctorProfilePage({ params }: Props) {
   if (!doctor) {
     notFound();
   }
+
+  // 🛡️ Track View (Background)
+  await incrementDoctorViews(resolvedParams.slug);
 
   // 2. JSON-LD STRUCTURED DATA (Physician & LocalBusiness)
   const jsonLd = {

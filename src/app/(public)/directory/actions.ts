@@ -94,6 +94,15 @@ export const getDoctorBySlug = cache(async function getDoctorBySlug(slug: string
   return { doctor: data as Doctor | null, error }
 });
 
+export async function incrementDoctorViews(slug: string) {
+  const supabase = createServerSupabase();
+  try {
+    await supabase.rpc('increment_doctor_views', { doctor_slug: slug });
+  } catch (e) {
+    console.error("Failed to increment views:", e);
+  }
+}
+
 export async function getStudentsForMap(options: {
   bounds?: [number, number, number, number]; // [minLng, minLat, maxLng, maxLat]
   limit?: number;
