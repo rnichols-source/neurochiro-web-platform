@@ -206,7 +206,7 @@ export const getDoctorBySlug = cache(async function getDoctorBySlug(slug: string
   }
 
   return { doctor: data as Doctor | null, error }
-}
+});
 
 export async function getStudentsForMap(options: {
   bounds?: [number, number, number, number]; // [minLng, minLat, maxLng, maxLat]

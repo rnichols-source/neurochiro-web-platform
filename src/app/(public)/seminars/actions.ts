@@ -63,7 +63,7 @@ export const getSeminars = cache(async function getSeminars(options: SeminarFilt
   }
 
   return sortedData;
-}
+});
 
 export const getSeminarsForMap = cache(async function getSeminarsForMap(bounds?: [number, number, number, number]) {
   const supabase = createServerSupabase()
