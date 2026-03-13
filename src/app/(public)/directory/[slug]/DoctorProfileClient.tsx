@@ -193,7 +193,30 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                       <span className="text-sm font-bold text-slate-100 block">Contact via Email</span>
                     </button>
                   )}
+                </div>
+
+                {/* Claim Profile Section for Unclaimed Listings */}
+                {!doctor.user_id && (
+                  <div className="mt-8 p-6 bg-neuro-orange/10 border border-neuro-orange/30 rounded-[2rem] relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-neuro-orange/10 blur-2xl -mr-12 -mt-12 group-hover:bg-neuro-orange/20 transition-all"></div>
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Sparkles className="w-4 h-4 text-neuro-orange fill-current" />
+                        <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest">Unclaimed Listing</span>
+                      </div>
+                      <p className="text-xs font-bold text-slate-100 mb-5 leading-relaxed">
+                        Are you {doctor.first_name ? `Dr. ${doctor.last_name}` : 'the owner of this practice'}? Claim this profile to manage your clinic's presence.
+                      </p>
+                      <Link 
+                        href={`/register?role=doctor&claim_id=${doctor.id}&tier=starter`}
+                        className="w-full py-4 bg-neuro-orange text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-neuro-orange-light transition-all flex items-center justify-center gap-2 shadow-lg shadow-neuro-orange/20"
+                      >
+                        Claim My Profile <ChevronRight className="w-4 h-4" />
+                      </Link>
+                    </div>
                   </div>
+                )}
+
                 <div className="flex gap-4 mt-10">
                   <Link 
                     href={doctor.instagram_url || "https://instagram.com"} 

@@ -103,10 +103,11 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
 
 export async function signInWithProvider(provider: 'google') {
   const supabase = createServerSupabase()
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://neurochiro.co'
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/callback`,
+      redirectTo: `${siteUrl}/api/auth/callback`,
     },
   })
   if (error) return redirect(`/login?error=${encodeURIComponent(error.message)}`)
@@ -180,6 +181,7 @@ export async function updateProfileAction(userId: string, profileData: any) {
 
   // 2. Role specific updates
   if (role === 'doctor') {
+    // We try to update by user_id first, as that is the intended link
     const { error: doctorError } = await supabase
       .from('doctors')
       .update({ 
@@ -188,7 +190,7 @@ export async function updateProfileAction(userId: string, profileData: any) {
         website_url: website, 
         membership_tier: tier 
       })
-      .eq('user_id', userId); // doctors table uses user_id
+      .or(`user_id.eq.${userId},id.eq.${userId}`);
       
     if (doctorError) {
       console.error("Failed to update doctor profile:", doctorError);
