@@ -55,7 +55,7 @@ export const getDoctors = cache(async function getDoctors(options: {
     // Determine if we should fall back to mock data
     let shouldFallback = !!error || !data;
     
-    if (!shouldFallback && data.length === 0) {
+    if (!shouldFallback && data && data.length === 0) {
       if (!bounds) {
         shouldFallback = true;
       } else {
@@ -88,7 +88,7 @@ export const getDoctors = cache(async function getDoctors(options: {
       }
     }
     
-    if (shouldFallback) {
+    if (shouldFallback || !data) {
       if (error) console.error("Database query error:", error);
       console.log("Returning mock data fallback for region:", regionCode)
       
