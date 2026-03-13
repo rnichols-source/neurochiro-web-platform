@@ -69,7 +69,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [isLockingDown, setIsLockingDown] = useState(false);
 
   // Filter items based on role
-  const filteredNavItems = allNavItems.filter(item => item.roles.includes(userRole));
+  const filteredNavItems = allNavItems.filter(item => {
+    const baseRole = userRole.split(':')[0];
+    return item.roles.includes(baseRole) || item.roles.includes(userRole);
+  });
 
   // Fetch real role and health data
   useEffect(() => {
