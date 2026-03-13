@@ -59,10 +59,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
+  const { tier, setTier } = useDoctorTier();
 
-  // Check for real admin session to show emergency exit
   useEffect(() => {
-    const checkRealRole = async () => {
+    const getProfile = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -73,17 +73,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           .single();
         
         setProfile(profileData);
-        const role = profileData?.role || 'doctor';
-
-        // 🛡️ MASTER FOUNDER OVERRIDE
-        if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com' || role === 'founder') {
-          setIsRealAdmin(true);
-        }
       }
     };
-    checkRealRole();
+    getProfile();
   }, []);
 
+  const isAdmin = ['admin', 'founder', 'super_admin', 'regional_admin'].includes(profile?.role);
   const tierWeight = { starter: 1, growth: 2, pro: 3 };
 
   const handleLogout = async () => {
@@ -154,7 +149,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         })}
 
         {/* 🛡️ EMERGENCY ADMIN EXIT */}
-        {isRealAdmin && (
+        {isAdmin && (
           <div className="pt-4 mt-4 border-t border-white/5 px-2">
             <button
               onClick={() => {
