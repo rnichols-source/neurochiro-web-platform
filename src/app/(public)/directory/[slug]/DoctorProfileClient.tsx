@@ -16,7 +16,8 @@ import {
   Mail,
   ExternalLink,
   MessageSquare,
-  Loader2
+  Loader2,
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
