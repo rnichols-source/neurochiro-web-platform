@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, X, MapPin, Briefcase, Sparkles, Star, ArrowRight, Check, TrendingUp, Zap, Loader2 } from "lucide-react";
 import { getJobsForRadar } from "@/app/(student)/student/dashboard/actions";
