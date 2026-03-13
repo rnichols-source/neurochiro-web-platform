@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { getVendorDashboardData } from "./actions";
-import { updateVendorOffer } from "@/app/actions/vendors";
+import { updateVendorOffer, updateVendorProfile } from "@/app/actions/vendors";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -35,6 +35,14 @@ export default function VendorDashboard() {
     expirationDate: ""
   });
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    companyName: "",
+    website: "",
+    shortDescription: "",
+    category: "Neurological Tech"
+  });
+  const [profileSaveStatus, setProfileSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +51,12 @@ export default function VendorDashboard() {
         setData(result);
         setOfferForm(result.offer);
         setOfferActive(result.offer.active);
+        setProfileForm({
+          companyName: result.profile.name || "",
+          website: result.profile.website_url || "",
+          shortDescription: result.profile.short_description || "",
+          category: result.profile.categories?.[0] || "Neurological Tech"
+        });
       }
       setLoading(false);
     };
@@ -60,6 +74,23 @@ export default function VendorDashboard() {
     } else {
       alert("Failed to save offer: " + result.error);
       setSaveStatus("idle");
+    }
+  };
+
+  const handleProfileSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileSaveStatus("saving");
+
+    const result = await updateVendorProfile(profileForm);
+    if (result.success) {
+      setProfileSaveStatus("saved");
+      setTimeout(() => {
+        setProfileSaveStatus("idle");
+        setIsEditingProfile(false);
+      }, 1500);
+    } else {
+      alert("Failed to update profile: " + result.error);
+      setProfileSaveStatus("idle");
     }
   };
 
@@ -235,19 +266,76 @@ export default function VendorDashboard() {
               </h3>
               <div className="space-y-3">
                 <button 
-                  onClick={() => alert("Redirecting to profile editor...")}
+                  onClick={() => setIsEditingProfile(!isEditingProfile)}
                   className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-left px-4 flex items-center justify-between group transition-all"
                 >
-                  Edit Public Profile <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                  Edit Public Profile <ChevronRight className={`w-4 h-4 text-gray-500 group-hover:text-white transition-all ${isEditingProfile ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
                 </button>
+                
+                {isEditingProfile && (
+                  <form onSubmit={handleProfileSave} className="p-4 bg-white/5 rounded-xl space-y-4 border border-white/10 mt-2">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Company Name</label>
+                      <input 
+                        type="text" 
+                        required
+                        className="w-full p-2 bg-white/10 border border-white/20 rounded focus:outline-neuro-orange text-white text-sm"
+                        value={profileForm.companyName}
+                        onChange={(e) => setProfileForm({...profileForm, companyName: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Website</label>
+                      <input 
+                        type="url" 
+                        required
+                        className="w-full p-2 bg-white/10 border border-white/20 rounded focus:outline-neuro-orange text-white text-sm"
+                        value={profileForm.website}
+                        onChange={(e) => setProfileForm({...profileForm, website: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Category</label>
+                      <select 
+                        className="w-full p-2 bg-white/10 border border-white/20 rounded focus:outline-neuro-orange text-white text-sm"
+                        value={profileForm.category}
+                        onChange={(e) => setProfileForm({...profileForm, category: e.target.value})}
+                      >
+                        <option className="text-black">Neurological Tech</option>
+                        <option className="text-black">Practice Management</option>
+                        <option className="text-black">EHR Systems</option>
+                        <option className="text-black">Marketing</option>
+                        <option className="text-black">Equipment</option>
+                        <option className="text-black">Supplements</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Short Description</label>
+                      <textarea 
+                        rows={2}
+                        className="w-full p-2 bg-white/10 border border-white/20 rounded focus:outline-neuro-orange text-white text-sm resize-none"
+                        value={profileForm.shortDescription}
+                        onChange={(e) => setProfileForm({...profileForm, shortDescription: e.target.value})}
+                      />
+                    </div>
+                    <button 
+                      type="submit"
+                      disabled={profileSaveStatus !== "idle"}
+                      className="w-full py-2 bg-neuro-orange text-white rounded font-bold text-xs hover:bg-neuro-orange-dark transition-colors"
+                    >
+                      {profileSaveStatus === "saving" ? "Saving..." : profileSaveStatus === "saved" ? "Saved!" : "Save Profile"}
+                    </button>
+                  </form>
+                )}
+
                 <button 
-                  onClick={() => alert("Loading billing portal...")}
+                  onClick={() => alert("Billing portal integration coming soon.")}
                   className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-left px-4 flex items-center justify-between group transition-all"
                 >
                   Billing & Subscription <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
                 </button>
                 <button 
-                  onClick={() => alert("Fetching API keys...")}
+                  onClick={() => alert("API keys will be available in V2.")}
                   className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-left px-4 flex items-center justify-between group transition-all"
                 >
                   API & Integrations <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all" />

@@ -59,6 +59,33 @@ export async function submitVendorApplication(formData: any) {
   }
 }
 
+export async function updateVendorProfile(profileData: any) {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Unauthorized")
+
+  try {
+    const { error } = await supabase
+      .from('vendors')
+      .update({
+        name: profileData.companyName,
+        website_url: profileData.website,
+        short_description: profileData.shortDescription,
+        categories: [profileData.category]
+      })
+      .eq('id', user.id)
+
+    if (error) throw error
+
+    revalidatePath('/vendor/dashboard')
+    revalidatePath('/marketplace')
+    return { success: true }
+  } catch (err) {
+    console.error("Failed to update profile:", err)
+    return { error: "Failed to update profile" }
+  }
+}
+
 export async function updateVendorOffer(offerData: any) {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()

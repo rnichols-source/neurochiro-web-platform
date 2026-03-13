@@ -13,6 +13,7 @@ import {
   Loader2
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useState, useEffect, Suspense } from "react";
 import { getPatientDashboardData } from "./actions";
 

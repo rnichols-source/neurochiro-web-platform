@@ -20,14 +20,15 @@ export async function getVendors() {
   return data
 }
 
-export async function trackVendorClick(vendorId: string, clickType: 'website' | 'discount' | 'profile') {
+export async function trackVendorClick(vendorId: string, clickType: 'website' | 'discount' | 'profile' | 'demo') {
   const supabase = createServerSupabase()
   
   // Update analytics count
-  const column = `${clickType}_clicks`
-  const { error } = await supabase.rpc('increment_vendor_clicks', { 
+  const column = clickType === 'profile' ? 'profile_views' : `${clickType}_clicks`
+  
+  const { error } = await supabase.rpc('increment_vendor_stats', { 
     vendor_id: vendorId, 
-    click_column: column 
+    stat_column: column 
   })
 
   if (error) {
