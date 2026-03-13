@@ -32,14 +32,31 @@ import {
   Target,
   Info
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getContractsAction, saveContractAnalysisAction } from "./actions";
 
 export default function ContractLabPage() {
   const [activeTab, setActiveTab] = useState("intelligence");
   const [isUploading, setIsUploading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [riskScore, setRiskScore] = useState<number | null>(null);
+  const [pastContracts, setPastContracts] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        const data = await getContractsAction();
+        setPastContracts(data);
+      } catch (e) {
+        console.error("Failed to load history:", e);
+      } finally {
+        setLoadingHistory(false);
+      }
+    }
+    loadHistory();
+  }, []);
 
   // MOCK DATA: Contract Intelligence Result
   const mockAnalysis = {
@@ -76,11 +93,17 @@ export default function ContractLabPage() {
     ]
   };
 
-  const handleSimulateUpload = () => {
+  const handleSimulateUpload = async () => {
     setIsUploading(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsUploading(false);
       setAnalysisResult(mockAnalysis);
+      try {
+        const saved = await saveContractAnalysisAction("Analysis - " + new Date().toLocaleDateString(), mockAnalysis);
+        setPastContracts([saved, ...pastContracts]);
+      } catch (e) {
+        console.error("Failed to save analysis:", e);
+      }
     }, 2500);
   };
 
@@ -142,7 +165,7 @@ export default function ContractLabPage() {
                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                   {/* Uploader Column */}
                   <div className="lg:col-span-4 space-y-6">
-                     <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 h-full flex flex-col">
+                     <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 flex flex-col min-h-[400px]">
                         <h2 className="text-2xl font-black text-neuro-navy mb-2">Upload Contract</h2>
                         <p className="text-sm text-gray-500 mb-8">Upload your PDF or paste the text. Our system will decode the legal jargon into clinical reality.</p>
                         
@@ -174,6 +197,42 @@ export default function ContractLabPage() {
                              <button onClick={() => setAnalysisResult(null)} className="mt-8 text-xs font-black uppercase tracking-widest text-neuro-navy hover:underline">Scan Another</button>
                           </div>
                         )}
+                     </div>
+
+                     {/* Past Analyses Sidebar */}
+                     <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100">
+                        <h3 className="text-sm font-black text-neuro-navy uppercase tracking-widest mb-6 flex items-center gap-2">
+                           <Clock className="w-4 h-4 text-neuro-orange" /> Previous Analyses
+                        </h3>
+                        
+                        <div className="space-y-3">
+                           {loadingHistory ? (
+                              <div className="py-10 text-center">
+                                 <Loader2 className="w-6 h-6 text-gray-200 animate-spin mx-auto mb-2" />
+                                 <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Retrieving Vault...</p>
+                              </div>
+                           ) : pastContracts.length > 0 ? (
+                              pastContracts.map((contract) => (
+                                 <button 
+                                    key={contract.id}
+                                    onClick={() => setAnalysisResult(contract.analysis_results)}
+                                    className="w-full text-left p-4 rounded-2xl border border-gray-50 hover:border-neuro-orange hover:bg-gray-50 transition-all group flex items-center justify-between"
+                                 >
+                                    <div className="min-w-0">
+                                       <p className="text-xs font-bold text-neuro-navy truncate">{contract.title}</p>
+                                       <p className="text-[10px] text-gray-400">{new Date(contract.created_at).toLocaleDateString()}</p>
+                                    </div>
+                                    <span className="text-xs font-black text-orange-500 italic ml-4">
+                                       {contract.analysis_results?.overallGrade || 'N/A'}
+                                    </span>
+                                 </button>
+                              ))
+                           ) : (
+                              <div className="py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-4">Your vault is empty</p>
+                              </div>
+                           )}
+                        </div>
                      </div>
                   </div>
 

@@ -17,9 +17,21 @@ export async function getStudentDashboardData() {
 
     const { data: student } = await supabase
       .from('students')
-      .select('school, graduation_year')
+      .select('school, graduation_year, interests, location_city')
       .eq('id', user.id)
       .single()
+
+    const { count: applicationsCount } = await supabase
+      .from('job_applications')
+      .select('*', { count: 'exact', head: true })
+      .eq('applicant_id', user.id)
+
+    // Calculate dynamic readiness score
+    let readiness = 20; // Base
+    if (student?.school) readiness += 20;
+    if (student?.graduation_year) readiness += 20;
+    if (student?.location_city) readiness += 20;
+    if (student?.interests && student.interests.length > 0) readiness += 20;
 
     return {
       profile: {
@@ -31,14 +43,32 @@ export async function getStudentDashboardData() {
         gradYear: student?.graduation_year || "2027"
       },
       stats: {
-        readiness: 85,
-        applications: 4,
-        matchScore: 9.2
+        readiness: readiness,
+        applications: applicationsCount || 0,
+        matchScore: student?.location_city ? 9.2 : 0
       }
     }
   } catch (e) {
     console.error("Student Dashboard Error:", e)
     return null
+  }
+}
+
+export async function getJobsForRadar() {
+  const supabase = createServerSupabase()
+  
+  try {
+    const { data: jobs, error } = await supabase
+      .from('jobs')
+      .select('*, doctors(clinic_name, photo_url)')
+      .eq('status', 'open')
+      .limit(5);
+
+    if (error) throw error;
+    return jobs || [];
+  } catch (e) {
+    console.error("Error fetching jobs for radar:", e);
+    return [];
   }
 }
 
