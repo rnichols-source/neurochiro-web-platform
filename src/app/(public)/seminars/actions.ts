@@ -13,7 +13,7 @@ export interface SeminarFilterOptions {
 
 export const getSeminars = cache(async function getSeminars(options: SeminarFilterOptions = {}) {
   const supabase = createServerSupabase()
-...
+
   let query = supabase
     .from('seminars')
     .select(`

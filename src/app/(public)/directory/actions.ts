@@ -171,7 +171,7 @@ export const getDoctors = cache(async function getDoctors(options: {
     console.error("Error fetching doctors:", e)
     return { doctors: MOCK_DOCTORS.slice(0, 100), total: MOCK_DOCTORS.length };
   }
-}
+});
 
 export const getDoctorBySlug = cache(async function getDoctorBySlug(slug: string) {
   const supabase = createServerSupabase()
