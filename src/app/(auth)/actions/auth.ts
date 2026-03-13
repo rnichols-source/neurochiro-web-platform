@@ -181,20 +181,36 @@ export async function updateProfileAction(userId: string, profileData: any) {
 
   // 2. Role specific updates
   if (role === 'doctor') {
-    // We try to update by user_id first, as that is the intended link
-    const { error: doctorError } = await supabase
-      .from('doctors')
-      .update({ 
-        clinic_name: clinicName, 
-        city: city, 
-        website_url: website, 
-        membership_tier: tier 
-      })
-      .or(`user_id.eq.${userId},id.eq.${userId}`);
-      
-    if (doctorError) {
-      console.error("Failed to update doctor profile:", doctorError);
-      return { error: doctorError.message };
+    try {
+      // First, try the standard user_id link
+      const { error: doctorError } = await supabase
+        .from('doctors')
+        .update({ 
+          clinic_name: clinicName, 
+          city: city, 
+          website_url: website, 
+          membership_tier: tier 
+        })
+        .eq('user_id', userId);
+        
+      if (doctorError) {
+        // If user_id column is missing, fallback to updating by ID
+        console.warn("Retrying update by ID...");
+        const { error: fallbackError } = await supabase
+          .from('doctors')
+          .update({ 
+            clinic_name: clinicName, 
+            city: city, 
+            website_url: website, 
+            membership_tier: tier 
+          })
+          .eq('id', userId);
+          
+        if (fallbackError) throw fallbackError;
+      }
+    } catch (err: any) {
+      console.error("Failed to update doctor profile:", err);
+      return { error: err.message || "Database connection error" };
     }
   } else if (role === 'student') {
     // Save student-specific data to the students table
