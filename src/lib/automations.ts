@@ -276,10 +276,23 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
               to: payload.email,
               subject: 'Welcome to NeuroChiro Marketplace 🏢',
               title: 'Vendor Account Created',
-              body: `<h1>Welcome ${payload.name || payload.full_name || ''},</h1><p>Set up your vendor profile to start offering products and services to thousands of specialized chiropractors.</p>`,
-              ctaText: 'Vendor Dashboard',
-              ctaUrl: 'https://neurochiro.co/vendor/dashboard'
+              body: `<h1>Welcome to the NeuroChiro Vendor Partner Network.</h1>
+                     <p>You now have access to a global directory of elite, neuro-focused chiropractors who are actively seeking top-tier products and services for their clinics.</p>
+                     <p>Your next step is to complete your vendor profile so we can get your listing approved and live on the marketplace.</p>
+                     <ul>
+                        <li>Add your company logo and description</li>
+                        <li>Submit your exclusive NeuroChiro Pro offer</li>
+                        <li>Wait for admin approval to go live</li>
+                     </ul>`,
+              ctaText: 'Complete Vendor Profile',
+              ctaUrl: 'https://neurochiro.co/vendor/dashboard',
+              secondaryCtaText: 'View Marketplace',
+              secondaryCtaUrl: 'https://neurochiro.co/marketplace'
             });
+
+            // Enqueue subsequent vendor onboarding emails
+            await enqueue('vendor_profile_reminder', payload, 24 * 60); // 24 hours later
+            await enqueue('vendor_optimization_tips', payload, 3 * 24 * 60); // 3 days later
           } else {
             // Patient / Public / Default
             await sendPremiumEmail({
@@ -309,7 +322,41 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         }
         break;
 
-      case 'mass_email_broadcast':
+        case 'vendor_profile_reminder':
+        if (emailEnabled && payload.email) {
+          await sendPremiumEmail({
+            to: payload.email,
+            subject: 'Action Required: Complete Your Vendor Profile ⚠️',
+            title: 'Profile Incomplete',
+            body: `<h1>Don't miss out on exposure, ${payload.name || 'Partner'}.</h1>
+                   <p>Your vendor profile is currently incomplete. Active listings receive significantly more clicks and direct inquiries from our network of chiropractors.</p>
+                   <p>Take 5 minutes to add your company details, logo, and a special offer for NeuroChiro members.</p>`,
+            ctaText: 'Complete Profile Now',
+            ctaUrl: 'https://neurochiro.co/vendor/dashboard'
+          });
+        }
+        break;
+
+        case 'vendor_optimization_tips':
+        if (emailEnabled && payload.email) {
+          await sendPremiumEmail({
+            to: payload.email,
+            subject: 'How to stand out in the NeuroChiro Marketplace 🚀',
+            title: 'Marketplace Optimization',
+            body: `<h1>Maximize Your ROI, ${payload.name || 'Partner'}.</h1>
+                   <p>Now that you are part of the NeuroChiro Vendor Network, here are the top 3 ways to get noticed by high-volume clinics:</p>
+                   <ul>
+                      <li><strong>Exclusive Offers:</strong> Vendors providing a "NeuroChiro Pro" discount see a 300% increase in clicks.</li>
+                      <li><strong>Clear ROI:</strong> Explain exactly how your product saves time, increases revenue, or improves patient outcomes.</li>
+                      <li><strong>Rich Media:</strong> Ensure your logo is high-resolution and your description is compelling.</li>
+                   </ul>`,
+            ctaText: 'Optimize Listing',
+            ctaUrl: 'https://neurochiro.co/vendor/dashboard'
+          });
+        }
+        break;
+
+        case 'student_career_accelerator':
         if (payload.isTest) {
           // Send only to the test email
           if (payload.testEmail) {

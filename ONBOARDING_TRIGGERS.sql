@@ -67,11 +67,11 @@ BEGIN
     ON CONFLICT (id) DO NOTHING;
 
   ELSIF user_role = 'vendor' THEN
-    -- Provision vendor profile (assuming vendors table exists, or fail gracefully)
+    -- Provision vendor profile
     BEGIN
-      INSERT INTO public.vendors (id) VALUES (NEW.id) ON CONFLICT (id) DO NOTHING;
-    EXCEPTION WHEN undefined_table THEN
-      -- Ignore if vendors table doesn't exist yet
+      INSERT INTO public.vendors (id, name) VALUES (NEW.id, COALESCE(user_full_name, 'New Vendor')) ON CONFLICT (id) DO NOTHING;
+    EXCEPTION WHEN OTHERS THEN
+      -- Ignore if vendors table doesn't exist yet or other schema mismatch
     END;
   END IF;
 

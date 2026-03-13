@@ -9,6 +9,9 @@ export async function triggerTestAutomation(type: string, email: string) {
     case 'welcome':
       await Automations.onSignup("test_user_id", email, "NeuroChiro Explorer", "patient");
       break;
+    case 'vendor_welcome':
+      await Automations.onSignup("test_vendor_id", email, "Acme Diagnostics", "vendor");
+      break;
     case 'upgrade':
       await Automations.onMembershipUpgrade("test_user_id", email, "Elite Pro");
       break;

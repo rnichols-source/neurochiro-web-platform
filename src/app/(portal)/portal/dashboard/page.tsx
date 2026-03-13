@@ -12,12 +12,10 @@ import {
   ArrowRight,
   Loader2
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { getPatientDashboardData } from "./actions";
 
-export default function PulseDashboard() {
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isNewPatient = searchParams.get('welcome') === 'true';
@@ -276,5 +274,17 @@ export default function PulseDashboard() {
 
       </div>
     </div>
+  );
+}
+
+export default function PulseDashboard() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-neuro-cream">
+        <Loader2 className="w-10 h-10 text-neuro-orange animate-spin" />
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }

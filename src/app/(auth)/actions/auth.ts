@@ -162,7 +162,7 @@ export async function updateProfileAction(userId: string, profileData: any) {
   
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return { success: true };
 
-  const { role, tier, clinicName, gradYear, school, city, website } = profileData;
+  const { role, tier, clinicName, companyName, gradYear, school, city, website } = profileData;
 
   // 1. Update main profile (ULTRA-STRICT: only verified core columns)
   // Note: We avoid updating city, tier, or website here as they belong in role-specific tables
@@ -208,6 +208,23 @@ export async function updateProfileAction(userId: string, profileData: any) {
     if (studentError) {
       console.error("Failed to update student profile:", studentError);
       return { error: studentError.message };
+    }
+  } else if (role === 'vendor') {
+    // Save vendor-specific data to the vendors table
+    // Ensure the vendor record exists first, or use an upsert/insert if needed
+    // Usually ONBOARDING_TRIGGERS handles the initial insert, so we update here
+    const { error: vendorError } = await supabase
+      .from('vendors')
+      .update({
+        name: companyName,
+        website_url: website,
+        tier: tier
+      })
+      .eq('id', userId);
+
+    if (vendorError) {
+      console.error("Failed to update vendor profile:", vendorError);
+      return { error: vendorError.message };
     }
   }
 

@@ -425,6 +425,47 @@ function RegisterContent() {
                       </div>
                     </div>
                   </>
+                ) : initialRole === "vendor" ? (
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Company Name</label>
+                      <div className="relative group">
+                        <Building2 className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-neuro-orange transition-colors" />
+                        <input 
+                          type="text" required placeholder="Acme Chiropractic Supplies"
+                          className="w-full pl-16 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
+                          value={profileData.companyName}
+                          onChange={(e) => setProfileData({...profileData, companyName: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">HQ City</label>
+                        <div className="relative group">
+                          <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-neuro-orange transition-colors" />
+                          <input 
+                            type="text" required placeholder="Chicago"
+                            className="w-full pl-16 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
+                            value={profileData.city}
+                            onChange={(e) => setProfileData({...profileData, city: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Website</label>
+                        <div className="relative group">
+                          <Globe className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-neuro-orange transition-colors" />
+                          <input 
+                            type="text" required placeholder="https://..."
+                            className="w-full pl-16 pr-8 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-neuro-orange/10 focus:border-neuro-orange/30 transition-all font-medium"
+                            value={profileData.website}
+                            onChange={(e) => setProfileData({...profileData, website: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
                 ) : (
                   <>
                     <div className="space-y-2">
