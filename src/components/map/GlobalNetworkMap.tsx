@@ -143,14 +143,14 @@ export default function GlobalNetworkMap({
           doc.latitude !== null && doc.latitude !== undefined && Number(doc.latitude) !== 0 && 
           doc.longitude !== null && doc.longitude !== undefined && Number(doc.longitude) !== 0 &&
           (!searchQuery || 
-            `${doc.first_name} ${doc.last_name} ${doc.clinic_name}`.toLowerCase().includes(searchQuery.toLowerCase()))
+            `${doc.first_name || ''} ${doc.last_name || ''} ${doc.clinic_name || ''}`.toLowerCase().includes(searchQuery.toLowerCase()))
         )
         .map(doc => ({
           type: 'Feature' as const,
           properties: { 
             cluster: false, 
             doctorId: doc.id,
-            name: doc.last_name?.startsWith('Dr.') ? doc.last_name : `Dr. ${doc.first_name} ${doc.last_name}`.trim().replace(/\s+/g, ' '),
+            name: doc.last_name?.startsWith('Dr.') ? doc.last_name : `Dr. ${doc.first_name || ''} ${doc.last_name || ''}`.trim().replace(/\s+/g, ' '),
             clinic: doc.clinic_name,
             slug: doc.slug,
             isHiring: doc.is_hiring,
