@@ -31,12 +31,11 @@ BEGIN
   END IF;
 
   -- 1. Upsert into public.profiles
-  INSERT INTO public.profiles (id, email, full_name, role, phone)
-  VALUES (NEW.id, NEW.email, user_full_name, user_role, user_phone)
+  INSERT INTO public.profiles (id, email, full_name, role)
+  VALUES (NEW.id, NEW.email, user_full_name, user_role)
   ON CONFLICT (id) DO UPDATE SET 
     email = EXCLUDED.email, 
-    full_name = COALESCE(EXCLUDED.full_name, public.profiles.full_name),
-    phone = COALESCE(EXCLUDED.phone, public.profiles.phone);
+    full_name = COALESCE(EXCLUDED.full_name, public.profiles.full_name);
 
   -- 2. Role-specific provisioning logic
   IF user_role = 'doctor' THEN
