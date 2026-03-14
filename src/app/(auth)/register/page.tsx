@@ -133,12 +133,10 @@ function RegisterContent() {
     formData.append("phone", accountData.phone);
 
     const result = await createAccountAction(formData, initialRole, initialTier, initialBilling);
+    console.log("[REGISTER_DEBUG] createAccountAction result:", result);
 
     if (result.error) {
       setError(result.error);
-      setIsPending(false);
-    } else if (result.sessionActive === false) {
-      setSuccessMsg("Your account has been created. Please check your email to verify your account before logging in.");
       setIsPending(false);
     } else {
       // Result success, user established
@@ -149,8 +147,8 @@ function RegisterContent() {
 
       if (result.user) {
         setUserId(result.user.id);
-        setStep("profile");
-        setIsPending(false);
+        console.log("[REGISTER_DEBUG] Setting userId and moving to profile step:", result.user.id);
+        
         // Optional: Store draft progress in local storage
         localStorage.setItem('nc_registration_draft', JSON.stringify({
           userId: result.user.id,
@@ -160,6 +158,14 @@ function RegisterContent() {
           step: "profile",
           email: accountData.email
         }));
+
+        if (result.sessionActive === false) {
+          console.log("[REGISTER_DEBUG] Session not active, showing success message but allowing progress.");
+          setSuccessMsg("Your account has been created. Please check your email to verify your account, but you can continue setting up your profile below.");
+        }
+        
+        setStep("profile");
+        setIsPending(false);
       } else {
         setError("Account created but failed to establish session. Please try logging in.");
         setIsPending(false);
