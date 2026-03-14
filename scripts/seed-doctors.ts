@@ -2,6 +2,10 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 import { parse } from 'csv-parse/sync';
+import * as dotenv from 'dotenv';
+
+// Load .env from project root
+dotenv.config();
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -74,9 +78,9 @@ async function seed() {
   // We'll do it in batches of 50 to avoid payload limits
   for (let i = 0; i < doctorsToInsert.length; i += 50) {
     const batch = doctorsToInsert.slice(i, i + 50);
-    const { error } = await supabase.from('doctors').insert(batch);
+    const { error } = await supabase.from('doctors').upsert(batch, { onConflict: 'slug' });
     if (error) {
-      console.error(`❌ Error inserting batch ${i / 50}:`, error.message);
+      console.error(`❌ Error inserting batch ${i / 50 + 1}:`, error.message);
     } else {
       console.log(`✅ Batch ${i / 50 + 1} complete.`);
     }
