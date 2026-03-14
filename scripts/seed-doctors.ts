@@ -50,16 +50,36 @@ async function seed() {
     const firstName = nameParts[0];
     const lastName = nameParts.slice(1).join(' ');
 
+    const country = r['Country'] || "United States";
+    const regionCode = country === 'Australia' ? 'AU' : 'US';
+    
+    // 🛡️ GEO-JITTER LOGIC
+    // If coordinates are missing, spread them across the country so they appear on map
+    let lat = parseFloat(r['Latitude']);
+    let lng = parseFloat(r['Longitude']);
+
+    if (!lat || !lng || lat === 0 || lng === 0) {
+      const seed = (firstName.length * 13) + (lastName.length * 7) + (fullName.length);
+      if (regionCode === 'AU') {
+        lat = -33 + (seed % 10);
+        lng = 140 + (seed % 15);
+      } else {
+        // Spread across US
+        lat = 35 + (seed % 10);
+        lng = -100 + (seed % 20);
+      }
+    }
+
     return {
       first_name: firstName,
       last_name: lastName,
       clinic_name: r['Practice Name'] || "NeuroChiro Clinic",
       city: r['City'] || "",
       state: r['State'] || "",
-      country: r['Country'] || "United States",
+      country: country,
       address: r['Address'] || "",
-      latitude: parseFloat(r['Latitude']) || 0,
-      longitude: parseFloat(r['Longitude']) || 0,
+      latitude: lat,
+      longitude: lng,
       website_url: r['Website URL'] || "",
       instagram_url: r['Instagram'] || "",
       facebook_url: r['Facebook'] || "",
@@ -67,7 +87,7 @@ async function seed() {
       specialties: [r['Practice Focus'] || 'General NeuroChiro'],
       verification_status: isUnpaid ? 'hidden' : 'verified',
       membership_tier: 'starter',
-      region_code: r['Country'] === 'United States' ? 'US' : 'AU', // fallback logic
+      region_code: regionCode,
       slug: (fullName.toLowerCase().replace(/\s+/g, '-') || 'dr-' + Math.random().toString(36).substring(7))
     };
   });
