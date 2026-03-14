@@ -43,7 +43,7 @@ export async function getDoctors(options: {
     // 4. Apply Ranking & Order
     query = query
       .order('membership_tier', { ascending: false }) // pro > growth > starter (approximate alphabetical)
-      .order('created_at', { ascending: false });
+      .order('id', { ascending: true });
 
     // 5. Apply Pagination
     const from = (page - 1) * limit;
@@ -69,7 +69,7 @@ export async function getDoctors(options: {
           .select('*')
           .eq('region_code', regionCode || 'US')
           .eq('verification_status', 'verified')
-          .order('created_at', { ascending: false })
+          .order('id', { ascending: true })
           .limit(limit);
         
         if (fallbackData && fallbackData.length > 0) {

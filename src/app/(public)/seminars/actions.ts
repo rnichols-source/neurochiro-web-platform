@@ -47,7 +47,7 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
 
   const { data, error } = await query
     .order('listing_tier', { ascending: false }) // This is simplified, real SQL would need more complex ordering for Premium > Featured > Basic
-    .order('created_at', { ascending: false })
+    .order('id', { ascending: true })
 
   // Manual sorting to ensure Premium > Featured > Basic
   const sortedData = (data || []).sort((a: any, b: any) => {
@@ -55,7 +55,7 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
     const tierA = tierMap[a.listing_tier] || 1;
     const tierB = tierMap[b.listing_tier] || 1;
     if (tierA !== tierB) return tierB - tierA;
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    return a.id.localeCompare(b.id);
   });
 
   if (error) {
