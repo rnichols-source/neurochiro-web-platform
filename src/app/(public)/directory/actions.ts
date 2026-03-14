@@ -52,6 +52,35 @@ export const getDoctors = cache(async function getDoctors(options: {
     
     const { data, error, count } = await query
 
+    // 🛡️ WIDE-ANGLE FALLBACK LOGIC
+    // If we have bounds and they returned 0, but there are doctors in the region,
+    // return the region's doctors so the map isn't empty.
+    if (!error && data && data.length === 0 && bounds) {
+      const { count: regionTotal } = await supabase
+        .from('doctors')
+        .select('*', { count: 'exact', head: true })
+        .eq('region_code', regionCode || 'US')
+        .eq('verification_status', 'verified');
+      
+      if (regionTotal && regionTotal > 0) {
+        console.log(`[DIRECTORY_ACTIONS] Bounds returned 0, but region ${regionCode} has ${regionTotal}. Using wide-angle fallback.`);
+        const { data: fallbackData } = await supabase
+          .from('doctors')
+          .select('*')
+          .eq('region_code', regionCode || 'US')
+          .eq('verification_status', 'verified')
+          .order('membership_tier', { ascending: false })
+          .limit(limit);
+        
+        if (fallbackData && fallbackData.length > 0) {
+          return {
+            doctors: fallbackData as Doctor[],
+            total: regionTotal
+          };
+        }
+      }
+    }
+
     if (error) {
       console.error("[DIRECTORY_ACTIONS] Database query error:", error);
       return { doctors: [], total: 0 };
