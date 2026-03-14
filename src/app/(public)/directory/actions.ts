@@ -41,8 +41,7 @@ export const getDoctors = cache(async function getDoctors(options: {
 
     // 4. Apply Ranking & Order
     query = query
-      .order('membership_tier', { ascending: false }) // pro > growth > starter
-      .order('is_featured', { ascending: false })
+      .order('membership_tier', { ascending: false }) // pro > growth > starter (approximate alphabetical)
       .order('created_at', { ascending: false });
 
     // 5. Apply Pagination
@@ -69,7 +68,7 @@ export const getDoctors = cache(async function getDoctors(options: {
           .select('*')
           .eq('region_code', regionCode || 'US')
           .eq('verification_status', 'verified')
-          .order('membership_tier', { ascending: false })
+          .order('created_at', { ascending: false })
           .limit(limit);
         
         if (fallbackData && fallbackData.length > 0) {
@@ -108,7 +107,7 @@ export const getDoctorBySlug = cache(async function getDoctorBySlug(slug: string
 
   // Fallback to finding by ID if slug is actually a UUID
   if (error || !data) {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
     if (isUuid) {
         const { data: byId, error: errorId } = await supabase
             .from('doctors')
@@ -140,6 +139,13 @@ export async function getStudentsForMap(options: {
   const supabase = createServerSupabase();
 
   try {
+    // 🛡️ Safety check: Check if students table exists
+    const { error: tableError } = await supabase.from('students').select('id').limit(1);
+    if (tableError && tableError.code === 'PGRST205') {
+      console.warn("[DIRECTORY_ACTIONS] Students table missing. Skipping student fetch.");
+      return [];
+    }
+
     let query = supabase
       .from('students')
       .select('id, full_name, school, location_city, graduation_year, interests, is_looking_for_mentorship, latitude, longitude')
