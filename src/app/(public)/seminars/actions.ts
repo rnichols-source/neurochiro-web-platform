@@ -1,7 +1,7 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
-import { cache } from 'react'
+import { unstable_noStore as noStore } from 'next/cache'
 
 export interface SeminarFilterOptions {
   country?: string;
@@ -11,7 +11,8 @@ export interface SeminarFilterOptions {
   showPast?: boolean;
 }
 
-export const getSeminars = cache(async function getSeminars(options: SeminarFilterOptions = {}) {
+export async function getSeminars(options: SeminarFilterOptions = {}) {
+  noStore();
   const supabase = createServerSupabase()
 
   let query = supabase
@@ -63,9 +64,10 @@ export const getSeminars = cache(async function getSeminars(options: SeminarFilt
   }
 
   return sortedData;
-});
+}
 
-export const getSeminarsForMap = cache(async function getSeminarsForMap(bounds?: [number, number, number, number]) {
+export async function getSeminarsForMap(bounds?: [number, number, number, number]) {
+  noStore();
   const supabase = createServerSupabase()
   
   let query = supabase
@@ -89,7 +91,7 @@ export const getSeminarsForMap = cache(async function getSeminarsForMap(bounds?:
       .gte('longitude', bounds[0])
       .lte('longitude', bounds[2])
       .gte('latitude', bounds[1])
-      .lte('longitude', bounds[3])
+      .lte('latitude', bounds[3])
   }
 
   const { data, error } = await query
@@ -100,7 +102,7 @@ export const getSeminarsForMap = cache(async function getSeminarsForMap(bounds?:
   }
 
   return data || []
-});
+}
 
 export async function incrementSeminarStats(id: string, column: 'page_views' | 'clicks') {
   const supabase = createServerSupabase()
@@ -114,7 +116,8 @@ export async function incrementSeminarStats(id: string, column: 'page_views' | '
   }
 }
 
-export const getSeminarById = cache(async function getSeminarById(id: string) {
+export async function getSeminarById(id: string) {
+    noStore();
     const supabase = createServerSupabase()
     const { data, error } = await supabase
         .from('seminars')
@@ -127,7 +130,7 @@ export const getSeminarById = cache(async function getSeminarById(id: string) {
         return null
     }
     return data
-});
+}
 
 export async function registerForSeminar(seminarId: string) {
   const supabase = createServerSupabase()

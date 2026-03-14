@@ -56,8 +56,14 @@ BEGIN
   -- 2. Role-specific provisioning logic
   IF user_role = 'doctor' THEN
     -- Provision doctor profile (hidden/pending by default)
-    INSERT INTO public.doctors (user_id, verification_status)
-    VALUES (NEW.id, 'pending')
+    INSERT INTO public.doctors (user_id, first_name, last_name, slug, verification_status)
+    VALUES (
+      NEW.id, 
+      COALESCE(split_part(user_full_name, ' ', 1), 'Dr.'), 
+      COALESCE(replace(user_full_name, split_part(user_full_name, ' ', 1) || ' ', ''), 'Specialist'),
+      'dr-' || lower(replace(replace(COALESCE(user_full_name, 'new-doctor-' || floor(random()*10000)::text), ' ', '-'), '.', '')),
+      'pending'
+    )
     ON CONFLICT (user_id) DO NOTHING;
     
   ELSIF user_role = 'student' THEN

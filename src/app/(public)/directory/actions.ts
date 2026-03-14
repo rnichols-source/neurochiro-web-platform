@@ -2,15 +2,16 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { Doctor } from '@/types/directory'
-import { cache } from 'react'
+import { unstable_noStore as noStore } from 'next/cache'
 
-export const getDoctors = cache(async function getDoctors(options: {
+export async function getDoctors(options: {
   regionCode?: string;
   bounds?: [number, number, number, number]; // [minLng, minLat, maxLng, maxLat]
   page?: number;
   limit?: number;
   searchQuery?: string;
 } = {}) {
+  noStore();
   const { regionCode, bounds, page = 1, limit = 100, searchQuery } = options;
   const supabase = createServerSupabase()
 
@@ -93,9 +94,10 @@ export const getDoctors = cache(async function getDoctors(options: {
     console.error("[DIRECTORY_ACTIONS] Critical error fetching doctors:", e);
     return { doctors: [], total: 0 };
   }
-});
+}
 
-export const getDoctorBySlug = cache(async function getDoctorBySlug(slug: string) {
+export async function getDoctorBySlug(slug: string) {
+  noStore();
   const supabase = createServerSupabase()
   
   // Try to find by slug first
@@ -120,7 +122,7 @@ export const getDoctorBySlug = cache(async function getDoctorBySlug(slug: string
   }
 
   return { doctor: data as Doctor | null, error }
-});
+}
 
 export async function incrementDoctorViews(slug: string) {
   const supabase = createServerSupabase();
@@ -135,6 +137,7 @@ export async function getStudentsForMap(options: {
   bounds?: [number, number, number, number]; // [minLng, minLat, maxLng, maxLat]
   limit?: number;
 } = {}) {
+  noStore();
   const { bounds, limit = 100 } = options;
   const supabase = createServerSupabase();
 
