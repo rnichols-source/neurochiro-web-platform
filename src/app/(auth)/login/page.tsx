@@ -13,8 +13,10 @@ import {
   Loader2
 } from "lucide-react";
 import { login, signInWithProvider } from "../actions/auth";
+import { unstable_noStore as noStore } from 'next/cache';
 
 function LoginContent() {
+  noStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const errorParam = searchParams.get("error");
