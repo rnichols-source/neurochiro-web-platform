@@ -111,7 +111,12 @@ export async function createAccountAction(formData: FormData, role: string, tier
     }
   })
 
-  if (error) return { error: error.message };
+  if (error) {
+    if (error.message.toLowerCase().includes('already registered')) {
+      return { error: 'This email is already registered. Please log in or use a different address.' };
+    }
+    return { error: error.message };
+  }
 
   if (data?.user) {
     Automations.onSignup(data.user.id, email, name, role, phone);
@@ -144,6 +149,9 @@ export async function updateProfileAction(userId: string, profileData: any) {
 
   if (profileError) {
     console.error("Profiles update error:", profileError);
+    if ((profileError as any).code === '23505') {
+      return { error: 'This email is already registered. Please log in or use a different address.' };
+    }
     return { error: profileError.message };
   }
 
@@ -162,6 +170,9 @@ export async function updateProfileAction(userId: string, profileData: any) {
         .eq('user_id', userId);
         
       if (doctorError) {
+        if ((doctorError as any).code === '23505') {
+          return { error: 'This email is already registered. Please log in or use a different address.' };
+        }
         // If user_id column is missing, fallback to updating by ID
         console.warn("Retrying update by ID...");
         const { error: fallbackError } = await supabase
@@ -174,10 +185,18 @@ export async function updateProfileAction(userId: string, profileData: any) {
           })
           .eq('id', userId);
           
-        if (fallbackError) throw fallbackError;
+        if (fallbackError) {
+          if ((fallbackError as any).code === '23505') {
+            return { error: 'This email is already registered. Please log in or use a different address.' };
+          }
+          throw fallbackError;
+        }
       }
     } catch (err: any) {
       console.error("Failed to update doctor profile:", err);
+      if (err.code === '23505' || (err.message && err.message.includes('23505'))) {
+        return { error: 'This email is already registered. Please log in or use a different address.' };
+      }
       return { error: err.message || "Database connection error" };
     }
   } else if (role === 'student') {
@@ -193,6 +212,9 @@ export async function updateProfileAction(userId: string, profileData: any) {
       
     if (studentError) {
       console.error("Failed to update student profile:", studentError);
+      if ((studentError as any).code === '23505') {
+        return { error: 'This email is already registered. Please log in or use a different address.' };
+      }
       return { error: studentError.message };
     }
   } else if (role === 'vendor') {
@@ -210,6 +232,9 @@ export async function updateProfileAction(userId: string, profileData: any) {
 
     if (vendorError) {
       console.error("Failed to update vendor profile:", vendorError);
+      if ((vendorError as any).code === '23505') {
+        return { error: 'This email is already registered. Please log in or use a different address.' };
+      }
       return { error: vendorError.message };
     }
   }
