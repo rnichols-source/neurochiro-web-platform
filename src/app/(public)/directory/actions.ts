@@ -85,19 +85,24 @@ export async function getDoctorBySlug(slug: string) {
       .select(selectFields)
       .eq('slug', slug)
       .eq('verification_status', 'verified')
-      .single()
+      .maybeSingle()
 
-    if (error || !data) {
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+    if (!data) {
+      // Improved UUID regex: 8-4-4-4-12
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+      
       if (isUuid) {
           const { data: byId, error: errorId } = await (supabase as any)
               .from('doctors')
               .select(selectFields)
               .eq('id', slug)
               .eq('verification_status', 'verified')
-              .single()
-          data = byId
-          error = errorId
+              .maybeSingle()
+          
+          if (byId) {
+            data = byId
+            error = errorId
+          }
       }
     }
     
