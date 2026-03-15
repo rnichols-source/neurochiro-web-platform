@@ -8,13 +8,13 @@ export async function getStudentProfile() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile, error: profileError } = await (supabase as any)
     .from('profiles')
     .select('full_name, email, role, tier')
     .eq('id', user.id)
     .single()
 
-  const { data: student, error: studentError } = await supabase
+  const { data: student, error: studentError } = await (supabase as any)
     .from('students')
     .select('*')
     .eq('id', user.id) // Assuming id is the PK referencing auth.users similar to doctors before the fix, let's just use id for now
@@ -25,7 +25,7 @@ export async function getStudentProfile() {
     return null
   }
 
-  return { ...profile, ...student }
+  return { ...(profile as any), ...(student as any) }
 }
 
 export async function updateStudentProfile(formData: FormData) {
@@ -40,7 +40,7 @@ export async function updateStudentProfile(formData: FormData) {
   const isLookingForMentorship = formData.get('is_looking_for_mentorship') === 'true'
 
   // 1. Update Profile (Name)
-  const { error: profileError } = await supabase
+  const { error: profileError } = await (supabase as any)
     .from('profiles')
     .update({ full_name: fullName })
     .eq('id', user.id)
@@ -48,7 +48,7 @@ export async function updateStudentProfile(formData: FormData) {
   if (profileError) throw profileError
 
   // 2. Update Student table
-  const { error: studentError } = await supabase
+  const { error: studentError } = await (supabase as any)
     .from('students')
     .update({
       school: school,
