@@ -8,6 +8,7 @@ import Footer from "@/components/landing/Footer";
 import NeuralPulseWrapper from "@/components/landing/NeuralPulseWrapper";
 import Link from "next/link";
 import { Zap, Activity, Brain as BrainIcon, BookOpen, Stethoscope, Calendar, MapPin, Users, ArrowRight, Loader2 } from "lucide-react";
+import SchemaMarkup from "@/components/seo/SchemaMarkup";
 
 // Lazy load heavy components (with SSR allowed where possible)
 const BentoGrid = dynamic(() => import("@/components/landing/BentoGrid"), {
@@ -16,8 +17,22 @@ const BentoGrid = dynamic(() => import("@/components/landing/BentoGrid"), {
 });
 
 export default function Home() {
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "NeuroChiro",
+    "url": "https://neurochiro.com",
+    "logo": "https://neurochiro.com/logo.png",
+    "description": "The global ecosystem for nervous-system-focused chiropractic.",
+    "sameAs": [
+      "https://facebook.com/neurochiro",
+      "https://instagram.com/neurochiro"
+    ]
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-neuro-cream overflow-x-hidden">
+      <SchemaMarkup data={organizationJsonLd} />
       
       {/* 1. HERO - Movement introduction */}
       <Hero />

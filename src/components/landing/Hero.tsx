@@ -2,51 +2,73 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, ChevronDown, Sparkles } from "lucide-react";
+import { ChevronDown, Sparkles } from "lucide-react";
 import LandingSearch from "./LandingSearch";
-import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export default function Hero() {
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 500], [0, 200]);
   const y2 = useTransform(scrollY, [0, 500], [0, -150]);
+  
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const orbVariants = {
+    animate: {
+      scale: [1, 1.1, 1],
+      opacity: [0.2, 0.3, 0.2],
+      transition: {
+        duration: 10,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }
+    },
+    static: {
+      scale: 1,
+      opacity: 0.2
+    }
+  };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-neuro-navy text-white">
       {/* Dynamic Background */}
       <div className="absolute inset-0 z-0" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(30,45,59,1)_0%,rgba(19,25,32,1)_100%)]" />
-        {/* Animated Gradient Orbs */}
+        
+        {/* Optimized Animated Gradient Orbs - Simplified on Mobile */}
         <motion.div 
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity }}
+          variants={orbVariants}
+          animate={isMobile ? "static" : "animate"}
           className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] bg-neuro-orange/20 rounded-full blur-[120px]"
         />
         <motion.div 
-          animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 10, repeat: Infinity, delay: 2 }}
+          variants={orbVariants}
+          animate={isMobile ? "static" : "animate"}
           className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-blue-600/20 rounded-full blur-[100px]"
         />
       </div>
 
-      {/* Grid Pattern Overlay Optimized */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]">
-        <Image 
-          src="/grid.svg" 
-          alt="Subtle neural network grid background" 
-          fill 
-          className="object-cover" 
-          priority 
-        />
-      </div>
+      {/* Inlined Grid Pattern Overlay - Performance Optimized */}
+      <div 
+        className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]" 
+        style={{ backgroundImage: 'var(--grid-pattern)' }}
+        aria-hidden="true"
+      />
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
         
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.6 }}
           className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm"
         >
           <span className="w-2 h-2 rounded-full bg-neuro-orange animate-pulse" aria-hidden="true" />
@@ -54,10 +76,10 @@ export default function Hero() {
         </motion.div>
 
         <motion.h1
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-6xl md:text-8xl font-heading font-black tracking-tight leading-[1.1] mb-8 drop-shadow-sm text-white"
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-5xl md:text-8xl font-heading font-black tracking-tight leading-[1.1] mb-8 drop-shadow-sm text-white"
         >
           The <span className="text-transparent bg-clip-text bg-gradient-to-r from-neuro-orange to-orange-400 drop-shadow-md">Nervous System</span> <br />
           First Ecosystem.
@@ -66,23 +88,27 @@ export default function Hero() {
         <LandingSearch />
       </div>
 
-      {/* Floating Elements (Parallax) */}
-      <motion.div style={{ y: y1 }} className="absolute top-[20%] left-[5%] opacity-20 hidden lg:block" aria-hidden="true">
-        <div className="w-24 h-24 border border-white/20 rounded-full flex items-center justify-center">
-          <div className="w-16 h-16 border border-neuro-orange/30 rounded-full" />
-        </div>
-      </motion.div>
-      <motion.div style={{ y: y2 }} className="absolute bottom-[20%] right-[5%] opacity-20 hidden lg:block" aria-hidden="true">
-         <div className="w-32 h-32 border border-blue-500/20 rounded-full flex items-center justify-center">
-           <div className="w-3 h-3 bg-blue-500 rounded-full blur-sm" />
-         </div>
-      </motion.div>
+      {/* Parallax Elements - Disabled on Mobile for Main Thread Relief */}
+      {!isMobile && (
+        <>
+          <motion.div style={{ y: y1 }} className="absolute top-[20%] left-[5%] opacity-20 hidden lg:block" aria-hidden="true">
+            <div className="w-24 h-24 border border-white/20 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 border border-neuro-orange/30 rounded-full" />
+            </div>
+          </motion.div>
+          <motion.div style={{ y: y2 }} className="absolute bottom-[20%] right-[5%] opacity-20 hidden lg:block" aria-hidden="true">
+             <div className="w-32 h-32 border border-blue-500/20 rounded-full flex items-center justify-center">
+               <div className="w-3 h-3 bg-blue-500 rounded-full blur-sm" />
+             </div>
+          </motion.div>
+        </>
+      )}
 
       {/* Floating Smart Match Wizard CTA */}
       <motion.div
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 2, duration: 0.8 }}
+        transition={{ delay: 1, duration: 0.6 }}
         className="absolute bottom-12 right-12 z-30 hidden md:block"
       >
         <Link 
@@ -104,7 +130,7 @@ export default function Hero() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
+        transition={{ delay: 1.5, duration: 0.8 }}
         className="absolute bottom-10 left-1/2 -translate-x-1/2 text-gray-500 flex flex-col items-center gap-2"
         aria-hidden="true"
       >
