@@ -54,15 +54,25 @@ export default function DirectoryManager() {
     if (!selectedDoctor) return;
     setIsUpdating(true);
     
-    // Cleanup coordinates to numbers
+    // Surgical update object to avoid sending primary keys or metadata columns
     const updates = {
-      ...selectedDoctor,
+      first_name: selectedDoctor.first_name,
+      last_name: selectedDoctor.last_name,
+      email: selectedDoctor.email,
+      slug: selectedDoctor.slug,
+      clinic_name: selectedDoctor.clinic_name,
+      address: selectedDoctor.address,
+      city: selectedDoctor.city,
+      state: selectedDoctor.state,
+      country: selectedDoctor.country,
       latitude: parseFloat(selectedDoctor.latitude) || 0,
-      longitude: parseFloat(selectedDoctor.longitude) || 0
+      longitude: parseFloat(selectedDoctor.longitude) || 0,
+      bio: selectedDoctor.bio,
+      website_url: selectedDoctor.website_url,
+      instagram_url: selectedDoctor.instagram_url,
+      verification_status: selectedDoctor.verification_status,
+      membership_tier: selectedDoctor.membership_tier
     };
-    // Don't update the primary key or user_id in this form
-    delete (updates as any).id;
-    delete (updates as any).user_id;
 
     const res = await updateDoctorManually(selectedDoctor.id, updates);
     if (res.success) {
