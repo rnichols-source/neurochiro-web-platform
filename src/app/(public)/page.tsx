@@ -5,18 +5,14 @@ import SectionHeader from "@/components/landing/SectionHeader";
 import IntentGateway from "@/components/landing/IntentGateway";
 import CallToAction from "@/components/landing/CallToAction";
 import Footer from "@/components/landing/Footer";
+import NeuralPulseWrapper from "@/components/landing/NeuralPulseWrapper";
 import Link from "next/link";
 import { Zap, Activity, Brain as BrainIcon, BookOpen, Stethoscope, Calendar, MapPin, Users, ArrowRight, Loader2 } from "lucide-react";
 
-// Lazy load heavy components
+// Lazy load heavy components (with SSR allowed where possible)
 const BentoGrid = dynamic(() => import("@/components/landing/BentoGrid"), {
   loading: () => <div className="h-[600px] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-neuro-orange" /></div>,
   ssr: true
-});
-
-const NeuralPulse = dynamic(() => import("@/components/landing/NeuralPulse"), {
-  loading: () => <div className="h-[400px] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-neuro-orange" /></div>,
-  ssr: false // This is very heavy and uses canvas/animation, best loaded on client
 });
 
 export default function Home() {
@@ -133,7 +129,7 @@ export default function Home() {
       </div>
 
       {/* 6. PROOF - Living Pulse */}
-      <NeuralPulse />
+      <NeuralPulseWrapper />
 
       {/* 6.5 EDUCATION HUB PREVIEW */}
       <section className="py-24 px-6 bg-white">
