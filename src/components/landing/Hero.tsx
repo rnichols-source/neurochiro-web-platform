@@ -14,7 +14,7 @@ export default function Hero() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-neuro-navy text-white">
       {/* Dynamic Background */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(30,45,59,1)_0%,rgba(19,25,32,1)_100%)]" />
         {/* Animated Gradient Orbs */}
         <motion.div 
@@ -33,7 +33,7 @@ export default function Hero() {
       <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]">
         <Image 
           src="/grid.svg" 
-          alt="" 
+          alt="Subtle neural network grid background" 
           fill 
           className="object-cover" 
           priority 
@@ -49,7 +49,7 @@ export default function Hero() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm"
         >
-          <span className="w-2 h-2 rounded-full bg-neuro-orange animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-neuro-orange animate-pulse" aria-hidden="true" />
           <span className="text-sm font-medium tracking-wide text-gray-300 uppercase">The Future of Chiropractic</span>
         </motion.div>
 
@@ -67,12 +67,12 @@ export default function Hero() {
       </div>
 
       {/* Floating Elements (Parallax) */}
-      <motion.div style={{ y: y1 }} className="absolute top-[20%] left-[5%] opacity-20 hidden lg:block">
+      <motion.div style={{ y: y1 }} className="absolute top-[20%] left-[5%] opacity-20 hidden lg:block" aria-hidden="true">
         <div className="w-24 h-24 border border-white/20 rounded-full flex items-center justify-center">
           <div className="w-16 h-16 border border-neuro-orange/30 rounded-full" />
         </div>
       </motion.div>
-      <motion.div style={{ y: y2 }} className="absolute bottom-[20%] right-[5%] opacity-20 hidden lg:block">
+      <motion.div style={{ y: y2 }} className="absolute bottom-[20%] right-[5%] opacity-20 hidden lg:block" aria-hidden="true">
          <div className="w-32 h-32 border border-blue-500/20 rounded-full flex items-center justify-center">
            <div className="w-3 h-3 bg-blue-500 rounded-full blur-sm" />
          </div>
@@ -87,14 +87,15 @@ export default function Hero() {
       >
         <Link 
           href="/directory?wizard=open"
-          className="group flex items-center gap-4 bg-white/10 backdrop-blur-xl border border-white/20 p-2 pl-6 rounded-full hover:bg-white/20 transition-all shadow-2xl"
+          className="group flex items-center gap-4 bg-white/10 backdrop-blur-xl border border-white/20 p-2 pl-6 rounded-full hover:bg-white/20 transition-all shadow-2xl min-h-[56px]"
+          aria-label="Launch Smart Match Wizard to find the right doctor for you"
         >
           <div className="flex flex-col items-start">
             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-neuro-orange">Need help?</span>
             <span className="text-sm font-bold text-white">Not sure who to see? <span className="text-gray-400 font-medium ml-1 group-hover:text-white transition-colors">Let us match you.</span></span>
           </div>
           <div className="w-12 h-12 bg-neuro-orange rounded-full flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
-            <Sparkles className="w-6 h-6 fill-current" />
+            <Sparkles className="w-6 h-6 fill-current" aria-hidden="true" />
           </div>
         </Link>
       </motion.div>
@@ -105,6 +106,7 @@ export default function Hero() {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 1 }}
         className="absolute bottom-10 left-1/2 -translate-x-1/2 text-gray-500 flex flex-col items-center gap-2"
+        aria-hidden="true"
       >
         <span className="text-xs uppercase tracking-widest">Explore</span>
         <ChevronDown className="w-5 h-5 animate-bounce" />

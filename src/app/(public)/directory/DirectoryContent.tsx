@@ -422,36 +422,55 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                 )}
               </>
             ) : (
-              <div className="bg-white rounded-[2.5rem] border border-dashed border-gray-200 p-12 text-center">
-                <Globe className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-                <h3 className="font-bold text-neuro-navy mb-2">No Clinics in this Area</h3>
-                <p className="text-gray-400 text-sm mb-8">We are expanding rapidly. Be the first to know when a specialist opens near you.</p>
+              <div className="bg-white rounded-[2.5rem] border-2 border-dashed border-gray-100 p-12 text-center shadow-sm" role="status">
+                <div className="w-20 h-20 bg-neuro-cream rounded-3xl flex items-center justify-center mx-auto mb-6">
+                  <Globe className="w-10 h-10 text-gray-300 animate-pulse" aria-hidden="true" />
+                </div>
+                <h3 className="text-2xl font-heading font-black text-neuro-navy mb-2">Expanding the Network</h3>
+                <p className="text-gray-500 text-sm mb-8 max-w-xs mx-auto leading-relaxed">
+                  We haven't mapped a verified specialist in this specific region yet. Try searching a nearby city or help us grow.
+                </p>
                 
                 {notifySuccess ? (
                   <motion.div 
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="p-6 bg-emerald-50 text-emerald-700 rounded-3xl border border-emerald-100 font-bold"
+                    className="p-6 bg-emerald-50 text-emerald-700 rounded-3xl border border-emerald-100 font-bold flex items-center justify-center gap-3"
                   >
-                    Success! We'll notify you soon.
+                    <ShieldCheck className="w-5 h-5" /> Success! We'll notify you soon.
                   </motion.div>
                 ) : (
-                  <form onSubmit={handleNotifyMe} className="max-w-md mx-auto space-y-4">
-                    <input 
-                      type="email" 
-                      name="email"
-                      required 
-                      placeholder="Your Email Address"
-                      className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-neuro-orange/20 outline-none"
-                    />
-                    <button 
-                      type="submit"
-                      disabled={notifying}
-                      className="w-full py-4 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-[10px] hover:bg-neuro-orange-dark transition-all disabled:opacity-50"
-                    >
-                      {notifying ? "Subscribing..." : "Notify Me via Email"}
-                    </button>
-                  </form>
+                  <div className="space-y-6">
+                    <form onSubmit={handleNotifyMe} className="max-w-md mx-auto space-y-3">
+                      <label htmlFor="notify-email" className="sr-only">Email address for notification</label>
+                      <input 
+                        id="notify-email"
+                        type="email" 
+                        name="email"
+                        required 
+                        placeholder="Enter email for area alerts..."
+                        className="w-full p-5 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-neuro-orange/20 outline-none font-medium min-h-[56px]"
+                        aria-label="Email address for notification"
+                      />
+                      <button 
+                        type="submit"
+                        disabled={notifying}
+                        className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-[10px] hover:bg-neuro-orange-dark transition-all disabled:opacity-50 shadow-lg shadow-neuro-orange/20 min-h-[56px]"
+                      >
+                        {notifying ? "Subscribing..." : "Notify Me via Email"}
+                      </button>
+                    </form>
+                    
+                    <div className="pt-6 border-t border-gray-50">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-4">Are you a doctor in this area?</p>
+                      <Link 
+                        href="/register?role=doctor"
+                        className="inline-flex items-center gap-2 text-neuro-orange font-bold hover:gap-3 transition-all text-sm"
+                      >
+                        Join the Global Directory <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  </div>
                 )}
               </div>
             )}
