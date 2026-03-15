@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 
 export async function getJobs(regionCode?: string, page: number = 1, limit: number = 20) {
   const supabase = createServerSupabase()
-  let query = supabase
+  let query = (supabase as any)
     .from('jobs')
     .select('*, doctors(clinic_name, photo_url)')
     .eq('status', 'open')
@@ -41,7 +41,7 @@ export async function postJob(formData: FormData) {
     status: 'open'
   }
 
-  const { data, error } = await supabase.from('jobs').insert(jobData).select().single()
+  const { data, error } = await (supabase as any).from('jobs').insert(jobData).select().single()
   if (error) throw error
 
   revalidatePath('/jobs')
@@ -56,13 +56,13 @@ export async function applyForJob(jobId: string) {
   if (!user) throw new Error("Unauthorized")
 
   // 1. Insert Application
-  const { data: jobInfo } = await supabase
+  const { data: jobInfo } = await (supabase as any)
     .from('jobs')
     .select('title, doctor_id, profiles!doctor_id(email)')
     .eq('id', jobId)
     .single();
 
-  const { error } = await supabase.from('job_applications').insert({
+  const { error } = await (supabase as any).from('job_applications').insert({
     job_id: jobId,
     applicant_id: user.id,
     status: 'pending'
