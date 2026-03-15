@@ -88,7 +88,7 @@ export async function getDoctorBySlug(slug: string) {
 export async function incrementDoctorViews(slug: string) {
   const supabase = createServerSupabase();
   try {
-    await supabase.rpc('increment_doctor_views', { doctor_slug: slug });
+    await (supabase as any).rpc('increment_doctor_views', { doctor_slug: slug });
   } catch (e) {
     console.error("Failed to increment views:", e);
   }
