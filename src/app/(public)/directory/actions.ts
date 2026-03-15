@@ -15,22 +15,19 @@ export async function getDoctors(options: {
   const { regionCode, bounds, page = 1, limit = 20, searchQuery } = options;
   const supabase = createServerSupabase()
 
+  console.log('📡 [DIRECTORY_ACTION] Fetching doctors...', { regionCode, bounds, searchQuery, page, limit });
+
   try {
-    // 🛡️ Optimized Direct Query with Type Bypass
     const selectFields = 'id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status, city, state, country, region_code, photo_url';
     
-    // 🔍 Hot-Fix: Loosened Filters for Launch Reliability
+    // 🛡️ Bypass strict types for complex OR logic
     let query = (supabase as any)
       .from('doctors')
-      .select(selectFields, { count: 'exact' });
+      .select(selectFields, { count: 'exact' })
+      .eq('verification_status', 'verified'); // Data confirms lowercase 'verified' is standard
 
-    // 1. Status Case-Insensitivity: Check for 'verified' OR 'Verified'
-    query = query.or('verification_status.eq.verified,verification_status.eq.Verified');
-
-    // 2. Country Matching: Support 'US', 'United States', and 'USA'
-    if (regionCode === 'US') {
-      query = query.or('country.eq.US,country.eq.United States,country.eq.USA,region_code.eq.US');
-    } else if (regionCode) {
+    // 🗺️ Regional Logic: If US is selected, we show everything in the US region
+    if (regionCode) {
       query = query.eq('region_code', regionCode);
     }
 
@@ -50,8 +47,7 @@ export async function getDoctors(options: {
       .order('membership_tier', { ascending: false })
       .range((page - 1) * limit, page * limit - 1);
 
-    // 📈 Debug Logging: Track result count in real-time
-    console.log('📡 [DIRECTORY_DEBUG] Doctors found:', data?.length || 0, 'Total in DB:', count);
+    console.log('📡 [DIRECTORY_DEBUG] Results:', data?.length || 0, 'Total:', count);
 
     if (error) {
       console.error("❌ [DIRECTORY_ACTION] Supabase Error:", error);
@@ -71,19 +67,16 @@ export async function getDoctors(options: {
 export async function getDoctorBySlug(slug: string) {
   noStore();
   const supabase = createServerSupabase()
-  
   const selectFields = 'id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status, city, state, country, region_code, photo_url, website_url, instagram_url, facebook_url';
   
-  // Try to find by slug first
   let { data, error } = await (supabase as any)
     .from('doctors')
     .select(selectFields)
     .eq('slug', slug)
     .single()
 
-  // Fallback to finding by ID if slug is actually a UUID
   if (error || !data) {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
     if (isUuid) {
         const { data: byId, error: errorId } = await (supabase as any)
             .from('doctors')
@@ -94,7 +87,6 @@ export async function getDoctorBySlug(slug: string) {
         error = errorId
     }
   }
-
   return { doctor: data as Doctor | null, error }
 }
 
@@ -114,7 +106,6 @@ export async function getStudentsForMap(options: {
   noStore();
   const { bounds, limit = 100 } = options;
   const supabase = createServerSupabase();
-
   try {
     let query = (supabase as any)
       .from('students')
@@ -130,17 +121,10 @@ export async function getStudentsForMap(options: {
         .lte('longitude', bounds[2])
         .lte('latitude', bounds[3]);
     }
-
     const { data, error } = await query
-
-    if (error) {
-      console.error("[DIRECTORY_ACTIONS] Error fetching students:", error);
-      return [];
-    }
-
+    if (error) return [];
     return (data || []) as any[];
   } catch (e) {
-    console.error("[DIRECTORY_ACTIONS] Critical error fetching students:", e);
     return [];
   }
 }
