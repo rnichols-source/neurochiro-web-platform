@@ -8,7 +8,7 @@ export async function getContractsAction() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Unauthorized")
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('contracts')
     .select('*')
     .eq('user_id', user.id)
@@ -23,7 +23,7 @@ export async function saveContractAnalysisAction(title: string, analysisResults:
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Unauthorized")
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('contracts')
     .insert({
       user_id: user.id,
