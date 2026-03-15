@@ -37,6 +37,27 @@ const getTwilioClient = async () => {
 
 const TWILIO_FROM = process.env.TWILIO_PHONE;
 
+/**
+ * SLACK / DISCORD WEBHOOK WORKER
+ */
+const sendSlackNotification = async (message: string) => {
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+  if (!webhookUrl) {
+    console.log(`[SLACK MOCK] ${message}`);
+    return;
+  }
+
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: message })
+    });
+  } catch (err) {
+    console.error("Failed to send Slack notification:", err);
+  }
+};
+
 // Admin client for backend operations
 const getSupabaseAdmin = () => {
   if (typeof window !== 'undefined') return null;
@@ -231,6 +252,9 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             '/settings'
           );
         }
+
+        // Notify Admins via Slack
+        await sendSlackNotification(`🆕 New ${payload.role} joined the network: *${payload.name || payload.full_name || 'Anonymous'}* (${payload.email})`);
 
         if (emailEnabled && payload.email) {
           if (payload.role === 'doctor') {
@@ -672,6 +696,23 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             const { data: profile } = await supabaseAdmin.from('profiles').select('role, full_name, email').eq('id', userId).single();
             if (profile?.role === 'doctor') {
                await supabaseAdmin.from('doctors').update({ verification_status: 'verified' }).eq('user_id', userId);
+
+               // 🛡️ NETWORK MILESTONE: Count verified doctors
+               const { count: verifiedCount } = await supabaseAdmin
+                 .from('doctors')
+                 .select('*', { count: 'exact', head: true })
+                 .eq('verification_status', 'verified');
+
+               // Get slug for the link
+               const { data: doctorData } = await supabaseAdmin
+                 .from('doctors')
+                 .select('slug')
+                 .eq('user_id', userId)
+                 .single();
+
+               const profileLink = doctorData?.slug ? `https://neurochiro.co/directory/${doctorData.slug}` : 'https://neurochiro.co/directory';
+
+               await sendSlackNotification(`🛡️ *New specialist verified!* Dr. ${profile.full_name || 'Anonymous'}\n📍 Profile: ${profileLink}\n📈 *Total Global Network: ${verifiedCount || 'N/A'}*`);
 
                if (emailEnabled && profile.email) {
                   await sendPremiumEmail({
