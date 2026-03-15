@@ -15,7 +15,7 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
   noStore();
   const supabase = createServerSupabase()
 
-  let query = supabase
+  let query = (supabase as any)
     .from('seminars')
     .select(`
       *,
@@ -70,7 +70,7 @@ export async function getSeminarsForMap(bounds?: [number, number, number, number
   noStore();
   const supabase = createServerSupabase()
   
-  let query = supabase
+  let query = (supabase as any)
     .from('seminars')
     .select(`
       id,
@@ -106,7 +106,7 @@ export async function getSeminarsForMap(bounds?: [number, number, number, number
 
 export async function incrementSeminarStats(id: string, column: 'page_views' | 'clicks') {
   const supabase = createServerSupabase()
-  const { error } = await supabase.rpc('increment_seminar_stats', {
+  const { error } = await (supabase as any).rpc('increment_seminar_stats', {
     seminar_id: id,
     stat_column: column
   })
@@ -119,7 +119,7 @@ export async function incrementSeminarStats(id: string, column: 'page_views' | '
 export async function getSeminarById(id: string) {
     noStore();
     const supabase = createServerSupabase()
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
         .from('seminars')
         .select('*')
         .eq('id', id)
@@ -138,9 +138,9 @@ export async function registerForSeminar(seminarId: string) {
   
   if (!user) return { error: "You must be logged in to register." }
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const { data: profile } = await (supabase as any).from('profiles').select('role').eq('id', user.id).single()
 
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('seminar_registrations')
     .insert({
       seminar_id: seminarId,
