@@ -13,8 +13,8 @@ const routePermissions: Record<string, string[]> = {
 
 // 🛡️ Rate Limiting Config
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const MAX_GENERAL_REQUESTS = 1000;
-const MAX_AUTH_REQUESTS = 100;
+const MAX_GENERAL_REQUESTS = 100;
+const MAX_AUTH_REQUESTS = 20;
 const ipCache = new Map<string, { count: number, start: number }>();
 
 // 🌐 Initialize Upstash Redis if available
