@@ -33,10 +33,15 @@ create policy "Admins have full access to profiles"
 --------------------------------------------------------------------------------
 -- DOCTORS (Practice Info)
 --------------------------------------------------------------------------------
--- Anyone can search/view doctors
-create policy "Doctors are viewable by everyone"
+-- Public users can only see verified doctors
+create policy "Public can only see verified doctors"
   on public.doctors for select
-  using ( true );
+  using ( verification_status = 'verified' );
+
+-- Doctors can see their own record regardless of status
+create policy "Doctors can see their own record"
+  on public.doctors for select
+  using ( auth.uid() = user_id );
 
 -- Doctors can update their own practice details
 create policy "Doctors can update their own info"
