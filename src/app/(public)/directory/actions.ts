@@ -25,7 +25,6 @@ export async function getDoctors(options: {
   revalidatePath('/directory');
 
   try {
-    // DEFENSIVE SELECT: Only query verified existing columns
     const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email, website_url, instagram_url, facebook_url';
     
     let query = (supabase as any)
@@ -37,8 +36,9 @@ export async function getDoctors(options: {
       query = query.eq('region_code', regionCode);
     }
 
-    if (searchQuery) {
-      query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,clinic_name.ilike.%${searchQuery}%`);
+    if (searchQuery && searchQuery.trim()) {
+      const cleanQuery = searchQuery.trim();
+      query = query.or(`first_name.ilike.%${cleanQuery}%,last_name.ilike.%${cleanQuery}%,clinic_name.ilike.%${cleanQuery}%,city.ilike.%${cleanQuery}%,state.ilike.%${cleanQuery}%`);
     }
 
     if (bounds) {
@@ -54,7 +54,7 @@ export async function getDoctors(options: {
       .range((page - 1) * limit, page * limit - 1);
 
     if (error) {
-      console.error("❌ [DIRECTORY_ACTION] Database Error:", error);
+      console.error("[DIRECTORY_ACTION] Database Error:", error);
       return { doctors: [], total: 0, error: true };
     }
     
@@ -64,7 +64,7 @@ export async function getDoctors(options: {
       error: false
     };
   } catch (e) {
-    console.error("❌ [DIRECTORY_ACTION] Critical Execution Error:", e);
+    console.error("[DIRECTORY_ACTION] Critical Execution Error:", e);
     return { doctors: [], total: 0, error: true };
   }
 }

@@ -75,7 +75,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
     try {
       let result = await getDoctors({ 
         regionCode: region.code,
-        searchQuery: query || searchQuery,
+        searchQuery: (query || searchQuery || "").trim(),
         limit: limit,
         page: nextPage
       });
@@ -85,10 +85,8 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
         return;
       }
 
-      console.log('CLIENT_RECEIVE:', result.doctors.length);
-
       // WIDE FETCH FALLBACK: If no doctors found in region, try global
-      if (result.doctors.length === 0 && !isLoadMore && !searchQuery && !query) {
+      if (result.doctors.length === 0 && !isLoadMore && !searchQuery.trim() && !query) {
         result = await getDoctors({ limit: limit, page: 1 });
       }
 
@@ -103,7 +101,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
       const currentLoadedCount = isLoadMore ? (doctors.length + result.doctors.length) : result.doctors.length;
       setHasMore(currentLoadedCount < result.total);
     } catch (error) {
-      console.error("❌ Request failed:", error);
+      console.error("Directory request failed:", error);
       setDbError(true);
     } finally {
       setLoading(false);
@@ -175,6 +173,9 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   };
 
   const filteredDoctors = useMemo(() => {
+    const q = (searchQuery || "").trim().toLowerCase();
+    const l = (locationQuery || "").trim().toLowerCase();
+
     return doctors.filter(doc => {
       if (matchCriteria && matchCriteria.length > 0) {
         const hasTag = (doc.specialties || []).some((s: any) => 
@@ -184,22 +185,24 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
       }
 
       const matchesName = 
-        (doc.first_name || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
-        (doc.last_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (doc.clinic_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (doc.specialties || []).some((s: any) => (s || "").toLowerCase().includes(searchQuery.toLowerCase()));
+        (doc.first_name || "").toLowerCase().includes(q) || 
+        (doc.last_name || "").toLowerCase().includes(q) ||
+        (doc.clinic_name || "").toLowerCase().includes(q) ||
+        (doc.specialties || []).some((s: any) => (s || "").toLowerCase().includes(q));
       
       const matchesLocation = 
-        (doc.city || "").toLowerCase().includes(locationQuery.toLowerCase()) ||
-        (doc.state || "").toLowerCase().includes(locationQuery.toLowerCase()) ||
-        (doc.address || "").toLowerCase().includes(locationQuery.toLowerCase());
+        (doc.city || "").toLowerCase().includes(l) ||
+        (doc.state || "").toLowerCase().includes(l) ||
+        (doc.country || "").toLowerCase().includes(l) ||
+        (doc.address || "").toLowerCase().includes(l);
 
-      return (searchQuery === "" || matchesName) && (locationQuery === "" || matchesLocation);
+      return (q === "" || matchesName) && (l === "" || matchesLocation);
     });
   }, [searchQuery, locationQuery, matchCriteria, doctors]);
 
   return (
     <div className="min-h-screen bg-neuro-cream">
+      {/* Smart Match Floating Button */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] md:bottom-12">
         <button 
           onClick={() => setIsWizardOpen(true)}
@@ -214,6 +217,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
 
       <SmartMatchWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} onComplete={(criteria) => setMatchCriteria(criteria)} />
 
+      {/* Search Header */}
       <header className="bg-neuro-navy text-white pt-20 pb-32 px-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-neuro-orange/10 blur-[120px] -mr-48 -mt-48"></div>
         <div className="max-w-7xl mx-auto relative z-10 text-center">
@@ -260,15 +264,12 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
         </div>
       </header>
 
+      {/* Main Content: Map + Grid */}
       <main className="max-w-7xl mx-auto px-8 -mt-16 relative z-20 pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-7">
-            <div className="bg-slate-200 rounded-[3rem] p-2 shadow-xl border border-gray-100 h-[700px] sticky top-8 overflow-hidden relative group">
-               {showMap ? <GlobalNetworkMap key={region.code} externalSearchQuery={searchQuery} onSearchChange={setSearchQuery} externalLocationQuery={locationQuery} initialDoctors={initialData.doctors} /> : <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center"><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Preparing Map...</p></div>}
-            </div>
-          </div>
-
-          <div className="lg:col-span-5 space-y-6">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8">
+          
+          {/* Listings Section (Top on mobile) */}
+          <div className="order-2 lg:order-2 lg:col-span-5 space-y-6">
             <div className="flex items-center justify-between mb-2">
                <div>
                  <h2 className="text-xl font-heading font-black text-neuro-navy">Verified Clinics</h2>
@@ -325,6 +326,14 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
               </div>
             )}
           </div>
+
+          {/* Map Section (Bottom on mobile) */}
+          <div className="order-1 lg:order-1 lg:col-span-7">
+            <div className="bg-slate-200 rounded-[3rem] p-2 shadow-xl border border-gray-100 h-[400px] lg:h-[700px] lg:sticky lg:top-8 overflow-hidden relative group">
+               {showMap ? <GlobalNetworkMap key={region.code} externalSearchQuery={searchQuery} onSearchChange={setSearchQuery} externalLocationQuery={locationQuery} initialDoctors={initialData.doctors} /> : <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center"><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Preparing Map...</p></div>}
+            </div>
+          </div>
+
         </div>
       </main>
     </div>
