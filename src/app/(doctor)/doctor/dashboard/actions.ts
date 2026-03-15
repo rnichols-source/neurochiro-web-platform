@@ -75,17 +75,17 @@ export async function getDoctorROIData(period: string = '30d') {
 
   try {
     const [doctorRes, leadsRes, messagesRes] = await Promise.all([
-      supabase.from('doctors').select('profile_views, patient_leads').eq('user_id', user.id).single(),
-      supabase.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
-      supabase.from('messages').select('*', { count: 'exact', head: true }).eq('recipient_id', user.id)
+      (supabase as any).from('doctors').select('profile_views, patient_leads').eq('user_id', user.id).single(),
+      (supabase as any).from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
+      (supabase as any).from('messages').select('*', { count: 'exact', head: true }).eq('recipient_id', user.id)
     ]);
 
     const stats = {
-      profile_views: doctorRes.data?.profile_views || 0,
-      contact_clicks: Math.floor((doctorRes.data?.profile_views || 0) * 0.15),
-      phone_taps: Math.floor((doctorRes.data?.profile_views || 0) * 0.08),
-      website_clicks: Math.floor((doctorRes.data?.profile_views || 0) * 0.12),
-      booking_clicks: Math.floor((doctorRes.data?.profile_views || 0) * 0.05),
+      profile_views: (doctorRes.data as any)?.profile_views || 0,
+      contact_clicks: Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.15),
+      phone_taps: Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.08),
+      website_clicks: Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.12),
+      booking_clicks: Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.05),
       message_requests: messagesRes.count || 0,
       referrals_sent: leadsRes.count || 0,
       confirmed_patients: Math.floor((leadsRes.count || 0) * 0.6),
