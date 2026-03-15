@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import NextImage from "next/image";
 import { Search, MapPin, Filter, Star, ShieldCheck, ArrowRight, Zap, Globe, Heart, Sparkles, X, Target, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
@@ -372,7 +373,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                     <div className="flex items-start justify-between mb-6">
                         <div className="flex items-center gap-4">
                           <div className="relative w-14 h-14 rounded-2xl bg-neuro-navy overflow-hidden shadow-lg border border-white/10">
-                              <Image 
+                              <NextImage 
                                 src={doc.photo_url || "/fallback-avatar.png"} 
                                 alt={`Dr. ${doc.first_name} ${doc.last_name}`}
                                 fill
