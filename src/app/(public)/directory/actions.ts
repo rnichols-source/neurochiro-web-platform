@@ -53,7 +53,8 @@ export async function getDoctors(options: {
 
     const { data, error, count } = await query
       .order('membership_tier', { ascending: false })
-      .range((page - 1) * limit, page * limit - 1);
+      .range((page - 1) * limit, page * limit - 1)
+      .limit(1000);
 
     if (error) {
       console.error("[DIRECTORY_ACTION] Database Error:", error);
