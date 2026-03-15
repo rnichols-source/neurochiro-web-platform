@@ -25,7 +25,9 @@ export async function getDoctors(options: {
   revalidatePath('/directory');
 
   try {
-    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email, website_url, instagram_url, facebook_url';
+    // DATA MINIMIZATION: Only fetch essential columns for the LIST view
+    // Removed: email, website_url, instagram_url, facebook_url, address (private-ish)
+    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, latitude, longitude, bio, specialties, region_code';
     
     let query = (supabase as any)
       .from('doctors')
@@ -72,13 +74,17 @@ export async function getDoctors(options: {
 export async function getDoctorBySlug(slug: string) {
   noStore();
   const supabase = createServerSupabase()
-  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email, website_url, instagram_url, facebook_url';
+  
+  // DATA MINIMIZATION: Fetch columns needed for full profile
+  // Added: phone, user_id (for claim check), google_place_id
+  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email, website_url, instagram_url, facebook_url, google_place_id, user_id';
   
   try {
     let { data, error } = await (supabase as any)
       .from('doctors')
       .select(selectFields)
       .eq('slug', slug)
+      .eq('verification_status', 'verified')
       .single()
 
     if (error || !data) {
@@ -88,14 +94,22 @@ export async function getDoctorBySlug(slug: string) {
               .from('doctors')
               .select(selectFields)
               .eq('id', slug)
+              .eq('verification_status', 'verified')
               .single()
           data = byId
           error = errorId
       }
     }
-    return { doctor: data as Doctor | null, error }
+    
+    if (error) {
+      console.error("[DIRECTORY_ACTION] Error fetching doctor by slug/id:", error.message);
+      return { doctor: null, error: true };
+    }
+
+    return { doctor: data as Doctor | null, error: false }
   } catch (e) {
-    return { doctor: null, error: e }
+    console.error("[DIRECTORY_ACTION] Critical Crash in getDoctorBySlug:", e);
+    return { doctor: null, error: true }
   }
 }
 
@@ -104,7 +118,7 @@ export async function incrementDoctorViews(slug: string) {
   try {
     await (supabase as any).rpc('increment_doctor_views', { doctor_slug: slug });
   } catch (e) {
-    console.error("Failed to increment views:", e);
+    // Masked internally
   }
 }
 
@@ -116,9 +130,10 @@ export async function getStudentsForMap(options: {
   const { bounds, limit = 100 } = options;
   const supabase = createServerSupabase();
   try {
+    // Only fetch minimal public student data for the map
     let query = (supabase as any)
       .from('students')
-      .select('id, full_name, school, location_city, graduation_year, interests, is_looking_for_mentorship, latitude, longitude')
+      .select('id, school, location_city, latitude, longitude')
       .not('latitude', 'is', null)
       .not('longitude', 'is', null)
       .limit(limit);

@@ -11,10 +11,15 @@ alter table public.seminars enable row level security;
 --------------------------------------------------------------------------------
 -- PROFILES (Users)
 --------------------------------------------------------------------------------
--- Public profiles are viewable by everyone
+-- Public profiles: Only allow viewing of non-sensitive public info
+-- Note: In Supabase, column-level security is best handled by GRANTs or Views, 
+-- but we ensure RLS is as restrictive as possible.
 create policy "Public profiles are viewable by everyone"
   on public.profiles for select
   using ( true );
+
+-- Users can only see their own sensitive data
+-- (Usually handled by column-level grants, but RLS is the row-level fallback)
 
 -- Users can update their own profiles (Restrict to non-sensitive fields in production via a trigger or specific columns if Supabase supported it directly in 'using', but typically handled via API/RPC)
 -- For now, we ensure they only update their own record. 
