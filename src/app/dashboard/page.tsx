@@ -12,13 +12,13 @@ export default async function DashboardRedirect() {
     redirect('/login');
   }
 
-  const { data: profile } = await supabase
+  const { data: profile } = await (supabase as any)
     .from('profiles')
     .select('role')
     .eq('id', user.id)
     .single();
 
-  let role = profile?.role || 'doctor';
+  let role = (profile as any)?.role || 'doctor';
 
   // 🛡️ FOUNDER OVERRIDE
   if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com') {
