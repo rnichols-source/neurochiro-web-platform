@@ -76,8 +76,8 @@ export async function getDoctorBySlug(slug: string) {
   const supabase = createServerSupabase()
   
   // DATA MINIMIZATION: Fetch columns needed for full profile
-  // Added: phone, user_id (for claim check), google_place_id
-  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email, website_url, instagram_url, facebook_url, google_place_id, user_id';
+  // Removed google_place_id as it does not exist in the schema
+  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email, website_url, instagram_url, facebook_url, user_id';
   
   try {
     let { data, error } = await (supabase as any)
