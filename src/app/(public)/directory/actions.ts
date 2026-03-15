@@ -15,20 +15,21 @@ export async function getDoctors(options: {
   const { regionCode, bounds, page = 1, limit = 20, searchQuery } = options;
   const supabase = createServerSupabase()
 
-  console.log('📡 [DIRECTORY_ACTION] Fetching doctors...', { regionCode, bounds, searchQuery, page, limit });
-
   try {
     // 🛡️ Optimized Direct Query with Type Bypass
     const selectFields = 'id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status, city, state, country, region_code, photo_url';
     
+    // 🔍 Hot-Fix: Loosened Filters for Launch Reliability
     let query = (supabase as any)
       .from('doctors')
-      .select(selectFields, { count: 'exact' })
-      .eq('verification_status', 'verified'); // 🛡️ Status Normalization
+      .select(selectFields, { count: 'exact' });
 
-    // 🗺️ Hot-Fix: Country Code Normalization (US, United States, USA)
+    // 1. Status Case-Insensitivity: Check for 'verified' OR 'Verified'
+    query = query.or('verification_status.eq.verified,verification_status.eq.Verified');
+
+    // 2. Country Matching: Support 'US', 'United States', and 'USA'
     if (regionCode === 'US') {
-      query = query.or('country.eq.US,country.eq.United States,country.eq.USA');
+      query = query.or('country.eq.US,country.eq.United States,country.eq.USA,region_code.eq.US');
     } else if (regionCode) {
       query = query.eq('region_code', regionCode);
     }
@@ -49,12 +50,14 @@ export async function getDoctors(options: {
       .order('membership_tier', { ascending: false })
       .range((page - 1) * limit, page * limit - 1);
 
+    // 📈 Debug Logging: Track result count in real-time
+    console.log('📡 [DIRECTORY_DEBUG] Doctors found:', data?.length || 0, 'Total in DB:', count);
+
     if (error) {
       console.error("❌ [DIRECTORY_ACTION] Supabase Error:", error);
       return { doctors: [], total: 0 };
     }
     
-    console.log(`✅ [DIRECTORY_ACTION] Successfully fetched ${data?.length || 0} doctors.`);
     return {
       doctors: (data || []) as Doctor[],
       total: count || 0
