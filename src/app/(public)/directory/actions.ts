@@ -16,30 +16,36 @@ export async function getDoctors(options: {
   const supabase = createServerSupabase()
 
   try {
-    // 🛡️ Optimized Search via RPC (Remote Procedure Call)
-    // This offloads filtering, text search, and bounding box checks to the database layer.
-    const { data, error } = await supabase.rpc('search_doctors', {
-      p_search_query: searchQuery || null,
-      p_region_code: null, // Set to null to search globally by default
-      p_min_lng: bounds ? bounds[0] : null,
-      p_min_lat: bounds ? bounds[1] : null,
-      p_max_lng: bounds ? bounds[2] : null,
-      p_max_lat: bounds ? bounds[3] : null,
-      p_page: page,
-      p_limit: limit
-    });
+    // 🛡️ Fallback to direct query while RPC issues are investigated
+    let query = supabase
+      .from('doctors')
+      .select('*', { count: 'exact' })
+      .eq('verification_status', 'verified');
 
-    if (error) {
-      console.error("[DIRECTORY_ACTIONS] RPC Search Error:", error);
-      // Fallback to empty results instead of crashing
-      return { doctors: [], total: 0 };
+    if (searchQuery) {
+      query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,clinic_name.ilike.%${searchQuery}%`);
     }
 
-    const total = data && data.length > 0 ? data[0].total_count : 0;
+    if (bounds) {
+      query = query
+        .gte('longitude', bounds[0])
+        .gte('latitude', bounds[1])
+        .lte('longitude', bounds[2])
+        .lte('latitude', bounds[3]);
+    }
+
+    const { data, error, count } = await query
+      .order('membership_tier', { ascending: false })
+      .range((page - 1) * limit, page * limit - 1);
+
+    if (error) {
+      console.error("[DIRECTORY_ACTIONS] Direct Query Error:", error);
+      return { doctors: [], total: 0 };
+    }
     
     return {
       doctors: (data || []) as Doctor[],
-      total: Number(total)
+      total: count || 0
     };
   } catch (e) {
     console.error("[DIRECTORY_ACTIONS] Critical error fetching doctors:", e);

@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function PublicDirectory() {
-  const initialData = await getDoctors({ regionCode: 'US', limit: 100 });
+  const initialData = await getDoctors({ limit: 1000 });
 
   return (
     <Suspense fallback={<DirectorySkeleton />}>
