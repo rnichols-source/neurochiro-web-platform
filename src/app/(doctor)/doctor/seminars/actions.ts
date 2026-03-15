@@ -9,7 +9,7 @@ export async function getDoctorSeminars() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('seminars')
     .select(`
       *,
@@ -45,13 +45,13 @@ export async function createSeminarAction(formData: FormData) {
   const tags = tags_input ? tags_input.split(',').map(t => t.trim()) : []
 
   // 2. Determine Pricing (Check if they are a Verified Doctor)
-  const { data: doctor } = await supabase
+  const { data: doctor } = await (supabase as any)
     .from('doctors')
     .select('is_verified')
     .eq('id', user.id)
     .single()
 
-  const isVerified = doctor?.is_verified || false
+  const isVerified = (doctor as any)?.is_verified || false
 
   // Pricing Logic
   let amount = isVerified ? 49 : 99; // Basic
@@ -64,7 +64,7 @@ export async function createSeminarAction(formData: FormData) {
   const country = locParts[1] || ''
 
   // 4. Save to Database
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('seminars')
     .insert({
       host_id: user.id,
