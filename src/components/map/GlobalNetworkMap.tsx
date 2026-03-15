@@ -169,7 +169,6 @@ export default function GlobalNetworkMap({
   }, [doctors, seminars, students, activeLayer, searchQuery]);
 
   const updateMapData = useCallback(async (bounds: [number, number, number, number], zoom: number) => {
-    console.log(`[MAP_DEBUG] Updating data with bounds:`, bounds, `zoom:`, zoom);
     currentBounds.current = bounds;
     currentZoom.current = zoom;
     setLoading(true);
@@ -183,7 +182,6 @@ export default function GlobalNetworkMap({
         setStudents(result);
       } else {
         const result = await getDoctors({ bounds, regionCode: region.code, limit: 100 });
-        console.log(`[MAP_DEBUG] Fetched ${result.doctors.length} doctors. Total: ${result.total}`);
         setDoctors(result.doctors);
       }
     } catch (e) {
@@ -206,7 +204,6 @@ export default function GlobalNetworkMap({
 
       // If we haven't received bounds yet, do an initial wide fetch
       if (!currentBounds.current) {
-        console.log("[MAP_DEBUG] Doing initial wide fetch for region:", region.code);
         updateMapData(undefined as any, region.mapDefaults.zoom);
       }
     }
@@ -220,7 +217,6 @@ export default function GlobalNetworkMap({
       // Fallback bounds if not yet moving
       const bounds = currentBounds.current || [-180, -85, 180, 85];
       const clusters = index.getClusters(bounds, Math.round(currentZoom.current));
-      console.log(`[MAP_DEBUG] Sending ${clusters.length} clusters to map.`);
       iframeRef.current.contentWindow.postMessage({ 
         type: 'update-clusters', 
         data: clusters,
@@ -240,13 +236,13 @@ export default function GlobalNetworkMap({
       }
 
       if (e.data.type === 'map-ready') {
-        console.log("[MAP_DEBUG] Map Iframe Ready");
+        // Ready
       } else if (e.data.type === 'map-move') {
         updateMapData(e.data.bounds, e.data.zoom);
       } else if (e.data.type === 'marker-click') {
         setSelectedPin(e.data.data);
       } else if (e.data.type === 'map-error') {
-        console.error("[MAP_DEBUG] Iframe Error:", e.data.error);
+        console.error("Map Iframe Error:", e.data.error);
       }
     };
 
@@ -313,7 +309,9 @@ export default function GlobalNetworkMap({
           { id: "student", label: "Student Layer", icon: GraduationCap, color: "text-blue-500 hover:bg-blue-500 hover:text-white" },
           { id: "seminar", label: "Seminars", icon: CalendarDays, color: "text-purple-500 hover:bg-purple-500 hover:text-white" }
         ].map(layer => (
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             key={layer.id}
             onClick={() => setActiveLayer(layer.id as "all" | "student" | "seminar")}
             className="flex items-center justify-end gap-3 group"
@@ -324,7 +322,7 @@ export default function GlobalNetworkMap({
             <div className={`w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-xl transition-all ${activeLayer === layer.id ? layer.color.split(' ')[1] + ' text-white border-transparent' : layer.color}`}>
               <layer.icon className="w-5 h-5" />
             </div>
-          </button>
+          </motion.button>
         ))}
       </div>
 

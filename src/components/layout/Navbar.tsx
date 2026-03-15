@@ -191,7 +191,7 @@ export default function Navbar() {
                 </Link>
                 <button 
                   onClick={() => setIsGetStartedOpen(true)}
-                  className="px-6 py-2.5 bg-neuro-orange hover:bg-neuro-orange-light text-white font-black text-xs uppercase tracking-widest rounded-full shadow-lg shadow-neuro-orange/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2"
+                  className="px-6 py-2.5 bg-neuro-orange hover:bg-neuro-orange-light active:scale-95 text-white font-black text-xs uppercase tracking-widest rounded-full shadow-lg shadow-neuro-orange/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2"
                 >
                   <Sparkles className="w-3.5 h-3.5" /> Join Network
                 </button>

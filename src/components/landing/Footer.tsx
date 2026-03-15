@@ -60,7 +60,7 @@ export default function Footer() {
               className="bg-white/5 border border-white/10 rounded-lg px-4 py-3 w-full text-white placeholder-gray-500 focus:outline-none focus:border-neuro-orange transition-colors"
             />
             <button 
-              className="bg-neuro-orange hover:bg-orange-600 px-4 py-3 rounded-lg font-bold text-white transition-colors"
+              className="bg-neuro-orange hover:bg-neuro-orange-light active:scale-95 px-4 py-3 rounded-lg font-bold text-white transition-all"
               aria-label="Join newsletter"
             >
               Join

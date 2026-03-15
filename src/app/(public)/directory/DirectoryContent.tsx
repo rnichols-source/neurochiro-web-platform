@@ -200,19 +200,29 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
     });
   }, [searchQuery, locationQuery, matchCriteria, doctors]);
 
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setLocationQuery("");
+    setMatchCriteria(null);
+    setPage(1);
+    fetchDoctors("", false);
+  };
+
   return (
     <div className="min-h-screen bg-neuro-cream">
       {/* Smart Match Floating Button */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] md:bottom-12">
-        <button 
+        <motion.button 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setIsWizardOpen(true)}
-          className="bg-neuro-navy text-white px-8 py-4 rounded-full shadow-2xl hover:bg-neuro-navy-light transition-all transform hover:scale-105 flex items-center gap-3 border border-white/10 group"
+          className="bg-neuro-navy text-white px-8 py-4 rounded-full shadow-2xl hover:bg-neuro-navy-light transition-all flex items-center gap-3 border border-white/10 group"
         >
           <div className="w-8 h-8 bg-neuro-orange rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
           <span className="font-black uppercase tracking-widest text-[10px]">Smart Match Wizard</span>
-        </button>
+        </motion.button>
       </div>
 
       <SmartMatchWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} onComplete={(criteria) => setMatchCriteria(criteria)} />
@@ -258,7 +268,14 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                   </motion.div>
                 </button>
               </div>
-              <button onClick={handleSearch} className="bg-neuro-navy text-white px-10 py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-neuro-navy-light transition-all shadow-lg">Search</button>
+              <motion.button 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSearch} 
+                className="bg-neuro-navy text-white px-10 py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-neuro-navy-light transition-all shadow-lg"
+              >
+                Search
+              </motion.button>
             </div>
           </div>
         </div>
@@ -273,7 +290,17 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
             <div className="flex items-center justify-between mb-2">
                <div>
                  <h2 className="text-xl font-heading font-black text-neuro-navy">Verified Clinics</h2>
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Showing {filteredDoctors.length} specialists</p>
+                 <div className="flex items-center gap-2 mt-1">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Showing {filteredDoctors.length} specialists</p>
+                    {(searchQuery || locationQuery || (matchCriteria && matchCriteria.length > 0)) && (
+                      <>
+                        <span className="text-gray-300">|</span>
+                        <button onClick={handleClearSearch} className="text-[10px] font-black text-neuro-orange uppercase tracking-widest hover:underline flex items-center gap-1">
+                          <X className="w-2.5 h-2.5" /> Clear All
+                        </button>
+                      </>
+                    )}
+                 </div>
                </div>
             </div>
 
@@ -282,18 +309,44 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                 <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-6" />
                 <h3 className="text-2xl font-black text-neuro-navy mb-2">Temporary Connection Issue</h3>
                 <p className="text-gray-500 text-sm mb-8">We're having trouble reaching the database. Please try refreshing.</p>
-                <button onClick={() => window.location.reload()} className="w-full py-5 bg-neuro-navy text-white font-black rounded-2xl uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-lg">
+                <motion.button 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => window.location.reload()} 
+                  className="w-full py-5 bg-neuro-navy text-white font-black rounded-2xl uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-lg"
+                >
                   <RefreshCw className="w-4 h-4" /> Refresh Directory
-                </button>
+                </motion.button>
               </div>
             ) : filteredDoctors.length > 0 ? (
               <>
+                <div className="mb-4">
+                  {(searchQuery || locationQuery) && (
+                    <p className="text-xs font-bold text-gray-500">
+                      Showing results for: <span className="text-neuro-navy">{(searchQuery && locationQuery) ? `${searchQuery} in ${locationQuery}` : (searchQuery || locationQuery)}</span>
+                    </p>
+                  )}
+                </div>
                 {filteredDoctors.map((doc, i) => (
-                  <div key={`${doc.id}-${i}`} className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden">
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    key={`${doc.id}-${i}`} 
+                    className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden"
+                  >
                     <div className="flex items-start justify-between mb-6">
                         <div className="flex items-center gap-4">
                           <div className="relative w-14 h-14 rounded-2xl bg-neuro-navy overflow-hidden shadow-lg border border-white/10">
-                              <NextImage src={doc.photo_url || "/fallback-avatar.png"} alt={`Dr. ${doc.first_name} ${doc.last_name}`} fill className="object-cover" sizes="56px" onError={(e) => { (e.target as HTMLImageElement).src = "/fallback-avatar.png"; }} />
+                              <NextImage 
+                                src={doc.photo_url || "/fallback-avatar.png"} 
+                                alt={`Dr. ${doc.first_name} ${doc.last_name}`} 
+                                fill 
+                                className="object-cover" 
+                                sizes="56px" 
+                                loading="lazy"
+                                onError={(e) => { (e.target as HTMLImageElement).src = "/fallback-avatar.png"; }} 
+                              />
                           </div>
                           <div>
                               <div className="flex items-center gap-1.5 mb-0.5">
@@ -310,8 +363,16 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                           </div>
                         </div>
                     </div>
-                    <Link href={`/directory/${doc.slug || doc.id}`} className="w-full py-4 bg-gray-50 group-hover:bg-neuro-navy group-hover:text-white text-neuro-navy font-black rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 border border-gray-100 group-hover:border-neuro-navy">View Profile <ArrowRight className="w-4 h-4" /></Link>
-                  </div>
+                    <Link href={`/directory/${doc.slug || doc.id}`}>
+                      <motion.div 
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        className="w-full py-4 bg-gray-50 group-hover:bg-neuro-navy group-hover:text-white text-neuro-navy font-black rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 border border-gray-100 group-hover:border-neuro-navy"
+                      >
+                        View Profile <ArrowRight className="w-4 h-4" />
+                      </motion.div>
+                    </Link>
+                  </motion.div>
                 ))}
               </>
             ) : (
@@ -321,7 +382,15 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                 <p className="text-gray-500 text-sm mb-8">We're growing! Be the first to know when a specialist opens near you.</p>
                 <form onSubmit={handleNotifyMe} className="space-y-3">
                   <input type="email" name="email" required placeholder="Enter email..." className="w-full p-5 bg-gray-50 border border-gray-100 rounded-2xl outline-none" />
-                  <button type="submit" disabled={notifying} className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-xs">{notifying ? "Subscribing..." : "Notify Me via Email"}</button>
+                  <motion.button 
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit" 
+                    disabled={notifying} 
+                    className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-xs"
+                  >
+                    {notifying ? "Subscribing..." : "Notify Me via Email"}
+                  </motion.button>
                 </form>
               </div>
             )}
