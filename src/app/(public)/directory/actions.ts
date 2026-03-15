@@ -6,78 +6,60 @@ import { unstable_noStore as noStore, revalidatePath } from 'next/cache'
 
 export async function getDoctors(options: {
   regionCode?: string;
-  bounds?: [number, number, number, number];
+  bounds?: [number, number, number, number]; // [minLng, minLat, maxLng, maxLat]
   page?: number;
   limit?: number;
   searchQuery?: string;
 } = {}) {
   noStore();
-  const { page = 1, limit = 20 } = options;
-  
-  console.log('📡 [DIRECTORY_DEBUG] ENV_CHECK:', {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'PRESENT' : 'MISSING',
-    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'PRESENT' : 'MISSING',
-    url_start: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 15)
-  });
+  const { regionCode, bounds, page = 1, limit = 20, searchQuery } = options;
+  const supabase = createServerSupabase()
+
+  // Force revalidation of the directory path
+  revalidatePath('/directory');
 
   try {
-    const supabase = createServerSupabase();
-    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email';
+    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, website_url, instagram_url, facebook_url, bio, specialties, region_code, email';
     
-    console.log('📡 [DIRECTORY_DEBUG] Executing query...');
-    const { data, error, count } = await (supabase as any)
+    // 🛡️ Bypass strict types for complex OR logic
+    let query = (supabase as any)
       .from('doctors')
       .select(selectFields, { count: 'exact' })
+      .eq('verification_status', 'verified'); // Data confirms lowercase 'verified' is standard
+
+    // 🗺️ Regional Logic: If US is selected, we show everything in the US region
+    if (regionCode) {
+      query = query.eq('region_code', regionCode);
+    }
+
+    if (searchQuery) {
+      query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,clinic_name.ilike.%${searchQuery}%`);
+    }
+
+    if (bounds) {
+      query = query
+        .gte('longitude', bounds[0])
+        .gte('latitude', bounds[1])
+        .lte('longitude', bounds[2])
+        .lte('latitude', bounds[3]);
+    }
+
+    const { data, error, count } = await query
+      .order('membership_tier', { ascending: false })
       .range((page - 1) * limit, page * limit - 1);
 
     if (error) {
-      console.error("❌ [DIRECTORY_DEBUG] Supabase Error:", error);
-      return { doctors: [], total: 0, error: error.message };
-    }
-
-    console.log('📡 [DIRECTORY_DEBUG] Query Success. Count:', count, 'Length:', data?.length);
-
-    if (!data || data.length === 0) {
-      console.log('⚠️ [DIRECTORY_DEBUG] No data from DB, returning Mock Doctor.');
-      return {
-        doctors: [{
-          id: 'debug-id-123',
-          first_name: 'Debug',
-          last_name: 'Physician',
-          clinic_name: 'Database Connection Active',
-          city: 'System',
-          state: 'OK',
-          slug: 'debug-doctor',
-          verification_status: 'verified',
-          membership_tier: 'pro',
-          bio: 'If you see this, the server action is working but the database table returned 0 results.',
-          specialties: ['Connectivity', 'Diagnostics']
-        }] as Doctor[],
-        total: 1
-      };
+      console.error("❌ [DIRECTORY_ACTION] Supabase Error:", error);
+      return { doctors: [], total: 0 };
     }
     
     return {
-      doctors: data as Doctor[],
+      doctors: (data || []) as Doctor[],
       total: count || 0
     };
-  } catch (e: any) {
-    console.error("❌ [DIRECTORY_DEBUG] Critical Crash:", e);
-    return { 
-      doctors: [{
-        id: 'error-id',
-        first_name: 'Server',
-        last_name: 'Error',
-        clinic_name: 'Action Crashed',
-        city: 'Error',
-        slug: 'error',
-        bio: `Error: ${e.message || 'Unknown error'}. Check server logs.`,
-        verification_status: 'verified',
-        membership_tier: 'pro'
-      }] as Doctor[], 
-      total: 1,
-      criticalError: e.message 
-    };
+  } catch (e) {
+    console.error("❌ [DIRECTORY_ACTION] Critical error:", e);
+    return { doctors: [], total: 0 };
   }
 }
 
