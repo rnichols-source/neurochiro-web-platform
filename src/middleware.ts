@@ -33,7 +33,7 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
   });
 }
 
-export default async function proxy(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
   const now = Date.now();
   const { pathname } = request.nextUrl;

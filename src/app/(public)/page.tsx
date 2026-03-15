@@ -1,9 +1,4 @@
-"use client";
-
 import dynamic from "next/dynamic";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase";
 import Hero from "@/components/landing/Hero";
 import FeatureSection from "@/components/landing/FeatureSection";
 import SectionHeader from "@/components/landing/SectionHeader";
@@ -25,7 +20,6 @@ const NeuralPulse = dynamic(() => import("@/components/landing/NeuralPulse"), {
 });
 
 export default function Home() {
-  const router = useRouter();
   return (
     <div className="flex flex-col min-h-screen bg-neuro-cream overflow-x-hidden">
       
@@ -78,7 +72,7 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="relative group cursor-pointer" onClick={() => router.push('/nervous-system')}>
+          <Link href="/nervous-system" className="relative group cursor-pointer block">
             <div className="absolute inset-0 bg-gradient-to-tr from-neuro-orange/30 to-blue-500/10 rounded-[3rem] blur-2xl group-hover:blur-[100px] transition-all opacity-50"></div>
             <div className="bg-white/5 border border-white/10 rounded-[3rem] p-12 relative z-10 backdrop-blur-2xl aspect-square flex flex-col items-center justify-center text-center shadow-2xl group-hover:border-white/20 transition-all">
                <div className="w-32 h-32 bg-neuro-orange/30 rounded-full flex items-center justify-center mb-8 relative">
@@ -91,7 +85,7 @@ export default function Home() {
                   {[1,2,3,4].map(i => <div key={i} className={`w-2 h-2 rounded-full ${i === 1 ? 'bg-neuro-orange' : 'bg-white/20'}`}></div>)}
                </div>
             </div>
-          </div>
+          </Link>
         </div>
       </section>
 

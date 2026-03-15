@@ -18,7 +18,7 @@ export default function BentoGrid() {
             viewport={{ once: true }}
             className="md:col-span-2 relative group overflow-hidden rounded-3xl bg-neuro-navy text-white p-10 flex flex-col justify-between"
           >
-            <div className="absolute inset-0 bg-[url('/map-dark.png')] opacity-20 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" />
+            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20 bg-repeat transition-transform duration-700 group-hover:scale-110" />
             <div className="absolute inset-0 bg-gradient-to-t from-neuro-navy via-neuro-navy/50 to-transparent" />
             
             <div className="relative z-10">
