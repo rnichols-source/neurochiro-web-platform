@@ -41,13 +41,13 @@ export async function getModerationData() {
       { count: totalProfiles },
       { data: recentAuditAlerts }
     ] = await Promise.all([
-      supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
-      supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('is_approved', false),
-      supabase.from('vendors').select('*', { count: 'exact', head: true }).eq('is_active', false),
-      supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified'),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      (supabase as any).from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+      (supabase as any).from('seminars').select('*', { count: 'exact', head: true }).eq('is_approved', false),
+      (supabase as any).from('vendors').select('*', { count: 'exact', head: true }).eq('is_active', false),
+      (supabase as any).from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified'),
+      (supabase as any).from('profiles').select('*', { count: 'exact', head: true }),
       // Fetch real security alerts from audit_logs table
-      supabase.from('audit_logs')
+      (supabase as any).from('audit_logs')
         .select('*')
         .or('severity.eq.High,severity.eq.Critical')
         .order('created_at', { ascending: false })
@@ -113,7 +113,7 @@ export async function resolveAlert(alertId: string, action: 'Dismiss' | 'Escalat
   // For now, we'll log the resolution action back into the audit trail
   const { data: { user } } = await supabase.auth.getUser();
   
-  await supabase.from('audit_logs').insert({
+  await (supabase as any).from('audit_logs').insert({
     category: 'SECURITY',
     event: `Moderator ${action}: Incident ${alertId}`,
     user_name: user?.email || "Admin",
@@ -133,7 +133,7 @@ export async function toggleModerationSetting(setting: 'autoApprove' | 'outbound
   const { data: { user } } = await supabase.auth.getUser();
 
   // Log the configuration change
-  await supabase.from('audit_logs').insert({
+  await (supabase as any).from('audit_logs').insert({
     category: 'SYSTEM',
     event: `Changed Moderation Setting '${setting}' to ${value}`,
     user_name: user?.email || "Admin",
@@ -149,7 +149,7 @@ export async function updateComplianceGuidelines(guidelines: string) {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
 
-  await supabase.from('audit_logs').insert({
+  await (supabase as any).from('audit_logs').insert({
     category: 'GENERAL',
     event: 'Published new Compliance Guidelines',
     user_name: user?.email || "Admin",

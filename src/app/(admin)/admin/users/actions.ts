@@ -95,10 +95,10 @@ export async function getTalentAuditStats() {
   const supabase = createServerSupabase();
   
   try {
-    const { count: students } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student');
-    const { count: doctors } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'doctor');
-    const { count: vendors } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'vendor');
-    const { count: paid } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).neq('tier', 'free');
+    const { count: students } = await (supabase as any).from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student');
+    const { count: doctors } = await (supabase as any).from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'doctor');
+    const { count: vendors } = await (supabase as any).from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'vendor');
+    const { count: paid } = await (supabase as any).from('profiles').select('*', { count: 'exact', head: true }).neq('tier', 'free');
 
     return {
       totalStudents: students || 0,

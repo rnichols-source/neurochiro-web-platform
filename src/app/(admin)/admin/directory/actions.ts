@@ -7,7 +7,7 @@ import { unstable_noStore as noStore } from 'next/cache';
 export async function getAllDoctors(search?: string) {
   noStore();
   const supabase = createServerSupabase();
-  let query = supabase.from('doctors').select('*').order('last_name', { ascending: true });
+  let query = (supabase as any).from('doctors').select('*').order('last_name', { ascending: true });
 
   if (search) {
     query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,clinic_name.ilike.%${search}%,email.ilike.%${search}%`);
@@ -34,7 +34,7 @@ export async function updateDoctorManually(doctorId: string, updates: any) {
 
   // Log the action
   try {
-    await supabase.from('audit_logs').insert({
+    await (supabase as any).from('audit_logs').insert({
       category: 'DIRECTORY',
       event: `Manual Update: Doctor ${doctorId}`,
       user_name: user?.email || "Founder",
@@ -73,7 +73,7 @@ export async function deleteDoctorManually(doctorId: string) {
     // Note: Some leads might reference auth.users(id), others might reference doctor(id)
     // We try both to be safe.
     try {
-      await supabase.from('leads').delete().eq('doctor_id', doctorId);
+      await (supabase as any).from('leads').delete().eq('doctor_id', doctorId);
     } catch (e) {
       console.warn("[DELETE] Leads cleanup skipped (column might not exist or reference auth.id)");
     }
@@ -99,7 +99,7 @@ export async function deleteDoctorManually(doctorId: string) {
 
     // 4. Log the action (Non-blocking)
     try {
-      await supabase.from('audit_logs').insert({
+      await (supabase as any).from('audit_logs').insert({
         category: 'DIRECTORY',
         event: `Manual Delete: Doctor ${doctorId}`,
         user_name: user?.email || "Founder",

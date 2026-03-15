@@ -26,7 +26,7 @@ export default function AdminAnnouncementsPage() {
 
   const deleteAnnouncement = async (id: string) => {
     if (!confirm("Are you sure you want to delete this announcement?")) return;
-    await supabase.from('announcements').delete().eq('id', id);
+    await (supabase as any).from('announcements').delete().eq('id', id);
     setAnnouncements(prev => prev.filter(a => a.id !== id));
   };
 

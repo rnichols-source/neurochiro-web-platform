@@ -59,11 +59,11 @@ export async function logAuditAction(params: {
     
     let userName = "System";
     if (user) {
-        const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
+        const { data: profile } = await (supabase as any).from('profiles').select('full_name').eq('id', user.id).single();
         userName = profile?.full_name || user.email || "Unknown User";
     }
 
-    const { error } = await supabase.from('audit_logs').insert({
+    const { error } = await (supabase as any).from('audit_logs').insert({
         category: params.category,
         event: params.event,
         user_name: userName,
