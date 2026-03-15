@@ -14,7 +14,7 @@ export async function saveDailyLog(logData: {
   
   if (!user) throw new Error("Unauthorized")
 
-  const { data, error } = await supabase.from('daily_logs').insert({
+  const { data, error } = await (supabase as any).from('daily_logs').insert({
     user_id: user.id,
     ...logData,
     date: new Date().toISOString().split('T')[0]
@@ -32,7 +32,7 @@ export async function getDailyLogs() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('daily_logs')
     .select('*')
     .eq('user_id', user.id)
