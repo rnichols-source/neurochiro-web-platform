@@ -16,10 +16,12 @@ export async function getDoctors(options: {
   const supabase = createServerSupabase()
 
   try {
-    // 🛡️ Fallback to direct query while RPC issues are investigated
+    // 🛡️ Optimized Direct Query
+    const selectFields = 'id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status';
+    
     let query = supabase
       .from('doctors')
-      .select('*', { count: 'exact' })
+      .select(selectFields, { count: 'exact' })
       .eq('verification_status', 'verified');
 
     if (searchQuery) {
