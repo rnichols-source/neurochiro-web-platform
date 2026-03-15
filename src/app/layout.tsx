@@ -73,7 +73,7 @@ import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import PWAInstallPrompt from "@/components/layout/PWAInstallPrompt";
 import AdminQuickNav from "@/components/admin/AdminQuickNav";
 import PerspectiveSwitcher from "@/components/admin/PerspectiveSwitcher";
-
+import CookieConsent from "@/components/layout/CookieConsent";
 import Script from "next/script";
 
 export default function RootLayout({
@@ -116,6 +116,7 @@ export default function RootLayout({
                 <PWAInstallPrompt />
                 <AdminQuickNav />
                 <PerspectiveSwitcher />
+                <CookieConsent />
                 <Script
                   id="register-sw"
                   strategy="lazyOnload"
