@@ -39,6 +39,7 @@ function cn(...inputs: ClassValue[]) {
 const allNavItems = [
   { name: "System Control", href: "/admin/dashboard", icon: LayoutDashboard, roles: ['super_admin', 'founder', 'admin'] },
   { name: "Talent Intelligence", href: "/admin/users", icon: Users, roles: ['super_admin', 'founder', 'admin', 'regional_admin'] },
+  { name: "Clinical Directory", href: "/admin/directory", icon: Stethoscope, roles: ['super_admin', 'founder', 'admin'] },
   { name: "Programs & LMS", href: "/admin/programs", icon: GraduationCap, roles: ['super_admin', 'founder', 'admin'] },
   { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert, roles: ['super_admin', 'founder', 'admin', 'support_admin'] },
   { name: "Seminar Approvals", href: "/admin/approvals/seminars", icon: ShieldCheck, roles: ['super_admin', 'founder', 'admin'] },
