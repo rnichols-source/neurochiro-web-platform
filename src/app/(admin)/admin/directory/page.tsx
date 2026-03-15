@@ -15,9 +15,10 @@ import {
   Building2,
   ShieldCheck,
   MoreVertical,
-  Plus
+  Plus,
+  Sparkles
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getAllDoctors, updateDoctorManually, deleteDoctorManually } from "./actions";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -27,10 +28,36 @@ export default function DirectoryManager() {
   const [loading, setLoading] = useState(true);
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showCleanup, setShowCleanup] = useState(false);
+  const [isCleaning, setIsCleaning] = useState(false);
+
+  // Identify empty/duplicate candidates
+  const cleanupCandidates = useMemo(() => {
+    return doctors.filter(d => (!d.first_name || d.first_name.trim() === "") && d.clinic_name);
+  }, [doctors]);
 
   useEffect(() => {
     fetchDoctors();
   }, []);
+
+  const handleCleanup = async () => {
+    if (!confirm(`This will permanently delete ${cleanupCandidates.length} incomplete profile records. Are you sure?`)) return;
+    
+    setIsCleaning(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const doc of cleanupCandidates) {
+      const res = await deleteDoctorManually(doc.id);
+      if (res.success) successCount++;
+      else failCount++;
+    }
+
+    alert(`Cleanup complete: ${successCount} removed, ${failCount} failed.`);
+    setShowCleanup(false);
+    fetchDoctors();
+    setIsCleaning(false);
+  };
 
   const fetchDoctors = async (query?: string) => {
     setLoading(true);
@@ -114,16 +141,28 @@ export default function DirectoryManager() {
           <p className="text-gray-400 mt-2 text-base md:text-lg font-medium">Manually edit, verify, or remove listings from the global network.</p>
         </div>
 
-        <form onSubmit={handleSearch} className="relative w-full lg:max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-          <input 
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name, clinic, or email..."
-            className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:outline-none focus:border-neuro-orange transition-all"
-          />
-        </form>
+        <div className="flex flex-col sm:flex-row gap-4 w-full lg:max-w-2xl">
+          <form onSubmit={handleSearch} className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <input 
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by name, clinic, or email..."
+              className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:outline-none focus:border-neuro-orange transition-all"
+            />
+          </form>
+          
+          {cleanupCandidates.length > 0 && (
+            <button
+              onClick={() => setShowCleanup(true)}
+              className="px-6 py-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 rounded-2xl flex items-center justify-center gap-3 transition-all font-black uppercase tracking-widest text-[10px]"
+            >
+              <Sparkles className="w-4 h-4" />
+              Cleanup ({cleanupCandidates.length})
+            </button>
+          )}
+        </div>
       </header>
 
       <section className="bg-white/5 border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl relative">
@@ -431,6 +470,73 @@ export default function DirectoryManager() {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+
+        {showCleanup && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 backdrop-blur-md bg-neuro-navy/60">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-[#0A0D14] rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/10 max-h-[80vh] flex flex-col"
+            >
+              <header className="p-8 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-6">
+                  <div className="w-16 h-16 rounded-[2rem] bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10 shadow-xl shrink-0">
+                    <Sparkles className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-white">Data Cleanup</h3>
+                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mt-1">Found {cleanupCandidates.length} incomplete records</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowCleanup(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-500">
+                  <X className="w-8 h-8" />
+                </button>
+              </header>
+
+              <div className="flex-1 overflow-y-auto p-8 space-y-4 custom-scrollbar">
+                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-6 mb-4">
+                  <p className="text-sm text-emerald-500 font-medium leading-relaxed">
+                    We found {cleanupCandidates.length} profile records that have a clinic name but are missing the doctor's name. These are usually duplicates created during automated imports or partial registrations.
+                  </p>
+                </div>
+
+                {cleanupCandidates.slice(0, 10).map(doc => (
+                  <div key={doc.id} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-between">
+                    <div>
+                      <p className="font-bold text-white text-sm">{doc.clinic_name}</p>
+                      <p className="text-[10px] text-gray-500 font-mono mt-1">{doc.id}</p>
+                    </div>
+                    <span className="px-3 py-1 bg-white/5 rounded-full text-[9px] font-black text-gray-400 uppercase tracking-widest">Incomplete</span>
+                  </div>
+                ))}
+                
+                {cleanupCandidates.length > 10 && (
+                  <p className="text-center text-gray-500 text-[10px] font-bold uppercase tracking-widest pt-4">
+                    + {cleanupCandidates.length - 10} more records
+                  </p>
+                )}
+              </div>
+
+              <footer className="p-8 bg-[#0A0D14] border-t border-white/5 flex justify-end gap-4">
+                <button
+                  onClick={() => setShowCleanup(false)}
+                  className="px-8 py-4 bg-white/5 hover:bg-white/10 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={handleCleanup}
+                  disabled={isCleaning}
+                  className="px-10 py-4 bg-emerald-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-500/20 hover:bg-emerald-400 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                >
+                  {isCleaning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {isCleaning ? "Cleaning Up..." : "Purge Incomplete Records"}
+                </button>
+              </footer>
             </motion.div>
           </div>
         )}
