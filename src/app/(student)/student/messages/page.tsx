@@ -12,7 +12,7 @@ export default async function StudentMessagesPage({ searchParams }: { searchPara
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
+  const { data: profile } = await (supabase as any)
     .from('profiles')
     .select('role')
     .eq('id', user.id)
@@ -25,7 +25,7 @@ export default async function StudentMessagesPage({ searchParams }: { searchPara
         <p className="text-gray-500 mt-2">Connect with doctors and clinics securely.</p>
       </div>
       
-      <MessagingSystem currentUserId={user.id} userRole={profile?.role || 'student'} initialOtherUserId={searchParams.to} />
+      <MessagingSystem currentUserId={user.id} userRole={(profile as any)?.role || 'student'} initialOtherUserId={searchParams.to} />
     </div>
   );
 }
