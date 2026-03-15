@@ -14,7 +14,7 @@ export async function sendReferral(formData: FormData) {
   const patientName = formData.get('patient_name') as string
   const notes = formData.get('notes') as string
 
-  const { data, error } = await supabase.from('referrals').insert({
+  const { data, error } = await (supabase as any).from('referrals').insert({
     referrer_id: user.id,
     recipient_id: recipientId,
     patient_name: patientName,
