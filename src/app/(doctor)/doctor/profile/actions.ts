@@ -10,8 +10,8 @@ export async function getDoctorProfile() {
     if (!user) return null
 
     const [profileRes, doctorRes] = await Promise.all([
-      supabase.from('profiles').select('full_name, email, role, tier').eq('id', user.id).single(),
-      supabase.from('doctors').select('*').eq('user_id', user.id).single()
+      (supabase as any).from('profiles').select('full_name, email, role, tier').eq('id', user.id).single(),
+      (supabase as any).from('doctors').select('*').eq('user_id', user.id).single()
     ])
 
     if (profileRes.error && profileRes.error.code !== 'PGRST116') {
@@ -46,7 +46,7 @@ export async function updateDoctorProfile(formData: FormData) {
     const specialties = formData.get('specialties')?.toString().split(',').map((s: string) => s.trim()) || []
 
     // 1. Update Profile (Name)
-    const { error: profileError } = await supabase
+    const { error: profileError } = await (supabase as any)
       .from('profiles')
       .update({ full_name: fullName })
       .eq('id', user.id)
@@ -57,7 +57,7 @@ export async function updateDoctorProfile(formData: FormData) {
     }
 
     // 2. Update Doctor table
-    const { error: doctorError } = await supabase
+    const { error: doctorError } = await (supabase as any)
       .from('doctors')
       .update({
         clinic_name: clinicName,
@@ -75,7 +75,7 @@ export async function updateDoctorProfile(formData: FormData) {
 
     // 3. Trigger geocoding if city changed
     try {
-      await supabase.from('automation_queue').insert({
+      await (supabase as any).from('automation_queue').insert({
         event_type: 'geocode_profile',
         payload: { userId: user.id, city }
       })
@@ -125,7 +125,7 @@ export async function uploadAvatar(formData: FormData) {
 
         const publicUrl = data?.publicUrl || ""
 
-        const { error: updateError } = await supabase
+        const { error: updateError } = await (supabase as any)
             .from('doctors')
             .update({ photo_url: publicUrl })
             .eq('user_id', user.id)
