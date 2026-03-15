@@ -12,83 +12,34 @@ export async function getDoctors(options: {
   searchQuery?: string;
 } = {}) {
   noStore();
-  const { regionCode, bounds, page = 1, limit = 100, searchQuery } = options;
+  const { regionCode, bounds, page = 1, limit = 20, searchQuery } = options;
   const supabase = createServerSupabase()
 
   try {
-    let query = supabase
-      .from('doctors')
-      .select('*', { count: 'exact' })
-      .eq('verification_status', 'verified')
-
-    // 1. Search Query (Simple ILIKE on name/clinic)
-    if (searchQuery) {
-      query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,clinic_name.ilike.%${searchQuery}%`);
-    }
-
-    // 2. Filter by Region if provided
-    if (regionCode) {
-      query = query.eq('region_code', regionCode)
-    }
-
-    // 3. Filter by Bounding Box (Map Viewport)
-    if (bounds) {
-      query = query
-        .gte('longitude', bounds[0])
-        .gte('latitude', bounds[1])
-        .lte('longitude', bounds[2])
-        .lte('latitude', bounds[3]);
-    }
-
-    // 4. Apply Ranking & Order
-    query = query
-      .order('membership_tier', { ascending: false }) // pro > growth > starter (approximate alphabetical)
-      .order('id', { ascending: true });
-
-    // 5. Apply Pagination
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-    query = query.range(from, to);
-    
-    const { data, error, count } = await query
-
-    // 🛡️ WIDE-ANGLE FALLBACK LOGIC
-    // If we have bounds and they returned 0, but there are doctors in the region,
-    // return the region's doctors so the map isn't empty.
-    if (!error && data && data.length === 0 && bounds) {
-      const { count: regionTotal } = await supabase
-        .from('doctors')
-        .select('*', { count: 'exact', head: true })
-        .eq('region_code', regionCode || 'US')
-        .eq('verification_status', 'verified');
-      
-      if (regionTotal && regionTotal > 0) {
-        console.log(`[DIRECTORY_ACTIONS] Bounds returned 0, but region ${regionCode} has ${regionTotal}. Using wide-angle fallback.`);
-        const { data: fallbackData } = await supabase
-          .from('doctors')
-          .select('*')
-          .eq('region_code', regionCode || 'US')
-          .eq('verification_status', 'verified')
-          .order('id', { ascending: true })
-          .limit(limit);
-        
-        if (fallbackData && fallbackData.length > 0) {
-          return {
-            doctors: fallbackData as Doctor[],
-            total: regionTotal
-          };
-        }
-      }
-    }
+    // 🛡️ Optimized Search via RPC (Remote Procedure Call)
+    // This offloads filtering, text search, and bounding box checks to the database layer.
+    const { data, error } = await supabase.rpc('search_doctors', {
+      p_search_query: searchQuery || null,
+      p_region_code: regionCode || null,
+      p_min_lng: bounds ? bounds[0] : null,
+      p_min_lat: bounds ? bounds[1] : null,
+      p_max_lng: bounds ? bounds[2] : null,
+      p_max_lat: bounds ? bounds[3] : null,
+      p_page: page,
+      p_limit: limit
+    });
 
     if (error) {
-      console.error("[DIRECTORY_ACTIONS] Database query error:", error);
+      console.error("[DIRECTORY_ACTIONS] RPC Search Error:", error);
+      // Fallback to empty results instead of crashing
       return { doctors: [], total: 0 };
     }
 
+    const total = data && data.length > 0 ? data[0].total_count : 0;
+    
     return {
       doctors: (data || []) as Doctor[],
-      total: count || 0
+      total: Number(total)
     };
   } catch (e) {
     console.error("[DIRECTORY_ACTIONS] Critical error fetching doctors:", e);
@@ -103,7 +54,7 @@ export async function getDoctorBySlug(slug: string) {
   // Try to find by slug first
   let { data, error } = await supabase
     .from('doctors')
-    .select('*')
+    .select('id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status')
     .eq('slug', slug)
     .single()
 
@@ -113,7 +64,7 @@ export async function getDoctorBySlug(slug: string) {
     if (isUuid) {
         const { data: byId, error: errorId } = await supabase
             .from('doctors')
-            .select('*')
+            .select('id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status')
             .eq('id', slug)
             .single()
         data = byId
@@ -142,13 +93,6 @@ export async function getStudentsForMap(options: {
   const supabase = createServerSupabase();
 
   try {
-    // 🛡️ Safety check: Check if students table exists
-    const { error: tableError } = await supabase.from('students').select('id').limit(1);
-    if (tableError && tableError.code === 'PGRST205') {
-      console.warn("[DIRECTORY_ACTIONS] Students table missing. Skipping student fetch.");
-      return [];
-    }
-
     let query = supabase
       .from('students')
       .select('id, full_name, school, location_city, graduation_year, interests, is_looking_for_mentorship, latitude, longitude')
