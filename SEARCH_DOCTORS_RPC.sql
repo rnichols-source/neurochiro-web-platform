@@ -39,7 +39,7 @@ BEGIN
       d.rating, d.review_count, d.latitude, d.longitude, d.membership_tier, d.verification_status
     FROM public.doctors d
     WHERE d.verification_status = 'verified'
-      AND (p_region_code IS NULL OR d.region_code = p_region_code)
+      AND (p_region_code IS NULL OR d.region_code = p_region_code OR p_region_code = 'US') -- Fallback to show all if US selected or null
       AND (
         p_search_query IS NULL OR 
         d.first_name ILIKE '%' || p_search_query || '%' OR 

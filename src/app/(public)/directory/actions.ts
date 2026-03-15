@@ -20,7 +20,7 @@ export async function getDoctors(options: {
     // This offloads filtering, text search, and bounding box checks to the database layer.
     const { data, error } = await supabase.rpc('search_doctors', {
       p_search_query: searchQuery || null,
-      p_region_code: regionCode || null,
+      p_region_code: null, // Set to null to search globally by default
       p_min_lng: bounds ? bounds[0] : null,
       p_min_lat: bounds ? bounds[1] : null,
       p_max_lng: bounds ? bounds[2] : null,
