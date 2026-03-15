@@ -22,7 +22,7 @@ export async function updateDoctorManually(doctorId: string, updates: any) {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('doctors')
     .update(updates)
     .eq('id', doctorId);
@@ -60,7 +60,7 @@ export async function deleteDoctorManually(doctorId: string) {
     console.log(`[DELETE] Starting deletion process for Doctor ID: ${doctorId}`);
 
     // 1. Delete associated jobs
-    const { error: jobsError } = await supabase
+    const { error: jobsError } = await (supabase as any)
       .from('jobs')
       .delete()
       .eq('doctor_id', doctorId);
@@ -79,7 +79,7 @@ export async function deleteDoctorManually(doctorId: string) {
     }
 
     // 3. Delete the doctor record
-    const { error: deleteError, data: deleteData } = await supabase
+    const { error: deleteError, data: deleteData } = await (supabase as any)
       .from('doctors')
       .delete()
       .eq('id', doctorId)

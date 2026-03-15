@@ -23,7 +23,7 @@ export async function getTalentUsers(options: {
       'Vendors': 'vendor'
     };
 
-    let query = supabase
+    let query = (supabase as any)
       .from('profiles')
       .select('*, doctors(clinic_name, city, state, verification_status), students(school, graduation_year)', { count: 'exact' })
       .eq('role', roleMap[type]);
