@@ -8,7 +8,7 @@ export async function getJobs(regionCode?: string, page: number = 1, limit: numb
   const supabase = createServerSupabase()
   let query = (supabase as any)
     .from('jobs')
-    .select('*, doctors(clinic_name, photo_url)')
+    .select('*, doctors(clinic_name)')
     .eq('status', 'open')
   
   if (regionCode) {

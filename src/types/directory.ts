@@ -15,35 +15,34 @@ export interface UserProfile {
 
 export interface Doctor {
   id: string;
-  user_id?: string; // Link to UserProfile
-  slug: string;
-  first_name: string;
-  last_name: string;
-  clinic_name: string;
-  city: string;
-  state: string;
-  country: string;
-  zip_code?: string;
-  address: string;
-  latitude: number;
-  longitude: number;
+  user_id?: string;
+  slug?: string;
+  first_name?: string;
+  last_name?: string;
+  clinic_name?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
   instagram_url?: string;
   facebook_url?: string;
   website_url?: string;
-  bio: string;
-  specialties: string[];
+  bio?: string;
+  specialties?: string[];
   google_place_id?: string;
   rating?: number;
   review_count?: number;
-  verification_status: 'pending' | 'verified' | 'hidden';
-  membership_tier: MembershipTier;
-  is_hiring: boolean;
-  is_mentoring: boolean;
-  region_code: string;
+  verification_status?: 'pending' | 'verified' | 'hidden';
+  membership_tier?: MembershipTier;
+  is_hiring?: boolean;
+  is_mentoring?: boolean;
+  region_code?: string;
   email?: string;
   photo_url?: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Student {

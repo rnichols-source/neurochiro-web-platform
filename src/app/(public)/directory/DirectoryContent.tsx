@@ -84,14 +84,14 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
     const limit = 20; // Chunk size for manageable loading
     
     try {
-      const result = await getDoctors({ 
-        regionCode: region.code,
-        searchQuery: query || searchQuery,
+      let result = await getDoctors({ 
         limit: limit,
         page: nextPage
       });
       
-      console.log('🔍 [CONTENT_DEBUG] Result received:', result.doctors.length, 'doctors.');
+      console.log('CLIENT_RECEIVE:', result.doctors.length);
+      if (result.error) console.error('SERVER_ERROR:', result.error);
+      if (result.criticalError) console.error('CRITICAL_SERVER_CRASH:', result.criticalError);
 
       if (isLoadMore) {
         setDoctors(prev => [...prev, ...result.doctors]);
@@ -101,11 +101,10 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
       
       setTotalCount(result.total);
       setPage(nextPage);
-      // Determine if more remain using the result total
       const currentLoadedCount = isLoadMore ? (doctors.length + result.doctors.length) : result.doctors.length;
       setHasMore(currentLoadedCount < result.total);
     } catch (error) {
-      console.error("❌ [CONTENT_DEBUG] Error fetching doctors:", error);
+      console.error("❌ [CONTENT_DEBUG] Request failed:", error);
     } finally {
       setLoading(false);
     }
@@ -178,33 +177,10 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   };
 
   const filteredDoctors = useMemo(() => {
-    return doctors.filter(doc => {
-      // 1. If smart match criteria exists, prioritize those tags
-      if (matchCriteria && matchCriteria.length > 0) {
-        const hasTag = (doc.specialties || []).some((s: any) => 
-          matchCriteria.some(c => (s || "").toLowerCase().includes(c.toLowerCase()))
-        );
-        if (!hasTag) return false;
-      }
-
-      const matchesName = 
-        (doc.first_name || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
-        (doc.last_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (doc.clinic_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (doc.specialties || []).some((s: any) => (s || "").toLowerCase().includes(searchQuery.toLowerCase()));
-      
-      const matchesLocation = 
-        (doc.city || "").toLowerCase().includes(locationQuery.toLowerCase()) ||
-        (doc.state || "").toLowerCase().includes(locationQuery.toLowerCase()) ||
-        (doc.zip_code || "").includes(locationQuery) ||
-        (doc.address || "").toLowerCase().includes(locationQuery.toLowerCase());
-
-      const nameCondition = searchQuery === "" ? true : matchesName;
-      const locationCondition = locationQuery === "" ? true : matchesLocation;
-
-      return nameCondition && locationCondition;
-    });
-  }, [searchQuery, locationQuery, matchCriteria, doctors]);
+    console.log('🔍 [FILTER_DEBUG] Raw doctors count:', doctors.length);
+    // TEMPORARILY DISABLE FILTERING: Return all doctors
+    return doctors;
+  }, [doctors]);
 
   return (
     <div className="min-h-screen bg-neuro-cream">

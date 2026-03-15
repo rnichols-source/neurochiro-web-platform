@@ -2,72 +2,89 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { Doctor } from '@/types/directory'
-import { unstable_noStore as noStore } from 'next/cache'
+import { unstable_noStore as noStore, revalidatePath } from 'next/cache'
 
 export async function getDoctors(options: {
   regionCode?: string;
-  bounds?: [number, number, number, number]; // [minLng, minLat, maxLng, maxLat]
+  bounds?: [number, number, number, number];
   page?: number;
   limit?: number;
   searchQuery?: string;
 } = {}) {
   noStore();
-  const { regionCode, bounds, page = 1, limit = 20, searchQuery } = options;
-  const supabase = createServerSupabase()
-
-  console.log('📡 [DIRECTORY_ACTION] Fetching doctors...', { regionCode, bounds, searchQuery, page, limit });
+  const { page = 1, limit = 20 } = options;
+  
+  console.log('📡 [DIRECTORY_DEBUG] ENV_CHECK:', {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'PRESENT' : 'MISSING',
+    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'PRESENT' : 'MISSING',
+    url_start: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 15)
+  });
 
   try {
-    const selectFields = 'id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status, city, state, country, region_code, photo_url';
+    const supabase = createServerSupabase();
+    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email';
     
-    // 🛡️ Bypass strict types for complex OR logic
-    let query = (supabase as any)
+    console.log('📡 [DIRECTORY_DEBUG] Executing query...');
+    const { data, error, count } = await (supabase as any)
       .from('doctors')
       .select(selectFields, { count: 'exact' })
-      .eq('verification_status', 'verified'); // Data confirms lowercase 'verified' is standard
-
-    // 🗺️ Regional Logic: If US is selected, we show everything in the US region
-    if (regionCode) {
-      query = query.eq('region_code', regionCode);
-    }
-
-    if (searchQuery) {
-      query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,clinic_name.ilike.%${searchQuery}%`);
-    }
-
-    if (bounds) {
-      query = query
-        .gte('longitude', bounds[0])
-        .gte('latitude', bounds[1])
-        .lte('longitude', bounds[2])
-        .lte('latitude', bounds[3]);
-    }
-
-    const { data, error, count } = await query
-      .order('membership_tier', { ascending: false })
       .range((page - 1) * limit, page * limit - 1);
 
-    console.log('📡 [DIRECTORY_DEBUG] Results:', data?.length || 0, 'Total:', count);
-
     if (error) {
-      console.error("❌ [DIRECTORY_ACTION] Supabase Error:", error);
-      return { doctors: [], total: 0 };
+      console.error("❌ [DIRECTORY_DEBUG] Supabase Error:", error);
+      return { doctors: [], total: 0, error: error.message };
+    }
+
+    console.log('📡 [DIRECTORY_DEBUG] Query Success. Count:', count, 'Length:', data?.length);
+
+    if (!data || data.length === 0) {
+      console.log('⚠️ [DIRECTORY_DEBUG] No data from DB, returning Mock Doctor.');
+      return {
+        doctors: [{
+          id: 'debug-id-123',
+          first_name: 'Debug',
+          last_name: 'Physician',
+          clinic_name: 'Database Connection Active',
+          city: 'System',
+          state: 'OK',
+          slug: 'debug-doctor',
+          verification_status: 'verified',
+          membership_tier: 'pro',
+          bio: 'If you see this, the server action is working but the database table returned 0 results.',
+          specialties: ['Connectivity', 'Diagnostics']
+        }] as Doctor[],
+        total: 1
+      };
     }
     
     return {
-      doctors: (data || []) as Doctor[],
+      doctors: data as Doctor[],
       total: count || 0
     };
-  } catch (e) {
-    console.error("❌ [DIRECTORY_ACTION] Critical error:", e);
-    return { doctors: [], total: 0 };
+  } catch (e: any) {
+    console.error("❌ [DIRECTORY_DEBUG] Critical Crash:", e);
+    return { 
+      doctors: [{
+        id: 'error-id',
+        first_name: 'Server',
+        last_name: 'Error',
+        clinic_name: 'Action Crashed',
+        city: 'Error',
+        slug: 'error',
+        bio: `Error: ${e.message || 'Unknown error'}. Check server logs.`,
+        verification_status: 'verified',
+        membership_tier: 'pro'
+      }] as Doctor[], 
+      total: 1,
+      criticalError: e.message 
+    };
   }
 }
 
 export async function getDoctorBySlug(slug: string) {
   noStore();
   const supabase = createServerSupabase()
-  const selectFields = 'id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status, city, state, country, region_code, photo_url, website_url, instagram_url, facebook_url';
+  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, website_url, instagram_url, facebook_url, bio, specialties, region_code, email';
   
   let { data, error } = await (supabase as any)
     .from('doctors')

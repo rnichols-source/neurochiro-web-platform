@@ -60,7 +60,7 @@ export async function getJobsForRadar() {
   try {
     const { data: jobs, error } = await (supabase as any)
       .from('jobs')
-      .select('*, doctors(clinic_name, photo_url)')
+      .select('*, doctors(clinic_name)')
       .eq('status', 'open')
       .limit(5);
 

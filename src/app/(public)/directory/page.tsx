@@ -11,10 +11,10 @@ export default function PublicDirectory() {
   useEffect(() => {
     console.log('📡 [PAGE_DEBUG] Initializing Directory Page (Client-Side)...');
     async function fetchInitialData() {
-      console.log('📡 [PAGE_DEBUG] Starting initial fetch for 1000 doctors...');
+      console.log('📡 [PAGE_DEBUG] Starting initial fetch (MINIMAL)...');
       try {
-        const data = await getDoctors({ limit: 1000 });
-        console.log('📡 [PAGE_DEBUG] Initial fetch complete:', data.doctors.length, 'found.');
+        const data = await getDoctors({ limit: 100 });
+        console.log('CLIENT_RECEIVE (INITIAL):', data.doctors.length);
         setInitialData(data);
       } catch (err) {
         console.error('❌ [PAGE_DEBUG] Fetch failed:', err);
