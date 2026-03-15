@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, Variants } from "framer-motion";
 import Link from "next/link";
 import { ChevronDown, Sparkles } from "lucide-react";
 import LandingSearch from "./LandingSearch";
@@ -20,14 +20,14 @@ export default function Hero() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const orbVariants = {
+  const orbVariants: Variants = {
     animate: {
       scale: [1, 1.1, 1],
       opacity: [0.2, 0.3, 0.2],
       transition: {
         duration: 10,
         repeat: Infinity,
-        ease: "easeInOut"
+        ease: "easeInOut" as const
       }
     },
     static: {
