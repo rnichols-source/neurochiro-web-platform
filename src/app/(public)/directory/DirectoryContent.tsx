@@ -371,8 +371,17 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                   <div key={`${doc.id}-${i}`} className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden">
                     <div className="flex items-start justify-between mb-6">
                         <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 rounded-2xl bg-neuro-navy flex items-center justify-center text-white font-black text-xl shadow-lg">
-                              {(doc.first_name?.[0] || 'D')}{(doc.last_name?.[0] || 'R')}
+                          <div className="relative w-14 h-14 rounded-2xl bg-neuro-navy overflow-hidden shadow-lg border border-white/10">
+                              <Image 
+                                src={doc.photo_url || "/fallback-avatar.png"} 
+                                alt={`Dr. ${doc.first_name} ${doc.last_name}`}
+                                fill
+                                className="object-cover"
+                                sizes="56px"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = "/fallback-avatar.png";
+                                }}
+                              />
                           </div>
                           <div>
                               <div className="flex items-center gap-1.5 mb-0.5">
