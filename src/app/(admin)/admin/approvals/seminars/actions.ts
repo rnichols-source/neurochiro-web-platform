@@ -7,7 +7,7 @@ import { onSeminarApprovedAction, onSeminarRejectedAction } from '@/app/actions/
 export async function getPendingSeminars() {
   const supabase = createServerSupabase()
   
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('seminars')
     .select(`
       *,
@@ -30,7 +30,7 @@ export async function getPendingSeminars() {
 export async function approveSeminarAction(id: string) {
   const supabase = createServerSupabase()
   
-  const { data: seminar, error: fetchError } = await supabase
+  const { data: seminar, error: fetchError } = await (supabase as any)
     .from('seminars')
     .select('*, host:host_id(email, full_name)')
     .eq('id', id)
@@ -38,7 +38,7 @@ export async function approveSeminarAction(id: string) {
 
   if (fetchError) throw new Error("Seminar not found")
 
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('seminars')
     .update({ is_approved: true } as any)
     .eq('id', id)
@@ -56,7 +56,7 @@ export async function approveSeminarAction(id: string) {
 export async function rejectSeminarAction(id: string, notes: string) {
   const supabase = createServerSupabase()
   
-  const { data: seminar, error: fetchError } = await supabase
+  const { data: seminar, error: fetchError } = await (supabase as any)
     .from('seminars')
     .select('*, host:host_id(email, full_name)')
     .eq('id', id)
@@ -64,7 +64,7 @@ export async function rejectSeminarAction(id: string, notes: string) {
 
   if (fetchError) throw new Error("Seminar not found")
 
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('seminars')
     .update({ 
       is_approved: false, 
