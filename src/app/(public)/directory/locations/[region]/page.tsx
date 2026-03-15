@@ -60,7 +60,7 @@ export default async function RegionalDirectoryPage({ params }: Props) {
         "@type": "Physician",
         "name": `${doc.first_name} ${doc.last_name}`,
         "image": doc.photo_url || "https://neurochiro.com/logo.png",
-        "url": `https://neurochiro.com/directory/${doc.slug}`,
+        "url": `https://neurochiro.com/directory/${doc.slug || doc.id}`,
         "address": {
           "@type": "PostalAddress",
           "addressLocality": doc.city,

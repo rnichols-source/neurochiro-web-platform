@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       type: "profile",
-      url: `https://neurochiro.com/directory/${doctor.slug}`,
+      url: `https://neurochiro.com/directory/${doctor.slug || doctor.id}`,
       images: [
         {
           url: ogImage,
