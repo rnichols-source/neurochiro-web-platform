@@ -380,18 +380,28 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                 <Globe className="w-12 h-12 text-gray-300 mx-auto mb-6 animate-pulse" />
                 <h3 className="text-2xl font-black text-neuro-navy mb-2">Expanding the Network</h3>
                 <p className="text-gray-500 text-sm mb-8">We're growing! Be the first to know when a specialist opens near you.</p>
-                <form onSubmit={handleNotifyMe} className="space-y-3">
-                  <input type="email" name="email" required placeholder="Enter email..." className="w-full p-5 bg-gray-50 border border-gray-100 rounded-2xl outline-none" />
-                  <motion.button 
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    type="submit" 
-                    disabled={notifying} 
-                    className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-xs"
+                {notifySuccess ? (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="p-6 bg-emerald-50 text-emerald-700 rounded-3xl border border-emerald-100 font-bold"
                   >
-                    {notifying ? "Subscribing..." : "Notify Me via Email"}
-                  </motion.button>
-                </form>
+                    Success! We'll notify you soon.
+                  </motion.div>
+                ) : (
+                  <form onSubmit={handleNotifyMe} className="space-y-3">
+                    <input type="email" name="email" required placeholder="Enter email..." className="w-full p-5 bg-gray-50 border border-gray-100 rounded-2xl outline-none" />
+                    <motion.button 
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      type="submit" 
+                      disabled={notifying} 
+                      className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-xs"
+                    >
+                      {notifying ? "Subscribing..." : "Notify Me via Email"}
+                    </motion.button>
+                  </form>
+                )}
               </div>
             )}
           </div>

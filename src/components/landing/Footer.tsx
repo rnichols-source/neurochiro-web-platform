@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Twitter, Instagram, Linkedin, Github } from "lucide-react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function Footer() {
   return (
@@ -53,21 +55,8 @@ export default function Footer() {
         <div>
           <h4 className="font-bold text-lg mb-6 text-gray-200">Stay Updated</h4>
           <p className="text-gray-400 mb-4 text-sm">Join our newsletter for the latest updates and clinical insights.</p>
-          <form className="flex gap-2">
-            <input 
-              type="email" 
-              placeholder="Enter your email" 
-              className="bg-white/5 border border-white/10 rounded-lg px-4 py-3 w-full text-white placeholder-gray-500 focus:outline-none focus:border-neuro-orange transition-colors"
-            />
-            <button 
-              className="bg-neuro-orange hover:bg-neuro-orange-light active:scale-95 px-4 py-3 rounded-lg font-bold text-white transition-all"
-              aria-label="Join newsletter"
-            >
-              Join
-            </button>
-          </form>
+          <NewsletterForm />
         </div>
-
       </div>
 
       <div className="max-w-7xl mx-auto pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
@@ -78,5 +67,48 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+  );
+}
+
+function NewsletterForm() {
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('loading');
+    // Simulated submission
+    await new Promise(resolve => setTimeout(resolve, 800));
+    setStatus('success');
+  };
+
+  if (status === 'success') {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl text-emerald-400 text-sm font-bold"
+      >
+        Welcome to the network!
+      </motion.div>
+    );
+  }
+
+  return (
+    <form className="flex gap-2" onSubmit={handleSubmit}>
+      <input 
+        type="email" 
+        required
+        placeholder="Enter your email" 
+        className="bg-white/5 border border-white/10 rounded-lg px-4 py-3 w-full text-white placeholder-gray-500 focus:outline-none focus:border-neuro-orange transition-colors"
+      />
+      <button 
+        type="submit"
+        disabled={status === 'loading'}
+        className="bg-neuro-orange hover:bg-neuro-orange-light active:scale-95 disabled:opacity-50 px-4 py-3 rounded-lg font-bold text-white transition-all"
+        aria-label="Join newsletter"
+      >
+        {status === 'loading' ? '...' : 'Join'}
+      </button>
+    </form>
   );
 }
