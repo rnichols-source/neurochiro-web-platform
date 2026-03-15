@@ -13,7 +13,7 @@ export type NotificationPayload = {
 export async function sendNotification(payload: NotificationPayload) {
   const supabase = createServerSupabase();
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('notifications')
     .insert({
       user_id: payload.userId,
@@ -33,7 +33,7 @@ export async function sendNotification(payload: NotificationPayload) {
   }
 
   // Check if push is enabled for this user
-  const { data: prefs } = await supabase
+  const { data: prefs } = await (supabase as any)
     .from('notification_preferences')
     .select('push_enabled')
     .eq('user_id', payload.userId)
