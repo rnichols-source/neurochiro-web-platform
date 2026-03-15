@@ -23,7 +23,7 @@ export default function LandingSearch() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6, duration: 0.8 }}
-      className="w-full max-w-4xl mx-auto mt-12 px-4 relative"
+      className="w-full max-w-4xl mx-auto mt-12 px-4 relative z-[110]"
     >
       {/* Search Glow Effect */}
       <div className="absolute -inset-1 bg-gradient-to-r from-neuro-orange/20 to-blue-500/20 rounded-[3rem] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none" />
