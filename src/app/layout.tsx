@@ -74,6 +74,8 @@ import PWAInstallPrompt from "@/components/layout/PWAInstallPrompt";
 import AdminQuickNav from "@/components/admin/AdminQuickNav";
 import PerspectiveSwitcher from "@/components/admin/PerspectiveSwitcher";
 
+import Script from "next/script";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -114,7 +116,9 @@ export default function RootLayout({
                 <PWAInstallPrompt />
                 <AdminQuickNav />
                 <PerspectiveSwitcher />
-                <script
+                <Script
+                  id="register-sw"
+                  strategy="lazyOnload"
                   dangerouslySetInnerHTML={{
                     __html: `
                       if ('serviceWorker' in navigator) {

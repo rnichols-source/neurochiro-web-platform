@@ -2,9 +2,15 @@
 
 import { motion, useScroll, useTransform, Variants } from "framer-motion";
 import Link from "next/link";
-import { ChevronDown, Sparkles } from "lucide-react";
-import LandingSearch from "./LandingSearch";
+import { ChevronDown, Sparkles, Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+
+// 🛡️ Performance: Dynamic import the heavy search island
+const DynamicLandingSearch = dynamic(() => import("./LandingSearch"), {
+  loading: () => <div className="w-full max-w-4xl h-[88px] bg-white/5 animate-pulse rounded-[3rem] mt-12" />,
+  ssr: false
+});
 
 export default function Hero() {
   const { scrollY } = useScroll();
@@ -85,7 +91,7 @@ export default function Hero() {
           First Ecosystem.
         </motion.h1>
 
-        <LandingSearch />
+        <DynamicLandingSearch />
       </div>
 
       {/* Parallax Elements - Disabled on Mobile for Main Thread Relief */}
