@@ -17,7 +17,7 @@ export async function sendBroadcastAction(formData: FormData) {
   if (!user) return { error: "Unauthorized" };
 
   // 2. Fetch Users based on segment
-  let query = supabase.from("profiles").select(`
+  let query = (supabase as any).from("profiles").select(`
     id, 
     email, 
     full_name,
@@ -77,7 +77,7 @@ export async function sendBroadcastAction(formData: FormData) {
     if (resendError) throw resendError;
 
     // 5. Save Campaign History
-    await supabase.from("campaigns").insert({
+    await (supabase as any).from("campaigns").insert({
       subject,
       body_html: bodyHtml,
       segment_targeted: segment,
