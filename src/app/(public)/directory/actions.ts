@@ -16,13 +16,20 @@ export async function getDoctors(options: {
   const supabase = createServerSupabase()
 
   try {
-    // 🛡️ Optimized Direct Query
+    // 🛡️ Optimized Direct Query with Type Bypass
     const selectFields = 'id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status, city, state, country, region_code, photo_url';
     
-    let query = supabase
+    let query = (supabase as any)
       .from('doctors')
       .select(selectFields, { count: 'exact' })
       .eq('verification_status', 'verified');
+
+    // 🗺️ Hot-Fix: Country Code Normalization
+    if (regionCode === 'US') {
+      query = query.or('country.eq.US,country.eq.United States,country.eq.USA');
+    } else if (regionCode) {
+      query = query.eq('region_code', regionCode);
+    }
 
     if (searchQuery) {
       query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,clinic_name.ilike.%${searchQuery}%`);
