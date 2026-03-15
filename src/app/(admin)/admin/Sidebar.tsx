@@ -23,7 +23,8 @@ import {
   ShieldCheck,
   AlertTriangle,
   Loader2,
-  Mail
+  Mail,
+  Stethoscope
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
