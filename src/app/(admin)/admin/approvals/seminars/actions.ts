@@ -40,7 +40,7 @@ export async function approveSeminarAction(id: string) {
 
   const { error } = await supabase
     .from('seminars')
-    .update({ is_approved: true })
+    .update({ is_approved: true } as any)
     .eq('id', id)
 
   if (error) throw new Error("Failed to approve seminar")
@@ -70,7 +70,7 @@ export async function rejectSeminarAction(id: string, notes: string) {
       is_approved: false, 
       admin_notes: notes,
       payment_status: 'rejected'
-    })
+    } as any)
     .eq('id', id)
 
   if (error) throw new Error("Failed to reject seminar")
