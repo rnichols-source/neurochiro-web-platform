@@ -56,7 +56,14 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   const [locationQuery, setLocationQuery] = useState(searchParams.get("location") || lastLocation || "");
   const [isLocating, setIsLocating] = useState(false);
   
-  const [doctors, setDoctors] = useState<any[]>(initialData.doctors);
+  // 🛡️ Debounced Search Effect
+  useEffect(() => {
+    if (searchQuery === searchParams.get("search")) return; // Skip initial sync
+    const timer = setTimeout(() => {
+      handleSearch();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
   const [totalCount, setTotalCount] = useState(initialData.total);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
