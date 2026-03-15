@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import NextImage from "next/image";
-import { Search, MapPin, Filter, Star, ShieldCheck, ArrowRight, Zap, Globe, Heart, Sparkles, X, Target, Calendar, RefreshCw, AlertTriangle } from "lucide-react";
+import { Search, MapPin, Filter, Star, ShieldCheck, ArrowRight, Zap, Globe, Heart, Sparkles, X, Target, Calendar, RefreshCw, AlertTriangle, RotateCcw } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRegion } from "@/context/RegionContext";
 import { useSearchParams } from "next/navigation";
@@ -32,11 +32,20 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   const [notifySuccess, setNotifySuccess] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [dbError, setDbError] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [matchCriteria, setMatchCriteria] = useState<string[] | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowMap(true), 1500);
     return () => clearTimeout(timer);
   }, []);
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setLocationQuery("");
+    setMatchCriteria(null);
+    fetchDoctors("");
+  };
 
   const handleNotifyMe = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -376,32 +385,47 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                 ))}
               </>
             ) : (
-              <div className="bg-white rounded-[2.5rem] border-2 border-dashed border-gray-100 p-12 text-center">
-                <Globe className="w-12 h-12 text-gray-300 mx-auto mb-6 animate-pulse" />
-                <h3 className="text-2xl font-black text-neuro-navy mb-2">Expanding the Network</h3>
-                <p className="text-gray-500 text-sm mb-8">We're growing! Be the first to know when a specialist opens near you.</p>
-                {notifySuccess ? (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="p-6 bg-emerald-50 text-emerald-700 rounded-3xl border border-emerald-100 font-bold"
+              <div className="space-y-6">
+                <div className="bg-white rounded-[2.5rem] border-2 border-dashed border-gray-100 p-12 text-center">
+                  <Globe className="w-12 h-12 text-gray-300 mx-auto mb-6 animate-pulse" />
+                  <h3 className="text-2xl font-black text-neuro-navy mb-2">Expanding the Network</h3>
+                  <p className="text-gray-500 text-sm mb-8">We haven't mapped a verified specialist in this specific area yet. Try searching a nearby city or reset your filters.</p>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={resetFilters}
+                    className="mb-8 px-8 py-4 bg-neuro-navy text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 mx-auto shadow-lg shadow-neuro-navy/20"
                   >
-                    Success! We'll notify you soon.
-                  </motion.div>
-                ) : (
-                  <form onSubmit={handleNotifyMe} className="space-y-3">
-                    <input type="email" name="email" required placeholder="Enter email..." className="w-full p-5 bg-gray-50 border border-gray-100 rounded-2xl outline-none" />
-                    <motion.button 
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      type="submit" 
-                      disabled={notifying} 
-                      className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-xs"
-                    >
-                      {notifying ? "Subscribing..." : "Notify Me via Email"}
-                    </motion.button>
-                  </form>
-                )}
+                    <RotateCcw className="w-4 h-4 text-neuro-orange" /> Reset All Filters
+                  </motion.button>
+
+                  <div className="pt-8 border-t border-gray-50">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Get area alerts</p>
+                    {notifySuccess ? (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="p-6 bg-emerald-50 text-emerald-700 rounded-3xl border border-emerald-100 font-bold"
+                      >
+                        Success! We'll notify you soon.
+                      </motion.div>
+                    ) : (
+                      <form onSubmit={handleNotifyMe} className="space-y-3 max-w-sm mx-auto">
+                        <input type="email" name="email" required placeholder="Enter email..." className="w-full p-5 bg-gray-50 border border-gray-100 rounded-2xl outline-none text-sm" />
+                        <motion.button 
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          type="submit" 
+                          disabled={notifying} 
+                          className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-xs shadow-lg shadow-neuro-orange/20"
+                        >
+                          {notifying ? "Subscribing..." : "Notify Me via Email"}
+                        </motion.button>
+                      </form>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </div>
