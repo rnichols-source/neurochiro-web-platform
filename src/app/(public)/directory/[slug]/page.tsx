@@ -23,8 +23,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const name = `${doctor.first_name} ${doctor.last_name}`;
   const location = `${doctor.city}, ${doctor.state || doctor.country}`;
-  const title = `${name} | Nervous System Chiropractor in ${location}`;
-  const description = `Connect with ${name}, a leading nervous system chiropractor at ${doctor.clinic_name} in ${location}. Specialist in Vagus Nerve health and neuro-centric chiropractic care.`;
+  const specialtyList = (doctor.specialties || []).slice(0, 3).join(", ");
+  
+  const title = `${name} | Nervous System Specialist at ${doctor.clinic_name}`;
+  const description = `Visit ${name} in ${location}. Specializing in ${specialtyList || 'Nervous System Chiropractic'}. Verified member of the NeuroChiro network of elite clinical practitioners.`;
+
+  const ogImage = doctor.photo_url || "https://neurochiro.com/logo.png";
 
   return {
     title,
@@ -32,13 +36,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      images: [doctor.photo_url || "/logo.png"],
+      type: "profile",
+      url: `https://neurochiro.com/directory/${doctor.slug}`,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${name} - ${doctor.clinic_name}`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [doctor.photo_url || "/logo.png"],
+      images: [ogImage],
     },
   };
 }
