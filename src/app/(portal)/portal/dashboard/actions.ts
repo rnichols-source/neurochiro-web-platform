@@ -9,7 +9,7 @@ export async function getPatientDashboardData() {
   if (!user) return null
 
   try {
-    const { data: profile } = await supabase
+    const { data: profile } = await (supabase as any)
       .from('profiles')
       .select('full_name')
       .eq('id', user.id)
@@ -18,7 +18,7 @@ export async function getPatientDashboardData() {
     // In production, query daily_logs and adjustments tables
     return {
       profile: {
-        name: profile?.full_name?.split(' ')[0] || user.email?.split('@')[0],
+        name: (profile as any)?.full_name?.split(' ')[0] || user.email?.split('@')[0],
       },
       regulationScore: 84,
       trend: "+12%",
