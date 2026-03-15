@@ -12,7 +12,7 @@ export default async function DoctorMessagesPage({ searchParams }: { searchParam
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
+  const { data: profile } = await (supabase as any)
     .from('profiles')
     .select('role')
     .eq('id', user.id)
@@ -25,7 +25,7 @@ export default async function DoctorMessagesPage({ searchParams }: { searchParam
         <p className="text-gray-400 mt-2">Connect with students, doctors, and the NeuroChiro team securely.</p>
       </div>
       
-      <MessagingSystem currentUserId={user.id} userRole={profile?.role || 'doctor'} initialOtherUserId={searchParams.to} />
+      <MessagingSystem currentUserId={user.id} userRole={(profile as any)?.role || 'doctor'} initialOtherUserId={searchParams.to} />
     </div>
   );
 }
