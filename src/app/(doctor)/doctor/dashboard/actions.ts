@@ -11,11 +11,11 @@ export async function getDoctorDashboardStats() {
 
     // Parallelize fetches for profile, practice info, seminars, jobs, and leads
     const [profileRes, doctorRes, seminarsRes, jobsRes, leadsRes] = await Promise.all([
-      supabase.from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
-      supabase.from('doctors').select('clinic_name, slug, location_city, profile_views').eq('user_id', user.id).single(),
-      supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
-      supabase.from('jobs').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
-      supabase.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id)
+      (supabase as any).from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
+      (supabase as any).from('doctors').select('clinic_name, slug, location_city, profile_views').eq('user_id', user.id).single(),
+      (supabase as any).from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
+      (supabase as any).from('jobs').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
+      (supabase as any).from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id)
     ]);
 
     const profile = profileRes.data;
@@ -23,9 +23,9 @@ export async function getDoctorDashboardStats() {
     const seminarCount = seminarsRes.count || 0;
     const jobCount = jobsRes.count || 0;
     const patientLeads = leadsRes.count || 0;
-    const profileViews = doctor?.profile_views || 0;
+    const profileViews = (doctor as any)?.profile_views || 0;
 
-    const userRole = profile?.role || 'doctor_starter';
+    const userRole = (profile as any)?.role || 'doctor_starter';
     const isFounder = user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com';
     const isAdmin = ['admin', 'super_admin', 'founder', 'regional_admin'].includes(userRole);
 
