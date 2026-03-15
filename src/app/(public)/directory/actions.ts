@@ -17,7 +17,7 @@ export async function getDoctors(options: {
 
   try {
     // 🛡️ Optimized Direct Query
-    const selectFields = 'id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status';
+    const selectFields = 'id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status, city, state, country, region_code, photo_url';
     
     let query = supabase
       .from('doctors')
@@ -59,10 +59,12 @@ export async function getDoctorBySlug(slug: string) {
   noStore();
   const supabase = createServerSupabase()
   
+  const selectFields = 'id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status, city, state, country, region_code, photo_url, website_url, instagram_url, facebook_url';
+  
   // Try to find by slug first
   let { data, error } = await supabase
     .from('doctors')
-    .select('id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status')
+    .select(selectFields)
     .eq('slug', slug)
     .single()
 
@@ -72,7 +74,7 @@ export async function getDoctorBySlug(slug: string) {
     if (isUuid) {
         const { data: byId, error: errorId } = await supabase
             .from('doctors')
-            .select('id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status')
+            .select(selectFields)
             .eq('id', slug)
             .single()
         data = byId
