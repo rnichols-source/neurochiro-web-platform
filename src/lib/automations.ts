@@ -38,12 +38,12 @@ const getTwilioClient = async () => {
 const TWILIO_FROM = process.env.TWILIO_PHONE;
 
 /**
- * SLACK / DISCORD WEBHOOK WORKER
+ * DISCORD WEBHOOK WORKER
  */
-const sendSlackNotification = async (message: string) => {
-  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+const sendDiscordNotification = async (message: string) => {
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
   if (!webhookUrl) {
-    console.log(`[SLACK MOCK] ${message}`);
+    console.log(`[DISCORD MOCK] ${message}`);
     return;
   }
 
@@ -51,10 +51,10 @@ const sendSlackNotification = async (message: string) => {
     await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: message })
+      body: JSON.stringify({ content: message })
     });
   } catch (err) {
-    console.error("Failed to send Slack notification:", err);
+    console.error("Failed to send Discord notification:", err);
   }
 };
 
@@ -253,8 +253,8 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           );
         }
 
-        // Notify Admins via Slack
-        await sendSlackNotification(`🆕 New ${payload.role} joined the network: *${payload.name || payload.full_name || 'Anonymous'}* (${payload.email})`);
+        // Notify Admins via Discord
+        await sendDiscordNotification(`🆕 New ${payload.role} joined the network: **${payload.name || payload.full_name || 'Anonymous'}** (${payload.email})`);
 
         if (emailEnabled && payload.email) {
           if (payload.role === 'doctor') {
@@ -712,7 +712,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
 
                const profileLink = doctorData?.slug ? `https://neurochiro.co/directory/${doctorData.slug}` : 'https://neurochiro.co/directory';
 
-               await sendSlackNotification(`🛡️ *New specialist verified!* Dr. ${profile.full_name || 'Anonymous'}\n📍 Profile: ${profileLink}\n📈 *Total Global Network: ${verifiedCount || 'N/A'}*`);
+               await sendDiscordNotification(`🛡️ **New specialist verified!** Dr. ${profile.full_name || 'Anonymous'}\n📍 Profile: ${profileLink}\n📈 **Total Global Network: ${verifiedCount || 'N/A'}**`);
 
                if (emailEnabled && profile.email) {
                   await sendPremiumEmail({
