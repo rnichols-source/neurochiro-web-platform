@@ -78,6 +78,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   const [hasMore, setHasMore] = useState(initialData.doctors.length < initialData.total);
 
   const fetchDoctors = async (query?: string, isLoadMore = false) => {
+    console.log('🔍 [CONTENT_DEBUG] fetchDoctors triggered...', { query, isLoadMore, page });
     setLoading(true);
     const nextPage = isLoadMore ? page + 1 : 1;
     const limit = 20; // Chunk size for manageable loading
@@ -90,6 +91,8 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
         page: nextPage
       });
       
+      console.log('🔍 [CONTENT_DEBUG] Result received:', result.doctors.length, 'doctors.');
+
       if (isLoadMore) {
         setDoctors(prev => [...prev, ...result.doctors]);
       } else {
@@ -102,7 +105,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
       const currentLoadedCount = isLoadMore ? (doctors.length + result.doctors.length) : result.doctors.length;
       setHasMore(currentLoadedCount < result.total);
     } catch (error) {
-      console.error("Error fetching doctors:", error);
+      console.error("❌ [CONTENT_DEBUG] Error fetching doctors:", error);
     } finally {
       setLoading(false);
     }
@@ -110,10 +113,9 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
 
   // Re-fetch if region changes
   useEffect(() => {
-    if (region.code) {
-      setPage(1);
-      fetchDoctors(searchQuery, false);
-    }
+    console.log('🔍 [CONTENT_DEBUG] Region change detected or initial mount. Code:', region.code);
+    setPage(1);
+    fetchDoctors(searchQuery, false);
   }, [region.code]);
 
   // Handle Search Execution

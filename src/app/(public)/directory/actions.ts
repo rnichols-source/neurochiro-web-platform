@@ -15,16 +15,21 @@ export async function getDoctors(options: {
   const { regionCode, bounds, page = 1, limit = 20, searchQuery } = options;
   const supabase = createServerSupabase()
 
+  console.log('🚀 [DEBUG] Fetching doctors now...', { regionCode, bounds, searchQuery, page, limit });
+
   try {
     // 🛡️ Optimized Direct Query with Type Bypass
     const selectFields = 'id, first_name, last_name, clinic_name, specialties, slug, bio, rating, review_count, latitude, longitude, membership_tier, verification_status, city, state, country, region_code, photo_url';
     
+    // 🔥 ALL-PLAY DEBUG: Remove all filters to verify connection
+    console.log('🔗 [DEBUG] Executing Supabase query...');
     let query = (supabase as any)
       .from('doctors')
-      .select(selectFields, { count: 'exact' })
-      .eq('verification_status', 'verified');
+      .select(selectFields, { count: 'exact' });
 
-    // 🗺️ Hot-Fix: Country Code Normalization
+    /* Temporarily commenting out filters for debugging
+    query = query.eq('verification_status', 'verified');
+
     if (regionCode === 'US') {
       query = query.or('country.eq.US,country.eq.United States,country.eq.USA');
     } else if (regionCode) {
@@ -42,16 +47,18 @@ export async function getDoctors(options: {
         .lte('longitude', bounds[2])
         .lte('latitude', bounds[3]);
     }
+    */
 
     const { data, error, count } = await query
       .order('membership_tier', { ascending: false })
       .range((page - 1) * limit, page * limit - 1);
 
     if (error) {
-      console.error("[DIRECTORY_ACTIONS] Direct Query Error:", error);
+      console.error("❌ [DEBUG] Supabase Error:", error);
       return { doctors: [], total: 0 };
     }
     
+    console.log(`✅ [DEBUG] Successfully fetched ${data?.length || 0} doctors.`);
     return {
       doctors: (data || []) as Doctor[],
       total: count || 0
