@@ -32,8 +32,13 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   // ... state ...
   const [notifying, setNotifying] = useState(false);
   const [notifySuccess, setNotifySuccess] = useState(false);
+  const [showMap, setShowMap] = useState(false);
 
-  // ... fetchDoctors ...
+  // 🛡️ Defer map loading until scroll or mount delay to improve TBT
+  useEffect(() => {
+    const timer = setTimeout(() => setShowMap(true), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleNotifyMe = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -331,13 +336,19 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
           {/* Map Section */}
           <div className="lg:col-span-7">
             <div className="bg-slate-200 rounded-[3rem] p-2 shadow-xl border border-gray-100 h-[700px] sticky top-8 overflow-hidden relative group">
-               <GlobalNetworkMap 
-                 key={region.code} 
-                 externalSearchQuery={searchQuery} 
-                 onSearchChange={setSearchQuery}
-                 externalLocationQuery={locationQuery} 
-                 initialDoctors={initialData.doctors}
-               />
+               {showMap ? (
+                 <GlobalNetworkMap 
+                   key={region.code} 
+                   externalSearchQuery={searchQuery} 
+                   onSearchChange={setSearchQuery}
+                   externalLocationQuery={locationQuery} 
+                   initialDoctors={initialData.doctors}
+                 />
+               ) : (
+                 <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center">
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Preparing Map Experience...</p>
+                 </div>
+               )}
             </div>
           </div>
 
