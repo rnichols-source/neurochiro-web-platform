@@ -87,11 +87,18 @@ export default function DirectoryManager() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this doctor? This action cannot be undone.")) return;
+    
+    // Optimistic update
+    const previousDoctors = [...doctors];
+    setDoctors(doctors.filter(d => d.id !== id));
+    
     const res = await deleteDoctorManually(id);
-    if (res.success) {
-      fetchDoctors(searchQuery);
-    } else {
+    if (!res.success) {
       alert("Error: " + res.error);
+      setDoctors(previousDoctors); // Rollback
+    } else {
+      // Refresh to ensure everything is in sync
+      fetchDoctors(searchQuery);
     }
   };
 

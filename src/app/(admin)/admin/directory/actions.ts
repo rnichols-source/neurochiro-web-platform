@@ -53,26 +53,53 @@ export async function updateDoctorManually(doctorId: string, updates: any) {
 }
 
 export async function deleteDoctorManually(doctorId: string) {
-  const supabase = createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
+  try {
+    const supabase = createServerSupabase();
+    const { data: { user } } = await supabase.auth.getUser();
 
-  const { error } = await supabase
-    .from('doctors')
-    .delete()
-    .eq('id', doctorId);
+    // 1. Delete associated jobs first (if any) to avoid foreign key constraints
+    const { error: jobsError } = await supabase
+      .from('jobs')
+      .delete()
+      .eq('doctor_id', doctorId);
+    
+    if (jobsError) {
+      console.warn("Error deleting associated jobs (might not exist):", jobsError);
+      // We continue anyway, as it might just be that the doctor has no jobs
+    }
 
-  if (error) return { success: false, error: error.message };
+    // 2. Delete the doctor
+    const { error } = await supabase
+      .from('doctors')
+      .delete()
+      .eq('id', doctorId);
 
-  await supabase.from('audit_logs').insert({
-    category: 'DIRECTORY',
-    event: `Manual Delete: Doctor ${doctorId}`,
-    user_name: user?.email || "Founder",
-    target: "Clinical Directory",
-    status: 'Success',
-    severity: 'High'
-  });
+    if (error) {
+      console.error("Manual Delete Error:", error);
+      return { success: false, error: error.message };
+    }
 
-  revalidatePath('/admin/directory');
-  revalidatePath('/directory');
-  return { success: true };
+    // Log the action
+    try {
+      await supabase.from('audit_logs').insert({
+        category: 'DIRECTORY',
+        event: `Manual Delete: Doctor ${doctorId}`,
+        user_name: user?.email || "Founder",
+        target: "Clinical Directory",
+        status: 'Success',
+        severity: 'High'
+      });
+    } catch (logErr) {
+      console.error("Non-blocking audit log error:", logErr);
+    }
+
+    revalidatePath('/admin/directory');
+    revalidatePath('/directory');
+    revalidatePath('/');
+    
+    return { success: true };
+  } catch (err: any) {
+    console.error("Critical error in deleteDoctorManually:", err);
+    return { success: false, error: err.message || "An unexpected error occurred during deletion." };
+  }
 }
