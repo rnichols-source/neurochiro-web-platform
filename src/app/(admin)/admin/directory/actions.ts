@@ -57,29 +57,47 @@ export async function deleteDoctorManually(doctorId: string) {
     const supabase = createServerSupabase();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // 1. Delete associated jobs first (if any) to avoid foreign key constraints
+    console.log(`[DELETE] Starting deletion process for Doctor ID: ${doctorId}`);
+
+    // 1. Delete associated jobs
     const { error: jobsError } = await supabase
       .from('jobs')
       .delete()
       .eq('doctor_id', doctorId);
     
     if (jobsError) {
-      console.warn("Error deleting associated jobs (might not exist):", jobsError);
-      // We continue anyway, as it might just be that the doctor has no jobs
+      console.warn("[DELETE] Jobs cleanup issue:", jobsError.message);
     }
 
-    // 2. Delete the doctor
-    const { error } = await supabase
+    // 2. Try to clean up leads if they reference this doctor_id
+    // Note: Some leads might reference auth.users(id), others might reference doctor(id)
+    // We try both to be safe.
+    try {
+      await supabase.from('leads').delete().eq('doctor_id', doctorId);
+    } catch (e) {
+      console.warn("[DELETE] Leads cleanup skipped (column might not exist or reference auth.id)");
+    }
+
+    // 3. Delete the doctor record
+    const { error: deleteError, data: deleteData } = await supabase
       .from('doctors')
       .delete()
-      .eq('id', doctorId);
+      .eq('id', doctorId)
+      .select();
 
-    if (error) {
-      console.error("Manual Delete Error:", error);
-      return { success: false, error: error.message };
+    if (deleteError) {
+      console.error("[DELETE] Doctor Table Error:", deleteError);
+      return { success: false, error: `Database Error: ${deleteError.message} (${deleteError.code})` };
     }
 
-    // Log the action
+    if (!deleteData || deleteData.length === 0) {
+      console.error("[DELETE] No record found to delete with ID:", doctorId);
+      return { success: false, error: "No record found with that ID. It may have already been deleted." };
+    }
+
+    console.log(`[DELETE] Successfully deleted doctor: ${doctorId}`);
+
+    // 4. Log the action (Non-blocking)
     try {
       await supabase.from('audit_logs').insert({
         category: 'DIRECTORY',
@@ -87,10 +105,11 @@ export async function deleteDoctorManually(doctorId: string) {
         user_name: user?.email || "Founder",
         target: "Clinical Directory",
         status: 'Success',
-        severity: 'High'
+        severity: 'High',
+        metadata: { deleted_id: doctorId, deleted_at: new Date().toISOString() }
       });
     } catch (logErr) {
-      console.error("Non-blocking audit log error:", logErr);
+      console.error("[DELETE] Audit Log Error (Non-blocking):", logErr);
     }
 
     revalidatePath('/admin/directory');
@@ -99,7 +118,7 @@ export async function deleteDoctorManually(doctorId: string) {
     
     return { success: true };
   } catch (err: any) {
-    console.error("Critical error in deleteDoctorManually:", err);
-    return { success: false, error: err.message || "An unexpected error occurred during deletion." };
+    console.error("[DELETE] Critical Exception:", err);
+    return { success: false, error: `Critical Exception: ${err.message || "Unknown error"}` };
   }
 }
