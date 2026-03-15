@@ -9,43 +9,43 @@ export async function getStudentDashboardData() {
   if (!user) return null
 
   try {
-    const { data: profile } = await supabase
+    const { data: profile } = await (supabase as any)
       .from('profiles')
       .select('role, tier, full_name')
       .eq('id', user.id)
       .single()
 
-    const { data: student } = await supabase
+    const { data: student } = await (supabase as any)
       .from('students')
       .select('school, graduation_year, interests, location_city')
       .eq('id', user.id)
       .single()
 
-    const { count: applicationsCount } = await supabase
+    const { count: applicationsCount } = await (supabase as any)
       .from('job_applications')
       .select('*', { count: 'exact', head: true })
       .eq('applicant_id', user.id)
 
     // Calculate dynamic readiness score
     let readiness = 20; // Base
-    if (student?.school) readiness += 20;
-    if (student?.graduation_year) readiness += 20;
-    if (student?.location_city) readiness += 20;
-    if (student?.interests && student.interests.length > 0) readiness += 20;
+    if ((student as any)?.school) readiness += 20;
+    if ((student as any)?.graduation_year) readiness += 20;
+    if ((student as any)?.location_city) readiness += 20;
+    if ((student as any)?.interests && (student as any).interests.length > 0) readiness += 20;
 
     return {
       profile: {
-        name: profile?.full_name?.split(' ')[0] || user.email?.split('@')[0],
-        fullName: profile?.full_name,
-        role: profile?.role,
-        status: (profile?.tier && profile?.tier !== 'free') ? 'active' : 'inactive',
-        school: student?.school || "Life University",
-        gradYear: student?.graduation_year || "2027"
+        name: (profile as any)?.full_name?.split(' ')[0] || user.email?.split('@')[0],
+        fullName: (profile as any)?.full_name,
+        role: (profile as any)?.role,
+        status: ((profile as any)?.tier && (profile as any)?.tier !== 'free') ? 'active' : 'inactive',
+        school: (student as any)?.school || "Life University",
+        gradYear: (student as any)?.graduation_year || "2027"
       },
       stats: {
         readiness: readiness,
         applications: applicationsCount || 0,
-        matchScore: student?.location_city ? 9.2 : 0
+        matchScore: (student as any)?.location_city ? 9.2 : 0
       }
     }
   } catch (e) {
@@ -58,7 +58,7 @@ export async function getJobsForRadar() {
   const supabase = createServerSupabase()
   
   try {
-    const { data: jobs, error } = await supabase
+    const { data: jobs, error } = await (supabase as any)
       .from('jobs')
       .select('*, doctors(clinic_name, photo_url)')
       .eq('status', 'open')
@@ -80,7 +80,7 @@ export async function transitionToDoctorAction() {
 
   try {
     // 1. Update Profile Role
-    const { error: profileError } = await supabase
+    const { error: profileError } = await (supabase as any)
       .from('profiles')
       .update({ role: 'doctor' })
       .eq('id', user.id)
@@ -88,13 +88,13 @@ export async function transitionToDoctorAction() {
     if (profileError) throw profileError
 
     // 2. Fetch full name for the doctor record
-    const { data: profile } = await supabase
+    const { data: profile } = await (supabase as any)
         .from('profiles')
         .select('full_name')
         .eq('id', user.id)
         .single()
         
-    const fullName = profile?.full_name || "New Doctor"
+    const fullName = (profile as any)?.full_name || "New Doctor"
     const nameParts = fullName.split(' ')
     const firstName = nameParts[0]
     const lastName = nameParts.slice(1).join(' ') || "Doctor"
@@ -103,7 +103,7 @@ export async function transitionToDoctorAction() {
     const baseSlug = `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9]/g, '-')
     const slug = `${baseSlug}-${Math.floor(Math.random() * 10000)}`
 
-    const { error: doctorError } = await supabase
+    const { error: doctorError } = await (supabase as any)
       .from('doctors')
       .upsert({ 
         user_id: user.id, 
