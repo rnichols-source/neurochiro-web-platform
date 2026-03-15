@@ -11,7 +11,7 @@ export async function submitLeadAction(formData: FormData) {
   const role = formData.get('role') as string || 'patient'
   const source = formData.get('source') as string || 'website_zero_state'
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('leads')
     .insert({
       email,
