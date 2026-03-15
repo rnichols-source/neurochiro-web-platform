@@ -28,13 +28,13 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     return redirect(`/login?error=auth_failed`)
   }
 
-  const { data: profile } = await supabase
+  const { data: profile } = await (supabase as any)
     .from('profiles')
     .select('role')
     .eq('id', data.user.id)
     .single()
 
-  let role = profile?.role || 'doctor'
+  let role = (profile as any)?.role || 'doctor'
   
   // 🛡️ FOUNDER OVERRIDE
   if (email === 'drray@neurochirodirectory.com' || email === 'raymond@neurochiro.com') {
@@ -140,7 +140,7 @@ export async function updateProfileAction(userId: string, profileData: any) {
 
   // 1. Update main profile (ULTRA-STRICT: only verified core columns)
   // Note: We avoid updating city, tier, or website here as they belong in role-specific tables
-  const { error: profileError } = await supabase
+  const { error: profileError } = await (supabase as any)
     .from('profiles')
     .update({ 
       role: role 
@@ -159,23 +159,22 @@ export async function updateProfileAction(userId: string, profileData: any) {
   if (role === 'doctor') {
     try {
       // First, try the standard user_id link
-      const { error: doctorError } = await supabase
+      const { error: doctorError } = await (supabase as any)
         .from('doctors')
-        .update({ 
-          clinic_name: clinicName, 
-          city: city, 
-          website_url: website, 
-          membership_tier: tier 
+        .update({
+          clinic_name: clinicName,
+          city: city,
+          website_url: website,
+          membership_tier: tier
         })
-        .eq('user_id', userId);
-        
+        .eq('user_id', userId);        
       if (doctorError) {
         if ((doctorError as any).code === '23505') {
           return { error: 'This email is already registered. Please log in or use a different address.' };
         }
         // If user_id column is missing, fallback to updating by ID
         console.warn("Retrying update by ID...");
-        const { error: fallbackError } = await supabase
+        const { error: fallbackError } = await (supabase as any)
           .from('doctors')
           .update({ 
             clinic_name: clinicName, 
@@ -201,7 +200,7 @@ export async function updateProfileAction(userId: string, profileData: any) {
     }
   } else if (role === 'student') {
     // Save student-specific data to the students table
-    const { error: studentError } = await supabase
+    const { error: studentError } = await (supabase as any)
       .from('students')
       .update({ 
         school: school,
@@ -221,7 +220,7 @@ export async function updateProfileAction(userId: string, profileData: any) {
     // Save vendor-specific data to the vendors table
     // Ensure the vendor record exists first, or use an upsert/insert if needed
     // Usually ONBOARDING_TRIGGERS handles the initial insert, so we update here
-    const { error: vendorError } = await supabase
+    const { error: vendorError } = await (supabase as any)
       .from('vendors')
       .update({
         name: companyName,
