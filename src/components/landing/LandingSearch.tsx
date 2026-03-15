@@ -67,7 +67,7 @@ export default function LandingSearch() {
           type="submit"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="bg-neuro-orange hover:bg-neuro-orange-light text-white px-12 py-6 rounded-[2.5rem] font-black uppercase tracking-widest transition-all shadow-2xl shadow-neuro-orange/40 flex items-center justify-center gap-3 group/btn relative overflow-hidden min-h-[56px]"
+          className="bg-orange-700 hover:bg-orange-800 text-white px-12 py-6 rounded-[2.5rem] font-black uppercase tracking-widest transition-all shadow-2xl shadow-neuro-orange/40 flex items-center justify-center gap-3 group/btn relative overflow-hidden min-h-[56px]"
           aria-label="Find a Doctor"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:animate-shimmer" />

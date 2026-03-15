@@ -21,9 +21,9 @@ export default function Footer() {
             The global nervous-system-first chiropractic ecosystem. Connecting doctors, students, and patients worldwide.
           </p>
           <div className="flex gap-4">
-            <Link href="https://twitter.com/neurochiro" className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors"><Twitter className="w-5 h-5" /></Link>
-            <Link href="https://instagram.com/neurochiro" className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors"><Instagram className="w-5 h-5" /></Link>
-            <Link href="https://linkedin.com/company/neurochiro" className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors"><Linkedin className="w-5 h-5" /></Link>
+            <Link href="https://twitter.com/neurochiro" className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors" aria-label="Follow NeuroChiro on Twitter"><Twitter className="w-5 h-5" aria-hidden="true" /></Link>
+            <Link href="https://instagram.com/neurochiro" className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors" aria-label="Follow NeuroChiro on Instagram"><Instagram className="w-5 h-5" aria-hidden="true" /></Link>
+            <Link href="https://linkedin.com/company/neurochiro" className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors" aria-label="Follow NeuroChiro on LinkedIn"><Linkedin className="w-5 h-5" aria-hidden="true" /></Link>
           </div>
         </div>
 

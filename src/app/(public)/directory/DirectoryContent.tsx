@@ -318,13 +318,14 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                 <Sparkles className="w-8 h-8 fill-current" />
               </div>
               <div>
-                <h3 className="text-xl font-heading font-black text-neuro-navy">Top Smart Matches Found</h3>
+                <h2 className="text-xl font-heading font-black text-neuro-navy">Top Smart Matches Found</h2>
                 <p className="text-gray-500 text-sm">We've filtered results for: <span className="font-bold text-neuro-orange capitalize">{matchCriteria.join(", ")}</span></p>
               </div>
             </div>
             <button 
               onClick={() => setMatchCriteria(null)}
               className="px-6 py-3 border-2 border-gray-100 hover:border-red-100 hover:text-red-500 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2"
+              aria-label="Clear smart match filters"
             >
               <X className="w-4 h-4" /> Clear Matches
             </button>
