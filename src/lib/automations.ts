@@ -221,9 +221,12 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
       case 'geocode_profile':
         if (supabaseAdmin && payload.userId && payload.city) {
           try {
-            // Very basic mock for actual geocoding API (e.g., Mapbox/Google)
-            // In a real app you'd do: fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${payload.city}.json?access_token=${...}`)
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(payload.city)}`);
+            // High-Precision Geocoding: Combine City, State, and Country
+            const searchQuery = [payload.city, payload.state, payload.country]
+              .filter(Boolean)
+              .join(', ');
+
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`);
             const data = await response.json();
             
             if (data && data.length > 0) {
@@ -232,7 +235,11 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
               
               await supabaseAdmin.from('doctors').update({
                 latitude: lat,
-                longitude: lng
+                longitude: lng,
+                // Also update city/state/country if provided to keep records clean
+                city: payload.city,
+                state: payload.state || null,
+                country: payload.country || 'United States'
               }).eq('user_id', payload.userId);
             }
           } catch (e) {

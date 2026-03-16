@@ -49,6 +49,8 @@ export default function PracticeProfile() {
     full_name: "",
     clinic_name: "",
     location_city: "",
+    location_state: "",
+    location_country: "United States",
     website: "",
     bio: "",
     specialties: [] as string[],
@@ -61,7 +63,7 @@ export default function PracticeProfile() {
     let score = 0;
     if (profileData.full_name) score += 15;
     if (profileData.clinic_name) score += 15;
-    if (profileData.location_city) score += 10;
+    if (profileData.location_city && profileData.location_state) score += 10;
     if (profileData.website) score += 10;
     if (profileData.bio && profileData.bio.length > 50) score += 20;
     if (profileData.specialties.length > 0) score += 10;
@@ -78,7 +80,9 @@ export default function PracticeProfile() {
         setProfileData({
           full_name: data.full_name || "",
           clinic_name: data.clinic_name || "",
-          location_city: data.location_city || "",
+          location_city: data.city || data.location_city || "",
+          location_state: data.state || "",
+          location_country: data.country || "United States",
           website: data.website_url || data.website || "",
           bio: data.bio || "",
           specialties: data.specialties || [],
@@ -117,6 +121,8 @@ export default function PracticeProfile() {
       formData.append('full_name', profileData.full_name);
       formData.append('clinic_name', profileData.clinic_name);
       formData.append('city', profileData.location_city);
+      formData.append('state', profileData.location_state);
+      formData.append('country', profileData.location_country);
       formData.append('website', profileData.website);
       formData.append('bio', profileData.bio);
       formData.append('specialties', profileData.specialties.join(','));
@@ -325,8 +331,34 @@ export default function PracticeProfile() {
                   value={profileData.location_city}
                   onChange={(e) => handleInputChange('location_city', e.target.value)}
                   className="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 font-bold text-neuro-navy focus:ring-2 focus:ring-neuro-orange/20 focus:border-neuro-orange/30 outline-none transition-all"
-                  placeholder="e.g. Austin, TX"
+                  placeholder="e.g. Austin"
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest flex items-center gap-2 ml-1">
+                    State / Province
+                  </label>
+                  <input 
+                    type="text"
+                    value={profileData.location_state}
+                    onChange={(e) => handleInputChange('location_state', e.target.value)}
+                    className="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 font-bold text-neuro-navy focus:ring-2 focus:ring-neuro-orange/20 focus:border-neuro-orange/30 outline-none transition-all"
+                    placeholder="e.g. TX"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest flex items-center gap-2 ml-1">
+                    Country
+                  </label>
+                  <input 
+                    type="text"
+                    value={profileData.location_country}
+                    onChange={(e) => handleInputChange('location_country', e.target.value)}
+                    className="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 font-bold text-neuro-navy focus:ring-2 focus:ring-neuro-orange/20 focus:border-neuro-orange/30 outline-none transition-all"
+                    placeholder="e.g. United States"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest flex items-center gap-2 ml-1">

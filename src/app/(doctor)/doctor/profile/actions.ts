@@ -41,6 +41,8 @@ export async function updateDoctorProfile(formData: FormData) {
     const fullName = formData.get('full_name') as string
     const clinicName = formData.get('clinic_name') as string
     const city = formData.get('city') as string
+    const state = formData.get('state') as string
+    const country = formData.get('country') as string || 'United States'
     const website = formData.get('website') as string
     const bio = formData.get('bio') as string
     const specialties = formData.get('specialties')?.toString().split(',').map((s: string) => s.trim()) || []
@@ -62,6 +64,8 @@ export async function updateDoctorProfile(formData: FormData) {
       .update({
         clinic_name: clinicName,
         city: city,
+        state: state,
+        country: country,
         website_url: website,
         bio: bio,
         specialties: specialties
@@ -73,11 +77,11 @@ export async function updateDoctorProfile(formData: FormData) {
       return { error: `Failed to update clinic info: ${doctorError.message}` }
     }
 
-    // 3. Trigger geocoding if city changed
+    // 3. Trigger geocoding if location changed
     try {
       await (supabase as any).from('automation_queue').insert({
         event_type: 'geocode_profile',
-        payload: { userId: user.id, city }
+        payload: { userId: user.id, city, state, country }
       })
     } catch (e) {
       console.warn("Automation queue trigger failed (non-critical):", e)
