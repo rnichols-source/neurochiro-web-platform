@@ -15,7 +15,8 @@ import {
   Store,
   CheckCircle2,
   BadgePercent,
-  Heart
+  Heart,
+  Lock
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
