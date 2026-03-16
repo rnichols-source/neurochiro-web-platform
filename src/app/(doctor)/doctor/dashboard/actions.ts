@@ -126,14 +126,15 @@ export async function getDoctorROIData(period: string = '30d') {
     // 1. Parallelize fetches for profile, stats, and leads
     const [profileRes, doctorRes, leadsRes, confirmedRes, analyticsRes] = await Promise.all([
       (supabase as any).from('profiles').select('tier, role').eq('id', user.id).single(),
-      (supabase as any).from('doctors').select('profile_views, patient_leads').eq('user_id', user.id).single(),
-      (supabase as any).from('leads').select('*').eq('doctor_id', user.id).eq('status', 'new'),
-      (supabase as any).from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id).eq('status', 'converted'),
+      (supabase as any).from('doctors').select('profile_views, patient_leads, average_case_value').eq('user_id', user.id).single(),
+      (supabase as any).from('leads').select('*').eq('doctor_id', user.id).is('confirmed_at', null),
+      (supabase as any).from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id).not('confirmed_at', 'is', null),
       (supabase as any).from('analytics_events').select('*').eq('doctor_id', user.id)
     ]);
 
     const tier = (profileRes.data as any)?.tier || 'starter';
     const membershipCost = tier === 'pro' ? 999 : tier === 'growth' ? 499 : 199;
+    const averageCaseValue = Number((doctorRes.data as any)?.average_case_value) || 2500;
     
     // Aggregating analytics from the new analytics_events table
     const analytics = analyticsRes.data || [];
@@ -150,7 +151,7 @@ export async function getDoctorROIData(period: string = '30d') {
       message_requests: 0,
       referrals_sent: (leadsRes.data as any)?.length || 0,
       confirmed_patients: confirmedRes.count || 0,
-      average_case_value: 2500,
+      average_case_value: averageCaseValue,
       membership_cost: membershipCost
     };
 

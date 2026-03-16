@@ -234,7 +234,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
                       "font-black text-neuro-orange leading-none transition-all",
                       roiMode === 'multiplier' ? "text-6xl" : "text-3xl"
                     )}>
-                      {roiMode === 'multiplier' ? `${Math.round(roiMultiplier)}x` : `$${netProfit.toLocaleString()}`}
+                      {roiMode === 'multiplier' ? `${roiMultiplier.toFixed(1)}x` : `$${netProfit.toLocaleString()}`}
                     </span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2">
                       {roiMode === 'multiplier' ? "Return on Cost" : "Monthly Profit"}
@@ -292,7 +292,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
               <span className="text-3xl font-black text-neuro-navy">{stat.value}</span>
               {i > 0 && (
                 <span className="text-[10px] font-bold text-gray-400 mb-1">
-                  {stats.profile_views > 0 ? Math.round((Number(stat.value) / stats.profile_views) * 100) : 0}% Conv.
+                  {stats.profile_views > 0 ? (Number(stat.value) / stats.profile_views * 100).toFixed(1) : "0"}% Conv.
                 </span>
               )}
             </div>

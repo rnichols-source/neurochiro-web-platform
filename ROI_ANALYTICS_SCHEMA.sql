@@ -4,6 +4,9 @@
 -- 1. ENHANCE LEADS TABLE
 ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS doctor_id uuid REFERENCES public.profiles(id);
 ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS confirmed_at timestamp with time zone;
+
+-- 1.1 ENHANCE DOCTORS TABLE
+ALTER TABLE public.doctors ADD COLUMN IF NOT EXISTS average_case_value numeric DEFAULT 2500;
 -- Ensure status enum/text supports 'confirmed'
 -- (Existing status is 'new', 'contacted', 'converted', 'closed'. We'll use 'converted' as 'confirmed')
 
