@@ -50,6 +50,30 @@ export async function getDoctorDashboardStats() {
     const userRole = (profile as any)?.role || 'doctor_starter';
     const isFounder = user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com';
     const isAdmin = ['admin', 'super_admin', 'founder', 'regional_admin'].includes(userRole);
+    const isPro = isAdmin || isFounder || userRole === 'doctor_pro';
+    const isGrowth = isPro || userRole === 'doctor_growth';
+
+    // 4. Secure Vendor Offers (SSR Gating)
+    const vendorOffers = isPro ? [
+      {
+        vendor: "NeuralPulse Technologies",
+        title: "20% off Neuro scanning equipment",
+        code: "NEUROPRO20",
+        link: "/marketplace"
+      },
+      {
+        vendor: "ChiroFlow EHR",
+        title: "3 months free practice software",
+        code: "FLOW3FREE",
+        link: "/marketplace"
+      },
+      {
+        vendor: "GrowthSpine Marketing",
+        title: "$500 off onboarding",
+        code: "GROW500",
+        link: "/marketplace"
+      }
+    ] : [];
 
     return {
       profile: {
@@ -57,9 +81,12 @@ export async function getDoctorDashboardStats() {
         slug: doctor?.slug || "",
         clinicName: doctor?.clinic_name || "My Practice",
         isMember: isFounder || isAdmin || ['doctor_pro', 'doctor_growth', 'doctor_starter', 'doctor_member'].includes(userRole),
+        isPro,
+        isGrowth,
         role: userRole,
         status: (profile?.tier && profile?.tier !== 'free') ? 'active' : 'inactive'
       },
+      vendorOffers,
       doctor: {
         city: doctor?.location_city || "your city"
       },

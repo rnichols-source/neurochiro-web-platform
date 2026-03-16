@@ -32,32 +32,36 @@ import OnboardingTracker from "@/components/doctor/OnboardingTracker";
 import ProductTutorial from "@/components/dashboard/ProductTutorial";
 import VerifiedBadge from "@/components/doctor/VerifiedBadge";
 import AnnouncementsFeed from "@/components/dashboard/AnnouncementsFeed";
+import UpgradeOverlay from "@/components/dashboard/UpgradeOverlay";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export default function DoctorDashboard() {
-  const { tier, isMember, isGrowth, isPro } = useDoctorTier();
+  const { tier, isMember, isGrowth: contextIsGrowth, isPro: contextIsPro } = useDoctorTier();
   const [isBoosting, setIsBoosting] = useState(false);
   const [boosted, setBoosted] = useState(false);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showHeatmapUpgrade, setShowHeatmapUpgrade] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getDoctorDashboardStats();
         setDashboardData(data || { 
-          profile: { name: "Doctor", clinicName: "Practice", isMember: false },
+          profile: { name: "Doctor", clinicName: "Practice", isMember: false, isPro: false, isGrowth: false },
           stats: [],
+          vendorOffers: [],
           marketPerformance: { completeness: 85, reviews: 90, engagement: 75 }
         });
       } catch (err) {
         console.error("Failed to fetch dashboard data:", err);
         setDashboardData({
-          profile: { name: "Doctor", clinicName: "Practice", isMember: false },
+          profile: { name: "Doctor", clinicName: "Practice", isMember: false, isPro: false, isGrowth: false },
           stats: [],
+          vendorOffers: [],
           marketPerformance: { completeness: 85, reviews: 90, engagement: 75 }
         });
       } finally {
@@ -68,6 +72,9 @@ export default function DoctorDashboard() {
   }, []);
 
   const hasAccess = isMember || dashboardData?.profile?.isMember;
+  const isPro = contextIsPro || dashboardData?.profile?.isPro;
+  const isGrowth = contextIsGrowth || dashboardData?.profile?.isGrowth;
+  const vendorOffers = dashboardData?.vendorOffers || [];
 
   const handleBoost = () => {
     setIsBoosting(true);
@@ -372,14 +379,26 @@ export default function DoctorDashboard() {
                      </div>
                      
                      <div className="relative z-20 text-center bg-neuro-navy/60 backdrop-blur-md p-6 rounded-2xl border border-white/10 group-hover:scale-105 transition-transform duration-500">
-                        <p className="text-sm font-bold text-white mb-1">Live Patient Traffic</p>
-                        <p className="text-[10px] text-neuro-orange font-black uppercase tracking-[0.2em]">Regional Density Mode</p>
-                        <Link 
-                          href="/doctor/analytics"
-                          className="inline-block mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-[9px] font-black uppercase tracking-widest rounded-lg border border-white/10 transition-all"
-                        >
-                           Switch to Heatmap
-                        </Link>
+                        {showHeatmapUpgrade && !isPro ? (
+                           <div className="animate-in fade-in zoom-in duration-300">
+                              <p className="text-xs font-black text-neuro-orange uppercase tracking-widest mb-2">Pro Feature Required</p>
+                              <Link href="/pricing?upgrade=pro" className="px-4 py-2 bg-neuro-orange text-white text-[9px] font-black uppercase tracking-widest rounded-lg shadow-lg">Upgrade to Elite Pro</Link>
+                           </div>
+                        ) : (
+                           <>
+                              <p className="text-sm font-bold text-white mb-1">Live Patient Traffic</p>
+                              <p className="text-[10px] text-neuro-orange font-black uppercase tracking-[0.2em]">Regional Density Mode</p>
+                              <button 
+                                onClick={() => {
+                                   if (!isPro) setShowHeatmapUpgrade(true);
+                                   else window.location.href = '/doctor/analytics';
+                                }}
+                                className="inline-block mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-[9px] font-black uppercase tracking-widest rounded-lg border border-white/10 transition-all"
+                              >
+                                 Switch to Heatmap
+                              </button>
+                           </>
+                        )}
                      </div>
                   </div>
                </section>
@@ -394,18 +413,15 @@ export default function DoctorDashboard() {
                   </div>
 
                   {!isPro && (
-                     <div className="absolute inset-0 z-20 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center p-8 text-center mt-16">
-                        <div className="w-12 h-12 bg-neuro-navy text-neuro-orange rounded-full flex items-center justify-center mb-4 shadow-lg">
-                           <Lock className="w-6 h-6" />
-                        </div>
-                        <h4 className="text-xl font-black text-neuro-navy mb-2">Partner Benefits Locked</h4>
-                        <p className="text-sm text-gray-500 max-w-md mb-6">Upgrade to the Pro Tier to unlock thousands of dollars in exclusive discounts on software, equipment, and services.</p>
-                        <Link href="/pricing" className="px-6 py-3 bg-neuro-orange text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:scale-105 transition-all">Upgrade to Pro</Link>
-                     </div>
+                     <UpgradeOverlay 
+                        title="Partner Benefits Locked"
+                        description="Upgrade to the Pro Tier to unlock thousands of dollars in exclusive discounts on software, equipment, and services."
+                        tierRequired="pro"
+                     />
                   )}
 
                   <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 ${!isPro ? 'blur-[4px] grayscale pointer-events-none' : ''}`}>
-                     {vendorOffers.map((offer, i) => (
+                     {vendorOffers.length > 0 ? vendorOffers.map((offer: any, i: number) => (
                         <div key={i} className="p-6 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col">
                            <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{offer.vendor}</h4>
                            <p className="text-base font-bold text-neuro-navy mb-4 flex-1">{offer.title}</p>
@@ -416,7 +432,17 @@ export default function DoctorDashboard() {
                               Redeem Offer
                            </Link>
                         </div>
-                     ))}
+                     )) : (
+                        // Mock UI for the blurred background if no data (SSR gated)
+                        [1,2,3].map((_, i) => (
+                           <div key={i} className="p-6 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col opacity-50">
+                              <div className="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                              <div className="h-6 w-full bg-gray-200 rounded mb-4"></div>
+                              <div className="h-10 w-full bg-white rounded border border-gray-200 mb-4"></div>
+                              <div className="h-10 w-full bg-gray-200 rounded"></div>
+                           </div>
+                        ))
+                     )}
                   </div>
                </section>
              </>
@@ -465,15 +491,33 @@ export default function DoctorDashboard() {
            <section className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
               <h3 className="font-heading font-black text-lg text-neuro-navy mb-4">Command Center Actions</h3>
               <div className="space-y-3">
-                 <Link href="/doctor/students" className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors group">
-                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                       <Search className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="block text-sm font-bold text-neuro-navy">Find Associate Talent</span>
-                      <span className="block text-[10px] text-gray-500 uppercase tracking-widest">Student Network</span>
-                    </div>
-                 </Link>
+                 <div className="relative">
+                    {!isGrowth && (
+                       <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-10 flex items-center justify-end pr-4 pointer-events-none">
+                          <Lock className="w-3 h-3 text-gray-400" />
+                       </div>
+                    )}
+                    <Link 
+                       href={isGrowth ? "/doctor/students" : "/pricing?upgrade=growth"} 
+                       className={cn(
+                          "flex items-center gap-3 p-3 rounded-xl transition-colors group",
+                          isGrowth ? "hover:bg-gray-50" : "opacity-60 cursor-not-allowed"
+                       )}
+                    >
+                       <div className={cn(
+                          "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                          isGrowth ? "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white" : "bg-gray-100 text-gray-400"
+                       )}>
+                          <Search className="w-4 h-4" />
+                       </div>
+                       <div>
+                         <span className="block text-sm font-bold text-neuro-navy">Find Associate Talent</span>
+                         <span className="block text-[10px] text-gray-500 uppercase tracking-widest">
+                            {isGrowth ? "Student Network" : "Growth Required"}
+                         </span>
+                       </div>
+                    </Link>
+                 </div>
                  <Link href="/doctor/jobs" className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors group">
                     <div className="w-8 h-8 rounded-lg bg-neuro-orange/10 flex items-center justify-center text-neuro-orange group-hover:bg-neuro-orange group-hover:text-white transition-colors">
                        <Plus className="w-4 h-4" />
