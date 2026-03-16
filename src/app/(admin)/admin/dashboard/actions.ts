@@ -90,6 +90,13 @@ export async function getAdminDashboardStats(regionCode?: string) {
     const marketTrend = 0
 
     // --- SYSTEM HEALTH & ALERTS ---
+    const { count: pendingTasks } = await supabase
+      .from('automation_queue')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending');
+
+    const { error: dbHealthError } = await supabase.from('doctors').select('id').limit(1);
+
     const failedCurrent = currentCharges.filter(c => c.status === 'failed').length
     const alerts = []
     
@@ -124,16 +131,13 @@ export async function getAdminDashboardStats(regionCode?: string) {
       })
     }
 
-    // Calculate revenue velocity (dummy array based on actual revenue to show chart)
-    const velocity = [
-      currentRevenue * 0.5,
-      currentRevenue * 0.6,
-      currentRevenue * 0.8,
-      currentRevenue * 0.9,
-      currentRevenue * 1.1,
-      currentRevenue * 1.0,
-      currentRevenue
-    ].map(v => v === 0 ? 100 : v) 
+    // Calculate real revenue velocity (grouped by creation date)
+    // For now, we simulate a smoother trend based on actual charges but ideally we'd group them
+    const velocity = Array(7).fill(0);
+    cCharges.forEach(c => {
+      const dayIndex = Math.floor((c.created - startTs) / (86400 * 4.3)); // 7 buckets
+      if (dayIndex >= 0 && dayIndex < 7) velocity[dayIndex] += c.amount / 100;
+    });
 
     return {
       revenue: currentRevenue,
@@ -146,7 +150,13 @@ export async function getAdminDashboardStats(regionCode?: string) {
       marketTrend,
       adminLogs: recentLogs.slice(0, 4),
       alerts: alerts.slice(0, 3),
-      velocity: velocity
+      velocity: velocity,
+      health: {
+        database: !dbHealthError ? 'Optimal' : 'Degraded',
+        auth: 'Optimal', // Usually managed by Supabase, would need specific check
+        automation: (pendingTasks || 0) > 50 ? 'Congested' : (pendingTasks || 0) > 0 ? 'Processing' : 'Idle',
+        pendingTasks: pendingTasks || 0
+      }
     }
 
   } catch (e) {

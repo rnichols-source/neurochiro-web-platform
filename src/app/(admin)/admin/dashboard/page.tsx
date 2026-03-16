@@ -241,28 +241,41 @@ export default function AdminDashboard() {
             <div className="space-y-6 md:space-y-8">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0"></div>
+                  <div className={`w-2 h-2 rounded-full ${stats?.health?.database === 'Optimal' ? 'bg-green-500' : 'bg-red-500'} animate-pulse shrink-0`}></div>
                   <span className="text-[10px] md:text-xs font-bold text-gray-400 truncate">Database Engine</span>
                 </div>
-                <span className="text-[9px] md:text-[10px] font-black uppercase text-green-500 shrink-0 bg-green-500/10 px-2 py-1 rounded">Optimal</span>
+                <span className={`text-[9px] md:text-[10px] font-black uppercase shrink-0 ${stats?.health?.database === 'Optimal' ? 'text-green-500 bg-green-500/10' : 'text-red-500 bg-red-500/10'} px-2 py-1 rounded`}>
+                  {stats?.health?.database || 'Unknown'}
+                </span>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0"></div>
+                  <div className={`w-2 h-2 rounded-full ${stats?.health?.auth === 'Optimal' ? 'bg-green-500' : 'bg-amber-500'} animate-pulse shrink-0`}></div>
                   <span className="text-[10px] md:text-xs font-bold text-gray-400 truncate">Auth Gateway</span>
                 </div>
-                <span className="text-[9px] md:text-[10px] font-black uppercase text-green-500 shrink-0 bg-green-500/10 px-2 py-1 rounded">Optimal</span>
+                <span className={`text-[9px] md:text-[10px] font-black uppercase shrink-0 ${stats?.health?.auth === 'Optimal' ? 'text-green-500 bg-green-500/10' : 'text-amber-500 bg-amber-500/10'} px-2 py-1 rounded`}>
+                  {stats?.health?.auth || 'Unknown'}
+                </span>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-2 h-2 rounded-full bg-neuro-orange shrink-0"></div>
+                  <div className={`w-2 h-2 rounded-full ${stats?.health?.automation === 'Idle' ? 'bg-gray-500' : 'bg-neuro-orange'} ${stats?.health?.automation !== 'Idle' ? 'animate-pulse' : ''} shrink-0`}></div>
                   <span className="text-[10px] md:text-xs font-bold text-gray-400 truncate">Automation Queue</span>
                 </div>
-                <span className="text-[9px] md:text-[10px] font-black uppercase text-neuro-orange shrink-0 bg-neuro-orange/10 px-2 py-1 rounded">Processing</span>
+                <span className={`text-[9px] md:text-[10px] font-black uppercase shrink-0 ${stats?.health?.automation === 'Idle' ? 'text-gray-500 bg-gray-500/10' : 'text-neuro-orange bg-neuro-orange/10'} px-2 py-1 rounded`}>
+                  {stats?.health?.automation || 'Idle'}
+                </span>
               </div>
 
               <div className="pt-6 md:pt-8 border-t border-white/10 space-y-4 md:space-y-6">
-                <h4 className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest">Revenue Velocity</h4>
+                <div className="flex justify-between items-center">
+                   <h4 className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest">Revenue Velocity</h4>
+                   {stats?.health?.pendingTasks > 0 && (
+                     <span className="text-[8px] font-bold text-neuro-orange animate-bounce">
+                       {stats.health.pendingTasks} Queue Tasks
+                     </span>
+                   )}
+                </div>
                 <div className="flex items-end gap-1 md:gap-2 h-24">
                   {stats?.velocity ? stats.velocity.map((v: number, i: number) => {
                     const max = Math.max(...stats.velocity);
