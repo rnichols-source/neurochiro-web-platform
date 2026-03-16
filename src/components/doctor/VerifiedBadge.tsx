@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from 'react';
 import { Copy, Check, ShieldCheck, ExternalLink, Code, Lock, Zap } from 'lucide-react';
 import Link from 'next/link';
 
