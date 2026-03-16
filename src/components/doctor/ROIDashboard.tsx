@@ -493,21 +493,20 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
                 <div className="p-1.5 bg-green-50 rounded-lg">
                   <Target className="w-4 h-4 text-green-500" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-neuro-navy">Deep Referral Tracking</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-neuro-navy">Deep Referral Tracking Active</span>
               </div>
               <h4 className="font-heading font-black text-lg mb-6">Top Patient Sources</h4>
               <div className="space-y-4">
-                {[
-                  { name: "Organic Search", val: "42%", trend: "up" },
-                  { name: "Instagram Bio", val: "28%", trend: "up" },
-                  { name: "NeuroChiro Map", val: "15%", trend: "stable" },
-                  { name: "Direct Referrals", val: "10%", trend: "up" }
-                ].map((source, i) => (
+                {data.patient_acquisition.length > 0 ? data.patient_acquisition.map((source, i) => (
                   <div key={i} className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-gray-500">{source.name}</span>
-                    <span className="text-xs font-black text-neuro-navy">{source.val}</span>
+                    <span className="text-xs font-bold text-gray-500">{source.source}</span>
+                    <span className="text-xs font-black text-neuro-navy">
+                      {data.stats.confirmed_patients > 0 ? Math.round((source.count / data.stats.confirmed_patients) * 100) : 0}%
+                    </span>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-xs text-gray-400 italic">No attribution data collected yet.</p>
+                )}
               </div>
               <div className="mt-6 pt-6 border-t border-gray-50">
                 <p className="text-[9px] text-gray-400 leading-relaxed italic">

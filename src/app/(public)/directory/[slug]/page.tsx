@@ -33,6 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    keywords: doctor.seo_keywords ? doctor.seo_keywords.split(',').map((k: string) => k.trim()) : undefined,
     openGraph: {
       title,
       description,

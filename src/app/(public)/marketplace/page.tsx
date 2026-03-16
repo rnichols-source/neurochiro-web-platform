@@ -25,6 +25,7 @@ import VendorOnboarding from "@/components/vendor/VendorOnboarding";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { getVendors, trackVendorClick } from "./actions";
 import { useEffect } from "react";
+import { useDoctorTier } from "@/context/DoctorTierContext";
 
 const MOCK_VENDORS: Vendor[] = [
   {
@@ -83,6 +84,7 @@ const CATEGORIES: VendorCategory[] = [
 
 export default function MarketplacePage() {
   const router = useRouter();
+  const { tier, isPro } = useDoctorTier();
   const { toggleSave, isSaved } = useUserPreferences();
   const [activeCategory, setActiveFilter] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -262,9 +264,54 @@ export default function MarketplacePage() {
                                 <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{vendor.categories[0]}</p>
                              </div>
                           </div>
-                          <p className="text-sm text-gray-500 leading-relaxed mb-8 flex-1">
+                          <p className="text-sm text-gray-500 leading-relaxed mb-6 flex-1">
                              {vendor.short_description}
                           </p>
+
+                          {/* Pro-Only Discount Display */}
+                          {vendor.is_partner && (
+                             <div className="mb-8 p-4 bg-gray-50 rounded-2xl border border-gray-100 relative overflow-hidden">
+                                {isPro ? (
+                                   <div className="text-center">
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Your Exclusive Reward</p>
+                                      <div className="bg-white px-4 py-2 rounded-xl border-2 border-dashed border-neuro-orange/30 inline-block mb-3">
+                                         <span className="font-mono font-black text-neuro-orange text-sm">{(vendor as any).discount_code || 'NEUROPRO'}</span>
+                                      </div>
+                                      <button 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleTrackClick(vendor.id, 'discount');
+                                          alert(`Reward Claimed! Use code: ${(vendor as any).discount_code || 'NEUROPRO'} at checkout.`);
+                                        }}
+                                        className="w-full py-2.5 bg-neuro-navy text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-neuro-navy-light transition-colors"
+                                      >
+                                         Claim My Reward
+                                      </button>
+                                   </div>
+                                ) : (
+                                   <div className="text-center group/pro">
+                                      <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] flex flex-col items-center justify-center p-4">
+                                         <Lock className="w-4 h-4 text-gray-400 mb-1" />
+                                         <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Pro Tier Only</p>
+                                      </div>
+                                      <div className="blur-[3px] grayscale select-none opacity-20">
+                                         <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Exclusive Reward</p>
+                                         <div className="bg-white px-4 py-2 rounded-xl border-2 border-dashed border-gray-200 inline-block mb-3">
+                                            <span className="font-mono font-black text-gray-300 text-sm">XXXXXXX</span>
+                                         </div>
+                                      </div>
+                                      <Link 
+                                        href="/pricing?upgrade=pro"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="relative z-10 text-[9px] font-black text-neuro-orange uppercase tracking-widest hover:underline"
+                                      >
+                                         Upgrade to Unlock
+                                      </Link>
+                                   </div>
+                                )}
+                             </div>
+                          )}
+
                           <div className="pt-6 border-t border-gray-50 flex items-center justify-between mt-auto">
                              <span className="text-[10px] font-black text-neuro-navy uppercase tracking-widest flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                                 View Profile <ArrowRight className="w-3 h-3" />

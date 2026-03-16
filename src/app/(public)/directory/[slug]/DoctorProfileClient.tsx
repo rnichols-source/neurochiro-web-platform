@@ -253,6 +253,17 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                     "{doctor.bio}"
                   </p>
                 </div>
+
+                {doctor.video_url && (
+                  <div className="mb-12 rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl aspect-video bg-black">
+                    <iframe 
+                      src={doctor.video_url.replace('watch?v=', 'embed/').replace('vimeo.com/', 'player.vimeo.com/video/')} 
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                )}
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   <div className="space-y-6">
