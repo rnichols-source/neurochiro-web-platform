@@ -22,6 +22,7 @@ import { ROIStats, ROIData } from '@/types/analytics';
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { confirmPatient } from '@/app/(doctor)/doctor/dashboard/actions';
+import Link from "next/link";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -320,6 +321,12 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
           </div>
           
           <div className="h-64 flex items-end justify-between gap-4 px-4 border-b border-gray-50 relative">
+            {data.historical_revenue.length === 0 && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm z-20">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Data Accumulating...</p>
+                <p className="text-[8px] text-gray-300 mt-1">Check back next month for trajectory insights.</p>
+              </div>
+            )}
             {/* Target Trajectory Line (SVG Overlay) */}
             <svg className="absolute inset-x-0 bottom-0 h-full w-full pointer-events-none px-4" preserveAspectRatio="none">
               <path 
@@ -443,8 +450,8 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
               </p>
             </div>
 
-            <button 
-              onClick={() => setHasVideo(!hasVideo)}
+            <Link 
+              href="/doctor/profile#video"
               className={cn(
                 "w-full py-4 font-black rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm border",
                 hasVideo 
@@ -457,7 +464,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
               ) : (
                 <>Add Intro Video <ArrowUpRight className="w-3 h-3" /></>
               )}
-            </button>
+            </Link>
           </section>
 
           {tier === 'growth' ? (
@@ -472,12 +479,12 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
                 <p className="text-xs text-white/90 mb-8 leading-relaxed font-bold">
                   You have <span className="underline decoration-white/40 decoration-2 underline-offset-4">{stats.confirmed_patients} patients</span>, but you don't know which source sent the 2 who actually paid. Stop guessing. <span className="text-white">Unlock Pro to see your Money-Makers.</span>
                 </p>
-                <button 
-                  onClick={onUpgrade}
+                <Link 
+                  href="/pricing?upgrade=pro"
                   className="w-full py-4 bg-white text-neuro-orange font-black rounded-2xl hover:bg-white/95 transition-all text-[10px] uppercase tracking-widest shadow-2xl active:scale-95 flex items-center justify-center gap-2"
                 >
                   Plug the Leak: Upgrade to Pro <ChevronRight className="w-3 h-3" />
-                </button>
+                </Link>
               </div>
             </section>
           ) : tier === 'pro' && (

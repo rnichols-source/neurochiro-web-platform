@@ -124,7 +124,9 @@ export default function DoctorAnalytics() {
                 <div className="aspect-[2/1] bg-white/5 rounded-3xl border border-white/10 flex items-center justify-center relative z-10">
                   <Globe className="w-16 h-16 text-white/10" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Processing Global Traffic...</p>
+                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                        {loading ? "Processing Global Traffic..." : "Aggregating Regional Insights..."}
+                     </p>
                   </div>
                 </div>
                 <div className="mt-8 grid grid-cols-2 gap-4 relative z-10">

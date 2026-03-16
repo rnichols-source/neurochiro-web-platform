@@ -9,7 +9,8 @@ export async function submitLeadAction(formData: FormData) {
   const location = formData.get('location') as string
   const firstName = formData.get('first_name') as string
   const role = formData.get('role') as string || 'patient'
-  const source = formData.get('source') as string || 'website_zero_state'
+  const source = formData.get('source') as string || 'directory'
+  const doctorId = formData.get('doctor_id') as string
 
   const { data, error } = await (supabase as any)
     .from('leads')
@@ -19,6 +20,7 @@ export async function submitLeadAction(formData: FormData) {
       first_name: firstName,
       role,
       source,
+      doctor_id: doctorId || null,
       status: 'new',
       metadata: {
         timestamp: new Date().toISOString(),

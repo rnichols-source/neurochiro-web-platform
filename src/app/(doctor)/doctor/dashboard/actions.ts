@@ -155,6 +155,46 @@ export async function getDoctorROIData(period: string = '30d') {
       membership_cost: membershipCost
     };
 
+    // 5. Fetch Historical Data (Last 6 Months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    const { data: historicalLeads } = await (supabase as any)
+      .from('leads')
+      .select('created_at, status')
+      .eq('doctor_id', user.id)
+      .gte('created_at', sixMonthsAgo.toISOString());
+
+    // 6. Fetch Acquisition Channels
+    const { data: acquisitionData } = await (supabase as any)
+      .from('leads')
+      .select('source')
+      .eq('doctor_id', user.id);
+
+    // Grouping historical data by month
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    const revenueByMonth = historicalLeads?.reduce((acc: any, lead: any) => {
+      const month = months[new Date(lead.created_at).getMonth()];
+      acc[month] = (acc[month] || 0) + (lead.status === 'converted' ? averageCaseValue : 0);
+      return acc;
+    }, {}) || {};
+
+    const historicalRevenue = Object.keys(revenueByMonth).length > 0 
+      ? Object.entries(revenueByMonth).map(([date, amount]) => ({ date, amount: amount as number }))
+      : [];
+
+    // Grouping acquisition sources
+    const sourceCounts = acquisitionData?.reduce((acc: any, lead: any) => {
+      const src = lead.source || 'directory';
+      acc[src] = (acc[src] || 0) + 1;
+      return acc;
+    }, {}) || {};
+
+    const patientAcquisition = Object.entries(sourceCounts).map(([source, count]) => ({
+      source: source.charAt(0).toUpperCase() + source.slice(1).replace('_', ' '),
+      count: count as number
+    }));
+
     return {
       period,
       stats,
@@ -163,19 +203,10 @@ export async function getDoctorROIData(period: string = '30d') {
         name: `${l.first_name} ${l.last_name?.charAt(0)}.`,
         date: new Date(l.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
       })),
-      historical_revenue: [
-        { date: 'SEP', amount: 12000 },
-        { date: 'OCT', amount: 15000 },
-        { date: 'NOV', amount: 18000 },
-        { date: 'DEC', amount: 14000 },
-        { date: 'JAN', amount: 22000 },
-        { date: 'FEB', amount: 20000 }
-      ],
-      patient_acquisition: [
-        { source: "Direct Search", count: 45 },
-        { source: "Global Directory", count: 30 },
-        { source: "Referral Network", count: 15 },
-        { source: "Seminar Redirects", count: 10 }
+      historical_revenue: historicalRevenue,
+      patient_acquisition: patientAcquisition.length > 0 ? patientAcquisition : [
+        { source: "Global Directory", count: 0 },
+        { source: "Direct Search", count: 0 }
       ]
     };
   } catch (e) {
