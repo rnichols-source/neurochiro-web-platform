@@ -165,9 +165,6 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
     );
   };
 
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
-  const [matchCriteria, setMatchCriteria] = useState<string[] | null>(null);
-
   useEffect(() => {
     const search = searchParams.get("search");
     const loc = searchParams.get("location");
