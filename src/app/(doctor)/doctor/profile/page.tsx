@@ -55,7 +55,9 @@ export default function PracticeProfile() {
     bio: "",
     specialties: [] as string[],
     photo_url: "",
-    tier: ""
+    tier: "",
+    video_url: "",
+    seo_keywords: ""
   });
 
   // Calculate real-time profile strength
@@ -87,7 +89,9 @@ export default function PracticeProfile() {
           bio: data.bio || "",
           specialties: data.specialties || [],
           photo_url: data.photo_url || data.avatar_url || "",
-          tier: data.tier || "free"
+          tier: data.tier || "free",
+          video_url: data.video_url || "",
+          seo_keywords: data.seo_keywords || ""
         });
         // Sync context tier if it differs
         if (data.subscription_tier) setTier(data.subscription_tier);
@@ -112,6 +116,20 @@ export default function PracticeProfile() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation Logic
+    if (!profileData.full_name || !profileData.clinic_name || !profileData.location_city || !profileData.location_state) {
+      setError("Mandatory fields missing: Name, Clinic, City, and State are required.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (profileData.bio.length < 50) {
+      setError("Your Bio is too short. Patients need to understand your clinical philosophy (min 50 chars).");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setSaving(true);
     setError(null);
     setSuccess(false);
@@ -126,6 +144,8 @@ export default function PracticeProfile() {
       formData.append('website', profileData.website);
       formData.append('bio', profileData.bio);
       formData.append('specialties', profileData.specialties.join(','));
+      formData.append('video_url', profileData.video_url);
+      formData.append('seo_keywords', profileData.seo_keywords);
 
       const result = await updateDoctorProfile(formData);
       
@@ -379,21 +399,74 @@ export default function PracticeProfile() {
                   <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest flex items-center gap-2 ml-1">
                     <FileText className="w-3 h-3" /> The Patient Magnet Script (Bio)
                   </label>
-                  <button 
-                    type="button"
-                    onClick={handleGenerateBio}
-                    className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-neuro-orange hover:text-neuro-orange-light transition-colors bg-neuro-orange/5 px-3 py-1.5 rounded-lg border border-neuro-orange/20"
-                  >
-                    <Sparkles className="w-3 h-3" /> AI Magic Write
-                  </button>
+                  <div className="flex items-center gap-4">
+                    <span className={cn("text-[9px] font-bold", profileData.bio.length > 500 ? "text-red-500" : "text-gray-400")}>
+                      {profileData.bio.length} / 500 chars
+                    </span>
+                    <button 
+                      type="button"
+                      onClick={handleGenerateBio}
+                      className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-neuro-orange hover:text-neuro-orange-light transition-colors bg-neuro-orange/5 px-3 py-1.5 rounded-lg border border-neuro-orange/20"
+                    >
+                      <Sparkles className="w-3 h-3" /> AI Magic Write
+                    </button>
+                  </div>
                 </div>
                 <textarea 
                   value={profileData.bio}
+                  maxLength={500}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   className="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 font-medium text-neuro-navy focus:ring-2 focus:ring-neuro-orange/20 focus:border-neuro-orange/30 outline-none transition-all min-h-[150px]"
                   placeholder="Share your clinical philosophy and how you help patients reach their outcomes..."
                 />
                 <p className="text-[9px] text-gray-400 italic">Pro Tip: Focus on outcomes, not just techniques. Patients want results.</p>
+              </div>
+
+              {/* Pro-Only Advanced Sections */}
+              <div className="md:col-span-2 pt-8 border-t border-gray-50">
+                <h3 className="text-sm font-black text-neuro-navy uppercase tracking-widest mb-6 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-neuro-orange" /> Advanced Authority Tools
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-2 relative">
+                    {tier !== 'pro' && (
+                      <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200">
+                        <Lock className="w-4 h-4 text-gray-400 mb-1" />
+                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Elite Pro Only</span>
+                      </div>
+                    )}
+                    <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest flex items-center gap-2 ml-1">
+                       Video Introduction URL
+                    </label>
+                    <input 
+                      type="url"
+                      disabled={tier !== 'pro'}
+                      value={profileData.video_url}
+                      onChange={(e) => handleInputChange('video_url', e.target.value)}
+                      className="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 font-bold text-neuro-navy outline-none"
+                      placeholder="YouTube or Vimeo Link"
+                    />
+                  </div>
+                  <div className="space-y-2 relative">
+                    {tier !== 'pro' && (
+                      <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200">
+                        <Lock className="w-4 h-4 text-gray-400 mb-1" />
+                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Elite Pro Only</span>
+                      </div>
+                    )}
+                    <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest flex items-center gap-2 ml-1">
+                       Custom SEO Keywords
+                    </label>
+                    <input 
+                      type="text"
+                      disabled={tier !== 'pro'}
+                      value={profileData.seo_keywords}
+                      onChange={(e) => handleInputChange('seo_keywords', e.target.value)}
+                      className="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 font-bold text-neuro-navy outline-none"
+                      placeholder="e.g. scoliosis Austin, pediatric chiro"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -427,16 +500,18 @@ export default function PracticeProfile() {
               </div>
             </div>
 
-            <div className="mt-12 flex items-center justify-between pt-8 border-t border-gray-50">
-              <p className="text-xs text-gray-400 font-medium italic">Changes update immediately in the global directory.</p>
-              <button 
-                type="submit"
-                disabled={saving || !hasChanges}
-                className="px-8 py-4 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-[10px] hover:bg-neuro-orange-dark transition-all disabled:opacity-50 flex items-center gap-3 shadow-lg shadow-neuro-orange/20"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                Go Live & Get Found
-              </button>
+            <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-6 pt-8 border-t border-gray-50">
+              <p className="text-xs text-gray-400 font-medium italic order-2 sm:order-1">Changes update immediately in the global directory.</p>
+              <div className="flex items-center gap-4 w-full sm:w-auto order-1 sm:order-2">
+                <button 
+                  type="submit"
+                  disabled={saving || !hasChanges}
+                  className="w-full sm:w-auto px-10 py-5 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-[11px] hover:bg-neuro-orange-dark transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-xl shadow-neuro-orange/30 active:scale-95"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Save Clinical Profile
+                </button>
+              </div>
             </div>
           </section>
 

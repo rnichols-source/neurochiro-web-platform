@@ -46,6 +46,8 @@ export async function updateDoctorProfile(formData: FormData) {
     const website = formData.get('website') as string
     const bio = formData.get('bio') as string
     const specialties = formData.get('specialties')?.toString().split(',').map((s: string) => s.trim()) || []
+    const videoUrl = formData.get('video_url') as string
+    const seoKeywords = formData.get('seo_keywords') as string
 
     // 1. Update Profile (Name)
     const { error: profileError } = await (supabase as any)
@@ -68,7 +70,9 @@ export async function updateDoctorProfile(formData: FormData) {
         country: country,
         website_url: website,
         bio: bio,
-        specialties: specialties
+        specialties: specialties,
+        video_url: videoUrl,
+        seo_keywords: seoKeywords
       })
       .eq('user_id', user.id)
 
