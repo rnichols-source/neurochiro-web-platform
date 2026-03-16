@@ -3,33 +3,16 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hostname = request.headers.get('host') || '';
 
-  // 1. CANONICAL & SECURITY REDIRECTS
-  // Force HTTPS in production
-  if (
-    process.env.NODE_ENV === 'production' &&
-    request.headers.get('x-forwarded-proto') === 'http'
-  ) {
-    return NextResponse.redirect(`https://${hostname}${pathname}`, 301);
-  }
-
-  // Handle www -> non-www
-  if (hostname.startsWith('www.')) {
-    const newHost = hostname.replace('www.', '');
-    return NextResponse.redirect(`https://${newHost}${pathname}`, 301);
-  }
-
-  // 2. SUPABASE AUTH SESSION SYNC
+  // 🛡️ INITIAL RESPONSE - Pass the whole request for atomic handling
   let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+    request,
   })
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+  // If keys are missing, just let traffic through (dev/emergency mode)
   if (!supabaseUrl || !supabaseKey) {
     return response;
   }
@@ -45,9 +28,7 @@ export async function middleware(request: NextRequest) {
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
           response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+            request,
           })
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
@@ -57,17 +38,24 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // 3. PROTECTED ROUTES
+  // 🛡️ PROTECTED ROUTES LOGIC
   const protectedPaths = ['/admin', '/doctor', '/student', '/portal', '/marketplace/dashboard'];
   const isProtected = protectedPaths.some(path => pathname.startsWith(path));
 
   if (isProtected) {
+    // IMPORTANT: Use getUser() instead of getSession() for security in middleware
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('redirect', pathname)
-      return NextResponse.redirect(loginUrl)
+      
+      // We must pass the updated cookies from 'response' to the redirect!
+      const redirectResponse = NextResponse.redirect(loginUrl)
+      response.cookies.getAll().forEach(cookie => {
+        redirectResponse.cookies.set(cookie.name, cookie.value);
+      });
+      return redirectResponse;
     }
   }
 
@@ -78,11 +66,12 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
+     * - api (internal APIs usually don't need Supabase SSR middleware run)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - .png, .jpg, .svg, etc. (image assets)
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif)$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif)$).*)',
   ],
 }

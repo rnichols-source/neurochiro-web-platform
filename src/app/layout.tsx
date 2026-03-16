@@ -17,7 +17,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://neurochiro.com"),
+  metadataBase: new URL("https://neurochiro.co"),
   title: "NeuroChiro | Nervous-System-First Chiropractic",
   description: "The global ecosystem for nervous-system-focused chiropractic. Find doctors, educational resources, and career opportunities.",
   alternates: {
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "NeuroChiro | Nervous-System-First Chiropractic",
     description: "The global ecosystem for nervous-system-focused chiropractic.",
-    url: "https://neurochiro.com",
+    url: "https://neurochiro.co",
     siteName: "NeuroChiro",
     images: [
       {
@@ -85,8 +85,8 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "NeuroChiro",
-    "url": "https://neurochiro.com",
-    "logo": "https://neurochiro.com/logo.png",
+    "url": "https://neurochiro.co",
+    "logo": "https://neurochiro.co/logo.png",
     "sameAs": [
       "https://facebook.com/neurochiro",
       "https://instagram.com/neurochiro"

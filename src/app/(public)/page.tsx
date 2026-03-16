@@ -21,8 +21,8 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "NeuroChiro",
-    "url": "https://neurochiro.com",
-    "logo": "https://neurochiro.com/logo.png",
+    "url": "https://neurochiro.co",
+    "logo": "https://neurochiro.co/logo.png",
     "description": "The global ecosystem for nervous-system-focused chiropractic.",
     "sameAs": [
       "https://facebook.com/neurochiro",
