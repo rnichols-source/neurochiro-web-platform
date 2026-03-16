@@ -35,14 +35,20 @@ async function checkAdminAuth() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  // Explicitly define profile type to avoid 'never' type errors
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single();
+    .single() as { data: { role: string } | null };
 
-  const isAdmin = profile?.role === 'admin' || profile?.role === 'founder' || 
-                  user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com';
+  const userEmail = (user.email || "").toLowerCase();
+  const superuserEmails = ['drray@neurochirodirectory.com', 'raymond@neurochiro.com'];
+  
+  // Harden isAdmin logic with metadata fallback and explicit string checks
+  const isAdmin = (profile && 'role' in profile && (profile.role === 'admin' || profile.role === 'founder')) || 
+                  (user.user_metadata?.role === 'admin' || user.user_metadata?.role === 'founder') ||
+                  superuserEmails.includes(userEmail);
   
   if (!isAdmin) throw new Error("Forbidden: Admin access required");
   return user;
