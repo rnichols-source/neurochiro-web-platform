@@ -21,6 +21,7 @@ import { MembershipTier } from '@/types/directory';
 import { ROIStats, ROIData } from '@/types/analytics';
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { confirmPatient } from '@/app/(doctor)/doctor/dashboard/actions';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -34,19 +35,27 @@ interface ROIDashboardProps {
 
 export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProps) {
   const [roiMode, setRoiMode] = useState<'multiplier' | 'dollars'>('multiplier');
-  const [pendingPatients, setPendingPatients] = useState([
-    { id: 1, name: "Sarah J.", date: "Feb 28" },
-    { id: 2, name: "Michael R.", date: "Mar 02" },
-    { id: 3, name: "Emma W.", date: "Mar 10" },
-  ]);
+  const [pendingPatients, setPendingPatients] = useState(data.pending_patients || []);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasVideo, setHasVideo] = useState(false);
 
-  const handleConfirm = (id: number) => {
-    setPendingPatients(prev => prev.filter(p => p.id !== id));
+  const handleConfirm = async (id: string) => {
+    try {
+      const result = await confirmPatient(id);
+      if (result.success) {
+        setPendingPatients(prev => prev.filter(p => p.id !== id));
+      }
+    } catch (e) {
+      console.error("Failed to confirm patient:", e);
+    }
   };
 
-  const handleBatchConfirm = () => {
-    setPendingPatients([]);
+  const handleBatchConfirm = async () => {
+    setIsRefreshing(true);
+    for (const patient of pendingPatients) {
+      await handleConfirm(patient.id);
+    }
+    setIsRefreshing(false);
   };
 
   const isLocked = tier === 'starter';
@@ -54,7 +63,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
   
   const stats = data.stats;
   const estimatedRevenue = stats.confirmed_patients * stats.average_case_value;
-  const roiMultiplier = estimatedRevenue / stats.membership_cost;
+  const roiMultiplier = stats.membership_cost > 0 ? (estimatedRevenue / stats.membership_cost) : 0;
   const netProfit = estimatedRevenue - stats.membership_cost;
   const NETWORK_AVG_ROI = 150;
 
@@ -283,7 +292,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
               <span className="text-3xl font-black text-neuro-navy">{stat.value}</span>
               {i > 0 && (
                 <span className="text-[10px] font-bold text-gray-400 mb-1">
-                  {Math.round((stat.value / stats.profile_views) * 100)}% Conv.
+                  {stats.profile_views > 0 ? Math.round((Number(stat.value) / stats.profile_views) * 100) : 0}% Conv.
                 </span>
               )}
             </div>
@@ -385,7 +394,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
                               <CheckCircle2 className="w-3.5 h-3.5" />
                             </button>
                             <button 
-                              onClick={() => handleConfirm(patient.id)} // In mock, just removes it
+                              onClick={() => setPendingPatients(prev => prev.filter(p => p.id !== patient.id))} 
                               className="p-1.5 bg-white text-gray-400 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
                               title="No Show"
                             >
@@ -398,9 +407,10 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
                 
                 <button 
                   onClick={handleBatchConfirm}
-                  className="w-full mt-6 py-3 bg-neuro-navy text-white text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-neuro-navy-light transition-all shadow-md active:scale-95"
+                  disabled={isRefreshing}
+                  className="w-full mt-6 py-3 bg-neuro-navy text-white text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-neuro-navy-light transition-all shadow-md active:scale-95 disabled:opacity-50"
                 >
-                    One-Click Batch Confirm
+                    {isRefreshing ? "Processing..." : "One-Click Batch Confirm"}
                 </button>
               </motion.section>
             )}

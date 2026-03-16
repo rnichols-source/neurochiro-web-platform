@@ -123,28 +123,45 @@ export async function getDoctorROIData(period: string = '30d') {
   if (!user) return null
 
   try {
-    const [doctorRes, leadsRes, messagesRes] = await Promise.all([
+    // 1. Parallelize fetches for profile, stats, and leads
+    const [profileRes, doctorRes, leadsRes, confirmedRes, analyticsRes] = await Promise.all([
+      (supabase as any).from('profiles').select('tier, role').eq('id', user.id).single(),
       (supabase as any).from('doctors').select('profile_views, patient_leads').eq('user_id', user.id).single(),
-      (supabase as any).from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
-      (supabase as any).from('messages').select('*', { count: 'exact', head: true }).eq('recipient_id', user.id)
+      (supabase as any).from('leads').select('*').eq('doctor_id', user.id).eq('status', 'new'),
+      (supabase as any).from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id).eq('status', 'converted'),
+      (supabase as any).from('analytics_events').select('*').eq('doctor_id', user.id)
     ]);
+
+    const tier = (profileRes.data as any)?.tier || 'starter';
+    const membershipCost = tier === 'pro' ? 999 : tier === 'growth' ? 499 : 199;
+    
+    // Aggregating analytics from the new analytics_events table
+    const analytics = analyticsRes.data || [];
+    const contactClicks = analytics.filter((a: any) => a.event_type === 'contact_click').length;
+    const bookingClicks = analytics.filter((a: any) => a.event_type === 'booking_click').length;
+    const phoneTaps = analytics.filter((a: any) => a.event_type === 'phone_tap').length;
 
     const stats = {
       profile_views: (doctorRes.data as any)?.profile_views || 0,
-      contact_clicks: Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.15),
-      phone_taps: Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.08),
+      contact_clicks: contactClicks || Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.15),
+      phone_taps: phoneTaps || Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.08),
       website_clicks: Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.12),
-      booking_clicks: Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.05),
-      message_requests: messagesRes.count || 0,
-      referrals_sent: leadsRes.count || 0,
-      confirmed_patients: Math.floor((leadsRes.count || 0) * 0.6),
+      booking_clicks: bookingClicks || Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.05),
+      message_requests: 0,
+      referrals_sent: (leadsRes.data as any)?.length || 0,
+      confirmed_patients: confirmedRes.count || 0,
       average_case_value: 2500,
-      membership_cost: 99
+      membership_cost: membershipCost
     };
 
     return {
       period,
       stats,
+      pending_patients: (leadsRes.data || []).map((l: any) => ({
+        id: l.id,
+        name: `${l.first_name} ${l.last_name?.charAt(0)}.`,
+        date: new Date(l.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      })),
       historical_revenue: [
         { date: 'SEP', amount: 12000 },
         { date: 'OCT', amount: 15000 },
@@ -163,5 +180,36 @@ export async function getDoctorROIData(period: string = '30d') {
   } catch (e) {
     console.error("ROI Data Error:", e);
     return null;
+  }
+}
+
+export async function confirmPatient(leadId: string) {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Unauthorized" }
+
+  try {
+    const { error } = await (supabase as any)
+      .from('leads')
+      .update({ 
+        status: 'converted', 
+        confirmed_at: new Date().toISOString() 
+      })
+      .eq('id', leadId)
+      .eq('doctor_id', user.id)
+
+    if (error) throw error;
+    
+    // Log the conversion event
+    await (supabase as any).from('analytics_events').insert({
+      doctor_id: user.id,
+      event_type: 'patient_confirmed',
+      metadata: { leadId }
+    });
+
+    return { success: true }
+  } catch (e: any) {
+    console.error("Confirm Patient Error:", e);
+    return { error: e.message }
   }
 }
