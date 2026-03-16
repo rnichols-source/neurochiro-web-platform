@@ -26,7 +26,8 @@ export async function getDoctors(options: {
 
   try {
     // DATA MINIMIZATION: Only fetch essential columns for the LIST view
-    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, latitude, longitude, bio, specialties, region_code, photo_url, rating, review_count';
+    // Removed: email, website_url, instagram_url, facebook_url, address (private-ish)
+    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, latitude, longitude, bio, specialties, region_code';
     
     let query = (supabase as any)
       .from('doctors')
@@ -76,7 +77,8 @@ export async function getDoctorBySlug(slug: string) {
   const supabase = createServerSupabase()
   
   // DATA MINIMIZATION: Fetch columns needed for full profile
-  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email, website_url, instagram_url, facebook_url, user_id, photo_url, rating, review_count';
+  // Removed google_place_id as it does not exist in the schema
+  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email, website_url, instagram_url, facebook_url, user_id';
   
   try {
     let { data, error } = await (supabase as any)
