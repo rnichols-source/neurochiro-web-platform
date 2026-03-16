@@ -12,7 +12,7 @@ export async function getDoctorDashboardStats() {
     // Parallelize fetches for profile, practice info, seminars, jobs, and leads
     const [profileRes, doctorRes, seminarsRes, jobsRes, leadsRes] = await Promise.all([
       (supabase as any).from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
-      (supabase as any).from('doctors').select('clinic_name, slug, location_city, profile_views').eq('user_id', user.id).single(),
+      (supabase as any).from('doctors').select('clinic_name, slug, location_city, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count').eq('user_id', user.id).single(),
       (supabase as any).from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
       (supabase as any).from('jobs').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
       (supabase as any).from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id)
@@ -24,6 +24,28 @@ export async function getDoctorDashboardStats() {
     const jobCount = jobsRes.count || 0;
     const patientLeads = leadsRes.count || 0;
     const profileViews = (doctor as any)?.profile_views || 0;
+
+    // 3. Robust Profile Completeness Calculation
+    let completeness = 0;
+    const weights = {
+      clinic_name: 10,
+      location_city: 10,
+      bio: 20,
+      photo_url: 20,
+      specialties: 10,
+      website_url: 10,
+      instagram_url: 10,
+      facebook_url: 10
+    };
+
+    if (doctor?.clinic_name) completeness += weights.clinic_name;
+    if (doctor?.location_city) completeness += weights.location_city;
+    if (doctor?.bio && doctor.bio.length > 50) completeness += weights.bio;
+    if (doctor?.photo_url) completeness += weights.photo_url;
+    if (doctor?.specialties && doctor.specialties.length > 0) completeness += weights.specialties;
+    if (doctor?.website_url) completeness += weights.website_url;
+    if (doctor?.instagram_url) completeness += weights.instagram_url;
+    if (doctor?.facebook_url) completeness += weights.facebook_url;
 
     const userRole = (profile as any)?.role || 'doctor_starter';
     const isFounder = user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com';
@@ -48,9 +70,9 @@ export async function getDoctorDashboardStats() {
         { label: "Job Applications", value: (jobCount * 1).toString(), trend: "0%" }
       ],
       marketPerformance: {
-        completeness: doctor?.clinic_name && doctor?.location_city ? 85 : 45,
-        reviews: 0,
-        engagement: profileViews > 0 ? 75 : 0
+        completeness: completeness,
+        reviews: (doctor as any)?.review_count || 0,
+        engagement: profileViews > 50 ? 90 : profileViews > 10 ? 60 : profileViews > 0 ? 30 : 0
       }
     }
   } catch (e) {

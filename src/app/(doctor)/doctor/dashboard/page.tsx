@@ -175,21 +175,21 @@ export default function DoctorDashboard() {
         {[
           { 
             label: "Profile Views", 
-            value: (dashboardData?.stats?.[0]?.value === "---" || dashboardData?.stats?.[0]?.value === "0") ? "120+" : dashboardData?.stats?.[0]?.value || "0", 
+            value: dashboardData?.stats?.[0]?.value || "0", 
             trend: dashboardData?.stats?.[0]?.trend || "0%", 
             icon: Eye, 
             color: "text-blue-600", 
             bg: "bg-blue-50",
-            isPotential: dashboardData?.stats?.[0]?.value === "---" || dashboardData?.stats?.[0]?.value === "0"
+            isPotential: dashboardData?.stats?.[0]?.value === "---"
           },
           { 
             label: "Patient Leads", 
-            value: (dashboardData?.stats?.[1]?.value === "---" || dashboardData?.stats?.[1]?.value === "0") ? "15+" : dashboardData?.stats?.[1]?.value || "0", 
+            value: dashboardData?.stats?.[1]?.value || "0", 
             trend: dashboardData?.stats?.[1]?.trend || "0%", 
             icon: UserPlus, 
             color: "text-purple-600", 
             bg: "bg-purple-50",
-            isPotential: dashboardData?.stats?.[1]?.value === "---" || dashboardData?.stats?.[1]?.value === "0"
+            isPotential: dashboardData?.stats?.[1]?.value === "---"
           },
           { label: "Seminar Clicks", value: dashboardData?.stats?.[2]?.value || "0", trend: dashboardData?.stats?.[2]?.trend || "0%", icon: MousePointerClick, color: "text-orange-600", bg: "bg-orange-50" },
           { label: "Job Applications", value: dashboardData?.stats?.[3]?.value || "0", trend: dashboardData?.stats?.[3]?.trend || "0%", icon: Briefcase, color: "text-green-600", bg: "bg-green-50" }
