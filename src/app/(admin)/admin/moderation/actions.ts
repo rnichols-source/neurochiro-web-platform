@@ -144,14 +144,40 @@ export async function moderateDoctor(doctorId: string, action: 'approve' | 'reje
       flag: 'pending' 
     };
 
+    const updateData: any = { 
+      verification_status: statusMap[action]
+    };
+
+    // Audit requirement: Update verification_date (verified_at) if approved
+    if (action === 'approve') {
+      updateData.verified_at = new Date().toISOString();
+    }
+
+    const { data: doctor, error: fetchError } = await (supabase as any)
+      .from('doctors')
+      .select('email, first_name')
+      .eq('id', doctorId)
+      .single();
+
     const { error: updateError } = await (supabase as any)
       .from('doctors')
-      .update({ 
-        verification_status: statusMap[action]
-      })
+      .update(updateData)
       .eq('id', doctorId);
 
     if (updateError) throw updateError;
+
+    // Trigger Notification: Welcome to the Network email via Automation Queue
+    if (action === 'approve' && doctor?.email) {
+      await (supabase as any).from('automation_queue').insert({
+        event_type: 'send_welcome_email',
+        payload: { 
+          to: doctor.email, 
+          name: doctor.first_name,
+          role: 'doctor'
+        },
+        status: 'pending'
+      });
+    }
 
     // Log the action
     await (supabase as any).from('audit_logs').insert({
