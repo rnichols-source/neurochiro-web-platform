@@ -25,7 +25,8 @@ import {
   getModerationData, 
   resolveAlert, 
   toggleModerationSetting, 
-  updateComplianceGuidelines 
+  updateComplianceGuidelines,
+  moderateDoctor 
 } from "./actions";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -37,7 +38,9 @@ export default function ModerationCenter() {
 
   const [isGuidelinesModalOpen, setIsGuidelinesModalOpen] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState<any>(null);
+  const [selectedQueue, setSelectedQueue] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [moderating, setModerating] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -48,6 +51,8 @@ export default function ModerationCenter() {
     const res = await getModerationData();
     if (res.success) {
       setData(res.data);
+    } else {
+      console.error(res.error);
     }
     setLoading(false);
   };
@@ -58,16 +63,26 @@ export default function ModerationCenter() {
     
     const res = await resolveAlert(selectedAlert.id, action);
     if (res.success) {
-      await fetchData(); // Refresh data to show changes
+      await fetchData(); 
       setSelectedAlert(null);
     }
     setResolving(null);
   };
 
+  const handleModerateDoctor = async (doctorId: string, action: 'approve' | 'reject' | 'flag') => {
+    setModerating(doctorId);
+    const res = await moderateDoctor(doctorId, action);
+    if (res.success) {
+      await fetchData();
+    } else {
+      alert(`Moderation Error: ${res.error}`);
+    }
+    setModerating(null);
+  };
+
   const handleToggleAutoApprove = async () => {
     if (!data) return;
     const newValue = !data.settings.autoApprove;
-    // Optimistic UI update
     setData({ ...data, settings: { ...data.settings, autoApprove: newValue } });
     await toggleModerationSetting('autoApprove', newValue);
   };
@@ -75,7 +90,6 @@ export default function ModerationCenter() {
   const handleToggleScanLinks = async () => {
     if (!data) return;
     const newValue = !data.settings.outboundScan;
-    // Optimistic UI update
     setData({ ...data, settings: { ...data.settings, outboundScan: newValue } });
     await toggleModerationSetting('outboundScan', newValue);
   };
@@ -153,8 +167,8 @@ export default function ModerationCenter() {
               return (
                 <section 
                   key={i} 
-                  onClick={() => alert(`Opening ${q.name} review queue...`)}
-                  className="bg-white/5 border border-white/5 rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-8 hover:border-neuro-orange/30 transition-all cursor-pointer group active:scale-95"
+                  onClick={() => setSelectedQueue(selectedQueue === q.id ? null : q.id)}
+                  className={`bg-white/5 border rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-8 hover:border-neuro-orange/30 transition-all cursor-pointer group active:scale-95 ${selectedQueue === q.id ? 'border-neuro-orange/50 bg-neuro-orange/5' : 'border-white/5'}`}
                 >
                   <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center mb-4 md:mb-6 ${q.color}`}>
                     <Icon className="w-5 h-5 md:w-6 md:h-6" />
@@ -168,6 +182,73 @@ export default function ModerationCenter() {
               );
             })}
           </div>
+
+          {/* Review Queue Items */}
+          <AnimatePresence mode="wait">
+            {selectedQueue === 'doctors' && (
+              <motion.section 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden"
+              >
+                <div className="p-6 md:p-8 border-b border-white/5 flex items-center justify-between bg-blue-500/5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                      <UserPlus className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-lg md:text-xl font-heading font-black text-white">Doctor Application Queue</h3>
+                  </div>
+                  <button onClick={() => setSelectedQueue(null)} className="text-gray-500 hover:text-white"><X className="w-6 h-6" /></button>
+                </div>
+                <div className="divide-y divide-white/5">
+                  {data?.queues.find((q: any) => q.id === 'doctors')?.items?.length === 0 ? (
+                    <div className="p-12 text-center text-gray-500 font-bold uppercase tracking-widest text-xs">
+                      No pending applications in this region.
+                    </div>
+                  ) : (
+                    data?.queues.find((q: any) => q.id === 'doctors')?.items?.map((item: any) => (
+                      <div key={item.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white/5 transition-all">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-neuro-navy flex items-center justify-center text-neuro-orange font-black text-xl">
+                            {item.last_name?.[0] || 'D'}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-white text-lg">Dr. {item.first_name} {item.last_name}</h4>
+                            <p className="text-xs text-gray-500">{item.clinic_name} • {item.city}, {item.state}</p>
+                            <p className="text-[9px] text-gray-600 uppercase font-black mt-1">Applied {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => handleModerateDoctor(item.id, 'approve')}
+                            disabled={moderating === item.id}
+                            className="flex-1 md:flex-none px-4 py-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                          >
+                            {moderating === item.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />} Approve
+                          </button>
+                          <button 
+                            onClick={() => handleModerateDoctor(item.id, 'flag')}
+                            disabled={moderating === item.id}
+                            className="flex-1 md:flex-none px-4 py-2 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                          >
+                             <Flag className="w-3 h-3" /> Flag
+                          </button>
+                          <button 
+                            onClick={() => handleModerateDoctor(item.id, 'reject')}
+                            disabled={moderating === item.id}
+                            className="flex-1 md:flex-none px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                          >
+                             <ShieldX className="w-3 h-3" /> Reject
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </motion.section>
+            )}
+          </AnimatePresence>
 
           {/* Active Alerts */}
           <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden">
