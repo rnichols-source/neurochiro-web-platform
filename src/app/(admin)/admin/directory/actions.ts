@@ -1,12 +1,14 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server';
+import { createAdminClient } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
 import { unstable_noStore as noStore } from 'next/cache';
 
 export async function getAllDoctors(search?: string) {
   noStore();
-  const supabase = createServerSupabase();
+  // Using Admin Client to ensure admin sees all records regardless of RLS
+  const supabase = createAdminClient();
   let query = (supabase as any).from('doctors').select('*').order('last_name', { ascending: true });
 
   if (search) {
@@ -19,8 +21,9 @@ export async function getAllDoctors(search?: string) {
 }
 
 export async function updateDoctorManually(doctorId: string, updates: any) {
-  const supabase = createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
+  // Use Admin Client for manual directory updates
+  const supabase = createAdminClient();
+  const { data: { user } } = await (supabase.auth as any).getUser(); // Auth might not work with admin client if token is not passed, but we don't strictly need user for update
 
   const { error } = await (supabase as any)
     .from('doctors')
@@ -32,12 +35,15 @@ export async function updateDoctorManually(doctorId: string, updates: any) {
     return { success: false, error: error.message };
   }
 
-  // Log the action
+  // Log the action (using server client for audit log to get user if possible)
   try {
+    const serverSupabase = createServerSupabase();
+    const { data: { user: serverUser } } = await serverSupabase.auth.getUser();
+    
     await (supabase as any).from('audit_logs').insert({
       category: 'DIRECTORY',
       event: `Manual Update: Doctor ${doctorId}`,
-      user_name: user?.email || "Founder",
+      user_name: serverUser?.email || "Founder",
       target: "Clinical Directory",
       status: 'Success',
       severity: 'Medium',
@@ -54,8 +60,10 @@ export async function updateDoctorManually(doctorId: string, updates: any) {
 
 export async function deleteDoctorManually(doctorId: string) {
   try {
-    const supabase = createServerSupabase();
-    const { data: { user } } = await supabase.auth.getUser();
+    // Use Admin Client to bypass RLS and ensure deletion works
+    const supabase = createAdminClient();
+    const serverSupabase = createServerSupabase();
+    const { data: { user: serverUser } } = await serverSupabase.auth.getUser();
 
     console.log(`[DELETE] Starting deletion process for Doctor ID: ${doctorId}`);
 
@@ -69,13 +77,11 @@ export async function deleteDoctorManually(doctorId: string) {
       console.warn("[DELETE] Jobs cleanup issue:", jobsError.message);
     }
 
-    // 2. Try to clean up leads if they reference this doctor_id
-    // Note: Some leads might reference auth.users(id), others might reference doctor(id)
-    // We try both to be safe.
+    // 2. Try to clean up leads
     try {
       await (supabase as any).from('leads').delete().eq('doctor_id', doctorId);
     } catch (e) {
-      console.warn("[DELETE] Leads cleanup skipped (column might not exist or reference auth.id)");
+      console.warn("[DELETE] Leads cleanup skipped");
     }
 
     // 3. Delete the doctor record
@@ -91,18 +97,34 @@ export async function deleteDoctorManually(doctorId: string) {
     }
 
     if (!deleteData || deleteData.length === 0) {
-      console.error("[DELETE] No record found to delete with ID:", doctorId);
-      return { success: false, error: "No record found with that ID. It may have already been deleted." };
+      // Fallback: Check if it was matching by user_id instead of id
+      console.warn(`[DELETE] No record found with id=${doctorId}, trying user_id...`);
+      const { error: deleteError2, data: deleteData2 } = await (supabase as any)
+        .from('doctors')
+        .delete()
+        .eq('user_id', doctorId)
+        .select();
+      
+      if (deleteError2) {
+        return { success: false, error: `Database Error (user_id): ${deleteError2.message}` };
+      }
+      
+      if (!deleteData2 || deleteData2.length === 0) {
+        console.error("[DELETE] No record found to delete with ID or UserID:", doctorId);
+        return { success: false, error: "No record found with that ID. It may have already been deleted." };
+      }
+      
+      console.log(`[DELETE] Successfully deleted doctor using user_id: ${doctorId}`);
+    } else {
+      console.log(`[DELETE] Successfully deleted doctor using id: ${doctorId}`);
     }
-
-    console.log(`[DELETE] Successfully deleted doctor: ${doctorId}`);
 
     // 4. Log the action (Non-blocking)
     try {
       await (supabase as any).from('audit_logs').insert({
         category: 'DIRECTORY',
         event: `Manual Delete: Doctor ${doctorId}`,
-        user_name: user?.email || "Founder",
+        user_name: serverUser?.email || "Founder",
         target: "Clinical Directory",
         status: 'Success',
         severity: 'High',
