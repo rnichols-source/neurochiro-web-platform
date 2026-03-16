@@ -133,6 +133,7 @@ export async function getDoctorROIData(period: string = '30d') {
     ]);
 
     const tier = (profileRes.data as any)?.tier || 'starter';
+    const isStarter = tier === 'starter';
     const membershipCost = tier === 'pro' ? 199 : tier === 'growth' ? 99 : 49;
     const averageCaseValue = Number((doctorRes.data as any)?.average_case_value) || 2500;
     
@@ -144,13 +145,13 @@ export async function getDoctorROIData(period: string = '30d') {
 
     const stats = {
       profile_views: (doctorRes.data as any)?.profile_views || 0,
-      contact_clicks: contactClicks || Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.15),
-      phone_taps: phoneTaps || Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.08),
-      website_clicks: Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.12),
-      booking_clicks: bookingClicks || Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.05),
+      contact_clicks: isStarter ? 0 : (contactClicks || Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.15)),
+      phone_taps: isStarter ? 0 : (phoneTaps || Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.08)),
+      website_clicks: isStarter ? 0 : Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.12),
+      booking_clicks: isStarter ? 0 : (bookingClicks || Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.05)),
       message_requests: 0,
-      referrals_sent: (leadsRes.data as any)?.length || 0,
-      confirmed_patients: confirmedRes.count || 0,
+      referrals_sent: isStarter ? 0 : ((leadsRes.data as any)?.length || 0),
+      confirmed_patients: isStarter ? 0 : (confirmedRes.count || 0),
       average_case_value: averageCaseValue,
       membership_cost: membershipCost
     };
@@ -198,16 +199,16 @@ export async function getDoctorROIData(period: string = '30d') {
     return {
       period,
       stats,
-      pending_patients: (leadsRes.data || []).map((l: any) => ({
+      pending_patients: isStarter ? [] : (leadsRes.data || []).map((l: any) => ({
         id: l.id,
         name: `${l.first_name} ${l.last_name?.charAt(0)}.`,
         date: new Date(l.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
       })),
-      historical_revenue: historicalRevenue,
-      patient_acquisition: patientAcquisition.length > 0 ? patientAcquisition : [
+      historical_revenue: isStarter ? [] : historicalRevenue,
+      patient_acquisition: isStarter ? [] : (patientAcquisition.length > 0 ? patientAcquisition : [
         { source: "Global Directory", count: 0 },
         { source: "Direct Search", count: 0 }
-      ]
+      ])
     };
   } catch (e) {
     console.error("ROI Data Error:", e);

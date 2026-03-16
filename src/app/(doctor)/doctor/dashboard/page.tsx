@@ -153,6 +153,7 @@ export default function DoctorDashboard() {
         <VerifiedBadge 
           doctorSlug={dashboardData?.profile?.slug || "profile"} 
           doctorName={dashboardData?.profile?.name || "Doctor"} 
+          tier={tier}
         />
       )}
 
