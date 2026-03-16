@@ -84,27 +84,6 @@ export default function DoctorDashboard() {
     }, 1500);
   };
 
-  const vendorOffers = [
-    {
-      vendor: "NeuralPulse Technologies",
-      title: "20% off Neuro scanning equipment",
-      code: "NEUROPRO20",
-      link: "/marketplace"
-    },
-    {
-      vendor: "ChiroFlow EHR",
-      title: "3 months free practice software",
-      code: "FLOW3FREE",
-      link: "/marketplace"
-    },
-    {
-      vendor: "GrowthSpine Marketing",
-      title: "$500 off onboarding",
-      code: "GROW500",
-      link: "/marketplace"
-    }
-  ];
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neuro-cream">
