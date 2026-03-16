@@ -24,7 +24,8 @@ import {
   AlertTriangle,
   Loader2,
   Mail,
-  Stethoscope
+  Stethoscope,
+  Tag
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -42,6 +43,7 @@ const allNavItems = [
   { name: "Talent Intelligence", href: "/admin/users", icon: Users, roles: ['super_admin', 'founder', 'admin', 'regional_admin'] },
   { name: "Clinical Directory", href: "/admin/directory", icon: Stethoscope, roles: ['super_admin', 'founder', 'admin'] },
   { name: "Programs & LMS", href: "/admin/programs", icon: GraduationCap, roles: ['super_admin', 'founder', 'admin'] },
+  { name: "Marketplace", href: "/admin/marketplace", icon: Tag, roles: ['super_admin', 'founder', 'admin'] },
   { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert, roles: ['super_admin', 'founder', 'admin', 'support_admin'] },
   { name: "Seminar Approvals", href: "/admin/approvals/seminars", icon: ShieldCheck, roles: ['super_admin', 'founder', 'admin'] },
   { name: "Announcements", href: "/admin/announcements", icon: Megaphone, roles: ['super_admin', 'founder', 'admin'] },
