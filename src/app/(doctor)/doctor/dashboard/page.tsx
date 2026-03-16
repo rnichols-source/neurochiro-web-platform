@@ -31,6 +31,7 @@ import { getDoctorDashboardStats } from "./actions";
 import OnboardingTracker from "@/components/doctor/OnboardingTracker";
 import ProductTutorial from "@/components/dashboard/ProductTutorial";
 import VerifiedBadge from "@/components/doctor/VerifiedBadge";
+import AnnouncementsFeed from "@/components/dashboard/AnnouncementsFeed";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -424,6 +425,8 @@ export default function DoctorDashboard() {
 
         {/* Sidebar Widgets */}
         <div className="space-y-6">
+           <AnnouncementsFeed audience="doctor" />
+
            {/* Market Performance */}
            <section className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
               <h3 className="font-heading font-black text-lg text-neuro-navy mb-6">Market Performance</h3>

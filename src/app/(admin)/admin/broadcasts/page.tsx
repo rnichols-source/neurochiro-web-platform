@@ -8,6 +8,7 @@ import { sendBroadcastAction } from "@/app/actions/comms-actions";
 export default function AdminBroadcastsPage() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{type: 'success' | 'error', msg: string} | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const [form, setForm] = useState({
     subject: "",
@@ -19,8 +20,14 @@ export default function AdminBroadcastsPage() {
   });
 
   const handleAction = async (actionType: 'test' | 'send') => {
+    if (actionType === 'send' && !showConfirm) {
+      setShowConfirm(true);
+      return;
+    }
+
     setLoading(true);
     setStatus(null);
+    setShowConfirm(false);
 
     const formData = new FormData();
     formData.append("subject", form.subject);
@@ -77,14 +84,25 @@ export default function AdminBroadcastsPage() {
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Audience Segment</label>
               <select 
                 value={form.audience}
-                onChange={(e) => setForm({ ...form, audience: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, audience: e.target.value });
+                  setShowConfirm(false);
+                }}
                 className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-neuro-orange/20 font-bold text-neuro-navy"
               >
-                <option value="all">All Active Users</option>
-                <option value="doctor">Doctors Only</option>
-                <option value="student">Students Only</option>
-                <option value="patient">Patients / Public</option>
-                <option value="paid_doctors">Doctors (Paid Tiers Only)</option>
+                <optgroup label="Global Roles">
+                  <option value="all">All Active Users</option>
+                  <option value="doctor">All Doctors</option>
+                  <option value="verified_doctors">Verified Doctors Only</option>
+                  <option value="paid_doctors">Paid Tiers Only</option>
+                  <option value="student">Students Only</option>
+                </optgroup>
+                <optgroup label="Regional Clusters">
+                  <option value="region:US">United States (Domestic)</option>
+                  <option value="region:AU">Australia / Oceania</option>
+                  <option value="region:CA">Canada</option>
+                  <option value="region:EU">European Union</option>
+                </optgroup>
               </select>
             </div>
 
@@ -144,21 +162,46 @@ export default function AdminBroadcastsPage() {
               </div>
             </div>
 
-            <div className="pt-4 flex gap-4">
-              <button 
-                onClick={() => handleAction('test')}
-                disabled={loading || !form.subject || !form.body}
-                className="flex-1 py-4 bg-gray-100 hover:bg-gray-200 text-neuro-navy rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex justify-center items-center gap-2"
-              >
-                <Eye className="w-4 h-4" /> Send Test
-              </button>
-              <button 
-                onClick={() => handleAction('send')}
-                disabled={loading || !form.subject || !form.body}
-                className="flex-1 py-4 bg-neuro-orange hover:bg-orange-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-neuro-orange/20 flex justify-center items-center gap-2"
-              >
-                <Send className="w-4 h-4" /> Broadcast
-              </button>
+            <div className="pt-4 flex flex-col gap-4">
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => handleAction('test')}
+                  disabled={loading || !form.subject || !form.body}
+                  className="flex-1 py-4 bg-gray-100 hover:bg-gray-200 text-neuro-navy rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex justify-center items-center gap-2"
+                >
+                  <Eye className="w-4 h-4" /> Send Test
+                </button>
+                
+                {showConfirm ? (
+                  <button 
+                    onClick={() => handleAction('send')}
+                    disabled={loading}
+                    className="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-red-600/20 flex justify-center items-center gap-2 animate-pulse"
+                  >
+                    <AlertCircle className="w-4 h-4" /> Confirm & Send
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => setShowConfirm(true)}
+                    disabled={loading || !form.subject || !form.body}
+                    className="flex-1 py-4 bg-neuro-orange hover:bg-orange-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-neuro-orange/20 flex justify-center items-center gap-2"
+                  >
+                    <Send className="w-4 h-4" /> Broadcast
+                  </button>
+                )}
+              </div>
+              
+              {showConfirm && (
+                <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-center space-y-2">
+                  <p className="text-[10px] text-red-600 font-black uppercase tracking-widest">
+                    ⚠️ ACCIDENTAL BROADCAST PROTECTION
+                  </p>
+                  <p className="text-[10px] text-red-500 font-bold">
+                    You are about to email the entire <span className="underline">{form.audience.replace(':', ' ')}</span> segment.
+                  </p>
+                  <button onClick={() => setShowConfirm(false)} className="text-[9px] font-black text-gray-400 uppercase tracking-widest hover:text-neuro-navy">Cancel Draft</button>
+                </div>
+              )}
             </div>
           </div>
         </div>
