@@ -35,7 +35,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function StudentDiscovery() {
   const router = useRouter();
-  const { isMember } = useDoctorTier();
+  const { isGrowth } = useDoctorTier();
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [showFilters, setShowFilters] = useState(false);
@@ -196,14 +196,14 @@ export default function StudentDiscovery() {
 
       {/* Talent Analytics */}
       <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden">
-         {!isMember && (
+         {!isGrowth && (
            <div className="absolute inset-0 bg-white/60 backdrop-blur-[4px] z-20 flex flex-col items-center justify-center text-center p-8">
               <div className="w-16 h-16 bg-neuro-orange/10 rounded-2xl flex items-center justify-center mb-4">
                  <Lock className="w-8 h-8 text-neuro-orange" />
               </div>
               <h3 className="text-xl font-heading font-black text-neuro-navy mb-2">Unlock Talent Intelligence</h3>
-              <p className="text-gray-500 max-w-sm mb-6 text-sm">Members see detailed analytics, regional trends, and high-performance student metrics.</p>
-              <Link href="/pricing" className="px-8 py-3 bg-neuro-navy text-white font-black rounded-xl text-xs uppercase tracking-widest shadow-xl transition-all hover:scale-105">Join the Network</Link>
+              <p className="text-gray-500 max-w-sm mb-6 text-sm">Growth members see detailed analytics, regional trends, and high-performance student metrics.</p>
+              <Link href="/pricing?upgrade=growth" className="px-8 py-3 bg-neuro-navy text-white font-black rounded-xl text-xs uppercase tracking-widest shadow-xl transition-all hover:scale-105">Upgrade to Growth</Link>
            </div>
          )}
 
@@ -412,7 +412,7 @@ export default function StudentDiscovery() {
                           >
                              Profile
                           </button>
-                          {isMember ? (
+                          {isGrowth ? (
                             <>
                               <button 
                                 onClick={() => openShadowingOffer(student)}
