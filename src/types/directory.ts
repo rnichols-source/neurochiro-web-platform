@@ -41,6 +41,8 @@ export interface Doctor {
   region_code?: string;
   email?: string;
   photo_url?: string;
+  video_url?: string;
+  seo_keywords?: string;
   created_at?: string;
   updated_at?: string;
 }

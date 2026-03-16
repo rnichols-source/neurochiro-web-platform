@@ -74,6 +74,8 @@ export interface Database {
           region_code: string
           email: string | null
           photo_url: string | null
+          video_url: string | null
+          seo_keywords: string | null
           created_at: string
           updated_at: string
           profile_views: number
@@ -108,6 +110,8 @@ export interface Database {
           region_code?: string
           email?: string | null
           photo_url?: string | null
+          video_url?: string | null
+          seo_keywords?: string | null
           created_at?: string
           updated_at?: string
           profile_views?: number
@@ -142,6 +146,8 @@ export interface Database {
           region_code?: string
           email?: string | null
           photo_url?: string | null
+          video_url?: string | null
+          seo_keywords?: string | null
           created_at?: string
           updated_at?: string
           profile_views?: number
