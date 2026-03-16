@@ -119,16 +119,17 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                   <div className="absolute inset-0 bg-neuro-orange blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
                   
                   <div className="w-56 h-56 rounded-[3rem] bg-neuro-navy border-4 border-neuro-orange/30 mx-auto flex items-center justify-center text-neuro-orange font-heading font-black text-7xl relative z-10 shadow-2xl shadow-black/40 overflow-hidden text-center">
-                    <Image 
-                      src={doctor.photo_url || "/fallback-avatar.png"} 
-                      alt={`${doctor.first_name || ''} ${doctor.last_name || ''}`}
-                      fill
-                      className="object-cover"
-                      priority
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/fallback-avatar.png";
-                      }}
-                    />
+                    {doctor.photo_url ? (
+                      <Image 
+                        src={doctor.photo_url} 
+                        alt={`${doctor.first_name || ''} ${doctor.last_name || ''}`}
+                        fill
+                        className="object-cover"
+                        priority
+                      />
+                    ) : (
+                      <span className="text-white">{(doctor.first_name?.[0] || 'N').toUpperCase()}</span>
+                    )}
                   </div>
                   
                   <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-neuro-orange text-white px-8 py-3 rounded-full font-black text-[11px] uppercase tracking-[0.25em] shadow-2xl flex items-center gap-2.5 z-20 whitespace-nowrap border-4 border-neuro-navy">

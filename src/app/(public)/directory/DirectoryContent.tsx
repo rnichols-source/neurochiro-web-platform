@@ -343,16 +343,19 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                   >
                     <div className="flex items-start justify-between mb-6">
                         <div className="flex items-center gap-4">
-                          <div className="relative w-14 h-14 rounded-2xl bg-neuro-navy overflow-hidden shadow-lg border border-white/10">
-                              <NextImage 
-                                src={doc.photo_url || "/fallback-avatar.png"} 
-                                alt={`Dr. ${doc.first_name} ${doc.last_name}`} 
-                                fill 
-                                className="object-cover" 
-                                sizes="56px" 
-                                loading="lazy"
-                                onError={(e) => { (e.target as HTMLImageElement).src = "/fallback-avatar.png"; }} 
-                              />
+                          <div className="relative w-14 h-14 rounded-2xl bg-neuro-navy overflow-hidden shadow-lg border border-white/10 flex items-center justify-center">
+                              {doc.photo_url ? (
+                                <NextImage 
+                                  src={doc.photo_url} 
+                                  alt={`Dr. ${doc.first_name} ${doc.last_name}`} 
+                                  fill 
+                                  className="object-cover" 
+                                  sizes="56px" 
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <span className="text-white font-black text-xl">{(doc.first_name?.[0] || 'N').toUpperCase()}</span>
+                              )}
                           </div>
                           <div>
                               <div className="flex items-center gap-1.5 mb-0.5">
