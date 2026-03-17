@@ -201,12 +201,12 @@ export default function GlobalNetworkMap({
     } finally {
       setLoading(false);
     }
-  }, [activeLayer, region.code]);
+  }, [activeLayer, region.code, initialDoctors.length]);
 
   const [mapReady, setMapReady] = useState(false);
 
   // 🛡️ SYNC COUNTER: Reflect exact list count
-  const verifiedCount = listDoctors.length > 0 ? listDoctors.length : initialDoctors.length;
+  const verifiedCount = listDoctors.length > 0 ? listDoctors.length : (initialDoctors.length > 0 ? initialDoctors.length : doctors.length);
 
   // Initial map centering and data fetch
   useEffect(() => {
@@ -302,9 +302,16 @@ export default function GlobalNetworkMap({
     return () => window.removeEventListener('message', handleMessage);
   }, [updateMapData]);
 
+  // 🛡️ Sync State: Ensure doctors state reflects initialDoctors when they arrive
+  useEffect(() => {
+    if (initialDoctors && initialDoctors.length > 0) {
+      setDoctors(initialDoctors);
+    }
+  }, [initialDoctors]);
+
   const activeCount = activeLayer === 'seminar' ? seminars.length : 
                       activeLayer === 'student' ? students.length : 
-                      doctors.length;
+                      verifiedCount;
 
   const activeLabel = activeLayer === 'seminar' ? "Active Seminars" : 
                       activeLayer === 'student' ? "Clinical Students" : 

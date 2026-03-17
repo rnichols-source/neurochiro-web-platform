@@ -57,14 +57,35 @@
         }
 
         @keyframes marker-pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(214, 104, 41, 0.7); }
-            70% { transform: scale(1.2); box-shadow: 0 0 0 10px rgba(214, 104, 41, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(214, 104, 41, 0); }
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(214, 104, 41, 0.7); }
+            70% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; box-shadow: 0 0 0 15px rgba(214, 104, 41, 0); }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(214, 104, 41, 0); }
         }
 
-        .active-specialist {
+        .active-specialist-marker {
+            background: #ff5722;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 15px rgba(214, 104, 41, 0.8);
             animation: marker-pulse 2s infinite;
-            z-index: 1000 !important;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+        }
+
+        .global-node-marker {
+            background: #444;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            border: 1px solid #888;
+            opacity: 0.6;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         .leaflet-control-attribution { display: none !important; }
@@ -209,14 +230,16 @@
                     const isFiltered = feat.properties.isFiltered;
                     
                     if (!isNaN(lat) && !isNaN(lng) && lat !== 0) {
-                        const marker = L.circleMarker([lat, lng], {
-                            radius: isFiltered ? 12 : 6,
-                            fillColor: isFiltered ? "#ff5722" : "#444",
-                            color: isFiltered ? "#fff" : "#888",
-                            weight: isFiltered ? 3 : 1,
-                            opacity: 1,
-                            fillOpacity: isFiltered ? 0.9 : 0.5,
-                            className: isFiltered ? 'active-specialist' : ''
+                        const icon = L.divIcon({
+                            className: '',
+                            html: isFiltered ? '<div class="active-specialist-marker"></div>' : '<div class="global-node-marker"></div>',
+                            iconSize: isFiltered ? [20, 20] : [10, 10],
+                            iconAnchor: isFiltered ? [10, 10] : [5, 5]
+                        });
+
+                        const marker = L.marker([lat, lng], { 
+                            icon,
+                            zIndexOffset: isFiltered ? 1000 : 0
                         }).addTo(window.markerLayer).bindPopup(feat.properties.name || "Specialist");
                         
                         if (isFiltered) activeMarkers.push(marker);
