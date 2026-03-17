@@ -691,7 +691,25 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         if (supabaseAdmin && payload.stripeData) {
           const data = payload.stripeData;
           const customerId = data.customer;
-          const userId = data.client_reference_id; 
+          const userId = data.client_reference_id;
+          const metadata = data.metadata || {};
+
+          // Handle Seminar Boost Payments
+          if (metadata.type === 'seminar_boost' && metadata.seminarId) {
+            const options = JSON.parse(metadata.options || '{}');
+            await supabaseAdmin.from('seminars').update({
+              is_boosted: true,
+              promotion_tier: options.globalPush ? 'premium' : options.studentRadar ? 'featured' : 'basic_boost'
+            }).eq('id', metadata.seminarId);
+
+            await supabaseAdmin.from('marketing_payments').update({
+              status: 'paid',
+              amount: data.amount_total / 100
+            }).eq('stripe_session_id', data.id);
+
+            revalidatePath('/doctor/seminars');
+            return;
+          }
           
           if (userId) {
             await supabaseAdmin.from('profiles').update({

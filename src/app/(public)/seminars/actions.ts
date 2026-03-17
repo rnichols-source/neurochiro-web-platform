@@ -46,22 +46,29 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
   }
 
   const { data, error } = await query
-    .order('listing_tier', { ascending: false }) // This is simplified, real SQL would need more complex ordering for Premium > Featured > Basic
-    .order('id', { ascending: true })
-
-  // Manual sorting to ensure Premium > Featured > Basic
-  const sortedData = (data || []).sort((a: any, b: any) => {
-    const tierMap: any = { 'premium': 3, 'featured': 2, 'basic': 1 };
-    const tierA = tierMap[a.listing_tier] || 1;
-    const tierB = tierMap[b.listing_tier] || 1;
-    if (tierA !== tierB) return tierB - tierA;
-    return a.id.localeCompare(b.id);
-  });
+    .order('is_boosted', { ascending: false })
+    .order('listing_tier', { ascending: false })
+    .order('created_at', { ascending: false })
 
   if (error) {
     console.error("Error fetching seminars:", error)
     return []
   }
+
+  // Final manual sort for robust tier ordering
+  const sortedData = (data || []).sort((a: any, b: any) => {
+    // 1. Boosted always first
+    if (a.is_boosted !== b.is_boosted) return a.is_boosted ? -1 : 1;
+    
+    // 2. Tier hierarchy
+    const tierMap: any = { 'premium': 3, 'featured': 2, 'basic': 1 };
+    const tierA = tierMap[a.listing_tier] || 1;
+    const tierB = tierMap[b.listing_tier] || 1;
+    if (tierA !== tierB) return tierB - tierA;
+    
+    // 3. Newest first
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
 
   return sortedData;
 }
@@ -81,7 +88,8 @@ export async function getSeminarsForMap(bounds?: [number, number, number, number
       instructor_name,
       latitude,
       longitude,
-      listing_tier
+      listing_tier,
+      is_boosted
     `)
     .eq('is_approved', true)
     .eq('is_past', false)
@@ -95,6 +103,8 @@ export async function getSeminarsForMap(bounds?: [number, number, number, number
   }
 
   const { data, error } = await query
+    .order('is_boosted', { ascending: false })
+    .order('listing_tier', { ascending: false })
 
   if (error) {
     console.error("Error fetching map seminars:", error)
@@ -144,9 +154,9 @@ export async function registerForSeminar(seminarId: string) {
     .from('seminar_registrations')
     .insert({
       seminar_id: seminarId,
-      user_id: user.id,
-      user_role: profile?.role || 'patient',
-      status: 'registered'
+      profile_id: user.id,
+      payment_status: 'paid', // For now, assume free/member registration is success
+      amount_paid: 0
     })
 
   if (error) {
