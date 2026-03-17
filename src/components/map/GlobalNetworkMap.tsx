@@ -239,44 +239,36 @@ export default function GlobalNetworkMap({
     if (!iframeRef.current?.contentWindow || !mapReady) return;
 
     const syncMap = () => {
-      const dataToSend = initialDoctors.length > 0 ? initialDoctors.map(doc => ({
-        type: 'Feature' as const,
-        geometry: { 
-          type: 'Point' as const, 
-          coordinates: [
-            parseFloat(doc.longitude as any), 
-            parseFloat(doc.latitude as any)
-          ] 
-        },
-        properties: { 
-          cluster: false, 
-          doctorId: doc.id, 
-          name: doc.last_name, 
-          type: 'doctor' as const 
-        }
-      })).filter(f => !isNaN(f.geometry.coordinates[0]) && !isNaN(f.geometry.coordinates[1])) : [];
+      // 🛡️ ABSOLUTE PIN FORCE: Send raw GeoJSON features to iframe
+      const dataToSend = initialDoctors.length > 0 ? initialDoctors.map(doc => {
+        // 🛡️ DATA KEY AUDIT: Check both naming conventions
+        const lat = parseFloat((doc.latitude || (doc as any).lat) as any);
+        const lng = parseFloat((doc.longitude || (doc as any).lng) as any);
+        
+        if (isNaN(lat) || isNaN(lng) || lat === 0) return null;
 
-      // 🛡️ SECURITY BYPASS: Use '*' to ensure message delivery across environments
+        return {
+          type: 'Feature' as const,
+          geometry: { 
+            type: 'Point' as const, 
+            coordinates: [lng, lat] 
+          },
+          properties: { 
+            cluster: false, 
+            doctorId: doc.id, 
+            name: `Dr. ${doc.last_name || ''}`, 
+            type: 'doctor' as const 
+          }
+        };
+      }).filter((f): f is NonNullable<typeof f> => f !== null) : [];
+
+      console.log('[MAP_PARENT] SENDING RAW MARKERS:', dataToSend.length);
+
       iframeRef.current?.contentWindow?.postMessage({
-        type: 'update-clusters',
+        type: 'force-raw-markers',
         data: dataToSend,
         layer: activeLayer
       }, '*');
-
-      // 🛡️ AUTO-ZOOM TO RESULTS
-      if (initialDoctors.length > 0 && activeLayer === 'all') {
-        const resultCoords = initialDoctors
-          .map(d => [parseFloat(d.latitude as any), parseFloat(d.longitude as any)])
-          .filter(coords => !isNaN(coords[0]) && !isNaN(coords[1]));
-        
-        if (resultCoords.length > 0) {
-          iframeRef.current?.contentWindow?.postMessage({
-            type: 'fit-bounds',
-            bounds: resultCoords,
-            padding: [50, 50]
-          }, '*');
-        }
-      }
     };
 
     // Give the iframe 500ms to settle before sending data
@@ -349,13 +341,6 @@ export default function GlobalNetworkMap({
           <button className="p-2 bg-white/10 rounded-xl hover:bg-white/20 transition-colors">
             <Filter className="w-4 h-4 text-white" />
           </button>
-        </div>
-
-        <div className="bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl inline-flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">
-            {region.label} NODE ACTIVE: <span className="text-white">{verifiedCount} SPECIALISTS FOUND</span>
-          </span>
         </div>
       </div>
 
