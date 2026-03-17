@@ -108,6 +108,45 @@ export async function updateDoctorProfile(formData: FormData) {
   }
 }
 
+export async function updateNotificationPreferences(preferences: any) {
+  try {
+    const supabase = createServerSupabase()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Unauthorized" }
+
+    const { error } = await (supabase as any)
+      .from('profiles')
+      .update({ notification_preferences: preferences })
+      .eq('id', user.id)
+
+    if (error) throw error
+
+    revalidatePath('/doctor/profile')
+    return { success: true }
+  } catch (err: any) {
+    console.error("Error updating notifications:", err)
+    return { error: err.message }
+  }
+}
+
+export async function generateAIProfileBio(clinicName: string, currentBio: string) {
+  try {
+    const supabase = createServerSupabase()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: "Unauthorized" }
+
+    // In a real production app, you would call the Gemini API here.
+    // For now, we simulate a high-converting "Patient Magnet" bio.
+    
+    const generatedBio = `At ${clinicName || 'our clinic'}, we specialize in nervous-system-first chiropractic care designed to restore clinical certainty and peak performance. Our approach goes beyond symptoms, utilizing objective scanning technology to map your neural integrity and architect a customized path to health. Join our community of patients who have unlocked a higher standard of living through precise, data-driven neurological adjustments. ${currentBio ? '\n\n' + currentBio : ''}`;
+
+    return { success: true, bio: generatedBio }
+  } catch (err: any) {
+    console.error("AI Write error:", err)
+    return { error: err.message }
+  }
+}
+
 export async function uploadAvatar(formData: FormData) {
     try {
         const supabase = createServerSupabase()

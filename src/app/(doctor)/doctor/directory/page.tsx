@@ -18,7 +18,8 @@ import {
   Zap, 
   Handshake,
   Loader2,
-  Users
+  Users,
+  Clock
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
