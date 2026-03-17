@@ -50,12 +50,20 @@ export default function DoctorDashboard() {
     const fetchData = async () => {
       try {
         const data = await getDoctorDashboardStats();
-        setDashboardData(data || { 
-          profile: { name: "Doctor", clinicName: "Practice", isMember: false, isPro: false, isGrowth: false },
-          stats: [],
-          vendorOffers: [],
-          marketPerformance: { completeness: 85, reviews: 90, engagement: 75 }
-        });
+        if (data) {
+          setDashboardData(data);
+          // 🛡️ AUTH LOOP: Redirect to Profile Editor if incomplete (< 20%)
+          if (data.marketPerformance?.completeness < 20) {
+            router.push('/doctor/profile?welcome=true');
+          }
+        } else {
+          setDashboardData({ 
+            profile: { name: "Doctor", clinicName: "Practice", isMember: false, isPro: false, isGrowth: false },
+            stats: [],
+            vendorOffers: [],
+            marketPerformance: { completeness: 0, reviews: 0, engagement: 0 }
+          });
+        }
       } catch (err) {
         console.error("Failed to fetch dashboard data:", err);
         setDashboardData({
