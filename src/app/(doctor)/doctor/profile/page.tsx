@@ -47,6 +47,7 @@ export default function ProfilePage() {
   useEffect(() => {
     async function load() {
       const data = await getDoctorProfile();
+      console.log("Profile data loaded:", data);
       setProfile(data);
       setLoading(false);
     }
