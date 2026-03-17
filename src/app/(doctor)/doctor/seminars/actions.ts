@@ -1,4 +1,4 @@
-'use server'
+"use server";
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
@@ -150,7 +150,6 @@ export async function createSeminarCampaignAction(seminarId: string, options: { 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co'
   
   // Calculate pricing based on selected options
-  let totalAmount = 0
   const lineItems: any[] = []
 
   if (options.topOfFeed) {
@@ -190,6 +189,9 @@ export async function createSeminarCampaignAction(seminarId: string, options: { 
       options: JSON.stringify(options)
     }
   })
+
+  return { sessionId: session.id, url: session.url }
+}
 
 export async function getSeminarAttendees(seminarId: string) {
   const supabase = createServerSupabase()
