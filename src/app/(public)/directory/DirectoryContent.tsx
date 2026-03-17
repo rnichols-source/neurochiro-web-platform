@@ -46,7 +46,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
     setSearchQuery("");
     setLocationQuery("");
     setMatchCriteria(null);
-    fetchDoctors("");
+    fetchDoctors("", "");
   };
 
   const handleNotifyMe = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -209,7 +209,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
     setLocationQuery("");
     setMatchCriteria(null);
     setPage(1);
-    fetchDoctors("", false);
+    fetchDoctors("", "", false);
   };
 
   return (
