@@ -238,46 +238,57 @@ export default function GlobalNetworkMap({
   useEffect(() => {
     if (!iframeRef.current?.contentWindow || !mapReady) return;
     
-    try {
-      // 🛡️ Pseudo-bounds: Force pins to appear immediately using wide fallback (-179 to 179)
-      const bounds = currentBounds.current || [-179, -85, 179, 85];
-      
-      // ☢️ NUCLEAR OPTION: If < 100 doctors, bypass clustering for maximum reliability
-      if (initialDoctors.length > 0 && initialDoctors.length < 100 && activeLayer === 'all') {
-        const rawPoints = initialDoctors
-          .map(doc => {
-            const lat = parseFloat(doc.latitude as any);
-            const lng = parseFloat(doc.longitude as any);
-            if (isNaN(lat) || isNaN(lng)) return null;
-            return {
-              type: 'Feature' as const,
-              properties: { 
-                cluster: false, 
-                doctorId: doc.id, 
-                type: 'doctor' as const, 
-                name: doc.last_name,
-                clinic: doc.clinic_name,
-                slug: doc.slug 
-              },
-              geometry: { type: 'Point' as const, coordinates: [lng, lat] }
-            };
-          })
-          .filter((p): p is NonNullable<typeof p> => p !== null);
+    const syncMarkers = () => {
+      try {
+        // 🛡️ Pseudo-bounds: Force pins to appear immediately using wide fallback (-179 to 179)
+        const bounds = currentBounds.current || [-179, -85, 179, 85];
+        
+        // ☢️ NUCLEAR OPTION: If < 100 doctors, bypass clustering for maximum reliability
+        if (initialDoctors.length > 0 && initialDoctors.length < 100 && activeLayer === 'all') {
+          // Re-derive rawPoints locally to ensure fresh data
+          const rawPoints = initialDoctors
+            .map(doc => {
+              const lat = parseFloat(doc.latitude as any);
+              const lng = parseFloat(doc.longitude as any);
+              if (isNaN(lat) || isNaN(lng)) return null;
+              return {
+                type: 'Feature' as const,
+                properties: { 
+                  cluster: false, 
+                  doctorId: doc.id, 
+                  type: 'doctor' as const, 
+                  name: doc.last_name,
+                  clinic: doc.clinic_name,
+                  slug: doc.slug 
+                },
+                geometry: { type: 'Point' as const, coordinates: [lng, lat] }
+              };
+            })
+            .filter((p): p is NonNullable<typeof p> => p !== null);
 
-        iframeRef.current.contentWindow.postMessage({ 
+          iframeRef.current?.contentWindow?.postMessage({ 
+            type: 'update-clusters', 
+            data: rawPoints, 
+            layer: activeLayer 
+          }, '*');
+          return;
+        }
+
+        const clusters = index.getClusters(bounds, Math.round(currentZoom.current));
+        iframeRef.current?.contentWindow?.postMessage({ 
           type: 'update-clusters', 
-          data: rawPoints, 
-          layer: activeLayer 
+          data: clusters,
+          layer: activeLayer
         }, '*');
-        return; // Exit early so we don't try to use the clustering logic
+      } catch (e) {
+        console.error("Error calculating/sending clusters:", e);
       }
+    };
 
-      const clusters = index.getClusters(bounds, Math.round(currentZoom.current));
-      iframeRef.current.contentWindow.postMessage({ 
-        type: 'update-clusters', 
-        data: clusters,
-        layer: activeLayer
-      }, '*');
+    // 🤝 HANDSHAKE: Small delay to ensure iframe is ready to receive
+    const timer = setTimeout(syncMarkers, 500);
+    return () => clearTimeout(timer);
+  }, [index, activeLayer, mapReady, initialDoctors]);
 
       // 🛡️ AUTO-ZOOM TO RESULTS (Task 4)
       // If we have doctors in the list, zoom the map to fit them

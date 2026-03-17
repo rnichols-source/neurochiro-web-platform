@@ -20,6 +20,8 @@
             cursor: pointer;
             position: relative;
             z-index: 9999 !important;
+            pointer-events: auto !important;
+            visibility: visible !important;
         }
 
         .cluster-marker {
@@ -115,12 +117,22 @@
     map.on('moveend', notifyParent);
     
     function updateMarkers(clusters) {
-        markers.forEach(m => map.removeLayer(m));
-        markers = [];
+        console.log('[MAP_IFRAME] CREATING MARKERS FOR:', clusters?.length || 0, 'items');
+        
+        // 🛡️ CLEAR OLD PINS: Prevent memory leaks and duplicates
+        markerLayer.clearLayers();
 
-        const fragment = [];
+        if (!clusters || !Array.isArray(clusters)) return;
+
         clusters.forEach(feature => {
-            const [longitude, latitude] = feature.geometry.coordinates;
+            if (!feature.geometry || !feature.geometry.coordinates) return;
+            
+            // 🛡️ Coordinate Verification: Leaflet uses [lat, lng]
+            const lng = feature.geometry.coordinates[0];
+            const lat = feature.geometry.coordinates[1];
+
+            if (isNaN(lat) || isNaN(lng)) return;
+
             const { cluster, point_count } = feature.properties;
 
             if (cluster) {
@@ -131,30 +143,32 @@
                     iconSize: [size, size]
                 });
 
-                const marker = L.marker([latitude, longitude], { icon }).addTo(map);
-                marker.on('click', () => map.setView([latitude, longitude], map.getZoom() + 2));
-                markers.push(marker);
+                const marker = L.marker([lat, lng], { icon });
+                marker.on('click', () => map.setView([lat, lng], map.getZoom() + 2));
+                marker.addTo(markerLayer);
             } else {
                 const icon = L.divIcon({
                     className: '',
-                    html: `<div class="custom-marker"><div class="pulse"></div></div>`,
+                    html: `<div class="custom-marker" style="z-index: 9999 !important;"><div class="pulse"></div></div>`,
                     iconSize: [24, 24],
                     iconAnchor: [12, 12]
                 });
 
-                const marker = L.marker([latitude, longitude], { icon }).addTo(map);
+                const marker = L.marker([lat, lng], { icon });
                 marker.on('click', () => {
                     window.parent.postMessage({ 
                         type: 'marker-click', 
                         data: feature.properties 
                     }, '*');
                 });
-                markers.push(marker);
+                marker.addTo(markerLayer);
             }
         });
     }
 
     window.addEventListener('message', (e) => {
+        console.log('[MAP_IFRAME] RECEIVED MESSAGE:', e.data.type, e.data.data?.length || 0);
+
         if (e.data.type === 'update-clusters') {
             updateMarkers(e.data.data);
         } else if (e.data.type === 'set-view') {
