@@ -29,10 +29,10 @@ export async function GET(request: NextRequest) {
 
     if (query) {
       // Logic Pivot: Explicit Name + Location fuzzy match
-      // We exclude region_code from fuzzy match because it's always 'US' or 'AU'
       const nameConditions = SEARCHABLE_NAME_COLUMNS.map(col => `${col}.ilike.%${query}%`);
       const locationConditions = SEARCHABLE_LOCATION_COLUMNS.map(col => `${col}.ilike.%${query}%`);
-      const specialtyCondition = `specialties.cs.{${query}}`;
+      // Use ILIKE on casted array to allow partial specialty matches
+      const specialtyCondition = `specialties::text.ilike.%${query}%`;
       
       dbQuery = dbQuery.or([...nameConditions, ...locationConditions, specialtyCondition].join(','));
     }
