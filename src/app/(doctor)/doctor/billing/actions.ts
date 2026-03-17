@@ -29,7 +29,7 @@ export async function getBillingData() {
       expand: ['data.default_payment_method']
     });
 
-    const activeSubscription = subscriptions.data[0] as Stripe.Subscription;
+    const activeSubscription = subscriptions.data[0] as any;
 
     // Fetch last 10 invoices
     const invoices = await stripe.invoices.list({
@@ -42,8 +42,8 @@ export async function getBillingData() {
       subscription: activeSubscription ? {
         id: activeSubscription.id,
         status: activeSubscription.status,
-        price: activeSubscription.items.data[0].price.unit_amount ? activeSubscription.items.data[0].price.unit_amount / 100 : 0,
-        interval: activeSubscription.items.data[0].plan.interval || 'month',
+        price: activeSubscription.items?.data?.[0]?.price?.unit_amount ? activeSubscription.items.data[0].price.unit_amount / 100 : 0,
+        interval: activeSubscription.items?.data?.[0]?.plan?.interval || 'month',
         nextBilling: activeSubscription.current_period_end 
           ? new Date(activeSubscription.current_period_end * 1000).toLocaleDateString('en-US', {
               month: 'short',
@@ -51,7 +51,7 @@ export async function getBillingData() {
               year: 'numeric'
             })
           : '---',
-        paymentMethod: (activeSubscription.default_payment_method as any)?.card?.last4 || null
+        paymentMethod: activeSubscription.default_payment_method?.card?.last4 || null
       } : null,
       invoices: invoices.data.map(inv => ({
         id: inv.id,
