@@ -243,29 +243,37 @@ export default function GlobalNetworkMap({
         type: 'Feature' as const,
         geometry: { 
           type: 'Point' as const, 
-          coordinates: [parseFloat(doc.longitude as any), parseFloat(doc.latitude as any)] 
+          coordinates: [
+            parseFloat(doc.longitude as any), 
+            parseFloat(doc.latitude as any)
+          ] 
         },
-        properties: { cluster: false, doctorId: doc.id, name: doc.last_name, type: 'doctor' }
-      })).filter(f => !isNaN(f.geometry.coordinates[0])) : [];
+        properties: { 
+          cluster: false, 
+          doctorId: doc.id, 
+          name: doc.last_name, 
+          type: 'doctor' as const 
+        }
+      })).filter(f => !isNaN(f.geometry.coordinates[0]) && !isNaN(f.geometry.coordinates[1])) : [];
 
       iframeRef.current?.contentWindow?.postMessage({
         type: 'update-clusters',
         data: dataToSend,
         layer: activeLayer
-      }, '*');
+      }, window.location.origin);
 
       // 🛡️ AUTO-ZOOM TO RESULTS
       if (initialDoctors.length > 0 && activeLayer === 'all') {
         const resultCoords = initialDoctors
-          .filter(d => parseFloat(d.latitude as any) && parseFloat(d.longitude as any))
-          .map(d => [parseFloat(d.latitude as any), parseFloat(d.longitude as any)]);
+          .map(d => [parseFloat(d.latitude as any), parseFloat(d.longitude as any)])
+          .filter(coords => !isNaN(coords[0]) && !isNaN(coords[1]));
         
         if (resultCoords.length > 0) {
           iframeRef.current?.contentWindow?.postMessage({
             type: 'fit-bounds',
             bounds: resultCoords,
             padding: [50, 50]
-          }, '*');
+          }, window.location.origin);
         }
       }
     };
@@ -278,6 +286,9 @@ export default function GlobalNetworkMap({
   // Handle iframe messages
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
+      // 🛡️ SECURITY HANDSHAKE
+      if (e.origin !== window.location.origin) return;
+
       // If we receive ANY map-related message, the iframe is clearly ready
       if (e.data && e.data.type && e.data.type.startsWith('map-')) {
           setMapReady(true);
