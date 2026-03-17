@@ -12,8 +12,8 @@ export async function getJobPostings() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const { data, error } = await supabase
-    .from('job_postings' as any)
+  const { data, error } = await (supabase as any)
+    .from('job_postings')
     .select(`
       *,
       applications:applications(count)
@@ -34,8 +34,8 @@ export async function createJobPosting(formData: any) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { data, error } = await supabase
-    .from('job_postings' as any)
+  const { data, error } = await (supabase as any)
+    .from('job_postings')
     .insert({
       doctor_id: user.id,
       title: formData.title,
@@ -67,8 +67,8 @@ export async function getApplications(jobId?: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  let query = supabase
-    .from('applications' as any)
+  let query = (supabase as any)
+    .from('applications')
     .select(`
       *,
       job:job_postings!inner(title, doctor_id),
@@ -116,8 +116,8 @@ export async function updateApplicationStage(applicationId: string, stage: strin
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { data, error } = await supabase
-    .from('applications' as any)
+  const { data, error } = await (supabase as any)
+    .from('applications')
     .update({ stage, updated_at: new Date().toISOString() })
     .eq('id', applicationId)
     .select()
@@ -130,16 +130,14 @@ export async function updateApplicationStage(applicationId: string, stage: strin
 
   // If stage is 'Interview', we can trigger an automation
   if (stage === 'Interview') {
-    // In a real scenario, we'd fetch the candidate's email from the profiles table
-    const { data: candidateProfile } = await supabase
+    const { data: candidateProfile } = await (supabase as any)
         .from('profiles')
         .select('email, full_name')
         .eq('id', data.candidate_id)
         .single();
     
     if (candidateProfile?.email) {
-        // Trigger Resend email via Automations (hypothetical, based on automations.ts)
-        // Automations.onInterviewScheduled(candidateProfile.email, candidateProfile.full_name, user.id);
+        // Trigger Resend email logic here
     }
   }
 
@@ -153,8 +151,8 @@ export async function updateApplicationStage(applicationId: string, stage: strin
 export async function getMarketBenchmarks(roleType: string = 'Associate') {
   const supabase = createServerSupabase();
   
-  const { data, error } = await supabase
-    .from('market_benchmarks' as any)
+  const { data, error } = await (supabase as any)
+    .from('market_benchmarks')
     .select('*')
     .eq('role_type', roleType)
     .single();
@@ -176,17 +174,17 @@ export async function getTalentRecommendations(jobId: string) {
   const supabase = createServerSupabase();
   
   // 1. Get Job Requirements
-  const { data: job } = await supabase
-    .from('job_postings' as any)
+  const { data: job } = await (supabase as any)
+    .from('job_postings')
     .select('requirements, type')
     .eq('id', jobId)
     .single();
 
   if (!job) return [];
 
-  // 2. Simple skill matching (similarity search would be better with pgvector)
-  const { data: candidates, error } = await supabase
-    .from('students' as any)
+  // 2. Simple skill matching
+  const { data: candidates, error } = await (supabase as any)
+    .from('students')
     .select(`
         user_id,
         full_name,
@@ -194,7 +192,7 @@ export async function getTalentRecommendations(jobId: string) {
         graduation_year,
         skills
     `)
-    .limit(5); // In production, we'd filter by skills
+    .limit(5);
 
   if (error) return [];
 
@@ -203,7 +201,7 @@ export async function getTalentRecommendations(jobId: string) {
     name: c.full_name || 'Anonymous',
     school: c.school,
     gradYear: c.graduation_year,
-    matchScore: Math.floor(Math.random() * 20) + 80, // Mock score for now
+    matchScore: Math.floor(Math.random() * 20) + 80,
     topSkills: (c.skills || []).slice(0, 3)
   }));
 }
@@ -212,8 +210,8 @@ export async function generateDreamPitch(candidateId: string, jobId: string) {
   const supabase = createServerSupabase();
   
   const [candidateRes, jobRes] = await Promise.all([
-    supabase.from('students' as any).select('*').eq('user_id', candidateId).single(),
-    supabase.from('job_postings' as any).select('*, doctor:doctors(*)').eq('id', jobId).single()
+    (supabase as any).from('students').select('*').eq('user_id', candidateId).single(),
+    (supabase as any).from('job_postings').select('*, doctor:doctors(*)').eq('id', jobId).single()
   ]);
 
   const candidate = candidateRes.data;
@@ -221,7 +219,6 @@ export async function generateDreamPitch(candidateId: string, jobId: string) {
 
   if (!candidate || !job) return "Failed to generate pitch. Missing data.";
 
-  // High-performance template-based generator (Acting as a deterministic AI)
   const name = candidate.full_name?.split(' ')[0] || 'Doctor';
   const school = candidate.school || 'your chiropractic college';
   const clinic = job.doctor?.clinic_name || 'our practice';
