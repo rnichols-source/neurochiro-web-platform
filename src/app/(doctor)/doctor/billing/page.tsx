@@ -1,33 +1,89 @@
 "use client";
 
-import { CreditCard, CheckCircle2, ShieldCheck, Zap, History, Download, DollarSign, TrendingUp } from "lucide-react";
-import { useDoctorTier } from "@/context/DoctorTierContext";
+import { CreditCard, CheckCircle2, ShieldCheck, Zap, History, Download, DollarSign, TrendingUp, Loader2, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { getBillingData } from "./actions";
 
 export default function DoctorBilling() {
-  const { tier } = useDoctorTier();
-  
-  const subscription = {
-    plan: tier === 'starter' ? "Starter Doctor Membership" : tier === 'growth' ? "Growth Practice Membership" : "Pro Clinical Membership",
-    price: tier === 'starter' ? "$199" : tier === 'growth' ? "$499" : "$999",
-    billingCycle: "monthly",
-    status: "Active",
-    nextBilling: "Nov 01, 2026"
+  const [loading, setLoading] = useState(true);
+  const [billingData, setBillingData] = useState<any>(null);
+  const [isPortalLoading, setIsPortalLoading] = useState(false);
+
+  useEffect(() => {
+    async function loadData() {
+      const data = await getBillingData();
+      setBillingData(data);
+      setLoading(false);
+    }
+    loadData();
+  }, []);
+
+  const handleOpenPortal = async () => {
+    setIsPortalLoading(true);
+    try {
+      const response = await fetch("/api/stripe/create-portal-session", {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Failed to open billing portal.");
+      }
+    } catch (err) {
+      alert("An error occurred. Please try again.");
+    } finally {
+      setIsPortalLoading(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-neuro-cream">
+        <Loader2 className="w-10 h-10 text-neuro-orange animate-spin mb-4" />
+        <p className="text-[10px] font-black text-neuro-navy uppercase tracking-[0.3em]">Synchronizing Secure Billing...</p>
+      </div>
+    );
+  }
+
+  if (!billingData || billingData.noCustomer) {
+    return (
+      <div className="p-8 max-w-5xl mx-auto flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="w-20 h-20 bg-gray-100 rounded-[2rem] flex items-center justify-center mb-6">
+          <CreditCard className="w-10 h-10 text-gray-400" />
+        </div>
+        <h1 className="text-3xl font-black text-neuro-navy mb-4">No Active Subscription</h1>
+        <p className="text-gray-500 max-w-md mb-8">
+          You are currently on the <span className="font-bold text-neuro-orange capitalize">{billingData?.tier || 'free'}</span> tier. Upgrade to unlock full clinical analytics and student discovery.
+        </p>
+        <Link 
+          href="/pricing" 
+          className="px-10 py-4 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-xs shadow-xl shadow-neuro-orange/30 hover:scale-105 transition-all"
+        >
+          View Membership Plans
+        </Link>
+      </div>
+    );
+  }
+
+  const { subscription, invoices, tier } = billingData;
+  const planName = tier === 'starter' ? "Starter Doctor Membership" : tier === 'growth' ? "Growth Practice Membership" : "Pro Clinical Membership";
 
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-8">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h1 className="text-4xl font-heading font-black text-neuro-navy">Billing & Subscriptions</h1>
-          <p className="text-neuro-gray mt-2 text-lg">Manage your practice membership and payouts.</p>
+          <p className="text-neuro-gray mt-2 text-lg">Manage your practice membership and history.</p>
         </div>
-        <div className="bg-green-50 border border-green-100 px-6 py-3 rounded-2xl flex items-center gap-4">
-           <div className="p-2 bg-green-100 rounded-xl text-green-600">
-              <DollarSign className="w-5 h-5" />
+        <div className="bg-white border border-gray-100 px-6 py-3 rounded-2xl flex items-center gap-4 shadow-sm">
+           <div className="p-2 bg-neuro-orange/10 rounded-xl text-neuro-orange">
+              <ShieldCheck className="w-5 h-5" />
            </div>
            <div>
-              <p className="text-[10px] font-black text-green-600 uppercase tracking-widest">Next Payout</p>
-              <p className="text-xl font-black text-neuro-navy">$4,250.00</p>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Status</p>
+              <p className="text-lg font-black text-neuro-navy capitalize">{subscription?.status || 'Active'}</p>
            </div>
         </div>
       </header>
@@ -35,51 +91,48 @@ export default function DoctorBilling() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
           {/* Subscription Status */}
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-heading font-black text-xl text-neuro-navy flex items-center gap-2">
-                <ShieldCheck className="w-6 h-6 text-neuro-orange" /> Practice Membership
+                <CreditCard className="w-6 h-6 text-neuro-orange" /> Practice Membership
               </h3>
-              <span className="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-black uppercase tracking-widest rounded-full">
-                {subscription.status}
+              <span className={cn(
+                "px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full",
+                subscription?.status === 'active' ? "bg-green-50 text-green-600" : "bg-orange-50 text-orange-600"
+              )}>
+                {subscription?.status || 'Unknown'}
               </span>
             </div>
             
-            <div className="flex flex-col md:flex-row gap-8 items-center border-b border-gray-50 pb-8 mb-8">
-              <div className="flex-1">
-                <p className="text-sm font-bold text-gray-500 uppercase tracking-widest">Current Plan</p>
-                <p className="text-3xl font-black text-neuro-navy">{subscription.plan}</p>
-                <p className="text-xs text-gray-400 mt-1 capitalize">{subscription.billingCycle} Billing • Next: {subscription.nextBilling}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 border-b border-gray-50 pb-8 mb-8">
+              <div>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Current Plan</p>
+                <p className="text-2xl font-black text-neuro-navy">{planName}</p>
+                <p className="text-xs text-gray-400 mt-1 capitalize">{subscription?.interval} Billing • Next: {subscription?.nextBilling}</p>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold text-gray-500 uppercase tracking-widest">{subscription.billingCycle === 'monthly' ? 'Monthly' : 'Annual'} Total</p>
-                <p className="text-3xl font-black text-neuro-navy">{subscription.price}<span className="text-sm text-gray-400 font-normal">/{subscription.billingCycle === 'monthly' ? 'mo' : 'yr'}</span></p>
+              <div>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Billing Amount</p>
+                <p className="text-2xl font-black text-neuro-navy">${subscription?.price}<span className="text-sm text-gray-400 font-normal">/{subscription?.interval === 'month' ? 'mo' : 'yr'}</span></p>
+                <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                   <ShieldCheck className="w-3 h-3 text-green-500" /> Card ending in {subscription?.paymentMethod || '••••'}
+                </p>
               </div>
             </div>
 
-            {subscription.billingCycle === 'monthly' && (
-              <div className="bg-neuro-orange/5 border border-neuro-orange/20 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 group">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-neuro-orange rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
-                    <Zap className="w-6 h-6 fill-current" />
-                  </div>
-                  <div>
-                    <h4 className="font-black text-neuro-navy">Upgrade to Annual</h4>
-                    <p className="text-xs text-gray-500">Switch to yearly billing and get <span className="text-neuro-orange font-bold">2 months free</span>.</p>
-                  </div>
-                </div>
-                <button className="px-6 py-3 bg-neuro-navy text-white font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-neuro-navy-light transition-all shadow-xl">
-                  Switch to Annual Plan
-                </button>
-              </div>
-            )}
-
-            <div className="flex gap-4">
-              <button className="px-6 py-3 bg-white border border-gray-200 text-neuro-navy font-bold rounded-xl hover:bg-gray-50 transition-all text-sm">
-                Change Payment Method
+            <div className="flex flex-wrap gap-4">
+              <button 
+                onClick={handleOpenPortal}
+                disabled={isPortalLoading}
+                className="px-8 py-4 bg-neuro-navy text-white font-black rounded-2xl uppercase tracking-widest text-[10px] hover:bg-neuro-navy-light transition-all shadow-xl disabled:opacity-50 flex items-center gap-2"
+              >
+                {isPortalLoading && <Loader2 className="w-3 h-3 animate-spin" />}
+                Manage Billing & Plan
               </button>
-              <button className="px-6 py-3 bg-white border border-gray-200 text-neuro-navy font-bold rounded-xl hover:bg-gray-50 transition-all text-sm text-red-500 hover:text-red-600 hover:border-red-100 hover:bg-red-50">
-                Cancel Subscription
+              <button 
+                onClick={handleOpenPortal}
+                className="px-8 py-4 bg-white border border-gray-200 text-gray-400 font-black rounded-2xl uppercase tracking-widest text-[10px] hover:bg-gray-50 transition-all"
+              >
+                Update Payment Method
               </button>
             </div>
           </section>
@@ -90,27 +143,41 @@ export default function DoctorBilling() {
               <History className="w-6 h-6 text-gray-400" /> Transaction History
             </h3>
             <div className="space-y-2">
-              {[
-                { date: "Oct 01, 2026", desc: "Monthly Membership", amount: `-${subscription.price}.00`, type: "debit" },
-                { date: "Sep 15, 2026", desc: "Seminar Payout - PHX", amount: "+$3,240.00", type: "credit" },
-                { date: "Sep 01, 2026", desc: "Monthly Membership", amount: `-${subscription.price}.00`, type: "debit" }
-              ].map((tx, i) => (
-                <div key={i} className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-2xl transition-colors group cursor-pointer border-b border-gray-50 last:border-0">
+              {invoices && invoices.length > 0 ? invoices.map((inv: any, i: number) => (
+                <a 
+                  key={i} 
+                  href={inv.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-2xl transition-colors group cursor-pointer border-b border-gray-50 last:border-0"
+                >
                   <div className="flex items-center gap-4">
-                    <div className={`p-2 rounded-xl ${tx.type === 'credit' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
-                      {tx.type === 'credit' ? <TrendingUp className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
+                    <div className="p-2 rounded-xl bg-gray-100 text-gray-500">
+                      <CreditCard className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="font-bold text-neuro-navy text-sm">{tx.desc}</p>
-                      <p className="text-[10px] text-gray-500 uppercase tracking-widest">{tx.date}</p>
+                      <p className="font-bold text-neuro-navy text-sm">Membership Invoice {inv.number}</p>
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black">{inv.date}</p>
                     </div>
                   </div>
-                  <div className="text-right flex items-center gap-4">
-                    <span className={`font-black ${tx.type === 'credit' ? 'text-green-600' : 'text-neuro-navy'}`}>{tx.amount}</span>
+                  <div className="text-right flex items-center gap-6">
+                    <div className="hidden sm:block">
+                       <span className={cn(
+                         "px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest",
+                         inv.status === 'paid' ? "bg-green-50 text-green-600" : "bg-gray-50 text-gray-400"
+                       )}>
+                         {inv.status}
+                       </span>
+                    </div>
+                    <span className="font-black text-neuro-navy text-sm">${inv.amount.toFixed(2)}</span>
                     <Download className="w-4 h-4 text-gray-300 group-hover:text-neuro-orange transition-colors" />
                   </div>
+                </a>
+              )) : (
+                <div className="py-8 text-center">
+                   <p className="text-sm text-gray-400 font-bold uppercase tracking-widest">No transaction history found</p>
                 </div>
-              ))}
+              )}
             </div>
           </section>
         </div>
@@ -120,34 +187,36 @@ export default function DoctorBilling() {
           <section className="bg-neuro-navy rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
             <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl -mr-16 -mt-16"></div>
             <div className="relative z-10">
-              <h3 className="text-xl font-heading font-black mb-4">Payout Settings</h3>
-              <p className="text-gray-400 text-xs mb-6 leading-relaxed">
-                 Manage how you receive payments for seminar ticket sales and mastermind subscriptions.
+              <h3 className="text-xl font-heading font-black mb-4">Practice Payouts</h3>
+              <p className="text-gray-400 text-xs mb-6 leading-relaxed font-bold">
+                 Manage how you receive payments for seminar ticket sales and associate recruitment bonuses.
               </p>
               
               <div className="bg-white/10 rounded-xl p-4 border border-white/10 mb-6">
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Active Account</p>
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Linked Account</p>
                  <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-bold">Stripe Connect •••• 4291</span>
+                    <span className="text-sm font-bold">Stripe Connect Active</span>
                  </div>
               </div>
 
-              <button className="w-full py-3 bg-neuro-orange text-white font-black rounded-xl hover:bg-neuro-orange-light transition-all shadow-lg text-xs uppercase tracking-widest">
-                Manage Payouts
+              <button className="w-full py-4 bg-neuro-orange text-white font-black rounded-xl hover:bg-neuro-orange-light transition-all shadow-lg text-[10px] uppercase tracking-widest">
+                Manage Payout Dashboard
               </button>
             </div>
           </section>
 
           <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
-             <h4 className="font-bold text-neuro-navy mb-4 text-sm uppercase tracking-widest">Tax Documents</h4>
+             <h4 className="font-black text-neuro-navy mb-6 text-[10px] uppercase tracking-widest flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-neuro-orange" /> Legal & Tax
+             </h4>
              <div className="space-y-3">
-                <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                   <span className="text-xs font-bold text-neuro-navy">2025 1099-K</span>
+                <button className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors">
+                   <span className="text-xs font-bold text-neuro-navy">2025 1099-K (Digital)</span>
                    <Download className="w-4 h-4 text-gray-400" />
                 </button>
-                <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                   <span className="text-xs font-bold text-neuro-navy">2024 1099-K</span>
+                <button className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors">
+                   <span className="text-xs font-bold text-neuro-navy">Membership Agreement</span>
                    <Download className="w-4 h-4 text-gray-400" />
                 </button>
              </div>
@@ -156,4 +225,8 @@ export default function DoctorBilling() {
       </div>
     </div>
   );
+}
+
+function cn(...inputs: any[]) {
+  return inputs.filter(Boolean).join(" ");
 }
