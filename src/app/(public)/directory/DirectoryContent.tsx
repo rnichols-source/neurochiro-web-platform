@@ -267,8 +267,8 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
             The global network of elite chiropractic clinics focused on the nervous system.
           </p>
           
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="bg-white rounded-[2.5rem] p-2 flex flex-col md:flex-row gap-2 shadow-2xl">
+          <div className="max-w-4xl mx-auto space-y-8 sticky top-4 z-[100] md:relative md:top-0">
+            <div className="bg-white rounded-[2.5rem] p-2 flex flex-col md:flex-row gap-2 shadow-2xl border border-gray-100">
               <div className="flex-1 relative">
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input 

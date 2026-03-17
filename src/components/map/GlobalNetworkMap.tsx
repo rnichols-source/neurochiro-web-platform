@@ -222,10 +222,25 @@ export default function GlobalNetworkMap({
         data: clusters,
         layer: activeLayer
       }, '*');
+
+      // 🛡️ AUTO-ZOOM TO RESULTS (Task 3)
+      if (searchQuery && doctors.length > 0 && activeLayer === 'all') {
+        const resultCoords = doctors
+          .filter(d => d.latitude && d.longitude)
+          .map(d => [Number(d.latitude), Number(d.longitude)]);
+        
+        if (resultCoords.length > 0) {
+          iframeRef.current.contentWindow.postMessage({
+            type: 'fit-bounds',
+            bounds: resultCoords,
+            padding: [80, 80]
+          }, '*');
+        }
+      }
     } catch (e) {
       console.error("Error calculating/sending clusters:", e);
     }
-  }, [index, activeLayer, mapReady]);
+  }, [index, activeLayer, mapReady, doctors, searchQuery]);
 
   // Handle iframe messages
   useEffect(() => {

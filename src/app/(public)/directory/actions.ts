@@ -27,12 +27,12 @@ export async function getDoctors(options: {
   try {
     // DATA MINIMIZATION: Only fetch essential columns for the LIST view
     // Removed: email, website_url, instagram_url, facebook_url, address (private-ish)
-    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, latitude, longitude, bio, specialties, region_code';
+    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, zip_code, verification_status, membership_tier, latitude, longitude, bio, specialties, region_code';
     
     let query = (supabase as any)
       .from('doctors')
       .select(selectFields, { count: 'exact' })
-      .eq('verification_status', 'verified');
+      .in('verification_status', ['verified', 'pending']);
 
     if (regionCode) {
       query = query.eq('region_code', regionCode);
@@ -40,7 +40,14 @@ export async function getDoctors(options: {
 
     if (searchQuery && searchQuery.trim()) {
       const cleanQuery = searchQuery.trim();
-      query = query.or(`first_name.ilike.%${cleanQuery}%,last_name.ilike.%${cleanQuery}%,clinic_name.ilike.%${cleanQuery}%,city.ilike.%${cleanQuery}%,state.ilike.%${cleanQuery}%`);
+      // Handle State Abbreviation (e.g. NJ -> New Jersey)
+      const stateMap: Record<string, string> = {
+        'NJ': 'New Jersey', 'NY': 'New York', 'TX': 'Texas', 'CA': 'California', 'FL': 'Florida',
+        'PA': 'Pennsylvania', 'IL': 'Illinois', 'OH': 'Ohio', 'GA': 'Georgia', 'NC': 'North Carolina'
+      };
+      const expandedQuery = stateMap[cleanQuery.toUpperCase()] || cleanQuery;
+
+      query = query.or(`first_name.ilike.%${cleanQuery}%,last_name.ilike.%${cleanQuery}%,clinic_name.ilike.%${cleanQuery}%,city.ilike.%${cleanQuery}%,state.ilike.%${expandedQuery}%,zip_code.ilike.%${cleanQuery}%,specialties.cs.{${cleanQuery}}`);
     }
 
     if (bounds) {
