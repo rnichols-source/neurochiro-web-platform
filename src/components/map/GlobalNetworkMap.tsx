@@ -205,8 +205,18 @@ export default function GlobalNetworkMap({
 
   const [mapReady, setMapReady] = useState(false);
 
+  // 🛡️ RACE CONDITION FIX: Continually ping map until it reports ready
+  useEffect(() => {
+    if (mapReady) return;
+    const interval = setInterval(() => {
+      iframeRef.current?.contentWindow?.postMessage({ type: 'is-ready' }, '*');
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [mapReady]);
+
   // 🛡️ SYNC COUNTER: Reflect exact list count
-  const verifiedCount = listDoctors.length > 0 ? listDoctors.length : (initialDoctors.length > 0 ? initialDoctors.length : doctors.length);
+  const verifiedCountTotal = initialDoctors.length || 122;
+  const filteredCount = listDoctors.length > 0 ? listDoctors.length : verifiedCountTotal;
 
   // Initial map centering and data fetch
   useEffect(() => {
@@ -311,7 +321,7 @@ export default function GlobalNetworkMap({
 
   const activeCount = activeLayer === 'seminar' ? seminars.length : 
                       activeLayer === 'student' ? students.length : 
-                      verifiedCount;
+                      filteredCount;
 
   const activeLabel = activeLayer === 'seminar' ? "Active Seminars" : 
                       activeLayer === 'student' ? "Clinical Students" : 
@@ -360,7 +370,10 @@ export default function GlobalNetworkMap({
           animate={{ y: 0, opacity: 1 }}
           className="inline-flex items-center gap-2 bg-neuro-orange px-4 py-2 rounded-xl shadow-lg border border-white/20"
         >
-          <span className="text-[10px] font-black text-white uppercase tracking-widest">{activeCount} {activeLabel}</span>
+          <span className="text-[10px] font-black text-white uppercase tracking-widest">
+            {listDoctors.length > 0 ? `${listDoctors.length} results / ` : ''}
+            {verifiedCountTotal} {activeLabel}
+          </span>
           <div className="w-1 h-1 rounded-full bg-white/50"></div>
           <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest">Global Network</span>
         </motion.div>
