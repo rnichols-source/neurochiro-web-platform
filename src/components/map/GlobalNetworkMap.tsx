@@ -241,11 +241,12 @@ export default function GlobalNetworkMap({
     const syncMap = () => {
       // 🛡️ ABSOLUTE PIN FORCE: Send raw GeoJSON features to iframe
       const dataToSend = initialDoctors.length > 0 ? initialDoctors.map(doc => {
-        // 🛡️ DATA KEY AUDIT: Check both naming conventions
-        const lat = parseFloat((doc.latitude || (doc as any).lat) as any);
-        const lng = parseFloat((doc.longitude || (doc as any).lng) as any);
+        // 🛡️ TYPE SAFE MAPPING: Ensure we are working with Numbers
+        const lat = Number(doc.latitude);
+        const lng = Number(doc.longitude);
         
-        if (isNaN(lat) || isNaN(lng) || lat === 0) return null;
+        // Hide placeholders (39.7837304 is the common 'United States' center placeholder)
+        if (!lat || !lng || lat === 0 || lat === 39.7837304) return null;
 
         return {
           type: 'Feature' as const,
@@ -262,7 +263,7 @@ export default function GlobalNetworkMap({
         };
       }).filter((f): f is NonNullable<typeof f> => f !== null) : [];
 
-      console.log('[MAP_PARENT] SENDING RAW MARKERS:', dataToSend.length);
+      console.log('[MAP_PARENT] SENDING TYPE-SAFE MARKERS:', dataToSend.length);
 
       iframeRef.current?.contentWindow?.postMessage({
         type: 'force-raw-markers',
