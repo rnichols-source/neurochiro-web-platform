@@ -138,35 +138,35 @@ export default function GlobalNetworkMap({
           }
         }));
     } else {
-      // 🛡️ NUCLEAR FIX: Bypass all filters to force markers onto the map.
-      // We take everything from initialDoctors first.
+      // 🤝 FINAL DATA HANDSHAKE: Use real coordinates from initialDoctors
       const sourceDoctors = initialDoctors.length > 0 ? initialDoctors : doctors;
       
-      points = sourceDoctors.map(doc => ({
-          type: 'Feature' as const,
-          properties: { 
-            cluster: false, 
-            doctorId: doc.id,
-            name: `TEST: ${doc.last_name || 'Doctor'}`,
-            clinic: doc.clinic_name,
-            slug: doc.slug,
-            type: 'doctor'
-          },
-          geometry: {
-            type: 'Point' as const,
-            coordinates: [
-              Number(doc.longitude) || region.mapDefaults.center[0], 
-              Number(doc.latitude) || region.mapDefaults.center[1]
-            ]
-          }
-      }));
+      points = sourceDoctors
+        .map(doc => {
+          const lat = parseFloat(doc.latitude as any);
+          const lng = parseFloat(doc.longitude as any);
 
-      // ☢️ NUCLEAR TEST MARKER: Add a guaranteed marker at a known NJ coordinate
-      points.push({
-        type: 'Feature' as const,
-        properties: { cluster: false, name: "NUCLEAR_TEST_MARKER", type: 'doctor' },
-        geometry: { type: 'Point' as const, coordinates: [-74.6372889, 40.6844646] }
-      });
+          if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
+            return null;
+          }
+
+          return {
+            type: 'Feature' as const,
+            properties: { 
+              cluster: false, 
+              doctorId: doc.id,
+              name: doc.last_name?.startsWith('Dr.') ? doc.last_name : `Dr. ${doc.first_name || ''} ${doc.last_name || ''}`.trim().replace(/\s+/g, ' '),
+              clinic: doc.clinic_name,
+              slug: doc.slug,
+              type: 'doctor'
+            },
+            geometry: {
+              type: 'Point' as const,
+              coordinates: [lng, lat]
+            }
+          };
+        })
+        .filter((p): p is NonNullable<typeof p> => p !== null);
     }
 
     cluster.load(points as Supercluster.PointFeature<Supercluster.AnyProps>[]);
@@ -202,7 +202,7 @@ export default function GlobalNetworkMap({
 
   const [mapReady, setMapReady] = useState(false);
 
-  // 🛡️ UNIFIED COUNTER: Use strictly what is in the list
+  // 🛡️ SYNC COUNTER: Reflect exact list count
   const verifiedCount = useMemo(() => {
     return (initialDoctors.length > 0 ? initialDoctors : doctors).length;
   }, [initialDoctors, doctors]);
@@ -210,10 +210,22 @@ export default function GlobalNetworkMap({
   // Initial map centering and data fetch
   useEffect(() => {
     if (mapReady && iframeRef.current?.contentWindow) {
+      // 🎯 CENTER ON RESULTS: If we have doctors, center on the first one
+      let center = region.mapDefaults.center;
+      let zoom = region.mapDefaults.zoom;
+
+      if (initialDoctors.length > 0) {
+        const firstDoc = initialDoctors.find(d => parseFloat(d.latitude as any) && parseFloat(d.longitude as any));
+        if (firstDoc) {
+          center = [parseFloat(firstDoc.longitude as any), parseFloat(firstDoc.latitude as any)];
+          zoom = 10; // Zoom in to the local area
+        }
+      }
+
       iframeRef.current.contentWindow.postMessage({
         type: 'set-view',
-        center: region.mapDefaults.center,
-        zoom: region.mapDefaults.zoom
+        center: center,
+        zoom: zoom
       }, '*');
 
       // If we haven't received bounds yet, do an initial wide fetch
@@ -221,7 +233,7 @@ export default function GlobalNetworkMap({
         updateMapData(undefined as any, region.mapDefaults.zoom);
       }
     }
-  }, [mapReady, region.code]);
+  }, [mapReady, region.code, initialDoctors]);
 
   // Re-sync markers when index (data) or layer changes
   useEffect(() => {
@@ -330,7 +342,7 @@ export default function GlobalNetworkMap({
         <div className="bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl inline-flex items-center gap-2">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">
-            {region.label} NODE ACTIVE: <span className="text-white">{verifiedCount} VERIFIED CLINICS</span>
+            {region.label} NODE ACTIVE: <span className="text-white">{verifiedCount} Specialists Found</span>
           </span>
         </div>
       </div>
