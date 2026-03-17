@@ -2,6 +2,18 @@
 
 import { MapPin, Search, Filter } from "lucide-react";
 
+export function DoctorCardSkeleton() {
+  return (
+    <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 flex gap-6 animate-pulse mb-4">
+      <div className="w-14 h-14 rounded-2xl bg-gray-100 shrink-0" />
+      <div className="flex-1 space-y-3 pt-2">
+        <div className="h-5 w-3/4 bg-gray-100 rounded" />
+        <div className="h-4 w-1/2 bg-gray-50 rounded" />
+      </div>
+    </div>
+  );
+}
+
 export default function DirectorySkeleton() {
   return (
     <div className="min-h-screen bg-neuro-cream">
@@ -20,17 +32,7 @@ export default function DirectorySkeleton() {
           <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-8" />
           
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 flex gap-6">
-              <div className="w-24 h-24 rounded-[2rem] bg-gray-100 animate-pulse shrink-0" />
-              <div className="flex-1 space-y-3 pt-2">
-                <div className="h-6 w-3/4 bg-gray-100 rounded animate-pulse" />
-                <div className="h-4 w-1/2 bg-gray-50 rounded animate-pulse" />
-                <div className="flex gap-2 pt-2">
-                  <div className="h-4 w-20 bg-gray-50 rounded animate-pulse" />
-                  <div className="h-4 w-20 bg-gray-50 rounded animate-pulse" />
-                </div>
-              </div>
-            </div>
+            <DoctorCardSkeleton key={i} />
           ))}
         </div>
 

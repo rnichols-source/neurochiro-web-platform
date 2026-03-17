@@ -7,6 +7,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRegion } from "@/context/RegionContext";
 import { useSearchParams } from "next/navigation";
 import { getDoctors } from "./actions";
+import { DoctorCardSkeleton } from "@/components/directory/DirectorySkeleton";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -71,6 +72,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   const [isLocating, setIsLocating] = useState(false);
   
   const [doctors, setDoctors] = useState<any[]>(initialData.doctors);
+  const [isFallback, setIsFallback] = useState(false);
   const [totalCount, setTotalCount] = useState(initialData.total);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -91,6 +93,8 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
         console.warn("Search API returned error, but we're staying in skeleton/loading mode");
         return;
       }
+
+      setIsFallback(!!result.isFallback);
 
       if (isLoadMore) {
         setDoctors(prev => [...prev, ...result.doctors]);
@@ -171,6 +175,8 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   };
 
   const filteredDoctors = useMemo(() => {
+    if (isFallback) return doctors;
+
     const q = (searchQuery || "").trim().toLowerCase();
     const l = (locationQuery || "").trim().toLowerCase();
 
@@ -339,15 +345,23 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
 
             {loading && doctors.length === 0 ? (
                <div className="space-y-4">
-                 {[1,2,3].map(i => <DirectorySkeleton key={i} />)}
+                 {[1,2,3,4,5].map(i => <DoctorCardSkeleton key={i} />)}
                </div>
             ) : filteredDoctors.length > 0 ? (
               <>
                 <div className="mb-4">
-                  {(searchQuery || locationQuery) && (
+                  {(searchQuery || locationQuery) && !isFallback && (
                     <p className="text-xs font-bold text-gray-500">
                       Showing results for: <span className="text-neuro-navy">{(searchQuery && locationQuery) ? `${searchQuery} in ${locationQuery}` : (searchQuery || locationQuery)}</span>
                     </p>
+                  )}
+                  {isFallback && (
+                    <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex items-center gap-3 mb-6">
+                      <Sparkles className="w-4 h-4 text-amber-500" />
+                      <p className="text-[10px] font-black uppercase tracking-widest text-amber-700">
+                        Top Verified Specialists (Fallback Network)
+                      </p>
+                    </div>
                   )}
                 </div>
                 {filteredDoctors.map((doc, i) => (
