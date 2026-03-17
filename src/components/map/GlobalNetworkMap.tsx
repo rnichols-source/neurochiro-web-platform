@@ -138,17 +138,16 @@ export default function GlobalNetworkMap({
           }
         }));
     } else {
-      // 🤝 FINAL DATA HANDSHAKE: Use real coordinates from initialDoctors
-      const sourceDoctors = initialDoctors.length > 0 ? initialDoctors : doctors;
+      // 🛡️ TOTAL MAP OVERRIDE: Force pins to match the list exactly
+      const sourceDoctors = initialDoctors; // Strictly use the list data
       
       points = sourceDoctors
         .map(doc => {
+          // Use exact database column names: latitude and longitude
           const lat = parseFloat(doc.latitude as any);
           const lng = parseFloat(doc.longitude as any);
 
-          if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
-            return null;
-          }
+          if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return null;
 
           return {
             type: 'Feature' as const,
@@ -202,10 +201,8 @@ export default function GlobalNetworkMap({
 
   const [mapReady, setMapReady] = useState(false);
 
-  // 🛡️ SYNC COUNTER: Reflect exact list count
-  const verifiedCount = useMemo(() => {
-    return (initialDoctors.length > 0 ? initialDoctors : doctors).length;
-  }, [initialDoctors, doctors]);
+  // 🛡️ TOTAL MAP OVERRIDE: If the list sees them, the map MUST count them.
+  const verifiedCount = initialDoctors.length;
 
   // Initial map centering and data fetch
   useEffect(() => {
@@ -342,7 +339,7 @@ export default function GlobalNetworkMap({
         <div className="bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl inline-flex items-center gap-2">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">
-            {region.label} NODE ACTIVE: <span className="text-white">{verifiedCount} Specialists Found</span>
+            {region.label} NODE ACTIVE: <span className="text-white">{verifiedCount} SPECIALISTS FOUND</span>
           </span>
         </div>
       </div>
