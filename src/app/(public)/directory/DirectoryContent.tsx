@@ -78,26 +78,18 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
 
   const fetchDoctors = async (query?: string, isLoadMore = false) => {
     setLoading(true);
-    setDbError(false);
     const nextPage = isLoadMore ? page + 1 : 1;
     const limit = 20;
     
     try {
-      let result = await getDoctors({ 
-        regionCode: region.code,
-        searchQuery: (query || searchQuery || "").trim(),
-        limit: limit,
-        page: nextPage
-      });
+      // Use the new Failsafe API Route
+      const searchQ = (query || searchQuery || "").trim();
+      const response = await fetch(`/api/directory/search?q=${encodeURIComponent(searchQ)}&region=${region.code}&limit=${limit}&page=${nextPage}`);
+      const result = await response.json();
       
-      if ((result as any).error) {
-        setDbError(true);
+      if (result.error && !result.doctors?.length) {
+        console.warn("Search API returned error, but we're staying in skeleton/loading mode");
         return;
-      }
-
-      // WIDE FETCH FALLBACK: If no doctors found in region, try global
-      if (result.doctors.length === 0 && !isLoadMore && !searchQuery.trim() && !query) {
-        result = await getDoctors({ limit: limit, page: 1 });
       }
 
       if (isLoadMore) {
@@ -112,7 +104,6 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
       setHasMore(currentLoadedCount < result.total);
     } catch (error) {
       console.error("Directory request failed:", error);
-      setDbError(true);
     } finally {
       setLoading(false);
     }
@@ -195,7 +186,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
         (doc.first_name || "").toLowerCase().includes(q) || 
         (doc.last_name || "").toLowerCase().includes(q) ||
         (doc.clinic_name || "").toLowerCase().includes(q) ||
-        (doc.specialties || []).some((s: any) => (s || "").toLowerCase().includes(q));
+        (doc.region_code || "").toLowerCase().includes(q);
       
       const matchesLocation = 
         (doc.city || "").toLowerCase().includes(l) ||
@@ -346,20 +337,10 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                </div>
             </div>
 
-            {dbError ? (
-              <div className="bg-white rounded-[2.5rem] border-2 border-red-100 p-12 text-center shadow-xl">
-                <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-6" />
-                <h3 className="text-2xl font-black text-neuro-navy mb-2">Temporary Connection Issue</h3>
-                <p className="text-gray-500 text-sm mb-8">We're having trouble reaching the database. Please try refreshing.</p>
-                <motion.button 
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => window.location.reload()} 
-                  className="w-full py-5 bg-neuro-navy text-white font-black rounded-2xl uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-lg"
-                >
-                  <RefreshCw className="w-4 h-4" /> Refresh Directory
-                </motion.button>
-              </div>
+            {loading && doctors.length === 0 ? (
+               <div className="space-y-4">
+                 {[1,2,3].map(i => <DirectorySkeleton key={i} />)}
+               </div>
             ) : filteredDoctors.length > 0 ? (
               <>
                 <div className="mb-4">

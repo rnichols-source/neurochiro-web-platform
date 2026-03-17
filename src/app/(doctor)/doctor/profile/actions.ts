@@ -81,6 +81,14 @@ export async function updateDoctorProfile(formData: FormData) {
       return { error: `Failed to update clinic info: ${doctorError.message}` }
     }
 
+    // Refresh search index for high-performance GIN/RPC search
+    try {
+      const adminSupabase = (await import('@/lib/supabase-admin')).createAdminClient();
+      await (adminSupabase as any).rpc('refresh_search_index');
+    } catch (refreshErr) {
+      console.warn("Search Index Refresh (non-critical):", refreshErr)
+    }
+
     // 3. Trigger geocoding if location changed
     try {
       await (supabase as any).from('automation_queue').insert({

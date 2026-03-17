@@ -35,6 +35,13 @@ export async function updateDoctorManually(doctorId: string, updates: any) {
     return { success: false, error: error.message };
   }
 
+  // Refresh search index for high-performance GIN/RPC search
+  try {
+    await (supabase as any).rpc('refresh_search_index');
+  } catch (refreshErr) {
+    console.warn("Search Index Refresh (non-critical):", refreshErr);
+  }
+
   // Log the action (using server client for audit log to get user if possible)
   try {
     const serverSupabase = createServerSupabase();
