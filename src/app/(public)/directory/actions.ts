@@ -47,7 +47,7 @@ export async function getDoctors(options: {
       };
       const expandedQuery = stateMap[cleanQuery.toUpperCase()] || cleanQuery;
 
-      query = query.or(`first_name.ilike.%${cleanQuery}%,last_name.ilike.%${cleanQuery}%,clinic_name.ilike.%${cleanQuery}%,city.ilike.%${cleanQuery}%,state.ilike.%${expandedQuery}%,zip_code.ilike.%${cleanQuery}%,specialties.cs.{${cleanQuery}}`);
+      query = query.or(`first_name.ilike.%${cleanQuery}%,last_name.ilike.%${cleanQuery}%,clinic_name.ilike.%${cleanQuery}%,city.ilike.%${cleanQuery}%,state.ilike.%${expandedQuery}%,zip_code.ilike.%${cleanQuery}%,specialties::text.ilike.%${cleanQuery}%,address.ilike.%${cleanQuery}%`);
     }
 
     if (bounds) {

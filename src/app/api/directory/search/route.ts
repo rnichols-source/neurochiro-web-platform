@@ -9,6 +9,7 @@ const SEARCHABLE_LOCATION_COLUMNS = ['city', 'state', 'address'];
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get('q') || '';
+  const location = searchParams.get('location') || '';
   const region = searchParams.get('region') || ''; // This is Country Code (US/AU)
   const limit = parseInt(searchParams.get('limit') || '20');
   
@@ -28,13 +29,14 @@ export async function GET(request: NextRequest) {
     }
 
     if (query) {
-      // Logic Pivot: Explicit Name + Location fuzzy match
       const nameConditions = SEARCHABLE_NAME_COLUMNS.map(col => `${col}.ilike.%${query}%`);
-      const locationConditions = SEARCHABLE_LOCATION_COLUMNS.map(col => `${col}.ilike.%${query}%`);
-      // Use ILIKE on casted array to allow partial specialty matches
       const specialtyCondition = `specialties::text.ilike.%${query}%`;
-      
-      dbQuery = dbQuery.or([...nameConditions, ...locationConditions, specialtyCondition].join(','));
+      dbQuery = dbQuery.or([...nameConditions, specialtyCondition].join(','));
+    }
+
+    if (location) {
+      const locationConditions = SEARCHABLE_LOCATION_COLUMNS.map(col => `${col}.ilike.%${location}%`);
+      dbQuery = dbQuery.or(locationConditions.join(','));
     }
 
     const { data, error, count } = await dbQuery

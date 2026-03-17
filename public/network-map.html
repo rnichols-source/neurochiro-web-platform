@@ -97,7 +97,7 @@
     cartoLayer.addTo(map);
 
     // 🛡️ GLOBAL LAYER ATTACHMENT
-    window.markerLayer = L.layerGroup().addTo(map);
+    window.markerLayer = L.featureGroup().addTo(map);
 
     window.parent.postMessage({ type: 'map-ready' }, '*');
 
@@ -185,30 +185,43 @@
         console.log('--- MAP OBJECT STATE ---', typeof map, map.getZoom(), map.getCenter());
 
         if (e.data.type === 'force-raw-markers') {
-            console.log('[MAP_IFRAME] FORCING RAW MARKERS:', e.data.data?.length || 0);
+            const features = e.data.data || [];
+            console.log('[MAP_IFRAME] FORCING RAW MARKERS:', features.length);
             window.markerLayer.clearLayers();
             
-            if (e.data.data && Array.isArray(e.data.data)) {
-                e.data.data.forEach(feat => {
+            if (Array.isArray(features)) {
+                features.forEach((feat, idx) => {
                     if (!feat.geometry || !feat.geometry.coordinates) return;
                     const [lng, lat] = feat.geometry.coordinates;
                     
                     if (!isNaN(lat) && !isNaN(lng) && lat !== 0) {
+                        // 🛡️ SUPER VISIBLE MARKER: Larger circle with glow
                         L.circleMarker([lat, lng], {
-                            radius: 8,
+                            radius: 12,
                             fillColor: "#ff5722",
                             color: "#fff",
-                            weight: 2,
+                            weight: 3,
                             opacity: 1,
-                            fillOpacity: 1
+                            fillOpacity: 0.9
                         }).addTo(window.markerLayer).bindPopup(feat.properties.name || "Specialist");
+                        
+                        console.log(`[MAP_IFRAME] Added marker ${idx} at [${lat}, ${lng}]`);
                     }
                 });
 
                 // 🛡️ AUTO-ALIGN: Force map to fit these markers
-                const bounds = window.markerLayer.getBounds();
-                if (bounds.isValid()) {
-                    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
+                try {
+                    const bounds = window.markerLayer.getBounds();
+                    if (bounds.isValid()) {
+                        console.log('[MAP_IFRAME] Fitting bounds:', bounds.toBBoxString());
+                        map.fitBounds(bounds, { padding: [100, 100], maxZoom: 10 });
+                    } else if (features.length > 0) {
+                        // Fallback: Pan to first marker if bounds invalid but markers exist
+                        const first = features[0].geometry.coordinates;
+                        map.setView([first[1], first[0]], 10);
+                    }
+                } catch (err) {
+                    console.error('[MAP_IFRAME] fitBounds error:', err);
                 }
             }
         } else if (e.data.type === 'update-clusters') {

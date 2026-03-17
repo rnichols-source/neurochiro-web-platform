@@ -78,15 +78,16 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(initialData.doctors.length < initialData.total);
 
-  const fetchDoctors = async (query?: string, isLoadMore = false) => {
+  const fetchDoctors = async (query?: string, loc?: string, isLoadMore = false) => {
     setLoading(true);
     const nextPage = isLoadMore ? page + 1 : 1;
     const limit = 20;
     
     try {
       // Use the new Failsafe API Route
-      const searchQ = (query || searchQuery || "").trim();
-      const response = await fetch(`/api/directory/search?q=${encodeURIComponent(searchQ)}&region=${region.code}&limit=${limit}&page=${nextPage}`);
+      const searchQ = (query !== undefined ? query : searchQuery).trim();
+      const locationQ = (loc !== undefined ? loc : locationQuery).trim();
+      const response = await fetch(`/api/directory/search?q=${encodeURIComponent(searchQ)}&location=${encodeURIComponent(locationQ)}&region=${region.code}&limit=${limit}&page=${nextPage}`);
       const result = await response.json();
       
       if (result.error && !result.doctors?.length) {
@@ -115,22 +116,21 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
 
   // Debounced search
   useEffect(() => {
-    if (searchQuery === searchParams.get("search")) return;
     const timer = setTimeout(() => {
       handleSearch();
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, locationQuery]);
 
   // Re-fetch if region changes
   useEffect(() => {
     setPage(1);
-    fetchDoctors(searchQuery, false);
+    fetchDoctors(searchQuery, locationQuery, false);
   }, [region.code]);
 
   const handleSearch = () => {
     setPage(1);
-    fetchDoctors(searchQuery, false);
+    fetchDoctors(searchQuery, locationQuery, false);
     if (locationQuery) setLastLocation(locationQuery);
   };
 
@@ -317,7 +317,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
             mobileView === 'list' ? 'hidden lg:block' : 'block'
           )}>
             <div className="bg-slate-200 rounded-[3rem] p-2 shadow-xl border border-gray-100 h-[500px] lg:h-[700px] lg:sticky lg:top-8 overflow-hidden relative group">
-               {showMap ? <GlobalNetworkMap key={region.code} externalSearchQuery={searchQuery} onSearchChange={setSearchQuery} externalLocationQuery={locationQuery} initialDoctors={initialData.doctors} /> : <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center"><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Preparing Map...</p></div>}
+               {showMap ? <GlobalNetworkMap key={region.code} externalSearchQuery={searchQuery} onSearchChange={setSearchQuery} externalLocationQuery={locationQuery} initialDoctors={filteredDoctors} /> : <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center"><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Preparing Map...</p></div>}
             </div>
           </div>
 
