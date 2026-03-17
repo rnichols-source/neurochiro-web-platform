@@ -2,6 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server';
 import { stripe } from '@/lib/stripe';
+import Stripe from 'stripe';
 
 export async function getBillingData() {
   try {
@@ -28,7 +29,7 @@ export async function getBillingData() {
       expand: ['data.default_payment_method']
     });
 
-    const activeSubscription = subscriptions.data[0];
+    const activeSubscription = subscriptions.data[0] as Stripe.Subscription;
 
     // Fetch last 10 invoices
     const invoices = await stripe.invoices.list({
@@ -42,12 +43,14 @@ export async function getBillingData() {
         id: activeSubscription.id,
         status: activeSubscription.status,
         price: activeSubscription.items.data[0].price.unit_amount ? activeSubscription.items.data[0].price.unit_amount / 100 : 0,
-        interval: activeSubscription.items.data[0].plan.interval,
-        nextBilling: new Date(activeSubscription.current_period_end * 1000).toLocaleDateString('en-US', {
-          month: 'short',
-          day: '2-digit',
-          year: 'numeric'
-        }),
+        interval: activeSubscription.items.data[0].plan.interval || 'month',
+        nextBilling: activeSubscription.current_period_end 
+          ? new Date(activeSubscription.current_period_end * 1000).toLocaleDateString('en-US', {
+              month: 'short',
+              day: '2-digit',
+              year: 'numeric'
+            })
+          : '---',
         paymentMethod: (activeSubscription.default_payment_method as any)?.card?.last4 || null
       } : null,
       invoices: invoices.data.map(inv => ({
