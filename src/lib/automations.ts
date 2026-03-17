@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
+import { revalidatePath } from 'next/cache';
 
 /**
  * LAZY RESEND LOADER
@@ -689,22 +690,22 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
       case 'payment_success':
         if (supabaseAdmin && payload.stripeData) {
           const data = payload.stripeData;
-          // In checkout.session, userId is in client_reference_id
-          // In invoice, we usually find customer, and might have subscription metadata
           const customerId = data.customer;
-          const userId = data.client_reference_id; // For checkout session
+          const userId = data.client_reference_id; 
           
           if (userId) {
             await supabaseAdmin.from('profiles').update({
               stripe_customer_id: customerId,
-              /* subscription_status: 'active' */
             }).eq('id', userId);
             
             const { data: profile } = await supabaseAdmin.from('profiles').select('role, full_name, email').eq('id', userId).single();
             if (profile?.role === 'doctor') {
                await supabaseAdmin.from('doctors').update({ verification_status: 'verified' }).eq('user_id', userId);
+               
+               // CLEAR CACHE ON SUCCESSFUL INITIAL PAYMENT
+               revalidatePath('/doctor/dashboard');
+               revalidatePath('/doctor/roi');
 
-               // 🛡️ NETWORK MILESTONE: Count verified doctors
                const { count: verifiedCount } = await supabaseAdmin
                  .from('doctors')
                  .select('*', { count: 'exact', head: true })
@@ -756,12 +757,33 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         if (supabaseAdmin && payload.stripeData) {
           const sub = payload.stripeData;
           const customerId = sub.customer;
-          // You would typically map Stripe Price IDs to your internal tiers here
-          // For now we update the status
+          const priceId = sub.items?.data?.[0]?.price?.id || '';
+          
+          // MAP STRIPE PRICE IDs TO TIERS
+          const priceToTier: Record<string, string> = {
+            'A0q': 'starter',
+            'A0s': 'starter',
+            'A0p': 'growth',
+            'A0r': 'pro'
+          };
+
+          // Find match by substring
+          const matchedKey = Object.keys(priceToTier).find(key => priceId.includes(key));
+          const newTier = matchedKey ? priceToTier[matchedKey] : 'starter';
+
           if (customerId) {
-            await supabaseAdmin.from('profiles').update({
-              /* subscription_status: sub.status */
-            }).eq('stripe_customer_id', customerId);
+            const { data: profile } = await supabaseAdmin
+              .from('profiles')
+              .update({ tier: newTier })
+              .eq('stripe_customer_id', customerId)
+              .select('id, role')
+              .single();
+
+            if (profile?.role === 'doctor') {
+               await supabaseAdmin.from('doctors').update({ membership_tier: newTier }).eq('user_id', profile.id);
+               revalidatePath('/doctor/dashboard');
+               revalidatePath('/doctor/roi');
+            }
           }
         }
         break;
