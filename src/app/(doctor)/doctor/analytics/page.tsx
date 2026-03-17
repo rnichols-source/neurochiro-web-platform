@@ -20,6 +20,7 @@ export default function DoctorAnalytics() {
   const { tier, setTier } = useDoctorTier();
   const [roiData, setRoiData] = useState<ROIData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     async function loadROIData() {
@@ -27,11 +28,31 @@ export default function DoctorAnalytics() {
       const data = await getDoctorROIData(period);
       if (data) {
         setRoiData(data as ROIData);
+        // If we have the real tier from the DB, let's update the context
+        if (data.tier) {
+          setTier(data.tier);
+        }
       }
       setLoading(false);
     }
     loadROIData();
-  }, [period]);
+  }, [period, setTier]);
+
+  // For conditional toggle rendering
+  useEffect(() => {
+    async function checkAdmin() {
+      const { createClient } = await import('@/lib/supabase');
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+        if (['admin', 'super_admin', 'founder'].includes(profile?.role || '')) {
+          setIsAdmin(true);
+        }
+      }
+    }
+    checkAdmin();
+  }, []);
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-12 text-neuro-navy">
@@ -57,18 +78,20 @@ export default function DoctorAnalytics() {
             ))}
           </div>
           
-          {/* Dev Tier Toggle - In production this is based on actual subscription */}
-          <div className="bg-neuro-orange/10 p-1 rounded-2xl border border-neuro-orange/20 flex shadow-sm">
-            {(["starter", "growth", "pro"] as const).map(t => (
-              <button 
-                key={t} 
-                onClick={() => setTier(t)}
-                className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${tier === t ? 'bg-neuro-orange text-white' : 'text-neuro-orange hover:bg-neuro-orange/5'}`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
+          {/* Dev Tier Toggle - Conditionally shown for admins only */}
+          {isAdmin && (
+            <div className="bg-neuro-orange/10 p-1 rounded-2xl border border-neuro-orange/20 flex shadow-sm">
+              {(["starter", "growth", "pro"] as const).map(t => (
+                <button 
+                  key={t} 
+                  onClick={() => setTier(t)}
+                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${tier === t ? 'bg-neuro-orange text-white' : 'text-neuro-orange hover:bg-neuro-orange/5'}`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </header>
 
@@ -80,7 +103,7 @@ export default function DoctorAnalytics() {
       ) : roiData ? (
         <>
           <ROIDashboard 
-            tier={tier} 
+            tier={roiData.tier} 
             data={roiData} 
             onUpgrade={() => console.log("Trigger Upgrade Flow")}
           />

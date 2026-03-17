@@ -15,6 +15,7 @@ export interface ROIStats {
 
 export interface ROIData {
   period: '7d' | '30d' | '90d' | 'ytd';
+  tier: MembershipTier;
   stats: ROIStats;
   pending_patients?: { id: string; name: string; date: string }[];
   historical_revenue: { date: string; amount: number }[];

@@ -198,6 +198,7 @@ export async function getDoctorROIData(period: string = '30d') {
 
     return {
       period,
+      tier,
       stats,
       pending_patients: isStarter ? [] : (leadsRes.data || []).map((l: any) => ({
         id: l.id,
