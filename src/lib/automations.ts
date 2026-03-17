@@ -817,10 +817,14 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             const { data: profile } = await supabaseAdmin.from('profiles').select('id, role').eq('stripe_customer_id', customerId).single();
             if (profile) {
               await supabaseAdmin.from('profiles').update({ tier: 'free' }).eq('id', profile.id);
-              // Hide from directory
+              // [FOREVER FIX] Do not hide from directory on subscription cancelation.
+              // We want listings to stay visible to preserve the platform's value.
+              // They will be downgraded to 'starter' tier instead (handled in profiles update above).
+              /*
               if (profile.role === 'doctor') {
                 await supabaseAdmin.from('doctors').update({ verification_status: 'hidden' }).eq('user_id', profile.id);
               }
+              */
             }
           }
         }

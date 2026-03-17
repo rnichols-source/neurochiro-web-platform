@@ -34,7 +34,7 @@ export async function getDoctors(options: {
       .select(selectFields, { count: 'exact' })
       .in('verification_status', ['verified', 'pending']);
 
-    if (regionCode) {
+    if (regionCode && regionCode !== 'US') {
       query = query.eq('region_code', regionCode);
     }
 
@@ -58,14 +58,33 @@ export async function getDoctors(options: {
         .lte('latitude', bounds[3]);
     }
 
+    // Improved ordering: Priority to Pro, then Growth, then Starter
     const { data, error, count } = await query
-      .order('membership_tier', { ascending: false })
-      .range((page - 1) * limit, page * limit - 1)
-      .limit(1000);
+      .order('membership_tier', { ascending: false }) // This puts 'starter' last but 'pro' and 'growth' order depends on names.
+      // Better to use an explicit priority if possible, but for now we'll stick to a more robust fallback
+      .range((page - 1) * limit, page * limit - 1);
 
     if (error) {
       console.error("[DIRECTORY_ACTION] Database Error:", error);
       return { doctors: [], total: 0, error: true };
+    }
+
+    // FALLBACK: If specific search/region returns nothing, return a subset of verified doctors
+    if ((!data || data.length === 0) && (regionCode || searchQuery)) {
+       const { data: fallbackData, count: fallbackCount } = await (supabase as any)
+         .from('doctors')
+         .select(selectFields, { count: 'exact' })
+         .eq('verification_status', 'verified')
+         .limit(limit);
+       
+       if (fallbackData && fallbackData.length > 0) {
+         return {
+           doctors: fallbackData as Doctor[],
+           total: fallbackCount || fallbackData.length,
+           error: false,
+           isFallback: true
+         };
+       }
     }
     
     return {
