@@ -68,7 +68,7 @@ export interface Database {
           rating: number | null
           review_count: number | null
           verification_status: 'pending' | 'verified' | 'hidden'
-          membership_tier: 'starter' | 'growth' | 'pro'
+          membership_tier: 'starter' | 'growth' | 'pro' | 'elite'
           is_hiring: boolean
           is_mentoring: boolean
           region_code: string
@@ -104,7 +104,7 @@ export interface Database {
           rating?: number | null
           review_count?: number | null
           verification_status?: 'pending' | 'verified' | 'hidden'
-          membership_tier?: 'starter' | 'growth' | 'pro'
+          membership_tier?: 'starter' | 'growth' | 'pro' | 'elite'
           is_hiring?: boolean
           is_mentoring?: boolean
           region_code?: string
@@ -140,7 +140,7 @@ export interface Database {
           rating?: number | null
           review_count?: number | null
           verification_status?: 'pending' | 'verified' | 'hidden'
-          membership_tier?: 'starter' | 'growth' | 'pro'
+          membership_tier?: 'starter' | 'growth' | 'pro' | 'elite'
           is_hiring?: boolean
           is_mentoring?: boolean
           region_code?: string
