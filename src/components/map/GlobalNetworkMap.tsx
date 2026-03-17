@@ -244,20 +244,40 @@ export default function GlobalNetworkMap({
       
       // ☢️ NUCLEAR OPTION: If < 100 doctors, bypass clustering for maximum reliability
       if (initialDoctors.length > 0 && initialDoctors.length < 100 && activeLayer === 'all') {
-        const rawPoints = points.filter(p => p.properties.type === 'doctor');
+        const rawPoints = initialDoctors
+          .map(doc => {
+            const lat = parseFloat(doc.latitude as any);
+            const lng = parseFloat(doc.longitude as any);
+            if (isNaN(lat) || isNaN(lng)) return null;
+            return {
+              type: 'Feature' as const,
+              properties: { 
+                cluster: false, 
+                doctorId: doc.id, 
+                type: 'doctor' as const, 
+                name: doc.last_name,
+                clinic: doc.clinic_name,
+                slug: doc.slug 
+              },
+              geometry: { type: 'Point' as const, coordinates: [lng, lat] }
+            };
+          })
+          .filter((p): p is NonNullable<typeof p> => p !== null);
+
         iframeRef.current.contentWindow.postMessage({ 
           type: 'update-clusters', 
-          data: rawPoints,
-          layer: activeLayer
+          data: rawPoints, 
+          layer: activeLayer 
         }, '*');
-      } else {
-        const clusters = index.getClusters(bounds, Math.round(currentZoom.current));
-        iframeRef.current.contentWindow.postMessage({ 
-          type: 'update-clusters', 
-          data: clusters,
-          layer: activeLayer
-        }, '*');
+        return; // Exit early so we don't try to use the clustering logic
       }
+
+      const clusters = index.getClusters(bounds, Math.round(currentZoom.current));
+      iframeRef.current.contentWindow.postMessage({ 
+        type: 'update-clusters', 
+        data: clusters,
+        layer: activeLayer
+      }, '*');
 
       // 🛡️ AUTO-ZOOM TO RESULTS (Task 4)
       // If we have doctors in the list, zoom the map to fit them
