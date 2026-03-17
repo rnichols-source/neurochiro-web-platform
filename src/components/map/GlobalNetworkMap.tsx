@@ -25,6 +25,7 @@ interface GlobalNetworkMapProps {
   onSearchChange?: (q: string) => void;
   externalLocationQuery?: string;
   initialDoctors?: Doctor[];
+  listDoctors?: Doctor[];
 }
 
 export default function GlobalNetworkMap({ 
@@ -32,7 +33,8 @@ export default function GlobalNetworkMap({
   externalSearchQuery = "",
   onSearchChange,
   externalLocationQuery = "",
-  initialDoctors = []
+  initialDoctors = [],
+  listDoctors = []
 }: GlobalNetworkMapProps) {
   const router = useRouter();
   const { region } = useRegion();
@@ -204,20 +206,22 @@ export default function GlobalNetworkMap({
   const [mapReady, setMapReady] = useState(false);
 
   // 🛡️ SYNC COUNTER: Reflect exact list count
-  const verifiedCount = initialDoctors.length > 0 ? initialDoctors.length : 0;
+  const verifiedCount = listDoctors.length > 0 ? listDoctors.length : initialDoctors.length;
 
   // Initial map centering and data fetch
   useEffect(() => {
     if (mapReady && iframeRef.current?.contentWindow) {
-      // 🎯 CENTER ON RESULTS: If we have doctors, center on the first one
+      // 🎯 CENTER ON RESULTS: If we have filtered list doctors, center on those
       let center = region.mapDefaults.center;
       let zoom = region.mapDefaults.zoom;
 
-      if (initialDoctors.length > 0) {
-        const firstDoc = initialDoctors.find(d => parseFloat(d.latitude as any) && parseFloat(d.longitude as any));
+      const focusDoctors = listDoctors.length > 0 ? listDoctors : initialDoctors;
+
+      if (focusDoctors.length > 0) {
+        const firstDoc = focusDoctors.find(d => parseFloat(d.latitude as any) && parseFloat(d.longitude as any));
         if (firstDoc) {
           center = [parseFloat(firstDoc.longitude as any), parseFloat(firstDoc.latitude as any)];
-          zoom = 10; // Zoom in to the local area
+          zoom = focusDoctors.length < 5 ? 10 : 6; // Zoom in more if fewer results
         }
       }
 
@@ -232,19 +236,19 @@ export default function GlobalNetworkMap({
         updateMapData(undefined as any, region.mapDefaults.zoom);
       }
     }
-  }, [mapReady, region.code, initialDoctors]);
+  }, [mapReady, region.code, listDoctors, initialDoctors]);
 
   // Re-sync markers when data, layer, or map state changes
   useEffect(() => {
     if (!iframeRef.current?.contentWindow || !mapReady) return;
 
     const syncMap = () => {
-      // 🛡️ ABSOLUTE PIN FORCE: Send raw features to iframe
+      // 🛡️ ABSOLUTE PIN FORCE: Send ALL 122 features to iframe, but maybe highlight filtered ones?
+      // For now, let's just send all initialDoctors to satisfy the "Show all 122" request.
       const dataToSend = (initialDoctors || []).map(doc => {
         const lat = Number(doc.latitude);
         const lng = Number(doc.longitude);
         
-        // Only skip if absolutely zero or NaN
         if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
 
         return {
@@ -257,12 +261,13 @@ export default function GlobalNetworkMap({
             cluster: false, 
             doctorId: doc.id, 
             name: `Dr. ${doc.last_name || ''}`, 
-            type: 'doctor' as const 
+            type: 'doctor' as const,
+            isFiltered: listDoctors.some(ld => ld.id === doc.id)
           }
         };
       }).filter((f): f is NonNullable<typeof f> => f !== null);
 
-      console.log('[MAP_PARENT] SYNCING MARKERS:', dataToSend.length);
+      console.log('[MAP_PARENT] SYNCING ALL MARKERS:', dataToSend.length);
 
       iframeRef.current?.contentWindow?.postMessage({
         type: 'force-raw-markers',
@@ -271,10 +276,9 @@ export default function GlobalNetworkMap({
       }, '*');
     };
 
-    // Give the iframe 500ms to settle before sending data
     const timer = setTimeout(syncMap, 500);
     return () => clearTimeout(timer);
-  }, [initialDoctors, mapReady, activeLayer]);
+  }, [initialDoctors, listDoctors, mapReady, activeLayer]);
 
   // Handle iframe messages
   useEffect(() => {
@@ -342,6 +346,17 @@ export default function GlobalNetworkMap({
             <Filter className="w-4 h-4 text-white" />
           </button>
         </div>
+
+        {/* 🛡️ COUNTER: Reflect exact list count */}
+        <motion.div 
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="inline-flex items-center gap-2 bg-neuro-orange px-4 py-2 rounded-xl shadow-lg border border-white/20"
+        >
+          <span className="text-[10px] font-black text-white uppercase tracking-widest">{activeCount} {activeLabel}</span>
+          <div className="w-1 h-1 rounded-full bg-white/50"></div>
+          <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest">Global Network</span>
+        </motion.div>
       </div>
 
       {/* 3. LAYER TOGGLES */}

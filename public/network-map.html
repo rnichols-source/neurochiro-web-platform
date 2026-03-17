@@ -56,6 +56,17 @@
             100% { transform: scale(3.5); opacity: 0; }
         }
 
+        @keyframes marker-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(214, 104, 41, 0.7); }
+            70% { transform: scale(1.2); box-shadow: 0 0 0 10px rgba(214, 104, 41, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(214, 104, 41, 0); }
+        }
+
+        .active-specialist {
+            animation: marker-pulse 2s infinite;
+            z-index: 1000 !important;
+        }
+
         .leaflet-control-attribution { display: none !important; }
     </style>
 </head>
@@ -189,36 +200,39 @@
             console.log('[MAP_IFRAME] FORCING RAW MARKERS:', features.length);
             window.markerLayer.clearLayers();
             
+            const activeMarkers = [];
+
             if (Array.isArray(features)) {
                 features.forEach((feat, idx) => {
                     if (!feat.geometry || !feat.geometry.coordinates) return;
                     const [lng, lat] = feat.geometry.coordinates;
+                    const isFiltered = feat.properties.isFiltered;
                     
                     if (!isNaN(lat) && !isNaN(lng) && lat !== 0) {
-                        // 🛡️ SUPER VISIBLE MARKER: Larger circle with glow
-                        L.circleMarker([lat, lng], {
-                            radius: 12,
-                            fillColor: "#ff5722",
-                            color: "#fff",
-                            weight: 3,
+                        const marker = L.circleMarker([lat, lng], {
+                            radius: isFiltered ? 12 : 6,
+                            fillColor: isFiltered ? "#ff5722" : "#444",
+                            color: isFiltered ? "#fff" : "#888",
+                            weight: isFiltered ? 3 : 1,
                             opacity: 1,
-                            fillOpacity: 0.9
+                            fillOpacity: isFiltered ? 0.9 : 0.5,
+                            className: isFiltered ? 'active-specialist' : ''
                         }).addTo(window.markerLayer).bindPopup(feat.properties.name || "Specialist");
                         
-                        console.log(`[MAP_IFRAME] Added marker ${idx} at [${lat}, ${lng}]`);
+                        if (isFiltered) activeMarkers.push(marker);
                     }
                 });
 
-                // 🛡️ AUTO-ALIGN: Force map to fit these markers
+                // 🛡️ INTELLIGENT ALIGN: Fit to filtered results, or fallback to all
                 try {
-                    const bounds = window.markerLayer.getBounds();
-                    if (bounds.isValid()) {
-                        console.log('[MAP_IFRAME] Fitting bounds:', bounds.toBBoxString());
-                        map.fitBounds(bounds, { padding: [100, 100], maxZoom: 10 });
-                    } else if (features.length > 0) {
-                        // Fallback: Pan to first marker if bounds invalid but markers exist
-                        const first = features[0].geometry.coordinates;
-                        map.setView([first[1], first[0]], 10);
+                    if (activeMarkers.length > 0) {
+                        const activeGroup = L.featureGroup(activeMarkers);
+                        map.fitBounds(activeGroup.getBounds(), { padding: [100, 100], maxZoom: 10 });
+                    } else {
+                        const bounds = window.markerLayer.getBounds();
+                        if (bounds.isValid()) {
+                            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 6 });
+                        }
                     }
                 } catch (err) {
                     console.error('[MAP_IFRAME] fitBounds error:', err);
