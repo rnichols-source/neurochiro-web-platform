@@ -10,8 +10,16 @@ export async function getDoctorProfile() {
     if (!user) return null
 
     const [profileRes, doctorRes] = await Promise.all([
-      (supabase as any).from('profiles').select('full_name, email, role, tier, notification_preferences').eq('id', user.id).maybeSingle(),
-      (supabase as any).from('doctors').select('*, clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, location_lat, slug, verification_status').eq('user_id', user.id).maybeSingle()
+      (supabase as any)
+        .from('profiles')
+        .select('full_name, email, role, tier, notification_preferences')
+        .eq('id', user.id)
+        .maybeSingle(),
+      (supabase as any)
+        .from('doctors')
+        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, location_lat, slug, verification_status')
+        .eq('user_id', user.id)
+        .maybeSingle()
     ])
 
     if (profileRes.error) {
