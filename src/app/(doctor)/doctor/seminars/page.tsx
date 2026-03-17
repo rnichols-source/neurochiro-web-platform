@@ -123,13 +123,13 @@ export default function SeminarsPage() {
           >
             View Hosting Packages
           </Link>
-          <button
-            onClick={() => setIsHostingOpen(true)}
+          <Link
+            href="/host-a-seminar"
             className="bg-neuro-orange text-white px-8 py-4 rounded-2xl shadow-xl hover:bg-neuro-orange-light transition-all transform hover:scale-105 flex items-center gap-3"
           >
             <Plus className="w-5 h-5" />
             <span className="font-black uppercase tracking-widest text-sm">Host a Seminar</span>
-          </button>
+          </Link>
         </div>      </header>
 
       {/* Seminar Analytics */}
