@@ -407,7 +407,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           
           if (payload.audience !== 'all') {
             if (payload.audience === 'paid_doctors') {
-              query = query.eq('role', 'doctor').in('tier', ['pro', 'elite']);
+              query = query.eq('role', 'doctor').in('tier', ['pro']);
             } else {
               query = query.eq('role', payload.audience);
             }
@@ -875,7 +875,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             .from('profiles')
             .select('id, full_name, phone, tier')
             .eq('role', 'doctor')
-            .in('tier', ['growth', 'pro', 'elite']);
+            .in('tier', ['growth', 'pro']);
 
           if (doctors && doctors.length > 0) {
             for (const doc of doctors) {

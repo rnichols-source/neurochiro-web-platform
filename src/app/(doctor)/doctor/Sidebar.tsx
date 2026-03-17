@@ -33,6 +33,8 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+type DoctorTier = 'starter' | 'growth' | 'pro';
+
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
@@ -57,7 +59,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
-  const { tier, setTier } = useDoctorTier();
+  const [tier, setTier] = useState<DoctorTier>('starter');
 
   useEffect(() => {
     const getProfile = async () => {
@@ -73,7 +75,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         if (profileData) {
           setProfile(profileData);
           if (profileData.tier) {
-            setTier(profileData.tier as DoctorTier);
+            const normalizedTier = profileData.tier.toLowerCase() as DoctorTier;
+            setTier(['starter', 'growth', 'pro'].includes(normalizedTier) ? normalizedTier : 'starter');
           }
         }
       }
@@ -82,12 +85,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   }, []);
 
   const isAdmin = ['admin', 'founder', 'super_admin', 'regional_admin'].includes(profile?.role);
-  const currentTier = (tier || 'starter').toLowerCase();
-  const tierWeight: Record<string, number> = { 
+  const tierWeight: Record<DoctorTier, number> = { 
     starter: 1, 
     growth: 2, 
-    pro: 3,
-    elite: 4
+    pro: 3
   };
 
   const handleLogout = async () => {
@@ -117,13 +118,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <nav className="px-4 space-y-1">
         <div className="mb-4 px-2 flex items-center justify-between">
           <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-            Doctor <span className="text-neuro-orange">{currentTier}</span>
+            Doctor <span className="text-neuro-orange">{tier}</span>
           </span>
-          {tierWeight[currentTier as keyof typeof tierWeight] >= 2 && <Zap className="w-3 h-3 text-neuro-orange fill-neuro-orange" />}
+          {tierWeight[tier] >= 2 && <Zap className="w-3 h-3 text-neuro-orange fill-neuro-orange" />}
         </div>
         {navItems.map((item) => {
           const isActive = pathname === item.href;
-          const isLocked = tierWeight[currentTier as keyof typeof tierWeight] < tierWeight[item.minTier as keyof typeof tierWeight];
+          const isLocked = tierWeight[tier] < tierWeight[item.minTier as DoctorTier];
           
           return (
             <div key={item.name} className="relative group">
@@ -197,7 +198,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </nav>
 
       <div className="p-4 mt-auto">
-        {currentTier === "starter" ? (
+        {tier === "starter" ? (
           <div className="bg-gradient-to-br from-neuro-navy-light to-neuro-navy p-4 rounded-xl border border-white/10 shadow-lg mb-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="p-1 bg-neuro-orange/20 rounded-md">
@@ -222,13 +223,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="bg-white/5 p-4 rounded-xl border border-white/5 mb-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-bold text-gray-500 uppercase">Profile Visibility</span>
-              <span className="text-[10px] font-bold text-neuro-orange">{['pro', 'elite'].includes(currentTier) ? '98%' : '75%'}</span>
+              <span className="text-[10px] font-bold text-neuro-orange">{tier === 'pro' ? '98%' : '75%'}</span>
             </div>
             <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-neuro-orange rounded-full transition-all duration-500" style={{ width: ['pro', 'elite'].includes(currentTier) ? '98%' : '75%' }}></div>
+              <div className="h-full bg-neuro-orange rounded-full transition-all duration-500" style={{ width: tier === 'pro' ? '98%' : '75%' }}></div>
             </div>
             <p className="text-[9px] text-gray-500 mt-2 flex items-center gap-1">
-              <BarChart3 className="w-3 h-3" /> {['pro', 'elite'].includes(currentTier) ? 'Top 5% of clinics' : 'Growing presence'}
+              <BarChart3 className="w-3 h-3" /> {tier === 'pro' ? 'Top 5% of clinics' : 'Growing presence'}
             </p>
           </div>
         )}
@@ -239,7 +240,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-xs group-hover/profile:bg-neuro-orange transition-colors">
                 {profile ? getInitials(profile.full_name) : "--"}
               </div>
-              {tierWeight[currentTier as keyof typeof tierWeight] >= 2 && (
+              {tierWeight[tier] >= 2 && (
                 <div className="absolute -top-1 -right-1 bg-neuro-orange rounded-full p-0.5 border border-neuro-navy">
                   <Star className="w-2 h-2 text-white fill-current" />
                 </div>
@@ -249,7 +250,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <p className="text-xs font-bold text-white truncate group-hover/profile:text-neuro-orange transition-colors">{profile?.full_name || "Loading..."}</p>
               <p className="text-[10px] text-gray-400 truncate flex items-center gap-1 capitalize">
                 <ShieldCheck className="w-2 h-2 text-gray-500" />
-                {currentTier} Member
+                {tier} Member
               </p>
             </div>
           </Link>

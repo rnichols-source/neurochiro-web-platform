@@ -53,7 +53,7 @@ function cn(...inputs: ClassValue[]) {
 export default function JobsPage() {
   const { tier } = useDoctorTier();
   const isMember = tier !== 'starter';
-  const isPro = tier === 'pro' || tier === 'elite';
+  const isPro = tier === 'pro';
   
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<any>(null);
@@ -133,16 +133,37 @@ export default function JobsPage() {
 
   const handleZap = async (e: React.MouseEvent, applicationId: string) => {
     e.stopPropagation();
+    
+    // Optimistic UI Update
+    const originalApplications = [...applications];
+    setApplications(prev => prev.map(app => 
+      app.id === applicationId ? { ...app, stage: 'Interview' } : app
+    ));
+    
     setIsZapping(true);
-    const res = await updateApplicationStage(applicationId, 'Interview');
-    if (res.success) {
+    try {
+      const res = await updateApplicationStage(applicationId, 'Interview');
+      if (res.success) {
+        setIsZapping(false);
+        setZapSuccess(true);
+        setTimeout(() => setZapSuccess(false), 3000);
+      } else {
+        // Rollback on failure
+        setApplications(originalApplications);
+        setIsZapping(false);
+      }
+    } catch (err) {
+      setApplications(originalApplications);
       setIsZapping(false);
-      setZapSuccess(true);
-      setTimeout(() => setZapSuccess(false), 3000);
-      // Refresh applications
-      const apps = await getApplications();
-      setApplications(apps);
     }
+  };
+
+  const [selectedStage, setSelectedStage] = useState<string | null>(null);
+
+  const handleReviewApplicants = (job: any, stage?: string) => {
+    setSelectedJob(job);
+    setSelectedStage(stage || null);
+    setActiveModal('Review-Applicants');
   };
 
   const handleCreateJob = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -256,12 +277,25 @@ export default function JobsPage() {
 
                 {activeModal === 'Review-Applicants' && (
                   <div className="space-y-4">
-                    {applications.filter(a => !selectedJob || a.jobId === selectedJob.id).length === 0 ? (
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                        {selectedStage ? `Filtering by ${selectedStage}` : 'All Applicants'}
+                      </p>
+                      {selectedStage && (
+                        <button 
+                          onClick={() => setSelectedStage(null)}
+                          className="text-[10px] font-black uppercase text-neuro-orange hover:underline"
+                        >
+                          Clear Filter
+                        </button>
+                      )}
+                    </div>
+                    {applications.filter(a => (!selectedJob || a.jobId === selectedJob.id) && (!selectedStage || a.stage === selectedStage)).length === 0 ? (
                       <div className="text-center py-12">
                         <Users className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-                        <p className="text-gray-500 font-bold">No applicants yet for this pipeline.</p>
+                        <p className="text-gray-500 font-bold">No applicants yet for this pipeline stage.</p>
                       </div>
-                    ) : applications.filter(a => !selectedJob || a.jobId === selectedJob.id).map((app, i) => (
+                    ) : applications.filter(a => (!selectedJob || a.jobId === selectedJob.id) && (!selectedStage || a.stage === selectedStage)).map((app, i) => (
                       <div key={i} className="flex items-center justify-between p-6 bg-white border border-gray-100 rounded-3xl hover:border-neuro-orange transition-all group cursor-pointer shadow-sm">
                          <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-2xl bg-neuro-navy flex items-center justify-center text-white font-bold text-lg">
@@ -577,7 +611,26 @@ export default function JobsPage() {
               </div>
            </div>
            
-           {activeJobsFiltered.length === 0 ? (
+           {loading ? (
+              <div className="space-y-6">
+                 {[1, 2].map(i => (
+                   <div key={i} className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm h-64 animate-pulse">
+                      <div className="flex justify-between items-start mb-8">
+                         <div className="space-y-3">
+                            <div className="h-6 w-48 bg-gray-100 rounded"></div>
+                            <div className="h-3 w-32 bg-gray-50 rounded"></div>
+                         </div>
+                         <div className="h-8 w-24 bg-gray-50 rounded-xl"></div>
+                      </div>
+                      <div className="grid grid-cols-4 gap-4">
+                         {[1, 2, 3, 4].map(j => (
+                           <div key={j} className="h-32 bg-gray-50 rounded-3xl"></div>
+                         ))}
+                      </div>
+                   </div>
+                 ))}
+              </div>
+           ) : activeJobsFiltered.length === 0 ? (
              <div className="bg-white rounded-[3rem] border-2 border-dashed border-gray-100 p-20 text-center space-y-6">
                 <div className="w-20 h-20 bg-neuro-cream rounded-full flex items-center justify-center mx-auto">
                    <Briefcase className="w-10 h-10 text-gray-300" />
@@ -635,7 +688,7 @@ export default function JobsPage() {
                      ].map((stage, idx) => (
                        <div 
                          key={idx}
-                         onClick={() => { setSelectedJob(job); setActiveModal('Review-Applicants'); }}
+                         onClick={() => handleReviewApplicants(job, stage.label)}
                          className={cn(
                           "p-6 rounded-3xl border text-center cursor-pointer transition-all hover:-translate-y-1 shadow-sm relative overflow-hidden flex flex-col items-center justify-center min-h-[160px]",
                           stage.color === 'blue' ? "bg-blue-50 border-blue-100 hover:bg-blue-100" :
