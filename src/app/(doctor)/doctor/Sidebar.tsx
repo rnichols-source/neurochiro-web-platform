@@ -72,7 +72,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           .eq('id', user.id)
           .single();
         
-        setProfile(profileData);
+        if (profileData) {
+          setProfile(profileData);
+          if (profileData.tier) {
+            setTier(profileData.tier as DoctorTier);
+          }
+        }
       }
     };
     getProfile();

@@ -54,11 +54,6 @@ export default function DoctorDashboard() {
         const data = await getDoctorDashboardStats();
         if (data) {
           setDashboardData(data);
-          // 🛡️ AUTH LOOP: Redirect to Profile Editor if incomplete (< 20%)
-          const completeness = data.marketPerformance?.completeness ?? 0;
-          if (completeness < 20) {
-            router.push('/doctor/profile?welcome=true');
-          }
         } else {
           setDashboardData({ 
             profile: { name: "Doctor", clinicName: "Practice", isMember: false, isPro: false, isGrowth: false },
@@ -105,6 +100,31 @@ export default function DoctorDashboard() {
 
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">
+      {/* 🛡️ NON-BLOCKING PROFILE BANNER */}
+      {hasAccess && (dashboardData?.marketPerformance?.completeness ?? 0) < 40 && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-neuro-orange/10 border border-neuro-orange/20 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-neuro-orange rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg">
+              <Zap className="w-5 h-5 fill-current" />
+            </div>
+            <div>
+              <p className="text-sm font-black text-neuro-navy uppercase tracking-tight">Your Clinical Profile is only {dashboardData?.marketPerformance?.completeness ?? 0}% Complete</p>
+              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Incomplete profiles are hidden from 85% of patient searches.</p>
+            </div>
+          </div>
+          <Link 
+            href="/doctor/profile"
+            className="px-6 py-2 bg-neuro-orange text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md hover:bg-neuro-orange-dark transition-all whitespace-nowrap"
+          >
+            Complete Now
+          </Link>
+        </motion.div>
+      )}
+
       <ProductTutorial />
       {/* Welcome & Global Stats */}
       <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
