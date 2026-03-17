@@ -138,16 +138,18 @@ export default function GlobalNetworkMap({
           }
         }));
     } else {
-      // 🛡️ TOTAL MAP OVERRIDE: Force pins to match the list exactly
-      const sourceDoctors = initialDoctors; // Strictly use the list data
+      // 🤝 FINAL DATA HANDSHAKE: Use real coordinates from initialDoctors
+      const sourceDoctors = initialDoctors;
       
       points = sourceDoctors
         .map(doc => {
-          // Use exact database column names: latitude and longitude
+          // 🛡️ Standardize coordinates: Strictly use latitude/longitude from Doctor interface
           const lat = parseFloat(doc.latitude as any);
           const lng = parseFloat(doc.longitude as any);
 
-          if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return null;
+          if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
+            return null;
+          }
 
           return {
             type: 'Feature' as const,
@@ -201,8 +203,8 @@ export default function GlobalNetworkMap({
 
   const [mapReady, setMapReady] = useState(false);
 
-  // 🛡️ TOTAL MAP OVERRIDE: If the list sees them, the map MUST count them.
-  const verifiedCount = initialDoctors.length;
+  // 🛡️ SYNC COUNTER: Reflect exact list count
+  const verifiedCount = initialDoctors.length > 0 ? initialDoctors.length : 0;
 
   // Initial map centering and data fetch
   useEffect(() => {
@@ -232,19 +234,30 @@ export default function GlobalNetworkMap({
     }
   }, [mapReady, region.code, initialDoctors]);
 
-  // Re-sync markers when index (data) or layer changes
+  // Re-sync markers when index (data), layer, or map state changes
   useEffect(() => {
     if (!iframeRef.current?.contentWindow || !mapReady) return;
     
     try {
-      // Fallback bounds if not yet moving
-      const bounds = currentBounds.current || [-180, -85, 180, 85];
-      const clusters = index.getClusters(bounds, Math.round(currentZoom.current));
-      iframeRef.current.contentWindow.postMessage({ 
-        type: 'update-clusters', 
-        data: clusters,
-        layer: activeLayer
-      }, '*');
+      // 🛡️ Pseudo-bounds: Force pins to appear immediately using wide fallback (-179 to 179)
+      const bounds = currentBounds.current || [-179, -85, 179, 85];
+      
+      // ☢️ NUCLEAR OPTION: If < 100 doctors, bypass clustering for maximum reliability
+      if (initialDoctors.length > 0 && initialDoctors.length < 100 && activeLayer === 'all') {
+        const rawPoints = points.filter(p => p.properties.type === 'doctor');
+        iframeRef.current.contentWindow.postMessage({ 
+          type: 'update-clusters', 
+          data: rawPoints,
+          layer: activeLayer
+        }, '*');
+      } else {
+        const clusters = index.getClusters(bounds, Math.round(currentZoom.current));
+        iframeRef.current.contentWindow.postMessage({ 
+          type: 'update-clusters', 
+          data: clusters,
+          layer: activeLayer
+        }, '*');
+      }
 
       // 🛡️ AUTO-ZOOM TO RESULTS (Task 4)
       // If we have doctors in the list, zoom the map to fit them
@@ -278,8 +291,11 @@ export default function GlobalNetworkMap({
       }
 
       if (e.data.type === 'map-ready') {
-        // Ready
+        setMapReady(true);
       } else if (e.data.type === 'map-move') {
+        // 🤝 HANDSHAKE: Update refs and trigger refresh
+        currentBounds.current = e.data.bounds;
+        currentZoom.current = e.data.zoom;
         updateMapData(e.data.bounds, e.data.zoom);
       } else if (e.data.type === 'marker-click') {
         setSelectedPin(e.data.data);
