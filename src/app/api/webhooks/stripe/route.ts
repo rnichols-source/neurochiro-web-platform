@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     .single();
 
   if (alreadyProcessed) {
-    console.log(`[STRIPE] Skipping already processed event: ${event.id}`);
+
     return NextResponse.json({ received: true, duplicate: true });
   }
 
@@ -59,8 +59,7 @@ export async function POST(req: Request) {
       case "customer.subscription.deleted":
         Automations.onSubscriptionCanceled(event.data.object);
         break;
-      default:
-        console.log(`Unhandled event type ${event.type}`);
+        break;
     }
   } catch (error) {
     // We log the error but still return 200 to Stripe. 

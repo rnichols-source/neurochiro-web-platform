@@ -133,7 +133,7 @@ function RegisterContent() {
     formData.append("phone", accountData.phone);
 
     const result = await createAccountAction(formData, initialRole, initialTier, initialBilling);
-    console.log("[REGISTER_DEBUG] createAccountAction result:", result);
+
 
     if (result.error) {
       setError(result.error);
@@ -147,7 +147,7 @@ function RegisterContent() {
 
       if (result.user) {
         setUserId(result.user.id);
-        console.log("[REGISTER_DEBUG] Setting userId and moving to profile step:", result.user.id);
+
         
         // Optional: Store draft progress in local storage
         localStorage.setItem('nc_registration_draft', JSON.stringify({
@@ -159,10 +159,7 @@ function RegisterContent() {
           email: accountData.email
         }));
 
-        if (result.sessionActive === false) {
-          console.log("[REGISTER_DEBUG] Session not active, showing success message but allowing progress.");
-          setSuccessMsg("Your account has been created. Please check your email to verify your account, but you can continue setting up your profile below.");
-        }
+
         
         setStep("profile");
         setIsPending(false);
