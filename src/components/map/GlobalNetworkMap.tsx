@@ -234,84 +234,46 @@ export default function GlobalNetworkMap({
     }
   }, [mapReady, region.code, initialDoctors]);
 
-  // Re-sync markers when index (data), layer, or map state changes
+  // Re-sync markers when data, layer, or map state changes
   useEffect(() => {
     if (!iframeRef.current?.contentWindow || !mapReady) return;
-    
-    const syncMarkers = () => {
-      try {
-        // 🛡️ Pseudo-bounds: Force pins to appear immediately using wide fallback (-179 to 179)
-        const bounds = currentBounds.current || [-179, -85, 179, 85];
+
+    const syncMap = () => {
+      const dataToSend = initialDoctors.length > 0 ? initialDoctors.map(doc => ({
+        type: 'Feature' as const,
+        geometry: { 
+          type: 'Point' as const, 
+          coordinates: [parseFloat(doc.longitude as any), parseFloat(doc.latitude as any)] 
+        },
+        properties: { cluster: false, doctorId: doc.id, name: doc.last_name, type: 'doctor' }
+      })).filter(f => !isNaN(f.geometry.coordinates[0])) : [];
+
+      iframeRef.current?.contentWindow?.postMessage({
+        type: 'update-clusters',
+        data: dataToSend,
+        layer: activeLayer
+      }, '*');
+
+      // 🛡️ AUTO-ZOOM TO RESULTS
+      if (initialDoctors.length > 0 && activeLayer === 'all') {
+        const resultCoords = initialDoctors
+          .filter(d => parseFloat(d.latitude as any) && parseFloat(d.longitude as any))
+          .map(d => [parseFloat(d.latitude as any), parseFloat(d.longitude as any)]);
         
-        // ☢️ NUCLEAR OPTION: If < 100 doctors, bypass clustering for maximum reliability
-        if (initialDoctors.length > 0 && initialDoctors.length < 100 && activeLayer === 'all') {
-          // Re-derive rawPoints locally to ensure fresh data
-          const rawPoints = initialDoctors
-            .map(doc => {
-              const lat = parseFloat(doc.latitude as any);
-              const lng = parseFloat(doc.longitude as any);
-              if (isNaN(lat) || isNaN(lng)) return null;
-              return {
-                type: 'Feature' as const,
-                properties: { 
-                  cluster: false, 
-                  doctorId: doc.id, 
-                  type: 'doctor' as const, 
-                  name: doc.last_name,
-                  clinic: doc.clinic_name,
-                  slug: doc.slug 
-                },
-                geometry: { type: 'Point' as const, coordinates: [lng, lat] }
-              };
-            })
-            .filter((p): p is NonNullable<typeof p> => p !== null);
-
-          iframeRef.current?.contentWindow?.postMessage({ 
-            type: 'update-clusters', 
-            data: rawPoints, 
-            layer: activeLayer 
+        if (resultCoords.length > 0) {
+          iframeRef.current?.contentWindow?.postMessage({
+            type: 'fit-bounds',
+            bounds: resultCoords,
+            padding: [50, 50]
           }, '*');
-          return;
         }
-
-        const clusters = index.getClusters(bounds, Math.round(currentZoom.current));
-        iframeRef.current?.contentWindow?.postMessage({ 
-          type: 'update-clusters', 
-          data: clusters,
-          layer: activeLayer
-        }, '*');
-      } catch (e) {
-        console.error("Error calculating/sending clusters:", e);
       }
     };
 
-    // 🤝 HANDSHAKE: Small delay to ensure iframe is ready to receive
-    const timer = setTimeout(syncMarkers, 500);
+    // Give the iframe 500ms to settle before sending data
+    const timer = setTimeout(syncMap, 500);
     return () => clearTimeout(timer);
-  }, [index, activeLayer, mapReady, initialDoctors]);
-
-      // 🛡️ AUTO-ZOOM TO RESULTS (Task 4)
-      // If we have doctors in the list, zoom the map to fit them
-      if (initialDoctors.length > 0 && activeLayer === 'all') {
-        const resultCoords = initialDoctors
-          .filter(d => d.latitude && d.longitude)
-          .map(d => [Number(d.latitude), Number(d.longitude)]);
-        
-        if (resultCoords.length > 0) {
-           // Small delay to ensure the map engine is ready to receive the bounds
-           setTimeout(() => {
-            iframeRef.current?.contentWindow?.postMessage({
-              type: 'fit-bounds',
-              bounds: resultCoords,
-              padding: [50, 50]
-            }, '*');
-           }, 500);
-        }
-      }
-    } catch (e) {
-      console.error("Error calculating/sending clusters:", e);
-    }
-  }, [index, activeLayer, mapReady, doctors, searchQuery]);
+  }, [initialDoctors, mapReady, activeLayer]);
 
   // Handle iframe messages
   useEffect(() => {

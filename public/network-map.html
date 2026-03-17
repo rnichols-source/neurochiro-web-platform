@@ -90,8 +90,8 @@
 
     cartoLayer.addTo(map);
 
-    // 🛡️ LAYER GROUP: Use a dedicated group to manage markers so we can clear them easily
-    const markerLayer = L.layerGroup().addTo(map);
+    // 🛡️ GLOBAL LAYER GROUP: Use a dedicated group to manage markers so we can clear them easily
+    var markerLayer = L.layerGroup().addTo(map);
 
     window.parent.postMessage({ type: 'map-ready' }, '*');
 
