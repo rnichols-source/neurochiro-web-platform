@@ -1,110 +1,97 @@
 "use client";
 
-import { Search, MapPin, Filter, Star, ShieldCheck, ArrowRight, Sparkles, Network, UserPlus, MessageSquare, X, Check, Mail, User, Zap, Handshake } from "lucide-react";
-import { useState, useMemo } from "react";
+import { 
+  Search, 
+  MapPin, 
+  Filter, 
+  Star, 
+  ShieldCheck, 
+  ArrowRight, 
+  Sparkles, 
+  Network, 
+  UserPlus, 
+  MessageSquare, 
+  X, 
+  Check, 
+  Mail, 
+  User, 
+  Zap, 
+  Handshake,
+  Loader2,
+  Users
+} from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useDoctorTier } from "@/context/DoctorTierContext";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { 
+  getReferralStats, 
+  getReciprocityLoop, 
+  getReferralDirectory, 
+  requestConnection, 
+  sendExternalInvite 
+} from "./actions";
 
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
-export default function DirectoryExplorer() {
-  const { tier } = useDoctorTier();
+export default function ReferralNetworkPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [isMessaging, setIsMessaging] = useState<string | null>(null);
-  const [messageSent, setMessageSent] = useState(false);
-  
-  // New States for handshakes
-  const [handshakesRemaining, setHandshakesRemaining] = useState(3);
-  const [handshakeSentTo, setHandshakeSentTo] = useState<string | null>(null);
-  
-  // New States for requested buttons
+  const [selectedSpecialty, setSelectedSpecialty] = useState("All Specialties");
   const [isInviteOpen, setIsInviteOpen] = useState(false);
-  const [inviteSent, setInviteSent] = useState(false);
   const [isConnectionsOpen, setIsConnectionsOpen] = useState(false);
+  const [messageSent, setMessageSent] = useState(false);
+  const [inviteSent, setInviteSent] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  
+  const [stats, setStats] = useState({ activePartners: 0, referralsSent: 0, referralsReceived: 0 });
+  const [reciprocityLoop, setReciprocityLoop] = useState<any[]>([]);
+  const [directory, setReferralDirectory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const doctors = [
-    {
-      id: "dr-1",
-      name: "Dr. Ryan Smith",
-      clinic: "Summit Chiropractic",
-      location: "Boulder, CO",
-      specialties: ["Pediatrics", "Sports"],
-      rating: 4.9,
-      isVerified: true,
-      isPartner: true,
-      lookingForPartners: true
-    },
-    {
-      id: "dr-2",
-      name: "Dr. Amanda White",
-      clinic: "The Neural Hive",
-      location: "Austin, TX",
-      specialties: ["Prenatal", "Neuro-Dev"],
-      rating: 5.0,
-      isVerified: true,
-      isPartner: false,
-      lookingForPartners: true
-    },
-    {
-      id: "dr-3",
-      name: "Dr. David Kim",
-      clinic: "Pacific Neuro Health",
-      location: "San Diego, CA",
-      specialties: ["Neurology", "TBI"],
-      rating: 4.8,
-      isVerified: true,
-      isPartner: true,
-      lookingForPartners: false
+  // Load Data
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      const [s, loop, dir] = await Promise.all([
+        getReferralStats(),
+        getReciprocityLoop(),
+        getReferralDirectory({ search: searchQuery, specialty: selectedSpecialty })
+      ]);
+      setStats(s);
+      setReciprocityLoop(loop);
+      setReferralDirectory(dir);
+      setLoading(false);
     }
-  ];
+    loadData();
+  }, [searchQuery, selectedSpecialty]);
 
-  const partnersLooking = useMemo(() => doctors.filter(d => d.lookingForPartners), []);
-
-  const handleHandshake = (docName: string) => {
-    if (tier === 'starter' && handshakesRemaining <= 0) {
-      alert("You've used all your Golden Handshakes for this month. Upgrade to Growth for unlimited connections!");
-      return;
+  const handleHandshake = async (targetUserId: string) => {
+    setActionLoading(targetUserId);
+    try {
+      await requestConnection(targetUserId);
+      // Refresh data
+      const [loop, dir] = await Promise.all([
+        getReciprocityLoop(),
+        getReferralDirectory({ search: searchQuery, specialty: selectedSpecialty })
+      ]);
+      setReciprocityLoop(loop);
+      setReferralDirectory(dir);
+    } catch (e) {
+      alert("Failed to send handshake request");
     }
-    
-    setHandshakeSentTo(docName);
-    if (tier === 'starter') {
-      setHandshakesRemaining(prev => prev - 1);
-    }
-    
-    setTimeout(() => {
-      setHandshakeSentTo(null);
-    }, 2000);
+    setActionLoading(null);
   };
 
-  const filteredDoctors = useMemo(() => {
-    return doctors.filter(doc => 
-      doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doc.clinic.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doc.location.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery]);
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessageSent(true);
-    setTimeout(() => {
-      setIsMessaging(null);
-      setMessageSent(false);
-    }, 2000);
-  };
-
-  const handleSendInvite = (e: React.FormEvent) => {
+  const handleSendInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     setInviteSent(true);
+    await sendExternalInvite(inviteEmail, "I'd like to connect with you on the NeuroChiro Referral Network.");
     setTimeout(() => {
       setIsInviteOpen(false);
       setInviteSent(false);
+      setInviteEmail("");
     }, 2000);
   };
+
+  const skeletons = Array(6).fill(0);
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -114,344 +101,284 @@ export default function DirectoryExplorer() {
           <p className="text-neuro-gray mt-2 text-lg">Connect, refer, and collaborate with the global NeuroChiro community.</p>
         </div>
         <div className="flex gap-3">
-           <button 
+           <button
             onClick={() => setIsConnectionsOpen(true)}
             className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-100 rounded-xl font-bold text-neuro-navy hover:bg-gray-50 transition-colors shadow-sm active:scale-95"
            >
-              <Network className="w-5 h-5 text-neuro-orange" /> My Connections
-           </button>
-           <button 
-            onClick={() => setIsInviteOpen(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-neuro-navy text-white font-bold rounded-xl hover:bg-neuro-navy-light transition-colors shadow-lg active:scale-95"
-           >
-              <UserPlus className="w-5 h-5" /> Invite Doctor
-           </button>
+               <Network className="w-5 h-5 text-neuro-orange" /> My Connections
+            </button>
+            <button
+             onClick={() => setIsInviteOpen(true)}
+             className="flex items-center gap-2 px-6 py-3 bg-neuro-navy text-white font-bold rounded-xl hover:bg-neuro-navy-light transition-colors shadow-lg active:scale-95"
+            >
+               <UserPlus className="w-5 h-5" /> Invite Doctor
+            </button>
         </div>
       </header>
 
-      {/* Reciprocity Loop / Golden Handshakes */}
-      <section className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
-         <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[100px] -mr-32 -mt-32"></div>
-         <div className="relative z-10">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-8">
-               <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-neuro-orange">
-                     <Sparkles className="w-5 h-5" />
-                     <span className="text-[10px] font-black uppercase tracking-[0.3em]">Reciprocity Loop</span>
-                  </div>
-                  <h2 className="text-3xl font-heading font-black text-white">3 Doctors in your region are looking for referral partners.</h2>
-                  <p className="text-gray-400 text-sm max-w-lg">One-click handshakes send a neuro-centric introduction to local docs to jumpstart your clinical network.</p>
-               </div>
-               
-               {tier === 'starter' && (
-                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-md flex items-center gap-6">
-                     <div className="text-center">
-                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Golden Handshakes</p>
-                        <div className="flex items-center gap-2 justify-center">
-                           <span className="text-3xl font-black text-neuro-orange">{handshakesRemaining}</span>
-                           <span className="text-xs font-bold text-gray-400">/ 3 Left</span>
-                        </div>
-                     </div>
-                     <div className="h-10 w-px bg-white/10"></div>
-                     <Link href="/pricing" className="text-[10px] font-black text-neuro-orange uppercase tracking-widest hover:underline flex items-center gap-1">
-                        Get Unlimited <Zap className="w-3 h-3 fill-neuro-orange" />
-                     </Link>
-                  </div>
-               )}
-            </div>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+         {[
+           { label: "Active Partners", value: stats.activePartners, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+           { label: "Referrals Sent", value: stats.referralsSent, icon: ArrowRight, color: "text-neuro-orange", bg: "bg-neuro-orange/10" },
+           { label: "Referrals Received", value: stats.referralsReceived, icon: Sparkles, color: "text-green-600", bg: "bg-green-50" }
+         ].map((kpi, i) => (
+           <div key={i} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 group hover:shadow-md transition-shadow">
+              <div className={`p-4 ${kpi.bg} rounded-2xl`}>
+                 <kpi.icon className={`w-6 h-6 ${kpi.color}`} />
+              </div>
+              <div>
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{kpi.label}</p>
+                 <p className="text-2xl font-black text-neuro-navy">{loading ? "..." : kpi.value}</p>
+              </div>
+           </div>
+         ))}
+      </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-               {partnersLooking.map((partner) => (
-                  <div key={partner.id} className="p-5 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-between group hover:bg-white/10 transition-all">
-                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-neuro-navy border border-white/10 flex items-center justify-center font-black text-neuro-orange">
-                           {partner.name.split(' ').slice(1).map(n => n[0]).join('')}
-                        </div>
-                        <div>
-                           <p className="text-sm font-bold text-white group-hover:text-neuro-orange transition-colors">{partner.name}</p>
-                           <p className="text-[10px] text-gray-500">{partner.location}</p>
-                        </div>
-                     </div>
-                     <button 
-                        onClick={() => handleHandshake(partner.name)}
-                        disabled={handshakeSentTo === partner.name}
-                        className={cn(
-                           "p-3 rounded-xl transition-all active:scale-90",
-                           handshakeSentTo === partner.name 
-                              ? "bg-green-500 text-white" 
-                              : "bg-neuro-orange/10 text-neuro-orange hover:bg-neuro-orange hover:text-white"
-                        )}
-                     >
-                        {handshakeSentTo === partner.name ? <Check className="w-5 h-5" /> : <Handshake className="w-5 h-5" />}
-                     </button>
-                  </div>
-               ))}
+      {/* Reciprocity Loop Banner */}
+      <section className="bg-neuro-navy rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
+         <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-neuro-orange/10 rounded-full blur-[100px] -mr-40 -mt-40"></div>
+         <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-6">
+               <Sparkles className="w-5 h-5 text-neuro-orange" />
+               <span className="text-[10px] font-black uppercase tracking-widest text-neuro-orange">The Reciprocity Loop</span>
+            </div>
+            
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+               <div className="max-w-xl">
+                  <h2 className="text-3xl font-heading font-black mb-4">Grow your clinical network locally.</h2>
+                  <p className="text-gray-400 text-sm leading-relaxed">
+                     We've identified NeuroChiro peers within <span className="text-white font-bold">50 miles</span> of your clinic who are actively looking for referral partners.
+                  </p>
+               </div>
+
+               <div className="flex -space-x-4 overflow-hidden">
+                  {loading ? (
+                    <div className="flex gap-2">
+                      <div className="w-12 h-12 rounded-full bg-white/5 animate-pulse"></div>
+                      <div className="w-12 h-12 rounded-full bg-white/5 animate-pulse"></div>
+                    </div>
+                  ) : reciprocityLoop.length > 0 ? (
+                    reciprocityLoop.slice(0, 4).map((doc, i) => (
+                      <div key={i} className="relative group cursor-pointer" title={`Dr. ${doc.last_name}`}>
+                         <div className="w-14 h-14 rounded-full border-4 border-neuro-navy bg-gray-800 overflow-hidden group-hover:scale-110 transition-transform shadow-xl">
+                            {doc.photo_url ? (
+                              <img src={doc.photo_url} alt={doc.last_name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-white font-bold">{doc.last_name[0]}</div>
+                            )}
+                         </div>
+                         <button 
+                          onClick={() => handleHandshake(doc.user_id)}
+                          disabled={actionLoading === doc.user_id}
+                          className="absolute -bottom-1 -right-1 p-1.5 bg-neuro-orange rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                         >
+                            {actionLoading === doc.user_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Handshake className="w-3 h-3 text-white" />}
+                         </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex items-center gap-4 bg-white/5 px-6 py-4 rounded-2xl border border-white/10">
+                       <p className="text-xs font-bold text-gray-400 italic">No peers in your immediate area yet.</p>
+                       <button onClick={() => setIsInviteOpen(true)} className="text-[10px] font-black text-neuro-orange uppercase tracking-widest hover:underline">Invite a Local Peer</button>
+                    </div>
+                  )}
+                  {reciprocityLoop.length > 4 && (
+                    <div className="w-14 h-14 rounded-full border-4 border-neuro-navy bg-white/10 flex items-center justify-center text-xs font-black">
+                       +{reciprocityLoop.length - 4}
+                    </div>
+                  )}
+               </div>
             </div>
          </div>
       </section>
 
-      {/* Network Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 hover:border-neuro-orange/20 transition-colors cursor-pointer">
-            <div className="p-3 bg-blue-50 rounded-2xl">
-               <Network className="w-6 h-6 text-blue-600" />
+      {/* Directory Search & Filters */}
+      <section className="space-y-6">
+         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative flex-1 max-w-md">
+               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+               <input 
+                type="text" 
+                placeholder="Search by name, technique, or city..." 
+                className="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl focus:outline-neuro-orange shadow-sm text-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+               />
             </div>
-            <div>
-               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Active Partners</p>
-               <p className="text-2xl font-black text-neuro-navy">12</p>
+            
+            <div className="flex items-center gap-3">
+               <div className="relative">
+                  <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <select 
+                    className="pl-10 pr-8 py-4 bg-white border border-gray-100 rounded-2xl focus:outline-neuro-orange shadow-sm text-sm appearance-none font-bold text-neuro-navy min-w-[200px]"
+                    value={selectedSpecialty}
+                    onChange={(e) => setSelectedSpecialty(e.target.value)}
+                  >
+                     <option>All Specialties</option>
+                     <option>Pediatrics</option>
+                     <option>Sports Performance</option>
+                     <option>Prenatal</option>
+                     <option>Functional Neurology</option>
+                  </select>
+               </div>
             </div>
          </div>
-         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 hover:border-neuro-orange/20 transition-colors cursor-pointer">
-            <div className="p-3 bg-green-50 rounded-2xl">
-               <ArrowRight className="w-6 h-6 text-green-600 -rotate-45" />
-            </div>
-            <div>
-               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Referrals Sent</p>
-               <p className="text-2xl font-black text-neuro-navy">8</p>
-            </div>
-         </div>
-         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 hover:border-neuro-orange/20 transition-colors cursor-pointer">
-            <div className="p-3 bg-orange-50 rounded-2xl">
-               <ArrowRight className="w-6 h-6 text-neuro-orange rotate-45" />
-            </div>
-            <div>
-               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Referrals Received</p>
-               <p className="text-2xl font-black text-neuro-navy">15</p>
-            </div>
-         </div>
-      </div>
 
-      {/* Search & Map Toggle */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input 
-            type="text" 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search doctors by name, technique, or city..." 
-            className="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all shadow-sm"
-          />
-        </div>
-        <div className="flex gap-2">
-           <button 
-            onClick={() => alert("Opening specialty filters...")}
-            className="px-6 py-4 bg-white border border-gray-100 rounded-2xl font-bold text-neuro-navy hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2"
-           >
-              <Filter className="w-4 h-4 text-gray-400" /> Specialties
-           </button>
-           <Link href="/directory" className="px-6 py-4 bg-white border border-gray-100 rounded-2xl font-bold text-neuro-navy hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-neuro-orange" /> Map View
-           </Link>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredDoctors.map((doc, i) => (
-          <div key={i} className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
-             {doc.isPartner && (
-                <div className="absolute top-0 right-0 bg-green-500 text-white text-[9px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-widest">
-                   Partner
+         {/* Doctor Grid */}
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {loading ? (
+              skeletons.map((_, i) => (
+                <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm animate-pulse space-y-4">
+                   <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full"></div>
+                      <div className="space-y-2">
+                         <div className="h-4 w-32 bg-gray-100 rounded"></div>
+                         <div className="h-3 w-24 bg-gray-100 rounded"></div>
+                      </div>
+                   </div>
+                   <div className="h-24 bg-gray-50 rounded-2xl"></div>
                 </div>
-             )}
-             <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-neuro-navy flex items-center justify-center text-white font-black text-xl">
-                   {doc.name.split(' ').slice(1).map(n => n[0]).join('')}
-                </div>
-                <div>
-                   <h3 className="font-bold text-lg text-neuro-navy flex items-center gap-1 group-hover:text-neuro-orange transition-colors">
-                      {doc.name} {doc.isVerified && <ShieldCheck className="w-4 h-4 text-blue-500" />}
-                   </h3>
-                   <p className="text-xs text-gray-500">{doc.clinic}</p>
-                </div>
-             </div>
-
-             <div className="space-y-4">
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                   <MapPin className="w-4 h-4 text-gray-400" /> {doc.location}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                   {doc.specialties.map((spec, j) => (
-                     <span key={j} className="px-3 py-1 bg-neuro-cream rounded-full text-[9px] font-black uppercase text-neuro-navy">
-                        {spec}
-                     </span>
-                   ))}
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2 pt-4 border-t border-gray-50">
-                   <button 
-                    onClick={() => alert(`Viewing profile for ${doc.name}...`)}
-                    className="py-2 bg-gray-50 text-neuro-navy text-[10px] font-black rounded-xl hover:bg-gray-100 transition-colors active:scale-95"
-                   >
-                      View Profile
-                   </button>
-                   <button 
-                    onClick={() => setIsMessaging(doc.name)}
-                    className="py-2 bg-neuro-navy text-white text-[10px] font-black rounded-xl hover:bg-neuro-navy-light transition-colors flex items-center justify-center gap-1 active:scale-95"
-                   >
-                      <MessageSquare className="w-3 h-3" /> Message
-                   </button>
-                </div>
-             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* MY CONNECTIONS MODAL */}
-      {isConnectionsOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/20">
-            <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-neuro-orange/20 rounded-2xl flex items-center justify-center text-neuro-orange">
-                  <Network className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-bold">My Network Connections</h3>
-                  <p className="text-[10px] uppercase font-black text-white/50 tracking-widest">Active Clinical Partners</p>
-                </div>
+              ))
+            ) : directory.length === 0 ? (
+              <div className="col-span-full py-20 text-center bg-white rounded-[3rem] border border-dashed border-gray-200">
+                 <MapPin className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                 <h3 className="text-xl font-bold text-neuro-navy">No doctors found</h3>
+                 <p className="text-gray-500 text-sm mt-1">Try adjusting your filters or search terms.</p>
               </div>
-              <button onClick={() => setIsConnectionsOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="p-8 max-h-[60vh] overflow-y-auto">
-              <div className="space-y-4">
-                {doctors.filter(d => d.isPartner).map(partner => (
-                  <div key={partner.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-neuro-navy rounded-xl flex items-center justify-center text-white font-bold text-xs">
-                        {partner.name.split(' ').slice(1).map(n => n[0]).join('')}
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-neuro-navy">{partner.name}</p>
-                        <p className="text-[10px] text-gray-500">{partner.clinic}</p>
-                      </div>
+            ) : directory.map((doc, i) => (
+              <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
+                 {doc.isPartner && (
+                   <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-600 rounded-full border border-green-100">
+                      <ShieldCheck className="w-3 h-3" />
+                      <span className="text-[8px] font-black uppercase tracking-widest">Active Partner</span>
+                   </div>
+                 )}
+                 {doc.isPending && (
+                   <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-neuro-orange rounded-full border border-neuro-orange/20">
+                      <Clock className="w-3 h-3" />
+                      <span className="text-[8px] font-black uppercase tracking-widest">Request Pending</span>
+                   </div>
+                 )}
+                 
+                 <div className="flex items-center gap-4 mb-6">
+                    <div className="w-16 h-16 rounded-full bg-neuro-cream overflow-hidden border-2 border-gray-50 group-hover:border-neuro-orange transition-colors">
+                       {doc.photo_url ? (
+                         <img src={doc.photo_url} alt={doc.last_name} className="w-full h-full object-cover" />
+                       ) : (
+                         <div className="w-full h-full flex items-center justify-center text-neuro-navy font-bold">{doc.last_name[0]}</div>
+                       )}
                     </div>
-                    <button 
-                      onClick={() => setIsMessaging(partner.name)}
-                      className="p-2 hover:bg-neuro-orange/10 text-neuro-navy hover:text-neuro-orange rounded-lg transition-colors"
+                    <div>
+                       <h4 className="font-bold text-neuro-navy text-lg group-hover:text-neuro-orange transition-colors">Dr. {doc.first_name} {doc.last_name}</h4>
+                       <p className="text-xs text-gray-500 flex items-center gap-1"><MapPin className="w-3 h-3" /> {doc.city}, {doc.state}</p>
+                    </div>
+                 </div>
+
+                 <div className="space-y-4 mb-8">
+                    <p className="text-xs text-gray-500 line-clamp-3 font-medium leading-relaxed italic">
+                       "{doc.bio || 'Available for collaboration and referrals in the neuro-focused community.'}"
+                    </p>
+                    
+                    <div className="flex flex-wrap gap-2">
+                       {(doc.specialties || []).slice(0, 3).map((spec: string, j: number) => (
+                         <span key={j} className="px-2.5 py-1 bg-neuro-cream text-neuro-navy text-[9px] font-black uppercase tracking-tighter rounded-lg border border-neuro-navy/5">{spec}</span>
+                       ))}
+                    </div>
+                 </div>
+
+                 <div className="grid grid-cols-2 gap-3">
+                    <Link 
+                      href={`/doctor/messages?to=${doc.user_id}`}
+                      className="py-3 bg-gray-50 text-neuro-navy font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
                     >
-                      <MessageSquare className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                       <MessageSquare className="w-3 h-3" /> Message
+                    </Link>
+                    {!doc.isPartner && !doc.isPending ? (
+                      <button 
+                        onClick={() => handleHandshake(doc.user_id)}
+                        disabled={actionLoading === doc.user_id}
+                        className="py-3 bg-neuro-orange text-white font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-neuro-orange-light transition-all shadow-lg shadow-neuro-orange/10 flex items-center justify-center gap-2"
+                      >
+                         {actionLoading === doc.user_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Handshake className="w-3 h-3" /> Handshake</>}
+                      </button>
+                    ) : (
+                      <button className="py-3 bg-white border border-gray-100 text-gray-400 font-black rounded-xl text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                         <Star className={cn("w-3 h-3", doc.isPartner ? "text-neuro-orange fill-neuro-orange" : "text-gray-300")} /> View Profile
+                      </button>
+                    )}
+                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            ))}
+         </div>
+      </section>
 
-      {/* INVITE DOCTOR MODAL */}
-      {isInviteOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white/20">
-            <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-neuro-orange/20 rounded-2xl flex items-center justify-center text-neuro-orange">
-                  <UserPlus className="w-6 h-6" />
+      {/* INVITE MODAL */}
+      <AnimatePresence>
+        {isInviteOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white/20"
+            >
+              <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-neuro-orange/20 rounded-2xl flex items-center justify-center text-neuro-orange">
+                    <UserPlus className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold uppercase tracking-tight">Invite Doctor</h3>
+                    <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Grow the Network</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold">Invite a Doctor</h3>
-                  <p className="text-[10px] uppercase font-black text-white/50 tracking-widest">Expand the NeuroChiro Network</p>
-                </div>
+                <button onClick={() => setIsInviteOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                  <X className="w-6 h-6" />
+                </button>
               </div>
-              <button onClick={() => setIsInviteOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <div className="p-8">
-              {inviteSent ? (
-                <div className="py-12 text-center space-y-4 animate-in zoom-in duration-300">
-                  <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto">
-                    <Check className="w-10 h-10" />
-                  </div>
-                  <h4 className="text-xl font-bold text-neuro-navy">Invitation Sent!</h4>
-                  <p className="text-gray-500">We've sent a secure link to your colleague.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleSendInvite} className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Doctor's Name</label>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input 
-                        required
-                        placeholder="Dr. Julian Reed"
-                        className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Email Address</label>
-                    <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input 
-                        type="email"
-                        required
-                        placeholder="doctor@clinic.com"
-                        className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all"
-                      />
-                    </div>
-                  </div>
-                  <button className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-light transition-all shadow-xl shadow-neuro-orange/20 uppercase tracking-widest text-sm">
-                    Send Invitation
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Messaging Modal */}
-      {isMessaging && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white/20">
-            <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-neuro-orange rounded-2xl flex items-center justify-center font-black">
-                  {isMessaging.split(' ').slice(1).map(n => n[0]).join('')}
-                </div>
-                <div>
-                  <h3 className="font-bold">Message {isMessaging}</h3>
-                  <p className="text-[10px] uppercase font-black text-white/50 tracking-widest">Direct Referral Inquiry</p>
-                </div>
+              <div className="p-8 space-y-6 text-center">
+                {inviteSent ? (
+                  <motion.div initial={{ y: 10 }} animate={{ y: 0 }} className="py-12 flex flex-col items-center">
+                    <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-6 border-4 border-green-100 shadow-xl">
+                      <Check className="w-10 h-10" />
+                    </div>
+                    <h4 className="text-2xl font-black text-neuro-navy">Invitation Sent!</h4>
+                    <p className="text-gray-500 text-sm mt-2">We've sent an access link to your peer.</p>
+                  </motion.div>
+                ) : (
+                  <>
+                    <p className="text-xs text-gray-500 leading-relaxed max-w-sm mx-auto font-medium">
+                      Invite local doctors to join the NeuroChiro network. When they join, they'll automatically appear in your Reciprocity Loop.
+                    </p>
+                    <form onSubmit={handleSendInvite} className="space-y-4">
+                      <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <input 
+                          type="email" 
+                          required 
+                          placeholder="doctor@clinic.com" 
+                          className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-neuro-orange text-sm font-bold"
+                          value={inviteEmail}
+                          onChange={(e) => setInviteEmail(e.target.value)}
+                        />
+                      </div>
+                      <button type="submit" className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl shadow-xl hover:bg-neuro-orange-dark transition-all uppercase tracking-widest text-xs">
+                        Send Invite & Connect
+                      </button>
+                    </form>
+                  </>
+                )}
               </div>
-              <button onClick={() => setIsMessaging(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <div className="p-8">
-              {messageSent ? (
-                <div className="py-12 text-center space-y-4 animate-in zoom-in duration-300">
-                  <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto">
-                    <Check className="w-10 h-10" />
-                  </div>
-                  <h4 className="text-xl font-bold text-neuro-navy">Message Sent!</h4>
-                  <p className="text-gray-500">Your referral inquiry has been delivered.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleSendMessage} className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Your Message</label>
-                    <textarea 
-                      required
-                      placeholder="Hi Doctor, I have a patient moving to your area..."
-                      className="w-full p-6 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 min-h-[150px] transition-all"
-                    />
-                  </div>
-                  <button className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-light transition-all shadow-xl shadow-neuro-orange/20 uppercase tracking-widest text-sm">
-                    Send Inquiry
-                  </button>
-                </form>
-              )}
-            </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
+}
+
+function cn(...inputs: any[]) {
+  return inputs.filter(Boolean).join(" ");
 }
