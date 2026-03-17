@@ -138,12 +138,15 @@ export default function GlobalNetworkMap({
           }
         }));
     } else {
-      points = doctors
+      // 🛡️ SYNC FIX: Ensure the map always shows exactly what the list shows
+      // Use initialDoctors as the source of truth for the directory view
+      const sourceDoctors = initialDoctors.length > 0 ? initialDoctors : doctors;
+      
+      points = sourceDoctors
         .filter(doc => 
           doc.latitude !== null && doc.latitude !== undefined && Number(doc.latitude) !== 0 && 
           doc.longitude !== null && doc.longitude !== undefined && Number(doc.longitude) !== 0 &&
-          (!searchQuery || 
-            `${doc.first_name || ''} ${doc.last_name || ''} ${doc.clinic_name || ''}`.toLowerCase().includes(searchQuery.toLowerCase()))
+          doc.verification_status === 'verified'
         )
         .map(doc => ({
           type: 'Feature' as const,
@@ -166,13 +169,17 @@ export default function GlobalNetworkMap({
 
     cluster.load(points as Supercluster.PointFeature<Supercluster.AnyProps>[]);
     return cluster;
-  }, [doctors, seminars, students, activeLayer, searchQuery]);
+  }, [doctors, seminars, students, activeLayer, searchQuery, initialDoctors]);
 
   const updateMapData = useCallback(async (bounds: [number, number, number, number], zoom: number) => {
     currentBounds.current = bounds;
     currentZoom.current = zoom;
-    setLoading(true);
     
+    // 🛡️ SYNC FIX: If we are in the directory view (which uses initialDoctors), 
+    // don't re-fetch data from the map bounds to prevent list/map mismatch.
+    if (initialDoctors.length > 0 && activeLayer === 'all') return;
+
+    setLoading(true);
     try {
       if (activeLayer === 'seminar') {
         const result = await getSeminarsForMap(bounds);
@@ -223,18 +230,22 @@ export default function GlobalNetworkMap({
         layer: activeLayer
       }, '*');
 
-      // 🛡️ AUTO-ZOOM TO RESULTS (Task 3)
-      if (searchQuery && doctors.length > 0 && activeLayer === 'all') {
-        const resultCoords = doctors
+      // 🛡️ AUTO-ZOOM TO RESULTS (Task 4)
+      // If we have doctors in the list, zoom the map to fit them
+      if (initialDoctors.length > 0 && activeLayer === 'all') {
+        const resultCoords = initialDoctors
           .filter(d => d.latitude && d.longitude)
           .map(d => [Number(d.latitude), Number(d.longitude)]);
         
         if (resultCoords.length > 0) {
-          iframeRef.current.contentWindow.postMessage({
-            type: 'fit-bounds',
-            bounds: resultCoords,
-            padding: [80, 80]
-          }, '*');
+           // Small delay to ensure the map engine is ready to receive the bounds
+           setTimeout(() => {
+            iframeRef.current?.contentWindow?.postMessage({
+              type: 'fit-bounds',
+              bounds: resultCoords,
+              padding: [50, 50]
+            }, '*');
+           }, 500);
         }
       }
     } catch (e) {
