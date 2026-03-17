@@ -10,16 +10,15 @@ export async function getDoctorProfile() {
     if (!user) return null
 
     const [profileRes, doctorRes] = await Promise.all([
-      (supabase as any).from('profiles').select('full_name, email, role, tier').eq('id', user.id).single(),
-      (supabase as any).from('doctors').select('*').eq('user_id', user.id).single()
+      (supabase as any).from('profiles').select('full_name, email, role, tier, notification_preferences').eq('id', user.id).single(),
+      (supabase as any).from('doctors').select('*, clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, location_lat, slug, verification_status').eq('user_id', user.id).single()
     ])
 
-    if (profileRes.error && profileRes.error.code !== 'PGRST116') {
-      console.error("Error fetching profile:", profileRes.error)
+    if (profileRes.error) {
+        console.error("Profile Fetch Error:", profileRes.error);
     }
-
-    if (doctorRes.error && doctorRes.error.code !== 'PGRST116') {
-      console.error("Error fetching doctor record:", doctorRes.error)
+    if (doctorRes.error) {
+        console.error("Doctor Fetch Error:", doctorRes.error);
     }
 
     return { 

@@ -125,12 +125,17 @@ export default function ProfilePage() {
     if (profile.photo_url || profile.avatar_url) score += 30;
     if (profile.website_url) score += 10;
     if (profile.clinic_name) score += 10;
-    if (profile.specialties?.length > 0) score += 10;
+    if (Array.isArray(profile.specialties) && profile.specialties.length > 0) score += 10;
     if (profile.location_lat) score += 20;
     return score;
   };
 
   const strength = calculateStrength();
+
+  const getTierDisplay = (tier: string) => {
+    if (['starter', 'growth', 'pro'].includes(tier)) return tier;
+    return 'starter'; // Default fallback
+  };
 
   if (loading) {
     return (
@@ -170,7 +175,7 @@ export default function ProfilePage() {
             <Bell className="w-4 h-4" /> Notification Settings
           </button>
           <Link 
-            href={`/doctor/${profile.slug}`}
+            href={`/doctor/${profile?.slug || '#'}`}
             className="bg-neuro-navy text-white px-8 py-4 rounded-2xl shadow-xl hover:bg-neuro-navy-light transition-all transform hover:scale-105 flex items-center gap-3"
           >
             <ExternalLink className="w-5 h-5" />
@@ -189,8 +194,8 @@ export default function ProfilePage() {
                 <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
                    <div className="relative">
                       <div className="w-40 h-40 rounded-[2.5rem] bg-neuro-cream overflow-hidden border-4 border-white shadow-xl">
-                         {profile.photo_url || profile.avatar_url ? (
-                           <img src={profile.photo_url || profile.avatar_url} alt="Clinic" className="w-full h-full object-cover" />
+                         {profile?.photo_url || profile?.avatar_url ? (
+                           <img src={profile?.photo_url || profile?.avatar_url || ''} alt="Clinic" className="w-full h-full object-cover" />
                          ) : (
                            <div className="w-full h-full flex items-center justify-center">
                               <Building2 className="w-16 h-16 text-gray-300" />
@@ -216,17 +221,17 @@ export default function ProfilePage() {
                    <div className="flex-1 space-y-4">
                       <div className="flex items-center gap-3">
                          <h2 className="text-3xl font-heading font-black text-neuro-navy">
-                           {profile.clinic_name || "Untitled Clinic"}
+                           {profile?.clinic_name || "Untitled Clinic"}
                          </h2>
-                         {profile.verification_status === 'verified' && (
+                         {profile?.verification_status === 'verified' && (
                            <div className="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1 border border-green-100">
                               <ShieldCheck className="w-3 h-3" /> Verified Clinic
                            </div>
                          )}
                       </div>
                       <div className="flex flex-wrap gap-4 text-sm text-gray-500 font-medium">
-                         <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-neuro-orange" /> {profile.city}, {profile.state}</span>
-                         <span className="flex items-center gap-1.5"><Globe className="w-4 h-4 text-blue-500" /> {profile.website_url || "No website"}</span>
+                         <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-neuro-orange" /> {profile?.city || 'Location'}, {profile?.state || 'State'}</span>
+                         <span className="flex items-center gap-1.5"><Globe className="w-4 h-4 text-blue-500" /> {profile?.website_url || "No website"}</span>
                       </div>
                    </div>
                 </div>
@@ -251,7 +256,7 @@ export default function ProfilePage() {
                 </div>
                 <textarea 
                   name="bio"
-                  value={profile.bio || ""}
+                  value={profile?.bio || ""}
                   onChange={(e) => setProfile((p: any) => ({ ...p, bio: e.target.value }))}
                   rows={6}
                   placeholder="Tell the NeuroChiro network about your clinical focus..."
@@ -266,11 +271,11 @@ export default function ProfilePage() {
                    <div className="space-y-4">
                       <div className="space-y-2">
                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Clinic Name</label>
-                         <input name="clinic_name" defaultValue={profile.clinic_name} className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none" />
+                         <input name="clinic_name" defaultValue={profile?.clinic_name || ''} className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none" />
                       </div>
                       <div className="space-y-2">
                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Website URL</label>
-                         <input name="website" defaultValue={profile.website_url} className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none" />
+                         <input name="website" defaultValue={profile?.website_url || ''} className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none" />
                       </div>
                    </div>
                 </div>
@@ -281,16 +286,16 @@ export default function ProfilePage() {
                       <div className="grid grid-cols-2 gap-4">
                          <div className="space-y-2">
                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">City</label>
-                            <input name="city" defaultValue={profile.city} className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none" />
+                            <input name="city" defaultValue={profile?.city || ''} className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none" />
                          </div>
                          <div className="space-y-2">
                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">State</label>
-                            <input name="state" defaultValue={profile.state} className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none" />
+                            <input name="state" defaultValue={profile?.state || ''} className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none" />
                          </div>
                       </div>
                       <div className="space-y-2">
                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Country</label>
-                         <input name="country" defaultValue={profile.country || "United States"} className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none" />
+                         <input name="country" defaultValue={profile?.country || "United States"} className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none" />
                       </div>
                    </div>
                 </div>
@@ -334,9 +339,9 @@ export default function ProfilePage() {
               <div className="space-y-4">
                  <p className="text-xs font-bold text-neuro-navy mb-4 uppercase tracking-widest">Network Status Checklist</p>
                  {[
-                   { label: "Directory Indexing", status: profile.clinic_name && profile.bio ? 'Active' : 'Missing Data', ok: !!(profile.clinic_name && profile.bio) },
-                   { label: "Geocoding Verification", status: profile.location_lat ? 'Verified' : 'Pending', ok: !!profile.location_lat },
-                   { label: "ROI Tracking Sync", status: 'Elite Only', ok: profile.tier === 'elite' }
+                   { label: "Directory Indexing", status: profile?.clinic_name && profile?.bio ? 'Active' : 'Missing Data', ok: !!(profile?.clinic_name && profile?.bio) },
+                   { label: "Geocoding Verification", status: profile?.location_lat ? 'Verified' : 'Pending', ok: !!profile?.location_lat },
+                   { label: "ROI Tracking Sync", status: 'Elite Only', ok: getTierDisplay(profile?.tier || 'starter') === 'elite' }
                  ].map((item, i) => (
                    <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
                       <span className="text-xs font-bold text-neuro-navy">{item.label}</span>
@@ -414,10 +419,10 @@ export default function ProfilePage() {
                           </div>
                        </div>
                        <button 
-                        onClick={() => handleNotificationToggle('email_referrals', !profile.notification_preferences?.email_referrals)}
-                        className={`w-14 h-8 rounded-full transition-all relative ${profile.notification_preferences?.email_referrals ? 'bg-neuro-orange' : 'bg-gray-200'}`}
+                        onClick={() => handleNotificationToggle('email_referrals', !profile?.notification_preferences?.email_referrals)}
+                        className={`w-14 h-8 rounded-full transition-all relative ${profile?.notification_preferences?.email_referrals ? 'bg-neuro-orange' : 'bg-gray-200'}`}
                        >
-                          <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${profile.notification_preferences?.email_referrals ? 'left-7' : 'left-1'}`} />
+                          <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${profile?.notification_preferences?.email_referrals ? 'left-7' : 'left-1'}`} />
                        </button>
                     </div>
 
@@ -432,10 +437,10 @@ export default function ProfilePage() {
                           </div>
                        </div>
                        <button 
-                        onClick={() => handleNotificationToggle('sms_applications', !profile.notification_preferences?.sms_applications)}
-                        className={`w-14 h-8 rounded-full transition-all relative ${profile.notification_preferences?.sms_applications ? 'bg-neuro-orange' : 'bg-gray-200'}`}
+                        onClick={() => handleNotificationToggle('sms_applications', !profile?.notification_preferences?.sms_applications)}
+                        className={`w-14 h-8 rounded-full transition-all relative ${profile?.notification_preferences?.sms_applications ? 'bg-neuro-orange' : 'bg-gray-200'}`}
                        >
-                          <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${profile.notification_preferences?.sms_applications ? 'left-7' : 'left-1'}`} />
+                          <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${profile?.notification_preferences?.sms_applications ? 'left-7' : 'left-1'}`} />
                        </button>
                     </div>
 
@@ -450,10 +455,10 @@ export default function ProfilePage() {
                           </div>
                        </div>
                        <button 
-                        onClick={() => handleNotificationToggle('system_roi_milestones', !profile.notification_preferences?.system_roi_milestones)}
-                        className={`w-14 h-8 rounded-full transition-all relative ${profile.notification_preferences?.system_roi_milestones ? 'bg-neuro-orange' : 'bg-gray-200'}`}
+                        onClick={() => handleNotificationToggle('system_roi_milestones', !profile?.notification_preferences?.system_roi_milestones)}
+                        className={`w-14 h-8 rounded-full transition-all relative ${profile?.notification_preferences?.system_roi_milestones ? 'bg-neuro-orange' : 'bg-gray-200'}`}
                        >
-                          <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${profile.notification_preferences?.system_roi_milestones ? 'left-7' : 'left-1'}`} />
+                          <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${profile?.notification_preferences?.system_roi_milestones ? 'left-7' : 'left-1'}`} />
                        </button>
                     </div>
                  </div>
