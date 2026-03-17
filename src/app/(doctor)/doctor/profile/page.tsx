@@ -170,7 +170,15 @@ export default function PracticeProfile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // 🛡️ VALIDATION: Check file size (5MB limit)
+    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_SIZE) {
+      setError("File too large (Max 5MB). Please optimize your photo before uploading.");
+      return;
+    }
+
     setSaving(true);
+    setError(null);
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -184,10 +192,10 @@ export default function PracticeProfile() {
       if (result.success && result.publicUrl) {
         setProfileData(prev => ({ ...prev, photo_url: result.publicUrl }));
         setSuccess(true);
-        setError(null);
+        setTimeout(() => setSuccess(false), 3000);
       }
     } catch (err: any) {
-      setError("A critical error occurred while uploading. Please try again.");
+      setError(`Upload failed: ${err.message || "Connection error"}`);
     } finally {
       setSaving(false);
     }
@@ -278,9 +286,17 @@ export default function PracticeProfile() {
 
             <div className="flex flex-col md:flex-row items-center gap-8 mb-12">
               <div 
-                onClick={() => fileInputRef.current?.click()}
-                className="relative w-32 h-32 rounded-[2.5rem] bg-gray-50 flex items-center justify-center text-gray-300 border-2 border-dashed border-gray-200 cursor-pointer hover:border-neuro-orange transition-all group overflow-hidden"
+                onClick={() => !saving && fileInputRef.current?.click()}
+                className={cn(
+                  "relative w-32 h-32 rounded-[2.5rem] bg-gray-50 flex items-center justify-center text-gray-300 border-2 border-dashed border-gray-200 transition-all group overflow-hidden",
+                  saving ? "cursor-wait opacity-80" : "cursor-pointer hover:border-neuro-orange"
+                )}
               >
+                {saving && (
+                  <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-sm flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-neuro-orange" />
+                  </div>
+                )}
                 {profileData.photo_url ? (
                   <>
                     <img loading="lazy" decoding="async" src={profileData.photo_url} alt="Clinic" className="w-full h-full object-cover" />

@@ -106,24 +106,34 @@ export async function uploadAvatar(formData: FormData) {
         const { data: { user } } = await supabase.auth.getUser()
         
         if (!user) {
-            return { error: "You must be logged in to upload photos." }
+            return { error: "Authentication required. Please log in again." }
         }
 
         const file = formData.get('file')
         if (!file || !(file instanceof File)) {
-            return { error: "No valid file was provided." }
+            return { error: "No valid image file detected." }
         }
 
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${user.id}-${Date.now()}.${fileExt}`
-        const filePath = `avatars/${fileName}`
+        const fileExt = file.name.split('.').pop()?.toLowerCase() || 'png'
+        const fileName = `${Date.now()}.${fileExt}`
+        // RLS expects folder to be the user ID
+        const filePath = `${user.id}/${fileName}`
 
         const { data: uploadData, error: uploadError } = await supabase.storage
             .from('clinic-photos')
-            .upload(filePath, file)
+            .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: true
+            })
 
         if (uploadError) {
-            console.error("Storage upload error:", uploadError)
+            console.error("[STORAGE_ERROR]:", uploadError)
+            if (uploadError.message.includes('bucket not found')) {
+                return { error: "Storage setup incomplete: 'clinic-photos' bucket missing." }
+            }
+            if (uploadError.message.includes('row-level security')) {
+                return { error: "Permission denied: Storage policies not configured." }
+            }
             return { error: `Upload failed: ${uploadError.message}` }
         }
 
@@ -133,20 +143,21 @@ export async function uploadAvatar(formData: FormData) {
 
         const publicUrl = data?.publicUrl || ""
 
-        const { error: updateError } = await (supabase as any)
-            .from('doctors')
-            .update({ photo_url: publicUrl })
-            .eq('user_id', user.id)
+        // Update BOTH tables for consistency
+        const [doctorRes, profileRes] = await Promise.all([
+            (supabase as any).from('doctors').update({ photo_url: publicUrl }).eq('user_id', user.id),
+            (supabase as any).from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id)
+        ])
 
-        if (updateError) {
-            console.error("Database update error:", updateError)
-            return { error: `Failed to update profile with photo: ${updateError.message}` }
+        if (doctorRes.error || profileRes.error) {
+            console.error("[DATABASE_SYNC_ERROR]:", doctorRes.error || profileRes.error)
+            return { error: "Photo uploaded but failed to sync with your profile database." }
         }
 
         revalidatePath('/doctor/profile')
         return { success: true, publicUrl }
     } catch (err: any) {
-        console.error("Critical upload error:", err)
-        return { error: err.message || "An unexpected error occurred during upload." }
+        console.error("[CRITICAL_UPLOAD_EXCEPTION]:", err)
+        return { error: `System Error: ${err.message || "An unexpected error occurred."}` }
     }
 }
