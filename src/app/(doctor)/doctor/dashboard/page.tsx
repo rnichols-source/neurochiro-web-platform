@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useDoctorTier } from "@/context/DoctorTierContext";
@@ -39,6 +40,7 @@ function cn(...inputs: ClassValue[]) {
 }
 
 export default function DoctorDashboard() {
+  const router = useRouter();
   const { tier, isMember, isGrowth: contextIsGrowth, isPro: contextIsPro } = useDoctorTier();
   const [isBoosting, setIsBoosting] = useState(false);
   const [boosted, setBoosted] = useState(false);
@@ -53,7 +55,8 @@ export default function DoctorDashboard() {
         if (data) {
           setDashboardData(data);
           // 🛡️ AUTH LOOP: Redirect to Profile Editor if incomplete (< 20%)
-          if (data.marketPerformance?.completeness < 20) {
+          const completeness = data.marketPerformance?.completeness ?? 0;
+          if (completeness < 20) {
             router.push('/doctor/profile?welcome=true');
           }
         } else {
