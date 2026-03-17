@@ -73,6 +73,41 @@ export async function getSeminarAnalytics() {
   }
 }
 
+export async function updateSeminarAction(seminarId: string, formData: FormData) {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Unauthorized")
+
+  const title = formData.get('title') as string
+  const description = formData.get('description') as string
+  const location = formData.get('location') as string
+  const dates = formData.get('dates') as string
+  const price = formData.get('price') as string
+  const max_capacity = formData.get('max_capacity') as string
+
+  const { data, error } = await (supabase as any)
+    .from('seminars')
+    .update({
+      title,
+      description,
+      location,
+      dates,
+      price: Number(price) || 0,
+      max_capacity: Number(max_capacity) || 0
+    })
+    .eq('id', seminarId)
+    .eq('host_id', user.id)
+    .select()
+
+  if (error) {
+    console.error("Error updating seminar:", error)
+    throw new Error("Failed to update seminar")
+  }
+
+  revalidatePath('/doctor/seminars')
+  return { success: true, seminar: data }
+}
+
 export async function createSeminarAction(formData: FormData) {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()

@@ -12,12 +12,7 @@ ADD COLUMN IF NOT EXISTS status text CHECK (status IN ('draft', 'published', 'co
 ADD COLUMN IF NOT EXISTS max_capacity integer;
 
 -- Migrating existing data if necessary (mapping date to start_date)
-UPDATE public.seminars SET start_date = date WHERE start_date IS NULL AND date IS NOT EXISTS;
--- (In some cases 'date' might be used differently, but let's assume it's the start date)
-
--- Ensure host_id references public.profiles
--- The existing table might already have this, but let's be sure.
--- If we need to change references, we might need to drop and recreate the constraint.
+-- UPDATE public.seminars SET start_date = date WHERE start_date IS NULL AND date IS NOT NULL;
 
 -- 2. Create seminar_registrations table
 CREATE TABLE IF NOT EXISTS public.seminar_registrations (

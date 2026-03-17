@@ -4,88 +4,20 @@
     <meta charset="utf-8">
     <title>NeuroChiro Network Map</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-    <!-- 🛡️ LEAFLET CSS MUST BE BEFORE JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         body { margin: 0; padding: 0; background: #0B1118; overflow: hidden; }
         #map { position: absolute; top: 0; bottom: 0; width: 100%; height: 100%; background: #0B1118; }
         
-        .custom-marker {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 3px solid white;
-            background: #D66829;
-            box-shadow: 0 0 20px rgba(214, 104, 41, 0.8);
-            cursor: pointer;
-            position: relative;
-            z-index: 9999 !important;
-            pointer-events: auto !important;
-            visibility: visible !important;
-        }
-
-        .cluster-marker {
-            background: rgba(214, 104, 41, 0.9);
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            color: white;
-            font-weight: 900;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: sans-serif;
-            box-shadow: 0 0 20px rgba(214, 104, 41, 0.4);
-            cursor: pointer;
-            backdrop-filter: blur(4px);
-            z-index: 9998 !important;
-        }
-
-        .pulse {
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: rgba(214, 104, 41, 0.4);
-            animation: pulse 2s infinite;
-            pointer-events: none;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(3.5); opacity: 0; }
-        }
-
-        @keyframes marker-pulse {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(214, 104, 41, 0.7); }
-            70% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; box-shadow: 0 0 0 15px rgba(214, 104, 41, 0); }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(214, 104, 41, 0); }
+        @keyframes pulse-animation {
+            0% { stroke-width: 2; stroke-opacity: 1; }
+            50% { stroke-width: 15; stroke-opacity: 0; }
+            100% { stroke-width: 2; stroke-opacity: 1; }
         }
 
         .active-specialist-marker {
-            background: #ff5722;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 0 15px rgba(214, 104, 41, 0.8);
-            animation: marker-pulse 2s infinite;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-        }
-
-        .global-node-marker {
-            background: #444;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            border: 1px solid #888;
-            opacity: 0.6;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            animation: pulse-animation 2s infinite;
         }
 
         .leaflet-control-attribution { display: none !important; }
@@ -93,187 +25,82 @@
 </head>
 <body>
 <div id="map"></div>
-<div id="error-banner" style="display:none; position:fixed; top:0; left:0; right:0; background:rgba(255,0,0,0.8); color:white; padding:10px; z-index:9999; font-family:sans-serif; font-size:12px;"></div>
 <script>
-    // 🛡️ GLOBAL VARIABLES - Outside of any closures
     var map;
     var markerLayer;
-    window.DEBUG_MAP = true;
-
-    // Error Reporting
-    window.onerror = function(msg, url, line) {
-        const errorMsg = `Map Error: ${msg} at ${url}:${line}`;
-        console.error(errorMsg);
-        window.parent.postMessage({ type: 'map-error', error: errorMsg }, '*');
-    };
-
-    console.log("[MAP_IFRAME] Initializing Optimized Leaflet...");
+    
+    console.log("[MAP_IFRAME] Initializing Leaflet...");
     
     map = L.map('map', {
         zoomControl: false,
         attributionControl: false,
-        tap: true,
-        touchZoom: true,
-        dragging: true,
-        preferCanvas: true // Use canvas for smoother rendering
+        preferCanvas: false // Use SVG for easier pulsing/styling
     }).setView([38, -98], 4);
 
-    // Primary Tile Layer (Dark Mode)
-    const cartoLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         subdomains: 'abcd',
-        maxZoom: 20,
-        updateWhenIdle: true, 
-        updateWhenZooming: false
-    });
+        maxZoom: 20
+    }).addTo(map);
 
-    cartoLayer.addTo(map);
-
-    // 🛡️ GLOBAL LAYER ATTACHMENT
     window.markerLayer = L.featureGroup().addTo(map);
 
-    window.parent.postMessage({ type: 'map-ready' }, '*');
-
-    let moveTimeout;
-
-    function notifyParent() {
-        if (moveTimeout) clearTimeout(moveTimeout);
-        
-        moveTimeout = setTimeout(() => {
-            const bounds = map.getBounds();
-            const zoom = map.getZoom();
-            
-            window.parent.postMessage({
-                type: 'map-move',
-                bounds: [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
-                zoom: zoom
-            }, '*');
-        }, 150);
+    function reportReady() {
+        console.log("[MAP_IFRAME] Map is Ready");
+        window.parent.postMessage({ type: 'map-ready' }, '*');
     }
 
-    map.on('moveend', notifyParent);
-    
-    function updateMarkers(clusters) {
-        console.log('[MAP_IFRAME] MARKER DATA RECEIVED:', clusters?.length || 0);
-        
-        // 🧪 VISUAL ALERT: If data arrives, turn border green
-        if (clusters && clusters.length > 0) {
-            document.body.style.border = '4px solid #22c55e';
-            
-            // 🛡️ FORCE MAP MOVE TO FIRST PIN
-            const firstPin = clusters[0];
-            if (firstPin.geometry && firstPin.geometry.coordinates) {
-                console.log('[MAP_IFRAME] PANNING TO FIRST PIN:', firstPin.geometry.coordinates);
-                map.panTo([firstPin.geometry.coordinates[1], firstPin.geometry.coordinates[0]]);
-            }
-        } else {
-            document.body.style.border = 'none';
-        }
-        
-        // 🛡️ CLEAR OLD PINS
-        window.markerLayer.clearLayers();
-
-        if (!clusters || !Array.isArray(clusters)) return;
-
-        clusters.forEach((feature, i) => {
-            if (!feature.geometry || !feature.geometry.coordinates) return;
-            
-            // 🛡️ COORDINATE VALIDATION
-            console.log(`[MAP_IFRAME] Marker ${i} coords:`, feature.geometry.coordinates);
-
-            const lng = feature.geometry.coordinates[0];
-            const lat = feature.geometry.coordinates[1];
-
-            if (isNaN(lat) || isNaN(lng)) {
-                console.error(`[MAP_IFRAME] Invalid coords for marker ${i}`);
-                return;
-            }
-
-            // 🛡️ GUARANTEED VISIBILITY: Simple CSS marker
-            const icon = L.divIcon({
-                className: '',
-                html: '<div style="background: #ff5722; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>',
-                iconSize: [12, 12],
-                iconAnchor: [6, 6]
-            });
-
-            const marker = L.marker([lat, lng], { icon });
-            
-            if (feature.properties && !feature.properties.cluster) {
-                marker.on('click', () => {
-                    window.parent.postMessage({ 
-                        type: 'marker-click', 
-                        data: feature.properties 
-                    }, '*');
-                });
-            }
-            
-            marker.addTo(window.markerLayer);
-        });
-    }
+    map.whenReady(reportReady);
 
     window.addEventListener('message', (e) => {
-        // 💣 CONSOLE BOMB DIAGNOSTIC
-        console.log('--- MAP INBOUND DATA ---', e.data);
-        console.log('--- MAP OBJECT STATE ---', typeof map, map.getZoom(), map.getCenter());
-
-        if (e.data.type === 'force-raw-markers') {
+        if (e.data.type === 'is-ready') {
+            reportReady();
+        } else if (e.data.type === 'force-raw-markers') {
             const features = e.data.data || [];
-            console.log('[MAP_IFRAME] FORCING RAW MARKERS:', features.length);
+            console.log('[MAP_IFRAME] Syncing markers:', features.length);
             window.markerLayer.clearLayers();
             
             const activeMarkers = [];
 
-            if (Array.isArray(features)) {
-                features.forEach((feat, idx) => {
-                    if (!feat.geometry || !feat.geometry.coordinates) return;
-                    const [lng, lat] = feat.geometry.coordinates;
-                    const isFiltered = feat.properties.isFiltered;
+            features.forEach((feat) => {
+                if (!feat.geometry || !feat.geometry.coordinates) return;
+                const [lng, lat] = feat.geometry.coordinates;
+                const isFiltered = feat.properties.isFiltered;
+                
+                if (!isNaN(lat) && !isNaN(lng) && lat !== 0) {
+                    const marker = L.circleMarker([lat, lng], {
+                        radius: isFiltered ? 10 : 5,
+                        fillColor: isFiltered ? "#ff5722" : "#444",
+                        color: isFiltered ? "#fff" : "#888",
+                        weight: isFiltered ? 2 : 1,
+                        opacity: 1,
+                        fillOpacity: isFiltered ? 0.9 : 0.5,
+                        className: isFiltered ? 'active-specialist-marker' : ''
+                    }).addTo(window.markerLayer).bindPopup(feat.properties.name || "Specialist");
                     
-                    if (!isNaN(lat) && !isNaN(lng) && lat !== 0) {
-                        const icon = L.divIcon({
-                            className: '',
-                            html: isFiltered ? '<div class="active-specialist-marker"></div>' : '<div class="global-node-marker"></div>',
-                            iconSize: isFiltered ? [20, 20] : [10, 10],
-                            iconAnchor: isFiltered ? [10, 10] : [5, 5]
-                        });
-
-                        const marker = L.marker([lat, lng], { 
-                            icon,
-                            zIndexOffset: isFiltered ? 1000 : 0
-                        }).addTo(window.markerLayer).bindPopup(feat.properties.name || "Specialist");
-                        
-                        if (isFiltered) activeMarkers.push(marker);
-                    }
-                });
-
-                // 🛡️ INTELLIGENT ALIGN: Fit to filtered results, or fallback to all
-                try {
-                    if (activeMarkers.length > 0) {
-                        const activeGroup = L.featureGroup(activeMarkers);
-                        map.fitBounds(activeGroup.getBounds(), { padding: [100, 100], maxZoom: 10 });
-                    } else {
-                        const bounds = window.markerLayer.getBounds();
-                        if (bounds.isValid()) {
-                            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 6 });
-                        }
-                    }
-                } catch (err) {
-                    console.error('[MAP_IFRAME] fitBounds error:', err);
+                    if (isFiltered) activeMarkers.push(marker);
                 }
+            });
+
+            try {
+                if (activeMarkers.length > 0) {
+                    const activeGroup = L.featureGroup(activeMarkers);
+                    map.fitBounds(activeGroup.getBounds(), { padding: [100, 100], maxZoom: 10 });
+                } else {
+                    const bounds = window.markerLayer.getBounds();
+                    if (bounds.isValid()) {
+                        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 6 });
+                    }
+                }
+            } catch (err) {
+                console.error('[MAP_IFRAME] fitBounds error:', err);
             }
-        } else if (e.data.type === 'update-clusters') {
-            updateMarkers(e.data.data);
         } else if (e.data.type === 'set-view') {
             const { center, zoom } = e.data;
-            map.setView([center[1], center[0]], zoom);
-        } else if (e.data.type === 'fit-bounds') {
-            const { bounds, padding } = e.data;
-            map.fitBounds(bounds, { padding: padding || [50, 50] });
+            if (center && center[0] !== undefined) {
+                map.setView([center[1], center[0]], zoom);
+            }
         }
     });
-
-    // 🚩 MAP INITIALIZED PING
-    window.parent.postMessage({ type: 'MAP_INITIALIZED' }, '*');
 </script>
 </body>
 </html>
