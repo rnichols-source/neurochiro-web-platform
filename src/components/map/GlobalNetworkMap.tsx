@@ -173,9 +173,6 @@ export default function GlobalNetworkMap({
     return cluster;
   }, [doctors, seminars, students, activeLayer, searchQuery, initialDoctors, region.mapDefaults.center]);
 
-  // 🛡️ DESTROY COUNTER LOGIC: If the list sees them, the map must count them.
-  const verifiedCount = (initialDoctors.length > 0 ? initialDoctors : doctors).length;
-
   const updateMapData = useCallback(async (bounds: [number, number, number, number], zoom: number) => {
     currentBounds.current = bounds;
     currentZoom.current = zoom;
@@ -205,10 +202,9 @@ export default function GlobalNetworkMap({
 
   const [mapReady, setMapReady] = useState(false);
 
-  // 🛡️ UNIFIED COUNTER: Use strictly verified doctors from the source
+  // 🛡️ UNIFIED COUNTER: Use strictly what is in the list
   const verifiedCount = useMemo(() => {
-    return (initialDoctors.length > 0 ? initialDoctors : doctors)
-      .filter(d => d.verification_status === 'verified').length;
+    return (initialDoctors.length > 0 ? initialDoctors : doctors).length;
   }, [initialDoctors, doctors]);
 
   // Initial map centering and data fetch
@@ -334,7 +330,7 @@ export default function GlobalNetworkMap({
         <div className="bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl inline-flex items-center gap-2">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">
-            {region.label} Node Active: <span className="text-white">{verifiedCount} CLINICS FOUND</span>
+            {region.label} NODE ACTIVE: <span className="text-white">{verifiedCount} VERIFIED CLINICS</span>
           </span>
         </div>
       </div>
