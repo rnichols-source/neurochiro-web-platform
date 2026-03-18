@@ -42,12 +42,12 @@ interface SidebarProps {
 
 const navItems = [
   { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard, minTier: "starter" },
-  { name: "Practice ROI", href: "/doctor/analytics", icon: BarChart3, minTier: "starter" },
+  // { name: "Practice ROI", href: "/doctor/analytics", icon: BarChart3, minTier: "starter" },
   { name: "Referral Network", href: "/doctor/directory", icon: Network, minTier: "starter" },
-  { name: "Tools & Partners", href: "/marketplace", icon: Store, minTier: "starter" },
-  { name: "Talent Command", href: "/doctor/students", icon: Users, minTier: "growth" },
+  // { name: "Tools & Partners", href: "/marketplace", icon: Store, minTier: "starter" },
+  // { name: "Talent Command", href: "/doctor/students", icon: Users, minTier: "growth" },
   { name: "Seminar Hub", href: "/doctor/seminars", icon: Calendar, minTier: "growth" },
-  { name: "Recruiting", href: "/doctor/jobs", icon: Briefcase, minTier: "growth" },
+  // { name: "Recruiting", href: "/doctor/jobs", icon: Briefcase, minTier: "growth" },
   { name: "Practice Profile", href: "/doctor/profile", icon: User, minTier: "starter" },
 ];
 

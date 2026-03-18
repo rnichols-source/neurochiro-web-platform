@@ -100,7 +100,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
         </div>
 
-        <div>
+        {/* Career Tools Section - Mothballed for Phase 1 Stability */}
+        {/* <div>
           <div className="mb-4 px-2">
             <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Career Tools</span>
           </div>
@@ -145,7 +146,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               );
             })}
           </div>
-        </div>
+        </div> */}
       </nav>
 
       <div className="p-4 mt-auto shrink-0">

@@ -39,8 +39,16 @@ export async function middleware(request: NextRequest) {
   )
 
   // 🛡️ PROTECTED ROUTES LOGIC
-  const protectedPaths = ['/admin', '/doctor', '/student', '/portal', '/marketplace/dashboard'];
+  const protectedPaths = ['/admin', '/doctor', '/student'];
+  const mothballedPaths = ['/portal', '/vendor', '/marketplace/dashboard'];
+  
   const isProtected = protectedPaths.some(path => pathname.startsWith(path));
+  const isMothballed = mothballedPaths.some(path => pathname.startsWith(path));
+
+  // If accessing a mothballed feature, redirect to a safe spot (Phase 1 Stability)
+  if (isMothballed) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
 
   if (isProtected) {
     // IMPORTANT: Use getUser() instead of getSession() for security in middleware
