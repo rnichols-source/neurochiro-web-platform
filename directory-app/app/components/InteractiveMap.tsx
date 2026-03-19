@@ -13,7 +13,7 @@ const CUSTOM_PIN_SVG = `
   </svg>
 `;
 
-export default function InteractiveMap({ doctors, onFlyTo }) {
+export default function InteractiveMap({ doctors, onFlyTo }: { doctors: any; onFlyTo: any }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
 
