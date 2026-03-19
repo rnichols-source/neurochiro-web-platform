@@ -286,7 +286,7 @@ export default function GlobalNetworkMap({
       }, '*');
     };
 
-    const timer = setTimeout(syncMap, 500);
+    const timer = setTimeout(syncMap, 2000);
     return () => clearTimeout(timer);
   }, [initialDoctors, listDoctors, mapReady, activeLayer]);
 
