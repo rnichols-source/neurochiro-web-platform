@@ -9,11 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "15.1.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
     "@clerk/nextjs": "^6.0.0",
+    "@sanity/client": "^7.18.0",
+    "@sanity/image-url": "^2.0.3",
     "mapbox-gl": "^3.0.0",
-    "next-sanity": "^9.0.0"
+    "next": "15.1.0",
+    "next-sanity": "^9.12.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }
