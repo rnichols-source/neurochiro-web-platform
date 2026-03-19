@@ -198,7 +198,6 @@ export default function SeminarsPage() {
         </div>
       </header>
 
-      {/* Seminar Analytics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-2 bg-neuro-orange/10 text-neuro-orange">
@@ -231,110 +230,39 @@ export default function SeminarsPage() {
                <Star className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Avg Network Rating</p>
-               <p className="text-2xl font-black text-neuro-navy">{analytics?.avgRating || "5.0"}/5</p>
+               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Avg Event Rating</p>
+               <div className="flex items-baseline gap-2">
+                  <p className="text-2xl font-black text-neuro-navy">{analytics?.avgRating || "N/A"}</p>
+               </div>
             </div>
          </div>
       </div>
 
+      {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Seminar List & Management */}
+        {/* Seminar List */}
         <div className="lg:col-span-2 space-y-6">
-           <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-heading font-black text-neuro-navy">Active Listings</h2>
-              <button className="text-xs font-bold text-gray-400 hover:text-neuro-navy">View Past Events</button>
-           </div>
-           
-           {mySeminars.length === 0 ? (
-             <div className="bg-white rounded-[2rem] border border-gray-100 p-12 shadow-sm text-center space-y-6">
-                <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto text-gray-300">
-                   <Calendar className="w-10 h-10" />
+           {mySeminars.map((s, i) => (
+             <div key={i} className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-start gap-6">
+                <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-neuro-navy font-black text-xl">
+                   {s.title.substring(0,2).toUpperCase()}
                 </div>
-                <div>
-                   <h3 className="text-xl font-bold text-neuro-navy mb-2">Host your first Seminar</h3>
-                   <p className="text-sm text-gray-500 max-w-sm mx-auto leading-relaxed">
-                      You haven't created any seminars yet. Start sharing your clinical expertise with the NeuroChiro network today.
-                   </p>
-                </div>
-                <button
-                  onClick={() => setIsHostingOpen(true)}
-                  className="px-8 py-4 bg-neuro-orange text-white font-black rounded-2xl shadow-xl hover:bg-neuro-orange-light transition-all transform hover:scale-105"
-                >
-                  Host a Seminar
-                </button>
-             </div>
-           ) : mySeminars.map((sem, i) => (
-             <div key={i} className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm group hover:shadow-xl transition-all">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
-                   <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                         <span className={`px-2 py-0.5 ${sem.is_approved ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-neuro-orange'} text-[9px] font-black rounded uppercase tracking-widest border ${sem.is_approved ? 'border-green-100' : 'border-neuro-orange/20'}`}>
-                            {sem.is_approved ? 'Published' : 'Awaiting Approval'}
-                         </span>
-                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{sem.dates || sem.start_date}</span>
-                      </div>
-                      <h3 className="text-2xl font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">{sem.title}</h3>
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                         <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {sem.location || sem.location_name}</span>
-                         <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1 px-2 py-0.5 bg-orange-50 text-neuro-orange rounded-full border border-orange-100">
-                               <Eye className="w-2.5 h-2.5" />
-                               <span className="text-[8px] font-black uppercase">{sem.page_views || 0} Views</span>
-                            </div>
-                            <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100">
-                               <Zap className="w-2.5 h-2.5" />
-                               <span className="text-[8px] font-black uppercase">{sem.listing_tier || 'basic'} Tier</span>
-                            </div>
-                         </div>
-                      </div>
-                   </div>
-                   <div className="flex gap-6 md:border-l md:border-gray-50 md:pl-6">
-                      <div className="text-center">
-                         <p className="text-xl font-black text-neuro-navy">{sem.registrations?.[0]?.count || 0}</p>
-                         <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Sold</p>
-                      </div>
-                      <div className="text-center">
-                         <p className="text-xl font-black text-neuro-navy">{sem.page_views || 0}</p>
-                         <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Views</p>
-                      </div>
-                      <div className="text-center">
-                         <p className="text-xl font-black text-neuro-orange">{sem.clicks || 0}</p>
-                         <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Clicks</p>
-                      </div>
-                      <div className="text-center">
-                         <p className="text-xl font-black text-green-600">${((sem.registrations?.[0]?.count || 0) * (sem.price || 0)).toLocaleString()}</p>
-                         <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Revenue</p>
-                      </div>
+                <div className="flex-1">
+                   <h3 className="font-bold text-lg text-neuro-navy mb-1">{s.title}</h3>
+                   <div className="flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                      <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3" /> {s.dates}</span>
+                      <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3" /> {s.location}</span>
                    </div>
                 </div>
-                
-                <div className="grid grid-cols-3 gap-3">
-                   <button
-                    onClick={() => setIsEditOpen(sem)}
-                    className="py-3 bg-gray-50 text-neuro-navy font-bold rounded-xl text-xs hover:bg-gray-100 transition-colors flex items-center justify-center"
-                   >
-                      Edit Details
-                   </button>
-                   <button
-                    onClick={() => setIsAttendeesOpen(sem)}
-                    className="py-3 bg-gray-50 text-neuro-navy font-bold rounded-xl text-xs hover:bg-gray-100 transition-colors flex items-center justify-center"
-                   >
-                      Manage Attendees
-                   </button>
-                   <button
-                    onClick={() => setIsAnalyticsOpen(sem)}
-                    className="py-3 bg-neuro-navy text-white font-bold rounded-xl text-xs hover:bg-neuro-navy-light transition-colors shadow-lg shadow-neuro-navy/10"
-                   >
-                      View Analytics
-                   </button>
+                <div className="flex items-center gap-2">
+                   <button onClick={() => setIsAnalyticsOpen(s)} className="p-3 hover:bg-gray-50 rounded-xl transition-colors"><BarChart3 className="w-4 h-4 text-gray-400" /></button>
+                   <button onClick={() => setIsAttendeesOpen(s)} className="p-3 hover:bg-gray-50 rounded-xl transition-colors"><Users className="w-4 h-4 text-gray-400" /></button>
+                   <button onClick={() => setIsEditOpen(s)} className="px-6 py-3 bg-neuro-navy text-white font-black rounded-xl hover:bg-neuro-navy-light transition-all text-[10px] uppercase tracking-widest">Edit</button>
                 </div>
-
              </div>
            ))}
-
-           <div className="bg-neuro-navy rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-xl">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[80px] -mr-32 -mt-32"></div>
-              <div className="relative z-10 flex items-center justify-between gap-6">
+           
+           <div className="p-8 bg-neuro-navy rounded-[2.5rem] text-white flex items-center justify-between shadow-xl">
                  <div>
                     <h3 className="text-xl font-bold mb-2">Seminar Leaderboard</h3>
                     <p className="text-gray-400 text-xs max-w-sm">
@@ -347,8 +275,6 @@ export default function SeminarsPage() {
                  >
                     View Rankings
                  </Link>
-
-              </div>
            </div>
         </div>
 
@@ -484,7 +410,6 @@ export default function SeminarsPage() {
                         <input name="registration_link" required placeholder="https://eventbrite.com/your-event" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
-                    <div className="grid grid-cols-2 gap-4">
                        <div className="space-y-2">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Price ($)</label>
                           <input type="number" name="price" required placeholder="299" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all" />
@@ -503,6 +428,7 @@ export default function SeminarsPage() {
                   >
                     {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save & Proceed"}
                   </button>
+                  </div>
                 </form>
               )}
             </div>
@@ -630,7 +556,6 @@ export default function SeminarsPage() {
                     </table>
                  </div>
                )}
-
                <div className="flex gap-4">
                   <button
                     onClick={() => handleDownloadCSV(isAttendeesOpen.id)}
