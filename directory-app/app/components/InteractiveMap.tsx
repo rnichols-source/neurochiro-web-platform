@@ -39,8 +39,8 @@ export default function InteractiveMap({ doctors, onFlyTo }: { doctors: any; onF
   // Expose flyTo function
   useEffect(() => {
     if (onFlyTo) {
-      onFlyTo((lng, lat) => {
-        map.current.flyTo({
+      onFlyTo((lng: any, lat: any) => {
+        map.current!.flyTo({
           center: [lng, lat],
           zoom: 14,
           essential: true,
