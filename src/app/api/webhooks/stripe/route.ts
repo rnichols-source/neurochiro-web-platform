@@ -59,7 +59,6 @@ export async function POST(req: Request) {
       case "customer.subscription.deleted":
         Automations.onSubscriptionCanceled(event.data.object);
         break;
-        break;
     }
   } catch (error) {
     // We log the error but still return 200 to Stripe. 

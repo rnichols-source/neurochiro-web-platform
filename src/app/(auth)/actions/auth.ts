@@ -49,8 +49,6 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     'regional_admin': '/admin/dashboard',
     'doctor': '/doctor/dashboard',
     'student': '/student/dashboard',
-    'patient': '/portal/dashboard',
-    'vendor': '/vendor/dashboard'
   }
 
   // Handle tiered roles (doctor_pro, student_free, etc)
@@ -61,6 +59,9 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     destination = '/doctor/dashboard';
   } else if (role.startsWith('student')) {
     destination = '/student/dashboard';
+  } else {
+    // If it's a legacy patient/vendor role, we send to login or home
+    destination = '/login';
   }
 
   // Clear any existing demo role cookie for admin logins
@@ -215,26 +216,6 @@ export async function updateProfileAction(userId: string, profileData: any) {
         return { error: 'This email is already registered. Please log in or use a different address.' };
       }
       return { error: studentError.message };
-    }
-  } else if (role === 'vendor') {
-    // Save vendor-specific data to the vendors table
-    // Ensure the vendor record exists first, or use an upsert/insert if needed
-    // Usually ONBOARDING_TRIGGERS handles the initial insert, so we update here
-    const { error: vendorError } = await (supabase as any)
-      .from('vendors')
-      .update({
-        name: companyName,
-        website_url: website,
-        tier: tier
-      })
-      .eq('id', userId);
-
-    if (vendorError) {
-      console.error("Failed to update vendor profile:", vendorError);
-      if ((vendorError as any).code === '23505') {
-        return { error: 'This email is already registered. Please log in or use a different address.' };
-      }
-      return { error: vendorError.message };
     }
   }
 

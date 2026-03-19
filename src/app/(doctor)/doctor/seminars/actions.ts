@@ -2,7 +2,6 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
-import { onSeminarHostedAction } from '@/app/actions/automations'
 import { stripe, PLANS } from '@/lib/stripe'
 
 export async function getDoctorSeminars() {
@@ -84,6 +83,7 @@ export async function updateSeminarAction(seminarId: string, formData: FormData)
   const dates = formData.get('dates') as string
   const price = formData.get('price') as string
   const max_capacity = formData.get('max_capacity') as string
+  const registration_link = formData.get('registration_link') as string
 
   const { data, error } = await (supabase as any)
     .from('seminars')
@@ -92,6 +92,7 @@ export async function updateSeminarAction(seminarId: string, formData: FormData)
       description,
       location,
       dates,
+      registration_link,
       price: Number(price) || 0,
       max_capacity: Number(max_capacity) || 0
     })
@@ -102,6 +103,16 @@ export async function updateSeminarAction(seminarId: string, formData: FormData)
   if (error) {
     console.error("Error updating seminar:", error)
     throw new Error("Failed to update seminar")
+  }
+
+  // Trigger geocoding on update
+  try {
+    await supabase.from('automation_queue').insert({
+      event_type: 'geocode_seminar',
+      payload: { seminarId, location }
+    })
+  } catch (e) {
+    console.warn("Geocoding update trigger failed:", e)
   }
 
   revalidatePath('/doctor/seminars')
@@ -129,11 +140,11 @@ export async function createSeminarAction(formData: FormData) {
   // 2. Determine Pricing (Check if they are a Verified Doctor)
   const { data: doctor } = await (supabase as any)
     .from('doctors')
-    .select('is_verified')
+    .select('verification_status')
     .eq('user_id', user.id)
     .single()
 
-  const isVerified = (doctor as any)?.is_verified || false
+  const isVerified = (doctor as any)?.verification_status === 'verified';
 
   // 3. Extract city/country from simple location input
   const locParts = location.split(',').map(s => s.trim())
@@ -169,6 +180,16 @@ export async function createSeminarAction(formData: FormData) {
     throw new Error("Failed to create seminar")
   }
 
+  // 5. Trigger geocoding so it shows up on the map
+  try {
+    await supabase.from('automation_queue').insert({
+      event_type: 'geocode_seminar',
+      payload: { seminarId: data.id, location }
+    })
+  } catch (e) {
+    console.warn("Geocoding queue trigger failed (non-critical):", e)
+  }
+
   revalidatePath('/doctor/seminars')
 
   return { 
@@ -194,19 +215,23 @@ export async function createSeminarCampaignAction(seminarId: string, options: { 
     })
   }
 
+  // 🛡️ CAMPAIGN SAFETY CHECK: Only proceed if we have real Stripe IDs
+  const isMock = (id: string) => id.includes('mock') || id.includes('price_seminar');
+
   if (options.studentRadar) {
-    // Mocking price if not in PLANS yet, in production these would be real product IDs
-    lineItems.push({
-      price: 'price_seminar_student_radar',
-      quantity: 1
-    })
+    const id = 'price_seminar_student_radar';
+    if (isMock(id)) {
+        return { error: "Student Radar promotion is currently in internal testing. Check back soon!" };
+    }
+    lineItems.push({ price: id, quantity: 1 });
   }
 
   if (options.globalPush) {
-    lineItems.push({
-      price: 'price_seminar_global_push',
-      quantity: 1
-    })
+    const id = 'price_seminar_global_push';
+    if (isMock(id)) {
+        return { error: "Global Push promotion is currently in internal testing. Check back soon!" };
+    }
+    lineItems.push({ price: id, quantity: 1 });
   }
 
   if (lineItems.length === 0) throw new Error("No promotion options selected")

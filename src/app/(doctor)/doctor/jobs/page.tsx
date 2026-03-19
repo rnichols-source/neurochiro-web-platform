@@ -255,9 +255,15 @@ export default function JobsPage() {
               <div className="p-10 max-h-[70vh] overflow-y-auto">
                 {activeModal === 'Post-New-Job' && (
                   <form onSubmit={handleCreateJob} className="space-y-6">
-                    <div className="p-6 bg-neuro-orange/5 border border-neuro-orange/10 rounded-2xl">
-                       <p className="text-sm font-bold text-neuro-navy mb-2">Role Title</p>
-                       <input name="title" required type="text" placeholder="e.g. Lead Associate Chiropractor" className="w-full p-4 rounded-xl border border-gray-200 focus:outline-neuro-orange" />
+                    <div className="space-y-4">
+                       <div className="p-6 bg-neuro-orange/5 border border-neuro-orange/10 rounded-2xl">
+                          <p className="text-sm font-bold text-neuro-navy mb-2">Role Title</p>
+                          <input name="title" required type="text" placeholder="e.g. Lead Associate Chiropractor" className="w-full p-4 rounded-xl border border-gray-200 focus:outline-neuro-orange" />
+                       </div>
+                       <div className="p-6 bg-gray-50 border border-gray-100 rounded-2xl">
+                          <p className="text-sm font-bold text-neuro-navy mb-2">Job Description</p>
+                          <textarea name="description" required rows={4} placeholder="Describe the clinical focus, culture, and expectations..." className="w-full p-4 rounded-xl border border-gray-200 focus:outline-neuro-orange resize-none" />
+                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                        <div className="p-6 bg-gray-50 border border-gray-100 rounded-2xl">
@@ -747,8 +753,8 @@ export default function JobsPage() {
              );
            })}
 
-           {/* Hiring Tools */}
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           {/* Hiring Tools - Mothballed for Phase 1 Stability */}
+           {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div 
                 onClick={() => setActiveModal('Interview-Scorecards')}
                 className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-start gap-4 hover:border-neuro-orange transition-all cursor-pointer group hover:shadow-lg relative overflow-hidden"
@@ -779,7 +785,7 @@ export default function JobsPage() {
                     <p className="text-xs text-gray-500 mt-1">Generate clinical onboarding blueprints for your staff.</p>
                  </div>
               </div>
-           </div>
+           </div> */}
         </div>
 
         {/* Sidebar Widgets */}
@@ -883,33 +889,6 @@ export default function JobsPage() {
                        </div>
                        <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                           <div className={cn("h-full", talentScore > 80 ? "bg-green-500" : "bg-neuro-orange")} style={{ width: `${talentScore}%` }}></div>
-                       </div>
-                       
-                       <button 
-                         onClick={() => setActiveModal('Pay-for-Performance-Calculator')}
-                         className="w-full py-3 bg-neuro-orange/10 text-neuro-orange text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange/20 transition-all flex items-center justify-center gap-2"
-                       >
-                          <Calculator className="w-3 h-3" /> Optimize Bonus Structure
-                       </button>
-                    </div>
-                 </div>
-
-                 {/* Real-time Demand Widget */}
-                 <div className="relative group/map">
-                    <div className="flex items-center justify-between mb-3">
-                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Candidate Density</p>
-                       <div className="flex items-center gap-1">
-                          <div className="w-1.5 h-1.5 rounded-full bg-neuro-orange animate-pulse"></div>
-                          <span className="text-[9px] font-bold text-neuro-orange uppercase tracking-widest">High Demand</span>
-                       </div>
-                    </div>
-                    
-                    <div className="aspect-[4/3] bg-neuro-navy rounded-2xl p-4 flex flex-col items-center justify-center relative overflow-hidden">
-                       <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-neuro-orange via-transparent to-transparent"></div>
-                       <Globe className="w-12 h-12 text-white/10 mb-2" />
-                       <div className="text-center relative z-10">
-                          <p className="text-xl font-black text-white">12:1</p>
-                          <p className="text-[9px] text-gray-400 uppercase font-bold tracking-tighter">Students vs Open Roles</p>
                        </div>
                     </div>
                  </div>

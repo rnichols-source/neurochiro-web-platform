@@ -57,8 +57,8 @@ function RegisterContent() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        if (initialRole === 'patient') {
-           router.push('/portal/dashboard');
+        if (initialRole === 'patient' || initialRole === 'vendor') {
+           router.push('/login');
            return;
         }
         setUserId(user.id);
@@ -67,6 +67,13 @@ function RegisterContent() {
       }
     };
     checkUser();
+  }, [initialRole, router]);
+
+  // Handle Redirect if role is invalid
+  useEffect(() => {
+    if (initialRole === 'patient' || initialRole === 'vendor') {
+      router.push('/register?role=doctor');
+    }
   }, [initialRole, router]);
 
   // Restore session if available

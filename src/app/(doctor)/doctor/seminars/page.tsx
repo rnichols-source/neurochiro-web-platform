@@ -83,7 +83,7 @@ export default function SeminarsPage() {
       if (result.success) {
         setSuccessState("seminar");
         
-        // Reload data
+        // Reload data and WAIT for it
         const [seminars, stats] = await Promise.all([
           getDoctorSeminars(),
           getSeminarAnalytics()
@@ -91,17 +91,18 @@ export default function SeminarsPage() {
         setMySeminars(seminars);
         setAnalytics(stats);
 
+        // Success message then close
         setTimeout(() => {
           setIsHostingOpen(false);
           setSuccessState(null);
           setIsSubmitting(false);
-        }, 2000);
+        }, 1500);
       } else {
-        alert("Failed to create seminar");
+        alert(result.error || "Failed to create seminar");
         setIsSubmitting(false);
       }
-    } catch (err) {
-      alert("Failed to create seminar");
+    } catch (err: any) {
+      alert(err.message || "Failed to create seminar");
       setIsSubmitting(false);
     }
   };
@@ -120,8 +121,8 @@ export default function SeminarsPage() {
         setIsEditOpen(null);
         setIsSubmitting(false);
       }
-    } catch (err) {
-      alert("Failed to update seminar");
+    } catch (err: any) {
+      alert(err.message || "Failed to update seminar");
       setIsSubmitting(false);
     }
   };
@@ -133,9 +134,12 @@ export default function SeminarsPage() {
       const result = await createSeminarCampaignAction(isCampaignOpen.id, campaignOptions);
       if (result.url) {
         window.location.href = result.url;
+      } else if (result.error) {
+        alert(result.error);
+        setIsSubmitting(false);
       }
-    } catch (err) {
-      alert("Failed to initiate campaign checkout");
+    } catch (err: any) {
+      alert(err.message || "Failed to initiate campaign checkout");
       setIsSubmitting(false);
     }
   };
@@ -475,7 +479,11 @@ export default function SeminarsPage() {
                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Dates</label>
                         <input name="dates" required placeholder="Oct 12-14, 2026" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all" />
                       </div>
-                    </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Registration Link (External URL)</label>
+                        <input name="registration_link" required placeholder="https://eventbrite.com/your-event" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
                     <div className="grid grid-cols-2 gap-4">
                        <div className="space-y-2">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Price ($)</label>
@@ -541,6 +549,10 @@ export default function SeminarsPage() {
                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Dates</label>
                         <input name="dates" defaultValue={isEditOpen.dates} required className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all" />
                       </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Registration Link</label>
+                      <input name="registration_link" defaultValue={isEditOpen.registration_link} required className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 transition-all" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                        <div className="space-y-2">

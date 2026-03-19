@@ -249,6 +249,27 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         }
         break;
 
+      case 'geocode_seminar':
+        if (supabaseAdmin && payload.seminarId && payload.location) {
+          try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(payload.location)}&limit=1`);
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+              const lat = parseFloat(data[0].lat);
+              const lng = parseFloat(data[0].lon);
+              
+              await supabaseAdmin.from('seminars').update({
+                latitude: lat,
+                longitude: lng
+              }).eq('id', payload.seminarId);
+            }
+          } catch (e) {
+            console.error("Geocoding failed for seminar:", payload.location, e);
+          }
+        }
+        break;
+
       case 'welcome_email':
         // 🛡️ PHASE 2: In-App Notification
         if (payload.userId) {
@@ -777,12 +798,18 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           const customerId = sub.customer;
           const priceId = sub.items?.data?.[0]?.price?.id || '';
           
-          // MAP STRIPE PRICE IDs TO TIERS
+          // 🛡️ CENTRALIZED PRICE ID TO TIER MAPPING (Last 3 chars of Stripe Price ID)
           const priceToTier: Record<string, string> = {
-            'A0q': 'starter',
-            'A0s': 'starter',
-            'A0p': 'growth',
-            'A0r': 'pro'
+            'A0q': 'starter',      // Doctor Starter Monthly
+            'A0s': 'starter',      // Doctor Starter Annual
+            'A0p': 'growth',       // Doctor Growth Monthly
+            'A0r': 'pro',          // Doctor Pro Monthly
+            'A0v': 'foundation',   // Student Foundation Monthly
+            'A0A': 'foundation',   // Student Foundation Annual
+            'A0w': 'professional', // Student Professional Monthly
+            'A0z': 'professional', // Student Professional Annual
+            'A0x': 'accelerator',  // Student Accelerator Monthly
+            'A0y': 'accelerator'   // Student Accelerator Annual
           };
 
           // Find match by substring
@@ -800,7 +827,9 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             if (profile?.role === 'doctor') {
                await supabaseAdmin.from('doctors').update({ membership_tier: newTier }).eq('user_id', profile.id);
                revalidatePath('/doctor/dashboard');
-               revalidatePath('/doctor/roi');
+            } else if (profile?.role === 'student') {
+               // Future: Add student tier specific updates if needed
+               revalidatePath('/student/dashboard');
             }
           }
         }

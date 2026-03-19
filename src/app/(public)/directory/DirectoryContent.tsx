@@ -13,7 +13,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { submitLeadAction } from "@/app/actions/leads";
-
 // Lazy load map for performance
 const GlobalNetworkMap = dynamic(() => import("@/components/map/GlobalNetworkMap"), {
   ssr: false,
@@ -24,23 +23,16 @@ const GlobalNetworkMap = dynamic(() => import("@/components/map/GlobalNetworkMap
   )
 });
 
-const SmartMatchWizard = dynamic(() => import("@/components/directory/SmartMatchWizard"), {
-  ssr: false
-});
+import DoctorCard from "@/components/directory/DoctorCard";
 
 export default function DirectoryContent({ initialData }: { initialData: { doctors: any[], total: number } }) {
   const [notifying, setNotifying] = useState(false);
   const [notifySuccess, setNotifySuccess] = useState(false);
-  const [showMap, setShowMap] = useState(false);
+  const [showMap, setShowMap] = useState(true);
   const [dbError, setDbError] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [matchCriteria, setMatchCriteria] = useState<string[] | null>(null);
   const [mobileView, setMobileView] = useState<'map' | 'list'>('list');
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowMap(true), 1500);
-    return () => clearTimeout(timer);
-  }, []);
 
   const resetFilters = () => {
     setSearchQuery("");
@@ -214,8 +206,8 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
 
   return (
     <div className="min-h-screen bg-neuro-cream">
-      {/* Smart Match Floating Button */}
-      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] md:bottom-12">
+      {/* Smart Match Floating Button - Mothballed for Phase 1 Stability */}
+      {/* <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] md:bottom-12">
         <motion.button 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -227,7 +219,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
           </div>
           <span className="font-black uppercase tracking-widest text-[10px]">Smart Match Wizard</span>
         </motion.button>
-      </div>
+      </div> */}
 
       {/* Mobile Toggle: Map vs List */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex bg-white rounded-full shadow-2xl p-1 border border-gray-100 lg:hidden">
@@ -251,7 +243,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
         </button>
       </div>
 
-      <SmartMatchWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} onComplete={(criteria) => setMatchCriteria(criteria)} />
+      {/* <SmartMatchWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} onComplete={(criteria) => setMatchCriteria(criteria)} /> */}
 
       {/* Search Header */}
       <header className="bg-neuro-navy text-white pt-20 pb-32 px-8 relative overflow-hidden">
@@ -365,54 +357,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                   )}
                 </div>
                 {filteredDoctors.map((doc, i) => (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    key={`${doc.id}-${i}`} 
-                    className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden"
-                  >
-                    <div className="flex items-start justify-between mb-6">
-                        <div className="flex items-center gap-4">
-                          <div className="relative w-14 h-14 rounded-2xl bg-neuro-navy overflow-hidden shadow-lg border border-white/10 flex items-center justify-center">
-                              {doc.photo_url ? (
-                                <NextImage 
-                                  src={doc.photo_url} 
-                                  alt={`Dr. ${doc.first_name} ${doc.last_name}`} 
-                                  fill 
-                                  className="object-cover" 
-                                  sizes="56px" 
-                                  loading="lazy"
-                                />
-                              ) : (
-                                <span className="text-white font-black text-xl">{(doc.first_name?.[0] || 'N').toUpperCase()}</span>
-                              )}
-                          </div>
-                          <div>
-                              <div className="flex items-center gap-1.5 mb-0.5">
-                                <h3 className="font-bold text-lg text-neuro-navy group-hover:text-neuro-orange transition-colors">{`Dr. ${doc.first_name || ''} ${doc.last_name || ''}`.replace(/^Dr\.\s+Dr\./i, 'Dr.').trim()}</h3>
-                                <ShieldCheck className="w-4 h-4 text-blue-500" />
-                              </div>
-                              <p className="text-xs text-gray-500 font-medium">{doc.clinic_name || 'Private Practice'}</p>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <div className="flex items-center gap-1 text-neuro-orange">
-                              <Star className="w-3.5 h-3.5 fill-current" />
-                              <span className="text-sm font-black text-neuro-navy">{doc.rating || "5.0"}</span>
-                          </div>
-                        </div>
-                    </div>
-                    <Link href={`/directory/${doc.slug || doc.id}`}>
-                      <motion.div 
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
-                        className="w-full py-4 bg-gray-50 group-hover:bg-neuro-navy group-hover:text-white text-neuro-navy font-black rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 border border-gray-100 group-hover:border-neuro-navy"
-                      >
-                        View Profile <ArrowRight className="w-4 h-4" />
-                      </motion.div>
-                    </Link>
-                  </motion.div>
+                  <DoctorCard key={`${doc.id}-${i}`} doc={doc} index={i} />
                 ))}
               </>
             ) : (
@@ -426,36 +371,10 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={resetFilters}
-                    className="mb-8 px-8 py-4 bg-neuro-navy text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 mx-auto shadow-lg shadow-neuro-navy/20"
+                    className="px-8 py-4 bg-neuro-navy text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 mx-auto shadow-lg shadow-neuro-navy/20"
                   >
                     <RotateCcw className="w-4 h-4 text-neuro-orange" /> Reset All Filters
                   </motion.button>
-
-                  <div className="pt-8 border-t border-gray-50">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Get area alerts</p>
-                    {notifySuccess ? (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="p-6 bg-emerald-50 text-emerald-700 rounded-3xl border border-emerald-100 font-bold"
-                      >
-                        Success! We'll notify you soon.
-                      </motion.div>
-                    ) : (
-                      <form onSubmit={handleNotifyMe} className="space-y-3 max-w-sm mx-auto">
-                        <input type="email" name="email" required placeholder="Enter email..." className="w-full p-5 bg-gray-50 border border-gray-100 rounded-2xl outline-none text-sm" />
-                        <motion.button 
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          type="submit" 
-                          disabled={notifying} 
-                          className="w-full py-5 bg-neuro-orange text-white font-black rounded-2xl uppercase tracking-widest text-xs shadow-lg shadow-neuro-orange/20"
-                        >
-                          {notifying ? "Subscribing..." : "Notify Me via Email"}
-                        </motion.button>
-                      </form>
-                    )}
-                  </div>
                 </div>
               </div>
             )}

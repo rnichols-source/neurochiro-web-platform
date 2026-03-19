@@ -35,11 +35,21 @@ export async function getDoctorProfile() {
     return { 
       ...profileData, 
       ...doctorData,
-      notification_preferences: profileData.notification_preferences || {}
+      notification_preferences: profileData.notification_preferences || {},
+      profile_views: 0,
+      patient_leads: 0
     }
   } catch (err) {
     console.error("Critical error in getDoctorProfile:", err)
-    return null
+    return { 
+      full_name: "", 
+      email: "", 
+      role: "doctor", 
+      tier: "starter", 
+      notification_preferences: {},
+      profile_views: 0,
+      patient_leads: 0
+    }
   }
 }
 

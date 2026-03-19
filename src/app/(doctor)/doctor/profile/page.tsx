@@ -26,6 +26,7 @@ import {
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 import { 
   getDoctorProfile, 
   updateDoctorProfile, 
@@ -39,7 +40,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [showToast, setShowToast] = useState<{ show: boolean, message: string }>({ show: false, message: "" });
+  const [showToast, setShowToast] = useState<{ show: boolean, message: string, type: 'success' | 'error' }>({ show: false, message: "", type: 'success' });
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,13 +55,15 @@ export default function ProfilePage() {
     load();
   }, []);
 
-  const triggerToast = (message: string) => {
-    setShowToast({ show: true, message });
-    setTimeout(() => setShowToast({ show: false, message: "" }), 3000);
+  const triggerToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setShowToast({ show: true, message, type });
+    setTimeout(() => setShowToast({ show: false, message: "", type: 'success' }), 4000);
   };
 
   const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (saving) return;
+    
     setSaving(true);
     const formData = new FormData(e.currentTarget);
     
@@ -74,13 +77,13 @@ export default function ProfilePage() {
     if (result.success) {
       triggerToast("Profile synchronized with NeuroChiro network.");
     } else {
-      alert(result.error || "Failed to update profile");
+      triggerToast(result.error || "Failed to update profile", "error");
     }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || saving) return;
 
     setSaving(true);
     const formData = new FormData();
@@ -93,23 +96,27 @@ export default function ProfilePage() {
       setProfile((prev: any) => ({ ...prev, photo_url: result.publicUrl, avatar_url: result.publicUrl }));
       triggerToast("Clinic photo updated successfully.");
     } else {
-      alert(result.error || "Failed to upload image");
+      triggerToast(result.error || "Failed to upload image", "error");
     }
   };
 
   const handleNotificationToggle = async (key: string, value: boolean) => {
+    if (!profile) return;
     const newPrefs = { ...profile.notification_preferences, [key]: value };
     setProfile((prev: any) => ({ ...prev, notification_preferences: newPrefs }));
     
     const result = await updateNotificationPreferences(newPrefs);
     if (result.success) {
       triggerToast("Notification preferences updated.");
+    } else {
+      triggerToast(result.error || "Failed to update notifications", "error");
     }
   };
 
   const handleAIMagicWrite = async () => {
+    if (!profile) return;
     setIsGeneratingBio(true);
-    const result = await generateAIProfileBio(profile.clinic_name, profile.bio);
+    const result = await generateAIProfileBio(profile?.clinic_name || "", profile?.bio || "");
     setIsGeneratingBio(false);
     
     if (result.success) {
@@ -155,9 +162,12 @@ export default function ProfilePage() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-10 right-10 z-[300] bg-neuro-navy text-white px-8 py-4 rounded-2xl shadow-2xl border border-white/10 flex items-center gap-3"
+            className={cn(
+              "fixed bottom-10 right-10 z-[300] text-white px-8 py-4 rounded-2xl shadow-2xl border flex items-center gap-3",
+              showToast.type === 'error' ? "bg-red-600 border-red-500" : "bg-neuro-navy border-white/10"
+            )}
           >
-            <CheckCircle2 className="w-5 h-5 text-green-400" />
+            {showToast.type === 'error' ? <AlertCircle className="w-5 h-5 text-white" /> : <CheckCircle2 className="w-5 h-5 text-green-400" />}
             <span className="font-bold text-sm">{showToast.message}</span>
           </motion.div>
         )}
@@ -176,7 +186,8 @@ export default function ProfilePage() {
             <Bell className="w-4 h-4" /> Notification Settings
           </button>
           <Link 
-            href={`/doctor/${profile?.slug || '#'}`}
+            href={`/directory/${profile?.slug || '#'}`}
+            target="_blank"
             className="bg-neuro-navy text-white px-8 py-4 rounded-2xl shadow-xl hover:bg-neuro-navy-light transition-all transform hover:scale-105 flex items-center gap-3"
           >
             <ExternalLink className="w-5 h-5" />
@@ -206,9 +217,10 @@ export default function ProfilePage() {
                       <button 
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="absolute -bottom-4 -right-4 p-4 bg-neuro-orange text-white rounded-2xl shadow-xl hover:scale-110 transition-all"
+                        disabled={saving}
+                        className="absolute -bottom-4 -right-4 p-4 bg-neuro-orange text-white rounded-2xl shadow-xl hover:scale-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                         <Camera className="w-5 h-5" />
+                         {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
                       </button>
                       <input 
                         type="file" 
@@ -306,7 +318,7 @@ export default function ProfilePage() {
                 <button 
                   type="submit"
                   disabled={saving}
-                  className="px-12 py-5 bg-neuro-orange text-white font-black rounded-[2rem] shadow-2xl shadow-neuro-orange/30 hover:bg-neuro-orange-light transition-all transform hover:scale-[1.02] active:scale-95 flex items-center gap-3 uppercase tracking-widest text-sm"
+                  className="px-12 py-5 bg-neuro-orange text-white font-black rounded-[2rem] shadow-2xl shadow-neuro-orange/30 hover:bg-neuro-orange-light transition-all transform hover:scale-[1.02] active:scale-95 flex items-center gap-3 uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                    {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                    Save Profile Updates
@@ -342,7 +354,7 @@ export default function ProfilePage() {
                  {[
                    { label: "Directory Indexing", status: profile?.clinic_name && profile?.bio ? 'Active' : 'Missing Data', ok: !!(profile?.clinic_name && profile?.bio) },
                    { label: "Geocoding Verification", status: profile?.location_lat ? 'Verified' : 'Pending', ok: !!profile?.location_lat },
-                   { label: "ROI Tracking Sync", status: 'Elite Only', ok: getTierDisplay(profile?.tier || 'starter') === 'elite' }
+                   { label: "ROI Tracking Sync", status: getTierDisplay(profile?.tier || 'starter') === 'pro' ? 'Active' : 'Pro Only', ok: getTierDisplay(profile?.tier || 'starter') === 'pro' }
                  ].map((item, i) => (
                    <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
                       <span className="text-xs font-bold text-neuro-navy">{item.label}</span>
@@ -355,18 +367,18 @@ export default function ProfilePage() {
               </div>
            </section>
 
-           {/* Quick Stats Widget */}
+           {/* Real Impact Widget */}
            <section className="bg-neuro-navy rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl">
               <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl -mr-16 -mt-16"></div>
               <div className="relative z-10 space-y-6">
                  <h4 className="font-heading font-black text-xl">Directory Impact</h4>
                  <div className="grid grid-cols-2 gap-6">
                     <div>
-                       <p className="text-3xl font-black text-neuro-orange">452</p>
+                       <p className="text-3xl font-black text-neuro-orange">{profile?.profile_views || 0}</p>
                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Profile Views</p>
                     </div>
                     <div>
-                       <p className="text-3xl font-black text-white">12</p>
+                       <p className="text-3xl font-black text-white">{profile?.patient_leads || 0}</p>
                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Inbound Leads</p>
                     </div>
                  </div>
@@ -374,7 +386,7 @@ export default function ProfilePage() {
                   href="/doctor/analytics"
                   className="w-full py-4 bg-white/10 hover:bg-white/20 border border-white/10 rounded-2xl flex items-center justify-center gap-2 transition-all group"
                  >
-                    <span className="text-xs font-black uppercase tracking-widest">Full ROI Report</span>
+                    <span className="text-xs font-black uppercase tracking-widest">Performance Reports</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                  </Link>
               </div>
