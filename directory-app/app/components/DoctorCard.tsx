@@ -1,4 +1,4 @@
-export default function DoctorCard({ doctor }) {
+export default function DoctorCard({ doctor }: { doctor: any }) {
   return (
     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
       <h3 className="text-lg font-semibold text-[#1a1a1a]">{doctor.name}</h3>
