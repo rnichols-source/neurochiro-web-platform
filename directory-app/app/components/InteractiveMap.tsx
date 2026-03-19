@@ -32,7 +32,7 @@ export default function InteractiveMap({ doctors, onFlyTo }: { doctors: any; onF
       el.innerHTML = CUSTOM_PIN_SVG;
       new mapboxgl.Marker(el)
         .setLngLat([doctor.lng, doctor.lat])
-        .addTo(map.current);
+        .addTo(map.current!);
     });
   }, [doctors]);
 
