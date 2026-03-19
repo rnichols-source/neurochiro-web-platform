@@ -1,0 +1,34 @@
+/* 
+ * NeuroChiro Global Design Tokens
+ * Used across all subdomains: directory, hub, learn, admin.
+ */
+
+:root {
+  /* Brand Palette */
+  --nc-primary: #004a99; /* Deep, professional blue */
+  --nc-secondary: #00b09b; /* Subtle teal accent */
+  --nc-dark: #1a1a1a;
+  --nc-light: #f9f9f9;
+  --nc-text: #333333;
+  
+  /* Typography */
+  --nc-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Spacing/Scale */
+  --nc-spacing-xs: 4px;
+  --nc-spacing-sm: 8px;
+  --nc-spacing-md: 16px;
+  --nc-spacing-lg: 24px;
+  --nc-spacing-xl: 48px;
+  
+  /* Border Radius */
+  --nc-radius: 8px;
+}
+
+body {
+  font-family: var(--nc-font-family);
+  color: var(--nc-text);
+  background-color: var(--nc-light);
+  margin: 0;
+  padding: 0;
+}

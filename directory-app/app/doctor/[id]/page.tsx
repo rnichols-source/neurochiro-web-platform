@@ -1,10 +1,11 @@
 /* ... existing imports ... */
-import { client } from '../../../lib/sanity.client';
+// import { client } from '../../../lib/sanity.client';
 
 export default async function DoctorProfile({ params }: { params: any }) {
-  const doctor = await client.fetch(`*[_type == "doctor" && _id == $id][0]`, { id: params.id });
+  // const doctor = await client.fetch(`*[_type == "doctor" && _id == $id][0]`, { id: params.id });
+  const doctor = null; 
 
-  if (!doctor) return <div className="p-10">Doctor not found.</div>;
+  if (!doctor) return <div className="p-10 text-center text-gray-500">Doctor Profile Coming Soon</div>;
 
   const claimUrl = `https://hub.neurochiro.co/claim?doctor_id=${doctor._id}`;
 
