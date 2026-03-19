@@ -12,11 +12,11 @@ const MOCK_DOCTORS = [
 
 export default function SearchPage() {
   const [selectedDoctorId, setSelectedDoctorId] = useState(null);
-  const flyToMap = useRef(null);
+  const flyToMap = useRef<((lng: number, lat: number) => void) | null>(null);
 
   const handleCardClick = (doctor: any) => {
     setSelectedDoctorId(doctor.id);
-    if (flyToMap.current) {
+    if (flyToMap.current && doctor.lng && doctor.lat) {
       flyToMap.current(doctor.lng, doctor.lat);
     }
   };
