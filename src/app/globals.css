@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+:root {
+  --grid-pattern: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v2h-2v-2h2zm0 4v2h-2v-2h2zM6 34v2H4v-2h2zm0 4v2H4v-2h2zM6 4v2H4V4h2zm0 4v2H4V8h2zm30 0v2h-2V8h2zm0-4v2h-2V4h2zm24 30v2h-2v-2h2zm0 4v2h-2v-2h2zM30 34v2h-2v-2h2zm0 4v2h-2v-2h2zM30 4v2h-2V4h2zm0 4v2h-2V8h2zm24 0v2h-2V8h2zm0-4v2h-2V4h2zM60 4v2h-2V4h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm-8 8v-2h2v2h-2zm-8 0v-2h2v2h-2zm-8 0v-2h2v2h-2zm-8 0v-2h2v2h-2zm-8 0v-2h2v2h-2zm-8 0v-2h2v2h-2zm-8 0v-2h2v2h-2zm-8 0v-2h2v2h-2zm0-8v-2h2v2h-2zm0-8v-2h2v2h-2zm0-8v-2h2v2h-2zm0-8v-2h2v2h-2zm0-8v-2h2v2h-2zm0-8v-2h2v2h-2zm0-8v-2h2v2h-2zm0-8v-2h2v2h-2zm8-8v2h-2V0h2zm8 0v2h-2V0h2zm8 0v2h-2V0h2zm8 0v2h-2V0h2zm8 0v2h-2V0h2zm8 0v2h-2V0h2zm8 0v2h-2V0h2zm8 0v2h-2V0h2zm-8 8v2h-2V8h2zm0 8v2h-2v-16h2zM30 16v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm8-64v2h-2V0h2zm0 8v2h-2V8h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm8-64v2h-2V0h2zm0 8v2h-2V8h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm8-64v2h-2V0h2zm0 8v2h-2V8h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zM24 0v2h-2V0h2zm0 8v2h-2V8h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zM18 0v2h-2V0h2zm0 8v2h-2V8h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zM12 0v2h-2V0h2zm0 8v2h-2V8h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zm0 8v2h-2v-2h2zM6 0v2H4V0h2zm0 8v2H4V8h2zm0 8v2H4v-2h2zm0 8v2H4v-2h2zm0 8v2H4v-2h2zm0 8v2H4v-2h2zm0 8v2H4v-2h2zm0 8v2H4v-2h2zM0 0v2h2V0H0zm0 8v2h2V8H0zm0 8v2h2v-2H0zm0 8v2h2v-2H0zm0 8v2h2v-2H0zm0 8v2h2v-2H0zm0 8v2h2v-2H0zm0 8v2h2v-2H0z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+@theme {
+  --font-heading: var(--font-lato), sans-serif;
+  --font-body: var(--font-montserrat), sans-serif;
+
+  --color-neuro-navy: #1E2D3B;
+  --color-neuro-navy-light: #2C3E50;
+  --color-neuro-navy-dark: #15202B;
+  --color-neuro-orange: #D66829;
+  --color-neuro-orange-light: #E8834A;
+  --color-neuro-cream: #F5F3EF;
+  --color-neuro-black: #131313;
+  --color-neuro-gray: #4B5563;
+  --color-neuro-blue-accent: #3B82F6;
+}
+
+/* Base styles */
+@layer base {
+  body {
+    @apply bg-neuro-cream text-neuro-black font-body antialiased selection:bg-neuro-orange selection:text-white;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold text-neuro-navy tracking-tight;
+  }
+}
+
+/* Custom Utilities & Animations */
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 20px rgba(214, 104, 41, 0.5);
+  }
+  
+  .glass-panel {
+    @apply backdrop-blur-md bg-white/10 border border-white/20 shadow-xl;
+  }
+
+  .glass-panel-dark {
+    @apply backdrop-blur-md bg-neuro-navy/80 border border-white/10 shadow-2xl;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-glow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-gradient-x {
+    animation: gradient-x 15s ease infinite;
+    background-size: 200% 200%;
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 20px rgba(214, 104, 41, 0.2); }
+  50% { opacity: 0.7; box-shadow: 0 0 40px rgba(214, 104, 41, 0.5); }
+}
+
+@keyframes gradient-x {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1E2D3B; 
+}
+::-webkit-scrollbar-thumb {
+  background: #4B5563; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D66829; 
+}

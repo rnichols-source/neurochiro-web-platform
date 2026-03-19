@@ -1,0 +1,13 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /doctor
+Disallow: /student
+Disallow: /portal
+
+# Host
+Host: https://neurochiro.com
+
+# Sitemaps
+Sitemap: https://neurochiro.com/sitemap.xml
