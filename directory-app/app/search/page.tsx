@@ -14,7 +14,7 @@ export default function SearchPage() {
   const [selectedDoctorId, setSelectedDoctorId] = useState(null);
   const flyToMap = useRef(null);
 
-  const handleCardClick = (doctor) => {
+  const handleCardClick = (doctor: any) => {
     setSelectedDoctorId(doctor.id);
     if (flyToMap.current) {
       flyToMap.current(doctor.lng, doctor.lat);
