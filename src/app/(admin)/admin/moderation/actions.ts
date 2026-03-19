@@ -25,7 +25,7 @@ export interface PlatformHealthMetrics {
 }
 
 // Fallback global settings if table doesn't exist yet
-let globalSettings = {
+const globalSettings = {
   autoApprove: false,
   outboundScan: true,
 };

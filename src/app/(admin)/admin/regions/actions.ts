@@ -3,13 +3,13 @@
 import { stripe } from "@/lib/stripe";
 
 // Mock database for settings to persist them across renders
-let globalSettings = {
+const globalSettings = {
   strictIsolation: true,
   crossBorder: false,
 };
 
 // Mock database for regions
-let dynamicRegions = [
+const dynamicRegions = [
   { code: 'US', name: 'United States', admin: 'Admin_US', currency: 'usd' },
   { code: 'AU', name: 'Australia', admin: 'Admin_AU', currency: 'aud' }
 ];

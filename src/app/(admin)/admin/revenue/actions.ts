@@ -15,8 +15,8 @@ async function fetchAll<T>(stripeList: any): Promise<T[]> {
 
 export async function getRevenueData(timeRange: string) {
   const now = new Date();
-  let startDate = new Date();
-  let previousStartDate = new Date();
+  const startDate = new Date();
+  const previousStartDate = new Date();
   let previousEndDate = new Date();
   
   // 1. Establish Precise Time Windows
@@ -119,7 +119,7 @@ export async function getRevenueData(timeRange: string) {
     const failedPaymentsTrend = currentFailed - previousFailed;
 
     // 6. Revenue Attribution (Real Data)
-    let breakdownRaw: Record<string, number> = {
+    const breakdownRaw: Record<string, number> = {
       "Doctor Subs": 0,
       "Student Network": 0,
       "LMS & Mastermind": 0,

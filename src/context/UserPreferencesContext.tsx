@@ -35,7 +35,8 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     const savedData = localStorage.getItem("nc_saved_items");
     if (savedData) {
       try {
-        setSaved(JSON.parse(savedData));
+        const parsed = JSON.parse(savedData);
+        setTimeout(() => setSaved(parsed), 0);
       } catch (e) {
         console.error("Failed to parse saved items", e);
       }

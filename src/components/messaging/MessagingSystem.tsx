@@ -112,7 +112,7 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
   useEffect(() => {
     fetchConversations().then(async (fetchedConvs) => {
       if (initialOtherUserId && fetchedConvs) {
-        let existingConv = fetchedConvs.find((c: any) => c.otherUser.id === initialOtherUserId);
+        const existingConv = fetchedConvs.find((c: any) => c.otherUser.id === initialOtherUserId);
         if (existingConv) {
           setSelectedConversation(existingConv);
         } else {
@@ -260,7 +260,7 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
   }, [searchQuery, handleSearchUsers]);
 
   const startNewConversation = (otherUser: any) => {
-    let existing = conversations.find(c => c.otherUser.id === otherUser.id);
+    const existing = conversations.find(c => c.otherUser.id === otherUser.id);
     if (existing) {
       setSelectedConversation(existing);
     } else {

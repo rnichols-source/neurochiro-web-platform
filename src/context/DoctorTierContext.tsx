@@ -18,7 +18,9 @@ export function DoctorTierProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("nc_doctor_tier") as MembershipTier;
-    if (saved) setTierState(saved);
+    if (saved) {
+      setTimeout(() => setTierState(saved), 0);
+    }
   }, []);
 
   const setTier = useCallback((t: MembershipTier) => {

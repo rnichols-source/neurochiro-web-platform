@@ -17,7 +17,7 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const saved = localStorage.getItem("nc_region") as RegionCode;
     if (saved && REGIONS[saved]) {
-      setRegionState(REGIONS[saved]);
+      setTimeout(() => setRegionState(REGIONS[saved]), 0);
     }
   }, []);
 

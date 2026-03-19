@@ -42,7 +42,7 @@ async function simulateMock() {
   // 3. Logic that would run in the trigger:
   console.log("⚙️ Executing Claim Logic...");
   
-  let resultDoctor: any = { ...unclaimedDoctor };
+  const resultDoctor: any = { ...unclaimedDoctor };
   
   if (newUser.email === unclaimedDoctor.email && resultDoctor.user_id === null) {
     resultDoctor.user_id = newUser.id;

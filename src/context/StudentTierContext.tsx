@@ -19,7 +19,9 @@ export function StudentTierProvider({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     const saved = localStorage.getItem("nc_student_tier") as StudentTier;
-    if (saved) setTierState(saved);
+    if (saved) {
+      setTimeout(() => setTierState(saved), 0);
+    }
   }, []);
 
   const setTier = (t: StudentTier) => {
