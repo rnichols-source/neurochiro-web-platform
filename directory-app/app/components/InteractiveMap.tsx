@@ -27,7 +27,7 @@ export default function InteractiveMap({ doctors, onFlyTo }: { doctors: any; onF
     });
 
     // Add markers
-    doctors.forEach((doctor) => {
+    doctors.forEach((doctor: any) => {
       const el = document.createElement('div');
       el.innerHTML = CUSTOM_PIN_SVG;
       new mapboxgl.Marker(el)
