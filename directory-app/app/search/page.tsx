@@ -41,7 +41,7 @@ export default function SearchPage() {
       <div className="flex-1 relative">
         <InteractiveMap 
           doctors={MOCK_DOCTORS} 
-          onFlyTo={(fn) => (flyToMap.current = fn)} 
+          onFlyTo={(fn: (lng: number, lat: number) => void) => { flyToMap.current = fn }} 
         />
         {/* "Search in this area" button overlay */}
         <button className="absolute top-4 left-1/2 -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-lg font-medium text-[#004a99] z-10 hover:shadow-xl transition-shadow">
