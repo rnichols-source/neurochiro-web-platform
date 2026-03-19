@@ -14,13 +14,13 @@ const CUSTOM_PIN_SVG = `
 `;
 
 export default function InteractiveMap({ doctors, onFlyTo }: { doctors: any; onFlyTo: any }) {
-  const mapContainer = useRef(null);
-  const map = useRef(null);
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
 
   useEffect(() => {
-    if (map.current) return;
+    if (map.current || !mapContainer.current) return;
     map.current = new mapboxgl.Map({
-      container: mapContainer.current,
+      container: mapContainer.current as HTMLElement,
       style: 'mapbox://styles/mapbox/light-v11', // Clean, professional light style
       center: [-98.5795, 39.8283], // US Center
       zoom: 3,
