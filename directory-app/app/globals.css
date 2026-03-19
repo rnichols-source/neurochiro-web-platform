@@ -1,0 +1,26 @@
+:root {
+  /* Brand Palette (Strict adherence to Branding Guidelines) */
+  --nc-primary-navy: #1E2D3B;
+  --nc-accent-orange: #D66829;
+  --nc-black: #131313;
+  --nc-light-cream: #F5F3EF;
+  --nc-gray: #4B5563;
+  
+  /* Typography */
+  /* Using imports or system fonts as placeholders for Lato/Montserrat */
+  --nc-font-heading: 'Lato', sans-serif;
+  --nc-font-body: 'Montserrat', sans-serif;
+}
+
+body {
+  font-family: var(--nc-font-body);
+  color: var(--nc-black);
+  background-color: var(--nc-light-cream);
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--nc-font-heading);
+  color: var(--nc-primary-navy);
+}
