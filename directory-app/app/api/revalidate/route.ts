@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 
 // Sanity Webhook Handler to refresh cached doctor profiles
-export async function POST(req) {
+import { NextRequest } from "next/server";
+
+export async function POST(req: NextRequest) {
   const body = await req.json();
   
   // Verify webhook signature (e.g., using a secret header)
