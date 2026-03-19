@@ -1,7 +1,7 @@
 /* ... existing imports ... */
 import { client } from '../../../lib/sanity.client';
 
-export default async function DoctorProfile({ params }) {
+export default async function DoctorProfile({ params }: { params: any }) {
   const doctor = await client.fetch(`*[_type == "doctor" && _id == $id][0]`, { id: params.id });
 
   if (!doctor) return <div className="p-10">Doctor not found.</div>;
