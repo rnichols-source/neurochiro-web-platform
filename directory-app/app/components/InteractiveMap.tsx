@@ -17,22 +17,33 @@ export default function InteractiveMap({ doctors, onFlyTo }: { doctors: any; onF
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
 
+  const markers = useRef<mapboxgl.Marker[]>([]);
+
   useEffect(() => {
     if (map.current || !mapContainer.current) return;
     map.current = new mapboxgl.Map({
       container: mapContainer.current as HTMLElement,
-      style: 'mapbox://styles/mapbox/light-v11', // Clean, professional light style
-      center: [-98.5795, 39.8283], // US Center
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [-98.5795, 39.8283],
       zoom: 3,
     });
+  }, []);
 
-    // Add markers
+  useEffect(() => {
+    if (!map.current) return;
+
+    // Clear existing markers
+    markers.current.forEach(marker => marker.remove());
+    markers.current = [];
+
+    // Add new markers
     doctors.forEach((doctor: any) => {
       const el = document.createElement('div');
       el.innerHTML = CUSTOM_PIN_SVG;
-      new mapboxgl.Marker(el)
+      const marker = new mapboxgl.Marker(el)
         .setLngLat([doctor.lng, doctor.lat])
         .addTo(map.current!);
+      markers.current.push(marker);
     });
   }, [doctors]);
 
