@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
 
-export default async function DoctorMessagesPage({ searchParams }: { searchParams: { to?: string } }) {
+export default async function MessagesPage({ searchParams }: { searchParams: Promise<{ to?: string }> }) {
+  const { to } = await searchParams;
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -24,8 +25,9 @@ export default async function DoctorMessagesPage({ searchParams }: { searchParam
         <h1 className="text-3xl font-heading font-black text-white uppercase tracking-tight">Direct Messages</h1>
         <p className="text-gray-400 mt-2">Connect with students, doctors, and the NeuroChiro team securely.</p>
       </div>
-      
-      <MessagingSystem currentUserId={user.id} userRole={(profile as any)?.role || 'doctor'} initialOtherUserId={searchParams.to} />
+
+      <MessagingSystem currentUserId={user.id} userRole={(profile as any)?.role || 'doctor'} initialOtherUserId={to} />
     </div>
   );
+}
 }
