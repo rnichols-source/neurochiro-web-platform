@@ -14,10 +14,10 @@ export async function updateDoctorProfile(formData: FormData) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  const doctorId = formData.get('doctorId');
-  const clinicName = formData.get('clinicName');
-  const bio = formData.get('bio');
-  const phone = formData.get('phone');
+  const doctorId = (formData.get('doctorId') as string) ?? "";
+  const clinicName = (formData.get('clinicName') as string) ?? "";
+  const bio = (formData.get('bio') as string) ?? "";
+  const phone = (formData.get('phone') as string) ?? "";
 
   // CRITICAL: Secure Ownership Check
   const doctor = await client.fetch(`*[_type == "doctor" && _id == $id][0]`, { id: doctorId });

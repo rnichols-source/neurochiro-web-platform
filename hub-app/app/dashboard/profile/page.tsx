@@ -4,12 +4,19 @@ import { useForm } from 'react-hook-form';
 import { updateDoctorProfile } from '../../actions/update-profile';
 import { useState } from 'react';
 
-export default function ProfileEditor({ doctor }) {
-  const { register, handleSubmit } = useForm({ defaultValues: doctor });
+interface Doctor {
+  _id: string;
+  clinicName?: string;
+  bio?: string;
+  phone?: string;
+}
+
+export default function ProfileEditor({ doctor }: { doctor: Doctor }) {
+  const { register, handleSubmit } = useForm<Doctor>({ defaultValues: doctor });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data: any) => {
     setLoading(true);
     const formData = new FormData();
     Object.keys(data).forEach(key => formData.append(key, data[key]));
@@ -19,8 +26,8 @@ export default function ProfileEditor({ doctor }) {
       await updateDoctorProfile(formData);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    } catch (e) {
-      alert("Error saving profile: " + e.message);
+    } catch (e: any) {
+      alert("Error saving profile: " + e?.message || "Unknown error");
     } finally {
       setLoading(false);
     }

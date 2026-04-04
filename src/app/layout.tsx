@@ -70,6 +70,7 @@ import { RegionProvider } from "@/context/RegionContext";
 import { DoctorTierProvider } from "@/context/DoctorTierContext";
 import { StudentTierProvider } from "@/context/StudentTierContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
+import { AuthProvider } from "@/context/AuthContext";
 import PWAInstallPrompt from "@/components/layout/PWAInstallPrompt";
 import AdminQuickNav from "@/components/admin/AdminQuickNav";
 import PerspectiveSwitcher from "@/components/admin/PerspectiveSwitcher";
@@ -112,7 +113,9 @@ export default function RootLayout({
           <DoctorTierProvider>
             <StudentTierProvider>
               <UserPreferencesProvider>
-                {children}
+                <AuthProvider>
+                  {children}
+                </AuthProvider>
                 <PWAInstallPrompt />
                 <AdminQuickNav />
                 <PerspectiveSwitcher />

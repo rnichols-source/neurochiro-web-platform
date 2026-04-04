@@ -98,7 +98,7 @@ export default function SeminarsPage() {
           setIsSubmitting(false);
         }, 1500);
       } else {
-        alert(result.error || "Failed to create seminar");
+        alert((result as any).error || "Failed to create seminar");
         setIsSubmitting(false);
       }
     } catch (err: any) {

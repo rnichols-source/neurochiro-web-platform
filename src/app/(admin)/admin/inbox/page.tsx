@@ -35,7 +35,7 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
       </div>
       
       <div className="flex-1 min-h-0">
-        <MessagingSystem currentUserId={user.id} userRole="admin" initialOtherUserId={searchParams.to} />
+        <MessagingSystem currentUserId={user.id} userRole="admin" initialOtherUserId={to} />
       </div>
     </div>
   );

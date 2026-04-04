@@ -107,7 +107,7 @@ export async function updateSeminarAction(seminarId: string, formData: FormData)
 
   // Trigger geocoding on update
   try {
-    await supabase.from('automation_queue').insert({
+    await (supabase as any).from('automation_queue').insert({
       event_type: 'geocode_seminar',
       payload: { seminarId, location }
     })
@@ -182,7 +182,7 @@ export async function createSeminarAction(formData: FormData) {
 
   // 5. Trigger geocoding so it shows up on the map
   try {
-    await supabase.from('automation_queue').insert({
+    await (supabase as any).from('automation_queue').insert({
       event_type: 'geocode_seminar',
       payload: { seminarId: data.id, location }
     })
