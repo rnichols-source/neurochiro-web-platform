@@ -1,6 +1,6 @@
 'use server';
 
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@sanity/client';
 
 const client = createClient({
@@ -11,7 +11,7 @@ const client = createClient({
 });
 
 export async function updateDoctorProfile(formData) {
-  const { userId } = auth();
+  const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
   const doctorId = formData.get('doctorId');
