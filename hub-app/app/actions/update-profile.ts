@@ -10,7 +10,7 @@ const client = createClient({
   useCdn: false,
 });
 
-export async function updateDoctorProfile(formData) {
+export async function updateDoctorProfile(formData: FormData) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
