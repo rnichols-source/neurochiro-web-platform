@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminInboxPage({ searchParams }: { searchParams: { to?: string } }) {
+export default async function InboxPage({ searchParams }: { searchParams: Promise<{ to?: string }> }) {
+  const { to } = await searchParams;
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
 
