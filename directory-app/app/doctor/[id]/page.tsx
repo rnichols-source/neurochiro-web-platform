@@ -6,8 +6,9 @@ interface Doctor {
   isClaimed?: boolean;
 }
 
-export default async function DoctorProfile({ params }: { params: any }) {
-  // const doctor = await client.fetch(`*[_type == "doctor" && _id == $id][0]`, { id: params.id });
+export default async function DoctorPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  // const doctor = await client.fetch(`*[_type == "doctor" && _id == $id][0]`, { id: id });
   const doctor: Doctor | null = null; 
 
   if (!doctor) return <div className="p-10 text-center text-gray-500">Doctor Profile Coming Soon</div>;
