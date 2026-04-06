@@ -38,7 +38,7 @@ export const PLANS = {
     maxJobPosts: 999,
   },
   SEMINAR_PROMO_TOP: {
-    id: process.env.STRIPE_SEMINAR_PROMO_TOP_PRICE_ID ?? "price_seminar_promo_top_mock",
+    id: process.env.STRIPE_SEMINAR_PROMO_TOP_PRICE_ID ?? "",
     name: "Seminar Promo Top",
     price: 99,
   }

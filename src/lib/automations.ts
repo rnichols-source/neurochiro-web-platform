@@ -9,7 +9,7 @@ import { revalidatePath } from 'next/cache';
 let _resend: Resend | null = null;
 const getResendClient = () => {
   if (!_resend) {
-    _resend = new Resend(process.env.RESEND_API_KEY || 're_mock_key');
+    _resend = new Resend(process.env.RESEND_API_KEY || '');
   }
   return _resend;
 };
