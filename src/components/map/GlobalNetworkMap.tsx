@@ -248,34 +248,39 @@ export default function GlobalNetworkMap({
     }
   }, [mapReady, region.code, listDoctors, initialDoctors]);
 
+  // Build marker data from initialDoctors
+  const buildMarkerData = useCallback(() => {
+    return (initialDoctors || []).map(doc => {
+      const lat = Number(doc.latitude);
+      const lng = Number(doc.longitude);
+
+      if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
+
+      return {
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [lng, lat]
+        },
+        properties: {
+          cluster: false,
+          doctorId: doc.id,
+          name: `Dr. ${doc.first_name || ''} ${doc.last_name || ''}`.trim(),
+          type: 'doctor' as const,
+          isFiltered: listDoctors.length > 0 ? listDoctors.some(ld => ld.id === doc.id) : true
+        }
+      };
+    }).filter((f): f is NonNullable<typeof f> => f !== null);
+  }, [initialDoctors, listDoctors]);
+
   // Re-sync markers when data, layer, or map state changes
+  // Uses retry to handle iframe not being ready on first attempt
   useEffect(() => {
-    if (!iframeRef.current?.contentWindow || !mapReady) return;
+    if (!iframeRef.current?.contentWindow) return;
 
-    const syncMap = () => {
-      // 🛡️ ABSOLUTE PIN FORCE: Send ALL 122 features to iframe, but maybe highlight filtered ones?
-      // For now, let's just send all initialDoctors to satisfy the "Show all 122" request.
-      const dataToSend = (initialDoctors || []).map(doc => {
-        const lat = Number(doc.latitude);
-        const lng = Number(doc.longitude);
-        
-        if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
-
-        return {
-          type: 'Feature' as const,
-          geometry: { 
-            type: 'Point' as const, 
-            coordinates: [lng, lat] 
-          },
-          properties: { 
-            cluster: false, 
-            doctorId: doc.id, 
-            name: `Dr. ${doc.last_name || ''}`, 
-            type: 'doctor' as const,
-            isFiltered: listDoctors.some(ld => ld.id === doc.id)
-          }
-        };
-      }).filter((f): f is NonNullable<typeof f> => f !== null);
+    const sendMarkers = () => {
+      const dataToSend = buildMarkerData();
+      if (dataToSend.length === 0) return;
 
       console.log('[MAP_PARENT] SYNCING ALL MARKERS:', dataToSend.length);
 
@@ -286,9 +291,15 @@ export default function GlobalNetworkMap({
       }, '*');
     };
 
-    const timer = setTimeout(syncMap, 2000);
-    return () => clearTimeout(timer);
-  }, [initialDoctors, listDoctors, mapReady, activeLayer]);
+    // Send immediately, then retry a few times to handle iframe race condition
+    if (mapReady) {
+      sendMarkers();
+    }
+    const t1 = setTimeout(sendMarkers, 1500);
+    const t2 = setTimeout(sendMarkers, 3500);
+    const t3 = setTimeout(sendMarkers, 6000);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, [initialDoctors, listDoctors, mapReady, activeLayer, buildMarkerData]);
 
   // Handle iframe messages
   useEffect(() => {
