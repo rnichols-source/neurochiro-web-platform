@@ -13,7 +13,7 @@ export async function getDoctorDashboardStats() {
     // Parallelize fetches for profile, practice info, seminars, jobs, and leads
     const [profileRes, doctorRes, seminarsRes, jobsRes, leadsRes] = await Promise.all([
       supabase.from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
-      supabase.from('doctors').select('clinic_name, slug, city, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count, membership_tier').eq('user_id', user.id).single(),
+      supabase.from('doctors').select('clinic_name, slug, city, state, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count, membership_tier').eq('user_id', user.id).single(),
       supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
       supabase.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
       supabase.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id)
@@ -26,27 +26,18 @@ export async function getDoctorDashboardStats() {
     const patientLeads = leadsRes.count || 0;
     const profileViews = (doctor as any)?.profile_views || 0;
 
-    // 3. Robust Profile Completeness Calculation
-    let completeness = 0;
-    const weights = {
-      clinic_name: 10,
-      city: 10,
-      bio: 20,
-      photo_url: 20,
-      specialties: 10,
-      website_url: 10,
-      instagram_url: 10,
-      facebook_url: 10
-    };
-
-    if (doctor?.clinic_name) completeness += weights.clinic_name;
-    if (doctor?.city) completeness += weights.city;
-    if (doctor?.bio && doctor.bio.length > 50) completeness += weights.bio;
-    if (doctor?.photo_url) completeness += weights.photo_url;
-    if (doctor?.specialties && doctor.specialties.length > 0) completeness += weights.specialties;
-    if (doctor?.website_url) completeness += weights.website_url;
-    if (doctor?.instagram_url) completeness += weights.instagram_url;
-    if (doctor?.facebook_url) completeness += weights.facebook_url;
+    // 3. Profile Completeness Calculation (specific weights per item)
+    const completenessItems = [
+      { key: 'photo', label: 'Upload a profile photo', weight: 20, done: !!doctor?.photo_url },
+      { key: 'bio', label: 'Write a bio (50+ characters)', weight: 20, done: !!(doctor?.bio && doctor.bio.length >= 50) },
+      { key: 'clinic_name', label: 'Add your clinic name', weight: 15, done: !!doctor?.clinic_name },
+      { key: 'specialties', label: 'Add at least one specialty', weight: 15, done: !!(doctor?.specialties && doctor.specialties.length > 0) },
+      { key: 'location', label: 'Fill in city and state', weight: 10, done: !!(doctor?.city && doctor?.state) },
+      { key: 'website', label: 'Add your website URL', weight: 10, done: !!doctor?.website_url },
+      { key: 'socials', label: 'Add a social media link', weight: 10, done: !!(doctor?.instagram_url || doctor?.facebook_url) },
+    ];
+    const completeness = completenessItems.filter(i => i.done).reduce((sum, i) => sum + i.weight, 0);
+    const missingItems = completenessItems.filter(i => !i.done);
 
     const userRole = profile?.role || 'doctor';
     const membershipTier = doctor?.membership_tier || 'starter';
@@ -77,6 +68,27 @@ export async function getDoctorDashboardStats() {
       }
     ] : [];
 
+    // Build tier-specific feature flags (server-enforced)
+    const tierFeatures = {
+      // Starter: basic stats only
+      profileViews: true,
+      contactClicks: true,
+      // Growth+: recruiting, verified badge, vendor discounts, basic ROI, job posting
+      studentSearch: isGrowth,
+      verifiedBadgeEmbed: isGrowth,
+      vendorDiscounts: isGrowth,
+      roiBasicAttribution: isGrowth,
+      jobPosting: isGrowth,
+      maxJobPosts: isPro ? 999 : isGrowth ? 5 : 0,
+      // Pro only: AI bio, full ROI, priority placement, seminar campaigns, student messaging
+      aiBioGenerator: isPro,
+      roiFullAttribution: isPro,
+      priorityPlacement: isPro,
+      seminarCampaigns: isPro,
+      studentMessaging: isPro,
+      unlimitedJobs: isPro,
+    };
+
     return {
       profile: {
         name: profile?.full_name || user.email?.split('@')[0] || "Doctor",
@@ -89,6 +101,7 @@ export async function getDoctorDashboardStats() {
         tier: membershipTier,
         status: membershipTier !== 'starter' ? 'active' : 'starter'
       },
+      tierFeatures,
       vendorOffers,
       doctor: {
         city: doctor?.city || "your city"
@@ -96,14 +109,30 @@ export async function getDoctorDashboardStats() {
       stats: [
         { label: "Profile Views", value: profileViews.toLocaleString(), trend: profileViews > 0 ? "+100%" : "0%" },
         { label: "Patient Leads", value: patientLeads.toString(), trend: patientLeads > 0 ? "+100%" : "0%" },
-        { label: "Seminar Clicks", value: (seminarCount * 1).toLocaleString(), trend: "0%" },
-        { label: "Job Applications", value: (jobCount * 1).toString(), trend: "0%" }
+        ...(isGrowth ? [
+          { label: "Seminar Registrations", value: seminarCount.toLocaleString(), trend: "0%" },
+          { label: "Job Applications", value: jobCount.toString(), trend: "0%" }
+        ] : [])
       ],
       marketPerformance: {
-        completeness: completeness,
+        completeness,
+        completenessItems: completenessItems.map(i => ({ label: i.label, weight: i.weight, done: i.done })),
+        missingItems: missingItems.map(i => i.label),
         reviews: (doctor as any)?.review_count || 0,
         engagement: profileViews > 50 ? 90 : profileViews > 10 ? 60 : profileViews > 0 ? 30 : 0
-      }
+      },
+      // Starter upsell data
+      starterUpsell: membershipTier === 'starter' ? {
+        missingFeatures: [
+          "Student recruiting & search",
+          "Verified badge for your website",
+          "Vendor partner discounts",
+          "ROI analytics dashboard",
+          "Job posting (up to 5 listings)",
+        ],
+        upgradeTier: 'growth' as const,
+        upgradePrice: 99,
+      } : null,
     }
   } catch (e) {
     console.error("CRITICAL DASHBOARD ERROR:", e)
@@ -128,14 +157,14 @@ export async function getDoctorROIData(period: string = '30d') {
   try {
     // 1. Parallelize fetches for profile, stats, and leads
     const [profileRes, doctorRes, leadsRes, confirmedRes, analyticsRes] = await Promise.all([
-      supabase.from('profiles').select('tier, role').eq('id', user.id).single(),
-      supabase.from('doctors').select('profile_views, patient_leads, average_case_value').eq('user_id', user.id).single(),
+      supabase.from('profiles').select('role').eq('id', user.id).single(),
+      supabase.from('doctors').select('profile_views, patient_leads, average_case_value, membership_tier').eq('user_id', user.id).single(),
       supabase.from('leads').select('*').eq('doctor_id', user.id).is('confirmed_at', null),
       supabase.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id).not('confirmed_at', 'is', null),
       supabase.from('analytics_events').select('*').eq('doctor_id', user.id)
     ]);
 
-    const tier = (profileRes.data as any)?.tier || 'starter';
+    const tier = doctorRes.data?.membership_tier || 'starter';
     const isStarter = tier === 'starter';
     const membershipCost = tier === 'pro' ? 199 : tier === 'growth' ? 99 : 49;
     const averageCaseValue = Number((doctorRes.data as any)?.average_case_value) || 2500;

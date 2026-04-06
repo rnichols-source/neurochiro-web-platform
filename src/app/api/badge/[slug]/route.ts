@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createAdminClient } from '@/lib/supabase-admin';
 
 export async function GET(
   request: NextRequest,
@@ -6,22 +7,44 @@ export async function GET(
 ) {
   const { slug } = await params;
 
-  // Optimized SVG Badge
-  const svg = `
-    <svg width="150" height="150" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="75" cy="75" r="70" fill="#0B1118" stroke="#D66829" stroke-width="4"/>
-      <path d="M75 35L81.1226 47.4067L94.8176 49.4019L84.9088 59.0533L87.2475 72.6881L75 66.25L62.7525 72.6881L65.0912 59.0533L55.1824 49.4019L68.8774 47.4067L75 35Z" fill="#D66829"/>
-      <text x="75" y="95" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="900" font-size="12" style="text-transform:uppercase;letter-spacing:1px;">Verified</text>
-      <text x="75" y="112" text-anchor="middle" fill="#D66829" font-family="Arial, sans-serif" font-weight="900" font-size="14" style="text-transform:uppercase;letter-spacing:2px;">Provider</text>
-      <text x="75" y="130" text-anchor="middle" fill="#4B5563" font-family="Arial, sans-serif" font-weight="bold" font-size="8" style="text-transform:uppercase;letter-spacing:1px;">NeuroChiro.com</text>
-      <path d="M100 75C100 88.8071 88.8071 100 75 100C61.1929 100 50 88.8071 50 75" stroke="#D66829" stroke-width="1" stroke-dasharray="2 2" opacity="0.3"/>
-    </svg>
-  `.trim();
+  // Verify the doctor exists and has Growth+ tier
+  const supabase = createAdminClient();
+  const { data: doctor } = await supabase
+    .from('doctors')
+    .select('first_name, last_name, membership_tier, verification_status')
+    .eq('slug', slug)
+    .single();
+
+  if (!doctor || doctor.verification_status !== 'verified') {
+    return new NextResponse('Doctor not found', { status: 404 });
+  }
+
+  const isEligible = doctor.membership_tier === 'growth' || doctor.membership_tier === 'pro';
+  const doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`;
+  const tierLabel = doctor.membership_tier === 'pro' ? 'PRO' : 'VERIFIED';
+
+  // Generate the SVG badge
+  const badgeColor = doctor.membership_tier === 'pro' ? '#D66829' : '#3B82F6';
+
+  const svg = `<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="60" rx="12" fill="#0B1118"/>
+  <rect x="1" y="1" width="198" height="58" rx="11" stroke="${badgeColor}" stroke-width="2"/>
+  ${isEligible ? `
+  <circle cx="30" cy="30" r="16" fill="${badgeColor}" fill-opacity="0.15"/>
+  <path d="M30 18L32.5 23.1L38.2 23.9L34.1 27.9L35 33.6L30 31L25 33.6L25.9 27.9L21.8 23.9L27.5 23.1L30 18Z" fill="${badgeColor}"/>
+  <text x="52" y="27" fill="white" font-family="system-ui,-apple-system,sans-serif" font-weight="800" font-size="11" letter-spacing="0.5">${tierLabel} PROVIDER</text>
+  <text x="52" y="43" fill="#9CA3AF" font-family="system-ui,-apple-system,sans-serif" font-weight="600" font-size="9" letter-spacing="0.3">NeuroChiro Directory</text>
+  ` : `
+  <circle cx="30" cy="30" r="16" fill="#374151" fill-opacity="0.3"/>
+  <text x="52" y="27" fill="#6B7280" font-family="system-ui,-apple-system,sans-serif" font-weight="800" font-size="11" letter-spacing="0.5">LISTED PROVIDER</text>
+  <text x="52" y="43" fill="#4B5563" font-family="system-ui,-apple-system,sans-serif" font-weight="600" font-size="9" letter-spacing="0.3">NeuroChiro Directory</text>
+  `}
+</svg>`.trim();
 
   return new NextResponse(svg, {
     headers: {
       'Content-Type': 'image/svg+xml',
-      'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
     },
   });
 }

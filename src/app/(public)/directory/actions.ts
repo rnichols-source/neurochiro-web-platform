@@ -65,15 +65,19 @@ export async function getDoctors(options: {
         .lte('latitude', bounds[3]);
     }
 
-    // Improved ordering: Priority to Pro, then Growth, then Starter
+    // Fetch with pagination
     const { data, error, count } = await query
-      .order('membership_tier', { ascending: false }) // This puts 'starter' last but 'pro' and 'growth' order depends on names.
-      // Better to use an explicit priority if possible, but for now we'll stick to a more robust fallback
       .range((page - 1) * limit, page * limit - 1);
 
     if (error) {
       console.error("[DIRECTORY_ACTION] Database Error:", error);
       return { doctors: [], total: 0, error: true };
+    }
+
+    // Priority sort: Pro first, then Growth, then Starter
+    const tierPriority: Record<string, number> = { pro: 1, growth: 2, starter: 3 };
+    if (data) {
+      data.sort((a, b) => (tierPriority[a.membership_tier] || 3) - (tierPriority[b.membership_tier] || 3));
     }
 
     // FALLBACK: If specific search/region returns nothing, return a subset of verified doctors

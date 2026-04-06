@@ -2,6 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
+import { requireTier } from '@/lib/tier'
 
 export async function getDoctorProfile() {
   try {
@@ -155,19 +156,68 @@ export async function updateNotificationPreferences(preferences: any) {
 
 export async function generateAIProfileBio(clinicName: string, currentBio: string) {
   try {
+    await requireTier('growth'); // AI Bio requires Growth or Pro
+
     const supabase = createServerSupabase()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: "Unauthorized" }
 
-    // In a real production app, you would call the Gemini API here.
-    // For now, we simulate a high-converting "Patient Magnet" bio.
-    
-    const generatedBio = `At ${clinicName || 'our clinic'}, we specialize in nervous-system-first chiropractic care designed to restore clinical certainty and peak performance. Our approach goes beyond symptoms, utilizing objective scanning technology to map your neural integrity and architect a customized path to health. Join our community of patients who have unlocked a higher standard of living through precise, data-driven neurological adjustments. ${currentBio ? '\n\n' + currentBio : ''}`;
+    // Fetch doctor profile data for context
+    const { data: doctor } = await supabase
+      .from('doctors')
+      .select('first_name, last_name, city, state, specialties')
+      .eq('user_id', user.id)
+      .single()
 
-    return { success: true, bio: generatedBio }
+    const doctorName = doctor ? `Dr. ${doctor.first_name} ${doctor.last_name}` : 'The doctor'
+    const location = [doctor?.city, doctor?.state].filter(Boolean).join(', ')
+    const specialties = doctor?.specialties?.join(', ') || 'nervous system chiropractic'
+
+    const apiKey = process.env.ANTHROPIC_API_KEY
+    if (!apiKey) {
+      return { error: "AI service is not configured. Please contact support." }
+    }
+
+    const Anthropic = (await import('@anthropic-ai/sdk')).default
+    const client = new Anthropic({ apiKey })
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 400,
+      messages: [{
+        role: 'user',
+        content: `Write a professional 150-200 word bio for a chiropractor's directory profile. Write in third person.
+
+Doctor: ${doctorName}
+Clinic: ${clinicName || 'their practice'}
+Location: ${location || 'United States'}
+Specialties: ${specialties}
+${currentBio ? `Current bio to improve upon: ${currentBio}` : ''}
+
+Requirements:
+- Emphasize nervous system chiropractic and neurological focus
+- Professional but warm and approachable tone
+- Mention their location naturally
+- Reference their specific specialties
+- Include a call-to-action for patients to schedule a visit
+- Do NOT use phrases like "cutting-edge" or "holistic"
+- Do NOT start with "Dr. [Name] is a..."
+- Start with something compelling about their approach or philosophy
+- Keep it between 150-200 words
+
+Return ONLY the bio text, no quotes or formatting.`
+      }]
+    })
+
+    const bioText = message.content[0].type === 'text' ? message.content[0].text : ''
+
+    return { success: true, bio: bioText.trim() }
   } catch (err: any) {
-    console.error("AI Write error:", err)
-    return { error: err.message }
+    if (err.message?.includes('membership')) {
+      return { error: err.message }
+    }
+    console.error("AI Bio generation error:", err)
+    return { error: "Failed to generate bio. Please try again." }
   }
 }
 

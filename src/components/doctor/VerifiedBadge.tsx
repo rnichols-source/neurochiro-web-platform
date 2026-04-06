@@ -16,8 +16,8 @@ export default function VerifiedBadge({ doctorSlug, doctorName, tier }: Verified
   
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co';
   
-  const embedCode = `<a href="${baseUrl}/directory/${doctorSlug}" target="_blank" rel="noopener noreferrer">
-  <img loading="lazy" decoding="async" src="${baseUrl}/api/badge/${doctorSlug}" alt="Verified NeuroChiro Provider - ${doctorName}" width="150" height="150" style="border:none;" />
+  const embedCode = `<a href="${baseUrl}/directory/${doctorSlug}" target="_blank" rel="noopener noreferrer" style="display:inline-block;">
+  <img loading="lazy" decoding="async" src="${baseUrl}/api/badge/${doctorSlug}" alt="Verified NeuroChiro Provider - ${doctorName}" width="200" height="60" style="border:none;border-radius:12px;" />
 </a>`;
 
   const handleCopy = () => {
