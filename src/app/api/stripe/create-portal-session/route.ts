@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     }
 
     // Get stripe_customer_id from profiles
-    const { data: profile } = await (supabase as any)
+    const { data: profile } = await supabase
       .from("profiles")
       .select("stripe_customer_id")
       .eq("id", user.id)

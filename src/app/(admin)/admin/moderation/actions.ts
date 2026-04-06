@@ -4,6 +4,7 @@ import { createServerSupabase } from '@/lib/supabase-server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
 import { AuditLog } from '@/types/admin';
+import { isFounderEmail } from '@/lib/founder';
 
 export interface ModerationAlert {
   id: string;
@@ -42,13 +43,10 @@ async function checkAdminAuth() {
     .eq('id', user.id)
     .single() as { data: { role: string } | null };
 
-  const userEmail = (user.email || "").toLowerCase();
-  const superuserEmails = ['drray@neurochirodirectory.com', 'raymond@neurochiro.com'];
-  
   // Harden isAdmin logic with metadata fallback and explicit string checks
-  const isAdmin = (profile && 'role' in profile && (profile.role === 'admin' || profile.role === 'founder')) || 
+  const isAdmin = (profile && 'role' in profile && (profile.role === 'admin' || profile.role === 'founder')) ||
                   (user.user_metadata?.role === 'admin' || user.user_metadata?.role === 'founder') ||
-                  superuserEmails.includes(userEmail);
+                  isFounderEmail(user.email);
   
   if (!isAdmin) throw new Error("Forbidden: Admin access required");
   return user;
@@ -69,17 +67,17 @@ export async function getModerationData() {
       { data: pendingDoctorsList },
       { data: recentAuditAlerts }
     ] = await Promise.all([
-      (supabase as any).from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
-      (supabase as any).from('seminars').select('*', { count: 'exact', head: true }).eq('is_approved', false),
-      (supabase as any).from('vendors').select('*', { count: 'exact', head: true }).eq('is_active', false),
-      (supabase as any).from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified'),
-      (supabase as any).from('profiles').select('*', { count: 'exact', head: true }),
-      (supabase as any).from('doctors')
+      supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+      supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('is_approved', false),
+      supabase.from('vendors').select('*', { count: 'exact', head: true }).eq('is_active', false),
+      supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.from('doctors')
         .select('id, first_name, last_name, clinic_name, city, state, created_at, verification_status')
         .eq('verification_status', 'pending')
         .order('created_at', { ascending: false })
         .limit(20),
-      (supabase as any).from('audit_logs')
+      supabase.from('audit_logs')
         .select('*')
         .or('severity.eq.High,severity.eq.Critical')
         .order('created_at', { ascending: false })
@@ -87,13 +85,13 @@ export async function getModerationData() {
     ]);
 
     // 2. Map real audit logs to ModerationAlerts
-    const alerts: ModerationAlert[] = (recentAuditAlerts || []).map((log: AuditLog) => ({
+    const alerts: ModerationAlert[] = (recentAuditAlerts || []).map((log) => ({
       id: log.id,
-      type: log.category,
+      type: log.category as any,
       source: log.user_name || "System",
       reason: log.event,
-      date: log.created_at || log.timestamp,
-      status: log.severity === 'Critical' ? 'Critical' : 'Warning'
+      date: log.created_at,
+      status: (log.severity === 'Critical' ? 'Critical' : 'Warning') as any
     }));
 
     // 3. Dynamic Health Metrics
@@ -153,13 +151,13 @@ export async function moderateDoctor(doctorId: string, action: 'approve' | 'reje
       updateData.verified_at = new Date().toISOString();
     }
 
-    const { data: doctor, error: fetchError } = await (supabase as any)
+    const { data: doctor, error: fetchError } = await supabase
       .from('doctors')
       .select('email, first_name')
       .eq('id', doctorId)
       .single();
 
-    const { error: updateError } = await (supabase as any)
+    const { error: updateError } = await supabase
       .from('doctors')
       .update(updateData)
       .eq('id', doctorId);
@@ -168,7 +166,7 @@ export async function moderateDoctor(doctorId: string, action: 'approve' | 'reje
 
     // Trigger Notification: Welcome to the Network email via Automation Queue
     if (action === 'approve' && doctor?.email) {
-      await (supabase as any).from('automation_queue').insert({
+      await supabase.from('automation_queue').insert({
         event_type: 'send_welcome_email',
         payload: { 
           to: doctor.email, 
@@ -180,7 +178,7 @@ export async function moderateDoctor(doctorId: string, action: 'approve' | 'reje
     }
 
     // Log the action
-    await (supabase as any).from('audit_logs').insert({
+    await supabase.from('audit_logs').insert({
       category: 'MODERATION',
       event: `Doctor ${action.toUpperCase()}: ${doctorId}`,
       user_name: adminUser.email || "Admin",
@@ -204,7 +202,7 @@ export async function resolveAlert(alertId: string, action: 'Dismiss' | 'Escalat
     const user = await checkAdminAuth();
     const supabase = createAdminClient();
     
-    await (supabase as any).from('audit_logs').insert({
+    await supabase.from('audit_logs').insert({
       category: 'SECURITY',
       event: `Moderator ${action}: Incident ${alertId}`,
       user_name: user?.email || "Admin",
@@ -226,7 +224,7 @@ export async function toggleModerationSetting(setting: 'autoApprove' | 'outbound
     
     const supabase = createAdminClient();
 
-    await (supabase as any).from('audit_logs').insert({
+    await supabase.from('audit_logs').insert({
       category: 'SYSTEM',
       event: `Changed Moderation Setting '${setting}' to ${value}`,
       user_name: user?.email || "Admin",
@@ -246,7 +244,7 @@ export async function updateComplianceGuidelines(guidelines: string) {
     const user = await checkAdminAuth();
     const supabase = createAdminClient();
 
-    await (supabase as any).from('audit_logs').insert({
+    await supabase.from('audit_logs').insert({
       category: 'GENERAL',
       event: 'Published new Compliance Guidelines',
       user_name: user?.email || "Admin",

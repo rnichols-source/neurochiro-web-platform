@@ -12,7 +12,7 @@ export async function submitVendorApplication(formData: any) {
 
   try {
     // 1. Update Profile Role
-    const { error: profileError } = await (supabase as any)
+    const { error: profileError } = await supabase
       .from('profiles')
       .update({ role: 'vendor' })
       .eq('id', user.id)
@@ -20,7 +20,7 @@ export async function submitVendorApplication(formData: any) {
     if (profileError) throw profileError
 
     // 2. Fetch existing vendor to avoid overwriting slug or active status
-    const { data: existingVendor } = await (supabase as any)
+    const { data: existingVendor } = await supabase
       .from('vendors')
       .select('slug, is_active, tier')
       .eq('id', user.id)
@@ -31,7 +31,7 @@ export async function submitVendorApplication(formData: any) {
     const isActive = existingVendor ? existingVendor.is_active : false;
     const tier = existingVendor ? existingVendor.tier : 'basic';
     
-    const { error: vendorError } = await (supabase as any)
+    const { error: vendorError } = await supabase
       .from('vendors')
       .upsert({
         id: user.id,
@@ -65,7 +65,7 @@ export async function updateVendorProfile(profileData: any) {
   if (!user) throw new Error("Unauthorized")
 
   try {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('vendors')
       .update({
         name: profileData.companyName,
@@ -93,7 +93,7 @@ export async function updateVendorOffer(offerData: any) {
 
   try {
     // Update the offer fields in the vendors table
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('vendors')
       .update({
         discount_code: offerData.couponCode,

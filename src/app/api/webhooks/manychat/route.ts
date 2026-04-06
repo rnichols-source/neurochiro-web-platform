@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Insert or Update the lead
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('leads')
       .upsert({
         manychat_id: user_id.toString(),

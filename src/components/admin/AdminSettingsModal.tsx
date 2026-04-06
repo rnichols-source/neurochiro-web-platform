@@ -117,7 +117,7 @@ export default function AdminSettingsModal({ isOpen, onClose, onEmergencyLockdow
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">Admin Email</label>
-                      <input className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-neuro-orange transition-all" defaultValue="raymond@neurochiro.com" />
+                      <input className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-neuro-orange transition-all" defaultValue="" placeholder="admin@example.com" />
                     </div>
                   </div>
                 </div>

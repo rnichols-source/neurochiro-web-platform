@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
+import { getSavedDoctors, getSavedJobs, getSavedSeminars, getSavedVendors } from "./actions";
 import { 
   Heart, 
   MapPin, 
@@ -23,15 +24,11 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Live data integration pending for saved detail fetching
-const LIVE_DOCTORS: any[] = [];
-const LIVE_JOBS: any[] = [];
-const LIVE_VENDORS: any[] = [];
-const LIVE_SEMINARS: any[] = [];
-
 export default function SavedPage() {
   const { saved, toggleSave } = useUserPreferences();
   const [activeTab, setActiveTab] = useState<keyof typeof saved>("doctors");
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const tabs = [
     { id: "doctors", label: "Doctors", icon: MapPin, count: saved.doctors.length },
@@ -41,22 +38,27 @@ export default function SavedPage() {
     { id: "articles", label: "Articles", icon: BookOpen, count: saved.articles.length },
   ];
 
-  const getSavedItems = () => {
-    switch (activeTab) {
-      case "doctors":
-        return LIVE_DOCTORS.filter(d => saved.doctors.includes(d.id));
-      case "jobs":
-        return LIVE_JOBS.filter(j => saved.jobs.includes(j.id));
-      case "vendors":
-        return LIVE_VENDORS.filter(v => saved.vendors.includes(v.id));
-      case "seminars":
-        return LIVE_SEMINARS.filter(s => saved.seminars.includes(s.id));
-      default:
-        return [];
+  useEffect(() => {
+    async function fetchItems() {
+      setLoading(true);
+      try {
+        const ids = saved[activeTab] || [];
+        if (ids.length === 0) { setItems([]); setLoading(false); return; }
+        let data: any[] = [];
+        if (activeTab === 'doctors') data = await getSavedDoctors(ids);
+        else if (activeTab === 'jobs') data = await getSavedJobs(ids);
+        else if (activeTab === 'seminars') data = await getSavedSeminars(ids);
+        else if (activeTab === 'vendors') data = await getSavedVendors(ids);
+        setItems(data);
+      } catch {
+        setItems([]);
+      }
+      setLoading(false);
     }
-  };
+    fetchItems();
+  }, [activeTab, saved]);
 
-  const currentItems = getSavedItems();
+  const currentItems = items;
 
   return (
     <div className="space-y-10 pb-20">

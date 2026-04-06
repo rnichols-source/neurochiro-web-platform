@@ -8,8 +8,9 @@ const SEARCHABLE_LOCATION_COLUMNS = ['city', 'state', 'address'];
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get('q') || '';
-  const location = searchParams.get('location') || '';
+  // Sanitize inputs: remove characters that could break PostgREST filter syntax
+  const query = (searchParams.get('q') || '').replace(/[%_(),.*\\]/g, '').trim();
+  const location = (searchParams.get('location') || '').replace(/[%_(),.*\\]/g, '').trim();
   const region = searchParams.get('region') || ''; // This is Country Code (US/AU)
   const limit = parseInt(searchParams.get('limit') || '20');
   
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
   try {
     const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, latitude, longitude, bio, specialties, region_code, address';
     
-    let dbQuery = (supabase as any)
+    let dbQuery = supabase
       .from('doctors')
       .select(selectFields, { count: 'exact' })
       .eq('verification_status', 'verified');
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
       console.log("[SEARCH_API] No results or error, triggered FALLBACK FETCH (Location Ignored)");
       
       // [FALLBACK FIX]: Ignore location filter entirely for fallback
-      let fallbackQuery = (supabase as any)
+      let fallbackQuery = supabase
         .from('doctors')
         .select(selectFields)
         .or('membership_tier.eq.pro,verification_status.eq.verified')
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
     console.error("[SEARCH_API] Critical Error:", err);
     
     // Emergency Fallback on total crash
-    const { data: emergencyData } = await (supabase as any)
+    const { data: emergencyData } = await supabase
       .from('doctors')
       .select('id, first_name, last_name, clinic_name, slug, city, state, country')
       .eq('verification_status', 'verified')

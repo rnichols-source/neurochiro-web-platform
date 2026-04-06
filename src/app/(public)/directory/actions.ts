@@ -1,11 +1,5 @@
 'use server'
 
-/**
- * SCHEMA PROTECTION:
- * DO NOT add photo_url, zip_code, or rating columns to selection fields 
- * unless they are first verified to exist in the Supabase Schema.
- */
-
 import { createServerSupabase } from '@/lib/supabase-server'
 import { Doctor } from '@/types/directory'
 import { unstable_noStore as noStore, revalidatePath } from 'next/cache'
@@ -29,7 +23,7 @@ export async function getDoctors(options: {
     // Removed: email, website_url, instagram_url, facebook_url, address (private-ish)
     const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, zip_code, verification_status, membership_tier, latitude, longitude, bio, specialties, region_code';
     
-    let query = (supabase as any)
+    let query = supabase
       .from('doctors')
       .select(selectFields, { count: 'exact' })
       .in('verification_status', ['verified', 'pending']);
@@ -39,14 +33,27 @@ export async function getDoctors(options: {
     }
 
     if (searchQuery && searchQuery.trim()) {
-      const cleanQuery = searchQuery.trim();
+      // Sanitize: remove characters that could break the PostgREST filter syntax
+      const cleanQuery = searchQuery.trim().replace(/[%_(),.*\\]/g, '');
+      if (!cleanQuery) return { doctors: [], total: 0 };
+
       // Handle State Abbreviation (e.g. NJ -> New Jersey)
       const stateMap: Record<string, string> = {
         'NJ': 'New Jersey', 'NY': 'New York', 'TX': 'Texas', 'CA': 'California', 'FL': 'Florida',
-        'PA': 'Pennsylvania', 'IL': 'Illinois', 'OH': 'Ohio', 'GA': 'Georgia', 'NC': 'North Carolina'
+        'PA': 'Pennsylvania', 'IL': 'Illinois', 'OH': 'Ohio', 'GA': 'Georgia', 'NC': 'North Carolina',
+        'MI': 'Michigan', 'AZ': 'Arizona', 'WA': 'Washington', 'MA': 'Massachusetts', 'TN': 'Tennessee',
+        'IN': 'Indiana', 'MO': 'Missouri', 'MD': 'Maryland', 'WI': 'Wisconsin', 'CO': 'Colorado',
+        'MN': 'Minnesota', 'SC': 'South Carolina', 'AL': 'Alabama', 'LA': 'Louisiana', 'KY': 'Kentucky',
+        'OR': 'Oregon', 'OK': 'Oklahoma', 'CT': 'Connecticut', 'UT': 'Utah', 'IA': 'Iowa',
+        'NV': 'Nevada', 'AR': 'Arkansas', 'MS': 'Mississippi', 'KS': 'Kansas', 'NM': 'New Mexico',
+        'NE': 'Nebraska', 'ID': 'Idaho', 'WV': 'West Virginia', 'HI': 'Hawaii', 'NH': 'New Hampshire',
+        'ME': 'Maine', 'MT': 'Montana', 'RI': 'Rhode Island', 'DE': 'Delaware', 'SD': 'South Dakota',
+        'ND': 'North Dakota', 'AK': 'Alaska', 'VT': 'Vermont', 'WY': 'Wyoming', 'DC': 'District of Columbia',
+        'VA': 'Virginia'
       };
       const expandedQuery = stateMap[cleanQuery.toUpperCase()] || cleanQuery;
 
+      // Search across name, clinic, location, and specialties (text cast for partial matching)
       query = query.or(`first_name.ilike.%${cleanQuery}%,last_name.ilike.%${cleanQuery}%,clinic_name.ilike.%${cleanQuery}%,city.ilike.%${cleanQuery}%,state.ilike.%${expandedQuery}%,zip_code.ilike.%${cleanQuery}%,specialties::text.ilike.%${cleanQuery}%,address.ilike.%${cleanQuery}%`);
     }
 
@@ -71,7 +78,7 @@ export async function getDoctors(options: {
 
     // FALLBACK: If specific search/region returns nothing, return a subset of verified doctors
     if ((!data || data.length === 0) && (regionCode || searchQuery)) {
-       const { data: fallbackData, count: fallbackCount } = await (supabase as any)
+       const { data: fallbackData, count: fallbackCount } = await supabase
          .from('doctors')
          .select(selectFields, { count: 'exact' })
          .eq('verification_status', 'verified')
@@ -107,7 +114,7 @@ export async function getDoctorBySlug(slug: string) {
   const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email, website_url, instagram_url, facebook_url, user_id';
   
   try {
-    let { data, error } = await (supabase as any)
+    let { data, error } = await supabase
       .from('doctors')
       .select(selectFields)
       .eq('slug', slug)
@@ -119,7 +126,7 @@ export async function getDoctorBySlug(slug: string) {
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
       
       if (isUuid) {
-          const { data: byId, error: errorId } = await (supabase as any)
+          const { data: byId, error: errorId } = await supabase
               .from('doctors')
               .select(selectFields)
               .eq('id', slug)
@@ -148,7 +155,7 @@ export async function getDoctorBySlug(slug: string) {
 export async function incrementDoctorViews(slug: string) {
   const supabase = createServerSupabase();
   try {
-    await (supabase as any).rpc('increment_doctor_views', { doctor_slug: slug });
+    await supabase.rpc('increment_doctor_views', { doctor_slug: slug });
   } catch (e) {
     // Masked internally
   }
@@ -163,9 +170,9 @@ export async function getStudentsForMap(options: {
   const supabase = createServerSupabase();
   try {
     // Only fetch minimal public student data for the map
-    let query = (supabase as any)
+    let query = supabase
       .from('students')
-      .select('id, school, location_city, latitude, longitude')
+      .select('id, full_name, school, graduation_year, location_city, latitude, longitude')
       .not('latitude', 'is', null)
       .not('longitude', 'is', null)
       .limit(limit);

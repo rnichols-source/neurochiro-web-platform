@@ -6,14 +6,10 @@ import { revalidatePath } from 'next/cache'
 
 export async function getJobs(regionCode?: string, page: number = 1, limit: number = 20) {
   const supabase = createServerSupabase()
-  let query = (supabase as any)
-    .from('jobs')
-    .select('*, doctors(clinic_name)')
+  let query = supabase
+    .from('job_postings')
+    .select('*')
     .eq('status', 'open')
-  
-  if (regionCode) {
-    query = query.eq('region_code', regionCode)
-  }
 
   const from = (page - 1) * limit;
   const to = from + limit - 1;
@@ -21,27 +17,35 @@ export async function getJobs(regionCode?: string, page: number = 1, limit: numb
 
   const { data, error } = await query
   if (error) throw error
-  return data
+
+  // Fetch clinic names for each job's doctor
+  if (data && data.length > 0) {
+    const doctorIds = [...new Set(data.map(j => j.doctor_id))]
+    const { data: doctors } = await supabase
+      .from('doctors')
+      .select('user_id, clinic_name')
+      .in('user_id', doctorIds)
+
+    const clinicMap = new Map((doctors || []).map(d => [d.user_id, d.clinic_name]))
+    return data.map(j => ({ ...j, clinic_name: clinicMap.get(j.doctor_id) || '' }))
+  }
+
+  return data || []
 }
 
 export async function postJob(formData: FormData) {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   if (!user) throw new Error("Unauthorized")
 
-  const jobData = {
+  const { data, error } = await supabase.from('job_postings').insert({
     doctor_id: user.id,
     title: formData.get('title') as string,
     description: formData.get('description') as string,
-    location: formData.get('location') as string,
     type: formData.get('type') as string,
-    salary_range: formData.get('salary_range') as string,
-    region_code: formData.get('region_code') as string || 'US',
     status: 'open'
-  }
-
-  const { data, error } = await (supabase as any).from('jobs').insert(jobData).select().single()
+  }).select().single()
   if (error) throw error
 
   revalidatePath('/jobs')
@@ -52,34 +56,40 @@ export async function postJob(formData: FormData) {
 export async function applyForJob(jobId: string) {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   if (!user) throw new Error("Unauthorized")
 
-  // 1. Insert Application
-  const { data: jobInfo } = await (supabase as any)
-    .from('jobs')
-    .select('title, doctor_id, profiles!doctor_id(email)')
+  // 1. Get job info
+  const { data: jobInfo } = await supabase
+    .from('job_postings')
+    .select('title, doctor_id')
     .eq('id', jobId)
     .single();
 
-  const { error } = await (supabase as any).from('job_applications').insert({
+  // 2. Get doctor's email
+  const { data: doctorProfile } = await supabase
+    .from('profiles')
+    .select('email')
+    .eq('id', jobInfo?.doctor_id || '')
+    .single();
+
+  // 3. Insert Application
+  const { error } = await supabase.from('job_applications').insert({
     job_id: jobId,
     applicant_id: user.id,
-    status: 'pending'
   });
 
   if (error) throw error;
 
-  // 2. Trigger Automation (Email to Applicant AND Doctor)
-  const doctorEmail = (jobInfo?.profiles as any)?.email;
+  // 4. Trigger Automation
   const jobTitle = jobInfo?.title || 'Unknown Position';
 
   await Automations.onJobApplication(
-    user.id, 
-    user.email || 'applicant@example.com', 
-    jobId, 
+    user.id,
+    user.email || 'applicant@example.com',
+    jobId,
     jobTitle,
-    doctorEmail || 'support@neurochirodirectory.com'
+    doctorProfile?.email || 'support@neurochirodirectory.com'
   );
 
   return { success: true };

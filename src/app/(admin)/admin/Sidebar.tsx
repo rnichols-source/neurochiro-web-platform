@@ -61,6 +61,7 @@ interface SidebarProps {
 }
 
 import { createClient } from "@/lib/supabase";
+import { isFounderEmail } from "@/lib/founder";
 
 export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProps) {
   const pathname = usePathname();
@@ -92,7 +93,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
         
         let role = profile?.role || 'admin';
         // 🛡️ MASTER FOUNDER OVERRIDE
-        if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com') {
+        if (isFounderEmail(user.email)) {
           role = 'founder';
         }
         setUserRole(role);

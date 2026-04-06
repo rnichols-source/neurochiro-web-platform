@@ -12,7 +12,7 @@ export async function getJobPostings() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('job_postings')
     .select(`
       *,
@@ -34,7 +34,7 @@ export async function createJobPosting(formData: any) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('job_postings')
     .insert({
       doctor_id: user.id,
@@ -67,7 +67,7 @@ export async function getApplications(jobId?: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  let query = (supabase as any)
+  let query = supabase
     .from('applications')
     .select(`
       *,
@@ -116,7 +116,7 @@ export async function updateApplicationStage(applicationId: string, stage: strin
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('applications')
     .update({ stage, updated_at: new Date().toISOString() })
     .eq('id', applicationId)
@@ -130,7 +130,7 @@ export async function updateApplicationStage(applicationId: string, stage: strin
 
   // If stage is 'Interview', we can trigger an automation
   if (stage === 'Interview') {
-    const { data: candidateProfile } = await (supabase as any)
+    const { data: candidateProfile } = await supabase
         .from('profiles')
         .select('email, full_name')
         .eq('id', data.candidate_id)
@@ -151,7 +151,7 @@ export async function updateApplicationStage(applicationId: string, stage: strin
 export async function getMarketBenchmarks(roleType: string = 'Associate', regionCode: string = 'DEFAULT') {
   const supabase = createServerSupabase();
   
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('market_benchmarks')
     .select('*')
     .eq('role_type', roleType)
@@ -160,7 +160,7 @@ export async function getMarketBenchmarks(roleType: string = 'Associate', region
 
   if (error) {
     // Try to get default if region specific not found
-    const { data: defaultData } = await (supabase as any)
+    const { data: defaultData } = await supabase
       .from('market_benchmarks')
       .select('*')
       .eq('role_type', roleType)
@@ -182,7 +182,7 @@ export async function getTalentRecommendations(jobId: string) {
   const supabase = createServerSupabase();
   
   // 1. Get Job Requirements
-  const { data: job } = await (supabase as any)
+  const { data: job } = await supabase
     .from('job_postings')
     .select('requirements, type')
     .eq('id', jobId)
@@ -193,7 +193,7 @@ export async function getTalentRecommendations(jobId: string) {
   const jobRequirements = job.requirements || [];
 
   // 2. Get Candidates (filtering by type if relevant, here using students as potential Associates)
-  const { data: candidates, error } = await (supabase as any)
+  const { data: candidates, error } = await supabase
     .from('students')
     .select(`
         user_id,
@@ -238,8 +238,8 @@ export async function generateDreamPitch(candidateId: string, jobId: string) {
   const supabase = createServerSupabase();
   
   const [candidateRes, jobRes] = await Promise.all([
-    (supabase as any).from('students').select('*').eq('user_id', candidateId).single(),
-    (supabase as any).from('job_postings').select('*, doctor:doctors(clinic_name)').eq('id', jobId).single()
+    supabase.from('students').select('*').eq('user_id', candidateId).single(),
+    supabase.from('job_postings').select('*').eq('id', jobId).single()
   ]);
 
   const candidate = candidateRes.data;
@@ -247,12 +247,16 @@ export async function generateDreamPitch(candidateId: string, jobId: string) {
 
   if (!candidate || !job) return "Failed to generate pitch. Missing data.";
 
-  // In a real production app, you would call Gemini API here.
-  // Using the server-side logic to simulate a high-quality AI response.
-  
+  // Fetch the doctor's clinic name
+  const { data: doctor } = await supabase
+    .from('doctors')
+    .select('clinic_name')
+    .eq('user_id', job.doctor_id)
+    .single();
+
   const firstName = candidate.full_name?.split(' ')[0] || 'Doctor';
   const school = candidate.school || 'your chiropractic college';
-  const clinic = job.doctor?.clinic_name || 'our practice';
+  const clinic = doctor?.clinic_name || 'our practice';
   const title = job.title;
 
   // Simulate Gemini prompt response

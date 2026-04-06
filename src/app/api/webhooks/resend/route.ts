@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     switch (eventType) {
       case "email.bounced":
         console.warn(`[REPUTATION ALERT] Email bounced for: ${email}`);
-        await (supabase as any)
+        await supabase
           .from('email_preferences')
           .update({ has_bounced: true, updated_at: new Date().toISOString() })
           .eq('user_id', (await getUserIdFromEmail(email, supabase)));
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
       case "email.complained":
         console.warn(`[REPUTATION ALERT] User marked email as SPAM: ${email}`);
-        await (supabase as any)
+        await supabase
           .from('email_preferences')
           .update({ has_complained: true, updated_at: new Date().toISOString() })
           .eq('user_id', (await getUserIdFromEmail(email, supabase)));
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 }
 
 async function getUserIdFromEmail(email: string, supabase: any) {
-  const { data } = await (supabase as any)
+  const { data } = await supabase
     .from('profiles')
     .select('id')
     .eq('email', email)

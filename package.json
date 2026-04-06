@@ -11,9 +11,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.0.0",
     "@radix-ui/react-slot": "^1.2.4",
-    "@sanity/client": "^6.0.0",
     "@sentry/nextjs": "^10.44.0",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.98.0",

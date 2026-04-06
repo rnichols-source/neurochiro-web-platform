@@ -17,7 +17,7 @@ export async function sendBroadcastAction(formData: FormData) {
   if (!user) return { error: "Unauthorized" };
 
   // 2. Fetch Users based on segment
-  let query = (supabase as any).from("profiles").select(`
+  let query = supabase.from("profiles").select(`
     id, 
     email, 
     full_name,
@@ -79,7 +79,7 @@ export async function sendBroadcastAction(formData: FormData) {
     }
 
     // 4. Save Campaign History & Admin Audit Log
-    await (supabase as any).from("campaigns").insert({
+    await supabase.from("campaigns").insert({
       subject,
       body_html: bodyHtml,
       segment_targeted: segment,
@@ -89,7 +89,7 @@ export async function sendBroadcastAction(formData: FormData) {
       sent_at: new Date().toISOString()
     });
 
-    await (supabase as any).from("audit_logs").insert({
+    await supabase.from("audit_logs").insert({
       category: 'COMMUNICATION',
       event: `Global Broadcast: ${subject}`,
       user_name: user.email || "Admin",

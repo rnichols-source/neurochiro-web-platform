@@ -9,26 +9,21 @@ const BASE_URL = 'https://neurochiro.com';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createServerSupabase();
 
-  // 1. Fetch all verified doctors for dynamic routes
   const { data: doctors } = await supabase
     .from('doctors')
     .select('slug, updated_at')
     .eq('verification_status', 'verified');
 
-  // 2. Fetch all active seminars
   const { data: seminars } = await supabase
     .from('seminars')
-    .select('id, updated_at')
-    .eq('is_approved', true)
-    .eq('is_past', false);
+    .select('id, created_at')
+    .eq('is_approved', true);
 
-  // Static routes
   const routes = [
     '',
     '/directory',
     '/seminars',
     '/marketplace',
-    '/programs/mastermind',
     '/nervous-system',
     '/learn',
     '/pricing',
@@ -41,7 +36,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === '' ? 1 : 0.8,
   }));
 
-  // Regional routes
   const regionalRoutes = Object.keys(REGIONS).map((code) => ({
     url: `${BASE_URL}/directory/locations/${code.toLowerCase()}`,
     lastModified: new Date().toISOString(),
@@ -49,18 +43,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  // Dynamic doctor routes
-  const doctorRoutes = (doctors || []).map((doctor: { slug: string; updated_at: string | null }) => ({
+  const doctorRoutes = (doctors || []).map((doctor) => ({
     url: `${BASE_URL}/directory/${doctor.slug}`,
     lastModified: doctor.updated_at || new Date().toISOString(),
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }));
 
-  // Dynamic seminar routes
-  const seminarRoutes = (seminars || []).map((seminar: { id: string; updated_at: string | null }) => ({
+  const seminarRoutes = (seminars || []).map((seminar) => ({
     url: `${BASE_URL}/seminars/${seminar.id}`,
-    lastModified: seminar.updated_at || new Date().toISOString(),
+    lastModified: seminar.created_at || new Date().toISOString(),
     changeFrequency: 'weekly' as const,
     priority: 0.6,
   }));

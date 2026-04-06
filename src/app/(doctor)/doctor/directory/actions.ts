@@ -15,9 +15,9 @@ export async function getReferralStats() {
   if (!user) return { activePartners: 0, referralsSent: 0, referralsReceived: 0 };
 
   const [partnersRes, sentRes, receivedRes] = await Promise.all([
-    (supabase as any).from('doctor_connections').select('id', { count: 'exact' }).eq('status', 'active').or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`),
-    (supabase as any).from('referrals').select('id', { count: 'exact' }).eq('sender_id', user.id),
-    (supabase as any).from('referrals').select('id', { count: 'exact' }).eq('receiver_id', user.id)
+    supabase.from('doctor_connections').select('id', { count: 'exact' }).eq('status', 'active').or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`),
+    supabase.from('referrals').select('id', { count: 'exact' }).eq('sender_id', user.id),
+    supabase.from('referrals').select('id', { count: 'exact' }).eq('receiver_id', user.id)
   ]);
 
   return {
@@ -36,7 +36,7 @@ export async function getReciprocityLoop() {
   if (!user) return [];
 
   // Get current user's location from profiles
-  const { data: doctor } = await (supabase as any)
+  const { data: doctor } = await supabase
     .from('profiles')
     .select('latitude, longitude')
     .eq('id', user.id)
@@ -47,7 +47,7 @@ export async function getReciprocityLoop() {
     return [];
   }
 
-  const { data, error } = await (supabase as any).rpc('get_reciprocity_candidates', {
+  const { data, error } = await supabase.rpc('get_reciprocity_candidates', {
     p_user_id: user.id,
     p_lat: (doctor as any).latitude,
     p_lng: (doctor as any).longitude,
@@ -70,7 +70,7 @@ export async function getReferralDirectory(filters: { search?: string, specialty
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  let query = (supabase as any)
+  let query = supabase
     .from('doctors')
     .select(`
       *,
@@ -92,7 +92,7 @@ export async function getReferralDirectory(filters: { search?: string, specialty
   if (error) return [];
 
   // Fetch connections to mark partners
-  const { data: connections } = await (supabase as any)
+  const { data: connections } = await supabase
     .from('doctor_connections')
     .select('requester_id, receiver_id, status')
     .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`);
@@ -124,7 +124,7 @@ export async function requestConnection(targetUserId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('doctor_connections')
     .insert({
       requester_id: user.id,

@@ -9,7 +9,7 @@ export async function getDoctorSeminars() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('seminars')
     .select(`
       *,
@@ -35,7 +35,7 @@ export async function getSeminarAnalytics() {
   const currentYear = new Date().getFullYear()
   const startOfYear = `${currentYear}-01-01T00:00:00Z`
   
-  const { data: registrations, error: regError } = await (supabase as any)
+  const { data: registrations, error: regError } = await supabase
     .from('seminar_registrations')
     .select('amount_paid, seminar_id, seminar:seminars(host_id)')
     .eq('payment_status', 'paid')
@@ -46,13 +46,13 @@ export async function getSeminarAnalytics() {
 
   // 2. Get Clinical Authority Index
   // Formula: (Num Published Seminars * 25) + (Avg Rating * 50) + (Total Attendees * 10)
-  const { data: seminars, error: semError } = await (supabase as any)
+  const { data: seminars, error: semError } = await supabase
     .from('seminars')
     .select('id')
     .eq('host_id', user.id)
     .eq('is_approved', true)
 
-  const { data: doctor, error: docError } = await (supabase as any)
+  const { data: doctor, error: docError } = await supabase
     .from('doctors')
     .select('rating')
     .eq('user_id', user.id)
@@ -85,7 +85,7 @@ export async function updateSeminarAction(seminarId: string, formData: FormData)
   const max_capacity = formData.get('max_capacity') as string
   const registration_link = formData.get('registration_link') as string
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('seminars')
     .update({
       title,
@@ -107,7 +107,7 @@ export async function updateSeminarAction(seminarId: string, formData: FormData)
 
   // Trigger geocoding on update
   try {
-    await (supabase as any).from('automation_queue').insert({
+    await supabase.from('automation_queue').insert({
       event_type: 'geocode_seminar',
       payload: { seminarId, location }
     })
@@ -138,7 +138,7 @@ export async function createSeminarAction(formData: FormData) {
   const tags = tags_input ? tags_input.split(',').map(t => t.trim()) : []
 
   // 2. Determine Pricing (Check if they are a Verified Doctor)
-  const { data: doctor } = await (supabase as any)
+  const { data: doctor } = await supabase
     .from('doctors')
     .select('verification_status')
     .eq('user_id', user.id)
@@ -152,7 +152,7 @@ export async function createSeminarAction(formData: FormData) {
   const country = locParts[1] || ''
 
   // 4. Save to Database
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('seminars')
     .insert({
       host_id: user.id,
@@ -182,7 +182,7 @@ export async function createSeminarAction(formData: FormData) {
 
   // 5. Trigger geocoding so it shows up on the map
   try {
-    await (supabase as any).from('automation_queue').insert({
+    await supabase.from('automation_queue').insert({
       event_type: 'geocode_seminar',
       payload: { seminarId: data.id, location }
     })
@@ -259,7 +259,7 @@ export async function getSeminarAttendees(seminarId: string) {
   if (!user) return []
 
   // Verify ownership
-  const { data: seminar } = await (supabase as any)
+  const { data: seminar } = await supabase
     .from('seminars')
     .select('id')
     .eq('id', seminarId)
@@ -268,7 +268,7 @@ export async function getSeminarAttendees(seminarId: string) {
 
   if (!seminar) throw new Error("Unauthorized")
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('seminar_registrations')
     .select(`
       id,

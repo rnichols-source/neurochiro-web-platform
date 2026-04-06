@@ -5,7 +5,7 @@ import { createServerSupabase } from '@/lib/supabase-server'
 export async function getVendors() {
   const supabase = createServerSupabase()
   
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('vendors')
     .select('*')
     .eq('is_active', true)
@@ -26,7 +26,7 @@ export async function trackVendorClick(vendorId: string, clickType: 'website' | 
   // Update analytics count
   const column = clickType === 'profile' ? 'profile_views' : `${clickType}_clicks`
   
-  const { error } = await (supabase as any).rpc('increment_vendor_stats', { 
+  const { error } = await supabase.rpc('increment_vendor_stats', { 
     vendor_id: vendorId, 
     stat_column: column 
   })

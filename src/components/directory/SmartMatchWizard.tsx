@@ -1,17 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Target, Users, MapPin, ArrowRight, CheckCircle2, ChevronLeft } from "lucide-react";
+import { X, Sparkles, Target, Users, MapPin, ArrowRight, ChevronLeft } from "lucide-react";
 
 interface SmartMatchWizardProps {
   isOpen: boolean;
   onClose: () => void;
-  onComplete: (criteria: string[]) => void;
+  onComplete?: (criteria: string[]) => void;
 }
 
 export default function SmartMatchWizard({ isOpen, onClose, onComplete }: SmartMatchWizardProps) {
+  const router = useRouter();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [selections, setSelections] = useState({
     focus: "",
     patientType: "",
@@ -41,27 +44,50 @@ export default function SmartMatchWizard({ isOpen, onClose, onComplete }: SmartM
   ];
 
   const handleNext = () => {
-    if (step < 3) setStep(step + 1);
-    else {
-      // Logic to filter: combine selections into keywords
-      const criteria = [selections.focus, selections.patientType].filter(Boolean);
-      onComplete(criteria);
+    if (step < 3) {
+      setStep(step + 1);
+    } else {
+      // Build search params from selections and navigate to directory
+      setLoading(true);
+      const params = new URLSearchParams();
+
+      // Combine focus + patient type into a search query
+      const searchTerms = [selections.focus, selections.patientType].filter(Boolean);
+      if (searchTerms.length > 0) {
+        params.set('q', searchTerms.join(' '));
+      }
+      if (selections.zipCode.trim()) {
+        params.set('zip', selections.zipCode.trim());
+      }
+
+      // Notify parent if callback provided
+      if (onComplete) {
+        onComplete(searchTerms);
+      }
+
       onClose();
+      router.push(`/directory?${params.toString()}`);
     }
+  };
+
+  const handleReset = () => {
+    setStep(1);
+    setSelections({ focus: "", patientType: "", zipCode: "" });
+    setLoading(false);
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={() => { onClose(); handleReset(); }}
             className="fixed inset-0 z-[400] bg-neuro-navy/80 backdrop-blur-sm"
           />
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -70,7 +96,7 @@ export default function SmartMatchWizard({ isOpen, onClose, onComplete }: SmartM
             <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 overflow-hidden">
               {/* Progress Bar */}
               <div className="h-1.5 w-full bg-gray-100 flex">
-                <motion.div 
+                <motion.div
                   initial={{ width: "0%" }}
                   animate={{ width: `${(step / 3) * 100}%` }}
                   className="h-full bg-neuro-orange"
@@ -84,14 +110,14 @@ export default function SmartMatchWizard({ isOpen, onClose, onComplete }: SmartM
                       <ChevronLeft className="w-5 h-5 text-gray-400" />
                     </button>
                   ) : <div />}
-                  <button onClick={onClose} className="p-2 hover:bg-gray-50 rounded-full transition-colors">
+                  <button onClick={() => { onClose(); handleReset(); }} className="p-2 hover:bg-gray-50 rounded-full transition-colors">
                     <X className="w-5 h-5 text-gray-400" />
                   </button>
                 </div>
 
                 <AnimatePresence mode="wait">
                   {step <= 2 ? (
-                    <motion.div 
+                    <motion.div
                       key={step}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
@@ -103,7 +129,7 @@ export default function SmartMatchWizard({ isOpen, onClose, onComplete }: SmartM
                       </h2>
                       <div className="grid grid-cols-1 gap-3">
                         {steps[step-1].options.map((opt, i) => (
-                          <button 
+                          <button
                             key={i}
                             onClick={() => {
                               if (step === 1) setSelections({...selections, focus: opt.value});
@@ -121,7 +147,7 @@ export default function SmartMatchWizard({ isOpen, onClose, onComplete }: SmartM
                       </div>
                     </motion.div>
                   ) : (
-                    <motion.div 
+                    <motion.div
                       key="step-3"
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
@@ -131,11 +157,11 @@ export default function SmartMatchWizard({ isOpen, onClose, onComplete }: SmartM
                       <h2 className="text-3xl font-heading font-black text-neuro-navy leading-tight">
                         Final step: Your Zip Code
                       </h2>
-                      <p className="text-gray-500 text-sm">We'll find the highest-rated nervous system specialists in your area.</p>
+                      <p className="text-gray-500 text-sm">We&apos;ll find the highest-rated nervous system specialists in your area.</p>
                       <div className="relative">
                         <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           placeholder="Enter Zip Code"
                           className="w-full pl-12 pr-6 py-5 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-neuro-orange font-bold text-lg"
                           value={selections.zipCode}
@@ -144,11 +170,12 @@ export default function SmartMatchWizard({ isOpen, onClose, onComplete }: SmartM
                           autoFocus
                         />
                       </div>
-                      <button 
+                      <button
                         onClick={handleNext}
-                        className="w-full py-5 bg-neuro-navy text-white font-black rounded-2xl hover:bg-neuro-navy-light transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm shadow-xl shadow-neuro-navy/20"
+                        disabled={loading}
+                        className="w-full py-5 bg-neuro-navy text-white font-black rounded-2xl hover:bg-neuro-navy-light transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm shadow-xl shadow-neuro-navy/20 disabled:opacity-60"
                       >
-                        Find My Matches <ArrowRight className="w-5 h-5" />
+                        {loading ? "Finding Matches..." : "Find My Matches"} <ArrowRight className="w-5 h-5" />
                       </button>
                     </motion.div>
                   )}

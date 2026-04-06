@@ -10,14 +10,14 @@ export async function getDoctorProfile() {
     if (!user) return null
 
     const [profileRes, doctorRes] = await Promise.all([
-      (supabase as any)
+      supabase
         .from('profiles')
         .select('full_name, email, role, tier, notification_preferences')
         .eq('id', user.id)
         .maybeSingle(),
-      (supabase as any)
+      supabase
         .from('doctors')
-        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, location_lat, slug, verification_status')
+        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, latitude, slug, verification_status')
         .eq('user_id', user.id)
         .maybeSingle()
     ])
@@ -29,13 +29,16 @@ export async function getDoctorProfile() {
         console.error("Doctor Fetch Error:", doctorRes.error);
     }
 
-    const profileData = profileRes.data || {};
-    const doctorData = doctorRes.data || {};
+    const profileData = profileRes.data;
+    const doctorData = doctorRes.data;
 
-    return { 
-      ...profileData, 
+    return {
+      full_name: profileData?.full_name || "",
+      email: profileData?.email || "",
+      role: profileData?.role || "doctor",
+      tier: profileData?.tier || "starter",
+      notification_preferences: profileData?.notification_preferences || {},
       ...doctorData,
-      notification_preferences: profileData.notification_preferences || {},
       profile_views: 0,
       patient_leads: 0
     }
@@ -71,7 +74,7 @@ export async function updateDoctorProfile(formData: FormData) {
     const seoKeywords = formData.get('seo_keywords') as string
 
     // 1. Update Profile (Name)
-    const { error: profileError } = await (supabase as any)
+    const { error: profileError } = await supabase
       .from('profiles')
       .update({ full_name: fullName })
       .eq('id', user.id)
@@ -82,7 +85,7 @@ export async function updateDoctorProfile(formData: FormData) {
     }
 
     // 2. Update Doctor table
-    const { error: doctorError } = await (supabase as any)
+    const { error: doctorError } = await supabase
       .from('doctors')
       .update({
         clinic_name: clinicName,
@@ -105,14 +108,14 @@ export async function updateDoctorProfile(formData: FormData) {
     // Refresh search index for high-performance GIN/RPC search
     try {
       const adminSupabase = (await import('@/lib/supabase-admin')).createAdminClient();
-      await (adminSupabase as any).rpc('refresh_search_index');
+      await adminSupabase.rpc('refresh_search_index');
     } catch (refreshErr) {
       console.warn("Search Index Refresh (non-critical):", refreshErr)
     }
 
     // 3. Trigger geocoding if location changed
     try {
-      await (supabase as any).from('automation_queue').insert({
+      await supabase.from('automation_queue').insert({
         event_type: 'geocode_profile',
         payload: { userId: user.id, city, state, country }
       })
@@ -135,7 +138,7 @@ export async function updateNotificationPreferences(preferences: any) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: "Unauthorized" }
 
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('profiles')
       .update({ notification_preferences: preferences })
       .eq('id', user.id)
@@ -213,8 +216,8 @@ export async function uploadAvatar(formData: FormData) {
 
         // Update BOTH tables for consistency
         const [doctorRes, profileRes] = await Promise.all([
-            (supabase as any).from('doctors').update({ photo_url: publicUrl }).eq('user_id', user.id),
-            (supabase as any).from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id)
+            supabase.from('doctors').update({ photo_url: publicUrl }).eq('user_id', user.id),
+            supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id)
         ])
 
         if (doctorRes.error || profileRes.error) {

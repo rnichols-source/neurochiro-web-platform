@@ -13,7 +13,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
     redirect("/login");
   }
 
-  const { data: profile } = await (supabase as any)
+  const { data: profile } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', user.id)

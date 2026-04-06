@@ -11,7 +11,7 @@ export async function getBillingData() {
 
     if (!user) return null;
 
-    const { data: profile } = await (supabase as any)
+    const { data: profile } = await supabase
       .from('profiles')
       .select('stripe_customer_id, tier')
       .eq('id', user.id)

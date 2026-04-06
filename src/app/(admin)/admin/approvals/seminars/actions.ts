@@ -6,16 +6,10 @@ import { onSeminarApprovedAction, onSeminarRejectedAction } from '@/app/actions/
 
 export async function getPendingSeminars() {
   const supabase = createServerSupabase()
-  
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('seminars')
-    .select(`
-      *,
-      host:host_id (
-        full_name,
-        email
-      )
-    `)
+    .select('*')
     .eq('is_approved', false)
     .order('created_at', { ascending: false })
 
@@ -24,29 +18,46 @@ export async function getPendingSeminars() {
     return []
   }
 
-  return data
+  // Fetch host details for each seminar
+  const hostIds = [...new Set(data.map(s => s.host_id))]
+  const { data: hosts } = await supabase
+    .from('profiles')
+    .select('id, full_name, email')
+    .in('id', hostIds)
+
+  const hostMap = new Map((hosts || []).map(h => [h.id, h]))
+
+  return data.map(s => ({
+    ...s,
+    host: hostMap.get(s.host_id) || { full_name: 'Unknown', email: '' }
+  }))
 }
 
 export async function approveSeminarAction(id: string) {
   const supabase = createServerSupabase()
-  
-  const { data: seminar, error: fetchError } = await (supabase as any)
+
+  const { data: seminar, error: fetchError } = await supabase
     .from('seminars')
-    .select('*, host:host_id(email, full_name)')
+    .select('*')
     .eq('id', id)
     .single()
 
-  if (fetchError) throw new Error("Seminar not found")
+  if (fetchError || !seminar) throw new Error("Seminar not found")
 
-  const { error } = await (supabase as any)
+  const { data: host } = await supabase
+    .from('profiles')
+    .select('email, full_name')
+    .eq('id', seminar.host_id)
+    .single()
+
+  const { error } = await supabase
     .from('seminars')
-    .update({ is_approved: true } as any)
+    .update({ is_approved: true })
     .eq('id', id)
 
   if (error) throw new Error("Failed to approve seminar")
 
-  // Trigger Automation (Notify Host)
-  await onSeminarApprovedAction(seminar.host_id, seminar.host.email, seminar.title)
+  await onSeminarApprovedAction(seminar.host_id, host?.email || '', seminar.title)
 
   revalidatePath('/admin/approvals/seminars')
   revalidatePath('/seminars')
@@ -55,28 +66,33 @@ export async function approveSeminarAction(id: string) {
 
 export async function rejectSeminarAction(id: string, notes: string) {
   const supabase = createServerSupabase()
-  
-  const { data: seminar, error: fetchError } = await (supabase as any)
+
+  const { data: seminar, error: fetchError } = await supabase
     .from('seminars')
-    .select('*, host:host_id(email, full_name)')
+    .select('*')
     .eq('id', id)
     .single()
 
-  if (fetchError) throw new Error("Seminar not found")
+  if (fetchError || !seminar) throw new Error("Seminar not found")
 
-  const { error } = await (supabase as any)
+  const { data: host } = await supabase
+    .from('profiles')
+    .select('email, full_name')
+    .eq('id', seminar.host_id)
+    .single()
+
+  const { error } = await supabase
     .from('seminars')
-    .update({ 
-      is_approved: false, 
+    .update({
+      is_approved: false,
       admin_notes: notes,
       payment_status: 'rejected'
-    } as any)
+    })
     .eq('id', id)
 
   if (error) throw new Error("Failed to reject seminar")
 
-  // Trigger Automation (Notify Host)
-  await onSeminarRejectedAction(seminar.host_id, seminar.host.email, seminar.title, notes)
+  await onSeminarRejectedAction(seminar.host_id, host?.email || '', seminar.title, notes)
 
   revalidatePath('/admin/approvals/seminars')
   return { success: true }

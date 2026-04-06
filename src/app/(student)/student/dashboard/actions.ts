@@ -9,19 +9,19 @@ export async function getStudentDashboardData() {
   if (!user) return null
 
   try {
-    const { data: profile } = await (supabase as any)
+    const { data: profile } = await supabase
       .from('profiles')
       .select('role, tier, full_name')
       .eq('id', user.id)
       .single()
 
-    const { data: student } = await (supabase as any)
+    const { data: student } = await supabase
       .from('students')
       .select('school, graduation_year, interests, location_city')
       .eq('id', user.id)
       .single()
 
-    const { count: applicationsCount } = await (supabase as any)
+    const { count: applicationsCount } = await supabase
       .from('job_applications')
       .select('*', { count: 'exact', head: true })
       .eq('applicant_id', user.id)
@@ -58,9 +58,9 @@ export async function getJobsForRadar() {
   const supabase = createServerSupabase()
   
   try {
-    const { data: jobs, error } = await (supabase as any)
-      .from('jobs')
-      .select('*, doctors(clinic_name)')
+    const { data: jobs, error } = await supabase
+      .from('job_postings')
+      .select('*')
       .eq('status', 'open')
       .limit(5);
 
@@ -80,7 +80,7 @@ export async function transitionToDoctorAction() {
 
   try {
     // 1. Update Profile Role
-    const { error: profileError } = await (supabase as any)
+    const { error: profileError } = await supabase
       .from('profiles')
       .update({ role: 'doctor' })
       .eq('id', user.id)
@@ -88,7 +88,7 @@ export async function transitionToDoctorAction() {
     if (profileError) throw profileError
 
     // 2. Fetch full name for the doctor record
-    const { data: profile } = await (supabase as any)
+    const { data: profile } = await supabase
         .from('profiles')
         .select('full_name')
         .eq('id', user.id)
@@ -103,14 +103,17 @@ export async function transitionToDoctorAction() {
     const baseSlug = `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9]/g, '-')
     const slug = `${baseSlug}-${Math.floor(Math.random() * 10000)}`
 
-    const { error: doctorError } = await (supabase as any)
+    const { error: doctorError } = await supabase
       .from('doctors')
-      .upsert({ 
-        user_id: user.id, 
+      .upsert({
+        user_id: user.id,
         first_name: firstName,
         last_name: lastName,
         slug: slug,
-        verification_status: 'pending' 
+        clinic_name: '',
+        bio: '',
+        address: '',
+        verification_status: 'pending'
       }, { onConflict: 'user_id' })
 
     if (doctorError) throw doctorError

@@ -12,7 +12,7 @@ export async function submitLeadAction(formData: FormData) {
   const source = formData.get('source') as string || 'directory'
   const doctorId = formData.get('doctor_id') as string
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('leads')
     .insert({
       email,

@@ -32,19 +32,19 @@ export default function NotificationsPage() {
   }, []);
 
   const markAsRead = async (id: string) => {
-    await (supabase as any).from('notifications').update({ read_at: new Date().toISOString() }).eq('id', id);
+    await supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', id);
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read_at: new Date().toISOString() } : n));
   };
 
   const markAllAsRead = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    await (supabase as any).from('notifications').update({ read_at: new Date().toISOString() }).eq('user_id', user.id).is('read_at', null);
+    await supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('user_id', user.id).is('read_at', null);
     setNotifications(prev => prev.map(n => ({ ...n, read_at: new Date().toISOString() })));
   };
 
   const deleteNotification = async (id: string) => {
-    await (supabase as any).from('notifications').delete().eq('id', id);
+    await supabase.from('notifications').delete().eq('id', id);
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 

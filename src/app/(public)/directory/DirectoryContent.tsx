@@ -24,6 +24,7 @@ const GlobalNetworkMap = dynamic(() => import("@/components/map/GlobalNetworkMap
 });
 
 import DoctorCard from "@/components/directory/DoctorCard";
+import SmartMatchWizard from "@/components/directory/SmartMatchWizard";
 
 export default function DirectoryContent({ initialData }: { initialData: { doctors: any[], total: number } }) {
   const [notifying, setNotifying] = useState(false);
@@ -59,8 +60,8 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   const searchParams = useSearchParams();
   const { toggleSave: globalToggleSave, isSaved, lastLocation, setLastLocation } = useUserPreferences();
   
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
-  const [locationQuery, setLocationQuery] = useState(searchParams.get("location") || lastLocation || "");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || searchParams.get("q") || "");
+  const [locationQuery, setLocationQuery] = useState(searchParams.get("location") || searchParams.get("zip") || lastLocation || "");
   const [isLocating, setIsLocating] = useState(false);
   
   const [doctors, setDoctors] = useState<any[]>(initialData.doctors);
@@ -243,7 +244,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
         </button>
       </div>
 
-      {/* <SmartMatchWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} onComplete={(criteria) => setMatchCriteria(criteria)} /> */}
+      <SmartMatchWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} onComplete={(criteria) => setMatchCriteria(criteria)} />
 
       {/* Search Header */}
       <header className="bg-neuro-navy text-white pt-20 pb-32 px-8 relative overflow-hidden">

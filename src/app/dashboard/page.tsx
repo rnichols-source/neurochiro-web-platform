@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createServerSupabase } from '@/lib/supabase-server';
+import { isFounderEmail } from '@/lib/founder';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +13,7 @@ export default async function DashboardRedirect() {
     redirect('/login');
   }
 
-  const { data: profile } = await (supabase as any)
+  const { data: profile } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', user.id)
@@ -21,7 +22,7 @@ export default async function DashboardRedirect() {
   let role = (profile as any)?.role || 'doctor';
 
   // 🛡️ FOUNDER OVERRIDE
-  if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com') {
+  if (isFounderEmail(user.email)) {
     role = 'founder';
   }
 

@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { isFounderEmail } from '@/lib/founder'
 
 export async function getDoctorDashboardStats() {
   try {
@@ -11,11 +12,11 @@ export async function getDoctorDashboardStats() {
 
     // Parallelize fetches for profile, practice info, seminars, jobs, and leads
     const [profileRes, doctorRes, seminarsRes, jobsRes, leadsRes] = await Promise.all([
-      (supabase as any).from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
-      (supabase as any).from('doctors').select('clinic_name, slug, location_city, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count').eq('user_id', user.id).single(),
-      (supabase as any).from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
-      (supabase as any).from('jobs').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
-      (supabase as any).from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id)
+      supabase.from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
+      supabase.from('doctors').select('clinic_name, slug, city, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count').eq('user_id', user.id).single(),
+      supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
+      supabase.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
+      supabase.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id)
     ]);
 
     const profile = profileRes.data;
@@ -29,7 +30,7 @@ export async function getDoctorDashboardStats() {
     let completeness = 0;
     const weights = {
       clinic_name: 10,
-      location_city: 10,
+      city: 10,
       bio: 20,
       photo_url: 20,
       specialties: 10,
@@ -39,7 +40,7 @@ export async function getDoctorDashboardStats() {
     };
 
     if (doctor?.clinic_name) completeness += weights.clinic_name;
-    if (doctor?.location_city) completeness += weights.location_city;
+    if (doctor?.city) completeness += weights.city;
     if (doctor?.bio && doctor.bio.length > 50) completeness += weights.bio;
     if (doctor?.photo_url) completeness += weights.photo_url;
     if (doctor?.specialties && doctor.specialties.length > 0) completeness += weights.specialties;
@@ -48,7 +49,7 @@ export async function getDoctorDashboardStats() {
     if (doctor?.facebook_url) completeness += weights.facebook_url;
 
     const userRole = (profile as any)?.role || 'doctor_starter';
-    const isFounder = user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com';
+    const isFounder = isFounderEmail(user.email);
     const isAdmin = ['admin', 'super_admin', 'founder', 'regional_admin'].includes(userRole);
     const isPro = isAdmin || isFounder || userRole === 'doctor_pro';
     const isGrowth = isPro || userRole === 'doctor_growth';
@@ -88,7 +89,7 @@ export async function getDoctorDashboardStats() {
       },
       vendorOffers,
       doctor: {
-        city: doctor?.location_city || "your city"
+        city: doctor?.city || "your city"
       },
       stats: [
         { label: "Profile Views", value: profileViews.toLocaleString(), trend: profileViews > 0 ? "+100%" : "0%" },
@@ -125,11 +126,11 @@ export async function getDoctorROIData(period: string = '30d') {
   try {
     // 1. Parallelize fetches for profile, stats, and leads
     const [profileRes, doctorRes, leadsRes, confirmedRes, analyticsRes] = await Promise.all([
-      (supabase as any).from('profiles').select('tier, role').eq('id', user.id).single(),
-      (supabase as any).from('doctors').select('profile_views, patient_leads, average_case_value').eq('user_id', user.id).single(),
-      (supabase as any).from('leads').select('*').eq('doctor_id', user.id).is('confirmed_at', null),
-      (supabase as any).from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id).not('confirmed_at', 'is', null),
-      (supabase as any).from('analytics_events').select('*').eq('doctor_id', user.id)
+      supabase.from('profiles').select('tier, role').eq('id', user.id).single(),
+      supabase.from('doctors').select('profile_views, patient_leads, average_case_value').eq('user_id', user.id).single(),
+      supabase.from('leads').select('*').eq('doctor_id', user.id).is('confirmed_at', null),
+      supabase.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id).not('confirmed_at', 'is', null),
+      supabase.from('analytics_events').select('*').eq('doctor_id', user.id)
     ]);
 
     const tier = (profileRes.data as any)?.tier || 'starter';
@@ -160,14 +161,14 @@ export async function getDoctorROIData(period: string = '30d') {
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     
-    const { data: historicalLeads } = await (supabase as any)
+    const { data: historicalLeads } = await supabase
       .from('leads')
       .select('created_at, status')
       .eq('doctor_id', user.id)
       .gte('created_at', sixMonthsAgo.toISOString());
 
     // 6. Fetch Acquisition Channels
-    const { data: acquisitionData } = await (supabase as any)
+    const { data: acquisitionData } = await supabase
       .from('leads')
       .select('source')
       .eq('doctor_id', user.id);
@@ -223,7 +224,7 @@ export async function confirmPatient(leadId: string) {
   if (!user) return { error: "Unauthorized" }
 
   try {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('leads')
       .update({ 
         status: 'converted', 
@@ -235,7 +236,7 @@ export async function confirmPatient(leadId: string) {
     if (error) throw error;
     
     // Log the conversion event
-    await (supabase as any).from('analytics_events').insert({
+    await supabase.from('analytics_events').insert({
       doctor_id: user.id,
       event_type: 'patient_confirmed',
       metadata: { leadId }

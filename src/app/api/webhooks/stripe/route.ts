@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   }
 
   // 2. RECORD PROCESSING START
-  await (supabase as any).from('processed_webhooks').insert({ id: event.id });
+  await supabase.from('processed_webhooks').insert({ id: event.id });
 
   try {
     // 3. TRIGGER BACKGROUND AUTOMATIONS

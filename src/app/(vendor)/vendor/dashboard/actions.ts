@@ -9,13 +9,13 @@ export async function getVendorDashboardData() {
   if (!user) return null
 
   try {
-    const { data: profile } = await (supabase as any)
+    const { data: profile } = await supabase
       .from('profiles')
       .select('role, full_name')
       .eq('id', user.id)
       .single()
 
-    const { data: vendor } = await (supabase as any)
+    const { data: vendor } = await supabase
       .from('vendors')
       .select('*')
       .eq('id', user.id)

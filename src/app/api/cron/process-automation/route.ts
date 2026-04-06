@@ -18,7 +18,7 @@ export async function GET(req: Request) {
   
   try {
     // 2. Fetch pending items from the queue that are scheduled for now or earlier
-    const { data: queueItems, error } = await (supabase as any)
+    const { data: queueItems, error } = await supabase
       .from('automation_queue')
       .select('*')
       .eq('status', 'pending')
@@ -34,7 +34,7 @@ export async function GET(req: Request) {
 
     // 3. Mark them as processing immediately to prevent race conditions
     const itemIds = queueItems.map((item: any) => item.id);
-    await (supabase as any)
+    await supabase
       .from('automation_queue')
       .update({ status: 'processing', updated_at: new Date().toISOString() })
       .in('id', itemIds);
@@ -51,7 +51,7 @@ export async function GET(req: Request) {
       const result = results[i];
       if (result.status === 'rejected') {
         const item = queueItems[i];
-        await (supabase as any)
+        await supabase
           .from('automation_queue')
           .update({ 
             status: 'failed', 

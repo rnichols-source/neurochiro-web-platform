@@ -43,6 +43,10 @@ export interface Doctor {
   photo_url?: string;
   video_url?: string;
   seo_keywords?: string;
+  zip_code?: string;
+  profile_views?: number;
+  patient_leads?: number;
+  average_case_value?: number;
   created_at?: string;
   updated_at?: string;
 }

@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { isFounderEmail } from "@/lib/founder";
 
 const NAV_ITEMS = [
   {
@@ -76,7 +77,7 @@ export default function AdminQuickNav() {
       
       if (user) {
         // 🛡️ MASTER FOUNDER OVERRIDE - If it's the founder, they are always admin
-        if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com') {
+        if (isFounderEmail(user.email)) {
           setIsAdmin(true);
           return;
         }
@@ -87,7 +88,7 @@ export default function AdminQuickNav() {
           .eq('id', user.id)
           .single();
         
-        const role = profile?.role;
+        const role = profile?.role || '';
         // Check for any elevated admin role
         if (['admin', 'founder', 'super_admin', 'regional_admin'].includes(role)) {
           setIsAdmin(true);

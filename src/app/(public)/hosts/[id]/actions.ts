@@ -6,7 +6,7 @@ export async function getHostProfile(userId: string) {
   const supabase = createServerSupabase()
   
   // 1. Get the Host Profile info
-  const { data: profile, error: profileError } = await (supabase as any)
+  const { data: profile, error: profileError } = await supabase
     .from('host_profiles')
     .select('*')
     .eq('user_id', userId)
@@ -14,7 +14,7 @@ export async function getHostProfile(userId: string) {
 
   // 2. If no host profile exists yet, get basic info from the public profile
   if (!profile) {
-    const { data: userProfile } = await (supabase as any)
+    const { data: userProfile } = await supabase
       .from('profiles')
       .select('full_name, avatar_url')
       .eq('id', userId)
@@ -41,7 +41,7 @@ export async function getHostProfile(userId: string) {
 
 async function getHostSeminars(userId: string) {
   const supabase = createServerSupabase()
-  const { data } = await (supabase as any)
+  const { data } = await supabase
     .from('seminars')
     .select('*')
     .eq('host_id', userId)

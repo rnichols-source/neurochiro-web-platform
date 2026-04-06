@@ -10,6 +10,7 @@ import { logoutAdmin, triggerEmergencyLockdown } from "./SidebarActions";
 import { createClient } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import AdminSettingsModal from "@/components/admin/AdminSettingsModal";
+import { isFounderEmail } from "@/lib/founder";
 
 export default function AdminLayout({
   children,
@@ -46,7 +47,7 @@ export default function AdminLayout({
         
         let role = profile?.role || 'admin';
         // 🛡️ MASTER FOUNDER OVERRIDE
-        if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com') {
+        if (isFounderEmail(user.email)) {
           role = 'founder';
           setUserName('Raymond Nichols');
         } else {

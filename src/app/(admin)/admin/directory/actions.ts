@@ -9,7 +9,7 @@ export async function getAllDoctors(search?: string) {
   noStore();
   // Using Admin Client to ensure admin sees all records regardless of RLS
   const supabase = createAdminClient();
-  let query = (supabase as any).from('doctors').select('*').order('last_name', { ascending: true });
+  let query = supabase.from('doctors').select('*').order('last_name', { ascending: true });
 
   if (search) {
     query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,clinic_name.ilike.%${search}%,email.ilike.%${search}%`);
@@ -25,7 +25,7 @@ export async function updateDoctorManually(doctorId: string, updates: any) {
   const supabase = createAdminClient();
   const { data: { user } } = await (supabase.auth as any).getUser(); // Auth might not work with admin client if token is not passed, but we don't strictly need user for update
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('doctors')
     .update(updates)
     .eq('id', doctorId);
@@ -37,7 +37,7 @@ export async function updateDoctorManually(doctorId: string, updates: any) {
 
   // Refresh search index for high-performance GIN/RPC search
   try {
-    await (supabase as any).rpc('refresh_search_index');
+    await supabase.rpc('refresh_search_index');
   } catch (refreshErr) {
     console.warn("Search Index Refresh (non-critical):", refreshErr);
   }
@@ -47,7 +47,7 @@ export async function updateDoctorManually(doctorId: string, updates: any) {
     const serverSupabase = createServerSupabase();
     const { data: { user: serverUser } } = await serverSupabase.auth.getUser();
     
-    await (supabase as any).from('audit_logs').insert({
+    await supabase.from('audit_logs').insert({
       category: 'DIRECTORY',
       event: `Manual Update: Doctor ${doctorId}`,
       user_name: serverUser?.email || "Founder",
@@ -75,8 +75,8 @@ export async function deleteDoctorManually(doctorId: string) {
     console.log(`[DELETE] Starting deletion process for Doctor ID: ${doctorId}`);
 
     // 1. Delete associated jobs
-    const { error: jobsError } = await (supabase as any)
-      .from('jobs')
+    const { error: jobsError } = await supabase
+      .from('job_postings')
       .delete()
       .eq('doctor_id', doctorId);
     
@@ -86,13 +86,13 @@ export async function deleteDoctorManually(doctorId: string) {
 
     // 2. Try to clean up leads
     try {
-      await (supabase as any).from('leads').delete().eq('doctor_id', doctorId);
+      await supabase.from('leads').delete().eq('doctor_id', doctorId);
     } catch (e) {
       console.warn("[DELETE] Leads cleanup skipped");
     }
 
     // 3. Delete the doctor record
-    const { error: deleteError, data: deleteData } = await (supabase as any)
+    const { error: deleteError, data: deleteData } = await supabase
       .from('doctors')
       .delete()
       .eq('id', doctorId)
@@ -106,7 +106,7 @@ export async function deleteDoctorManually(doctorId: string) {
     if (!deleteData || deleteData.length === 0) {
       // Fallback: Check if it was matching by user_id instead of id
       console.warn(`[DELETE] No record found with id=${doctorId}, trying user_id...`);
-      const { error: deleteError2, data: deleteData2 } = await (supabase as any)
+      const { error: deleteError2, data: deleteData2 } = await supabase
         .from('doctors')
         .delete()
         .eq('user_id', doctorId)
@@ -128,7 +128,7 @@ export async function deleteDoctorManually(doctorId: string) {
 
     // 4. Log the action (Non-blocking)
     try {
-      await (supabase as any).from('audit_logs').insert({
+      await supabase.from('audit_logs').insert({
         category: 'DIRECTORY',
         event: `Manual Delete: Doctor ${doctorId}`,
         user_name: serverUser?.email || "Founder",

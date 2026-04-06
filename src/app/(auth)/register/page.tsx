@@ -28,7 +28,7 @@ import {
   ChevronRight,
   Info
 } from "lucide-react";
-import { createAccountAction, updateProfileAction, signInWithProvider } from "../actions/auth";
+import { createAccountAction, updateProfileAction, signInWithProvider, claimDoctorProfileAction } from "../actions/auth";
 import { STRIPE_PAYMENT_LINKS } from "@/lib/stripe-links";
 import { createClient } from "@/lib/supabase";
 
@@ -199,8 +199,18 @@ function RegisterContent() {
       const isClaiming = !!searchParams.get("claim_id") || !!localStorage.getItem('nc_claim_id');
 
       if (isClaiming) {
+        // Link the doctor record to this user's account
+        const claimId = searchParams.get("claim_id") || localStorage.getItem('nc_claim_id');
+        if (claimId && userId) {
+          const claimResult = await claimDoctorProfileAction(userId, claimId);
+          if (claimResult.error) {
+            setError(claimResult.error);
+            setIsPending(false);
+            return;
+          }
+        }
         localStorage.removeItem('nc_registration_draft');
-        localStorage.removeItem('nc_claim_id'); // Clear after use
+        localStorage.removeItem('nc_claim_id');
         router.push(`/${initialRole}/dashboard?claim_success=true`);
       } else {
         setStep("payment");

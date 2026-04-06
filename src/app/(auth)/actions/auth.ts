@@ -4,6 +4,7 @@ import { createServerSupabase } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { Automations } from '@/lib/automations'
 import { cookies } from 'next/headers'
+import { isFounderEmail } from '@/lib/founder'
 
 export async function login(formData: FormData, redirectUrl?: string | null) {
   const email = formData.get('email') as string
@@ -28,7 +29,7 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     return redirect(`/login?error=auth_failed`)
   }
 
-  const { data: profile } = await (supabase as any)
+  const { data: profile } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', data.user.id)
@@ -37,7 +38,7 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   let role = (profile as any)?.role || 'doctor'
   
   // 🛡️ FOUNDER OVERRIDE
-  if (email === 'drray@neurochirodirectory.com' || email === 'raymond@neurochiro.com') {
+  if (isFounderEmail(email)) {
     role = 'founder';
   }
 
@@ -141,7 +142,7 @@ export async function updateProfileAction(userId: string, profileData: any) {
 
   // 1. Update main profile (ULTRA-STRICT: only verified core columns)
   // Note: We avoid updating city, tier, or website here as they belong in role-specific tables
-  const { error: profileError } = await (supabase as any)
+  const { error: profileError } = await supabase
     .from('profiles')
     .update({ 
       role: role 
@@ -160,7 +161,7 @@ export async function updateProfileAction(userId: string, profileData: any) {
   if (role === 'doctor') {
     try {
       // First, try the standard user_id link
-      const { error: doctorError } = await (supabase as any)
+      const { error: doctorError } = await supabase
         .from('doctors')
         .update({
           clinic_name: clinicName,
@@ -175,7 +176,7 @@ export async function updateProfileAction(userId: string, profileData: any) {
         }
         // If user_id column is missing, fallback to updating by ID
         console.warn("Retrying update by ID...");
-        const { error: fallbackError } = await (supabase as any)
+        const { error: fallbackError } = await supabase
           .from('doctors')
           .update({ 
             clinic_name: clinicName, 
@@ -201,7 +202,7 @@ export async function updateProfileAction(userId: string, profileData: any) {
     }
   } else if (role === 'student') {
     // Save student-specific data to the students table
-    const { error: studentError } = await (supabase as any)
+    const { error: studentError } = await supabase
       .from('students')
       .update({ 
         school: school,
@@ -220,4 +221,46 @@ export async function updateProfileAction(userId: string, profileData: any) {
   }
 
   return { success: true };
+}
+
+/**
+ * Claims an unclaimed doctor profile by linking it to the authenticated user.
+ * Called after registration when a claim_id is present.
+ */
+export async function claimDoctorProfileAction(userId: string, claimId: string) {
+  const supabase = createServerSupabase();
+
+  // Verify the doctor record exists and is unclaimed
+  const { data: doctor, error: fetchError } = await supabase
+    .from('doctors')
+    .select('id, user_id, first_name, last_name')
+    .eq('id', claimId)
+    .single();
+
+  if (fetchError || !doctor) {
+    return { error: 'Doctor profile not found.' };
+  }
+
+  if (doctor.user_id) {
+    return { error: 'This profile has already been claimed.' };
+  }
+
+  // Link the doctor record to the new user
+  const { error: updateError } = await supabase
+    .from('doctors')
+    .update({ user_id: userId })
+    .eq('id', claimId);
+
+  if (updateError) {
+    console.error("Failed to claim doctor profile:", updateError);
+    return { error: 'Failed to claim profile. Please contact support.' };
+  }
+
+  // Update the user's profile role to doctor
+  await supabase
+    .from('profiles')
+    .update({ role: 'doctor' })
+    .eq('id', userId);
+
+  return { success: true, doctorName: `${doctor.first_name} ${doctor.last_name}` };
 }

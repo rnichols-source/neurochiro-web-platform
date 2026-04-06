@@ -12,9 +12,9 @@ export type Notification = {
   user_id: string;
   title: string;
   body: string;
-  type: string;
-  priority: "info" | "important" | "urgent";
-  link?: string;
+  type: string | null;
+  priority: string | null;
+  link?: string | null;
   read_at: string | null;
   created_at: string;
   metadata?: any;
@@ -24,8 +24,8 @@ export type Announcement = {
   id: string;
   title: string;
   body: string;
-  audience_type: string;
-  priority: string;
+  audience_type: string | null;
+  priority: string | null;
   created_at: string;
   link?: string;
 };
@@ -142,7 +142,7 @@ export default function NotificationBell() {
     setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
-  const getIcon = (type: string, priority: string) => {
+  const getIcon = (type: string | null, priority: string | null) => {
     if (type === 'announcement') return <Megaphone className="w-4 h-4 text-purple-500" />;
     if (priority === 'urgent') return <AlertTriangle className="w-4 h-4 text-red-500" />;
     if (priority === 'important') return <Zap className="w-4 h-4 text-neuro-orange" />;

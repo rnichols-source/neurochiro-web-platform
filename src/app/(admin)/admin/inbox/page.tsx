@@ -1,6 +1,7 @@
 import { createServerSupabase } from "@/lib/supabase-server";
 import MessagingSystem from "@/components/messaging/MessagingSystem";
 import { redirect } from "next/navigation";
+import { isFounderEmail } from "@/lib/founder";
 
 export const dynamic = 'force-dynamic';
 
@@ -13,14 +14,14 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
     redirect("/login");
   }
 
-  const { data: profile } = await (supabase as any)
+  const { data: profile } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', user.id)
     .single();
 
   const userRole = (profile as any)?.role;
-  const isFounder = user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com';
+  const isFounder = isFounderEmail(user.email);
   const isAdmin = ['admin', 'super_admin', 'founder', 'regional_admin'].includes(userRole);
 
   if (!isFounder && !isAdmin) {

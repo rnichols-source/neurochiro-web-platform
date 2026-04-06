@@ -84,7 +84,7 @@ export async function getAdminDashboardStats(regionCode?: string) {
 
     // --- MARKET HEALTH ---
     // Accurate ratio of Verified vs Total Listings
-    const { count: totalDoctorsCount } = await (supabase as any).from('doctors').select('*', { count: 'exact', head: true });
+    const { count: totalDoctorsCount } = await supabase.from('doctors').select('*', { count: 'exact', head: true });
     const verifiedRatio = totalDoctorsCount ? (doctorsCount / totalDoctorsCount) * 100 : 0;
     
     // Weighted Market Health Score

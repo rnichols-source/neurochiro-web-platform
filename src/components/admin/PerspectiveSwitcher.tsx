@@ -18,6 +18,7 @@ import { useStudentTier, StudentTier } from "@/context/StudentTierContext";
 import { MembershipTier } from "@/types/directory";
 
 import { createClient } from "@/lib/supabase";
+import { isFounderEmail } from "@/lib/founder";
 
 export default function PerspectiveSwitcher() {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +36,7 @@ export default function PerspectiveSwitcher() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        if (user.email === 'drray@neurochirodirectory.com' || user.email === 'raymond@neurochiro.com') {
+        if (isFounderEmail(user.email)) {
           setIsDev(true);
           return;
         }
