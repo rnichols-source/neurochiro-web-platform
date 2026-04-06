@@ -39,6 +39,9 @@
   "exclude": [
     "node_modules",
     "hub-app",
-    "directory-app"
+    "directory-app",
+    "scripts",
+    "tests",
+    "e2e"
   ]
 }
