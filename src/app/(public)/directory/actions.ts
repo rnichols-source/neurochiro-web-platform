@@ -2,7 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { Doctor } from '@/types/directory'
-import { unstable_noStore as noStore, revalidatePath } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 
 export async function getDoctors(options: {
   regionCode?: string;
@@ -11,7 +11,6 @@ export async function getDoctors(options: {
   limit?: number;
   searchQuery?: string;
 } = {}) {
-  noStore();
   const { regionCode, bounds, page = 1, limit = 20, searchQuery } = options;
   const supabase = createServerSupabase()
 
@@ -110,7 +109,6 @@ export async function getDoctors(options: {
 }
 
 export async function getDoctorBySlug(slug: string) {
-  noStore();
   const supabase = createServerSupabase()
   
   // DATA MINIMIZATION: Fetch columns needed for full profile
@@ -169,7 +167,6 @@ export async function getStudentsForMap(options: {
   bounds?: [number, number, number, number]; // [minLng, minLat, maxLng, maxLat]
   limit?: number;
 } = {}) {
-  noStore();
   const { bounds, limit = 100 } = options;
   const supabase = createServerSupabase();
   try {

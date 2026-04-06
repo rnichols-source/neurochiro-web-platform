@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  poweredByHeader: false,
+  compress: true,
   images: {
     remotePatterns: [
       {
@@ -12,7 +14,22 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/storage/v1/object/public/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'gddapefwrmucimpdhjrz.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
     ],
+    formats: ['image/avif', 'image/webp'],
   },
   transpilePackages: ["lucide-react", "framer-motion"],
 };

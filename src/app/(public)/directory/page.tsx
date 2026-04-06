@@ -12,7 +12,7 @@ export default function PublicDirectory() {
   useEffect(() => {
     async function fetchInitialData() {
       try {
-        const data = await getDoctors({ limit: 1000 });
+        const data = await getDoctors({ limit: 20 });
         setInitialData(data);
       } catch (err) {
         console.error('Directory initial fetch failed:', err);

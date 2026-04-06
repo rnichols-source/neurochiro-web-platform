@@ -1,7 +1,6 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
-import { unstable_noStore as noStore } from 'next/cache'
 
 export interface SeminarFilterOptions {
   country?: string;
@@ -12,7 +11,7 @@ export interface SeminarFilterOptions {
 }
 
 export async function getSeminars(options: SeminarFilterOptions = {}) {
-  noStore();
+
   const supabase = createServerSupabase()
 
   let query = supabase
@@ -74,7 +73,7 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
 }
 
 export async function getSeminarsForMap(bounds?: [number, number, number, number]) {
-  noStore();
+
   const supabase = createServerSupabase()
   
   let query = supabase
@@ -127,7 +126,7 @@ export async function incrementSeminarStats(id: string, column: 'page_views' | '
 }
 
 export async function getSeminarById(id: string) {
-    noStore();
+  
     const supabase = createServerSupabase()
     const { data, error } = await supabase
         .from('seminars')

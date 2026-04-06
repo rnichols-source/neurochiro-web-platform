@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 
-export const dynamic = 'force-dynamic';
+// Cache search results for 60 seconds at the edge
+export const revalidate = 60;
 
 const SEARCHABLE_NAME_COLUMNS = ['first_name', 'last_name', 'clinic_name'];
 const SEARCHABLE_LOCATION_COLUMNS = ['city', 'state', 'address'];
@@ -80,6 +81,8 @@ export async function GET(request: NextRequest) {
       total: count || data.length,
       isFallback: false,
       error: false
+    }, {
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' }
     });
 
   } catch (err) {

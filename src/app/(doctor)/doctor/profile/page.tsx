@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { 
@@ -207,7 +208,7 @@ export default function ProfilePage() {
                    <div className="relative">
                       <div className="w-40 h-40 rounded-[2.5rem] bg-neuro-cream overflow-hidden border-4 border-white shadow-xl">
                          {profile?.photo_url || profile?.avatar_url ? (
-                           <img src={profile?.photo_url || profile?.avatar_url || ''} alt="Clinic" className="w-full h-full object-cover" />
+                           <Image src={profile?.photo_url || profile?.avatar_url || ''} alt="Clinic" fill className="object-cover" sizes="160px" />
                          ) : (
                            <div className="w-full h-full flex items-center justify-center">
                               <Building2 className="w-16 h-16 text-gray-300" />

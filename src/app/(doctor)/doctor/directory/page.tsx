@@ -24,6 +24,7 @@ import {
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { 
   getReferralStats, 
   getReciprocityLoop, 
@@ -164,7 +165,7 @@ export default function ReferralNetworkPage() {
                       <div key={i} className="relative group cursor-pointer" title={`Dr. ${doc.last_name}`}>
                          <div className="w-14 h-14 rounded-full border-4 border-neuro-navy bg-gray-800 overflow-hidden group-hover:scale-110 transition-transform shadow-xl">
                             {doc.photo_url ? (
-                              <img src={doc.photo_url} alt={doc.last_name} className="w-full h-full object-cover" />
+                              <Image src={doc.photo_url} alt={doc.last_name || ''} fill className="object-cover" sizes="64px" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-white font-bold">{doc.last_name[0]}</div>
                             )}
@@ -265,7 +266,7 @@ export default function ReferralNetworkPage() {
                  <div className="flex items-center gap-4 mb-6">
                     <div className="w-16 h-16 rounded-full bg-neuro-cream overflow-hidden border-2 border-gray-50 group-hover:border-neuro-orange transition-colors">
                        {doc.photo_url ? (
-                         <img src={doc.photo_url} alt={doc.last_name} className="w-full h-full object-cover" />
+                         <Image src={doc.photo_url} alt={doc.last_name || ''} fill className="object-cover" sizes="64px" />
                        ) : (
                          <div className="w-full h-full flex items-center justify-center text-neuro-navy font-bold">{doc.last_name[0]}</div>
                        )}
