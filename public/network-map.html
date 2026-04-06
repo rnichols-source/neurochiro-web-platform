@@ -9,7 +9,7 @@
     <style>
         body { margin: 0; padding: 0; background: #0B1118; overflow: hidden; }
         #map { position: absolute; top: 0; bottom: 0; width: 100%; height: 100%; background: #0B1118; }
-        
+
         @keyframes pulse-animation {
             0% { stroke-width: 2; stroke-opacity: 1; }
             50% { stroke-width: 15; stroke-opacity: 0; }
@@ -28,13 +28,11 @@
 <script>
     var map;
     var markerLayer;
-    
-    console.log("[MAP_IFRAME] Initializing Leaflet...");
-    
+
     map = L.map('map', {
         zoomControl: false,
         attributionControl: false,
-        preferCanvas: false // Use SVG for easier pulsing/styling
+        preferCanvas: false
     }).setView([38, -98], 4);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -45,60 +43,92 @@
     window.markerLayer = L.featureGroup().addTo(map);
 
     function reportReady() {
-        console.log("[MAP_IFRAME] Map is Ready");
         window.parent.postMessage({ type: 'map-ready' }, '*');
     }
 
-    map.whenReady(reportReady);
+    function renderMarkers(features) {
+        window.markerLayer.clearLayers();
+        var activeMarkers = [];
+        var hasAnyFiltered = features.some(function(f) { return f.properties && f.properties.isFiltered; });
 
-    window.addEventListener('message', (e) => {
+        features.forEach(function(feat) {
+            if (!feat.geometry || !feat.geometry.coordinates) return;
+            var lng = feat.geometry.coordinates[0];
+            var lat = feat.geometry.coordinates[1];
+            var isActive = hasAnyFiltered ? feat.properties.isFiltered : true;
+
+            if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+                var marker = L.circleMarker([lat, lng], {
+                    radius: isActive ? 8 : 4,
+                    fillColor: isActive ? "#ff5722" : "#666",
+                    color: isActive ? "#fff" : "#999",
+                    weight: isActive ? 2 : 1,
+                    opacity: 1,
+                    fillOpacity: isActive ? 0.9 : 0.4,
+                    className: isActive ? 'active-specialist-marker' : ''
+                }).addTo(window.markerLayer).bindPopup(feat.properties.name || "Specialist");
+
+                if (isActive) activeMarkers.push(marker);
+            }
+        });
+
+        try {
+            if (activeMarkers.length > 0) {
+                var activeGroup = L.featureGroup(activeMarkers);
+                map.fitBounds(activeGroup.getBounds(), { padding: [50, 50], maxZoom: 6 });
+            }
+        } catch (err) {
+            console.error('[MAP] fitBounds error:', err);
+        }
+    }
+
+    // Self-load doctors from the API so we don't depend on postMessage
+    function loadDoctors() {
+        fetch('/api/directory/search?q=&limit=200')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                var doctors = data.doctors || [];
+                console.log('[MAP] Loaded', doctors.length, 'doctors from API');
+                var features = doctors
+                    .filter(function(d) { return d.latitude && d.longitude && d.latitude !== 0 && d.longitude !== 0; })
+                    .map(function(d) {
+                        return {
+                            type: 'Feature',
+                            geometry: { type: 'Point', coordinates: [d.longitude, d.latitude] },
+                            properties: {
+                                cluster: false,
+                                doctorId: d.id,
+                                name: 'Dr. ' + (d.first_name || '') + ' ' + (d.last_name || ''),
+                                slug: d.slug,
+                                type: 'doctor',
+                                isFiltered: true
+                            }
+                        };
+                    });
+                renderMarkers(features);
+            })
+            .catch(function(err) {
+                console.error('[MAP] Failed to load doctors:', err);
+            });
+    }
+
+    map.whenReady(function() {
+        reportReady();
+        loadDoctors();
+    });
+
+    // Also still listen for postMessage for filtered results
+    window.addEventListener('message', function(e) {
         if (e.data.type === 'is-ready') {
             reportReady();
         } else if (e.data.type === 'force-raw-markers') {
-            const features = e.data.data || [];
-            console.log('[MAP_IFRAME] Syncing markers:', features.length);
-            window.markerLayer.clearLayers();
-            
-            const activeMarkers = [];
-
-            // If no features are marked as filtered, treat ALL as active
-            var hasAnyFiltered = features.some(f => f.properties && f.properties.isFiltered);
-
-            features.forEach((feat) => {
-                if (!feat.geometry || !feat.geometry.coordinates) return;
-                const [lng, lat] = feat.geometry.coordinates;
-                const isActive = hasAnyFiltered ? feat.properties.isFiltered : true;
-
-                if (!isNaN(lat) && !isNaN(lng) && lat !== 0) {
-                    const marker = L.circleMarker([lat, lng], {
-                        radius: isActive ? 8 : 4,
-                        fillColor: isActive ? "#ff5722" : "#666",
-                        color: isActive ? "#fff" : "#999",
-                        weight: isActive ? 2 : 1,
-                        opacity: 1,
-                        fillOpacity: isActive ? 0.9 : 0.4,
-                        className: isActive ? 'active-specialist-marker' : ''
-                    }).addTo(window.markerLayer).bindPopup(feat.properties.name || "Specialist");
-
-                    if (isActive) activeMarkers.push(marker);
-                }
-            });
-
-            try {
-                if (activeMarkers.length > 0) {
-                    const activeGroup = L.featureGroup(activeMarkers);
-                    map.fitBounds(activeGroup.getBounds(), { padding: [100, 100], maxZoom: 10 });
-                } else {
-                    const bounds = window.markerLayer.getBounds();
-                    if (bounds.isValid()) {
-                        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 6 });
-                    }
-                }
-            } catch (err) {
-                console.error('[MAP_IFRAME] fitBounds error:', err);
+            var features = e.data.data || [];
+            if (features.length > 0) {
+                renderMarkers(features);
             }
         } else if (e.data.type === 'set-view') {
-            const { center, zoom } = e.data;
+            var center = e.data.center;
+            var zoom = e.data.zoom;
             if (center && center[0] !== undefined) {
                 map.setView([center[1], center[0]], zoom);
             }
