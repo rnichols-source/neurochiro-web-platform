@@ -61,7 +61,7 @@ interface SidebarProps {
 }
 
 import { createClient } from "@/lib/supabase";
-import { isFounderEmail } from "@/lib/founder";
+import { isFounderRole } from "@/lib/founder";
 
 export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProps) {
   const pathname = usePathname();
@@ -91,11 +91,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
           .eq('id', user.id)
           .single();
         
-        let role = profile?.role || 'admin';
-        // 🛡️ MASTER FOUNDER OVERRIDE
-        if (isFounderEmail(user.email)) {
-          role = 'founder';
-        }
+        const role = profile?.role || 'admin';
         setUserRole(role);
       }
 

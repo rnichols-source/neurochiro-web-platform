@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createServerSupabase } from '@/lib/supabase-server';
-import { isFounderEmail } from '@/lib/founder';
+import { isFounderRole } from '@/lib/founder';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,8 +21,8 @@ export default async function DashboardRedirect() {
 
   let role = (profile as any)?.role || 'doctor';
 
-  // 🛡️ FOUNDER OVERRIDE
-  if (isFounderEmail(user.email)) {
+  // 🛡️ FOUNDER OVERRIDE (role is set in DB at login time)
+  if (isFounderRole(role)) {
     role = 'founder';
   }
 

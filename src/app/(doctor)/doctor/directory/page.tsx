@@ -304,9 +304,9 @@ export default function ReferralNetworkPage() {
                          {actionLoading === doc.user_id ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Handshake className="w-3 h-3" /> Handshake</>}
                       </button>
                     ) : (
-                      <button className="py-3 bg-white border border-gray-100 text-gray-400 font-black rounded-xl text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                      <a href={`/directory/${doc.slug}`} className="py-3 bg-white border border-gray-100 text-gray-400 font-black rounded-xl text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:border-neuro-orange/30 hover:text-neuro-orange transition-all">
                          <Star className={cn("w-3 h-3", doc.isPartner ? "text-neuro-orange fill-neuro-orange" : "text-gray-300")} /> View Profile
-                      </button>
+                      </a>
                     )}
                  </div>
               </div>

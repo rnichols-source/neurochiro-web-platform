@@ -1,6 +1,21 @@
 /**
- * Centralized founder check. Uses FOUNDER_EMAILS env var (comma-separated).
- * Falls back to empty list if not set — no one gets founder access by default.
+ * Checks if the given role (from the database profiles.role column) has founder/admin privileges.
+ * This is the primary way to check for elevated access — always use this over email checks.
+ */
+export function isAdminRole(role: string | null | undefined): boolean {
+  if (!role) return false
+  return ['founder', 'admin', 'super_admin', 'regional_admin'].includes(role)
+}
+
+export function isFounderRole(role: string | null | undefined): boolean {
+  if (!role) return false
+  return role === 'founder'
+}
+
+/**
+ * Bootstrap check using env var. ONLY used during login to set the initial role
+ * for founder accounts. All other code should use isAdminRole/isFounderRole
+ * which check the database role.
  */
 const founderEmails = (process.env.NEXT_PUBLIC_FOUNDER_EMAILS || '')
   .split(',')

@@ -26,8 +26,7 @@ export const registrationSchema = z.object({
   role: z.enum([
     "student_free",
     "student_paid",
-    "doctor_non_member",
-    "doctor_member",
+    "doctor",
     "patient",
     "admin",
     "regional_admin",

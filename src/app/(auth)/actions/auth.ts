@@ -52,7 +52,7 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     'student': '/student/dashboard',
   }
 
-  // Handle tiered roles (doctor_pro, student_free, etc)
+  // Route to the correct dashboard based on role
   let destination = '/doctor/dashboard'; // Default
   if (dashboardMap[role]) {
     destination = dashboardMap[role];

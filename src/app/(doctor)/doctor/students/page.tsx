@@ -27,11 +27,12 @@ import {
   Eye,
   TrendingUp
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDoctorTier } from "@/context/DoctorTierContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { searchStudents } from "./actions";
 
 export default function StudentDiscovery() {
   const router = useRouter();
@@ -45,7 +46,33 @@ export default function StudentDiscovery() {
   const [messageSent, setMessageSent] = useState(false);
   const [isInterviewRequest, setIsInterviewRequest] = useState(false);
   const [isShadowingOffer, setIsShadowingOffer] = useState(false);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set(['std-1', 'std-3']));
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [students, setStudents] = useState<any[]>([]);
+  const [studentsLoading, setStudentsLoading] = useState(true);
+
+  useEffect(() => {
+    searchStudents(searchTerm || undefined)
+      .then((data) => {
+        // Normalize DB records to match the UI's expected shape
+        const normalized = (data || []).map((s: any) => ({
+          id: s.id,
+          name: s.name || s.full_name || 'Student',
+          school: s.school || 'Chiropractic College',
+          gradYear: s.graduation_year ? String(s.graduation_year) : 'TBD',
+          interests: s.interests || [],
+          skills: s.skills || [],
+          readinessScore: Math.min(100, 40 + (s.school ? 20 : 0) + (s.graduation_year ? 15 : 0) + ((s.interests?.length || 0) * 5) + (s.is_looking_for_mentorship ? 10 : 0)),
+          status: s.is_looking_for_mentorship ? "Seeking Mentorship" : "Active",
+          isFavorite: favorites.has(s.id),
+          location: s.location_city || '',
+          bio: '',
+          email: s.email,
+        }));
+        setStudents(normalized);
+      })
+      .catch(() => setStudents([]))
+      .finally(() => setStudentsLoading(false));
+  }, [searchTerm]);
 
   const toggleFavorite = (id: string) => {
     setFavorites(prev => {
@@ -56,79 +83,10 @@ export default function StudentDiscovery() {
     });
   };
 
-  const students = [
-    {
-      id: "std-1",
-      name: "Raymond Nichols",
-      school: "Life University",
-      gradYear: "2027",
-      interests: ["Pediatrics", "Neuro-Scanning"],
-      readinessScore: 98,
-      recentViews: 12,
-      activeTalks: 3,
-      status: "Interviewing",
-      isFavorite: true,
-      isElite: true,
-      clinicalStats: {
-        adjusted: "480+",
-        certification: "Level 3 scanning",
-        volumeCapacity: "120+ visits/week"
-      },
-      projectedROI: "$220k/year",
-      bio: "Focusing on the intersection of pediatric development and neurological integrity. Experience with Insight Scanning technology and chiropractic neurology principles.",
-      achievements: ["Dean's List", "Neurology Club President"],
-      location: "Marietta, GA"
-    },
-    {
-      id: "std-2",
-      name: "Sarah Miller",
-      school: "Palmer College",
-      gradYear: "2026",
-      interests: ["Sports Performance", "TBI"],
-      readinessScore: 94,
-      recentViews: 8,
-      activeTalks: 1,
-      status: "Active Discovery",
-      isFavorite: false,
-      isElite: true,
-      clinicalStats: {
-        adjusted: "350+",
-        certification: "TBI Protocol Cert",
-        volumeCapacity: "100+ visits/week"
-      },
-      projectedROI: "$185k/year",
-      bio: "Passionate about high-performance athletics and traumatic brain injury recovery. Looking for a clinical setting that prioritizes objective neuro-functional testing.",
-      achievements: ["Sports Council Lead", "Research Assistant"],
-      location: "Davenport, IA"
-    },
-    {
-      id: "std-3",
-      name: "Jason Lee",
-      school: "Parker University",
-      gradYear: "2028",
-      interests: ["General Practice", "HRV Mastery"],
-      readinessScore: 88,
-      recentViews: 4,
-      activeTalks: 0,
-      status: "Mentorship",
-      isFavorite: true,
-      isElite: false,
-      clinicalStats: {
-        adjusted: "120+",
-        certification: "HRV Mastery",
-        volumeCapacity: "60+ visits/week"
-      },
-      projectedROI: "$140k/year",
-      bio: "Incoming clinical intern with a strong foundation in heart rate variability and autonomic nervous system regulation. Seeking long-term mentorship in family-based neuro-wellness.",
-      achievements: ["Student Ambassador", "HRV Certified"],
-      location: "Dallas, TX"
-    }
-  ];
-
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           student.school.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          student.interests.some(i => i.toLowerCase().includes(searchTerm.toLowerCase()));
+                          student.interests.some((i: string) => i.toLowerCase().includes(searchTerm.toLowerCase()));
 
     if (activeFilter === 'top') return matchesSearch && student.readinessScore >= 90;
     if (activeFilter === 'pipeline') return matchesSearch && favorites.has(student.id);
@@ -339,7 +297,7 @@ export default function StudentDiscovery() {
                  <div className="flex items-center gap-4 mb-6">
                     <div className="relative">
                        <div className="w-16 h-16 rounded-2xl bg-neuro-navy/5 flex items-center justify-center text-neuro-navy font-black text-xl">
-                          {student.name.split(' ').map(n => n[0]).join('')}
+                          {student.name.split(' ').map((n: string) => n[0]).join('')}
                        </div>
                        {student.readinessScore >= 95 && (
                           <div className="absolute -top-2 -left-2 bg-red-500 text-white p-1.5 rounded-xl shadow-lg animate-bounce">

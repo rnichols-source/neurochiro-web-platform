@@ -10,7 +10,7 @@ import { logoutAdmin, triggerEmergencyLockdown } from "./SidebarActions";
 import { createClient } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import AdminSettingsModal from "@/components/admin/AdminSettingsModal";
-import { isFounderEmail } from "@/lib/founder";
+import { isFounderRole } from "@/lib/founder";
 
 export default function AdminLayout({
   children,
@@ -45,11 +45,9 @@ export default function AdminLayout({
           .eq('id', user.id)
           .single();
         
-        let role = profile?.role || 'admin';
-        // 🛡️ MASTER FOUNDER OVERRIDE
-        if (isFounderEmail(user.email)) {
-          role = 'founder';
-          setUserName('Raymond Nichols');
+        const role = profile?.role || 'admin';
+        if (isFounderRole(role)) {
+          setUserName(profile?.full_name || 'Raymond Nichols');
         } else {
           setUserName(profile?.full_name || 'Administrator');
         }

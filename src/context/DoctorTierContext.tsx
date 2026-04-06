@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo, useCallback } from 'react';
 import { MembershipTier } from '@/types/directory';
+import { getDoctorTier } from '@/lib/tier';
 
 interface DoctorTierContextType {
   tier: MembershipTier;
@@ -9,23 +10,30 @@ interface DoctorTierContextType {
   isMember: boolean;
   isGrowth: boolean;
   isPro: boolean;
+  loading: boolean;
 }
 
 const DoctorTierContext = createContext<DoctorTierContextType | undefined>(undefined);
 
 export function DoctorTierProvider({ children }: { children: ReactNode }) {
-  const [tier, setTierState] = useState<MembershipTier>('growth');
+  const [tier, setTierState] = useState<MembershipTier>('starter');
+  const [loading, setLoading] = useState(true);
 
+  // Load tier from server (database) on mount — not from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem("nc_doctor_tier") as MembershipTier;
-    if (saved) {
-      setTimeout(() => setTierState(saved), 0);
-    }
+    getDoctorTier()
+      .then(({ tier: serverTier }) => {
+        setTierState(serverTier as MembershipTier);
+      })
+      .catch(() => {
+        setTierState('starter');
+      })
+      .finally(() => setLoading(false));
   }, []);
 
+  // setTier is kept for the admin PerspectiveSwitcher dev tool only
   const setTier = useCallback((t: MembershipTier) => {
     setTierState(t);
-    localStorage.setItem("nc_doctor_tier", t);
   }, []);
 
   const value = useMemo(() => ({
@@ -33,8 +41,9 @@ export function DoctorTierProvider({ children }: { children: ReactNode }) {
     setTier,
     isMember: tier === 'starter' || tier === 'growth' || tier === 'pro',
     isGrowth: tier === 'growth' || tier === 'pro',
-    isPro: tier === 'pro'
-  }), [tier, setTier]);
+    isPro: tier === 'pro',
+    loading,
+  }), [tier, setTier, loading]);
 
   return (
     <DoctorTierContext.Provider value={value}>

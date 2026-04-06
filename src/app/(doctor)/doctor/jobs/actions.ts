@@ -3,6 +3,7 @@
 import { createServerSupabase } from '@/lib/supabase-server';
 import { revalidatePath } from 'next/cache';
 import { Automations } from '@/lib/automations';
+import { requireTier } from '@/lib/tier';
 
 /**
  * 1. JOB POSTINGS ACTIONS
@@ -30,6 +31,8 @@ export async function getJobPostings() {
 }
 
 export async function createJobPosting(formData: any) {
+  await requireTier('growth'); // Job posting requires Growth or Pro tier
+
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");

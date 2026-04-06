@@ -3,6 +3,7 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import { stripe, PLANS } from '@/lib/stripe'
+import { requireTier } from '@/lib/tier'
 
 export async function getDoctorSeminars() {
   const supabase = createServerSupabase()
@@ -120,6 +121,8 @@ export async function updateSeminarAction(seminarId: string, formData: FormData)
 }
 
 export async function createSeminarAction(formData: FormData) {
+  await requireTier('growth'); // Seminar hosting requires Growth or Pro tier
+
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Unauthorized")

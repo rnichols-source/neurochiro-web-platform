@@ -18,7 +18,7 @@ import { useStudentTier, StudentTier } from "@/context/StudentTierContext";
 import { MembershipTier } from "@/types/directory";
 
 import { createClient } from "@/lib/supabase";
-import { isFounderEmail } from "@/lib/founder";
+import { isAdminRole } from "@/lib/founder";
 
 export default function PerspectiveSwitcher() {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,18 +36,13 @@ export default function PerspectiveSwitcher() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        if (isFounderEmail(user.email)) {
-          setIsDev(true);
-          return;
-        }
-
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)
           .single();
-        
-        if (profile && ['admin', 'founder', 'super_admin', 'regional_admin'].includes(profile.role)) {
+
+        if (profile && isAdminRole(profile.role)) {
           setIsDev(true);
           return;
         }
@@ -97,9 +92,9 @@ export default function PerspectiveSwitcher() {
   const isStudentPath = pathname.includes("/student");
 
   const doctorTiers: { id: MembershipTier; label: string; desc: string, role: string }[] = [
-    { id: "starter", label: "Starter", desc: "Limited visibility & tools", role: "doctor_starter" },
-    { id: "growth", label: "Growth", desc: "Full recruiting & directory", role: "doctor_growth" },
-    { id: "pro", label: "Elite Pro", desc: "Advanced analytics & priority", role: "doctor_pro" }
+    { id: "starter", label: "Starter", desc: "Standard listing & profile ($49/mo)", role: "doctor" },
+    { id: "growth", label: "Growth", desc: "Recruiting & seminars ($99/mo)", role: "doctor" },
+    { id: "pro", label: "Pro", desc: "Full analytics & priority ($199/mo)", role: "doctor" }
   ];
 
   const studentTiers: { id: StudentTier; label: string; desc: string, role: string }[] = [

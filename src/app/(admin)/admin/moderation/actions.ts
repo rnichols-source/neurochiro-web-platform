@@ -4,7 +4,7 @@ import { createServerSupabase } from '@/lib/supabase-server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
 import { AuditLog } from '@/types/admin';
-import { isFounderEmail } from '@/lib/founder';
+import { isAdminRole } from '@/lib/founder';
 
 export interface ModerationAlert {
   id: string;
@@ -44,9 +44,8 @@ async function checkAdminAuth() {
     .single() as { data: { role: string } | null };
 
   // Harden isAdmin logic with metadata fallback and explicit string checks
-  const isAdmin = (profile && 'role' in profile && (profile.role === 'admin' || profile.role === 'founder')) ||
-                  (user.user_metadata?.role === 'admin' || user.user_metadata?.role === 'founder') ||
-                  isFounderEmail(user.email);
+  const isAdmin = (profile && 'role' in profile && isAdminRole(profile.role)) ||
+                  isAdminRole(user.user_metadata?.role as string);
   
   if (!isAdmin) throw new Error("Forbidden: Admin access required");
   return user;

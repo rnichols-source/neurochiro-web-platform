@@ -1,7 +1,7 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
-import { isFounderEmail } from '@/lib/founder'
+import { isFounderRole } from '@/lib/founder'
 
 export async function getDoctorDashboardStats() {
   try {
@@ -13,7 +13,7 @@ export async function getDoctorDashboardStats() {
     // Parallelize fetches for profile, practice info, seminars, jobs, and leads
     const [profileRes, doctorRes, seminarsRes, jobsRes, leadsRes] = await Promise.all([
       supabase.from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
-      supabase.from('doctors').select('clinic_name, slug, city, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count').eq('user_id', user.id).single(),
+      supabase.from('doctors').select('clinic_name, slug, city, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count, membership_tier').eq('user_id', user.id).single(),
       supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
       supabase.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
       supabase.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id)
@@ -48,11 +48,12 @@ export async function getDoctorDashboardStats() {
     if (doctor?.instagram_url) completeness += weights.instagram_url;
     if (doctor?.facebook_url) completeness += weights.facebook_url;
 
-    const userRole = (profile as any)?.role || 'doctor_starter';
-    const isFounder = isFounderEmail(user.email);
+    const userRole = profile?.role || 'doctor';
+    const membershipTier = doctor?.membership_tier || 'starter';
+    const isFounder = isFounderRole(userRole);
     const isAdmin = ['admin', 'super_admin', 'founder', 'regional_admin'].includes(userRole);
-    const isPro = isAdmin || isFounder || userRole === 'doctor_pro';
-    const isGrowth = isPro || userRole === 'doctor_growth';
+    const isPro = isAdmin || isFounder || membershipTier === 'pro';
+    const isGrowth = isPro || membershipTier === 'growth';
 
     // 4. Secure Vendor Offers (SSR Gating)
     const vendorOffers = isPro ? [
@@ -81,11 +82,12 @@ export async function getDoctorDashboardStats() {
         name: profile?.full_name || user.email?.split('@')[0] || "Doctor",
         slug: doctor?.slug || "",
         clinicName: doctor?.clinic_name || "My Practice",
-        isMember: isFounder || isAdmin || ['doctor_pro', 'doctor_growth', 'doctor_starter', 'doctor_member'].includes(userRole),
+        isMember: isFounder || isAdmin || userRole === 'doctor',
         isPro,
         isGrowth,
         role: userRole,
-        status: (profile?.tier && profile?.tier !== 'free') ? 'active' : 'inactive'
+        tier: membershipTier,
+        status: membershipTier !== 'starter' ? 'active' : 'starter'
       },
       vendorOffers,
       doctor: {
