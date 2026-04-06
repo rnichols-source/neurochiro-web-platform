@@ -353,7 +353,7 @@ export default function GlobalNetworkMap({
       <iframe 
         ref={iframeRef}
         id="network-map-iframe"
-        src="/network-map.html"
+        src={`/network-map.html${initialDoctors.length > 0 ? '?autoload=doctors' : ''}`}
         loading="lazy"
         className="absolute inset-0 w-full h-full border-none"
         title="Global Network Map"

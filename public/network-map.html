@@ -123,7 +123,11 @@
 
     map.whenReady(function() {
         reportReady();
-        loadDoctors();
+        // Only auto-load doctors if the parent page requests it via URL param
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('autoload') === 'doctors') {
+            loadDoctors();
+        }
     });
 
     // Also still listen for postMessage for filtered results
