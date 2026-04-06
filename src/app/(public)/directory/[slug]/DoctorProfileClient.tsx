@@ -21,14 +21,25 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
-import { onReferralSentAction } from "@/app/actions/automations";
+import { sendReferral } from "@/app/actions/referrals";
+import { submitPatientStory, getApprovedStories } from "@/app/actions/patient-stories";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import GoogleReviews from "@/components/directory/GoogleReviews";
 import Image from "next/image";
 
 export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slug: string }) {
   const [referring, setReferring] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
+  const [referralSent, setReferralSent] = useState(false);
+  const [referralPatientName, setReferralPatientName] = useState('');
+  const [referralNotes, setReferralNotes] = useState('');
   const [session, setSession] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [stories, setStories] = useState<any[]>([]);
+  const [showStoryForm, setShowStoryForm] = useState(false);
+  const [storySubmitted, setStorySubmitted] = useState(false);
+  const [storyForm, setStoryForm] = useState({ patientFirstName: '', conditionBefore: '', outcomeAfter: '', storyText: '' });
+  const [submittingStory, setSubmittingStory] = useState(false);
   const supabase = createClient();
   const [modalState, setModalState] = useState({
     isOpen: false,
@@ -40,26 +51,45 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
     const fetchSession = async () => {
       const { data } = await supabase.auth.getSession();
       setSession(data.session);
+      if (data.session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.session.user.id)
+          .single();
+        setUserRole(profile?.role || null);
+      }
     };
     fetchSession();
-  }, [supabase]);
+    getApprovedStories(doctor.id).then(setStories);
+  }, [supabase, doctor.id]);
+
+  const handleSendReferral = async () => {
+    setReferring(true);
+    try {
+      await sendReferral(doctor.id, referralPatientName || undefined, referralNotes || undefined);
+      setReferralSent(true);
+      setTimeout(() => {
+        setShowReferralModal(false);
+        setReferralSent(false);
+        setReferralPatientName('');
+        setReferralNotes('');
+      }, 2000);
+    } catch (err: any) {
+      alert(err.message || 'Failed to send referral');
+    }
+    setReferring(false);
+  };
 
   const handleReferral = async (e: React.FormEvent) => {
     e.preventDefault();
     setReferring(true);
     try {
-      await onReferralSentAction(
-        session?.user?.id || "guest",
-        session?.user?.user_metadata?.full_name || "Guest User",
-        doctor.id,
-        doctor.email || "doctor@example.com",
-        doctor.phone || "555-0199",
-        "Patient Referral"
-      );
+      await sendReferral(doctor.id, 'Patient Referral');
       setModalState({
         isOpen: true,
         title: "Referral Sent",
-        message: `Your referral for ${doctor?.first_name} ${doctor?.last_name} has been processed successfully.`
+        message: `Your referral for Dr. ${doctor?.first_name} ${doctor?.last_name} has been processed successfully.`
       });
     } catch (err) {
       console.error(err);
@@ -196,6 +226,60 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                   )}
                 </div>
 
+                {/* Refer a Patient Button (visible to logged-in doctors viewing another doctor) */}
+                {session && userRole === 'doctor' && doctor.user_id !== session.user.id && (
+                  <button
+                    onClick={() => setShowReferralModal(true)}
+                    className="w-full mt-4 flex items-center gap-4 p-5 bg-neuro-orange/10 rounded-3xl border border-neuro-orange/20 group hover:bg-neuro-orange/20 hover:border-neuro-orange/40 transition-all text-left"
+                  >
+                    <div className="p-2.5 bg-neuro-orange/20 rounded-xl text-neuro-orange group-hover:bg-neuro-orange/30 transition-all">
+                      <Users className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-bold text-neuro-orange block">Refer a Patient</span>
+                  </button>
+                )}
+
+                {/* Referral Modal */}
+                <AnimatePresence>
+                  {showReferralModal && (
+                    <>
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowReferralModal(false)} className="fixed inset-0 z-[500] bg-black/60 backdrop-blur-sm" />
+                      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[501] w-full max-w-md p-6">
+                        <div className="bg-white rounded-3xl p-8 shadow-2xl">
+                          {referralSent ? (
+                            <div className="text-center py-8">
+                              <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                              <h3 className="text-xl font-black text-neuro-navy">Referral Sent!</h3>
+                              <p className="text-gray-500 mt-2">Dr. {doctor.last_name} has been notified.</p>
+                            </div>
+                          ) : (
+                            <>
+                              <h3 className="text-xl font-black text-neuro-navy mb-1">Refer a Patient</h3>
+                              <p className="text-gray-500 text-sm mb-6">Send a referral to Dr. {doctor.first_name} {doctor.last_name}</p>
+                              <div className="space-y-4">
+                                <div>
+                                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Patient Name (optional)</label>
+                                  <input type="text" value={referralPatientName} onChange={e => setReferralPatientName(e.target.value)} className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" placeholder="e.g. John Smith" />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Notes (optional)</label>
+                                  <textarea value={referralNotes} onChange={e => setReferralNotes(e.target.value)} className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange h-24 resize-none" placeholder="e.g. Patient relocating to your area, needs continued care..." />
+                                </div>
+                                <div className="flex gap-3">
+                                  <button onClick={() => setShowReferralModal(false)} className="flex-1 py-3 border border-gray-200 rounded-xl font-bold text-gray-500 hover:bg-gray-50 transition-colors">Cancel</button>
+                                  <button onClick={handleSendReferral} disabled={referring} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold hover:bg-neuro-orange/90 transition-colors disabled:opacity-50">
+                                    {referring ? 'Sending...' : 'Send Referral'}
+                                  </button>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+
                 {/* Claim Profile Section for Unclaimed Listings */}
                 {!doctor.user_id && (
                   <div className="mt-8 p-6 bg-neuro-orange/10 border border-neuro-orange/30 rounded-[2rem] relative overflow-hidden group">
@@ -303,6 +387,68 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                   placeId={doctor.google_place_id} 
                   doctorName={`${doctor.first_name} ${doctor.last_name}`} 
                 />
+              </section>
+
+              {/* Patient Transformation Stories */}
+              <section className="bg-white rounded-[3rem] border border-gray-100 p-12 shadow-sm">
+                <h3 className="text-2xl font-heading font-black text-neuro-navy mb-8 flex items-center gap-3">
+                  <Zap className="w-6 h-6 text-neuro-orange" />
+                  Patient Transformation Stories
+                </h3>
+
+                {stories.length > 0 ? (
+                  <div className="space-y-6 mb-8">
+                    {stories.map((story) => (
+                      <div key={story.id} className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-sm font-black text-neuro-navy">{story.patient_first_name}</span>
+                          <span className="text-xs text-gray-400">&middot;</span>
+                          <span className="text-xs text-gray-500">{story.condition_before} &rarr; {story.outcome_after}</span>
+                        </div>
+                        <p className="text-gray-600 text-sm leading-relaxed italic">&ldquo;{story.story_text}&rdquo;</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-sm mb-8">No stories yet. Be the first to share your experience!</p>
+                )}
+
+                {storySubmitted ? (
+                  <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
+                    <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                    <p className="font-bold text-green-700">Thank you for sharing your story!</p>
+                    <p className="text-green-600 text-sm">It will appear after review.</p>
+                  </div>
+                ) : showStoryForm ? (
+                  <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 space-y-4">
+                    <h4 className="font-bold text-neuro-navy">Share Your Experience</h4>
+                    <input type="text" placeholder="Your first name" value={storyForm.patientFirstName} onChange={e => setStoryForm(f => ({...f, patientFirstName: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" required />
+                    <div className="grid grid-cols-2 gap-3">
+                      <input type="text" placeholder="Condition before (e.g. chronic migraines)" value={storyForm.conditionBefore} onChange={e => setStoryForm(f => ({...f, conditionBefore: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" required />
+                      <input type="text" placeholder="Outcome after (e.g. headache-free)" value={storyForm.outcomeAfter} onChange={e => setStoryForm(f => ({...f, outcomeAfter: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" required />
+                    </div>
+                    <textarea placeholder="Tell your story..." value={storyForm.storyText} onChange={e => setStoryForm(f => ({...f, storyText: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange h-28 resize-none" required />
+                    <div className="flex gap-3">
+                      <button onClick={() => setShowStoryForm(false)} className="px-6 py-3 border border-gray-200 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors">Cancel</button>
+                      <button
+                        disabled={submittingStory || !storyForm.patientFirstName || !storyForm.conditionBefore || !storyForm.outcomeAfter || !storyForm.storyText}
+                        onClick={async () => {
+                          setSubmittingStory(true);
+                          const result = await submitPatientStory(doctor.id, storyForm);
+                          setSubmittingStory(false);
+                          if (result.success) { setStorySubmitted(true); setShowStoryForm(false); }
+                        }}
+                        className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-bold hover:bg-neuro-orange/90 transition-colors disabled:opacity-50"
+                      >
+                        {submittingStory ? 'Submitting...' : 'Submit Story'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button onClick={() => setShowStoryForm(true)} className="px-6 py-3 bg-neuro-navy text-white rounded-xl font-bold text-sm hover:bg-neuro-navy/90 transition-colors">
+                    Share Your Story
+                  </button>
+                )}
               </section>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

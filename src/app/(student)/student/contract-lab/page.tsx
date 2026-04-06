@@ -35,12 +35,14 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getContractsAction, saveContractAnalysisAction } from "./actions";
+import { getContractsAction, analyzeContractAction } from "./actions";
 
 export default function ContractLabPage() {
   const [activeTab, setActiveTab] = useState("intelligence");
   const [isUploading, setIsUploading] = useState(false);
+  const [contractText, setContractText] = useState('');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [riskScore, setRiskScore] = useState<number | null>(null);
   const [pastContracts, setPastContracts] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
@@ -59,53 +61,27 @@ export default function ContractLabPage() {
     loadHistory();
   }, []);
 
-  // MOCK DATA: Contract Intelligence Result
-  const mockAnalysis = {
-    overallGrade: "C+",
-    summary: "This contract heavily favors the clinic owner. While the base salary is fair, the non-compete and termination clauses are highly restrictive.",
-    clauses: [
-      {
-        type: "Base Salary",
-        status: "safe",
-        text: "$75,000 guaranteed for year 1.",
-        insight: "Standard regional average. Guaranteed floor provides safety while you build your patient base."
-      },
-      {
-        type: "Bonus Structure",
-        status: "warning",
-        text: "20% of collections over $20,000/mo.",
-        insight: "The threshold is high. You will need to see ~120 patients/week consistently before earning a bonus.",
-        negotiation: "Ask to lower the threshold to $15k for the first 6 months to incentivize growth."
-      },
-      {
-        type: "Non-Compete Radius",
-        status: "danger",
-        text: "15 miles for 2 years post-termination.",
-        insight: "Highly restrictive. This covers the entire metropolitan area and forces relocation if you leave.",
-        negotiation: "Counter with 5 miles for 1 year, or ask to restrict it to a specific zip code."
-      },
-      {
-        type: "Mentorship",
-        status: "danger",
-        text: "No defined mentorship hours.",
-        insight: "Verbal promises of training do not hold up. You risk being used for volume without development.",
-        negotiation: "Require '2 hours of dedicated 1-on-1 clinical review per week' added to the schedule."
-      }
-    ]
-  };
-
-  const handleSimulateUpload = async () => {
+  const handleAnalyzeContract = async () => {
+    if (!contractText.trim() || contractText.trim().length < 100) {
+      setAnalysisError("Please paste at least 100 characters of contract text.");
+      return;
+    }
     setIsUploading(true);
-    setTimeout(async () => {
-      setIsUploading(false);
-      setAnalysisResult(mockAnalysis);
-      try {
-        const saved = await saveContractAnalysisAction("Analysis - " + new Date().toLocaleDateString(), mockAnalysis);
-        setPastContracts([saved, ...pastContracts]);
-      } catch (e) {
-        console.error("Failed to save analysis:", e);
+    setAnalysisError(null);
+    try {
+      const result = await analyzeContractAction(contractText);
+      if (result.error) {
+        setAnalysisError(result.error);
+      } else if (result.analysis) {
+        setAnalysisResult(result.analysis);
+        // Refresh history
+        const history = await getContractsAction();
+        setPastContracts(history);
       }
-    }, 2500);
+    } catch (err: any) {
+      setAnalysisError(err.message || "Analysis failed.");
+    }
+    setIsUploading(false);
   };
 
   return (
@@ -171,24 +147,32 @@ export default function ContractLabPage() {
                         <p className="text-sm text-gray-500 mb-8">Upload your PDF or paste the text. Our system will decode the legal jargon into clinical reality.</p>
                         
                         {!analysisResult ? (
-                          <div 
-                            onClick={handleSimulateUpload}
-                            className="flex-1 border-2 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center p-8 text-center cursor-pointer hover:border-neuro-orange hover:bg-neuro-orange/5 transition-all group"
-                          >
-                             {isUploading ? (
-                               <div className="flex flex-col items-center">
-                                 <div className="w-12 h-12 border-4 border-neuro-orange/30 border-t-neuro-orange rounded-full animate-spin mb-4"></div>
-                                 <p className="font-bold text-neuro-navy uppercase tracking-widest text-xs">Analyzing Clauses...</p>
-                               </div>
-                             ) : (
-                               <>
-                                 <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-white group-hover:shadow-md transition-all">
-                                    <Upload className="w-8 h-8 text-gray-400 group-hover:text-neuro-orange" />
-                                 </div>
-                                 <h3 className="font-black text-neuro-navy mb-2">Drop PDF Here</h3>
-                                 <p className="text-xs text-gray-400">or click to browse</p>
-                               </>
-                             )}
+                          <div className="flex-1 flex flex-col gap-4">
+                            <textarea
+                              value={contractText}
+                              onChange={(e) => setContractText(e.target.value)}
+                              placeholder="Paste your employment contract text here..."
+                              className="flex-1 p-4 border-2 border-gray-200 rounded-2xl resize-none focus:outline-neuro-orange focus:border-neuro-orange text-sm min-h-[200px]"
+                            />
+                            {analysisError && (
+                              <p className="text-red-500 text-xs font-bold">{analysisError}</p>
+                            )}
+                            <button
+                              onClick={handleAnalyzeContract}
+                              disabled={isUploading || !contractText.trim()}
+                              className="w-full py-4 bg-neuro-navy text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-neuro-navy/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                              {isUploading ? (
+                                <>
+                                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                  Analyzing with AI...
+                                </>
+                              ) : (
+                                <>
+                                  <ShieldAlert className="w-4 h-4" /> Analyze Contract
+                                </>
+                              )}
+                            </button>
                           </div>
                         ) : (
                           <div className="flex-1 bg-green-50 border border-green-200 rounded-[2rem] flex flex-col items-center justify-center p-8 text-center">
@@ -224,7 +208,7 @@ export default function ContractLabPage() {
                                        <p className="text-[10px] text-gray-400">{new Date(contract.created_at).toLocaleDateString()}</p>
                                     </div>
                                     <span className="text-xs font-black text-orange-500 italic ml-4">
-                                       {contract.analysis_results?.overallGrade || 'N/A'}
+                                       {contract.analysis_results?.overallScore || contract.analysis_results?.overallGrade || 'N/A'}
                                     </span>
                                  </button>
                               ))
@@ -247,33 +231,45 @@ export default function ContractLabPage() {
                                 <p className="text-gray-500 font-medium">{analysisResult.summary}</p>
                               </div>
                               <div className="text-center shrink-0 ml-8">
-                                <span className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Contract Grade</span>
-                                <span className="text-5xl font-black text-orange-500 italic">{analysisResult.overallGrade}</span>
+                                <span className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Score</span>
+                                <span className="text-5xl font-black text-orange-500 italic">{analysisResult.overallScore || analysisResult.overallGrade || 'N/A'}</span>
+                                {analysisResult.overallRecommendation && (
+                                  <span className={`block text-xs font-black uppercase tracking-widest mt-1 ${analysisResult.overallRecommendation === 'Accept' ? 'text-green-500' : analysisResult.overallRecommendation === 'Walk Away' ? 'text-red-500' : 'text-orange-500'}`}>{analysisResult.overallRecommendation}</span>
+                                )}
                               </div>
                            </div>
 
                            <div className="space-y-6">
-                              {analysisResult.clauses.map((clause: any, i: number) => (
-                                <div key={i} className={`p-6 rounded-2xl border ${clause.status === 'safe' ? 'bg-green-50/50 border-green-100' : clause.status === 'warning' ? 'bg-orange-50/50 border-orange-100' : 'bg-red-50/50 border-red-100'}`}>
+                              {(analysisResult.clauses || []).map((clause: any, i: number) => {
+                                const risk = clause.risk || clause.status || 'Medium';
+                                const isLow = risk === 'Low' || risk === 'safe';
+                                const isHigh = risk === 'High' || risk === 'Critical' || risk === 'danger';
+                                return (
+                                <div key={i} className={`p-6 rounded-2xl border ${isLow ? 'bg-green-50/50 border-green-100' : isHigh ? 'bg-red-50/50 border-red-100' : 'bg-orange-50/50 border-orange-100'}`}>
                                    <div className="flex items-start gap-4">
                                       <div className="mt-1">
-                                         {clause.status === 'safe' && <ShieldCheck className="w-6 h-6 text-green-500" />}
-                                         {clause.status === 'warning' && <AlertTriangle className="w-6 h-6 text-orange-500" />}
-                                         {clause.status === 'danger' && <ShieldAlert className="w-6 h-6 text-red-500" />}
+                                         {isLow && <ShieldCheck className="w-6 h-6 text-green-500" />}
+                                         {!isLow && !isHigh && <AlertTriangle className="w-6 h-6 text-orange-500" />}
+                                         {isHigh && <ShieldAlert className="w-6 h-6 text-red-500" />}
                                       </div>
                                       <div className="flex-1">
-                                         <h4 className="font-black text-neuro-navy mb-1 uppercase tracking-widest text-xs">{clause.type}</h4>
-                                         <p className="text-lg font-bold text-gray-800 mb-3">"{clause.text}"</p>
-                                         
+                                         <div className="flex items-center gap-2 mb-1">
+                                           <h4 className="font-black text-neuro-navy uppercase tracking-widest text-xs">{clause.name || clause.type}</h4>
+                                           <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${isLow ? 'bg-green-100 text-green-600' : isHigh ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'}`}>{risk}</span>
+                                         </div>
+                                         <p className="text-sm font-bold text-gray-800 mb-3">{clause.finding || clause.text}</p>
+
                                          <div className="space-y-3">
+                                            {(clause.insight || clause.recommendation) && (
                                             <div className="flex gap-2">
                                               <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
                                               <div>
-                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">Why it matters</span>
-                                                <p className="text-sm text-gray-600 leading-relaxed">{clause.insight}</p>
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">Recommendation</span>
+                                                <p className="text-sm text-gray-600 leading-relaxed">{clause.recommendation || clause.insight}</p>
                                               </div>
                                             </div>
-                                            
+                                            )}
+
                                             {clause.negotiation && (
                                               <div className="flex gap-2 mt-4 pt-4 border-t border-black/5">
                                                 <MessageSquare className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
@@ -287,7 +283,8 @@ export default function ContractLabPage() {
                                       </div>
                                    </div>
                                 </div>
-                              ))}
+                              );
+                              })}
                            </div>
                         </div>
                      ) : (

@@ -859,17 +859,119 @@ export interface Database {
         Row: {
           id: string
           user_id: string
+          energy_level: number | null
+          pain_level: number | null
+          sleep_quality: number | null
+          notes: string | null
+          log_date: string | null
           created_at: string
         }
         Insert: {
           id?: string
           user_id: string
+          energy_level?: number | null
+          pain_level?: number | null
+          sleep_quality?: number | null
+          notes?: string | null
+          log_date?: string | null
           created_at?: string
         }
         Update: {
           id?: string
           user_id?: string
+          energy_level?: number | null
+          pain_level?: number | null
+          sleep_quality?: number | null
+          notes?: string | null
+          log_date?: string | null
           created_at?: string
+        }
+        Relationships: []
+      }
+      patient_stories: {
+        Row: {
+          id: string
+          doctor_id: string
+          patient_first_name: string
+          condition_before: string
+          outcome_after: string
+          story_text: string
+          approved: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          doctor_id: string
+          patient_first_name: string
+          condition_before: string
+          outcome_after: string
+          story_text: string
+          approved?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          doctor_id?: string
+          patient_first_name?: string
+          condition_before?: string
+          outcome_after?: string
+          story_text?: string
+          approved?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      courses: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          modules: Json
+          tier_required: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description: string
+          modules?: Json
+          tier_required?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          modules?: Json
+          tier_required?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      course_progress: {
+        Row: {
+          id: string
+          user_id: string
+          course_id: string
+          completed_modules: Json
+          started_at: string
+          completed_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          course_id: string
+          completed_modules?: Json
+          started_at?: string
+          completed_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          course_id?: string
+          completed_modules?: Json
+          started_at?: string
+          completed_at?: string | null
         }
         Relationships: []
       }

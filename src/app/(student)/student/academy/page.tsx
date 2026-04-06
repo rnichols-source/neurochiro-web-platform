@@ -1,79 +1,202 @@
 "use client";
 
-import { 
-  GraduationCap, 
-  Sparkles,
-  Lock,
-  ArrowLeft,
-  Loader2,
-  Rocket,
-  ShieldCheck,
-  Zap
-} from "lucide-react";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { GraduationCap, BookOpen, CheckCircle2, Lock, ChevronRight, Clock } from "lucide-react";
+import { getCourses, getCourseById, completeModule } from "./actions";
 
-export default function AcademyComingSoon() {
-  return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Background Glows */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-neuro-orange/5 blur-[120px] rounded-full -mr-40 -mt-40 pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-neuro-navy/5 blur-[100px] rounded-full -ml-32 -mb-32 pointer-events-none"></div>
+function cn(...inputs: any[]) { return inputs.filter(Boolean).join(" "); }
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-3xl w-full text-center relative z-10"
-      >
-        <div className="w-24 h-24 bg-neuro-orange/10 rounded-[2.5rem] flex items-center justify-center text-neuro-orange mx-auto mb-10 shadow-inner">
-          <Rocket className="w-12 h-12" />
-        </div>
+export default function AcademyPage() {
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [selectedModule, setSelectedModule] = useState<any>(null);
+  const [completing, setCompleting] = useState(false);
 
-        <div className="space-y-6 mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-neuro-navy text-white rounded-full mb-4">
-            <Lock className="w-3 h-3 text-neuro-orange" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Deployment in Progress</span>
+  useEffect(() => {
+    getCourses().then((data) => {
+      setCourses(data);
+      setLoading(false);
+    });
+  }, []);
+
+  const openCourse = async (courseId: string) => {
+    const course = await getCourseById(courseId);
+    setSelectedCourse(course);
+    setSelectedModule(null);
+  };
+
+  const handleCompleteModule = async () => {
+    if (!selectedCourse || !selectedModule) return;
+    setCompleting(true);
+    await completeModule(selectedCourse.id, selectedModule.id);
+    // Refresh
+    const updated = await getCourseById(selectedCourse.id);
+    setSelectedCourse(updated);
+    const allCourses = await getCourses();
+    setCourses(allCourses);
+    setCompleting(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+        <div className="w-10 h-10 border-4 border-neuro-orange border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Course Detail View
+  if (selectedCourse) {
+    const completedIds = selectedCourse.progress?.completed_modules || [];
+
+    return (
+      <div className="space-y-8 pb-20">
+        <button onClick={() => { setSelectedCourse(null); setSelectedModule(null); }} className="text-sm font-bold text-neuro-orange hover:underline">
+          &larr; Back to Courses
+        </button>
+
+        <header>
+          <h1 className="text-3xl font-heading font-black text-neuro-navy uppercase tracking-tight">{selectedCourse.title}</h1>
+          <p className="text-gray-500 mt-2">{selectedCourse.description}</p>
+          <div className="flex items-center gap-4 mt-3">
+            <span className="text-xs font-bold text-gray-400">{selectedCourse.moduleCount} modules</span>
+            <span className="text-xs font-bold text-green-500">{selectedCourse.completedCount} completed</span>
           </div>
-          
-          <h1 className="text-5xl md:text-6xl font-heading font-black text-neuro-navy leading-tight tracking-tight">
-            The Academy is <br/>
-            <span className="text-neuro-orange text-glow-orange">Coming Soon.</span>
-          </h1>
-          
-          <p className="text-gray-500 text-lg md:text-xl font-medium max-w-xl mx-auto leading-relaxed">
-            We're putting the finishing touches on the world's most advanced clinical neurology learning library. Get ready for 100+ hours of proprietary protocols.
-          </p>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-          {[
-            { icon: Zap, label: "Clinical Protocols", desc: "Step-by-step scans" },
-            { icon: ShieldCheck, label: "Research Vault", desc: "Peer-reviewed data" },
-            { icon: GraduationCap, label: "Certifications", desc: "Mastery badges" }
-          ].map((item, i) => (
-            <div key={i} className="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-3">
-              <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-neuro-navy mx-auto">
-                <item.icon className="w-5 h-5" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Module List */}
+          <div className="space-y-2">
+            {selectedCourse.modules.map((mod: any, i: number) => {
+              const isCompleted = Array.isArray(completedIds) && completedIds.includes(mod.id);
+              return (
+                <button
+                  key={mod.id}
+                  onClick={() => setSelectedModule(mod)}
+                  className={cn(
+                    "w-full text-left p-4 rounded-2xl border transition-all",
+                    selectedModule?.id === mod.id ? "bg-neuro-orange/10 border-neuro-orange/30" : "bg-white border-gray-100 hover:border-gray-200",
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black",
+                      isCompleted ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-500"
+                    )}>
+                      {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("font-bold text-sm", isCompleted ? "text-green-600" : "text-neuro-navy")}>{mod.title}</p>
+                      <p className="text-gray-400 text-xs truncate">{mod.description}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Module Content */}
+          <div className="lg:col-span-2">
+            {selectedModule ? (
+              <div className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock className="w-4 h-4 text-gray-400" />
+                  <span className="text-xs font-bold text-gray-400">{selectedModule.readTime}</span>
+                </div>
+                <h2 className="text-2xl font-black text-neuro-navy mb-4">{selectedModule.title}</h2>
+                <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed mb-8">
+                  <p>{selectedModule.content}</p>
+                </div>
+                {Array.isArray(completedIds) && completedIds.includes(selectedModule.id) ? (
+                  <div className="flex items-center gap-2 text-green-500 font-bold text-sm">
+                    <CheckCircle2 className="w-5 h-5" /> Module Completed
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleCompleteModule}
+                    disabled={completing}
+                    className="px-8 py-4 bg-neuro-navy text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-neuro-navy/90 transition-all disabled:opacity-50"
+                  >
+                    {completing ? 'Saving...' : 'Mark as Complete'}
+                  </button>
+                )}
               </div>
-              <h4 className="font-bold text-sm text-neuro-navy uppercase tracking-tight">{item.label}</h4>
-              <p className="text-[10px] text-gray-400 font-medium">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link 
-            href="/student/dashboard"
-            className="flex items-center gap-2 px-8 py-4 bg-neuro-navy text-white font-black rounded-2xl hover:bg-neuro-navy-light transition-all shadow-xl uppercase tracking-widest text-xs group"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Dashboard
-          </Link>
-          <div className="flex items-center gap-3 px-6 py-4 bg-white border border-gray-100 rounded-2xl">
-            <Loader2 className="w-4 h-4 text-neuro-orange animate-spin" />
-            <span className="text-[10px] font-black text-neuro-navy uppercase tracking-widest italic">Syncing Curriculum Nodes...</span>
+            ) : (
+              <div className="bg-gray-50 rounded-[2.5rem] border border-gray-100 p-12 text-center">
+                <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-400 font-bold">Select a module to start learning</p>
+              </div>
+            )}
           </div>
         </div>
-      </motion.div>
+      </div>
+    );
+  }
+
+  // Course Listing
+  return (
+    <div className="space-y-8 pb-20">
+      <header>
+        <h1 className="text-3xl font-heading font-black text-neuro-navy uppercase tracking-tight flex items-center gap-3">
+          <GraduationCap className="w-8 h-8 text-neuro-orange" /> Academy
+        </h1>
+        <p className="text-gray-500 mt-2">Build your clinical foundation with structured courses in nervous system chiropractic.</p>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {courses.map((course) => {
+          const progress = course.moduleCount > 0 ? Math.round((course.completedCount / course.moduleCount) * 100) : 0;
+
+          return (
+            <div
+              key={course.id}
+              className={cn(
+                "bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden transition-all",
+                course.isLocked ? "opacity-70" : "hover:shadow-md hover:border-gray-200 cursor-pointer"
+              )}
+              onClick={() => !course.isLocked && openCourse(course.id)}
+            >
+              {course.isLocked && (
+                <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                  <div className="text-center p-4">
+                    <Lock className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="font-bold text-gray-500 text-sm">Paid Members Only</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-5 h-5 text-neuro-orange" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                  {course.moduleCount} modules
+                </span>
+                {course.tierRequired === 'free' && (
+                  <span className="text-[10px] font-black uppercase tracking-widest text-green-500 bg-green-50 px-2 py-0.5 rounded-full">Free</span>
+                )}
+              </div>
+
+              <h3 className="text-lg font-black text-neuro-navy mb-2">{course.title}</h3>
+              <p className="text-gray-500 text-sm mb-6 line-clamp-2">{course.description}</p>
+
+              {/* Progress bar */}
+              <div className="mt-auto">
+                <div className="flex justify-between text-xs font-bold mb-1">
+                  <span className="text-gray-400">{progress}% complete</span>
+                  <span className="text-gray-400">{course.completedCount}/{course.moduleCount}</span>
+                </div>
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-neuro-orange rounded-full transition-all"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

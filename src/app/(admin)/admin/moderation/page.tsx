@@ -21,13 +21,14 @@ import {
   ShieldX
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { 
-  getModerationData, 
-  resolveAlert, 
-  toggleModerationSetting, 
+import {
+  getModerationData,
+  resolveAlert,
+  toggleModerationSetting,
   updateComplianceGuidelines,
-  moderateDoctor 
+  moderateDoctor
 } from "./actions";
+import { getPendingStories, approvePatientStory, rejectPatientStory } from "@/app/actions/patient-stories";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -41,9 +42,12 @@ export default function ModerationCenter() {
   const [selectedQueue, setSelectedQueue] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [moderating, setModerating] = useState<string | null>(null);
+  const [pendingStories, setPendingStories] = useState<any[]>([]);
+  const [storyActioning, setStoryActioning] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
+    getPendingStories().then(setPendingStories);
   }, []);
 
   const fetchData = async () => {
@@ -469,6 +473,60 @@ export default function ModerationCenter() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Patient Story Approvals */}
+      {pendingStories.length > 0 && (
+        <section className="bg-white/5 border border-white/5 rounded-[2rem] p-6 md:p-8 text-white">
+          <h3 className="text-base md:text-lg font-black mb-4 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-neuro-orange" />
+            Patient Stories Pending Approval ({pendingStories.length})
+          </h3>
+          <div className="space-y-3">
+            {pendingStories.map((story) => (
+              <div key={story.id} className="bg-white/5 border border-white/5 rounded-2xl p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-white">
+                    {story.patient_first_name} — for Dr. {story.doctor?.first_name} {story.doctor?.last_name}
+                  </span>
+                  <span className="text-[10px] text-gray-500">
+                    {story.doctor?.clinic_name}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400 mb-1">
+                  <span className="text-gray-500 font-bold">Before:</span> {story.condition_before} &rarr; <span className="text-gray-500 font-bold">After:</span> {story.outcome_after}
+                </p>
+                <p className="text-xs text-gray-400 italic mb-3">&ldquo;{story.story_text}&rdquo;</p>
+                <div className="flex gap-2">
+                  <button
+                    disabled={storyActioning === story.id}
+                    onClick={async () => {
+                      setStoryActioning(story.id);
+                      await approvePatientStory(story.id);
+                      setPendingStories(prev => prev.filter(s => s.id !== story.id));
+                      setStoryActioning(null);
+                    }}
+                    className="px-4 py-2 bg-green-500/20 text-green-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-500/30 transition-colors"
+                  >
+                    <CheckCircle2 className="w-3 h-3 inline mr-1" /> Approve
+                  </button>
+                  <button
+                    disabled={storyActioning === story.id}
+                    onClick={async () => {
+                      setStoryActioning(story.id);
+                      await rejectPatientStory(story.id);
+                      setPendingStories(prev => prev.filter(s => s.id !== story.id));
+                      setStoryActioning(null);
+                    }}
+                    className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500/30 transition-colors"
+                  >
+                    <XCircle className="w-3 h-3 inline mr-1" /> Reject
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

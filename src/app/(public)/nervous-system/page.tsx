@@ -14,6 +14,45 @@ import {
   Info
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+function DirectorySearchBar() {
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (query.trim()) params.set('q', query.trim());
+    router.push(`/directory?${params.toString()}`);
+  };
+
+  return (
+    <div className="w-full max-w-lg mx-auto">
+      <form onSubmit={handleSearch} className="flex gap-3">
+        <div className="flex-1 relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by city, state, or specialty..."
+            className="w-full pl-12 pr-4 py-5 bg-white/10 border border-white/20 rounded-2xl text-white placeholder:text-gray-500 focus:outline-none focus:border-neuro-orange font-bold"
+          />
+        </div>
+        <button
+          type="submit"
+          className="px-8 py-5 bg-neuro-orange text-white font-black uppercase tracking-widest rounded-2xl shadow-xl hover:bg-neuro-orange-light transition-all hover:scale-105"
+        >
+          Find <ArrowRight className="w-4 h-4 inline ml-1" />
+        </button>
+      </form>
+      <p className="text-center text-xs text-gray-600 mt-4">
+        Or <Link href="/directory" className="text-neuro-orange font-bold hover:underline">browse all 140+ specialists</Link> in our global network
+      </p>
+    </div>
+  );
+}
 
 // --- Types & Data ---
 type SystemKey = "brain" | "spinal-cord" | "vagus" | "autonomic";
@@ -209,12 +248,7 @@ export default function NervousSystemExperience() {
           <p className="text-gray-400 text-lg mb-12 leading-relaxed">
             NeuroChiro doctors are specifically trained to assess and support the health of your nervous system. Find a clinical expert in your region.
           </p>
-          <Link 
-            href="/directory" 
-            className="inline-flex items-center gap-3 px-12 py-5 bg-neuro-orange hover:bg-neuro-orange-light text-white font-black uppercase tracking-widest rounded-2xl shadow-2xl transition-all transform hover:scale-105"
-          >
-            Find a NeuroChiro Doctor <ArrowRight className="w-5 h-5" />
-          </Link>
+          <DirectorySearchBar />
         </div>
       </section>
 
