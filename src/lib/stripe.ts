@@ -13,8 +13,14 @@ export const PLANS = {
   starter: {
     id: "starter",
     name: "Starter",
-    priceId: process.env.STRIPE_STARTER_PRICE_ID ?? "",
-    price: 49,
+    monthly: {
+      priceId: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID ?? "",
+      price: 49,
+    },
+    annual: {
+      priceId: process.env.STRIPE_STARTER_ANNUAL_PRICE_ID ?? "",
+      price: 490,
+    },
     canPostJobs: false,
     canManageSeminars: false,
     maxJobPosts: 0,
@@ -22,8 +28,14 @@ export const PLANS = {
   growth: {
     id: "growth",
     name: "Growth",
-    priceId: process.env.STRIPE_GROWTH_PRICE_ID ?? "",
-    price: 99,
+    monthly: {
+      priceId: process.env.STRIPE_GROWTH_MONTHLY_PRICE_ID ?? "",
+      price: 99,
+    },
+    annual: {
+      priceId: process.env.STRIPE_GROWTH_ANNUAL_PRICE_ID ?? "",
+      price: 990,
+    },
     canPostJobs: true,
     canManageSeminars: false,
     maxJobPosts: 5,
@@ -31,8 +43,14 @@ export const PLANS = {
   pro: {
     id: "pro",
     name: "Pro",
-    priceId: process.env.STRIPE_PRO_PRICE_ID ?? "",
-    price: 199,
+    monthly: {
+      priceId: process.env.STRIPE_PRO_MONTHLY_PRICE_ID ?? "",
+      price: 199,
+    },
+    annual: {
+      priceId: process.env.STRIPE_PRO_ANNUAL_PRICE_ID ?? "",
+      price: 1990,
+    },
     canPostJobs: true,
     canManageSeminars: true,
     maxJobPosts: 999,
@@ -43,3 +61,8 @@ export const PLANS = {
     price: 99,
   }
 };
+
+// Helper to get the right price ID based on billing cycle
+export function getPriceId(tier: 'starter' | 'growth' | 'pro', cycle: 'monthly' | 'annual'): string {
+  return PLANS[tier][cycle].priceId;
+}
