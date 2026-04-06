@@ -61,23 +61,26 @@
             
             const activeMarkers = [];
 
+            // If no features are marked as filtered, treat ALL as active
+            var hasAnyFiltered = features.some(f => f.properties && f.properties.isFiltered);
+
             features.forEach((feat) => {
                 if (!feat.geometry || !feat.geometry.coordinates) return;
                 const [lng, lat] = feat.geometry.coordinates;
-                const isFiltered = feat.properties.isFiltered;
-                
+                const isActive = hasAnyFiltered ? feat.properties.isFiltered : true;
+
                 if (!isNaN(lat) && !isNaN(lng) && lat !== 0) {
                     const marker = L.circleMarker([lat, lng], {
-                        radius: isFiltered ? 10 : 5,
-                        fillColor: isFiltered ? "#ff5722" : "#444",
-                        color: isFiltered ? "#fff" : "#888",
-                        weight: isFiltered ? 2 : 1,
+                        radius: isActive ? 8 : 4,
+                        fillColor: isActive ? "#ff5722" : "#666",
+                        color: isActive ? "#fff" : "#999",
+                        weight: isActive ? 2 : 1,
                         opacity: 1,
-                        fillOpacity: isFiltered ? 0.9 : 0.5,
-                        className: isFiltered ? 'active-specialist-marker' : ''
+                        fillOpacity: isActive ? 0.9 : 0.4,
+                        className: isActive ? 'active-specialist-marker' : ''
                     }).addTo(window.markerLayer).bindPopup(feat.properties.name || "Specialist");
-                    
-                    if (isFiltered) activeMarkers.push(marker);
+
+                    if (isActive) activeMarkers.push(marker);
                 }
             });
 
