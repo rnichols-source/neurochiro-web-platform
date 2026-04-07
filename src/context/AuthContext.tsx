@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { createClient } from '@/lib/supabase';
 import { User, Session } from '@supabase/supabase-js';
 
@@ -22,11 +22,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  // Create the client inside a ref so it's only created once and NOT during render
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
 
   useEffect(() => {
+    // Initialize client on mount only (not during render)
+    if (!supabaseRef.current) {
+      supabaseRef.current = createClient();
+    }
+    const supabase = supabaseRef.current;
+
     const setData = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setSession(session);
         setUser(session.user);
@@ -42,10 +49,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     setData();
     return () => subscription.unsubscribe();
-  }, [supabase]);
+  }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    if (supabaseRef.current) {
+      await supabaseRef.current.auth.signOut();
+    }
   };
 
   return (
