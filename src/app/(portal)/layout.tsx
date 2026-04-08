@@ -1,23 +1,18 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { AuthProvider } from "@/context/AuthContext";
-import { 
-  LayoutDashboard, 
-  Activity, 
-  Search, 
-  BookOpen, 
-  UserCircle, 
-  Settings,
-  LogOut,
-  Bell,
-  HelpCircle,
+import { usePathname, useRouter } from "next/navigation";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { createClient } from "@/lib/supabase";
+import {
+  LayoutDashboard,
+  Activity,
+  Search,
+  BookOpen,
   Heart,
-  MessageSquare,
-  Bell as BellIcon
+  LogOut,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 const navItems = [
@@ -28,31 +23,37 @@ const navItems = [
   { name: "Learn", href: "/portal/learn", icon: BookOpen },
 ];
 
-const mobileNavItems = [
-  { name: "Home", href: "/portal/dashboard", icon: LayoutDashboard },
-  { name: "Messages", href: "/portal/messages", icon: MessageSquare },
-  { name: "Alerts", href: "/portal/notifications", icon: BellIcon },
-  { name: "Profile", href: "/portal/settings", icon: UserCircle },
-];
-
-export default function PortalLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function PortalShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user } = useAuth();
+  const [fullName, setFullName] = useState("");
 
-  const handleSupport = () => {
-    alert("Support ticket system opening... How can we help you today?");
+  useEffect(() => {
+    if (!user?.id) return;
+    const supabase = createClient();
+    supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.full_name) setFullName(data.full_name);
+      });
+  }, [user?.id]);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
   };
 
   return (
-    <AuthProvider>
     <div className="flex h-dvh bg-neuro-cream overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 bg-neuro-navy text-white hidden md:flex flex-col border-r border-white/10">
         <div className="p-6">
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-3">
             <img loading="lazy" decoding="async" src="/logo-white.png" alt="NeuroChiro" className="w-8 h-8 object-contain" />
             <span className="text-xl font-heading font-black tracking-tight text-white">
               NEURO<span className="text-neuro-orange">CHIRO</span>
@@ -67,65 +68,55 @@ export default function PortalLayout({
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
-                  isActive 
-                    ? "bg-neuro-orange text-white shadow-lg shadow-neuro-orange/20" 
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  isActive
+                    ? "bg-neuro-orange text-white shadow-lg shadow-neuro-orange/20"
                     : "text-gray-400 hover:bg-white/5 hover:text-white"
                 }`}
               >
-                <item.icon className={`w-5 h-5 ${isActive ? "text-white" : "group-hover:text-neuro-orange transition-colors"}`} />
+                <item.icon className={`w-5 h-5 ${isActive ? "text-white" : ""}`} />
                 <span className="font-medium">{item.name}</span>
-                {isActive && (
-                  <motion.div layoutId="activeNav" className="ml-auto w-1.5 h-1.5 rounded-full bg-white" />
-                )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/10 space-y-2">
-           <button 
-             onClick={handleSupport}
-             className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white transition-colors"
-           >
-              <HelpCircle className="w-5 h-5" />
-              <span className="font-medium">Support & Help</span>
-           </button>
-           <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-red-400 transition-colors">
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">Sign Out</span>
-           </button>
+        <div className="p-4 border-t border-white/10 space-y-3">
+          {fullName && (
+            <p className="px-4 text-sm font-medium text-gray-300 truncate">{fullName}</p>
+          )}
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-red-400 transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">Sign Out</span>
+          </button>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden min-w-0">
-        {/* Header */}
-        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 md:px-12 shrink-0">
+        <header className="h-16 bg-white border-b border-gray-100 flex items-center px-8 md:px-12 shrink-0">
           <h2 className="text-xl font-black text-neuro-navy uppercase tracking-tight">
-            {navItems.find(i => i.href === pathname)?.name || "Portal"}
+            {navItems.find((i) => i.href === pathname)?.name || "Portal"}
           </h2>
-          <div className="flex items-center gap-6">
-            <button className="p-2.5 bg-gray-50 text-gray-400 hover:text-neuro-orange hover:bg-neuro-cream rounded-xl transition-all relative">
-               <Bell className="w-5 h-5" />
-               <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-neuro-orange rounded-full border-2 border-white" />
-            </button>
-            <div className="w-10 h-10 rounded-xl bg-neuro-navy flex items-center justify-center text-white font-black text-xs shadow-lg">
-               JD
-            </div>
-          </div>
         </header>
 
-        {/* Scrollable Area */}
         <div className="flex-1 overflow-y-auto p-6 md:p-10 w-full min-w-0 pb-24 md:pb-10">
-          <div className="max-w-6xl mx-auto w-full">
-            {children}
-          </div>
+          <div className="max-w-6xl mx-auto w-full">{children}</div>
         </div>
       </main>
 
-      <MobileBottomNav items={mobileNavItems} />
+      <MobileBottomNav items={navItems} />
     </div>
+  );
+}
+
+export default function PortalLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthProvider>
+      <PortalShell>{children}</PortalShell>
     </AuthProvider>
   );
 }

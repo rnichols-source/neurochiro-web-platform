@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Activity, Sun, Moon, Zap, CheckCircle2, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Activity, Sun, Moon, Zap, CheckCircle2, TrendingUp, TrendingDown, Minus, Flame } from "lucide-react";
 import { submitDailyLog, getLast30DaysLogs, getTodaysLog } from "./actions";
 
 type DailyLog = {
@@ -39,7 +39,7 @@ function SliderInput({ label, icon: Icon, value, onChange, color, invertScale }:
         max={10}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 bg-gray-100 rounded-full appearance-none cursor-pointer accent-neuro-orange"
+        className="w-full h-3 bg-gray-100 rounded-full appearance-none cursor-pointer accent-neuro-orange [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-neuro-orange [&::-webkit-slider-thumb]:shadow-md touch-pan-x"
       />
       <div className="flex justify-between text-[10px] text-gray-400 font-bold mt-1">
         <span>{invertScale ? 'None' : 'Low'}</span>
@@ -100,6 +100,24 @@ export default function TrackPage() {
   const painTrend = avg(recentLogs, 'pain_level') - avg(olderLogs, 'pain_level');
   const sleepTrend = avg(recentLogs, 'sleep_quality') - avg(olderLogs, 'sleep_quality');
 
+  // Calculate streak: consecutive days backwards from today with a log
+  const streak = (() => {
+    if (logs.length === 0) return 0;
+    const logDates = new Set(logs.map((l) => l.log_date));
+    let count = 0;
+    const d = new Date();
+    while (true) {
+      const key = d.toISOString().slice(0, 10);
+      if (logDates.has(key)) {
+        count++;
+        d.setDate(d.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return count;
+  })();
+
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[60vh]">
@@ -112,8 +130,15 @@ export default function TrackPage() {
     <div className="space-y-8 pb-20">
       <header>
         <h1 className="text-3xl font-heading font-black text-neuro-navy uppercase tracking-tight">Health Tracker</h1>
-        <p className="text-gray-500 mt-1">Track how you feel every day. Your nervous system adapts over time.</p>
+        <p className="text-gray-500 mt-1">Log how you feel each day to see trends over time.</p>
       </header>
+
+      {streak > 0 && (
+        <div className="flex items-center gap-2 px-4 py-3 bg-orange-50 border border-orange-100 rounded-xl w-fit">
+          <Flame className="w-5 h-5 text-neuro-orange" />
+          <span className="font-bold text-neuro-navy">{streak} day streak</span>
+        </div>
+      )}
 
       {/* Daily Check-in */}
       <section className="bg-neuro-cream rounded-2xl border border-gray-100 p-8 shadow-sm">
@@ -213,7 +238,7 @@ export default function TrackPage() {
           <Sun className="w-16 h-16 text-gray-200 mx-auto mb-4" />
           <h2 className="text-xl font-black text-gray-400 mb-2">No tracking data yet</h2>
           <p className="text-gray-500 text-sm max-w-md mx-auto">
-            Start your daily check-in above to track how your energy, pain, and sleep change over time. The more you log, the clearer your nervous system trends become.
+            Start your daily check-in above to track how your energy, pain, and sleep change over time.
           </p>
         </section>
       )}
