@@ -7,7 +7,7 @@ export default function VendorLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen bg-neuro-cream overflow-hidden">
+    <div className="flex h-dvh bg-neuro-cream overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 bg-neuro-navy flex flex-col border-r border-white/10 shrink-0">
         <div className="p-6">

@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-neuro-cream pt-32 pb-20 px-6">
+    <div className="min-h-dvh bg-neuro-cream pt-32 pb-20 px-6">
       <div className="max-w-3xl mx-auto text-center space-y-8">
         <h1 className="text-5xl font-heading font-black text-neuro-navy">Get in Touch</h1>
         <p className="text-xl text-gray-600">Have questions about the NeuroChiro platform? We're here to help.</p>

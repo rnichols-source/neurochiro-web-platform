@@ -73,7 +73,7 @@ export default function SeminarHub() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B1118] text-white pt-32 pb-32">
+    <div className="min-h-dvh bg-[#0B1118] text-white pt-32 pb-32">
       {/* Premium Header */}
       <header className="max-w-7xl mx-auto px-8 mb-20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-neuro-orange/10 blur-[120px] -mr-40 -mt-40 pointer-events-none"></div>

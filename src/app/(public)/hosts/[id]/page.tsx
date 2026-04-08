@@ -38,13 +38,13 @@ export default function HostProfilePage({ params }: { params: Promise<{ id: stri
   }, [id]);
 
   if (loading) return (
-    <div className="min-h-screen bg-[#0B1118] flex items-center justify-center">
+    <div className="min-h-dvh bg-[#0B1118] flex items-center justify-center">
       <Loader2 className="w-12 h-12 animate-spin text-neuro-orange" />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#0B1118] text-white pt-32 pb-40">
+    <div className="min-h-dvh bg-[#0B1118] text-white pt-32 pb-40">
       <div className="max-w-7xl mx-auto px-8">
         
         <Link href="/seminars" className="inline-flex items-center gap-2 text-gray-500 hover:text-white transition-colors text-xs font-black uppercase tracking-widest mb-12 group">

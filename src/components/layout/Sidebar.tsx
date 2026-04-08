@@ -66,7 +66,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 h-screen bg-neuro-navy flex flex-col border-r border-white/10 shrink-0">
+    <aside className="w-64 h-dvh bg-neuro-navy flex flex-col border-r border-white/10 shrink-0">
       <div className="p-6">
         <Link href="/" className="flex items-center gap-3 group">
           <img loading="lazy" decoding="async" src="/logo-white.png" alt="NeuroChiro" className="w-8 h-8 object-contain" />

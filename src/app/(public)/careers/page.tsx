@@ -111,7 +111,7 @@ export default function CareersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neuro-cream pt-24 pb-20 overflow-x-hidden">
+    <div className="min-h-dvh bg-neuro-cream pt-24 pb-20 overflow-x-hidden">
       
       {/* Application Modal */}
       <AnimatePresence>

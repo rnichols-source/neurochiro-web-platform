@@ -85,7 +85,7 @@ export default function ContractLabPage() {
   };
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto space-y-12 relative bg-neuro-cream min-h-screen">
+    <div className="p-8 max-w-[1600px] mx-auto space-y-12 relative bg-neuro-cream min-h-dvh">
       
       {/* High-Value Hero Section */}
       <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 bg-neuro-navy p-10 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl">

@@ -104,7 +104,7 @@ export default function HostLandingPage() {
   const destination = user ? "#hosting-tiers" : "/register?role=doctor&redirect=/doctor/seminars";
 
   return (
-    <div className="min-h-screen bg-[#0B1118] text-white pt-32 pb-40 overflow-hidden">
+    <div className="min-h-dvh bg-[#0B1118] text-white pt-32 pb-40 overflow-hidden">
       {/* Background Accents */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-neuro-orange/5 blur-[150px] -mr-40 -mt-40 pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/5 blur-[150px] -ml-40 -mb-40 pointer-events-none"></div>

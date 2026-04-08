@@ -117,7 +117,7 @@ export default function NegotiationGuidePage() {
   };
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto space-y-12 relative bg-neuro-cream min-h-screen">
+    <div className="p-8 max-w-[1600px] mx-auto space-y-12 relative bg-neuro-cream min-h-dvh">
       <AnimatePresence>
         {successToast && (
           <motion.div 

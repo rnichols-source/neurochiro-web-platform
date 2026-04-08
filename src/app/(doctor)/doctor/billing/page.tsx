@@ -40,7 +40,7 @@ export default function DoctorBilling() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-neuro-cream">
+      <div className="min-h-dvh flex flex-col items-center justify-center bg-neuro-cream">
         <Loader2 className="w-10 h-10 text-neuro-orange animate-spin mb-4" />
         <p className="text-[10px] font-black text-neuro-navy uppercase tracking-[0.3em]">Synchronizing Secure Billing...</p>
       </div>

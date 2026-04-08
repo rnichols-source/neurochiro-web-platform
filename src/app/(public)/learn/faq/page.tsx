@@ -31,7 +31,7 @@ export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <div className="min-h-screen bg-neuro-cream pb-32">
+    <div className="min-h-dvh bg-neuro-cream pb-32">
       {/* Header */}
       <header className="bg-neuro-navy text-white pt-32 pb-24 px-8 relative overflow-hidden text-center">
         <div className="max-w-4xl mx-auto relative z-10 space-y-6">

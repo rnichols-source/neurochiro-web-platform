@@ -23,7 +23,7 @@ export default function PricingLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-neuro-cream pt-32 pb-20 overflow-x-hidden">
+    <div className="min-h-dvh bg-neuro-cream pt-32 pb-20 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Unified Pricing Header */}

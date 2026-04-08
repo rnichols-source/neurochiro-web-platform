@@ -31,6 +31,16 @@
 
 /* Custom Utilities & Animations */
 @layer utilities {
+  /* Mobile Safari safe viewport height */
+  .h-dvh {
+    height: 100vh;
+    height: 100dvh;
+  }
+  .min-h-dvh {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
   .text-glow {
     text-shadow: 0 0 20px rgba(214, 104, 41, 0.5);
   }

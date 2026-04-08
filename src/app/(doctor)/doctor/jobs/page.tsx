@@ -219,7 +219,7 @@ export default function JobsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neuro-cream">
+      <div className="min-h-dvh flex items-center justify-center bg-neuro-cream">
         <Loader2 className="w-10 h-10 text-neuro-orange animate-spin" />
       </div>
     );

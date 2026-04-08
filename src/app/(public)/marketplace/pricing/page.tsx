@@ -74,7 +74,7 @@ export default function MarketplacePricingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-neuro-cream pt-24 pb-20 overflow-x-hidden">
+    <div className="min-h-dvh bg-neuro-cream pt-24 pb-20 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <Link href="/marketplace" className="inline-flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest hover:text-neuro-orange transition-colors mb-12 group">
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Marketplace

@@ -97,14 +97,14 @@ export default function VendorDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neuro-cream">
+      <div className="min-h-dvh flex items-center justify-center bg-neuro-cream">
         <Loader2 className="w-10 h-10 text-neuro-orange animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="p-10 max-w-7xl mx-auto space-y-10 bg-neuro-cream min-h-screen text-neuro-navy">
+    <div className="p-10 max-w-7xl mx-auto space-y-10 bg-neuro-cream min-h-dvh text-neuro-navy">
       <header className="mb-10">
         <h1 className="text-4xl font-heading font-black">Vendor Command Center</h1>
         <p className="text-gray-500 mt-2 text-lg">Manage your marketplace presence and NeuroChiro Pro offers.</p>

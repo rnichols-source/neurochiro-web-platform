@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-neuro-cream pt-32 pb-20 px-6">
+    <div className="min-h-dvh bg-neuro-cream pt-32 pb-20 px-6">
       <div className="max-w-3xl mx-auto space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <h1 className="text-5xl font-heading font-black text-neuro-navy">Terms of Service</h1>

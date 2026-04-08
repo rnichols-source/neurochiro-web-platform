@@ -58,7 +58,7 @@ export default function PublicJobs() {
   }, [region.code, jobs]);
 
   return (
-    <div className="min-h-screen bg-neuro-cream pb-32">
+    <div className="min-h-dvh bg-neuro-cream pb-32">
       {/* Header */}
       <header className="bg-neuro-navy text-white pt-32 pb-24 px-8 relative overflow-hidden">
         <div className="max-w-7xl mx-auto relative z-10 text-center space-y-6">

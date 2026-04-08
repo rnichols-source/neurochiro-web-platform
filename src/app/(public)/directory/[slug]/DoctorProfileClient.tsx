@@ -128,7 +128,7 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
   };
 
   return (
-    <div className="min-h-screen bg-neuro-cream pb-32">
+    <div className="min-h-dvh bg-neuro-cream pb-32">
       <div className="bg-neuro-navy pt-32 pb-20 px-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-neuro-orange/10 blur-[150px] -mr-80 -mt-80 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 blur-[150px] -ml-80 -mb-80 pointer-events-none"></div>

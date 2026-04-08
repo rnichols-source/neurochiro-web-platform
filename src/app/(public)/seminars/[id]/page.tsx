@@ -61,7 +61,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B1118] flex flex-col items-center justify-center">
+      <div className="min-h-dvh bg-[#0B1118] flex flex-col items-center justify-center">
         <Loader2 className="w-12 h-12 animate-spin text-neuro-orange mb-4" />
         <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Syncing Event Intel...</p>
       </div>
@@ -70,7 +70,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
 
   if (!seminar) {
     return (
-      <div className="min-h-screen bg-[#0B1118] flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-dvh bg-[#0B1118] flex flex-col items-center justify-center p-6 text-center">
         <h1 className="text-4xl font-black text-white mb-4 uppercase tracking-tighter">Event Not Found</h1>
         <p className="text-gray-500 mb-8 font-medium">The seminar you're looking for doesn't exist or has been moved.</p>
         <Link href="/seminars" className="px-10 py-4 bg-neuro-orange text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-xl shadow-neuro-orange/20">
@@ -81,7 +81,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
   }
 
   return (
-    <div className="min-h-screen bg-[#0B1118] text-white">
+    <div className="min-h-dvh bg-[#0B1118] text-white">
       {/* Hero Section */}
       <section className="relative pt-32 pb-40 px-8 overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 z-0">

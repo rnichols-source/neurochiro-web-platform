@@ -85,7 +85,7 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
   };
 
   return (
-    <div className="min-h-screen bg-neuro-cream pt-24 pb-20 overflow-x-hidden text-neuro-navy">
+    <div className="min-h-dvh bg-neuro-cream pt-24 pb-20 overflow-x-hidden text-neuro-navy">
       <div className="max-w-7xl mx-auto px-6">
         
         <Breadcrumbs className="mb-6" />

@@ -207,7 +207,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 h-screen flex-col border-r border-white/10 shrink-0 relative overflow-y-auto z-[100]">
+      <aside className="hidden md:flex w-64 h-dvh flex-col border-r border-white/10 shrink-0 relative overflow-y-auto z-[100]">
         {SidebarContent}
       </aside>
 

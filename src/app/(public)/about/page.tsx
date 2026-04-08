@@ -5,7 +5,7 @@ import { Users, Heart, Target, Sparkles } from "lucide-react";
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-neuro-cream pt-32 pb-20">
+    <div className="min-h-dvh bg-neuro-cream pt-32 pb-20">
       <div className="max-w-7xl mx-auto px-6 md:px-8">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

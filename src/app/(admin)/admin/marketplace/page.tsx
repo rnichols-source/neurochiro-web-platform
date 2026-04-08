@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 export default function MarketplaceComingSoon() {
   return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6">
+    <div className="min-h-dvh bg-[#020617] flex items-center justify-center p-6">
       <div className="max-w-2xl w-full text-center space-y-8">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}

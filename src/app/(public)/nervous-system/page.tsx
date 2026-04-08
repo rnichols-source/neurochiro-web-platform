@@ -100,7 +100,7 @@ export default function NervousSystemExperience() {
   const [activeSystem, setActiveSystem] = useState<SystemKey>("brain");
 
   return (
-    <div className="min-h-screen bg-[#0B1118] text-white selection:bg-neuro-orange/30">
+    <div className="min-h-dvh bg-[#0B1118] text-white selection:bg-neuro-orange/30">
       
       <main className="relative pt-32 px-8 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         

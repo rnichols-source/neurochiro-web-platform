@@ -52,7 +52,7 @@ const learningPaths = [
 
 export default function EducationHub() {
   return (
-    <div className="min-h-screen bg-neuro-cream pb-32">
+    <div className="min-h-dvh bg-neuro-cream pb-32">
       {/* Immersive Header */}
       <header className="bg-neuro-navy text-white pt-32 pb-48 px-8 relative overflow-hidden">
         <div className="max-w-7xl mx-auto relative z-10 text-center space-y-6">

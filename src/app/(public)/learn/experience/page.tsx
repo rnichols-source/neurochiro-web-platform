@@ -37,7 +37,7 @@ export default function ExperiencePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-dvh bg-white">
       {/* Hero Section */}
       <section className="bg-neuro-navy text-white pt-32 pb-24 px-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-neuro-orange/10 blur-[120px] rounded-full -mr-64 -mt-64"></div>

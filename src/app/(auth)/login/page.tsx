@@ -90,6 +90,7 @@ function LoginContent() {
                 required
                 autoComplete="email"
                 placeholder="email@neurochiro.com"
+                inputMode="email"
                 className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -142,7 +143,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-neuro-cream flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-dvh bg-neuro-cream flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-neuro-navy/5 blur-[120px] -ml-48 -mt-48"></div>
       

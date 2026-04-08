@@ -36,7 +36,7 @@ export default function VendorApplyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neuro-cream pt-24 pb-20 overflow-x-hidden">
+    <div className="min-h-dvh bg-neuro-cream pt-24 pb-20 overflow-x-hidden">
       <div className="max-w-3xl mx-auto px-6">
         <div className="text-center mb-12 space-y-4">
            <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-[10px] block">Partnership</span>

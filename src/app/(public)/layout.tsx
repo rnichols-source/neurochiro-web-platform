@@ -8,7 +8,7 @@ export default function PublicLayout({
   return (
     <>
       <Navbar />
-      <div className="min-h-screen">
+      <div className="min-h-dvh">
         {children}
       </div>
     </>

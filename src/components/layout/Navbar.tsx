@@ -201,7 +201,7 @@ export default function Navbar() {
 
           {/* Mobile Menu Toggle */}
           <button 
-            className={`lg:hidden p-2 rounded-lg ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`}
+            className={`lg:hidden p-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`}
             onClick={() => setMobileMenuOpen(true)}
           >
             <Menu className="w-6 h-6" />

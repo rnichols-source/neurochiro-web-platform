@@ -23,7 +23,7 @@ function SuccessContent() {
   const tier = searchParams.get("tier") || "growth";
 
   return (
-    <div className="min-h-screen bg-neuro-cream flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-dvh bg-neuro-cream flex flex-col items-center justify-center p-6 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-neuro-orange/5 blur-[140px] rounded-full -mr-40 pointer-events-none"></div>
       
       <div className="max-w-2xl w-full">
@@ -84,7 +84,7 @@ function SuccessContent() {
 
 export default function PaymentSuccessPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-neuro-cream" />}>
+    <Suspense fallback={<div className="min-h-dvh bg-neuro-cream" />}>
       <SuccessContent />
     </Suspense>
   );

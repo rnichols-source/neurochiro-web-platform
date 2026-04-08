@@ -16,7 +16,7 @@ export function DoctorCardSkeleton() {
 
 export default function DirectorySkeleton() {
   return (
-    <div className="min-h-screen bg-neuro-cream">
+    <div className="min-h-dvh bg-neuro-cream">
       {/* Search Header Skeleton */}
       <div className="bg-neuro-navy pt-32 pb-12 px-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-4">

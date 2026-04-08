@@ -206,7 +206,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   };
 
   return (
-    <div className="min-h-screen bg-neuro-cream">
+    <div className="min-h-dvh bg-neuro-cream">
       {/* Smart Match Floating Button - Mothballed for Phase 1 Stability */}
       {/* <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] md:bottom-12">
         <motion.button 

@@ -128,7 +128,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
       )}
 
       <aside className={cn(
-        "fixed lg:static inset-y-0 left-0 w-64 h-screen bg-[#0F172A] flex flex-col border-r border-white/5 shrink-0 z-[200] transition-transform duration-300 transform",
+        "fixed lg:static inset-y-0 left-0 w-64 h-dvh bg-[#0F172A] flex flex-col border-r border-white/5 shrink-0 z-[200] transition-transform duration-300 transform",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         <div className="p-6 flex items-center justify-between">

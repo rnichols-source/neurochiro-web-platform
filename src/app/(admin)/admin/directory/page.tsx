@@ -130,7 +130,7 @@ export default function DirectoryManager() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-[1600px] mx-auto space-y-8 text-white min-h-screen">
+    <div className="p-4 md:p-8 max-w-[1600px] mx-auto space-y-8 text-white min-h-dvh">
       <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 text-neuro-orange">

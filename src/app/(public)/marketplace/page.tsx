@@ -119,7 +119,7 @@ export default function MarketplacePage() {
   const featuredPartners = vendors.filter(v => v.tier === 'featured_partner');
 
   return (
-    <div className="min-h-screen bg-neuro-cream pt-24 pb-20 overflow-x-hidden">
+    <div className="min-h-dvh bg-neuro-cream pt-24 pb-20 overflow-x-hidden">
       
       {/* Onboarding Wizard Overlay */}
       <AnimatePresence>

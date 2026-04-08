@@ -23,7 +23,7 @@ export default function DoctorLayout({
 
   return (
     <AuthProvider>
-    <div className="flex flex-col md:flex-row h-screen bg-neuro-cream overflow-hidden">
+    <div className="flex flex-col md:flex-row h-dvh bg-neuro-cream overflow-hidden">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       {/* Mobile Top Bar */}

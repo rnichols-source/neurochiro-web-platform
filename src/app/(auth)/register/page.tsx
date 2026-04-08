@@ -247,7 +247,7 @@ function RegisterContent() {
   };
 
   return (
-    <div className="min-h-screen bg-neuro-cream flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-dvh bg-neuro-cream flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-neuro-orange/5 blur-[160px] -mr-40 -mt-40 rounded-full animate-pulse-slow"></div>
       <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-neuro-navy/5 blur-[140px] -ml-32 -mb-32 rounded-full"></div>
@@ -672,7 +672,7 @@ function RegisterContent() {
 export default function RegisterPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-neuro-cream flex flex-col items-center justify-center">
+      <div className="min-h-dvh bg-neuro-cream flex flex-col items-center justify-center">
         <Loader2 className="w-12 h-12 animate-spin text-neuro-orange mb-4" />
         <p className="text-[10px] font-black text-neuro-navy uppercase tracking-[0.3em]">Initializing Core...</p>
       </div>

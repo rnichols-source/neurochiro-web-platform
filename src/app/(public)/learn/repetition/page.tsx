@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function RepetitionPage() {
   return (
-    <div className="min-h-screen bg-neuro-cream pb-32">
+    <div className="min-h-dvh bg-neuro-cream pb-32">
       {/* Hero Section */}
       <section className="bg-neuro-navy text-white pt-32 pb-24 px-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-neuro-orange/10 blur-[120px] rounded-full -mr-64 -mt-64"></div>

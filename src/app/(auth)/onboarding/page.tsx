@@ -112,7 +112,7 @@ function OnboardingContent() {
   };
 
   return (
-    <div className="min-h-screen bg-neuro-cream flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-dvh bg-neuro-cream flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-neuro-orange/5 blur-[160px] -mr-40 -mt-40 rounded-full"></div>
       
@@ -168,7 +168,7 @@ function OnboardingContent() {
 
 export default function OnboardingPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-neuro-cream" />}>
+    <Suspense fallback={<div className="min-h-dvh bg-neuro-cream" />}>
       <OnboardingContent />
     </Suspense>
   );

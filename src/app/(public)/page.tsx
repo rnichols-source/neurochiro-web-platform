@@ -31,7 +31,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-neuro-cream overflow-x-hidden">
+    <div className="flex flex-col min-h-dvh bg-neuro-cream overflow-x-hidden">
       <SchemaMarkup data={organizationJsonLd} />
       
       {/* 1. HERO - Movement introduction */}

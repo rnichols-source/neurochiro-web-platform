@@ -92,7 +92,7 @@ export default function AdminLayout({
 
   return (
     <AuthProvider>
-    <div className="flex flex-col h-screen bg-[#020617] overflow-hidden">
+    <div className="flex flex-col h-dvh bg-[#020617] overflow-hidden">
       <PerspectiveBanner />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar 
