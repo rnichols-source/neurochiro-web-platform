@@ -1,15 +1,11 @@
 "use client";
 
 import {
-  Briefcase,
-  GraduationCap,
   Search,
   Calendar,
   BookOpen,
   UserCircle,
-  Trophy,
   Loader2,
-  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -23,12 +19,10 @@ export default function StudentDashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchData = async () => {
-      const result = await getStudentDashboardData();
+    getStudentDashboardData().then((result) => {
       if (result) setData(result);
       setLoading(false);
-    };
-    fetchData();
+    });
   }, []);
 
   const handleTransition = async () => {
@@ -64,29 +58,21 @@ export default function StudentDashboard() {
 
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto space-y-8">
-      {/* Welcome */}
       <header>
         <h1 className="text-3xl font-heading font-black text-neuro-navy">
-          Welcome back, <span className="text-neuro-orange">{studentName}</span>
+          {studentName}
         </h1>
-        {schoolInfo && (
-          <p className="text-neuro-gray mt-1">{schoolInfo}</p>
-        )}
+        {schoolInfo && <p className="text-neuro-gray mt-1">{schoolInfo}</p>}
       </header>
 
       {/* Graduation transition banner */}
       {isGraduating && (
         <div className="bg-neuro-navy p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-neuro-orange rounded-xl flex items-center justify-center text-white">
-              <Trophy className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-lg font-black text-white">Ready to transition?</h3>
-              <p className="text-sm text-gray-300">
-                Upgrade to a Doctor profile to activate your directory listing.
-              </p>
-            </div>
+          <div>
+            <h3 className="text-lg font-black text-white">Transition to Doctor</h3>
+            <p className="text-sm text-gray-300">
+              Switch to a Doctor account to access the full provider dashboard.
+            </p>
           </div>
           <button
             onClick={handleTransition}
@@ -116,9 +102,6 @@ export default function StudentDashboard() {
         <div className="bg-white p-5 rounded-2xl border border-gray-100">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Job Applications</p>
           <p className="text-2xl font-black text-neuro-navy">{applications}</p>
-          {applications === 0 && (
-            <p className="text-xs text-gray-400 mt-1">Browse open positions to get started</p>
-          )}
         </div>
       </div>
 
@@ -129,7 +112,7 @@ export default function StudentDashboard() {
           {[
             { label: "Browse Jobs", href: "/student/jobs", icon: Search },
             { label: "Find Seminars", href: "/student/seminars", icon: Calendar },
-            { label: "Continue Academy", href: "/student/academy", icon: BookOpen },
+            { label: "Academy", href: "/student/academy", icon: BookOpen },
             { label: "Edit Profile", href: "/student/profile", icon: UserCircle },
           ].map((action) => (
             <Link

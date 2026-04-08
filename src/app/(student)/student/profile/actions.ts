@@ -36,7 +36,9 @@ export async function updateStudentProfile(formData: FormData) {
   const fullName = formData.get('full_name') as string
   const school = formData.get('school') as string
   const gradYear = formData.get('gradYear') as string
+  const locationCity = formData.get('location_city') as string | null
   const interests = formData.get('interests')?.toString().split(',').map(s => s.trim()).filter(Boolean) || []
+  const skills = formData.get('skills')?.toString().split(',').map(s => s.trim()).filter(Boolean) || []
   const isLookingForMentorship = formData.get('is_looking_for_mentorship') === 'true'
 
   // 1. Update Profile (Name)
@@ -53,10 +55,12 @@ export async function updateStudentProfile(formData: FormData) {
     .update({
       school: school,
       graduation_year: gradYear ? parseInt(gradYear, 10) : null,
+      location_city: locationCity || null,
       interests: interests,
+      skills: skills,
       is_looking_for_mentorship: isLookingForMentorship
     })
-    .eq('id', user.id) // Using id based on ONBOARDING_TRIGGERS.sql
+    .eq('id', user.id)
 
   if (studentError) {
       console.error("Student error:", studentError);
