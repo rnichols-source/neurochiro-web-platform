@@ -56,16 +56,16 @@ export default function Navbar() {
   ];
 
   // Determine if we should use white text based on scroll state and current page
-  const isDarkPage = pathname === "/" || pathname?.startsWith("/learn") || pathname === "/directory" || pathname?.startsWith("/directory/") || pathname?.startsWith("/nervous-system") || pathname?.startsWith("/seminars") || pathname?.startsWith("/marketplace");
-  const useWhiteText = isScrolled || isDarkPage;
+  // Always use white text on dark navy navbar
+  const useWhiteText = true;
 
   return (
     <>
       <header 
         className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
-          isScrolled 
-            ? "bg-neuro-navy/90 backdrop-blur-md border-b border-white/10 py-4 shadow-xl" 
-            : "bg-transparent py-6"
+          isScrolled
+            ? "bg-neuro-navy/95 backdrop-blur-md border-b border-white/10 py-4 shadow-xl"
+            : "bg-neuro-navy py-5"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-8 flex items-center justify-between">
