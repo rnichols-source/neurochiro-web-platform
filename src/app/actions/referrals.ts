@@ -50,6 +50,21 @@ export async function sendReferral(recipientDoctorId: string, patientName?: stri
     link: '/doctor/dashboard'
   })
 
+  // Trigger email/SMS automation
+  try {
+    const { Automations } = await import('@/lib/automations');
+    await Automations.onReferralSent(
+      user.id,
+      referrerProfile?.full_name || 'A doctor',
+      recipientDoctor.user_id,
+      '',
+      '',
+      patientName || 'a patient'
+    );
+  } catch (e) {
+    console.error("Referral automation failed:", e);
+  }
+
   revalidatePath('/doctor/dashboard')
   return { success: true }
 }

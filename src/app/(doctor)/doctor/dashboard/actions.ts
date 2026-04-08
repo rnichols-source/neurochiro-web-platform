@@ -12,7 +12,7 @@ export async function getDoctorDashboardStats() {
 
     // Parallelize fetches for profile, practice info, seminars, jobs, and leads
     const [profileRes, doctorRes, seminarsRes, jobsRes, leadsRes] = await Promise.all([
-      supabase.from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
+      supabase.from('profiles').select('role, tier, full_name, subscription_status').eq('id', user.id).single(),
       supabase.from('doctors').select('clinic_name, slug, city, state, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count, membership_tier').eq('user_id', user.id).single(),
       supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
       supabase.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
@@ -72,7 +72,8 @@ export async function getDoctorDashboardStats() {
         clinicName: doctor?.clinic_name || "My Practice",
         isMember: isFounder || isAdmin || userRole === 'doctor',
         role: userRole,
-        status: 'active'
+        status: 'active',
+        subscription_status: (profile as any)?.subscription_status || null
       },
       vendorOffers,
       doctor: {

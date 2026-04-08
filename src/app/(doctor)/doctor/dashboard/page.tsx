@@ -71,6 +71,15 @@ export default function DoctorDashboard() {
         </div>
       )}
 
+      {/* Payment Prompt */}
+      {data?.profile?.subscription_status !== 'active' && (
+        <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
+          <h3 className="font-bold text-neuro-navy mb-1">Activate your membership</h3>
+          <p className="text-gray-500 text-sm mb-4">Your profile is set up but not yet visible to patients. Start your $49/month membership to go live in the directory.</p>
+          <Link href="/doctor/billing" className="inline-flex items-center gap-2 px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm">Activate Membership</Link>
+        </div>
+      )}
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map((stat) => (

@@ -298,7 +298,6 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
 
             // Enqueue abandoned checkout / profile reminder
             await enqueue('doctor_profile_reminder', payload, 2 * 60); // 2 hours later
-            await enqueue('doctor_growth_upsell', payload, 3 * 24 * 60); // 3 days later
           } else if (payload.role === 'student') {
             await sendPremiumEmail({ 
               to: payload.email, 

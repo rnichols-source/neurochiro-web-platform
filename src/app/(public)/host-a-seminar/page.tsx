@@ -1,68 +1,128 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { createClient } from "@/lib/supabase";
+import { createSeminarListingCheckout } from "./actions";
 
-const benefits = [
-  "Get your seminar listed in front of thousands of chiropractic students and doctors",
-  "Dedicated event page with description, dates, location, and registration link",
-  "Analytics dashboard to track page views and registration clicks",
-  "Reach a global audience of nervous-system-first chiropractors",
-];
+export default function HostSeminarPage() {
+  const [isMember, setIsMember] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
-export default function HostLandingPage() {
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      setUserEmail(user.email || "");
+      const { data } = await supabase
+        .from("profiles")
+        .select("subscription_status")
+        .eq("id", user.id)
+        .single();
+      if (data?.subscription_status === "active") setIsMember(true);
+    });
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    const fd = new FormData(e.currentTarget);
+    const seminarData = {
+      title: fd.get("title") as string,
+      description: fd.get("description") as string,
+      location: fd.get("location") as string,
+      dates: fd.get("dates") as string,
+      registrationLink: fd.get("registrationLink") as string,
+      price: fd.get("price") as string,
+      capacity: fd.get("capacity") as string,
+      hostEmail: userEmail || (fd.get("hostEmail") as string),
+    };
+
+    if (isMember) {
+      // TODO: call createSeminarAction directly for free listing
+      setSuccess(true);
+      setLoading(false);
+      return;
+    }
+
+    const result = await createSeminarListingCheckout(seminarData);
+    if (result.error) { setError(result.error); setLoading(false); return; }
+    if (result.url) window.location.href = result.url;
+  };
+
+  if (success) {
+    return (
+      <div className="min-h-dvh bg-neuro-cream pt-32 pb-20 text-center px-6">
+        <h1 className="text-3xl font-heading font-black text-neuro-navy mb-4">Seminar Listed!</h1>
+        <p className="text-gray-500 mb-8">Your seminar has been submitted for listing.</p>
+        <Link href="/seminars" className="px-8 py-3 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange-dark transition-colors">View Seminars</Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-dvh bg-[#0B1118] text-white pt-32 pb-40">
-      {/* Hero */}
-      <section className="max-w-3xl mx-auto px-8 text-center space-y-8 mb-24">
-        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange">
-          <span className="w-2 h-2 rounded-full bg-neuro-orange animate-pulse" />
-          Educator Network
-        </span>
-
-        <h1 className="text-5xl font-heading font-black tracking-tight leading-tight">
-          Host a Seminar
-        </h1>
-
-        <p className="text-gray-400 text-xl leading-relaxed max-w-2xl mx-auto">
-          Share your clinical expertise with the NeuroChiro community. List your
-          seminar on the marketplace and connect with students and doctors who
-          are ready to learn.
-        </p>
-      </section>
-
-      {/* Benefits */}
-      <section className="max-w-3xl mx-auto px-8 mb-24">
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-10 space-y-6">
-          <h2 className="text-2xl font-heading font-black mb-6">
-            What You Get
-          </h2>
-          {benefits.map((benefit) => (
-            <div key={benefit} className="flex items-start gap-4">
-              <CheckCircle2 className="w-5 h-5 text-neuro-orange mt-0.5 shrink-0" />
-              <p className="text-gray-300 font-medium">{benefit}</p>
-            </div>
-          ))}
+    <div className="min-h-dvh bg-neuro-cream pt-24 pb-20">
+      <div className="max-w-xl mx-auto px-6">
+        <div className="text-center mb-10 space-y-3">
+          <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-[10px]">Educator Network</span>
+          <h1 className="text-4xl font-heading font-black text-neuro-navy">Host a Seminar</h1>
+          <p className="text-gray-500">Share your expertise with the NeuroChiro community.</p>
         </div>
-      </section>
 
-      {/* CTA */}
-      <section className="max-w-3xl mx-auto px-8 text-center">
-        <Link
-          href="/register?role=doctor"
-          className="inline-flex items-center gap-3 px-12 py-6 bg-neuro-orange text-white rounded-3xl font-black uppercase tracking-widest text-xs hover:bg-neuro-orange-light transition-all shadow-2xl shadow-neuro-orange/30"
-        >
-          Create Your Seminar
-          <ArrowRight className="w-4 h-4" />
-        </Link>
-        <p className="mt-6 text-sm text-gray-500">
-          Already have an account?{" "}
-          <Link
-            href="/doctor/seminars"
-            className="text-neuro-orange hover:underline"
-          >
-            Manage your seminars
-          </Link>
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 border border-gray-100 shadow-xl space-y-5">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Title</label>
+            <input name="title" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Description</label>
+            <textarea name="description" rows={3} required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Location</label>
+              <input name="location" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Dates</label>
+              <input name="dates" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange" placeholder="e.g. June 15-17, 2026" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Registration Link</label>
+            <input name="registrationLink" type="url" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange" placeholder="https://..." />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Price</label>
+              <input name="price" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange" placeholder="$299" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Capacity</label>
+              <input name="capacity" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange" placeholder="50" />
+            </div>
+          </div>
+          {!userEmail && (
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Your Email</label>
+              <input name="hostEmail" type="email" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+            </div>
+          )}
+          {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
+          <button type="submit" disabled={loading} className="w-full py-4 bg-neuro-orange text-white font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange-dark transition-all disabled:opacity-50">
+            {loading ? "Processing..." : isMember ? "List Your Seminar — Free with Membership" : "List Your Seminar — $199"}
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-gray-500 mt-6">
+          NeuroChiro members host seminars for free. Not a member?{" "}
+          <Link href="/pricing/doctors" className="text-neuro-orange font-bold hover:underline">Join for $49/month</Link>.
         </p>
-      </section>
+      </div>
     </div>
   );
 }

@@ -22,7 +22,6 @@ export async function POST(req: Request) {
   }
 
   // 1. IDEMPOTENCY CHECK
-  // Check if we've already processed this event ID to prevent duplicate actions
   const { data: alreadyProcessed } = await supabase
     .from('processed_webhooks')
     .select('id')
@@ -30,7 +29,6 @@ export async function POST(req: Request) {
     .single();
 
   if (alreadyProcessed) {
-
     return NextResponse.json({ received: true, duplicate: true });
   }
 
@@ -38,32 +36,151 @@ export async function POST(req: Request) {
   await supabase.from('processed_webhooks').insert({ id: event.id });
 
   try {
-    // 3. TRIGGER BACKGROUND AUTOMATIONS
-    // We do NOT 'await' these calls. Automations.enqueue handles DB persistence
-    // and background execution, returning control to this route immediately.
     switch (event.type) {
-      case "checkout.session.completed":
-        Automations.onPaymentSuccess(event.data.object);
+      case "checkout.session.completed": {
+        const session = event.data.object as any;
+        const userId = session.metadata?.userId;
+        const customer = session.customer as string;
+
+        if (userId) {
+          // Update profile with Stripe customer ID and activate membership
+          await supabase
+            .from('profiles')
+            .update({
+              stripe_customer_id: customer,
+              subscription_status: 'active',
+              tier: 'active',
+            })
+            .eq('id', userId);
+
+          // If user is a doctor, mark as verified
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', userId)
+            .single();
+
+          if (profile?.role === 'doctor') {
+            await supabase
+              .from('doctors')
+              .update({ verification_status: 'verified' })
+              .eq('user_id', userId);
+          }
+
+          // Handle metadata-driven record creation
+          const metaType = session.metadata?.type;
+
+          if (metaType === 'vendor') {
+            await supabase.from('vendors').insert({
+              id: userId,
+              name: session.metadata?.company_name || '',
+              short_description: session.metadata?.description || '',
+              is_active: false,
+            });
+          }
+
+          if (metaType === 'seminar_listing') {
+            await supabase.from('seminars').insert({
+              host_id: userId,
+              title: session.metadata?.title || 'Untitled Seminar',
+              description: session.metadata?.description || '',
+              dates: session.metadata?.dates || new Date().toISOString(),
+              location: session.metadata?.location || null,
+              is_approved: false,
+            });
+          }
+        }
+
+        // Enqueue automations
+        Automations.onPaymentSuccess(session);
         break;
-      case "invoice.payment_succeeded":
-        // Handle successful renewals
-        Automations.onPaymentSuccess(event.data.object);
+      }
+
+      case "invoice.payment_succeeded": {
+        const invoice = event.data.object as any;
+        const customer = invoice.customer as string;
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('stripe_customer_id', customer)
+          .single();
+
+        if (profile) {
+          await supabase
+            .from('profiles')
+            .update({ subscription_status: 'active', tier: 'active' })
+            .eq('id', profile.id);
+        }
+
+        Automations.onPaymentSuccess(invoice);
         break;
-      case "invoice.payment_failed":
-        Automations.onPaymentFailed(event.data.object);
+      }
+
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as any;
+        const customer = invoice.customer as string;
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('stripe_customer_id', customer)
+          .single();
+
+        if (profile) {
+          await supabase
+            .from('profiles')
+            .update({ subscription_status: 'past_due', tier: 'free' })
+            .eq('id', profile.id);
+        }
+
+        Automations.onPaymentFailed(invoice);
         break;
-      case "customer.subscription.updated":
-        // Handle tier upgrades/downgrades
-        Automations.onSubscriptionUpdated(event.data.object);
+      }
+
+      case "customer.subscription.updated": {
+        const subscription = event.data.object as any;
+        const customer = subscription.customer as string;
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('stripe_customer_id', customer)
+          .single();
+
+        if (profile) {
+          await supabase
+            .from('profiles')
+            .update({ subscription_status: subscription.status })
+            .eq('id', profile.id);
+        }
+
+        Automations.onSubscriptionUpdated(subscription);
         break;
-      case "customer.subscription.deleted":
-        Automations.onSubscriptionCanceled(event.data.object);
+      }
+
+      case "customer.subscription.deleted": {
+        const subscription = event.data.object as any;
+        const customer = subscription.customer as string;
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('stripe_customer_id', customer)
+          .single();
+
+        if (profile) {
+          await supabase
+            .from('profiles')
+            .update({ subscription_status: 'canceled', tier: 'free' })
+            .eq('id', profile.id);
+        }
+
+        Automations.onSubscriptionCanceled(subscription);
         break;
+      }
     }
   } catch (error) {
-    // We log the error but still return 200 to Stripe. 
-    // The event is recorded in processed_webhooks, and individual 
-    // automation failures are tracked in the automation_queue table.
     console.error("Webhook Automation Dispatch Error:", error);
   }
 

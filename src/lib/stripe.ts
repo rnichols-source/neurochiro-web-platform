@@ -34,7 +34,23 @@ export const PLANS = {
       price: 90,
     },
   },
-};
+  vendor: {
+    id: "vendor",
+    name: "Vendor Marketplace Partner",
+    monthly: {
+      priceId: process.env.STRIPE_VENDOR_MONTHLY_PRICE_ID ?? "",
+      price: 99,
+    },
+  },
+  seminar_listing: {
+    id: "seminar_listing",
+    name: "Seminar Listing (Non-Member)",
+    oneTime: {
+      priceId: process.env.STRIPE_SEMINAR_LISTING_PRICE_ID ?? "",
+      price: 199,
+    },
+  },
+} as const;
 
 export function getPriceId(plan: 'doctor' | 'student', cycle: 'monthly' | 'annual'): string {
   return PLANS[plan][cycle].priceId;

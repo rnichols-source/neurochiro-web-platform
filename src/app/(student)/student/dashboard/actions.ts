@@ -11,7 +11,7 @@ export async function getStudentDashboardData() {
   try {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role, tier, full_name')
+      .select('role, tier, full_name, subscription_status')
       .eq('id', user.id)
       .single()
 
@@ -39,6 +39,7 @@ export async function getStudentDashboardData() {
         fullName: (profile as any)?.full_name,
         role: (profile as any)?.role,
         status: ((profile as any)?.tier && (profile as any)?.tier !== 'free') ? 'active' : 'inactive',
+        subscription_status: (profile as any)?.subscription_status || null,
         school: (student as any)?.school || "Life University",
         gradYear: (student as any)?.graduation_year || "2027"
       },
