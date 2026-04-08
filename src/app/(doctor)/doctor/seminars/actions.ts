@@ -237,6 +237,26 @@ export async function getSeminarAttendees(seminarId: string) {
   return data
 }
 
+export async function deleteSeminarAction(seminarId: string) {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Unauthorized")
+
+  const { error } = await supabase
+    .from('seminars')
+    .delete()
+    .eq('id', seminarId)
+    .eq('host_id', user.id)
+
+  if (error) {
+    console.error("Error deleting seminar:", error)
+    throw new Error("Failed to delete seminar")
+  }
+
+  revalidatePath('/doctor/seminars')
+  return { success: true }
+}
+
 export async function exportAttendeesToCSV(seminarId: string) {
   const attendees = await getSeminarAttendees(seminarId)
   if (attendees.length === 0) return ""

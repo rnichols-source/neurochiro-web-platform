@@ -274,3 +274,45 @@ The ${clinic} Team`;
 
   return pitch;
 }
+
+export async function deleteJobPosting(jobId: string) {
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { error } = await supabase
+    .from('job_postings')
+    .delete()
+    .eq('id', jobId)
+    .eq('doctor_id', user.id);
+
+  if (error) {
+    console.error("Error deleting job posting:", error);
+    throw new Error("Failed to delete job posting");
+  }
+
+  revalidatePath('/doctor/jobs');
+  return { success: true };
+}
+
+export async function toggleJobStatus(jobId: string, currentStatus: string) {
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const newStatus = currentStatus === 'Active' ? 'Closed' : 'Active';
+
+  const { error } = await supabase
+    .from('job_postings')
+    .update({ status: newStatus })
+    .eq('id', jobId)
+    .eq('doctor_id', user.id);
+
+  if (error) {
+    console.error("Error toggling job status:", error);
+    throw new Error("Failed to update job status");
+  }
+
+  revalidatePath('/doctor/jobs');
+  return { success: true, newStatus };
+}

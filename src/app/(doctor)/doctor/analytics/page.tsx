@@ -1,152 +1,111 @@
 "use client";
 
-import {
-  ArrowLeft,
-  PieChart,
-  Activity,
-  Globe,
-  Settings,
-  Loader2
-} from "lucide-react";
-import Link from "next/link";
 import { useState, useEffect } from "react";
-import ROIDashboard from "@/components/doctor/ROIDashboard";
+import { Loader2, Eye, MousePointer, Phone, Globe } from "lucide-react";
 import { ROIData } from "@/types/analytics";
 import { getDoctorROIData } from "../dashboard/actions";
 
 export default function DoctorAnalytics() {
-  const [period, setPeriod] = useState<'7D' | '1M' | '3M' | '1Y'>('1M');
+  const [period, setPeriod] = useState<"7D" | "30D" | "90D" | "1Y">("30D");
   const [roiData, setRoiData] = useState<ROIData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadROIData() {
-      setLoading(true);
-      const data = await getDoctorROIData(period);
-      if (data) {
-        setRoiData(data as ROIData);
-      }
-      setLoading(false);
-    }
-    loadROIData();
+    setLoading(true);
+    getDoctorROIData(period)
+      .then((data) => { if (data) setRoiData(data as ROIData); })
+      .finally(() => setLoading(false));
   }, [period]);
 
+  const statCards = roiData
+    ? [
+        { label: "Profile Views", value: roiData.stats.profile_views, icon: Eye },
+        { label: "Contact Clicks", value: roiData.stats.contact_clicks, icon: MousePointer },
+        { label: "Phone Taps", value: roiData.stats.phone_taps, icon: Phone },
+        { label: "Website Clicks", value: roiData.stats.website_clicks, icon: Globe },
+      ]
+    : [];
+
+  const estimatedRevenue = roiData
+    ? roiData.stats.confirmed_patients * roiData.stats.average_case_value
+    : 0;
+
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-12 text-neuro-navy">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <Link href="/doctor/dashboard" className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest hover:text-neuro-orange transition-colors mb-4">
-            <ArrowLeft className="w-4 h-4" /> Back to Command Center
-          </Link>
-          <h1 className="text-4xl font-heading font-black">Practice ROI Dashboard</h1>
-          <p className="text-gray-500 mt-2">Measuring the clinical and financial impact of your NeuroChiro presence.</p>
+    <div className="p-8 max-w-5xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
+        <div className="flex bg-white border border-gray-200 rounded-lg p-1">
+          {(["7D", "30D", "90D", "1Y"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setPeriod(t)}
+              className={`px-4 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                period === t ? "bg-gray-900 text-white" : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {t}
+            </button>
+          ))}
         </div>
-        
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="bg-white p-1 rounded-2xl border border-gray-100 flex shadow-sm">
-            {["7D", "1M", "3M", "1Y"].map(t => (
-              <button 
-                key={t} 
-                onClick={() => setPeriod(t as any)}
-                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${period === t ? 'bg-neuro-navy text-white shadow-lg' : 'bg-transparent text-gray-400 hover:text-neuro-navy'}`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
+      </div>
 
       {loading ? (
-        <div className="h-96 flex flex-col items-center justify-center bg-white rounded-2xl border border-gray-100 shadow-sm">
-           <Loader2 className="w-10 h-10 text-neuro-orange animate-spin mb-4" />
-           <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Aggregating Clinical Data...</p>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
         </div>
-      ) : roiData ? (
-        <>
-          <ROIDashboard 
-            tier={roiData.tier} 
-            data={roiData} 
-            onUpgrade={() => console.log("Trigger Upgrade Flow")}
-          />
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Patient Acquisition Channels */}
-              <section className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm">
-                <div className="flex items-center justify-between mb-8">
-                   <h3 className="text-xl font-heading font-black flex items-center gap-2">
-                     <PieChart className="w-5 h-5 text-neuro-orange" /> Acquisition Channels
-                   </h3>
-                   <button className="text-[10px] font-black text-neuro-orange uppercase tracking-widest hover:underline flex items-center gap-1">
-                     View Details <Settings className="w-3 h-3" />
-                   </button>
-                </div>
-                <div className="space-y-6">
-                  {roiData.patient_acquisition.map((c, i) => (
-                    <div key={i}>
-                      <div className="flex justify-between text-xs font-bold mb-2">
-                        <span>{c.source}</span>
-                        <span className="text-gray-400">{c.count}%</span>
-                      </div>
-                      <div className="h-2 w-full bg-gray-50 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full ${i === 0 ? 'bg-neuro-navy' : i === 1 ? 'bg-neuro-orange' : i === 2 ? 'bg-blue-500' : 'bg-purple-500'}`} 
-                          style={{ width: `${c.count}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* Engagement Heatmap */}
-              <section className="bg-neuro-navy rounded-2xl p-10 text-white relative overflow-hidden shadow-xl">
-                <h3 className="text-xl font-heading font-black mb-8 flex items-center gap-2 relative z-10">
-                  <Activity className="w-5 h-5 text-neuro-orange" /> Lead Velocity Heatmap
-                </h3>
-                
-                <div className="aspect-[2/1] bg-[#0A0D14] rounded-3xl border border-white/10 relative overflow-hidden group">
-                    {/* Heatmap Simulation */}
-                    <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                       <div className="text-center">
-                          <Globe className="w-12 h-12 text-white/5 mx-auto mb-4" />
-                          <p className="text-[10px] font-black text-neuro-orange uppercase tracking-[0.3em]">High Density Clusters Detected</p>
-                       </div>
-                    </div>
-
-                    <div className="absolute bottom-4 left-4 flex items-center gap-4">
-                       <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-neuro-orange"></div>
-                          <span className="text-xs font-bold text-gray-400 uppercase">Incoming Leads</span>
-                       </div>
-                       <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                          <span className="text-xs font-bold text-gray-400 uppercase">Provider Coverage</span>
-                       </div>
-                    </div>
-                  </div>
-
-                <div className="mt-8 grid grid-cols-2 gap-4 relative z-10">
-                  <div className="p-5 bg-white/5 rounded-2xl border border-white/5">
-                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Top Referral Source</p>
-                    <p className="text-sm font-bold">Denver Health Network</p>
-                  </div>
-                  <div className="p-5 bg-white/5 rounded-2xl border border-white/5">
-                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Highest Conversion</p>
-                    <p className="text-sm font-bold">Mobile / Instagram</p>
-                  </div>
-                </div>
-              </section>
-            </div>
-        </>
+      ) : !roiData ? (
+        <div className="text-center py-16 text-gray-500">
+          <p>No data available for this period.</p>
+        </div>
       ) : (
-        <div className="h-96 flex flex-col items-center justify-center bg-white rounded-2xl border border-gray-100 shadow-sm">
-           <p className="text-sm font-bold text-gray-400">No performance data available for this period.</p>
+        <div className="space-y-6">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {statCards.map((card) => (
+              <div key={card.label} className="bg-white border border-gray-200 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <card.icon className="w-4 h-4 text-gray-400" />
+                  <span className="text-xs font-medium text-gray-500">{card.label}</span>
+                </div>
+                <p className="text-2xl font-bold text-gray-900">{card.value.toLocaleString()}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Revenue Estimate */}
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <p className="text-sm font-medium text-gray-500 mb-1">Estimated Revenue</p>
+            <p className="text-3xl font-bold text-gray-900">${estimatedRevenue.toLocaleString()}</p>
+            <p className="text-xs text-gray-400 mt-1">
+              {roiData.stats.confirmed_patients} confirmed patients x ${roiData.stats.average_case_value.toLocaleString()} avg case value
+            </p>
+          </div>
+
+          {/* Lead Sources */}
+          {roiData.patient_acquisition.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h2 className="text-sm font-semibold text-gray-900 mb-4">Lead Sources</h2>
+              <div className="space-y-3">
+                {roiData.patient_acquisition.map((channel, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-700">{channel.source}</span>
+                      <span className="text-gray-500">{channel.count}%</span>
+                    </div>
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gray-900 rounded-full"
+                        style={{ width: `${channel.count}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
-

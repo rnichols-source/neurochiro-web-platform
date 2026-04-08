@@ -1,40 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard,
-  Search,
-  Users,
-  Calendar,
-  Briefcase,
-  User,
-  LogOut,
-  ChevronRight,
-  Sparkles,
-  ShieldCheck,
-  Zap,
-  Star,
-  BarChart3,
-  Network,
-  Lock,
-  Store,
-  X,
-  MessageSquare,
-  Bell,
-  CreditCard,
-  GraduationCap
+  LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
+  MessageSquare, BarChart3, Bell, CreditCard, LogOut, X,
 } from "lucide-react";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase";
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -53,52 +27,33 @@ const navItems = [
   { name: "Billing", href: "/doctor/billing", icon: CreditCard },
 ];
 
-const eliteItems = [
-  { name: "The Mastermind", href: "https://www.neurochiromastermind.com", icon: Star, highlight: "text-purple-400" },
-];
-
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [profile, setProfile] = useState<any>(null);
+  const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {
-    const getProfile = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-
-        if (profileData) {
-          setProfile(profileData);
-        }
+        supabase.from("profiles").select("full_name").eq("id", user.id).single()
+          .then(({ data }) => setUserName(data?.full_name || null));
       }
-    };
-    getProfile();
+    });
   }, []);
 
-  const isAdmin = ['admin', 'founder', 'super_admin', 'regional_admin'].includes(profile?.role);
-
   const handleLogout = async () => {
-    if (confirm("Are you sure you want to log out?")) {
-      const supabase = createClient();
-      await supabase.auth.signOut();
-      // Clear demo role cookie if it exists
-      document.cookie = "nc_demo_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      router.push("/login");
-      router.refresh();
-    }
+    if (!confirm("Are you sure you want to log out?")) return;
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    document.cookie = "nc_demo_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    router.push("/login");
+    router.refresh();
   };
 
-  const getInitials = (name: string) => {
-    return name?.split(" ").map(n => n[0]).join("").toUpperCase() || "NC";
-  };
+  const initials = userName?.split(" ").map((n) => n[0]).join("").toUpperCase() || "--";
 
-  const SidebarContent = (
+  const Content = (
     <div className="flex flex-col h-full bg-neuro-navy">
       <div className="p-6">
         <Link href="/" className="flex items-center gap-2">
@@ -107,107 +62,32 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </Link>
       </div>
 
-      <nav className="px-4 space-y-1">
-        <div className="mb-4 px-2 flex items-center justify-between">
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-            Doctor Portal
-          </span>
-        </div>
+      <nav className="px-4 space-y-1 flex-1">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
-
+          const active = pathname === item.href;
           return (
-            <div key={item.name} className="relative group">
-              <Link
-                href={item.href}
-                onClick={() => {
-                   if (onClose) onClose();
-                }}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200",
-                  isActive
-                    ? "bg-neuro-orange text-white"
-                    : "text-gray-400 hover:text-white hover:bg-white/5"
-                )}
-              >
-                <item.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-gray-400 group-hover:text-neuro-orange-light")} />
-                <span className="font-medium text-sm">{item.name}</span>
-                {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
-              </Link>
-            </div>
+            <Link
+              key={item.name}
+              href={item.href}
+              onClick={onClose}
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                active ? "bg-neuro-orange text-white" : "text-gray-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <item.icon className={`w-5 h-5 ${active ? "text-white" : "text-gray-400"}`} />
+              {item.name}
+            </Link>
           );
         })}
-
-        {/* 🛡️ EMERGENCY ADMIN EXIT */}
-        {isAdmin && (
-          <div className="pt-4 mt-4 border-t border-white/5 px-2">
-            <button
-              onClick={() => {
-                // Clear the cookie aggressively
-                document.cookie = "nc_demo_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-                // Hard redirect
-                window.location.href = "/admin/dashboard";
-              }}
-              className="w-full flex items-center gap-3 px-3 py-2 bg-neuro-orange/10 text-neuro-orange rounded-lg hover:bg-neuro-orange/20 transition-all border border-neuro-orange/20"
-            >
-              <ShieldCheck className="w-5 h-5" />
-              <span className="font-bold text-sm">Admin Control</span>
-              <ChevronRight className="w-4 h-4 ml-auto" />
-            </button>
-          </div>
-        )}
       </nav>
 
-      {/* Elite Programs Section */}
-      <nav className="mt-8 px-4 space-y-1">
-        <div className="mb-4 px-2">
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Elite Programs</span>
-        </div>
-        {eliteItems.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            onClick={onClose}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group text-gray-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/5"
-          >
-            <item.icon className={cn("w-5 h-5", item.highlight)} />
-            <span className="font-medium text-sm">{item.name}</span>
-            <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-          </Link>
-        ))}
-      </nav>
-
-      <div className="p-4 mt-auto">
-        <div className="bg-white/5 p-4 rounded-xl border border-white/5 mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold text-gray-500 uppercase">Profile Visibility</span>
-              <span className="text-[10px] font-bold text-neuro-orange">Active</span>
-            </div>
-            <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
-              <BarChart3 className="w-3 h-3" /> Your clinic is listed on the directory
-            </p>
+      <div className="p-4 border-t border-white/10">
+        <div className="flex items-center gap-3 px-3 py-2">
+          <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-xs">
+            {initials}
           </div>
-
-        <div className="flex items-center gap-3 px-3 py-3 border-t border-white/10 group/profile">
-          <Link href="/doctor/profile" className="flex items-center gap-3 flex-1 min-w-0" onClick={onClose}>
-            <div className="relative">
-              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-xs group-hover/profile:bg-neuro-orange transition-colors">
-                {profile ? getInitials(profile.full_name) : "--"}
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-white truncate group-hover/profile:text-neuro-orange transition-colors">{profile?.full_name || "Loading..."}</p>
-              <p className="text-[10px] text-gray-400 truncate flex items-center gap-1 capitalize">
-                <ShieldCheck className="w-2 h-2 text-gray-500" />
-                Member
-              </p>
-            </div>
-          </Link>
-          <button 
-            onClick={handleLogout}
-            className="text-gray-400 hover:text-red-400 p-2 rounded-lg hover:bg-white/5 transition-all"
-            title="Logout"
-          >
+          <p className="text-xs font-bold text-white truncate flex-1">{userName || "Loading..."}</p>
+          <button onClick={handleLogout} className="text-gray-400 hover:text-red-400 p-1 rounded-lg transition-colors" title="Logout">
             <LogOut className="w-4 h-4" />
           </button>
         </div>
@@ -217,36 +97,19 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 h-dvh flex-col border-r border-white/10 shrink-0 relative overflow-y-auto">
-        {SidebarContent}
+      <aside className="hidden md:flex w-64 h-dvh flex-col border-r border-white/10 shrink-0 overflow-y-auto">
+        {Content}
       </aside>
 
-      {/* Mobile Drawer */}
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-[200] md:hidden">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={onClose}
-              className="absolute inset-0 bg-neuro-navy/60 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="relative w-64 h-full bg-neuro-navy flex flex-col shadow-2xl overflow-y-auto"
-            >
-              <button 
-                onClick={onClose}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white z-50"
-              >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-neuro-navy/60 backdrop-blur-sm" />
+            <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="relative w-64 h-full bg-neuro-navy flex flex-col shadow-2xl overflow-y-auto">
+              <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white z-50">
                 <X className="w-6 h-6" />
               </button>
-              {SidebarContent}
+              {Content}
             </motion.div>
           </div>
         )}
