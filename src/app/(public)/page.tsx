@@ -3,6 +3,11 @@ import { Search, ArrowRight, MapPin, ShieldCheck, Globe, Users, Stethoscope, Gra
 import { createAdminClient } from "@/lib/supabase-admin";
 import Footer from "@/components/landing/Footer";
 
+export const metadata = {
+  title: "NeuroChiro | Find a Nervous System Chiropractor",
+  description: "The global directory for nervous system chiropractors. Find verified specialists, track your health, and connect with the chiropractic community.",
+};
+
 export const revalidate = 300; // Cache for 5 minutes
 
 async function getFeaturedDoctors() {

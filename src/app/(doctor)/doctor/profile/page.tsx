@@ -62,7 +62,7 @@ export default function ProfilePage() {
     <div className="p-6 md:p-8 max-w-4xl mx-auto pb-20">
       {/* Toast */}
       {showToast.show && (
-        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl text-sm font-bold shadow-lg ${showToast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+        <div className={`fixed bottom-4 right-4 z-50 px-4 py-3 rounded-xl text-sm font-bold shadow-lg ${showToast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
           {showToast.message}
         </div>
       )}

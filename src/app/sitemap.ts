@@ -27,6 +27,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/nervous-system',
     '/learn',
     '/pricing',
+    '/about',
+    '/contact',
+    '/careers',
+    '/nervous-system',
     '/login',
     '/register',
   ].map((route) => ({

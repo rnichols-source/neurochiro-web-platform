@@ -34,6 +34,20 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
 
+  // Role-based access control
+  const userRole = session?.user?.user_metadata?.role || '';
+  const path = req.nextUrl.pathname;
+
+  if (path.startsWith('/doctor') && !['doctor', 'admin', 'founder', 'super_admin'].includes(userRole)) {
+    return NextResponse.redirect(new URL('/dashboard', req.url));
+  }
+  if (path.startsWith('/student') && !['student', 'admin', 'founder', 'super_admin'].includes(userRole)) {
+    return NextResponse.redirect(new URL('/dashboard', req.url));
+  }
+  if (path.startsWith('/admin') && !['admin', 'founder', 'super_admin', 'regional_admin'].includes(userRole)) {
+    return NextResponse.redirect(new URL('/dashboard', req.url));
+  }
+
   return res;
 }
 
