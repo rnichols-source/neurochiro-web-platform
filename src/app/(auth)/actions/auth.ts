@@ -50,6 +50,7 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     'regional_admin': '/admin/dashboard',
     'doctor': '/doctor/dashboard',
     'student': '/student/dashboard',
+    'patient': '/portal/dashboard',
   }
 
   // Route to the correct dashboard based on role
@@ -61,8 +62,7 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   } else if (role.startsWith('student')) {
     destination = '/student/dashboard';
   } else {
-    // If it's a legacy patient/vendor role, we send to login or home
-    destination = '/login';
+    destination = '/';
   }
 
   // Clear any existing demo role cookie for admin logins
