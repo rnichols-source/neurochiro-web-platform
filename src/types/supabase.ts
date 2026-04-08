@@ -83,6 +83,7 @@ export interface Database {
           is_mentoring: boolean
           region_code: string
           email: string | null
+          phone: string | null
           photo_url: string | null
           video_url: string | null
           seo_keywords: string | null
@@ -120,6 +121,7 @@ export interface Database {
           is_mentoring?: boolean
           region_code?: string
           email?: string | null
+          phone?: string | null
           photo_url?: string | null
           video_url?: string | null
           seo_keywords?: string | null
@@ -157,6 +159,7 @@ export interface Database {
           is_mentoring?: boolean
           region_code?: string
           email?: string | null
+          phone?: string | null
           photo_url?: string | null
           video_url?: string | null
           seo_keywords?: string | null

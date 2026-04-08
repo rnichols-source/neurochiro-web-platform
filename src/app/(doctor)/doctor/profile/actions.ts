@@ -18,7 +18,7 @@ export async function getDoctorProfile() {
         .maybeSingle(),
       supabase
         .from('doctors')
-        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, latitude, slug, verification_status')
+        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status')
         .eq('user_id', user.id)
         .maybeSingle()
     ])
@@ -73,6 +73,7 @@ export async function updateDoctorProfile(formData: FormData) {
     const specialties = formData.get('specialties')?.toString().split(',').map((s: string) => s.trim()) || []
     const videoUrl = formData.get('video_url') as string
     const seoKeywords = formData.get('seo_keywords') as string
+    const phone = formData.get('phone') as string
 
     // 1. Update Profile (Name)
     const { error: profileError } = await supabase
@@ -97,7 +98,8 @@ export async function updateDoctorProfile(formData: FormData) {
         bio: bio,
         specialties: specialties,
         video_url: videoUrl,
-        seo_keywords: seoKeywords
+        seo_keywords: seoKeywords,
+        phone: phone || null
       })
       .eq('user_id', user.id)
 
