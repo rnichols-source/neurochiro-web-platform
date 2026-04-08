@@ -32,8 +32,9 @@ export async function GET(request: NextRequest) {
 
     if (query) {
       const nameConditions = SEARCHABLE_NAME_COLUMNS.map(col => `${col}.ilike.%${query}%`);
+      const locationConditions = SEARCHABLE_LOCATION_COLUMNS.map(col => `${col}.ilike.%${query}%`);
       const specialtyCondition = `specialties::text.ilike.%${query}%`;
-      dbQuery = dbQuery.or([...nameConditions, specialtyCondition].join(','));
+      dbQuery = dbQuery.or([...nameConditions, ...locationConditions, specialtyCondition].join(','));
     }
 
     if (location) {

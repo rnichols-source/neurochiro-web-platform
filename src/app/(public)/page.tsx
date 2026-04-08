@@ -26,9 +26,9 @@ export default async function HomePage() {
   return (
     <div className="min-h-dvh bg-neuro-cream">
       {/* Hero */}
-      <section className="bg-neuro-navy text-white pt-32 pb-20 px-6">
+      <section className="bg-neuro-navy text-white pt-40 md:pt-48 pb-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-heading font-black tracking-tight leading-tight mb-4">
+          <h1 className="text-4xl md:text-5xl font-heading font-black tracking-tight leading-tight mb-4 text-white">
             Find a Nervous System<br />
             <span className="text-neuro-orange">Chiropractor</span>
           </h1>
