@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Search, ArrowRight, MapPin, ShieldCheck, Globe, Users, Stethoscope, GraduationCap, Heart } from "lucide-react";
+import { Search, ArrowRight, MapPin, ShieldCheck, Globe, Users } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase-admin";
 import Footer from "@/components/landing/Footer";
+import WhoIsItFor from "@/components/landing/WhoIsItFor";
 
 export const metadata = {
   title: "NeuroChiro | Find a Nervous System Chiropractor",
@@ -128,30 +129,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* For Everyone */}
-      <section className="max-w-5xl mx-auto px-6 py-16">
-        <h2 className="text-2xl font-heading font-black text-neuro-navy text-center mb-10">Who Is NeuroChiro For?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link href="/pricing/doctors" className="bg-white rounded-2xl border border-gray-100 p-6 text-center hover:shadow-lg hover:border-gray-200 transition-all">
-            <Stethoscope className="w-8 h-8 text-neuro-orange mx-auto mb-3" />
-            <h3 className="font-bold text-neuro-navy mb-1">For Doctors</h3>
-            <p className="text-gray-500 text-sm mb-3">Get your practice listed in the global directory.</p>
-            <p className="text-neuro-orange font-bold text-sm">$49/mo (USD) &rarr;</p>
-          </Link>
-          <Link href="/pricing/students" className="bg-white rounded-2xl border border-gray-100 p-6 text-center hover:shadow-lg hover:border-gray-200 transition-all">
-            <GraduationCap className="w-8 h-8 text-neuro-orange mx-auto mb-3" />
-            <h3 className="font-bold text-neuro-navy mb-1">For Students</h3>
-            <p className="text-gray-500 text-sm mb-3">Find jobs, attend seminars, and launch your career.</p>
-            <p className="text-neuro-orange font-bold text-sm">$9/mo (USD) &rarr;</p>
-          </Link>
-          <Link href="/register?role=patient" className="bg-white rounded-2xl border border-gray-100 p-6 text-center hover:shadow-lg hover:border-gray-200 transition-all">
-            <Heart className="w-8 h-8 text-neuro-orange mx-auto mb-3" />
-            <h3 className="font-bold text-neuro-navy mb-1">For Patients</h3>
-            <p className="text-gray-500 text-sm mb-3">Track your health and find the right specialist.</p>
-            <p className="text-neuro-orange font-bold text-sm">Free &rarr;</p>
-          </Link>
-        </div>
-      </section>
+      {/* For Everyone — client component for region-aware pricing */}
+      <WhoIsItFor />
 
       {/* Doctor CTA */}
       <section className="bg-neuro-navy py-16 px-6">
