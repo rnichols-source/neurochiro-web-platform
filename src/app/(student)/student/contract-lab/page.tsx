@@ -84,7 +84,7 @@ export default function ContractLabPage() {
   return (
     <div className="p-8 max-w-[1400px] mx-auto space-y-8">
       <header>
-        <h1 className="text-3xl font-heading font-black text-neuro-navy">Contract Lab</h1>
+        <h1 className="text-2xl font-heading font-black text-neuro-navy">Contract Lab</h1>
         <p className="text-gray-500 mt-2">Paste your employment contract below and let AI analyze each clause for risks and negotiation opportunities.</p>
       </header>
 
@@ -98,7 +98,7 @@ export default function ContractLabPage() {
               <div className="flex-1 flex flex-col gap-4">
                 <textarea value={contractText} onChange={(e) => setContractText(e.target.value)} placeholder="Paste your employment contract text here..." className="flex-1 p-4 border-2 border-gray-200 rounded-2xl resize-none focus:outline-neuro-orange focus:border-neuro-orange text-sm min-h-[180px]" />
                 {analysisError && <p className="text-red-500 text-xs font-bold">{analysisError}</p>}
-                <button onClick={handleAnalyze} disabled={isUploading || !contractText.trim()} className="w-full py-4 bg-neuro-navy text-white rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-neuro-navy/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                <button onClick={handleAnalyze} disabled={isUploading || !contractText.trim()} className="w-full py-3 px-6 bg-neuro-navy text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-neuro-navy/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                   {isUploading ? <><Loader2 className="w-4 h-4 animate-spin" /> Analyzing...</> : <><ShieldAlert className="w-4 h-4" /> Analyze Contract</>}
                 </button>
               </div>

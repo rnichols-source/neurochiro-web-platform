@@ -59,7 +59,7 @@ export default function StudentDashboard() {
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto space-y-8">
       <header>
-        <h1 className="text-3xl font-heading font-black text-neuro-navy">
+        <h1 className="text-2xl font-heading font-black text-neuro-navy">
           {studentName}
         </h1>
         {schoolInfo && <p className="text-neuro-gray mt-1">{schoolInfo}</p>}

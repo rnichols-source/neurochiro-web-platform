@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, User, Stethoscope, GraduationCap, Zap, MapPin, BookOpen, Crown, Users, Briefcase, Store, Calendar, Sparkles, Bell } from "lucide-react";
+import { Menu, X, ChevronDown, User, Stethoscope, GraduationCap, Zap, MapPin, BookOpen, Crown, Users, Briefcase, Store, Calendar, Sparkles, Bell, Heart } from "lucide-react";
 import RegionSwitcher from "./RegionSwitcher";
 import GetStartedModal from "./GetStartedModal";
 import NotificationBell from "./NotificationBell";
@@ -110,25 +110,25 @@ export default function Navbar() {
               </button>
               <div className="absolute top-full right-0 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all">
                 <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 w-64 overflow-hidden">
-                  <Link href="/seminars" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors">
-                    <div className="p-2 bg-neuro-orange/10 rounded-lg text-neuro-orange"><Calendar className="w-4 h-4" /></div>
+                  <Link href="/pricing/doctors" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors">
+                    <div className="p-2 bg-neuro-orange/10 rounded-lg text-neuro-orange"><Stethoscope className="w-4 h-4" /></div>
                     <div>
-                      <p className="text-sm font-bold text-neuro-navy">Seminars</p>
-                      <p className="text-xs text-gray-500">Live Clinical Training</p>
+                      <p className="text-sm font-bold text-neuro-navy">I&apos;m a Doctor</p>
+                      <p className="text-xs text-gray-500">Get listed in the directory</p>
                     </div>
                   </Link>
-                  <Link href="/host-a-seminar" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">
-                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600"><Users className="w-4 h-4" /></div>
+                  <Link href="/pricing/students" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">
+                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600"><GraduationCap className="w-4 h-4" /></div>
                     <div>
-                      <p className="text-sm font-bold text-blue-900">Host a Seminar</p>
-                      <p className="text-xs text-gray-500">Join Educator Network</p>
+                      <p className="text-sm font-bold text-blue-900">I&apos;m a Student</p>
+                      <p className="text-xs text-gray-500">Jobs, seminars &amp; career tools</p>
                     </div>
                   </Link>
-                  <Link href="https://www.neurochiromastermind.com" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">
-                    <div className="p-2 bg-purple-50 rounded-lg text-purple-600"><Crown className="w-4 h-4" /></div>
+                  <Link href="/register?role=patient" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">
+                    <div className="p-2 bg-red-50 rounded-lg text-red-500"><Heart className="w-4 h-4" /></div>
                     <div>
-                      <p className="text-sm font-bold text-purple-900">Mastermind</p>
-                      <p className="text-xs text-gray-500">Elite Clinical Network</p>
+                      <p className="text-sm font-bold text-red-900">I&apos;m a Patient</p>
+                      <p className="text-xs text-gray-500">Track health &amp; find specialists</p>
                     </div>
                   </Link>
                 </div>
@@ -254,14 +254,14 @@ export default function Navbar() {
 
               <div className="space-y-4 pt-8 border-t border-white/10">
                 <p className="text-xs font-black uppercase tracking-widest text-gray-500">Join the Network</p>
-                <Link href="/seminars" className="flex items-center gap-4 text-xl font-bold text-gray-300">
-                  <Calendar className="w-5 h-5 text-neuro-orange" /> Seminars
+                <Link href="/pricing/doctors" className="flex items-center gap-4 text-xl font-bold text-gray-300">
+                  <Stethoscope className="w-5 h-5 text-neuro-orange" /> I&apos;m a Doctor
                 </Link>
-                <Link href="/host-a-seminar" className="flex items-center gap-4 text-xl font-bold text-gray-300">
-                  <Users className="w-5 h-5 text-blue-500" /> Host a Seminar
+                <Link href="/pricing/students" className="flex items-center gap-4 text-xl font-bold text-gray-300">
+                  <GraduationCap className="w-5 h-5 text-blue-500" /> I&apos;m a Student
                 </Link>
-                <Link href="https://www.neurochiromastermind.com" className="flex items-center gap-4 text-xl font-bold text-gray-300">
-                  <Crown className="w-5 h-5 text-purple-500" /> Mastermind
+                <Link href="/register?role=patient" className="flex items-center gap-4 text-xl font-bold text-gray-300">
+                  <Heart className="w-5 h-5 text-red-500" /> I&apos;m a Patient
                 </Link>
               </div>
             </div>

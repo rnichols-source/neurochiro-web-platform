@@ -39,7 +39,7 @@ export default function JobsPage() {
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-8">
       <header>
-        <h1 className="text-3xl font-heading font-black text-neuro-navy">Jobs</h1>
+        <h1 className="text-2xl font-heading font-black text-neuro-navy">Jobs</h1>
       </header>
 
       <div className="relative">

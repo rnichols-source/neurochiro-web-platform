@@ -1,7 +1,8 @@
 "use client";
 
 import NextImage from "next/image";
-import { ShieldCheck, Star, ArrowRight } from "lucide-react";
+import { ShieldCheck, Star, ArrowRight, Heart } from "lucide-react";
+import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
@@ -11,14 +12,25 @@ interface DoctorCardProps {
 }
 
 export default function DoctorCard({ doc, index }: DoctorCardProps) {
+  const { isSaved, toggleSave } = useUserPreferences();
+  const docId = doc.id.toString();
+  const saved = isSaved('doctors', docId);
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      key={`${doc.id}-${index}`} 
+      key={`${doc.id}-${index}`}
       className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden"
     >
+      <button
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleSave('doctors', docId); }}
+        className="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-50 z-10"
+        aria-label={saved ? "Unsave doctor" : "Save doctor"}
+      >
+        <Heart className={`w-5 h-5 ${saved ? 'text-red-500 fill-red-500' : 'text-gray-300'}`} />
+      </button>
       <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-4">
             <div className="relative w-14 h-14 rounded-2xl bg-neuro-navy overflow-hidden shadow-lg border border-white/10 flex items-center justify-center">

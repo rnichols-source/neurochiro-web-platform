@@ -129,7 +129,7 @@ export default function TrackPage() {
   return (
     <div className="space-y-8 pb-20">
       <header>
-        <h1 className="text-3xl font-heading font-black text-neuro-navy uppercase tracking-tight">Health Tracker</h1>
+        <h1 className="text-2xl font-heading font-black text-neuro-navy uppercase tracking-tight">Health Tracker</h1>
         <p className="text-gray-500 mt-1">Log how you feel each day to see trends over time.</p>
       </header>
 
@@ -163,7 +163,7 @@ export default function TrackPage() {
         <button
           onClick={handleSubmit}
           disabled={saving}
-          className="px-8 py-4 bg-neuro-navy text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-neuro-navy/90 transition-all disabled:opacity-50 flex items-center gap-2"
+          className="px-6 py-3 bg-neuro-navy text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-neuro-navy/90 transition-all disabled:opacity-50 flex items-center gap-2"
         >
           {saved ? <><CheckCircle2 className="w-4 h-4" /> Saved!</> : saving ? 'Saving...' : todayLogged ? 'Update Check-in' : 'Log Today'}
         </button>

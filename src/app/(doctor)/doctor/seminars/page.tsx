@@ -116,7 +116,7 @@ export default function SeminarsPage() {
     <div className="p-8 max-w-5xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">Seminars</h1>
+        <h1 className="text-2xl font-heading font-black text-neuro-navy">Seminars</h1>
         <button
           onClick={() => setShowCreateModal(true)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"

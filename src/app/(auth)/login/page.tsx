@@ -13,6 +13,7 @@ import {
   Loader2
 } from "lucide-react";
 import { login, signInWithProvider } from "../actions/auth";
+import { createClient } from "@/lib/supabase";
 import { unstable_noStore as noStore } from 'next/cache';
 
 function LoginContent() {
@@ -25,6 +26,21 @@ function LoginContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPending, setIsPending] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSent, setForgotSent] = useState(false);
+  const [forgotPending, setForgotPending] = useState(false);
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotPending(true);
+    const supabase = createClient();
+    await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: window.location.origin + "/reset-password",
+    });
+    setForgotSent(true);
+    setForgotPending(false);
+  };
 
   useEffect(() => {
     if (errorParam === "session_expired") {
@@ -72,60 +88,100 @@ function LoginContent() {
           <div className="flex-1 h-px bg-gray-100"></div>
         </div>
 
-        <form 
-          action={async (formData) => {
-            setIsPending(true);
-            await login(formData, redirectParam);
-            setIsPending(false);
-          }} 
-          className="space-y-4"
-        >
-          <div className="space-y-1">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input 
-                name="email"
-                type="email" 
-                required
-                autoComplete="email"
-                placeholder="email@neurochiro.com"
-                inputMode="email"
-                className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+        {showForgotPassword ? (
+          <div className="space-y-4">
+            {forgotSent ? (
+              <div className="text-center space-y-4">
+                <p className="text-gray-700 font-semibold">Check your email for a reset link</p>
+                <p className="text-gray-500 text-sm">We sent a password reset link to <strong>{forgotEmail}</strong></p>
+                <button type="button" onClick={() => { setShowForgotPassword(false); setForgotSent(false); setForgotEmail(""); }}
+                  className="text-sm font-bold text-neuro-orange hover:underline">Back to login</button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Email Address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="email"
+                      required
+                      autoComplete="email"
+                      placeholder="email@neurochiro.com"
+                      inputMode="email"
+                      className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <button type="submit" disabled={forgotPending}
+                  className="w-full py-5 bg-neuro-navy text-white font-black rounded-2xl hover:bg-neuro-navy-light transition-all shadow-xl shadow-neuro-navy/20 uppercase tracking-widest disabled:opacity-70 flex items-center justify-center gap-2">
+                  {forgotPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Send Reset Link"}
+                </button>
+                <p className="text-center">
+                  <button type="button" onClick={() => setShowForgotPassword(false)}
+                    className="text-sm font-bold text-neuro-orange hover:underline">Back to login</button>
+                </p>
+              </form>
+            )}
           </div>
-
-          <div className="space-y-1">
-            <div className="flex justify-between items-center ml-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Password</label>
-              <button type="button" className="text-[10px] font-bold text-neuro-orange hover:underline uppercase tracking-widest">Forgot?</button>
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input 
-                name="password"
-                type="password" 
-                required
-                autoComplete="current-password"
-                placeholder="••••••••"
-                className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <button 
-            type="submit"
-            disabled={isPending}
-            className="w-full py-5 bg-neuro-navy text-white font-black rounded-2xl hover:bg-neuro-navy-light transition-all shadow-xl shadow-neuro-navy/20 mt-6 uppercase tracking-widest disabled:opacity-70 flex items-center justify-center gap-2"
+        ) : (
+          <form
+            action={async (formData) => {
+              setIsPending(true);
+              await login(formData, redirectParam);
+              setIsPending(false);
+            }}
+            className="space-y-4"
           >
-            {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign In"}
-          </button>
-        </form>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Email Address</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  placeholder="email@neurochiro.com"
+                  inputMode="email"
+                  className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex justify-between items-center ml-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Password</label>
+                <button type="button" onClick={() => setShowForgotPassword(true)} className="text-[10px] font-bold text-neuro-orange hover:underline uppercase tracking-widest">Forgot?</button>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  name="password"
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isPending}
+              className="w-full py-5 bg-neuro-navy text-white font-black rounded-2xl hover:bg-neuro-navy-light transition-all shadow-xl shadow-neuro-navy/20 mt-6 uppercase tracking-widest disabled:opacity-70 flex items-center justify-center gap-2"
+            >
+              {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign In"}
+            </button>
+          </form>
+        )}
 
         <div className="mt-10 text-center space-y-4">
           <p className="text-sm text-gray-400">Don't have an account yet?</p>

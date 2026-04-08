@@ -151,7 +151,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Save */}
-        <button type="submit" disabled={saving} className="w-full py-4 bg-neuro-navy text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-neuro-navy/90 disabled:opacity-50">
+        <button type="submit" disabled={saving} className="w-full py-3 px-6 bg-neuro-navy text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-neuro-navy/90 disabled:opacity-50">
           <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Profile'}
         </button>
       </form>
