@@ -1,26 +1,7 @@
 "use client";
 
-import { 
-  Stethoscope, 
-  Search, 
-  MapPin, 
-  Globe, 
-  Mail, 
-  ChevronRight, 
-  Edit3, 
-  Trash2, 
-  X, 
-  Check, 
-  Loader2,
-  Building2,
-  ShieldCheck,
-  MoreVertical,
-  Plus,
-  Sparkles
-} from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { getAllDoctors, updateDoctorManually, deleteDoctorManually } from "./actions";
-import { motion, AnimatePresence } from "framer-motion";
 
 export default function DirectoryManager() {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -28,47 +9,14 @@ export default function DirectoryManager() {
   const [loading, setLoading] = useState(true);
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [showCleanup, setShowCleanup] = useState(false);
-  const [isCleaning, setIsCleaning] = useState(false);
 
-  // Identify empty/duplicate candidates
-  const cleanupCandidates = useMemo(() => {
-    return doctors.filter(d => (!d.first_name || d.first_name.trim() === "") && d.clinic_name);
-  }, [doctors]);
-
-  useEffect(() => {
-    fetchDoctors();
-  }, []);
-
-  const handleCleanup = async () => {
-    if (!confirm(`This will permanently delete ${cleanupCandidates.length} incomplete profile records. Are you sure?`)) return;
-    
-    setIsCleaning(true);
-    let successCount = 0;
-    let failCount = 0;
-
-    for (const doc of cleanupCandidates) {
-      const res = await deleteDoctorManually(doc.id);
-      if (res.success) successCount++;
-      else failCount++;
-    }
-
-    alert(`Cleanup complete: ${successCount} removed, ${failCount} failed.`);
-    setShowCleanup(false);
-    fetchDoctors();
-    setIsCleaning(false);
-  };
+  useEffect(() => { fetchDoctors(); }, []);
 
   const fetchDoctors = async (query?: string) => {
     setLoading(true);
-    try {
-      const data = await getAllDoctors(query);
-      setDoctors(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
+    try { setDoctors(await getAllDoctors(query)); }
+    catch (e) { console.error(e); }
+    finally { setLoading(false); }
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -80,8 +28,6 @@ export default function DirectoryManager() {
     e.preventDefault();
     if (!selectedDoctor) return;
     setIsUpdating(true);
-    
-    // Surgical update object to avoid sending primary keys or metadata columns
     const updates = {
       first_name: selectedDoctor.first_name,
       last_name: selectedDoctor.last_name,
@@ -98,12 +44,10 @@ export default function DirectoryManager() {
       website_url: selectedDoctor.website_url,
       instagram_url: selectedDoctor.instagram_url,
       verification_status: selectedDoctor.verification_status,
-      membership_tier: selectedDoctor.membership_tier
+      membership_tier: selectedDoctor.membership_tier,
     };
-
     const res = await updateDoctorManually(selectedDoctor.id, updates);
     if (res.success) {
-      alert("Doctor profile updated successfully.");
       setSelectedDoctor(null);
       fetchDoctors(searchQuery);
     } else {
@@ -113,132 +57,76 @@ export default function DirectoryManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this doctor? This action cannot be undone.")) return;
-    
-    // Optimistic update
-    const previousDoctors = [...doctors];
-    setDoctors(doctors.filter(d => d.id !== id));
-    
+    if (!confirm("Delete this doctor? This cannot be undone.")) return;
+    const prev = [...doctors];
+    setDoctors(doctors.filter((d) => d.id !== id));
     const res = await deleteDoctorManually(id);
     if (!res.success) {
       alert("Error: " + res.error);
-      setDoctors(previousDoctors); // Rollback
+      setDoctors(prev);
     } else {
-      // Refresh to ensure everything is in sync
       fetchDoctors(searchQuery);
     }
   };
 
+  const statusColor = (s: string) =>
+    s === "verified" ? "bg-green-500/10 text-green-400" :
+    s === "pending" ? "bg-yellow-500/10 text-yellow-400" :
+    "bg-gray-500/10 text-gray-400";
+
   return (
-    <div className="p-4 md:p-8 max-w-[1600px] mx-auto space-y-8 text-white min-h-dvh">
-      <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-2 mb-2 text-neuro-orange">
-            <Stethoscope className="w-5 h-5" />
-            <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white">Clinical Operations</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-heading font-black">Directory Manager</h1>
-          <p className="text-gray-400 mt-2 text-base md:text-lg font-medium">Manually edit, verify, or remove listings from the global network.</p>
-        </div>
+    <div className="p-6 max-w-6xl mx-auto text-white space-y-6">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <h1 className="text-2xl font-bold">Doctors</h1>
+        <form onSubmit={handleSearch} className="flex gap-2">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search name, clinic, email..."
+            className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm w-64 focus:outline-none focus:border-white/30"
+          />
+          <button type="submit" className="px-4 py-2 bg-white/10 rounded-lg text-sm hover:bg-white/20">
+            Search
+          </button>
+        </form>
+      </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 w-full lg:max-w-2xl">
-          <form onSubmit={handleSearch} className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-            <input 
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name, clinic, or email..."
-              className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:outline-none focus:border-neuro-orange transition-all"
-            />
-          </form>
-          
-          {cleanupCandidates.length > 0 && (
-            <button
-              onClick={() => setShowCleanup(true)}
-              className="px-6 py-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 rounded-2xl flex items-center justify-center gap-3 transition-all font-black uppercase tracking-widest text-[10px]"
-            >
-              <Sparkles className="w-4 h-4" />
-              Cleanup ({cleanupCandidates.length})
-            </button>
-          )}
-        </div>
-      </header>
-
-      <section className="bg-white/5 border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative">
-        {loading && (
-          <div className="absolute inset-0 bg-neuro-navy/40 backdrop-blur-[2px] z-50 flex items-center justify-center">
-            <Loader2 className="w-10 h-10 text-neuro-orange animate-spin" />
-          </div>
-        )}
-
-        <div className="overflow-x-auto min-h-[400px]">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-white/[0.03]">
+      {loading && !doctors.length ? (
+        <p className="text-gray-500 text-center py-12">Loading...</p>
+      ) : (
+        <div className="bg-white/5 border border-white/5 rounded-xl overflow-hidden">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-white/5 text-xs text-gray-500 uppercase">
               <tr>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5">Doctor & Clinic</th>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5">Location</th>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5">Status</th>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5">Tier</th>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right border-b border-white/5">Actions</th>
+                <th className="px-4 py-3">Name</th>
+                <th className="px-4 py-3">Clinic</th>
+                <th className="px-4 py-3">Location</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Tier</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {doctors.length === 0 && !loading ? (
+              {doctors.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-8 py-20 text-center text-gray-500 font-bold uppercase tracking-widest text-xs">
-                    No clinical listings found.
-                  </td>
+                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500">No doctors found.</td>
                 </tr>
               ) : (
                 doctors.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-white/[0.03] transition-all group">
-                    <td className="px-8 py-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-neuro-navy border border-white/5 flex items-center justify-center text-neuro-orange font-black text-xl shadow-lg shrink-0">
-                          {doc.last_name?.[0] || 'D'}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-bold text-white text-lg truncate">Dr. {doc.first_name} {doc.last_name}</p>
-                          <p className="text-xs text-gray-500 truncate">{doc.clinic_name || 'No Clinic Name'}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex items-center gap-2 text-gray-400">
-                        <MapPin className="w-3 h-3 text-neuro-orange shrink-0" />
-                        <span className="text-xs font-medium truncate">{doc.city}, {doc.state || doc.country}</span>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border border-white/5 ${
-                        doc.verification_status === 'verified' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
-                        doc.verification_status === 'pending' ? 'bg-amber-500/10 text-amber-500' :
-                        'bg-gray-500/10 text-gray-500'
-                      }`}>
+                  <tr key={doc.id} className="hover:bg-white/5">
+                    <td className="px-4 py-3 font-medium">Dr. {doc.first_name} {doc.last_name}</td>
+                    <td className="px-4 py-3 text-gray-400">{doc.clinic_name || "-"}</td>
+                    <td className="px-4 py-3 text-gray-400">{doc.city}{doc.state ? `, ${doc.state}` : ""}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-0.5 rounded text-xs font-semibold ${statusColor(doc.verification_status)}`}>
                         {doc.verification_status}
                       </span>
                     </td>
-                    <td className="px-8 py-6">
-                      <span className="text-[10px] font-black text-white uppercase tracking-widest bg-white/5 px-2 py-1 rounded-lg border border-white/5">
-                        {doc.membership_tier}
-                      </span>
-                    </td>
-                    <td className="px-8 py-6 text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
-                          onClick={() => setSelectedDoctor({...doc})}
-                          className="p-3 bg-white/5 hover:bg-neuro-orange text-white rounded-xl transition-all border border-white/5 shadow-xl"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(doc.id)}
-                          className="p-3 bg-white/5 hover:bg-red-500 text-white rounded-xl transition-all border border-white/5 shadow-xl"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                    <td className="px-4 py-3 text-gray-400 capitalize">{doc.membership_tier}</td>
+                    <td className="px-4 py-3 text-right space-x-2">
+                      <button onClick={() => setSelectedDoctor({ ...doc })} className="px-3 py-1 bg-white/10 rounded text-xs hover:bg-white/20">Edit</button>
+                      <button onClick={() => handleDelete(doc.id)} className="px-3 py-1 bg-red-500/10 text-red-400 rounded text-xs hover:bg-red-500/20">Delete</button>
                     </td>
                   </tr>
                 ))
@@ -246,301 +134,73 @@ export default function DirectoryManager() {
             </tbody>
           </table>
         </div>
-      </section>
+      )}
 
-      {/* EDIT MODAL */}
-      <AnimatePresence>
-        {selectedDoctor && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 backdrop-blur-md bg-neuro-navy/60">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-[#0A0D14] rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden border border-white/10 max-h-[90vh] flex flex-col"
-            >
-              <header className="p-8 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-6 min-w-0">
-                  <div className="w-16 h-16 rounded-[2rem] bg-neuro-navy flex items-center justify-center text-neuro-orange font-black text-3xl shadow-xl border border-white/10 shrink-0">
-                    {selectedDoctor.last_name?.[0] || 'D'}
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-2xl font-black text-white truncate">Edit Clinical Profile</h3>
-                    <p className="text-[10px] font-black text-neuro-orange uppercase tracking-[0.2em] mt-1 truncate">Doctor ID: {selectedDoctor.id}</p>
-                  </div>
-                </div>
-                <button onClick={() => setSelectedDoctor(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-500 shrink-0">
-                  <X className="w-8 h-8" />
-                </button>
-              </header>
-
-              <form onSubmit={handleUpdate} className="flex-1 overflow-y-auto p-8 md:p-10 space-y-10 custom-scrollbar">
-                {/* 1. Core Identity */}
-                <div className="space-y-6">
-                  <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5 pb-2 ml-2">Identity & Contact</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-600 uppercase ml-4">First Name</label>
-                      <input 
-                        value={selectedDoctor.first_name || ""}
-                        onChange={(e) => setSelectedDoctor({...selectedDoctor, first_name: e.target.value})}
-                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-600 uppercase ml-4">Last Name</label>
-                      <input 
-                        value={selectedDoctor.last_name || ""}
-                        onChange={(e) => setSelectedDoctor({...selectedDoctor, last_name: e.target.value})}
-                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-600 uppercase ml-4">Email Address</label>
-                      <input 
-                        value={selectedDoctor.email || ""}
-                        onChange={(e) => setSelectedDoctor({...selectedDoctor, email: e.target.value})}
-                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-600 uppercase ml-4">Directory Slug</label>
-                      <input 
-                        value={selectedDoctor.slug || ""}
-                        onChange={(e) => setSelectedDoctor({...selectedDoctor, slug: e.target.value})}
-                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none font-mono"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. Clinical Info */}
-                <div className="space-y-6">
-                  <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5 pb-2 ml-2">Practice Details</h4>
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-600 uppercase ml-4">Clinic Name</label>
-                      <input 
-                        value={selectedDoctor.clinic_name || ""}
-                        onChange={(e) => setSelectedDoctor({...selectedDoctor, clinic_name: e.target.value})}
-                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-600 uppercase ml-4">Full Address</label>
-                      <textarea 
-                        value={selectedDoctor.address || ""}
-                        onChange={(e) => setSelectedDoctor({...selectedDoctor, address: e.target.value})}
-                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none h-24 resize-none"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-600 uppercase ml-4">City</label>
-                        <input 
-                          value={selectedDoctor.city || ""}
-                          onChange={(e) => setSelectedDoctor({...selectedDoctor, city: e.target.value})}
-                          className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-600 uppercase ml-4">State</label>
-                        <input 
-                          value={selectedDoctor.state || ""}
-                          onChange={(e) => setSelectedDoctor({...selectedDoctor, state: e.target.value})}
-                          className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-600 uppercase ml-4">Country</label>
-                        <input 
-                          value={selectedDoctor.country || ""}
-                          onChange={(e) => setSelectedDoctor({...selectedDoctor, country: e.target.value})}
-                          className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3. Map Data */}
-                <div className="space-y-6">
-                  <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5 pb-2 ml-2">Mapping & Coordinates</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-600 uppercase ml-4">Latitude</label>
-                      <input 
-                        type="number" step="any"
-                        value={selectedDoctor.latitude || 0}
-                        onChange={(e) => setSelectedDoctor({...selectedDoctor, latitude: e.target.value})}
-                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-600 uppercase ml-4">Longitude</label>
-                      <input 
-                        type="number" step="any"
-                        value={selectedDoctor.longitude || 0}
-                        onChange={(e) => setSelectedDoctor({...selectedDoctor, longitude: e.target.value})}
-                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* 4. Bio & Socials */}
-                <div className="space-y-6">
-                  <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5 pb-2 ml-2">Profile Content</h4>
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-600 uppercase ml-4">Biography</label>
-                      <textarea 
-                        value={selectedDoctor.bio || ""}
-                        onChange={(e) => setSelectedDoctor({...selectedDoctor, bio: e.target.value})}
-                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none h-48 resize-none"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-600 uppercase ml-4">Website URL</label>
-                        <input 
-                          value={selectedDoctor.website_url || ""}
-                          onChange={(e) => setSelectedDoctor({...selectedDoctor, website_url: e.target.value})}
-                          className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-600 uppercase ml-4">Instagram URL</label>
-                        <input 
-                          value={selectedDoctor.instagram_url || ""}
-                          onChange={(e) => setSelectedDoctor({...selectedDoctor, instagram_url: e.target.value})}
-                          className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 5. Status & Governance */}
-                <div className="space-y-6">
-                  <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5 pb-2 ml-2">Governance</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-600 uppercase ml-4">Verification Status</label>
-                      <select 
-                        value={selectedDoctor.verification_status}
-                        onChange={(e) => setSelectedDoctor({...selectedDoctor, verification_status: e.target.value})}
-                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none text-white"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="verified">Verified</option>
-                        <option value="hidden">Hidden</option>
-                        <option value="rejected">Rejected</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-600 uppercase ml-4">Membership Tier</label>
-                      <select 
-                        value={selectedDoctor.membership_tier}
-                        onChange={(e) => setSelectedDoctor({...selectedDoctor, membership_tier: e.target.value})}
-                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:border-neuro-orange outline-none text-white"
-                      >
-                        <option value="starter">Starter</option>
-                        <option value="growth">Growth</option>
-                        <option value="pro">Pro</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="sticky bottom-0 pt-8 pb-4 bg-[#0A0D14] flex justify-end gap-4 border-t border-white/5">
-                  <button 
-                    type="button"
-                    onClick={() => setSelectedDoctor(null)}
-                    className="px-8 py-4 bg-white/5 hover:bg-white/10 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs transition-all"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit"
-                    disabled={isUpdating}
-                    className="px-10 py-4 bg-neuro-orange text-white rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs shadow-xl shadow-neuro-orange/20 hover:bg-neuro-orange-light transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
-                  >
-                    {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                    {isUpdating ? "Saving Changes..." : "Commit Profile Updates"}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-
-        {showCleanup && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 backdrop-blur-md bg-neuro-navy/60">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-[#0A0D14] rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-white/10 max-h-[80vh] flex flex-col"
-            >
-              <header className="p-8 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-6">
-                  <div className="w-16 h-16 rounded-[2rem] bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10 shadow-xl shrink-0">
-                    <Sparkles className="w-8 h-8" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-white">Data Cleanup</h3>
-                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mt-1">Found {cleanupCandidates.length} incomplete records</p>
-                  </div>
-                </div>
-                <button onClick={() => setShowCleanup(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-500">
-                  <X className="w-8 h-8" />
-                </button>
-              </header>
-
-              <div className="flex-1 overflow-y-auto p-8 space-y-4 custom-scrollbar">
-                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-6 mb-4">
-                  <p className="text-sm text-emerald-500 font-medium leading-relaxed">
-                    We found {cleanupCandidates.length} profile records that have a clinic name but are missing the doctor's name. These are usually duplicates created during automated imports or partial registrations.
-                  </p>
-                </div>
-
-                {cleanupCandidates.slice(0, 10).map(doc => (
-                  <div key={doc.id} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-between">
-                    <div>
-                      <p className="font-bold text-white text-sm">{doc.clinic_name}</p>
-                      <p className="text-[10px] text-gray-500 font-mono mt-1">{doc.id}</p>
-                    </div>
-                    <span className="px-3 py-1 bg-white/5 rounded-full text-xs font-black text-gray-400 uppercase tracking-widest">Incomplete</span>
+      {/* Edit Modal */}
+      {selectedDoctor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-[#0d1117] border border-white/10 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-white/10">
+              <h2 className="text-lg font-bold">Edit Doctor</h2>
+              <button onClick={() => setSelectedDoctor(null)} className="text-gray-500 hover:text-white text-xl">&times;</button>
+            </div>
+            <form onSubmit={handleUpdate} className="p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  ["first_name", "First Name"],
+                  ["last_name", "Last Name"],
+                  ["clinic_name", "Clinic Name"],
+                  ["city", "City"],
+                  ["state", "State"],
+                  ["email", "Email"],
+                ].map(([key, label]) => (
+                  <div key={key}>
+                    <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                    <input
+                      value={selectedDoctor[key] || ""}
+                      onChange={(e) => setSelectedDoctor({ ...selectedDoctor, [key]: e.target.value })}
+                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-white/30"
+                    />
                   </div>
                 ))}
-                
-                {cleanupCandidates.length > 10 && (
-                  <p className="text-center text-gray-500 text-[10px] font-bold uppercase tracking-widest pt-4">
-                    + {cleanupCandidates.length - 10} more records
-                  </p>
-                )}
               </div>
-
-              <footer className="p-8 bg-[#0A0D14] border-t border-white/5 flex justify-end gap-4">
-                <button
-                  onClick={() => setShowCleanup(false)}
-                  className="px-8 py-4 bg-white/5 hover:bg-white/10 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all"
-                >
-                  Close
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Verification Status</label>
+                  <select
+                    value={selectedDoctor.verification_status}
+                    onChange={(e) => setSelectedDoctor({ ...selectedDoctor, verification_status: e.target.value })}
+                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-white/30"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="verified">Verified</option>
+                    <option value="hidden">Hidden</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Membership Tier</label>
+                  <select
+                    value={selectedDoctor.membership_tier}
+                    onChange={(e) => setSelectedDoctor({ ...selectedDoctor, membership_tier: e.target.value })}
+                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-white/30"
+                  >
+                    <option value="starter">Starter</option>
+                    <option value="growth">Growth</option>
+                    <option value="pro">Pro</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setSelectedDoctor(null)} className="px-4 py-2 bg-white/5 rounded-lg text-sm hover:bg-white/10">Cancel</button>
+                <button type="submit" disabled={isUpdating} className="px-4 py-2 bg-blue-600 rounded-lg text-sm hover:bg-blue-500 disabled:opacity-50">
+                  {isUpdating ? "Saving..." : "Save"}
                 </button>
-                <button
-                  onClick={handleCleanup}
-                  disabled={isCleaning}
-                  className="px-10 py-4 bg-emerald-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-500/20 hover:bg-emerald-400 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
-                >
-                  {isCleaning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  {isCleaning ? "Cleaning Up..." : "Purge Incomplete Records"}
-                </button>
-              </footer>
-            </motion.div>
+              </div>
+            </form>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }
