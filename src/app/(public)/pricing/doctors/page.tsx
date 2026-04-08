@@ -9,7 +9,7 @@ export default function DoctorPricing() {
   const { region } = useRegion();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
 
-  const price = billingCycle === "monthly" ? "49" : "490";
+  const price = billingCycle === "monthly" ? region.pricing.doctor.starter.monthly : region.pricing.doctor.starter.annual;
 
   const features = [
     "Directory listing with profile page",
@@ -47,7 +47,7 @@ export default function DoctorPricing() {
           <div className={`absolute top-0.5 w-6 h-6 bg-neuro-orange rounded-full transition-all ${billingCycle === 'annual' ? 'left-7' : 'left-0.5'}`} />
         </button>
         <span className={`text-sm font-bold ${billingCycle === 'annual' ? 'text-neuro-navy' : 'text-gray-400'}`}>
-          Annual <span className="text-green-500 text-xs">(Save $98)</span>
+          Annual <span className="text-green-500 text-xs">(Save {region.currency.symbol}{Math.round(Number(region.pricing.doctor.starter.monthly) * 12 - Number(region.pricing.doctor.starter.annual))})</span>
         </span>
       </div>
 
