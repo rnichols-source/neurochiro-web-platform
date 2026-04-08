@@ -54,6 +54,27 @@ export async function getStudentDashboardData() {
   }
 }
 
+export async function getAcademyProgress() {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { completed: 0, total: 12 }
+
+  const { data } = await supabase
+    .from('course_progress')
+    .select('completed_modules')
+    .eq('user_id', user.id)
+
+  let completed = 0
+  if (data) {
+    data.forEach(row => {
+      const modules = Array.isArray(row.completed_modules) ? row.completed_modules : []
+      completed += modules.length
+    })
+  }
+
+  return { completed, total: 12 } // 3 courses × 4 modules each
+}
+
 export async function getJobsForRadar() {
   const supabase = createServerSupabase()
   

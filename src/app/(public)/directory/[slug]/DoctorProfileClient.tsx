@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  MapPin, 
-  Globe, 
-  Instagram, 
-  Facebook, 
-  ShieldCheck, 
-  Users, 
+import {
+  MapPin,
+  Globe,
+  Instagram,
+  Facebook,
+  ShieldCheck,
+  Users,
   Calendar,
   ChevronRight,
   CheckCircle2,
@@ -18,10 +18,13 @@ import {
   MessageSquare,
   Loader2,
   Sparkles,
-  Phone
+  Phone,
+  Heart,
+  Share2
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
+import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { sendReferral } from "@/app/actions/referrals";
 import { submitPatientStory, getApprovedStories } from "@/app/actions/patient-stories";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
@@ -29,6 +32,8 @@ import GoogleReviews from "@/components/directory/GoogleReviews";
 import Image from "next/image";
 
 export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slug: string }) {
+  const { toggleSave, isSaved } = useUserPreferences();
+  const [copied, setCopied] = useState(false);
   const [referring, setReferring] = useState(false);
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [referralSent, setReferralSent] = useState(false);
@@ -128,6 +133,18 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
     }
   };
 
+  const handleShare = async () => {
+    const url = window.location.href;
+    const title = `Dr. ${doctor.first_name} ${doctor.last_name} - ${doctor.clinic_name}`;
+    if (navigator.share) {
+      try { await navigator.share({ title, url }); } catch { /* user cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <div className="min-h-dvh bg-neuro-cream pb-32">
       <div className="bg-neuro-navy pt-32 pb-20 px-6 relative overflow-hidden">
@@ -166,9 +183,27 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                 </div>
 
                 <div className="text-center space-y-4 mb-10">
-                  <h1 className="text-5xl font-heading font-black leading-tight text-white tracking-tight">
-                    {doctor.first_name || 'Neuro'} <br/> {doctor.last_name || 'Clinician'}
-                  </h1>
+                  <div className="flex items-start justify-center gap-2">
+                    <h1 className="text-5xl font-heading font-black leading-tight text-white tracking-tight">
+                      {doctor.first_name || 'Neuro'} <br/> {doctor.last_name || 'Clinician'}
+                    </h1>
+                    <div className="flex flex-col gap-1 pt-1">
+                      <button
+                        onClick={() => toggleSave('doctors', doctor.id?.toString())}
+                        className="p-2 rounded-full hover:bg-white/10 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        aria-label="Save doctor"
+                      >
+                        <Heart className={`w-6 h-6 ${isSaved('doctors', doctor.id?.toString()) ? 'text-red-500 fill-red-500' : 'text-white/50'}`} />
+                      </button>
+                      <button
+                        onClick={handleShare}
+                        className="p-2 rounded-full hover:bg-white/10 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        aria-label="Share profile"
+                      >
+                        <Share2 className={`w-6 h-6 ${copied ? 'text-green-400' : 'text-white/50'}`} />
+                      </button>
+                    </div>
+                  </div>
                   <div className="inline-block">
                     <p className="text-neuro-orange font-black text-[10px] uppercase tracking-[0.3em] bg-neuro-orange/10 py-2.5 px-6 rounded-full border border-neuro-orange/20">
                       {doctor.clinic_name || 'Private Practice'}

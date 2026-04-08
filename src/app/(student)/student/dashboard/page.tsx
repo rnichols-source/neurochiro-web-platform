@@ -9,18 +9,23 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { getStudentDashboardData, transitionToDoctorAction } from "./actions";
+import { getStudentDashboardData, getAcademyProgress, transitionToDoctorAction } from "./actions";
 import { useRouter } from "next/navigation";
 
 export default function StudentDashboard() {
   const [data, setData] = useState<any>(null);
+  const [academyData, setAcademyData] = useState<{ completed: number; total: number }>({ completed: 0, total: 12 });
   const [loading, setLoading] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    getStudentDashboardData().then((result) => {
-      if (result) setData(result);
+    Promise.all([
+      getStudentDashboardData(),
+      getAcademyProgress(),
+    ]).then(([dashResult, academyResult]) => {
+      if (dashResult) setData(dashResult);
+      if (academyResult) setAcademyData(academyResult);
       setLoading(false);
     });
   }, []);
@@ -96,8 +101,8 @@ export default function StudentDashboard() {
         </div>
         <div className="bg-white p-5 rounded-2xl border border-gray-100">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Academy Progress</p>
-          <p className="text-2xl font-black text-neuro-navy">0 courses</p>
-          <p className="text-xs text-gray-400 mt-1">Coming soon</p>
+          <p className="text-2xl font-black text-neuro-navy">{academyData.completed} of {academyData.total} modules</p>
+          <p className="text-xs text-gray-400 mt-1">{academyData.completed === 0 ? "Start learning" : `${Math.round((academyData.completed / academyData.total) * 100)}% complete`}</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-gray-100">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Job Applications</p>

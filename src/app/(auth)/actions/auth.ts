@@ -31,7 +31,7 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, full_name')
     .eq('id', data.user.id)
     .single()
 
@@ -40,6 +40,11 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   // 🛡️ FOUNDER OVERRIDE
   if (isFounderEmail(email)) {
     role = 'founder';
+  }
+
+  // Check if first-time user (name not set)
+  if (!(profile as any)?.full_name && ['doctor', 'student'].includes(role)) {
+    return redirect(`/onboarding?role=${role}`);
   }
 
   // Standardize the dashboard routes
