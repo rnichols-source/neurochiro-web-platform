@@ -28,13 +28,11 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { useDoctorTier } from "@/context/DoctorTierContext";
 import { getDoctorDashboardStats } from "./actions";
 import OnboardingTracker from "@/components/doctor/OnboardingTracker";
 import ProductTutorial from "@/components/dashboard/ProductTutorial";
 import VerifiedBadge from "@/components/doctor/VerifiedBadge";
 import AnnouncementsFeed from "@/components/dashboard/AnnouncementsFeed";
-import UpgradeOverlay from "@/components/dashboard/UpgradeOverlay";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -42,12 +40,10 @@ function cn(...inputs: ClassValue[]) {
 
 export default function DoctorDashboard() {
   const router = useRouter();
-  const { tier, isMember, isGrowth: contextIsGrowth, isPro: contextIsPro } = useDoctorTier();
   const [isBoosting, setIsBoosting] = useState(false);
   const [boosted, setBoosted] = useState(false);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showHeatmapUpgrade, setShowHeatmapUpgrade] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,9 +74,6 @@ export default function DoctorDashboard() {
     fetchData();
   }, []);
 
-  const hasAccess = isMember || dashboardData?.profile?.isMember;
-  const isPro = contextIsPro || dashboardData?.profile?.isPro;
-  const isGrowth = contextIsGrowth || dashboardData?.profile?.isGrowth;
   const vendorOffers = dashboardData?.vendorOffers || [];
 
   const handleBoost = () => {
@@ -109,9 +102,6 @@ export default function DoctorDashboard() {
           <div className="text-neuro-gray mt-2 text-lg">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <span>Welcome back, <span className="font-bold text-neuro-orange">{dashboardData?.profile?.name || "Doctor"}</span>.</span>
-              <span className="px-3 py-1 bg-neuro-orange/10 text-neuro-orange text-[10px] font-black uppercase tracking-widest rounded-full border border-neuro-orange/20">
-                {tier} Tier Active
-              </span>
             </div>
           </div>
         </div>

@@ -235,9 +235,9 @@ function RegisterContent() {
       return;
     }
 
-    // Get the correct Stripe link
+    // Get the correct Stripe link (single membership per role)
     const links = initialRole === "doctor" ? STRIPE_PAYMENT_LINKS.doctor : STRIPE_PAYMENT_LINKS.student;
-    const baseUrl = (links as any)[initialTier][initialBilling];
+    const baseUrl = (links as any)[initialBilling] || links.monthly;
     
     // CRITICAL: Append user_id to stripe metadata via client_reference_id
     // This allows the webhook to identify the user and activate their profile.
@@ -585,7 +585,7 @@ function RegisterContent() {
                 <div className="flex justify-between items-start mb-8 pb-8 border-b border-gray-200">
                   <div>
                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Selected Membership</span>
-                    <h4 className="text-3xl font-black text-neuro-navy capitalize">{initialTier} {initialRole}</h4>
+                    <h4 className="text-3xl font-black text-neuro-navy capitalize">{initialRole === 'doctor' ? 'Doctor' : 'Student'} Membership</h4>
                     <div className="flex items-center gap-2 mt-2">
                        <ShieldCheck className="w-4 h-4 text-emerald-500" />
                        <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Verified Program</span>
@@ -594,9 +594,9 @@ function RegisterContent() {
                   <div className="text-right">
                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">{initialBilling} billing</span>
                     <p className="text-4xl font-black text-neuro-orange">
-                      {region.currency.symbol}{initialRole === "doctor" 
-                        ? (region.pricing.doctor as any)[initialTier][initialBilling] 
-                        : (region.pricing.student as any)[initialTier][initialBilling]
+                      {region.currency.symbol}{initialRole === "doctor"
+                        ? (initialBilling === 'annual' ? '490' : '49')
+                        : (initialBilling === 'annual' ? '90' : '9')
                       }
                     </p>
                   </div>

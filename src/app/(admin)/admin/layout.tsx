@@ -13,7 +13,7 @@ import AdminSettingsModal from "@/components/admin/AdminSettingsModal";
 import { isFounderRole } from "@/lib/founder";
 import { AuthProvider } from "@/context/AuthContext";
 import AdminQuickNav from "@/components/admin/AdminQuickNav";
-import PerspectiveSwitcher from "@/components/admin/PerspectiveSwitcher";
+
 
 export default function AdminLayout({
   children,
@@ -234,7 +234,6 @@ export default function AdminLayout({
         )}
       </AnimatePresence>
       <AdminQuickNav />
-      <PerspectiveSwitcher />
     </div>
     </AuthProvider>
   );

@@ -132,9 +132,7 @@ export default function SeminarsPage() {
     setIsSubmitting(true);
     try {
       const result = await createSeminarCampaignAction(isCampaignOpen.id, campaignOptions);
-      if (result.url) {
-        window.location.href = result.url;
-      } else if (result.error) {
+      if ('error' in result && result.error) {
         alert(result.error);
         setIsSubmitting(false);
       }

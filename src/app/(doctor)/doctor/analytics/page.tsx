@@ -1,6 +1,6 @@
 "use client";
 
-import { 
+import {
   ArrowLeft,
   PieChart,
   Activity,
@@ -12,15 +12,12 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import ROIDashboard from "@/components/doctor/ROIDashboard";
 import { ROIData } from "@/types/analytics";
-import { useDoctorTier } from "@/context/DoctorTierContext";
 import { getDoctorROIData } from "../dashboard/actions";
 
 export default function DoctorAnalytics() {
   const [period, setPeriod] = useState<'7D' | '1M' | '3M' | '1Y'>('1M');
-  const { tier, setTier } = useDoctorTier();
   const [roiData, setRoiData] = useState<ROIData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     async function loadROIData() {
@@ -28,31 +25,11 @@ export default function DoctorAnalytics() {
       const data = await getDoctorROIData(period);
       if (data) {
         setRoiData(data as ROIData);
-        // If we have the real tier from the DB, let's update the context
-        if (data.tier) {
-          setTier(data.tier);
-        }
       }
       setLoading(false);
     }
     loadROIData();
-  }, [period, setTier]);
-
-  // For conditional toggle rendering
-  useEffect(() => {
-    async function checkAdmin() {
-      const { createClient } = await import('@/lib/supabase');
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-        if (['admin', 'super_admin', 'founder'].includes(profile?.role || '')) {
-          setIsAdmin(true);
-        }
-      }
-    }
-    checkAdmin();
-  }, []);
+  }, [period]);
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-12 text-neuro-navy">
@@ -77,21 +54,6 @@ export default function DoctorAnalytics() {
               </button>
             ))}
           </div>
-          
-          {/* Dev Tier Toggle - Conditionally shown for admins only */}
-          {isAdmin && (
-            <div className="bg-neuro-orange/10 p-1 rounded-2xl border border-neuro-orange/20 flex shadow-sm">
-              {(["starter", "growth", "pro"] as const).map(t => (
-                <button 
-                  key={t} 
-                  onClick={() => setTier(t)}
-                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${tier === t ? 'bg-neuro-orange text-white' : 'text-neuro-orange hover:bg-neuro-orange/5'}`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </header>
 
@@ -108,8 +70,7 @@ export default function DoctorAnalytics() {
             onUpgrade={() => console.log("Trigger Upgrade Flow")}
           />
 
-          {tier !== 'starter' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Patient Acquisition Channels */}
               <section className="bg-white rounded-[2.5rem] border border-gray-100 p-10 shadow-sm">
                 <div className="flex items-center justify-between mb-8">
@@ -145,14 +106,13 @@ export default function DoctorAnalytics() {
                   <Activity className="w-5 h-5 text-neuro-orange" /> Lead Velocity Heatmap
                 </h3>
                 
-                {tier === 'pro' ? (
-                  <div className="aspect-[2/1] bg-[#0A0D14] rounded-3xl border border-white/10 relative overflow-hidden group">
+                <div className="aspect-[2/1] bg-[#0A0D14] rounded-3xl border border-white/10 relative overflow-hidden group">
                     {/* Heatmap Simulation */}
                     <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
                     <div className="absolute top-1/4 left-1/3 w-32 h-32 bg-neuro-orange/40 rounded-full blur-[40px] animate-pulse"></div>
                     <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-neuro-orange/20 rounded-full blur-[60px]"></div>
                     <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-blue-500/20 rounded-full blur-[30px] animate-pulse" style={{ animationDelay: '1s' }}></div>
-                    
+
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                        <div className="text-center">
                           <Globe className="w-12 h-12 text-white/5 mx-auto mb-4" />
@@ -171,16 +131,6 @@ export default function DoctorAnalytics() {
                        </div>
                     </div>
                   </div>
-                ) : (
-                  <div className="aspect-[2/1] bg-white/5 rounded-3xl border border-white/10 flex items-center justify-center relative z-10">
-                    <Globe className="w-16 h-16 text-white/10" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                          {loading ? "Processing Global Traffic..." : "Aggregating Regional Insights..."}
-                       </p>
-                    </div>
-                  </div>
-                )}
 
                 <div className="mt-8 grid grid-cols-2 gap-4 relative z-10">
                   <div className="p-5 bg-white/5 rounded-2xl border border-white/5">
@@ -194,7 +144,6 @@ export default function DoctorAnalytics() {
                 </div>
               </section>
             </div>
-          )}
         </>
       ) : (
         <div className="h-96 flex flex-col items-center justify-center bg-white rounded-[2.5rem] border border-gray-100 shadow-sm">

@@ -21,12 +21,11 @@ import { motion } from "framer-motion";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 const navItems = [
-  { name: "Pulse", href: "/portal/dashboard", icon: LayoutDashboard },
-  { name: "Track", href: "/portal/track", icon: Activity },
+  { name: "Dashboard", href: "/portal/dashboard", icon: LayoutDashboard },
+  { name: "Find a Doctor", href: "/directory", icon: Search },
   { name: "Saved", href: "/portal/saved", icon: Heart },
-  { name: "Directory", href: "/directory", icon: Search },
+  { name: "Health Tracker", href: "/portal/track", icon: Activity },
   { name: "Learn", href: "/portal/learn", icon: BookOpen },
-  { name: "Identity", href: "/portal/settings", icon: UserCircle },
 ];
 
 const mobileNavItems = [

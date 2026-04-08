@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useStudentTier } from "@/context/StudentTierContext";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 
 function cn(...inputs: any[]) {
@@ -35,14 +34,13 @@ export default function CareersPage() {
   const [applicationStep, setApplicationStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOneClickApplying, setIsOneClickApplying] = useState(false);
-  const { isProfessional, tier } = useStudentTier();
 
   const handleOneClickApply = async () => {
     setIsOneClickApplying(true);
     // Simulate API call to fetch profile and submit
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsOneClickApplying(false);
-    alert(`Success! Your NeuroChiro ${tier} Profile has been securely submitted to ${selectedJob?.clinic}. You'll receive an update in your dashboard once they review your application.`);
+    alert(`Success! Your NeuroChiro Profile has been securely submitted to ${selectedJob?.clinic}. You'll receive an update in your dashboard once they review your application.`);
     setSelectedJob(null);
     setTimeout(() => setApplicationStep(1), 300);
   };
@@ -154,19 +152,13 @@ export default function CareersPage() {
                            <p className="text-sm text-gray-300">You can apply below, but creating a profile lets you track application status, save resumes, and get matched with elite clinics automatically.</p>
                         </div>
                         <div className="flex flex-col gap-3">
-                           {isProfessional ? (
-                              <button 
+                              <button
                                  onClick={handleOneClickApply}
                                  disabled={isOneClickApplying}
                                  className="px-6 py-3 bg-neuro-orange text-white font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-neuro-orange-light transition-all whitespace-nowrap shadow-xl flex items-center gap-2"
                               >
                                  {isOneClickApplying ? 'Applying...' : '1-Click Apply with Profile'} <Zap className={cn("w-3.5 h-3.5", isOneClickApplying ? "animate-pulse" : "fill-current")} />
                               </button>
-                           ) : (
-                              <Link href="/register?role=student" className="px-6 py-3 bg-white text-neuro-navy font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-neuro-orange hover:text-white transition-all whitespace-nowrap shadow-xl">
-                                 Create Profile First
-                              </Link>
-                           )}
                         </div>
                      </div>
 

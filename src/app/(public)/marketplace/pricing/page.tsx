@@ -16,8 +16,6 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
-import { STRIPE_PAYMENT_LINKS } from "@/lib/stripe-links";
-
 export default function MarketplacePricingPage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
   const plans = [

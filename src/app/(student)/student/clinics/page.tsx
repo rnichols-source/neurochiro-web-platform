@@ -19,12 +19,10 @@ import {
   Lock
 } from "lucide-react";
 import Link from "next/link";
-import { useStudentTier } from "@/context/StudentTierContext";
 import { motion } from "framer-motion";
 
 export default function CareerMapPage() {
   const router = useRouter();
-  const { tier, isAccelerator, isProfessional, isFoundation } = useStudentTier();
 
   const clinics = [
     {
@@ -109,8 +107,8 @@ export default function CareerMapPage() {
                             {clinic.logo}
                          </div>
                          <div className="text-right">
-                            <div className={`text-xl font-black text-neuro-navy ${!isProfessional ? 'blur-[3px] opacity-40' : ''}`}>
-                               {isProfessional ? `${clinic.matchScore}%` : "XX%"}
+                            <div className={`text-xl font-black text-neuro-navy`}>
+                               {`${clinic.matchScore}%`}
                             </div>
                             <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Match Score</div>
                          </div>
@@ -125,11 +123,9 @@ export default function CareerMapPage() {
                    </div>
                    <div className="p-4 bg-gray-50/50 flex gap-3">
                       <button className="flex-1 py-3 bg-white border border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-neuro-navy hover:bg-gray-100 transition-all">View Profile</button>
-                      <button 
-                        onClick={() => !isAccelerator && router.push('/pricing')}
-                        className={`flex-1 py-3 ${isAccelerator ? 'bg-neuro-orange text-white' : 'bg-gray-200 text-gray-400'} rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 transition-all`}
+                      <button
+                        className={`flex-1 py-3 bg-neuro-orange text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 transition-all`}
                       >
-                         {!isAccelerator && <Lock className="w-3 h-3" />}
                          <Users className="w-3.5 h-3.5" /> Mentorship
                       </button>
                    </div>
@@ -141,16 +137,8 @@ export default function CareerMapPage() {
         {/* Sidebar: Career Radar & Alerts */}
         <div className="space-y-6">
            <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden">
-              {!isFoundation && (
-                 <div className="absolute inset-0 z-20 bg-white/60 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center">
-                    <Lock className="w-8 h-8 text-neuro-orange mb-4" />
-                    <h4 className="text-lg font-black text-neuro-navy mb-2">Radar Gated</h4>
-                    <p className="text-xs text-gray-500 mb-6">Foundation members unlock real-time radar for local clinic matches.</p>
-                    <Link href="/pricing" className="px-6 py-2 bg-neuro-navy text-white rounded-lg text-[10px] font-black uppercase tracking-widest">Upgrade</Link>
-                 </div>
-              )}
               <h3 className="text-xl font-heading font-black text-neuro-navy mb-10">Career Radar</h3>
-              <div className={`relative aspect-square mb-10 ${!isFoundation ? 'blur-sm grayscale' : ''}`}>
+              <div className={`relative aspect-square mb-10`}>
                  {/* Radar Visual */}
                  <div className="absolute inset-0 border border-gray-100 rounded-full"></div>
                  <div className="absolute inset-8 border border-gray-100 rounded-full"></div>

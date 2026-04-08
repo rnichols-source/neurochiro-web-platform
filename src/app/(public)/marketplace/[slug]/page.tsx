@@ -24,7 +24,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useDoctorTier } from "@/context/DoctorTierContext";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 export default function VendorProfilePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -34,9 +33,6 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
   const [hasClaimed, setHasClaimed] = useState(false);
-  
-  // Use DoctorTierContext to check access
-  const { isPro } = useDoctorTier();
   
   // In a real app, fetch based on slug
   const vendor = {
@@ -129,8 +125,7 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
             </header>
 
             {/* Member Exclusive Perk (Segmented Highlight with Access Control) */}
-            {isPro ? (
-              <section className="bg-neuro-navy p-10 rounded-[3rem] text-white relative overflow-hidden shadow-2xl border-4 border-neuro-orange/20">
+            <section className="bg-neuro-navy p-10 rounded-[3rem] text-white relative overflow-hidden shadow-2xl border-4 border-neuro-orange/20">
                  <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/20 blur-[100px] pointer-events-none"></div>
                  <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 justify-between">
                     <div className="flex items-center gap-6">
@@ -138,11 +133,11 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
                           <BadgePercent className="w-8 h-8 text-white" />
                        </div>
                        <div className="space-y-1">
-                          <p className="text-[10px] font-black uppercase text-neuro-orange tracking-[0.3em]">Pro Tier Exclusive Perk</p>
+                          <p className="text-[10px] font-black uppercase text-neuro-orange tracking-[0.3em]">Exclusive Perk</p>
                           <h3 className="text-xl md:text-2xl font-black text-white">{vendor.perk}</h3>
                        </div>
                     </div>
-                    <button 
+                    <button
                       onClick={handleClaimOffer}
                       disabled={isClaiming || hasClaimed}
                       className="px-8 py-4 bg-white text-neuro-navy font-black rounded-2xl hover:bg-neuro-orange hover:text-white transition-all uppercase tracking-widest text-[10px] shadow-xl shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -151,27 +146,6 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
                     </button>
                  </div>
               </section>
-            ) : (
-              <section className="bg-white p-10 rounded-[3rem] border border-gray-200 shadow-sm relative overflow-hidden group">
-                 <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 justify-between">
-                    <div className="flex items-center gap-6">
-                       <div className="w-16 h-16 bg-gray-100 rounded-[1.5rem] flex items-center justify-center border border-gray-200">
-                          <Lock className="w-8 h-8 text-gray-400" />
-                       </div>
-                       <div className="space-y-1">
-                          <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em]">Partner Offer Locked</p>
-                          <h3 className="text-xl md:text-2xl font-black text-neuro-navy blur-[4px] select-none">15% Off Hardware + Free Implementation</h3>
-                       </div>
-                    </div>
-                    <button 
-                      onClick={() => router.push('/pricing')}
-                      className="px-8 py-4 bg-neuro-navy text-white font-black rounded-2xl hover:bg-neuro-orange transition-all uppercase tracking-widest text-[10px] shadow-lg shrink-0 flex items-center gap-2"
-                    >
-                       Upgrade to Pro
-                    </button>
-                 </div>
-              </section>
-            )}
 
             {/* Product Overview */}
             <section className="bg-white p-10 md:p-12 rounded-[3rem] border border-gray-100 shadow-sm">

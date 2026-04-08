@@ -67,8 +67,6 @@ export const viewport = {
 };
 
 import { RegionProvider } from "@/context/RegionContext";
-import { DoctorTierProvider } from "@/context/DoctorTierContext";
-import { StudentTierProvider } from "@/context/StudentTierContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import LazyOverlays from "@/components/layout/LazyOverlays";
 
@@ -105,14 +103,10 @@ export default function RootLayout({
         className={`${lato.variable} ${montserrat.variable} antialiased font-body bg-neuro-cream text-neuro-black`}
       >
         <RegionProvider>
-          <DoctorTierProvider>
-            <StudentTierProvider>
-              <UserPreferencesProvider>
-                {children}
-                <LazyOverlays />
-              </UserPreferencesProvider>
-            </StudentTierProvider>
-          </DoctorTierProvider>
+          <UserPreferencesProvider>
+            {children}
+            <LazyOverlays />
+          </UserPreferencesProvider>
         </RegionProvider>
       </body>
     </html>

@@ -2,7 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
-import { requireTier } from '@/lib/tier'
+
 
 export async function getDoctorProfile() {
   try {
@@ -156,8 +156,6 @@ export async function updateNotificationPreferences(preferences: any) {
 
 export async function generateAIProfileBio(clinicName: string, currentBio: string) {
   try {
-    await requireTier('growth'); // AI Bio requires Growth or Pro
-
     const supabase = createServerSupabase()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: "Unauthorized" }

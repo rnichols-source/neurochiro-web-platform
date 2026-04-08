@@ -26,8 +26,6 @@ import VendorOnboarding from "@/components/vendor/VendorOnboarding";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { getVendors, trackVendorClick } from "./actions";
 import { useEffect } from "react";
-import { useDoctorTier } from "@/context/DoctorTierContext";
-
 const MOCK_VENDORS: Vendor[] = [
   {
     id: "1",
@@ -85,7 +83,6 @@ const CATEGORIES: VendorCategory[] = [
 
 export default function MarketplacePage() {
   const router = useRouter();
-  const { tier, isPro } = useDoctorTier();
   const { toggleSave, isSaved } = useUserPreferences();
   const [activeCategory, setActiveFilter] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -269,16 +266,15 @@ export default function MarketplacePage() {
                              {vendor.short_description}
                           </p>
 
-                          {/* Pro-Only Discount Display */}
+                          {/* Discount Display */}
                           {vendor.is_partner && (
                              <div className="mb-8 p-4 bg-gray-50 rounded-2xl border border-gray-100 relative overflow-hidden">
-                                {isPro ? (
                                    <div className="text-center">
                                       <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Your Exclusive Reward</p>
                                       <div className="bg-white px-4 py-2 rounded-xl border-2 border-dashed border-neuro-orange/30 inline-block mb-3">
                                          <span className="font-mono font-black text-neuro-orange text-sm">{(vendor as any).discount_code || 'NEUROPRO'}</span>
                                       </div>
-                                      <button 
+                                      <button
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           handleTrackClick(vendor.id, 'discount');
@@ -289,27 +285,6 @@ export default function MarketplacePage() {
                                          Claim My Reward
                                       </button>
                                    </div>
-                                ) : (
-                                   <div className="text-center group/pro">
-                                      <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] flex flex-col items-center justify-center p-4">
-                                         <Lock className="w-4 h-4 text-gray-400 mb-1" />
-                                         <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Pro Tier Only</p>
-                                      </div>
-                                      <div className="blur-[3px] grayscale select-none opacity-20">
-                                         <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Exclusive Reward</p>
-                                         <div className="bg-white px-4 py-2 rounded-xl border-2 border-dashed border-gray-200 inline-block mb-3">
-                                            <span className="font-mono font-black text-gray-300 text-sm">XXXXXXX</span>
-                                         </div>
-                                      </div>
-                                      <Link 
-                                        href="/pricing?upgrade=pro"
-                                        onClick={(e) => e.stopPropagation()}
-                                        className="relative z-10 text-[9px] font-black text-neuro-orange uppercase tracking-widest hover:underline"
-                                      >
-                                         Upgrade to Unlock
-                                      </Link>
-                                   </div>
-                                )}
                              </div>
                           )}
 

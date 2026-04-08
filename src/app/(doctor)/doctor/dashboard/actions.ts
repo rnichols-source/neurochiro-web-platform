@@ -40,14 +40,11 @@ export async function getDoctorDashboardStats() {
     const missingItems = completenessItems.filter(i => !i.done);
 
     const userRole = profile?.role || 'doctor';
-    const membershipTier = doctor?.membership_tier || 'starter';
     const isFounder = isFounderRole(userRole);
     const isAdmin = ['admin', 'super_admin', 'founder', 'regional_admin'].includes(userRole);
-    const isPro = isAdmin || isFounder || membershipTier === 'pro';
-    const isGrowth = isPro || membershipTier === 'growth';
 
-    // 4. Secure Vendor Offers (SSR Gating)
-    const vendorOffers = isPro ? [
+    // Vendor Offers (shown to everyone)
+    const vendorOffers = [
       {
         vendor: "NeuralPulse Technologies",
         title: "20% off Neuro scanning equipment",
@@ -66,28 +63,7 @@ export async function getDoctorDashboardStats() {
         code: "GROW500",
         link: "/marketplace"
       }
-    ] : [];
-
-    // Build tier-specific feature flags (server-enforced)
-    const tierFeatures = {
-      // Starter: basic stats only
-      profileViews: true,
-      contactClicks: true,
-      // Growth+: recruiting, verified badge, vendor discounts, basic ROI, job posting
-      studentSearch: isGrowth,
-      verifiedBadgeEmbed: isGrowth,
-      vendorDiscounts: isGrowth,
-      roiBasicAttribution: isGrowth,
-      jobPosting: isGrowth,
-      maxJobPosts: isPro ? 999 : isGrowth ? 5 : 0,
-      // Pro only: AI bio, full ROI, priority placement, seminar campaigns, student messaging
-      aiBioGenerator: isPro,
-      roiFullAttribution: isPro,
-      priorityPlacement: isPro,
-      seminarCampaigns: isPro,
-      studentMessaging: isPro,
-      unlimitedJobs: isPro,
-    };
+    ];
 
     return {
       profile: {
@@ -95,13 +71,9 @@ export async function getDoctorDashboardStats() {
         slug: doctor?.slug || "",
         clinicName: doctor?.clinic_name || "My Practice",
         isMember: isFounder || isAdmin || userRole === 'doctor',
-        isPro,
-        isGrowth,
         role: userRole,
-        tier: membershipTier,
-        status: membershipTier !== 'starter' ? 'active' : 'starter'
+        status: 'active'
       },
-      tierFeatures,
       vendorOffers,
       doctor: {
         city: doctor?.city || "your city"
@@ -109,10 +81,8 @@ export async function getDoctorDashboardStats() {
       stats: [
         { label: "Profile Views", value: profileViews.toLocaleString(), trend: profileViews > 0 ? "+100%" : "0%" },
         { label: "Patient Leads", value: patientLeads.toString(), trend: patientLeads > 0 ? "+100%" : "0%" },
-        ...(isGrowth ? [
-          { label: "Seminar Registrations", value: seminarCount.toLocaleString(), trend: "0%" },
-          { label: "Job Applications", value: jobCount.toString(), trend: "0%" }
-        ] : [])
+        { label: "Seminar Registrations", value: seminarCount.toLocaleString(), trend: "0%" },
+        { label: "Job Applications", value: jobCount.toString(), trend: "0%" }
       ],
       marketPerformance: {
         completeness,
@@ -121,18 +91,6 @@ export async function getDoctorDashboardStats() {
         reviews: (doctor as any)?.review_count || 0,
         engagement: profileViews > 50 ? 90 : profileViews > 10 ? 60 : profileViews > 0 ? 30 : 0
       },
-      // Starter upsell data
-      starterUpsell: membershipTier === 'starter' ? {
-        missingFeatures: [
-          "Student recruiting & search",
-          "Verified badge for your website",
-          "Vendor partner discounts",
-          "ROI analytics dashboard",
-          "Job posting (up to 5 listings)",
-        ],
-        upgradeTier: 'growth' as const,
-        upgradePrice: 99,
-      } : null,
     }
   } catch (e) {
     console.error("CRITICAL DASHBOARD ERROR:", e)

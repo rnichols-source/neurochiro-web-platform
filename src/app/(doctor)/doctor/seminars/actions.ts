@@ -2,8 +2,8 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
-import { stripe, PLANS } from '@/lib/stripe'
-import { requireTier } from '@/lib/tier'
+import { stripe } from '@/lib/stripe'
+
 
 export async function getDoctorSeminars() {
   const supabase = createServerSupabase()
@@ -121,8 +121,6 @@ export async function updateSeminarAction(seminarId: string, formData: FormData)
 }
 
 export async function createSeminarAction(formData: FormData) {
-  await requireTier('growth'); // Seminar hosting requires Growth or Pro tier
-
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Unauthorized")
@@ -202,58 +200,7 @@ export async function createSeminarAction(formData: FormData) {
 }
 
 export async function createSeminarCampaignAction(seminarId: string, options: { topOfFeed: boolean, studentRadar: boolean, globalPush: boolean }) {
-  const supabase = createServerSupabase()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Unauthorized")
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co'
-  
-  // Calculate pricing based on selected options
-  const lineItems: any[] = []
-
-  if (options.topOfFeed) {
-    lineItems.push({
-      price: PLANS.SEMINAR_PROMO_TOP.id,
-      quantity: 1
-    })
-  }
-
-  // 🛡️ CAMPAIGN SAFETY CHECK: Only proceed if we have real Stripe IDs
-  const isMock = (id: string) => id.includes('mock') || id.includes('price_seminar');
-
-  if (options.studentRadar) {
-    const id = 'price_seminar_student_radar';
-    if (isMock(id)) {
-        return { error: "Student Radar promotion is currently in internal testing. Check back soon!" };
-    }
-    lineItems.push({ price: id, quantity: 1 });
-  }
-
-  if (options.globalPush) {
-    const id = 'price_seminar_global_push';
-    if (isMock(id)) {
-        return { error: "Global Push promotion is currently in internal testing. Check back soon!" };
-    }
-    lineItems.push({ price: id, quantity: 1 });
-  }
-
-  if (lineItems.length === 0) throw new Error("No promotion options selected")
-
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    line_items: lineItems,
-    mode: 'payment',
-    success_url: `${siteUrl}/doctor/seminars?payment_success=true&seminar_id=${seminarId}`,
-    cancel_url: `${siteUrl}/doctor/seminars?payment_cancelled=true`,
-    metadata: {
-      userId: user.id,
-      seminarId: seminarId,
-      type: 'seminar_boost',
-      options: JSON.stringify(options)
-    }
-  })
-
-  return { sessionId: session.id, url: session.url }
+  return { error: "Seminar promotion campaigns are coming soon. Your seminar is live in the directory." };
 }
 
 export async function getSeminarAttendees(seminarId: string) {

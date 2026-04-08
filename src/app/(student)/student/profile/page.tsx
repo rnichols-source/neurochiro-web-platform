@@ -32,12 +32,9 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { onProfileUpdateAction } from "@/app/actions/automations";
-import { useStudentTier } from "@/context/StudentTierContext";
-
 import { getStudentProfile, updateStudentProfile } from "./actions";
 
 export default function ProfilePage() {
-  const { tier, isFoundation, isProfessional, isAccelerator } = useStudentTier();
   const [profile, setProfile] = useState({
     name: "",
     email: "",
@@ -182,7 +179,7 @@ export default function ProfilePage() {
         
         {/* Readiness Score Block */}
         <div className="relative group">
-          <div className={`bg-neuro-navy text-white px-6 py-3 rounded-2xl shadow-lg flex items-center gap-4 cursor-default transition-all ${!isProfessional ? 'blur-[2px] opacity-50 grayscale' : ''}`}>
+          <div className={`bg-neuro-navy text-white px-6 py-3 rounded-2xl shadow-lg flex items-center gap-4 cursor-default transition-all`}>
              <div className="flex flex-col">
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Career Readiness</span>
                 <span className="text-xl font-black">{profile.readinessScore}%</span>
@@ -191,11 +188,6 @@ export default function ProfilePage() {
                 GOAL
              </div>
           </div>
-          {!isProfessional && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 backdrop-blur-[1px] rounded-2xl z-20">
-               <Lock className="w-5 h-5 text-neuro-navy" />
-            </div>
-          )}
         </div>
       </header>
 
@@ -227,8 +219,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex flex-wrap justify-center md:justify-start gap-2">
                   <span className="px-4 py-1.5 bg-neuro-navy text-white text-[10px] font-black rounded-full uppercase tracking-widest flex items-center gap-2 border border-white/10 shadow-lg">
-                    {getTierIcon(tier)}
-                    Student {tier}
+                    Student Member
                   </span>
                   <span className="px-4 py-1.5 bg-neuro-orange/10 text-neuro-orange text-[10px] font-black rounded-full uppercase tracking-widest border border-neuro-orange/20">Verified Student</span>
                 </div>
@@ -282,23 +273,15 @@ export default function ProfilePage() {
              
              {/* Intro Video Card */}
              <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden flex flex-col h-full">
-                {!isProfessional && (
-                   <div className="absolute inset-0 z-30 bg-white/60 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center">
-                      <Lock className="w-10 h-10 text-neuro-orange mb-4 shadow-xl shadow-neuro-orange/10" />
-                      <h4 className="text-xl font-black text-neuro-navy mb-2">Video Gated</h4>
-                      <p className="text-xs text-gray-500 mb-6 max-w-xs">Intro Videos are a Professional feature. Clinics are 4x more likely to contact students with a video.</p>
-                      <Link href="/pricing" className="px-6 py-2.5 bg-neuro-orange text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">Upgrade</Link>
-                   </div>
-                )}
                 <div className="flex items-center justify-between mb-8">
                    <h3 className="font-bold text-neuro-navy flex items-center gap-2">
                       <Video className="w-5 h-5 text-neuro-orange" /> Intro Video
                    </h3>
                    <span className="text-[10px] font-black text-neuro-orange bg-neuro-orange/10 px-2 py-0.5 rounded uppercase tracking-widest">Required</span>
                 </div>
-                <div 
-                  onClick={() => isProfessional && setActiveModal('video')}
-                  className={`aspect-video bg-neuro-navy rounded-3xl flex flex-col items-center justify-center relative group cursor-pointer overflow-hidden border-4 border-white shadow-2xl ${!isProfessional ? 'blur-sm grayscale' : ''}`}
+                <div
+                  onClick={() => setActiveModal('video')}
+                  className={`aspect-video bg-neuro-navy rounded-3xl flex flex-col items-center justify-center relative group cursor-pointer overflow-hidden border-4 border-white shadow-2xl`}
                 >
                    <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform backdrop-blur-md border border-white/20 shadow-xl">
                       <Play className="w-7 h-7 text-white fill-current" />
@@ -312,30 +295,22 @@ export default function ProfilePage() {
 
              {/* Resume Card */}
              <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden flex flex-col h-full">
-                {!isProfessional && (
-                   <div className="absolute inset-0 z-30 bg-white/60 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center">
-                      <Lock className="w-10 h-10 text-blue-600 mb-4 shadow-xl shadow-blue-600/10" />
-                      <h4 className="text-xl font-black text-neuro-navy mb-2">Resume Locked</h4>
-                      <p className="text-xs text-gray-500 mb-6 max-w-xs">Professional members can upload their CV for direct clinic applications.</p>
-                      <Link href="/pricing" className="px-6 py-2.5 bg-neuro-navy text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-neuro-orange transition-all">Upgrade</Link>
-                   </div>
-                )}
                 <div className="flex items-center justify-between mb-8">
                    <h3 className="font-bold text-neuro-navy flex items-center gap-2">
                       <FileText className="w-5 h-5 text-blue-600" /> Resume / CV
                    </h3>
                    <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded uppercase tracking-widest">Active</span>
                 </div>
-                <div 
-                  onClick={() => isProfessional && setActiveModal('resume')}
-                  className={`flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-100 rounded-3xl hover:border-neuro-orange transition-all cursor-pointer group bg-gray-50/50 ${!isProfessional ? 'blur-sm grayscale' : ''}`}
+                <div
+                  onClick={() => setActiveModal('resume')}
+                  className={`flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-100 rounded-3xl hover:border-neuro-orange transition-all cursor-pointer group bg-gray-50/50`}
                 >
                    <Upload className="w-10 h-10 text-gray-300 group-hover:text-neuro-orange mb-4 transition-colors" />
                    <p className="text-sm font-bold text-neuro-navy">Raymond_Nichols_CV.pdf</p>
                    <p className="text-[10px] text-gray-400 mt-1 uppercase font-black tracking-widest">Updated 2 days ago</p>
                 </div>
-                <button 
-                  onClick={() => isProfessional && setActiveModal('resume')}
+                <button
+                  onClick={() => setActiveModal('resume')}
                   className="w-full mt-6 py-4 bg-white border border-gray-100 text-neuro-navy font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-colors active:scale-95 shadow-sm"
                 >
                    Replace File
@@ -359,18 +334,18 @@ export default function ProfilePage() {
               </div>
               
               <div className="mb-10">
-                 <p className="text-gray-400 text-[10px] uppercase font-black tracking-widest mb-2">Current Tier</p>
-                 <h3 className="text-3xl font-heading font-black">Student {tier}</h3>
+                 <p className="text-gray-400 text-[10px] uppercase font-black tracking-widest mb-2">Membership</p>
+                 <h3 className="text-3xl font-heading font-black">Student Member</h3>
                  <div className="flex items-center gap-2 mt-3 text-[10px] font-black uppercase tracking-widest text-neuro-orange">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    {tier === "Free" ? 'Foundation Access Only' : `${tier} Plan Active`}
+                    Active
                  </div>
               </div>
 
               <div className="space-y-4 mb-10">
                  <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest p-5 bg-white/5 rounded-2xl border border-white/10">
                     <span className="text-gray-400">Monthly Mentorships</span>
-                    <span className={!isAccelerator ? 'text-gray-500' : 'text-neuro-orange'}>{isAccelerator ? 'Unlimited' : '0 / 0'}</span>
+                    <span className={'text-neuro-orange'}>Unlimited</span>
                  </div>
                  <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest p-5 bg-white/5 rounded-2xl border border-white/10">
                     <span className="text-gray-400">Open to Mentorship</span>
@@ -383,7 +358,7 @@ export default function ProfilePage() {
                  </div>
                  <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest p-5 bg-white/5 rounded-2xl border border-white/10">
                     <span className="text-gray-400">Clinical Playbooks</span>
-                    <span className={!isProfessional ? 'text-gray-500' : 'text-green-500'}>{isProfessional ? 'Unlimited' : 'None'}</span>
+                    <span className={'text-green-500'}>Unlimited</span>
                  </div>
               </div>
 
@@ -391,7 +366,7 @@ export default function ProfilePage() {
                 href="/pricing"
                 className="w-full py-5 bg-white text-neuro-navy hover:bg-neuro-orange hover:text-white transition-all rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl flex items-center justify-center gap-3 active:scale-95"
               >
-                {tier === "Accelerator" ? 'Manage Billing' : 'Upgrade Membership'} <ChevronRight className="w-4 h-4" />
+                Manage Billing <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
           </section>

@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Users, 
-  GraduationCap, 
-  ShieldAlert, 
-  Globe, 
+import {
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+  ShieldAlert,
+  Globe,
   Settings,
   LogOut,
   ChevronRight,
@@ -25,7 +25,9 @@ import {
   Loader2,
   Mail,
   Stethoscope,
-  Tag
+  Tag,
+  Briefcase,
+  Calendar
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -37,21 +39,17 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Full set of nav items
+// Nav items - visible to all admins
 const allNavItems = [
-  { name: "System Control", href: "/admin/dashboard", icon: LayoutDashboard, roles: ['super_admin', 'founder', 'admin'] },
-  { name: "Talent Intelligence", href: "/admin/users", icon: Users, roles: ['super_admin', 'founder', 'admin', 'regional_admin'] },
-  { name: "Clinical Directory", href: "/admin/directory", icon: Stethoscope, roles: ['super_admin', 'founder', 'admin'] },
-  { name: "Programs & LMS", href: "/admin/programs", icon: GraduationCap, roles: ['super_admin', 'founder', 'admin'] },
-  { name: "Marketplace", href: "/admin/marketplace", icon: Tag, roles: ['super_admin', 'founder', 'admin'] },
-  { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert, roles: ['super_admin', 'founder', 'admin', 'support_admin'] },
-  { name: "Seminar Approvals", href: "/admin/approvals/seminars", icon: ShieldCheck, roles: ['super_admin', 'founder', 'admin'] },
-  { name: "Announcements", href: "/admin/announcements", icon: Megaphone, roles: ['super_admin', 'founder', 'admin'] },
-  { name: "Broadcasts", href: "/admin/broadcasts", icon: Mail, roles: ['super_admin', 'founder', 'admin'] },
-  { name: "Regions & Licensing", href: "/admin/regions", icon: Globe, roles: ['super_admin', 'founder', 'admin'] },
-  { name: "Revenue & Payments", href: "/admin/revenue", icon: CreditCard, roles: ['super_admin', 'founder', 'admin'] },
-  { name: "Communication", href: "/admin/inbox", icon: MessageSquare, roles: ['super_admin', 'founder', 'admin', 'support_admin', 'regional_admin'] },
-  { name: "System Logs", href: "/admin/logs", icon: History, roles: ['super_admin', 'founder', 'admin'] },
+  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { name: "Doctors", href: "/admin/directory", icon: Stethoscope },
+  { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
+  { name: "Seminars", href: "/admin/seminars", icon: Calendar },
+  { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert },
+  { name: "Announcements", href: "/admin/announcements", icon: Megaphone },
+  { name: "Revenue", href: "/admin/revenue", icon: CreditCard },
+  { name: "Logs", href: "/admin/logs", icon: History },
 ];
 
 interface SidebarProps {
@@ -72,11 +70,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
   const [userRole, setUserRole] = useState('super_admin'); 
   const [isLockingDown, setIsLockingDown] = useState(false);
 
-  // Filter items based on role
-  const filteredNavItems = allNavItems.filter(item => {
-    const baseRole = userRole.split(':')[0];
-    return item.roles.includes(baseRole) || item.roles.includes(userRole);
-  });
+  const filteredNavItems = allNavItems;
 
   // Fetch real role and health data
   useEffect(() => {

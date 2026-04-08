@@ -33,7 +33,6 @@ import {
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useDoctorTier } from "@/context/DoctorTierContext";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { 
@@ -51,10 +50,6 @@ function cn(...inputs: ClassValue[]) {
 }
 
 export default function JobsPage() {
-  const { tier } = useDoctorTier();
-  const isMember = tier !== 'starter';
-  const isPro = tier === 'pro';
-  
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [selectedApplicant, setSelectedApplicant] = useState<any>(null);
@@ -337,14 +332,6 @@ export default function JobsPage() {
 
                  {activeModal === 'Interview-Scorecards' && (
                   <div className="space-y-8">
-                     {!isPro ? (
-                       <div className="py-12 flex flex-col items-center justify-center text-center">
-                          <Lock className="w-12 h-12 text-neuro-orange mb-4" />
-                          <h4 className="text-xl font-bold">Pro Feature Required</h4>
-                          <p className="text-xs text-gray-500 max-w-xs mb-6">Upgrade to the Pro Tier to unlock standardized clinical interview scorecards and hiring analytics.</p>
-                          <Link href="/pricing" className="px-8 py-3 bg-neuro-orange text-white font-black rounded-xl text-[10px] uppercase">Upgrade Now</Link>
-                       </div>
-                     ) : (
                        <>
                         <div className="p-8 bg-neuro-navy text-white rounded-[2.5rem] relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl"></div>
@@ -423,20 +410,12 @@ export default function JobsPage() {
                             </button>
                         </div>
                        </>
-                     )}
                   </div>
                 )}
 
                 {activeModal === '90-Day-Success-Plan' && (
                   <div className="space-y-8">
-                    {!isPro ? (
-                       <div className="py-12 flex flex-col items-center justify-center text-center">
-                          <Lock className="w-12 h-12 text-neuro-orange mb-4" />
-                          <h4 className="text-xl font-bold">Elite Onboarding Tools Locked</h4>
-                          <p className="text-xs text-gray-500 max-w-xs mb-6">Upgrade to Pro to automatically generate clinical onboarding plans and 90-day mastery roadmaps.</p>
-                          <Link href="/pricing" className="px-8 py-3 bg-neuro-orange text-white font-black rounded-xl text-[10px] uppercase">Upgrade Now</Link>
-                       </div>
-                    ) : !showPreview ? (
+                    {!showPreview ? (
                       <div className="py-12 flex flex-col items-center justify-center text-center">
                         <motion.div 
                           animate={{ y: [0, -10, 0] }}
@@ -663,16 +642,6 @@ export default function JobsPage() {
 
              return (
                <div key={job.id} className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm group hover:shadow-xl transition-all relative overflow-hidden">
-                  {!isMember && (
-                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-8">
-                      <div className="w-12 h-12 bg-neuro-orange/10 rounded-2xl flex items-center justify-center mb-4">
-                         <Lock className="w-6 h-6 text-neuro-orange" />
-                      </div>
-                      <h3 className="font-bold text-neuro-navy mb-1">Pipeline Tracking Locked</h3>
-                      <p className="text-xs text-gray-500 max-w-xs mb-4">Members can manage applicants, screen candidates, and generate success plans.</p>
-                      <button className="px-6 py-2 bg-neuro-navy text-white font-black rounded-xl text-[10px] uppercase">Join the Network</button>
-                    </div>
-                  )}
                   <div className="flex items-center justify-between mb-8">
                      <div>
                         <h3 className="text-2xl font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">{job.title}</h3>
@@ -791,14 +760,6 @@ export default function JobsPage() {
         {/* Sidebar Widgets */}
         <div className="space-y-6">
            <section className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
-              {!isMember && (
-                <div className="absolute inset-0 bg-neuro-navy/80 backdrop-blur-[4px] z-20 flex flex-col items-center justify-center text-center p-6">
-                   <Lock className="w-8 h-8 text-neuro-orange mb-4" />
-                   <h4 className="font-bold mb-2 text-sm">Talent Match Locked</h4>
-                   <p className="text-[10px] text-gray-400 mb-4 text-center">Join to see AI-matched talent recommendations for your roles.</p>
-                   <button className="px-4 py-2 bg-neuro-orange rounded-xl text-[10px] font-black uppercase">Apply Now</button>
-                </div>
-              )}
               <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl -mr-16 -mt-16"></div>
               <div className="relative z-10">
                  <div className="flex items-center gap-2 mb-8">

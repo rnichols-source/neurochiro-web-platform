@@ -1,11 +1,9 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
-import { requireTier } from '@/lib/tier'
 import { revalidatePath } from 'next/cache'
 
 export async function sendReferral(recipientDoctorId: string, patientName?: string, notes?: string) {
-  await requireTier('growth') // Starter cannot send referrals
 
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
@@ -132,8 +130,6 @@ export async function acknowledgeReferral(referralId: string) {
 }
 
 export async function getReferralAnalytics() {
-  await requireTier('pro') // Full analytics is Pro only
-
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null

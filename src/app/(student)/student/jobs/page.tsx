@@ -22,15 +22,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { onJobApplicationAction } from "@/app/actions/automations";
-import { useStudentTier } from "@/context/StudentTierContext";
-
 export default function JobsPage() {
   const router = useRouter();
-  const { tier, isProfessional, isFoundation, isAccelerator } = useStudentTier();
   const [toast, setToast] = useState<{isOpen: boolean, message: string}>({ isOpen: false, message: "" });
 
   const handleApply = async (jobTitle: string, clinicName: string) => {
-    if (!isProfessional) return; // Safeguard
     // Arguments: applicantId, email, jobId, jobTitle, doctorEmail
     await onJobApplicationAction("Student_User", "student@example.com", "MOCK_JOB_ID", jobTitle, "hiring@clinic.com");
     setToast({ isOpen: true, message: `Application sent to ${clinicName} for the ${jobTitle} position!` });
@@ -99,37 +95,22 @@ export default function JobsPage() {
              </div>
           </div>
           <div className="relative group">
-            <div className={`bg-white px-6 py-3 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 ${!isProfessional ? 'blur-[2px] opacity-50 grayscale' : ''}`}>
+            <div className={`bg-white px-6 py-3 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 ${''}`}>
                <Target className="w-5 h-5 text-green-600" />
                <div>
                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Readiness</p>
                  <p className="text-sm font-bold text-neuro-navy">85% Score</p>
                </div>
             </div>
-            {!isProfessional && (
-               <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[1px] rounded-2xl z-10">
-                  <Lock className="w-4 h-4 text-neuro-navy" />
-               </div>
-            )}
           </div>
         </div>
       </header>
 
-      {/* Application Tracker - Gated for Professional */}
+      {/* Application Tracker */}
       <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm overflow-hidden relative min-h-[200px]">
-         {!isProfessional && (
-            <div className="absolute inset-0 z-30 bg-white/60 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center">
-               <div className="w-12 h-12 bg-neuro-navy text-neuro-orange rounded-full flex items-center justify-center mb-4 shadow-lg">
-                  <Lock className="w-6 h-6" />
-               </div>
-               <h4 className="text-xl font-black text-neuro-navy mb-2">Application Tracking Locked</h4>
-               <p className="text-sm text-gray-500 max-w-sm mb-6">Upgrade to Professional to apply for jobs and track your application status in real-time.</p>
-               <Link href="/pricing" className="px-8 py-3 bg-neuro-orange text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">Upgrade Now</Link>
-            </div>
-         )}
          <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/5 blur-3xl"></div>
          <h2 className="text-xl font-heading font-bold text-neuro-navy mb-6">Active Applications</h2>
-         <div className={`flex gap-6 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2 ${!isProfessional ? 'blur-md grayscale' : ''}`}>
+         <div className={`flex gap-6 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2 ${''}`}>
             {[
               { clinic: "The Neural Connection", status: "Interview Scheduled", date: "Oct 12", color: "bg-blue-600" },
               { clinic: "Vitality Neuro Life", status: "Reviewing Resume", date: "Oct 08", color: "bg-neuro-orange" },
@@ -151,17 +132,14 @@ export default function JobsPage() {
         {/* Advanced Filters */}
         <aside className="w-full md:w-64 space-y-8">
           <div className="bg-neuro-navy rounded-3xl p-6 text-white relative overflow-hidden group">
-             {!isProfessional && <div className="absolute inset-0 bg-neuro-navy/40 backdrop-blur-[1px] z-10"></div>}
              <div className="relative z-20">
                 <Sparkles className="w-6 h-6 text-neuro-orange mb-4" />
                 <h4 className="font-bold text-sm mb-2">Smart Match</h4>
                 <p className="text-[10px] text-gray-400 leading-relaxed mb-4">
-                   {isProfessional 
-                     ? "We've highlighted clinics that match your clinical interests and preferred location." 
-                     : "Personalized matching is a Professional feature."}
+                   We&apos;ve highlighted clinics that match your clinical interests and preferred location.
                 </p>
-                <Link href={isProfessional ? "#" : "/pricing"} className="block w-full py-2 bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/20 transition-colors text-center">
-                   {isProfessional ? "Adjust Preferences" : "Upgrade Plan"}
+                <Link href="#" className="block w-full py-2 bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/20 transition-colors text-center">
+                   Adjust Preferences
                 </Link>
              </div>
           </div>
@@ -179,11 +157,6 @@ export default function JobsPage() {
           </div>
 
           <div className="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm relative">
-             {!isProfessional && (
-                <div className="absolute inset-0 z-10 bg-white/40 backdrop-blur-[1px] flex items-center justify-center rounded-3xl">
-                   <Lock className="w-5 h-5 text-neuro-navy opacity-20" />
-                </div>
-             )}
              <h4 className="font-bold text-neuro-navy mb-2 text-sm">Career Prep</h4>
              <p className="text-[10px] text-gray-500 mb-4">Improve your score to attract top clinics.</p>
              <ul className="space-y-2">
@@ -210,7 +183,7 @@ export default function JobsPage() {
 
           {jobs.map((job, i) => (
             <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
-              {job.matchScore > 95 && isProfessional && (
+              {job.matchScore > 95 && (
                  <div className="absolute top-0 right-0 bg-neuro-orange text-white text-[9px] font-black px-4 py-1 rounded-bl-xl uppercase tracking-[0.2em]">
                     Top Match
                  </div>
@@ -223,7 +196,7 @@ export default function JobsPage() {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-bold text-xl text-neuro-navy group-hover:text-neuro-orange transition-colors">{job.title}</h3>
-                      {job.status === "Applied" && isProfessional && (
+                      {job.status === "Applied" && (
                          <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[9px] font-black rounded uppercase tracking-widest border border-blue-100">Applied</span>
                       )}
                     </div>
@@ -235,8 +208,8 @@ export default function JobsPage() {
                       <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5" /> {job.posted}
                       </span>
-                      <span className={`text-[10px] font-black text-neuro-orange uppercase tracking-widest flex items-center gap-1.5 ${!isProfessional ? 'blur-[2px] opacity-40 select-none' : ''}`}>
-                        <LineChart className="w-3.5 h-3.5" /> {isProfessional ? `${job.matchScore}% Match` : "XX% Match"}
+                      <span className={`text-[10px] font-black text-neuro-orange uppercase tracking-widest flex items-center gap-1.5`}>
+                        <LineChart className="w-3.5 h-3.5" /> {`${job.matchScore}% Match`}
                       </span>
                     </div>
                   </div>
@@ -246,11 +219,10 @@ export default function JobsPage() {
                     View Details
                   </button>
                   <button 
-                    onClick={() => isProfessional ? handleApply(job.title, job.clinic) : router.push('/pricing')}
-                    className={`px-6 py-3 ${job.status === 'Applied' && isProfessional ? 'bg-gray-100 text-gray-400' : 'bg-neuro-navy text-white hover:bg-neuro-navy-light shadow-lg shadow-neuro-navy/20'} font-black rounded-xl text-xs transition-all relative overflow-hidden`}
+                    onClick={() => handleApply(job.title, job.clinic)}
+                    className={`px-6 py-3 ${job.status === 'Applied' ? 'bg-gray-100 text-gray-400' : 'bg-neuro-navy text-white hover:bg-neuro-navy-light shadow-lg shadow-neuro-navy/20'} font-black rounded-xl text-xs transition-all relative overflow-hidden`}
                   >
-                    {!isProfessional && <Lock className="w-3 h-3 absolute top-1 right-1 opacity-20" />}
-                    {job.status === 'Applied' && isProfessional ? 'Manage App' : isProfessional ? 'Apply Now' : 'Upgrade to Apply'}
+                    {job.status === 'Applied' ? 'Manage App' : 'Apply Now'}
                   </button>
                 </div>
               </div>

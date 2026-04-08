@@ -21,7 +21,6 @@ import {
   Clock
 } from "lucide-react";
 import Link from "next/link";
-import { useStudentTier } from "@/context/StudentTierContext";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { getStudentDashboardData, transitionToDoctorAction } from "./actions";
@@ -29,7 +28,6 @@ import JobRadar from "@/components/student/JobRadar";
 import { useRouter } from "next/navigation";
 
 export default function StudentDashboard() {
-  const { tier, isFoundation, isProfessional, isAccelerator } = useStudentTier();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
@@ -132,10 +130,8 @@ export default function StudentDashboard() {
           </h1>
           <div className="flex items-center gap-3 mt-2">
              <span className="px-3 py-1 bg-neuro-navy text-white text-[10px] font-black rounded-full uppercase tracking-widest flex items-center gap-2">
-                {tier === "Accelerator" && <Sparkles className="w-3 h-3 text-neuro-orange" />}
-                {tier === "Professional" && <Zap className="w-3 h-3 text-neuro-orange" />}
-                {tier === "Foundation" && <Trophy className="w-3 h-3 text-neuro-orange" />}
-                {tier} Member
+                <Sparkles className="w-3 h-3 text-neuro-orange" />
+                Student Member
              </span>
              <span className="text-neuro-gray text-lg">• {schoolInfo}</span>
           </div>
@@ -168,50 +164,34 @@ export default function StudentDashboard() {
         <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Mentorship - Accelerator */}
           <div className="relative group">
-            <Link href={isAccelerator ? "/student/clinics" : "/pricing"} className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group block h-full ${!isAccelerator ? 'opacity-60 grayscale-[0.5]' : ''}`}>
+            <Link href="/student/clinics" className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group block h-full`}>
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-blue-600 transition-colors">
                 <Users className="w-6 h-6 text-blue-600 group-hover:text-white" />
               </div>
               <h3 className="font-bold text-neuro-navy mb-1">Mentorship</h3>
               <p className="text-[10px] text-gray-500 leading-tight">
-                {isAccelerator 
-                  ? "2 active mentor connections" 
-                  : "14 High-Volume Doctors in your region looked for an associate this week. Your profile was hidden."
-                }
+                2 active mentor connections
               </p>
               <div className="mt-4 flex items-center gap-1 text-[10px] font-black text-blue-600 uppercase tracking-widest">
-                {isAccelerator ? "View Network" : "Unlock Connections"} <ChevronRight className="w-3 h-3" />
+                View Network <ChevronRight className="w-3 h-3" />
               </div>
             </Link>
-            {!isAccelerator && (
-               <div className="absolute top-4 right-4">
-                  <Lock className="w-4 h-4 text-neuro-orange" />
-               </div>
-            )}
           </div>
 
           {/* Applications - Professional */}
           <div className="relative group">
-            <Link href={isProfessional ? "/student/jobs" : "/pricing"} className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group block h-full ${!isProfessional ? 'opacity-60 grayscale-[0.5]' : ''}`}>
+            <Link href="/student/jobs" className={`bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group block h-full`}>
               <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-neuro-orange transition-colors">
                 <Briefcase className="w-6 h-6 text-neuro-orange group-hover:text-white" />
               </div>
               <h3 className="font-bold text-neuro-navy mb-1">Applications</h3>
               <p className="text-[10px] text-gray-500 leading-tight">
-                {isProfessional 
-                  ? `${data?.stats?.applications || 0} active job applications` 
-                  : "3 'Elite' Tier jobs were posted in Denver today. Paid members already have interviews scheduled."
-                }
+                {`${data?.stats?.applications || 0} active job applications`}
               </p>
               <div className="mt-4 flex items-center gap-1 text-[10px] font-black text-neuro-orange uppercase tracking-widest">
-                {isProfessional ? "Track Status" : "Reveal Views"} <ChevronRight className="w-3 h-3" />
+                Track Status <ChevronRight className="w-3 h-3" />
               </div>
             </Link>
-            {!isProfessional && (
-               <div className="absolute top-4 right-4">
-                  <Lock className="w-4 h-4 text-neuro-orange" />
-               </div>
-            )}
           </div>
 
           {/* Academy - Accelerator */}
@@ -271,18 +251,13 @@ export default function StudentDashboard() {
            
            <div className="space-y-3 relative z-10">
               <Link 
-                href={isAccelerator ? "/student/academy" : "/pricing"} 
-                className={`block w-full py-4 font-black text-[11px] uppercase tracking-widest rounded-2xl text-center transition-all shadow-xl active:scale-[0.98] flex items-center justify-center gap-2 ${
-                  isAccelerator 
-                    ? "bg-neuro-orange text-white hover:bg-neuro-orange-light shadow-neuro-orange/20" 
-                    : "bg-white/10 text-gray-400 border border-white/10 hover:bg-white/20"
-                }`}
+                href="/student/academy"
+                className={`block w-full py-4 font-black text-[11px] uppercase tracking-widest rounded-2xl text-center transition-all shadow-xl active:scale-[0.98] flex items-center justify-center gap-2 bg-neuro-orange text-white hover:bg-neuro-orange-light shadow-neuro-orange/20`}
               >
-                 {!isAccelerator && <Lock className="w-3.5 h-3.5 text-neuro-orange" />}
-                 {isAccelerator ? "Accelerate My Path" : "Unlock Accelerator"}
+                 Accelerate My Path
               </Link>
               <p className="text-[9px] text-gray-500 text-center font-bold uppercase tracking-tighter">
-                 {isAccelerator ? "Unlocks the 2026 Associate Placement Roadmap" : "Accelerator Only: Placement Roadmap"}
+                 Unlocks the 2026 Associate Placement Roadmap
               </p>
            </div>
         </div>
@@ -380,15 +355,9 @@ export default function StudentDashboard() {
                         <p className="text-xs text-gray-400 leading-relaxed mb-6 max-w-sm">
                            Protect your career. Download the exact "Contract Red-Flags" our legal team identified in 90% of chiropractic associate agreements.
                         </p>
-                        {!isFoundation ? (
-                           <Link href="/pricing" className="px-6 py-3 bg-white text-neuro-navy font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-neuro-orange hover:text-white transition-all inline-block">
-                              Upgrade to Unlock Gift
-                           </Link>
-                        ) : (
-                           <button className="px-6 py-3 bg-green-500 text-white font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-green-600 transition-all">
+                        <button className="px-6 py-3 bg-green-500 text-white font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-green-600 transition-all">
                               Download My Copy
                            </button>
-                        )}
                      </div>
                   </div>
                   

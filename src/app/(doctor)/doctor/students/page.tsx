@@ -30,13 +30,11 @@ import {
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useDoctorTier } from "@/context/DoctorTierContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { searchStudents } from "./actions";
 
 export default function StudentDiscovery() {
   const router = useRouter();
-  const { isGrowth } = useDoctorTier();
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [showFilters, setShowFilters] = useState(false);
@@ -154,16 +152,6 @@ export default function StudentDiscovery() {
 
       {/* Talent Analytics */}
       <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden">
-         {!isGrowth && (
-           <div className="absolute inset-0 bg-white/60 backdrop-blur-[4px] z-20 flex flex-col items-center justify-center text-center p-8">
-              <div className="w-16 h-16 bg-neuro-orange/10 rounded-2xl flex items-center justify-center mb-4">
-                 <Lock className="w-8 h-8 text-neuro-orange" />
-              </div>
-              <h3 className="text-xl font-heading font-black text-neuro-navy mb-2">Unlock Talent Intelligence</h3>
-              <p className="text-gray-500 max-w-sm mb-6 text-sm">Growth members see detailed analytics, regional trends, and high-performance student metrics.</p>
-              <Link href="/pricing?upgrade=growth" className="px-8 py-3 bg-neuro-navy text-white font-black rounded-xl text-xs uppercase tracking-widest shadow-xl transition-all hover:scale-105">Upgrade to Growth</Link>
-           </div>
-         )}
 
          <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-heading font-black text-neuro-navy flex items-center gap-2">
@@ -370,26 +358,18 @@ export default function StudentDiscovery() {
                           >
                              Profile
                           </button>
-                          {isGrowth ? (
-                            <>
-                              <button 
+                              <button
                                 onClick={() => openShadowingOffer(student)}
                                 className="py-3 bg-white border border-neuro-orange/30 text-neuro-orange font-black rounded-xl text-[9px] uppercase tracking-tighter hover:bg-neuro-orange/5 transition-all flex items-center justify-center gap-1 active:scale-95"
                               >
                                  <Gift className="w-3 h-3" /> Shadow
                               </button>
-                              <button 
+                              <button
                                 onClick={() => openInterviewRequest(student)}
                                 className="py-3 bg-neuro-navy text-white font-black rounded-xl text-[9px] uppercase tracking-tighter hover:bg-neuro-navy-light transition-all flex items-center justify-center gap-1 shadow-lg shadow-neuro-navy/10 active:scale-95 group"
                               >
                                  <Zap className="w-3 h-3 text-neuro-orange fill-neuro-orange group-hover:animate-pulse" /> Interview
                               </button>
-                            </>
-                          ) : (
-                            <button className="col-span-2 py-3 bg-neuro-navy/5 text-gray-400 font-black rounded-xl text-[9px] uppercase tracking-tighter flex items-center justify-center gap-2 cursor-not-allowed border border-dashed border-gray-200">
-                               <Lock className="w-3 h-3" /> Unlock Recruitment
-                            </button>
-                          )}
                        </div>
                     </div>
                  </div>

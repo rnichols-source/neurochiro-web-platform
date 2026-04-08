@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Search, 
-  Users, 
-  Calendar, 
-  Briefcase, 
-  User, 
+import {
+  LayoutDashboard,
+  Search,
+  Users,
+  Calendar,
+  Briefcase,
+  User,
   LogOut,
   ChevronRight,
   Sparkles,
@@ -19,13 +19,16 @@ import {
   Network,
   Lock,
   Store,
-  X
+  X,
+  MessageSquare,
+  Bell,
+  CreditCard,
+  GraduationCap
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useDoctorTier } from "@/context/DoctorTierContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase";
 
@@ -33,22 +36,21 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-type DoctorTier = 'starter' | 'growth' | 'pro';
-
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
 }
 
 const navItems = [
-  { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard, minTier: "starter" },
-  // { name: "Practice ROI", href: "/doctor/analytics", icon: BarChart3, minTier: "starter" },
-  { name: "Referral Network", href: "/doctor/directory", icon: Network, minTier: "starter" },
-  // { name: "Tools & Partners", href: "/marketplace", icon: Store, minTier: "starter" },
-  // { name: "Talent Command", href: "/doctor/students", icon: Users, minTier: "growth" },
-  { name: "Seminar Hub", href: "/doctor/seminars", icon: Calendar, minTier: "growth" },
-  // { name: "Recruiting", href: "/doctor/jobs", icon: Briefcase, minTier: "growth" },
-  { name: "Practice Profile", href: "/doctor/profile", icon: User, minTier: "starter" },
+  { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
+  { name: "Profile", href: "/doctor/profile", icon: User },
+  { name: "Jobs", href: "/doctor/jobs", icon: Briefcase },
+  { name: "Students", href: "/doctor/students", icon: GraduationCap },
+  { name: "Seminars", href: "/doctor/seminars", icon: Calendar },
+  { name: "Messages", href: "/doctor/messages", icon: MessageSquare },
+  { name: "Analytics", href: "/doctor/analytics", icon: BarChart3 },
+  { name: "Notifications", href: "/doctor/notifications", icon: Bell },
+  { name: "Billing", href: "/doctor/billing", icon: CreditCard },
 ];
 
 const eliteItems = [
@@ -59,7 +61,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
-  const [tier, setTier] = useState<DoctorTier>('starter');
 
   useEffect(() => {
     const getProfile = async () => {
@@ -71,13 +72,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           .select('*')
           .eq('id', user.id)
           .single();
-        
+
         if (profileData) {
           setProfile(profileData);
-          if (profileData.tier) {
-            const normalizedTier = profileData.tier.toLowerCase() as DoctorTier;
-            setTier(['starter', 'growth', 'pro'].includes(normalizedTier) ? normalizedTier : 'starter');
-          }
         }
       }
     };
@@ -85,11 +82,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   }, []);
 
   const isAdmin = ['admin', 'founder', 'super_admin', 'regional_admin'].includes(profile?.role);
-  const tierWeight: Record<DoctorTier, number> = { 
-    starter: 1, 
-    growth: 2, 
-    pro: 3
-  };
 
   const handleLogout = async () => {
     if (confirm("Are you sure you want to log out?")) {
@@ -118,42 +110,30 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <nav className="px-4 space-y-1">
         <div className="mb-4 px-2 flex items-center justify-between">
           <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-            Doctor <span className="text-neuro-orange">{tier}</span>
+            Doctor Portal
           </span>
-          {tierWeight[tier] >= 2 && <Zap className="w-3 h-3 text-neuro-orange fill-neuro-orange" />}
         </div>
         {navItems.map((item) => {
           const isActive = pathname === item.href;
-          const isLocked = tierWeight[tier] < tierWeight[item.minTier as DoctorTier];
-          
+
           return (
             <div key={item.name} className="relative group">
               <Link
-                href={isLocked ? "#" : item.href}
+                href={item.href}
                 onClick={() => {
-                   if (!isLocked && onClose) onClose();
+                   if (onClose) onClose();
                 }}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200",
-                  isActive 
-                    ? "bg-neuro-orange text-white" 
-                    : isLocked 
-                      ? "text-gray-600 cursor-not-allowed" 
-                      : "text-gray-400 hover:text-white hover:bg-white/5"
+                  isActive
+                    ? "bg-neuro-orange text-white"
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
                 )}
               >
-                <item.icon className={cn("w-5 h-5", isActive ? "text-white" : isLocked ? "text-gray-700" : "text-gray-400 group-hover:text-neuro-orange-light")} />
+                <item.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-gray-400 group-hover:text-neuro-orange-light")} />
                 <span className="font-medium text-sm">{item.name}</span>
-                {isLocked && <Lock className="w-3 h-3 ml-auto text-gray-700" />}
-                {isActive && !isLocked && <ChevronRight className="w-4 h-4 ml-auto" />}
+                {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
               </Link>
-              
-              {isLocked && (
-                <div className="absolute left-full ml-2 top-0 bg-neuro-navy border border-white/10 p-3 rounded-xl shadow-2xl w-48 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-                  <p className="text-[10px] font-bold text-white mb-1">Unlock {item.name}</p>
-                  <p className="text-[9px] text-gray-400">Available on <span className="text-neuro-orange uppercase">{item.minTier}</span> tier and above.</p>
-                </div>
-              )}
             </div>
           );
         })}
@@ -198,41 +178,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </nav>
 
       <div className="p-4 mt-auto">
-        {tier === "starter" ? (
-          <div className="bg-gradient-to-br from-neuro-navy-light to-neuro-navy p-4 rounded-xl border border-white/10 shadow-lg mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-1 bg-neuro-orange/20 rounded-md">
-                <Sparkles className="w-4 h-4 text-neuro-orange" />
-              </div>
-              <span className="text-xs font-bold text-white uppercase tracking-wider">Upgrade Plan</span>
-            </div>
-            <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
-              List your clinic publicly and unlock full recruiting tools.
-            </p>
-            <button 
-              onClick={() => {
-                setTier("growth");
-                if (onClose) onClose();
-              }}
-              className="w-full py-2 bg-neuro-orange hover:bg-neuro-orange-light text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
-              Join Growth
-            </button>
-          </div>
-        ) : (
-          <div className="bg-white/5 p-4 rounded-xl border border-white/5 mb-4">
+        <div className="bg-white/5 p-4 rounded-xl border border-white/5 mb-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-bold text-gray-500 uppercase">Profile Visibility</span>
-              <span className="text-[10px] font-bold text-neuro-orange">{tier === 'pro' ? '98%' : '75%'}</span>
-            </div>
-            <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-neuro-orange rounded-full transition-all duration-500" style={{ width: tier === 'pro' ? '98%' : '75%' }}></div>
+              <span className="text-[10px] font-bold text-neuro-orange">Active</span>
             </div>
             <p className="text-[9px] text-gray-500 mt-2 flex items-center gap-1">
-              <BarChart3 className="w-3 h-3" /> {tier === 'pro' ? 'Top 5% of clinics' : 'Growing presence'}
+              <BarChart3 className="w-3 h-3" /> Your clinic is listed on the directory
             </p>
           </div>
-        )}
 
         <div className="flex items-center gap-3 px-3 py-3 border-t border-white/10 group/profile">
           <Link href="/doctor/profile" className="flex items-center gap-3 flex-1 min-w-0" onClick={onClose}>
@@ -240,17 +194,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-xs group-hover/profile:bg-neuro-orange transition-colors">
                 {profile ? getInitials(profile.full_name) : "--"}
               </div>
-              {tierWeight[tier] >= 2 && (
-                <div className="absolute -top-1 -right-1 bg-neuro-orange rounded-full p-0.5 border border-neuro-navy">
-                  <Star className="w-2 h-2 text-white fill-current" />
-                </div>
-              )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-white truncate group-hover/profile:text-neuro-orange transition-colors">{profile?.full_name || "Loading..."}</p>
               <p className="text-[10px] text-gray-400 truncate flex items-center gap-1 capitalize">
                 <ShieldCheck className="w-2 h-2 text-gray-500" />
-                {tier} Member
+                Member
               </p>
             </div>
           </Link>

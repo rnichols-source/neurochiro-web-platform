@@ -1,11 +1,7 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
-import { requireTier } from '@/lib/tier'
-
 export async function searchStudents(query?: string) {
-  await requireTier('growth') // Student search requires Growth or Pro tier
-
   const supabase = createServerSupabase()
 
   let dbQuery = supabase
