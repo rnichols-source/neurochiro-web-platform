@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
+import { useRegion } from "@/context/RegionContext";
 
 const features = [
   "Verified vendor listing in the NeuroChiro Marketplace",
@@ -9,6 +12,7 @@ const features = [
 ];
 
 export default function MarketplacePricingPage() {
+  const { region } = useRegion();
   return (
     <div className="min-h-dvh bg-neuro-cream pt-24 pb-20">
       <div className="max-w-lg mx-auto px-6 text-center">
@@ -17,7 +21,7 @@ export default function MarketplacePricingPage() {
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-xl p-10 space-y-8">
           <div>
-            <span className="text-5xl font-black text-neuro-navy">$99</span>
+            <span className="text-5xl font-black text-neuro-navy">{region.currency.symbol}99</span>
             <span className="text-gray-400 text-lg font-bold">/month</span>
           </div>
 

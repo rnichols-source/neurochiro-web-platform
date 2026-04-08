@@ -4,8 +4,10 @@ import { CreditCard, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getBillingData } from "./actions";
+import { useRegion } from "@/context/RegionContext";
 
 export default function StudentBilling() {
+  const { region } = useRegion();
   const [loading, setLoading] = useState(true);
   const [billingData, setBillingData] = useState<any>(null);
   const [isPortalLoading, setIsPortalLoading] = useState(false);
@@ -45,12 +47,12 @@ export default function StudentBilling() {
         <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
           <CreditCard className="w-10 h-10 text-gray-300 mx-auto mb-4" />
           <p className="text-lg font-bold text-neuro-navy mb-2">No active subscription</p>
-          <p className="text-sm text-gray-500 mb-6">Start your $9/month student membership to unlock all features.</p>
+          <p className="text-sm text-gray-500 mb-6">{`Start your ${region.currency.symbol}${region.pricing.student.foundation.monthly}/month student membership to unlock all features.`}</p>
           <Link
             href="/pricing/students"
             className="inline-block px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm hover:bg-neuro-orange-light transition-colors"
           >
-            Start Membership — $9/mo
+            {`Start Membership — ${region.currency.symbol}${region.pricing.student.foundation.monthly}/mo`}
           </Link>
         </div>
       </div>

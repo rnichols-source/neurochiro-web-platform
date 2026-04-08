@@ -4,8 +4,10 @@ import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getDoctorDashboardStats } from "./actions";
+import { useRegion } from "@/context/RegionContext";
 
 export default function DoctorDashboard() {
+  const { region } = useRegion();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -75,7 +77,7 @@ export default function DoctorDashboard() {
       {data?.profile?.subscription_status !== 'active' && (
         <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
           <h3 className="font-bold text-neuro-navy mb-1">Activate your membership</h3>
-          <p className="text-gray-500 text-sm mb-4">Your profile is set up but not yet visible to patients. Start your $49/month membership to go live in the directory.</p>
+          <p className="text-gray-500 text-sm mb-4">{`Your profile is set up but not yet visible to patients. Start your ${region.currency.symbol}${region.pricing.doctor.starter.monthly}/month membership to go live in the directory.`}</p>
           <Link href="/doctor/billing" className="inline-flex items-center gap-2 px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm">Activate Membership</Link>
         </div>
       )}

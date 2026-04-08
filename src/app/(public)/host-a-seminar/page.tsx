@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { createSeminarListingCheckout } from "./actions";
+import { useRegion } from "@/context/RegionContext";
 
 export default function HostSeminarPage() {
+  const { region } = useRegion();
   const [isMember, setIsMember] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -114,13 +116,13 @@ export default function HostSeminarPage() {
           )}
           {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
           <button type="submit" disabled={loading} className="w-full py-4 bg-neuro-orange text-white font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange-dark transition-all disabled:opacity-50">
-            {loading ? "Processing..." : isMember ? "List Your Seminar — Free with Membership" : "List Your Seminar — $199"}
+            {loading ? "Processing..." : isMember ? "List Your Seminar — Free with Membership" : `List Your Seminar — ${region.currency.symbol}199`}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
           NeuroChiro members host seminars for free. Not a member?{" "}
-          <Link href="/pricing/doctors" className="text-neuro-orange font-bold hover:underline">Join for $49/month</Link>.
+          <Link href="/pricing/doctors" className="text-neuro-orange font-bold hover:underline">{`Join for ${region.currency.symbol}${region.pricing.doctor.starter.monthly}/month`}</Link>.
         </p>
       </div>
     </div>

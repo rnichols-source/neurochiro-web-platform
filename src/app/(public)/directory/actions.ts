@@ -24,7 +24,7 @@ export async function getDoctors(options: {
       .select(selectFields, { count: 'exact' })
       .in('verification_status', ['verified', 'pending']);
 
-    if (regionCode && regionCode !== 'US') {
+    if (regionCode && regionCode !== 'ALL') {
       query = query.eq('region_code', regionCode);
     }
 
@@ -45,7 +45,14 @@ export async function getDoctors(options: {
         'NE': 'Nebraska', 'ID': 'Idaho', 'WV': 'West Virginia', 'HI': 'Hawaii', 'NH': 'New Hampshire',
         'ME': 'Maine', 'MT': 'Montana', 'RI': 'Rhode Island', 'DE': 'Delaware', 'SD': 'South Dakota',
         'ND': 'North Dakota', 'AK': 'Alaska', 'VT': 'Vermont', 'WY': 'Wyoming', 'DC': 'District of Columbia',
-        'VA': 'Virginia'
+        'VA': 'Virginia',
+        // Australian states/territories
+        'VIC': 'Victoria', 'NSW': 'New South Wales', 'QLD': 'Queensland',
+        'SA': 'South Australia', 'TAS': 'Tasmania', 'ACT': 'Australian Capital Territory',
+        'NT': 'Northern Territory',
+        // Canadian provinces
+        'ON': 'Ontario', 'BC': 'British Columbia', 'AB': 'Alberta', 'QC': 'Quebec',
+        'MB': 'Manitoba', 'SK': 'Saskatchewan', 'NS': 'Nova Scotia', 'NB': 'New Brunswick',
       };
       const expandedQuery = stateMap[cleanQuery.toUpperCase()] || cleanQuery;
 

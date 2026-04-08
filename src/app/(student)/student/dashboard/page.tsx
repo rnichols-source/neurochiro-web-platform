@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getStudentDashboardData, getAcademyProgress, transitionToDoctorAction } from "./actions";
 import { useRouter } from "next/navigation";
+import { useRegion } from "@/context/RegionContext";
 
 export default function StudentDashboard() {
   const [data, setData] = useState<any>(null);
@@ -18,6 +19,7 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
   const router = useRouter();
+  const { region } = useRegion();
 
   useEffect(() => {
     Promise.all([
@@ -94,7 +96,7 @@ export default function StudentDashboard() {
       {data?.profile?.subscription_status !== 'active' && (
         <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
           <h3 className="font-bold text-neuro-navy mb-1">Activate your membership</h3>
-          <p className="text-gray-500 text-sm mb-4">Unlock full access to career tools, job applications, and the student network. Start your $9/month membership.</p>
+          <p className="text-gray-500 text-sm mb-4">{`Unlock full access to career tools, job applications, and the student network. Start your ${region.currency.symbol}${region.pricing.student.foundation.monthly}/month membership.`}</p>
           <Link href="/student/billing" className="inline-flex items-center gap-2 px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm">Activate Membership</Link>
         </div>
       )}

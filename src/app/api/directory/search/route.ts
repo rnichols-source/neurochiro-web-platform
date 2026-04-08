@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       .eq('verification_status', 'verified');
 
     // region_code is Country (US, AU, etc.)
-    if (region && region !== 'US') {
+    if (region && region !== 'ALL') {
       dbQuery = dbQuery.eq('region_code', region);
     }
 
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         .limit(20);
       
       // Still filter by country if provided to keep it somewhat relevant
-      if (region && region !== 'US') {
+      if (region && region !== 'ALL') {
         fallbackQuery = fallbackQuery.eq('region_code', region);
       }
 

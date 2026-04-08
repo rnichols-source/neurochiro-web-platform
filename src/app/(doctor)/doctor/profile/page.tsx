@@ -111,7 +111,7 @@ export default function ProfilePage() {
             <input name="clinic_name" defaultValue={profile?.clinic_name || ''} placeholder="Clinic Name" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
             <input name="city" defaultValue={profile?.city || ''} placeholder="City" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
             <input name="state" defaultValue={profile?.state || ''} placeholder="State" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
-            <input name="country" defaultValue={profile?.country || 'United States'} placeholder="Country" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+            <input name="country" defaultValue={profile?.country || ''} placeholder="Country (e.g. United States, Australia)" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
             <input name="phone" defaultValue={profile?.phone || ''} placeholder="Clinic phone number" inputMode="tel" autoComplete="tel" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
           </div>
         </div>
