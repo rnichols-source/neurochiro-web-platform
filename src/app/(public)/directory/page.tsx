@@ -1,29 +1,14 @@
-"use client";
-
-import { Suspense, useEffect, useState } from "react";
+import { Suspense } from "react";
 import DirectoryContent from "./DirectoryContent";
 import { getDoctors } from "./actions";
 import DirectorySkeleton from "@/components/directory/DirectorySkeleton";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 
-export default function PublicDirectory() {
-  const [initialData, setInitialData] = useState<{ doctors: any[], total: number } | null>(null);
+// Dynamic because getDoctors uses cookies for Supabase auth
+export const dynamic = 'force-dynamic';
 
-  useEffect(() => {
-    async function fetchInitialData() {
-      try {
-        const data = await getDoctors({ limit: 20 });
-        setInitialData(data);
-      } catch (err) {
-        console.error('Directory initial fetch failed:', err);
-      }
-    }
-    fetchInitialData();
-  }, []);
-
-  if (!initialData) {
-    return <DirectorySkeleton />;
-  }
+export default async function PublicDirectory() {
+  const initialData = await getDoctors({ limit: 20 });
 
   return (
     <ErrorBoundary title="Directory Content Error">

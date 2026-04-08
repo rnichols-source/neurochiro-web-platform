@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AuthProvider } from "@/context/AuthContext";
 import { 
   LayoutDashboard, 
   Activity, 
@@ -47,6 +48,7 @@ export default function PortalLayout({
   };
 
   return (
+    <AuthProvider>
     <div className="flex h-screen bg-neuro-cream overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 bg-neuro-navy text-white hidden md:flex flex-col border-r border-white/10">
@@ -125,5 +127,6 @@ export default function PortalLayout({
 
       <MobileBottomNav items={mobileNavItems} />
     </div>
+    </AuthProvider>
   );
 }

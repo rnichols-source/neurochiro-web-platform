@@ -11,6 +11,9 @@ import { createClient } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import AdminSettingsModal from "@/components/admin/AdminSettingsModal";
 import { isFounderRole } from "@/lib/founder";
+import { AuthProvider } from "@/context/AuthContext";
+import AdminQuickNav from "@/components/admin/AdminQuickNav";
+import PerspectiveSwitcher from "@/components/admin/PerspectiveSwitcher";
 
 export default function AdminLayout({
   children,
@@ -88,6 +91,7 @@ export default function AdminLayout({
   };
 
   return (
+    <AuthProvider>
     <div className="flex flex-col h-screen bg-[#020617] overflow-hidden">
       <PerspectiveBanner />
       <div className="flex flex-1 overflow-hidden">
@@ -229,6 +233,9 @@ export default function AdminLayout({
           </motion.div>
         )}
       </AnimatePresence>
+      <AdminQuickNav />
+      <PerspectiveSwitcher />
     </div>
+    </AuthProvider>
   );
 }

@@ -14,9 +14,6 @@ export async function getDoctors(options: {
   const { regionCode, bounds, page = 1, limit = 20, searchQuery } = options;
   const supabase = createServerSupabase()
 
-  // Force revalidation of the directory path
-  revalidatePath('/directory');
-
   try {
     // DATA MINIMIZATION: Only fetch essential columns for the LIST view
     // Removed: email, website_url, instagram_url, facebook_url, address (private-ish)

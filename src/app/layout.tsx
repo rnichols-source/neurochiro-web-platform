@@ -70,12 +70,7 @@ import { RegionProvider } from "@/context/RegionContext";
 import { DoctorTierProvider } from "@/context/DoctorTierContext";
 import { StudentTierProvider } from "@/context/StudentTierContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
-import { AuthProvider } from "@/context/AuthContext";
-import PWAInstallPrompt from "@/components/layout/PWAInstallPrompt";
-import AdminQuickNav from "@/components/admin/AdminQuickNav";
-import PerspectiveSwitcher from "@/components/admin/PerspectiveSwitcher";
-import CookieConsent from "@/components/layout/CookieConsent";
-import Script from "next/script";
+import LazyOverlays from "@/components/layout/LazyOverlays";
 
 export default function RootLayout({
   children,
@@ -113,33 +108,8 @@ export default function RootLayout({
           <DoctorTierProvider>
             <StudentTierProvider>
               <UserPreferencesProvider>
-                <AuthProvider>
-                  {children}
-                </AuthProvider>
-                <PWAInstallPrompt />
-                <AdminQuickNav />
-                <PerspectiveSwitcher />
-                <CookieConsent />
-                <Script
-                  id="register-sw"
-                  strategy="lazyOnload"
-                  dangerouslySetInnerHTML={{
-                    __html: `
-                      if ('serviceWorker' in navigator) {
-                        window.addEventListener('load', function() {
-                          navigator.serviceWorker.register('/sw.js').then(
-                            function(registration) {
-                              console.log('Service Worker registration successful with scope: ', registration.scope);
-                            },
-                            function(err) {
-                              console.log('Service Worker registration failed: ', err);
-                            }
-                          );
-                        });
-                      }
-                    `,
-                  }}
-                />
+                {children}
+                <LazyOverlays />
               </UserPreferencesProvider>
             </StudentTierProvider>
           </DoctorTierProvider>

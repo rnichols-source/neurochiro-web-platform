@@ -2,6 +2,7 @@
 
 import Sidebar from "./Sidebar";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
+import { AuthProvider } from "@/context/AuthContext";
 import { LayoutDashboard, MessageSquare, Bell, User, ShieldCheck, Menu } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -21,6 +22,7 @@ export default function DoctorLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
+    <AuthProvider>
     <div className="flex flex-col md:flex-row h-screen bg-neuro-cream overflow-hidden">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
@@ -60,5 +62,6 @@ export default function DoctorLayout({
         onMenuClick={() => setIsSidebarOpen(true)}
       />
     </div>
+    </AuthProvider>
   );
 }

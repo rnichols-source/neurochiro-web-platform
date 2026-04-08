@@ -4,7 +4,7 @@ import DoctorProfileClient from "./DoctorProfileClient";
 import { Metadata } from "next";
 import SchemaMarkup from "@/components/seo/SchemaMarkup";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60; // ISR: cache for 60 seconds
 
 interface Props {
   params: Promise<{ slug: string }>;
