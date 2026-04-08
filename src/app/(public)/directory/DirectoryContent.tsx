@@ -60,8 +60,9 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   const searchParams = useSearchParams();
   const { toggleSave: globalToggleSave, isSaved, lastLocation, setLastLocation } = useUserPreferences();
   
+  const hasSearchParam = !!(searchParams.get("search") || searchParams.get("q"));
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || searchParams.get("q") || "");
-  const [locationQuery, setLocationQuery] = useState(searchParams.get("location") || searchParams.get("zip") || lastLocation || "");
+  const [locationQuery, setLocationQuery] = useState(searchParams.get("location") || searchParams.get("zip") || (hasSearchParam ? "" : lastLocation) || "");
   const [isLocating, setIsLocating] = useState(false);
   
   const [doctors, setDoctors] = useState<any[]>(initialData.doctors);
