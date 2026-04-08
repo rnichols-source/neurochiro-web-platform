@@ -155,7 +155,7 @@ export default function AdminRevenue() {
       {/* Metric Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {revenueStats.map((stat, i) => (
-          <section key={i} className="bg-white/5 border border-white/5 rounded-[2.5rem] p-8 group hover:border-white/10 transition-all">
+          <section key={i} className="bg-white/5 border border-white/5 rounded-2xl p-8 group hover:border-white/10 transition-all">
             <div className="flex justify-between items-start mb-6">
               <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-neuro-orange">
                 <stat.icon className="w-6 h-6" />
@@ -176,7 +176,7 @@ export default function AdminRevenue() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Transaction Feed */}
         <div className="lg:col-span-2 space-y-8">
-          <section className="bg-white/5 border border-white/5 rounded-[3rem] overflow-hidden">
+          <section className="bg-white/5 border border-white/5 rounded-2xl overflow-hidden">
             <div className="p-8 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <h3 className="text-xl font-heading font-black text-white text-white">Recent Transactions</h3>
               <div className="flex gap-2 items-center">
@@ -250,7 +250,7 @@ export default function AdminRevenue() {
 
         {/* Breakdown Analytics */}
         <div className="space-y-8">
-          <section className="bg-white/5 border border-white/5 rounded-[3rem] p-10">
+          <section className="bg-white/5 border border-white/5 rounded-2xl p-10">
             <h3 className="text-xl font-heading font-black text-white mb-8">Revenue Breakdown</h3>
             <div className="space-y-6">
               {loading ? (
@@ -280,8 +280,7 @@ export default function AdminRevenue() {
             </button>
           </section>
 
-          <section className="bg-gradient-to-br from-neuro-navy to-slate-900 border border-white/10 rounded-[3rem] p-10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl -mr-16 -mt-16"></div>
+          <section className="bg-gradient-to-br from-neuro-navy to-slate-900 border border-white/10 rounded-2xl p-10 relative overflow-hidden">
             <h3 className="text-xl font-heading font-black text-white mb-2 text-white">Projected Growth</h3>
             <p className="text-xs text-gray-400 mb-8 font-medium">Based on current acquisition velocity.</p>
             <div className="text-4xl font-black text-white mb-2">

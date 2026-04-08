@@ -48,7 +48,7 @@ function SearchResults() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 bg-white/5 rounded-[3rem] border border-white/5">
+      <div className="flex flex-col items-center justify-center py-20 bg-white/5 rounded-2xl border border-white/5">
         <Loader2 className="w-12 h-12 text-neuro-orange animate-spin mb-4" />
         <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Scanning Platform Infrastructure...</p>
       </div>
@@ -130,7 +130,7 @@ function SearchResults() {
           <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest px-2">System Events ({logs.length})</h3>
           <div className="space-y-3">
             {logs.length === 0 ? (
-              <div className="p-20 bg-white/5 rounded-[3rem] border border-white/5 text-center">
+              <div className="p-20 bg-white/5 rounded-2xl border border-white/5 text-center">
                 <History className="w-12 h-12 text-gray-700 mx-auto mb-4" />
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">No matching events</p>
               </div>
@@ -144,15 +144,15 @@ function SearchResults() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-white group-hover:text-neuro-orange transition-colors truncate">{log.event}</p>
                       <div className="flex items-center gap-3 mt-1">
-                        <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">{log.user_name || log.user}</span>
-                        <span className="text-[9px] font-black text-gray-700 uppercase tracking-widest">•</span>
-                        <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">{formatDistanceToNow(new Date(log.created_at || log.timestamp), { addSuffix: true })}</span>
+                        <span className="text-xs font-black text-gray-500 uppercase tracking-widest">{log.user_name || log.user}</span>
+                        <span className="text-xs font-black text-gray-700 uppercase tracking-widest">•</span>
+                        <span className="text-xs font-black text-gray-500 uppercase tracking-widest">{formatDistanceToNow(new Date(log.created_at || log.timestamp), { addSuffix: true })}</span>
                       </div>
                     </div>
                   </div>
                   <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10 shrink-0">
                     <Database className="w-3 h-3 text-gray-600" />
-                    <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest font-mono">{log.target}</span>
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-widest font-mono">{log.target}</span>
                   </div>
                 </div>
               ))
@@ -168,7 +168,7 @@ export default function GlobalSearchPage() {
   return (
     <Suspense fallback={
       <div className="p-8 max-w-[1200px] mx-auto space-y-10">
-        <div className="flex flex-col items-center justify-center py-20 bg-white/5 rounded-[3rem] border border-white/5">
+        <div className="flex flex-col items-center justify-center py-20 bg-white/5 rounded-2xl border border-white/5">
           <Loader2 className="w-12 h-12 text-neuro-orange animate-spin mb-4" />
           <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Initializing Intelligence...</p>
         </div>

@@ -43,7 +43,7 @@ export default function AdminAnnouncementsPage() {
 
       <div className="space-y-12">
         {/* Builder */}
-        <section className="bg-gray-50/50 p-8 rounded-[3rem] border border-gray-100">
+        <section className="bg-gray-50/50 p-8 rounded-2xl border border-gray-100">
           <AnnouncementBuilder />
         </section>
 
@@ -54,7 +54,7 @@ export default function AdminAnnouncementsPage() {
             <h2 className="text-xl font-black text-neuro-navy uppercase tracking-tight">Announcement History</h2>
           </div>
 
-          <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
@@ -83,12 +83,12 @@ export default function AdminAnnouncementsPage() {
                         <p className="text-[10px] text-gray-400 font-medium truncate max-w-xs">{ann.body}</p>
                       </td>
                       <td className="px-8 py-6">
-                        <span className="px-3 py-1 bg-gray-100 text-[9px] font-black text-gray-500 rounded-full uppercase tracking-widest">
+                        <span className="px-3 py-1 bg-gray-100 text-xs font-black text-gray-500 rounded-full uppercase tracking-widest">
                           {ann.audience_type}
                         </span>
                       </td>
                       <td className="px-8 py-6">
-                        <span className={`px-3 py-1 text-[9px] font-black rounded-full uppercase tracking-widest ${
+                        <span className={`px-3 py-1 text-xs font-black rounded-full uppercase tracking-widest ${
                           ann.priority === 'urgent' ? 'bg-red-50 text-red-500' : 
                           ann.priority === 'important' ? 'bg-orange-50 text-orange-500' : 
                           'bg-blue-50 text-blue-500'

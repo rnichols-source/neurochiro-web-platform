@@ -339,7 +339,7 @@ export default function GlobalNetworkMap({
                       "Verified Clinics";
 
   return (
-    <div className="relative w-full h-full bg-[#0B1118] overflow-hidden rounded-[2.5rem]">
+    <div className="relative w-full h-full bg-[#0B1118] overflow-hidden rounded-2xl">
       {loading && (
         <div className="absolute inset-0 z-50 bg-neuro-navy/40 backdrop-blur-sm flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">

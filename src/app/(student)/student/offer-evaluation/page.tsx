@@ -197,8 +197,7 @@ export default function OfferEvaluationPage() {
         )}
       </AnimatePresence>
 
-      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 bg-neuro-navy p-10 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-neuro-orange/20 blur-[120px] rounded-full -mr-48 -mt-48 pointer-events-none"></div>
+      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 bg-neuro-navy p-10 rounded-2xl text-white relative overflow-hidden shadow-2xl">
         <div className="relative z-10">
           <div className="flex flex-wrap items-center gap-2 mb-4">
             <div className="px-3 py-1 bg-neuro-orange text-white text-[10px] font-black uppercase tracking-widest rounded-md shadow-lg flex items-center gap-1">
@@ -251,7 +250,7 @@ export default function OfferEvaluationPage() {
                 <div>
                    <label className="flex justify-between text-xs font-bold text-gray-500 mb-2">
                      Base Salary / Floor
-                     {eduMode && <span className="text-[9px] text-neuro-orange font-black bg-neuro-orange/10 px-2 rounded-full flex items-center gap-1"><Info className="w-3 h-3"/> Your safety net.</span>}
+                     {eduMode && <span className="text-xs text-neuro-orange font-black bg-neuro-orange/10 px-2 rounded-full flex items-center gap-1"><Info className="w-3 h-3"/> Your safety net.</span>}
                    </label>
                    <input type="number" value={offer.base} onChange={e => setOffer({...offer, base: Number(e.target.value)})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-xl font-black text-neuro-navy focus:ring-2 focus:ring-neuro-orange/20 outline-none" />
                 </div>
@@ -344,7 +343,7 @@ export default function OfferEvaluationPage() {
         <div className="xl:col-span-7 space-y-6">
            
            {/* Final Scorecard */}
-           <div className="bg-neuro-navy text-white rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden border border-white/10">
+           <div className="bg-neuro-navy text-white rounded-2xl p-10 shadow-2xl relative overflow-hidden border border-white/10">
               <div className="absolute top-0 left-0 w-full h-1 bg-white/10">
                 <motion.div 
                   className="h-full bg-gradient-to-r from-neuro-orange to-yellow-400" 
@@ -362,7 +361,7 @@ export default function OfferEvaluationPage() {
                          key={analysis.grade}
                          initial={{ scale: 0.8, opacity: 0 }}
                          animate={{ scale: 1, opacity: 1 }}
-                         className={`text-8xl font-black italic tracking-tighter ${analysis.gradeColor} drop-shadow-lg`}
+                         className={`text-4xl md:text-5xl font-black italic tracking-tighter ${analysis.gradeColor} drop-shadow-lg`}
                        >
                          {analysis.grade}
                        </motion.span>

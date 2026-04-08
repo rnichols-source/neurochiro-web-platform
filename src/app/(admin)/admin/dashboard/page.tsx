@@ -122,8 +122,7 @@ export default function AdminDashboard() {
           { label: "Talent Network", value: stats ? stats.talent.toString() : "0", trend: stats ? formatTrend(stats.talentTrend) : "+0%", icon: Users, color: "text-blue-500" },
           { label: "Market Health", value: stats ? `${stats.marketHealth}%` : "0%", trend: stats ? formatTrend(stats.marketTrend) : "+0%", icon: Activity, color: "text-purple-500" }
         ].map((item, i) => (
-          <section key={i} className="bg-[#0A0D14] border border-white/5 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden group hover:border-white/10 transition-all">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 blur-3xl -mr-12 -mt-12 transition-all group-hover:bg-neuro-orange/10"></div>
+          <section key={i} className="bg-[#0A0D14] border border-white/5 rounded-[2rem] md:rounded-2xl p-6 md:p-8 relative overflow-hidden group hover:border-white/10 transition-all">
             <div className="flex justify-between items-start mb-6">
               <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center ${item.color} shrink-0`}>
                 <item.icon className="w-5 h-5 md:w-6 md:h-6" />
@@ -132,7 +131,7 @@ export default function AdminDashboard() {
                 {item.trend}
               </span>
             </div>
-            <p className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1 truncate">{item.label}</p>
+            <p className="text-xs md:text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1 truncate">{item.label}</p>
             <p className="text-2xl md:text-3xl font-black text-white truncate">{loading ? "..." : item.value}</p>
           </section>
         ))}
@@ -142,7 +141,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Core Control Matrix */}
         <div className="lg:col-span-2 space-y-6 md:space-y-8">
-          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-[3rem] p-6 md:p-10">
+          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-2xl p-6 md:p-10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 md:mb-10">
               <div>
                 <h3 className="text-xl md:text-2xl font-heading font-black text-white">System Governance</h3>
@@ -157,7 +156,7 @@ export default function AdminDashboard() {
                 </Link>
                 <button 
                   onClick={() => setIsAutomationModalOpen(true)}
-                  className="px-4 md:px-6 py-3 bg-neuro-orange text-white rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:bg-neuro-orange-light transition-all shadow-lg whitespace-nowrap shrink-0"
+                  className="px-4 md:px-6 py-3 bg-neuro-orange text-white rounded-xl text-xs md:text-[10px] font-black uppercase tracking-widest hover:bg-neuro-orange-light transition-all shadow-lg whitespace-nowrap shrink-0"
                 >
                   Automation Config
                 </button>
@@ -165,34 +164,34 @@ export default function AdminDashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-              <div className="p-6 md:p-8 bg-neuro-navy rounded-[2rem] md:rounded-[2.5rem] border border-white/5 space-y-4 md:space-y-6 group cursor-pointer hover:border-neuro-orange/30 transition-all flex flex-col">
+              <div className="p-6 md:p-8 bg-neuro-navy rounded-[2rem] md:rounded-2xl border border-white/5 space-y-4 md:space-y-6 group cursor-pointer hover:border-neuro-orange/30 transition-all flex flex-col">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-white/5 rounded-xl md:rounded-2xl flex items-center justify-center text-neuro-orange shrink-0">
                     <Database className="w-5 h-5 md:w-6 md:h-6" />
                   </div>
                   <div className="min-w-0">
                     <h4 className="text-white font-bold text-sm md:text-base truncate">Data Sovereignty</h4>
-                    <p className="text-[9px] md:text-[10px] text-gray-500 uppercase font-black truncate">Active Nodes: {Object.keys(REGIONS).length}</p>
+                    <p className="text-xs md:text-[10px] text-gray-500 uppercase font-black truncate">Active Nodes: {Object.keys(REGIONS).length}</p>
                   </div>
                 </div>
                 <p className="text-xs text-gray-400 leading-relaxed flex-1">Regional data centers are monitored for proper isolation and compliance mapping.</p>
-                <Link href="/admin/regions" className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-neuro-orange group-hover:gap-3 transition-all mt-auto pt-2">
+                <Link href="/admin/regions" className="flex items-center gap-2 text-xs md:text-[10px] font-black uppercase text-neuro-orange group-hover:gap-3 transition-all mt-auto pt-2">
                   Manage Infrastructure <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
 
-              <div className="p-6 md:p-8 bg-white/5 rounded-[2rem] md:rounded-[2.5rem] border border-white/5 space-y-4 md:space-y-6 group cursor-pointer hover:border-blue-500/30 transition-all flex flex-col">
+              <div className="p-6 md:p-8 bg-white/5 rounded-[2rem] md:rounded-2xl border border-white/5 space-y-4 md:space-y-6 group cursor-pointer hover:border-blue-500/30 transition-all flex flex-col">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-white/5 rounded-xl md:rounded-2xl flex items-center justify-center text-blue-500 shrink-0">
                     <ShieldCheck className="w-5 h-5 md:w-6 md:h-6" />
                   </div>
                   <div className="min-w-0">
                     <h4 className="text-white font-bold text-sm md:text-base truncate">Member Verification</h4>
-                    <p className="text-[9px] md:text-[10px] text-gray-500 uppercase font-black truncate">Active Verifications</p>
+                    <p className="text-xs md:text-[10px] text-gray-500 uppercase font-black truncate">Active Verifications</p>
                   </div>
                 </div>
                 <p className="text-xs text-gray-400 leading-relaxed flex-1">Review queue for doctor credentials, licensing, and marketplace listings.</p>
-                <Link href="/admin/moderation" className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-blue-500 group-hover:gap-3 transition-all mt-auto pt-2">
+                <Link href="/admin/moderation" className="flex items-center gap-2 text-xs md:text-[10px] font-black uppercase text-blue-500 group-hover:gap-3 transition-all mt-auto pt-2">
                   Review Queue <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
@@ -200,10 +199,10 @@ export default function AdminDashboard() {
           </section>
 
           {/* Activity Pulse */}
-          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-[3rem] overflow-hidden">
+          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-2xl overflow-hidden">
             <div className="p-6 md:p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
               <h3 className="text-lg md:text-xl font-heading font-black text-white">Recent Admin Actions</h3>
-              <Link href="/admin/logs" className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest hover:text-white underline underline-offset-4 transition-colors">View Audit Log</Link>
+              <Link href="/admin/logs" className="text-xs md:text-[10px] font-black text-gray-500 uppercase tracking-widest hover:text-white underline underline-offset-4 transition-colors">View Audit Log</Link>
             </div>
             <div className="divide-y divide-white/5">
               {loading ? (
@@ -219,10 +218,10 @@ export default function AdminDashboard() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs md:text-sm font-bold text-white truncate">{log.event}</p>
-                        <p className="text-[9px] md:text-[10px] text-gray-500 truncate">{log.user} → {log.target}</p>
+                        <p className="text-xs md:text-[10px] text-gray-500 truncate">{log.user} → {log.target}</p>
                       </div>
                     </div>
-                    <span className="text-[9px] md:text-[10px] font-bold text-gray-600 sm:text-right shrink-0">
+                    <span className="text-xs md:text-[10px] font-bold text-gray-600 sm:text-right shrink-0">
                       {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
                     </span>
                   </div>
@@ -234,8 +233,7 @@ export default function AdminDashboard() {
 
         {/* Intelligence Sidebar */}
         <div className="space-y-6 md:space-y-8">
-          <section className="bg-neuro-navy rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-2xl relative overflow-hidden text-white border border-white/5">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+          <section className="bg-neuro-navy rounded-[2rem] md:rounded-2xl p-6 md:p-10 shadow-2xl relative overflow-hidden text-white border border-white/5">
             <h3 className="text-xl md:text-2xl font-heading font-black mb-6 md:mb-8">System Health</h3>
             
             <div className="space-y-6 md:space-y-8">
@@ -244,7 +242,7 @@ export default function AdminDashboard() {
                   <div className={`w-2 h-2 rounded-full ${stats?.health?.database === 'Optimal' ? 'bg-green-500' : 'bg-red-500'} animate-pulse shrink-0`}></div>
                   <span className="text-[10px] md:text-xs font-bold text-gray-400 truncate">Database Engine</span>
                 </div>
-                <span className={`text-[9px] md:text-[10px] font-black uppercase shrink-0 ${stats?.health?.database === 'Optimal' ? 'text-green-500 bg-green-500/10' : 'text-red-500 bg-red-500/10'} px-2 py-1 rounded`}>
+                <span className={`text-xs md:text-[10px] font-black uppercase shrink-0 ${stats?.health?.database === 'Optimal' ? 'text-green-500 bg-green-500/10' : 'text-red-500 bg-red-500/10'} px-2 py-1 rounded`}>
                   {stats?.health?.database || 'Unknown'}
                 </span>
               </div>
@@ -253,7 +251,7 @@ export default function AdminDashboard() {
                   <div className={`w-2 h-2 rounded-full ${stats?.health?.auth === 'Optimal' ? 'bg-green-500' : 'bg-amber-500'} animate-pulse shrink-0`}></div>
                   <span className="text-[10px] md:text-xs font-bold text-gray-400 truncate">Auth Gateway</span>
                 </div>
-                <span className={`text-[9px] md:text-[10px] font-black uppercase shrink-0 ${stats?.health?.auth === 'Optimal' ? 'text-green-500 bg-green-500/10' : 'text-amber-500 bg-amber-500/10'} px-2 py-1 rounded`}>
+                <span className={`text-xs md:text-[10px] font-black uppercase shrink-0 ${stats?.health?.auth === 'Optimal' ? 'text-green-500 bg-green-500/10' : 'text-amber-500 bg-amber-500/10'} px-2 py-1 rounded`}>
                   {stats?.health?.auth || 'Unknown'}
                 </span>
               </div>
@@ -262,16 +260,16 @@ export default function AdminDashboard() {
                   <div className={`w-2 h-2 rounded-full ${stats?.health?.automation === 'Idle' ? 'bg-gray-500' : 'bg-neuro-orange'} ${stats?.health?.automation !== 'Idle' ? 'animate-pulse' : ''} shrink-0`}></div>
                   <span className="text-[10px] md:text-xs font-bold text-gray-400 truncate">Automation Queue</span>
                 </div>
-                <span className={`text-[9px] md:text-[10px] font-black uppercase shrink-0 ${stats?.health?.automation === 'Idle' ? 'text-gray-500 bg-gray-500/10' : 'text-neuro-orange bg-neuro-orange/10'} px-2 py-1 rounded`}>
+                <span className={`text-xs md:text-[10px] font-black uppercase shrink-0 ${stats?.health?.automation === 'Idle' ? 'text-gray-500 bg-gray-500/10' : 'text-neuro-orange bg-neuro-orange/10'} px-2 py-1 rounded`}>
                   {stats?.health?.automation || 'Idle'}
                 </span>
               </div>
 
               <div className="pt-6 md:pt-8 border-t border-white/10 space-y-4 md:space-y-6">
                 <div className="flex justify-between items-center">
-                   <h4 className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest">Revenue Velocity</h4>
+                   <h4 className="text-xs md:text-[10px] font-black text-gray-500 uppercase tracking-widest">Revenue Velocity</h4>
                    {stats?.health?.pendingTasks > 0 && (
-                     <span className="text-[8px] font-bold text-neuro-orange animate-bounce">
+                     <span className="text-xs font-bold text-neuro-orange animate-bounce">
                        {stats.health.pendingTasks} Queue Tasks
                      </span>
                    )}
@@ -300,14 +298,14 @@ export default function AdminDashboard() {
                 className="w-full py-4 md:py-5 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl flex items-center justify-center gap-2 md:gap-3 hover:bg-white/10 transition-all disabled:opacity-50 active:scale-95"
               >
                 {exporting ? <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-neuro-orange animate-spin" /> : <Download className="w-4 h-4 md:w-5 md:h-5 text-neuro-orange" />}
-                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">
+                <span className="text-xs md:text-[10px] font-black uppercase tracking-widest">
                   {exporting ? "Generating..." : "Intelligence Report"}
                 </span>
               </button>
             </div>
           </section>
 
-          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 text-white">
+          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-2xl p-6 md:p-8 text-white">
             <h3 className="text-base md:text-lg font-black mb-4 md:mb-6">Internal Alerts</h3>
             <div className="space-y-3 md:space-y-4">
               {loading ? (
@@ -321,10 +319,10 @@ export default function AdminDashboard() {
                       {alert.severity === 'High' || alert.severity === 'Critical' ? <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-red-500 shrink-0" /> : <Bell className="w-4 h-4 md:w-5 md:h-5 text-neuro-orange shrink-0" />}
                       <div className="min-w-0 flex-1">
                         <p className="text-xs font-bold truncate">{alert.title}</p>
-                        <p className="text-[9px] text-gray-400 truncate mt-0.5">{alert.description}</p>
+                        <p className="text-xs text-gray-400 truncate mt-0.5">{alert.description}</p>
                       </div>
                     </div>
-                    <span className="text-[9px] font-bold text-gray-500 sm:ml-auto shrink-0 self-end sm:self-auto">{alert.time === 'Active' || alert.time === 'Just now' ? alert.time : formatDistanceToNow(new Date(alert.time), { addSuffix: true })}</span>
+                    <span className="text-xs font-bold text-gray-500 sm:ml-auto shrink-0 self-end sm:self-auto">{alert.time === 'Active' || alert.time === 'Just now' ? alert.time : formatDistanceToNow(new Date(alert.time), { addSuffix: true })}</span>
                   </div>
                 ))
               )}
@@ -336,7 +334,7 @@ export default function AdminDashboard() {
       {/* AUTOMATION MODAL */}
       {isAutomationModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 backdrop-blur-md bg-neuro-navy/60">
-          <div className="bg-[#0A0D14] rounded-[2rem] md:rounded-[3rem] w-full max-w-xl shadow-2xl overflow-hidden border border-white/10 p-6 md:p-10 text-white max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#0A0D14] rounded-[2rem] md:rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden border border-white/10 p-6 md:p-10 text-white max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-8 md:mb-10">
               <h3 className="text-2xl md:text-3xl font-black">Global Automation</h3>
               <button onClick={() => setIsAutomationModalOpen(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors"><X className="w-5 h-5"/></button>

@@ -57,7 +57,7 @@ export default function EducationHub() {
       <header className="bg-neuro-navy text-white pt-32 pb-48 px-8 relative overflow-hidden">
         <div className="max-w-7xl mx-auto relative z-10 text-center space-y-6">
           <span className="text-neuro-orange-light font-black uppercase tracking-[0.4em] text-xs">Patient Education Hub</span>
-          <h1 className="text-6xl md:text-8xl font-heading font-black leading-[0.9] text-white">
+          <h1 className="text-6xl md:text-5xl font-heading font-black leading-[0.9] text-white">
             Understand Your <br />
             <span className="text-neuro-orange">Nervous System.</span>
           </h1>
@@ -86,7 +86,7 @@ export default function EducationHub() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               key={path.title}
-              className="bg-white rounded-[3rem] p-10 shadow-2xl border border-gray-100 flex flex-col items-center text-center group hover:-translate-y-2 transition-all"
+              className="bg-white rounded-2xl p-10 shadow-2xl border border-gray-100 flex flex-col items-center text-center group hover:-translate-y-2 transition-all"
             >
               <div className="w-16 h-16 rounded-2xl bg-neuro-navy flex items-center justify-center text-white mb-6 group-hover:bg-neuro-orange transition-colors">
                 <path.icon className="w-8 h-8" />
@@ -123,8 +123,7 @@ export default function EducationHub() {
               </nav>
             </div>
 
-            <div className="bg-neuro-navy p-8 rounded-[2.5rem] text-white relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-24 h-24 bg-neuro-orange/10 blur-2xl"></div>
+            <div className="bg-neuro-navy p-8 rounded-2xl text-white relative overflow-hidden">
                <HelpCircle className="w-8 h-8 text-neuro-orange mb-4" />
                <h4 className="text-xl font-bold mb-2">Common Questions</h4>
                <p className="text-xs text-gray-400 mb-6">Find quick answers to billing, safety, and results.</p>
@@ -147,11 +146,11 @@ export default function EducationHub() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {ARTICLES.map((article, i) => (
-                <Link key={i} href={`/learn/${article.slug}`} className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all group cursor-pointer">
+                <Link key={i} href={`/learn/${article.slug}`} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all group cursor-pointer">
                   <div className="aspect-video relative overflow-hidden">
                     <img loading="lazy" decoding="async" src={article.img} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                     <div className="absolute top-4 left-4">
-                      <span className="px-3 py-1 bg-white/90 backdrop-blur-md rounded-lg text-[9px] font-black uppercase tracking-widest text-neuro-navy">{article.category}</span>
+                      <span className="px-3 py-1 bg-white/90 backdrop-blur-md rounded-lg text-xs font-black uppercase tracking-widest text-neuro-navy">{article.category}</span>
                     </div>
                   </div>
                   <div className="p-8">
@@ -172,8 +171,7 @@ export default function EducationHub() {
         </div>
 
         {/* Global CTA */}
-        <section className="mt-32 bg-neuro-orange rounded-[4rem] p-12 md:p-20 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl">
-           <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-white/10 blur-[100px] -ml-48 -mt-48 rounded-full"></div>
+        <section className="mt-32 bg-neuro-orange rounded-2xl p-12 md:p-20 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl">
            <div className="relative z-10 max-w-xl">
               <h2 className="text-4xl md:text-5xl font-heading font-black mb-6">Ready to experience clinical regulation?</h2>
               <p className="text-white/80 text-xl font-medium">

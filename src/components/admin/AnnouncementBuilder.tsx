@@ -91,7 +91,7 @@ export default function AnnouncementBuilder() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form */}
         <div className="lg:col-span-2 space-y-6">
-          <form onSubmit={handlePublish} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
+          <form onSubmit={handlePublish} className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Announcement Title</label>
               <input 
@@ -196,7 +196,7 @@ export default function AnnouncementBuilder() {
 
         {/* Preview */}
         <div className="space-y-6">
-          <div className="bg-gray-50 p-8 rounded-[2.5rem] border border-gray-100 h-full">
+          <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100 h-full">
             <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 text-center">Live Preview</h3>
             
             <div className="w-full bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
@@ -221,7 +221,7 @@ export default function AnnouncementBuilder() {
                       {form.body || "This is where your announcement body will appear. Keep it concise and valuable."}
                     </p>
                     <div className="flex items-center justify-between mt-3">
-                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                      <span className="text-xs font-black text-gray-400 uppercase tracking-widest">
                         ANNOUNCEMENT • JUST NOW
                       </span>
                     </div>

@@ -452,7 +452,7 @@ export default function MessagingSystem({ currentUserId, userRole, initialOtherU
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-md bg-[#0A0D14] rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden"
+              className="relative w-full max-w-md bg-[#0A0D14] rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
             >
               <div className="p-8 border-b border-white/5">
                 <div className="flex justify-between items-center mb-6">

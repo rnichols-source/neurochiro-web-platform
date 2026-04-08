@@ -17,7 +17,7 @@ export default function DoctorCard({ doc, index }: DoctorCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       key={`${doc.id}-${index}`} 
-      className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden"
+      className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden"
     >
       <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-4">

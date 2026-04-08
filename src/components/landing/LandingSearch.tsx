@@ -26,12 +26,12 @@ export default function LandingSearch() {
       className="w-full max-w-4xl mx-auto mt-12 px-4 relative z-[110]"
     >
       {/* Search Glow Effect */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-neuro-orange/20 to-blue-500/20 rounded-[3rem] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute -inset-1 bg-gradient-to-r from-neuro-orange/20 to-blue-500/20 rounded-2xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
       <form 
         role="search"
         onSubmit={handleSearch}
-        className="relative bg-white/10 backdrop-blur-2xl border border-white/20 p-2.5 rounded-[3rem] flex flex-col md:flex-row gap-2 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] group focus-within:border-neuro-orange/50 focus-within:bg-white/15 transition-all duration-500"
+        className="relative bg-white/10 backdrop-blur-2xl border border-white/20 p-2.5 rounded-2xl flex flex-col md:flex-row gap-2 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] group focus-within:border-neuro-orange/50 focus-within:bg-white/15 transition-all duration-500"
       >
         <div className="flex-1 relative">
           <label htmlFor="search-specialty" className="sr-only">Specialty or condition</label>
@@ -67,7 +67,7 @@ export default function LandingSearch() {
           type="submit"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="bg-orange-700 hover:bg-orange-800 text-white px-12 py-6 rounded-[2.5rem] font-black uppercase tracking-widest transition-all shadow-2xl shadow-neuro-orange/40 flex items-center justify-center gap-3 group/btn relative overflow-hidden min-h-[56px]"
+          className="bg-orange-700 hover:bg-orange-800 text-white px-12 py-6 rounded-2xl font-black uppercase tracking-widest transition-all shadow-2xl shadow-neuro-orange/40 flex items-center justify-center gap-3 group/btn relative overflow-hidden min-h-[56px]"
           aria-label="Find a Doctor"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:animate-shimmer" />

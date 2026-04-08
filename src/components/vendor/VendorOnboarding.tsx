@@ -60,7 +60,7 @@ export default function VendorOnboarding({ onClose }: VendorOnboardingProps) {
   ];
 
   return (
-    <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 w-full max-w-2xl overflow-hidden relative flex flex-col">
+    <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-2xl overflow-hidden relative flex flex-col">
       {onClose && (
         <button onClick={onClose} className="absolute top-8 right-8 p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors z-20">
           <X className="w-6 h-6" />
@@ -69,7 +69,6 @@ export default function VendorOnboarding({ onClose }: VendorOnboardingProps) {
 
       {/* Progress Bar Header */}
       <div className="bg-neuro-navy p-10 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[100px]"></div>
         <div className="relative z-10">
           <h2 className="text-2xl font-heading font-black mb-6">Partner Onboarding</h2>
           
@@ -94,7 +93,7 @@ export default function VendorOnboarding({ onClose }: VendorOnboardingProps) {
                   }`}>
                     {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : <Icon className="w-5 h-5" />}
                   </div>
-                  <span className={`text-[9px] font-black uppercase tracking-widest ${isActive ? "text-white" : "text-white/40"}`}>{s.title}</span>
+                  <span className={`text-xs font-black uppercase tracking-widest ${isActive ? "text-white" : "text-white/40"}`}>{s.title}</span>
                 </div>
               );
             })}

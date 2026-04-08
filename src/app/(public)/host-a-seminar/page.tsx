@@ -106,8 +106,6 @@ export default function HostLandingPage() {
   return (
     <div className="min-h-dvh bg-[#0B1118] text-white pt-32 pb-40 overflow-hidden">
       {/* Background Accents */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-neuro-orange/5 blur-[150px] -mr-40 -mt-40 pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/5 blur-[150px] -ml-40 -mb-40 pointer-events-none"></div>
 
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-8 relative z-10 text-center mb-32">
@@ -151,7 +149,7 @@ export default function HostLandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-6xl md:text-8xl font-heading font-black tracking-tighter leading-[0.9] mb-12"
+          className="text-6xl md:text-5xl font-heading font-black tracking-tighter leading-[0.9] mb-12"
         >
           Scale Your <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-neuro-orange to-orange-400">Clinical Impact.</span>
@@ -194,7 +192,7 @@ export default function HostLandingPage() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-[#151C26] rounded-[3rem] w-full max-w-4xl shadow-2xl overflow-hidden border border-white/10"
+            className="bg-[#151C26] rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden border border-white/10"
           >
             <div className="p-10 border-b border-white/5 flex items-center justify-between">
               <div>
@@ -211,15 +209,15 @@ export default function HostLandingPage() {
             
             <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-8">
                {templates.map((template, i) => (
-                 <div key={i} className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] group hover:border-neuro-orange transition-all relative overflow-hidden">
+                 <div key={i} className="bg-white/5 border border-white/10 p-8 rounded-2xl group hover:border-neuro-orange transition-all relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity">
                        <Sparkles className="w-12 h-12 text-neuro-orange" />
                     </div>
                     <div className="flex items-center gap-2 mb-4">
-                       <div className="px-3 py-1 bg-neuro-orange/20 text-neuro-orange rounded-full text-[8px] font-black uppercase tracking-widest">
+                       <div className="px-3 py-1 bg-neuro-orange/20 text-neuro-orange rounded-full text-xs font-black uppercase tracking-widest">
                           1-Click Template
                        </div>
-                       <div className="px-3 py-1 bg-green-500/20 text-green-500 rounded-full text-[8px] font-black uppercase tracking-widest">
+                       <div className="px-3 py-1 bg-green-500/20 text-green-500 rounded-full text-xs font-black uppercase tracking-widest">
                           High Conversion
                        </div>
                     </div>
@@ -274,7 +272,7 @@ export default function HostLandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className={`relative p-10 rounded-[3rem] border transition-all flex flex-col ${
+              className={`relative p-10 rounded-2xl border transition-all flex flex-col ${
                 tier.featured 
                 ? "bg-white/5 border-neuro-orange shadow-[0_32px_64px_-16px_rgba(214,104,41,0.2)]" 
                 : "bg-white/[0.02] border-white/10 hover:border-white/20"
@@ -329,7 +327,7 @@ export default function HostLandingPage() {
       </section>
 
       {/* Trust & Stats */}
-      <section className="max-w-5xl mx-auto px-8 py-24 bg-white/5 border border-white/10 rounded-[4rem] text-center relative overflow-hidden">
+      <section className="max-w-5xl mx-auto px-8 py-24 bg-white/5 border border-white/10 rounded-2xl text-center relative overflow-hidden">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
           {[
             { label: "Active Students", value: "2,500+", icon: Users },

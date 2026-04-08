@@ -91,7 +91,7 @@ export default function DoctorBilling() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
           {/* Subscription Status */}
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden">
+          <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm relative overflow-hidden">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-heading font-black text-xl text-neuro-navy flex items-center gap-2">
                 <CreditCard className="w-6 h-6 text-neuro-orange" /> Practice Membership
@@ -138,7 +138,7 @@ export default function DoctorBilling() {
           </section>
 
           {/* Transaction History */}
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+          <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
             <h3 className="font-heading font-black text-xl text-neuro-navy mb-6 flex items-center gap-2">
               <History className="w-6 h-6 text-gray-400" /> Transaction History
             </h3>
@@ -163,7 +163,7 @@ export default function DoctorBilling() {
                   <div className="text-right flex items-center gap-6">
                     <div className="hidden sm:block">
                        <span className={cn(
-                         "px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest",
+                         "px-2 py-0.5 rounded text-xs font-black uppercase tracking-widest",
                          inv.status === 'paid' ? "bg-green-50 text-green-600" : "bg-gray-50 text-gray-400"
                        )}>
                          {inv.status}
@@ -184,8 +184,7 @@ export default function DoctorBilling() {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <section className="bg-neuro-navy rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl -mr-16 -mt-16"></div>
+          <section className="bg-neuro-navy rounded-2xl p-8 text-white relative overflow-hidden shadow-2xl">
             <div className="relative z-10">
               <h3 className="text-xl font-heading font-black mb-4">Practice Payouts</h3>
               <p className="text-gray-400 text-xs mb-6 leading-relaxed font-bold">
@@ -206,7 +205,7 @@ export default function DoctorBilling() {
             </div>
           </section>
 
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+          <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
              <h4 className="font-black text-neuro-navy mb-6 text-[10px] uppercase tracking-widest flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-neuro-orange" /> Legal & Tax
              </h4>

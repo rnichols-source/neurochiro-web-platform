@@ -165,7 +165,7 @@ export default function DirectoryManager() {
         </div>
       </header>
 
-      <section className="bg-white/5 border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl relative">
+      <section className="bg-white/5 border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative">
         {loading && (
           <div className="absolute inset-0 bg-neuro-navy/40 backdrop-blur-[2px] z-50 flex items-center justify-center">
             <Loader2 className="w-10 h-10 text-neuro-orange animate-spin" />
@@ -211,7 +211,7 @@ export default function DirectoryManager() {
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/5 ${
+                      <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border border-white/5 ${
                         doc.verification_status === 'verified' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
                         doc.verification_status === 'pending' ? 'bg-amber-500/10 text-amber-500' :
                         'bg-gray-500/10 text-gray-500'
@@ -256,7 +256,7 @@ export default function DirectoryManager() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-[#0A0D14] rounded-[3rem] w-full max-w-4xl shadow-2xl overflow-hidden border border-white/10 max-h-[90vh] flex flex-col"
+              className="bg-[#0A0D14] rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden border border-white/10 max-h-[90vh] flex flex-col"
             >
               <header className="p-8 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-6 min-w-0">
@@ -480,7 +480,7 @@ export default function DirectoryManager() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-[#0A0D14] rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/10 max-h-[80vh] flex flex-col"
+              className="bg-[#0A0D14] rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-white/10 max-h-[80vh] flex flex-col"
             >
               <header className="p-8 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-6">
@@ -510,7 +510,7 @@ export default function DirectoryManager() {
                       <p className="font-bold text-white text-sm">{doc.clinic_name}</p>
                       <p className="text-[10px] text-gray-500 font-mono mt-1">{doc.id}</p>
                     </div>
-                    <span className="px-3 py-1 bg-white/5 rounded-full text-[9px] font-black text-gray-400 uppercase tracking-widest">Incomplete</span>
+                    <span className="px-3 py-1 bg-white/5 rounded-full text-xs font-black text-gray-400 uppercase tracking-widest">Incomplete</span>
                   </div>
                 ))}
                 

@@ -260,7 +260,7 @@ export default function SeminarsPage() {
              </div>
            ))}
            
-           <div className="p-8 bg-neuro-navy rounded-[2.5rem] text-white flex items-center justify-between shadow-xl">
+           <div className="p-8 bg-neuro-navy rounded-2xl text-white flex items-center justify-between shadow-xl">
                  <div>
                     <h3 className="text-xl font-bold mb-2">Seminar Leaderboard</h3>
                     <p className="text-gray-400 text-xs max-w-sm">
@@ -304,7 +304,7 @@ export default function SeminarsPage() {
                            <opt.icon className="w-4 h-4 text-neuro-orange" />
                            <div>
                               <span className="text-[11px] font-black text-neuro-navy block leading-tight">{opt.name}</span>
-                              <span className="text-[9px] font-black text-green-500 uppercase tracking-widest bg-green-50 px-1 rounded">{opt.discount}</span>
+                              <span className="text-xs font-black text-green-500 uppercase tracking-widest bg-green-50 px-1 rounded">{opt.discount}</span>
                            </div>
                         </div>
                         <span className="text-xs font-black text-gray-400 group-hover:text-neuro-orange transition-colors">{opt.price}</span>
@@ -342,7 +342,7 @@ export default function SeminarsPage() {
                     <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
                        <Sparkles className="w-8 h-8 text-neuro-orange" />
                     </div>
-                    <p className="text-[9px] font-black text-neuro-orange uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                    <p className="text-xs font-black text-neuro-orange uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
                        <Zap className="w-3 h-3 fill-current" /> Sell-Out Hack #1
                     </p>
                     <p className="text-xs font-bold text-neuro-navy leading-relaxed italic">
@@ -357,7 +357,7 @@ export default function SeminarsPage() {
       {/* HOST SEMINAR MODAL */}
       {isHostingOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white/20">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-white/20">
             <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-neuro-orange/20 rounded-2xl flex items-center justify-center text-neuro-orange">
@@ -437,7 +437,7 @@ export default function SeminarsPage() {
       {/* EDIT SEMINAR MODAL */}
       {isEditOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white/20">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-white/20">
             <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-neuro-orange/20 rounded-2xl flex items-center justify-center text-neuro-orange">
@@ -507,7 +507,7 @@ export default function SeminarsPage() {
       {/* MANAGE ATTENDEES MODAL */}
       {isAttendeesOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/20">
+          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-white/20">
             <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-neuro-orange/20 rounded-2xl flex items-center justify-center text-neuro-orange">
@@ -577,7 +577,7 @@ export default function SeminarsPage() {
       {/* VIEW ANALYTICS MODAL */}
       {isAnalyticsOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/20">
+          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-white/20">
             <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-neuro-orange/20 rounded-2xl flex items-center justify-center text-neuro-orange">
@@ -596,21 +596,21 @@ export default function SeminarsPage() {
             <div className="p-8 space-y-8">
                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Registrations</p>
+                     <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Registrations</p>
                      <p className="text-xl font-black text-neuro-navy">{isAnalyticsOpen.registrations?.[0]?.count || 0}</p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Clicks</p>
+                     <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Clicks</p>
                      <p className="text-xl font-black text-neuro-orange">{isAnalyticsOpen.clicks || 0}</p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Conv. Rate</p>
+                     <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Conv. Rate</p>
                      <p className="text-xl font-black text-green-600">
                        {isAnalyticsOpen.page_views > 0 ? Math.round(((isAnalyticsOpen.registrations?.[0]?.count || 0) / isAnalyticsOpen.page_views) * 100) : 0}%
                      </p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Views</p>
+                     <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Views</p>
                      <p className="text-xl font-black text-neuro-navy">{isAnalyticsOpen.page_views || 0}</p>
                   </div>
                </div>
@@ -634,7 +634,7 @@ export default function SeminarsPage() {
       {/* CREATE CAMPAIGN MODAL */}
       {isCampaignOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white/20">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-white/20">
             <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-neuro-orange/20 rounded-2xl flex items-center justify-center text-neuro-orange">
@@ -660,7 +660,7 @@ export default function SeminarsPage() {
                            <Sparkles className="w-4 h-4 text-neuro-orange" />
                            <div>
                               <span className="text-sm font-bold text-neuro-navy block">Top of Feed Placement</span>
-                              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Pin to top of directory</span>
+                              <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Pin to top of directory</span>
                            </div>
                         </div>
                         <div className="flex items-center gap-4">
@@ -679,7 +679,7 @@ export default function SeminarsPage() {
                            <Target className="w-4 h-4 text-neuro-orange" />
                            <div>
                               <span className="text-sm font-bold text-neuro-navy block">Student Radar Boost</span>
-                              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Direct Student Notification</span>
+                              <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Direct Student Notification</span>
                            </div>
                         </div>
                         <div className="flex items-center gap-4">
@@ -698,7 +698,7 @@ export default function SeminarsPage() {
                            <Globe className="w-4 h-4 text-neuro-orange" />
                            <div>
                               <span className="text-sm font-bold text-neuro-navy block">Global Push Notification</span>
-                              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">All mobile app users</span>
+                              <span className="text-xs font-black text-gray-400 uppercase tracking-widest">All mobile app users</span>
                            </div>
                         </div>
                         <div className="flex items-center gap-4">

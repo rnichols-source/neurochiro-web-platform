@@ -151,7 +151,7 @@ export default function StudentDiscovery() {
       </header>
 
       {/* Talent Analytics */}
-      <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden">
+      <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm relative overflow-hidden">
 
          <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-heading font-black text-neuro-navy flex items-center gap-2">
@@ -300,7 +300,7 @@ export default function StudentDiscovery() {
                           {(student as any).recentViews > 5 && (
                             <div className="flex items-center gap-1 px-2 py-0.5 bg-orange-50 text-neuro-orange rounded-full border border-orange-100 animate-pulse">
                                <Eye className="w-2.5 h-2.5" />
-                               <span className="text-[8px] font-black uppercase">{(student as any).recentViews} Views Today</span>
+                               <span className="text-xs font-black uppercase">{(student as any).recentViews} Views Today</span>
                             </div>
                           )}
                        </div>
@@ -308,7 +308,7 @@ export default function StudentDiscovery() {
                        <div className="flex items-center gap-2 mt-1">
                           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Class of {student.gradYear}</p>
                           <span className="w-1 h-1 rounded-full bg-gray-300" />
-                          <span className={`text-[9px] font-black uppercase tracking-widest ${
+                          <span className={`text-xs font-black uppercase tracking-widest ${
                             student.status === "Interviewing" ? "text-red-500" : "text-neuro-orange"
                           }`}>
                             {student.status}
@@ -322,11 +322,11 @@ export default function StudentDiscovery() {
                     {/* Clinical Stats - Proof of ROI */}
                     <div className="grid grid-cols-2 gap-3">
                        <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Adjusted</p>
+                          <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Adjusted</p>
                           <p className="text-sm font-black text-neuro-navy">{(student as any).clinicalStats.adjusted}</p>
                        </div>
                        <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Capacity</p>
+                          <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Capacity</p>
                           <p className="text-sm font-black text-neuro-navy">{(student as any).clinicalStats.volumeCapacity}</p>
                        </div>
                     </div>
@@ -337,7 +337,7 @@ export default function StudentDiscovery() {
                           <Sparkles className="w-3 h-3 text-neuro-orange" />
                        </div>
                        <p className="text-xl font-black text-neuro-navy">{(student as any).projectedROI}</p>
-                       <p className="text-[9px] text-gray-500 font-bold uppercase mt-1">Based on readiness & clinical stats</p>
+                       <p className="text-xs text-gray-500 font-bold uppercase mt-1">Based on readiness & clinical stats</p>
                     </div>
 
                     <div className="pt-6 border-t border-gray-50 space-y-4 mt-auto">
@@ -354,19 +354,19 @@ export default function StudentDiscovery() {
                        <div className="grid grid-cols-3 gap-2">
                           <button 
                             onClick={() => setSelectedStudentForProfile(student)}
-                            className="py-3 bg-gray-50 text-neuro-navy font-black rounded-xl text-[9px] uppercase tracking-tighter hover:bg-gray-100 transition-colors active:scale-95"
+                            className="py-3 bg-gray-50 text-neuro-navy font-black rounded-xl text-xs uppercase tracking-tighter hover:bg-gray-100 transition-colors active:scale-95"
                           >
                              Profile
                           </button>
                               <button
                                 onClick={() => openShadowingOffer(student)}
-                                className="py-3 bg-white border border-neuro-orange/30 text-neuro-orange font-black rounded-xl text-[9px] uppercase tracking-tighter hover:bg-neuro-orange/5 transition-all flex items-center justify-center gap-1 active:scale-95"
+                                className="py-3 bg-white border border-neuro-orange/30 text-neuro-orange font-black rounded-xl text-xs uppercase tracking-tighter hover:bg-neuro-orange/5 transition-all flex items-center justify-center gap-1 active:scale-95"
                               >
                                  <Gift className="w-3 h-3" /> Shadow
                               </button>
                               <button
                                 onClick={() => openInterviewRequest(student)}
-                                className="py-3 bg-neuro-navy text-white font-black rounded-xl text-[9px] uppercase tracking-tighter hover:bg-neuro-navy-light transition-all flex items-center justify-center gap-1 shadow-lg shadow-neuro-navy/10 active:scale-95 group"
+                                className="py-3 bg-neuro-navy text-white font-black rounded-xl text-xs uppercase tracking-tighter hover:bg-neuro-navy-light transition-all flex items-center justify-center gap-1 shadow-lg shadow-neuro-navy/10 active:scale-95 group"
                               >
                                  <Zap className="w-3 h-3 text-neuro-orange fill-neuro-orange group-hover:animate-pulse" /> Interview
                               </button>
@@ -387,7 +387,7 @@ export default function StudentDiscovery() {
         </div>
       ) : (
         /* Map View Placeholder */
-        <div className="bg-neuro-navy rounded-[3rem] p-12 h-[600px] flex flex-col items-center justify-center text-center relative overflow-hidden shadow-2xl">
+        <div className="bg-neuro-navy rounded-2xl p-12 h-[600px] flex flex-col items-center justify-center text-center relative overflow-hidden shadow-2xl">
            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
            <div className="relative z-10 space-y-6">
               <div className="w-24 h-24 bg-neuro-orange/10 rounded-[2rem] flex items-center justify-center mx-auto border border-neuro-orange/20">
@@ -420,7 +420,7 @@ export default function StudentDiscovery() {
       {/* Student Profile Modal */}
       {selectedStudentForProfile && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/20">
+          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-white/20">
             <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-2xl bg-neuro-orange flex items-center justify-center text-white font-black text-2xl shadow-lg">
@@ -514,7 +514,7 @@ export default function StudentDiscovery() {
       {/* Messaging Modal */}
       {selectedStudentForMessage && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white/20">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-white/20">
             <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-neuro-orange rounded-2xl flex items-center justify-center font-black">
@@ -551,7 +551,7 @@ export default function StudentDiscovery() {
                         {isShadowingOffer ? "Shadowing Stipend Template" : "High-Converting Template"}
                       </label>
                       {(isInterviewRequest || isShadowingOffer) && (
-                        <span className="flex items-center gap-1 text-[9px] font-black text-neuro-orange uppercase">
+                        <span className="flex items-center gap-1 text-xs font-black text-neuro-orange uppercase">
                           <Zap className="w-2.5 h-2.5 fill-current" /> {isShadowingOffer ? "Elite Perk" : "Optimized"}
                         </span>
                       )}
@@ -585,11 +585,11 @@ export default function StudentDiscovery() {
                       )}
                     </button>
                     {isShadowingOffer ? (
-                      <p className="text-[9px] text-gray-400 text-center font-bold uppercase tracking-tighter">
+                      <p className="text-xs text-gray-400 text-center font-bold uppercase tracking-tighter">
                         Includes <span className="text-neuro-orange">Paid Audit</span>, Lunch, and $100 Student Stipend
                       </p>
                     ) : isInterviewRequest && (
-                      <p className="text-[9px] text-gray-400 text-center font-bold uppercase tracking-tighter">
+                      <p className="text-xs text-gray-400 text-center font-bold uppercase tracking-tighter">
                         Includes your <span className="text-neuro-orange">Calendly</span> link for 1-click scheduling
                       </p>
                     )}

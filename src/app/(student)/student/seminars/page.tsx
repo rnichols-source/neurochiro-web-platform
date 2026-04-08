@@ -160,7 +160,7 @@ export default function SeminarsPage() {
                     <div key={i} className="p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer group">
                       <p className="text-xs font-bold text-neuro-navy group-hover:text-neuro-orange">{n.title}</p>
                       <p className="text-[10px] text-gray-500 mt-0.5">{n.desc}</p>
-                      <p className="text-[8px] text-gray-400 mt-1 uppercase font-bold">{n.time}</p>
+                      <p className="text-xs text-gray-400 mt-1 uppercase font-bold">{n.time}</p>
                     </div>
                   ))}
                 </div>
@@ -231,7 +231,7 @@ export default function SeminarsPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {seminars.map((sem, i) => (
-            <div key={i} className="bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden shadow-sm group hover:shadow-xl transition-all flex flex-col">
+            <div key={i} className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm group hover:shadow-xl transition-all flex flex-col">
               <div className={`aspect-[16/10] ${sem.image} relative overflow-hidden`}>
                 <div className="absolute top-4 right-4 flex gap-2">
                   <button 
@@ -271,7 +271,7 @@ export default function SeminarsPage() {
                     <div className="w-10 h-10 rounded-full bg-gray-200 border-2 border-white shadow-sm"></div>
                     <div className="flex flex-col">
                        <span className="text-xs font-bold text-neuro-navy">{sem.host}</span>
-                       <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Host</span>
+                       <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">Host</span>
                     </div>
                   </div>
                   <div className="text-right">
@@ -279,7 +279,7 @@ export default function SeminarsPage() {
                       <span className="text-[10px] text-gray-400 line-through font-bold">{sem.doctorPrice}</span>
                       <p className="text-lg font-black text-neuro-navy">{sem.price}</p>
                     </div>
-                    <p className="text-[9px] text-neuro-orange uppercase font-black tracking-widest">
+                    <p className="text-xs text-neuro-orange uppercase font-black tracking-widest">
                        Saving you {sem.savings} today
                     </p>
                   </div>
@@ -307,7 +307,7 @@ export default function SeminarsPage() {
 
       {/* Seminar Library & Network */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-         <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+         <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
             <h3 className="text-xl font-heading font-bold text-neuro-navy mb-6">Seminar Attendance Network</h3>
             <div className="space-y-6">
                <p className="text-sm text-gray-500">See which of your peers and mentors are attending upcoming events.</p>
@@ -327,7 +327,7 @@ export default function SeminarsPage() {
                </div>
             </div>
          </section>
-         <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+         <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
             <h3 className="text-xl font-heading font-bold text-neuro-navy mb-6">My Seminar Badges</h3>
             <div className="flex flex-wrap gap-4">
                {[
@@ -351,7 +351,7 @@ export default function SeminarsPage() {
       {/* TRAVEL MODE MODAL */}
       {isTravelModeOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
             <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
@@ -387,7 +387,7 @@ export default function SeminarsPage() {
       {/* FILTERS MODAL */}
       {isFiltersOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl overflow-hidden">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
             <div className="p-8 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Filter className="w-5 h-5 text-neuro-orange" />
@@ -422,7 +422,7 @@ export default function SeminarsPage() {
       {/* SEMINAR DETAILS MODAL */}
       {selectedSeminar && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className={`h-48 ${selectedSeminar.image} relative shrink-0`}>
                <button 
                 onClick={() => setSelectedSeminar(null)}

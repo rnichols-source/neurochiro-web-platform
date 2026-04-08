@@ -57,8 +57,7 @@ export default function IdentityPage() {
         <div className="lg:col-span-8 space-y-6">
            
            {/* Profile Hero Block (Navy) */}
-           <section className="bg-neuro-navy p-8 md:p-12 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[100px] pointer-events-none"></div>
+           <section className="bg-neuro-navy p-8 md:p-12 rounded-2xl text-white relative overflow-hidden shadow-2xl">
               <div className="absolute bottom-0 right-10 opacity-10">
                  <Zap className="w-48 h-48" />
               </div>
@@ -117,7 +116,7 @@ export default function IdentityPage() {
                   className="space-y-6"
                 >
                    {/* Neural Snapshot Card */}
-                   <section className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                   <section className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
                       <div className="flex items-center justify-between mb-10">
                          <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-neuro-orange/10 rounded-2xl flex items-center justify-center">
@@ -148,7 +147,7 @@ export default function IdentityPage() {
                    </section>
 
                    {/* Latest Scans Segment */}
-                   <section className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                   <section className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
                       <div className="flex items-center justify-between mb-10">
                          <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center">
@@ -180,7 +179,7 @@ export default function IdentityPage() {
                    </section>
 
                    {/* Practitioners Card */}
-                   <section className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                   <section className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm">
                       <div className="flex items-center justify-between mb-10">
                          <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center">
@@ -228,7 +227,7 @@ export default function IdentityPage() {
                    className="space-y-6"
                 >
                    {/* Contact Information */}
-                   <section className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                   <section className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm">
                       <div className="flex items-center justify-between mb-10">
                          <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center">
@@ -260,7 +259,7 @@ export default function IdentityPage() {
                    </section>
 
                    {/* Demographic Details */}
-                   <section className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                   <section className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm">
                       <div className="flex items-center justify-between mb-10">
                          <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center">
@@ -312,7 +311,7 @@ export default function IdentityPage() {
                   className="space-y-6"
                 >
                    {/* Career Intro Card */}
-                   <section className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                   <section className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm">
                       <div className="flex items-center justify-between mb-10">
                          <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-neuro-orange/10 rounded-2xl flex items-center justify-center text-neuro-orange">
@@ -399,7 +398,7 @@ export default function IdentityPage() {
                   className="space-y-6"
                 >
                    {/* Plan Overview */}
-                   <section className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                   <section className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
                       <div className="flex items-center justify-between mb-10">
                          <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-neuro-orange/10 rounded-2xl flex items-center justify-center">
@@ -439,7 +438,7 @@ export default function IdentityPage() {
                    </section>
 
                    {/* Payment Methods */}
-                   <section className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                   <section className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm">
                       <h3 className="text-xl font-black text-neuro-navy mb-8 flex items-center gap-3">
                         <CreditCard className="w-6 h-6 text-blue-500" /> Payment Methods
                       </h3>
@@ -456,7 +455,7 @@ export default function IdentityPage() {
                    </section>
 
                    {/* Transaction History */}
-                   <section className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                   <section className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm">
                       <h3 className="text-xl font-black text-neuro-navy mb-8 flex items-center gap-3">
                         <History className="w-6 h-6 text-gray-400" /> Billing History
                       </h3>
@@ -483,7 +482,7 @@ export default function IdentityPage() {
         <div className="lg:col-span-4 space-y-6">
            
            {/* Profile Strength Block */}
-           <section className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm text-center md:text-left relative overflow-hidden">
+           <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm text-center md:text-left relative overflow-hidden">
               <div className="flex flex-col items-center md:items-start gap-4 relative z-20">
                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Profile Strength</p>
                  <div className="flex items-baseline gap-2">
@@ -502,7 +501,7 @@ export default function IdentityPage() {
            </section>
 
            {/* Account Navigation Block */}
-           <section className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+           <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
               <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-8 px-2">Account Management</h3>
               <nav className="space-y-2">
                 {tabs.map((item) => (
@@ -526,7 +525,7 @@ export default function IdentityPage() {
            </section>
 
            {/* Latest Reports Segment */}
-           <section className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm relative overflow-hidden">
+           <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
               <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-6 px-2">Recent Reports</h3>
               <div className={`space-y-4`}>
                  {[
@@ -548,8 +547,7 @@ export default function IdentityPage() {
            </section>
 
            {/* Plan Status Block (Navy) */}
-           <section className="bg-neuro-navy p-10 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-neuro-orange/10 blur-[80px] pointer-events-none"></div>
+           <section className="bg-neuro-navy p-10 rounded-2xl text-white relative overflow-hidden shadow-2xl">
               <div className="relative z-10">
                  <span className="text-[10px] font-black uppercase text-neuro-orange tracking-[0.3em] mb-6 block">Care Status</span>
                  <h3 className="text-2xl font-heading font-black mb-2">Patient Access</h3>

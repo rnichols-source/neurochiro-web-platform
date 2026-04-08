@@ -48,7 +48,7 @@ export default function JobRadar() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm h-[500px] flex flex-col items-center justify-center">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm h-[500px] flex flex-col items-center justify-center">
         <Loader2 className="w-10 h-10 text-neuro-orange animate-spin mb-4" />
         <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Scanning Opportunities...</p>
       </div>
@@ -57,7 +57,7 @@ export default function JobRadar() {
 
   if (jobs.length === 0) {
     return (
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm h-[500px] flex flex-col items-center justify-center p-10 text-center">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm h-[500px] flex flex-col items-center justify-center p-10 text-center">
         <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-200 mb-6">
           <Briefcase className="w-8 h-8" />
         </div>
@@ -70,7 +70,7 @@ export default function JobRadar() {
   const currentJob = jobs[currentIndex];
 
   return (
-    <section className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col h-[500px]">
+    <section className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-[500px]">
       <div className="p-6 border-b border-gray-50 flex items-center justify-between bg-neuro-navy text-white">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-neuro-orange" />

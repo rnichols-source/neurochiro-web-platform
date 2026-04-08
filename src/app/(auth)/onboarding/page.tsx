@@ -91,8 +91,7 @@ function OnboardingContent() {
       content: (
         <div className="space-y-8">
           <p className="text-gray-500 font-medium">We've customized your experience. When you enter, we'll give you a quick 60-second tour of your new tools.</p>
-          <div className="p-8 bg-neuro-navy rounded-[2.5rem] text-white relative overflow-hidden text-left">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl -mr-16 -mt-16"></div>
+          <div className="p-8 bg-neuro-navy rounded-2xl text-white relative overflow-hidden text-left">
             <h4 className="font-bold mb-2">Pro Tip:</h4>
             <p className="text-sm text-gray-300">Check the 'Referral Insights' tab to see exactly how patients are finding you.</p>
           </div>
@@ -114,7 +113,6 @@ function OnboardingContent() {
   return (
     <div className="min-h-dvh bg-neuro-cream flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Background elements */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-neuro-orange/5 blur-[160px] -mr-40 -mt-40 rounded-full"></div>
       
       <div className="w-full max-w-2xl">
         <div className="mb-12 flex justify-center gap-2">
@@ -133,9 +131,9 @@ function OnboardingContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="bg-white rounded-[4rem] shadow-[0_48px_96px_-16px_rgba(0,0,0,0.1)] border border-white/40 p-10 md:p-16 text-center relative z-10"
+          className="bg-white rounded-2xl shadow-[0_48px_96px_-16px_rgba(0,0,0,0.1)] border border-white/40 p-10 md:p-16 text-center relative z-10"
         >
-          <div className={`w-24 h-24 ${currentStep.bg} ${currentStep.color} rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 shadow-inner`}>
+          <div className={`w-24 h-24 ${currentStep.bg} ${currentStep.color} rounded-2xl flex items-center justify-center mx-auto mb-10 shadow-inner`}>
             <currentStep.icon className="w-12 h-12" />
           </div>
 

@@ -129,11 +129,10 @@ export default function MarketplacePage() {
 
       {/* Hero Section */}
       <section className="relative pt-12 pb-24 px-6 overflow-hidden">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-neuro-orange/5 blur-[140px] rounded-full -mr-40 pointer-events-none"></div>
         <div className="max-w-7xl mx-auto">
           <div className="text-center space-y-8 relative z-10">
             <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-[10px] block border border-neuro-orange/20 px-4 py-1.5 rounded-full w-max mx-auto">NeuroChiro Ecosystem</span>
-            <h1 className="text-5xl md:text-7xl font-heading font-black text-neuro-navy leading-[1.05] max-w-4xl mx-auto">
+            <h1 className="text-5xl md:text-5xl font-heading font-black text-neuro-navy leading-[1.05] max-w-4xl mx-auto">
               The Tools to <br/>
               <span className="text-neuro-orange text-glow">Build Your Practice.</span>
             </h1>
@@ -176,9 +175,8 @@ export default function MarketplacePage() {
                <Link key={vendor.id} href={`/marketplace/${vendor.slug}`}>
                  <motion.div 
                    whileHover={{ y: -5 }}
-                   className="bg-neuro-navy text-white rounded-[2.5rem] p-10 relative overflow-hidden group border border-white/10 shadow-2xl"
+                   className="bg-neuro-navy text-white rounded-2xl p-10 relative overflow-hidden group border border-white/10 shadow-2xl"
                  >
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-3xl -mr-20 -mt-20 group-hover:bg-neuro-orange/20 transition-all"></div>
                     
                     <div className="relative z-10 flex flex-col h-full">
                        <div className="flex items-start justify-between mb-8">
@@ -193,7 +191,7 @@ export default function MarketplacePage() {
                        
                        <div className="mt-auto flex flex-wrap gap-3">
                           {vendor.benefits.map(b => (
-                            <span key={b} className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-gray-300 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
+                            <span key={b} className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-gray-300 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
                                <CheckCircle2 className="w-3 h-3 text-neuro-orange" /> {b}
                             </span>
                           ))}
@@ -212,7 +210,7 @@ export default function MarketplacePage() {
            <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
               {/* Category Sidebar */}
               <div className="lg:col-span-1 space-y-8">
-                 <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm sticky top-32">
+                 <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm sticky top-32">
                     <div className="flex items-center gap-2 mb-8 pb-4 border-b border-gray-100">
                        <LayoutGrid className="w-5 h-5 text-neuro-orange" />
                        <h3 className="font-bold text-neuro-navy uppercase tracking-widest text-xs">Categories</h3>
@@ -246,7 +244,7 @@ export default function MarketplacePage() {
                        <div 
                           key={vendor.id} 
                           onClick={() => router.push(`/marketplace/${vendor.slug}`)}
-                          className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl hover:border-neuro-orange transition-all group h-full flex flex-col cursor-pointer"
+                          className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-neuro-orange transition-all group h-full flex flex-col cursor-pointer"
                        >
                           <div className="flex items-center gap-4 mb-6">
                              <img loading="lazy" decoding="async" src={vendor.logo_url} alt={vendor.name} className="w-12 h-12 rounded-xl object-cover" />
@@ -254,7 +252,7 @@ export default function MarketplacePage() {
                                 <div className="flex items-center gap-2 mb-0.5">
                                    <h4 className="font-bold text-neuro-navy text-lg group-hover:text-neuro-orange transition-colors truncate">{vendor.name}</h4>
                                    {vendor.is_partner && (
-                                      <div className="flex items-center gap-1 px-2 py-0.5 bg-neuro-orange/10 text-neuro-orange text-[8px] font-black uppercase tracking-widest rounded-full shrink-0">
+                                      <div className="flex items-center gap-1 px-2 py-0.5 bg-neuro-orange/10 text-neuro-orange text-xs font-black uppercase tracking-widest rounded-full shrink-0">
                                          <BadgePercent className="w-2.5 h-2.5" /> Pro Perk
                                       </div>
                                    )}
@@ -270,7 +268,7 @@ export default function MarketplacePage() {
                           {vendor.is_partner && (
                              <div className="mb-8 p-4 bg-gray-50 rounded-2xl border border-gray-100 relative overflow-hidden">
                                    <div className="text-center">
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Your Exclusive Reward</p>
+                                      <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Your Exclusive Reward</p>
                                       <div className="bg-white px-4 py-2 rounded-xl border-2 border-dashed border-neuro-orange/30 inline-block mb-3">
                                          <span className="font-mono font-black text-neuro-orange text-sm">{(vendor as any).discount_code || 'NEUROPRO'}</span>
                                       </div>
@@ -280,7 +278,7 @@ export default function MarketplacePage() {
                                           handleTrackClick(vendor.id, 'discount');
                                           alert(`Reward Claimed! Use code: ${(vendor as any).discount_code || 'NEUROPRO'} at checkout.`);
                                         }}
-                                        className="w-full py-2.5 bg-neuro-navy text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-neuro-navy-light transition-colors"
+                                        className="w-full py-2.5 bg-neuro-navy text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-neuro-navy-light transition-colors"
                                       >
                                          Claim My Reward
                                       </button>
@@ -321,7 +319,7 @@ export default function MarketplacePage() {
                  </div>
                  
                  {filteredVendors.length === 0 && (
-                   <div className="py-20 text-center bg-white rounded-[3rem] border border-dashed border-gray-200">
+                   <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200">
                       <Store className="w-16 h-16 text-gray-200 mx-auto mb-4" />
                       <h3 className="text-xl font-bold text-neuro-navy">No vendors found in this category</h3>
                       <p className="text-gray-400 mt-2">Try adjusting your filters or search query.</p>
@@ -335,7 +333,7 @@ export default function MarketplacePage() {
       {/* CTA: Vendor Signup */}
       <section className="py-20 px-6">
          <div className="max-w-5xl mx-auto">
-            <div className="bg-neuro-navy rounded-[3rem] p-12 md:p-20 text-center text-white relative overflow-hidden shadow-2xl">
+            <div className="bg-neuro-navy rounded-2xl p-12 md:p-20 text-center text-white relative overflow-hidden shadow-2xl">
                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-neuro-orange/20 via-transparent to-transparent pointer-events-none"></div>
                <div className="relative z-10 max-w-2xl mx-auto space-y-8">
                   <h2 className="text-4xl md:text-6xl font-heading font-black leading-tight">

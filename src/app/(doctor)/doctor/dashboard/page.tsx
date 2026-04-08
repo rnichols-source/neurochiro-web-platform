@@ -144,8 +144,7 @@ export default function DoctorDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Feed / Insights */}
         <div className="lg:col-span-2 space-y-8">
-           <section className="bg-neuro-navy rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-xl">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[80px] -mr-32 -mt-32"></div>
+           <section className="bg-neuro-navy rounded-2xl p-8 text-white relative overflow-hidden shadow-xl">
               <div className="relative z-10">
                  <div className="flex items-center gap-2 mb-4">
                     <Sparkles className="w-5 h-5 text-neuro-orange" />

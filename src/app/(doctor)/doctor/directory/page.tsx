@@ -138,8 +138,7 @@ export default function ReferralNetworkPage() {
       </div>
 
       {/* Reciprocity Loop Banner */}
-      <section className="bg-neuro-navy rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
-         <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-neuro-orange/10 rounded-full blur-[100px] -mr-40 -mt-40"></div>
+      <section className="bg-neuro-navy rounded-2xl p-10 text-white relative overflow-hidden shadow-2xl">
          <div className="relative z-10">
             <div className="flex items-center gap-2 mb-6">
                <Sparkles className="w-5 h-5 text-neuro-orange" />
@@ -231,7 +230,7 @@ export default function ReferralNetworkPage() {
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading ? (
               skeletons.map((_, i) => (
-                <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm animate-pulse space-y-4">
+                <div key={i} className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm animate-pulse space-y-4">
                    <div className="flex items-center gap-4">
                       <div className="w-16 h-16 bg-gray-100 rounded-full"></div>
                       <div className="space-y-2">
@@ -243,23 +242,23 @@ export default function ReferralNetworkPage() {
                 </div>
               ))
             ) : directory.length === 0 ? (
-              <div className="col-span-full py-20 text-center bg-white rounded-[3rem] border border-dashed border-gray-200">
+              <div className="col-span-full py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200">
                  <MapPin className="w-12 h-12 text-gray-200 mx-auto mb-4" />
                  <h3 className="text-xl font-bold text-neuro-navy">No doctors found</h3>
                  <p className="text-gray-500 text-sm mt-1">Try adjusting your filters or search terms.</p>
               </div>
             ) : directory.map((doc, i) => (
-              <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
+              <div key={i} className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
                  {doc.isPartner && (
                    <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-600 rounded-full border border-green-100">
                       <ShieldCheck className="w-3 h-3" />
-                      <span className="text-[8px] font-black uppercase tracking-widest">Active Partner</span>
+                      <span className="text-xs font-black uppercase tracking-widest">Active Partner</span>
                    </div>
                  )}
                  {doc.isPending && (
                    <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-neuro-orange rounded-full border border-neuro-orange/20">
                       <Clock className="w-3 h-3" />
-                      <span className="text-[8px] font-black uppercase tracking-widest">Request Pending</span>
+                      <span className="text-xs font-black uppercase tracking-widest">Request Pending</span>
                    </div>
                  )}
                  
@@ -284,7 +283,7 @@ export default function ReferralNetworkPage() {
                     
                     <div className="flex flex-wrap gap-2">
                        {(doc.specialties || []).slice(0, 3).map((spec: string, j: number) => (
-                         <span key={j} className="px-2.5 py-1 bg-neuro-cream text-neuro-navy text-[9px] font-black uppercase tracking-tighter rounded-lg border border-neuro-navy/5">{spec}</span>
+                         <span key={j} className="px-2.5 py-1 bg-neuro-cream text-neuro-navy text-xs font-black uppercase tracking-tighter rounded-lg border border-neuro-navy/5">{spec}</span>
                        ))}
                     </div>
                  </div>
@@ -323,7 +322,7 @@ export default function ReferralNetworkPage() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white/20"
+              className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-white/20"
             >
               <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
                 <div className="flex items-center gap-4">

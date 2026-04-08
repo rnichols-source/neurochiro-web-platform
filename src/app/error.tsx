@@ -22,10 +22,9 @@ export default function Error({
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-xl w-full bg-white rounded-[3rem] shadow-2xl p-12 text-center border border-neuro-orange/10 relative overflow-hidden"
+        className="max-w-xl w-full bg-white rounded-2xl shadow-2xl p-12 text-center border border-neuro-orange/10 relative overflow-hidden"
       >
         {/* Background Decorative Element */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/5 blur-3xl rounded-full -mr-16 -mt-16" />
         
         <div className="relative z-10">
           <div className="w-20 h-20 bg-neuro-orange/10 rounded-3xl flex items-center justify-center mx-auto mb-8">

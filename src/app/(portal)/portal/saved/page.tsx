@@ -104,7 +104,7 @@ export default function SavedPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden"
+              className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-6">
                 <button 
@@ -154,7 +154,7 @@ export default function SavedPage() {
         </AnimatePresence>
 
         {currentItems.length === 0 && (
-          <div className="col-span-full py-20 text-center bg-white rounded-[3rem] border border-dashed border-gray-200">
+          <div className="col-span-full py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200">
             <Heart className="w-16 h-16 text-gray-100 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-neuro-navy">No saved {activeTab} yet</h3>
             <p className="text-gray-400 mt-2">Items you save across the platform will appear here.</p>

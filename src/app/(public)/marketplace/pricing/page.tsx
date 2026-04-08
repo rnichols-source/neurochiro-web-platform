@@ -79,7 +79,7 @@ export default function MarketplacePricingPage() {
         </Link>
 
         <div className="text-center mb-20 space-y-6">
-           <h1 className="text-5xl md:text-7xl font-heading font-black text-neuro-navy leading-tight">
+           <h1 className="text-5xl md:text-5xl font-heading font-black text-neuro-navy leading-tight">
               Simple Pricing. <br/>
               <span className="text-neuro-orange">Unlimited Scale.</span>
            </h1>
@@ -101,7 +101,7 @@ export default function MarketplacePricingPage() {
              </button>
              <div className="flex items-center gap-2">
                <span className={`text-xs font-black uppercase tracking-widest transition-colors ${billingCycle === 'annual' ? 'text-neuro-navy' : 'text-gray-400'}`}>Annual</span>
-               <span className="bg-green-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter shadow-sm">2 Months Free</span>
+               <span className="bg-green-500 text-white text-xs font-black px-2 py-0.5 rounded-full uppercase tracking-tighter shadow-sm">2 Months Free</span>
              </div>
            </div>
 
@@ -112,7 +112,7 @@ export default function MarketplacePricingPage() {
              <motion.div 
                key={plan.id}
                whileHover={{ y: -10 }}
-               className={`relative bg-white rounded-[3rem] p-10 border shadow-sm flex flex-col h-full ${plan.popular ? 'border-neuro-orange ring-4 ring-neuro-orange/10' : 'border-gray-100'}`}
+               className={`relative bg-white rounded-2xl p-10 border shadow-sm flex flex-col h-full ${plan.popular ? 'border-neuro-orange ring-4 ring-neuro-orange/10' : 'border-gray-100'}`}
              >
                 {plan.popular && (
                   <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-neuro-orange text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl">

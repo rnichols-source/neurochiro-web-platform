@@ -81,7 +81,7 @@ export default function HostProfilePage({ params }: { params: Promise<{ id: stri
             </header>
 
             {/* Stats Bar */}
-            <div className="grid grid-cols-3 gap-8 p-8 bg-white/5 border border-white/10 rounded-[2.5rem] backdrop-blur-xl">
+            <div className="grid grid-cols-3 gap-8 p-8 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl">
                <div className="text-center">
                   <p className="text-3xl font-black text-white">{profile.seminars?.length || 0}</p>
                   <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-1">Events Hosted</p>
@@ -107,7 +107,7 @@ export default function HostProfilePage({ params }: { params: Promise<{ id: stri
                  {profile.seminars?.map((sem: any) => (
                    <div key={sem.id} className="p-8 bg-white/5 border border-white/10 rounded-[2rem] hover:border-neuro-orange/40 transition-all group cursor-pointer">
                       <div className="flex items-center justify-between mb-4">
-                         <span className="px-3 py-1 bg-white/10 text-white text-[9px] font-black rounded uppercase tracking-widest">
+                         <span className="px-3 py-1 bg-white/10 text-white text-xs font-black rounded uppercase tracking-widest">
                             {sem.listing_tier}
                          </span>
                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{sem.dates}</span>
@@ -125,7 +125,7 @@ export default function HostProfilePage({ params }: { params: Promise<{ id: stri
 
           {/* RIGHT COLUMN - Host Card */}
           <div className="space-y-8">
-            <div className="p-10 bg-white/5 border border-white/10 rounded-[3rem] sticky top-32">
+            <div className="p-10 bg-white/5 border border-white/10 rounded-2xl sticky top-32">
               <div className="w-32 h-32 rounded-[2rem] bg-neuro-orange flex items-center justify-center text-5xl font-black text-white mb-8 mx-auto shadow-2xl shadow-neuro-orange/20 overflow-hidden">
                 {profile.logo_url ? <img loading="lazy" decoding="async" src={profile.logo_url} className="w-full h-full object-cover" /> : profile.organization_name?.charAt(0)}
               </div>

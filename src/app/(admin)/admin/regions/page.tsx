@@ -153,7 +153,7 @@ export default function RegionalControl() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Region List */}
         <div className="lg:col-span-2 space-y-6 md:space-y-8">
-          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden">
+          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-2xl overflow-hidden">
             <div className="p-6 md:p-8 border-b border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
               <h3 className="text-xl font-heading font-black text-white flex items-center gap-3">
                 <Server className="w-5 h-5 text-gray-400" /> Active Regional Nodes
@@ -178,7 +178,7 @@ export default function RegionalControl() {
                         <div className="min-w-0">
                           <h4 className="text-xl md:text-2xl font-black text-white mb-1 flex items-center gap-2 truncate">
                             {regionConfig.name}
-                            <span className="text-[9px] bg-white/10 px-2 py-0.5 rounded text-gray-400 tracking-widest uppercase shrink-0">{regionConfig.code}</span>
+                            <span className="text-xs bg-white/10 px-2 py-0.5 rounded text-gray-400 tracking-widest uppercase shrink-0">{regionConfig.code}</span>
                           </h4>
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                             <span className="text-[10px] md:text-xs font-bold text-gray-400 flex items-center gap-1 whitespace-nowrap">
@@ -192,7 +192,7 @@ export default function RegionalControl() {
                       </div>
                       <div className="flex items-center justify-between sm:justify-end gap-4 md:gap-8 border-t border-white/5 sm:border-0 pt-4 sm:pt-0">
                         <div className="text-left sm:text-right">
-                          <p className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">MTD Revenue</p>
+                          <p className="text-xs md:text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">MTD Revenue</p>
                           <p className="text-lg md:text-xl font-black text-white">{regionStats.revenue}</p>
                         </div>
                         <button 
@@ -211,7 +211,7 @@ export default function RegionalControl() {
 
           {/* Infrastructure Health */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8">
+            <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-2xl p-6 md:p-8">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
                   <Database className="w-5 h-5 md:w-6 md:h-6" />
@@ -237,7 +237,7 @@ export default function RegionalControl() {
               </div>
             </section>
             
-            <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8">
+            <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-2xl p-6 md:p-8">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500">
                   <Lock className="w-5 h-5 md:w-6 md:h-6" />
@@ -259,8 +259,7 @@ export default function RegionalControl() {
 
         {/* Settings Sidebar */}
         <div className="space-y-6 md:space-y-8">
-          <section className="bg-neuro-navy rounded-[2rem] md:rounded-[3rem] p-8 md:p-10 shadow-2xl relative overflow-hidden border border-white/5">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl -mr-16 -mt-16"></div>
+          <section className="bg-neuro-navy rounded-[2rem] md:rounded-2xl p-8 md:p-10 shadow-2xl relative overflow-hidden border border-white/5">
             <h3 className="text-xl md:text-2xl font-heading font-black text-white mb-8">Global Logic</h3>
             
             <div className="space-y-8">
@@ -268,7 +267,7 @@ export default function RegionalControl() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-black text-white">Strict Isolation</p>
-                    <p className="text-[9px] md:text-[10px] text-gray-500 uppercase font-bold mt-1 tracking-widest">Enforce Geo-Fencing</p>
+                    <p className="text-xs md:text-[10px] text-gray-500 uppercase font-bold mt-1 tracking-widest">Enforce Geo-Fencing</p>
                   </div>
                   <div 
                     onClick={handleToggleIsolation}
@@ -284,7 +283,7 @@ export default function RegionalControl() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-black text-white">Cross-Border Referrals</p>
-                    <p className="text-[9px] md:text-[10px] text-gray-500 uppercase font-bold mt-1 tracking-widest">Allow Global Network</p>
+                    <p className="text-xs md:text-[10px] text-gray-500 uppercase font-bold mt-1 tracking-widest">Allow Global Network</p>
                   </div>
                   <div 
                     onClick={handleToggleCrossBorder}
@@ -309,13 +308,13 @@ export default function RegionalControl() {
             </div>
           </section>
 
-          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8">
+          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-2xl p-6 md:p-8">
             <h3 className="text-lg font-black text-white mb-6">Regional Support Hub</h3>
             <div className="space-y-4">
               <button className="w-full p-4 bg-white/5 hover:bg-white/10 transition-colors rounded-2xl border border-white/5 flex items-center justify-between group">
                 <span className="text-[10px] md:text-xs font-bold text-gray-300 group-hover:text-white transition-colors">Compliance Tickets</span>
                 {supportMetrics.complianceTickets > 0 ? (
-                  <span className="px-3 py-1 bg-neuro-orange/20 border border-neuro-orange/30 text-neuro-orange rounded-lg text-[9px] md:text-[10px] font-black shadow-sm shrink-0">
+                  <span className="px-3 py-1 bg-neuro-orange/20 border border-neuro-orange/30 text-neuro-orange rounded-lg text-xs md:text-[10px] font-black shadow-sm shrink-0">
                     {supportMetrics.complianceTickets} Open
                   </span>
                 ) : (
@@ -326,7 +325,7 @@ export default function RegionalControl() {
               <button className="w-full p-4 bg-white/5 hover:bg-white/10 transition-colors rounded-2xl border border-white/5 flex items-center justify-between group">
                 <span className="text-[10px] md:text-xs font-bold text-gray-300 group-hover:text-white transition-colors">Licensing Reviews</span>
                 {supportMetrics.licensingReviews > 0 ? (
-                  <span className="px-3 py-1 bg-blue-500/20 border border-blue-500/30 text-blue-400 rounded-lg text-[9px] md:text-[10px] font-black shadow-sm shrink-0">
+                  <span className="px-3 py-1 bg-blue-500/20 border border-blue-500/30 text-blue-400 rounded-lg text-xs md:text-[10px] font-black shadow-sm shrink-0">
                     {supportMetrics.licensingReviews} Pending
                   </span>
                 ) : (
@@ -343,7 +342,7 @@ export default function RegionalControl() {
       {/* Add Region Modal */}
       {isAddRegionModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 backdrop-blur-md bg-neuro-navy/60">
-          <div className="bg-[#0A0D14] rounded-[2rem] md:rounded-[3rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white/10 p-8 md:p-10 max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#0A0D14] rounded-[2rem] md:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-white/10 p-8 md:p-10 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-8">
               <h3 className="text-xl md:text-2xl font-black text-white flex items-center gap-3">
                 <Globe className="w-6 h-6 text-neuro-orange" /> Add Region
@@ -412,12 +411,12 @@ export default function RegionalControl() {
       {/* Region Details Modal */}
       {selectedRegion && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 backdrop-blur-md bg-neuro-navy/60">
-          <div className="bg-[#0A0D14] rounded-[2rem] md:rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/10 max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#0A0D14] rounded-[2rem] md:rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-white/10 max-h-[90vh] overflow-y-auto">
             <div className="p-8 md:p-10 border-b border-white/5 bg-white/5 flex items-center justify-between">
               <div>
                 <h3 className="text-2xl md:text-3xl font-black text-white flex items-center gap-3">
                   {selectedRegion.name}
-                  <span className="text-[9px] md:text-[10px] bg-white/10 px-3 py-1 rounded-lg text-gray-300 tracking-widest uppercase border border-white/10">
+                  <span className="text-xs md:text-[10px] bg-white/10 px-3 py-1 rounded-lg text-gray-300 tracking-widest uppercase border border-white/10">
                     {selectedRegion.code}
                   </span>
                 </h3>
@@ -427,25 +426,25 @@ export default function RegionalControl() {
             </div>
             <div className="p-6 md:p-10 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
               <div className="p-5 md:p-6 bg-white/5 rounded-2xl border border-white/5">
-                <p className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <p className="text-xs md:text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                   <ShieldCheck className="w-3 h-3 text-blue-500" /> Regional Admin
                 </p>
                 <p className="text-base md:text-lg font-bold text-white">{selectedRegion.admin}</p>
               </div>
               <div className="p-5 md:p-6 bg-white/5 rounded-2xl border border-white/5">
-                <p className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <p className="text-xs md:text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                   <Database className="w-3 h-3 text-emerald-500" /> MTD Revenue
                 </p>
                 <p className="text-base md:text-lg font-bold text-white">{selectedRegion.revenue}</p>
               </div>
               <div className="p-5 md:p-6 bg-white/5 rounded-2xl border border-white/5">
-                <p className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <p className="text-xs md:text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                   <Users className="w-3 h-3 text-purple-500" /> Active Users
                 </p>
                 <p className="text-base md:text-lg font-bold text-white">{selectedRegion.users}</p>
               </div>
               <div className="p-5 md:p-6 bg-white/5 rounded-2xl border border-white/5">
-                <p className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <p className="text-xs md:text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                   <Server className="w-3 h-3 text-neuro-orange" /> Node Status
                 </p>
                 <p className="text-base md:text-lg font-bold text-green-500 flex items-center gap-2">
@@ -465,7 +464,7 @@ export default function RegionalControl() {
       {/* Admin Audit Modal */}
       {isAssignRoleModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 backdrop-blur-md bg-neuro-navy/60">
-          <div className="bg-[#0A0D14] rounded-[2rem] md:rounded-[3rem] w-full max-w-4xl shadow-2xl overflow-hidden border border-white/10 max-h-[90vh] flex flex-col">
+          <div className="bg-[#0A0D14] rounded-[2rem] md:rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden border border-white/10 max-h-[90vh] flex flex-col">
             <div className="p-8 md:p-10 border-b border-white/5 bg-white/5 flex items-center justify-between">
               <div>
                 <h3 className="text-xl md:text-2xl font-black text-white flex items-center gap-3">
@@ -478,7 +477,7 @@ export default function RegionalControl() {
             
             <div className="overflow-x-auto overflow-y-auto flex-1">
               <table className="w-full text-left min-w-[600px]">
-                <thead className="bg-white/5 text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest sticky top-0 backdrop-blur-md z-10">
+                <thead className="bg-white/5 text-xs md:text-[10px] font-black text-gray-500 uppercase tracking-widest sticky top-0 backdrop-blur-md z-10">
                   <tr>
                     <th className="px-6 md:px-8 py-5 border-b border-white/5">Administrator</th>
                     <th className="px-6 md:px-8 py-5 border-b border-white/5 text-center">Assigned Scope</th>
@@ -493,7 +492,7 @@ export default function RegionalControl() {
                       <p className="text-[10px] text-gray-500">raymond@neurochiro.com</p>
                     </td>
                     <td className="px-6 md:px-8 py-6 text-center">
-                      <span className="px-2 md:px-3 py-1.5 bg-neuro-orange/20 text-neuro-orange border border-neuro-orange/30 rounded-lg text-[8px] md:text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
+                      <span className="px-2 md:px-3 py-1.5 bg-neuro-orange/20 text-neuro-orange border border-neuro-orange/30 rounded-lg text-xs md:text-xs font-black uppercase tracking-widest whitespace-nowrap">
                         Global
                       </span>
                     </td>
@@ -511,7 +510,7 @@ export default function RegionalControl() {
                         <p className="text-[10px] text-gray-500">admin.{r.code.toLowerCase()}@neurochiro.com</p>
                       </td>
                       <td className="px-6 md:px-8 py-6 text-center">
-                        <span className="px-2 md:px-3 py-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-lg text-[8px] md:text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
+                        <span className="px-2 md:px-3 py-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-lg text-xs md:text-xs font-black uppercase tracking-widest whitespace-nowrap">
                           Region: {r.code}
                         </span>
                       </td>

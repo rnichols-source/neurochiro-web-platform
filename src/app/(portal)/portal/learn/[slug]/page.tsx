@@ -107,7 +107,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
       </div>
 
       {/* Hero Header */}
-      <section className="relative rounded-[3.5rem] overflow-hidden mb-12 shadow-2xl border border-gray-100 group w-full h-[400px] md:h-[550px]">
+      <section className="relative rounded-2xl overflow-hidden mb-12 shadow-2xl border border-gray-100 group w-full h-[400px] md:h-[550px]">
          <img loading="lazy" decoding="async" src={article.image} alt={article.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[5s] ease-out" />
          <div className="absolute inset-0 bg-gradient-to-t from-neuro-black via-neuro-black/20 to-transparent" />
          
@@ -121,7 +121,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
               <span className="px-5 py-2 bg-neuro-orange text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-full inline-block shadow-xl">
                  {article.category}
               </span>
-              <h1 className="text-4xl md:text-7xl font-heading font-black text-white leading-[1.1] drop-shadow-2xl max-w-4xl tracking-tight">
+              <h1 className="text-4xl md:text-5xl font-heading font-black text-white leading-[1.1] drop-shadow-2xl max-w-4xl tracking-tight">
                  {article.title}
               </h1>
             </motion.div>
@@ -133,7 +133,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
          
          {/* Main Article Body */}
          <div className="space-y-12">
-            <div className="bg-white p-8 md:p-16 rounded-[3.5rem] border border-gray-100 shadow-xl shadow-neuro-navy/5 relative overflow-hidden">
+            <div className="bg-white p-8 md:p-16 rounded-2xl border border-gray-100 shadow-xl shadow-neuro-navy/5 relative overflow-hidden">
                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-neuro-orange to-orange-300"></div>
                
                {/* Meta Row */}
@@ -141,7 +141,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                   <div className="flex items-center gap-3">
                      <div className="w-10 h-10 rounded-2xl bg-neuro-navy flex items-center justify-center text-white text-xs font-bold shadow-lg">RN</div>
                      <div className="flex flex-col gap-0.5">
-                        <span className="text-gray-300 text-[8px]">Instructor</span>
+                        <span className="text-gray-300 text-xs">Instructor</span>
                         <span className="text-neuro-navy">{article.author}</span>
                      </div>
                   </div>
@@ -187,8 +187,8 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
             </div>
 
             {/* Author Section */}
-            <div className="bg-neuro-cream p-10 md:p-16 rounded-[3.5rem] border border-neuro-navy/5 flex flex-col md:flex-row gap-10 items-center">
-               <div className="w-32 h-32 rounded-[2.5rem] bg-neuro-navy flex items-center justify-center text-white text-4xl font-black shadow-2xl shrink-0">RN</div>
+            <div className="bg-neuro-cream p-10 md:p-16 rounded-2xl border border-neuro-navy/5 flex flex-col md:flex-row gap-10 items-center">
+               <div className="w-32 h-32 rounded-2xl bg-neuro-navy flex items-center justify-center text-white text-4xl font-black shadow-2xl shrink-0">RN</div>
                <div className="text-center md:text-left space-y-4">
                   <h3 className="text-2xl font-heading font-black text-neuro-navy">About Dr. Raymond Nichols</h3>
                   <p className="text-gray-600 leading-relaxed text-lg italic">
@@ -201,7 +201,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
 
          {/* Sidebar - Sticky */}
          <div className="space-y-8 lg:sticky lg:top-8">
-            <section className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-xl shadow-neuro-navy/5">
+            <section className="bg-white p-10 rounded-2xl border border-gray-100 shadow-xl shadow-neuro-navy/5">
                <h3 className="text-xl font-heading font-black text-neuro-navy mb-8 uppercase tracking-widest text-xs border-b border-gray-50 pb-4">Learning Goals</h3>
                <div className="space-y-6">
                   {[
@@ -222,8 +222,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                </button>
             </section>
 
-            <section className="bg-neuro-navy p-10 rounded-[3rem] text-white relative overflow-hidden group shadow-2xl">
-               <div className="absolute top-0 right-0 w-48 h-48 bg-neuro-orange/10 blur-[80px] group-hover:bg-neuro-orange/20 transition-all duration-700 pointer-events-none"></div>
+            <section className="bg-neuro-navy p-10 rounded-2xl text-white relative overflow-hidden group shadow-2xl">
                <div className="relative z-10">
                   <h3 className="text-xl font-heading font-black mb-8 uppercase tracking-widest text-[10px] text-gray-400">Related Content</h3>
                   <div className="space-y-8">
@@ -233,7 +232,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                      ].map((item, i) => (
                        <Link key={i} href="#" className="block group/link space-y-2 border-b border-white/5 pb-6 last:border-0 last:pb-0">
                           <div className="flex items-center gap-2">
-                             <span className="text-[9px] font-black text-neuro-orange uppercase tracking-[0.2em]">{item.time} {item.type}</span>
+                             <span className="text-xs font-black text-neuro-orange uppercase tracking-[0.2em]">{item.time} {item.type}</span>
                           </div>
                           <h4 className="font-bold text-lg flex items-center justify-between group-hover/link:text-neuro-orange transition-colors">
                              {item.title}
@@ -245,7 +244,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                </div>
             </section>
 
-            <section className="p-10 bg-white rounded-[3rem] border border-gray-100 shadow-sm text-center">
+            <section className="p-10 bg-white rounded-2xl border border-gray-100 shadow-sm text-center">
                <div className="w-16 h-16 bg-neuro-orange/10 rounded-[1.5rem] flex items-center justify-center mb-6 shadow-sm mx-auto">
                   <User className="w-8 h-8 text-neuro-orange" />
                </div>

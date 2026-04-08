@@ -151,7 +151,6 @@ export default function TalentIntelligence() {
           { label: "Active Matches", value: auditStats?.activeMatches || "---", trend: "+28", icon: Activity, color: "text-purple-500" }
         ].map((item, i) => (
           <section key={i} className="bg-white/5 border border-white/5 rounded-[2rem] p-6 md:p-8 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 blur-3xl -mr-12 -mt-12 transition-all group-hover:bg-neuro-orange/10"></div>
             <div className="flex justify-between items-start mb-4">
               <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center ${item.color}`}>
                 <item.icon className="w-5 h-5 md:w-6 md:h-6" />
@@ -226,7 +225,7 @@ export default function TalentIntelligence() {
 
         {/* User Table */}
         <div className="lg:col-span-3 space-y-8">
-          <section className="bg-white/5 border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl relative">
+          <section className="bg-white/5 border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative">
             {loading && (
               <div className="absolute inset-0 bg-neuro-navy/40 backdrop-blur-[2px] z-50 flex items-center justify-center">
                 <Loader2 className="w-10 h-10 text-neuro-orange animate-spin" />
@@ -266,7 +265,7 @@ export default function TalentIntelligence() {
                           </div>
                         </td>
                         <td className="px-8 py-6 text-center">
-                          <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/5 ${
+                          <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border border-white/5 ${
                             user.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
                             user.status === 'Verified' ? 'bg-blue-500/10 text-blue-400' :
                             'bg-gray-500/10 text-gray-500'
@@ -324,7 +323,7 @@ export default function TalentIntelligence() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-[#0A0D14] rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/10"
+              className="bg-[#0A0D14] rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-white/10"
             >
               <div className="p-8 md:p-10 border-b border-white/5 bg-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-6 min-w-0">
@@ -382,7 +381,7 @@ export default function TalentIntelligence() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0A0D14] rounded-[3rem] w-full max-w-4xl shadow-2xl overflow-hidden border border-white/10 p-8 md:p-12 text-white max-h-[90vh] overflow-y-auto"
+              className="bg-[#0A0D14] rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden border border-white/10 p-8 md:p-12 text-white max-h-[90vh] overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-12">
                 <div>
@@ -450,7 +449,7 @@ export default function TalentIntelligence() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0A0D14] rounded-[3rem] w-full max-w-xl shadow-2xl overflow-hidden border border-white/10 p-8 md:p-12 text-white max-h-[90vh] overflow-y-auto"
+              className="bg-[#0A0D14] rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden border border-white/10 p-8 md:p-12 text-white max-h-[90vh] overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-10">
                 <h3 className="text-3xl font-black flex items-center gap-4">

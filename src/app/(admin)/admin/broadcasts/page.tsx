@@ -79,7 +79,7 @@ export default function AdminBroadcastsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Editor */}
         <div className="space-y-6">
-          <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
+          <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Audience Segment</label>
               <select 
@@ -199,7 +199,7 @@ export default function AdminBroadcastsPage() {
                   <p className="text-[10px] text-red-500 font-bold">
                     You are about to email the entire <span className="underline">{form.audience.replace(':', ' ')}</span> segment.
                   </p>
-                  <button onClick={() => setShowConfirm(false)} className="text-[9px] font-black text-gray-400 uppercase tracking-widest hover:text-neuro-navy">Cancel Draft</button>
+                  <button onClick={() => setShowConfirm(false)} className="text-xs font-black text-gray-400 uppercase tracking-widest hover:text-neuro-navy">Cancel Draft</button>
                 </div>
               )}
             </div>
@@ -208,7 +208,7 @@ export default function AdminBroadcastsPage() {
 
         {/* Live Preview */}
         <div>
-          <div className="sticky top-8 border-[8px] border-gray-900 rounded-[3rem] overflow-hidden bg-gray-50 h-[800px] shadow-2xl flex flex-col">
+          <div className="sticky top-8 border-[8px] border-gray-900 rounded-2xl overflow-hidden bg-gray-50 h-[800px] shadow-2xl flex flex-col">
             <div className="bg-gray-900 text-white py-2 text-center text-[10px] font-bold uppercase tracking-widest border-b border-gray-800">
               Live Email Preview
             </div>

@@ -234,7 +234,7 @@ export default function NotificationBell() {
                               {ann.body}
                             </p>
                             <div className="flex items-center gap-3 mt-3">
-                              <span className="text-[9px] font-black text-purple-400 uppercase tracking-widest">
+                              <span className="text-xs font-black text-purple-400 uppercase tracking-widest">
                                 ANNOUNCEMENT • {formatDistanceToNow(new Date(ann.created_at), { addSuffix: true })}
                               </span>
                             </div>
@@ -266,7 +266,7 @@ export default function NotificationBell() {
                               {notif.body}
                             </p>
                             <div className="flex items-center justify-between mt-3">
-                              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                              <span className="text-xs font-black text-gray-400 uppercase tracking-widest">
                                 {notif.type} • {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true })}
                               </span>
                               {notif.link && (

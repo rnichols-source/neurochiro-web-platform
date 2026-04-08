@@ -106,9 +106,8 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
           <div className="lg:col-span-8 space-y-8">
             
             {/* Header / Brand Identity */}
-            <header className="flex flex-col md:flex-row md:items-center gap-10 bg-white p-10 md:p-12 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/5 rounded-full blur-[100px] -mr-16 -mt-16"></div>
-               <img loading="lazy" decoding="async" src={vendor.logo_url} alt={vendor.name} className="w-32 h-32 rounded-[2.5rem] object-cover border border-gray-100 shadow-2xl relative z-10" />
+            <header className="flex flex-col md:flex-row md:items-center gap-10 bg-white p-10 md:p-12 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
+               <img loading="lazy" decoding="async" src={vendor.logo_url} alt={vendor.name} className="w-32 h-32 rounded-2xl object-cover border border-gray-100 shadow-2xl relative z-10" />
                <div className="space-y-4 relative z-10">
                   <div className="flex flex-wrap items-center gap-3">
                      {vendor.tier === 'featured_partner' && (
@@ -125,8 +124,7 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
             </header>
 
             {/* Member Exclusive Perk (Segmented Highlight with Access Control) */}
-            <section className="bg-neuro-navy p-10 rounded-[3rem] text-white relative overflow-hidden shadow-2xl border-4 border-neuro-orange/20">
-                 <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/20 blur-[100px] pointer-events-none"></div>
+            <section className="bg-neuro-navy p-10 rounded-2xl text-white relative overflow-hidden shadow-2xl border-4 border-neuro-orange/20">
                  <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 justify-between">
                     <div className="flex items-center gap-6">
                        <div className="w-16 h-16 bg-neuro-orange rounded-[1.5rem] flex items-center justify-center shadow-lg shadow-neuro-orange/30">
@@ -148,7 +146,7 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
               </section>
 
             {/* Product Overview */}
-            <section className="bg-white p-10 md:p-12 rounded-[3rem] border border-gray-100 shadow-sm">
+            <section className="bg-white p-10 md:p-12 rounded-2xl border border-gray-100 shadow-sm">
                <div className="flex items-center gap-3 mb-8">
                   <Activity className="w-6 h-6 text-neuro-orange" />
                   <h2 className="text-2xl font-heading font-black">About the Tech</h2>
@@ -178,7 +176,7 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
                
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {vendor.caseStudies.map((study, i) => (
-                    <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all cursor-pointer group">
+                    <div key={i} className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all cursor-pointer group">
                        <div className="flex items-center justify-between mb-6">
                           <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-neuro-orange transition-colors">
                              <FileText className="w-6 h-6" />
@@ -198,11 +196,11 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
             </section>
 
             {/* Testimonials */}
-            <section className="bg-neuro-cream/30 p-10 md:p-12 rounded-[3rem] border border-neuro-navy/5">
+            <section className="bg-neuro-cream/30 p-10 md:p-12 rounded-2xl border border-neuro-navy/5">
                <h2 className="text-2xl font-heading font-black mb-10 text-center">Trusted by 450+ Clinics</h2>
                <div className="grid grid-cols-1 gap-6">
                   {vendor.testimonials.map((t, i) => (
-                    <div key={i} className="bg-white p-10 rounded-[3rem] shadow-sm relative overflow-hidden group">
+                    <div key={i} className="bg-white p-10 rounded-2xl shadow-sm relative overflow-hidden group">
                        <MessageSquare className="w-12 h-12 text-neuro-orange/10 mb-6" />
                        <p className="text-xl font-medium italic text-neuro-navy leading-relaxed mb-10 relative z-10">"{t.text}"</p>
                        <div className="flex items-center gap-4">
@@ -222,7 +220,7 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
           <div className="lg:col-span-4 space-y-6">
              
              {/* Growth & Conversion Card */}
-             <div className="bg-white p-8 md:p-10 rounded-[3rem] border border-gray-100 shadow-xl sticky top-32 space-y-8">
+             <div className="bg-white p-8 md:p-10 rounded-2xl border border-gray-100 shadow-xl sticky top-32 space-y-8">
                 <div>
                    <h3 className="font-heading font-black text-xl mb-2 flex items-center gap-2">
                       <Sparkles className="w-5 h-5 text-neuro-orange" /> Growth Tools
@@ -301,7 +299,7 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
              </div>
 
              {/* Compatibility / Tech Specs Segment */}
-             <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm space-y-6">
+             <div className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm space-y-6">
                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Compatibility</h4>
                 <div className="space-y-3">
                    {vendor.techSpecs.map(spec => (
@@ -313,8 +311,7 @@ export default function VendorProfilePage({ params }: { params: Promise<{ slug: 
              </div>
 
              {/* Partner Badge Explainer (Gradient) */}
-             <div className="bg-gradient-to-br from-neuro-orange to-neuro-orange-dark rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+             <div className="bg-gradient-to-br from-neuro-orange to-neuro-orange-dark rounded-2xl p-10 text-white shadow-2xl relative overflow-hidden group">
                 <div className="relative z-10">
                    <ShieldCheck className="w-12 h-12 mb-6 text-white" />
                    <h4 className="font-heading font-black text-xl mb-3">Verified Partner</h4>

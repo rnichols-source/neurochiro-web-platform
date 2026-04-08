@@ -183,7 +183,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <span className="text-[10px] font-bold text-gray-500 uppercase">Profile Visibility</span>
               <span className="text-[10px] font-bold text-neuro-orange">Active</span>
             </div>
-            <p className="text-[9px] text-gray-500 mt-2 flex items-center gap-1">
+            <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
               <BarChart3 className="w-3 h-3" /> Your clinic is listed on the directory
             </p>
           </div>

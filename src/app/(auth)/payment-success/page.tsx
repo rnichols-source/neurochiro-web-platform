@@ -24,15 +24,14 @@ function SuccessContent() {
 
   return (
     <div className="min-h-dvh bg-neuro-cream flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-neuro-orange/5 blur-[140px] rounded-full -mr-40 pointer-events-none"></div>
       
       <div className="max-w-2xl w-full">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[3.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-gray-100 p-10 md:p-16 text-center relative z-10"
+          className="bg-white rounded-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-gray-100 p-10 md:p-16 text-center relative z-10"
         >
-          <div className="w-24 h-24 bg-emerald-50 rounded-[2.5rem] flex items-center justify-center text-emerald-500 mx-auto mb-10 shadow-inner">
+          <div className="w-24 h-24 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 mx-auto mb-10 shadow-inner">
             <CheckCircle2 className="w-12 h-12" />
           </div>
 

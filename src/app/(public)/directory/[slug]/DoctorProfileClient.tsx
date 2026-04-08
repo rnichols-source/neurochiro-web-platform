@@ -17,7 +17,8 @@ import {
   ExternalLink,
   MessageSquare,
   Loader2,
-  Sparkles
+  Sparkles,
+  Phone
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
@@ -130,8 +131,6 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
   return (
     <div className="min-h-dvh bg-neuro-cream pb-32">
       <div className="bg-neuro-navy pt-32 pb-20 px-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-neuro-orange/10 blur-[150px] -mr-80 -mt-80 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 blur-[150px] -ml-80 -mb-80 pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="mb-10">
@@ -143,12 +142,11 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white/10 backdrop-blur-md rounded-[3rem] p-8 border border-white/20 shadow-2xl relative"
+                className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl relative"
               >
                 <div className="relative mb-14 group">
-                  <div className="absolute inset-0 bg-neuro-orange blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
                   
-                  <div className="w-56 h-56 rounded-[3rem] bg-neuro-navy border-4 border-neuro-orange/30 mx-auto flex items-center justify-center text-neuro-orange font-heading font-black text-7xl relative z-10 shadow-2xl shadow-black/40 overflow-hidden text-center">
+                  <div className="w-56 h-56 rounded-2xl bg-neuro-navy border-4 border-neuro-orange/30 mx-auto flex items-center justify-center text-neuro-orange font-heading font-black text-5xl relative z-10 shadow-2xl shadow-black/40 overflow-hidden text-center">
                     {doctor.photo_url ? (
                       <Image 
                         src={doctor.photo_url} 
@@ -283,7 +281,6 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                 {/* Claim Profile Section for Unclaimed Listings */}
                 {!doctor.user_id && (
                   <div className="mt-8 p-6 bg-neuro-orange/10 border border-neuro-orange/30 rounded-[2rem] relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-neuro-orange/10 blur-2xl -mr-12 -mt-12 group-hover:bg-neuro-orange/20 transition-all"></div>
                     <div className="relative z-10">
                       <div className="flex items-center gap-2 mb-3">
                         <Sparkles className="w-4 h-4 text-neuro-orange fill-current" />
@@ -322,8 +319,7 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
             </div>
 
             <div className="w-full lg:w-2/3 space-y-10">
-              <section className="bg-white/5 backdrop-blur-sm rounded-[3.5rem] p-12 border border-white/10 shadow-xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-neuro-orange/5 blur-[100px] -mr-48 -mt-48 transition-all duration-1000 group-hover:bg-neuro-orange/10 pointer-events-none"></div>
+              <section className="bg-white/5 backdrop-blur-sm rounded-2xl p-12 border border-white/10 shadow-xl relative overflow-hidden group">
                 
                 <h3 className="text-3xl font-heading font-black mb-10 flex items-center gap-5 text-white">
                   <div className="p-4 bg-neuro-orange rounded-[1.25rem] shadow-2xl shadow-neuro-orange/30">
@@ -339,7 +335,7 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                 </div>
 
                 {doctor.video_url && (
-                  <div className="mb-12 rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl aspect-video bg-black">
+                  <div className="mb-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl aspect-video bg-black">
                     <iframe 
                       src={doctor.video_url.replace('watch?v=', 'embed/').replace('vimeo.com/', 'player.vimeo.com/video/')} 
                       className="w-full h-full"
@@ -390,7 +386,7 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
               </section>
 
               {/* Patient Transformation Stories */}
-              <section className="bg-white rounded-[3rem] border border-gray-100 p-12 shadow-sm">
+              <section className="bg-white rounded-2xl border border-gray-100 p-12 shadow-sm">
                 <h3 className="text-2xl font-heading font-black text-neuro-navy mb-8 flex items-center gap-3">
                   <Zap className="w-6 h-6 text-neuro-orange" />
                   Patient Transformation Stories
@@ -451,50 +447,37 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                 )}
               </section>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-neuro-navy border-2 border-neuro-orange/40 rounded-[3rem] p-12 relative group overflow-hidden shadow-2xl transition-all hover:border-neuro-orange">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[80px] -mr-24 -mt-24 transition-all duration-700 group-hover:bg-neuro-orange/20 pointer-events-none"></div>
-                  <h4 className="text-3xl font-black mb-5 flex items-center gap-4 text-white">
-                    <Calendar className="w-8 h-8 text-neuro-orange" />
-                    Book an Exam
-                  </h4>
-                  <p className="text-slate-400 text-base mb-10 leading-relaxed font-medium">Secure your clinical neuro-developmental assessment directly with the office.</p>
-                  <button 
-                    onClick={handleBooking}
-                    className="w-full py-6 bg-neuro-orange text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:bg-neuro-orange-light transition-all shadow-2xl shadow-neuro-orange/30 hover:scale-[1.03] active:scale-95"
-                  >
-                    Check Availability
-                  </button>
-                </div>
-
-                <div className="bg-white/5 border border-white/10 rounded-[3rem] p-12 group relative overflow-hidden transition-all hover:border-white/20">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] -mr-24 -mt-24 transition-all duration-700 group-hover:bg-blue-500/10 pointer-events-none"></div>
-                  <h4 className="text-3xl font-black mb-5 flex items-center gap-4 text-white">
-                    <Users className="w-8 h-8 text-blue-400" />
-                    Refer a Patient
-                  </h4>
-                  <p className="text-slate-400 text-base mb-10 leading-relaxed font-medium">Secure HIPAA-compliant referral for nervous-system-first collaborative care.</p>
-                  <button 
-                    onClick={handleReferral}
-                    disabled={referring}
-                    className="w-full py-6 bg-white/10 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:bg-white/20 transition-all border border-white/10 flex items-center justify-center gap-4 hover:scale-[1.03] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group shadow-2xl"
-                  >
-                    {referring ? (
-                      <>
-                        <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        <span className="tracking-[0.1em]">Processing...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Send Secure Referral</span>
-                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Sticky mobile booking bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 px-4 z-50 lg:hidden">
+        <div className="flex gap-3">
+          <a
+            href={doctor.website_url || "#"}
+            target={doctor.website_url ? "_blank" : undefined}
+            rel={doctor.website_url ? "noopener noreferrer" : undefined}
+            className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm text-center hover:bg-neuro-orange-light transition-colors"
+          >
+            Book Appointment
+          </a>
+          {doctor.phone ? (
+            <a
+              href={`tel:${doctor.phone}`}
+              className="flex-1 py-3 bg-neuro-navy text-white rounded-xl font-bold text-sm text-center flex items-center justify-center gap-2 hover:bg-neuro-navy-light transition-colors"
+            >
+              <Phone className="w-4 h-4" /> Call
+            </a>
+          ) : (
+            <button
+              disabled
+              className="flex-1 py-3 bg-gray-100 text-gray-400 rounded-xl font-bold text-sm text-center flex items-center justify-center gap-2 cursor-not-allowed"
+            >
+              <Phone className="w-4 h-4" /> Call
+            </button>
+          )}
         </div>
       </div>
 
@@ -505,7 +488,7 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white rounded-[3.5rem] p-12 max-w-md w-full shadow-2xl border border-gray-100 text-center relative overflow-hidden"
+              className="bg-white rounded-2xl p-12 max-w-md w-full shadow-2xl border border-gray-100 text-center relative overflow-hidden"
             >
               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-neuro-orange to-blue-500"></div>
               <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-[2rem] flex items-center justify-center mx-auto mb-10 shadow-inner">

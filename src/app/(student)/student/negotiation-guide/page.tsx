@@ -133,8 +133,7 @@ export default function NegotiationGuidePage() {
       </AnimatePresence>
 
       {/* High-Value Hero Section */}
-      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 bg-neuro-navy p-10 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-neuro-orange/10 blur-[120px] rounded-full -mr-48 -mt-48 pointer-events-none"></div>
+      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 bg-neuro-navy p-10 rounded-2xl text-white relative overflow-hidden shadow-2xl">
         <div className="relative z-10 max-w-3xl">
           <div className="flex flex-wrap items-center gap-2 mb-4">
             <div className="px-3 py-1 bg-neuro-orange text-white text-[10px] font-black uppercase tracking-widest rounded-md shadow-lg flex items-center gap-1">
@@ -164,7 +163,7 @@ export default function NegotiationGuidePage() {
       </header>
 
       {/* Main System Navigation */}
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden sticky top-4 z-50">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden sticky top-4 z-50">
         <div className="flex overflow-x-auto hide-scrollbar">
           {[
             { id: "framework", label: "1. The Framework", icon: Scale },
@@ -193,10 +192,9 @@ export default function NegotiationGuidePage() {
         <AnimatePresence mode="wait">
           {activeTab === 'framework' && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
-               <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-100">
+               <div className="bg-white rounded-2xl p-10 shadow-sm border border-gray-100">
                   <h2 className="text-3xl font-black text-neuro-navy mb-4">The Core Principle</h2>
                   <div className="p-8 bg-neuro-navy text-white rounded-[2rem] shadow-xl italic text-2xl font-bold text-center border border-neuro-orange/20 relative overflow-hidden">
-                     <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl rounded-full"></div>
                      "We do not negotiate for money. We negotiate for career architecture."
                   </div>
                   <p className="mt-8 text-gray-600 text-lg leading-relaxed max-w-4xl">
@@ -242,7 +240,7 @@ export default function NegotiationGuidePage() {
           {/* SECTION 2: CONTRACT INTELLIGENCE */}
           {activeTab === 'intelligence' && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
-               <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-100">
+               <div className="bg-white rounded-2xl p-10 shadow-sm border border-gray-100">
                  <h2 className="text-3xl font-black text-neuro-navy mb-6">Contract Decoder</h2>
                  <p className="text-gray-500 text-lg mb-8">Understand exactly what you are signing. Hover or click to reveal the truth behind standard clauses.</p>
                  
@@ -353,7 +351,7 @@ export default function NegotiationGuidePage() {
           {/* SECTION 4: SIMULATOR */}
           {activeTab === 'simulator' && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
-               <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-100">
+               <div className="bg-white rounded-2xl p-10 shadow-sm border border-gray-100">
                  <div className="flex items-center justify-between mb-8">
                    <div>
                      <h2 className="text-3xl font-black text-neuro-navy mb-2">Live Negotiation Simulator</h2>
@@ -406,7 +404,7 @@ export default function NegotiationGuidePage() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Career Strategy Concepts */}
-                  <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-100 space-y-8">
+                  <div className="bg-white rounded-2xl p-10 shadow-sm border border-gray-100 space-y-8">
                      <h2 className="text-3xl font-black text-neuro-navy">The "Forever" Trap</h2>
                      <p className="text-gray-600 leading-relaxed text-lg">
                         90% of associates leave their first job within 18 months. Stop negotiating your first contract as if it's your final destination. 
@@ -425,8 +423,7 @@ export default function NegotiationGuidePage() {
                   </div>
 
                   {/* Career Value Calculator */}
-                  <div className="bg-neuro-navy rounded-[2.5rem] p-10 shadow-2xl text-white relative overflow-hidden">
-                     <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/20 blur-3xl rounded-full"></div>
+                  <div className="bg-neuro-navy rounded-2xl p-10 shadow-2xl text-white relative overflow-hidden">
                      <h2 className="text-2xl font-black mb-2 relative z-10">The $100k Calculator</h2>
                      <p className="text-gray-400 text-sm mb-8 relative z-10">See how small negotiations compound over a 5-year associate period.</p>
                      
@@ -450,7 +447,7 @@ export default function NegotiationGuidePage() {
                </div>
 
                {/* Pre-Signing Checklist */}
-               <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-100">
+               <div className="bg-white rounded-2xl p-10 shadow-sm border border-gray-100">
                   <div className="flex items-center justify-between mb-8">
                      <h2 className="text-2xl font-black text-neuro-navy">Pre-Signing Checklist</h2>
                      <button className="text-xs font-black text-neuro-orange uppercase tracking-widest hover:underline flex items-center gap-1"><Download className="w-4 h-4"/> Get PDF</button>

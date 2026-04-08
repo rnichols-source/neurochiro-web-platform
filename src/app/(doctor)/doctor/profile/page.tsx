@@ -202,11 +202,10 @@ export default function ProfilePage() {
         <div className="lg:col-span-2 space-y-8">
           <form onSubmit={handleUpdateProfile} className="space-y-8">
              {/* Profile Header Card */}
-             <div className="bg-white rounded-[3rem] p-10 border border-gray-100 shadow-sm relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/5 blur-3xl -mr-32 -mt-32"></div>
+             <div className="bg-white rounded-2xl p-10 border border-gray-100 shadow-sm relative overflow-hidden group">
                 <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
                    <div className="relative">
-                      <div className="w-40 h-40 rounded-[2.5rem] bg-neuro-cream overflow-hidden border-4 border-white shadow-xl">
+                      <div className="w-40 h-40 rounded-2xl bg-neuro-cream overflow-hidden border-4 border-white shadow-xl">
                          {profile?.photo_url || profile?.avatar_url ? (
                            <Image src={profile?.photo_url || profile?.avatar_url || ''} alt="Clinic" fill className="object-cover" sizes="160px" />
                          ) : (
@@ -238,7 +237,7 @@ export default function ProfilePage() {
                            {profile?.clinic_name || "Untitled Clinic"}
                          </h2>
                          {profile?.verification_status === 'verified' && (
-                           <div className="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1 border border-green-100">
+                           <div className="px-3 py-1 bg-green-50 text-green-600 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-1 border border-green-100">
                               <ShieldCheck className="w-3 h-3" /> Verified Clinic
                            </div>
                          )}
@@ -252,7 +251,7 @@ export default function ProfilePage() {
              </div>
 
              {/* Bio Section */}
-             <div className="bg-white rounded-[2.5rem] border border-gray-100 p-10 shadow-sm space-y-6">
+             <div className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm space-y-6">
                 <div className="flex items-center justify-between">
                    <h3 className="text-xl font-heading font-black text-neuro-navy flex items-center gap-3">
                       <FileText className="w-6 h-6 text-neuro-orange" />
@@ -280,7 +279,7 @@ export default function ProfilePage() {
 
              {/* Core Details Grid */}
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white rounded-[2.5rem] border border-gray-100 p-10 shadow-sm space-y-6">
+                <div className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm space-y-6">
                    <h3 className="text-xl font-heading font-black text-neuro-navy">Clinic Information</h3>
                    <div className="space-y-4">
                       <div className="space-y-2">
@@ -294,7 +293,7 @@ export default function ProfilePage() {
                    </div>
                 </div>
 
-                <div className="bg-white rounded-[2.5rem] border border-gray-100 p-10 shadow-sm space-y-6">
+                <div className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm space-y-6">
                    <h3 className="text-xl font-heading font-black text-neuro-navy">Location Hub</h3>
                    <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
@@ -331,7 +330,7 @@ export default function ProfilePage() {
         {/* Sidebar Widgets */}
         <div className="space-y-8">
            {/* Profile Strength Card */}
-           <section className="bg-white rounded-[3rem] p-10 border border-gray-100 shadow-sm">
+           <section className="bg-white rounded-2xl p-10 border border-gray-100 shadow-sm">
               <div className="flex justify-between items-end mb-6">
                  <div>
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Profile Strength</p>
@@ -360,7 +359,7 @@ export default function ProfilePage() {
                    <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
                       <span className="text-xs font-bold text-neuro-navy">{item.label}</span>
                       <div className="flex items-center gap-2">
-                         <span className={`text-[9px] font-black uppercase tracking-widest ${item.ok ? 'text-green-500' : 'text-neuro-orange'}`}>{item.status}</span>
+                         <span className={`text-xs font-black uppercase tracking-widest ${item.ok ? 'text-green-500' : 'text-neuro-orange'}`}>{item.status}</span>
                          {item.ok ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <AlertCircle className="w-4 h-4 text-neuro-orange" />}
                       </div>
                    </div>
@@ -369,18 +368,17 @@ export default function ProfilePage() {
            </section>
 
            {/* Real Impact Widget */}
-           <section className="bg-neuro-navy rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl -mr-16 -mt-16"></div>
+           <section className="bg-neuro-navy rounded-2xl p-10 text-white relative overflow-hidden shadow-2xl">
               <div className="relative z-10 space-y-6">
                  <h4 className="font-heading font-black text-xl">Directory Impact</h4>
                  <div className="grid grid-cols-2 gap-6">
                     <div>
                        <p className="text-3xl font-black text-neuro-orange">{profile?.profile_views || 0}</p>
-                       <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Profile Views</p>
+                       <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Profile Views</p>
                     </div>
                     <div>
                        <p className="text-3xl font-black text-white">{profile?.patient_leads || 0}</p>
-                       <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Inbound Leads</p>
+                       <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Inbound Leads</p>
                     </div>
                  </div>
                  <Link 
@@ -403,7 +401,7 @@ export default function ProfilePage() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white/20"
+              className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-white/20"
             >
               <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-navy text-white">
                 <div className="flex items-center gap-4">

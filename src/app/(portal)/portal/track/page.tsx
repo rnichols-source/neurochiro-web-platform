@@ -116,7 +116,7 @@ export default function TrackPage() {
       </header>
 
       {/* Daily Check-in */}
-      <section className="bg-neuro-cream rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+      <section className="bg-neuro-cream rounded-2xl border border-gray-100 p-8 shadow-sm">
         <h2 className="text-xl font-black text-neuro-navy mb-6 flex items-center gap-2">
           <Activity className="w-5 h-5 text-neuro-orange" />
           {todayLogged ? "Today's Check-in (Update)" : "Daily Check-in"}
@@ -146,7 +146,7 @@ export default function TrackPage() {
 
       {/* 30-Day Trends */}
       {logs.length > 0 ? (
-        <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+        <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
           <h2 className="text-xl font-black text-neuro-navy mb-6">30-Day Trends</h2>
 
           <div className="grid grid-cols-3 gap-4 mb-8">
@@ -186,7 +186,7 @@ export default function TrackPage() {
                 </div>
               ))}
             </div>
-            <div className="flex justify-between text-[9px] text-gray-400">
+            <div className="flex justify-between text-xs text-gray-400">
               <span>{logs[0]?.log_date}</span>
               <span>{logs[logs.length - 1]?.log_date}</span>
             </div>
@@ -209,7 +209,7 @@ export default function TrackPage() {
           </div>
         </section>
       ) : (
-        <section className="bg-white rounded-[2.5rem] border border-gray-100 p-12 shadow-sm text-center">
+        <section className="bg-white rounded-2xl border border-gray-100 p-12 shadow-sm text-center">
           <Sun className="w-16 h-16 text-gray-200 mx-auto mb-4" />
           <h2 className="text-xl font-black text-gray-400 mb-2">No tracking data yet</h2>
           <p className="text-gray-500 text-sm max-w-md mx-auto">

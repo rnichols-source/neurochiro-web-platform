@@ -46,7 +46,7 @@ export default function AdminSettingsModal({ isOpen, onClose, onEmergencyLockdow
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="bg-[#0A0D14] rounded-[3rem] w-full max-w-5xl h-[80vh] shadow-2xl overflow-hidden border border-white/10 flex"
+          className="bg-[#0A0D14] rounded-2xl w-full max-w-5xl h-[80vh] shadow-2xl overflow-hidden border border-white/10 flex"
         >
           {/* Sidebar */}
           <div className="w-64 border-r border-white/5 bg-white/[0.02] p-8 hidden md:flex flex-col">

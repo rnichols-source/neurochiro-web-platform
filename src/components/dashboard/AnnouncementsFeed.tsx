@@ -79,10 +79,10 @@ export default function AnnouncementsFeed({ audience }: { audience: string }) {
                 
                 <div className="flex-1 min-w-0 pr-6">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[9px] font-black uppercase tracking-widest opacity-60">
+                    <span className="text-xs font-black uppercase tracking-widest opacity-60">
                       {formatDistanceToNow(new Date(ann.created_at), { addSuffix: true })}
                     </span>
-                    {isUrgent && <span className="px-2 py-0.5 bg-red-500 text-white text-[8px] font-black uppercase rounded-full">Urgent</span>}
+                    {isUrgent && <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-black uppercase rounded-full">Urgent</span>}
                   </div>
                   <h4 className={`font-bold text-sm uppercase tracking-tight ${isUrgent ? 'text-red-900' : 'text-neuro-navy'}`}>
                     {ann.title}

@@ -142,6 +142,12 @@ export default function Navbar() {
             
             {user ? (
               <div className="flex items-center gap-4">
+                <Link
+                  href="/dashboard"
+                  className={`text-sm font-bold transition-colors hover:text-neuro-orange ${useWhiteText ? "text-white" : "text-neuro-navy"}`}
+                >
+                  Dashboard
+                </Link>
                 <NotificationBell />
                 <div className="relative group/user">
                   <Link 

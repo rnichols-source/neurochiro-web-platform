@@ -63,7 +63,7 @@ export default function PublicJobs() {
       <header className="bg-neuro-navy text-white pt-32 pb-24 px-8 relative overflow-hidden">
         <div className="max-w-7xl mx-auto relative z-10 text-center space-y-6">
           <span className="text-neuro-orange-light font-black uppercase tracking-[0.4em] text-xs">Clinical Career Marketplace</span>
-          <h1 className="text-5xl md:text-7xl font-heading font-black text-white">
+          <h1 className="text-5xl md:text-5xl font-heading font-black text-white">
             Find Your Next <br />
             <span className="text-neuro-orange">Opportunity.</span>
           </h1>
@@ -76,7 +76,7 @@ export default function PublicJobs() {
       <main className="max-w-5xl mx-auto px-8 -mt-12 relative z-20">
         
         {/* Search Bar */}
-        <div className="bg-white p-4 rounded-[2.5rem] shadow-2xl border border-gray-100 flex flex-col md:flex-row items-center gap-4 mb-12">
+        <div className="bg-white p-4 rounded-2xl shadow-2xl border border-gray-100 flex flex-col md:flex-row items-center gap-4 mb-12">
            <div className="flex-1 relative w-full">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input 
@@ -98,7 +98,7 @@ export default function PublicJobs() {
                  initial={{ opacity: 0, y: 10 }}
                  animate={{ opacity: 1, y: 0 }}
                  key={job.id}
-                 className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group flex flex-col md:flex-row md:items-center justify-between gap-8"
+                 className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group flex flex-col md:flex-row md:items-center justify-between gap-8"
                >
                   <div className="flex items-center gap-6">
                      <div className="w-16 h-16 rounded-2xl bg-neuro-cream flex items-center justify-center text-neuro-navy">
@@ -128,7 +128,7 @@ export default function PublicJobs() {
                </motion.div>
              ))
            ) : (
-             <div className="py-20 text-center bg-white rounded-[3rem] border border-dashed border-gray-200">
+             <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200">
                 <Briefcase className="w-16 h-16 text-gray-200 mx-auto mb-4" />
                 <h3 className="text-2xl font-black text-neuro-navy">No Jobs in {region.label}</h3>
                 <p className="text-gray-400">Expand your search or check back soon.</p>
@@ -137,8 +137,7 @@ export default function PublicJobs() {
         </div>
 
         {/* Support Section */}
-        <section className="mt-24 bg-neuro-orange rounded-[4rem] p-12 text-white relative overflow-hidden text-center shadow-2xl">
-           <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-white/10 blur-[80px] -mr-32 -mt-32 rounded-full"></div>
+        <section className="mt-24 bg-neuro-orange rounded-2xl p-12 text-white relative overflow-hidden text-center shadow-2xl">
            <div className="relative z-10 max-w-xl mx-auto space-y-6">
               <h2 className="text-3xl font-heading font-black">Looking to hire?</h2>
               <p className="font-medium opacity-90">

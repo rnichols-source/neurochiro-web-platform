@@ -10,11 +10,6 @@ export default function CallToAction() {
       {/* Dynamic Background */}
       <div className="absolute inset-0">
          <div className="absolute inset-0 bg-gradient-to-br from-neuro-navy to-gray-900" />
-         <motion.div 
-           animate={{ scale: [1, 1.5, 1], opacity: [0.1, 0.2, 0.1] }}
-           transition={{ duration: 10, repeat: Infinity }}
-           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-neuro-orange/10 rounded-full blur-[120px]"
-         />
       </div>
 
       <div className="relative z-10 max-w-4xl mx-auto text-center">
@@ -23,7 +18,7 @@ export default function CallToAction() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="text-5xl md:text-7xl font-heading font-bold text-white mb-8 tracking-tight"
+          className="text-5xl md:text-5xl font-heading font-bold text-white mb-8 tracking-tight"
         >
           Join the <span className="text-transparent bg-clip-text bg-gradient-to-r from-neuro-orange to-orange-400">Evolution.</span>
         </motion.h2>

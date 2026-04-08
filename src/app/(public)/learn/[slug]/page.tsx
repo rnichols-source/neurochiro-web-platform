@@ -119,7 +119,7 @@ export default async function ArticlePage({ params }: Props) {
             ))}
 
             {/* Key Takeaways Card */}
-            <div className="bg-neuro-navy rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
+            <div className="bg-neuro-navy rounded-2xl p-10 text-white relative overflow-hidden shadow-2xl">
                <div className="absolute top-0 right-0 p-8 opacity-10">
                   <Brain className="w-32 h-32" />
                </div>

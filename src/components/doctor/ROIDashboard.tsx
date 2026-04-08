@@ -77,8 +77,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
     return (
       <div className="space-y-8 px-1 sm:px-0">
         {/* Profit Teaser Header */}
-        <section className="bg-white rounded-[2rem] sm:rounded-[3rem] border border-gray-100 p-6 sm:p-10 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/5 blur-[100px] -mr-32 -mt-32"></div>
+        <section className="bg-white rounded-[2rem] sm:rounded-2xl border border-gray-100 p-6 sm:p-10 shadow-sm relative overflow-hidden">
           
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
             <div>
@@ -118,7 +117,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
                         <Lock className="w-5 h-5 text-neuro-orange" />
                      </div>
                   </div>
-                  <p className="text-[9px] text-gray-400 mt-6 italic">Upgrade to Growth to unblur your practice analytics and start converting these leads.</p>
+                  <p className="text-xs text-gray-400 mt-6 italic">Upgrade to Growth to unblur your practice analytics and start converting these leads.</p>
                </div>
             </div>
           </div>
@@ -146,7 +145,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
         </div>
 
         {/* Lost Revenue Calculator */}
-        <section className="bg-gray-50 rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-12 border border-gray-100 flex flex-col items-center text-center">
+        <section className="bg-gray-50 rounded-[2rem] sm:rounded-2xl p-8 sm:p-12 border border-gray-100 flex flex-col items-center text-center">
            <div className="p-4 bg-red-50 text-red-500 rounded-2xl mb-6">
               <TrendingUp className="w-8 h-8 rotate-180" />
            </div>
@@ -163,7 +162,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
                  <p className="text-2xl font-black text-neuro-navy">${lostRevenue.toLocaleString()}</p>
               </div>
               <div className="p-6 bg-white rounded-2xl border border-neuro-orange/20 shadow-sm relative">
-                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-neuro-orange text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest">Recommended</div>
+                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-neuro-orange text-white text-xs font-black px-2 py-1 rounded-full uppercase tracking-widest">Recommended</div>
                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Recovery Plan</p>
                  <p className="text-2xl font-black text-neuro-orange">Growth Tier</p>
               </div>
@@ -176,8 +175,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
   return (
     <div className="space-y-8 px-1 sm:px-0">
       {/* High Impact ROI Banner */}
-      <section className="bg-neuro-navy rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-10 text-white relative overflow-hidden shadow-2xl border border-white/5">
-        <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-neuro-orange/10 rounded-full blur-[120px] -mr-40 -mt-40"></div>
+      <section className="bg-neuro-navy rounded-2xl sm:rounded-2xl p-6 sm:p-10 text-white relative overflow-hidden shadow-2xl border border-white/5">
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div>
             <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -231,11 +229,10 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
               </div>
 
               <div className="relative group">
-                <div className="absolute inset-0 bg-neuro-orange blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity"></div>
                 <div className="relative w-48 h-48 sm:w-64 sm:h-64 rounded-full border-[12px] sm:border-[16px] border-white/5 flex flex-col items-center justify-center text-center p-6 sm:p-10 shadow-inner">
                     <span className={cn(
                       "font-black text-neuro-orange leading-none transition-all tracking-tighter",
-                      roiMode === 'multiplier' ? "text-5xl sm:text-7xl" : "text-2xl sm:text-4xl"
+                      roiMode === 'multiplier' ? "text-5xl sm:text-5xl" : "text-2xl sm:text-4xl"
                     )}>
                       {roiMode === 'multiplier' ? `${roiMultiplier.toFixed(1)}x` : `$${netProfit.toLocaleString()}`}
                     </span>
@@ -245,7 +242,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
                     
                     {/* Network Average Comparison */}
                     <div className="mt-4 pt-4 border-t border-white/10 w-full">
-                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Network Avg: {NETWORK_AVG_ROI}x</p>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Network Avg: {NETWORK_AVG_ROI}x</p>
                       <div className="flex items-center justify-center gap-1.5">
                         {roiMultiplier >= NETWORK_AVG_ROI ? (
                           <>
@@ -305,7 +302,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Historical Revenue Trend */}
-        <section className="lg:col-span-2 bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-gray-100 p-6 sm:p-8 shadow-sm">
+        <section className="lg:col-span-2 bg-white rounded-[2rem] sm:rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <h3 className="text-xl font-heading font-black flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-neuro-orange" /> Growth Trajectory
@@ -326,7 +323,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
             {data.historical_revenue.length === 0 && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm z-20">
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Data Accumulating...</p>
-                <p className="text-[8px] text-gray-300 mt-1">Check back next month for trajectory insights.</p>
+                <p className="text-xs text-gray-300 mt-1">Check back next month for trajectory insights.</p>
               </div>
             )}
             {/* Target Trajectory Line (SVG Overlay) */}
@@ -349,7 +346,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
                     ${rev.amount.toLocaleString()}
                   </div>
                 </div>
-                <span className="text-[9px] font-bold text-gray-400 mt-4 uppercase tracking-tighter">{rev.date}</span>
+                <span className="text-xs font-bold text-gray-400 mt-4 uppercase tracking-tighter">{rev.date}</span>
               </div>
             ))}
           </div>
@@ -377,7 +374,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
                     <h4 className="font-heading font-black text-neuro-navy flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-neuro-orange" /> Queue
                     </h4>
-                    <span className="bg-neuro-orange text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-lg shadow-neuro-orange/20">{pendingPatients.length} PENDING</span>
+                    <span className="bg-neuro-orange text-white text-xs font-black px-2.5 py-1 rounded-full shadow-lg shadow-neuro-orange/20">{pendingPatients.length} PENDING</span>
                 </div>
                 
                 <div className="space-y-3 relative z-10">
@@ -390,7 +387,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
                       >
                         <div>
                             <p className="text-xs font-black text-neuro-navy">{patient.name}</p>
-                            <p className="text-[9px] text-gray-400 font-bold uppercase">{patient.date} • Verified</p>
+                            <p className="text-xs text-gray-400 font-bold uppercase">{patient.date} • Verified</p>
                         </div>
                         <div className="flex gap-2">
                             <button 
@@ -425,7 +422,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
             <div className="flex items-center justify-between mb-6">
               <h4 className="font-heading font-black text-neuro-navy">ROI Accelerator</h4>
               <div className="flex items-center gap-2">
-                <span className="text-[9px] font-black text-neuro-navy uppercase">Profile</span>
+                <span className="text-xs font-black text-neuro-navy uppercase">Profile</span>
                 <span className={cn("text-xs font-black", hasVideo ? "text-green-500" : "text-neuro-orange")}>
                   {hasVideo ? "100%" : "75%"}
                 </span>
@@ -466,7 +463,6 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
 
           {tier === 'growth' ? (
             <section className="bg-gradient-to-br from-neuro-orange to-neuro-orange-dark rounded-[2rem] p-8 text-white relative overflow-hidden group shadow-xl border-t-4 border-white/20">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl"></div>
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-4">
                   <Lock className="w-4 h-4 text-white/80" />

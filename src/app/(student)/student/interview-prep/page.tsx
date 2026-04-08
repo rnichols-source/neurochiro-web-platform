@@ -163,7 +163,6 @@ export default function InterviewPrepPage() {
           <p className="text-neuro-gray text-lg max-w-sm mx-auto">"You don't rise to the level of your goals, you fall to the level of your training."</p>
           
           <div className="bg-neuro-navy border border-white/10 rounded-[2rem] p-8 shadow-2xl text-left space-y-4 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl"></div>
             <h3 className="font-black text-white flex items-center gap-2 uppercase tracking-widest text-xs">
               <ShieldCheck className="w-4 h-4 text-neuro-orange" /> Performance Audit
             </h3>
@@ -210,8 +209,7 @@ export default function InterviewPrepPage() {
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Exit Practice Mode
         </button>
 
-        <header className="bg-neuro-navy rounded-[2.5rem] p-10 border border-white/5 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-neuro-orange/10 blur-[120px] -mr-48 -mt-48"></div>
+        <header className="bg-neuro-navy rounded-2xl p-10 border border-white/5 shadow-2xl relative overflow-hidden">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-6">
               <div className={`p-4 rounded-[2rem] bg-white/5 border border-white/10 text-neuro-orange shadow-inner`}>
@@ -234,7 +232,7 @@ export default function InterviewPrepPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-6">
-            <section className="bg-white rounded-[3rem] p-10 shadow-2xl border border-gray-100 relative overflow-hidden">
+            <section className="bg-white rounded-2xl p-10 shadow-2xl border border-gray-100 relative overflow-hidden">
               <div className="flex items-center justify-between mb-8">
                  <h3 className="text-xl font-black text-neuro-navy flex items-center gap-2 italic uppercase">
                    <Mic className="w-6 h-6 text-neuro-orange" /> Voice Lab
@@ -242,7 +240,7 @@ export default function InterviewPrepPage() {
                  {isRecording && <div className="flex items-center gap-2 px-3 py-1 bg-red-50 text-red-600 rounded-full text-[10px] font-black animate-pulse border border-red-100">REC</div>}
               </div>
               
-              <div className="aspect-square rounded-[2.5rem] bg-gray-50 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center p-8 relative overflow-hidden shadow-inner">
+              <div className="aspect-square rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center p-8 relative overflow-hidden shadow-inner">
                 {isRecording ? (
                   <>
                     <div className="absolute inset-0 bg-neuro-orange/[0.02] animate-pulse"></div>
@@ -325,9 +323,9 @@ export default function InterviewPrepPage() {
           </div>
 
           <div className="space-y-6">
-            <section className="bg-white rounded-[3rem] border border-gray-100 p-10 shadow-sm h-fit relative">
+            <section className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm h-fit relative">
               <div className="absolute top-6 right-8">
-                 <div className="px-3 py-1 bg-neuro-orange/10 text-neuro-orange text-[8px] font-black rounded-full uppercase tracking-widest border border-neuro-orange/20">Active Scenario</div>
+                 <div className="px-3 py-1 bg-neuro-orange/10 text-neuro-orange text-xs font-black rounded-full uppercase tracking-widest border border-neuro-orange/20">Active Scenario</div>
               </div>
               <h3 className="text-xl font-black text-neuro-navy mb-8 flex items-center gap-2 italic uppercase">
                 <Target className="w-6 h-6 text-neuro-orange" /> The Prompt
@@ -377,15 +375,13 @@ export default function InterviewPrepPage() {
         )}
       </AnimatePresence>
 
-      <header className="relative py-12 px-10 bg-neuro-navy rounded-[3.5rem] overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-neuro-orange/10 blur-[150px] -mr-64 -mt-64"></div>
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-500/5 blur-[100px] -ml-32 -mb-32"></div>
+      <header className="relative py-12 px-10 bg-neuro-navy rounded-2xl overflow-hidden shadow-2xl">
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
            <div className="max-w-3xl">
               <div className="flex items-center gap-2 mb-4">
-                 <div className="px-3 py-1 bg-neuro-orange text-white text-[9px] font-black rounded-full uppercase tracking-[0.2em] shadow-lg shadow-neuro-orange/20">Elite Accelerator</div>
-                 <div className="px-3 py-1 bg-white/10 text-gray-300 text-[9px] font-black rounded-full uppercase tracking-[0.2em] border border-white/10">100K Resource</div>
+                 <div className="px-3 py-1 bg-neuro-orange text-white text-xs font-black rounded-full uppercase tracking-[0.2em] shadow-lg shadow-neuro-orange/20">Elite Accelerator</div>
+                 <div className="px-3 py-1 bg-white/10 text-gray-300 text-xs font-black rounded-full uppercase tracking-[0.2em] border border-white/10">100K Resource</div>
               </div>
               <h1 className="text-5xl md:text-6xl font-black text-white italic tracking-tighter leading-none mb-6">
                 The Interview <span className="text-neuro-orange underline decoration-white/20">Closer.</span>
@@ -396,9 +392,9 @@ export default function InterviewPrepPage() {
            </div>
            
            <div className="shrink-0 flex flex-col items-center gap-4">
-              <div className="w-32 h-32 bg-white/5 rounded-[2.5rem] border border-white/10 flex flex-col items-center justify-center text-center p-4 backdrop-blur-md">
+              <div className="w-32 h-32 bg-white/5 rounded-2xl border border-white/10 flex flex-col items-center justify-center text-center p-4 backdrop-blur-md">
                  <p className="text-3xl font-black text-neuro-orange">98%</p>
-                 <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest mt-1">Hiring Rate</p>
+                 <p className="text-xs font-black text-gray-500 uppercase tracking-widest mt-1">Hiring Rate</p>
               </div>
               <button 
                 onClick={handleDownload}
@@ -424,7 +420,7 @@ export default function InterviewPrepPage() {
             <div 
               key={i} 
               onClick={() => setActiveTrack(mod)}
-              className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-2xl transition-all cursor-pointer group active:scale-[0.97] relative overflow-hidden"
+              className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm hover:shadow-2xl transition-all cursor-pointer group active:scale-[0.97] relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-10 transition-opacity">
                  <mod.icon className="w-32 h-32" />
@@ -447,7 +443,7 @@ export default function InterviewPrepPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
         {/* Practice Questions */}
-        <section className="lg:col-span-3 bg-white rounded-[3.5rem] border border-gray-100 p-10 shadow-sm">
+        <section className="lg:col-span-3 bg-white rounded-2xl border border-gray-100 p-10 shadow-sm">
           <div className="flex items-center justify-between mb-10">
              <h2 className="text-2xl font-black text-neuro-navy uppercase italic flex items-center gap-3">
                <div className="p-2 bg-neuro-orange/10 rounded-xl">
@@ -455,7 +451,7 @@ export default function InterviewPrepPage() {
                </div>
                The 7-Figure Script Vault
              </h2>
-             <span className="px-3 py-1 bg-gray-50 text-gray-400 text-[9px] font-black rounded-full uppercase tracking-widest border border-gray-100">Most Frequently Asked</span>
+             <span className="px-3 py-1 bg-gray-50 text-gray-400 text-xs font-black rounded-full uppercase tracking-widest border border-gray-100">Most Frequently Asked</span>
           </div>
           
           <div className="grid grid-cols-1 gap-4">
@@ -481,8 +477,7 @@ export default function InterviewPrepPage() {
             ))}
           </div>
 
-          <div className="mt-10 p-8 bg-neuro-navy text-white rounded-[2.5rem] relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl"></div>
+          <div className="mt-10 p-8 bg-neuro-navy text-white rounded-2xl relative overflow-hidden">
              <div className="relative z-10 flex items-center gap-6">
                 <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
                    <PlayCircle className="w-8 h-8 text-neuro-orange" />
@@ -497,8 +492,7 @@ export default function InterviewPrepPage() {
         </section>
 
         {/* Essential Checklist */}
-        <section className="lg:col-span-2 bg-gradient-to-br from-neuro-navy to-neuro-navy-dark text-white rounded-[3.5rem] p-12 shadow-2xl relative overflow-hidden flex flex-col">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[100px] -mr-32 -mt-32"></div>
+        <section className="lg:col-span-2 bg-gradient-to-br from-neuro-navy to-neuro-navy-dark text-white rounded-2xl p-12 shadow-2xl relative overflow-hidden flex flex-col">
           
           <div className="mb-10">
              <h2 className="text-3xl font-black italic tracking-tighter mb-2">The 100K Prep <span className="text-neuro-orange underline decoration-white/20">Checklist.</span></h2>
@@ -547,7 +541,7 @@ export default function InterviewPrepPage() {
               initial={{ opacity: 0, scale: 0.9, y: 40 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 40 }}
-              className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden border border-white/10"
+              className="bg-white rounded-2xl w-full max-w-2xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden border border-white/10"
             >
               <div className="p-10 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                 <div className="flex items-center gap-4">
@@ -568,7 +562,7 @@ export default function InterviewPrepPage() {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   <div className="p-8 bg-blue-50/50 rounded-[2.5rem] border border-blue-100 relative overflow-hidden">
+                   <div className="p-8 bg-blue-50/50 rounded-2xl border border-blue-100 relative overflow-hidden">
                      <div className="absolute top-0 right-0 p-4">
                         <Lightbulb className="w-5 h-5 text-blue-300" />
                      </div>
@@ -576,7 +570,7 @@ export default function InterviewPrepPage() {
                      <p className="text-sm text-blue-900 leading-relaxed font-bold italic">"{selectedQuestion.hint}"</p>
                    </div>
                    
-                   <div className="p-8 bg-neuro-orange/5 rounded-[2.5rem] border border-neuro-orange/10 relative overflow-hidden">
+                   <div className="p-8 bg-neuro-orange/5 rounded-2xl border border-neuro-orange/10 relative overflow-hidden">
                      <div className="absolute top-0 right-0 p-4">
                         <Sparkles className="w-5 h-5 text-neuro-orange/30" />
                      </div>
@@ -615,7 +609,7 @@ export default function InterviewPrepPage() {
               initial={{ opacity: 0, scale: 0.9, y: 40 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 40 }}
-              className="bg-white rounded-[3.5rem] w-full max-w-xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden border border-white/10"
+              className="bg-white rounded-2xl w-full max-w-xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden border border-white/10"
             >
               <div className={cn("p-10 flex items-center justify-between", activeTrack.color)}>
                 <div className="flex items-center gap-5">
@@ -653,7 +647,7 @@ export default function InterviewPrepPage() {
                    >
                      Initiate Drill <Zap className="w-4 h-4 text-neuro-orange" />
                    </button>
-                   <p className="text-[9px] text-center text-gray-400 mt-4 font-black uppercase tracking-widest">Estimated Time: 8 Minutes</p>
+                   <p className="text-xs text-center text-gray-400 mt-4 font-black uppercase tracking-widest">Estimated Time: 8 Minutes</p>
                 </div>
               </div>
             </motion.div>

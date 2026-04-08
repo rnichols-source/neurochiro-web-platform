@@ -28,14 +28,13 @@ export default function VerifiedBadge({ doctorSlug, doctorName, tier }: Verified
   };
 
   return (
-    <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/5 blur-[100px] -mr-32 -mt-32"></div>
+    <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm relative overflow-hidden">
       
       <div className="relative z-10 flex flex-col lg:flex-row gap-12 items-center">
         {/* Visual Preview */}
         <div className="w-full lg:w-1/3 flex flex-col items-center justify-center p-8 bg-neuro-cream rounded-3xl border border-gray-100 relative group">
           <div className="absolute top-4 left-4">
-             <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Live Preview</span>
+             <span className="text-xs font-black uppercase tracking-widest text-gray-400">Live Preview</span>
           </div>
           
           {/* Stylized Badge (Mocking the API response) */}
@@ -51,7 +50,7 @@ export default function VerifiedBadge({ doctorSlug, doctorName, tier }: Verified
                 {isStarter ? "Pending" : "Provider"}
              </span>
              <div className="w-8 h-px bg-current opacity-20 my-1"></div>
-             <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">NeuroChiro</span>
+             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">NeuroChiro</span>
           </div>
           
           <p className="mt-6 text-[10px] text-gray-400 font-medium text-center">

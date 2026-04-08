@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 
 // 🛡️ Performance: Dynamic import the heavy search island
 const DynamicLandingSearch = dynamic(() => import("./LandingSearch"), {
-  loading: () => <div className="w-full max-w-4xl h-[88px] bg-white/5 animate-pulse rounded-[3rem] mt-12" />,
+  loading: () => <div className="w-full max-w-4xl h-[88px] bg-white/5 animate-pulse rounded-2xl mt-12" />,
   ssr: false
 });
 
@@ -48,17 +48,7 @@ export default function Hero() {
       <div className="absolute inset-0 z-0" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(30,45,59,1)_0%,rgba(19,25,32,1)_100%)]" />
         
-        {/* Optimized Animated Gradient Orbs - Simplified on Mobile */}
-        <motion.div 
-          variants={orbVariants}
-          animate={isMobile ? "static" : "animate"}
-          className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] bg-neuro-orange/20 rounded-full blur-[120px]"
-        />
-        <motion.div 
-          variants={orbVariants}
-          animate={isMobile ? "static" : "animate"}
-          className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-blue-600/20 rounded-full blur-[100px]"
-        />
+        {/* Background orbs removed for cleaner design */}
       </div>
 
       {/* Inlined Grid Pattern Overlay - Performance Optimized */}
@@ -85,7 +75,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-5xl md:text-8xl font-heading font-black tracking-tight leading-[1.1] mb-8 drop-shadow-sm text-white"
+          className="text-5xl md:text-5xl font-heading font-black tracking-tight leading-[1.1] mb-8 drop-shadow-sm text-white"
         >
           The <span className="text-transparent bg-clip-text bg-gradient-to-r from-neuro-orange to-orange-400 drop-shadow-md">Nervous System</span> <br />
           First Ecosystem.
@@ -123,7 +113,7 @@ export default function Hero() {
           aria-label="Launch Smart Match Wizard to find the right doctor for you"
         >
           <div className="flex flex-col items-start">
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-neuro-orange">Need help?</span>
+            <span className="text-xs font-black uppercase tracking-[0.2em] text-neuro-orange">Need help?</span>
             <span className="text-sm font-bold text-white">Not sure who to see? <span className="text-gray-400 font-medium ml-1 group-hover:text-white transition-colors">Let us match you.</span></span>
           </div>
           <div className="w-12 h-12 bg-neuro-orange rounded-full flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">

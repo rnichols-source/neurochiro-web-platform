@@ -52,7 +52,7 @@ export default function DoctorPricing() {
       </div>
 
       {/* Plan card */}
-      <div className="bg-white rounded-[2.5rem] border-2 border-neuro-orange p-10 shadow-xl">
+      <div className="bg-white rounded-2xl border-2 border-neuro-orange p-10 shadow-xl">
         <div className="text-center mb-8">
           <p className="text-xs font-black text-neuro-orange uppercase tracking-widest mb-2">Doctor Membership</p>
           <div className="flex items-baseline justify-center gap-1">

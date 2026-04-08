@@ -88,8 +88,7 @@ export default function ContractLabPage() {
     <div className="p-8 max-w-[1600px] mx-auto space-y-12 relative bg-neuro-cream min-h-dvh">
       
       {/* High-Value Hero Section */}
-      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 bg-neuro-navy p-10 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-neuro-orange/10 blur-[120px] rounded-full -mr-48 -mt-48 pointer-events-none"></div>
+      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 bg-neuro-navy p-10 rounded-2xl text-white relative overflow-hidden shadow-2xl">
         <div className="relative z-10 max-w-3xl">
           <div className="flex flex-wrap items-center gap-2 mb-4">
             <div className="px-3 py-1 bg-neuro-orange text-white text-[10px] font-black uppercase tracking-widest rounded-md shadow-lg flex items-center gap-1">
@@ -109,7 +108,7 @@ export default function ContractLabPage() {
       </header>
 
       {/* Main System Navigation */}
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden sticky top-4 z-50">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden sticky top-4 z-50">
         <div className="flex overflow-x-auto hide-scrollbar">
           {[
             { id: "intelligence", label: "1. AI Contract Analyzer", icon: Search },
@@ -142,7 +141,7 @@ export default function ContractLabPage() {
                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                   {/* Uploader Column */}
                   <div className="lg:col-span-4 space-y-6">
-                     <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 flex flex-col min-h-[400px]">
+                     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 flex flex-col min-h-[400px]">
                         <h2 className="text-2xl font-black text-neuro-navy mb-2">Upload Contract</h2>
                         <p className="text-sm text-gray-500 mb-8">Upload your PDF or paste the text. Our system will decode the legal jargon into clinical reality.</p>
                         
@@ -185,7 +184,7 @@ export default function ContractLabPage() {
                      </div>
 
                      {/* Past Analyses Sidebar */}
-                     <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100">
+                     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
                         <h3 className="text-sm font-black text-neuro-navy uppercase tracking-widest mb-6 flex items-center gap-2">
                            <Clock className="w-4 h-4 text-neuro-orange" /> Previous Analyses
                         </h3>
@@ -224,7 +223,7 @@ export default function ContractLabPage() {
                   {/* Results Column */}
                   <div className="lg:col-span-8">
                      {analysisResult ? (
-                        <div className="bg-white rounded-[2.5rem] p-10 shadow-xl border border-gray-100">
+                        <div className="bg-white rounded-2xl p-10 shadow-xl border border-gray-100">
                            <div className="flex items-center justify-between mb-8 pb-8 border-b border-gray-100">
                               <div>
                                 <h2 className="text-3xl font-black text-neuro-navy mb-2">Intelligence Report</h2>
@@ -288,7 +287,7 @@ export default function ContractLabPage() {
                            </div>
                         </div>
                      ) : (
-                        <div className="bg-neuro-navy/5 rounded-[2.5rem] border border-dashed border-neuro-navy/20 h-full flex flex-col items-center justify-center p-12 text-center min-h-[500px]">
+                        <div className="bg-neuro-navy/5 rounded-2xl border border-dashed border-neuro-navy/20 h-full flex flex-col items-center justify-center p-12 text-center min-h-[500px]">
                            <Search className="w-16 h-16 text-gray-300 mb-6" />
                            <h3 className="text-2xl font-black text-gray-400 mb-2">Awaiting Contract Data</h3>
                            <p className="text-gray-500 max-w-md">Upload a document on the left to reveal hidden risks and generate an automated negotiation strategy.</p>
@@ -302,7 +301,7 @@ export default function ContractLabPage() {
           {/* SECTION 2: OFFER COMPARISON MATRIX */}
           {activeTab === 'comparison' && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
-               <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-100 overflow-x-auto">
+               <div className="bg-white rounded-2xl p-10 shadow-sm border border-gray-100 overflow-x-auto">
                  <div className="flex items-center justify-between mb-8 min-w-[800px]">
                     <div>
                       <h2 className="text-3xl font-black text-neuro-navy mb-2">The Offer Matrix</h2>
@@ -353,8 +352,7 @@ export default function ContractLabPage() {
           {/* SECTION 3: CAREER RISK AUDIT */}
           {activeTab === 'risk' && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
-               <div className="bg-neuro-navy text-white rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-96 h-96 bg-red-500/10 blur-[100px] rounded-full"></div>
+               <div className="bg-neuro-navy text-white rounded-2xl p-10 shadow-2xl relative overflow-hidden">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 relative z-10">
                      <div>
                         <h2 className="text-3xl font-black mb-4">Clinic Culture & Risk Audit</h2>
@@ -421,7 +419,7 @@ export default function ContractLabPage() {
           {/* SECTION 4: INCOME SIMULATOR */}
           {activeTab === 'simulator' && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
-               <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-100">
+               <div className="bg-white rounded-2xl p-10 shadow-sm border border-gray-100">
                   <div className="max-w-3xl mb-10">
                      <h2 className="text-3xl font-black text-neuro-navy mb-4">5-Year Lifetime Income Simulator</h2>
                      <p className="text-gray-500 text-lg leading-relaxed">
@@ -455,7 +453,7 @@ export default function ContractLabPage() {
                                      animate={{ height: `${(data.o1 / 250000) * 100}%` }}
                                      transition={{ duration: 1, delay: i * 0.1 }}
                                    >
-                                     <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-black text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">${(data.o1/1000).toFixed(0)}k</span>
+                                     <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-black text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">${(data.o1/1000).toFixed(0)}k</span>
                                    </motion.div>
                                    {/* Offer 2 Bar */}
                                    <motion.div 
@@ -464,7 +462,7 @@ export default function ContractLabPage() {
                                      animate={{ height: `${(data.o2 / 250000) * 100}%` }}
                                      transition={{ duration: 1, delay: i * 0.1 }}
                                    >
-                                     <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-black text-neuro-orange opacity-0 group-hover:opacity-100 transition-opacity">${(data.o2/1000).toFixed(0)}k</span>
+                                     <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-black text-neuro-orange opacity-0 group-hover:opacity-100 transition-opacity">${(data.o2/1000).toFixed(0)}k</span>
                                    </motion.div>
                                 </div>
                                 <p className="mt-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">{data.year}</p>
@@ -507,7 +505,7 @@ export default function ContractLabPage() {
                        <div className="p-4 bg-gray-50 rounded-2xl w-fit mb-6 group-hover:bg-neuro-orange/10 transition-colors">
                           <FileText className="w-8 h-8 text-gray-400 group-hover:text-neuro-orange transition-colors" />
                        </div>
-                       <span className="text-[9px] font-black uppercase tracking-widest text-neuro-orange mb-2 block">{doc.type}</span>
+                       <span className="text-xs font-black uppercase tracking-widest text-neuro-orange mb-2 block">{doc.type}</span>
                        <h3 className="text-xl font-bold text-neuro-navy mb-3">{doc.title}</h3>
                        <p className="text-sm text-gray-500 mb-8 leading-relaxed flex-1">{doc.desc}</p>
                        <button className="flex items-center justify-center gap-2 w-full py-4 bg-gray-50 text-neuro-navy font-black text-xs uppercase tracking-widest rounded-xl hover:bg-neuro-navy hover:text-white transition-all">

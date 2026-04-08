@@ -53,7 +53,7 @@ export default function VendorApplyPage() {
            ))}
         </div>
 
-        <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-gray-100 shadow-2xl relative overflow-hidden">
+        <div className="bg-white rounded-2xl p-8 md:p-12 border border-gray-100 shadow-2xl relative overflow-hidden">
            <AnimatePresence mode="wait">
               {step === 1 && (
                 <motion.form 
@@ -159,8 +159,7 @@ export default function VendorApplyPage() {
         </div>
 
         {/* Requirements Box */}
-        <div className="mt-12 p-8 bg-neuro-navy rounded-[2.5rem] text-white relative overflow-hidden">
-           <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 rounded-full blur-3xl"></div>
+        <div className="mt-12 p-8 bg-neuro-navy rounded-2xl text-white relative overflow-hidden">
            <div className="relative z-10 flex items-start gap-6">
               <div className="p-3 bg-white/10 rounded-2xl">
                  <ShieldCheck className="w-6 h-6 text-neuro-orange" />

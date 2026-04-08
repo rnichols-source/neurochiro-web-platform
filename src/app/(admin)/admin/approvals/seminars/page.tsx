@@ -78,7 +78,7 @@ export default function SeminarApprovalsPage() {
           <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Loading Submission Data...</p>
         </div>
       ) : seminars.length === 0 ? (
-        <div className="py-32 text-center bg-gray-50 rounded-[3rem] border border-dashed border-gray-200">
+        <div className="py-32 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
           <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-neuro-navy">All Caught Up!</h3>
           <p className="text-gray-500">There are no seminars currently awaiting review.</p>
@@ -86,7 +86,7 @@ export default function SeminarApprovalsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {seminars.map((seminar) => (
-            <div key={seminar.id} className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm hover:shadow-xl transition-all group overflow-hidden relative">
+            <div key={seminar.id} className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm hover:shadow-xl transition-all group overflow-hidden relative">
               
               {/* Promotion Tier Indicator */}
               <div className={`absolute top-0 right-0 px-8 py-2 rounded-bl-3xl text-[10px] font-black uppercase tracking-widest ${
@@ -103,9 +103,9 @@ export default function SeminarApprovalsPage() {
                 <div className="lg:col-span-2 space-y-4">
                   <div className="flex items-center gap-2">
                     {seminar.host_type_at_submission === 'doctor' ? (
-                      <span className="px-3 py-1 bg-green-50 text-green-600 text-[9px] font-black rounded-lg uppercase tracking-widest border border-green-100">Verified Doctor</span>
+                      <span className="px-3 py-1 bg-green-50 text-green-600 text-xs font-black rounded-lg uppercase tracking-widest border border-green-100">Verified Doctor</span>
                     ) : (
-                      <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[9px] font-black rounded-lg uppercase tracking-widest border border-blue-100">External Host</span>
+                      <span className="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-black rounded-lg uppercase tracking-widest border border-blue-100">External Host</span>
                     )}
                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{new Date(seminar.created_at).toLocaleDateString()}</span>
                   </div>
@@ -137,10 +137,10 @@ export default function SeminarApprovalsPage() {
 
                   <div className="flex flex-wrap gap-2 pt-2">
                     {seminar.target_audience?.map((target: string) => (
-                      <span key={target} className="px-3 py-1 bg-gray-100 rounded-full text-[9px] font-black uppercase tracking-widest text-gray-500">{target}</span>
+                      <span key={target} className="px-3 py-1 bg-gray-100 rounded-full text-xs font-black uppercase tracking-widest text-gray-500">{target}</span>
                     ))}
                     {seminar.tags?.map((tag: string) => (
-                      <span key={tag} className="px-3 py-1 bg-orange-50 rounded-full text-[9px] font-black uppercase tracking-widest text-neuro-orange">#{tag}</span>
+                      <span key={tag} className="px-3 py-1 bg-orange-50 rounded-full text-xs font-black uppercase tracking-widest text-neuro-orange">#{tag}</span>
                     ))}
                   </div>
                 </div>

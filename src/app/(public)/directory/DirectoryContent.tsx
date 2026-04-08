@@ -248,7 +248,6 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
 
       {/* Search Header */}
       <header className="bg-neuro-navy text-white pt-20 pb-32 px-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-neuro-orange/10 blur-[120px] -mr-48 -mt-48"></div>
         <div className="max-w-7xl mx-auto relative z-10 text-center">
           <h1 className="text-5xl md:text-6xl font-heading font-black mb-6 text-white drop-shadow-xl">
             Find a <span className="text-neuro-orange">NeuroChiro</span> Doctor.
@@ -258,7 +257,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
           </p>
           
           <div className="max-w-4xl mx-auto space-y-8 sticky top-4 z-[100] md:relative md:top-0">
-            <div className="bg-white rounded-[2.5rem] p-2 flex flex-col md:flex-row gap-2 shadow-2xl border border-gray-100">
+            <div className="bg-white rounded-2xl p-2 flex flex-col md:flex-row gap-2 shadow-2xl border border-gray-100">
               <div className="flex-1 relative">
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input 
@@ -309,7 +308,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
             "lg:col-span-7",
             mobileView === 'list' ? 'hidden lg:block' : 'block'
           )}>
-            <div className="bg-slate-200 rounded-[3rem] p-2 shadow-xl border border-gray-100 h-[500px] lg:h-[700px] lg:sticky lg:top-8 overflow-hidden relative group">
+            <div className="bg-slate-200 rounded-2xl p-2 shadow-xl border border-gray-100 h-[500px] lg:h-[700px] lg:sticky lg:top-8 overflow-hidden relative group">
                {showMap ? <GlobalNetworkMap key={region.code} externalSearchQuery={searchQuery} onSearchChange={setSearchQuery} externalLocationQuery={locationQuery} initialDoctors={initialData.doctors} listDoctors={filteredDoctors} /> : <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center"><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Preparing Map...</p></div>}
             </div>
           </div>
@@ -363,7 +362,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
               </>
             ) : (
               <div className="space-y-6">
-                <div className="bg-white rounded-[2.5rem] border-2 border-dashed border-gray-100 p-12 text-center">
+                <div className="bg-white rounded-2xl border-2 border-dashed border-gray-100 p-12 text-center">
                   <Globe className="w-12 h-12 text-gray-300 mx-auto mb-6 animate-pulse" />
                   <h3 className="text-2xl font-black text-neuro-navy mb-2">Expanding the Network</h3>
                   <p className="text-gray-500 text-sm mb-8">We haven't mapped a verified specialist in this specific area yet. Try searching a nearby city or reset your filters.</p>

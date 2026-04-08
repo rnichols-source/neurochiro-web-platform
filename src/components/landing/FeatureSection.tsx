@@ -29,7 +29,7 @@ export default function FeatureSection({ subtitle, title, description, features,
             ))}
           </ul>
         </div>
-        <div className={`bg-neuro-navy rounded-[3rem] aspect-square flex items-center justify-center ${reversed ? 'lg:order-1' : ''}`}>
+        <div className={`bg-neuro-navy rounded-2xl aspect-square flex items-center justify-center ${reversed ? 'lg:order-1' : ''}`}>
           <div className="text-6xl font-heading font-black text-white/10">NEURO</div>
         </div>
       </div>

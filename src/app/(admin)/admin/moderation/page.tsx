@@ -156,7 +156,7 @@ export default function ModerationCenter() {
                 <item.icon className="w-4 h-4 md:w-5 md:h-5" />
               </div>
             </div>
-            <p className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1 truncate">{item.label}</p>
+            <p className="text-xs md:text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1 truncate">{item.label}</p>
             <p className="text-xl md:text-2xl font-black text-white">{item.value}</p>
           </section>
         ))}
@@ -172,7 +172,7 @@ export default function ModerationCenter() {
                 <section 
                   key={i} 
                   onClick={() => setSelectedQueue(selectedQueue === q.id ? null : q.id)}
-                  className={`bg-white/5 border rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-8 hover:border-neuro-orange/30 transition-all cursor-pointer group active:scale-95 ${selectedQueue === q.id ? 'border-neuro-orange/50 bg-neuro-orange/5' : 'border-white/5'}`}
+                  className={`bg-white/5 border rounded-[1.5rem] md:rounded-2xl p-6 md:p-8 hover:border-neuro-orange/30 transition-all cursor-pointer group active:scale-95 ${selectedQueue === q.id ? 'border-neuro-orange/50 bg-neuro-orange/5' : 'border-white/5'}`}
                 >
                   <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center mb-4 md:mb-6 ${q.color}`}>
                     <Icon className="w-5 h-5 md:w-6 md:h-6" />
@@ -194,7 +194,7 @@ export default function ModerationCenter() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden"
+                className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-2xl overflow-hidden"
               >
                 <div className="p-6 md:p-8 border-b border-white/5 flex items-center justify-between bg-blue-500/5">
                   <div className="flex items-center gap-4">
@@ -220,7 +220,7 @@ export default function ModerationCenter() {
                           <div>
                             <h4 className="font-bold text-white text-lg">Dr. {item.first_name} {item.last_name}</h4>
                             <p className="text-xs text-gray-500">{item.clinic_name} • {item.city}, {item.state}</p>
-                            <p className="text-[9px] text-gray-600 uppercase font-black mt-1">Applied {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</p>
+                            <p className="text-xs text-gray-600 uppercase font-black mt-1">Applied {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -255,7 +255,7 @@ export default function ModerationCenter() {
           </AnimatePresence>
 
           {/* Active Alerts */}
-          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden">
+          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-2xl overflow-hidden">
             <div className="p-6 md:p-8 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <h3 className="text-lg md:text-xl font-heading font-black text-white">Security Alerts</h3>
               <div className="relative w-full sm:w-auto">
@@ -284,8 +284,8 @@ export default function ModerationCenter() {
                       </div>
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <span className={`px-2 py-0.5 rounded text-[8px] md:text-[9px] font-black uppercase tracking-widest ${alert.status === 'Critical' ? 'bg-red-500/10 text-red-500' : 'bg-orange-500/10 text-orange-500'}`}>{alert.status}</span>
-                          <span className="text-[9px] md:text-[10px] text-gray-500 whitespace-nowrap">• {formatDistanceToNow(new Date(alert.date), { addSuffix: true })}</span>
+                          <span className={`px-2 py-0.5 rounded text-xs md:text-xs font-black uppercase tracking-widest ${alert.status === 'Critical' ? 'bg-red-500/10 text-red-500' : 'bg-orange-500/10 text-orange-500'}`}>{alert.status}</span>
+                          <span className="text-xs md:text-[10px] text-gray-500 whitespace-nowrap">• {formatDistanceToNow(new Date(alert.date), { addSuffix: true })}</span>
                         </div>
                         <h4 className="font-bold text-sm md:text-base text-white truncate">{alert.type}: {alert.source}</h4>
                         <p className="text-[10px] md:text-xs text-gray-400 mt-1 truncate">{alert.reason}</p>
@@ -306,15 +306,14 @@ export default function ModerationCenter() {
 
         {/* Global Logic Sidebar */}
         <div className="space-y-6 md:space-y-8">
-          <section className="bg-neuro-navy rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-2xl relative overflow-hidden border border-white/5">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+          <section className="bg-neuro-navy rounded-[2rem] md:rounded-2xl p-6 md:p-10 shadow-2xl relative overflow-hidden border border-white/5">
             <h3 className="text-xl md:text-2xl font-heading font-black text-white mb-6 md:mb-8">System Logic</h3>
             <div className="space-y-6 md:space-y-8">
               <div className="space-y-3 md:space-y-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <p className="text-sm font-black text-white truncate">Auto-Approve Applications</p>
-                    <p className="text-[9px] md:text-[10px] text-gray-500 uppercase font-bold mt-1 tracking-widest truncate">Bypass Manual Review</p>
+                    <p className="text-xs md:text-[10px] text-gray-500 uppercase font-bold mt-1 tracking-widest truncate">Bypass Manual Review</p>
                   </div>
                   <div 
                     onClick={handleToggleAutoApprove}
@@ -330,7 +329,7 @@ export default function ModerationCenter() {
                 <div className="flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <p className="text-sm font-black text-white truncate">Outbound Link Scan</p>
-                    <p className="text-[9px] md:text-[10px] text-gray-500 uppercase font-bold mt-1 tracking-widest truncate">Automated Security</p>
+                    <p className="text-xs md:text-[10px] text-gray-500 uppercase font-bold mt-1 tracking-widest truncate">Automated Security</p>
                   </div>
                   <div 
                     onClick={handleToggleScanLinks}
@@ -344,7 +343,7 @@ export default function ModerationCenter() {
             </div>
           </section>
 
-          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 text-white">
+          <section className="bg-white/5 border border-white/5 rounded-[2rem] md:rounded-2xl p-6 md:p-8 text-white">
             <h3 className="text-base md:text-lg font-black mb-4 md:mb-6">Moderator Workload</h3>
             <div className="space-y-3 md:space-y-4">
               <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
@@ -376,7 +375,7 @@ export default function ModerationCenter() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0A0D14] rounded-[2rem] md:rounded-[3rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white/10"
+              className="bg-[#0A0D14] rounded-[2rem] md:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-white/10"
             >
               <div className="p-6 md:p-10 border-b border-white/5 bg-white/5 flex items-center justify-between">
                 <div>
@@ -387,9 +386,9 @@ export default function ModerationCenter() {
               </div>
               <div className="p-6 md:p-10 space-y-6 md:space-y-8">
                 <div className="p-5 md:p-6 bg-white/5 rounded-2xl border border-white/5">
-                  <p className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase mb-2">Automated Detection Reason</p>
+                  <p className="text-xs md:text-[10px] font-black text-gray-500 uppercase mb-2">Automated Detection Reason</p>
                   <p className="text-xs md:text-sm text-gray-300 leading-relaxed">{selectedAlert.reason}</p>
-                  <p className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase mt-4">Source Entity</p>
+                  <p className="text-xs md:text-[10px] font-black text-gray-500 uppercase mt-4">Source Entity</p>
                   <p className="text-xs md:text-sm font-bold text-white mt-1">{selectedAlert.source}</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
@@ -424,14 +423,14 @@ export default function ModerationCenter() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0A0D14] rounded-[2rem] md:rounded-[3rem] w-full max-w-4xl shadow-2xl overflow-hidden border border-white/10 max-h-[90vh] flex flex-col"
+              className="bg-[#0A0D14] rounded-[2rem] md:rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden border border-white/10 max-h-[90vh] flex flex-col"
             >
               <div className="p-6 md:p-10 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
                 <div>
                   <h3 className="text-xl md:text-3xl font-black text-white flex items-center gap-3">
                     <FileText className="w-6 h-6 md:w-8 md:h-8 text-neuro-orange" /> Compliance Policies
                   </h3>
-                  <p className="text-[9px] md:text-xs font-black text-gray-500 uppercase tracking-[0.2em] mt-2">Official Platform Guidelines & Rules</p>
+                  <p className="text-xs md:text-xs font-black text-gray-500 uppercase tracking-[0.2em] mt-2">Official Platform Guidelines & Rules</p>
                 </div>
                 <button onClick={() => setIsGuidelinesModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-500"><X className="w-6 h-6 md:w-8 md:h-8" /></button>
               </div>

@@ -58,7 +58,7 @@ export default function DoctorAnalytics() {
       </header>
 
       {loading ? (
-        <div className="h-96 flex flex-col items-center justify-center bg-white rounded-[2.5rem] border border-gray-100 shadow-sm">
+        <div className="h-96 flex flex-col items-center justify-center bg-white rounded-2xl border border-gray-100 shadow-sm">
            <Loader2 className="w-10 h-10 text-neuro-orange animate-spin mb-4" />
            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Aggregating Clinical Data...</p>
         </div>
@@ -72,7 +72,7 @@ export default function DoctorAnalytics() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Patient Acquisition Channels */}
-              <section className="bg-white rounded-[2.5rem] border border-gray-100 p-10 shadow-sm">
+              <section className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm">
                 <div className="flex items-center justify-between mb-8">
                    <h3 className="text-xl font-heading font-black flex items-center gap-2">
                      <PieChart className="w-5 h-5 text-neuro-orange" /> Acquisition Channels
@@ -100,8 +100,7 @@ export default function DoctorAnalytics() {
               </section>
 
               {/* Engagement Heatmap */}
-              <section className="bg-neuro-navy rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-xl">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[100px]"></div>
+              <section className="bg-neuro-navy rounded-2xl p-10 text-white relative overflow-hidden shadow-xl">
                 <h3 className="text-xl font-heading font-black mb-8 flex items-center gap-2 relative z-10">
                   <Activity className="w-5 h-5 text-neuro-orange" /> Lead Velocity Heatmap
                 </h3>
@@ -109,9 +108,6 @@ export default function DoctorAnalytics() {
                 <div className="aspect-[2/1] bg-[#0A0D14] rounded-3xl border border-white/10 relative overflow-hidden group">
                     {/* Heatmap Simulation */}
                     <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-                    <div className="absolute top-1/4 left-1/3 w-32 h-32 bg-neuro-orange/40 rounded-full blur-[40px] animate-pulse"></div>
-                    <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-neuro-orange/20 rounded-full blur-[60px]"></div>
-                    <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-blue-500/20 rounded-full blur-[30px] animate-pulse" style={{ animationDelay: '1s' }}></div>
 
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                        <div className="text-center">
@@ -123,11 +119,11 @@ export default function DoctorAnalytics() {
                     <div className="absolute bottom-4 left-4 flex items-center gap-4">
                        <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full bg-neuro-orange"></div>
-                          <span className="text-[8px] font-bold text-gray-400 uppercase">Incoming Leads</span>
+                          <span className="text-xs font-bold text-gray-400 uppercase">Incoming Leads</span>
                        </div>
                        <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                          <span className="text-[8px] font-bold text-gray-400 uppercase">Provider Coverage</span>
+                          <span className="text-xs font-bold text-gray-400 uppercase">Provider Coverage</span>
                        </div>
                     </div>
                   </div>
@@ -146,7 +142,7 @@ export default function DoctorAnalytics() {
             </div>
         </>
       ) : (
-        <div className="h-96 flex flex-col items-center justify-center bg-white rounded-[2.5rem] border border-gray-100 shadow-sm">
+        <div className="h-96 flex flex-col items-center justify-center bg-white rounded-2xl border border-gray-100 shadow-sm">
            <p className="text-sm font-bold text-gray-400">No performance data available for this period.</p>
         </div>
       )}

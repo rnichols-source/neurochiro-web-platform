@@ -155,13 +155,13 @@ export default function AdminLogs() {
       </div>
 
       {/* Logs Table */}
-      <section className="bg-white/5 border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl">
+      <section className="bg-white/5 border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
         <div className="p-8 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/[0.02]">
           <div className="flex items-center gap-4">
             <h3 className="text-xl font-heading font-black text-white">Live Event Stream</h3>
             <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
               <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-[8px] font-black text-green-500 uppercase tracking-widest">Real-time Feed</span>
+              <span className="text-xs font-black text-green-500 uppercase tracking-widest">Real-time Feed</span>
             </div>
           </div>
           <div className="relative w-full md:w-96">
@@ -214,8 +214,8 @@ export default function AdminLogs() {
                         <div>
                           <p className="text-sm font-bold text-white group-hover:text-neuro-orange transition-colors">{log.event}</p>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest px-2 py-0.5 bg-white/5 rounded-md">{log.category}</span>
-                            <span className={`text-[9px] font-black uppercase tracking-widest ${
+                            <span className="text-xs font-black text-gray-500 uppercase tracking-widest px-2 py-0.5 bg-white/5 rounded-md">{log.category}</span>
+                            <span className={`text-xs font-black uppercase tracking-widest ${
                               log.status === 'Success' ? 'text-emerald-500' : log.status === 'Failed' ? 'text-red-500' : 'text-amber-500'
                             }`}>{log.status}</span>
                           </div>
@@ -252,7 +252,7 @@ export default function AdminLogs() {
                           <Clock className="w-3 h-3 text-neuro-orange" />
                           {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
                         </div>
-                        <span className="text-[9px] text-gray-600 font-mono mt-1">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                        <span className="text-xs text-gray-600 font-mono mt-1">{new Date(log.timestamp).toLocaleTimeString()}</span>
                       </div>
                     </td>
                   </tr>

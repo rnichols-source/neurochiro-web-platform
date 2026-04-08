@@ -236,7 +236,7 @@ export default function JobsPage() {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative bg-white rounded-[3rem] shadow-2xl border border-white/20 w-full max-w-2xl overflow-hidden"
+              className="relative bg-white rounded-2xl shadow-2xl border border-white/20 w-full max-w-2xl overflow-hidden"
             >
               <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-neuro-cream/30">
                 <h3 className="text-2xl font-heading font-black text-neuro-navy uppercase tracking-tight">
@@ -311,7 +311,7 @@ export default function JobsPage() {
                             <div className="text-right">
                                <div className="flex items-center gap-1 justify-end">
                                   <span className={cn(
-                                    "px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest",
+                                    "px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-widest",
                                     app.stage === 'New' ? "bg-blue-50 text-blue-600" :
                                     app.stage === 'Interview' ? "bg-orange-50 text-neuro-orange" :
                                     "bg-purple-50 text-purple-600"
@@ -319,7 +319,7 @@ export default function JobsPage() {
                                     {app.stage}
                                   </span>
                                </div>
-                               <p className="text-[8px] text-gray-400 mt-1 uppercase font-bold">Applied {new Date(app.appliedAt).toLocaleDateString()}</p>
+                               <p className="text-xs text-gray-400 mt-1 uppercase font-bold">Applied {new Date(app.appliedAt).toLocaleDateString()}</p>
                             </div>
                             <button onClick={() => window.open(app.resumeUrl, '_blank')} className="p-2 hover:bg-gray-50 rounded-lg">
                                <ExternalLink className="w-4 h-4 text-gray-400" />
@@ -333,8 +333,7 @@ export default function JobsPage() {
                  {activeModal === 'Interview-Scorecards' && (
                   <div className="space-y-8">
                        <>
-                        <div className="p-8 bg-neuro-navy text-white rounded-[2.5rem] relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl"></div>
+                        <div className="p-8 bg-neuro-navy text-white rounded-2xl relative overflow-hidden">
                             <div className="relative z-10 flex justify-between items-center">
                               <div>
                                   <h4 className="text-xl font-heading font-black mb-1 text-white">Elite Standardized Scorecard</h4>
@@ -437,7 +436,7 @@ export default function JobsPage() {
                                   className="h-full bg-neuro-orange"
                                 />
                              </div>
-                             <p className="text-[9px] font-black text-neuro-orange uppercase animate-pulse">Architecting Onboarding Systems...</p>
+                             <p className="text-xs font-black text-neuro-orange uppercase animate-pulse">Architecting Onboarding Systems...</p>
                           </div>
                         ) : (
                           <button 
@@ -454,8 +453,7 @@ export default function JobsPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         className="space-y-6"
                       >
-                         <div className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-3xl -mr-32 -mt-32"></div>
+                         <div className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark p-8 rounded-2xl text-white relative overflow-hidden shadow-2xl">
                             <div className="relative z-10">
                                <div className="flex items-center gap-2 mb-6">
                                   <CheckCircle2 className="w-5 h-5 text-neuro-orange" />
@@ -502,7 +500,7 @@ export default function JobsPage() {
                                   className="h-full bg-neuro-orange"
                                 />
                              </div>
-                             <p className="text-[9px] font-black text-neuro-orange uppercase animate-pulse">Personalizing Value Proposition...</p>
+                             <p className="text-xs font-black text-neuro-orange uppercase animate-pulse">Personalizing Value Proposition...</p>
                           </div>
                         ) : (
                           <button 
@@ -519,7 +517,7 @@ export default function JobsPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         className="space-y-8"
                       >
-                         <div className="bg-gray-50 p-8 rounded-[2.5rem] border border-gray-100">
+                         <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100">
                             <div className="flex items-center gap-2 mb-4">
                                <Sparkles className="w-4 h-4 text-neuro-orange" />
                                <span className="text-[10px] font-black uppercase text-neuro-orange tracking-widest">AI Generated Dream Pitch</span>
@@ -616,7 +614,7 @@ export default function JobsPage() {
                  ))}
               </div>
            ) : activeJobsFiltered.length === 0 ? (
-             <div className="bg-white rounded-[3rem] border-2 border-dashed border-gray-100 p-20 text-center space-y-6">
+             <div className="bg-white rounded-2xl border-2 border-dashed border-gray-100 p-20 text-center space-y-6">
                 <div className="w-20 h-20 bg-neuro-cream rounded-full flex items-center justify-center mx-auto">
                    <Briefcase className="w-10 h-10 text-gray-300" />
                 </div>
@@ -700,7 +698,7 @@ export default function JobsPage() {
                                 ) : (
                                   <Zap className={cn("w-3 h-3", isZapping && "animate-pulse")} />
                                 )}
-                                <span className="text-[8px] font-black uppercase tracking-tighter">
+                                <span className="text-xs font-black uppercase tracking-tighter">
                                   {isZapping ? "Zapping..." : zapSuccess ? "Invites Sent" : "Zap to Interview"}
                                 </span>
                               </button>
@@ -726,9 +724,9 @@ export default function JobsPage() {
            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div 
                 onClick={() => setActiveModal('Interview-Scorecards')}
-                className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-start gap-4 hover:border-neuro-orange transition-all cursor-pointer group hover:shadow-lg relative overflow-hidden"
+                className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-start gap-4 hover:border-neuro-orange transition-all cursor-pointer group hover:shadow-lg relative overflow-hidden"
               >
-                 <div className="absolute top-4 right-4 bg-neuro-orange/10 text-neuro-orange text-[8px] font-black px-2 py-1 rounded-full flex items-center gap-1 border border-neuro-orange/20">
+                 <div className="absolute top-4 right-4 bg-neuro-orange/10 text-neuro-orange text-xs font-black px-2 py-1 rounded-full flex items-center gap-1 border border-neuro-orange/20">
                     <Award className="w-2 h-2" /> ELITE FEATURE
                  </div>
                  <div className="p-4 bg-neuro-navy rounded-2xl text-white group-hover:bg-neuro-orange transition-colors shadow-lg">
@@ -741,9 +739,9 @@ export default function JobsPage() {
               </div>
               <div 
                 onClick={() => setActiveModal('90-Day-Success-Plan')}
-                className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-start gap-4 hover:border-neuro-orange transition-all cursor-pointer group hover:shadow-lg relative overflow-hidden"
+                className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-start gap-4 hover:border-neuro-orange transition-all cursor-pointer group hover:shadow-lg relative overflow-hidden"
               >
-                 <div className="absolute top-4 right-4 bg-neuro-orange/10 text-neuro-orange text-[8px] font-black px-2 py-1 rounded-full flex items-center gap-1 border border-neuro-orange/20">
+                 <div className="absolute top-4 right-4 bg-neuro-orange/10 text-neuro-orange text-xs font-black px-2 py-1 rounded-full flex items-center gap-1 border border-neuro-orange/20">
                     <Award className="w-2 h-2" /> ELITE FEATURE
                  </div>
                  <div className="p-4 bg-neuro-navy rounded-2xl text-white group-hover:bg-neuro-orange transition-colors shadow-lg">
@@ -759,8 +757,7 @@ export default function JobsPage() {
 
         {/* Sidebar Widgets */}
         <div className="space-y-6">
-           <section className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl -mr-16 -mt-16"></div>
+           <section className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark rounded-2xl p-10 text-white relative overflow-hidden shadow-2xl">
               <div className="relative z-10">
                  <div className="flex items-center gap-2 mb-8">
                     <Sparkles className="w-5 h-5 text-neuro-orange" />
@@ -783,7 +780,7 @@ export default function JobsPage() {
                                </div>
                                <div>
                                   <p className="text-sm font-bold group-hover:text-neuro-orange transition-colors">{student.name}</p>
-                                  <p className="text-[9px] text-gray-400 uppercase tracking-widest font-black">{student.school}</p>
+                                  <p className="text-xs text-gray-400 uppercase tracking-widest font-black">{student.school}</p>
                                </div>
                             </div>
                             <span className="text-xs font-black text-neuro-orange">{student.matchScore}%</span>
@@ -791,7 +788,7 @@ export default function JobsPage() {
                          
                          <button 
                            onClick={() => openPitchDeck(student)}
-                           className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[8px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all group/btn"
+                           className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all group/btn"
                          >
                             <Sparkles className="w-3 h-3 text-neuro-orange group-hover/btn:scale-125 transition-transform" /> Generate Dream Pitch
                          </button>
@@ -809,7 +806,7 @@ export default function JobsPage() {
            </section>
 
            {/* Market Competitiveness Benchmarking */}
-           <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden group">
+           <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4">
                  <div className="w-10 h-10 bg-neuro-navy/5 rounded-full flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-neuro-navy" />

@@ -41,7 +41,7 @@ export default function RegionSwitcher() {
             className="absolute right-0 mt-2 w-56 bg-neuro-navy border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[200] p-2"
           >
             <div className="px-3 py-2 mb-1">
-              <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Select Region</p>
+              <p className="text-xs font-black text-gray-500 uppercase tracking-widest">Select Region</p>
             </div>
             {Object.values(REGIONS).map((r) => (
               <button
@@ -67,7 +67,7 @@ export default function RegionSwitcher() {
             ))}
             
             <div className="mt-2 pt-2 border-t border-white/5 px-3 py-2">
-              <p className="text-[8px] text-gray-500 font-medium leading-tight">
+              <p className="text-xs text-gray-500 font-medium leading-tight">
                 Data, pricing, and currency will update automatically.
               </p>
             </div>

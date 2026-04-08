@@ -145,7 +145,7 @@ export default function VendorDashboard() {
         <div className="lg:col-span-2 space-y-8">
           
           {/* Partner Offer Management */}
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="p-8 border-b border-gray-50 flex items-center justify-between bg-neuro-navy text-white">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-neuro-orange/20 rounded-xl">
@@ -232,7 +232,7 @@ export default function VendorDashboard() {
 
         <div className="space-y-8">
           {/* Profile Visibility Score */}
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+          <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
             <h3 className="font-heading font-black text-lg text-neuro-navy mb-6 flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-blue-500" /> Marketplace Pulse
             </h3>
@@ -259,8 +259,7 @@ export default function VendorDashboard() {
           </section>
 
           {/* Compliance & Settings */}
-          <section className="bg-neuro-navy rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl -mr-16 -mt-16"></div>
+          <section className="bg-neuro-navy rounded-2xl p-8 text-white shadow-xl relative overflow-hidden">
             <div className="relative z-10">
               <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <Settings className="w-5 h-5 text-gray-400" /> Vendor Settings
@@ -346,7 +345,7 @@ export default function VendorDashboard() {
           </section>
 
           {/* Quick Support */}
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm text-center">
+          <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm text-center">
             <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="w-8 h-8 text-blue-500" />
             </div>

@@ -27,7 +27,7 @@ export default function GoogleReviews({ placeId, doctorName }: GoogleReviewsProp
 
   if (!placeId) {
     return (
-      <div className="bg-white/5 border border-white/10 rounded-[3rem] p-10 text-center">
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-10 text-center">
         <ShieldCheck className="w-12 h-12 text-gray-600 mx-auto mb-4 opacity-20" />
         <h3 className="text-xl font-black text-white mb-2">Patient Reviews Coming Soon</h3>
         <p className="text-slate-400 text-sm max-w-xs mx-auto">
@@ -39,7 +39,7 @@ export default function GoogleReviews({ placeId, doctorName }: GoogleReviewsProp
 
   if (loading) {
     return (
-      <div className="bg-white/5 border border-white/10 rounded-[3rem] p-10 animate-pulse">
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-10 animate-pulse">
         <div className="h-8 w-48 bg-white/10 rounded-lg mb-6"></div>
         <div className="space-y-4">
           <div className="h-24 bg-white/5 rounded-2xl"></div>
@@ -52,7 +52,7 @@ export default function GoogleReviews({ placeId, doctorName }: GoogleReviewsProp
   return (
     <div className="space-y-8">
       {/* Header Stat Card */}
-      <div className="bg-white/5 border border-white/10 rounded-[3rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden group">
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-10 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neuro-orange to-blue-500 opacity-50"></div>
         
         <div className="flex items-center gap-6">
@@ -88,7 +88,7 @@ export default function GoogleReviews({ placeId, doctorName }: GoogleReviewsProp
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white/[0.03] border border-white/5 p-8 rounded-[2.5rem] hover:bg-white/[0.05] transition-all"
+            className="bg-white/[0.03] border border-white/5 p-8 rounded-2xl hover:bg-white/[0.05] transition-all"
           >
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-neuro-navy border border-white/10 flex items-center justify-center text-neuro-orange font-black text-lg overflow-hidden">

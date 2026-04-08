@@ -53,7 +53,6 @@ export default function BentoGrid() {
             viewport={{ once: true }}
             className="relative group overflow-hidden rounded-3xl bg-neuro-cream border border-gray-100 p-10 flex flex-col justify-between"
           >
-             <div className="absolute -right-10 -top-10 w-40 h-40 bg-neuro-orange/10 rounded-full blur-3xl transition-opacity group-hover:opacity-100 opacity-50" aria-hidden="true" />
             
             <div>
               <div className="w-12 h-12 rounded-full bg-neuro-orange/10 flex items-center justify-center mb-6">

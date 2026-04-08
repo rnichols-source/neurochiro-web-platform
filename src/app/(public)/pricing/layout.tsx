@@ -29,7 +29,7 @@ export default function PricingLayout({
         {/* Unified Pricing Header */}
         <div className="text-center mb-16 space-y-4">
           <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-xs">Membership Tiers</span>
-          <h1 className="text-5xl md:text-7xl font-heading font-black text-neuro-navy">Invest in your <span className="text-neuro-orange">Evolution.</span></h1>
+          <h1 className="text-5xl md:text-5xl font-heading font-black text-neuro-navy">Invest in your <span className="text-neuro-orange">Evolution.</span></h1>
           <p className="text-gray-500 text-xl max-w-2xl mx-auto font-medium">
             Choose the path that fits your clinical or personal journey.
           </p>

@@ -9,7 +9,7 @@ export default function TermsPage() {
           <p className="text-neuro-orange font-bold text-sm uppercase tracking-widest pb-2">Last Updated: March 14, 2026</p>
         </div>
 
-        <div className="prose prose-slate max-w-none bg-white p-12 rounded-[3rem] shadow-xl border border-gray-100">
+        <div className="prose prose-slate max-w-none bg-white p-12 rounded-2xl shadow-xl border border-gray-100">
           <p className="lead text-lg text-gray-600 mb-8">By using the NeuroChiro platform, you agree to the following terms and conditions.</p>
           
           <h2 className="text-2xl font-bold text-neuro-navy mt-12 mb-4">1. Acceptance of Terms</h2>

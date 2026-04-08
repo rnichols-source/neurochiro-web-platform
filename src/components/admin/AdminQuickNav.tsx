@@ -138,11 +138,10 @@ export default function AdminQuickNav() {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20"
+              className="relative w-full max-w-lg bg-white rounded-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20"
             >
               {/* Header */}
               <div className="bg-neuro-navy p-8 text-white relative">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[80px] rounded-full -mr-32 -mt-32"></div>
                 
                 <div className="flex justify-between items-start relative z-10">
                   <div className="space-y-1">
@@ -174,7 +173,7 @@ export default function AdminQuickNav() {
                       </div>
                       <div className="flex-1">
                         <h4 className="font-black text-neuro-navy text-sm uppercase tracking-tight">{item.title}</h4>
-                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{item.subtitle}</p>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{item.subtitle}</p>
                       </div>
                       <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-neuro-orange group-hover:translate-x-1 transition-all" />
                     </button>
@@ -184,7 +183,7 @@ export default function AdminQuickNav() {
 
               {/* Footer */}
               <div className="p-6 bg-white border-t border-gray-100 text-center">
-                <div className="inline-flex items-center gap-2 text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                <div className="inline-flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-[0.2em]">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                   Secure Admin Session Active
                 </div>

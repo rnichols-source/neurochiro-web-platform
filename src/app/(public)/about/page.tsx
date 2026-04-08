@@ -13,7 +13,7 @@ export default function AboutPage() {
           className="text-center max-w-3xl mx-auto mb-20"
         >
           <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-[10px] block mb-4">Our Mission</span>
-          <h1 className="text-5xl md:text-7xl font-heading font-black text-neuro-navy mb-8">
+          <h1 className="text-5xl md:text-5xl font-heading font-black text-neuro-navy mb-8">
             Transforming Human <span className="text-neuro-orange">Potential.</span>
           </h1>
           <p className="text-gray-600 text-lg md:text-xl leading-relaxed">
@@ -33,7 +33,7 @@ export default function AboutPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm"
+              className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm"
             >
               <div className="w-12 h-12 bg-neuro-orange/10 rounded-2xl flex items-center justify-center text-neuro-orange mb-6">
                 <item.icon className="w-6 h-6" />

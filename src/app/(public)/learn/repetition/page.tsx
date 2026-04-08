@@ -9,10 +9,9 @@ export default function RepetitionPage() {
     <div className="min-h-dvh bg-neuro-cream pb-32">
       {/* Hero Section */}
       <section className="bg-neuro-navy text-white pt-32 pb-24 px-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-neuro-orange/10 blur-[120px] rounded-full -mr-64 -mt-64"></div>
         <div className="max-w-4xl mx-auto relative z-10 text-center space-y-6">
           <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-xs">Path 02: Consistency</span>
-          <h1 className="text-5xl md:text-7xl font-heading font-black text-white">Why Repetition Matters</h1>
+          <h1 className="text-5xl md:text-5xl font-heading font-black text-white">Why Repetition Matters</h1>
           <p className="text-gray-300 text-xl font-medium max-w-2xl mx-auto">
             Your nervous system doesn't change overnight. It adapts through consistent, intentional input.
           </p>
@@ -22,7 +21,7 @@ export default function RepetitionPage() {
       {/* The Gym Analogy */}
       <section className="py-24 px-8 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         <div className="relative">
-           <div className="bg-white rounded-[3rem] p-12 shadow-2xl border border-gray-100 relative z-10 overflow-hidden">
+           <div className="bg-white rounded-2xl p-12 shadow-2xl border border-gray-100 relative z-10 overflow-hidden">
               <div className="absolute top-0 right-0 p-8 opacity-10">
                  <Dumbbell className="w-32 h-32 text-neuro-navy" />
               </div>
@@ -60,7 +59,6 @@ export default function RepetitionPage() {
 
       {/* Language Analogy */}
       <section className="py-24 bg-neuro-navy text-white px-8 overflow-hidden relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-neuro-orange/5 blur-[120px]"></div>
         <div className="max-w-5xl mx-auto text-center relative z-10 space-y-12">
            <Languages className="w-16 h-16 text-neuro-orange mx-auto mb-8" />
            <h2 className="text-4xl md:text-6xl font-heading font-black text-white">Learning a New Language</h2>

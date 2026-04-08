@@ -106,7 +106,6 @@ export default function PWAInstallPrompt() {
           className="fixed bottom-6 left-6 right-6 z-[1000] md:left-auto md:right-10 md:w-96"
         >
           <div className="bg-neuro-navy text-white p-6 rounded-[2rem] shadow-2xl border border-white/10 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl pointer-events-none"></div>
             
             <button 
               onClick={closePrompt}

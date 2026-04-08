@@ -66,7 +66,7 @@ export default function GetStartedModal({ isOpen, onClose }: GetStartedModalProp
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[301] w-full max-w-4xl p-6"
           >
-            <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 overflow-hidden relative">
+            <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden relative">
               <button 
                 onClick={onClose}
                 className="absolute top-8 right-8 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
@@ -87,7 +87,7 @@ export default function GetStartedModal({ isOpen, onClose }: GetStartedModalProp
                       key={i} 
                       href={item.href}
                       onClick={onClose}
-                      className="group flex items-start gap-6 p-8 rounded-[2.5rem] border border-gray-100 hover:border-neuro-orange/30 hover:shadow-xl hover:shadow-neuro-orange/5 transition-all bg-white relative overflow-hidden"
+                      className="group flex items-start gap-6 p-8 rounded-2xl border border-gray-100 hover:border-neuro-orange/30 hover:shadow-xl hover:shadow-neuro-orange/5 transition-all bg-white relative overflow-hidden"
                     >
                       <div className={`w-14 h-14 rounded-2xl ${item.bg} ${item.color} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
                         <item.icon className="w-7 h-7" />

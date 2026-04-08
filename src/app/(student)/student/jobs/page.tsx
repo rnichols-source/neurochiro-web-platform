@@ -107,8 +107,7 @@ export default function JobsPage() {
       </header>
 
       {/* Application Tracker */}
-      <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm overflow-hidden relative min-h-[200px]">
-         <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/5 blur-3xl"></div>
+      <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm overflow-hidden relative min-h-[200px]">
          <h2 className="text-xl font-heading font-bold text-neuro-navy mb-6">Active Applications</h2>
          <div className={`flex gap-6 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2 ${''}`}>
             {[
@@ -182,9 +181,9 @@ export default function JobsPage() {
           </div>
 
           {jobs.map((job, i) => (
-            <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
+            <div key={i} className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
               {job.matchScore > 95 && (
-                 <div className="absolute top-0 right-0 bg-neuro-orange text-white text-[9px] font-black px-4 py-1 rounded-bl-xl uppercase tracking-[0.2em]">
+                 <div className="absolute top-0 right-0 bg-neuro-orange text-white text-xs font-black px-4 py-1 rounded-bl-xl uppercase tracking-[0.2em]">
                     Top Match
                  </div>
               )}
@@ -197,7 +196,7 @@ export default function JobsPage() {
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-bold text-xl text-neuro-navy group-hover:text-neuro-orange transition-colors">{job.title}</h3>
                       {job.status === "Applied" && (
-                         <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[9px] font-black rounded uppercase tracking-widest border border-blue-100">Applied</span>
+                         <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs font-black rounded uppercase tracking-widest border border-blue-100">Applied</span>
                       )}
                     </div>
                     <p className="text-sm font-medium text-gray-500 mb-4">{job.clinic}</p>

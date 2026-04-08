@@ -197,7 +197,7 @@ export default function ProfilePage() {
         <div className="lg:col-span-8 space-y-8">
           
           {/* Hero Profile Block */}
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-10 shadow-sm relative overflow-hidden">
+          <section className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-neuro-orange/5 rounded-bl-[5rem] pointer-events-none"></div>
             
             <div className="flex flex-col md:flex-row items-center gap-10">
@@ -272,7 +272,7 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
              
              {/* Intro Video Card */}
-             <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden flex flex-col h-full">
+             <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm relative overflow-hidden flex flex-col h-full">
                 <div className="flex items-center justify-between mb-8">
                    <h3 className="font-bold text-neuro-navy flex items-center gap-2">
                       <Video className="w-5 h-5 text-neuro-orange" /> Intro Video
@@ -294,7 +294,7 @@ export default function ProfilePage() {
              </section>
 
              {/* Resume Card */}
-             <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden flex flex-col h-full">
+             <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm relative overflow-hidden flex flex-col h-full">
                 <div className="flex items-center justify-between mb-8">
                    <h3 className="font-bold text-neuro-navy flex items-center gap-2">
                       <FileText className="w-5 h-5 text-blue-600" /> Resume / CV
@@ -323,8 +323,7 @@ export default function ProfilePage() {
         <div className="lg:col-span-4 space-y-6">
           
           {/* Account Status Segment */}
-          <section className="bg-neuro-navy rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-neuro-orange/10 blur-[80px] pointer-events-none"></div>
+          <section className="bg-neuro-navy rounded-2xl p-10 text-white relative overflow-hidden shadow-2xl">
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-8">
                 <div className="p-2 bg-neuro-orange/20 rounded-xl">
@@ -372,7 +371,7 @@ export default function ProfilePage() {
           </section>
 
           {/* Shortlist Segment */}
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+          <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
              <h4 className="font-heading font-black text-neuro-navy mb-8 flex items-center gap-3">
                 <Bookmark className="w-5 h-5 text-neuro-orange" /> Saved Shortlist
              </h4>
@@ -405,7 +404,7 @@ export default function ProfilePage() {
           </section>
 
           {/* Account Actions Segment */}
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+          <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
              <h4 className="font-heading font-black text-neuro-navy mb-6 px-2">Account Actions</h4>
              <div className="space-y-2">
                 <button 
@@ -439,7 +438,7 @@ export default function ProfilePage() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white/20"
+              className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-white/20"
             >
               {/* EDIT PROFILE MODAL */}
               {activeModal === 'edit-profile' && (
@@ -490,8 +489,7 @@ export default function ProfilePage() {
                     <h3 className="text-2xl font-black text-neuro-navy">Intro Video</h3>
                     <button onClick={() => setActiveModal(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X className="w-6 h-6" /></button>
                   </div>
-                  <div className="aspect-video bg-neuro-navy rounded-[2.5rem] flex flex-col items-center justify-center border-4 border-gray-100 shadow-2xl relative overflow-hidden">
-                     <div className="absolute inset-0 bg-neuro-orange/5 blur-3xl"></div>
+                  <div className="aspect-video bg-neuro-navy rounded-2xl flex flex-col items-center justify-center border-4 border-gray-100 shadow-2xl relative overflow-hidden">
                      <Camera className="w-12 h-12 text-white/20 mb-4 relative z-10" />
                      <p className="text-white/50 text-sm font-bold relative z-10">Record your philosophy...</p>
                   </div>
@@ -509,7 +507,7 @@ export default function ProfilePage() {
                     <h3 className="text-2xl font-black text-neuro-navy">Replace Resume/CV</h3>
                     <button onClick={() => setActiveModal(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X className="w-6 h-6" /></button>
                   </div>
-                  <div className="p-12 border-4 border-dashed border-gray-100 rounded-[3rem] flex flex-col items-center justify-center text-center bg-gray-50/50">
+                  <div className="p-12 border-4 border-dashed border-gray-100 rounded-2xl flex flex-col items-center justify-center text-center bg-gray-50/50">
                      <Upload className="w-12 h-12 text-gray-300 mb-4" />
                      <p className="font-bold text-neuro-navy mb-1">Drag and drop your new CV</p>
                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">PDF, DOCX up to 10MB</p>

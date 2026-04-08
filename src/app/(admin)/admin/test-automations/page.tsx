@@ -113,29 +113,28 @@ export default function AutomationCommandCenter() {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Active Queue</p>
           <p className="text-4xl font-black text-neuro-navy">{stats.pending + stats.failed}</p>
           <div className="mt-4 flex items-center gap-2 text-xs font-bold text-orange-500">
             <Clock className="w-4 h-4" /> Processing Now
           </div>
         </div>
-        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm border-l-4 border-l-red-500">
+        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm border-l-4 border-l-red-500">
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Failed Jobs</p>
           <p className="text-4xl font-black text-red-600">{stats.failed}</p>
           <div className="mt-4 flex items-center gap-2 text-xs font-bold text-red-400">
             <AlertCircle className="w-4 h-4" /> Requires Attention
           </div>
         </div>
-        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm border-l-4 border-l-emerald-500">
+        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm border-l-4 border-l-emerald-500">
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Successfully Run</p>
           <p className="text-4xl font-black text-emerald-600">{stats.completed}</p>
           <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-400">
             <CheckCircle2 className="w-4 h-4" /> Automation Health: 98%
           </div>
         </div>
-        <div className="bg-neuro-navy p-8 rounded-[2.5rem] shadow-xl shadow-neuro-navy/20 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl -mr-16 -mt-16"></div>
+        <div className="bg-neuro-navy p-8 rounded-2xl shadow-xl shadow-neuro-navy/20 relative overflow-hidden">
           <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Operational Status</p>
           <p className="text-2xl font-black text-white uppercase tracking-tight">OPTIMAL</p>
           <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-400">
@@ -202,7 +201,7 @@ export default function AutomationCommandCenter() {
       </div>
 
       {/* Live Queue Table */}
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <table className="w-full text-left">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100">
@@ -231,14 +230,14 @@ export default function AutomationCommandCenter() {
                   <p className="text-[10px] text-gray-400 font-mono truncate max-w-xs">{JSON.stringify(job.payload)}</p>
                 </td>
                 <td className="px-8 py-6">
-                  <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                  <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest ${
                     job.status === 'completed' ? 'bg-emerald-50 text-emerald-600' :
                     job.status === 'failed' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
                   }`}>
                     {job.status}
                   </span>
                   {job.status === 'failed' && (
-                    <p className="text-[9px] text-red-400 mt-1 font-bold uppercase truncate max-w-[150px]">{job.last_error}</p>
+                    <p className="text-xs text-red-400 mt-1 font-bold uppercase truncate max-w-[150px]">{job.last_error}</p>
                   )}
                 </td>
                 <td className="px-8 py-6">

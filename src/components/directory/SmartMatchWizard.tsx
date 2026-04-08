@@ -93,7 +93,7 @@ export default function SmartMatchWizard({ isOpen, onClose, onComplete }: SmartM
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[401] w-full max-w-xl p-6"
           >
-            <div className="bg-white rounded-[3rem] shadow-2xl border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
               {/* Progress Bar */}
               <div className="h-1.5 w-full bg-gray-100 flex">
                 <motion.div

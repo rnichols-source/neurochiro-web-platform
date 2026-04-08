@@ -51,7 +51,7 @@ export default function CareerMapPage() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 relative">
       {/* Interactive Map Header */}
-      <section className="bg-neuro-navy h-[400px] rounded-[2.5rem] relative overflow-hidden shadow-2xl border border-white/10 group">
+      <section className="bg-neuro-navy h-[400px] rounded-2xl relative overflow-hidden shadow-2xl border border-white/10 group">
          {/* Background Map Visual */}
          <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/dark-v10/static/-98,38,3,0/1200x400?access_token=MOCK')] bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-1000"></div>
          
@@ -110,14 +110,14 @@ export default function CareerMapPage() {
                             <div className={`text-xl font-black text-neuro-navy`}>
                                {`${clinic.matchScore}%`}
                             </div>
-                            <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Match Score</div>
+                            <div className="text-xs font-black text-gray-400 uppercase tracking-widest leading-none">Match Score</div>
                          </div>
                       </div>
                       <h3 className="text-lg font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors mb-1">{clinic.name}</h3>
                       <p className="text-xs text-gray-400 font-medium mb-6">{clinic.location}</p>
                       <div className="flex flex-wrap gap-2">
                          {clinic.tags.map(tag => (
-                            <span key={tag} className="px-2.5 py-1 bg-blue-50 text-blue-600 text-[9px] font-black rounded uppercase tracking-widest border border-blue-100">{tag}</span>
+                            <span key={tag} className="px-2.5 py-1 bg-blue-50 text-blue-600 text-xs font-black rounded uppercase tracking-widest border border-blue-100">{tag}</span>
                          ))}
                       </div>
                    </div>
@@ -136,7 +136,7 @@ export default function CareerMapPage() {
 
         {/* Sidebar: Career Radar & Alerts */}
         <div className="space-y-6">
-           <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden">
+           <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm relative overflow-hidden">
               <h3 className="text-xl font-heading font-black text-neuro-navy mb-10">Career Radar</h3>
               <div className={`relative aspect-square mb-10`}>
                  {/* Radar Visual */}
@@ -156,13 +156,12 @@ export default function CareerMapPage() {
                     className="absolute top-1/2 left-1/2 w-1/2 h-0.5 bg-gradient-to-r from-neuro-orange/40 to-transparent origin-left -translate-y-1/2"
                  />
 
-                 <span className="absolute top-0 left-1/2 -translate-x-1/2 text-[8px] font-black text-gray-300 uppercase tracking-widest">Denver</span>
-                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[8px] font-black text-gray-300 uppercase tracking-widest">Austin</span>
+                 <span className="absolute top-0 left-1/2 -translate-x-1/2 text-xs font-black text-gray-300 uppercase tracking-widest">Denver</span>
+                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs font-black text-gray-300 uppercase tracking-widest">Austin</span>
               </div>
               <p className="text-[10px] text-gray-400 font-bold text-center leading-relaxed italic">Scanning for new clinic matches in your top 3 cities...</p>
               
               <div className="mt-8 bg-neuro-navy p-5 rounded-2xl text-white relative overflow-hidden group">
-                 <div className="absolute top-0 right-0 w-24 h-24 bg-neuro-orange/10 blur-2xl group-hover:bg-neuro-orange/20 transition-all duration-500"></div>
                  <div className="relative z-10 flex items-start gap-3">
                     <div className="p-1.5 bg-neuro-orange rounded-lg">
                        <Zap className="w-3.5 h-3.5 text-white fill-current" />
@@ -176,7 +175,6 @@ export default function CareerMapPage() {
            </section>
 
            <section className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark rounded-[2rem] p-8 text-white text-center relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl -mr-16 -mt-16"></div>
               <Sparkles className="w-10 h-10 text-neuro-orange mx-auto mb-6" />
               <h4 className="font-heading font-black text-xl mb-3 leading-tight">Priority Matching</h4>
               <p className="text-gray-400 text-xs mb-8 leading-relaxed">Accelerator members appear at the top of candidate searches for elite clinics.</p>

@@ -100,7 +100,7 @@ export default function AcademyPage() {
           {/* Module Content */}
           <div className="lg:col-span-2">
             {selectedModule ? (
-              <div className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+              <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
                 <div className="flex items-center gap-2 mb-2">
                   <Clock className="w-4 h-4 text-gray-400" />
                   <span className="text-xs font-bold text-gray-400">{selectedModule.readTime}</span>
@@ -124,7 +124,7 @@ export default function AcademyPage() {
                 )}
               </div>
             ) : (
-              <div className="bg-gray-50 rounded-[2.5rem] border border-gray-100 p-12 text-center">
+              <div className="bg-gray-50 rounded-2xl border border-gray-100 p-12 text-center">
                 <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-400 font-bold">Select a module to start learning</p>
               </div>

@@ -19,7 +19,7 @@ export default function StudentBilling() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
           {/* Current Plan */}
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+          <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-heading font-black text-xl text-neuro-navy flex items-center gap-2">
                 <ShieldCheck className="w-6 h-6 text-neuro-orange" /> Current Membership
@@ -69,7 +69,7 @@ export default function StudentBilling() {
           </section>
 
           {/* Payment Method */}
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+          <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
             <h3 className="font-heading font-black text-xl text-neuro-navy mb-6 flex items-center gap-2">
               <CreditCard className="w-6 h-6 text-blue-500" /> Payment Method
             </h3>
@@ -88,7 +88,7 @@ export default function StudentBilling() {
           </section>
 
           {/* Invoice History */}
-          <section className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
+          <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
             <h3 className="font-heading font-black text-xl text-neuro-navy mb-6 flex items-center gap-2">
               <History className="w-6 h-6 text-gray-400" /> Payment History
             </h3>
@@ -119,8 +119,7 @@ export default function StudentBilling() {
 
         {/* Upgrade Sidebar */}
         <div className="space-y-6">
-          <section className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl -mr-16 -mt-16"></div>
+          <section className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark rounded-2xl p-8 text-white relative overflow-hidden shadow-2xl">
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-6">
                 <Zap className="w-6 h-6 text-neuro-orange" />

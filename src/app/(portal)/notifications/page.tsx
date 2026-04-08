@@ -110,7 +110,6 @@ export default function NotificationsPage() {
           </div>
 
           <div className="bg-neuro-navy p-6 rounded-[2rem] text-white shadow-xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/20 blur-3xl group-hover:bg-neuro-orange/30 transition-all" />
             <Megaphone className="w-8 h-8 text-neuro-orange mb-4" />
             <h3 className="text-lg font-black uppercase tracking-tight leading-tight">Stay Updated</h3>
             <p className="text-xs text-gray-400 font-medium mt-2 leading-relaxed">
@@ -135,7 +134,7 @@ export default function NotificationsPage() {
             />
           </div>
 
-          <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden min-h-[500px]">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden min-h-[500px]">
             {loading ? (
               <div className="flex flex-col items-center justify-center p-24 space-y-4">
                 <div className="w-12 h-12 border-4 border-gray-100 border-t-neuro-orange rounded-full animate-spin" />

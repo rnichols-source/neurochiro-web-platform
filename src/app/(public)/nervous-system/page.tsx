@@ -109,7 +109,6 @@ export default function NervousSystemExperience() {
           
           {/* Silhouette Placeholder (In production, this is the 3D R3F Canvas) */}
           <div className="relative w-full h-full flex items-center justify-center">
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 via-transparent to-neuro-orange/10 rounded-full blur-[120px]"></div>
             
             {/* SVG Interactive Anatomy */}
             <svg viewBox="0 0 200 400" className="w-full h-full drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]">
@@ -156,10 +155,9 @@ export default function NervousSystemExperience() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="bg-white/5 backdrop-blur-2xl border border-white/10 p-10 rounded-[3rem] shadow-2xl relative overflow-hidden"
+              className="bg-white/5 backdrop-blur-2xl border border-white/10 p-10 rounded-2xl shadow-2xl relative overflow-hidden"
             >
               {/* Animated Glow in Card */}
-              <div className={`absolute -top-24 -right-24 w-48 h-48 rounded-full blur-[80px] opacity-20 ${SYSTEMS[activeSystem].color}`}></div>
 
               <header className="mb-10">
                 <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 inline-block text-white ${SYSTEMS[activeSystem].color}`}>

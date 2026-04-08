@@ -55,8 +55,7 @@ export default function NotificationSettings() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Channels */}
-      <section className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl pointer-events-none"></div>
+      <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
         <h3 className="text-xl font-black text-neuro-navy mb-8 flex items-center gap-3">
           <Bell className="w-6 h-6 text-blue-500" /> Delivery Channels
         </h3>
@@ -89,8 +88,7 @@ export default function NotificationSettings() {
       </section>
 
       {/* Alert Types */}
-      <section className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/5 blur-3xl pointer-events-none"></div>
+      <section className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
         <h3 className="text-xl font-black text-neuro-navy mb-8 flex items-center gap-3">
           <ShieldCheck className="w-6 h-6 text-neuro-orange" /> Notification Types
         </h3>

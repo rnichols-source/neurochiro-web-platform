@@ -12,8 +12,6 @@ const stats = [
 export default function StatsSection() {
   return (
     <section className="py-20 bg-neuro-navy text-white relative overflow-hidden">
-      {/* Background Pulse */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[200px] bg-neuro-orange/10 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">

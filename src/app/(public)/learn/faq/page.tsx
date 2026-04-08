@@ -36,7 +36,7 @@ export default function FAQPage() {
       <header className="bg-neuro-navy text-white pt-32 pb-24 px-8 relative overflow-hidden text-center">
         <div className="max-w-4xl mx-auto relative z-10 space-y-6">
           <HelpCircle className="w-16 h-16 text-neuro-orange mx-auto mb-4" />
-          <h1 className="text-5xl md:text-7xl font-heading font-black text-white">Common Questions</h1>
+          <h1 className="text-5xl md:text-5xl font-heading font-black text-white">Common Questions</h1>
           <p className="text-gray-300 text-xl font-medium">Clarity and transparency regarding your care.</p>
         </div>
 
@@ -44,7 +44,7 @@ export default function FAQPage() {
 
       <main className="max-w-4xl mx-auto px-8 -mt-12 relative z-20 space-y-12">
         {/* Accordion */}
-        <section className="bg-white rounded-[3rem] p-10 shadow-2xl border border-gray-100">
+        <section className="bg-white rounded-2xl p-10 shadow-2xl border border-gray-100">
           <div className="divide-y divide-gray-100">
             {faqs.map((faq, i) => (
               <div key={i} className="py-6 first:pt-0 last:pb-0">
@@ -68,7 +68,7 @@ export default function FAQPage() {
         </section>
 
         {/* Insurance vs Cash Section */}
-        <section className="bg-white rounded-[3rem] p-12 shadow-2xl border border-gray-100 overflow-hidden relative">
+        <section className="bg-white rounded-2xl p-12 shadow-2xl border border-gray-100 overflow-hidden relative">
            <div className="absolute top-0 right-0 p-12 opacity-5">
               <Wallet className="w-48 h-48 text-neuro-navy" />
            </div>

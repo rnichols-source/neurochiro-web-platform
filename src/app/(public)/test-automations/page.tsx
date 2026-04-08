@@ -44,7 +44,7 @@ export default function AutomationPlayground() {
         <p className="text-gray-500">Test platform event triggers, Resend email delivery, and Database queuing.</p>
       </header>
 
-      <section className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 space-y-6">
+      <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 space-y-6">
         <div className="flex items-center gap-4 p-4 bg-neuro-orange/5 rounded-2xl border border-neuro-orange/10">
           <Info className="w-6 h-6 text-neuro-orange" />
           <p className="text-sm text-neuro-navy/80 leading-relaxed">

@@ -126,7 +126,7 @@ export default function CareersPage() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl border border-white/20 overflow-hidden flex flex-col max-h-[90vh]"
+              className="relative w-full max-w-2xl bg-white rounded-[2rem] sm:rounded-2xl shadow-2xl border border-white/20 overflow-hidden flex flex-col max-h-[90vh]"
             >
               <div className="p-6 sm:p-8 border-b border-gray-100 flex items-start justify-between bg-neuro-navy text-white shrink-0">
                 <div>
@@ -143,7 +143,6 @@ export default function CareersPage() {
                 {applicationStep === 1 && (
                   <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                      <div className="flex flex-col sm:flex-row items-center gap-6 p-6 bg-neuro-navy rounded-[2rem] text-white border border-white/10 shadow-2xl relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl group-hover:bg-neuro-orange/20 transition-all"></div>
                         <div className="w-14 h-14 bg-neuro-orange rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0">
                            <Users className="w-7 h-7" />
                         </div>
@@ -254,11 +253,10 @@ export default function CareersPage() {
 
       {/* 1. Hero Section */}
       <section className="relative pt-12 pb-24 px-6 overflow-hidden">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-neuro-orange/10 blur-[120px] rounded-full -mr-40 pointer-events-none"></div>
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8 relative z-10">
             <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-[10px] block border border-neuro-orange/20 px-4 py-1.5 rounded-full w-max">NeuroChiro Careers</span>
-            <h1 className="text-5xl md:text-7xl font-heading font-black text-neuro-navy leading-[1.05]">
+            <h1 className="text-5xl md:text-5xl font-heading font-black text-neuro-navy leading-[1.05]">
               More Than a Job. <br/>
               <span className="text-neuro-orange">A Mission.</span>
             </h1>
@@ -275,12 +273,11 @@ export default function CareersPage() {
             </div>
           </div>
           <div className="relative hidden lg:block">
-             <div className="absolute inset-0 bg-gradient-to-tr from-neuro-navy/5 to-neuro-orange/5 rounded-[3rem] blur-2xl transform rotate-3"></div>
-             <div className="bg-white p-2 rounded-[3rem] shadow-2xl relative z-10 transform -rotate-2 border border-gray-100">
+             <div className="bg-white p-2 rounded-2xl shadow-2xl relative z-10 transform -rotate-2 border border-gray-100">
                 <img loading="lazy" decoding="async" 
                   src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
                   alt="Chiropractic Assistant interacting with patient" 
-                  className="rounded-[2.5rem] w-full h-[400px] object-cover"
+                  className="rounded-2xl w-full h-[400px] object-cover"
                 />
              </div>
              {/* Floating badge */}
@@ -310,7 +307,7 @@ export default function CareersPage() {
                { icon: Zap, title: "Clinical Tech", desc: "Assist the doctor with clinical duties, perform neuro-scans (training provided!), and educate patients on their healing journey." },
                { icon: Heart, title: "Wellness Coordinator", desc: "Drive community impact through internal marketing, event planning, and orchestrating patient appreciation days." }
              ].map((role, i) => (
-               <div key={i} className="p-8 bg-neuro-cream rounded-[2.5rem] border border-gray-100 hover:border-neuro-orange transition-all group">
+               <div key={i} className="p-8 bg-neuro-cream rounded-2xl border border-gray-100 hover:border-neuro-orange transition-all group">
                   <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                      <role.icon className="w-7 h-7 text-neuro-orange" />
                   </div>
@@ -384,7 +381,7 @@ export default function CareersPage() {
               {/* Job Listings */}
               <div className="lg:col-span-3 space-y-6">
                  {filteredJobs.map(job => (
-                    <div key={job.id} className="bg-white p-6 sm:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden flex flex-col sm:flex-row gap-6 sm:items-center">
+                    <div key={job.id} className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden flex flex-col sm:flex-row gap-6 sm:items-center">
                        <div className="absolute left-0 top-0 bottom-0 w-2 bg-neuro-orange scale-y-0 group-hover:scale-y-100 transition-transform origin-bottom"></div>
                        
                        <div className="flex-1 space-y-4">
@@ -437,7 +434,7 @@ export default function CareersPage() {
                  ))}
 
                  {filteredJobs.length === 0 && (
-                   <div className="py-20 text-center bg-white rounded-[3rem] border border-dashed border-gray-200">
+                   <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200">
                       <Briefcase className="w-16 h-16 text-gray-200 mx-auto mb-4" />
                       <h3 className="text-xl font-bold text-neuro-navy">No roles found matching your search</h3>
                       <p className="text-gray-400 mt-2">Try adjusting your filters or search query.</p>

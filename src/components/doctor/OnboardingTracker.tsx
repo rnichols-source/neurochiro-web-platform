@@ -22,9 +22,8 @@ export default function OnboardingTracker() {
     <motion.section 
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl border border-white/5"
+      className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark rounded-2xl p-8 text-white relative overflow-hidden shadow-2xl border border-white/5"
     >
-      <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[100px] -mr-32 -mt-32"></div>
       
       <button 
         onClick={() => setIsVisible(false)}
@@ -70,13 +69,13 @@ export default function OnboardingTracker() {
                   <step.icon className="w-4 h-4" />
                 </div>
                 {step.bonus && (
-                  <span className="text-[8px] font-black text-neuro-orange uppercase tracking-widest bg-neuro-orange/10 px-2 py-1 rounded-lg">
+                  <span className="text-xs font-black text-neuro-orange uppercase tracking-widest bg-neuro-orange/10 px-2 py-1 rounded-lg">
                     {step.bonus}
                   </span>
                 )}
               </div>
               <p className={`text-sm font-bold ${step.completed ? "text-gray-400" : "text-white"}`}>{step.label}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 mt-1">
+              <p className="text-xs font-black uppercase tracking-widest text-gray-500 mt-1">
                 {step.completed ? "Completed" : "Action Required"}
               </p>
             </Link>

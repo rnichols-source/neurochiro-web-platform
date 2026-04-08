@@ -180,7 +180,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
                 <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Live Engine</span>
               </div>
               <span className={cn(
-                "text-[9px] font-black px-2 py-0.5 rounded border",
+                "text-xs font-black px-2 py-0.5 rounded border",
                 health?.status === 'OPTIMAL' ? "text-green-500 border-green-500/20 bg-green-500/10" : "text-amber-500 border-amber-500/20 bg-amber-500/10"
               )}>
                 {health?.status || "SYNCING..."}

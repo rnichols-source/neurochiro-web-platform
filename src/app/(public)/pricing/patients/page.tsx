@@ -29,7 +29,7 @@ export default function PatientPricing() {
         <div 
           key={tier.id}
           className={cn(
-            "bg-white rounded-[3rem] p-12 flex flex-col border transition-all duration-500 hover:shadow-2xl relative border-neuro-orange shadow-xl scale-105 z-10"
+            "bg-white rounded-2xl p-12 flex flex-col border transition-all duration-500 hover:shadow-2xl relative border-neuro-orange shadow-xl scale-105 z-10"
           )}
         >
           {tier.tag && (
@@ -68,15 +68,15 @@ export default function PatientPricing() {
           <div className="mt-12 pt-10 border-t border-gray-100 grid grid-cols-3 gap-4 text-center">
              <div className="space-y-2">
                 <Globe className="w-6 h-6 text-gray-300 mx-auto" />
-                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400">Global Network</p>
+                <p className="text-xs font-black uppercase tracking-widest text-gray-400">Global Network</p>
              </div>
              <div className="space-y-2">
                 <ShieldCheck className="w-6 h-6 text-gray-300 mx-auto" />
-                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400">Privacy First</p>
+                <p className="text-xs font-black uppercase tracking-widest text-gray-400">Privacy First</p>
              </div>
              <div className="space-y-2">
                 <Activity className="w-6 h-6 text-gray-300 mx-auto" />
-                <p className="text-[8px] font-black uppercase tracking-widest text-gray-400">Health Insights</p>
+                <p className="text-xs font-black uppercase tracking-widest text-gray-400">Health Insights</p>
              </div>
           </div>
         </div>

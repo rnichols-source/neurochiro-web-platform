@@ -38,7 +38,7 @@ function LoginContent() {
 
   return (
     <div className="flex flex-col md:flex-row gap-8 items-center justify-center max-w-4xl w-full relative z-10 transition-all duration-500 items-center">
-      <div className="w-full max-w-md bg-white rounded-[3rem] shadow-2xl border border-gray-100 p-10">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 p-10">
         <Link href="/" className="inline-flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest hover:text-neuro-navy transition-colors mb-10">
           <ChevronLeft className="w-4 h-4" /> Back to Home
         </Link>
@@ -145,10 +145,9 @@ export default function LoginPage() {
   return (
     <div className="min-h-dvh bg-neuro-cream flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Background Decor */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-neuro-navy/5 blur-[120px] -ml-48 -mt-48"></div>
       
       <Suspense fallback={
-        <div className="w-full max-w-md bg-white rounded-[3rem] shadow-2xl border border-gray-100 p-10 relative z-10 flex justify-center items-center h-64">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 p-10 relative z-10 flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neuro-orange"></div>
         </div>
       }>

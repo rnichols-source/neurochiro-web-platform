@@ -4,7 +4,7 @@ import { MapPin, Search, Filter } from "lucide-react";
 
 export function DoctorCardSkeleton() {
   return (
-    <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 flex gap-6 animate-pulse mb-4">
+    <div className="bg-white p-6 rounded-2xl border border-gray-100 flex gap-6 animate-pulse mb-4">
       <div className="w-14 h-14 rounded-2xl bg-gray-100 shrink-0" />
       <div className="flex-1 space-y-3 pt-2">
         <div className="h-5 w-3/4 bg-gray-100 rounded" />
@@ -37,7 +37,7 @@ export default function DirectorySkeleton() {
         </div>
 
         {/* Map Column Skeleton */}
-        <div className="lg:col-span-5 h-[600px] sticky top-32 rounded-[2.5rem] bg-gray-100 animate-pulse overflow-hidden flex items-center justify-center">
+        <div className="lg:col-span-5 h-[600px] sticky top-32 rounded-2xl bg-gray-100 animate-pulse overflow-hidden flex items-center justify-center">
           <p className="text-gray-300 font-black uppercase tracking-widest text-xs">Syncing Global Nodes...</p>
         </div>
       </div>

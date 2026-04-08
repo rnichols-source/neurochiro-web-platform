@@ -9,10 +9,9 @@ export default function FoundationsPage() {
     <div className="min-h-dvh bg-white">
       {/* Hero Section */}
       <section className="bg-neuro-navy text-white pt-32 pb-24 px-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-neuro-orange/10 blur-[120px] rounded-full -mr-64 -mt-64"></div>
         <div className="max-w-4xl mx-auto relative z-10 text-center space-y-6">
           <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-xs">Path 01: Foundations</span>
-          <h1 className="text-5xl md:text-7xl font-heading font-black">What is Nervous System Chiropractic?</h1>
+          <h1 className="text-5xl md:text-5xl font-heading font-black">What is Nervous System Chiropractic?</h1>
           <p className="text-gray-300 text-xl font-medium max-w-2xl mx-auto">
             Forget everything you think you know about "cracking backs." Discover the clinical reality of regulation.
           </p>
@@ -37,8 +36,7 @@ export default function FoundationsPage() {
           </p>
         </div>
         <div className="relative">
-           <div className="absolute inset-0 bg-neuro-orange/20 blur-[100px] rounded-full"></div>
-           <div className="bg-neuro-navy rounded-[3rem] p-12 relative z-10 border border-white/10 shadow-2xl text-white text-center aspect-square flex flex-col justify-center">
+           <div className="bg-neuro-navy rounded-2xl p-12 relative z-10 border border-white/10 shadow-2xl text-white text-center aspect-square flex flex-col justify-center">
               <Activity className="w-20 h-20 text-neuro-orange mx-auto mb-8 animate-pulse" />
               <h3 className="text-3xl font-black mb-4">Neural Harmony</h3>
               <p className="text-gray-400 max-w-xs mx-auto">When your nervous system is regulated, your heart, lungs, digestion, and immune system work in sync.</p>
@@ -75,7 +73,7 @@ export default function FoundationsPage() {
                 color: "text-purple-500"
               }
             ].map((item, i) => (
-              <div key={i} className="bg-white p-10 rounded-[3rem] shadow-xl border border-gray-100 group hover:-translate-y-2 transition-all">
+              <div key={i} className="bg-white p-10 rounded-2xl shadow-xl border border-gray-100 group hover:-translate-y-2 transition-all">
                 <div className={`w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center mb-6 ${item.color} group-hover:scale-110 transition-transform`}>
                   <item.icon className="w-6 h-6" />
                 </div>

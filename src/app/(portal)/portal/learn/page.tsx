@@ -157,8 +157,7 @@ export default function LearnHub() {
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-neuro-navy">Featured This Week</span>
            </div>
            
-           <div className="bg-neuro-navy rounded-[3rem] overflow-hidden flex flex-col lg:flex-row text-white shadow-2xl relative border border-white/5 group">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-neuro-orange/10 blur-[100px] pointer-events-none group-hover:bg-neuro-orange/20 transition-all duration-700"></div>
+           <div className="bg-neuro-navy rounded-2xl overflow-hidden flex flex-col lg:flex-row text-white shadow-2xl relative border border-white/5 group">
               <div className="flex-1 p-10 lg:p-20 flex flex-col justify-center relative z-10">
                  <div className="flex items-center gap-2 mb-6">
                     <span className="px-4 py-1 bg-neuro-orange text-white font-black uppercase tracking-widest text-[10px] rounded-full shadow-lg shadow-neuro-orange/20">Masterclass</span>
@@ -187,7 +186,6 @@ export default function LearnHub() {
                  <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20 bg-center" />
                  <div className="absolute inset-0 flex items-center justify-center">
                     <div className="relative">
-                       <div className="absolute inset-0 bg-neuro-orange blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
                        <PlayCircle className="w-32 h-32 text-white relative z-10 opacity-30 group-hover:opacity-100 transition-all group-hover:scale-110 cursor-pointer" />
                     </div>
                  </div>
@@ -229,7 +227,7 @@ export default function LearnHub() {
                    key={item.id}
                    whileHover={{ y: -12 }}
                    onClick={() => handleArticleClick(item.slug)}
-                   className="bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden cursor-pointer group shadow-sm hover:shadow-2xl hover:border-neuro-orange/30 transition-all flex flex-col h-full"
+                   className="bg-white rounded-2xl border border-gray-100 overflow-hidden cursor-pointer group shadow-sm hover:shadow-2xl hover:border-neuro-orange/30 transition-all flex flex-col h-full"
                  >
                     <div className="h-48 relative overflow-hidden shrink-0">
                        <img loading="lazy" decoding="async" src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
@@ -243,7 +241,7 @@ export default function LearnHub() {
                           </button>
                        </div>
                        <div className="absolute bottom-4 left-4">
-                          <span className="px-4 py-1.5 bg-white/90 backdrop-blur-md text-neuro-navy text-[9px] font-black uppercase tracking-widest rounded-lg shadow-lg">
+                          <span className="px-4 py-1.5 bg-white/90 backdrop-blur-md text-neuro-navy text-xs font-black uppercase tracking-widest rounded-lg shadow-lg">
                              {item.category}
                           </span>
                        </div>
@@ -275,7 +273,7 @@ export default function LearnHub() {
          </div>
 
          {filteredArticles.length === 0 && (
-           <div className="py-32 text-center bg-white rounded-[3rem] border border-dashed border-gray-200">
+           <div className="py-32 text-center bg-white rounded-2xl border border-dashed border-gray-200">
               <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
                  <Search className="w-10 h-10 text-gray-200" />
               </div>
@@ -292,7 +290,7 @@ export default function LearnHub() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="bg-neuro-cream rounded-[3rem] p-12 md:p-20 border border-neuro-navy/5 relative overflow-hidden">
+      <section className="bg-neuro-cream rounded-2xl p-12 md:p-20 border border-neuro-navy/5 relative overflow-hidden">
          <div className="absolute top-0 right-0 p-10 opacity-10">
             <BookOpen className="w-64 h-64 text-neuro-navy" />
          </div>

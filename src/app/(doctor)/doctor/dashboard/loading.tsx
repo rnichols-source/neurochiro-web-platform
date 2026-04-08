@@ -7,8 +7,8 @@ export default function Loading() {
           <div key={i} className="h-28 bg-gray-100 rounded-2xl" />
         ))}
       </div>
-      <div className="h-64 bg-gray-100 rounded-[2.5rem]" />
-      <div className="h-48 bg-gray-100 rounded-[2.5rem]" />
+      <div className="h-64 bg-gray-100 rounded-2xl" />
+      <div className="h-48 bg-gray-100 rounded-2xl" />
     </div>
   );
 }

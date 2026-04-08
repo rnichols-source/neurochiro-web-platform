@@ -104,7 +104,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                   <span className="text-sm">{seminar.country === 'Australia' ? '🇦🇺' : '🇺🇸'}</span> {seminar.city}, {seminar.country}
                 </span>
               </div>
-              <h1 className="text-5xl md:text-7xl font-heading font-black tracking-tight leading-tight">
+              <h1 className="text-5xl md:text-5xl font-heading font-black tracking-tight leading-tight">
                 {seminar.title}
               </h1>
               <div className="flex flex-wrap items-center gap-8 pt-4">
@@ -175,7 +175,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Day 1 */}
-                <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 space-y-8">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-10 space-y-8">
                   <div className="flex items-center justify-between">
                     <h3 className="text-4xl font-black text-white/20 uppercase tracking-tighter">Day 1</h3>
                     <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest bg-neuro-orange/10 px-3 py-1 rounded-lg">Foundations</span>
@@ -191,7 +191,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                 </div>
 
                 {/* Day 2 */}
-                <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 space-y-8">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-10 space-y-8">
                   <div className="flex items-center justify-between">
                     <h3 className="text-4xl font-black text-white/20 uppercase tracking-tighter">Day 2</h3>
                     <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest bg-blue-400/10 px-3 py-1 rounded-lg">Advanced</span>
@@ -234,7 +234,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                 Your Instructor
               </h2>
               <div className="flex flex-col md:flex-row gap-10 items-start">
-                <div className="w-32 h-32 rounded-[2.5rem] bg-neuro-orange flex-shrink-0 border-4 border-white/10 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
+                <div className="w-32 h-32 rounded-2xl bg-neuro-orange flex-shrink-0 border-4 border-white/10 flex items-center justify-center text-white text-4xl font-black shadow-2xl">
                   {seminar.instructor_name?.charAt(4)}
                 </div>
                 <div className="space-y-4">
@@ -249,7 +249,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
 
           {/* Right Column: Sidebar Stats */}
           <div className="lg:col-span-4 space-y-8">
-            <div className="bg-white/5 border border-white/10 rounded-[3rem] p-10 space-y-8 sticky top-32">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-10 space-y-8 sticky top-32">
               <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">Event Logistics</h3>
               
               <div className="space-y-6">
@@ -294,7 +294,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                     <button
                       key={t}
                       onClick={() => setSelectedTier(t)}
-                      className={`py-3 px-2 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all border ${
+                      className={`py-3 px-2 rounded-xl text-xs font-black uppercase tracking-tighter transition-all border ${
                         selectedTier === t 
                           ? 'bg-neuro-orange border-neuro-orange text-white shadow-lg shadow-neuro-orange/20' 
                           : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/30'

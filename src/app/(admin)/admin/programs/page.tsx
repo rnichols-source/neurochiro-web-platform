@@ -70,7 +70,7 @@ export default function ProgramOperations() {
         <div className="lg:col-span-2 space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {programs.map((program, i) => (
-              <section key={i} className="bg-white/5 border border-white/5 rounded-[2.5rem] p-8 hover:border-neuro-orange/30 transition-all group">
+              <section key={i} className="bg-white/5 border border-white/5 rounded-2xl p-8 hover:border-neuro-orange/30 transition-all group">
                 <div className="flex justify-between items-start mb-6">
                   <div className="w-14 h-14 rounded-2xl bg-neuro-navy flex items-center justify-center text-neuro-orange">
                     <Video className="w-7 h-7" />
@@ -102,7 +102,7 @@ export default function ProgramOperations() {
           </div>
 
           {/* Student Reviews / Activity */}
-          <section className="bg-white/5 border border-white/5 rounded-[2.5rem] overflow-hidden">
+          <section className="bg-white/5 border border-white/5 rounded-2xl overflow-hidden">
             <div className="p-8 border-b border-white/5 flex items-center justify-between">
               <h3 className="text-xl font-heading font-black text-white">Student Progress Logs</h3>
               <button 
@@ -131,8 +131,7 @@ export default function ProgramOperations() {
 
         {/* Analytics Sidebar */}
         <div className="space-y-8">
-          <section className="bg-neuro-navy rounded-[3rem] p-10 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-neuro-orange/10 blur-3xl -mr-16 -mt-16"></div>
+          <section className="bg-neuro-navy rounded-2xl p-10 shadow-2xl relative overflow-hidden">
             <h3 className="text-2xl font-heading font-black text-white mb-8">Unit Economics</h3>
             <div className="space-y-6">
               <div className="p-6 bg-white/5 rounded-3xl border border-white/10">
@@ -145,11 +144,11 @@ export default function ProgramOperations() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-white/5 rounded-2xl border border-white/5 text-center">
                   <p className="text-lg font-black text-white">1,270</p>
-                  <p className="text-[8px] font-black text-gray-500 uppercase">Active Students</p>
+                  <p className="text-xs font-black text-gray-500 uppercase">Active Students</p>
                 </div>
                 <div className="p-4 bg-white/5 rounded-2xl border border-white/5 text-center">
                   <p className="text-lg font-black text-white">84%</p>
-                  <p className="text-[8px] font-black text-gray-500 uppercase">Avg Completion</p>
+                  <p className="text-xs font-black text-gray-500 uppercase">Avg Completion</p>
                 </div>
               </div>
               <button 
@@ -162,7 +161,7 @@ export default function ProgramOperations() {
             </div>
           </section>
 
-          <section className="bg-white/5 border border-white/5 rounded-[2.5rem] p-8">
+          <section className="bg-white/5 border border-white/5 rounded-2xl p-8">
             <h3 className="text-lg font-black text-white mb-6">Action Required</h3>
             <div className="space-y-4">
               <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
@@ -197,7 +196,7 @@ export default function ProgramOperations() {
       {/* MODALS */}
       {isBroadcastModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-[#0A0D14] rounded-[3rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white/10 p-10">
+          <div className="bg-[#0A0D14] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-white/10 p-10">
             <div className="flex justify-between items-center mb-8">
               <h3 className="text-2xl font-black text-white">Program Broadcast</h3>
               <button onClick={() => setIsBroadcastModalOpen(false)}><X className="text-gray-500" /></button>
@@ -215,7 +214,7 @@ export default function ProgramOperations() {
 
       {selectedProgram && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-neuro-navy/40">
-          <div className="bg-[#0A0D14] rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-white/10">
+          <div className="bg-[#0A0D14] rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-white/10">
             <div className="p-10 border-b border-white/5 bg-white/5 flex items-center justify-between">
               <div>
                 <h3 className="text-3xl font-black text-white">{selectedProgram.name}</h3>
