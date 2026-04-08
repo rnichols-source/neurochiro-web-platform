@@ -17,7 +17,7 @@ export async function getDoctors(options: {
   try {
     // DATA MINIMIZATION: Only fetch essential columns for the LIST view
     // Removed: email, website_url, instagram_url, facebook_url, address (private-ish)
-    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, zip_code, verification_status, membership_tier, latitude, longitude, bio, specialties, region_code';
+    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, latitude, longitude, bio, specialties, region_code';
     
     let query = supabase
       .from('doctors')
@@ -49,8 +49,8 @@ export async function getDoctors(options: {
       };
       const expandedQuery = stateMap[cleanQuery.toUpperCase()] || cleanQuery;
 
-      // Search across name, clinic, location, and specialties (text cast for partial matching)
-      query = query.or(`first_name.ilike.%${cleanQuery}%,last_name.ilike.%${cleanQuery}%,clinic_name.ilike.%${cleanQuery}%,city.ilike.%${cleanQuery}%,state.ilike.%${expandedQuery}%,zip_code.ilike.%${cleanQuery}%,specialties::text.ilike.%${cleanQuery}%,address.ilike.%${cleanQuery}%`);
+      // Search across name, clinic, and location fields
+      query = query.or(`first_name.ilike.%${cleanQuery}%,last_name.ilike.%${cleanQuery}%,clinic_name.ilike.%${cleanQuery}%,city.ilike.%${cleanQuery}%,state.ilike.%${expandedQuery}%,address.ilike.%${cleanQuery}%`);
     }
 
     if (bounds) {
