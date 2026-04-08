@@ -56,7 +56,7 @@ export default function DoctorAnalytics() {
         </div>
       ) : !roiData ? (
         <div className="text-center py-16 text-gray-500">
-          <p>No data available for this period.</p>
+          <p>No analytics data yet. Your profile views and leads will appear here once patients start finding you in the directory.</p>
         </div>
       ) : (
         <div className="space-y-6">

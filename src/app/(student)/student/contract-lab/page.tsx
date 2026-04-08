@@ -61,7 +61,7 @@ export default function ContractLabPage() {
 
   const handleAnalyze = async () => {
     if (!contractText.trim() || contractText.trim().length < 100) {
-      setAnalysisError("Please paste at least 100 characters of contract text.");
+      setAnalysisError("Please paste the full contract text (at least 100 characters). The AI needs enough content to analyze for risks.");
       return;
     }
     setIsUploading(true);

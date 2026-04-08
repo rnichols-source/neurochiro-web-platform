@@ -349,11 +349,14 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                     </p>
                   )}
                   {isFallback && (
-                    <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex items-center gap-3 mb-6">
-                      <Sparkles className="w-4 h-4 text-amber-500" />
-                      <p className="text-[10px] font-black uppercase tracking-widest text-amber-700">
-                        Top Verified Specialists (Fallback Network)
-                      </p>
+                    <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl mb-6">
+                      <div className="flex items-center gap-3 mb-1">
+                        <Sparkles className="w-4 h-4 text-amber-500" />
+                        <p className="text-[10px] font-black uppercase tracking-widest text-amber-700">
+                          Suggested Specialists
+                        </p>
+                      </div>
+                      <p className="text-xs text-amber-600 ml-7">We didn&apos;t find exact matches. Here are some verified specialists you might like.</p>
                     </div>
                   )}
                 </div>

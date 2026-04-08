@@ -118,8 +118,8 @@ function LoginContent() {
           <div className="space-y-4">
             {forgotSent ? (
               <div className="text-center space-y-4">
-                <p className="text-gray-700 font-semibold">Check your email for a reset link</p>
-                <p className="text-gray-500 text-sm">We sent a password reset link to <strong>{forgotEmail}</strong></p>
+                <p className="text-gray-700 font-semibold">If an account exists with this email, you'll receive a reset link shortly.</p>
+                <p className="text-gray-500 text-sm">We sent instructions to <strong>{forgotEmail}</strong></p>
                 <button type="button" onClick={() => { setShowForgotPassword(false); setForgotSent(false); setForgotEmail(""); }}
                   className="text-sm font-bold text-neuro-orange hover:underline">Back to login</button>
               </div>

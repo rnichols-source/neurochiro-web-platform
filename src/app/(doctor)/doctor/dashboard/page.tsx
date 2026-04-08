@@ -85,6 +85,10 @@ export default function DoctorDashboard() {
           </div>
         ))}
       </div>
+
+      {statCards.reduce((sum, s) => sum + Number(s.value), 0) === 0 && (
+        <p className="text-sm text-gray-400">Your stats will update as patients find your profile in the directory.</p>
+      )}
     </div>
   );
 }

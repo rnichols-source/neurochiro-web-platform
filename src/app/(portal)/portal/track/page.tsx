@@ -167,6 +167,7 @@ export default function TrackPage() {
         >
           {saved ? <><CheckCircle2 className="w-4 h-4" /> Saved!</> : saving ? 'Saving...' : todayLogged ? 'Update Check-in' : 'Log Today'}
         </button>
+        <p className="text-xs text-gray-400 mt-2">Tip: Adjust the sliders to match how you're feeling today.</p>
       </section>
 
       {/* 30-Day Trends */}
