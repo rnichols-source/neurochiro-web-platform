@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import NextImage from "next/image";
 import { ShieldCheck, Star, ArrowRight, Heart } from "lucide-react";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
 interface DoctorCardProps {
@@ -15,6 +16,7 @@ export default function DoctorCard({ doc, index }: DoctorCardProps) {
   const { isSaved, toggleSave } = useUserPreferences();
   const docId = doc.id.toString();
   const saved = isSaved('doctors', docId);
+  const [showToast, setShowToast] = useState<string | null>(null);
 
   return (
     <motion.div
@@ -25,11 +27,29 @@ export default function DoctorCard({ doc, index }: DoctorCardProps) {
       className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden"
     >
       <button
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleSave('doctors', docId); }}
+        onClick={(e) => {
+          e.preventDefault(); e.stopPropagation();
+          const wasSaved = saved;
+          toggleSave('doctors', docId);
+          setShowToast(wasSaved ? "Removed" : "Saved!");
+          setTimeout(() => setShowToast(null), 2000);
+        }}
         className="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-50 z-10"
         aria-label={saved ? "Unsave doctor" : "Save doctor"}
       >
         <Heart className={`w-5 h-5 ${saved ? 'text-red-500 fill-red-500' : 'text-gray-300'}`} />
+        <AnimatePresence>
+          {showToast && (
+            <motion.span
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="absolute -bottom-7 right-0 text-xs font-bold text-neuro-navy bg-white border border-gray-200 rounded-lg px-2 py-1 shadow whitespace-nowrap"
+            >
+              {showToast}
+            </motion.span>
+          )}
+        </AnimatePresence>
       </button>
       <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-4">

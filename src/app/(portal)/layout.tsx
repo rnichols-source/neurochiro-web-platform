@@ -12,6 +12,7 @@ import {
   BookOpen,
   Heart,
   LogOut,
+  Settings,
 } from "lucide-react";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
@@ -21,6 +22,7 @@ const navItems = [
   { name: "Saved", href: "/portal/saved", icon: Heart },
   { name: "Health Tracker", href: "/portal/track", icon: Activity },
   { name: "Learn", href: "/learn", icon: BookOpen },
+  { name: "Settings", href: "/portal/settings", icon: Settings },
 ];
 
 function PortalShell({ children }: { children: React.ReactNode }) {

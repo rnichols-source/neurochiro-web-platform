@@ -47,6 +47,7 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
   const [storyForm, setStoryForm] = useState({ patientFirstName: '', conditionBefore: '', outcomeAfter: '', storyText: '' });
   const [submittingStory, setSubmittingStory] = useState(false);
   const supabase = createClient();
+  const [saveToast, setSaveToast] = useState<string | null>(null);
   const [modalState, setModalState] = useState({
     isOpen: false,
     title: "",
@@ -188,13 +189,32 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                       {doctor.first_name || 'Neuro'} <br/> {doctor.last_name || 'Clinician'}
                     </h1>
                     <div className="flex flex-col gap-1 pt-1">
-                      <button
-                        onClick={() => toggleSave('doctors', doctor.id?.toString())}
-                        className="p-2 rounded-full hover:bg-white/10 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                        aria-label="Save doctor"
-                      >
-                        <Heart className={`w-6 h-6 ${isSaved('doctors', doctor.id?.toString()) ? 'text-red-500 fill-red-500' : 'text-white/50'}`} />
-                      </button>
+                      <div className="relative">
+                        <button
+                          onClick={() => {
+                            const wasSaved = isSaved('doctors', doctor.id?.toString());
+                            toggleSave('doctors', doctor.id?.toString());
+                            setSaveToast(wasSaved ? "Removed" : "Saved!");
+                            setTimeout(() => setSaveToast(null), 2000);
+                          }}
+                          className="p-2 rounded-full hover:bg-white/10 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                          aria-label="Save doctor"
+                        >
+                          <Heart className={`w-6 h-6 ${isSaved('doctors', doctor.id?.toString()) ? 'text-red-500 fill-red-500' : 'text-white/50'}`} />
+                        </button>
+                        <AnimatePresence>
+                          {saveToast && (
+                            <motion.span
+                              initial={{ opacity: 0, y: 4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0 }}
+                              className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-xs font-bold text-white bg-neuro-navy border border-white/20 rounded-lg px-2 py-1 shadow whitespace-nowrap"
+                            >
+                              {saveToast}
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
+                      </div>
                       <button
                         onClick={handleShare}
                         className="p-2 rounded-full hover:bg-white/10 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"

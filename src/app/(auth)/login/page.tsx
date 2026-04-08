@@ -30,6 +30,8 @@ function LoginContent() {
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
   const [forgotPending, setForgotPending] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,9 +68,33 @@ function LoginContent() {
         </div>
 
         {errorMsg && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 text-sm font-bold animate-in fade-in slide-in-from-top-2 duration-300">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            {errorMsg}
+          <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-bold animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              {errorMsg}
+            </div>
+            {errorParam === "email_not_confirmed" && (
+              <div className="mt-2 ml-8">
+                {resendSent ? (
+                  <span className="text-green-600 text-xs font-bold">Verification email sent!</span>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={resending}
+                    onClick={async () => {
+                      setResending(true);
+                      const supabase = createClient();
+                      await supabase.auth.resend({ type: 'signup', email });
+                      setResendSent(true);
+                      setResending(false);
+                    }}
+                    className="text-xs font-bold text-neuro-orange hover:underline disabled:opacity-50"
+                  >
+                    {resending ? "Sending..." : "Resend verification email"}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
 

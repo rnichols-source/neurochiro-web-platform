@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
-  MessageSquare, FileText, LogOut, X,
+  MessageSquare, FileText, LogOut, X, Settings,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,6 +22,7 @@ const navItems = [
   { name: "Seminars", href: "/student/seminars", icon: Calendar },
   { name: "Academy", href: "/student/academy", icon: GraduationCap },
   { name: "Contract Lab", href: "/student/contract-lab", icon: FileText },
+  { name: "Settings", href: "/student/settings", icon: Settings },
   { name: "Messages", href: "/student/messages", icon: MessageSquare },
 ];
 
