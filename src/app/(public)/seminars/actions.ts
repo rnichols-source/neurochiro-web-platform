@@ -164,5 +164,19 @@ export async function registerForSeminar(seminarId: string) {
     return { error: "Failed to register." }
   }
 
+  // Notify the user of successful registration
+  try {
+    const { data: seminar } = await supabase.from('seminars').select('title').eq('id', seminarId).single()
+    const { Automations } = await import('@/lib/automations')
+    await Automations.onSeminarRegistration(
+      user.id,
+      user.email || '',
+      '',
+      seminar?.title || 'Seminar'
+    )
+  } catch (e) {
+    console.error("Seminar registration automation failed:", e)
+  }
+
   return { success: true }
 }

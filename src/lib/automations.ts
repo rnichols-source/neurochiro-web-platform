@@ -898,12 +898,20 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
 
       case 'daily_talent_drop':
         if (supabaseAdmin) {
-          // 1. Get all Growth & Pro Tier Doctors
-          const { data: doctors } = await supabaseAdmin
-            .from('profiles')
-            .select('id, full_name, phone, tier')
-            .eq('role', 'doctor')
-            .in('tier', ['growth', 'pro']);
+          // 1. Get all verified doctors (active paying members)
+          const { data: doctorProfiles } = await supabaseAdmin
+            .from('doctors')
+            .select('user_id')
+            .eq('verification_status', 'verified');
+
+          const verifiedUserIds = (doctorProfiles || []).map((d: any) => d.user_id).filter(Boolean);
+
+          const { data: doctors } = verifiedUserIds.length > 0
+            ? await supabaseAdmin
+                .from('profiles')
+                .select('id, full_name, phone, tier')
+                .in('id', verifiedUserIds)
+            : { data: [] as any[] };
 
           if (doctors && doctors.length > 0) {
             for (const doc of doctors) {
@@ -936,6 +944,29 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           }
         }
         break;
+
+      case 'broadcast_announcement': {
+        const { title, audience_type } = payload;
+        let query = supabaseAdmin!.from('profiles').select('id');
+        if (audience_type && audience_type !== 'all') {
+          query = query.eq('role', audience_type);
+        }
+        const { data: users } = await query.limit(1000);
+
+        if (users && users.length > 0) {
+          const notifications = users.map((u: any) => ({
+            user_id: u.id,
+            title: `📢 ${title}`,
+            body: title,
+            type: 'announcement',
+            priority: 'info',
+          }));
+          for (let i = 0; i < notifications.length; i += 100) {
+            await supabaseAdmin!.from('notifications').insert(notifications.slice(i, i + 100));
+          }
+        }
+        break;
+      }
 
       case 'admin_notification':
         if (process.env.NODE_ENV !== 'development') {

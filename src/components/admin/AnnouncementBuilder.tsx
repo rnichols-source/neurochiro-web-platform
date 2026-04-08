@@ -42,6 +42,12 @@ export default function AnnouncementBuilder() {
     if (dbError) {
       setError(dbError.message);
     } else {
+      // Queue broadcast notification
+      await supabase.from('automation_queue').insert({
+        event_type: 'broadcast_announcement',
+        payload: { title: form.title, audience_type: form.audience_type || 'all' },
+        status: 'pending',
+      });
       setSuccess(true);
       setForm({
         title: "",

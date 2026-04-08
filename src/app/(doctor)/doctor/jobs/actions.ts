@@ -2,7 +2,6 @@
 
 import { createServerSupabase } from '@/lib/supabase-server';
 import { revalidatePath } from 'next/cache';
-import { Automations } from '@/lib/automations';
 
 
 /**
@@ -54,6 +53,14 @@ export async function createJobPosting(formData: any) {
   if (error) {
     console.error("Error creating job posting:", error);
     throw new Error("Failed to create job posting");
+  }
+
+  // Notify admin of new job posting
+  try {
+    const { Automations } = await import('@/lib/automations');
+    await Automations.onJobPosted(formData.title || 'New Position');
+  } catch (e) {
+    console.error("Job posted automation failed:", e);
   }
 
   revalidatePath('/doctor/jobs');

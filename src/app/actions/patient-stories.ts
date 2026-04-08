@@ -94,6 +94,32 @@ export async function approvePatientStory(storyId: string) {
 
   if (error) throw new Error("Failed to approve story")
 
+  // Notify the doctor that a story was published on their profile
+  const { data: story } = await supabase
+    .from('patient_stories')
+    .select('doctor_id, patient_first_name')
+    .eq('id', storyId)
+    .single();
+
+  if (story) {
+    const { data: doctor } = await supabase
+      .from('doctors')
+      .select('user_id, slug')
+      .eq('id', story.doctor_id)
+      .single();
+
+    if (doctor?.user_id) {
+      await supabase.from('notifications').insert({
+        user_id: doctor.user_id,
+        title: 'New Patient Story Published',
+        body: `A transformation story from ${story.patient_first_name} has been approved and is now visible on your profile.`,
+        type: 'system',
+        priority: 'info',
+        link: doctor.slug ? `/directory/${doctor.slug}` : '/doctor/dashboard'
+      });
+    }
+  }
+
   revalidatePath('/admin/moderation')
   return { success: true }
 }

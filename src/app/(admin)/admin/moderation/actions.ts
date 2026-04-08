@@ -163,17 +163,25 @@ export async function moderateDoctor(doctorId: string, action: 'approve' | 'reje
 
     if (updateError) throw updateError;
 
-    // Trigger Notification: Welcome to the Network email via Automation Queue
-    if (action === 'approve' && doctor?.email) {
-      await supabase.from('automation_queue').insert({
-        event_type: 'send_welcome_email',
-        payload: { 
-          to: doctor.email, 
-          name: doctor.first_name,
-          role: 'doctor'
-        },
-        status: 'pending'
-      });
+    // Notify the doctor that their profile has been approved
+    if (action === 'approve') {
+      // Get the doctor's user_id
+      const { data: approvedDoctor } = await supabase
+        .from('doctors')
+        .select('user_id, first_name, last_name')
+        .eq('id', doctorId)
+        .single();
+
+      if (approvedDoctor?.user_id) {
+        await supabase.from('notifications').insert({
+          user_id: approvedDoctor.user_id,
+          title: 'Profile Approved!',
+          body: 'Your doctor profile has been verified and is now live in the directory. Patients can find you!',
+          type: 'system',
+          priority: 'important',
+          link: '/doctor/dashboard'
+        });
+      }
     }
 
     // Log the action
