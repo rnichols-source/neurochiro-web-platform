@@ -9,11 +9,17 @@ export default function PatientDashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState(false);
+
   useEffect(() => {
-    getPatientDashboardData().then(d => { setData(d); setLoading(false); });
+    getPatientDashboardData()
+      .then(d => { setData(d); })
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="w-8 h-8 text-neuro-orange animate-spin" /></div>;
+  if (error) return <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4"><p className="text-red-500 font-bold">Something went wrong.</p><button onClick={() => window.location.reload()} className="px-4 py-2 bg-neuro-navy text-white rounded-xl text-sm font-bold">Retry</button></div>;
 
   return (
     <div className="space-y-6 pb-20">

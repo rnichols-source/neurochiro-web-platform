@@ -96,7 +96,7 @@ export default function ProfilePage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-neuro-navy mb-1">Graduation Year</label>
-            <input className={inputClass} inputMode="numeric" value={form.gradYear} onChange={(e) => update("gradYear", e.target.value)} />
+            <input className={inputClass} type="number" min="2020" max="2035" value={form.gradYear} onChange={(e) => update("gradYear", e.target.value)} placeholder="e.g. 2027" />
           </div>
         </div>
 
@@ -136,7 +136,7 @@ export default function ProfilePage() {
               <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${form.mentorship ? 'left-6' : 'left-0.5'}`} />
             </button>
           </div>
-          <input type="hidden" name="mentorship" value={form.mentorship ? "true" : "false"} />
+          {/* Mentorship value handled in form state, not hidden input */}
         </div>
 
         <button

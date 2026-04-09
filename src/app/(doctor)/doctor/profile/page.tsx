@@ -15,8 +15,13 @@ export default function ProfilePage() {
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [error, setError] = useState(false);
+
   useEffect(() => {
-    getDoctorProfile().then((data) => { setProfile(data); setLoading(false); });
+    getDoctorProfile()
+      .then((data) => { setProfile(data); })
+      .catch(() => { setError(true); })
+      .finally(() => setLoading(false));
   }, []);
 
   const toast = (message: string, type: 'success' | 'error' = 'success') => {
@@ -57,6 +62,7 @@ export default function ProfilePage() {
   };
 
   if (loading) return <div className="flex items-center justify-center min-h-dvh"><Loader2 className="w-8 h-8 text-neuro-orange animate-spin" /></div>;
+  if (error) return <div className="flex flex-col items-center justify-center min-h-dvh gap-4"><p className="text-red-500 font-bold">Failed to load profile.</p><button onClick={() => window.location.reload()} className="px-4 py-2 bg-neuro-navy text-white rounded-xl text-sm font-bold">Retry</button></div>;
 
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto pb-20">
@@ -75,6 +81,22 @@ export default function ProfilePage() {
           </Link>
         )}
       </div>
+
+      {/* Profile Live Status */}
+      {profile?.verification_status === 'verified' && profile?.slug && (
+        <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <p className="text-sm font-bold text-green-700">Your profile is live in the directory</p>
+          </div>
+          <Link href={`/directory/${profile.slug}`} target="_blank" className="text-xs font-bold text-green-600 hover:underline">View it</Link>
+        </div>
+      )}
+      {profile?.verification_status === 'pending' && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
+          <p className="text-sm font-bold text-yellow-700">Your profile is under review. It will appear in the directory once approved.</p>
+        </div>
+      )}
 
       <form onSubmit={handleSave} className="space-y-8">
         {/* Photo */}
@@ -122,8 +144,8 @@ export default function ProfilePage() {
           <div className="space-y-4">
             <input name="website" defaultValue={profile?.website_url || ''} placeholder="Website URL" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input name="instagram" defaultValue={profile?.instagram_url || ''} placeholder="Instagram URL" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
-              <input name="facebook" defaultValue={profile?.facebook_url || ''} placeholder="Facebook URL" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+              <input name="instagram_url" defaultValue={profile?.instagram_url || ''} placeholder="Instagram URL" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+              <input name="facebook_url" defaultValue={profile?.facebook_url || ''} placeholder="Facebook URL" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
             </div>
           </div>
         </div>

@@ -10,9 +10,12 @@ export default function DoctorBilling() {
   const [billingData, setBillingData] = useState<any>(null);
   const [isPortalLoading, setIsPortalLoading] = useState(false);
 
+  const [error, setError] = useState(false);
+
   useEffect(() => {
     getBillingData()
       .then((data) => setBillingData(data))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -34,6 +37,18 @@ export default function DoctorBilling() {
     return (
       <div className="min-h-dvh flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-neuro-orange animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-2xl font-black text-neuro-navy">Billing</h1>
+        <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+          <p className="text-red-500 font-bold mb-4">Unable to load billing information.</p>
+          <button onClick={() => window.location.reload()} className="px-4 py-2 bg-neuro-navy text-white rounded-xl text-sm font-bold">Retry</button>
+        </div>
       </div>
     );
   }
@@ -98,6 +113,7 @@ export default function DoctorBilling() {
           {isPortalLoading && <Loader2 className="w-4 h-4 animate-spin" />}
           Manage Subscription
         </button>
+        <p className="text-xs text-gray-400 mt-2">Update your payment method, change plans, or cancel anytime from the Stripe portal.</p>
       </div>
 
       {/* Payment History */}

@@ -77,13 +77,17 @@ export default function TrackPage() {
 
   const handleSubmit = async () => {
     setSaving(true);
-    const result = await submitDailyLog({ energyLevel: energy, painLevel: pain, sleepQuality: sleep, notes });
+    // Send local date to avoid timezone mismatch (server is UTC, user may be AU/NZ)
+    const now = new Date();
+    const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const result = await submitDailyLog({ energyLevel: energy, painLevel: pain, sleepQuality: sleep, notes, localDate });
     setSaving(false);
     if (result.success) {
-      setSaved(true);
-      setTodayLogged(true);
+      // Verify data persisted by refetching before showing success
       const updatedLogs = await getLast30DaysLogs();
       setLogs(updatedLogs as DailyLog[]);
+      setTodayLogged(true);
+      setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     }
   };
@@ -107,7 +111,8 @@ export default function TrackPage() {
     let count = 0;
     const d = new Date();
     while (true) {
-      const key = d.toISOString().slice(0, 10);
+      // Use local date string to match against log dates
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       if (logDates.has(key)) {
         count++;
         d.setDate(d.getDate() - 1);

@@ -8,12 +8,14 @@ export async function submitDailyLog(data: {
   painLevel: number;
   sleepQuality: number;
   notes?: string;
+  localDate?: string;
 }) {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: "Unauthorized" }
 
-  const today = new Date().toISOString().split('T')[0]
+  // Use client's local date if provided, otherwise fall back to server date
+  const today = data.localDate || new Date().toISOString().split('T')[0]
 
   // Check if already logged today
   const { data: existing } = await supabase
@@ -24,7 +26,6 @@ export async function submitDailyLog(data: {
     .single()
 
   if (existing) {
-    // Update today's log
     const { error } = await supabase
       .from('daily_logs')
       .update({
@@ -37,7 +38,6 @@ export async function submitDailyLog(data: {
 
     if (error) return { error: error.message }
   } else {
-    // Insert new log
     const { error } = await supabase
       .from('daily_logs')
       .insert({
