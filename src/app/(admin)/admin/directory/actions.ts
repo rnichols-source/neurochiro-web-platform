@@ -275,17 +275,19 @@ export async function sendMigrationEmails(doctorIds: string[]) {
             </p>
             <p style="color: #555; font-size: 16px; line-height: 1.6; margin-bottom: 8px;"><strong>Here's how to get started:</strong></p>
             <ol style="color: #555; font-size: 15px; line-height: 1.8; margin-bottom: 24px; padding-left: 20px;">
-              <li>Go to the login page</li>
-              <li>Click <strong>"Forgot password?"</strong></li>
-              <li>Enter your email: <strong>${doctor.email}</strong></li>
-              <li>You'll get a 6-digit code — enter it on the next screen</li>
-              <li>Set your password and complete your profile</li>
+              <li>Click the button below to create your account</li>
+              <li>Use this email: <strong>${doctor.email}</strong></li>
+              <li>Choose a password</li>
+              <li>Complete your profile — it takes about 5 minutes</li>
             </ol>
             <div style="text-align: center; margin: 32px 0;">
-              <a href="${loginLink}" style="display: inline-block; padding: 16px 32px; background-color: #D66829; color: white; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 12px; letter-spacing: 0.5px;">
-                Go to Login Page
+              <a href="${siteUrl}/register?role=doctor" style="display: inline-block; padding: 16px 32px; background-color: #D66829; color: white; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 12px; letter-spacing: 0.5px;">
+                Create My Account
               </a>
             </div>
+            <p style="color: #999; font-size: 13px; text-align: center;">
+              Already created your account? <a href="${loginLink}" style="color: #D66829; font-weight: 700;">Log in here</a>
+            </p>
             <p style="color: #999; font-size: 13px; line-height: 1.5; margin-top: 32px; border-top: 1px solid #eee; padding-top: 24px;">
               Questions? Just reply to this email or contact us at support@neurochirodirectory.com.
             </p>
