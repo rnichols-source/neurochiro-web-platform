@@ -21,26 +21,24 @@ export async function POST(request: NextRequest) {
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
 
-  // Store code in database
-  await supabase.from('leads').upsert({
+  // Delete any old reset codes for this email first
+  await supabase
+    .from('leads')
+    .delete()
+    .eq('email', email)
+    .eq('source', 'password_reset_code');
+
+  // Store new code
+  const { error: insertError } = await supabase.from('leads').insert({
     email,
     source: 'password_reset_code',
     role: 'reset',
     status: 'new',
-    metadata: { code, expires_at: expiresAt, user_id: user.id },
-  }, { onConflict: 'email' }).select();
-
-  // If upsert fails due to no unique constraint, just insert
-  // The verify endpoint will check the most recent code
-
-  // Also try direct insert as backup
-  await supabase.from('leads').insert({
-    email,
-    source: 'password_reset_code',
-    role: 'reset',
-    status: 'new',
+    location: '',
     metadata: { code, expires_at: expiresAt, user_id: user.id },
   });
+
+  console.log(`[RESET_CODE] Stored code for ${email}: ${insertError ? insertError.message : 'success'}`);
 
   // Send code via Resend
   await resend.emails.send({
