@@ -172,7 +172,7 @@ export default function DirectoryManager() {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">Doctors</h1>
-          <p className="text-gray-500 text-sm">{doctors.length} total in database</p>
+          <p className="text-gray-500 text-sm">{doctors.length} doctors in database</p>
         </div>
         <div className="flex items-center gap-3">
           <button
