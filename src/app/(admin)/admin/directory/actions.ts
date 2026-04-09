@@ -216,6 +216,102 @@ export async function migrateDoctorsFromCSV(rows: { name: string; email: string;
   return { created, skipped, errors };
 }
 
+export async function sendMigrationEmails(doctorIds: string[]) {
+  const supabase = createAdminClient();
+  let sent = 0;
+  let failed = 0;
+  const errors: string[] = [];
+
+  for (const id of doctorIds) {
+    try {
+      const { data: doctor } = await supabase
+        .from('doctors')
+        .select('first_name, last_name, email, user_id')
+        .eq('id', id)
+        .single();
+
+      if (!doctor?.email) { failed++; errors.push(`${id}: no email`); continue; }
+
+      const firstName = doctor.first_name || 'Doctor';
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co';
+
+      // Generate password reset link via Supabase Auth
+      let resetLink = `${siteUrl}/reset-password`;
+      if (doctor.user_id) {
+        try {
+          const { data: linkData } = await supabase.auth.admin.generateLink({
+            type: 'recovery',
+            email: doctor.email,
+            options: { redirectTo: `${siteUrl}/reset-password` }
+          });
+          if (linkData?.properties?.action_link) {
+            resetLink = linkData.properties.action_link;
+          }
+        } catch {}
+      }
+
+      // Send via Resend
+      const { Resend } = await import('resend');
+      const resend = new Resend(process.env.RESEND_API_KEY || '');
+
+      await resend.emails.send({
+        from: 'NeuroChiro <support@neurochirodirectory.com>',
+        to: [doctor.email],
+        subject: `Dr. ${firstName}, your new NeuroChiro profile is ready`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px;">
+            <div style="text-align: center; margin-bottom: 32px;">
+              <h1 style="font-size: 24px; font-weight: 800; color: #1E2D3B; margin: 0;">NEURO<span style="color: #D66829;">CHIRO</span></h1>
+            </div>
+            <h2 style="font-size: 22px; font-weight: 700; color: #1E2D3B; margin-bottom: 16px;">
+              Hey Dr. ${firstName}, your new profile is ready.
+            </h2>
+            <p style="color: #555; font-size: 16px; line-height: 1.6; margin-bottom: 16px;">
+              We've upgraded the NeuroChiro platform with a completely new design, faster search, and better tools for your practice.
+            </p>
+            <p style="color: #555; font-size: 16px; line-height: 1.6; margin-bottom: 16px;">
+              <strong>Your membership stays exactly the same</strong> — same billing, same price, nothing changes. You just need to set a password on the new site and complete your profile.
+            </p>
+            <p style="color: #555; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+              It takes about 5 minutes. Once your profile is complete, you'll be live in the global directory and patients can find you.
+            </p>
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${resetLink}" style="display: inline-block; padding: 16px 32px; background-color: #D66829; color: white; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 12px; letter-spacing: 0.5px;">
+                Set My Password &amp; Complete Profile
+              </a>
+            </div>
+            <p style="color: #999; font-size: 13px; line-height: 1.5; margin-top: 32px; border-top: 1px solid #eee; padding-top: 24px;">
+              Questions? Just reply to this email or contact us at support@neurochirodirectory.com.
+            </p>
+          </div>
+        `,
+      });
+
+      sent++;
+    } catch (err: any) {
+      failed++;
+      errors.push(`${id}: ${err.message}`);
+    }
+  }
+
+  // Log the action
+  try {
+    const serverSupabase = createServerSupabase();
+    const { data: { user } } = await serverSupabase.auth.getUser();
+    await supabase.from('audit_logs').insert({
+      category: 'MIGRATION',
+      event: `Migration emails sent: ${sent} delivered, ${failed} failed`,
+      user_name: user?.email || 'Founder',
+      target: 'Doctor Migration',
+      status: 'Success',
+      severity: 'Medium',
+      metadata: { sent, failed, errors }
+    });
+  } catch {}
+
+  return { sent, failed, errors };
+}
+
 export async function deleteDoctorManually(doctorId: string) {
   try {
     // Use Admin Client to bypass RLS and ensure deletion works

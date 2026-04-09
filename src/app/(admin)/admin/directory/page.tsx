@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getAllDoctors, updateDoctorManually, deleteDoctorManually, bulkDeleteDoctors, migrateDoctorsFromCSV } from "./actions";
-import { Trash2, Upload, CheckSquare, Square, AlertTriangle, CheckCircle2, Loader2, X } from "lucide-react";
+import { getAllDoctors, updateDoctorManually, deleteDoctorManually, bulkDeleteDoctors, migrateDoctorsFromCSV, sendMigrationEmails } from "./actions";
+import { Trash2, Upload, CheckSquare, Square, AlertTriangle, CheckCircle2, Loader2, X, Mail } from "lucide-react";
 
 export default function DirectoryManager() {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -12,6 +12,8 @@ export default function DirectoryManager() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkEmailing, setBulkEmailing] = useState(false);
+  const [emailResult, setEmailResult] = useState<{ sent: number; failed: number } | null>(null);
   const [showMigrate, setShowMigrate] = useState(false);
   const [migrateStatus, setMigrateStatus] = useState<any>(null);
   const [migrating, setMigrating] = useState(false);
@@ -103,6 +105,19 @@ export default function DirectoryManager() {
       alert("Error: " + result.error);
     }
     setBulkDeleting(false);
+  };
+
+  const handleBulkEmail = async () => {
+    if (selected.size === 0) return;
+    if (!confirm(`Send "Your new profile is ready" email to ${selected.size} doctor${selected.size > 1 ? 's' : ''}?`)) return;
+    setBulkEmailing(true);
+    setEmailResult(null);
+    const result = await sendMigrationEmails(Array.from(selected));
+    setEmailResult({ sent: result.sent, failed: result.failed });
+    setBulkEmailing(false);
+    if (result.errors.length > 0) {
+      console.warn("Email errors:", result.errors);
+    }
   };
 
   const handleCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -256,6 +271,14 @@ export default function DirectoryManager() {
               Clear Selection
             </button>
             <button
+              onClick={handleBulkEmail}
+              disabled={bulkEmailing}
+              className="px-4 py-2 bg-blue-600 rounded-lg text-sm hover:bg-blue-500 flex items-center gap-2 disabled:opacity-50"
+            >
+              {bulkEmailing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+              {bulkEmailing ? 'Sending...' : `Email ${selected.size}`}
+            </button>
+            <button
               onClick={handleBulkDelete}
               disabled={bulkDeleting}
               className="px-4 py-2 bg-red-600 rounded-lg text-sm hover:bg-red-500 flex items-center gap-2 disabled:opacity-50"
@@ -264,6 +287,22 @@ export default function DirectoryManager() {
               {bulkDeleting ? 'Deleting...' : `Delete ${selected.size}`}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Email Result */}
+      {emailResult && (
+        <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-green-400" />
+            <span className="text-sm font-bold text-green-300">
+              {emailResult.sent} email{emailResult.sent !== 1 ? 's' : ''} sent
+              {emailResult.failed > 0 && <span className="text-red-400"> &middot; {emailResult.failed} failed</span>}
+            </span>
+          </div>
+          <button onClick={() => setEmailResult(null)} className="text-gray-500 hover:text-white">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
