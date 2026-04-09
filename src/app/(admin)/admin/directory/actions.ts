@@ -378,14 +378,67 @@ export async function sendMigrationEmails(doctorIds: string[]) {
             <p style="color: #555; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
               It takes about 5 minutes. Once your profile is complete, you'll be live in the global directory and patients can find you.
             </p>
-            <p style="color: #555; font-size: 16px; line-height: 1.6; margin-bottom: 8px;"><strong>Here's how to get started:</strong></p>
-            <ol style="color: #555; font-size: 15px; line-height: 1.8; margin-bottom: 24px; padding-left: 20px;">
-              <li>Click the button below to go to the login page</li>
-              <li>Click <strong>"Forgot password?"</strong></li>
-              <li>Enter your email: <strong>${doctor.email}</strong></li>
-              <li>You'll get a 6-digit code — enter it to set your password</li>
-              <li>Complete your profile — it takes about 5 minutes</li>
-            </ol>
+
+            <div style="background: #f5f3ef; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+              <p style="color: #1E2D3B; font-size: 16px; font-weight: 700; margin-bottom: 16px;">Follow these exact steps:</p>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 12px 8px 0; vertical-align: top; width: 32px;">
+                    <div style="width: 28px; height: 28px; background: #D66829; color: white; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 800; font-size: 14px;">1</div>
+                  </td>
+                  <td style="padding: 8px 0; color: #555; font-size: 15px;">
+                    Click <strong>"Set My Password"</strong> below to go to the login page
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 12px 8px 0; vertical-align: top;">
+                    <div style="width: 28px; height: 28px; background: #D66829; color: white; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 800; font-size: 14px;">2</div>
+                  </td>
+                  <td style="padding: 8px 0; color: #555; font-size: 15px;">
+                    Click the orange <strong>"FORGOT?"</strong> link next to the password field
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 12px 8px 0; vertical-align: top;">
+                    <div style="width: 28px; height: 28px; background: #D66829; color: white; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 800; font-size: 14px;">3</div>
+                  </td>
+                  <td style="padding: 8px 0; color: #555; font-size: 15px;">
+                    Type in your email: <strong>${doctor.email}</strong> and click Send Code
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 12px 8px 0; vertical-align: top;">
+                    <div style="width: 28px; height: 28px; background: #D66829; color: white; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 800; font-size: 14px;">4</div>
+                  </td>
+                  <td style="padding: 8px 0; color: #555; font-size: 15px;">
+                    Check your inbox for an email with a <strong>6-digit code</strong> from NeuroChiro
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 12px 8px 0; vertical-align: top;">
+                    <div style="width: 28px; height: 28px; background: #D66829; color: white; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 800; font-size: 14px;">5</div>
+                  </td>
+                  <td style="padding: 8px 0; color: #555; font-size: 15px;">
+                    Enter the code, choose a password, and click <strong>Set New Password</strong>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 12px 8px 0; vertical-align: top;">
+                    <div style="width: 28px; height: 28px; background: #D66829; color: white; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 800; font-size: 14px;">6</div>
+                  </td>
+                  <td style="padding: 8px 0; color: #555; font-size: 15px;">
+                    Log in with your email and new password, then complete your profile
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="background: #FFF3E0; border: 1px solid #FFE0B2; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+              <p style="color: #E65100; font-size: 13px; font-weight: 700; margin: 0;">
+                ⚠️ Important: Do NOT click "Continue with Google" or "Create Account" — use the email/password login with the steps above.
+              </p>
+            </div>
+
             <div style="text-align: center; margin: 32px 0;">
               <a href="${loginLink}" style="display: inline-block; padding: 16px 32px; background-color: #D66829; color: white; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 12px; letter-spacing: 0.5px;">
                 Set My Password
