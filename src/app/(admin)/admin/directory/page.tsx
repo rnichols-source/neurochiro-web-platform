@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getAllDoctors, updateDoctorManually, deleteDoctorManually } from "./actions";
+import { useState, useEffect, useRef } from "react";
+import { getAllDoctors, updateDoctorManually, deleteDoctorManually, bulkDeleteDoctors, migrateDoctorsFromCSV } from "./actions";
+import { Trash2, Upload, CheckSquare, Square, AlertTriangle, CheckCircle2, Loader2, X } from "lucide-react";
 
 export default function DirectoryManager() {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -9,6 +10,12 @@ export default function DirectoryManager() {
   const [loading, setLoading] = useState(true);
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [showMigrate, setShowMigrate] = useState(false);
+  const [migrateStatus, setMigrateStatus] = useState<any>(null);
+  const [migrating, setMigrating] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetchDoctors(); }, []);
 
@@ -69,6 +76,76 @@ export default function DirectoryManager() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelected(next);
+  };
+
+  const toggleSelectAll = () => {
+    if (selected.size === doctors.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(doctors.map(d => d.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selected.size === 0) return;
+    if (!confirm(`Delete ${selected.size} doctor${selected.size > 1 ? 's' : ''}? This cannot be undone.`)) return;
+    setBulkDeleting(true);
+    const result = await bulkDeleteDoctors(Array.from(selected));
+    if (result.success) {
+      setSelected(new Set());
+      fetchDoctors(searchQuery);
+      alert(`Deleted ${result.deleted} doctor${result.deleted !== 1 ? 's' : ''}.${result.failed ? ` ${result.failed} failed.` : ''}`);
+    } else {
+      alert("Error: " + result.error);
+    }
+    setBulkDeleting(false);
+  };
+
+  const handleCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setMigrating(true);
+    setMigrateStatus(null);
+
+    const text = await file.text();
+    const lines = text.split('\n').filter(l => l.trim());
+    const headers = lines[0].split(',');
+
+    // Find column indices
+    const emailIdx = headers.findIndex(h => h.toLowerCase().includes('customer email'));
+    const nameIdx = headers.findIndex(h => h.toLowerCase().includes('customer name'));
+    const custIdIdx = headers.findIndex(h => h.toLowerCase().includes('customer id'));
+    const subIdIdx = headers.findIndex(h => h.toLowerCase() === 'id');
+    const amountIdx = headers.findIndex(h => h.toLowerCase().includes('amount'));
+    const statusIdx = headers.findIndex(h => h.toLowerCase() === 'status');
+
+    const rows = lines.slice(1).map(line => {
+      // Handle CSV with commas in quoted fields
+      const cols = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(c => c.replace(/^"|"$/g, '').trim()) || line.split(',');
+      return {
+        email: cols[emailIdx] || '',
+        name: cols[nameIdx] || '',
+        stripeCustomerId: cols[custIdIdx] || '',
+        subscriptionId: cols[subIdIdx] || '',
+        amount: cols[amountIdx] || '0',
+        status: cols[statusIdx] || '',
+      };
+    }).filter(r => r.email && r.status.toLowerCase() === 'active');
+
+    const result = await migrateDoctorsFromCSV(rows);
+    setMigrateStatus(result);
+    setMigrating(false);
+    fetchDoctors(searchQuery);
+
+    // Reset file input
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
   const statusColor = (s: string) =>
     s === "verified" ? "bg-green-500/10 text-green-400" :
     s === "pending" ? "bg-yellow-500/10 text-yellow-400" :
@@ -76,22 +153,121 @@ export default function DirectoryManager() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto text-white space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="text-2xl font-bold">Doctors</h1>
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search name, clinic, email..."
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm w-64 focus:outline-none focus:border-white/30"
-          />
-          <button type="submit" className="px-4 py-2 bg-white/10 rounded-lg text-sm hover:bg-white/20">
-            Search
+        <div>
+          <h1 className="text-2xl font-bold">Doctors</h1>
+          <p className="text-gray-500 text-sm">{doctors.length} total in database</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowMigrate(!showMigrate)}
+            className="px-4 py-2 bg-blue-600 rounded-lg text-sm hover:bg-blue-500 flex items-center gap-2"
+          >
+            <Upload className="w-4 h-4" /> Migrate from Stripe
           </button>
-        </form>
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search name, clinic, email..."
+              className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm w-64 focus:outline-none focus:border-white/30"
+            />
+            <button type="submit" className="px-4 py-2 bg-white/10 rounded-lg text-sm hover:bg-white/20">
+              Search
+            </button>
+          </form>
+        </div>
       </div>
 
+      {/* Migration Panel */}
+      {showMigrate && (
+        <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold">Migrate Existing Members</h2>
+              <p className="text-gray-400 text-sm">Upload your Stripe subscriptions CSV to import active members.</p>
+            </div>
+            <button onClick={() => setShowMigrate(false)} className="text-gray-500 hover:text-white">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 px-6 py-3 bg-blue-600 rounded-lg text-sm font-bold cursor-pointer hover:bg-blue-500 transition-colors">
+              <Upload className="w-4 h-4" />
+              {migrating ? 'Importing...' : 'Upload CSV'}
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".csv"
+                onChange={handleCSVUpload}
+                className="hidden"
+                disabled={migrating}
+              />
+            </label>
+            {migrating && <Loader2 className="w-5 h-5 animate-spin text-blue-400" />}
+          </div>
+
+          {migrateStatus && (
+            <div className="bg-white/5 rounded-lg p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <span className="font-bold">Migration Complete</span>
+              </div>
+              <p className="text-sm text-gray-300">
+                <span className="text-green-400 font-bold">{migrateStatus.created}</span> created
+                {' '}&middot;{' '}
+                <span className="text-yellow-400 font-bold">{migrateStatus.skipped}</span> already existed (updated)
+              </p>
+              {migrateStatus.errors.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-xs text-red-400 font-bold mb-1">{migrateStatus.errors.length} errors:</p>
+                  <div className="max-h-32 overflow-y-auto text-xs text-red-300 space-y-1">
+                    {migrateStatus.errors.map((err: string, i: number) => (
+                      <p key={i}>{err}</p>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="text-xs text-gray-500">
+            <p>Expected CSV columns: Customer Email, Customer Name, Customer ID, Status, Amount</p>
+            <p>Only rows with Status = &quot;active&quot; will be imported.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Actions Bar */}
+      {selected.size > 0 && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-400" />
+            <span className="font-bold text-red-300">{selected.size} doctor{selected.size !== 1 ? 's' : ''} selected</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSelected(new Set())}
+              className="px-4 py-2 bg-white/10 rounded-lg text-sm hover:bg-white/20"
+            >
+              Clear Selection
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              disabled={bulkDeleting}
+              className="px-4 py-2 bg-red-600 rounded-lg text-sm hover:bg-red-500 flex items-center gap-2 disabled:opacity-50"
+            >
+              {bulkDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+              {bulkDeleting ? 'Deleting...' : `Delete ${selected.size}`}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Table */}
       {loading && !doctors.length ? (
         <p className="text-gray-500 text-center py-12">Loading...</p>
       ) : (
@@ -99,8 +275,17 @@ export default function DirectoryManager() {
           <table className="w-full text-left text-sm">
             <thead className="bg-white/5 text-xs text-gray-500 uppercase">
               <tr>
+                <th className="px-4 py-3 w-10">
+                  <button onClick={toggleSelectAll} className="hover:text-white transition-colors">
+                    {selected.size === doctors.length && doctors.length > 0 ? (
+                      <CheckSquare className="w-4 h-4 text-blue-400" />
+                    ) : (
+                      <Square className="w-4 h-4" />
+                    )}
+                  </button>
+                </th>
                 <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Clinic</th>
+                <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Location</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Tier</th>
@@ -110,13 +295,22 @@ export default function DirectoryManager() {
             <tbody className="divide-y divide-white/5">
               {doctors.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500">No doctors found.</td>
+                  <td colSpan={7} className="px-4 py-12 text-center text-gray-500">No doctors found.</td>
                 </tr>
               ) : (
                 doctors.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-white/5">
+                  <tr key={doc.id} className={`hover:bg-white/5 ${selected.has(doc.id) ? 'bg-blue-500/5' : ''}`}>
+                    <td className="px-4 py-3">
+                      <button onClick={() => toggleSelect(doc.id)} className="hover:text-white transition-colors">
+                        {selected.has(doc.id) ? (
+                          <CheckSquare className="w-4 h-4 text-blue-400" />
+                        ) : (
+                          <Square className="w-4 h-4 text-gray-600" />
+                        )}
+                      </button>
+                    </td>
                     <td className="px-4 py-3 font-medium">Dr. {doc.first_name} {doc.last_name}</td>
-                    <td className="px-4 py-3 text-gray-400">{doc.clinic_name || "-"}</td>
+                    <td className="px-4 py-3 text-gray-400 text-xs">{doc.email || "-"}</td>
                     <td className="px-4 py-3 text-gray-400">{doc.city}{doc.state ? `, ${doc.state}` : ""}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded text-xs font-semibold ${statusColor(doc.verification_status)}`}>

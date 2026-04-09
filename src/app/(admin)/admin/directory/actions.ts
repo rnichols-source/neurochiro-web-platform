@@ -65,6 +65,157 @@ export async function updateDoctorManually(doctorId: string, updates: any) {
   return { success: true };
 }
 
+export async function bulkDeleteDoctors(doctorIds: string[]) {
+  try {
+    const supabase = createAdminClient();
+    let deleted = 0;
+    let failed = 0;
+
+    for (const id of doctorIds) {
+      // Clean up associated records
+      try { await supabase.from('job_postings').delete().eq('doctor_id', id); } catch {}
+      try { await supabase.from('leads').delete().eq('doctor_id', id); } catch {}
+      try { await supabase.from('patient_stories').delete().eq('doctor_id', id); } catch {}
+
+      const { error } = await supabase.from('doctors').delete().eq('id', id);
+      if (error) { failed++; } else { deleted++; }
+    }
+
+    // Log the action
+    try {
+      const serverSupabase = createServerSupabase();
+      const { data: { user } } = await serverSupabase.auth.getUser();
+      await supabase.from('audit_logs').insert({
+        category: 'DIRECTORY',
+        event: `Bulk Delete: ${deleted} doctors removed`,
+        user_name: user?.email || "Founder",
+        target: "Clinical Directory",
+        status: 'Success',
+        severity: 'High',
+        metadata: { deleted_ids: doctorIds, deleted_count: deleted, failed_count: failed }
+      });
+    } catch {}
+
+    revalidatePath('/admin/directory');
+    revalidatePath('/directory');
+    revalidatePath('/');
+
+    return { success: true, deleted, failed };
+  } catch (err: any) {
+    return { success: false, error: err.message, deleted: 0, failed: doctorIds.length };
+  }
+}
+
+export async function migrateDoctorsFromCSV(rows: { name: string; email: string; stripeCustomerId: string; subscriptionId: string; amount: string }[]) {
+  const supabase = createAdminClient();
+  let created = 0;
+  let skipped = 0;
+  const errors: string[] = [];
+
+  for (const row of rows) {
+    try {
+      // Check if doctor with this email already exists
+      const { data: existing } = await supabase
+        .from('doctors')
+        .select('id')
+        .eq('email', row.email)
+        .maybeSingle();
+
+      if (existing) {
+        // Doctor already exists, update their profile's stripe info if they have a user_id
+        const { data: doc } = await supabase.from('doctors').select('user_id').eq('id', existing.id).single();
+        if (doc?.user_id) {
+          await supabase.from('profiles').update({
+            stripe_customer_id: row.stripeCustomerId,
+            subscription_status: 'active',
+          }).eq('id', doc.user_id);
+        }
+        skipped++;
+        continue;
+      }
+
+      // Parse name
+      const nameParts = row.name.trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      // Create slug
+      const slug = `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+
+      // Create doctor record
+      const { error: insertError } = await supabase.from('doctors').insert({
+        first_name: firstName,
+        last_name: lastName,
+        email: row.email,
+        slug: `${slug}-${Math.random().toString(36).substring(2, 6)}`,
+        clinic_name: `${firstName} ${lastName} Chiropractic`,
+        city: '',
+        state: '',
+        country: 'US',
+        address: '',
+        latitude: 0,
+        longitude: 0,
+        bio: '',
+        specialties: [],
+        verification_status: 'verified',
+        membership_tier: 'starter',
+        region_code: 'US',
+        profile_views: 0,
+        patient_leads: 0,
+      });
+
+      if (insertError) {
+        errors.push(`${row.email}: ${insertError.message}`);
+      } else {
+        created++;
+      }
+
+      // Also create a Supabase auth account + profile
+      // Note: uses admin client to create users
+      const tempPassword = `NC-${Math.random().toString(36).substring(2, 10)}!`;
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: row.email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: { role: 'doctor', full_name: row.name }
+      });
+
+      if (authData?.user) {
+        // Create profile
+        await supabase.from('profiles').upsert({
+          id: authData.user.id,
+          email: row.email,
+          full_name: row.name,
+          role: 'doctor',
+          subscription_status: 'active',
+          tier: 'starter',
+          stripe_customer_id: row.stripeCustomerId,
+        });
+
+        // Link doctor record to auth user
+        await supabase.from('doctors').update({
+          user_id: authData.user.id,
+        }).eq('email', row.email);
+
+        // Send password reset so they can set their own password
+        await supabase.auth.admin.generateLink({
+          type: 'recovery',
+          email: row.email,
+        });
+      } else if (authError) {
+        console.warn(`Auth creation for ${row.email}:`, authError.message);
+      }
+    } catch (err: any) {
+      errors.push(`${row.email}: ${err.message}`);
+    }
+  }
+
+  revalidatePath('/admin/directory');
+  revalidatePath('/directory');
+
+  return { created, skipped, errors };
+}
+
 export async function deleteDoctorManually(doctorId: string) {
   try {
     // Use Admin Client to bypass RLS and ensure deletion works
