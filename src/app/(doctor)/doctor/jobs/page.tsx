@@ -29,6 +29,8 @@ export default function JobsPage() {
 
   useEffect(() => { loadData(); }, []);
 
+  const [applyMethod, setApplyMethod] = useState("neurochiro");
+
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitting(true);
@@ -39,8 +41,13 @@ export default function JobsPage() {
       type: fd.get("type") as string,
       salary_min: Number(fd.get("salary_min")) || 0,
       salary_max: Number(fd.get("salary_max")) || 0,
+      category: fd.get("category") as string,
+      employment_type: fd.get("employment_type") as string,
+      apply_method: fd.get("apply_method") as string,
+      apply_url: fd.get("apply_url") as string || null,
     });
     setShowPostModal(false);
+    setApplyMethod("neurochiro");
     setSubmitting(false);
     loadData();
   }
@@ -209,6 +216,36 @@ export default function JobsPage() {
                   <option value="Buy-In">Buy-In</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select name="category" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+                  <option value="Clinical">Clinical</option>
+                  <option value="Support Staff">Support Staff</option>
+                  <option value="Technical">Technical</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
+                <select name="employment_type" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+                  <option value="Full-time">Full-time</option>
+                  <option value="Part-time">Part-time</option>
+                  <option value="Contract">Contract</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">How to Apply</label>
+                <select name="apply_method" value={applyMethod} onChange={(e) => setApplyMethod(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+                  <option value="neurochiro">Through NeuroChiro</option>
+                  <option value="external">External Link</option>
+                </select>
+              </div>
+              {applyMethod === "external" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Apply URL</label>
+                  <input name="apply_url" type="url" placeholder="https://..." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Salary Min</label>

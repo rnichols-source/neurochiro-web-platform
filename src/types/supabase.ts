@@ -528,6 +528,13 @@ export interface Database {
           benefits: string[] | null
           requirements: string[] | null
           status: string
+          category: string | null
+          employment_type: string | null
+          apply_method: string | null
+          apply_url: string | null
+          expires_at: string | null
+          city: string | null
+          state: string | null
           created_at: string
         }
         Insert: {
@@ -541,6 +548,13 @@ export interface Database {
           benefits?: string[] | null
           requirements?: string[] | null
           status?: string
+          category?: string | null
+          employment_type?: string | null
+          apply_method?: string | null
+          apply_url?: string | null
+          expires_at?: string | null
+          city?: string | null
+          state?: string | null
           created_at?: string
         }
         Update: {
@@ -554,6 +568,13 @@ export interface Database {
           benefits?: string[] | null
           requirements?: string[] | null
           status?: string
+          category?: string | null
+          employment_type?: string | null
+          apply_method?: string | null
+          apply_url?: string | null
+          expires_at?: string | null
+          city?: string | null
+          state?: string | null
           created_at?: string
         }
         Relationships: []
@@ -590,18 +611,30 @@ export interface Database {
           id: string
           applicant_id: string
           job_id: string
+          applicant_name: string | null
+          applicant_email: string | null
+          applicant_phone: string | null
+          message: string | null
           created_at: string
         }
         Insert: {
           id?: string
-          applicant_id: string
+          applicant_id?: string
           job_id: string
+          applicant_name?: string | null
+          applicant_email?: string | null
+          applicant_phone?: string | null
+          message?: string | null
           created_at?: string
         }
         Update: {
           id?: string
           applicant_id?: string
           job_id?: string
+          applicant_name?: string | null
+          applicant_email?: string | null
+          applicant_phone?: string | null
+          message?: string | null
           created_at?: string
         }
         Relationships: []

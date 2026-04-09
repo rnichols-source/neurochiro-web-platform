@@ -45,6 +45,11 @@ export async function createJobPosting(formData: any) {
       salary_max: formData.salary_max,
       benefits: formData.benefits || [],
       requirements: formData.requirements || [],
+      category: formData.category || null,
+      employment_type: formData.employment_type || null,
+      apply_method: formData.apply_method || 'neurochiro',
+      apply_url: formData.apply_url || null,
+      expires_at: null,
       status: 'Active'
     })
     .select()

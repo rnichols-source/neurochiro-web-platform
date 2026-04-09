@@ -89,6 +89,25 @@ export async function POST(req: Request) {
               is_approved: false,
             });
           }
+
+          if (metaType === 'job_listing') {
+            const durationDays = parseInt(session.metadata?.duration || '30', 10);
+            const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString();
+            await supabase.from('job_postings').insert({
+              doctor_id: userId || session.metadata?.contact_email || 'guest',
+              title: session.metadata?.title || 'Untitled Position',
+              description: session.metadata?.description || '',
+              category: session.metadata?.category || null,
+              employment_type: session.metadata?.employment_type || null,
+              salary_min: parseInt(session.metadata?.salary_min || '0', 10) || null,
+              salary_max: parseInt(session.metadata?.salary_max || '0', 10) || null,
+              city: session.metadata?.city || null,
+              state: session.metadata?.state || null,
+              apply_method: 'neurochiro',
+              expires_at: expiresAt,
+              status: 'Active',
+            });
+          }
         }
 
         // Enqueue automations

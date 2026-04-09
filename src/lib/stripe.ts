@@ -50,6 +50,30 @@ export const PLANS = {
       price: 199,
     },
   },
+  job_listing_30: {
+    id: "job_listing_30",
+    name: "Job Listing — 30 Days",
+    oneTime: {
+      priceId: process.env.STRIPE_JOB_30_PRICE_ID ?? "",
+      price: 49,
+    },
+  },
+  job_listing_60: {
+    id: "job_listing_60",
+    name: "Job Listing — 60 Days",
+    oneTime: {
+      priceId: process.env.STRIPE_JOB_60_PRICE_ID ?? "",
+      price: 79,
+    },
+  },
+  job_listing_90: {
+    id: "job_listing_90",
+    name: "Job Listing — 90 Days",
+    oneTime: {
+      priceId: process.env.STRIPE_JOB_90_PRICE_ID ?? "",
+      price: 99,
+    },
+  },
 } as const;
 
 export function getPriceId(plan: 'doctor' | 'student', cycle: 'monthly' | 'annual'): string {

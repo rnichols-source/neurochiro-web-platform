@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Search, MapPin, Briefcase, Clock } from "lucide-react";
 import Link from "next/link";
-import { getJobs } from "@/app/(public)/jobs/actions";
+import { getPublicJobs } from "@/app/(public)/careers/actions";
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState<any[]>([]);
@@ -11,7 +11,7 @@ export default function JobsPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    getJobs().then(setJobs).catch(console.error).finally(() => setLoading(false));
+    getPublicJobs({}).then(setJobs).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
@@ -68,7 +68,7 @@ export default function JobsPage() {
         <div className="space-y-4">
           {filtered.map((job) => {
             const salary = fmtSalary(job.salary_min, job.salary_max);
-            const location = [job.clinic_city, job.clinic_state].filter(Boolean).join(", ");
+            const location = [job.city || job.clinic_city, job.state || job.clinic_state].filter(Boolean).join(", ");
             return (
               <div
                 key={job.id}
@@ -83,9 +83,9 @@ export default function JobsPage() {
                       <p className="text-sm text-gray-500 mt-0.5">{job.clinic_name}</p>
                     )}
                     <div className="flex flex-wrap gap-4 mt-2 text-xs text-gray-400">
-                      {job.type && (
+                      {job.employment_type && (
                         <span className="flex items-center gap-1">
-                          <Briefcase className="w-3.5 h-3.5" /> {job.type}
+                          <Briefcase className="w-3.5 h-3.5" /> {job.employment_type}
                         </span>
                       )}
                       {salary && (
@@ -106,10 +106,10 @@ export default function JobsPage() {
                     </div>
                   </div>
                   <Link
-                    href={job.slug ? `/directory/${job.slug}` : job.clinic_name ? `/directory?q=${encodeURIComponent(job.clinic_name)}` : '/directory'}
+                    href={`/careers/${job.id}`}
                     className="shrink-0 px-6 py-3 bg-neuro-navy text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-neuro-navy/90 transition-colors"
                   >
-                    View Clinic Profile
+                    View Details
                   </Link>
                 </div>
               </div>
