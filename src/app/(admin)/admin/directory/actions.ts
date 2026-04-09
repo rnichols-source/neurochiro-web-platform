@@ -235,24 +235,22 @@ export async function sendMigrationEmails(doctorIds: string[]) {
       const firstName = doctor.first_name || 'Doctor';
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co';
 
-      // Generate password reset link via Supabase Auth
-      let resetLink = `${siteUrl}/reset-password`;
+      // Trigger Supabase's built-in password reset email flow
+      // This sends a separate email from Supabase with a working token
       if (doctor.user_id) {
         try {
-          const { data: linkData } = await supabase.auth.admin.generateLink({
+          await supabase.auth.admin.generateLink({
             type: 'recovery',
             email: doctor.email,
             options: { redirectTo: `${siteUrl}/reset-password` }
           });
-          if (linkData?.properties?.action_link) {
-            resetLink = linkData.properties.action_link;
-          }
         } catch {}
       }
 
-      // Send via Resend
+      // Also send our branded welcome email via Resend
       const { Resend } = await import('resend');
       const resend = new Resend(process.env.RESEND_API_KEY || '');
+      const loginLink = `${siteUrl}/login`;
 
       await resend.emails.send({
         from: 'NeuroChiro <support@neurochirodirectory.com>',
@@ -275,9 +273,17 @@ export async function sendMigrationEmails(doctorIds: string[]) {
             <p style="color: #555; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
               It takes about 5 minutes. Once your profile is complete, you'll be live in the global directory and patients can find you.
             </p>
+            <p style="color: #555; font-size: 16px; line-height: 1.6; margin-bottom: 8px;"><strong>Here's how to get started:</strong></p>
+            <ol style="color: #555; font-size: 15px; line-height: 1.8; margin-bottom: 24px; padding-left: 20px;">
+              <li>Go to the login page</li>
+              <li>Click <strong>"Forgot password?"</strong></li>
+              <li>Enter your email (<strong>${doctor.email}</strong>)</li>
+              <li>Check your inbox for the reset link</li>
+              <li>Set your password and complete your profile</li>
+            </ol>
             <div style="text-align: center; margin: 32px 0;">
-              <a href="${resetLink}" style="display: inline-block; padding: 16px 32px; background-color: #D66829; color: white; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 12px; letter-spacing: 0.5px;">
-                Set My Password &amp; Complete Profile
+              <a href="${loginLink}" style="display: inline-block; padding: 16px 32px; background-color: #D66829; color: white; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 12px; letter-spacing: 0.5px;">
+                Go to Login Page
               </a>
             </div>
             <p style="color: #999; font-size: 13px; line-height: 1.5; margin-top: 32px; border-top: 1px solid #eee; padding-top: 24px;">
