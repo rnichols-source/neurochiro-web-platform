@@ -19,6 +19,37 @@ export default function PatientDashboard() {
     <div className="space-y-6 pb-20">
       <h1 className="text-2xl font-heading font-black text-neuro-navy">Hi, {data?.name || 'there'}</h1>
 
+      {/* Onboarding for new patients */}
+      {!data?.todayLogged && (!data?.streak || data.streak === 0) && (
+        <div className="bg-white rounded-2xl border border-neuro-orange/20 p-6">
+          <h2 className="font-black text-neuro-navy mb-1">Welcome to NeuroChiro</h2>
+          <p className="text-gray-500 text-sm mb-4">Here&apos;s how to get started:</p>
+          <div className="space-y-3">
+            <Link href="/portal/track" className="flex items-center gap-4 p-4 rounded-xl border bg-gray-50 border-gray-100 hover:border-neuro-orange/30 transition-all">
+              <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm font-black">1</div>
+              <div>
+                <p className="text-sm font-bold text-neuro-navy">Log your first check-in</p>
+                <p className="text-xs text-gray-400">Track your energy, pain, and sleep in 30 seconds</p>
+              </div>
+            </Link>
+            <Link href="/directory" className="flex items-center gap-4 p-4 rounded-xl border bg-gray-50 border-gray-100 hover:border-neuro-orange/30 transition-all">
+              <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm font-black">2</div>
+              <div>
+                <p className="text-sm font-bold text-neuro-navy">Find a doctor near you</p>
+                <p className="text-xs text-gray-400">Search the global directory of verified specialists</p>
+              </div>
+            </Link>
+            <Link href="/portal/saved" className="flex items-center gap-4 p-4 rounded-xl border bg-gray-50 border-gray-100 hover:border-neuro-orange/30 transition-all">
+              <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm font-black">3</div>
+              <div>
+                <p className="text-sm font-bold text-neuro-navy">Save your favorites</p>
+                <p className="text-xs text-gray-400">Bookmark doctors to compare and revisit later</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Daily Check-in Card — THE primary action */}
       {data?.todayLogged ? (
         <div className="bg-white rounded-2xl border border-green-200 p-6">

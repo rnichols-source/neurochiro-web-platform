@@ -24,8 +24,8 @@ export default function AboutPage() {
 
           <div className="bg-white rounded-2xl border border-gray-100 p-8 md:p-12 shadow-sm mb-16">
             <div className="flex flex-col md:flex-row gap-8 items-start">
-              <div className="w-24 h-24 rounded-2xl bg-neuro-navy flex items-center justify-center text-white font-black text-3xl flex-shrink-0">
-                RN
+              <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0">
+                <img src="/raymond-nichols.jpg" alt="Raymond Nichols, Founder of NeuroChiro" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h2 className="text-2xl font-black text-neuro-navy mb-1">Raymond Nichols</h2>

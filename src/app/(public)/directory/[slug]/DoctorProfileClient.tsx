@@ -188,7 +188,7 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                     )}
                   </div>
                   
-                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-neuro-orange text-white px-8 py-3 rounded-full font-black text-[11px] uppercase tracking-[0.25em] shadow-2xl flex items-center gap-2.5 z-20 whitespace-nowrap border-4 border-neuro-navy">
+                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-neuro-orange text-white px-8 py-3 rounded-full font-black text-[11px] uppercase tracking-[0.25em] shadow-2xl flex items-center gap-2.5 z-20 whitespace-nowrap border-4 border-neuro-navy" title="This doctor's identity and practice have been reviewed by the NeuroChiro team. This does not constitute a guarantee of clinical outcomes.">
                     <ShieldCheck className="w-4 h-4" /> Verified Clinician
                   </div>
                 </div>
@@ -553,7 +553,8 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                   <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
                     <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-2" />
                     <p className="font-bold text-green-700">Request Sent!</p>
-                    <p className="text-green-600 text-sm">Dr. {doctor.last_name}&apos;s office will contact you soon.</p>
+                    <p className="text-green-600 text-sm mb-3">Dr. {doctor.last_name}&apos;s office will contact you within 1-2 business days.</p>
+                    <p className="text-gray-400 text-xs">You&apos;ll hear from them at the email you provided. If you don&apos;t hear back within 48 hours, try calling the office directly.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -663,6 +664,15 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Disclaimer */}
+      <div className="max-w-5xl mx-auto px-6 py-6">
+        <p className="text-[11px] text-gray-400 text-center leading-relaxed">
+          NeuroChiro is a directory service, not a healthcare provider. The &ldquo;Verified Clinician&rdquo; badge indicates that this doctor&apos;s identity and practice have been reviewed by our team. It does not constitute a guarantee of clinical outcomes, endorsement, or recommendation. Always consult directly with a healthcare provider before making medical decisions.{" "}
+          <a href="/terms" className="underline hover:text-gray-600">Terms</a> &middot;{" "}
+          <a href="/privacy" className="underline hover:text-gray-600">Privacy</a>
+        </p>
       </div>
 
       {/* Sticky mobile booking bar */}

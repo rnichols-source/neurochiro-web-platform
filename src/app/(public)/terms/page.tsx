@@ -79,28 +79,42 @@ export default function TermsPage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-neuro-navy mb-3">8. Intellectual Property</h2>
+              <h2 className="text-xl font-bold text-neuro-navy mb-3">8. Doctor Referrals</h2>
+              <p className="text-gray-600">
+                NeuroChiro facilitates doctor-to-doctor referrals as a convenience feature. NeuroChiro does not evaluate, endorse, or guarantee the quality of care provided by any referred doctor. Referring doctors and receiving doctors are independently responsible for their own clinical decisions. NeuroChiro bears no liability for outcomes arising from referrals made through the platform.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold text-neuro-navy mb-3">9. Job Board &amp; Career Listings</h2>
+              <p className="text-gray-600">
+                Job postings on NeuroChiro are submitted by employers (clinics, practices, or individual doctors). NeuroChiro does not verify the accuracy of job postings, vet employers, or guarantee employment outcomes. Employers are solely responsible for the content of their listings, hiring practices, and compliance with applicable labor laws. NeuroChiro is not liable for disputes between employers and applicants.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold text-neuro-navy mb-3">10. Intellectual Property</h2>
               <p className="text-gray-600">
                 All content on the NeuroChiro platform (design, code, branding, course materials) is owned by NeuroChiro. Doctor-submitted content (bios, photos, stories) remains the property of the submitting doctor but is licensed to NeuroChiro for display on the platform.
               </p>
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-neuro-navy mb-3">9. Dispute Resolution</h2>
+              <h2 className="text-xl font-bold text-neuro-navy mb-3">11. Dispute Resolution</h2>
               <p className="text-gray-600">
                 Any disputes arising from your use of NeuroChiro will first be addressed through good-faith negotiation. If we cannot resolve the issue informally, disputes will be settled through binding arbitration in accordance with the rules of the American Arbitration Association. You agree to resolve disputes individually and waive any right to participate in class action proceedings.
               </p>
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-neuro-navy mb-3">10. Changes to These Terms</h2>
+              <h2 className="text-xl font-bold text-neuro-navy mb-3">12. Changes to These Terms</h2>
               <p className="text-gray-600">
                 We may update these terms from time to time. We will notify you of material changes via email or a notice on the platform. Continued use after changes constitutes acceptance.
               </p>
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-neuro-navy mb-3">11. Contact</h2>
+              <h2 className="text-xl font-bold text-neuro-navy mb-3">13. Contact</h2>
               <p className="text-gray-600">
                 Questions about these terms? Contact us at{" "}
                 <a href="mailto:legal@neurochiro.com" className="text-neuro-orange font-bold hover:underline">legal@neurochiro.com</a>.

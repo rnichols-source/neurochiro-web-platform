@@ -29,7 +29,7 @@ export default function PatientPricing() {
         <div 
           key={tier.id}
           className={cn(
-            "bg-white rounded-2xl p-12 flex flex-col border transition-all duration-500 hover:shadow-2xl relative border-neuro-orange shadow-xl scale-105 z-10"
+            "bg-white rounded-2xl p-12 flex flex-col border transition-all duration-500 hover:shadow-2xl relative border-2 border-neuro-orange shadow-xl"
           )}
         >
           {tier.tag && (

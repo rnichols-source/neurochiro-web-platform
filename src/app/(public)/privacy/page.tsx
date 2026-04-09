@@ -111,7 +111,19 @@ export default function PrivacyPage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-neuro-navy mb-3">8. Contact</h2>
+              <h2 className="text-xl font-bold text-neuro-navy mb-3">8. International Users</h2>
+              <p className="text-gray-600 mb-3">NeuroChiro serves users globally. If you are located outside the United States:</p>
+              <ul className="list-disc pl-5 space-y-2 text-gray-600 text-sm">
+                <li><strong>European Union (GDPR):</strong> You have the right to access, rectify, erase, restrict processing, and port your data. You may also object to processing and lodge a complaint with your local data protection authority. We process your data based on consent and legitimate interest.</li>
+                <li><strong>Australia (Privacy Act 1988):</strong> We comply with the Australian Privacy Principles (APPs). You have the right to access and correct your personal information. We do not transfer personal data outside Australia without appropriate safeguards. Complaints can be directed to the Office of the Australian Information Commissioner (OAIC).</li>
+                <li><strong>Canada (PIPEDA):</strong> We collect, use, and disclose your personal information only with your consent and for identified purposes. You may withdraw consent at any time.</li>
+                <li><strong>United Kingdom (UK GDPR):</strong> Your rights mirror those under EU GDPR. Contact us to exercise them.</li>
+                <li><strong>New Zealand (Privacy Act 2020):</strong> You have the right to access and correct your personal information held by us.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold text-neuro-navy mb-3">9. Contact</h2>
               <p className="text-gray-600">
                 For privacy-related questions or concerns, email{" "}
                 <a href="mailto:privacy@neurochiro.com" className="text-neuro-orange font-bold hover:underline">privacy@neurochiro.com</a>.

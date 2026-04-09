@@ -9,21 +9,23 @@ interface SocialProofProps {
 }
 
 export default function SocialProof({ variant = "hero" }: SocialProofProps) {
-  const [stats, setStats] = useState({ doctors: 140, countries: 6 });
+  const [stats, setStats] = useState<{ doctors: number; countries: number } | null>(null);
 
   useEffect(() => {
     fetch("/api/stats")
       .then((r) => r.json())
       .then((d) => {
-        if (d.doctors) setStats({ doctors: d.doctors, countries: d.countries || 6 });
+        if (d.doctors !== undefined) setStats({ doctors: d.doctors, countries: d.countries || 1 });
       })
-      .catch(() => {});
+      .catch(() => setStats({ doctors: 0, countries: 0 }));
   }, []);
 
+  if (!stats) return null; // Don't show until real data loads
+
   const items = [
-    { icon: Users, label: `${stats.doctors}+ Verified Doctors` },
-    { icon: MapPin, label: `${stats.countries} Countries` },
-    { icon: ShieldCheck, label: "100% Verified Profiles" },
+    ...(stats.doctors > 0 ? [{ icon: Users, label: `${stats.doctors}+ Verified Doctors` }] : []),
+    ...(stats.countries > 1 ? [{ icon: MapPin, label: `${stats.countries} Countries` }] : []),
+    { icon: ShieldCheck, label: "Every Profile Reviewed" },
   ];
 
   if (variant === "inline") {

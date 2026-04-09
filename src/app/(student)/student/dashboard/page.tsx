@@ -78,6 +78,31 @@ export default function StudentDashboard() {
         {schoolInfo && <p className="text-neuro-gray mt-1">{schoolInfo}</p>}
       </header>
 
+      {/* Onboarding — First Steps */}
+      {profileCompleteness < 80 && (
+        <div className="bg-white rounded-2xl border border-neuro-orange/20 p-6">
+          <h2 className="font-black text-neuro-navy mb-1">Welcome to NeuroChiro</h2>
+          <p className="text-gray-500 text-sm mb-4">Here&apos;s how to get the most out of your membership:</p>
+          <div className="space-y-3">
+            {[
+              { done: profileCompleteness >= 50, label: "Complete your profile", desc: "Add your school, graduation year, and interests", href: "/student/profile" },
+              { done: academyData.completed > 0, label: "Start the Academy", desc: "Begin your first course module", href: "/student/academy" },
+              { done: applications > 0, label: "Browse the job board", desc: "See what positions are available near you", href: "/student/jobs" },
+            ].map((step, i) => (
+              <Link key={i} href={step.href} className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${step.done ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-100 hover:border-neuro-orange/30'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-black ${step.done ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
+                  {step.done ? '✓' : i + 1}
+                </div>
+                <div>
+                  <p className={`text-sm font-bold ${step.done ? 'text-green-700 line-through' : 'text-neuro-navy'}`}>{step.label}</p>
+                  <p className="text-xs text-gray-400">{step.desc}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Graduation transition banner */}
       {isGraduating && (
         <div className="bg-neuro-navy p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
