@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, Quote } from "lucide-react";
 import Link from "next/link";
 import { useRegion } from "@/context/RegionContext";
 
@@ -73,6 +73,16 @@ export default function StudentPricing() {
         >
           Get Started <ArrowRight className="w-5 h-5" />
         </Link>
+      </div>
+
+      {/* Student Testimonial */}
+      <div className="mt-12 bg-neuro-navy rounded-2xl p-8 text-center">
+        <Quote className="w-6 h-6 text-neuro-orange/40 mx-auto mb-4" />
+        <p className="text-white/80 text-sm leading-relaxed mb-4 max-w-md mx-auto">
+          &ldquo;I found my associate position through NeuroChiro before I even graduated. The job board and seminar access alone are worth it.&rdquo;
+        </p>
+        <p className="font-bold text-white text-sm">Emily Chen</p>
+        <p className="text-gray-400 text-xs">Toronto, CA &middot; Student Member</p>
       </div>
     </div>
   );

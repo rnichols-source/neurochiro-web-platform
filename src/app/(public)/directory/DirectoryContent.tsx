@@ -26,6 +26,20 @@ const GlobalNetworkMap = dynamic(() => import("@/components/map/GlobalNetworkMap
 import DoctorCard from "@/components/directory/DoctorCard";
 import SmartMatchWizard from "@/components/directory/SmartMatchWizard";
 
+const SPECIALTY_FILTERS = [
+  "Torque Release",
+  "Upper Cervical",
+  "Gonstead",
+  "Network Spinal",
+  "Activator",
+  "SOT",
+  "Thompson",
+  "Pediatric",
+  "Prenatal",
+  "Sports",
+  "Functional Neurology",
+];
+
 export default function DirectoryContent({ initialData }: { initialData: { doctors: any[], total: number } }) {
   const [notifying, setNotifying] = useState(false);
   const [notifySuccess, setNotifySuccess] = useState(false);
@@ -34,6 +48,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [matchCriteria, setMatchCriteria] = useState<string[] | null>(null);
   const [mobileView, setMobileView] = useState<'map' | 'list'>('list');
+  const [activeSpecialty, setActiveSpecialty] = useState<string | null>(null);
 
   const resetFilters = () => {
     setSearchQuery("");
@@ -297,6 +312,34 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
               </motion.button>
             </div>
           </div>
+
+          {/* Specialty Filters */}
+          <div className="max-w-4xl mx-auto mt-6 overflow-x-auto scrollbar-hide">
+            <div className="flex gap-2 pb-2 justify-center flex-wrap">
+              {SPECIALTY_FILTERS.map((specialty) => (
+                <button
+                  key={specialty}
+                  onClick={() => {
+                    if (activeSpecialty === specialty) {
+                      setActiveSpecialty(null);
+                      setSearchQuery("");
+                    } else {
+                      setActiveSpecialty(specialty);
+                      setSearchQuery(specialty);
+                    }
+                  }}
+                  className={cn(
+                    "px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border",
+                    activeSpecialty === specialty
+                      ? "bg-neuro-orange text-white border-neuro-orange"
+                      : "bg-white/10 text-white/70 border-white/20 hover:bg-white/20 hover:text-white"
+                  )}
+                >
+                  {specialty}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </header>
 
@@ -369,16 +412,43 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                 <div className="bg-white rounded-2xl border-2 border-dashed border-gray-100 p-12 text-center">
                   <Globe className="w-12 h-12 text-gray-300 mx-auto mb-6 animate-pulse" />
                   <h3 className="text-2xl font-black text-neuro-navy mb-2">Expanding the Network</h3>
-                  <p className="text-gray-500 text-sm mb-8">We haven't mapped a verified specialist in this specific area yet. Try searching a nearby city or reset your filters.</p>
-                  
+                  <p className="text-gray-500 text-sm mb-8">We haven&apos;t mapped a verified specialist in this specific area yet. Try searching a nearby city or reset your filters.</p>
+
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={resetFilters}
-                    className="px-8 py-4 bg-neuro-navy text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 mx-auto shadow-lg shadow-neuro-navy/20"
+                    className="px-8 py-4 bg-neuro-navy text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 mx-auto shadow-lg shadow-neuro-navy/20 mb-8"
                   >
                     <RotateCcw className="w-4 h-4 text-neuro-orange" /> Reset All Filters
                   </motion.button>
+
+                  {/* Email Capture for Zero Results */}
+                  {!notifySuccess ? (
+                    <form onSubmit={handleNotifyMe} className="max-w-sm mx-auto pt-6 border-t border-gray-100">
+                      <p className="text-sm font-bold text-neuro-navy mb-3">Get notified when we add a doctor near you</p>
+                      <div className="flex gap-2">
+                        <input
+                          type="email"
+                          name="email"
+                          required
+                          placeholder="you@email.com"
+                          className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange"
+                        />
+                        <button
+                          type="submit"
+                          disabled={notifying}
+                          className="px-5 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-colors disabled:opacity-50"
+                        >
+                          {notifying ? '...' : 'Notify Me'}
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="pt-6 border-t border-gray-100">
+                      <p className="text-sm font-bold text-green-600">We&apos;ll let you know when a doctor joins near you!</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

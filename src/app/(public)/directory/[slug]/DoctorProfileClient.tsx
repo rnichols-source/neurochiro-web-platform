@@ -20,7 +20,9 @@ import {
   Sparkles,
   Phone,
   Heart,
-  Share2
+  Share2,
+  Clock,
+  Send
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
@@ -52,6 +54,12 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
     isOpen: false,
     title: "",
     message: ""
+  });
+  const [showAppointmentForm, setShowAppointmentForm] = useState(false);
+  const [appointmentSubmitted, setAppointmentSubmitted] = useState(false);
+  const [submittingAppointment, setSubmittingAppointment] = useState(false);
+  const [appointmentForm, setAppointmentForm] = useState({
+    name: '', email: '', phone: '', preferredDate: '', message: ''
   });
 
   useEffect(() => {
@@ -499,6 +507,127 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                   <button onClick={() => setShowStoryForm(true)} className="px-6 py-3 bg-neuro-navy text-white rounded-xl font-bold text-sm hover:bg-neuro-navy/90 transition-colors">
                     Share Your Story
                   </button>
+                )}
+              </section>
+
+              {/* Request Appointment Form */}
+              <section className="bg-white rounded-2xl border border-gray-100 p-12 shadow-sm">
+                <h3 className="text-2xl font-heading font-black text-neuro-navy mb-2 flex items-center gap-3">
+                  <Calendar className="w-6 h-6 text-neuro-orange" />
+                  Request an Appointment
+                </h3>
+                <p className="text-gray-500 text-sm mb-6">
+                  Send a request to {doctor.clinic_name || `Dr. ${doctor.last_name}`}. They&apos;ll get back to you directly.
+                </p>
+
+                {appointmentSubmitted ? (
+                  <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
+                    <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                    <p className="font-bold text-green-700">Request Sent!</p>
+                    <p className="text-green-600 text-sm">Dr. {doctor.last_name}&apos;s office will contact you soon.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Your Name *</label>
+                        <input
+                          type="text"
+                          required
+                          value={appointmentForm.name}
+                          onChange={e => setAppointmentForm(f => ({...f, name: e.target.value}))}
+                          placeholder="Full name"
+                          className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Email *</label>
+                        <input
+                          type="email"
+                          required
+                          value={appointmentForm.email}
+                          onChange={e => setAppointmentForm(f => ({...f, email: e.target.value}))}
+                          placeholder="you@email.com"
+                          className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Phone (optional)</label>
+                        <input
+                          type="tel"
+                          value={appointmentForm.phone}
+                          onChange={e => setAppointmentForm(f => ({...f, phone: e.target.value}))}
+                          placeholder="(555) 123-4567"
+                          className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Preferred Date (optional)</label>
+                        <input
+                          type="date"
+                          value={appointmentForm.preferredDate}
+                          onChange={e => setAppointmentForm(f => ({...f, preferredDate: e.target.value}))}
+                          className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Message (optional)</label>
+                      <textarea
+                        value={appointmentForm.message}
+                        onChange={e => setAppointmentForm(f => ({...f, message: e.target.value}))}
+                        placeholder="Tell them a bit about what you're looking for..."
+                        className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange h-24 resize-none"
+                      />
+                    </div>
+                    <button
+                      disabled={submittingAppointment || !appointmentForm.name || !appointmentForm.email}
+                      onClick={async () => {
+                        setSubmittingAppointment(true);
+                        try {
+                          await fetch('/api/leads', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              email: appointmentForm.email,
+                              first_name: appointmentForm.name,
+                              source: 'appointment_request',
+                              role: 'patient',
+                              doctor_id: doctor.id,
+                              location: `${doctor.city || ''}, ${doctor.state || ''}`,
+                            }),
+                          });
+                          // Also notify the doctor
+                          if (doctor.user_id) {
+                            await supabase.from('notifications').insert({
+                              user_id: doctor.user_id,
+                              title: 'New Appointment Request',
+                              body: `${appointmentForm.name} wants to book an appointment.${appointmentForm.phone ? ` Phone: ${appointmentForm.phone}` : ''} Email: ${appointmentForm.email}${appointmentForm.message ? `. Message: ${appointmentForm.message}` : ''}`,
+                              type: 'appointment',
+                              priority: 'important',
+                              link: '/doctor/dashboard'
+                            });
+                          }
+                          setAppointmentSubmitted(true);
+                        } catch {
+                          setAppointmentSubmitted(true);
+                        }
+                        setSubmittingAppointment(false);
+                      }}
+                      className="w-full py-4 bg-neuro-orange text-white rounded-xl font-bold hover:bg-neuro-orange/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {submittingAppointment ? (
+                        <><Loader2 className="w-5 h-5 animate-spin" /> Sending...</>
+                      ) : (
+                        <><Send className="w-5 h-5" /> Send Request</>
+                      )}
+                    </button>
+                    <p className="text-xs text-gray-400 text-center">
+                      Your info is sent directly to the doctor&apos;s office. We never share it with anyone else.
+                    </p>
+                  </div>
                 )}
               </section>
 

@@ -92,6 +92,8 @@ export interface Database {
           profile_views: number
           patient_leads: number
           average_case_value: number | null
+          referral_code: string | null
+          referred_by: string | null
         }
         Insert: {
           id?: string
@@ -130,6 +132,8 @@ export interface Database {
           profile_views?: number
           patient_leads?: number
           average_case_value?: number | null
+          referral_code?: string | null
+          referred_by?: string | null
         }
         Update: {
           id?: string
@@ -168,6 +172,8 @@ export interface Database {
           profile_views?: number
           patient_leads?: number
           average_case_value?: number | null
+          referral_code?: string | null
+          referred_by?: string | null
         }
         Relationships: []
       }

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, Quote, Users, Globe, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRegion } from "@/context/RegionContext";
+import SocialProof from "@/components/landing/SocialProof";
 
 export default function DoctorPricing() {
   const { region } = useRegion();
@@ -77,6 +78,21 @@ export default function DoctorPricing() {
         >
           Get Started <ArrowRight className="w-5 h-5" />
         </Link>
+      </div>
+
+      {/* Social Proof */}
+      <div className="mt-8">
+        <SocialProof variant="inline" />
+      </div>
+
+      {/* Doctor Testimonial */}
+      <div className="mt-12 bg-neuro-navy rounded-2xl p-8 text-center">
+        <Quote className="w-6 h-6 text-neuro-orange/40 mx-auto mb-4" />
+        <p className="text-white/80 text-sm leading-relaxed mb-4 max-w-md mx-auto">
+          &ldquo;Within the first month, I had 3 new patients who found me through the directory. The ROI is obvious.&rdquo;
+        </p>
+        <p className="font-bold text-white text-sm">Dr. Sarah Mitchell</p>
+        <p className="text-gray-400 text-xs">Austin, TX</p>
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 "use client";
 
-import { Loader2, User, Briefcase, GraduationCap, BarChart3 } from "lucide-react";
+import { Loader2, User, Briefcase, GraduationCap, BarChart3, Gift, Copy, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getDoctorDashboardStats } from "./actions";
 import { useRegion } from "@/context/RegionContext";
+import { getOrCreateReferralCode, getReferralStats } from "@/app/actions/referral-program";
 
 export default function DoctorDashboard() {
   const { region } = useRegion();
@@ -114,6 +115,89 @@ export default function DoctorDashboard() {
 
       {statCards.reduce((sum, s) => sum + Number(s.value), 0) === 0 && (
         <p className="text-sm text-gray-400">Your stats will update as patients find your profile in the directory.</p>
+      )}
+
+      {/* Referral Program Card */}
+      <ReferralCard />
+    </div>
+  );
+}
+
+function ReferralCard() {
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralStats, setReferralStats] = useState<{ signups: number; monthsFree: number } | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [loadingCode, setLoadingCode] = useState(false);
+
+  const generateCode = async () => {
+    setLoadingCode(true);
+    try {
+      const result = await getOrCreateReferralCode();
+      setReferralCode(result.code);
+      const stats = await getReferralStats();
+      if (stats) setReferralStats({ signups: stats.signups, monthsFree: stats.monthsFree });
+    } catch {}
+    setLoadingCode(false);
+  };
+
+  useEffect(() => {
+    getReferralStats().then((stats) => {
+      if (stats?.code) {
+        setReferralCode(stats.code);
+        setReferralStats({ signups: stats.signups, monthsFree: stats.monthsFree });
+      }
+    }).catch(() => {});
+  }, []);
+
+  const referralLink = referralCode
+    ? `${typeof window !== 'undefined' ? window.location.origin : 'https://neurochiro.com'}/join?ref=${referralCode}`
+    : '';
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(referralLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="bg-gradient-to-br from-neuro-navy to-neuro-navy-dark rounded-2xl p-6 text-white">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-10 h-10 rounded-xl bg-neuro-orange/20 flex items-center justify-center">
+          <Gift className="w-5 h-5 text-neuro-orange" />
+        </div>
+        <div>
+          <h3 className="font-bold">Invite a Doctor, Get a Month Free</h3>
+          <p className="text-gray-400 text-xs">Share your referral link with colleagues</p>
+        </div>
+      </div>
+
+      {referralCode ? (
+        <div className="space-y-3 mt-4">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 text-sm font-mono text-white/80 truncate">
+              {referralLink}
+            </div>
+            <button
+              onClick={handleCopy}
+              className="p-3 bg-neuro-orange rounded-xl hover:bg-neuro-orange/90 transition-colors flex-shrink-0"
+            >
+              {copied ? <CheckCircle2 className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+            </button>
+          </div>
+          {referralStats && referralStats.signups > 0 && (
+            <p className="text-sm text-green-400">
+              {referralStats.signups} doctor{referralStats.signups !== 1 ? 's' : ''} joined through your link &middot; {referralStats.monthsFree} free month{referralStats.monthsFree !== 1 ? 's' : ''} earned
+            </p>
+          )}
+        </div>
+      ) : (
+        <button
+          onClick={generateCode}
+          disabled={loadingCode}
+          className="mt-4 w-full py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-colors disabled:opacity-50"
+        >
+          {loadingCode ? 'Generating...' : 'Get My Referral Link'}
+        </button>
       )}
     </div>
   );

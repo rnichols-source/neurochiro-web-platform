@@ -3,6 +3,10 @@ import { Search, ArrowRight, MapPin, ShieldCheck, Globe, Users } from "lucide-re
 import { createAdminClient } from "@/lib/supabase-admin";
 import Footer from "@/components/landing/Footer";
 import WhoIsItFor from "@/components/landing/WhoIsItFor";
+import Testimonials from "@/components/landing/Testimonials";
+import SocialProof from "@/components/landing/SocialProof";
+import DoctorValueProp from "@/components/landing/DoctorValueProp";
+import EmailCaptureBanner from "@/components/landing/EmailCaptureBanner";
 
 export const metadata = {
   title: "NeuroChiro | Find a Nervous System Chiropractor",
@@ -59,19 +63,8 @@ export default async function HomePage() {
           </form>
         </div>
 
-        {/* Trust Stats */}
-        <div className="flex flex-wrap justify-center gap-8 mt-12 max-w-2xl mx-auto">
-          {[
-            { icon: Users, label: "140+ Verified Doctors" },
-            { icon: Globe, label: "Global Network" },
-            { icon: ShieldCheck, label: "100% Verified Profiles" },
-          ].map((stat, i) => (
-            <div key={i} className="flex items-center gap-2 text-gray-400">
-              <stat.icon className="w-4 h-4 text-neuro-orange" />
-              <span className="text-sm font-bold">{stat.label}</span>
-            </div>
-          ))}
-        </div>
+        {/* Trust Stats — Dynamic */}
+        <SocialProof doctorCount={featured.length > 0 ? undefined : 0} />
       </section>
 
       {/* Featured Doctors */}
@@ -129,8 +122,17 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Testimonials */}
+      <Testimonials />
+
       {/* For Everyone — client component for region-aware pricing */}
       <WhoIsItFor />
+
+      {/* Doctor Value Prop */}
+      <DoctorValueProp />
+
+      {/* Email Capture for Non-Account Patients */}
+      <EmailCaptureBanner />
 
       {/* Doctor CTA */}
       <section className="bg-neuro-navy py-16 px-6">

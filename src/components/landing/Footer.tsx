@@ -36,6 +36,7 @@ export default function Footer() {
             <li><Link href="/directory" className="text-gray-400 hover:text-neuro-orange transition-colors">Global Directory</Link></li>
             <li><Link href="/register?role=student" className="text-gray-400 hover:text-neuro-orange transition-colors">For Students</Link></li>
             <li><Link href="/register?role=doctor" className="text-gray-400 hover:text-neuro-orange transition-colors">For Doctors</Link></li>
+            <li><Link href="/why-neurochiro" className="text-gray-400 hover:text-neuro-orange transition-colors">Why NeuroChiro?</Link></li>
             <li><Link href="/seminars" className="text-gray-400 hover:text-neuro-orange transition-colors">Seminars Hub</Link></li>
             <li><Link href="/host-a-seminar" className="text-gray-400 hover:text-neuro-orange transition-colors">Host a Seminar</Link></li>
           </ul>
@@ -74,12 +75,19 @@ export default function Footer() {
 
 function NewsletterForm() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+  const [email, setEmail] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email) return;
     setStatus('loading');
-    // Simulated submission
-    await new Promise(resolve => setTimeout(resolve, 800));
+    try {
+      await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'footer_newsletter', role: 'subscriber' }),
+      });
+    } catch {}
     setStatus('success');
   };
 
@@ -97,10 +105,12 @@ function NewsletterForm() {
 
   return (
     <form className="flex gap-2" onSubmit={handleSubmit}>
-      <input 
-        type="email" 
+      <input
+        type="email"
         required
-        placeholder="Enter your email" 
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Enter your email"
         className="bg-white/5 border border-white/10 rounded-lg px-4 py-3 w-full text-white placeholder-gray-500 focus:outline-none focus:border-neuro-orange transition-colors"
       />
       <button 

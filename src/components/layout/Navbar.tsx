@@ -50,6 +50,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "Find a Doctor", href: "/directory", icon: MapPin },
+    { name: "Why NeuroChiro?", href: "/why-neurochiro", icon: Zap },
     { name: "Education", href: "/learn", icon: BookOpen },
     { name: "Careers", href: "/careers", icon: Briefcase },
     { name: "Marketplace", href: "/marketplace", icon: Store },
