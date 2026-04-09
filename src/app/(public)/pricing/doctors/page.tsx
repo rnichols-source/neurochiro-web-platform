@@ -85,14 +85,21 @@ export default function DoctorPricing() {
         <SocialProof variant="inline" />
       </div>
 
-      {/* Doctor Testimonial */}
-      <div className="mt-12 bg-neuro-navy rounded-2xl p-8 text-center">
-        <Quote className="w-6 h-6 text-neuro-orange/40 mx-auto mb-4" />
-        <p className="text-white/80 text-sm leading-relaxed mb-4 max-w-md mx-auto">
-          &ldquo;Within the first month, I had 3 new patients who found me through the directory. The ROI is obvious.&rdquo;
-        </p>
-        <p className="font-bold text-white text-sm">Dr. Sarah Mitchell</p>
-        <p className="text-gray-400 text-xs">Austin, TX</p>
+      {/* Why Not Google? */}
+      <div className="mt-12 bg-gray-50 rounded-2xl p-8 border border-gray-100">
+        <h3 className="font-bold text-neuro-navy text-center mb-4">&ldquo;Why not just use Google Business Profile?&rdquo;</h3>
+        <div className="space-y-3 max-w-md mx-auto">
+          {[
+            "Google lists every chiropractor. NeuroChiro only lists nervous system specialists. Your patients find you, not your competitors.",
+            "Google doesn't verify your approach. Our badge tells patients you've been reviewed and approved by a network that understands what you do.",
+            "Google doesn't offer referrals, job postings, seminar hosting, student recruiting, or messaging. We do — all in one membership.",
+          ].map((point, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-neuro-orange flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-gray-600">{point}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

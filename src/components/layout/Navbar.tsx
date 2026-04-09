@@ -53,7 +53,6 @@ export default function Navbar() {
     { name: "Why NeuroChiro?", href: "/why-neurochiro", icon: Zap },
     { name: "Education", href: "/learn", icon: BookOpen },
     { name: "Careers", href: "/careers", icon: Briefcase },
-    { name: "Marketplace", href: "/marketplace", icon: Store },
   ];
 
   // Determine if we should use white text based on scroll state and current page

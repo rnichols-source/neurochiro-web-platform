@@ -61,6 +61,8 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
   const [appointmentForm, setAppointmentForm] = useState({
     name: '', email: '', phone: '', preferredDate: '', message: ''
   });
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [reportSubmitted, setReportSubmitted] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -341,24 +343,18 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                   )}
                 </AnimatePresence>
 
-                {/* Claim Profile Section for Unclaimed Listings */}
+                {/* Are you this doctor? CTA */}
                 {!doctor.user_id && (
-                  <div className="mt-8 p-6 bg-neuro-orange/10 border border-neuro-orange/30 rounded-[2rem] relative overflow-hidden group">
-                    <div className="relative z-10">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Sparkles className="w-4 h-4 text-neuro-orange fill-current" />
-                        <span className="text-[10px] font-black text-neuro-orange uppercase tracking-widest">Unclaimed Listing</span>
-                      </div>
-                      <p className="text-xs font-bold text-slate-100 mb-5 leading-relaxed">
-                        Are you {doctor.first_name ? `Dr. ${doctor.last_name}` : 'the owner of this practice'}? Claim this profile to manage your clinic's presence.
-                      </p>
-                      <Link 
-                        href={`/register?role=doctor&claim_id=${doctor.id}&tier=starter`}
-                        className="w-full py-4 bg-neuro-orange text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-neuro-orange-light transition-all flex items-center justify-center gap-2 shadow-lg shadow-neuro-orange/20"
-                      >
-                        Claim My Profile <ChevronRight className="w-4 h-4" />
-                      </Link>
-                    </div>
+                  <div className="mt-8 p-6 bg-white/5 border border-white/10 rounded-2xl">
+                    <p className="text-xs text-gray-400 mb-3">
+                      Are you Dr. {doctor.last_name}? Join NeuroChiro to manage your profile and connect with patients.
+                    </p>
+                    <Link
+                      href="/register?role=doctor"
+                      className="text-xs font-bold text-neuro-orange hover:underline"
+                    >
+                      Create your account
+                    </Link>
                   </div>
                 )}
 
@@ -408,28 +404,19 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                   </div>
                 )}
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
                   <div className="space-y-6">
                     <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 border-b border-white/10 pb-4">Core Focus Areas</h4>
                     <div className="flex flex-wrap gap-3">
-                      {(doctor.specialties || []).map((s: string, i: number) => (
-                        <span key={i} className="px-6 py-3 bg-neuro-orange/10 border border-neuro-orange/20 text-neuro-orange rounded-2xl text-[12px] font-black uppercase tracking-wider hover:bg-neuro-orange/20 transition-all hover:-translate-y-0.5">
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-6">
-                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 border-b border-white/10 pb-4">Clinic Infrastructure</h4>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4 text-sm font-black text-slate-100 bg-white/5 p-5 rounded-[1.5rem] border border-white/5 hover:bg-white/10 transition-colors">
-                        <CheckCircle2 className="w-6 h-6 text-emerald-400" /> 
-                        Nervous System Scanning Active
-                      </div>
-                      <div className="flex items-center gap-4 text-sm font-black text-slate-100 bg-white/5 p-5 rounded-[1.5rem] border border-white/5 opacity-80 hover:opacity-100 transition-all">
-                        <ShieldCheck className="w-6 h-6 text-blue-400" /> 
-                        HIPAA Compliant Secure Facility
-                      </div>
+                      {(doctor.specialties || []).length > 0 ? (
+                        (doctor.specialties || []).map((s: string, i: number) => (
+                          <span key={i} className="px-6 py-3 bg-neuro-orange/10 border border-neuro-orange/20 text-neuro-orange rounded-2xl text-[12px] font-black uppercase tracking-wider hover:bg-neuro-orange/20 transition-all hover:-translate-y-0.5">
+                            {s}
+                          </span>
+                        ))
+                      ) : (
+                        <p className="text-slate-400 text-sm">Specialties not yet listed.</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -509,6 +496,48 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                   </button>
                 )}
               </section>
+
+              {/* Report a Concern */}
+              <div className="text-center">
+                {reportSubmitted ? (
+                  <p className="text-sm text-green-600 font-bold">Thank you. Our team will review this.</p>
+                ) : showReportForm ? (
+                  <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm text-left">
+                    <h4 className="font-bold text-neuro-navy mb-1 text-sm">Report a Concern</h4>
+                    <p className="text-gray-400 text-xs mb-4">If you have a safety or credential concern about this doctor, let us know. All reports are reviewed by our team.</p>
+                    <form onSubmit={async (e) => {
+                      e.preventDefault();
+                      const form = e.target as HTMLFormElement;
+                      const data = new FormData(form);
+                      await fetch('/api/leads', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          email: data.get('email'),
+                          first_name: data.get('name'),
+                          source: 'report_concern',
+                          role: 'report',
+                          doctor_id: doctor.id,
+                          location: `Report about Dr. ${doctor.last_name}: ${data.get('concern')}`,
+                        }),
+                      });
+                      setReportSubmitted(true);
+                    }} className="space-y-3">
+                      <input type="text" name="name" required placeholder="Your name" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-neuro-orange" />
+                      <input type="email" name="email" required placeholder="Your email" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-neuro-orange" />
+                      <textarea name="concern" required placeholder="Describe your concern..." rows={3} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-neuro-orange resize-none" />
+                      <div className="flex gap-2">
+                        <button type="button" onClick={() => setShowReportForm(false)} className="px-4 py-2 text-gray-500 text-xs font-bold hover:text-gray-700">Cancel</button>
+                        <button type="submit" className="px-4 py-2 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-colors">Submit Report</button>
+                      </div>
+                    </form>
+                  </div>
+                ) : (
+                  <button onClick={() => setShowReportForm(true)} className="text-xs text-gray-400 hover:text-red-500 transition-colors underline">
+                    Report a concern about this doctor
+                  </button>
+                )}
+              </div>
 
               {/* Request Appointment Form */}
               <section className="bg-white rounded-2xl border border-gray-100 p-12 shadow-sm">

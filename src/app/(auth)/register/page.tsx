@@ -19,6 +19,8 @@ function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [licenseState, setLicenseState] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
@@ -132,6 +134,28 @@ function RegisterForm() {
               placeholder="Phone number (optional)"
             />
           </div>
+
+          {/* License info for doctors */}
+          {role === "doctor" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">License # <span className="text-gray-400">(required)</span></label>
+                <input
+                  type="text" required value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="DC-12345"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">License State</label>
+                <input
+                  type="text" required value={licenseState} onChange={(e) => setLicenseState(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="e.g. TX, CA, NSW"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Role toggle */}
           <div className="flex rounded-lg border border-gray-300 overflow-hidden">

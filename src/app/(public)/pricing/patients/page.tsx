@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ArrowRight, Heart, ShieldCheck, Activity, Globe, Quote } from "lucide-react";
+import { Check, ArrowRight, Heart, ShieldCheck, Activity, Globe } from "lucide-react";
 import Link from "next/link";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -82,14 +82,12 @@ export default function PatientPricing() {
         </div>
       ))}
 
-      {/* Patient Testimonial */}
+      {/* Patient Value Prop */}
       <div className="mt-12 bg-neuro-navy rounded-2xl p-8 text-center max-w-lg mx-auto">
-        <Quote className="w-6 h-6 text-neuro-orange/40 mx-auto mb-4" />
-        <p className="text-white/80 text-sm leading-relaxed mb-4">
-          &ldquo;I moved to a new city and had no idea how to find a chiropractor who actually focuses on the nervous system. NeuroChiro made it so easy.&rdquo;
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-3">Why It&apos;s Free</p>
+        <p className="text-white/80 text-sm leading-relaxed">
+          We believe patients should always have free access to find the right specialist. Search the directory, track your health, and save your favorite doctors &mdash; no credit card needed, ever.
         </p>
-        <p className="font-bold text-white text-sm">Mark R.</p>
-        <p className="text-gray-400 text-xs">San Diego, CA &middot; Patient</p>
       </div>
     </div>
   );

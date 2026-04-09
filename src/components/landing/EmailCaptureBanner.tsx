@@ -61,7 +61,7 @@ export default function EmailCaptureBanner() {
           Can&apos;t find a doctor near you?
         </h3>
         <p className="text-gray-500 text-sm mb-6">
-          Leave your email and we&apos;ll let you know when a verified specialist joins your area.
+          Leave your email and we&apos;ll notify you when a verified specialist joins your area. One email, no spam. Unsubscribe anytime.
         </p>
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
           <input

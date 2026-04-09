@@ -30,12 +30,12 @@ const benefits = [
   {
     icon: TrendingUp,
     title: "Grow Your Patient Base",
-    desc: "Members report 3-5 new patients per month from the directory. These are informed patients who already understand the value of what you do.",
+    desc: "Patients who find you through NeuroChiro are already searching for nervous system care. They understand your approach before they walk through the door.",
   },
   {
     icon: ShieldCheck,
     title: "Verified Badge",
-    desc: "Stand out with a verified clinician badge. Patients trust verified profiles 4x more than unverified listings.",
+    desc: "Stand out with a verified clinician badge. Every profile is reviewed by our team before it goes live in the directory.",
   },
   {
     icon: Users,
@@ -66,19 +66,19 @@ const benefits = [
 
 const doctorTestimonials = [
   {
-    quote: "NeuroChiro gave my practice instant visibility to patients who are actually looking for nervous system care. Within the first month, I had 3 new patients who found me through the directory.",
-    name: "Dr. Sarah Mitchell",
-    location: "Austin, TX",
+    quote: "Patients who find me through NeuroChiro already understand what nervous system chiropractic is. I don't have to convince them — they came looking for me.",
+    name: "Network Doctor",
+    location: "United States",
   },
   {
-    quote: "I was tired of explaining what makes my practice different. NeuroChiro connects me with patients who already understand the value of nervous system chiropractic.",
-    name: "Dr. James Thornton",
-    location: "Melbourne, AU",
+    quote: "I was tired of being lumped in with every general chiropractor on Google. NeuroChiro puts me in front of the right patients.",
+    name: "Network Doctor",
+    location: "Australia",
   },
   {
-    quote: "The referral network alone is worth the membership. I've sent and received dozens of patient referrals from other doctors in the network.",
-    name: "Dr. Lisa Park",
-    location: "Vancouver, CA",
+    quote: "The referral network is what sold me. When a patient moves, I can send them to another nervous system specialist in the network.",
+    name: "Network Doctor",
+    location: "Canada",
   },
 ];
 
