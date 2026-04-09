@@ -36,12 +36,18 @@ function LoginContent() {
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setForgotPending(true);
-    const supabase = createClient();
-    await supabase.auth.resetPasswordForEmail(forgotEmail, {
-      redirectTo: window.location.origin + "/reset-password",
-    });
-    setForgotSent(true);
-    setForgotPending(false);
+    try {
+      await fetch('/api/auth/reset-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+      // Redirect to reset page with email pre-filled
+      window.location.href = `/reset-password?email=${encodeURIComponent(forgotEmail)}`;
+    } catch {
+      setForgotSent(true);
+      setForgotPending(false);
+    }
   };
 
   useEffect(() => {

@@ -277,8 +277,8 @@ export async function sendMigrationEmails(doctorIds: string[]) {
             <ol style="color: #555; font-size: 15px; line-height: 1.8; margin-bottom: 24px; padding-left: 20px;">
               <li>Go to the login page</li>
               <li>Click <strong>"Forgot password?"</strong></li>
-              <li>Enter your email (<strong>${doctor.email}</strong>)</li>
-              <li>Check your inbox for the reset link</li>
+              <li>Enter your email: <strong>${doctor.email}</strong></li>
+              <li>You'll get a 6-digit code — enter it on the next screen</li>
               <li>Set your password and complete your profile</li>
             </ol>
             <div style="text-align: center; margin: 32px 0;">
