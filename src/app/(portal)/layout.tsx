@@ -21,7 +21,7 @@ const navItems = [
   { name: "Find a Doctor", href: "/directory", icon: Search },
   { name: "Saved", href: "/portal/saved", icon: Heart },
   { name: "Health Tracker", href: "/portal/track", icon: Activity },
-  { name: "Learn", href: "/learn", icon: BookOpen },
+  { name: "Learn", href: "/portal/learn", icon: BookOpen },
   { name: "Settings", href: "/portal/settings", icon: Settings },
 ];
 

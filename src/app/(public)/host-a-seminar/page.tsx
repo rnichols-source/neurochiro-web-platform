@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
-import { createSeminarListingCheckout } from "./actions";
+import { createSeminarListingCheckout, createMemberSeminar } from "./actions";
 import { useRegion } from "@/context/RegionContext";
 
 export default function HostSeminarPage() {
@@ -45,7 +45,8 @@ export default function HostSeminarPage() {
     };
 
     if (isMember) {
-      // TODO: call createSeminarAction directly for free listing
+      const result = await createMemberSeminar(seminarData);
+      if (result.error) { setError(result.error); setLoading(false); return; }
       setSuccess(true);
       setLoading(false);
       return;

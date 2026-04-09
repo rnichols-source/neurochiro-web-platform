@@ -9,21 +9,33 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<"newest" | "salary">("newest");
 
   useEffect(() => {
     getPublicJobs({}).then(setJobs).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return jobs;
-    const q = search.toLowerCase();
-    return jobs.filter(
-      (j) =>
-        j.title?.toLowerCase().includes(q) ||
-        j.clinic_city?.toLowerCase().includes(q) ||
-        j.clinic_name?.toLowerCase().includes(q)
-    );
-  }, [jobs, search]);
+    let result = jobs;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (j) =>
+          j.title?.toLowerCase().includes(q) ||
+          j.clinic_city?.toLowerCase().includes(q) ||
+          j.city?.toLowerCase().includes(q) ||
+          j.state?.toLowerCase().includes(q) ||
+          j.clinic_name?.toLowerCase().includes(q)
+      );
+    }
+    // Sort
+    if (sortBy === "newest") {
+      result = [...result].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    } else if (sortBy === "salary") {
+      result = [...result].sort((a, b) => (b.salary_max || b.salary_min || 0) - (a.salary_max || a.salary_min || 0));
+    }
+    return result;
+  }, [jobs, search, sortBy]);
 
   const fmtSalary = (min: number | null, max: number | null) =>
     min && max ? `$${min.toLocaleString()} - $${max.toLocaleString()}` : min ? `From $${min.toLocaleString()}` : max ? `Up to $${max.toLocaleString()}` : null;
@@ -42,15 +54,31 @@ export default function JobsPage() {
         <h1 className="text-2xl font-heading font-black text-neuro-navy">Jobs</h1>
       </header>
 
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by title, clinic, or city..."
-          className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 shadow-sm"
-        />
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by title, clinic, city, or state..."
+            className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 shadow-sm"
+          />
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setSortBy("newest")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${sortBy === "newest" ? "bg-neuro-navy text-white" : "bg-white border border-gray-200 text-gray-500 hover:border-gray-300"}`}
+          >
+            Newest
+          </button>
+          <button
+            onClick={() => setSortBy("salary")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${sortBy === "salary" ? "bg-neuro-navy text-white" : "bg-white border border-gray-200 text-gray-500 hover:border-gray-300"}`}
+          >
+            Highest Pay
+          </button>
+        </div>
       </div>
 
       {loading ? (

@@ -61,9 +61,9 @@ export default function StudentDashboard() {
 
   const missingItems: { label: string; href: string }[] = [];
   if (!data?.profile?.fullName) missingItems.push({ label: "Add your full name", href: "/student/profile" });
-  if (!data?.profile?.school || data.profile.school === "Life University") missingItems.push({ label: "Confirm your school", href: "/student/profile" });
-  if (!data?.profile?.gradYear || data.profile.gradYear === "2027") missingItems.push({ label: "Confirm graduation year", href: "/student/profile" });
-  if (data?.stats?.matchScore === 0) missingItems.push({ label: "Add your location", href: "/student/profile" });
+  if (!data?.profile?.school) missingItems.push({ label: "Add your school", href: "/student/profile" });
+  if (!data?.profile?.gradYear) missingItems.push({ label: "Add graduation year", href: "/student/profile" });
+  if (!data?.profile?.city) missingItems.push({ label: "Add your location", href: "/student/profile" });
 
   const currentYear = new Date().getFullYear();
   const gradYear = data?.profile?.gradYear ? parseInt(data.profile.gradYear, 10) : null;

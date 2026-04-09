@@ -94,7 +94,8 @@ export default function ProfilePage() {
       )}
       {profile?.verification_status === 'pending' && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
-          <p className="text-sm font-bold text-yellow-700">Your profile is under review. It will appear in the directory once approved.</p>
+          <p className="text-sm font-bold text-yellow-700">Your profile is under review.</p>
+          <p className="text-xs text-yellow-600 mt-1">Most profiles are reviewed within 24-48 hours. You&apos;ll get a notification when it goes live.</p>
         </div>
       )}
 

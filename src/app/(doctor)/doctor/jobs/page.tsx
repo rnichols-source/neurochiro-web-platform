@@ -89,7 +89,7 @@ export default function JobsPage() {
         <h1 className="text-2xl font-heading font-black text-neuro-navy">Jobs</h1>
         <button
           onClick={() => setShowPostModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+          className="flex items-center gap-2 px-4 py-2 bg-neuro-orange text-white rounded-lg hover:bg-neuro-orange/90 transition-colors text-sm font-bold"
         >
           <Plus className="w-4 h-4" /> Post New Job
         </button>
