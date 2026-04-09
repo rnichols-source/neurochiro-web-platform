@@ -1,34 +1,50 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { createClient } from "@/lib/supabase";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const [password, setPassword] = useState("");
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
   const [sessionReady, setSessionReady] = useState(false);
   const [checking, setChecking] = useState(true);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Supabase sends the recovery token in the URL hash
-    // The client library auto-exchanges it for a session
     const supabase = createClient();
-    supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
+    const code = searchParams.get("code");
+
+    // If there's a code in the URL, exchange it for a session
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (!error) {
+          setSessionReady(true);
+        }
+        setChecking(false);
+      });
+      return;
+    }
+
+    // Listen for PASSWORD_RECOVERY event (hash-based flow)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
         setSessionReady(true);
         setChecking(false);
       }
     });
 
-    // Also check if there's already a session (user clicked link and session was set)
+    // Also check if there's already a session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         setSessionReady(true);
       }
       setChecking(false);
     });
-  }, []);
+
+    return () => subscription.unsubscribe();
+  }, [searchParams]);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +53,7 @@ export default function ResetPasswordPage() {
     const supabase = createClient();
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
-      if (error.message.includes('session') || error.message.includes('Auth')) {
+      if (error.message.includes("session") || error.message.includes("Auth")) {
         setError("Your reset link has expired. Please request a new one from the login page.");
       } else {
         setError(error.message);
@@ -86,5 +102,13 @@ export default function ResetPasswordPage() {
         <p className="text-center mt-4"><Link href="/login" className="text-sm text-neuro-orange font-bold hover:underline">Back to login</Link></p>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-dvh bg-neuro-cream flex items-center justify-center p-6"><div className="w-8 h-8 border-4 border-neuro-orange border-t-transparent rounded-full animate-spin" /></div>}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
