@@ -23,6 +23,18 @@ export async function middleware(req: NextRequest) {
     }
   );
 
+  // Detect password recovery flow and redirect to reset-password page
+  const code = req.nextUrl.searchParams.get('code');
+  const type = req.nextUrl.searchParams.get('type');
+  if (code && (type === 'recovery' || req.nextUrl.pathname === '/')) {
+    // Check if this looks like a recovery redirect (has code but landing on homepage)
+    if (req.nextUrl.pathname === '/' && code) {
+      const resetUrl = new URL('/reset-password', req.url);
+      resetUrl.searchParams.set('code', code);
+      return NextResponse.redirect(resetUrl);
+    }
+  }
+
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session && (
@@ -52,5 +64,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/portal/:path*', '/doctor/:path*', '/student/:path*', '/admin/:path*'],
+  matcher: ['/', '/portal/:path*', '/doctor/:path*', '/student/:path*', '/admin/:path*'],
 };
