@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getAllDoctors, updateDoctorManually, deleteDoctorManually, bulkDeleteDoctors, migrateDoctorsFromCSV, sendMigrationEmails } from "./actions";
-import { Trash2, Upload, CheckSquare, Square, AlertTriangle, CheckCircle2, Loader2, X, Mail } from "lucide-react";
+import { getAllDoctors, updateDoctorManually, deleteDoctorManually, bulkDeleteDoctors, migrateDoctorsFromCSV, sendMigrationEmails, registerAllUnlinkedDoctors } from "./actions";
+import { Trash2, Upload, CheckSquare, Square, AlertTriangle, CheckCircle2, Loader2, X, Mail, UserPlus } from "lucide-react";
 
 export default function DirectoryManager() {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -14,6 +14,8 @@ export default function DirectoryManager() {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [bulkEmailing, setBulkEmailing] = useState(false);
   const [emailResult, setEmailResult] = useState<{ sent: number; failed: number } | null>(null);
+  const [registering, setRegistering] = useState(false);
+  const [registerResult, setRegisterResult] = useState<{ registered: number; failed: number; total: number } | null>(null);
   const [showMigrate, setShowMigrate] = useState(false);
   const [migrateStatus, setMigrateStatus] = useState<any>(null);
   const [migrating, setMigrating] = useState(false);
@@ -176,6 +178,22 @@ export default function DirectoryManager() {
         </div>
         <div className="flex items-center gap-3">
           <button
+            onClick={async () => {
+              if (!confirm('Register auth accounts for ALL doctors without one? This lets them use "Forgot Password" to log in.')) return;
+              setRegistering(true);
+              setRegisterResult(null);
+              const result = await registerAllUnlinkedDoctors();
+              setRegisterResult(result);
+              setRegistering(false);
+              fetchDoctors(searchQuery);
+            }}
+            disabled={registering}
+            className="px-4 py-2 bg-green-600 rounded-lg text-sm hover:bg-green-500 flex items-center gap-2 disabled:opacity-50"
+          >
+            {registering ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+            {registering ? 'Registering...' : 'Register All'}
+          </button>
+          <button
             onClick={() => setShowMigrate(!showMigrate)}
             className="px-4 py-2 bg-blue-600 rounded-lg text-sm hover:bg-blue-500 flex items-center gap-2"
           >
@@ -287,6 +305,22 @@ export default function DirectoryManager() {
               {bulkDeleting ? 'Deleting...' : `Delete ${selected.size}`}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Register Result */}
+      {registerResult && (
+        <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-green-400" />
+            <span className="text-sm font-bold text-green-300">
+              {registerResult.registered} of {registerResult.total} doctors registered
+              {registerResult.failed > 0 && <span className="text-red-400"> &middot; {registerResult.failed} failed</span>}
+            </span>
+          </div>
+          <button onClick={() => setRegisterResult(null)} className="text-gray-500 hover:text-white">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 

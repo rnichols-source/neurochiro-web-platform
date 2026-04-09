@@ -216,6 +216,111 @@ export async function migrateDoctorsFromCSV(rows: { name: string; email: string;
   return { created, skipped, errors };
 }
 
+export async function registerAllUnlinkedDoctors() {
+  const supabase = createAdminClient();
+
+  // Find all doctors without a user_id (no auth account)
+  const { data: unlinked } = await supabase
+    .from('doctors')
+    .select('id, first_name, last_name, email')
+    .is('user_id', null);
+
+  if (!unlinked || unlinked.length === 0) {
+    return { registered: 0, failed: 0, errors: [], total: 0 };
+  }
+
+  let registered = 0;
+  let failed = 0;
+  const errors: string[] = [];
+
+  for (const doctor of unlinked) {
+    if (!doctor.email) {
+      errors.push(`${doctor.first_name} ${doctor.last_name}: no email`);
+      failed++;
+      continue;
+    }
+
+    try {
+      // Check if auth account already exists for this email
+      const { data: existingUsers } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1 });
+      // Use a direct approach - try to create, if fails it already exists
+      const tempPassword = `NC-${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 4)}!A`;
+
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: doctor.email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: { role: 'doctor', full_name: `${doctor.first_name} ${doctor.last_name}` }
+      });
+
+      if (authError) {
+        // User might already exist — try to find them
+        const { data: { users } } = await supabase.auth.admin.listUsers();
+        const existingUser = users?.find(u => u.email === doctor.email);
+
+        if (existingUser) {
+          // Link existing auth user to doctor record
+          await supabase.from('doctors').update({ user_id: existingUser.id }).eq('id', doctor.id);
+
+          // Ensure profile exists
+          await supabase.from('profiles').upsert({
+            id: existingUser.id,
+            email: doctor.email,
+            full_name: `${doctor.first_name} ${doctor.last_name}`,
+            role: 'doctor',
+            subscription_status: 'active',
+            tier: 'starter',
+          });
+
+          registered++;
+          continue;
+        }
+
+        errors.push(`${doctor.email}: ${authError.message}`);
+        failed++;
+        continue;
+      }
+
+      if (authData?.user) {
+        // Create profile
+        await supabase.from('profiles').upsert({
+          id: authData.user.id,
+          email: doctor.email,
+          full_name: `${doctor.first_name} ${doctor.last_name}`,
+          role: 'doctor',
+          subscription_status: 'active',
+          tier: 'starter',
+        });
+
+        // Link doctor record
+        await supabase.from('doctors').update({ user_id: authData.user.id }).eq('id', doctor.id);
+
+        registered++;
+      }
+    } catch (err: any) {
+      errors.push(`${doctor.email}: ${err.message}`);
+      failed++;
+    }
+  }
+
+  // Log
+  try {
+    const serverSupabase = createServerSupabase();
+    const { data: { user } } = await serverSupabase.auth.getUser();
+    await supabase.from('audit_logs').insert({
+      category: 'MIGRATION',
+      event: `Bulk registration: ${registered} registered, ${failed} failed`,
+      user_name: user?.email || 'Founder',
+      target: 'Doctor Migration',
+      status: 'Success',
+      severity: 'High',
+      metadata: { registered, failed, errors: errors.slice(0, 20) }
+    });
+  } catch {}
+
+  return { registered, failed, errors, total: unlinked.length };
+}
+
 export async function sendMigrationEmails(doctorIds: string[]) {
   const supabase = createAdminClient();
   let sent = 0;
