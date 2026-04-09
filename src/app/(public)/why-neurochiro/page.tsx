@@ -95,7 +95,7 @@ export default function WhyNeuroChiroPage() {
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-4">
             For Doctors
           </p>
-          <h1 className="text-4xl md:text-5xl font-heading font-black tracking-tight leading-tight mb-6">
+          <h1 className="text-4xl md:text-5xl font-heading font-black tracking-tight leading-tight mb-6 text-white">
             Stop Competing with <br />
             <span className="text-neuro-orange">Generalists.</span>
           </h1>
