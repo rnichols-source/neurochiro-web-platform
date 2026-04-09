@@ -69,6 +69,7 @@ export const viewport = {
 import { RegionProvider } from "@/context/RegionContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import LazyOverlays from "@/components/layout/LazyOverlays";
+import RecoveryRedirect from "@/components/auth/RecoveryRedirect";
 
 export default function RootLayout({
   children,
@@ -104,6 +105,7 @@ export default function RootLayout({
       >
         <RegionProvider>
           <UserPreferencesProvider>
+            <RecoveryRedirect />
             {children}
             <LazyOverlays />
           </UserPreferencesProvider>
