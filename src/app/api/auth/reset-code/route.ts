@@ -9,39 +9,48 @@ export async function POST(request: NextRequest) {
   const supabase = createAdminClient();
   const resend = new Resend(process.env.RESEND_API_KEY || '');
 
-  // Check if user exists
-  const { data: users } = await supabase.auth.admin.listUsers();
-  const user = users?.users?.find(u => u.email === email);
-  if (!user) {
-    // Don't reveal if email exists — just say "sent"
+  // Look up user by email in profiles table (simpler than listing all auth users)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (!profile) {
+    // Don't reveal if email exists
     return NextResponse.json({ success: true });
   }
 
   // Generate 6-digit code
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
-  // Delete any old reset codes for this email first
-  await supabase
+  // Delete old codes
+  const { error: deleteError } = await supabase
     .from('leads')
     .delete()
     .eq('email', email)
     .eq('source', 'password_reset_code');
 
-  // Store new code
-  const { error: insertError } = await supabase.from('leads').insert({
-    email,
-    source: 'password_reset_code',
-    role: 'reset',
-    status: 'new',
-    location: '',
-    metadata: { code, expires_at: expiresAt, user_id: user.id },
-  });
+  console.log(`[RESET_CODE] Delete old codes: ${deleteError?.message || 'ok'}`);
 
-  console.log(`[RESET_CODE] Stored code for ${email}: ${insertError ? insertError.message : 'success'}`);
+  // Store new code
+  const { data: insertData, error: insertError } = await supabase
+    .from('leads')
+    .insert({
+      email,
+      source: 'password_reset_code',
+      role: 'reset',
+      status: 'new',
+      metadata: { code, expires_at: expiresAt, user_id: profile.id },
+    })
+    .select('id')
+    .single();
+
+  console.log(`[RESET_CODE] Insert result: ${insertError?.message || 'ok'}, id: ${insertData?.id || 'none'}`);
 
   // Send code via Resend
-  await resend.emails.send({
+  const { error: emailError } = await resend.emails.send({
     from: 'NeuroChiro <support@neurochirodirectory.com>',
     to: [email],
     subject: `Your NeuroChiro reset code: ${code}`,
@@ -65,6 +74,8 @@ export async function POST(request: NextRequest) {
       </div>
     `,
   });
+
+  console.log(`[RESET_CODE] Email sent: ${emailError?.message || 'ok'}`);
 
   return NextResponse.json({ success: true });
 }
