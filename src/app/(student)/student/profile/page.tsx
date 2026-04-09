@@ -122,18 +122,21 @@ export default function ProfilePage() {
         </div>
 
         {/* Mentorship */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Mentorship</h2>
-            <p className="text-sm font-medium text-neuro-navy">Looking for mentorship</p>
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide">Mentorship</h2>
+              <p className="text-xs text-gray-400 mt-1">Are you looking for a mentor?</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => update("mentorship", !form.mentorship)}
+              className={`relative w-12 h-6 rounded-full transition-colors ${form.mentorship ? 'bg-green-500' : 'bg-gray-200'}`}
+            >
+              <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${form.mentorship ? 'left-6' : 'left-0.5'}`} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => update("mentorship", !form.mentorship)}
-            className={`w-11 h-6 rounded-full transition-colors relative ${form.mentorship ? "bg-neuro-orange" : "bg-gray-300"}`}
-          >
-            <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${form.mentorship ? "left-6" : "left-1"}`} />
-          </button>
+          <input type="hidden" name="mentorship" value={form.mentorship ? "true" : "false"} />
         </div>
 
         <button

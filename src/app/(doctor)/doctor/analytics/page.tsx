@@ -19,10 +19,10 @@ export default function DoctorAnalytics() {
 
   const statCards = roiData
     ? [
-        { label: "Profile Views", value: roiData.stats.profile_views, icon: Eye },
-        { label: "Contact Clicks", value: roiData.stats.contact_clicks, icon: MousePointer },
-        { label: "Phone Taps", value: roiData.stats.phone_taps, icon: Phone },
-        { label: "Website Clicks", value: roiData.stats.website_clicks, icon: Globe },
+        { label: "Profile Views", value: roiData.stats.profile_views, icon: Eye, subtitle: "Total times your profile was viewed" },
+        { label: "Contact Clicks", value: roiData.stats.contact_clicks, icon: MousePointer, subtitle: "Times patients clicked your contact info" },
+        { label: "Phone Taps", value: roiData.stats.phone_taps, icon: Phone, subtitle: "Times patients tapped your phone number" },
+        { label: "Website Clicks", value: roiData.stats.website_clicks, icon: Globe, subtitle: "Times patients visited your website" },
       ]
     : [];
 
@@ -69,6 +69,7 @@ export default function DoctorAnalytics() {
                   <span className="text-xs font-medium text-gray-500">{card.label}</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-900">{card.value.toLocaleString()}</p>
+                <p className="text-xs text-gray-400 mt-1">{card.subtitle}</p>
               </div>
             ))}
           </div>

@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -25,7 +24,7 @@ export default function SettingsPage() {
     if (error) setMessage({ type: "error", text: error.message });
     else {
       setMessage({ type: "success", text: "Password updated successfully!" });
-      setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
+      setNewPassword(""); setConfirmPassword("");
     }
   };
 
@@ -48,7 +47,6 @@ export default function SettingsPage() {
         {message && (
           <p className={`text-sm font-bold ${message.type === "success" ? "text-green-600" : "text-red-600"}`}>{message.text}</p>
         )}
-        <input type="password" placeholder="Current password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
         <input type="password" placeholder="New password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
         <input type="password" placeholder="Confirm new password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
         <button type="submit" className="px-6 py-3 bg-neuro-navy text-white rounded-xl font-bold hover:bg-neuro-navy/90 transition-colors">Update Password</button>

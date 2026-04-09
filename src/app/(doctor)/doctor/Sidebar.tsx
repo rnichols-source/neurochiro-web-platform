@@ -32,6 +32,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [userName, setUserName] = useState<string | null>(null);
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
 
   useEffect(() => {
     const supabase = createClient();
@@ -39,6 +40,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       if (user) {
         supabase.from("profiles").select("full_name").eq("id", user.id).single()
           .then(({ data }) => setUserName(data?.full_name || null));
+        supabase.from("notifications").select("*", { count: "exact", head: true })
+          .eq("user_id", user.id).is("read_at", null)
+          .then(({ count }) => setUnreadNotifs(count || 0));
       }
     });
   }, []);
@@ -77,6 +81,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             >
               <item.icon className={`w-5 h-5 ${active ? "text-white" : "text-gray-400"}`} />
               {item.name}
+              {item.name === 'Notifications' && unreadNotifs > 0 && (
+                <span className="ml-auto bg-neuro-orange text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">{unreadNotifs > 9 ? '9+' : unreadNotifs}</span>
+              )}
             </Link>
           );
         })}

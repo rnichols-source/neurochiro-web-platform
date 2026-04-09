@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, User, Briefcase, GraduationCap, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getDoctorDashboardStats } from "./actions";
@@ -94,6 +94,21 @@ export default function DoctorDashboard() {
             </p>
             <p className="text-2xl font-black text-neuro-navy">{stat.value}</p>
           </div>
+        ))}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: "Edit Profile", href: "/doctor/profile", icon: User },
+          { label: "Post a Job", href: "/doctor/jobs", icon: Briefcase },
+          { label: "Browse Students", href: "/doctor/students", icon: GraduationCap },
+          { label: "View Analytics", href: "/doctor/analytics", icon: BarChart3 },
+        ].map((action) => (
+          <Link key={action.href} href={action.href} className="bg-white rounded-2xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-gray-200 transition-all">
+            <action.icon className="w-5 h-5 text-neuro-orange mx-auto mb-2" />
+            <p className="text-xs font-bold text-neuro-navy">{action.label}</p>
+          </Link>
         ))}
       </div>
 

@@ -106,10 +106,10 @@ export default function JobsPage() {
                     </div>
                   </div>
                   <Link
-                    href={job.clinic_name ? `/directory?q=${encodeURIComponent(job.clinic_name)}` : '/directory'}
+                    href={job.slug ? `/directory/${job.slug}` : job.clinic_name ? `/directory?q=${encodeURIComponent(job.clinic_name)}` : '/directory'}
                     className="shrink-0 px-6 py-3 bg-neuro-navy text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-neuro-navy/90 transition-colors"
                   >
-                    Contact Clinic
+                    View Clinic Profile
                   </Link>
                 </div>
               </div>

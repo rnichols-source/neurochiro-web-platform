@@ -23,13 +23,13 @@ export async function getJobs(regionCode?: string, page: number = 1, limit: numb
     const doctorIds = [...new Set(data.map(j => j.doctor_id))]
     const { data: doctors } = await supabase
       .from('doctors')
-      .select('user_id, clinic_name, city, state')
+      .select('user_id, clinic_name, city, state, slug')
       .in('user_id', doctorIds)
 
-    const clinicMap = new Map((doctors || []).map(d => [d.user_id, { clinic_name: d.clinic_name, city: d.city, state: d.state }]))
+    const clinicMap = new Map((doctors || []).map(d => [d.user_id, { clinic_name: d.clinic_name, city: d.city, state: d.state, slug: d.slug }]))
     return data.map(j => {
-      const doc = clinicMap.get(j.doctor_id) || { clinic_name: '', city: '', state: '' }
-      return { ...j, clinic_name: doc.clinic_name, clinic_city: doc.city, clinic_state: doc.state }
+      const doc = clinicMap.get(j.doctor_id) || { clinic_name: '', city: '', state: '', slug: '' }
+      return { ...j, clinic_name: doc.clinic_name, clinic_city: doc.city, clinic_state: doc.state, slug: doc.slug }
     })
   }
 

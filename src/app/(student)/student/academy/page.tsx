@@ -23,7 +23,14 @@ export default function AcademyPage() {
   const openCourse = async (courseId: string) => {
     const course = await getCourseById(courseId);
     setSelectedCourse(course);
-    setSelectedModule(null);
+    // Auto-select first uncompleted module
+    if (course) {
+      const completedIds = course.progress?.completed_modules || [];
+      const firstUncompleted = course.modules.find((m: any) => !completedIds.includes(m.id));
+      setSelectedModule(firstUncompleted || course.modules[0] || null);
+    } else {
+      setSelectedModule(null);
+    }
   };
 
   const handleCompleteModule = async () => {

@@ -59,6 +59,12 @@ export default function StudentDashboard() {
   const profileCompleteness = data?.stats?.readiness || 0;
   const applications = data?.stats?.applications || 0;
 
+  const missingItems: { label: string; href: string }[] = [];
+  if (!data?.profile?.fullName) missingItems.push({ label: "Add your full name", href: "/student/profile" });
+  if (!data?.profile?.school || data.profile.school === "Life University") missingItems.push({ label: "Confirm your school", href: "/student/profile" });
+  if (!data?.profile?.gradYear || data.profile.gradYear === "2027") missingItems.push({ label: "Confirm graduation year", href: "/student/profile" });
+  if (data?.stats?.matchScore === 0) missingItems.push({ label: "Add your location", href: "/student/profile" });
+
   const currentYear = new Date().getFullYear();
   const gradYear = data?.profile?.gradYear ? parseInt(data.profile.gradYear, 10) : null;
   const isGraduating = gradYear && gradYear <= currentYear;
@@ -109,6 +115,15 @@ export default function StudentDashboard() {
           <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full bg-neuro-orange rounded-full" style={{ width: `${profileCompleteness}%` }} />
           </div>
+          {missingItems.length > 0 && (
+            <ul className="mt-3 space-y-1">
+              {missingItems.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-xs text-neuro-orange hover:underline">{item.label}</Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         <div className="bg-white p-5 rounded-2xl border border-gray-100">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Academy Progress</p>

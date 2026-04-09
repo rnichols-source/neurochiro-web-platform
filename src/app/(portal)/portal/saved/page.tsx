@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { getSavedDoctors } from "./actions";
-import { Heart, MapPin } from "lucide-react";
+import { Heart, MapPin, X } from "lucide-react";
 import Link from "next/link";
 
 type Doctor = {
@@ -17,7 +17,7 @@ type Doctor = {
 };
 
 export default function SavedPage() {
-  const { saved } = useUserPreferences();
+  const { saved, toggleSave } = useUserPreferences();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,8 +55,15 @@ export default function SavedPage() {
           {doctors.map((doc) => (
             <div
               key={doc.id}
-              className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-shadow"
+              className="relative bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-shadow"
             >
+              <button
+                onClick={() => { toggleSave('doctors', doc.id.toString()); setDoctors(prev => prev.filter(d => d.id !== doc.id)); }}
+                className="absolute top-3 right-3 p-1.5 text-gray-300 hover:text-red-500 transition-colors"
+                title="Remove"
+              >
+                <X className="w-4 h-4" />
+              </button>
               <h3 className="text-lg font-bold text-neuro-navy">
                 Dr. {doc.first_name} {doc.last_name}
               </h3>

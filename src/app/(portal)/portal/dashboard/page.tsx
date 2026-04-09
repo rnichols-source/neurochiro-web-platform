@@ -72,20 +72,25 @@ export default function PatientDashboard() {
         {data?.last7Days && data.last7Days.length > 0 && (
           <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-50">
             <p className="text-xs text-gray-400 mr-2">Last 7 days</p>
-            {data.last7Days.map((day: any, i: number) => (
-              <div
-                key={i}
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  day.energy === null ? 'bg-gray-100 text-gray-300' :
-                  day.energy >= 7 ? 'bg-green-100 text-green-600' :
-                  day.energy >= 4 ? 'bg-yellow-100 text-yellow-600' :
-                  'bg-red-100 text-red-600'
-                }`}
-                title={`${day.date}: ${day.energy !== null ? `Energy ${day.energy}` : 'No log'}`}
-              >
-                {day.energy !== null ? day.energy : '·'}
-              </div>
-            ))}
+            {data.last7Days.map((day: any, i: number) => {
+              const dayName = new Date(day.date + 'T12:00:00').toLocaleDateString('en', { weekday: 'short' }).charAt(0);
+              return (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                      day.energy === null ? 'bg-gray-100 text-gray-300' :
+                      day.energy >= 7 ? 'bg-green-100 text-green-600' :
+                      day.energy >= 4 ? 'bg-yellow-100 text-yellow-600' :
+                      'bg-red-100 text-red-600'
+                    }`}
+                    title={`${day.date}: ${day.energy !== null ? `Energy ${day.energy}` : 'No log'}`}
+                  >
+                    {day.energy !== null ? day.energy : '·'}
+                  </div>
+                  <span className="text-[9px] text-gray-400">{dayName}</span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

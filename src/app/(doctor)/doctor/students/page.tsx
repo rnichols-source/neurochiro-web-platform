@@ -147,7 +147,7 @@ export default function StudentsPage() {
                 </div>
               )}
               <Link
-                href="/doctor/messages"
+                href={`/doctor/messages?to=${selectedStudent.user_id || selectedStudent.id}`}
                 className="block w-full text-center py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
               >
                 Send Message

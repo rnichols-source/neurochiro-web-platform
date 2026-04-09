@@ -145,6 +145,9 @@ export default function SeminarsPage() {
                         {status.label}
                       </span>
                     </div>
+                    {sem.description && (
+                      <p className="text-gray-500 text-sm line-clamp-1 mt-1">{sem.description}</p>
+                    )}
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       {sem.location && <span>{sem.location}</span>}
                       {sem.dates && <span>{new Date(sem.dates).toLocaleDateString()}</span>}
