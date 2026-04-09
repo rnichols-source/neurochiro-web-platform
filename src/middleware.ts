@@ -23,12 +23,18 @@ export async function middleware(req: NextRequest) {
     }
   );
 
-  // Detect password recovery flow and redirect to reset-password page
-  const code = req.nextUrl.searchParams.get('code');
-  const type = req.nextUrl.searchParams.get('type');
-  if (code && (type === 'recovery' || req.nextUrl.pathname === '/')) {
-    // Check if this looks like a recovery redirect (has code but landing on homepage)
-    if (req.nextUrl.pathname === '/' && code) {
+  // Detect password recovery flow landing on homepage and redirect to reset-password
+  if (req.nextUrl.pathname === '/') {
+    const errorCode = req.nextUrl.searchParams.get('error_code');
+    const code = req.nextUrl.searchParams.get('code');
+
+    // If Supabase sent an error (like otp_expired), redirect to reset-password with error
+    if (errorCode === 'otp_expired') {
+      return NextResponse.redirect(new URL('/reset-password?expired=true', req.url));
+    }
+
+    // If there's a code param, pass it to reset-password
+    if (code) {
       const resetUrl = new URL('/reset-password', req.url);
       resetUrl.searchParams.set('code', code);
       return NextResponse.redirect(resetUrl);
