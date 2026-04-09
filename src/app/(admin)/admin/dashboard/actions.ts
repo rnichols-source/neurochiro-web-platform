@@ -95,6 +95,12 @@ export async function getAdminDashboardStats(regionCode?: string) {
     const marketHealthScore = Math.min(Math.max(mrrGrowthScore + verificationScore + talentGrowthScore, 40), 99) 
     const marketTrend = revenueTrend > 0 ? 5.2 : -2.1; // Calculated delta
 
+    // --- PENDING VERIFICATIONS ---
+    const { count: pendingVerifications } = await supabase
+      .from('doctors')
+      .select('*', { count: 'exact', head: true })
+      .eq('verification_status', 'pending');
+
     // --- SYSTEM HEALTH & ALERTS ---
     const { count: pendingTasks } = await supabase
       .from('automation_queue')
@@ -157,6 +163,7 @@ export async function getAdminDashboardStats(regionCode?: string) {
       adminLogs: recentLogs.slice(0, 4),
       alerts: alerts.slice(0, 3),
       velocity: velocity,
+      pendingVerifications: pendingVerifications || 0,
       health: {
         database: !dbHealthError ? 'Optimal' : 'Degraded',
         auth: 'Optimal', // Usually managed by Supabase, would need specific check

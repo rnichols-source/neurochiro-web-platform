@@ -61,8 +61,11 @@ export default function HostSeminarPage() {
     return (
       <div className="min-h-dvh bg-neuro-cream pt-32 pb-20 text-center px-6">
         <h1 className="text-3xl font-heading font-black text-neuro-navy mb-4">Seminar Listed!</h1>
-        <p className="text-gray-500 mb-8">Your seminar has been submitted for listing.</p>
-        <Link href="/seminars" className="px-8 py-3 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange-dark transition-colors">View Seminars</Link>
+        <p className="text-gray-500 mb-8">Your seminar is now live in the directory.</p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link href="/seminars" className="px-8 py-3 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">View All Seminars</Link>
+          <Link href="/doctor/seminars" className="px-8 py-3 bg-neuro-navy text-white font-bold rounded-xl hover:bg-neuro-navy/90 transition-colors">Manage My Seminars</Link>
+        </div>
       </div>
     );
   }

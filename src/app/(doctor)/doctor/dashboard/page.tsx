@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, User, Briefcase, GraduationCap, BarChart3, Gift, Copy, CheckCircle2 } from "lucide-react";
+import { Loader2, User, Briefcase, GraduationCap, BarChart3, Gift, Copy, CheckCircle2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getDoctorDashboardStats } from "./actions";
@@ -42,9 +42,16 @@ export default function DoctorDashboard() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <header>
-        <h1 className="text-2xl font-black text-neuro-navy">{profile.name}</h1>
-        <p className="text-gray-500 text-sm mt-1">{profile.clinicName}</p>
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-black text-neuro-navy">{profile.name}</h1>
+          <p className="text-gray-500 text-sm mt-1">{profile.clinicName}</p>
+        </div>
+        {data?.profile?.slug && (
+          <Link href={`/directory/${data.profile.slug}`} target="_blank" className="text-sm font-bold text-neuro-orange hover:underline flex items-center gap-1">
+            View My Profile <ExternalLink className="w-4 h-4" />
+          </Link>
+        )}
       </header>
 
       {/* Onboarding — First 3 Steps */}

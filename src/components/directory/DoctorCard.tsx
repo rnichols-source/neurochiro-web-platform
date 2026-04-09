@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import NextImage from "next/image";
-import { ShieldCheck, Star, ArrowRight, Heart } from "lucide-react";
+import { ShieldCheck, Star, ArrowRight, Heart, Phone } from "lucide-react";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -82,15 +82,26 @@ export default function DoctorCard({ doc, index }: DoctorCardProps) {
             </div>
           </div>
       </div>
-      <Link href={`/directory/${doc.slug || doc.id}`}>
-        <motion.div 
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.99 }}
-          className="w-full py-4 bg-gray-50 group-hover:bg-neuro-navy group-hover:text-white text-neuro-navy font-black rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 border border-gray-100 group-hover:border-neuro-navy"
-        >
-          View Profile <ArrowRight className="w-4 h-4" />
-        </motion.div>
-      </Link>
+      <div className="flex gap-2">
+        <Link href={`/directory/${doc.slug || doc.id}`} className="flex-1">
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            className="w-full py-4 bg-gray-50 group-hover:bg-neuro-navy group-hover:text-white text-neuro-navy font-black rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 border border-gray-100 group-hover:border-neuro-navy"
+          >
+            View Profile <ArrowRight className="w-4 h-4" />
+          </motion.div>
+        </Link>
+        {doc.phone && (
+          <a
+            href={`tel:${doc.phone}`}
+            className="py-4 px-5 bg-neuro-orange/10 text-neuro-orange rounded-2xl border border-neuro-orange/20 hover:bg-neuro-orange hover:text-white transition-all flex items-center justify-center"
+            aria-label="Call doctor"
+          >
+            <Phone className="w-4 h-4" />
+          </a>
+        )}
+      </div>
     </motion.div>
   );
 }

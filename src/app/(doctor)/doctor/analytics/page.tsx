@@ -34,7 +34,7 @@ export default function DoctorAnalytics() {
     <div className="p-8 max-w-5xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Your Numbers</h1>
         <div className="flex bg-white border border-gray-200 rounded-lg p-1">
           {(["7D", "30D", "90D", "1Y"] as const).map((t) => (
             <button
@@ -74,12 +74,12 @@ export default function DoctorAnalytics() {
             ))}
           </div>
 
-          {/* Revenue Estimate */}
+          {/* Patient Impact */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <p className="text-sm font-medium text-gray-500 mb-1">Estimated Revenue</p>
-            <p className="text-3xl font-bold text-gray-900">${estimatedRevenue.toLocaleString()}</p>
+            <p className="text-sm font-medium text-gray-500 mb-1">Patients From NeuroChiro</p>
+            <p className="text-3xl font-bold text-gray-900">{roiData.stats.confirmed_patients}</p>
             <p className="text-xs text-gray-400 mt-1">
-              {roiData.stats.confirmed_patients} confirmed patients x ${roiData.stats.average_case_value.toLocaleString()} avg case value
+              Patients who found you through the directory and booked an appointment
             </p>
           </div>
 

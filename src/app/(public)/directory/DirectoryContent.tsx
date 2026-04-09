@@ -27,16 +27,17 @@ import DoctorCard from "@/components/directory/DoctorCard";
 import SmartMatchWizard from "@/components/directory/SmartMatchWizard";
 
 const SPECIALTY_FILTERS = [
+  "Migraines",
+  "Back Pain",
+  "Sciatica",
+  "Pediatric",
+  "Prenatal",
+  "Sports",
   "Torque Release",
   "Upper Cervical",
   "Gonstead",
   "Network Spinal",
   "Activator",
-  "SOT",
-  "Thompson",
-  "Pediatric",
-  "Prenatal",
-  "Sports",
   "Functional Neurology",
 ];
 

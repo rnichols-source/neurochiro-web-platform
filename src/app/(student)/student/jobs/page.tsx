@@ -1,18 +1,30 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Search, MapPin, Briefcase, Clock } from "lucide-react";
+import { Search, MapPin, Briefcase, Clock, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { getPublicJobs } from "@/app/(public)/careers/actions";
+import { createClient } from "@/lib/supabase";
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "salary">("newest");
+  const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     getPublicJobs({}).then(setJobs).catch(console.error).finally(() => setLoading(false));
+    // Fetch jobs this student has applied to
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('job_applications')
+        .select('job_id')
+        .eq('applicant_id', user.id);
+      if (data) setAppliedJobIds(new Set(data.map(a => a.job_id)));
+    });
   }, []);
 
   const filtered = useMemo(() => {
@@ -97,10 +109,11 @@ export default function JobsPage() {
           {filtered.map((job) => {
             const salary = fmtSalary(job.salary_min, job.salary_max);
             const location = [job.city || job.clinic_city, job.state || job.clinic_state].filter(Boolean).join(", ");
+            const hasApplied = appliedJobIds.has(job.id);
             return (
               <div
                 key={job.id}
-                className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group"
+                className={`bg-white p-6 rounded-2xl border shadow-sm hover:shadow-md transition-all group ${hasApplied ? 'border-green-200 bg-green-50/30' : 'border-gray-100'}`}
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
@@ -133,12 +146,18 @@ export default function JobsPage() {
                       )}
                     </div>
                   </div>
-                  <Link
-                    href={`/careers/${job.id}`}
-                    className="shrink-0 px-6 py-3 bg-neuro-navy text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-neuro-navy/90 transition-colors"
-                  >
-                    View Details
-                  </Link>
+                  {hasApplied ? (
+                    <div className="shrink-0 flex items-center gap-2 px-6 py-3 bg-green-100 text-green-700 font-bold rounded-xl text-xs uppercase tracking-widest">
+                      <CheckCircle2 className="w-4 h-4" /> Applied
+                    </div>
+                  ) : (
+                    <Link
+                      href={`/careers/${job.id}`}
+                      className="shrink-0 px-6 py-3 bg-neuro-navy text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-neuro-navy/90 transition-colors"
+                    >
+                      View Details
+                    </Link>
+                  )}
                 </div>
               </div>
             );

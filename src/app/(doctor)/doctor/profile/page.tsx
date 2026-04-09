@@ -13,7 +13,17 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [showToast, setShowToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: "", type: 'success' });
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Warn on tab close if unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) { e.preventDefault(); }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   const [error, setError] = useState(false);
 
@@ -34,6 +44,7 @@ export default function ProfilePage() {
     setSaving(true);
     const result = await updateDoctorProfile(new FormData(e.currentTarget));
     setSaving(false);
+    if (result.success) setHasUnsavedChanges(false);
     toast(result.success ? "Profile saved." : (result.error || "Failed to save."), result.success ? 'success' : 'error');
   };
 
@@ -99,7 +110,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <form onSubmit={handleSave} className="space-y-8">
+      <form onSubmit={handleSave} onChange={() => setHasUnsavedChanges(true)} className="space-y-8">
         {/* Photo */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Photo</h2>

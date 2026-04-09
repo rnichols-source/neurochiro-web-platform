@@ -37,7 +37,7 @@ export default function AdminDashboard() {
     { label: "Total Revenue", value: stats ? formatCurrency(stats.revenue) : "$0", trend: stats ? formatTrend(stats.revenueTrend) : "+0%", icon: DollarSign, color: "text-green-500" },
     { label: "Active Doctors", value: stats ? stats.doctors.toString() : "0", trend: stats ? formatTrend(stats.doctorTrend) : "+0%", icon: Users, color: "text-neuro-orange" },
     { label: "Talent Network", value: stats ? stats.talent.toString() : "0", trend: stats ? formatTrend(stats.talentTrend) : "+0%", icon: Users, color: "text-blue-500" },
-    { label: "Market Health", value: stats ? `${stats.marketHealth}%` : "0%", trend: stats ? formatTrend(stats.marketTrend) : "+0%", icon: Activity, color: "text-purple-500" },
+    { label: "Platform Score", value: stats ? `${stats.marketHealth}%` : "0%", trend: stats ? formatTrend(stats.marketTrend) : "+0%", icon: Activity, color: "text-purple-500" },
   ];
 
   return (
@@ -60,6 +60,19 @@ export default function AdminDashboard() {
           {loading ? 'Refreshing...' : 'Refresh'}
         </button>
       </header>
+
+      {/* Pending Verifications Alert */}
+      {stats?.pendingVerifications > 0 && (
+        <Link href="/admin/moderation" className="block bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 hover:bg-yellow-500/15 transition-colors">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-yellow-400" />
+              <span className="text-sm font-bold text-yellow-300">{stats.pendingVerifications} doctor{stats.pendingVerifications !== 1 ? 's' : ''} pending verification</span>
+            </div>
+            <span className="text-xs text-yellow-400 font-bold">Review now &rarr;</span>
+          </div>
+        </Link>
+      )}
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
