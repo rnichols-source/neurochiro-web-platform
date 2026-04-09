@@ -38,7 +38,7 @@ function LoginContent() {
     setForgotPending(true);
     const supabase = createClient();
     await supabase.auth.resetPasswordForEmail(forgotEmail, {
-      redirectTo: window.location.origin + "/reset-password",
+      redirectTo: window.location.origin + "/api/auth/callback?type=recovery&next=/reset-password",
     });
     setForgotSent(true);
     setForgotPending(false);
