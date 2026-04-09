@@ -86,14 +86,14 @@ export default function AboutPage() {
               {[
                 { step: "1", title: "Application Review", desc: "Every doctor submits their credentials, license information, and practice details when they join." },
                 { step: "2", title: "Manual Verification", desc: "Our team reviews each application. We confirm the practice exists and the doctor is who they say they are." },
-                { step: "3", title: "Ongoing Monitoring", desc: "Profiles are subject to patient feedback and periodic review. We remove doctors who don&apos;t meet our standards." },
+                { step: "3", title: "Ongoing Monitoring", desc: "Profiles are subject to patient feedback and periodic review. We remove doctors who don\u2019t meet our standards." },
               ].map((item) => (
                 <div key={item.step} className="bg-white/5 rounded-xl p-6 border border-white/10">
                   <div className="w-8 h-8 rounded-lg bg-neuro-orange/20 text-neuro-orange font-black flex items-center justify-center mb-3">
                     {item.step}
                   </div>
-                  <h3 className="font-bold mb-2">{item.title}</h3>
-                  <p className="text-gray-400 text-sm">{item.desc}</p>
+                  <h3 className="font-bold mb-2 text-white">{item.title}</h3>
+                  <p className="text-gray-300 text-sm">{item.desc}</p>
                 </div>
               ))}
             </div>
