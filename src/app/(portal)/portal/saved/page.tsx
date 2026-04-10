@@ -14,6 +14,8 @@ type Doctor = {
   slug: string;
   city: string | null;
   state: string | null;
+  photo_url: string | null;
+  specialties: string[] | null;
 };
 
 export default function SavedPage() {
@@ -55,30 +57,48 @@ export default function SavedPage() {
           {doctors.map((doc) => (
             <div
               key={doc.id}
-              className="relative bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-shadow"
+              className="relative bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-shadow"
             >
               <button
-                onClick={() => { toggleSave('doctors', doc.id.toString()); setDoctors(prev => prev.filter(d => d.id !== doc.id)); }}
+                onClick={() => {
+                  if (!confirm('Remove this doctor from your saved list?')) return;
+                  toggleSave('doctors', doc.id.toString());
+                  setDoctors(prev => prev.filter(d => d.id !== doc.id));
+                }}
                 className="absolute top-3 right-3 p-1.5 text-gray-300 hover:text-red-500 transition-colors"
                 title="Remove"
               >
                 <X className="w-4 h-4" />
               </button>
-              <h3 className="text-lg font-bold text-neuro-navy">
-                Dr. {doc.first_name} {doc.last_name}
-              </h3>
-              {doc.clinic_name && (
-                <p className="text-sm text-gray-500 mt-1">{doc.clinic_name}</p>
-              )}
-              {(doc.city || doc.state) && (
-                <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                  <MapPin className="w-3 h-3" />
-                  {[doc.city, doc.state].filter(Boolean).join(", ")}
-                </p>
+              <div className="flex items-start gap-4 mb-3">
+                <div className="w-12 h-12 rounded-xl bg-neuro-navy overflow-hidden flex-shrink-0 flex items-center justify-center">
+                  {doc.photo_url ? (
+                    <img src={doc.photo_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-white font-black text-lg">{(doc.first_name?.[0] || 'D').toUpperCase()}</span>
+                  )}
+                </div>
+                <div className="pr-6">
+                  <h3 className="font-bold text-neuro-navy">Dr. {doc.first_name} {doc.last_name}</h3>
+                  {doc.clinic_name && <p className="text-xs text-gray-500">{doc.clinic_name}</p>}
+                  {(doc.city || doc.state) && (
+                    <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                      <MapPin className="w-3 h-3" />
+                      {[doc.city, doc.state].filter(Boolean).join(", ")}
+                    </p>
+                  )}
+                </div>
+              </div>
+              {doc.specialties && doc.specialties.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {doc.specialties.slice(0, 3).map((s: string, i: number) => (
+                    <span key={i} className="px-2 py-0.5 bg-neuro-orange/5 text-neuro-orange text-[10px] font-bold rounded border border-neuro-orange/10">{s}</span>
+                  ))}
+                </div>
               )}
               <Link
                 href={`/directory/${doc.slug}`}
-                className="mt-4 inline-block px-6 py-2.5 bg-neuro-navy text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-neuro-orange transition-colors"
+                className="block text-center py-2.5 bg-neuro-navy text-white text-xs font-bold rounded-xl hover:bg-neuro-navy/90 transition-colors"
               >
                 View Profile
               </Link>

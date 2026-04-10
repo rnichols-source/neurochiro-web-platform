@@ -88,7 +88,7 @@ export default function TrackPage() {
       setLogs(updatedLogs as DailyLog[]);
       setTodayLogged(true);
       setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      setTimeout(() => setSaved(false), 5000);
     }
   };
 
@@ -172,7 +172,7 @@ export default function TrackPage() {
         >
           {saved ? <><CheckCircle2 className="w-4 h-4" /> Saved!</> : saving ? 'Saving...' : todayLogged ? 'Update Check-in' : 'Log Today'}
         </button>
-        <p className="text-xs text-gray-400 mt-2">Tip: Adjust the sliders to match how you're feeling today.</p>
+        <p className="text-xs text-gray-400 mt-2">Tip: 1 = worst, 10 = best. For pain, 1 = no pain, 10 = severe.</p>
       </section>
 
       {/* 30-Day Trends */}
