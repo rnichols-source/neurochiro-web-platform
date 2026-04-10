@@ -106,8 +106,8 @@ export default function DoctorDashboard() {
         </div>
       )}
 
-      {/* Payment Prompt */}
-      {data?.profile?.subscription_status !== 'active' && (
+      {/* Payment Prompt — only show if not active AND not already verified in directory */}
+      {data?.profile?.subscription_status !== 'active' && data?.profile?.verification_status !== 'verified' && (
         <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
           <h3 className="font-bold text-neuro-navy mb-1">Activate your membership</h3>
           <p className="text-gray-500 text-sm mb-4">{`Your profile is set up but not yet visible to patients. Start your ${region.currency.symbol}${region.pricing.doctor.starter.monthly}/month membership to go live in the directory.`}</p>
@@ -198,8 +198,8 @@ function ReferralCard() {
           <Gift className="w-5 h-5 text-neuro-orange" />
         </div>
         <div>
-          <h3 className="font-bold">Invite a Doctor, Get a Month Free</h3>
-          <p className="text-gray-400 text-xs">Share your referral link with colleagues</p>
+          <h3 className="font-bold">Invite a Doctor, You Both Get a Free Month</h3>
+          <p className="text-gray-400 text-xs">When a colleague joins using your link, you both get one month free on your membership</p>
         </div>
       </div>
 
