@@ -92,10 +92,10 @@ export default function DoctorAnalytics() {
 
           {/* Patient Impact */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <p className="text-sm font-medium text-gray-500 mb-1">Patients From NeuroChiro</p>
-            <p className="text-3xl font-bold text-gray-900">{roiData.stats.confirmed_patients}</p>
+            <p className="text-sm font-medium text-gray-500 mb-1">Appointment Requests</p>
+            <p className="text-3xl font-bold text-gray-900">{roiData.stats.referrals_sent}</p>
             <p className="text-xs text-gray-400 mt-1">
-              Patients who found you through the directory and booked an appointment
+              Patients who found you through the directory and requested an appointment
             </p>
           </div>
 
