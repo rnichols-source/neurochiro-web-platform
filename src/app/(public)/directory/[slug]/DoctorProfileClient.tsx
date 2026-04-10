@@ -49,6 +49,14 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
 
   const saved = isSaved('doctors', doctor.id?.toString());
   const name = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
+
+  const trackEvent = (eventType: string) => {
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ doctorId: doctor.id, eventType }),
+    }).catch(() => {});
+  };
   const location = [doctor.city, doctor.state].filter(Boolean).join(", ");
   const specialties = doctor.specialties || [];
 
@@ -142,17 +150,17 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
           {/* Contact Buttons */}
           <div className="flex gap-3 mb-6">
             {doctor.phone && (
-              <a href={`tel:${doctor.phone}`} className="flex-1 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors">
+              <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')} className="flex-1 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors">
                 <Phone className="w-4 h-4" /> Call
               </a>
             )}
             {doctor.website_url && (
-              <a href={doctor.website_url} target="_blank" rel="noopener noreferrer" className="flex-1 py-3 bg-neuro-navy text-white font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-neuro-navy/90 transition-colors">
+              <a href={doctor.website_url} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('website_click')} className="flex-1 py-3 bg-neuro-navy text-white font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-neuro-navy/90 transition-colors">
                 <Globe className="w-4 h-4" /> Website
               </a>
             )}
             {doctor.email && (
-              <a href={`mailto:${doctor.email}`} className="flex-1 py-3 bg-gray-100 text-neuro-navy font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors">
+              <a href={`mailto:${doctor.email}`} onClick={() => trackEvent('contact_click')} className="flex-1 py-3 bg-gray-100 text-neuro-navy font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors">
                 <Mail className="w-4 h-4" /> Email
               </a>
             )}
@@ -389,12 +397,13 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
           <a
             href={doctor.website_url || "#"}
             target={doctor.website_url ? "_blank" : undefined}
+            onClick={() => trackEvent('booking_click')}
             className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm text-center"
           >
             Book Appointment
           </a>
           {doctor.phone ? (
-            <a href={`tel:${doctor.phone}`} className="flex-1 py-3 bg-neuro-navy text-white rounded-xl font-bold text-sm text-center flex items-center justify-center gap-2">
+            <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')} className="flex-1 py-3 bg-neuro-navy text-white rounded-xl font-bold text-sm text-center flex items-center justify-center gap-2">
               <Phone className="w-4 h-4" /> Call
             </a>
           ) : (
