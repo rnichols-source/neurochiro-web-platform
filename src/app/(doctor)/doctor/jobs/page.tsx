@@ -268,18 +268,22 @@ export default function JobsPage() {
               )}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Salary Min</label>
-                  <input name="salary_min" type="number" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Salary Min ($)</label>
+                  <input name="salary_min" type="number" min="0" placeholder="e.g. 60000" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Salary Max</label>
-                  <input name="salary_max" type="number" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Salary Max ($)</label>
+                  <input name="salary_max" type="number" min="0" placeholder="e.g. 90000" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Benefits (optional)</label>
+                <input name="benefits" placeholder="e.g. Health insurance, CE allowance, PTO" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
               </div>
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50"
+                className="w-full py-2.5 bg-neuro-orange text-white rounded-lg hover:bg-neuro-orange/90 transition-colors text-sm font-bold disabled:opacity-50"
               >
                 {submitting ? "Posting..." : "Post Job"}
               </button>
