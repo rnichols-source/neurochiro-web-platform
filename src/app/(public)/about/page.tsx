@@ -42,7 +42,7 @@ export default function AboutPage() {
                   </p>
                   <p>
                     We&apos;re a small team building something we believe in. If you have questions, feedback, or just want to talk, I&apos;m reachable at{" "}
-                    <a href="mailto:raymond@neurochiro.com" className="text-neuro-orange font-bold hover:underline">raymond@neurochiro.com</a>.
+                    <a href="mailto:support@neurochirodirectory.com" className="text-neuro-orange font-bold hover:underline">support@neurochirodirectory.com</a>.
                   </p>
                 </div>
               </div>
@@ -52,10 +52,10 @@ export default function AboutPage() {
           {/* Values */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
             {[
-              { icon: Users, title: "Community First", desc: "We exist to serve the nervous system chiropractic community &mdash; doctors, students, and patients." },
+              { icon: Users, title: "Community First", desc: "We exist to serve the nervous system chiropractic community \u2014 doctors, students, and patients." },
               { icon: Heart, title: "Patient Safety", desc: "Every doctor on the platform is reviewed before their profile goes live. We take verification seriously." },
               { icon: Target, title: "Clinical Focus", desc: "We only list doctors who specialize in nervous system chiropractic. No generalists, no dilution." },
-              { icon: ShieldCheck, title: "Transparency", desc: "We&apos;re upfront about what we are, who we are, and how we operate. No hidden agendas." },
+              { icon: ShieldCheck, title: "Transparency", desc: "We\u2019re upfront about what we are, who we are, and how we operate. No hidden agendas." },
             ].map((item, i) => (
               <motion.div
                 key={i}
