@@ -16,10 +16,7 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
 
   let query = supabase
     .from('seminars')
-    .select(`
-      *,
-      registrations:seminar_registrations(count)
-    `)
+    .select('*')
     .eq('is_approved', true)
 
   if (options.country && options.country !== 'All') {
@@ -40,13 +37,9 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
 
   if (options.showPast) {
     query = query.eq('is_past', true)
-  } else {
-    query = query.eq('is_past', false)
   }
 
   const { data, error } = await query
-    .order('is_boosted', { ascending: false })
-    .order('listing_tier', { ascending: false })
     .order('created_at', { ascending: false })
 
   if (error) {
