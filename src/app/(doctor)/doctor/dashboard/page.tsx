@@ -150,7 +150,10 @@ export default function DoctorDashboard() {
       </div>
 
       {statCards.reduce((sum, s) => sum + Number(s.value), 0) === 0 && (
-        <p className="text-sm text-gray-400">Your stats will update as patients find your profile in the directory.</p>
+        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4">
+          <p className="text-sm text-blue-700 font-bold">Your stats are warming up</p>
+          <p className="text-xs text-blue-600 mt-1">As patients find you in the directory, you&apos;ll see profile views, leads, and more here. Make sure your profile is complete to appear in search results.</p>
+        </div>
       )}
 
       {/* Referral Program Card */}
