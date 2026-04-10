@@ -280,22 +280,18 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                 onClick={async () => {
                   setSubmittingAppointment(true);
                   try {
-                    await fetch('/api/leads', {
+                    await fetch('/api/appointment', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
-                        email: appointmentForm.email, first_name: appointmentForm.name,
-                        source: 'appointment_request', role: 'patient',
-                        doctor_id: doctor.id, location: `${doctor.city || ''}, ${doctor.state || ''}`,
+                        patientName: appointmentForm.name,
+                        patientEmail: appointmentForm.email,
+                        patientPhone: appointmentForm.phone,
+                        preferredDate: appointmentForm.preferredDate,
+                        message: appointmentForm.message,
+                        doctorId: doctor.id,
                       }),
                     });
-                    if (doctor.user_id) {
-                      await supabase.from('notifications').insert({
-                        user_id: doctor.user_id, title: 'New Appointment Request',
-                        body: `${appointmentForm.name} wants to book. Email: ${appointmentForm.email}${appointmentForm.phone ? `, Phone: ${appointmentForm.phone}` : ''}${appointmentForm.message ? `. "${appointmentForm.message}"` : ''}`,
-                        type: 'appointment', priority: 'important', link: '/doctor/dashboard'
-                      });
-                    }
                     setAppointmentSubmitted(true);
                   } catch { setAppointmentSubmitted(true); }
                   setSubmittingAppointment(false);
