@@ -10,8 +10,9 @@ import { createClient } from "@/lib/supabase";
 
 const baseNavItems = [
   { name: "Home", href: "/doctor/dashboard", icon: LayoutDashboard },
-  { name: "Messages", href: "/doctor/messages", icon: MessageSquare },
+  { name: "Profile", href: "/doctor/profile", icon: User },
   { name: "Alerts", href: "/doctor/notifications", icon: Bell },
+  { name: "Messages", href: "/doctor/messages", icon: MessageSquare },
   { name: "Menu", href: "#", icon: Menu, isMenuTrigger: true },
 ];
 
