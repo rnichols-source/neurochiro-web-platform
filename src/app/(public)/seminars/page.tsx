@@ -27,7 +27,7 @@ export default function SeminarsPage() {
         </div>
         <div className="max-w-4xl mx-auto relative z-10 text-center">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-3">Events &amp; Workshops</p>
-          <h1 className="text-4xl md:text-5xl font-heading font-black mb-4">
+          <h1 className="text-4xl md:text-5xl font-heading font-black mb-4 text-white">
             Upcoming <span className="text-neuro-orange">Seminars</span>
           </h1>
           <p className="text-gray-400 text-lg max-w-xl mx-auto mb-8">
