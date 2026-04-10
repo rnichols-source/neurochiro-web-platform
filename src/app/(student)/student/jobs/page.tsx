@@ -12,6 +12,7 @@ export default function JobsPage() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "salary">("newest");
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
+  const [appliedStages, setAppliedStages] = useState<Record<string, string>>({});
 
   useEffect(() => {
     getPublicJobs({}).then(setJobs).catch(console.error).finally(() => setLoading(false));
@@ -23,7 +24,19 @@ export default function JobsPage() {
         .from('job_applications')
         .select('job_id')
         .eq('applicant_id', user.id);
-      if (data) setAppliedJobIds(new Set(data.map(a => a.job_id)));
+      if (data) {
+        setAppliedJobIds(new Set(data.map(a => a.job_id)));
+      }
+      // Also check applications table for stage info
+      const { data: apps } = await supabase
+        .from('applications')
+        .select('job_id, stage')
+        .eq('candidate_id', user.id);
+      if (apps) {
+        const stageMap: Record<string, string> = {};
+        apps.forEach((a: any) => { stageMap[a.job_id] = a.stage || 'Applied'; });
+        setAppliedStages(stageMap);
+      }
     });
   }, []);
 
@@ -147,8 +160,11 @@ export default function JobsPage() {
                     </div>
                   </div>
                   {hasApplied ? (
-                    <div className="shrink-0 flex items-center gap-2 px-6 py-3 bg-green-100 text-green-700 font-bold rounded-xl text-xs uppercase tracking-widest">
-                      <CheckCircle2 className="w-4 h-4" /> Applied
+                    <div className="shrink-0 flex flex-col items-center gap-1 px-5 py-2 bg-green-50 border border-green-200 rounded-xl">
+                      <div className="flex items-center gap-1 text-green-700 text-xs font-bold">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Applied
+                      </div>
+                      <span className="text-[10px] text-green-600 font-medium">{appliedStages[job.id] || 'New'}</span>
                     </div>
                   ) : (
                     <Link

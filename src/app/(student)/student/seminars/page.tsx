@@ -60,7 +60,9 @@ export default function SeminarsPage() {
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200">
           <Calendar className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-neuro-navy mb-1">No upcoming seminars.</h3>
+          <h3 className="text-xl font-bold text-neuro-navy mb-1">No upcoming seminars</h3>
+          <p className="text-gray-400 text-sm mb-4">Check back soon — new events are added regularly.</p>
+          <a href="/seminars" className="text-sm font-bold text-neuro-orange hover:underline">Browse all public seminars</a>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
