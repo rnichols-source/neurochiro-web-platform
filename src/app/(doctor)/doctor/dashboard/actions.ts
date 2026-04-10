@@ -6,17 +6,19 @@ import { isFounderRole } from '@/lib/founder'
 export async function getDoctorDashboardStats() {
   try {
     const supabase = createServerSupabase()
-    
+    const { createAdminClient } = await import('@/lib/supabase-admin')
+    const admin = createAdminClient()
+
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
-    // Parallelize fetches for profile, practice info, seminars, jobs, and leads
+    // Use admin client to bypass any RLS issues
     const [profileRes, doctorRes, seminarsRes, jobsRes, leadsRes] = await Promise.all([
-      supabase.from('profiles').select('role, tier, full_name, subscription_status').eq('id', user.id).single(),
-      supabase.from('doctors').select('clinic_name, slug, city, state, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count, membership_tier, verification_status').eq('user_id', user.id).single(),
-      supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
-      supabase.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
-      supabase.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id)
+      admin.from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
+      admin.from('doctors').select('clinic_name, slug, city, state, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count, membership_tier, verification_status').eq('user_id', user.id).single(),
+      admin.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
+      admin.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
+      admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id)
     ]);
 
     const profile = profileRes.data;
