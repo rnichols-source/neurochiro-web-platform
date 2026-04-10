@@ -312,6 +312,7 @@ export interface Database {
           tier: string
           discount_code: string | null
           discount_description: string | null
+          logo_url: string | null
           is_active: boolean
           created_at: string
         }
@@ -326,6 +327,7 @@ export interface Database {
           tier?: string
           discount_code?: string | null
           discount_description?: string | null
+          logo_url?: string | null
           is_active?: boolean
           created_at?: string
         }
@@ -340,6 +342,7 @@ export interface Database {
           tier?: string
           discount_code?: string | null
           discount_description?: string | null
+          logo_url?: string | null
           is_active?: boolean
           created_at?: string
         }
