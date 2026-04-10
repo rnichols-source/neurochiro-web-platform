@@ -2,24 +2,12 @@
 
 import * as React from "react";
 import { useEffect, useState } from "react";
-import {
-  Calendar,
-  MapPin,
-  Clock,
-  ArrowLeft,
-  Loader2,
-  ExternalLink,
-} from "lucide-react";
+import { Calendar, MapPin, ArrowLeft, Loader2, ExternalLink, Users, Globe } from "lucide-react";
 import Link from "next/link";
 import { getSeminarById, incrementSeminarStats } from "../actions";
+import Footer from "@/components/landing/Footer";
 
-export const dynamic = "force-dynamic";
-
-export default function SeminarDetailsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function SeminarDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
   const [seminar, setSeminar] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -29,175 +17,150 @@ export default function SeminarDetailsPage({
       const data = await getSeminarById(id);
       setSeminar(data);
       setLoading(false);
-      if (id) incrementSeminarStats(id, "page_views");
+      if (id) incrementSeminarStats(id, "page_views").catch(() => {});
     }
     load();
   }, [id]);
 
-  const handleRegisterClick = () => {
-    if (id) incrementSeminarStats(id, "clicks");
-  };
-
   if (loading) {
     return (
-      <div className="min-h-dvh bg-[#0B1118] flex flex-col items-center justify-center">
-        <Loader2 className="w-12 h-12 animate-spin text-neuro-orange mb-4" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
-          Loading...
-        </p>
+      <div className="min-h-dvh bg-neuro-cream flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-neuro-orange" />
       </div>
     );
   }
 
   if (!seminar) {
     return (
-      <div className="min-h-dvh bg-[#0B1118] flex flex-col items-center justify-center p-6 text-center">
-        <h1 className="text-4xl font-black text-white mb-4">Event Not Found</h1>
-        <p className="text-gray-500 mb-8">
-          The seminar you are looking for does not exist or has been removed.
-        </p>
-        <Link
-          href="/seminars"
-          className="px-10 py-4 bg-neuro-orange text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-neuro-orange-light transition-all shadow-xl"
-        >
-          Return to Seminars
+      <div className="min-h-dvh bg-neuro-cream flex flex-col items-center justify-center p-6 text-center">
+        <h1 className="text-2xl font-black text-neuro-navy mb-4">Event Not Found</h1>
+        <p className="text-gray-500 mb-6">This seminar doesn&apos;t exist or has been removed.</p>
+        <Link href="/seminars" className="px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl">
+          Back to Seminars
         </Link>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-dvh bg-[#0B1118] text-white">
-      {/* Hero */}
-      <section className="relative pt-32 pb-24 px-8 border-b border-white/5">
-        {seminar.image_url && (
-          <div className="absolute inset-0 z-0">
-            <img
-              loading="lazy"
-              decoding="async"
-              src={seminar.image_url}
-              alt=""
-              className="w-full h-full object-cover opacity-20 blur-sm scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#0B1118] via-[#0B1118]/80 to-[#0B1118]" />
-          </div>
-        )}
+  const location = [seminar.location, seminar.city, seminar.country].filter(Boolean).join(", ");
 
-        <div className="max-w-5xl mx-auto relative z-10 space-y-8">
-          <Link
-            href="/seminars"
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-xs font-black uppercase tracking-widest"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back to All Seminars
+  return (
+    <div className="min-h-dvh bg-neuro-cream">
+      {/* Hero */}
+      <section className="bg-neuro-navy text-white pt-28 pb-12 px-6">
+        <div className="max-w-3xl mx-auto">
+          <Link href="/seminars" className="text-xs text-gray-400 hover:text-white transition-colors mb-6 inline-flex items-center gap-1">
+            <ArrowLeft className="w-3 h-3" /> All Seminars
           </Link>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {seminar.event_type && (
-              <span className="px-4 py-1.5 bg-neuro-orange/10 border border-neuro-orange/20 text-neuro-orange text-[10px] font-black rounded-lg uppercase tracking-[0.2em]">
-                {seminar.event_type}
-              </span>
-            )}
-            {seminar.city && (
-              <span className="px-4 py-1.5 bg-white/5 border border-white/10 text-gray-300 text-[10px] font-black rounded-lg uppercase tracking-[0.2em]">
-                {seminar.city}, {seminar.country}
-              </span>
+          {/* Date + Location */}
+          <div className="flex flex-wrap items-center gap-3 mb-4 mt-4">
+            <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
+              <Calendar className="w-4 h-4 text-neuro-orange" />
+              <span className="text-sm font-bold">{seminar.dates}</span>
+            </div>
+            {location && (
+              <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
+                <MapPin className="w-4 h-4 text-neuro-orange" />
+                <span className="text-sm font-bold">{location}</span>
+              </div>
             )}
           </div>
 
-          <h1 className="text-5xl font-heading font-black tracking-tight leading-tight">
+          <h1 className="text-3xl md:text-4xl font-heading font-black text-white mb-4">
             {seminar.title}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-8 text-sm">
-            {seminar.instructor_name && (
-              <p className="text-gray-300">
-                <span className="text-gray-500 text-[10px] font-black uppercase tracking-widest block mb-1">
-                  Instructor
-                </span>
-                {seminar.instructor_name}
-              </p>
-            )}
-            {seminar.dates && (
-              <p className="text-gray-300 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-neuro-orange" />
-                {seminar.dates}
-              </p>
-            )}
-          </div>
+          {seminar.instructor_name && (
+            <p className="text-gray-400">Hosted by <span className="text-white font-bold">{seminar.instructor_name}</span></p>
+          )}
         </div>
       </section>
 
       {/* Content */}
-      <section className="py-24 px-8 max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-16">
-        {/* Description */}
-        <div className="lg:col-span-2 space-y-8">
-          {seminar.description && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-heading font-black">Overview</h2>
-              <div className="text-lg text-gray-300 leading-relaxed whitespace-pre-wrap">
-                {seminar.description}
+      <section className="max-w-3xl mx-auto px-6 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Description */}
+            {seminar.description && (
+              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+                <h2 className="text-lg font-black text-neuro-navy mb-4">About This Event</h2>
+                <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">{seminar.description}</p>
               </div>
-            </div>
-          )}
+            )}
 
-          {seminar.instructor_bio && (
-            <div className="space-y-4 pt-8 border-t border-white/10">
-              <h2 className="text-2xl font-heading font-black">
-                About the Instructor
-              </h2>
-              <p className="text-gray-400 leading-relaxed italic">
-                {seminar.instructor_bio}
-              </p>
-            </div>
-          )}
-        </div>
+            {/* Instructor Bio */}
+            {seminar.instructor_bio && (
+              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+                <h2 className="text-lg font-black text-neuro-navy mb-4">About the Host</h2>
+                <p className="text-gray-600 leading-relaxed italic">{seminar.instructor_bio}</p>
+              </div>
+            )}
 
-        {/* Sidebar */}
-        <div className="space-y-8">
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-8 space-y-6 sticky top-32">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">
-              Event Details
-            </h3>
+            {/* Tags */}
+            {seminar.tags && seminar.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {seminar.tags.map((tag: string, i: number) => (
+                  <span key={i} className="px-3 py-1.5 bg-neuro-orange/5 text-neuro-orange text-xs font-bold rounded-lg border border-neuro-orange/10">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
 
-            {(seminar.venue || seminar.city) && (
-              <div className="flex items-start gap-4">
-                <MapPin className="w-5 h-5 text-neuro-orange mt-0.5" />
-                <div>
-                  <p className="font-bold text-gray-200">
-                    {seminar.venue || `${seminar.city}, ${seminar.country}`}
-                  </p>
-                  {seminar.venue && (
-                    <p className="text-xs text-gray-500">
-                      {seminar.city}, {seminar.country}
-                    </p>
-                  )}
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 sticky top-24 space-y-5">
+              <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Event Details</h3>
+
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <Calendar className="w-5 h-5 text-neuro-orange mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-bold text-neuro-navy text-sm">{seminar.dates}</p>
+                    {(seminar.start_time || seminar.end_time) && (
+                      <p className="text-xs text-gray-400">{seminar.start_time} — {seminar.end_time}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
 
-            {(seminar.start_time || seminar.end_time) && (
-              <div className="flex items-start gap-4">
-                <Clock className="w-5 h-5 text-neuro-orange mt-0.5" />
-                <p className="font-bold text-gray-200">
-                  {seminar.start_time} — {seminar.end_time}
-                </p>
-              </div>
-            )}
+                {location && (
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-neuro-orange mt-0.5 flex-shrink-0" />
+                    <p className="font-bold text-neuro-navy text-sm">{location}</p>
+                  </div>
+                )}
 
-            {seminar.registration_link && (
-              <a
-                href={seminar.registration_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={handleRegisterClick}
-                className="w-full py-5 bg-neuro-orange text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-neuro-orange-light transition-all shadow-xl flex items-center justify-center gap-3"
-              >
-                Register <ExternalLink className="w-4 h-4" />
-              </a>
-            )}
+                {seminar.price != null && (
+                  <div className="pt-3 border-t border-gray-100">
+                    {seminar.price > 0 ? (
+                      <p className="text-2xl font-black text-neuro-navy">${seminar.price} <span className="text-sm font-normal text-gray-400">per person</span></p>
+                    ) : (
+                      <p className="text-2xl font-black text-green-600">Free</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {seminar.registration_link && (
+                <a
+                  href={seminar.registration_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => incrementSeminarStats(id, "clicks").catch(() => {})}
+                  className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors"
+                >
+                  Register Now <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }
