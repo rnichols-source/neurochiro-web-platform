@@ -88,10 +88,15 @@ export default function MarketplacePage() {
                     </div>
                   )}
 
-                  {/* Name + Description */}
-                  <h2 className="text-2xl md:text-3xl font-heading font-black text-neuro-navy mb-3">
-                    {vendor.name}
-                  </h2>
+                  {/* Logo + Name */}
+                  <div className="flex items-center gap-4 mb-3">
+                    {vendor.logo_url && (
+                      <img src={vendor.logo_url} alt={vendor.name} className="w-14 h-14 rounded-xl object-contain bg-gray-50 p-1 border border-gray-100" />
+                    )}
+                    <h2 className="text-2xl md:text-3xl font-heading font-black text-neuro-navy">
+                      {vendor.name}
+                    </h2>
+                  </div>
 
                   {vendor.short_description && (
                     <p className="text-gray-500 mb-4">{vendor.short_description}</p>
