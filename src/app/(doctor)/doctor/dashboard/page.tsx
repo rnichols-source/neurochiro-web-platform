@@ -106,8 +106,8 @@ export default function DoctorDashboard() {
         </div>
       )}
 
-      {/* Payment Prompt — only show if not active AND not already verified in directory */}
-      {data?.profile?.subscription_status !== 'active' && data?.profile?.verification_status !== 'verified' && (
+      {/* Payment Prompt — only show if not active AND no doctor slug (no profile in directory) */}
+      {data?.profile?.subscription_status !== 'active' && !data?.profile?.slug && (
         <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
           <h3 className="font-bold text-neuro-navy mb-1">Activate your membership</h3>
           <p className="text-gray-500 text-sm mb-4">{`Your profile is set up but not yet visible to patients. Start your ${region.currency.symbol}${region.pricing.doctor.starter.monthly}/month membership to go live in the directory.`}</p>
