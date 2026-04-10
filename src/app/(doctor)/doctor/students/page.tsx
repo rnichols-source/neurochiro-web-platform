@@ -36,16 +36,33 @@ export default function StudentsPage() {
     <div className="p-8 max-w-5xl mx-auto space-y-8">
       <h1 className="text-2xl font-heading font-black text-neuro-navy">Students</h1>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search by name, school, or interest..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-        />
+      {/* Search + Filters */}
+      <div className="space-y-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by name, school, city, or interest..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-neuro-orange/20"
+          />
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {['All', '2025', '2026', '2027', '2028'].map((year) => (
+            <button
+              key={year}
+              onClick={() => setSearchTerm(year === 'All' ? '' : year)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                (year === 'All' && !searchTerm) || searchTerm === year
+                  ? 'bg-neuro-navy text-white'
+                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+              }`}
+            >
+              {year === 'All' ? 'All Students' : `Class of ${year}`}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Student Grid */}
