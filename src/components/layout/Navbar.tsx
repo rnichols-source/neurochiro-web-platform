@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown, User, Stethoscope, GraduationCap, Zap, MapPin, BookOpen, Crown, Users, Briefcase, Store, Calendar, Sparkles, Bell, Heart } from "lucide-react";
+
 import RegionSwitcher from "./RegionSwitcher";
 import GetStartedModal from "./GetStartedModal";
 import NotificationBell from "./NotificationBell";
@@ -50,9 +51,9 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "Find a Doctor", href: "/directory", icon: MapPin },
+    { name: "Seminars", href: "/seminars", icon: Calendar },
     { name: "Why NeuroChiro?", href: "/why-neurochiro", icon: Zap },
     { name: "About", href: "/about", icon: Users },
-    { name: "Education", href: "/learn", icon: BookOpen },
     { name: "Careers", href: "/careers", icon: Briefcase },
   ];
 

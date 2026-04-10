@@ -36,6 +36,7 @@ export default function Footer() {
             <li><Link href="/directory" className="text-gray-400 hover:text-neuro-orange transition-colors">Global Directory</Link></li>
             <li><Link href="/register?role=student" className="text-gray-400 hover:text-neuro-orange transition-colors">For Students</Link></li>
             <li><Link href="/register?role=doctor" className="text-gray-400 hover:text-neuro-orange transition-colors">For Doctors</Link></li>
+            <li><Link href="/seminars" className="text-gray-400 hover:text-neuro-orange transition-colors">Seminars</Link></li>
             <li><Link href="/why-neurochiro" className="text-gray-400 hover:text-neuro-orange transition-colors">Why NeuroChiro?</Link></li>
           </ul>
         </div>
