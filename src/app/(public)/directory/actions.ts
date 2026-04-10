@@ -117,7 +117,7 @@ export async function getDoctorBySlug(slug: string) {
   
   // DATA MINIMIZATION: Fetch columns needed for full profile
   // Removed google_place_id as it does not exist in the schema
-  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email, phone, website_url, instagram_url, facebook_url, user_id';
+  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email, phone, website_url, instagram_url, facebook_url, user_id, photo_url, video_url';
   
   try {
     let { data, error } = await supabase
