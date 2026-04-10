@@ -73,7 +73,7 @@ export async function getCourses() {
     .eq('id', user.id)
     .single() : { data: null };
 
-  const isPaid = profile?.tier === 'paid' || profile?.role === 'student_paid' || profile?.role === 'admin' || profile?.role === 'founder';
+  const isPaid = profile?.role === 'student' || profile?.role === 'student_paid' || profile?.role === 'admin' || profile?.role === 'founder';
 
   return courses.map(c => {
     const modules = (typeof c.modules === 'string' ? JSON.parse(c.modules) : c.modules) || [];

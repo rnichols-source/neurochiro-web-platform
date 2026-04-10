@@ -86,6 +86,9 @@ export default function ContractLabPage() {
       <header>
         <h1 className="text-2xl font-heading font-black text-neuro-navy">Contract Lab</h1>
         <p className="text-gray-500 mt-2">Paste your employment contract below and let AI analyze each clause for risks and negotiation opportunities.</p>
+        <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+          <p className="text-xs text-yellow-700"><strong>Disclaimer:</strong> This is an AI-powered analysis tool, not legal advice. Always consult a licensed attorney before signing any employment contract.</p>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

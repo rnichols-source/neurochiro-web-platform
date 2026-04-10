@@ -83,7 +83,7 @@ export default function ProfilePage() {
         {/* Personal Info */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">Personal Info</h2>
-          <label className="block text-sm font-medium text-neuro-navy mb-1">Full Name</label>
+          <label className="block text-sm font-medium text-neuro-navy mb-1">Full Name <span className="text-red-400">*</span></label>
           <input className={inputClass} value={form.name} onChange={(e) => update("name", e.target.value)} />
         </div>
 
@@ -91,11 +91,11 @@ export default function ProfilePage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
           <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Education</h2>
           <div>
-            <label className="block text-sm font-medium text-neuro-navy mb-1">School</label>
+            <label className="block text-sm font-medium text-neuro-navy mb-1">School <span className="text-red-400">*</span></label>
             <input className={inputClass} value={form.school} onChange={(e) => update("school", e.target.value)} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neuro-navy mb-1">Graduation Year</label>
+            <label className="block text-sm font-medium text-neuro-navy mb-1">Graduation Year <span className="text-red-400">*</span></label>
             <input className={inputClass} type="number" min="2020" max="2035" value={form.gradYear} onChange={(e) => update("gradYear", e.target.value)} placeholder="e.g. 2027" />
           </div>
         </div>

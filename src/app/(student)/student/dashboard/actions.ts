@@ -40,8 +40,9 @@ export async function getStudentDashboardData() {
         role: (profile as any)?.role,
         status: ((profile as any)?.tier && (profile as any)?.tier !== 'free') ? 'active' : 'inactive',
         subscription_status: (profile as any)?.subscription_status || null,
-        school: (student as any)?.school || "Life University",
-        gradYear: (student as any)?.graduation_year || "2027"
+        school: (student as any)?.school || null,
+        gradYear: (student as any)?.graduation_year || null,
+        city: (student as any)?.location_city || null
       },
       stats: {
         readiness: readiness,
