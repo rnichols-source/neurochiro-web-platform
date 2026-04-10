@@ -164,24 +164,44 @@ export default function JobsPage() {
           {jobApplicants.length === 0 ? (
             <p className="text-gray-500 text-sm">No applicants yet.</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {jobApplicants.map((app) => (
-                <div key={app.id} className="flex items-center justify-between border-b border-gray-100 pb-3 last:border-0">
-                  <div>
-                    <p className="font-medium text-gray-900">{app.name}</p>
-                    <p className="text-sm text-gray-500">
-                      Applied {new Date(app.appliedAt).toLocaleDateString()}
-                    </p>
+                <div key={app.id} className="border border-gray-100 rounded-xl p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <p className="font-bold text-neuro-navy">{app.name}</p>
+                      {app.school && <p className="text-sm text-gray-500">{app.school}{app.gradYear ? ` · Class of ${app.gradYear}` : ''}</p>}
+                      <p className="text-xs text-gray-400 mt-1">Applied {new Date(app.appliedAt).toLocaleDateString()}</p>
+                      {app.skills && app.skills.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {app.skills.slice(0, 4).map((skill: string, i: number) => (
+                            <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded">{skill}</span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-2 mt-3">
+                        {app.candidateId && (
+                          <a href={`/doctor/messages?to=${app.candidateId}`} className="text-xs font-bold text-neuro-orange hover:underline">
+                            Message
+                          </a>
+                        )}
+                        {app.resumeUrl && (
+                          <a href={app.resumeUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-blue-600 hover:underline">
+                            View Resume
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    <select
+                      value={app.stage}
+                      onChange={(e) => handleStageChange(app.id, e.target.value)}
+                      className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white flex-shrink-0"
+                    >
+                      {["New", "Screening", "Interview", "Offer", "Hired", "Rejected"].map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
                   </div>
-                  <select
-                    value={app.stage}
-                    onChange={(e) => handleStageChange(app.id, e.target.value)}
-                    className="text-sm border border-gray-200 rounded-md px-3 py-1.5 bg-white"
-                  >
-                    {["New", "Screening", "Interview", "Offer", "Hired", "Rejected"].map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
                 </div>
               ))}
             </div>
