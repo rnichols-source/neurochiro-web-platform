@@ -7,6 +7,7 @@ import {
   createSeminarAction,
   updateSeminarAction,
   deleteSeminarAction,
+  getSeminarRegistrants,
 } from "./actions";
 
 export default function SeminarsPage() {
@@ -15,6 +16,9 @@ export default function SeminarsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editSeminar, setEditSeminar] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedSeminarId, setSelectedSeminarId] = useState<string | null>(null);
+  const [registrants, setRegistrants] = useState<any[]>([]);
+  const [loadingRegistrants, setLoadingRegistrants] = useState(false);
 
   async function loadData() {
     setLoading(true);
@@ -152,7 +156,12 @@ export default function SeminarsPage() {
                       {sem.location && <span>{sem.location}</span>}
                       {sem.dates && <span>{new Date(sem.dates).toLocaleDateString()}</span>}
                       {sem.registrations?.[0]?.count != null && (
-                        <span>{sem.registrations[0].count} registered</span>
+                        <button
+                          onClick={() => setSelectedSeminarId(selectedSeminarId === sem.id ? null : sem.id)}
+                          className="text-neuro-orange font-bold hover:underline"
+                        >
+                          {sem.registrations[0].count} registered
+                        </button>
                       )}
                     </div>
                   </div>
@@ -171,6 +180,10 @@ export default function SeminarsPage() {
                     </button>
                   </div>
                 </div>
+                {/* Registrant List */}
+                {selectedSeminarId === sem.id && (
+                  <RegistrantList seminarId={sem.id} />
+                )}
               </div>
             );
           })}
@@ -206,6 +219,39 @@ export default function SeminarsPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function RegistrantList({ seminarId }: { seminarId: string }) {
+  const [registrants, setRegistrants] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getSeminarRegistrants(seminarId).then((data) => {
+      setRegistrants(data);
+      setLoading(false);
+    });
+  }, [seminarId]);
+
+  if (loading) return <div className="p-4 text-center text-gray-400 text-sm">Loading registrants...</div>;
+
+  if (registrants.length === 0) return <div className="p-4 text-center text-gray-400 text-sm">No registrants yet.</div>;
+
+  return (
+    <div className="border-t border-gray-100 p-4">
+      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Registrants</p>
+      <div className="space-y-2">
+        {registrants.map((r) => (
+          <div key={r.id} className="flex items-center justify-between text-sm">
+            <div>
+              <span className="font-medium text-neuro-navy">{r.name}</span>
+              {r.email && <a href={`mailto:${r.email}`} className="text-neuro-orange ml-2 hover:underline text-xs">{r.email}</a>}
+            </div>
+            <span className="text-xs text-gray-400">{new Date(r.registeredAt).toLocaleDateString()}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

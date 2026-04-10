@@ -268,3 +268,15 @@ export async function exportAttendeesToCSV(seminarId: string) {
 
   return header + rows
 }
+
+
+// Alias for the page component
+export async function getSeminarRegistrants(seminarId: string) {
+  const attendees = await getSeminarAttendees(seminarId);
+  return attendees.map((a: any) => ({
+    id: a.id,
+    name: a.profile?.full_name || 'Registrant',
+    email: a.profile?.email || '',
+    registeredAt: a.created_at,
+  }))
+}
