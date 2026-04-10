@@ -30,6 +30,7 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     getNotifications().then((data) => {
@@ -124,7 +125,10 @@ export default function NotificationsPage() {
                     ? "bg-neuro-orange/5 border-neuro-orange/20 hover:border-neuro-orange/40"
                     : "bg-white border-gray-100 hover:border-gray-200"
                 )}
-                onClick={() => isUnread && handleMarkRead(notif.id)}
+                onClick={() => {
+                  setExpandedId(expandedId === notif.id ? null : notif.id);
+                  if (isUnread) handleMarkRead(notif.id);
+                }}
               >
                 <div
                   className={cn(
@@ -141,7 +145,7 @@ export default function NotificationsPage() {
                     </p>
                     {isUnread && <span className="w-2 h-2 bg-neuro-orange rounded-full flex-shrink-0" />}
                   </div>
-                  <p className="text-gray-500 text-sm mt-0.5 line-clamp-2">{notif.body}</p>
+                  <p className={cn("text-gray-500 text-sm mt-0.5", expandedId === notif.id ? "" : "line-clamp-2")}>{notif.body}</p>
                   <p className="text-gray-400 text-xs mt-2">
                     {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true })}
                   </p>
