@@ -54,6 +54,7 @@ export default function Navbar() {
     { name: "Seminars", href: "/seminars", icon: Calendar },
     { name: "Why NeuroChiro?", href: "/why-neurochiro", icon: Zap },
     { name: "About", href: "/about", icon: Users },
+    { name: "Marketplace", href: "/marketplace", icon: Store },
     { name: "Careers", href: "/careers", icon: Briefcase },
   ];
 
