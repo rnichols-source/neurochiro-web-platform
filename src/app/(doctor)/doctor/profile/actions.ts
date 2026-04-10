@@ -268,14 +268,14 @@ export async function uploadAvatar(formData: FormData) {
 
         const publicUrl = data?.publicUrl || ""
 
-        // Update BOTH tables for consistency
-        const [doctorRes, profileRes] = await Promise.all([
-            supabase.from('doctors').update({ photo_url: publicUrl }).eq('user_id', user.id),
-            supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id)
-        ])
+        // Update doctor photo_url
+        const { error: updateError } = await supabase
+            .from('doctors')
+            .update({ photo_url: publicUrl })
+            .eq('user_id', user.id)
 
-        if (doctorRes.error || profileRes.error) {
-            console.error("[DATABASE_SYNC_ERROR]:", doctorRes.error || profileRes.error)
+        if (updateError) {
+            console.error("[DATABASE_SYNC_ERROR]:", updateError)
             return { error: "Photo uploaded but failed to sync with your profile database." }
         }
 
