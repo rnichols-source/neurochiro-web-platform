@@ -72,6 +72,14 @@ export default function AcademyPage() {
           </div>
         </header>
 
+        {selectedCourse.completedCount >= selectedCourse.moduleCount && selectedCourse.moduleCount > 0 && (
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
+            <div className="text-3xl mb-2">🎓</div>
+            <h3 className="text-lg font-black text-green-700 mb-1">Course Complete!</h3>
+            <p className="text-green-600 text-sm">You&apos;ve completed all {selectedCourse.moduleCount} modules in {selectedCourse.title}. Great work!</p>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Module List */}
           <div className="space-y-2">
@@ -169,7 +177,7 @@ export default function AcademyPage() {
                 <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
                   <div className="text-center p-4">
                     <Lock className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="font-bold text-gray-500 text-sm">Paid Members Only</p>
+                    <p className="font-bold text-gray-500 text-sm">Coming Soon</p>
                   </div>
                 </div>
               )}
