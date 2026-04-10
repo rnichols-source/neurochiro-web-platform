@@ -167,8 +167,8 @@ export async function createSeminarAction(formData: FormData) {
       listing_tier: tier,
       target_audience: target_audience.length > 0 ? target_audience : ['Doctors', 'Students'],
       tags,
-      payment_status: 'pending', 
-      is_approved: false, // ALWAYS false until Admin reviews
+      payment_status: 'paid',
+      is_approved: true, // Members auto-approved
       host_type_at_submission: isVerified ? 'doctor' : 'external',
       latitude: 0,
       longitude: 0
