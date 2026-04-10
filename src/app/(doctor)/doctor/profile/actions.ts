@@ -18,7 +18,7 @@ export async function getDoctorProfile() {
         .maybeSingle(),
       supabase
         .from('doctors')
-        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url')
+        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, membership_tier')
         .eq('user_id', user.id)
         .maybeSingle()
     ])
