@@ -154,13 +154,13 @@ export async function getDoctorROIData(period: string = '30d') {
 
     const stats = {
       profile_views: (doctorRes.data as any)?.profile_views || 0,
-      contact_clicks: isStarter ? 0 : (contactClicks || Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.15)),
-      phone_taps: isStarter ? 0 : (phoneTaps || Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.08)),
-      website_clicks: isStarter ? 0 : Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.12),
-      booking_clicks: isStarter ? 0 : (bookingClicks || Math.floor(((doctorRes.data as any)?.profile_views || 0) * 0.05)),
+      contact_clicks: contactClicks,
+      phone_taps: phoneTaps,
+      website_clicks: analytics.filter((a: any) => a.event_type === 'website_click').length,
+      booking_clicks: bookingClicks,
       message_requests: 0,
-      referrals_sent: isStarter ? 0 : ((leadsRes.data as any)?.length || 0),
-      confirmed_patients: isStarter ? 0 : (confirmedRes.count || 0),
+      referrals_sent: (leadsRes.data as any)?.length || 0,
+      confirmed_patients: confirmedRes.count || 0,
       average_case_value: averageCaseValue,
       membership_cost: membershipCost
     };
