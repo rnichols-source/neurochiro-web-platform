@@ -12,13 +12,17 @@ export async function getDoctorDashboardStats() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
+    // First get doctor table ID for leads/jobs queries
+    const { data: doctorIdRow } = await admin.from('doctors').select('id').eq('user_id', user.id).single();
+    const docId = doctorIdRow?.id || user.id;
+
     // Use admin client to bypass any RLS issues
     const [profileRes, doctorRes, seminarsRes, jobsRes, leadsRes] = await Promise.all([
       admin.from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
       admin.from('doctors').select('clinic_name, slug, city, state, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count, membership_tier, verification_status').eq('user_id', user.id).single(),
       admin.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
-      admin.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id),
-      admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id)
+      admin.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', docId),
+      admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', docId)
     ]);
 
     const profile = profileRes.data;
@@ -118,17 +122,23 @@ export async function getDoctorDashboardStats() {
 
 export async function getDoctorROIData(period: string = '30d') {
   const supabase = createServerSupabase()
+  const { createAdminClient } = await import('@/lib/supabase-admin')
+  const admin = createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
   try {
-    // 1. Parallelize fetches for profile, stats, and leads
+    // First get the doctor's table ID
+    const { data: doctorRow } = await admin.from('doctors').select('id').eq('user_id', user.id).single();
+    const doctorTableId = doctorRow?.id || user.id;
+
+    // 1. Parallelize fetches using admin client and correct doctor ID
     const [profileRes, doctorRes, leadsRes, confirmedRes, analyticsRes] = await Promise.all([
-      supabase.from('profiles').select('role').eq('id', user.id).single(),
-      supabase.from('doctors').select('profile_views, patient_leads, average_case_value, membership_tier').eq('user_id', user.id).single(),
-      supabase.from('leads').select('*').eq('doctor_id', user.id).is('confirmed_at', null),
-      supabase.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id).not('confirmed_at', 'is', null),
-      supabase.from('analytics_events').select('*').eq('doctor_id', user.id)
+      admin.from('profiles').select('role').eq('id', user.id).single(),
+      admin.from('doctors').select('profile_views, patient_leads, average_case_value, membership_tier').eq('user_id', user.id).single(),
+      admin.from('leads').select('*').eq('doctor_id', doctorTableId).is('confirmed_at', null),
+      admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', doctorTableId).not('confirmed_at', 'is', null),
+      admin.from('analytics_events').select('*').eq('doctor_id', doctorTableId)
     ]);
 
     const tier = doctorRes.data?.membership_tier || 'starter';
@@ -159,10 +169,10 @@ export async function getDoctorROIData(period: string = '30d') {
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     
-    const { data: historicalLeads } = await supabase
+    const { data: historicalLeads } = await admin
       .from('leads')
       .select('created_at, status')
-      .eq('doctor_id', user.id)
+      .eq('doctor_id', doctorTableId)
       .gte('created_at', sixMonthsAgo.toISOString());
 
     // 6. Fetch Acquisition Channels
