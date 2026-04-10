@@ -156,6 +156,22 @@ export default function DoctorDashboard() {
         </div>
       )}
 
+      {/* Marketplace */}
+      <Link href="/marketplace" className="block bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md hover:border-gray-200 transition-all">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-neuro-orange/10 flex items-center justify-center">
+              <Briefcase className="w-5 h-5 text-neuro-orange" />
+            </div>
+            <div>
+              <p className="font-bold text-neuro-navy text-sm">Marketplace</p>
+              <p className="text-xs text-gray-400">Products and tools for your practice</p>
+            </div>
+          </div>
+          <ExternalLink className="w-4 h-4 text-gray-300" />
+        </div>
+      </Link>
+
       {/* Referral Program Card */}
       <ReferralCard />
     </div>
