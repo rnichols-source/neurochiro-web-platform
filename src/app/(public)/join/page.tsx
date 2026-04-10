@@ -30,7 +30,7 @@ export default async function JoinReferralPage({ searchParams }: Props) {
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-4">
                 You&apos;ve Been Invited
               </p>
-              <h1 className="text-4xl md:text-5xl font-heading font-black tracking-tight leading-tight mb-4">
+              <h1 className="text-4xl md:text-5xl font-heading font-black tracking-tight leading-tight mb-4 text-white">
                 {referrer.name} <br />
                 <span className="text-neuro-orange">Wants You to Join</span>
               </h1>
@@ -47,7 +47,7 @@ export default async function JoinReferralPage({ searchParams }: Props) {
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-4">
                 Join the Network
               </p>
-              <h1 className="text-4xl md:text-5xl font-heading font-black tracking-tight leading-tight mb-4">
+              <h1 className="text-4xl md:text-5xl font-heading font-black tracking-tight leading-tight mb-4 text-white">
                 Join <span className="text-neuro-orange">NeuroChiro</span>
               </h1>
               <p className="text-gray-400 text-lg mb-10">
