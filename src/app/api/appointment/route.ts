@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         body: `${patientName} wants to book an appointment. Email: ${patientEmail}${patientPhone ? `, Phone: ${patientPhone}` : ''}${message ? `. "${message}"` : ''}`,
         type: 'appointment',
         priority: 'important',
-        link: '/doctor/dashboard',
+        link: null,
       });
     }
 
