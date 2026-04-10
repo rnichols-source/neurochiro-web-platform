@@ -189,6 +189,11 @@ export default function ProfilePage() {
         <button type="submit" disabled={saving} className="w-full py-3 px-6 bg-neuro-navy text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-neuro-navy/90 disabled:opacity-50">
           <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Profile'}
         </button>
+        {profile?.slug && (
+          <p className="text-center text-xs text-gray-400 mt-3">
+            After saving, <Link href={`/directory/${profile.slug}`} target="_blank" className="text-neuro-orange font-bold hover:underline">preview your public profile</Link> to see what patients see.
+          </p>
+        )}
       </form>
 
       {/* Verified Badge */}
