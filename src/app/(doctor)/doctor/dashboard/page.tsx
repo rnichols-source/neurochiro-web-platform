@@ -6,17 +6,28 @@ import { useState, useEffect } from "react";
 import { getDoctorDashboardStats } from "./actions";
 import { useRegion } from "@/context/RegionContext";
 import { getOrCreateReferralCode, getReferralStats } from "@/app/actions/referral-program";
+import { createClient } from "@/lib/supabase";
 
 export default function DoctorDashboard() {
   const { region } = useRegion();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const [views, setViews] = useState<number | null>(null);
+
   useEffect(() => {
     getDoctorDashboardStats()
       .then((res) => setData(res))
       .catch(() => setData(null))
       .finally(() => setLoading(false));
+
+    // Fetch profile views directly from client as backup
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      const { data } = await supabase.from('doctors').select('profile_views').eq('user_id', user.id).single();
+      if (data?.profile_views) setViews(data.profile_views);
+    });
   }, []);
 
   if (loading) {
@@ -33,7 +44,7 @@ export default function DoctorDashboard() {
   const missingItems: string[] = data?.marketPerformance?.missingItems || [];
 
   const statCards = [
-    { label: "Profile Views", value: stats[0]?.value || "0" },
+    { label: "Profile Views", value: views !== null ? views.toString() : (stats[0]?.value || "0") },
     { label: "Patient Leads", value: stats[1]?.value || "0" },
     { label: "Seminar Registrations", value: stats[2]?.value || "0" },
     { label: "Job Applications", value: stats[3]?.value || "0" },
