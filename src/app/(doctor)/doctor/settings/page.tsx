@@ -26,10 +26,13 @@ export default function SettingsPage() {
   const [prefsSaved, setPrefsSaved] = useState(false);
 
   useEffect(() => {
-    // Load notification preferences
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
+      // Show email
+      const el = document.getElementById('current-email');
+      if (el) el.textContent = user.email || '';
+      // Load notification preferences
       const { data } = await supabase.from('profiles').select('notification_preferences').eq('id', user.id).single();
       if (data?.notification_preferences) {
         setNotifPrefs({ ...notifPrefs, ...(data.notification_preferences as any) });
@@ -87,6 +90,13 @@ export default function SettingsPage() {
   return (
     <div className="max-w-xl mx-auto py-8 px-6 space-y-10">
       <h1 className="text-2xl font-heading font-black text-neuro-navy">Settings</h1>
+
+      {/* Email */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Email</h2>
+        <p className="text-sm text-neuro-navy font-medium" id="current-email">Loading...</p>
+        <p className="text-xs text-gray-400 mt-1">To change your email, contact <a href="mailto:support@neurochirodirectory.com" className="text-neuro-orange hover:underline">support@neurochirodirectory.com</a></p>
+      </div>
 
       {/* Notification Preferences */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
