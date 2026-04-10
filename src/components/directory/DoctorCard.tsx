@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import NextImage from "next/image";
-import { ShieldCheck, Star, ArrowRight, Heart, Phone } from "lucide-react";
+import { ShieldCheck, ArrowRight, Heart, Phone, MapPin } from "lucide-react";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -18,14 +18,18 @@ export default function DoctorCard({ doc, index }: DoctorCardProps) {
   const saved = isSaved('doctors', docId);
   const [showToast, setShowToast] = useState<string | null>(null);
 
+  const location = [doc.city, doc.state].filter(Boolean).join(", ");
+  const specialties = (doc.specialties || []).slice(0, 3);
+  const name = `Dr. ${doc.first_name || ''} ${doc.last_name || ''}`.replace(/^Dr\.\s+Dr\./i, 'Dr.').trim();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      key={`${doc.id}-${index}`}
-      className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden"
+      transition={{ delay: index * 0.03 }}
+      className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-lg hover:border-gray-200 transition-all group relative"
     >
+      {/* Save Button */}
       <button
         onClick={(e) => {
           e.preventDefault(); e.stopPropagation();
@@ -34,10 +38,10 @@ export default function DoctorCard({ doc, index }: DoctorCardProps) {
           setShowToast(wasSaved ? "Removed" : "Saved!");
           setTimeout(() => setShowToast(null), 2000);
         }}
-        className="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-50 z-10"
+        className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-50 z-10"
         aria-label={saved ? "Unsave doctor" : "Save doctor"}
       >
-        <Heart className={`w-5 h-5 ${saved ? 'text-red-500 fill-red-500' : 'text-gray-300'}`} />
+        <Heart className={`w-5 h-5 ${saved ? 'text-red-500 fill-red-500' : 'text-gray-200 hover:text-gray-400'} transition-colors`} />
         <AnimatePresence>
           {showToast && (
             <motion.span
@@ -51,54 +55,68 @@ export default function DoctorCard({ doc, index }: DoctorCardProps) {
           )}
         </AnimatePresence>
       </button>
-      <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="relative w-14 h-14 rounded-2xl bg-neuro-navy overflow-hidden shadow-lg border border-white/10 flex items-center justify-center">
-                {doc.photo_url ? (
-                  <NextImage 
-                    src={doc.photo_url} 
-                    alt={`Dr. ${doc.first_name} ${doc.last_name}`} 
-                    fill 
-                    className="object-cover" 
-                    sizes="56px" 
-                    loading="lazy"
-                  />
-                ) : (
-                  <span className="text-white font-black text-xl">{(doc.first_name?.[0] || 'N').toUpperCase()}</span>
-                )}
-            </div>
-            <div>
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <h3 className="font-bold text-lg text-neuro-navy group-hover:text-neuro-orange transition-colors">{`Dr. ${doc.first_name || ''} ${doc.last_name || ''}`.replace(/^Dr\.\s+Dr\./i, 'Dr.').trim()}</h3>
-                  <ShieldCheck className="w-4 h-4 text-blue-500" />
-                </div>
-                <p className="text-xs text-gray-500 font-medium">{doc.clinic_name || 'Private Practice'}</p>
-            </div>
+
+      {/* Doctor Info */}
+      <div className="flex items-start gap-4 mb-4">
+        <div className="relative w-14 h-14 rounded-xl bg-neuro-navy overflow-hidden shadow flex-shrink-0 flex items-center justify-center">
+          {doc.photo_url ? (
+            <NextImage
+              src={doc.photo_url}
+              alt={name}
+              fill
+              className="object-cover"
+              sizes="56px"
+              loading="lazy"
+            />
+          ) : (
+            <span className="text-white font-black text-xl">{(doc.first_name?.[0] || 'N').toUpperCase()}</span>
+          )}
+        </div>
+        <div className="flex-1 min-w-0 pr-8">
+          <div className="flex items-center gap-1.5">
+            <h3 className="font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors truncate">{name}</h3>
+            <ShieldCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex items-center gap-1 text-neuro-orange">
-                <Star className="w-3.5 h-3.5 fill-current" />
-                <span className="text-sm font-black text-neuro-navy">{doc.rating || "5.0"}</span>
+          <p className="text-xs text-gray-500 truncate">{doc.clinic_name || 'Private Practice'}</p>
+          {location && (
+            <div className="flex items-center gap-1 mt-1">
+              <MapPin className="w-3 h-3 text-gray-400 flex-shrink-0" />
+              <span className="text-xs text-gray-400">{location}</span>
             </div>
-          </div>
+          )}
+        </div>
       </div>
+
+      {/* Specialties */}
+      {specialties.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {specialties.map((s: string, i: number) => (
+            <span key={i} className="px-2.5 py-1 bg-neuro-orange/5 text-neuro-orange text-[10px] font-bold rounded-lg border border-neuro-orange/10">
+              {s}
+            </span>
+          ))}
+          {(doc.specialties || []).length > 3 && (
+            <span className="px-2.5 py-1 text-gray-400 text-[10px] font-bold">
+              +{doc.specialties.length - 3} more
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Actions */}
       <div className="flex gap-2">
         <Link href={`/directory/${doc.slug || doc.id}`} className="flex-1">
-          <motion.div
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            className="w-full py-4 bg-gray-50 group-hover:bg-neuro-navy group-hover:text-white text-neuro-navy font-black rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 border border-gray-100 group-hover:border-neuro-navy"
-          >
-            View Profile <ArrowRight className="w-4 h-4" />
-          </motion.div>
+          <div className="w-full py-3 bg-neuro-navy text-white font-bold rounded-xl text-xs text-center hover:bg-neuro-navy/90 transition-colors flex items-center justify-center gap-2">
+            View Profile <ArrowRight className="w-3.5 h-3.5" />
+          </div>
         </Link>
         {doc.phone && (
           <a
             href={`tel:${doc.phone}`}
-            className="py-4 px-5 bg-neuro-orange/10 text-neuro-orange rounded-2xl border border-neuro-orange/20 hover:bg-neuro-orange hover:text-white transition-all flex items-center justify-center"
+            className="py-3 px-4 bg-neuro-orange text-white rounded-xl hover:bg-neuro-orange/90 transition-colors flex items-center justify-center gap-1.5 text-xs font-bold"
             aria-label="Call doctor"
           >
-            <Phone className="w-4 h-4" />
+            <Phone className="w-3.5 h-3.5" /> Call
           </a>
         )}
       </div>
