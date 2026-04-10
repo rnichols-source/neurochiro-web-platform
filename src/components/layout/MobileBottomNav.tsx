@@ -16,6 +16,7 @@ interface NavItem {
   href: string;
   icon: LucideIcon;
   isMenuTrigger?: boolean;
+  badge?: number;
 }
 
 interface MobileBottomNavProps {
@@ -35,10 +36,15 @@ export default function MobileBottomNav({ items, onMenuClick }: MobileBottomNavP
           const Content = (
             <div className="flex flex-col items-center justify-center flex-1 h-full gap-1 relative w-full">
               <div className={cn(
-                "p-1.5 rounded-xl transition-all duration-300",
+                "p-1.5 rounded-xl transition-all duration-300 relative",
                 isActive ? "text-neuro-orange bg-neuro-orange/5" : "text-gray-400"
               )}>
                 <item.icon className="w-6 h-6" />
+                {item.badge && item.badge > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-black flex items-center justify-center rounded-full">
+                    {item.badge > 9 ? '9+' : item.badge}
+                  </span>
+                )}
               </div>
               <span className={cn(
                 "text-[10px] font-black uppercase tracking-tighter transition-colors",

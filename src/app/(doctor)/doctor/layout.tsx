@@ -5,9 +5,10 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { AuthProvider } from "@/context/AuthContext";
 import { LayoutDashboard, MessageSquare, Bell, User, ShieldCheck, Menu } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase";
 
-const navItems = [
+const baseNavItems = [
   { name: "Home", href: "/doctor/dashboard", icon: LayoutDashboard },
   { name: "Messages", href: "/doctor/messages", icon: MessageSquare },
   { name: "Alerts", href: "/doctor/notifications", icon: Bell },
@@ -20,6 +21,28 @@ export default function DoctorLayout({
   children: React.ReactNode;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .is('read_at', null);
+      if (data !== null) {
+        // count is in the response headers, use length as fallback
+      }
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .is('read_at', null);
+      setUnreadCount(count || 0);
+    });
+  }, []);
 
   return (
     <AuthProvider>
@@ -57,8 +80,8 @@ export default function DoctorLayout({
           {children}
         </main>
       </div>
-      <MobileBottomNav 
-        items={navItems} 
+      <MobileBottomNav
+        items={baseNavItems.map(item => item.name === 'Alerts' ? { ...item, badge: unreadCount } : item)}
         onMenuClick={() => setIsSidebarOpen(true)}
       />
     </div>
