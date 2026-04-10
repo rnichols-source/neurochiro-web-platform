@@ -146,12 +146,23 @@ export default function StudentsPage() {
                   <p className="text-sm text-gray-700">{selectedStudent.bio}</p>
                 </div>
               )}
-              <Link
-                href={`/doctor/messages?to=${selectedStudent.user_id || selectedStudent.id}`}
-                className="block w-full text-center py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-              >
-                Send Message
-              </Link>
+              {selectedStudent.user_id ? (
+                <Link
+                  href={`/doctor/messages?to=${selectedStudent.user_id}`}
+                  className="block w-full text-center py-2.5 bg-neuro-orange text-white rounded-lg hover:bg-neuro-orange/90 transition-colors text-sm font-bold"
+                >
+                  Send Message
+                </Link>
+              ) : selectedStudent.email ? (
+                <a
+                  href={`mailto:${selectedStudent.email}`}
+                  className="block w-full text-center py-2.5 bg-neuro-navy text-white rounded-lg hover:bg-neuro-navy/90 transition-colors text-sm font-bold"
+                >
+                  Email Student
+                </a>
+              ) : (
+                <p className="text-center text-xs text-gray-400">No contact info available</p>
+              )}
             </div>
           </div>
         </div>
