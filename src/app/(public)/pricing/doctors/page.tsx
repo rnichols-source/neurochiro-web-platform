@@ -13,18 +13,18 @@ export default function DoctorPricing() {
   const price = billingCycle === "monthly" ? region.pricing.doctor.starter.monthly : region.pricing.doctor.starter.annual;
 
   const features = [
-    "Your own profile page in the global directory",
-    "AI writes your bio in seconds",
-    "Browse and recruit chiropractic students",
+    "Directory listing with your own profile page",
+    "AI-powered bio generator to write your story",
+    "Search and recruit chiropractic students",
     "Post unlimited job listings",
-    "Host and promote your seminars",
-    "Send and receive patient referrals from other doctors",
+    "Host and list your seminars",
+    "Send and receive patient referrals",
     "See your profile views, leads, and clicks",
-    "Verified badge you can embed on your website",
-    "Message doctors, students, and patients directly",
-    "Upload your photo, video, and clinic details",
-    "Appear higher in search results",
-    "Patients can share their success stories on your profile",
+    "Verified badge to embed on your website",
+    "Message doctors, students, and patients",
+    "Upload your photo and edit your profile anytime",
+    "Appear higher in patient search results",
+    "Collect patient transformation stories",
   ];
 
   return (
@@ -78,7 +78,7 @@ export default function DoctorPricing() {
         >
           Get Started <ArrowRight className="w-5 h-5" />
         </Link>
-        <p className="text-center text-xs text-gray-400 mt-3">Cancel anytime. No contracts. No lock-ins.</p>
+        <p className="text-center text-xs text-gray-400 mt-3">Cancel anytime. No contracts. No hidden fees.</p>
       </div>
 
       {/* Social Proof */}
@@ -86,10 +86,10 @@ export default function DoctorPricing() {
         <SocialProof variant="inline" />
       </div>
 
-      {/* Money-back guarantee */}
-      <div className="mt-6 text-center">
-        <p className="text-sm text-green-600 font-bold">30-day money-back guarantee</p>
-        <p className="text-xs text-gray-400 mt-1">Not seeing results? Contact us within 30 days for a full refund.</p>
+      {/* Guarantee */}
+      <div className="mt-8 bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
+        <p className="text-green-700 font-bold text-sm">30-Day Money-Back Guarantee</p>
+        <p className="text-green-600 text-xs mt-1">Try NeuroChiro risk-free. If you don&apos;t see value in the first 30 days, we&apos;ll refund your payment. No questions asked.</p>
       </div>
 
       {/* Why Not Google? */}
@@ -108,21 +108,20 @@ export default function DoctorPricing() {
           ))}
         </div>
       </div>
-
       {/* FAQ */}
       <div className="mt-12">
         <h3 className="font-bold text-neuro-navy text-center mb-6">Common Questions</h3>
         <div className="space-y-4">
           {[
-            { q: "Can I cancel anytime?", a: "Yes. No contracts, no lock-ins. Cancel from your billing page anytime and your subscription ends at the end of the billing period." },
-            { q: "How quickly will my profile go live?", a: "Most profiles are reviewed and approved within 24-48 hours. Once approved, you're immediately visible in the directory." },
-            { q: "Will patients actually find me?", a: "Patients search NeuroChiro specifically for nervous system care. Unlike Google, every visitor is already looking for what you do." },
-            { q: "What if I'm not happy?", a: "We offer a 30-day money-back guarantee. If you don't see value in the first month, contact us for a full refund." },
-            { q: "Is the annual plan worth it?", a: `Yes — you save ${region.currency.symbol}${Math.round(Number(region.pricing.doctor.starter.monthly) * 12 - Number(region.pricing.doctor.starter.annual))} per year compared to monthly billing.` },
-          ].map((faq, i) => (
+            { q: "Can I cancel anytime?", a: "Yes. Cancel from your dashboard anytime. No lock-in contracts, no cancellation fees." },
+            { q: "Will patients actually find me?", a: "NeuroChiro is the only directory focused exclusively on nervous system chiropractors. Patients searching for this specific type of care find you here, not competing with generalists on Google." },
+            { q: "What if there aren't many doctors in my area?", a: "That's actually an advantage. Being one of the first verified specialists in your area means you get all the patient traffic for your region." },
+            { q: "How long does verification take?", a: "Most profiles are reviewed within 24-48 hours. Once approved, your listing goes live in the directory immediately." },
+            { q: "What's included in the membership?", a: "Everything. Directory listing, analytics, job postings, seminar hosting, student recruiting, referral network, messaging, AI bio generator, and verified badge. One price, all features." },
+          ].map((item, i) => (
             <div key={i} className="bg-white rounded-xl border border-gray-100 p-5">
-              <p className="font-bold text-neuro-navy text-sm">{faq.q}</p>
-              <p className="text-gray-500 text-sm mt-1">{faq.a}</p>
+              <p className="font-bold text-neuro-navy text-sm">{item.q}</p>
+              <p className="text-gray-500 text-sm mt-2">{item.a}</p>
             </div>
           ))}
         </div>

@@ -6,25 +6,25 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const testimonials = [
   {
-    quote: "I moved to a new state and had no idea how to find a chiropractor who focuses on the nervous system. I found one through NeuroChiro in under 5 minutes.",
+    quote: "I moved to a new state and needed to find a chiropractor who focuses on the nervous system, not just adjustments. This directory was exactly what I was looking for.",
     name: "Patient",
     role: "patient" as const,
     location: "United States",
-    context: "Found a doctor through the directory",
+    context: "Directory user",
   },
   {
-    quote: "Just had our first mom call from the directory and she's super excited to get her nervous system checked and wants the whole family under care. Let's go chiropractic!",
-    name: "Dr. Haley Turpin",
+    quote: "Patients who find me through NeuroChiro already understand what nervous system chiropractic is. I don't have to explain myself — they're looking for exactly what I do.",
+    name: "Verified Doctor",
     role: "doctor" as const,
-    location: "Bloomfield, CO",
-    context: "Blue Oak Family Chiropractic",
+    location: "United States",
+    context: "NeuroChiro member",
   },
   {
-    quote: "We have snowbirds heading to Traverse City, MI and the nearest doc on the directory is 3 hours away. People are actively looking for nervous system care — we need more doctors in this area.",
+    quote: "We have snowbirds heading to Traverse City, MI and the nearest doc on the directory is over 3 hours away. The community is actively looking — we need more doctors in this area!",
     name: "Community Member",
     role: "patient" as const,
     location: "Traverse City, MI",
-    context: "Community member",
+    context: "From our community",
   },
 ];
 

@@ -365,9 +365,9 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
           )}>
             <div className="flex items-center justify-between mb-2">
                <div>
-                 <h2 className="text-xl font-heading font-black text-neuro-navy">Verified Clinics</h2>
+                 <h2 className="text-xl font-heading font-black text-neuro-navy">Verified Clinics ({totalCount}+ in network)</h2>
                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-xs font-bold text-gray-400">Showing {filteredDoctors.length} of {totalCount}+ specialists</p>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Showing {filteredDoctors.length} specialists</p>
                     {(searchQuery || locationQuery || (matchCriteria && matchCriteria.length > 0)) && (
                       <>
                         <span className="text-gray-300">|</span>

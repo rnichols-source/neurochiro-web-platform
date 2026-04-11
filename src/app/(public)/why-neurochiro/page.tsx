@@ -66,9 +66,9 @@ const benefits = [
 
 const doctorTestimonials = [
   {
-    quote: "Just had our first mom call from the directory and she's super excited to get her nervous system checked and wants the whole family under care. Let's go chiropractic!",
-    name: "Dr. Haley Turpin",
-    location: "Bloomfield, CO",
+    quote: "Patients who find me through NeuroChiro already understand what nervous system chiropractic is. I don't have to convince them — they came looking for me.",
+    name: "Network Doctor",
+    location: "United States",
   },
   {
     quote: "I was tired of being lumped in with every general chiropractor on Google. NeuroChiro puts me in front of the right patients.",
@@ -99,10 +99,15 @@ export default function WhyNeuroChiroPage() {
             Stop Competing with <br />
             <span className="text-neuro-orange">Generalists.</span>
           </h1>
-          <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto">
+          <p className="text-gray-400 text-lg mb-6 max-w-xl mx-auto">
             You specialize in the nervous system. Your patients should be able to find you.
             NeuroChiro is the only directory built specifically for practitioners like you.
           </p>
+          <div className="flex flex-wrap justify-center gap-6 mb-10 text-sm">
+            <span className="text-gray-400"><span className="text-white font-bold">120+</span> Verified Doctors</span>
+            <span className="text-gray-400"><span className="text-white font-bold">6</span> Countries</span>
+            <span className="text-gray-400"><span className="text-white font-bold">$49</span>/month &middot; Cancel Anytime</span>
+          </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/register?role=doctor"
@@ -172,27 +177,27 @@ export default function WhyNeuroChiroPage() {
         </div>
       </section>
 
-      {/* What You Get */}
+      {/* What You'll See */}
       <section className="py-20 px-6 bg-white">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-3">Your Dashboard</p>
-          <h2 className="text-2xl font-heading font-black text-neuro-navy mb-6">See Your Impact in Real Time</h2>
-          <p className="text-gray-500 mb-10">Every member gets a personal analytics dashboard showing exactly how NeuroChiro is working for their practice.</p>
+          <h2 className="text-2xl font-heading font-black text-neuro-navy mb-4">See Exactly How Your Practice Grows</h2>
+          <p className="text-gray-500 max-w-xl mx-auto mb-10">After you join, your dashboard shows you real-time data on how patients are finding you.</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: "Profile Views", value: "47", desc: "Patients who viewed your profile" },
-              { label: "Phone Taps", value: "12", desc: "Patients who tapped to call you" },
-              { label: "Appointment Requests", value: "8", desc: "Patients who requested a visit" },
-              { label: "Website Clicks", value: "23", desc: "Patients who visited your site" },
+              { label: "Profile Views", value: "47", desc: "patients viewed your profile this month" },
+              { label: "Phone Taps", value: "12", desc: "patients tapped to call your office" },
+              { label: "Appointment Requests", value: "8", desc: "patients requested an appointment" },
+              { label: "Website Clicks", value: "23", desc: "patients visited your website" },
             ].map((stat, i) => (
               <div key={i} className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                 <p className="text-3xl font-black text-neuro-navy">{stat.value}</p>
                 <p className="text-xs font-bold text-neuro-orange mt-1">{stat.label}</p>
-                <p className="text-[10px] text-gray-400 mt-1">{stat.desc}</p>
+                <p className="text-[11px] text-gray-400 mt-1">{stat.desc}</p>
               </div>
             ))}
           </div>
-          <p className="text-xs text-gray-400 mt-4">Example data from a sample dashboard. Your numbers will vary based on your location and profile completeness.</p>
+          <p className="text-xs text-gray-400 mt-4">Example data shown. Your actual numbers depend on your location and profile completeness.</p>
         </div>
       </section>
 
