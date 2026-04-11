@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   const query = (searchParams.get('q') || '').replace(/[%_(),.*\\]/g, '').trim();
   const location = (searchParams.get('location') || '').replace(/[%_(),.*\\]/g, '').trim();
   const region = searchParams.get('region') || ''; // This is Country Code (US/AU)
-  const limit = parseInt(searchParams.get('limit') || '20');
+  const limit = parseInt(searchParams.get('limit') || '200');
   
   const supabase = createAdminClient();
 

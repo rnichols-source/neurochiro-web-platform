@@ -91,7 +91,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   const fetchDoctors = async (query?: string, loc?: string, isLoadMore = false) => {
     setLoading(true);
     const nextPage = isLoadMore ? page + 1 : 1;
-    const limit = 20;
+    const limit = 200;
     
     try {
       // Use the new Failsafe API Route
