@@ -16,7 +16,7 @@ export default function PatientPricing() {
       name: "Patient Access",
       price: "0",
       description: "Access to the NeuroChiro clinical ecosystem is free for all patients.",
-      features: ["Digital Health ID Card", "Personal Scan History", "Global Doctor Directory", "Clinic Booking Tools", "Health Progress Reports", "Educational Resources"],
+      features: ["Search the Global Doctor Directory", "Save Your Favorite Doctors", "Daily Health Tracker", "Request Appointments", "Educational Articles", "Free Forever"],
       cta: "Create Free Account",
       featured: true,
       tag: "Always Free"

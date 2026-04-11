@@ -412,8 +412,8 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
               <div className="space-y-6">
                 <div className="bg-white rounded-2xl border-2 border-dashed border-gray-100 p-12 text-center">
                   <Globe className="w-12 h-12 text-gray-300 mx-auto mb-6 animate-pulse" />
-                  <h3 className="text-2xl font-black text-neuro-navy mb-2">Expanding the Network</h3>
-                  <p className="text-gray-500 text-sm mb-8">We haven&apos;t mapped a verified specialist in this specific area yet. Try searching a nearby city or reset your filters.</p>
+                  <h3 className="text-2xl font-black text-neuro-navy mb-2">No Doctors Found</h3>
+                  <p className="text-gray-500 text-sm mb-8">We don&apos;t have a verified specialist in this area yet. Try a nearby city or clear your search.</p>
 
                   <motion.button
                     whileHover={{ scale: 1.02 }}

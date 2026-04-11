@@ -102,12 +102,28 @@ function RegisterForm() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Role toggle — first so fields adjust */}
+          <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+            <button type="button" onClick={() => setRole("doctor")}
+              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${role === "doctor" ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>
+              Doctor
+            </button>
+            <button type="button" onClick={() => setRole("student")}
+              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${role === "student" ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>
+              Student
+            </button>
+            <button type="button" onClick={() => setRole("patient")}
+              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${role === "patient" ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>
+              Patient
+            </button>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
             <input
               type="text" required value={name} onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              placeholder="Dr. Jane Smith"
+              placeholder={role === "doctor" ? "Dr. Jane Smith" : "Your full name"}
             />
           </div>
           <div>
@@ -156,22 +172,6 @@ function RegisterForm() {
               </div>
             </div>
           )}
-
-          {/* Role toggle */}
-          <div className="flex rounded-lg border border-gray-300 overflow-hidden">
-            <button type="button" onClick={() => setRole("doctor")}
-              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${role === "doctor" ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>
-              I&#39;m a Doctor
-            </button>
-            <button type="button" onClick={() => setRole("student")}
-              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${role === "student" ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>
-              I&#39;m a Student
-            </button>
-            <button type="button" onClick={() => setRole("patient")}
-              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${role === "patient" ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>
-              I&#39;m a Patient
-            </button>
-          </div>
 
           <button type="submit" disabled={pending}
             className="w-full py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-60">

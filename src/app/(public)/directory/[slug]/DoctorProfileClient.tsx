@@ -85,7 +85,7 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
   };
 
   return (
-    <div className="min-h-dvh bg-white pb-28">
+    <div className="min-h-dvh bg-white pb-32">
       {/* Header */}
       <div className="bg-neuro-navy pt-24 pb-6 px-6">
         <div className="max-w-3xl mx-auto">
@@ -165,6 +165,13 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
               </a>
             )}
           </div>
+
+          {/* Incomplete profile notice */}
+          {!doctor.bio && !doctor.phone && !doctor.website_url && (
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-4">
+              <p className="text-xs text-gray-500 text-center">This doctor is new to NeuroChiro and is still setting up their profile.</p>
+            </div>
+          )}
 
           {/* Refer Button (doctor-to-doctor only) */}
           {session && userRole === 'doctor' && doctor.user_id !== session.user.id && (
@@ -260,7 +267,7 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
         </div>
 
         {/* Request Appointment */}
-        <div className="mt-6 bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+        <div id="appointment" className="mt-6 bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
           <h2 className="text-lg font-black text-neuro-navy mb-2 flex items-center gap-2">
             <Calendar className="w-5 h-5 text-neuro-orange" /> Request an Appointment
           </h2>
@@ -392,24 +399,30 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
       )}
 
       {/* Sticky mobile bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 px-4 z-50 lg:hidden">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 px-4 z-40 lg:hidden">
         <div className="flex gap-3 max-w-3xl mx-auto">
-          <a
-            href={doctor.website_url || "#"}
-            target={doctor.website_url ? "_blank" : undefined}
-            onClick={() => trackEvent('booking_click')}
-            className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm text-center"
-          >
-            Book Appointment
-          </a>
-          {doctor.phone ? (
+          {doctor.website_url ? (
+            <a
+              href={doctor.website_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent('booking_click')}
+              className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm text-center"
+            >
+              Visit Website
+            </a>
+          ) : (
+            <a
+              href="#appointment"
+              className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm text-center"
+            >
+              Request Appointment
+            </a>
+          )}
+          {doctor.phone && (
             <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')} className="flex-1 py-3 bg-neuro-navy text-white rounded-xl font-bold text-sm text-center flex items-center justify-center gap-2">
               <Phone className="w-4 h-4" /> Call
             </a>
-          ) : (
-            <button disabled className="flex-1 py-3 bg-gray-100 text-gray-400 rounded-xl font-bold text-sm text-center flex items-center justify-center gap-2 cursor-not-allowed">
-              <Phone className="w-4 h-4" /> Call
-            </button>
           )}
         </div>
       </div>

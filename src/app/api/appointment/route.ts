@@ -110,6 +110,30 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Send confirmation email to the patient
+    await resend.emails.send({
+      from: 'NeuroChiro <support@neurochirodirectory.com>',
+      to: [patientEmail],
+      subject: `Your appointment request was sent to Dr. ${doctor.first_name} ${doctor.last_name}`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px;">
+          <div style="text-align: center; margin-bottom: 32px;">
+            <h1 style="font-size: 24px; font-weight: 800; color: #1E2D3B; margin: 0;">NEURO<span style="color: #D66829;">CHIRO</span></h1>
+          </div>
+          <h2 style="font-size: 20px; font-weight: 700; color: #1E2D3B; margin-bottom: 16px;">Your request was sent!</h2>
+          <p style="color: #555; font-size: 16px; line-height: 1.6; margin-bottom: 16px;">
+            We sent your appointment request to <strong>Dr. ${doctor.first_name} ${doctor.last_name}</strong> at ${doctor.clinic_name || 'their clinic'}.
+          </p>
+          <p style="color: #555; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+            They should get back to you within <strong>1-2 business days</strong> at this email address. If you don't hear back, try calling their office directly.
+          </p>
+          <p style="color: #999; font-size: 12px; margin-top: 32px; border-top: 1px solid #eee; padding-top: 16px;">
+            This email was sent because you requested an appointment through <a href="https://neurochiro.co" style="color: #D66829;">neurochiro.co</a>
+          </p>
+        </div>
+      `,
+    }).catch(() => {}); // Don't fail if patient email fails
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('[APPOINTMENT_API] Error:', err);

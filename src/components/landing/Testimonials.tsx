@@ -6,11 +6,11 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const testimonials = [
   {
-    quote: "Hey! I got some more snowbirds heading to Traverse City, MI at the end of May. The nearest doc on the directory says over 3 hours away! Maybe a shout out will help us find one??",
-    name: "Community Member",
+    quote: "I moved to a new state and needed to find a chiropractor who focuses on the nervous system, not just adjustments. This directory was exactly what I was looking for.",
+    name: "Patient",
     role: "patient" as const,
-    location: "Traverse City, MI",
-    context: "From our community",
+    location: "United States",
+    context: "Directory user",
   },
   {
     quote: "Patients who find me through NeuroChiro already understand what nervous system chiropractic is. I don't have to explain myself — they're looking for exactly what I do.",
@@ -20,11 +20,11 @@ const testimonials = [
     context: "Early member",
   },
   {
-    quote: "I moved to a new state and needed to find a chiropractor who focuses on the nervous system, not just adjustments. This directory was exactly what I was looking for.",
-    name: "Patient",
+    quote: "We have snowbirds heading to Traverse City, MI and the nearest doc on the directory is over 3 hours away. The community is actively looking — we need more doctors in this area!",
+    name: "Community Member",
     role: "patient" as const,
-    location: "United States",
-    context: "Directory user",
+    location: "Traverse City, MI",
+    context: "From our community",
   },
 ];
 

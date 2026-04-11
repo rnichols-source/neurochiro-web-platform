@@ -116,7 +116,7 @@ function LoginContent() {
 
         <div className="relative flex items-center gap-4 mb-8">
           <div className="flex-1 h-px bg-gray-100"></div>
-          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Or login with email</span>
+          <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Or login with email</span>
           <div className="flex-1 h-px bg-gray-100"></div>
         </div>
 
@@ -132,7 +132,7 @@ function LoginContent() {
             ) : (
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Email Address</label>
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-2">Email Address</label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
@@ -168,7 +168,7 @@ function LoginContent() {
             className="space-y-4"
           >
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Email Address</label>
+              <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-2">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -187,8 +187,8 @@ function LoginContent() {
 
             <div className="space-y-1">
               <div className="flex justify-between items-center ml-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Password</label>
-                <button type="button" onClick={() => setShowForgotPassword(true)} className="text-[10px] font-bold text-neuro-orange hover:underline uppercase tracking-widest">Forgot?</button>
+                <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Password</label>
+                <button type="button" onClick={() => setShowForgotPassword(true)} className="text-xs font-bold text-neuro-orange hover:underline uppercase tracking-widest">Forgot?</button>
               </div>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
