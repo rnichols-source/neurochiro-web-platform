@@ -13,11 +13,11 @@ const testimonials = [
     context: "Found a doctor through the directory",
   },
   {
-    quote: "The patients who find me through NeuroChiro already get it. They understand nervous system care before they walk through the door. That changes everything.",
-    name: "Network Doctor",
+    quote: "Just had our first mom call from the directory and she's super excited to get her nervous system checked and wants the whole family under care. Let's go chiropractic!",
+    name: "Dr. Haley Turpin",
     role: "doctor" as const,
-    location: "United States",
-    context: "Member",
+    location: "Bloomfield, CO",
+    context: "Blue Oak Family Chiropractic",
   },
   {
     quote: "We have snowbirds heading to Traverse City, MI and the nearest doc on the directory is 3 hours away. People are actively looking for nervous system care — we need more doctors in this area.",

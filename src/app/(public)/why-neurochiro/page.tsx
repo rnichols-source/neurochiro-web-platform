@@ -66,9 +66,9 @@ const benefits = [
 
 const doctorTestimonials = [
   {
-    quote: "Patients who find me through NeuroChiro already understand what nervous system chiropractic is. I don't have to convince them — they came looking for me.",
-    name: "Network Doctor",
-    location: "United States",
+    quote: "Just had our first mom call from the directory and she's super excited to get her nervous system checked and wants the whole family under care. Let's go chiropractic!",
+    name: "Dr. Haley Turpin",
+    location: "Bloomfield, CO",
   },
   {
     quote: "I was tired of being lumped in with every general chiropractor on Google. NeuroChiro puts me in front of the right patients.",
