@@ -51,9 +51,9 @@ export default async function HomePage() {
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
-                name="q"
+                name="location"
                 type="text"
-                placeholder="City, region, or doctor name..."
+                placeholder="City, state, or doctor name..."
                 className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-neuro-orange"
               />
             </div>
