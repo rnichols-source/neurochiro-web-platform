@@ -172,6 +172,30 @@ export default function WhyNeuroChiroPage() {
         </div>
       </section>
 
+      {/* What You Get */}
+      <section className="py-20 px-6 bg-white">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-3">Your Dashboard</p>
+          <h2 className="text-2xl font-heading font-black text-neuro-navy mb-6">See Your Impact in Real Time</h2>
+          <p className="text-gray-500 mb-10">Every member gets a personal analytics dashboard showing exactly how NeuroChiro is working for their practice.</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Profile Views", value: "47", desc: "Patients who viewed your profile" },
+              { label: "Phone Taps", value: "12", desc: "Patients who tapped to call you" },
+              { label: "Appointment Requests", value: "8", desc: "Patients who requested a visit" },
+              { label: "Website Clicks", value: "23", desc: "Patients who visited your site" },
+            ].map((stat, i) => (
+              <div key={i} className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                <p className="text-3xl font-black text-neuro-navy">{stat.value}</p>
+                <p className="text-xs font-bold text-neuro-orange mt-1">{stat.label}</p>
+                <p className="text-[10px] text-gray-400 mt-1">{stat.desc}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-400 mt-4">Example data from a sample dashboard. Your numbers will vary based on your location and profile completeness.</p>
+        </div>
+      </section>
+
       {/* Testimonials */}
       <section className="py-20 px-6 bg-neuro-navy">
         <div className="max-w-4xl mx-auto">

@@ -13,18 +13,18 @@ export default function DoctorPricing() {
   const price = billingCycle === "monthly" ? region.pricing.doctor.starter.monthly : region.pricing.doctor.starter.annual;
 
   const features = [
-    "Directory listing with profile page",
-    "AI-powered bio generator",
-    "Student search and recruiting",
-    "Unlimited job postings",
-    "Seminar hosting",
-    "Doctor-to-doctor referral tracking",
-    "ROI analytics dashboard",
-    "Verified badge for your website",
-    "Real-time messaging",
-    "Photo upload and profile editor",
-    "Priority search placement",
-    "Patient transformation stories",
+    "Your own profile page in the global directory",
+    "AI writes your bio in seconds",
+    "Browse and recruit chiropractic students",
+    "Post unlimited job listings",
+    "Host and promote your seminars",
+    "Send and receive patient referrals from other doctors",
+    "See your profile views, leads, and clicks",
+    "Verified badge you can embed on your website",
+    "Message doctors, students, and patients directly",
+    "Upload your photo, video, and clinic details",
+    "Appear higher in search results",
+    "Patients can share their success stories on your profile",
   ];
 
   return (
@@ -78,11 +78,18 @@ export default function DoctorPricing() {
         >
           Get Started <ArrowRight className="w-5 h-5" />
         </Link>
+        <p className="text-center text-xs text-gray-400 mt-3">Cancel anytime. No contracts. No lock-ins.</p>
       </div>
 
       {/* Social Proof */}
       <div className="mt-8">
         <SocialProof variant="inline" />
+      </div>
+
+      {/* Money-back guarantee */}
+      <div className="mt-6 text-center">
+        <p className="text-sm text-green-600 font-bold">30-day money-back guarantee</p>
+        <p className="text-xs text-gray-400 mt-1">Not seeing results? Contact us within 30 days for a full refund.</p>
       </div>
 
       {/* Why Not Google? */}
@@ -97,6 +104,25 @@ export default function DoctorPricing() {
             <div key={i} className="flex items-start gap-3">
               <Check className="w-5 h-5 text-neuro-orange flex-shrink-0 mt-0.5" />
               <p className="text-sm text-gray-600">{point}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div className="mt-12">
+        <h3 className="font-bold text-neuro-navy text-center mb-6">Common Questions</h3>
+        <div className="space-y-4">
+          {[
+            { q: "Can I cancel anytime?", a: "Yes. No contracts, no lock-ins. Cancel from your billing page anytime and your subscription ends at the end of the billing period." },
+            { q: "How quickly will my profile go live?", a: "Most profiles are reviewed and approved within 24-48 hours. Once approved, you're immediately visible in the directory." },
+            { q: "Will patients actually find me?", a: "Patients search NeuroChiro specifically for nervous system care. Unlike Google, every visitor is already looking for what you do." },
+            { q: "What if I'm not happy?", a: "We offer a 30-day money-back guarantee. If you don't see value in the first month, contact us for a full refund." },
+            { q: "Is the annual plan worth it?", a: `Yes — you save ${region.currency.symbol}${Math.round(Number(region.pricing.doctor.starter.monthly) * 12 - Number(region.pricing.doctor.starter.annual))} per year compared to monthly billing.` },
+          ].map((faq, i) => (
+            <div key={i} className="bg-white rounded-xl border border-gray-100 p-5">
+              <p className="font-bold text-neuro-navy text-sm">{faq.q}</p>
+              <p className="text-gray-500 text-sm mt-1">{faq.a}</p>
             </div>
           ))}
         </div>

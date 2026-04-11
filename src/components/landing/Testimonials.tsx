@@ -6,25 +6,25 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const testimonials = [
   {
-    quote: "I moved to a new state and needed to find a chiropractor who focuses on the nervous system, not just adjustments. This directory was exactly what I was looking for.",
+    quote: "I moved to a new state and had no idea how to find a chiropractor who focuses on the nervous system. I found one through NeuroChiro in under 5 minutes.",
     name: "Patient",
     role: "patient" as const,
     location: "United States",
-    context: "Directory user",
+    context: "Found a doctor through the directory",
   },
   {
-    quote: "Patients who find me through NeuroChiro already understand what nervous system chiropractic is. I don't have to explain myself — they're looking for exactly what I do.",
+    quote: "The patients who find me through NeuroChiro already get it. They understand nervous system care before they walk through the door. That changes everything.",
     name: "Network Doctor",
     role: "doctor" as const,
     location: "United States",
-    context: "Early member",
+    context: "Member",
   },
   {
-    quote: "We have snowbirds heading to Traverse City, MI and the nearest doc on the directory is over 3 hours away. The community is actively looking — we need more doctors in this area!",
+    quote: "We have snowbirds heading to Traverse City, MI and the nearest doc on the directory is 3 hours away. People are actively looking for nervous system care — we need more doctors in this area.",
     name: "Community Member",
     role: "patient" as const,
     location: "Traverse City, MI",
-    context: "From our community",
+    context: "Community member",
   },
 ];
 

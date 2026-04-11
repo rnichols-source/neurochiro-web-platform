@@ -32,16 +32,16 @@ export default function AboutPage() {
                 <p className="text-neuro-orange font-bold text-sm mb-4">Founder, NeuroChiro</p>
                 <div className="text-gray-600 space-y-4 leading-relaxed">
                   <p>
-                    I started NeuroChiro because I saw a gap in the chiropractic world. Doctors who specialize in the nervous system have a fundamentally different approach to care &mdash; but patients have no way to find them. They search Google and end up with generalists, or worse, they give up.
+                    I&apos;m a chiropractor and the founder of AlignLife, a nervous-system-focused practice in Greer, South Carolina. I started NeuroChiro because I saw a gap that frustrated me every day: patients who specifically need nervous system chiropractic care have no way to find us.
                   </p>
                   <p>
-                    Meanwhile, the doctors themselves are invisible. They&apos;re doing incredible work but competing with every chiropractor on the block for the same generic search results. That&apos;s not right.
+                    They search Google and end up with generalists. Meanwhile, doctors like us are doing incredible work but competing with every chiropractor on the block for the same generic search results. That&apos;s not right.
                   </p>
                   <p>
-                    NeuroChiro is the fix. A dedicated directory where nervous system specialists can be found by the patients who need them most. No noise, no generalists &mdash; just the best practitioners in the world, verified and visible.
+                    NeuroChiro is the fix. A dedicated directory where nervous system specialists can be found by the patients who need them most. No generalists, no noise &mdash; just verified practitioners who share this approach to care. We now have over 120 doctors across multiple countries.
                   </p>
                   <p>
-                    We&apos;re a small team building something we believe in. If you have questions, feedback, or just want to talk, I&apos;m reachable at{" "}
+                    This isn&apos;t a side project. This is the platform I wish existed when I started my practice. If you have questions, I&apos;m personally reachable at{" "}
                     <a href="mailto:support@neurochirodirectory.com" className="text-neuro-orange font-bold hover:underline">support@neurochirodirectory.com</a>.
                   </p>
                 </div>
