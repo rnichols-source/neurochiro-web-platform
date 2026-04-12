@@ -21,10 +21,10 @@ export async function getSystemHealth() {
   };
 }
 
-import { createServerSupabase } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 
 export async function logoutAdmin() {
-  const supabase = createServerSupabase();
+  const supabase = createAdminClient();
   await supabase.auth.signOut();
   return { success: true };
 }

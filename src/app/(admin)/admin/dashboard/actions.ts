@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerSupabase } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { stripe } from "@/lib/stripe"
 import { getAuditLogs } from "../logs/actions"
 import { AuditLog } from "@/types/admin"
@@ -17,7 +17,7 @@ async function fetchAll<T>(stripeList: any): Promise<T[]> {
 }
 
 export async function getAdminDashboardStats(regionCode?: string) {
-  const supabase = createServerSupabase()
+  const supabase = createAdminClient()
   
   try {
     // 1. Establish precise time window for 30D
@@ -40,18 +40,18 @@ export async function getAdminDashboardStats(regionCode?: string) {
     ])
 
     // Filter charges by region if needed
-    let cCharges = currentCharges.filter(c => c.status === 'succeeded' && !c.refunded)
-    let pCharges = previousCharges.filter(c => c.status === 'succeeded' && !c.refunded)
+    let cCharges = currentCharges.filter((c: any) => c.status === 'succeeded' && !c.refunded)
+    let pCharges = previousCharges.filter((c: any) => c.status === 'succeeded' && !c.refunded)
 
     if (regionCode && regionCode !== 'ALL') {
       const targetCurrency = regionCode === 'AU' ? 'aud' : 'usd'
-      cCharges = cCharges.filter(c => c.currency === targetCurrency)
-      pCharges = pCharges.filter(c => c.currency === targetCurrency)
+      cCharges = cCharges.filter((c: any) => c.currency === targetCurrency)
+      pCharges = pCharges.filter((c: any) => c.currency === targetCurrency)
     }
 
     // --- REVENUE ---
-    const currentRevenue = cCharges.reduce((sum, c) => sum + c.amount, 0) / 100
-    const previousRevenue = pCharges.reduce((sum, c) => sum + c.amount, 0) / 100
+    const currentRevenue = cCharges.reduce((sum: number, c: any) => sum + c.amount, 0) / 100
+    const previousRevenue = pCharges.reduce((sum: number, c: any) => sum + c.amount, 0) / 100
     const revenueTrend = previousRevenue === 0 ? 100 : ((currentRevenue - previousRevenue) / previousRevenue) * 100
 
     // --- ACTIVE DOCTORS (With Region Filtering) ---
@@ -109,7 +109,7 @@ export async function getAdminDashboardStats(regionCode?: string) {
 
     const { error: dbHealthError } = await supabase.from('doctors').select('id').limit(1);
 
-    const failedCurrent = currentCharges.filter(c => c.status === 'failed').length
+    const failedCurrent = currentCharges.filter((c: any) => c.status === 'failed').length
     const alerts = []
     
     if (failedCurrent > 5) {
@@ -146,7 +146,7 @@ export async function getAdminDashboardStats(regionCode?: string) {
     // Calculate real revenue velocity (grouped by creation date)
     // For now, we simulate a smoother trend based on actual charges but ideally we'd group them
     const velocity = Array(7).fill(0);
-    cCharges.forEach(c => {
+    cCharges.forEach((c: any) => {
       const dayIndex = Math.floor((c.created - startTs) / (86400 * 4.3)); // 7 buckets
       if (dayIndex >= 0 && dayIndex < 7) velocity[dayIndex] += c.amount / 100;
     });

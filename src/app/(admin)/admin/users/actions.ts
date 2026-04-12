@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerSupabase } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 
 export type UserType = 'Students' | 'Doctors' | 'Vendors';
 
@@ -14,7 +14,7 @@ export async function getTalentUsers(options: {
   const { type, search, status, page = 1, limit = 10 } = options;
   const from = (page - 1) * limit;
   const to = from + limit - 1;
-  const supabase = createServerSupabase();
+  const supabase = createAdminClient();
 
   try {
     const roleMap: Record<UserType, string> = {
@@ -92,7 +92,7 @@ export async function getTalentUsers(options: {
 }
 
 export async function getTalentAuditStats() {
-  const supabase = createServerSupabase();
+  const supabase = createAdminClient();
   
   try {
     const { count: students } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student');

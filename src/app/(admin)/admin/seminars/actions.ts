@@ -1,10 +1,10 @@
 'use server'
 
-import { createServerSupabase } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { revalidatePath } from 'next/cache'
 
 export async function getAdminSeminars() {
-  const supabase = createServerSupabase()
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('seminars')
@@ -37,7 +37,7 @@ export async function getAdminSeminars() {
 }
 
 export async function toggleSeminarApproval(seminarId: string, isApproved: boolean) {
-  const supabase = createServerSupabase()
+  const supabase = createAdminClient()
 
   const { error } = await supabase
     .from('seminars')
@@ -51,7 +51,7 @@ export async function toggleSeminarApproval(seminarId: string, isApproved: boole
 }
 
 export async function deleteSeminar(seminarId: string) {
-  const supabase = createServerSupabase()
+  const supabase = createAdminClient()
 
   const { error } = await supabase
     .from('seminars')

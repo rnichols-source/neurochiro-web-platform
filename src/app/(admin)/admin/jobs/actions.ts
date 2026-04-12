@@ -1,9 +1,9 @@
 'use server'
 
-import { createServerSupabase } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 
 export async function getAdminJobPostings() {
-  const supabase = createServerSupabase()
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('job_postings')
@@ -36,7 +36,7 @@ export async function getAdminJobPostings() {
 }
 
 export async function updateJobStatus(jobId: string, status: string) {
-  const supabase = createServerSupabase()
+  const supabase = createAdminClient()
 
   const { error } = await supabase
     .from('job_postings')
@@ -48,7 +48,7 @@ export async function updateJobStatus(jobId: string, status: string) {
 }
 
 export async function deleteJobPosting(jobId: string) {
-  const supabase = createServerSupabase()
+  const supabase = createAdminClient()
 
   const { error } = await supabase
     .from('job_postings')

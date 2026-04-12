@@ -1,7 +1,7 @@
 'use server'
 
 import { AuditLog, LogCategory } from "@/types/admin";
-import { createServerSupabase } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 
 export async function getAuditLogs(options: { 
   category?: string; 
@@ -9,7 +9,7 @@ export async function getAuditLogs(options: {
   limit?: number;
 } = {}) {
   const { category, search, limit = 50 } = options;
-  const supabase = createServerSupabase();
+  const supabase = createAdminClient();
 
   try {
     let query = supabase
@@ -54,7 +54,7 @@ export async function logAuditAction(params: {
     severity: string;
     metadata?: any;
 }) {
-    const supabase = createServerSupabase();
+    const supabase = createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
     
     let userName = "System";

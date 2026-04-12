@@ -1,11 +1,11 @@
 'use server'
 
-import { createServerSupabase } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { revalidatePath } from 'next/cache'
 import { onSeminarApprovedAction, onSeminarRejectedAction } from '@/app/actions/automations'
 
 export async function getPendingSeminars() {
-  const supabase = createServerSupabase()
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('seminars')
@@ -34,7 +34,7 @@ export async function getPendingSeminars() {
 }
 
 export async function approveSeminarAction(id: string) {
-  const supabase = createServerSupabase()
+  const supabase = createAdminClient()
 
   const { data: seminar, error: fetchError } = await supabase
     .from('seminars')
@@ -65,7 +65,7 @@ export async function approveSeminarAction(id: string) {
 }
 
 export async function rejectSeminarAction(id: string, notes: string) {
-  const supabase = createServerSupabase()
+  const supabase = createAdminClient()
 
   const { data: seminar, error: fetchError } = await supabase
     .from('seminars')
