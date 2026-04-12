@@ -25,7 +25,7 @@ export async function getTalentUsers(options: {
 
     let query = supabase
       .from('profiles')
-      .select('*, doctors(clinic_name, city, state, verification_status), students(school, graduation_year)', { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('role', roleMap[type]);
 
     if (search) {
@@ -52,33 +52,18 @@ export async function getTalentUsers(options: {
 
     if (error) throw error;
 
-    const formattedUsers = (data || []).map((u: any) => {
-      let entity = "";
-      let context = "";
-      if (type === 'Students') {
-        entity = u.students?.[0]?.school || "N/A";
-        context = `Class of ${u.students?.[0]?.graduation_year || "N/A"}`;
-      } else if (type === 'Doctors') {
-        entity = u.doctors?.[0]?.clinic_name || "N/A";
-        context = `${u.doctors?.[0]?.city || ""}, ${u.doctors?.[0]?.state || ""}`;
-      } else if (type === 'Vendors') {
-        entity = "Vendor Partner";
-        context = "Marketplace";
-      }
-
-      return {
-        id: u.id,
-        name: u.full_name,
-        email: u.email,
-        entity,
-        context,
-        status: u.tier !== 'free' ? 'Paid' : 'Free',
-        engagement: 0, // Would need actual analytics table
-        matches: 0,
-        joined: new Date(u.created_at).toLocaleDateString(),
-        role: u.role
-      };
-    });
+    const formattedUsers = (data || []).map((u: any) => ({
+      id: u.id,
+      name: u.full_name,
+      email: u.email,
+      entity: '',
+      context: '',
+      status: u.tier !== 'free' ? 'Paid' : 'Free',
+      engagement: 0,
+      matches: 0,
+      joined: new Date(u.created_at).toLocaleDateString(),
+      role: u.role
+    }));
 
     return {
       users: formattedUsers,
