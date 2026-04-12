@@ -22,7 +22,7 @@ export async function GET(req: Request) {
       .from('automation_queue')
       .select('*')
       .eq('status', 'pending')
-      .lte('scheduled_at', new Date().toISOString())
+      .lte('created_at', new Date().toISOString())
       .order('created_at', { ascending: true })
       .limit(50);
 
