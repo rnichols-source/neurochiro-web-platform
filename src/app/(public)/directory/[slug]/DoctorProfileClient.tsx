@@ -98,9 +98,8 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
         <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden relative">
           {/* Banner Photo */}
           {doctor.photo_url ? (
-            <div className="relative w-full h-48 md:h-64">
-              <Image src={doctor.photo_url} alt={name} fill className="object-cover" priority />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+            <div className="relative w-full h-56 md:h-72 bg-gray-100">
+              <Image src={doctor.photo_url} alt={name} fill className="object-contain" priority />
             </div>
           ) : (
             <div className="w-full h-32 bg-neuro-navy" />
