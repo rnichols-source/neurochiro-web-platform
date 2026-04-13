@@ -95,40 +95,33 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
 
       {/* Profile Card */}
       <div className="max-w-3xl mx-auto px-6 -mt-2">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden relative">
-          {/* Banner Photo */}
-          {doctor.photo_url ? (
-            <div className="relative w-full h-48 md:h-64">
-              <Image src={doctor.photo_url} alt={name} fill className="object-cover" priority />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-            </div>
-          ) : (
-            <div className="w-full h-32 bg-neuro-navy" />
-          )}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-lg p-6 md:p-8 relative">
+          {/* Save & Share */}
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <button onClick={handleShare} className="p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label="Share profile">
+              <Share2 className={`w-5 h-5 ${copied ? 'text-green-500' : 'text-gray-400'}`} />
+            </button>
+            <button
+              onClick={() => {
+                toggleSave('doctors', doctor.id?.toString());
+              }}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label={saved ? "Unsave" : "Save"}
+            >
+              <Heart className={`w-5 h-5 ${saved ? 'text-red-500 fill-red-500' : 'text-gray-400'}`} />
+            </button>
+          </div>
 
-          <div className="p-6 md:p-8">
-            {/* Save & Share */}
-            <div className="absolute top-4 right-4 flex items-center gap-2">
-              <button onClick={handleShare} className="p-2 rounded-full bg-black/30 hover:bg-black/50 transition-colors" aria-label="Share profile">
-                <Share2 className={`w-5 h-5 ${copied ? 'text-green-400' : 'text-white'}`} />
-              </button>
-              <button
-                onClick={() => {
-                  toggleSave('doctors', doctor.id?.toString());
-                }}
-                className="p-2 rounded-full bg-black/30 hover:bg-black/50 transition-colors"
-                aria-label={saved ? "Unsave" : "Save"}
-              >
-                <Heart className={`w-5 h-5 ${saved ? 'text-red-500 fill-red-500' : 'text-white'}`} />
-              </button>
+          {/* Doctor Info with Profile Picture */}
+          <div className="flex items-start gap-5 mb-6">
+            <div className="w-20 h-20 rounded-xl bg-neuro-navy overflow-hidden flex-shrink-0 flex items-center justify-center shadow-md relative">
+              {doctor.photo_url ? (
+                <Image src={doctor.photo_url} alt={name} fill className="object-cover" priority />
+              ) : (
+                <span className="text-white font-black text-3xl">{(doctor.first_name?.[0] || 'N').toUpperCase()}</span>
+              )}
             </div>
-
-            {/* Doctor Info with Profile Picture */}
-            <div className="flex items-start gap-5 mb-6 -mt-14">
-              <div className="w-24 h-24 rounded-full bg-neuro-navy flex-shrink-0 flex items-center justify-center shadow-lg border-4 border-white">
-                <span className="text-white font-black text-3xl">{(doctor.first_name?.[0] || 'N').toUpperCase()}{(doctor.last_name?.[0] || '').toUpperCase()}</span>
-              </div>
-              <div className="pt-8">
+            <div className="pt-1">
                 <div className="flex items-center gap-2 mb-1">
                   <h1 className="text-2xl font-black text-neuro-navy">{name}</h1>
                   <ShieldCheck className="w-5 h-5 text-blue-500" />
@@ -186,7 +179,6 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
               <Users className="w-4 h-4" /> Refer a Patient
             </button>
           )}
-          </div>
         </div>
 
         {/* Bio */}
