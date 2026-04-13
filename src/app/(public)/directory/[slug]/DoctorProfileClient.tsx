@@ -98,8 +98,9 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
         <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden relative">
           {/* Banner Photo */}
           {doctor.photo_url ? (
-            <div className="relative w-full h-56 md:h-72 bg-gray-100">
-              <Image src={doctor.photo_url} alt={name} fill className="object-contain" priority />
+            <div className="relative w-full h-48 md:h-64">
+              <Image src={doctor.photo_url} alt={name} fill className="object-cover" priority />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
             </div>
           ) : (
             <div className="w-full h-32 bg-neuro-navy" />
@@ -124,12 +125,8 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
 
             {/* Doctor Info with Profile Picture */}
             <div className="flex items-start gap-5 mb-6 -mt-14">
-              <div className="w-24 h-24 rounded-full bg-neuro-navy overflow-hidden flex-shrink-0 flex items-center justify-center shadow-lg border-4 border-white relative">
-                {doctor.photo_url ? (
-                  <Image src={doctor.photo_url} alt={name} fill className="object-cover" priority />
-                ) : (
-                  <span className="text-white font-black text-3xl">{(doctor.first_name?.[0] || 'N').toUpperCase()}</span>
-                )}
+              <div className="w-24 h-24 rounded-full bg-neuro-navy flex-shrink-0 flex items-center justify-center shadow-lg border-4 border-white">
+                <span className="text-white font-black text-3xl">{(doctor.first_name?.[0] || 'N').toUpperCase()}{(doctor.last_name?.[0] || '').toUpperCase()}</span>
               </div>
               <div className="pt-8">
                 <div className="flex items-center gap-2 mb-1">
