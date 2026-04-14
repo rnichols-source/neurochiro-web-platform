@@ -14,10 +14,16 @@ export default function AcademyPage() {
   const [completing, setCompleting] = useState(false);
 
   useEffect(() => {
-    getCourses().then((data) => {
-      setCourses(data);
-      setLoading(false);
-    });
+    getCourses()
+      .then((data) => {
+        setCourses(data);
+      })
+      .catch((err) => {
+        console.error("Academy load error:", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const openCourse = async (courseId: string) => {

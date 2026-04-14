@@ -44,65 +44,83 @@ export const SEED_COURSES = [
 ];
 
 export async function getCourses() {
-  const supabase = createServerSupabase()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // Try to fetch from database first, fall back to seed data
-  let courses = SEED_COURSES as any[];
   try {
-    const { data: dbCourses, error } = await supabase
-      .from('courses')
-      .select('*')
-      .order('created_at', { ascending: true })
+    const supabase = createServerSupabase()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    if (!error && dbCourses && dbCourses.length > 0) {
-      courses = dbCourses;
-    }
-  } catch {
-    // Table may not exist yet — use seed data
-  }
-
-  // Get progress for the current user
-  let progressMap: Record<string, any> = {};
-  if (user) {
+    // Try to fetch from database first, fall back to seed data
+    let courses = SEED_COURSES as any[];
     try {
-      const { data: progress } = await supabase
-        .from('course_progress')
+      const { data: dbCourses, error } = await supabase
+        .from('courses')
         .select('*')
-        .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
 
-      progressMap = Object.fromEntries((progress || []).map(p => [p.course_id, p]))
+      if (!error && dbCourses && dbCourses.length > 0) {
+        courses = dbCourses;
+      }
     } catch {
       // Table may not exist yet
     }
-  }
 
-  // Determine user tier
-  const { data: profile } = user ? await supabase
-    .from('profiles')
-    .select('role, tier')
-    .eq('id', user.id)
-    .single() : { data: null };
+    // Get progress for the current user
+    let progressMap: Record<string, any> = {};
+    if (user) {
+      try {
+        const { data: progress } = await supabase
+          .from('course_progress')
+          .select('*')
+          .eq('user_id', user.id)
 
-  const isPaid = profile?.role === 'student' || profile?.role === 'student_paid' || profile?.role === 'admin' || profile?.role === 'founder';
+        progressMap = Object.fromEntries((progress || []).map(p => [p.course_id, p]))
+      } catch {}
+    }
 
-  return courses.map(c => {
-    const modules = (typeof c.modules === 'string' ? JSON.parse(c.modules) : c.modules) || [];
-    const progress = progressMap[c.id];
-    const completedModules = progress?.completed_modules || [];
+    // Determine user tier
+    let isPaid = false;
+    try {
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, tier')
+          .eq('id', user.id)
+          .single();
+        isPaid = profile?.role === 'student' || profile?.role === 'student_paid' || profile?.role === 'admin' || profile?.role === 'founder';
+      }
+    } catch {}
 
-    return {
+    return courses.map(c => {
+      const modules = (typeof c.modules === 'string' ? JSON.parse(c.modules) : c.modules) || [];
+      const progress = progressMap[c.id];
+      const completedModules = progress?.completed_modules || [];
+
+      return {
+        id: c.id,
+        title: c.title,
+        description: c.description,
+        tierRequired: c.tier_required,
+        isLocked: c.tier_required === 'paid' && !isPaid,
+        moduleCount: modules.length,
+        completedCount: Array.isArray(completedModules) ? completedModules.length : 0,
+        modules,
+        progress,
+      };
+    });
+  } catch (err) {
+    console.error("getCourses error:", err);
+    // Return seed data as fallback
+    return SEED_COURSES.map(c => ({
       id: c.id,
       title: c.title,
       description: c.description,
       tierRequired: c.tier_required,
-      isLocked: c.tier_required === 'paid' && !isPaid,
-      moduleCount: modules.length,
-      completedCount: Array.isArray(completedModules) ? completedModules.length : 0,
-      modules,
-      progress,
-    };
-  });
+      isLocked: false,
+      moduleCount: c.modules.length,
+      completedCount: 0,
+      modules: c.modules,
+      progress: null,
+    }));
+  }
 }
 
 export async function getCourseById(courseId: string) {
