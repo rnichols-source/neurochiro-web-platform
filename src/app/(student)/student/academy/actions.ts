@@ -47,23 +47,34 @@ export async function getCourses() {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Try to fetch from database first
-  const { data: dbCourses } = await supabase
-    .from('courses')
-    .select('*')
-    .order('created_at', { ascending: true })
+  // Try to fetch from database first, fall back to seed data
+  let courses = SEED_COURSES as any[];
+  try {
+    const { data: dbCourses, error } = await supabase
+      .from('courses')
+      .select('*')
+      .order('created_at', { ascending: true })
 
-  const courses = (dbCourses && dbCourses.length > 0) ? dbCourses : SEED_COURSES;
+    if (!error && dbCourses && dbCourses.length > 0) {
+      courses = dbCourses;
+    }
+  } catch {
+    // Table may not exist yet — use seed data
+  }
 
   // Get progress for the current user
   let progressMap: Record<string, any> = {};
   if (user) {
-    const { data: progress } = await supabase
-      .from('course_progress')
-      .select('*')
-      .eq('user_id', user.id)
+    try {
+      const { data: progress } = await supabase
+        .from('course_progress')
+        .select('*')
+        .eq('user_id', user.id)
 
-    progressMap = Object.fromEntries((progress || []).map(p => [p.course_id, p]))
+      progressMap = Object.fromEntries((progress || []).map(p => [p.course_id, p]))
+    } catch {
+      // Table may not exist yet
+    }
   }
 
   // Determine user tier
