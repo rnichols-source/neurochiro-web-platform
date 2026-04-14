@@ -16,10 +16,12 @@ export default function AcademyPage() {
   useEffect(() => {
     getCourses()
       .then((data) => {
-        setCourses(data);
+        console.log("Academy courses loaded:", data?.length, data);
+        setCourses(data || []);
       })
       .catch((err) => {
         console.error("Academy load error:", err);
+        setCourses([]);
       })
       .finally(() => {
         setLoading(false);
