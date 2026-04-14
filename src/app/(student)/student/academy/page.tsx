@@ -106,8 +106,34 @@ export default function AcademyPage() {
                   <span className="text-xs font-bold text-gray-400">{selectedModule.readTime}</span>
                 </div>
                 <h2 className="text-2xl font-black text-neuro-navy mb-4">{selectedModule.title}</h2>
-                <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed mb-8">
-                  <p>{selectedModule.content}</p>
+                <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed mb-8 space-y-4">
+                  {selectedModule.content.split('\n\n').map((paragraph: string, i: number) => {
+                    // Handle bold markdown
+                    const formatted = paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    // Handle bullet points
+                    if (paragraph.trim().startsWith('- ')) {
+                      const items = paragraph.split('\n').filter((l: string) => l.trim().startsWith('- '));
+                      return (
+                        <ul key={i} className="list-disc pl-6 space-y-1">
+                          {items.map((item: string, j: number) => (
+                            <li key={j} dangerouslySetInnerHTML={{ __html: item.replace(/^- /, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                          ))}
+                        </ul>
+                      );
+                    }
+                    // Handle numbered lists
+                    if (/^\d+\.\s/.test(paragraph.trim())) {
+                      const items = paragraph.split('\n').filter((l: string) => /^\d+\.\s/.test(l.trim()));
+                      return (
+                        <ol key={i} className="list-decimal pl-6 space-y-1">
+                          {items.map((item: string, j: number) => (
+                            <li key={j} dangerouslySetInnerHTML={{ __html: item.replace(/^\d+\.\s/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                          ))}
+                        </ol>
+                      );
+                    }
+                    return <p key={i} dangerouslySetInnerHTML={{ __html: formatted }} />;
+                  })}
                 </div>
                 {Array.isArray(completedIds) && completedIds.includes(selectedModule.id) ? (
                   <div className="flex items-center gap-2 text-green-500 font-bold text-sm">
