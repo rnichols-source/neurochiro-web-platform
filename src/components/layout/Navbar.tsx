@@ -91,14 +91,14 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+          <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
             {navLinks.map((link) => (
-              <Link 
-                key={link.name} 
+              <Link
+                key={link.name}
                 href={link.href}
-                className={`text-xs xl:text-sm font-bold tracking-wide transition-colors flex items-center gap-2 hover:text-neuro-orange ${
+                className={`text-xs font-bold tracking-wide transition-colors whitespace-nowrap hover:text-neuro-orange ${
                   pathname === link.href
-                    ? "text-neuro-orange" 
+                    ? "text-neuro-orange"
                     : useWhiteText ? "text-gray-300" : "text-neuro-navy/80"
                 }`}
               >
@@ -108,7 +108,7 @@ export default function Navbar() {
 
             {/* Dropdown: Join the Network */}
             <div className="relative group">
-              <button className={`text-xs xl:text-sm font-bold tracking-wide transition-colors flex items-center gap-1 hover:text-neuro-orange ${useWhiteText ? "text-gray-300" : "text-neuro-navy/80"}`}>
+              <button className={`text-xs font-bold tracking-wide transition-colors flex items-center gap-1 whitespace-nowrap hover:text-neuro-orange ${useWhiteText ? "text-gray-300" : "text-neuro-navy/80"}`}>
                 Join <ChevronDown className="w-4 h-4" />
               </button>
               <div className="absolute top-full right-0 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all">
