@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Search, ArrowRight, MapPin, ShieldCheck, Globe, Users } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase-admin";
 import Footer from "@/components/landing/Footer";
@@ -79,8 +80,12 @@ export default async function HomePage() {
                 className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-lg hover:border-gray-200 transition-all group"
               >
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-14 h-14 rounded-xl bg-neuro-navy/5 flex items-center justify-center text-neuro-navy font-black text-lg">
-                    {doc.first_name?.[0]}{doc.last_name?.[0]}
+                  <div className="w-14 h-14 rounded-xl bg-neuro-navy/5 flex items-center justify-center text-neuro-navy font-black text-lg overflow-hidden relative">
+                    {doc.photo_url ? (
+                      <Image src={doc.photo_url} alt={`Dr. ${doc.first_name} ${doc.last_name}`} fill className="object-cover" />
+                    ) : (
+                      <>{doc.first_name?.[0]}{doc.last_name?.[0]}</>
+                    )}
                   </div>
                   <div>
                     <p className="font-bold text-neuro-navy">Dr. {doc.first_name} {doc.last_name}</p>

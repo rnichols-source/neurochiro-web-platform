@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   const supabase = createAdminClient();
 
   try {
-    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, latitude, longitude, bio, specialties, region_code, address';
+    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, latitude, longitude, bio, specialties, region_code, address, photo_url, phone';
     
     let dbQuery = supabase
       .from('doctors')
