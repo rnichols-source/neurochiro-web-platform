@@ -806,13 +806,580 @@ Trust the process. Trust your training. Trust your philosophy. And show up every
     tier_required: 'paid',
     stripe_plan: 'course_business',
     price: 297,
+    preview_module: 'm1',
     modules: [
-      { id: 'm1', title: 'Understanding Practice Models', description: 'Associate, startup, acquisition — the real pros and cons', readTime: '15 min', content: 'Full content coming soon — video modules in production.' },
-      { id: 'm2', title: 'Reading a P&L', description: 'The numbers you need to know from day one', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
-      { id: 'm3', title: 'Negotiating Your First Contract', description: 'What to watch for so you don\'t get burned', readTime: '15 min', content: 'Full content coming soon — video modules in production.' },
-      { id: 'm4', title: 'Insurance vs. Cash vs. Hybrid', description: 'Pros, cons, and financial realities of each model', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
-      { id: 'm5', title: 'Setting Your Fees', description: 'How to price your services and understand collections', readTime: '10 min', content: 'Full content coming soon — video modules in production.' },
-      { id: 'm6', title: 'Building a Personal Brand', description: 'Attract patients before you even open the doors', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
+      {
+        id: 'm1',
+        title: 'Understanding Practice Models',
+        description: 'Associate, startup, acquisition — the real pros and cons',
+        readTime: '15 min',
+        content: `You have three paths into practice after graduation: work as an associate, start from scratch, or buy an existing practice. Each one has real advantages and real risks that nobody in school explains honestly. Let's fix that.
+
+**Path 1: Associateship (The Apprenticeship)**
+
+This is the most common path, and for good reason. You trade time and labor for mentorship, steady income, and zero financial risk.
+
+**The Real Pros:**
+- You get paid while you learn. No debt from a buildout, no lease, no equipment purchases.
+- You see volume. An established practice feeds you patients from day one. You'll see more patients in your first 3 months as an associate than most cold-start owners see in their first year.
+- You learn systems. How to run a front desk, manage a schedule, handle insurance, collect money, deal with difficult patients — you learn this by watching, not guessing.
+- You build confidence. There's no substitute for reps. By the time you've adjusted 5,000 patients, you move differently as a doctor.
+
+**The Real Cons:**
+- You don't own anything. When you leave, you leave. The patients aren't yours, the brand isn't yours, and the equity isn't yours.
+- Compensation has a ceiling. Most associates earn 25-35% of collections. If the practice collects $80K/month and you're producing $40K of it, you're making $10-14K/month. Not bad, but the owner is making significantly more.
+- Bad owners exist. Some clinic owners treat associates as cheap labor, not mentees. They overwork you, underpay you, restrict your clinical freedom, and then complain when you leave. This is why contract negotiation matters (Module 3).
+- Non-competes can trap you. A poorly written non-compete can prevent you from practicing within 15-25 miles for 1-2 years after you leave. That can destroy your plans.
+
+**The Verdict:** Best path for most new graduates. Target 2-3 years. Learn everything you can. Save aggressively. Then make your move.
+
+**Path 2: Cold Start (Build From Zero)**
+
+You find a location, sign a lease, buy equipment, build it out, and open the doors. Nobody hands you anything. Everything you build is yours.
+
+**The Real Pros:**
+- 100% ownership from day one. Every patient, every dollar, every decision is yours.
+- You build it YOUR way. Your brand, your systems, your culture, your clinical philosophy — no compromises.
+- Maximum long-term upside. A practice you build from scratch and grow to $1M+ in revenue is worth $500K-$1M+ if you ever sell it.
+- No bad habits to inherit. You don't have to fix someone else's broken systems, reputation, or staff problems.
+
+**The Real Cons:**
+- You need capital. A basic buildout runs $75K-$150K depending on your market. Scanning equipment alone is $15K-$30K. You need 6 months of operating expenses in reserve. Total: $100K-$250K before you see your first patient.
+- Income is $0 for months. Month 1 you might see 15 patients total. Month 2, maybe 30. You won't be profitable for 6-12 months in most cases. You need to eat and pay rent during this time.
+- You are everything. Marketer, recruiter, accountant, janitor, CEO, and doctor — all at once. This is overwhelming for someone who just graduated.
+- Failure rate is real. Approximately 20% of new chiropractic practices close within 3 years. Not because the doctor was bad — because they ran out of money or burned out.
+
+**The Verdict:** Only do this if you have capital (or a spouse/family that can support you), a strong local network, and a high tolerance for risk and discomfort. Alternatively, do this after 2-3 years as an associate with savings and business knowledge.
+
+**Path 3: Practice Acquisition (Buy Existing)**
+
+You purchase an existing practice from a retiring doctor or someone relocating. You inherit the patients, the staff, the systems, and the reputation.
+
+**The Real Pros:**
+- Cash flow from day one. You're buying an existing revenue stream. A practice doing $50K/month in collections continues doing roughly that under new ownership, assuming you don't screw up the transition.
+- Immediate patient base. No marketing needed in the early months. The patients are already coming in.
+- Staff and systems in place. The team knows what they're doing. The insurance billing is set up. The EMR is configured.
+- Bank financing is easier. Banks will finance practice acquisitions at 7-10 year terms because there's proven revenue. Cold starts are much harder to finance.
+
+**The Real Cons:**
+- You're buying someone else's reputation — good or bad. If the previous doctor had a negative reputation, you inherit that.
+- Culture clashes. The existing staff and patients are used to doing things a certain way. Changing the culture is one of the hardest things in business.
+- Valuation is tricky. How do you know if $350K is a fair price? What are you actually buying? (Revenue? Profit? Equipment? Goodwill?) You need a broker or consultant to evaluate the deal.
+- Existing patient attrition. Some patients are loyal to the previous doctor, not the practice. Expect 20-40% attrition in the first year even with a perfect transition.
+
+**The Verdict:** Great option if you can find the right practice at the right price. Best done after 2+ years of clinical experience so you can evaluate the practice with an informed eye.
+
+**The Decision Framework**
+
+Ask yourself:
+1. How much capital do I have access to? (Under $50K → Associate. $100K+ → Cold start or acquisition is possible.)
+2. How much risk can I tolerate? (Low → Associate. High → Cold start.)
+3. How fast do I need income? (Immediately → Associate or acquisition. Can wait 6-12 months → Cold start.)
+4. Do I want to build or optimize? (Build → Cold start. Optimize → Acquisition.)
+
+There's no wrong answer. But there ARE wrong reasons. Don't go cold start because your ego won't let you work for someone else. Don't stay an associate forever because you're afraid of risk. And don't buy a practice just because it's available.
+
+Make the decision based on math, market, and self-awareness — not emotion.`
+      },
+      {
+        id: 'm2',
+        title: 'Reading a P&L',
+        description: 'The numbers you need to know from day one',
+        readTime: '15 min',
+        content: `A Profit & Loss statement is the scoreboard of your business. If you can't read it, you're playing the game blindfolded. Most chiropractors avoid their P&L because numbers feel intimidating. This module will make it simple.
+
+**What is a P&L?**
+
+A P&L (also called an Income Statement) shows three things over a specific time period (usually monthly):
+1. How much money came in (Revenue)
+2. How much money went out (Expenses)
+3. What's left over (Profit or Loss)
+
+That's it. Revenue minus Expenses equals Profit. Everything else is detail.
+
+**The Chiropractic P&L — Line by Line**
+
+Here's what a real chiropractic P&L looks like, with benchmarks for a healthy practice:
+
+**REVENUE**
+- **Gross Collections**: Total money collected from all sources — patient payments, insurance reimbursements, cash payments. This is the top-line number. For a single-doctor practice, healthy is $40K-$80K/month. Elite is $100K+.
+- **Adjustments/Write-offs**: Insurance contractual adjustments, sliding-scale discounts, failed payment attempts. Track this because if your write-offs exceed 30% of gross charges, you have a billing problem.
+- **Net Revenue**: What you actually keep. This is the number that matters. Everything below is measured as a percentage of Net Revenue.
+
+**COST OF SERVICES (Variable Costs)**
+- **Associate Doctor Compensation**: If you have associates, typically 25-35% of their individual collections. Benchmark: 8-15% of total revenue.
+- **Supplies**: Adjustment tables, headrest paper, biofreeze, supplements for resale, etc. Benchmark: 2-4% of revenue.
+
+**OPERATING EXPENSES (Fixed Costs)**
+
+- **Rent/Lease**: Your second biggest expense after payroll. Benchmark: 5-10% of revenue. If you're paying more than 10%, your space is too expensive for your revenue level.
+- **Staff Payroll**: Front desk, CA, billing coordinator, office manager. Benchmark: 20-28% of revenue. This is usually the single largest expense category.
+- **Payroll Taxes & Benefits**: Employer's share of FICA, state unemployment, workers comp, health insurance if offered. Benchmark: 3-5% of revenue.
+- **Marketing/Advertising**: Google Ads, social media, community events, print materials, sponsorships. Benchmark: 3-8% of revenue. New practices should be closer to 8-10%. Established practices can run at 3-5%.
+- **Software/Technology**: EHR system, scheduling software, billing software, scanning software, payment processing. Benchmark: 2-4% of revenue.
+- **Insurance**: Malpractice insurance, general liability, property insurance. Benchmark: 1-2% of revenue.
+- **Equipment Leases**: Scanning equipment, adjustment tables, decompression tables, laser. Benchmark: 2-5% of revenue.
+- **Billing/Collections**: If you outsource billing (many offices do), this runs 6-10% of collections. If you do it in-house, it's included in your staff payroll number.
+- **Professional Services**: Accountant, attorney, business consultant. Benchmark: 1-2% of revenue.
+- **Continuing Education**: Seminars, certifications, travel for education. Benchmark: 1-2% of revenue.
+- **Utilities/Miscellaneous**: Electric, internet, phone, water, cleaning, office supplies. Benchmark: 2-3% of revenue.
+
+**THE BOTTOM LINE**
+
+- **Total Expenses**: Sum of everything above. Healthy benchmark: 55-70% of revenue.
+- **Net Profit (Owner's Income)**: What the owner takes home before personal taxes. Healthy benchmark: 30-45% of revenue.
+
+**Reading the Scoreboard**
+
+For a practice collecting $60,000/month:
+
+| Category | Amount | % of Revenue |
+|----------|--------|-------------|
+| Net Revenue | $60,000 | 100% |
+| Staff Payroll | $15,000 | 25% |
+| Rent | $4,500 | 7.5% |
+| Marketing | $3,000 | 5% |
+| All Other Expenses | $13,500 | 22.5% |
+| **Total Expenses** | **$36,000** | **60%** |
+| **Net Profit** | **$24,000** | **40%** |
+
+That's $24,000/month to the owner — $288,000/year before taxes. That's a healthy practice.
+
+**Red Flags on a P&L**
+
+- **Net profit below 25%**: Something is wrong. Either revenue is too low or expenses are too high. Diagnose which one.
+- **Rent above 12%**: Your overhead is eating your profit. Either negotiate a lower lease or grow revenue to bring the percentage down.
+- **Staff payroll above 30%**: You're overstaffed for your revenue, or you're paying above market. This is the most common profit killer.
+- **Marketing at 0%**: You're relying entirely on referrals and walk-ins. This works until it doesn't. Budget for marketing, even when things are good.
+- **Revenue declining 3+ months in a row**: Don't ignore this trend. Diagnose the cause: fewer new patients? Lower show rate? Lost a referral source? Revenue problems always get worse before they get better.
+
+**What Associates Should Know**
+
+Even as an associate, understanding the P&L matters because:
+
+1. It tells you if the practice is healthy. If the owner is struggling financially, your job is at risk.
+2. It tells you how much you're actually contributing. If you know you're collecting $35K/month and earning $10K, you understand your value.
+3. It prepares you for ownership. When you eventually run your own practice, you won't be starting from zero on financial literacy.
+4. It gives you negotiating leverage. "I produced $40K in collections last month on a $12K salary — let's talk about a raise" is a very different conversation than "I think I deserve more money."
+
+**Action Step**
+
+If you're currently associating, ask the owner to walk you through the practice P&L (some will, some won't). If they won't share exact numbers, ask for benchmarks: "What percentage of revenue goes to overhead?" This tells you a lot.
+
+If you're planning to open, build a pro forma P&L — a projection of what your first year will look like month by month. Be conservative on revenue estimates and generous on expense estimates. If the math doesn't work on paper, it won't work in reality.`
+      },
+      {
+        id: 'm3',
+        title: 'Negotiating Your First Contract',
+        description: "What to watch for so you don't get burned",
+        readTime: '15 min',
+        content: `Your first associate contract will be the most important financial document you sign in your early career. A good contract sets you up for growth. A bad one traps you. Most new graduates are so excited to get a job offer that they sign whatever is put in front of them. Don't be that person.
+
+**The Core Components of Every Associate Contract**
+
+Every contract should clearly define these seven elements. If any are missing or vague, that's a red flag.
+
+**1. Compensation Structure**
+
+The three most common models:
+
+- **Percentage of Collections**: You earn a percentage of what you personally collect. Standard range: 25-35%. Pro: directly tied to your performance. Con: if the practice has billing issues, your income suffers even when you're seeing patients.
+
+- **Base Salary + Bonus**: A guaranteed monthly salary (typically $4K-$7K) plus a bonus once you exceed a production threshold. Pro: income stability while you build volume. Con: the bonus structure can be designed to be nearly impossible to achieve.
+
+- **Flat Salary**: A fixed monthly amount regardless of production. Typical range: $5K-$8K/month. Pro: predictable income. Con: no upside for high performance, and owners may feel less invested in feeding you patients.
+
+**What to negotiate**: Ask for percentage of collections with a minimum guaranteed base for the first 3-6 months. Example: "30% of my collections or $5,000/month, whichever is higher, for the first 6 months. After that, 30% of collections with no floor." This protects you while you ramp up.
+
+**2. Non-Compete Clause**
+
+This is the most dangerous clause in any contract. A non-compete restricts where you can practice after you leave.
+
+- **Radius**: How far away you must be. Common range: 10-25 miles. Anything over 25 miles is aggressive.
+- **Duration**: How long the restriction lasts. Common range: 1-2 years. More than 2 years is excessive.
+- **Enforceability**: Non-competes vary in enforceability by state. California, Oklahoma, and North Dakota don't enforce them at all. Other states enforce them selectively.
+
+**What to negotiate**: Push for the smallest radius and shortest duration possible. 10 miles for 1 year is reasonable. 25 miles for 2 years is harsh. Also negotiate for a "buyout clause" — a fixed dollar amount you can pay to void the non-compete if you leave (e.g., $10,000-$25,000).
+
+**RED FLAG**: If an owner refuses to negotiate the non-compete at all, think carefully. They may be more interested in trapping you than developing you.
+
+**3. Termination Terms**
+
+How can each party end the relationship, and what happens when they do?
+
+- **Notice period**: How much advance notice is required. Standard: 60-90 days. This gives both sides time to plan.
+- **Termination for cause vs. without cause**: "For cause" means someone did something wrong (misconduct, malpractice, breach of contract). "Without cause" means either party can leave for any reason with proper notice.
+- **What you keep**: Do you keep your patient list? Your scanning data? Your Google reviews? Probably not — but it should be defined.
+
+**What to negotiate**: Ensure both parties have equal termination rights. If the owner can fire you with 30 days notice but you must give 90 days, that's unfair. Make it symmetrical.
+
+**4. Schedule and Expectations**
+
+- **Hours per week**: Standard is 32-40 clinical hours. Clarify whether "hours" means patient hours or total hours (including paperwork, team meetings, marketing events).
+- **Patient volume expectations**: Some contracts specify minimum patient visits per week. Know what's expected and whether it's realistic given the practice's current patient base.
+- **Administrative duties**: Are you expected to do marketing? Social media? Community events? Screenings? If so, is that time compensated?
+
+**What to negotiate**: Get clinical hours in writing. If the contract says "full-time" without defining hours, it could mean anything. Also clarify who covers your patients when you're sick or on vacation.
+
+**5. Benefits**
+
+- **Health insurance**: Many small chiropractic offices don't offer this. If they do, it's a significant value-add.
+- **Paid time off (PTO)**: Standard: 2-3 weeks per year. Clarify whether this is truly paid or if you just don't get penalized for missing days.
+- **Continuing education**: Is CE time paid? Is there a CE budget? Standard: $1,000-$3,000/year.
+- **Malpractice insurance**: The practice should cover this. If they expect you to pay your own malpractice premium, factor that into your compensation analysis.
+
+**6. Intellectual Property and Patients**
+
+- Who owns the patient relationships? (Answer: legally, the practice does.)
+- Can you take your patient list if you leave? (Almost always: no.)
+- Who owns content you create for the practice's social media? (Define this.)
+
+**7. Growth Path**
+
+The best contracts include a path forward:
+- Is there an opportunity for partnership or equity?
+- At what production levels?
+- On what timeline?
+- Is it written into the contract or just a verbal promise?
+
+**What to negotiate**: If the owner talks about future partnership, get the general terms in writing — even if it's just "after 3 years of employment and sustained production of $X/month, Doctor will have the option to discuss equity participation." Verbal promises are worthless in business.
+
+**The Negotiation Conversation**
+
+Most new graduates are afraid to negotiate because they don't want to seem greedy or difficult. Here's the reality: owners expect you to negotiate. If you don't, they wonder if you have the backbone to run their practice.
+
+Script: "I'm really excited about this opportunity, and I want to make sure we set up a structure that works for both of us long-term. I've reviewed the contract and have a few items I'd like to discuss. I think we can find a structure where we both feel great about it."
+
+This is professional, collaborative, and confident. No one will rescind an offer because you asked to negotiate the terms.
+
+**Before You Sign**
+
+1. Have a lawyer review the contract. Not your uncle who's a lawyer — a lawyer who understands healthcare employment contracts. Cost: $500-$1,500. Worth every penny.
+2. Talk to former associates of this practice. If the owner has had 5 associates in 3 years, that tells you something.
+3. Run the math. At the proposed compensation, what do you need to collect each month to hit your income goals? Is that realistic?
+4. Trust your gut. If something feels off during the negotiation process, pay attention. How someone negotiates with you is how they'll treat you.`
+      },
+      {
+        id: 'm4',
+        title: 'Insurance vs. Cash vs. Hybrid',
+        description: 'Pros, cons, and financial realities of each model',
+        readTime: '15 min',
+        content: `This is the most debated topic in chiropractic business — and the one most clouded by ideology rather than analysis. Let's cut through the opinions and look at the actual financial reality of each model.
+
+**Model 1: Insurance-Based Practice**
+
+You accept most or all major insurance plans. Patients pay their copay at the visit, and you bill insurance for the rest.
+
+**Financial Reality:**
+- Average reimbursement per visit: $45-$85 (varies wildly by payer and region)
+- Time to collect: 14-45 days average (some claims take 90+ days)
+- Denial rate: 5-15% of claims are initially denied and require follow-up
+- Billing cost: 6-10% of collections if outsourced, or 1-2 full-time staff if done in-house
+- Write-offs: 20-40% of billed charges are written off as contractual adjustments
+
+**Pros:**
+- Larger patient pool. Most people have insurance and expect to use it. You're not excluding anyone.
+- Lower barrier to entry for patients. A $30 copay is easier to say yes to than a $75 cash visit.
+- Consistent patient flow. Insurance patients tend to follow care plans because their out-of-pocket cost is low.
+- Practice valuation. Insurance-based practices are easier to sell because the revenue stream is diversified across many payers, not dependent on one doctor's personality.
+
+**Cons:**
+- You're working for insurance companies, not patients. They dictate your reimbursement, your visit limits, your documentation requirements, and whether care is "medically necessary."
+- Collections lag. You might deliver $50,000 in services this month but only collect $35,000 because of insurance lag, denials, and write-offs.
+- Administrative burden is enormous. Prior authorizations, claims submissions, appeals, credentialing, re-credentialing, compliance audits — this is a full-time job on top of patient care.
+- Reimbursement rates are declining. Every year, insurance companies find new ways to pay you less. You're on a treadmill that speeds up.
+- You need volume to make it work. At $65/visit average, you need to see 150-200 patients per week to hit $40K-$50K in collections. That's a grind.
+
+**Model 2: Cash-Based Practice**
+
+No insurance accepted. Patients pay the full fee at the time of service. You may provide them with a superbill to submit to their own insurance for out-of-network reimbursement.
+
+**Financial Reality:**
+- Average fee per visit: $55-$125 (you set the price)
+- Time to collect: Immediately (payment at time of service)
+- Denial rate: 0% (no claims to deny)
+- Billing cost: Near zero
+- Write-offs: Minimal (occasional failed payment or courtesy discount)
+
+**Pros:**
+- You get paid in full, immediately. No waiting, no chasing, no denials. Cash in hand.
+- No billing department needed. This saves you $40K-$80K/year in billing staff or outsourcing costs.
+- Clinical freedom. You determine what care is needed, not an insurance reviewer. No prior auths, no visit limits, no "medical necessity" games.
+- Higher per-visit revenue. Even at a lower fee than your insurance billing rate, you keep more because there are no contractual write-offs.
+- Simpler operations. Fewer staff, less paperwork, less compliance burden, fewer headaches.
+
+**Cons:**
+- Smaller patient pool. You're excluding everyone who can't or won't pay out of pocket. In some markets, that's 40-60% of potential patients.
+- Higher marketing costs. You need to convince people to pay when they could go down the street and use their insurance. This requires stronger branding and marketing.
+- Care plan compliance drops. When patients are paying $75-$100 per visit, they're more likely to skip visits, shorten their care plan, or drop out when symptoms improve.
+- Harder to scale. Cash practices are often personality-driven. If you're the brand, it's harder to add an associate who commands the same fees.
+- Financial pressure on patients creates tension. Having "the money conversation" with every patient is emotionally draining for some doctors.
+
+**Model 3: Hybrid Practice**
+
+You accept some insurance plans (usually the ones that pay well) and also have a cash/membership option for patients without insurance or with high-deductible plans.
+
+**Financial Reality:**
+- Mix of insurance and cash revenue (typically 50/50 to 70/30 insurance/cash)
+- Average revenue per visit: $55-$90 (blended)
+- Requires both a billing system AND a cash/membership system
+- More complex but more resilient
+
+**Pros:**
+- Best of both worlds. You capture insured patients AND cash-pay patients.
+- Membership models create recurring revenue. A $79/month membership for 4 visits creates predictable cash flow that doesn't depend on insurance reimbursement.
+- You can drop bad-paying insurance plans. If Medicaid pays $25/visit, drop it and offer those patients a membership option instead.
+- More resilient to market changes. If insurance reimbursements drop, your cash/membership revenue provides a buffer.
+
+**Cons:**
+- Operationally complex. You need staff who can handle insurance billing AND cash/membership management.
+- Can feel inconsistent to patients. "Why does my neighbor pay $30 with insurance but I pay $79 on the membership?" Transparency in pricing matters.
+- Training team on two systems. Your front desk needs to be fluent in both insurance verification and membership enrollment.
+
+**The Membership Model (A Cash Practice Superpower)**
+
+If you go cash or hybrid, the membership model is your most powerful tool:
+
+**Structure:**
+- Monthly fee: $69-$129/month
+- Includes: 4 adjustments per month + 1 progress scan per quarter
+- Additional visits: discounted rate ($35-$50)
+- Family discounts: 15-25% off for additional family members
+
+**Why it works:**
+- Patients commit monthly (recurring revenue)
+- It feels like a good deal compared to per-visit pricing
+- Automatic payment removes the "money conversation" from every visit
+- Retention is significantly higher than per-visit cash patients
+
+**Which Model is Right for You?**
+
+Honestly, it depends on your market, your personality, and your risk tolerance:
+
+- **Insurance-heavy market + low marketing budget + want volume**: Insurance or hybrid
+- **Affluent market + strong brand + want freedom**: Cash or hybrid
+- **Starting cold with no reputation**: Hybrid gives you the broadest patient base
+- **Joining an existing practice**: You'll likely inherit their model
+
+The most important thing: choose a model intentionally, not by default. Too many chiropractors end up insurance-based simply because they never considered the alternative. Too many go cash because a guru told them to, without analyzing whether their market supports it.
+
+Run the numbers for YOUR market, YOUR expenses, YOUR goals. The math will tell you the answer.`
+      },
+      {
+        id: 'm5',
+        title: 'Setting Your Fees',
+        description: 'How to price your services and understand collections',
+        readTime: '12 min',
+        content: `Most new chiropractors set their fees by looking at what the doctor down the street charges and matching it. This is lazy and often wrong. Your fees should be based on your costs, your market, your positioning, and the value you deliver.
+
+**The Cost-Based Floor**
+
+Before you decide what to charge, you need to know your breakeven — the minimum you need to collect per visit to cover your costs.
+
+Formula:
+**Monthly Overhead / Monthly Patient Visits = Cost Per Visit**
+
+Example: $25,000 monthly overhead / 400 visits = $62.50 per visit just to break even. You need to charge MORE than this to make a profit.
+
+This number is your floor. Never set fees below your cost-per-visit, even for "introductory offers" (except a one-time new patient special, which is a marketing cost).
+
+**The Value-Based Ceiling**
+
+Your ceiling is determined by what the market will bear and what you can justify through outcomes and experience.
+
+Factors that raise your ceiling:
+- Specialized training or focus (pediatric, prenatal, sports, executives)
+- Advanced technology (scanning equipment, decompression, laser)
+- Demonstrated outcomes (before/after scans, testimonials, Google reviews)
+- Premium experience (beautiful office, short wait times, exceptional service)
+- Market positioning (are you positioned as a specialist or a commodity?)
+
+A general chiropractor in a strip mall competes on price. A nervous-system-focused practice with scanning technology and measurable outcomes competes on value. The first charges $45/visit and struggles. The second charges $85/visit and thrives.
+
+**Common Fee Schedule (US Market, 2025-2026)**
+
+These are general ranges. Adjust for your specific market (urban vs. rural, cost of living, competition density):
+
+| Service | Low Market | Mid Market | Premium Market |
+|---------|-----------|-----------|---------------|
+| New Patient Exam | $125-$175 | $175-$275 | $275-$450 |
+| Initial Scanning | $75-$125 | $125-$200 | $200-$350 |
+| Regular Adjustment | $45-$55 | $55-$75 | $75-$125 |
+| Re-evaluation + Scan | $75-$100 | $100-$175 | $175-$250 |
+| X-rays (if offered) | $75-$125 | $125-$200 | $200-$300 |
+| Monthly Membership | $59-$79 | $79-$119 | $119-$199 |
+
+**Understanding Collections vs. Charges**
+
+Your fee schedule (what you charge) is not the same as your collections (what you actually receive). The difference matters enormously.
+
+**For insurance practices:**
+- You charge $75 for an adjustment
+- Insurance contractual rate is $52
+- Patient copay is $30
+- Insurance pays $22
+- You collected $52 on a $75 charge (69% collection rate)
+- The $23 difference is a contractual write-off
+
+**For cash practices:**
+- You charge $75 for an adjustment
+- Patient pays $75
+- You collected $75 on a $75 charge (100% collection rate)
+- No write-off
+
+This is why cash practices can charge lower fees and still make more money. At $65/visit cash with 100% collection, you keep more than $75/visit insurance with 69% collection ($65 vs. $52).
+
+**The Collection Rate Benchmarks**
+
+Track this number monthly:
+- **Insurance practice**: 55-75% collection rate is typical. Below 55% = billing problems.
+- **Cash practice**: 95-100% collection rate is expected. Below 95% = payment system problems.
+- **Hybrid practice**: 70-85% blended collection rate is healthy.
+
+**Raising Your Fees**
+
+You should raise fees annually — at minimum with inflation (3-5% per year). Most chiropractors are afraid to raise fees because they think patients will leave. Data shows otherwise:
+
+- 2-5% annual increase: virtually zero patient pushback
+- 5-10% increase: minor pushback, usually from less than 5% of patients
+- 10%+ increase: requires strong justification (new technology, expanded services, market repositioning)
+
+**How to communicate a fee increase:**
+"As of [date], our fees will be adjusted to reflect the continued investment in our scanning technology, clinical training, and the quality of care we provide. We remain committed to delivering the best nervous system care in [city/region]."
+
+Send this notice 30 days before the increase takes effect. Don't apologize. Don't over-explain. Quality costs money, and patients who value quality understand that.
+
+**The New Patient Special**
+
+A new patient special is a marketing tool, not a discount. It lowers the barrier for someone to experience your office for the first time.
+
+Effective structure: "New Patient Experience — $49 (regularly $275). Includes comprehensive exam, nervous system scan, and doctor consultation."
+
+This works because:
+- $49 is low enough that price objections disappear
+- The patient experiences your scanning technology (which sells the care plan)
+- You lose $226 on the initial visit but gain a patient worth $3,000-$10,000 in lifetime value
+- You should still deliver a FULL experience at this price — never a watered-down version
+
+**Never do**: Free adjustments, free exams, or "see how you feel" offers. These attract bargain hunters, not committed patients. A $49 special attracts someone who values what you do but needed a lower entry point.`
+      },
+      {
+        id: 'm6',
+        title: 'Building a Personal Brand',
+        description: 'Attract patients before you even open the doors',
+        readTime: '15 min',
+        content: `Your personal brand is not your logo. It's not your website colors. It's not your Instagram grid. Your personal brand is what people say about you when you're not in the room. It's the feeling people get when they interact with you, your content, and your practice.
+
+Every successful chiropractor you admire has a personal brand — whether they built it intentionally or not. The difference between the ones who thrive and the ones who struggle is intentionality.
+
+**Brand = Promise + Proof**
+
+Your brand is the intersection of two things:
+
+1. **The promise you make**: What outcome do you deliver? Who do you serve? What experience can people expect?
+2. **The proof you provide**: What evidence do you have that you deliver on that promise? Testimonials, scan results, patient stories, credentials, content.
+
+Without the promise, you're forgettable. Without the proof, you're unbelievable. You need both.
+
+**The Four Pillars of a Chiropractic Personal Brand**
+
+**Pillar 1: Expertise (What You Know)**
+
+This is your clinical knowledge made visible. You demonstrate expertise through:
+
+- Educational content that teaches people something they didn't know
+- Clinical insights that show depth of understanding
+- Case studies and outcome data that prove you get results
+- Speaking engagements, podcast appearances, published articles
+
+The key: teach at the level your audience can absorb. You're not writing for chiropractors — you're writing for parents, executives, athletes, and everyday people. Use simple language. Use analogies. Tell stories.
+
+Content ideas for demonstrating expertise:
+- "3 signs your child's nervous system is stuck in fight-or-flight"
+- "Why your headaches might not be coming from your head"
+- "What your HRV score is telling you about your stress levels"
+- "The connection between birth trauma and developmental delays"
+
+**Pillar 2: Empathy (Who You Serve)**
+
+The most powerful brands make their audience feel understood. When a stressed-out mom sees your content and thinks "this doctor GETS it," you've won.
+
+Empathy in branding means:
+- Naming the specific struggles your patients face
+- Acknowledging the frustration of not finding answers
+- Showing that you understand their world, not just their spine
+- Using language that mirrors how they describe their problems (not clinical jargon)
+
+Content ideas for demonstrating empathy:
+- "To the mom who's been told her kid will 'grow out of it'"
+- "I see you — running on 4 hours of sleep, surviving on coffee, and still showing up for everyone but yourself"
+- "You've tried everything. What if the answer isn't another medication?"
+
+**Pillar 3: Authority (Why You Specifically)**
+
+Authority is what separates you from every other chiropractor who says similar things. It's the answer to "why should I choose YOU?"
+
+Authority builders:
+- Years of focused experience in your niche
+- Advanced training and certifications (but don't lead with these — they support, not sell)
+- Measurable outcomes: "We've performed 15,000 nervous system scans and helped 3,000 families"
+- Media features, speaking engagements, podcast appearances
+- Association with respected organizations and mentors
+
+Content ideas for building authority:
+- "After scanning 5,000 patients, here's what I've learned about stress and the nervous system"
+- Share your process: "Here's exactly how we evaluate a new patient in our office"
+- Document your continuing education: "Just completed advanced training in pediatric nervous system care"
+
+**Pillar 4: Personality (What Makes You Human)**
+
+People buy from people, not from practices. Your personality is your unfair advantage because nobody else is you.
+
+Show up as a real person:
+- Behind-the-scenes of your day
+- Your own health journey
+- Your family (if you're comfortable sharing)
+- Your humor, your quirks, your passions outside of chiropractic
+- Your mistakes and what you learned from them
+
+The rule: 80% professional value, 20% personal personality. Don't become a lifestyle influencer. But don't be a clinical robot either.
+
+**The Content Machine**
+
+Consistent content is the engine of personal branding. Here's the system that works for busy chiropractors:
+
+**Weekly Minimum:**
+- 3 Instagram posts (Reels perform 3-5x better than static posts)
+- 1 LinkedIn post (if targeting professionals or clinic owners)
+- 1 Google Business update (helps SEO)
+- 2-3 Instagram Stories per day (low effort, high engagement)
+
+**Monthly:**
+- 1 long-form piece (blog post, newsletter, or YouTube video)
+- 1 patient success story (with permission)
+- 1 community engagement post (event, sponsorship, charity)
+
+**Quarterly:**
+- 1 community workshop or screening event
+- 1 collaboration with another local business or practitioner
+- Updated headshots and branding photos (your visual content should look current)
+
+**The Compounding Effect**
+
+Personal branding is a long game. Month 1, you'll feel like you're talking to nobody. Month 3, a few people will notice. Month 6, patients will start saying "I've been following you for a while." Month 12, patients will come in already trusting you before they've met you.
+
+This is the compounding effect of consistent visibility. Every post, every story, every workshop compounds on the last. The chiropractor who posts 3x/week for 2 years has 312 pieces of content working for them 24/7. That's a moat no competitor can cross overnight.
+
+**The Brand Audit**
+
+Ask yourself:
+1. If someone Googled my name right now, what would they find?
+2. If a patient described me to a friend, what would they say?
+3. Is my online presence consistent with the doctor I want to be known as?
+4. Would I choose me as my chiropractor based on what I see online?
+
+If the answer to any of these is unsatisfying, that's your starting point. Your brand is being built whether you're intentional about it or not. Take control of the narrative.`
+      },
     ]
   },
   {
