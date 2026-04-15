@@ -74,6 +74,47 @@ export const PLANS = {
       price: 99,
     },
   },
+  // Academy Courses (one-time purchases)
+  course_clinical_identity: {
+    id: "course_clinical_identity",
+    name: "Building Your Clinical Identity",
+    oneTime: {
+      priceId: process.env.STRIPE_COURSE_CLINICAL_IDENTITY_PRICE_ID ?? "",
+      price: 197,
+    },
+  },
+  course_business: {
+    id: "course_business",
+    name: "The Business of Chiropractic",
+    oneTime: {
+      priceId: process.env.STRIPE_COURSE_BUSINESS_PRICE_ID ?? "",
+      price: 297,
+    },
+  },
+  course_clinical_confidence: {
+    id: "course_clinical_confidence",
+    name: "Clinical Confidence",
+    oneTime: {
+      priceId: process.env.STRIPE_COURSE_CLINICAL_CONFIDENCE_PRICE_ID ?? "",
+      price: 297,
+    },
+  },
+  course_associate_playbook: {
+    id: "course_associate_playbook",
+    name: "The Associate Playbook",
+    oneTime: {
+      priceId: process.env.STRIPE_COURSE_ASSOCIATE_PLAYBOOK_PRICE_ID ?? "",
+      price: 397,
+    },
+  },
+  course_bundle: {
+    id: "course_bundle",
+    name: "School-to-Practice System (All 4 Courses)",
+    oneTime: {
+      priceId: process.env.STRIPE_COURSE_BUNDLE_PRICE_ID ?? "",
+      price: 797,
+    },
+  },
 } as const;
 
 export function getPriceId(plan: 'doctor' | 'student', cycle: 'monthly' | 'annual'): string {

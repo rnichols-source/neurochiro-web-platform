@@ -90,6 +90,30 @@ export async function POST(req: Request) {
             });
           }
 
+          if (metaType === 'course_purchase') {
+            const courseId = session.metadata?.courseId;
+            if (courseId) {
+              await (supabase as any).from('course_purchases').insert({
+                user_id: userId,
+                course_id: courseId,
+                stripe_session_id: session.id,
+                amount: session.amount_total,
+              });
+            }
+          }
+
+          if (metaType === 'course_bundle') {
+            const courseIds = (session.metadata?.courseIds || '').split(',').filter(Boolean);
+            for (const courseId of courseIds) {
+              await (supabase as any).from('course_purchases').upsert({
+                user_id: userId,
+                course_id: courseId,
+                stripe_session_id: session.id,
+                amount: session.amount_total,
+              }, { onConflict: 'user_id,course_id' });
+            }
+          }
+
           if (metaType === 'job_listing') {
             const durationDays = parseInt(session.metadata?.duration || '30', 10);
             const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString();

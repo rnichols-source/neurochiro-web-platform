@@ -518,39 +518,331 @@ This is evidence-based, outcome-driven, nervous-system-first chiropractic. And i
     ]
   },
   {
-    id: 'course-clinical-practice',
-    title: 'Clinical Practice Excellence',
-    description: 'Advanced clinical strategies for the nervous-system-first chiropractor. Patient communication, scanning protocols, and practice building.',
+    id: 'course-clinical-identity',
+    title: 'Building Your Clinical Identity',
+    description: 'Graduate with clarity, a personal brand, and a 90-day plan while everyone else is scrambling. This is the foundation every student needs before stepping into practice.',
     tier_required: 'paid',
+    stripe_plan: 'course_clinical_identity',
+    price: 197,
+    preview_module: 'm1',
     modules: [
       {
         id: 'm1',
-        title: 'The New Patient Experience',
-        description: 'Designing a 4-step journey from scan to care plan',
+        title: 'Who Are You as a Doctor?',
+        description: 'Finding your philosophy, your niche, and your non-negotiables',
         readTime: '12 min',
-        content: `The first visit sets the tone for the entire clinical relationship. A structured new patient experience creates certainty for both the doctor and the patient. It communicates professionalism, builds trust, and positions the care plan presentation as a natural next step rather than a sales pitch.`
+        content: `This is the most important question you will answer in your career — and almost no one in chiropractic school asks you to answer it. Who are you as a doctor? Not what technique you use. Not what school you went to. WHO ARE YOU?
+
+**Why This Matters More Than Technique**
+
+Here's what nobody tells you in school: patients don't choose you because of your technique. They choose you because of who you are, what you believe, and how that makes them feel. Two doctors can use the exact same technique and get completely different results — not because of their hands, but because of the conviction and clarity behind them.
+
+The doctors who build thriving practices in their first 3 years all have one thing in common: they know exactly who they are, who they serve, and why it matters. The doctors who struggle? They're trying to be everything to everyone.
+
+**The Identity Framework**
+
+Answer these five questions. Write them down. These become the foundation of everything — your website, your elevator pitch, your report of findings, your social media, your hiring decisions, everything.
+
+1. **What do I believe about health that most people don't?**
+This is your philosophical core. For nervous system chiropractors, it might be: "I believe the nervous system controls everything, and that optimizing neural function is the most powerful thing you can do for your health." This belief will attract some people and repel others. That's the point.
+
+2. **Who am I uniquely positioned to serve?**
+Not "everyone." Not "anyone with a spine." Get specific. Pediatric families? Stressed-out executives? Pregnant women? Athletes? The more specific you get, the more magnetic you become to that group. A pediatric-focused nervous system chiropractor doesn't compete with the general chiropractor down the street — they occupy a completely different category.
+
+3. **What transformation do I deliver?**
+Not "adjustments." Not "pain relief." What is the OUTCOME? "I help children with developmental challenges reach their full potential by optimizing their nervous system." "I help overwhelmed professionals reclaim their energy and mental clarity." The transformation is what people pay for.
+
+4. **What will I never compromise on?**
+These are your clinical non-negotiables. Maybe it's: "I will always scan before I adjust." Or: "I will never adjust someone I haven't examined." Or: "I will always tell the truth about what I see, even when it's not what they want to hear." These non-negotiables become your reputation.
+
+5. **What is my 10-year vision?**
+Where is this going? Multi-location practice? Speaking and education? Research? Mentorship? Your 10-year vision determines the moves you make in year one.
+
+**Your Clinical Philosophy Statement**
+
+Once you've answered those five questions, distill them into a 2-3 sentence Clinical Philosophy Statement. This becomes your north star:
+
+Example: "I am a nervous system chiropractor who specializes in pediatric neurodevelopment. I believe every child deserves a nervous system that is free from interference so they can grow, learn, and thrive. I use objective scanning technology to measure, track, and prove the impact of care — because parents deserve certainty, not guesswork."
+
+That statement does more for your career than any technique certification ever will. It tells patients who you are. It tells associates what you stand for. It tells your team what matters.
+
+**Common Mistakes**
+
+- **Being too vague**: "I help people feel better" means nothing. Everyone says that.
+- **Copying someone else's identity**: Your mentor's identity is theirs. Learn from them, but build your own.
+- **Changing your identity based on market trends**: Your identity should evolve slowly over years, not shift with every seminar you attend.
+- **Thinking you need more credentials first**: You don't need another certification to know who you are. You need clarity.
+
+**Action Step**
+
+Before you move to the next module, write out your answers to the five questions and draft your Clinical Philosophy Statement. Don't overthink it — your first draft won't be perfect. But having something written down puts you ahead of 90% of graduates.`
       },
       {
         id: 'm2',
-        title: 'Objective Scanning Protocols',
-        description: 'Standard operating procedures for EMG, thermo, and HRV',
-        readTime: '15 min',
-        content: `Standardized scanning protocols ensure consistency and reliability in clinical assessment. This module covers proper patient positioning, scanning technique, artifact identification, and interpretation frameworks for surface EMG, thermal scanning, and heart rate variability analysis.`
+        title: 'The Nervous System Elevator Pitch',
+        description: 'Explaining what you do in 30 seconds so anyone gets it',
+        readTime: '10 min',
+        content: `You will be asked "So what do you do?" thousands of times in your career. At family gatherings, at networking events, at the gym, at your kid's school. Most chiropractors fumble this moment with either too much jargon or a weak, apologetic answer.
+
+Your elevator pitch is not a sales script. It's a clear, confident, compelling explanation of what you do and why it matters — delivered in 30 seconds or less.
+
+**The Formula**
+
+"I'm a [type] chiropractor. I help [specific people] with [specific problem] by [your unique approach]. Most [people/patients/parents] don't realize that [surprising insight], and that's where I come in."
+
+**Example Pitches**
+
+For a pediatric-focused doctor:
+"I'm a nervous system chiropractor. I work mostly with kids — the ones who are struggling with focus, sleep, behavior, or developmental milestones. I use brain and nervous system scanning to find exactly where their system is stuck, and gentle adjustments to help it reorganize. Most parents don't realize that birth trauma, even from a 'normal' delivery, can create nervous system interference that affects everything from colic to concentration. That's where I come in."
+
+For a family wellness doctor:
+"I'm a nervous system chiropractor. I help families optimize their health by making sure their nervous systems are functioning at 100%. We use objective scanning technology — similar to what you'd see in a neurologist's office — to measure how well the brain and body are communicating. What most people don't realize is that stress, whether physical, chemical, or emotional, creates measurable interference in the nervous system. We find it, we correct it, and we track the improvement over time."
+
+For a performance-focused doctor:
+"I'm a nervous system chiropractor who works with high performers — executives, athletes, entrepreneurs. I help them operate at a higher level by optimizing the system that controls everything: the nervous system. We measure brain-body communication objectively, identify where stress has created interference, and correct it. Most of my clients come in thinking chiropractic is about back pain. They stay because they sleep better, think clearer, and perform at a level they didn't know was possible."
+
+**The Keys**
+
+1. **Lead with identity, not credentials**: "I'm a nervous system chiropractor" not "I graduated from Palmer in 2024"
+2. **Name your people**: "Kids," "executives," "families" — not "patients" or "people"
+3. **Name the outcome, not the process**: "Optimize nervous system function" not "adjust subluxations"
+4. **Include the surprise**: The "most people don't realize..." line creates curiosity
+5. **Practice until it's natural**: You should be able to deliver this while making eye contact, not reciting from memory
+
+**What NOT to Say**
+
+- "I crack backs" — Undermines the entire profession
+- "It's like a massage but for your spine" — Wrong and diminishing
+- "I'm kind of like a physical therapist" — You're not, and this confuses people
+- "It's hard to explain..." — Then practice more
+- Starting with "Well, it's actually..." in an apologetic tone — Own it
+
+**Action Step**
+
+Write your pitch using the formula. Practice it out loud 10 times. Then deliver it to three people this week and note their response. Refine based on what gets the best reaction (genuine curiosity, follow-up questions = winning).`
       },
       {
         id: 'm3',
-        title: 'Patient Communication Mastery',
-        description: 'How to explain nervous system care to any audience',
-        readTime: '10 min',
-        content: `The ability to explain complex neurological concepts in simple, compelling language is the single most valuable clinical skill. Learn frameworks for explaining subluxation, neuroplasticity, and care plans to patients of all backgrounds.`
+        title: 'Building Your Online Presence Before Graduation',
+        description: 'Create your professional brand while you still have time',
+        readTime: '12 min',
+        content: `The biggest advantage you have as a student is TIME. You have time to build a professional online presence before you need one. By the time you graduate, you should have a visible, credible, professional brand that clinic owners, patients, and colleagues can find.
+
+**Why This Can't Wait Until After Graduation**
+
+When you apply for associate positions, the first thing clinic owners do is Google you. They check your Instagram. They look at your LinkedIn. If they find nothing — or worse, find a party-heavy social media presence — you've lost before the interview starts.
+
+When you open your own practice, you need patients from day one. A social media following of 500 engaged, local people is worth more than a $10,000 marketing budget. But building that following takes months. Start now.
+
+**The Three Platforms That Matter**
+
+You don't need to be everywhere. You need to be excellent in three places:
+
+**1. Instagram (Your Portfolio)**
+This is where you showcase your clinical identity. Content pillars:
+- Educational content about the nervous system (2-3x per week)
+- Behind-the-scenes of your clinical training
+- Patient education topics your future patients will search for
+- Your philosophy and why you chose nervous system chiropractic
+- Reposting/sharing research and clinical pearls
+
+Content format priority: Reels > Carousels > Single photos. Video is king. You don't need professional production — phone camera, good lighting, clear audio.
+
+**2. LinkedIn (Your Resume)**
+This is where clinic owners and professional connections find you. Must-haves:
+- Professional headshot (not your graduation photo — get a proper one)
+- Headline: "Nervous System Chiropractor | [Your Specialty Focus] | [School] Class of [Year]"
+- About section: Your Clinical Philosophy Statement from Module 1
+- Posts: 1-2x per week, professional tone, industry insights
+- Connect with every clinic owner, chiropractor, and industry leader you can find
+
+**3. Google Business Profile (Your Foundation)**
+Even if you don't have a practice yet, understand how this works because it's the #1 patient acquisition channel for chiropractors. When you do start practicing:
+- Claim your profile immediately
+- Get reviews from your first 10 patients within the first month
+- Post weekly updates
+- Respond to every review within 24 hours
+
+**Content Creation System**
+
+The biggest obstacle to consistency is not knowing what to post. Here's a weekly system:
+
+- **Monday**: Educational post (teach something about the nervous system)
+- **Wednesday**: Personal/philosophy post (why you do what you do, a clinical insight, a patient interaction that moved you)
+- **Friday**: Engagement post (question, poll, or call to action)
+
+Batch create content on Sunday. Write 3 captions, shoot 2-3 short videos, schedule everything. Total time: 2 hours per week.
+
+**What to Avoid**
+
+- Political content on your professional accounts
+- Bashing other healthcare professions
+- Making clinical claims you can't support
+- Posting patient information (even with permission — it's risky)
+- Being inactive for weeks at a time (consistency > perfection)
+- Buying followers (fake engagement is obvious and damages credibility)
+
+**The Compounding Effect**
+
+Here's the math: If you start posting 3x per week today, and you have 18 months until graduation, that's 234 posts. Each post reaches an average of 100-500 people. By graduation, you've made thousands of impressions in your local community. You've built credibility. You've demonstrated expertise. You've created a body of work that says "this person is serious, knowledgeable, and passionate."
+
+That body of work is an asset no one can take from you. It follows you to every job, every practice, every city. Start building it now.`
       },
       {
         id: 'm4',
-        title: 'Practice Building with Data',
-        description: 'Using clinical outcomes to grow your practice organically',
-        readTime: '12 min',
-        content: `When you measure outcomes objectively, your results speak for themselves. Learn how to use before-and-after scan data, patient testimonials, and community education events to build a referral-driven practice.`
+        title: 'Your First 90 Days Game Plan',
+        description: 'The exact playbook for your first 3 months out of school',
+        readTime: '15 min',
+        content: `The first 90 days after graduation are the most critical — and the most chaotic — of your career. Having a plan eliminates the chaos. This module gives you a week-by-week framework for your first 90 days, whether you're starting as an associate or opening your own practice.
+
+**Before Day 1: The Pre-Launch Checklist**
+
+Complete these before your first day of work:
+
+- [ ] State license application submitted and approved
+- [ ] Malpractice insurance secured (NCMIC, ChiroSecure, or equivalent)
+- [ ] NPI number obtained
+- [ ] DEA registration (if required in your state)
+- [ ] CPR/First Aid certification current
+- [ ] Professional wardrobe ready (you get one chance at first impressions)
+- [ ] Clinical Philosophy Statement written and memorized
+- [ ] Elevator pitch practiced and natural
+- [ ] LinkedIn profile professional and complete
+- [ ] Instagram presence established with at least 20 posts
+
+**Days 1-30: The Foundation Phase**
+
+Your only job in the first 30 days: learn the system and build trust.
+
+**If you're an associate:**
+- Learn every system, protocol, and procedure in the office — don't assume you know better
+- Shadow the lead doctor for at least 5 full patient interactions before you adjust anyone
+- Memorize the office's scanning and adjustment protocols
+- Learn every team member's name, role, and what matters to them
+- Ask the clinic owner: "What does success look like for me at 30 days? 90 days? 6 months?"
+- Start a daily journal: what you learned, what went well, what you need to improve
+- Goal: See 30-50 patients per week by end of month 1
+
+**If you're opening cold:**
+- Finalize your lease, build-out, and equipment installation
+- Set up your practice management software
+- Complete your Google Business Profile
+- Order scanning equipment and get trained on it
+- Build your new patient intake process (forms, consent, scan protocol)
+- Host a soft opening for friends and family (practice your systems with friendly faces)
+- Begin community outreach: introduce yourself to every business within a half-mile radius
+- Goal: 5-10 new patients scheduled for month 2
+
+**Days 31-60: The Growth Phase**
+
+Now you know the basics. Time to accelerate.
+
+**If you're an associate:**
+- You should be adjusting 50-80 patients per week
+- Start delivering your own Reports of Findings (with the lead doctor observing initially)
+- Track your numbers daily: new patients, patient visits, show rate, case average
+- Identify your top 5 referring patients and personally thank them
+- Ask the clinic owner for feedback weekly — don't wait for your review
+- Begin contributing to the office's social media and community events
+- Goal: Consistent 60+ patient visits per week
+
+**If you're opening cold:**
+- Run your first community workshop or screening event
+- Launch your Google Ads or social media advertising
+- Build relationships with 3-5 local businesses for cross-referrals
+- Start a "Founder's Rate" offer for your first 25 patients (discounted care plan — not free adjustments)
+- Get your first 5 Google reviews
+- Refine your systems based on real patient experience
+- Goal: 15-25 new patients this month, 40+ patient visits per week
+
+**Days 61-90: The Momentum Phase**
+
+This is where you prove you belong.
+
+**If you're an associate:**
+- You should be seeing 80-100+ patient visits per week
+- Your conversion rate on new patients should be 75%+
+- You should have at least 3 patient testimonials or success stories
+- Begin taking ownership of specific office initiatives (marketing, community events, social media)
+- Have the "growth conversation" with the clinic owner: What's the path to more responsibility? Partnership? Opening a second location?
+- Goal: Producing $25K+/month in collections
+
+**If you're opening cold:**
+- You should have 50+ active patients
+- Cash flow should be approaching break-even
+- Your systems should be running smoothly (if they're not, fix them now — they only get harder to change as you grow)
+- Hire your first team member (front desk/CA) if you haven't already
+- Plan your first re-evaluation week — show patients their before/after scans
+- Begin planning a signature community event or workshop series
+- Goal: 30+ new patients this month, 80+ patient visits per week
+
+**The Numbers That Matter**
+
+Track these weekly from day one:
+
+| Metric | Associate Target (Month 3) | Owner Target (Month 3) |
+|--------|---------------------------|------------------------|
+| Patient Visits/Week | 80-100 | 60-80 |
+| New Patients/Month | 15-25 | 20-30 |
+| Show Rate | 85%+ | 85%+ |
+| Case Acceptance | 75%+ | 75%+ |
+| Collections/Month | $25K+ | $15K+ |
+| Google Reviews | 10+ | 10+ |
+
+**The Mindset Shift**
+
+The hardest part of the first 90 days isn't clinical — it's psychological. You will feel like an imposter. You will wonder if you're good enough. You will compare yourself to doctors who've been practicing for 20 years.
+
+This is normal. Every doctor felt this way. The cure is not more confidence — it's more reps. See more patients. Do more scans. Deliver more reports. Confidence is a lagging indicator of competence, and competence comes from repetition.
+
+Trust the process. Trust your training. Trust your philosophy. And show up every single day like you belong — because you do.`
       },
+    ]
+  },
+  {
+    id: 'course-business',
+    title: 'The Business of Chiropractic',
+    description: 'Understand money, contracts, and practice models so nobody takes advantage of you. The business education chiropractic school skipped.',
+    tier_required: 'paid',
+    stripe_plan: 'course_business',
+    price: 297,
+    modules: [
+      { id: 'm1', title: 'Understanding Practice Models', description: 'Associate, startup, acquisition — the real pros and cons', readTime: '15 min', content: 'Full content coming soon — video modules in production.' },
+      { id: 'm2', title: 'Reading a P&L', description: 'The numbers you need to know from day one', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
+      { id: 'm3', title: 'Negotiating Your First Contract', description: 'What to watch for so you don\'t get burned', readTime: '15 min', content: 'Full content coming soon — video modules in production.' },
+      { id: 'm4', title: 'Insurance vs. Cash vs. Hybrid', description: 'Pros, cons, and financial realities of each model', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
+      { id: 'm5', title: 'Setting Your Fees', description: 'How to price your services and understand collections', readTime: '10 min', content: 'Full content coming soon — video modules in production.' },
+      { id: 'm6', title: 'Building a Personal Brand', description: 'Attract patients before you even open the doors', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
+    ]
+  },
+  {
+    id: 'course-clinical-confidence',
+    title: 'Clinical Confidence',
+    description: 'Walk into day one and perform like you\'ve been doing this for years. The real-world clinical skills school didn\'t prepare you for.',
+    tier_required: 'paid',
+    stripe_plan: 'course_clinical_confidence',
+    price: 297,
+    modules: [
+      { id: 'm1', title: 'Your First Day with Real Patients', description: 'What school didn\'t teach you about the real thing', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
+      { id: 'm2', title: 'Report of Findings That Convert', description: 'Without being salesy — how to present with conviction', readTime: '15 min', content: 'Full content coming soon — video modules in production.' },
+      { id: 'm3', title: 'Handling Patient Objections', description: '"I just want to come when I\'m in pain" — what to say', readTime: '10 min', content: 'Full content coming soon — video modules in production.' },
+      { id: 'm4', title: 'Difficult Conversations', description: 'Non-compliant patients, dismissals, and boundaries', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
+      { id: 'm5', title: 'Documentation That Protects You', description: 'Clinical notes that tell the story and cover you legally', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
+      { id: 'm6', title: 'Building Referral Relationships', description: 'How to earn respect from MDs, PTs, and specialists', readTime: '10 min', content: 'Full content coming soon — video modules in production.' },
+    ]
+  },
+  {
+    id: 'course-associate-playbook',
+    title: 'The Associate Playbook',
+    description: 'Produce more, earn more, and position yourself to own within 3 years. The playbook clinic owners wish every associate had.',
+    tier_required: 'paid',
+    stripe_plan: 'course_associate_playbook',
+    price: 397,
+    modules: [
+      { id: 'm1', title: 'What Clinic Owners Actually Want', description: 'From someone who hires — the unfiltered truth', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
+      { id: 'm2', title: 'Producing $30K+/Month as an Associate', description: 'The benchmarks, the habits, the mindset', readTime: '15 min', content: 'Full content coming soon — video modules in production.' },
+      { id: 'm3', title: 'When to Stay, When to Leave', description: 'Reading the signs and making the right move at the right time', readTime: '10 min', content: 'Full content coming soon — video modules in production.' },
+      { id: 'm4', title: 'From Associate to Owner', description: 'The transition playbook — buying in, branching out, or starting fresh', readTime: '15 min', content: 'Full content coming soon — video modules in production.' },
     ]
   }
 ];

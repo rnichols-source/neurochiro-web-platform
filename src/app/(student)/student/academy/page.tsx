@@ -1,46 +1,88 @@
 "use client";
 
-import { useState } from "react";
-import { GraduationCap, BookOpen, CheckCircle2, Lock, ChevronRight, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { GraduationCap, BookOpen, CheckCircle2, Lock, ChevronRight, Clock, Zap, ShieldCheck } from "lucide-react";
 import { SEED_COURSES } from "./courses-data";
+import { createCourseCheckout, createBundleCheckout, getPurchasedCourses } from "./purchase-actions";
 
 function cn(...inputs: any[]) { return inputs.filter(Boolean).join(" "); }
 
 export default function AcademyPage() {
+  const [purchasedCourseIds, setPurchasedCourseIds] = useState<string[]>([]);
+  const [loadingPurchase, setLoadingPurchase] = useState<string | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [selectedModule, setSelectedModule] = useState<any>(null);
+  const [completing, setCompleting] = useState(false);
+
+  useEffect(() => {
+    getPurchasedCourses()
+      .then(setPurchasedCourseIds)
+      .catch(() => {});
+  }, []);
+
   const courses = SEED_COURSES.map(c => ({
     id: c.id,
     title: c.title,
     description: c.description,
     tierRequired: c.tier_required,
-    isLocked: false,
+    price: (c as any).price || 0,
+    stripePlan: (c as any).stripe_plan || null,
+    previewModule: (c as any).preview_module || null,
+    isPurchased: c.tier_required === 'free' || purchasedCourseIds.includes(c.id),
     moduleCount: c.modules.length,
     completedCount: 0,
     modules: c.modules,
   }));
-  const [selectedCourse, setSelectedCourse] = useState<any>(null);
-  const [selectedModule, setSelectedModule] = useState<any>(null);
-  const [completing, setCompleting] = useState(false);
+
+  const paidCourses = courses.filter(c => c.tierRequired === 'paid');
+  const allPaidPurchased = paidCourses.every(c => c.isPurchased);
 
   const openCourse = (courseId: string) => {
     const course = courses.find(c => c.id === courseId);
-    setSelectedCourse(course || null);
-    if (course) {
-      setSelectedModule(course.modules[0] || null);
-    } else {
-      setSelectedModule(null);
+    if (!course) return;
+    setSelectedCourse(course);
+    setSelectedModule(course.modules[0] || null);
+  };
+
+  const handlePurchase = async (courseId: string) => {
+    setLoadingPurchase(courseId);
+    try {
+      const result = await createCourseCheckout(courseId);
+      if (result.url) {
+        window.location.href = result.url;
+      } else {
+        alert(result.error || 'Something went wrong');
+      }
+    } catch {
+      alert('Something went wrong. Please try again.');
     }
+    setLoadingPurchase(null);
+  };
+
+  const handleBundlePurchase = async () => {
+    setLoadingPurchase('bundle');
+    try {
+      const result = await createBundleCheckout();
+      if (result.url) {
+        window.location.href = result.url;
+      } else {
+        alert(result.error || 'Something went wrong');
+      }
+    } catch {
+      alert('Something went wrong. Please try again.');
+    }
+    setLoadingPurchase(null);
   };
 
   const handleCompleteModule = () => {
     if (!selectedCourse || !selectedModule) return;
     setCompleting(true);
-    // For now, just show completion locally (progress tracking requires DB tables)
     setTimeout(() => setCompleting(false), 500);
   };
 
   // Course Detail View
   if (selectedCourse) {
-    const completedIds = selectedCourse.progress?.completed_modules || [];
+    const isPreviewOnly = !selectedCourse.isPurchased;
 
     return (
       <div className="space-y-8 pb-20">
@@ -53,48 +95,59 @@ export default function AcademyPage() {
           <p className="text-gray-500 mt-2">{selectedCourse.description}</p>
           <div className="flex items-center gap-4 mt-3">
             <span className="text-xs font-bold text-gray-400">{selectedCourse.moduleCount} modules</span>
-            <span className="text-xs font-bold text-green-500">{selectedCourse.completedCount} completed</span>
+            {isPreviewOnly && (
+              <span className="text-xs font-bold text-neuro-orange bg-neuro-orange/10 px-2 py-0.5 rounded-full">Preview Mode</span>
+            )}
           </div>
         </header>
-
-        {selectedCourse.completedCount >= selectedCourse.moduleCount && selectedCourse.moduleCount > 0 && (
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
-            <div className="text-3xl mb-2">🎓</div>
-            <h3 className="text-lg font-black text-green-700 mb-1">Course Complete!</h3>
-            <p className="text-green-600 text-sm">You&apos;ve completed all {selectedCourse.moduleCount} modules in {selectedCourse.title}. Great work!</p>
-          </div>
-        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Module List */}
           <div className="space-y-2">
             {selectedCourse.modules.map((mod: any, i: number) => {
-              const isCompleted = Array.isArray(completedIds) && completedIds.includes(mod.id);
+              const isLocked = isPreviewOnly && mod.id !== selectedCourse.previewModule && i > 0;
               return (
                 <button
                   key={mod.id}
-                  onClick={() => setSelectedModule(mod)}
+                  onClick={() => !isLocked && setSelectedModule(mod)}
+                  disabled={isLocked}
                   className={cn(
                     "w-full text-left p-4 rounded-2xl border transition-all",
+                    isLocked ? "opacity-50 cursor-not-allowed bg-gray-50 border-gray-100" :
                     selectedModule?.id === mod.id ? "bg-neuro-orange/10 border-neuro-orange/30" : "bg-white border-gray-100 hover:border-gray-200",
                   )}
                 >
                   <div className="flex items-center gap-3">
                     <div className={cn(
                       "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black",
-                      isCompleted ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-500"
+                      isLocked ? "bg-gray-100 text-gray-400" : "bg-gray-100 text-gray-500"
                     )}>
-                      {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
+                      {isLocked ? <Lock className="w-3.5 h-3.5" /> : i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={cn("font-bold text-sm", isCompleted ? "text-green-600" : "text-neuro-navy")}>{mod.title}</p>
+                      <p className={cn("font-bold text-sm", isLocked ? "text-gray-400" : "text-neuro-navy")}>{mod.title}</p>
                       <p className="text-gray-400 text-xs truncate">{mod.description}</p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                    {!isLocked && <ChevronRight className="w-4 h-4 text-gray-300" />}
                   </div>
                 </button>
               );
             })}
+
+            {/* Purchase CTA in sidebar */}
+            {isPreviewOnly && (
+              <div className="mt-4 bg-neuro-navy rounded-2xl p-5 text-white">
+                <h4 className="font-black text-sm mb-1">Unlock Full Course</h4>
+                <p className="text-gray-300 text-xs mb-4">Get access to all {selectedCourse.moduleCount} modules.</p>
+                <button
+                  onClick={() => handlePurchase(selectedCourse.id)}
+                  disabled={loadingPurchase === selectedCourse.id}
+                  className="w-full py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 disabled:opacity-50 transition-colors"
+                >
+                  {loadingPurchase === selectedCourse.id ? 'Loading...' : `Unlock for $${selectedCourse.price}`}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Module Content */}
@@ -108,9 +161,7 @@ export default function AcademyPage() {
                 <h2 className="text-2xl font-black text-neuro-navy mb-4">{selectedModule.title}</h2>
                 <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed mb-8 space-y-4">
                   {selectedModule.content.split('\n\n').map((paragraph: string, i: number) => {
-                    // Handle bold markdown
                     const formatted = paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                    // Handle bullet points
                     if (paragraph.trim().startsWith('- ')) {
                       const items = paragraph.split('\n').filter((l: string) => l.trim().startsWith('- '));
                       return (
@@ -121,7 +172,6 @@ export default function AcademyPage() {
                         </ul>
                       );
                     }
-                    // Handle numbered lists
                     if (/^\d+\.\s/.test(paragraph.trim())) {
                       const items = paragraph.split('\n').filter((l: string) => /^\d+\.\s/.test(l.trim()));
                       return (
@@ -135,11 +185,7 @@ export default function AcademyPage() {
                     return <p key={i} dangerouslySetInnerHTML={{ __html: formatted }} />;
                   })}
                 </div>
-                {Array.isArray(completedIds) && completedIds.includes(selectedModule.id) ? (
-                  <div className="flex items-center gap-2 text-green-500 font-bold text-sm">
-                    <CheckCircle2 className="w-5 h-5" /> Module Completed
-                  </div>
-                ) : (
+                {!isPreviewOnly && (
                   <button
                     onClick={handleCompleteModule}
                     disabled={completing}
@@ -162,8 +208,11 @@ export default function AcademyPage() {
   }
 
   // Course Listing
+  const freeCourses = courses.filter(c => c.tierRequired === 'free');
+  const premiumCourses = courses.filter(c => c.tierRequired === 'paid');
+
   return (
-    <div className="space-y-8 pb-20">
+    <div className="space-y-10 pb-20">
       <header>
         <h1 className="text-3xl font-heading font-black text-neuro-navy uppercase tracking-tight flex items-center gap-3">
           <GraduationCap className="w-8 h-8 text-neuro-orange" /> Academy
@@ -171,58 +220,112 @@ export default function AcademyPage() {
         <p className="text-gray-500 mt-2">Build your clinical foundation with structured courses in nervous system chiropractic.</p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {courses.map((course) => {
-          const progress = course.moduleCount > 0 ? Math.round((course.completedCount / course.moduleCount) * 100) : 0;
-
-          return (
+      {/* Free Courses */}
+      <section>
+        <h2 className="text-sm font-black uppercase tracking-widest text-gray-400 mb-4">Free Courses</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {freeCourses.map((course) => (
             <div
               key={course.id}
-              className={cn(
-                "bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm relative overflow-hidden transition-all",
-                course.isLocked ? "opacity-70" : "hover:shadow-md hover:border-gray-200 cursor-pointer"
-              )}
-              onClick={() => !course.isLocked && openCourse(course.id)}
+              onClick={() => openCourse(course.id)}
+              className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-gray-200 cursor-pointer transition-all"
             >
-              {course.isLocked && (
-                <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                  <div className="text-center p-4">
-                    <Lock className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="font-bold text-gray-500 text-sm">Coming Soon</p>
-                  </div>
-                </div>
-              )}
+              <div className="flex items-center gap-2 mb-3">
+                <BookOpen className="w-4 h-4 text-neuro-orange" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{course.moduleCount} modules</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-green-500 bg-green-50 px-2 py-0.5 rounded-full">Free</span>
+              </div>
+              <h3 className="text-lg font-black text-neuro-navy mb-1">{course.title}</h3>
+              <p className="text-gray-500 text-sm line-clamp-2">{course.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
-              <div className="flex items-center gap-2 mb-4">
-                <BookOpen className="w-5 h-5 text-neuro-orange" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                  {course.moduleCount} modules
-                </span>
-                {course.tierRequired === 'free' && (
-                  <span className="text-[10px] font-black uppercase tracking-widest text-green-500 bg-green-50 px-2 py-0.5 rounded-full">Free</span>
+      {/* Bundle Offer */}
+      {!allPaidPurchased && (
+        <section className="bg-neuro-navy rounded-2xl p-8 text-white">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-2 mb-2">
+              <Zap className="w-5 h-5 text-neuro-orange" />
+              <span className="text-xs font-black uppercase tracking-widest text-neuro-orange">Best Value</span>
+            </div>
+            <h2 className="text-2xl font-black mb-2">The School-to-Practice System</h2>
+            <p className="text-gray-300 mb-4">All 4 premium courses. The complete unfair advantage for your career. Own it forever.</p>
+            <div className="flex items-center gap-4 mb-6">
+              <span className="text-3xl font-black">$797</span>
+              <span className="text-gray-400 line-through text-lg">$1,188</span>
+              <span className="bg-neuro-orange/20 text-neuro-orange text-xs font-black px-3 py-1 rounded-full">Save $391</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mb-6 text-sm">
+              {premiumCourses.map(c => (
+                <div key={c.id} className="flex items-center gap-2 text-gray-300">
+                  <CheckCircle2 className="w-4 h-4 text-neuro-orange flex-shrink-0" />
+                  <span>{c.title}</span>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={handleBundlePurchase}
+              disabled={loadingPurchase === 'bundle'}
+              className="px-8 py-4 bg-neuro-orange text-white rounded-xl font-black uppercase tracking-widest text-sm hover:bg-neuro-orange/90 disabled:opacity-50 transition-colors"
+            >
+              {loadingPurchase === 'bundle' ? 'Loading...' : 'Get the Full System — $797'}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* Premium Courses */}
+      <section>
+        <h2 className="text-sm font-black uppercase tracking-widest text-gray-400 mb-4">Premium Courses</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {premiumCourses.map((course) => (
+            <div
+              key={course.id}
+              className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <BookOpen className="w-4 h-4 text-neuro-orange" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{course.moduleCount} modules</span>
+                {course.isPurchased ? (
+                  <span className="text-[10px] font-black uppercase tracking-widest text-green-500 bg-green-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3" /> Owned
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-black uppercase tracking-widest text-neuro-orange bg-neuro-orange/10 px-2 py-0.5 rounded-full">${course.price}</span>
                 )}
               </div>
-
-              <h3 className="text-lg font-black text-neuro-navy mb-2">{course.title}</h3>
-              <p className="text-gray-500 text-sm mb-6 line-clamp-2">{course.description}</p>
-
-              {/* Progress bar */}
-              <div className="mt-auto">
-                <div className="flex justify-between text-xs font-bold mb-1">
-                  <span className="text-gray-400">{progress}% complete</span>
-                  <span className="text-gray-400">{course.completedCount}/{course.moduleCount}</span>
+              <h3 className="text-lg font-black text-neuro-navy mb-1">{course.title}</h3>
+              <p className="text-gray-500 text-sm mb-4 line-clamp-2">{course.description}</p>
+              {course.isPurchased ? (
+                <button
+                  onClick={() => openCourse(course.id)}
+                  className="w-full py-3 bg-neuro-navy text-white rounded-xl font-bold text-sm hover:bg-neuro-navy/90 transition-colors"
+                >
+                  Continue Learning
+                </button>
+              ) : (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => openCourse(course.id)}
+                    className="flex-1 py-3 border border-gray-200 text-neuro-navy rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors"
+                  >
+                    Preview
+                  </button>
+                  <button
+                    onClick={() => handlePurchase(course.id)}
+                    disabled={loadingPurchase === course.id}
+                    className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 disabled:opacity-50 transition-colors"
+                  >
+                    {loadingPurchase === course.id ? 'Loading...' : `Unlock $${course.price}`}
+                  </button>
                 </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-neuro-orange rounded-full transition-all"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
+              )}
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
