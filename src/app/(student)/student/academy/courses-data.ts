@@ -1389,13 +1389,558 @@ If the answer to any of these is unsatisfying, that's your starting point. Your 
     tier_required: 'paid',
     stripe_plan: 'course_clinical_confidence',
     price: 297,
+    preview_module: 'm1',
     modules: [
-      { id: 'm1', title: 'Your First Day with Real Patients', description: 'What school didn\'t teach you about the real thing', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
-      { id: 'm2', title: 'Report of Findings That Convert', description: 'Without being salesy — how to present with conviction', readTime: '15 min', content: 'Full content coming soon — video modules in production.' },
-      { id: 'm3', title: 'Handling Patient Objections', description: '"I just want to come when I\'m in pain" — what to say', readTime: '10 min', content: 'Full content coming soon — video modules in production.' },
-      { id: 'm4', title: 'Difficult Conversations', description: 'Non-compliant patients, dismissals, and boundaries', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
-      { id: 'm5', title: 'Documentation That Protects You', description: 'Clinical notes that tell the story and cover you legally', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
-      { id: 'm6', title: 'Building Referral Relationships', description: 'How to earn respect from MDs, PTs, and specialists', readTime: '10 min', content: 'Full content coming soon — video modules in production.' },
+      {
+        id: 'm1',
+        title: 'Your First Day with Real Patients',
+        description: "What school didn't teach you about the real thing",
+        readTime: '15 min',
+        content: `School prepared you to pass boards. It did not prepare you to walk into a room, look a human being in the eyes, and be their doctor. The gap between clinical competence and clinical confidence is massive — and it only closes through understanding what actually happens on day one.
+
+**The Reality Check**
+
+Here's what day one actually feels like: Your hands are slightly shaky. The patient is watching you. You're running through the protocol in your head while trying to appear calm and experienced. The front desk calls you to say your next patient is already waiting. You haven't finished your notes from the last one.
+
+This is normal. Every doctor experienced this. The ones who succeeded pushed through it. The ones who didn't let the discomfort convince them they weren't ready.
+
+You ARE ready. You have the knowledge. What you're missing is pattern recognition — the ability to quickly assess a situation, make a decision, and act. That only comes from reps. So let's prepare you to make those first reps count.
+
+**Before the Patient Walks In**
+
+Preparation eliminates 80% of anxiety. Before every patient:
+
+1. **Review their intake form** — 2 minutes. Know their chief complaint, their history, and any red flags BEFORE you enter the room. Nothing destroys confidence faster than reading their paperwork in front of them.
+
+2. **Have a mental framework** — Don't improvise. Your first interaction follows a structure:
+   - Greet and connect (30 seconds of human conversation — not health talk)
+   - Confirm their reason for being here (in their words, not yours)
+   - Explain what you're going to do and why
+   - Do it
+   - Explain what you found
+   - Tell them what happens next
+
+3. **Check your equipment** — Make sure the scanning equipment is on, the table is clean, the headrest paper is fresh. Small details signal professionalism.
+
+**The First 30 Seconds**
+
+The patient decides whether they trust you in the first 30 seconds. Not based on your credentials — based on how you make them feel.
+
+**Do:**
+- Make eye contact when you walk in
+- Smile genuinely
+- Use their first name: "Hi Sarah, I'm Dr. [Name]. It's great to meet you."
+- Shake their hand firmly (or offer a fist bump — read the room)
+- Sit down at their level — don't stand over them
+
+**Don't:**
+- Walk in staring at their chart
+- Start with clinical questions immediately
+- Apologize for the wait (even if there was one — it's weak)
+- Look at your phone or the computer
+- Use jargon in your greeting
+
+**The Connection Moment**
+
+Before you touch a single clinical topic, spend 30-60 seconds being a human:
+- "I see you're from [town] — how long have you been there?"
+- "What do you do for work, Sarah?"
+- "Who referred you in? (If someone did) — Oh, I love the Johnsons. Great family."
+
+This isn't wasted time. This is trust-building. A patient who feels seen as a person — not a case — will follow your recommendations, refer their friends, and forgive your inevitable mistakes as a new doctor.
+
+**The Consultation**
+
+Now transition to clinical. The key here is LISTENING, not talking.
+
+"So Sarah, tell me what's going on — what brought you in today?"
+
+Then shut up. Let them talk. Don't interrupt. Don't start diagnosing in your head. Just listen. When they finish, repeat back what you heard:
+
+"So if I'm hearing you right, the headaches started about 6 months ago, they're mostly on the right side, they're happening 3-4 times a week, and nothing you've tried has really helped. Is that right?"
+
+This does three things:
+1. Confirms you actually listened
+2. Makes the patient feel heard
+3. Gives you an accurate starting point
+
+**The Exam and Scan**
+
+This is where your training kicks in. You know how to examine a patient. You know how to run scans. The difference between school and real life:
+
+- **Narrate what you're doing**: "I'm going to check the range of motion in your neck now. Turn your head slowly to the right for me..." Silence during an exam is uncomfortable for patients.
+- **Explain findings in real-time**: "I'm noticing some restriction when you turn to the left — that's significant, and I'll explain why in a minute."
+- **Show confidence in your hands**: Even if you're unsure, move with purpose. Hesitation is visible and creates doubt.
+- **Use the scans as your anchor**: This is where nervous system chiropractors have a MASSIVE advantage. You're not guessing — you're showing them objective data. The scans do the talking.
+
+**The Close of Visit One**
+
+Never, NEVER end the first visit without a clear next step:
+
+"Sarah, based on what I'm seeing in your exam and your scans, I'd like to put together a complete picture for you. I have everything I need to do that. Can you come back [specific day/time] so I can walk you through exactly what I found and what I recommend? It'll take about 20 minutes."
+
+This is not pushy. This is professional. A doctor who examines you and says nothing definitive is confusing. A doctor who says "come back so I can explain what I found and what we can do about it" is confident and organized.
+
+**The Mindset Shift**
+
+Here's the truth nobody tells you: your first 50 patients don't care that you're new. They don't know you're new unless you tell them. They came to see a DOCTOR, and that's what you are.
+
+Stop qualifying yourself: "I'm a new doctor, so..." No. You're their doctor. Period.
+
+Stop comparing yourself to your mentor or the doctor you shadowed. They have 20 years of reps. You have your training, your scanning technology, and your genuine desire to help. That's enough to start. The rest comes with time.
+
+Your patients need you to be confident so they can be confident in their decision to trust you with their health. Fake it for the first 50 patients if you have to. By patient 100, you won't be faking it anymore.`
+      },
+      {
+        id: 'm2',
+        title: 'Report of Findings That Convert',
+        description: 'Without being salesy — how to present with conviction',
+        readTime: '15 min',
+        content: `The Report of Findings (ROF) is the most important conversation in your entire patient relationship. It's where trust is built or lost. It's where patients commit to their health or walk out the door. And it's where most new doctors completely fall apart.
+
+The ROF is not a sales pitch. It's a clinical recommendation delivered with conviction and clarity. The moment it feels like selling, you've lost.
+
+**The Framework: Problem → Cause → Solution → Plan**
+
+Every effective ROF follows this structure. Memorize it. Practice it. Never deviate from it.
+
+**Step 1: The Problem (Their Words)**
+
+Start with what THEY told you:
+
+"Sarah, when you came in, you told me you've been dealing with headaches 3-4 times a week for the last 6 months, and nothing has helped. You also mentioned you're not sleeping well and your energy has tanked. Is that still accurate?"
+
+Why this works: You're showing you listened. You're using their language. And you're getting them to re-commit to the problem out loud — which makes the solution feel necessary, not optional.
+
+**Step 2: The Cause (Your Findings)**
+
+Now you show them what you found. This is where your scanning technology becomes your MVP.
+
+Pull up their scans on a screen they can see. Walk them through it simply:
+
+"Here's what your nervous system scan revealed. These red areas along your upper neck show significant asymmetry in how your muscles are firing — which tells me the nerves in this area are not communicating properly with your brain. This thermal scan shows a temperature imbalance at the same level — that's your body's stress response stuck in overdrive. And your heart rate variability score is 34, which tells me your overall nervous system is running on fumes."
+
+Then connect the cause to the complaint:
+
+"This is why you're getting headaches. This is why you can't sleep. This is why your energy is gone. Your nervous system — the system that controls everything — is under interference at the top of your spine. Your body has been compensating for this for a long time, and now it's running out of ways to compensate."
+
+Why this works: You've moved the conversation from "I have headaches" to "my nervous system is compromised." That's a fundamentally different — and more serious — framing. And you didn't guess. You showed them the evidence.
+
+**Step 3: The Solution (What You Do)**
+
+Keep this simple and confident:
+
+"The good news is this is exactly what we specialize in. Through specific adjustments to these areas of interference, we can restore proper communication between your brain and your body. As that communication improves, your body can start healing and regulating the way it's designed to."
+
+Don't over-explain the technique. Don't get into biomechanics. Don't name the vertebrae. Patients don't care about C1 — they care about feeling better, sleeping better, and having energy again.
+
+**Step 4: The Plan (Specific and Structured)**
+
+"Based on what I see, here's what I recommend: I'd like to see you three times per week for the first four weeks. That intensity is important because your nervous system needs repetitive input to change the pattern it's been stuck in. After four weeks, we'll rescan you and compare — I expect to see measurable improvement in all three scans. From there, we'll taper based on how your nervous system is responding."
+
+Then present the investment:
+
+"For this initial phase, the investment is [amount]. We have payment options if that's helpful. Do you have any questions about what I've recommended?"
+
+**The Delivery**
+
+Your delivery matters as much as your content:
+
+- **Eye contact**: Look at them, not the screen, when you're explaining what the findings mean for their life.
+- **Pace**: Slow down. New doctors rush because they're nervous. Pausing after a significant statement gives it weight.
+- **Tone**: Conversational, not clinical. You're talking to a person, not presenting to a board.
+- **Posture**: Lean forward slightly. Uncross your arms. This signals engagement and confidence.
+- **Use a pen**: Point to specific areas on the scan. Physical pointing draws attention and adds authority.
+
+**The Questions**
+
+After you present the plan, stop talking. The patient will usually say one of three things:
+
+1. **"Okay, let's do it."** — Great. Schedule them immediately. Don't add unnecessary information.
+
+2. **"I need to think about it."** — This usually means they have an unspoken concern. Ask: "Absolutely — is there a specific part you'd like me to clarify?" Often they'll reveal it's about money, time, or skepticism. Address that specific concern.
+
+3. **"That's more than I expected."** — This is almost always about money. Respond with the investment reframe: "I completely understand. Let me break it down — at three visits per week for four weeks, that's [per-visit cost]. And we have monthly payment options that make it very manageable. The question isn't really whether you can afford the care — it's whether you can afford to keep living with these headaches for another 6 months."
+
+**What NOT to Do**
+
+- **Don't apologize for the price.** "I know it's a lot, but..." Undermines everything you just said.
+- **Don't give too many options.** "You could do 3x, or 2x, or even 1x a week..." Decision paralysis kills conversion. One recommendation. One plan.
+- **Don't skip the scans.** Telling someone they have subluxation without showing them evidence is just your opinion. Showing them the scan data is proof.
+- **Don't rush.** A 20-minute ROF that creates a committed patient is infinitely more valuable than a 5-minute ROF that creates a confused one.
+- **Don't end without a clear next step.** "Think about it and call us" is a death sentence. They won't call. Always schedule the first adjustment before they leave — even if it's "tentatively."
+
+**The Conversion Benchmark**
+
+A well-delivered ROF should convert at 70-85%. If you're below 60%, the issue is usually:
+- You're not connecting the findings to their life (it feels academic, not personal)
+- You're giving too many options instead of one clear recommendation
+- You're not confident in the plan (if you don't believe it, they won't either)
+- You're rushing through the scans instead of letting the data land
+
+Practice your ROF out loud 20 times before you deliver your first one. Record yourself. Watch it back. The cringe is the teacher.`
+      },
+      {
+        id: 'm3',
+        title: 'Handling Patient Objections',
+        description: '"I just want to come when I\'m in pain" — what to say',
+        readTime: '12 min',
+        content: `Objections are not rejections. An objection means the patient is interested enough to engage — they just have a barrier. Your job is to understand the barrier and address it directly. Here are the most common objections you'll face and exactly how to handle them.
+
+**Objection 1: "I just want to come when I'm in pain."**
+
+This is the #1 objection in chiropractic, and it reveals a fundamental misunderstanding of what you do. The patient sees you as a pain doctor. You need to reframe.
+
+**Response:**
+"I totally understand that, and if pain relief was all we did here, I'd agree with you. But here's what your scan showed — [point to scan]. This pattern of interference has been developing for a long time, and the headaches are just the symptom your body is using to get your attention. If we only address the pain and don't correct the underlying pattern, the pain comes back. Every time. What I'm recommending is that we actually fix the problem so you're not dealing with this again in 3 months. Does that make sense?"
+
+**Why it works:** You validated their perspective ("I totally understand"), then used their own scan data to show that pain is a symptom, not the problem. You didn't argue — you educated.
+
+**Objection 2: "I can't afford that."**
+
+Money objections are usually one of two things: (a) they genuinely can't afford it, or (b) they don't see enough value to justify the price. You need to figure out which one.
+
+**Response:**
+"I hear you — and I never want finances to be the reason someone doesn't get the care they need. Let me ask you this: if money wasn't a factor, would you move forward with the plan I recommended?"
+
+If they say **yes**: "Great. Let's talk about options. We have monthly payment plans that break this down into manageable amounts. Would that help?" (Then present the payment plan.)
+
+If they say **they're not sure**: The issue isn't money — it's value. Go back to the findings and reconnect the dots between their scan results, their symptoms, and the impact on their life.
+
+**Objection 3: "I need to talk to my spouse."**
+
+Sometimes this is genuine. Sometimes it's an exit strategy. Either way, don't fight it.
+
+**Response:**
+"Absolutely — that's a smart decision. Health decisions should be made together. Would it help if I put together a quick summary of your findings that you can show them? And would it make sense to schedule a tentative start date so we don't lose momentum? We can always adjust if you need to."
+
+**Why it works:** You respected their process, gave them a tool to have the conversation at home, and still got something on the calendar. A "tentative" appointment is 10x more likely to happen than "call us when you're ready."
+
+**Objection 4: "My last chiropractor didn't do scans / didn't recommend this much care."**
+
+Translation: "Why are you different, and why should I trust you over my previous experience?"
+
+**Response:**
+"That's actually a really important point. Not all chiropractic is the same. What we do here is nervous-system-focused — we measure how your brain and body are communicating using this scanning technology, and we track your progress objectively. Your previous experience may have been great — but this is a different approach with different goals. We're not just chasing symptoms. We're correcting the pattern causing them. That's why we scan, that's why we track, and that's why the care plan is structured the way it is."
+
+**Objection 5: "Does this really work?"**
+
+They're asking for evidence. Give it to them.
+
+**Response:**
+"Great question. Let me show you something." Then pull up a before/after scan comparison from a similar case (with patient permission, or use a de-identified example). "This patient came in with a similar scan pattern to yours. This is their scan after 12 weeks of care. You can see the change objectively. That's what I'm expecting to see with you."
+
+If you don't have before/after examples yet (you're brand new), say: "The research supports what we do — I can send you a few studies if you'd like. But honestly, the best evidence will be YOUR progress scan at the 4-week mark. I'm confident in what I'm seeing, and I think you will be too."
+
+**Objection 6: "I'll just see how I feel after a few visits."**
+
+This is the "I'll try it but I'm not committed" objection. It's dangerous because these patients inevitably feel better after 3-4 visits (the acute response) and quit before real correction happens.
+
+**Response:**
+"I appreciate that you're open to starting. Here's what I'd ask: give me the full first phase — four weeks. Here's why: your nervous system is going to respond quickly. You'll probably feel better within the first week or two. But feeling better and being corrected are two different things. If we stop at pain relief, the pattern reasserts itself and we're back to square one. At the four-week mark, we rescan. If the objective data shows improvement, we know the plan is working. If it doesn't, we reassess. Fair?"
+
+**The Universal Framework**
+
+Every objection follows the same handling pattern:
+
+1. **Validate**: "I understand" / "Great question" / "I hear you" — never dismiss or argue
+2. **Reframe**: Redirect from their concern to the clinical reality
+3. **Evidence**: Use scan data, case examples, or research to support your position
+4. **Next step**: Always end with a clear action, not an open question
+
+**The Mindset**
+
+Objections feel personal when you're new. They're not. The patient is not rejecting you — they're processing a decision. Your job is to help them process, not to pressure them.
+
+If you've done a thorough exam, presented clear scan findings, and made a confident recommendation — you've done your job. Some patients will say yes. Some will say no. Some will say not yet. All of that is okay. What's not okay is watering down your recommendation because you're afraid of the objection. That's a disservice to the patient and to yourself.`
+      },
+      {
+        id: 'm4',
+        title: 'Difficult Conversations',
+        description: 'Non-compliant patients, dismissals, and boundaries',
+        readTime: '12 min',
+        content: `Not every patient interaction is a breakthrough story. Some patients don't follow the plan. Some need to be told hard truths. Some need to be dismissed from care. These conversations are uncomfortable but essential — and avoiding them will erode your practice from the inside.
+
+**The Non-Compliant Patient**
+
+This patient agreed to 3x/week but shows up once a week — sometimes less. Their scans aren't improving. They complain that "it's not working."
+
+**The Conversation:**
+
+Don't lecture. Don't guilt-trip. Be direct and factual:
+
+"Mike, I want to have an honest conversation with you because I care about your results. When we started, we agreed on three visits per week because that's what your nervous system needed to make real change. Over the past six weeks, you've averaged about one visit per week. I'm not surprised that your scans haven't improved much — the plan only works if we follow it."
+
+Then pause. Let them respond. They'll usually explain (work schedule, finances, forgot, etc.).
+
+"I get it — life gets busy. But here's my concern: if we continue at this pace, I don't think you're going to get the results you came here for, and I don't want either of us to waste time or money. So let's figure this out. What's the realistic schedule you can actually commit to?"
+
+Then adjust the plan to something they'll actually do. A patient doing 2x/week consistently is better than one who's supposed to do 3x but only does 1x.
+
+**If they keep missing after the conversation:** You need to decide whether to continue care. It's okay to say: "Mike, I think we should put your care on hold until you're in a position to commit to the frequency needed. I'm here whenever you're ready."
+
+**The Patient Who Isn't Responding**
+
+You've done everything right — consistent visits, proper adjustments, good compliance — and the scans aren't improving. This is the hardest conversation because it challenges your clinical confidence.
+
+**The Conversation:**
+
+"Sarah, I want to be transparent with you. We're at the 12-week mark, and while you've had some symptomatic improvement, your scans aren't showing the progress I expected at this point. That concerns me, and I don't want to just keep doing the same thing and hoping for different results."
+
+Then explore options:
+
+"I'd like to do two things: First, I want to revisit my analysis and make sure I'm not missing something in my approach. Second, I want to consider whether there's a co-factor — sleep, stress, diet, a structural issue — that's limiting your nervous system's ability to respond. I may also recommend we bring in another set of eyes — whether that's a colleague of mine, your primary care doctor, or a specialist."
+
+**Why this works:** You're being honest, not defensive. You're showing the patient that you care about results, not just visits. And you're demonstrating professional maturity by acknowledging the limits of your current approach. Patients respect this enormously.
+
+**Dismissing a Patient from Care**
+
+Sometimes you need to end the doctor-patient relationship. Reasons include:
+- Consistent no-shows or no-calls (disrespects your time and your team)
+- Inappropriate behavior toward staff
+- Refusal to follow safety recommendations
+- Combative or threatening behavior
+- Fraud or insurance misrepresentation
+
+**The Conversation (In Person):**
+
+"John, I need to have a difficult conversation. Based on [specific behavior], I've decided that it's best for both of us if we discontinue care at this office. I want to make sure you have continuity of care, so I'm happy to transfer your records to another provider. I'll provide you with a list of chiropractors in the area."
+
+**Follow Up in Writing:**
+
+Every dismissal MUST be documented in writing. Send a certified letter:
+
+"Dear John, This letter confirms our conversation on [date] regarding the discontinuation of your chiropractic care at [Practice Name]. We will continue to be available for emergency care for the next 30 days to allow you time to establish care with another provider. Your records will be made available upon signed request. We wish you the best in your continued health journey. Sincerely, Dr. [Name]"
+
+**Why 30 days:** Most state boards require you to provide a reasonable transition period. Abrupt termination without notice can be considered patient abandonment, which is a licensure issue.
+
+**Setting Boundaries Early**
+
+Most difficult conversations become difficult because boundaries weren't set upfront. Prevent this:
+
+**On visit one, establish:**
+- Your cancellation/no-show policy (in writing, signed by patient)
+- Communication expectations (office hours for questions, emergency protocols)
+- Financial policies (payment due at time of service, what happens with failed payments)
+- Clinical expectations (you determine the care plan, they commit to following it)
+
+**With your team, establish:**
+- Staff are never to be spoken to disrespectfully. Period. This is non-negotiable.
+- Late patients beyond 10 minutes may need to be rescheduled. Don't let one late patient destroy the schedule for everyone else.
+- Financial conversations happen at the front desk, not in the adjusting room. Keep clinical space clinical.
+
+**The Emotional Toll**
+
+Difficult conversations drain you. That's normal. What's not normal — and not sustainable — is avoiding them. Avoidance compounds. The non-compliant patient who's never confronted becomes a 6-month problem. The disrespectful patient who's never corrected poisons your team culture. The non-responding patient who's never honestly assessed becomes an ethical issue.
+
+Have the conversation. Have it early. Have it with compassion but without apology. Your practice — and your patients — will be better for it.`
+      },
+      {
+        id: 'm5',
+        title: 'Documentation That Protects You',
+        description: 'Clinical notes that tell the story and cover you legally',
+        readTime: '15 min',
+        content: `Your clinical notes are simultaneously the most boring and most important part of your practice. They're boring because writing them feels tedious. They're important because when a malpractice case, an insurance audit, or a board complaint arrives — and at some point in your career, at least one will — your notes are your defense. If it's not documented, it didn't happen.
+
+**The Legal Standard**
+
+In a malpractice case, the standard is simple: another reasonable chiropractor, reviewing your notes, should be able to understand what you found, what you did, and why you did it.
+
+If your notes say "Adj C1-C5, T4. RTC 2 days." — that's not documentation. That's a shorthand reminder for yourself that will be useless in court.
+
+If your notes say "Patient presents with persistent right-sided headaches, rated 6/10 today, worsening with screen time. Exam findings: restricted ROM cervical right rotation (40 degrees), tenderness C1-C2 right, positive foraminal compression test right. sEMG shows asymmetry at C1 and C5-C7. Adjusted C1 (toggle), C5 (diversified), T4 (diversified). Post-adjustment: cervical ROM improved bilaterally, patient reports reduced tension. Plan: continue 3x/week. RTC in 2 days." — that's documentation.
+
+**The SOAP Format**
+
+Every visit note should follow the SOAP format. It's the universal standard and what every auditor, attorney, and board reviewer expects.
+
+**S — Subjective**
+What the patient tells you. In their words.
+- Chief complaint and current status
+- Pain levels (use a consistent scale — 0-10)
+- Changes since last visit (better, worse, same)
+- Any new symptoms or concerns
+- Relevant lifestyle factors (sleep, stress, activity)
+
+Example: "Patient reports headaches have decreased from 4x/week to 2x/week since starting care. Sleep has improved — falling asleep within 20 minutes vs. 60+ previously. Rates current headache intensity at 3/10, down from 7/10 at initial visit. No new complaints."
+
+**O — Objective**
+What you find on examination. Measurable, observable findings.
+- Range of motion measurements
+- Palpation findings (tenderness, spasm, fixation — with specific location)
+- Orthopedic/neurological test results
+- Scan findings (sEMG, thermography, HRV — reference specific values)
+- Posture observations
+
+Example: "Cervical ROM: flexion 50 deg (improved from 35), extension 55 deg, right rotation 60 deg (improved from 40), left rotation 65 deg. Palpation: mild tenderness C1 right (reduced from moderate), no spasm noted. sEMG: C1 asymmetry reduced from 45% to 22%. HRV: SDNN 48ms (improved from 34ms at initial)."
+
+**A — Assessment**
+Your clinical interpretation. What the findings mean.
+- Working diagnosis
+- Progress relative to initial presentation
+- Clinical impression of trajectory
+
+Example: "Vertebral subluxation complex, cervical region, with associated autonomic dysregulation. Patient showing measurable improvement in both subjective complaints and objective measures. Neural interference patterns reducing consistent with expected timeline. Progressing as anticipated."
+
+**P — Plan**
+What you're going to do about it. And when.
+- Treatment delivered today (technique, regions, specifics)
+- Any additional therapies (ice, exercises, ergonomic recommendations)
+- Visit frequency recommendation
+- Next milestone (re-scan date, re-evaluation)
+- Any referrals or co-management notes
+
+Example: "Adjusted C1 (toggle recoil, right laterality), C5 (diversified, PR), T4 (diversified, PRS). Post-adjustment cervical ROM full and symmetric. Continue 3x/week per corrective care plan. Progress scan scheduled for [date], visit 12. Patient educated on workstation ergonomics and given handout."
+
+**The Non-Negotiables**
+
+Regardless of how busy you are, every note MUST include:
+
+1. **Date and time of service**
+2. **Patient's subjective report** (even if it's "patient reports no change since last visit")
+3. **What you examined or assessed**
+4. **What you did** (specific technique, specific segments, specific side/direction)
+5. **Patient's response to treatment** (tolerated well, immediate improvement, adverse reaction)
+6. **Plan going forward**
+
+**Common Documentation Mistakes**
+
+- **Copy-paste notes**: Every visit has the same note, word for word. Auditors catch this immediately, and it suggests you're not actually evaluating the patient.
+- **Vague language**: "Adjusted spine" tells nobody anything. WHERE on the spine? WHAT technique? WHAT direction?
+- **Missing informed consent**: Document that you explained the risks and benefits of care and obtained consent — especially on the first visit.
+- **No progress notes**: If you scan at week 1 and week 12 but have no notes showing what happened in between, you have a 10-week gap that's legally dangerous.
+- **Documenting in bulk**: Writing notes for 20 patients at the end of the day from memory. This produces inaccurate notes. Write during or immediately after each visit.
+
+**The Audit-Proof Practice**
+
+Insurance audits are not uncommon. They request records for a selection of patients and review whether the care you billed for was documented and justified. To survive an audit:
+
+- Every billed visit has a corresponding SOAP note
+- Every service code billed matches what's documented (if you bill 98941 — 3-4 spinal regions — your note should document 3-4 regions adjusted)
+- Medical necessity is established (initial exam documents the condition, progress notes show ongoing need)
+- Care plans have defined goals and timelines (not open-ended "come forever")
+- Re-evaluations happen at regular intervals with documented outcomes
+
+**Templates Save Your Life**
+
+Build SOAP note templates in your EHR for common visit types:
+- New patient exam template
+- Regular adjustment visit template
+- Re-evaluation template
+- Discharge/release template
+
+Templates ensure you never miss a required element. You fill in the patient-specific details, but the structure is pre-built. Most modern EHR systems support this. Use it.
+
+**The Bottom Line**
+
+Documentation is not paperwork — it's protection. Five minutes of thorough notes today can save you from a $50,000 malpractice settlement, a failed insurance audit, or a board investigation 3 years from now. Write notes as if a stranger will read them and judge your clinical decisions. Because someday, one might.`
+      },
+      {
+        id: 'm6',
+        title: 'Building Referral Relationships',
+        description: 'How to earn respect from MDs, PTs, and specialists',
+        readTime: '12 min',
+        content: `The chiropractors who build the most successful practices are not the best marketers — they're the best collaborators. A single referral relationship with a pediatrician, an OB-GYN, or an orthopedic surgeon can generate more patients in a year than a $20,000 ad budget.
+
+But here's the challenge: the medical community has historically been skeptical of chiropractic. And honestly, some of that skepticism has been earned — by chiropractors who made claims they couldn't support, who rejected collaboration, and who positioned themselves as anti-medicine.
+
+Nervous system chiropractic changes this dynamic. You have objective data. You have measurable outcomes. You speak the language of evidence. That opens doors.
+
+**The Approach: Lead with Value, Not with Asks**
+
+The #1 mistake chiropractors make with referral relationships: they walk into an MD's office and say "Hi, I'm a chiropractor. Can you send me patients?"
+
+That's like walking up to a stranger and asking for money. It doesn't work.
+
+Instead, lead with value. Provide something useful BEFORE you ask for anything.
+
+**Strategy 1: The Outcome Report**
+
+When you see a patient who was referred by, or is also being seen by, another provider — send that provider an outcome report.
+
+Format:
+"Dear Dr. [Name], I'm writing regarding our mutual patient, [Patient Name]. They presented to our office on [date] with [complaint]. Our nervous system evaluation revealed [objective findings — scan data]. After [X] weeks of care, their follow-up scan shows [measurable improvement]. Their subjective symptoms have [improved/resolved]. I'll continue to manage their chiropractic care and will keep you updated on their progress. Please don't hesitate to reach out if you have any questions about our findings or approach."
+
+**Why this works:**
+- You used professional medical communication
+- You included objective data (not just "they feel better")
+- You positioned yourself as a collaborative provider, not a competitor
+- You asked for nothing — just provided information
+
+After 3-5 of these reports, the doctor starts noticing. They think: "This chiropractor is professional, uses data, and communicates well." That's when referrals start flowing.
+
+**Strategy 2: The Lunch and Learn**
+
+Invite yourself to present at a medical office, PT practice, or hospital department meeting. Offer a 15-minute presentation on a topic that's relevant to their patients.
+
+Topics that work:
+- "Heart Rate Variability: An Objective Measure of Autonomic Health" (MDs love data)
+- "The Vagus Nerve and Its Role in Chronic Inflammation" (relevant to GI docs, rheumatologists)
+- "Pediatric Nervous System Assessment: What the Scans Show" (pediatricians, developmental specialists)
+- "Non-Pharmacological Approaches to Chronic Pain" (pain management, orthopedics)
+
+The key: present the SCIENCE, not chiropractic. Don't pitch your practice. Don't use chiropractic jargon. Speak their language. Show scan data. Reference published research. Be a scientist who happens to be a chiropractor.
+
+At the end: "If you ever have a patient you think could benefit from a nervous system evaluation, I'm happy to see them and send you a full report. Here's my card."
+
+**Strategy 3: Co-Management**
+
+The most powerful referral relationships are bilateral — you refer to them AND they refer to you. This requires you to actually refer patients out when appropriate.
+
+When to refer:
+- Red flags on exam (progressive neurological deficit, suspected fracture, cauda equina signs)
+- Conditions outside your scope (uncontrolled diabetes, depression/anxiety, suspected autoimmune)
+- Patients who aren't responding to care after appropriate timeline
+- Patients who need imaging you can't provide
+
+When you refer, call the provider personally. Don't just hand the patient a name. "Hi Dr. [Name], I'm Dr. [You], a chiropractor in [area]. I have a patient I'd like to refer to you for [reason]. I've been providing chiropractic care for [condition], and I'd like your evaluation on [specific concern]. Can I send them over?"
+
+That phone call does more for your professional reputation than any marketing campaign.
+
+**Strategy 4: The Community Presence**
+
+Show up where other providers show up:
+- Chamber of Commerce health events
+- Hospital charity events
+- Local BNI or professional networking groups
+- Health fairs (have your scanning equipment there — it's a conversation starter)
+- Sports team sponsorships where the team doctor sees you providing care
+
+Be known. Be seen. Be professional. Over time, proximity builds familiarity, and familiarity builds trust.
+
+**Who to Target**
+
+Not all referral relationships are equal. Prioritize based on patient overlap:
+
+**High Value (pursue actively):**
+- Pediatricians (massive overlap with pediatric chiropractic)
+- OB-GYNs (prenatal patients, postpartum, fertility)
+- Functional medicine doctors (philosophically aligned, shared patients)
+- Orthopedic surgeons (they see patients who don't need surgery but need something)
+- Pain management specialists (they're looking for non-pharma options)
+
+**Medium Value (pursue opportunistically):**
+- Primary care / family medicine
+- Physical therapists (can be collaborative, but some view chiros as competition)
+- Mental health providers (anxiety, depression often have autonomic components)
+- Naturopathic doctors
+
+**Lower Value (don't ignore, but don't prioritize):**
+- Dentists (occasional TMJ overlap)
+- Optometrists
+- Veterinarians (yes, really — they refer human clients who love holistic care for their pets)
+
+**The Long Game**
+
+Referral relationships take 6-12 months to develop. You won't send one letter and get 10 referrals. This is a trust-building process:
+
+- Month 1-3: Introduce yourself, send outcome reports when you share patients
+- Month 3-6: Offer a lunch and learn, follow up with a thank you note for any referrals
+- Month 6-12: The relationship deepens. They start proactively sending patients.
+- Year 2+: You're on their speed dial. They call you to discuss cases. You call them.
+
+The chiropractors who have 5-10 active referral relationships with medical providers have the most stable, recession-proof practices in the profession. Build these relationships from day one. It's the highest-ROI activity you'll ever do.`
+      },
     ]
   },
   {
