@@ -115,6 +115,15 @@ export const PLANS = {
       price: 99,
     },
   },
+  // Content Library Add-on
+  content_library: {
+    id: "content_library",
+    name: "Patient Education Content Library",
+    monthly: {
+      priceId: process.env.STRIPE_CONTENT_LIBRARY_PRICE_ID ?? "",
+      price: 29,
+    },
+  },
 } as const;
 
 export function getPriceId(plan: 'doctor' | 'student', cycle: 'monthly' | 'annual'): string {
