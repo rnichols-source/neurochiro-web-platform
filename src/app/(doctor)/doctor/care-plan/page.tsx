@@ -75,11 +75,23 @@ export default function CarePlanCalculator() {
             top: 0 !important;
             width: 100% !important;
             max-width: 100% !important;
-            padding: 40px !important;
+            padding: 20px !important;
             margin: 0 !important;
             border: none !important;
             box-shadow: none !important;
+            font-size: 12px !important;
           }
+          [data-print-area] .p-6 { padding: 12px !important; }
+          [data-print-area] .p-4 { padding: 8px !important; }
+          [data-print-area] .space-y-6 > * + * { margin-top: 12px !important; }
+          [data-print-area] .space-y-3 > * + * { margin-top: 6px !important; }
+          [data-print-area] .mb-3 { margin-bottom: 6px !important; }
+          [data-print-area] .mb-6 { margin-bottom: 10px !important; }
+          [data-print-area] .pt-5 { padding-top: 10px !important; }
+          [data-print-area] .gap-3 { gap: 6px !important; }
+          [data-print-area] .text-2xl { font-size: 18px !important; }
+          [data-print-area] .text-xl { font-size: 16px !important; }
+          [data-print-area] .rounded-xl { border-radius: 8px !important; }
         }
       `}</style>
       <div className="flex items-center justify-between mb-8">
