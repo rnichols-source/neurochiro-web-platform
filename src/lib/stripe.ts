@@ -80,7 +80,7 @@ export const PLANS = {
     name: "Building Your Clinical Identity",
     oneTime: {
       priceId: process.env.STRIPE_COURSE_CLINICAL_IDENTITY_PRICE_ID ?? "",
-      price: 197,
+      price: 29,
     },
   },
   course_business: {
@@ -88,7 +88,7 @@ export const PLANS = {
     name: "The Business of Chiropractic",
     oneTime: {
       priceId: process.env.STRIPE_COURSE_BUSINESS_PRICE_ID ?? "",
-      price: 297,
+      price: 39,
     },
   },
   course_clinical_confidence: {
@@ -96,7 +96,7 @@ export const PLANS = {
     name: "Clinical Confidence",
     oneTime: {
       priceId: process.env.STRIPE_COURSE_CLINICAL_CONFIDENCE_PRICE_ID ?? "",
-      price: 297,
+      price: 39,
     },
   },
   course_associate_playbook: {
@@ -104,7 +104,7 @@ export const PLANS = {
     name: "The Associate Playbook",
     oneTime: {
       priceId: process.env.STRIPE_COURSE_ASSOCIATE_PLAYBOOK_PRICE_ID ?? "",
-      price: 397,
+      price: 49,
     },
   },
   course_bundle: {
@@ -112,7 +112,7 @@ export const PLANS = {
     name: "School-to-Practice System (All 4 Courses)",
     oneTime: {
       priceId: process.env.STRIPE_COURSE_BUNDLE_PRICE_ID ?? "",
-      price: 797,
+      price: 99,
     },
   },
 } as const;

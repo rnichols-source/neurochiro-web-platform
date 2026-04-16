@@ -253,9 +253,9 @@ export default function AcademyPage() {
             <h2 className="text-2xl font-black mb-2">The School-to-Practice System</h2>
             <p className="text-gray-300 mb-4">All 4 premium courses. The complete unfair advantage for your career. Own it forever.</p>
             <div className="flex items-center gap-4 mb-6">
-              <span className="text-3xl font-black">$797</span>
-              <span className="text-gray-400 line-through text-lg">$1,188</span>
-              <span className="bg-neuro-orange/20 text-neuro-orange text-xs font-black px-3 py-1 rounded-full">Save $391</span>
+              <span className="text-3xl font-black">$99</span>
+              <span className="text-gray-400 line-through text-lg">$156</span>
+              <span className="bg-neuro-orange/20 text-neuro-orange text-xs font-black px-3 py-1 rounded-full">Save $57</span>
             </div>
             <div className="grid grid-cols-2 gap-2 mb-6 text-sm">
               {premiumCourses.map(c => (
@@ -270,7 +270,7 @@ export default function AcademyPage() {
               disabled={loadingPurchase === 'bundle'}
               className="px-8 py-4 bg-neuro-orange text-white rounded-xl font-black uppercase tracking-widest text-sm hover:bg-neuro-orange/90 disabled:opacity-50 transition-colors"
             >
-              {loadingPurchase === 'bundle' ? 'Loading...' : 'Get the Full System — $797'}
+              {loadingPurchase === 'bundle' ? 'Loading...' : 'Get the Full System — $99'}
             </button>
           </div>
         </section>

@@ -384,7 +384,7 @@ That's nervous-system-first chiropractic. It's not complicated. But it requires 
     description: 'Graduate with clarity, a personal brand, and a 90-day plan while everyone else is scrambling. This is the foundation every student needs before stepping into practice.',
     tier_required: 'paid',
     stripe_plan: 'course_clinical_identity',
-    price: 197,
+    price: 29,
     preview_module: 'm1',
     modules: [
       {
@@ -610,7 +610,7 @@ Show up every day like you belong. Because you do.`
     description: 'Understand money, contracts, and practice models so nobody takes advantage of you. The business education chiropractic school skipped.',
     tier_required: 'paid',
     stripe_plan: 'course_business',
-    price: 297,
+    price: 39,
     preview_module: 'm1',
     modules: [
       {
@@ -984,7 +984,7 @@ If those answers bother you — good. That's your starting point. Your brand is 
     description: 'Walk into day one and perform like you\'ve been doing this for years. The real-world clinical skills school didn\'t prepare you for.',
     tier_required: 'paid',
     stripe_plan: 'course_clinical_confidence',
-    price: 297,
+    price: 39,
     preview_module: 'm1',
     modules: [
       {
@@ -1348,7 +1348,7 @@ The doctors with 5-10 active referral relationships with MDs and specialists hav
     description: 'Produce more, earn more, and position yourself to own within 3 years. The playbook clinic owners wish every associate had.',
     tier_required: 'paid',
     stripe_plan: 'course_associate_playbook',
-    price: 397,
+    price: 49,
     preview_module: 'm1',
     modules: [
       {
