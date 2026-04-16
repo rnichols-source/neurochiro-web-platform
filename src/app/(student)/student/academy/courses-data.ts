@@ -1349,11 +1349,282 @@ The doctors with 5-10 active referral relationships with MDs and specialists hav
     tier_required: 'paid',
     stripe_plan: 'course_associate_playbook',
     price: 397,
+    preview_module: 'm1',
     modules: [
-      { id: 'm1', title: 'What Clinic Owners Actually Want', description: 'From someone who hires — the unfiltered truth', readTime: '12 min', content: 'Full content coming soon — video modules in production.' },
-      { id: 'm2', title: 'Producing $30K+/Month as an Associate', description: 'The benchmarks, the habits, the mindset', readTime: '15 min', content: 'Full content coming soon — video modules in production.' },
-      { id: 'm3', title: 'When to Stay, When to Leave', description: 'Reading the signs and making the right move at the right time', readTime: '10 min', content: 'Full content coming soon — video modules in production.' },
-      { id: 'm4', title: 'From Associate to Owner', description: 'The transition playbook — buying in, branching out, or starting fresh', readTime: '15 min', content: 'Full content coming soon — video modules in production.' },
+      {
+        id: 'm1',
+        title: 'What Clinic Owners Actually Want',
+        description: 'From someone who hires — the unfiltered truth',
+        readTime: '12 min',
+        content: `I've hired associates. I've fired associates. I've watched associates turn into rockstars and I've watched talented people wash out in 90 days. The difference almost never comes down to clinical skill.
+
+Every new grad who walks through the door can adjust. You all passed boards. You all did your clinicals. That part's a wash. What separates the associates who thrive from the ones who struggle is everything else.
+
+**Show up like you own the place**
+
+Not arrogantly. But with ownership energy. The associate who walks in, sees a dirty bathroom, and cleans it — that person is going to succeed. The one who walks past it and thinks "that's not my job" — they're already failing.
+
+Owners are watching everything in the first 30 days. How you greet the team in the morning. Whether you help the front desk when they're slammed. Whether you stay late when a patient runs over or clock out at exactly 5:00.
+
+I had an associate who, in his first week, noticed our Google reviews had slowed down. Without being asked, he started personally asking patients to leave reviews after great visits. Within a month we had 40 new reviews. He never mentioned it. I noticed. That's ownership energy.
+
+**Produce. That's it.**
+
+Your value to the practice is directly tied to how much revenue you generate. That's not cold — it's math. The practice has rent, payroll, equipment leases, insurance. All of that gets paid from collections.
+
+What owners are calculating in their head, even if they never say it out loud: "I'm paying this person $8K in salary, plus payroll taxes, plus malpractice, plus training time. That's roughly $11K all-in. If they're collecting $15K, I'm barely breaking even. If they're collecting $30K, we're both winning."
+
+Your target from day one: collect at least 3x your total compensation cost.
+
+**Don't be a project**
+
+Owners want associates who solve problems, not create them. Every time you come with an issue, come with a solution too. "Hey, our no-show rate is climbing on Fridays. I was thinking we could start confirmation texts the night before — I already looked into the software, it's $30/month. Want me to set it up?"
+
+Compare that to: "A bunch of people no-showed today."
+
+One is an associate. The other is a partner in training.
+
+**Be coachable — actually coachable**
+
+Every owner says they want someone coachable, and every new grad says they are. But here's what coachable actually looks like: your owner tells you your ROF is too long. A coachable associate says "okay, I'll tighten it up — can you watch my next one?" An uncoachable associate gets defensive, explains why they think the length is necessary, and changes nothing.
+
+The fastest way to earn an owner's trust: ask "What's one thing I could be doing better?" and then actually do it.
+
+**The stuff that gets you fired**
+
+Might as well be blunt.
+
+Showing up late consistently. Not once because of traffic. Consistently. It tells the owner you don't respect their time or the patients'.
+
+Talking negatively about the practice to patients. Even small comments like "yeah, I wish we had better equipment." Patients hear that and lose confidence.
+
+Creating drama with the team. If the front desk starts complaining about you, you're done. Even if you're clinically excellent. Team chemistry is non-negotiable in a small office.
+
+Phone addiction. If you're on your phone between patients instead of engaging with the team or reviewing charts — the owner notices. So does everyone else.
+
+Being a know-it-all. You just graduated. You don't know more than someone who's been doing this for 15 years. Even when you disagree, there's a way to say it. "I've been reading about a different approach — would you be open to me trying it with a few patients and tracking the outcomes?" versus "Actually, in school they taught us..."
+
+**What makes an owner think "I want this person as my partner"**
+
+They produce consistently. They treat the team well. They never stop learning. They bring ideas. They handle problems before the owner even knows they exist. And when things go wrong — a bad review, a missed diagnosis, a complaint — they own it immediately instead of making excuses.
+
+That's the associate every owner is looking for. Be that person.`
+      },
+      {
+        id: 'm2',
+        title: 'Producing $30K+/Month as an Associate',
+        description: 'The benchmarks, the habits, the mindset',
+        readTime: '15 min',
+        content: `Thirty thousand a month in collections. That's the number. That's where you go from "the owner tolerates me" to "the owner needs me." That's where raises happen, bonuses kick in, and equity conversations start.
+
+Is it realistic for a new associate? Not in month one. But by month four or five? Absolutely. The docs who hit it aren't superhuman. They just understand the math and build the habits.
+
+**The math**
+
+Reverse-engineer it. Say your average collection per visit is $65 (blended between insurance and cash, write-offs accounted for).
+
+$30,000 / $65 = 462 visits per month
+
+That's roughly 115 per week, or about 23 per day across 5 days. Busy, but not insane. Plenty of nervous system chiropractors see 20-30 a day.
+
+But those visits don't just appear. They come from two places: new patients converting into care plans, and existing patients showing up consistently.
+
+**New patients per month.** You need 15-25 by month 3. If you're getting fewer, talk to the owner about patient allocation — or start generating your own through community outreach.
+
+**Case acceptance rate.** When you present a care plan, what percentage say yes? If you're presenting to 20 new patients and only 10 start care, that's 50%. Get that to 70-80% and everything changes. That's an extra 4-6 patients starting care every single month. Over a year, the compound effect is massive.
+
+The biggest thing that moves case acceptance? Your report of findings. If it's not converting at 70%+, that's your bottleneck. Fix that and production follows.
+
+**Patient visit average.** How many total visits a patient completes before they leave care. Industry average is around 12. Nervous system practices with scans and structured plans should be at 36-48. Every additional visit per patient is pure leverage — you already did the hard work of getting them in the door.
+
+PVA comes down to two things: the strength of your initial recommendation and your ability to keep patients engaged through the middle of their plan. Rescan data is your best weapon. When someone at visit 24 says they're thinking about stopping and you show them their scans are 60% improved but not fully corrected — they stay.
+
+**Show rate.** If 100 are scheduled and 80 show, that's a 20% leak. At $65 per visit, you just lost $1,300 in a single week. That's $5,200 per month that evaporated.
+
+Most show rate problems are system problems. Is the front desk confirming 24-48 hours ahead? Are patients educated on why every visit matters? Is the schedule convenient? Target: 85%+. Below 80% is a crisis.
+
+**The daily habits**
+
+The docs who hit $30K aren't doing anything magical. They just do the basics every single day.
+
+They review their schedule the night before. Not in the morning. The night before. They know who's coming, who's a rescan, who's been struggling with compliance.
+
+They start on time. Not 5 minutes late. Not still eating breakfast when the first patient arrives. Ready before the patient sits down.
+
+They don't waste adjusting room time. The adjustment is 3-5 minutes. The conversation around it is 1-2 minutes. If you're spending 15 minutes per patient in a high-volume environment, your schedule collapses by noon.
+
+That doesn't mean rushing people. It means being prepared. You know what you're adjusting and why before you walk in. "How's the sleep been? Good — that tracks with what I'm feeling. C1 is holding much better. Let me check T4... yep, still needs work. Let's get you adjusted."
+
+They track numbers daily. Not weekly. Not monthly. How many patients today? How many new patients? What's today's collection? If you don't know your numbers, you can't improve them.
+
+**The mindset piece**
+
+Some associates don't hit $30K because somewhere in their head they've decided that production focus means you don't care about patients.
+
+That's backwards. A patient who starts a care plan is a patient whose nervous system gets corrected. A patient who says no and walks out stays stuck. When you get better at case acceptance, you're not selling more — you're helping more.
+
+The highest-producing doctors I know are also the most clinically excellent. They're confident in their findings, clear in their recommendations, and convicted that the care plan will change that person's life. That conviction shows up in the numbers.
+
+If money feels weird, get over it. You spent hundreds of thousands on your education. You deserve to be well-compensated. Your patients deserve a doctor who's financially stable. And the practice deserves an associate who contributes to growth.
+
+**The timeline**
+
+Month 1: $8K-$12K. Learning the systems, lighter schedule. Fine.
+
+Month 2: $12K-$18K. Schedule filling. More new patients. ROF tightening.
+
+Month 3: $18K-$24K. 15+ patients per day consistently. Case acceptance improving.
+
+Month 4-5: $24K-$30K. The push. 20+ per day, 70%+ conversion, 85%+ show rate.
+
+Month 6+: $30K+ consistently. Now you're optimizing — increasing PVA, getting patient referrals, taking on community outreach.
+
+If you're not on this trajectory, something specific is broken. It's either new patient flow, case acceptance, PVA, or show rate. Figure out which one and attack it.`
+      },
+      {
+        id: 'm3',
+        title: 'When to Stay, When to Leave',
+        description: 'Reading the signs and making the right move at the right time',
+        readTime: '12 min',
+        content: `This is the module I wish someone had given me. I've watched good doctors stay too long at bad practices, and impatient doctors leave too early from great ones. Both mistakes cost years.
+
+**Signs you're in the right place**
+
+Not every day will be great. But if most of these are true, you're probably in a good spot.
+
+The owner invests in your development. They watch your ROF. They send you to seminars. They introduce you to their mentors. They talk about your future, not just your current production.
+
+You're growing. Patient volume is increasing. Skills are sharpening. You're getting more responsibility — not the same exact role you had on day one.
+
+The team respects you. CAs help you. Front desk roots for you. You feel like part of something.
+
+The culture is healthy. No gossiping, no eggshells. Accountability but also support. You actually like going to work most days.
+
+The money is fair. Maybe not your dream number, but it reflects your production and there's a clear path to more.
+
+If you've got most of those? Stay. Two to three years at a great practice is worth more than five years of job-hopping.
+
+**Signs it's time to go**
+
+This is harder. Leaving is scary, so most people rationalize staying even when the situation is clearly broken.
+
+**The owner lied about the opportunity.** Promised mentorship but you're just filling a room. Promised partnership at 2 years, now it's "not the right time." Promised 20 new patients a month and you're getting 6. Broken promises are a pattern. If they've broken three, they'll break the fourth.
+
+**Your production is being capped.** You're capable of more but the schedule limits you. New patients go to the other associate or the owner keeps them. You've been told "we don't need you to do more." If you're hungry and the practice is holding you back, that's a ceiling.
+
+**The culture is toxic.** Owner yells at staff. Constant turnover. Patients complain about the front desk. You dread Mondays. Life is too short, and it will erode your clinical confidence over time.
+
+**You're not learning anymore.** This one's sneaky because it feels comfortable. You've got your rhythm, see your patients, go home. But you haven't learned anything new in 6 months. Comfort is the enemy of growth.
+
+**The money doesn't match.** You're producing $35K and taking home $9K. You've asked for a raise and been told "let's revisit in 6 months" for the third time. At some point, the gap between what you produce and what you earn is disrespectful.
+
+**How to leave the right way**
+
+Give proper notice. Whatever your contract says, honor it. 60 days minimum. 90 if you can. The owner needs time to hire a replacement, and a clean handoff protects your reputation.
+
+Have the conversation in person. Not by text. Sit down: "I've been thinking about this for a while, and I've decided it's time to move on. I want to handle this professionally and make the transition smooth."
+
+Don't badmouth. Not to the team, not to patients, not to other docs. The chiropractic world is small. Your reputation follows you everywhere.
+
+Finish strong. Your last 30-60 days should be your BEST work. Leave the charts clean, the schedule organized, and the team grateful you were there.
+
+**When you're not sure**
+
+Sometimes it's not clearly stay or clearly go. If that's you, have the conversation before making the decision. Sit down with the owner: "I want to be here long-term, but there are a few things I need to be honest about." Then name them.
+
+Give the owner a chance to respond. Sometimes they didn't realize there was a problem. Sometimes they fix it. Sometimes they say "this is how it is" — and now you have your answer.
+
+Worst thing you can do is leave without ever giving them a chance to address your concerns.
+
+**The two-year minimum**
+
+Unless the situation is truly toxic, stay at least two years at your first associateship.
+
+Year one is just learning. Getting reps, finding your voice. Leaving at month 10 because you're "not growing fast enough" is almost always premature.
+
+Year two is when the real value shows up. Patient base is established. Conversion rates are solid. You've seen the practice through its cycles. You actually understand the business now.
+
+Leaving after two years with real production numbers and a strong recommendation — that's a launchpad. Leaving after 8 months because it "wasn't a fit" raises questions everywhere you go next.`
+      },
+      {
+        id: 'm4',
+        title: 'From Associate to Owner',
+        description: 'The transition playbook — buying in, branching out, or starting fresh',
+        readTime: '15 min',
+        content: `You've done your time. Built your skills. Produced consistently. Now you're ready. The question isn't whether — it's how.
+
+Three paths. Each one has a right time and a wrong time.
+
+**Path A: Buy into the practice you're at**
+
+Smoothest transition if — big if — the owner is genuinely willing to sell equity and you trust each other.
+
+You purchase a percentage (typically 25-50% to start), become co-owner, share profits based on ownership, and over time buy the remaining equity or take over when the owner retires.
+
+When this works: The owner has been talking about it and isn't just dangling it as retention. There's mutual respect. You've been producing $30K+ consistently. The practice has good systems, solid revenue, healthy patient base. The owner wants to slow down, not just extract cash from a partner.
+
+When this doesn't work: The owner says "partner" but means "investor." You're paying for equity but getting no decision-making authority. Or the practice is declining and the owner wants someone to share the sinking ship. Or there's no formal valuation — just a number pulled from thin air.
+
+How to do it right: Get a formal practice valuation from a third party. Not the owner's number. Not yours. A professional valuation based on revenue, profit, patient base, equipment, and goodwill. Expect to pay 50-75% of one year's net collections for a 50% stake.
+
+Hire YOUR lawyer. Not the owner's. The agreement needs to cover what you're buying, payment terms, what happens if one of you wants out, how disagreements get resolved, and how remaining equity transfers over time.
+
+I've seen beautiful partnerships and ugly ones. The beautiful ones all have one thing in common: everything was written down before money changed hands. The ugly ones all start the same way: "We trusted each other and figured we'd work it out."
+
+**Path B: Open your own**
+
+Leave the associateship. New location, new patients, new everything. Clean slate.
+
+When this works: You've saved capital — $75K-$150K minimum, ideally more. You've identified a market. You've built a personal brand with a local following. You've spent 2-3 years as an associate and understand the business side — billing, hiring, marketing, leases, equipment, credentialing. Not just the clinical side.
+
+When this doesn't work: You're leaving because you're frustrated, not because you're ready. You have $20K in savings and $300K in loans. You've never tracked a P&L. You "feel like it's time" but can't articulate your business plan.
+
+I'm not trying to kill anyone's dream. I want you to open a practice. But I've watched people open too early. They burn through savings in 4 months. They're stressed about making rent — both the practice's and their own. Their confidence tanks because they're worried about money instead of focused on patients. Some close within a year and go back to associating with less savings and a bruised ego.
+
+Be honest with yourself:
+
+Can you cover 6 months of practice expenses ($8K-$15K/month) AND personal living expenses with zero patient revenue? If not, you're not ready.
+
+Do you have realistic revenue projections? Not "100 patients a week by month 3." Realistic. 10-20 per week in month one, growing 15-20% per month.
+
+Have you negotiated a commercial lease before? Do you know what a triple-net lease is? A tenant improvement allowance? If not, talk to a broker before you sign anything.
+
+Do you have a marketing plan beyond "people will find me"? Website, Google Business Profile, social presence, community outreach — all from day one.
+
+Do you have at least one person for front desk? Adjusting patients AND answering phones AND collecting payments AND doing intake alone is a recipe for burnout.
+
+If you checked all those boxes — go. Seriously. The freedom and upside of ownership is worth it for the right person at the right time.
+
+**Path C: Buy an existing practice**
+
+Someone's retiring or relocating. You buy the whole thing — patients, staff, equipment, brand, lease.
+
+When this works: The practice is profitable and you can verify it with tax returns (not just the owner's word). Staff is solid and willing to stay. Lease is transferable with 3-5 years remaining. Patient base is actually active — seen within 12 months, not a list of 2,000 inactive files. Price is based on a real valuation, not the owner's retirement fantasy.
+
+Due diligence is everything:
+
+Pull the last 3 years of tax returns. Not the owner's Excel P&L. The actual returns filed with the IRS.
+
+Count active patients. "Active" means seen within 12 months. Anything older is a file, not a patient.
+
+Talk to staff privately. Ask why the owner is selling. Ask if they plan to stay. Ask what the biggest challenge is. Their answers tell you more than the owner ever will.
+
+Get an equipment appraisal. That decompression table the owner says is worth $40K might be $8K on the used market.
+
+Understand the transition. Best acquisitions include 3-6 months of overlap where the selling doctor introduces you to patients. If they want to hand you keys on Friday and disappear Monday, expect 30-40% patient loss.
+
+**Making the decision**
+
+If the practice you're at is great and the owner wants to sell equity — Path A. Lowest risk, smoothest transition.
+
+If you have the capital, the plan, and the market — and want to build something 100% yours — Path B. Highest risk, highest upside.
+
+If there's a good practice available at a fair price — Path C. Moderate risk, immediate cash flow.
+
+No wrong choice. Only wrong timing. Be honest about where you are financially, clinically, and personally.
+
+And one more thing. Don't wait until you feel "ready." You won't. Nobody does. You make the move when the math works and the opportunity is there, and you figure it out on the other side. That's what every owner before you did.`
+      },
     ]
   }
 ];
