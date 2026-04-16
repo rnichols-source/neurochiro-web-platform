@@ -65,6 +65,23 @@ export default function CarePlanCalculator() {
 
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto">
+      <style jsx global>{`
+        @media print {
+          body * { visibility: hidden !important; }
+          [data-print-area], [data-print-area] * { visibility: visible !important; }
+          [data-print-area] {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 40px !important;
+            margin: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+          }
+        }
+      `}</style>
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-heading font-black text-neuro-navy flex items-center gap-3">
@@ -197,9 +214,9 @@ export default function CarePlanCalculator() {
 
         {/* Right: Output (printable) */}
         <div className="lg:col-span-3">
-          <div ref={printRef} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden print:shadow-none print:border-none">
+          <div ref={printRef} data-print-area className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             {/* Header */}
-            <div className="bg-neuro-navy p-6 text-white print:bg-white print:text-neuro-navy print:border-b print:border-gray-200">
+            <div className="bg-neuro-navy p-6 text-white print:!bg-white print:!text-neuro-navy print:!border-b print:!border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-black">Your Care Plan</h2>
