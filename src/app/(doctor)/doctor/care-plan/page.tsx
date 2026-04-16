@@ -67,31 +67,42 @@ export default function CarePlanCalculator() {
     <div className="p-4 md:p-8 max-w-5xl mx-auto">
       <style jsx global>{`
         @media print {
-          body * { visibility: hidden !important; }
-          [data-print-area], [data-print-area] * { visibility: visible !important; }
+          html, body { margin: 0 !important; padding: 0 !important; }
+          body * { display: none !important; }
+          [data-print-area],
+          [data-print-area] * { display: revert !important; visibility: visible !important; }
           [data-print-area] {
-            position: absolute !important;
+            position: fixed !important;
             left: 0 !important;
             top: 0 !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            padding: 20px !important;
+            width: 100vw !important;
+            max-width: 100vw !important;
+            padding: 24px 32px !important;
             margin: 0 !important;
             border: none !important;
             box-shadow: none !important;
-            font-size: 12px !important;
+            font-size: 11px !important;
+            border-radius: 0 !important;
+            overflow: visible !important;
           }
-          [data-print-area] .p-6 { padding: 12px !important; }
+          [data-print-area] .bg-neuro-navy { background: #f8f8f8 !important; color: #1a1a2e !important; }
+          [data-print-area] .text-white { color: #1a1a2e !important; }
+          [data-print-area] .text-gray-300 { color: #666 !important; }
+          [data-print-area] .p-6 { padding: 10px !important; }
           [data-print-area] .p-4 { padding: 8px !important; }
-          [data-print-area] .space-y-6 > * + * { margin-top: 12px !important; }
-          [data-print-area] .space-y-3 > * + * { margin-top: 6px !important; }
-          [data-print-area] .mb-3 { margin-bottom: 6px !important; }
-          [data-print-area] .mb-6 { margin-bottom: 10px !important; }
-          [data-print-area] .pt-5 { padding-top: 10px !important; }
-          [data-print-area] .gap-3 { gap: 6px !important; }
-          [data-print-area] .text-2xl { font-size: 18px !important; }
-          [data-print-area] .text-xl { font-size: 16px !important; }
-          [data-print-area] .rounded-xl { border-radius: 8px !important; }
+          [data-print-area] .space-y-6 > * + * { margin-top: 10px !important; }
+          [data-print-area] .space-y-3 > * + * { margin-top: 4px !important; }
+          [data-print-area] .mb-3 { margin-bottom: 4px !important; }
+          [data-print-area] .mb-6 { margin-bottom: 8px !important; }
+          [data-print-area] .pt-5 { padding-top: 8px !important; }
+          [data-print-area] .gap-3 { gap: 4px !important; }
+          [data-print-area] .gap-4 { gap: 6px !important; }
+          [data-print-area] .text-2xl { font-size: 16px !important; }
+          [data-print-area] .text-xl { font-size: 14px !important; }
+          [data-print-area] .text-lg { font-size: 13px !important; }
+          [data-print-area] .w-10 { width: 28px !important; height: 28px !important; }
+          [data-print-area] .rounded-2xl { border-radius: 6px !important; }
+          [data-print-area] .rounded-xl { border-radius: 6px !important; }
         }
       `}</style>
       <div className="flex items-center justify-between mb-8">
