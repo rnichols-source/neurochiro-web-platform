@@ -115,9 +115,13 @@ export async function getApplications(jobId?: string) {
     jobTitle: app.job.title,
     candidateId: app.candidate_id,
     name: app.candidate.full_name || 'Anonymous Candidate',
+    email: app.candidate.email || '',
     school: app.candidate.school,
     gradYear: app.candidate.graduation_year,
     stage: app.stage,
+    rating: app.rating ?? 0,
+    doctorNotes: app.doctor_notes ?? '',
+    stageHistory: app.stage_history ?? [],
     skills: app.candidate.skills || [],
     resumeUrl: app.candidate.resume_url,
     appliedAt: app.created_at
@@ -141,6 +145,20 @@ export async function updateApplicationStage(applicationId: string, stage: strin
     throw new Error("Failed to update stage");
   }
 
+  // Try to append stage history (column may not exist yet)
+  try {
+    const historyEntry = { stage, timestamp: new Date().toISOString(), changedBy: user.id };
+    const existingHistory = (data as any).stage_history || [];
+    const newHistory = [...existingHistory, historyEntry];
+    await (supabase as any)
+      .from('applications')
+      .update({ stage_history: newHistory })
+      .eq('id', applicationId);
+  } catch (e) {
+    // stage_history column may not exist — that's fine
+    console.error("Could not update stage_history:", e);
+  }
+
   // If stage is 'Interview', we can trigger an automation
   if (stage === 'Interview') {
     const { data: candidateProfile } = await supabase
@@ -148,7 +166,7 @@ export async function updateApplicationStage(applicationId: string, stage: strin
         .select('email, full_name')
         .eq('id', data.candidate_id)
         .single();
-    
+
     if (candidateProfile?.email) {
         // Trigger Resend email logic here
     }
@@ -327,4 +345,131 @@ export async function toggleJobStatus(jobId: string, currentStatus: string) {
 
   revalidatePath('/doctor/jobs');
   return { success: true, newStatus };
+}
+
+/**
+ * 5. ATS ACTIONS — Rating, Notes, Detail
+ */
+
+export async function updateApplicantRating(applicationId: string, rating: number) {
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  try {
+    const { error } = await (supabase as any)
+      .from('applications')
+      .update({ rating })
+      .eq('id', applicationId);
+
+    if (error) {
+      console.error("Error updating rating:", error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/doctor/jobs');
+    return { success: true };
+  } catch (e) {
+    console.error("Rating column may not exist:", e);
+    return { success: false, error: "Column may not exist" };
+  }
+}
+
+export async function updateApplicantNotes(applicationId: string, notes: string) {
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  try {
+    const { error } = await (supabase as any)
+      .from('applications')
+      .update({ doctor_notes: notes })
+      .eq('id', applicationId);
+
+    if (error) {
+      console.error("Error updating notes:", error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/doctor/jobs');
+    return { success: true };
+  } catch (e) {
+    console.error("doctor_notes column may not exist:", e);
+    return { success: false, error: "Column may not exist" };
+  }
+}
+
+export async function getApplicationWithHistory(applicationId: string) {
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  try {
+    const { data: rawData, error } = await (supabase as any)
+      .from('applications')
+      .select(`
+        *,
+        job:job_postings!inner(title, doctor_id, type, salary_min, salary_max, employment_type, description),
+        candidate:students!inner(
+          user_id,
+          full_name,
+          school,
+          graduation_year,
+          skills,
+          resume_url
+        )
+      `)
+      .eq('id', applicationId)
+      .single();
+
+    const data = rawData as any;
+
+    if (error || !data) {
+      console.error("Error fetching application detail:", error);
+      return null;
+    }
+
+    // Get candidate email from profiles
+    let email = '';
+    let phone = '';
+    try {
+      const { data: profile } = await (supabase as any)
+        .from('profiles')
+        .select('email, phone')
+        .eq('id', data.candidate_id)
+        .single();
+      email = (profile as any)?.email || '';
+      phone = (profile as any)?.phone || '';
+    } catch (e) {
+      // ignore — phone column may not exist
+    }
+
+    return {
+      id: data.id,
+      jobId: data.job_id,
+      jobTitle: data.job?.title || '',
+      jobType: data.job?.type || '',
+      jobSalaryMin: data.job?.salary_min || 0,
+      jobSalaryMax: data.job?.salary_max || 0,
+      jobEmploymentType: data.job?.employment_type || '',
+      jobDescription: data.job?.description || '',
+      candidateId: data.candidate_id,
+      name: data.candidate?.full_name || 'Anonymous Candidate',
+      email,
+      phone,
+      school: data.candidate?.school || '',
+      gradYear: data.candidate?.graduation_year || '',
+      skills: data.candidate?.skills || [],
+      resumeUrl: data.candidate?.resume_url || '',
+      stage: data.stage,
+      rating: data.rating ?? 0,
+      doctorNotes: data.doctor_notes ?? '',
+      stageHistory: data.stage_history ?? [],
+      message: data.message || data.cover_letter || '',
+      appliedAt: data.created_at,
+    };
+  } catch (e) {
+    console.error("Error in getApplicationWithHistory:", e);
+    return null;
+  }
 }
