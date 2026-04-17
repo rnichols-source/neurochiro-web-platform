@@ -148,6 +148,23 @@ export const PLANS = {
       price: 29,
     },
   },
+  // Workshop Kits
+  workshop_bundle: {
+    id: "workshop_bundle",
+    name: "Workshop Mastery System (All 5 Kits)",
+    oneTime: {
+      priceId: process.env.STRIPE_WORKSHOP_BUNDLE_PRICE_ID ?? "",
+      price: 149,
+    },
+  },
+  workshop_individual: {
+    id: "workshop_individual",
+    name: "Workshop Kit (Individual)",
+    oneTime: {
+      priceId: process.env.STRIPE_WORKSHOP_INDIVIDUAL_PRICE_ID ?? "",
+      price: 49,
+    },
+  },
   // Scan Report Generator
   scan_report: {
     id: "scan_report",
