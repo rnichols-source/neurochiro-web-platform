@@ -115,6 +115,39 @@ export const PLANS = {
       price: 99,
     },
   },
+  // Contract Templates
+  contract_bundle: {
+    id: "contract_bundle",
+    name: "Complete Contract Templates Bundle",
+    oneTime: {
+      priceId: process.env.STRIPE_CONTRACT_BUNDLE_PRICE_ID ?? "",
+      price: 99,
+    },
+  },
+  contract_employment: {
+    id: "contract_employment",
+    name: "Employment Agreement Template",
+    oneTime: {
+      priceId: process.env.STRIPE_CONTRACT_EMPLOYMENT_PRICE_ID ?? "",
+      price: 49,
+    },
+  },
+  contract_standard: {
+    id: "contract_standard",
+    name: "Contract Template (Standard)",
+    oneTime: {
+      priceId: process.env.STRIPE_CONTRACT_STANDARD_PRICE_ID ?? "",
+      price: 39,
+    },
+  },
+  contract_basic: {
+    id: "contract_basic",
+    name: "Contract Template (Basic)",
+    oneTime: {
+      priceId: process.env.STRIPE_CONTRACT_BASIC_PRICE_ID ?? "",
+      price: 29,
+    },
+  },
   // Content Library Add-on
   content_library: {
     id: "content_library",
