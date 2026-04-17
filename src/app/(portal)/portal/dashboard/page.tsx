@@ -1,19 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Zap, Flame, Search, Heart, BookOpen, Activity, ArrowRight, Loader2 } from "lucide-react";
+import { Zap, Flame, Search, Heart, BookOpen, Activity, ArrowRight, Loader2, Dumbbell, Calendar, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { getPatientDashboardData } from "./actions";
+import { isPremiumMember } from "../premium-actions";
 
 export default function PatientDashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [premium, setPremium] = useState(false);
 
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    getPatientDashboardData()
-      .then(d => { setData(d); })
+    Promise.all([
+      getPatientDashboardData(),
+      isPremiumMember().catch(() => false),
+    ])
+      .then(([d, p]) => { setData(d); setPremium(p); })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
@@ -24,6 +29,27 @@ export default function PatientDashboard() {
   return (
     <div className="space-y-6 pb-20">
       <h1 className="text-2xl font-heading font-black text-neuro-navy">Hi, {data?.name || 'there'}</h1>
+
+      {/* Premium Quick Actions */}
+      {premium && (
+        <div className="grid grid-cols-4 gap-2">
+          {[
+            { label: "Check In", href: "/portal/track", icon: Activity, bg: "bg-blue-50", iconColor: "text-blue-500" },
+            { label: "Exercises", href: "/portal/exercises", icon: Dumbbell, bg: "bg-orange-50", iconColor: "text-neuro-orange" },
+            { label: "Learn", href: "/portal/learn", icon: BookOpen, bg: "bg-green-50", iconColor: "text-green-500" },
+            { label: "My Journey", href: "/portal/journey", icon: Calendar, bg: "bg-purple-50", iconColor: "text-purple-500" },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`${item.bg} rounded-2xl p-4 text-center hover:shadow-md transition-all active:scale-95`}
+            >
+              <item.icon className={`w-7 h-7 ${item.iconColor} mx-auto mb-1.5`} />
+              <p className="text-[11px] font-bold text-neuro-navy">{item.label}</p>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* Onboarding for new patients */}
       {!data?.todayLogged && (!data?.streak || data.streak === 0) && (
@@ -131,6 +157,20 @@ export default function PatientDashboard() {
           </div>
         )}
       </div>
+
+      {/* Premium Upgrade Card */}
+      {!premium && (
+        <div className="bg-neuro-navy rounded-2xl p-6">
+          <h3 className="text-white font-black text-lg mb-1">Your Health, Between Visits</h3>
+          <p className="text-gray-400 text-sm mb-4 leading-relaxed">
+            Track your progress, get daily exercises, and understand what&apos;s happening in your body &mdash; all in one place.
+          </p>
+          <p className="text-gray-300 text-xs font-bold mb-4">$9/month &middot; Cancel anytime</p>
+          <button className="px-5 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-all">
+            Start Free Trial &mdash; 7 Days Free
+          </button>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-3 gap-3">

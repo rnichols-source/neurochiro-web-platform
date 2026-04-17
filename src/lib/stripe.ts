@@ -148,6 +148,15 @@ export const PLANS = {
       price: 29,
     },
   },
+  // Patient Premium
+  patient_premium: {
+    id: "patient_premium",
+    name: "Patient Premium Membership",
+    monthly: {
+      priceId: process.env.STRIPE_PATIENT_PREMIUM_PRICE_ID ?? "",
+      price: 9,
+    },
+  },
   // Workshop Kits
   workshop_bundle: {
     id: "workshop_bundle",

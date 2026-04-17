@@ -13,6 +13,8 @@ import {
   Heart,
   LogOut,
   Settings,
+  Dumbbell,
+  TrendingUp,
 } from "lucide-react";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
@@ -21,6 +23,8 @@ const navItems = [
   { name: "Find a Doctor", href: "/directory", icon: Search },
   { name: "Saved", href: "/portal/saved", icon: Heart },
   { name: "Health Tracker", href: "/portal/track", icon: Activity },
+  { name: "Exercises", href: "/portal/exercises", icon: Dumbbell },
+  { name: "My Journey", href: "/portal/journey", icon: TrendingUp },
   { name: "Learn", href: "/portal/learn", icon: BookOpen },
   { name: "Settings", href: "/portal/settings", icon: Settings },
 ];
