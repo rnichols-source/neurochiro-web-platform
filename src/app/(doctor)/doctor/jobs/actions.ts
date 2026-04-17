@@ -12,21 +12,29 @@ export async function getJobPostings() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
+  // Try with application count join first, fall back to simple query
   const { data, error } = await supabase
     .from('job_postings')
-    .select(`
-      *,
-      applications:applications(count)
-    `)
+    .select(`*, applications:applications(count)`)
     .eq('doctor_id', user.id)
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error("Error fetching job postings:", error);
-    return [];
+    console.error("Error fetching with join, trying simple query:", error.message);
+    const result = await supabase
+      .from('job_postings')
+      .select('*')
+      .eq('doctor_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (result.error) {
+      console.error("Error fetching job postings:", result.error);
+      return [];
+    }
+    return (result.data || []) as any[];
   }
 
-  return data;
+  return (data || []) as any[];
 }
 
 export async function createJobPosting(formData: any) {
