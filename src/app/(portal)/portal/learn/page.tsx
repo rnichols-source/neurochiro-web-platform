@@ -1,22 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { ARTICLES } from "@/lib/articles";
-import Link from "next/link";
-import { BookOpen, Search } from "lucide-react";
+import { BookOpen, Search, ChevronDown, ChevronUp } from "lucide-react";
 
-// Filter out doctor/business-focused articles from patient portal
-const PATIENT_ARTICLES = ARTICLES.filter(a =>
-  !['Business', 'Communication'].includes(a.category)
-);
+let ARTICLES: any[] = [];
+try {
+  ARTICLES = require("../articles-data").ARTICLES;
+} catch {
+  // Fallback if file doesn't exist
+}
 
-const CATEGORIES = ['All', ...new Set(PATIENT_ARTICLES.map(a => a.category))];
+const CATEGORIES = ['All', ...new Set(ARTICLES.map((a: any) => a.category))] as string[];
 
 export default function PortalLearnPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const filtered = PATIENT_ARTICLES.filter(a => {
+  const filtered = ARTICLES.filter((a: any) => {
     const matchesSearch = !search || a.title.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = category === 'All' || a.category === category;
     return matchesSearch && matchesCategory;
@@ -55,19 +56,56 @@ export default function PortalLearnPage() {
       </div>
 
       {/* Articles */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filtered.map((article) => (
-          <Link key={article.slug} href={`/learn/${article.slug}`} className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md hover:border-gray-200 transition-all">
-            <div className="flex items-start gap-3">
-              <BookOpen className="w-5 h-5 text-neuro-orange mt-0.5 flex-shrink-0" />
-              <div>
-                <h3 className="font-bold text-neuro-navy text-sm">{article.title}</h3>
-                <p className="text-xs text-gray-400 mt-1">{article.category} · {article.readTime}</p>
-                <p className="text-gray-500 text-sm mt-2 line-clamp-2">{article.intro}</p>
-              </div>
+      <div className="space-y-3">
+        {filtered.map((article: any) => {
+          const isExpanded = expandedId === article.id;
+          const preview = article.content.split('\n\n')[0] || '';
+
+          return (
+            <div key={article.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:border-gray-200 transition-all">
+              <button
+                onClick={() => setExpandedId(isExpanded ? null : article.id)}
+                className="w-full text-left p-5 flex items-start gap-3"
+              >
+                <BookOpen className="w-5 h-5 text-neuro-orange mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-neuro-navy text-sm">{article.title}</h3>
+                  <p className="text-xs text-gray-400 mt-1">{article.category} · {article.readTime}</p>
+                  {!isExpanded && (
+                    <p className="text-gray-500 text-sm mt-2 line-clamp-2">{preview}</p>
+                  )}
+                </div>
+                <div className="flex-shrink-0 mt-1">
+                  {isExpanded ? (
+                    <ChevronUp className="w-4 h-4 text-gray-300" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-gray-300" />
+                  )}
+                </div>
+              </button>
+              {isExpanded && (
+                <div className="px-5 pb-5 border-t border-gray-100 pt-4">
+                  <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed space-y-4">
+                    {article.content.split('\n\n').map((paragraph: string, i: number) => {
+                      const formatted = paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                      if (paragraph.trim().startsWith('- ')) {
+                        const items = paragraph.split('\n').filter((l: string) => l.trim().startsWith('- '));
+                        return (
+                          <ul key={i} className="list-disc pl-6 space-y-1">
+                            {items.map((item: string, j: number) => (
+                              <li key={j} dangerouslySetInnerHTML={{ __html: item.replace(/^- /, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                            ))}
+                          </ul>
+                        );
+                      }
+                      return <p key={i} dangerouslySetInnerHTML={{ __html: formatted }} />;
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
-          </Link>
-        ))}
+          );
+        })}
       </div>
 
       {filtered.length === 0 && (
