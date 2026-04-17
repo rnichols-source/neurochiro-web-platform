@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Zap, Flame, Search, Heart, BookOpen, Activity, ArrowRight, Loader2, Dumbbell, Calendar, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { getPatientDashboardData } from "./actions";
-import { isPremiumMember } from "../premium-actions";
+import { isPremiumMember, createPremiumCheckout } from "../premium-actions";
 
 export default function PatientDashboard() {
   const [data, setData] = useState<any>(null);
@@ -166,7 +166,17 @@ export default function PatientDashboard() {
             Track your progress, get daily exercises, and understand what&apos;s happening in your body &mdash; all in one place.
           </p>
           <p className="text-gray-300 text-xs font-bold mb-4">$9/month &middot; Cancel anytime</p>
-          <button className="px-5 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-all">
+          <button
+            onClick={async () => {
+              const result = await createPremiumCheckout();
+              if (result.url) {
+                window.location.href = result.url;
+              } else {
+                alert(result.error || 'Something went wrong');
+              }
+            }}
+            className="px-5 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-all"
+          >
             Start Free Trial &mdash; 7 Days Free
           </button>
         </div>

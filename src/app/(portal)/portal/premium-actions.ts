@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { stripe } from '@/lib/stripe'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -347,5 +348,54 @@ export async function isPremiumMember(): Promise<boolean> {
     return data.tier !== 'free' || data.subscription_status === 'active'
   } catch {
     return false
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Checkout
+// ---------------------------------------------------------------------------
+
+export async function createPremiumCheckout() {
+  let userId: string
+  try {
+    const { user } = await getUser()
+    userId = user.id
+  } catch {
+    return { error: 'You must be logged in.' }
+  }
+
+  try {
+    const priceId = process.env.STRIPE_PATIENT_PREMIUM_PRICE_ID
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      line_items: priceId ? [
+        { price: priceId, quantity: 1 }
+      ] : [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: { name: 'Patient Premium Membership' },
+            unit_amount: 900,
+            recurring: { interval: 'month' },
+          },
+          quantity: 1,
+        }
+      ],
+      subscription_data: {
+        trial_period_days: 7,
+      },
+      metadata: {
+        userId,
+        type: 'patient_premium',
+      },
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/portal/dashboard?upgraded=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/portal/dashboard`,
+    })
+
+    return { url: session.url }
+  } catch (err: any) {
+    console.error('Premium checkout error:', err)
+    return { error: err.message || 'Something went wrong' }
   }
 }
