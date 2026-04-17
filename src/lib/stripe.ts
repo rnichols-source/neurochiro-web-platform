@@ -148,6 +148,15 @@ export const PLANS = {
       price: 29,
     },
   },
+  // Scan Report Generator
+  scan_report: {
+    id: "scan_report",
+    name: "Scan Report Generator",
+    monthly: {
+      priceId: process.env.STRIPE_SCAN_REPORT_PRICE_ID ?? "",
+      price: 19,
+    },
+  },
   // KPI Tracker
   kpi_tracker: {
     id: "kpi_tracker",
