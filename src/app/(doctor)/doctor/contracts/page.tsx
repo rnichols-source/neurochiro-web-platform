@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { createClient } from "@/lib/supabase";
 import { Search, Copy, Check, Edit3, X, FileText, Users, Building2, Puzzle, Shield, Zap, Lock, ChevronDown } from "lucide-react";
 
 interface ContractTemplate {
@@ -53,7 +54,22 @@ export default function ContractsPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
-  const [purchasedIds] = useState<string[]>([]); // TODO: check Supabase
+  const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      try {
+        const { data } = await (supabase as any)
+          .from('course_purchases')
+          .select('course_id')
+          .eq('user_id', user.id);
+        setPurchasedIds((data || []).map((r: any) => r.course_id));
+      } catch {}
+    });
+  }, []);
+
   const hasBundled = purchasedIds.includes('contract-bundle');
 
   const filtered = useMemo(() => {
