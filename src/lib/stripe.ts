@@ -148,6 +148,15 @@ export const PLANS = {
       price: 29,
     },
   },
+  // KPI Tracker
+  kpi_tracker: {
+    id: "kpi_tracker",
+    name: "KPI Tracker",
+    monthly: {
+      priceId: process.env.STRIPE_KPI_TRACKER_PRICE_ID ?? "",
+      price: 29,
+    },
+  },
   // Content Library Add-on
   content_library: {
     id: "content_library",

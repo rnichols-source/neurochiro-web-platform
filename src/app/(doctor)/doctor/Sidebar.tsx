@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
-  MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck,
+  MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck, TrendingUp,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,6 +25,7 @@ const navItems = [
   { name: "Care Plan", href: "/doctor/care-plan", icon: Calculator },
   { name: "Content Library", href: "/doctor/content-library", icon: Library },
   { name: "Contracts", href: "/doctor/contracts", icon: FileCheck },
+  { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp },
   { name: "Analytics", href: "/doctor/analytics", icon: BarChart3 },
   { name: "Notifications", href: "/doctor/notifications", icon: Bell },
   { name: "Settings", href: "/doctor/settings", icon: Settings },
