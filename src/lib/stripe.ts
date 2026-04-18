@@ -148,6 +148,15 @@ export const PLANS = {
       price: 29,
     },
   },
+  // Billing Guide
+  billing_guide: {
+    id: "billing_guide",
+    name: "Insurance & Billing Toolkit",
+    oneTime: {
+      priceId: process.env.STRIPE_BILLING_GUIDE_PRICE_ID ?? "",
+      price: 39,
+    },
+  },
   // Patient Premium
   patient_premium: {
     id: "patient_premium",
