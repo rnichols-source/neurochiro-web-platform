@@ -34,7 +34,9 @@ interface LineItem {
 
 interface PLCategory {
   id: string;
-  name: string;
+  label: string;
+  minPct: number;
+  maxPct: number;
   items: LineItem[];
 }
 
@@ -614,7 +616,7 @@ export default function PLAnalyzerPage() {
                     minWidth: 600,
                   }}
                 >
-                  <span>{isExpanded ? "\u25BC" : "\u25B6"} {cat.name}</span>
+                  <span>{isExpanded ? "\u25BC" : "\u25B6"} {cat.label}</span>
                   <span style={{ textAlign: "right", fontSize: 13 }}>${fmt(ct?.perfectDollar || 0)}</span>
                   <span style={{ textAlign: "right", fontSize: 13, color: "#64748b" }}>{fmtPct(ct?.perfectPct || 0)}</span>
                   <span style={{ textAlign: "right", fontSize: 13 }}>{(ct?.userDollar || 0) > 0 ? `$${fmt(ct.userDollar)}` : "-"}</span>
