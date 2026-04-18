@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
-  MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck, TrendingUp, Activity, Presentation, Receipt,
+  MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck, TrendingUp, Activity, Presentation, Receipt, DollarSign,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,6 +27,7 @@ const navItems = [
   { name: "Workshops", href: "/doctor/workshops", icon: Presentation },
   { name: "Contracts", href: "/doctor/contracts", icon: FileCheck },
   { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp },
+  { name: "P&L Analyzer", href: "/doctor/pl-analyzer", icon: DollarSign },
   { name: "Scan Reports", href: "/doctor/scan-report", icon: Activity },
   { name: "Billing Guide", href: "/doctor/billing-guide", icon: Receipt },
   { name: "Analytics", href: "/doctor/analytics", icon: BarChart3 },

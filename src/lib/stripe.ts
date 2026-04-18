@@ -148,6 +148,15 @@ export const PLANS = {
       price: 29,
     },
   },
+  // P&L Analyzer
+  pl_analyzer: {
+    id: "pl_analyzer",
+    name: "Perfect P&L Analyzer",
+    oneTime: {
+      priceId: process.env.STRIPE_PL_ANALYZER_PRICE_ID ?? "",
+      price: 29,
+    },
+  },
   // Billing Guide
   billing_guide: {
     id: "billing_guide",
