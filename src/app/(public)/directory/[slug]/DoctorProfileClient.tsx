@@ -24,6 +24,7 @@ import { sendReferral } from "@/app/actions/referrals";
 import { submitPatientStory, getApprovedStories } from "@/app/actions/patient-stories";
 import GoogleReviews from "@/components/directory/GoogleReviews";
 import Image from "next/image";
+import { getEpisodeByDoctorSlug } from "../../spotlight/spotlight-data";
 
 export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slug: string }) {
   const { toggleSave, isSaved } = useUserPreferences();
@@ -49,6 +50,7 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
 
   const saved = isSaved('doctors', doctor.id?.toString());
   const name = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
+  const spotlightEpisode = getEpisodeByDoctorSlug(slug);
 
   const trackEvent = (eventType: string) => {
     fetch('/api/track', {
@@ -186,6 +188,37 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
           <div className="mt-6 bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
             <h2 className="text-lg font-black text-neuro-navy mb-3">About</h2>
             <p className="text-gray-600 leading-relaxed">{doctor.bio}</p>
+          </div>
+        )}
+
+        {/* Spotlight Featured Interview */}
+        {spotlightEpisode && (
+          <div className="mt-6 bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <div className="flex items-center gap-2 px-6 pt-5 pb-3">
+              <span className="text-lg">🎬</span>
+              <h2 className="text-lg font-black text-neuro-navy">Featured on NeuroChiro Spotlight</h2>
+              <span className="bg-neuro-orange/10 text-neuro-orange text-xs font-black px-2.5 py-0.5 rounded-full">
+                EP {String(spotlightEpisode.episodeNumber).padStart(2, "0")}
+              </span>
+            </div>
+            <div className="px-6 pb-3">
+              <p className="text-gray-500 text-sm italic">&ldquo;{spotlightEpisode.quote}&rdquo;</p>
+            </div>
+            <div className="aspect-video">
+              <iframe
+                src={spotlightEpisode.videoUrl}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={`NeuroChiro Spotlight — ${spotlightEpisode.doctorName}`}
+              />
+            </div>
+            <div className="px-6 py-4">
+              <p className="text-gray-500 text-sm mb-3">{spotlightEpisode.description}</p>
+              <Link href="/spotlight" className="text-neuro-orange font-bold text-sm hover:underline">
+                Watch all Spotlight episodes &rarr;
+              </Link>
+            </div>
           </div>
         )}
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ArrowRight, MapPin, ShieldCheck, Globe, Users } from "lucide-react";
+import { Search, ArrowRight, MapPin, ShieldCheck, Globe, Users, Play } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase-admin";
 import Footer from "@/components/landing/Footer";
 import WhoIsItFor from "@/components/landing/WhoIsItFor";
@@ -8,6 +8,7 @@ import Testimonials from "@/components/landing/Testimonials";
 import SocialProof from "@/components/landing/SocialProof";
 import DoctorValueProp from "@/components/landing/DoctorValueProp";
 import EmailCaptureBanner from "@/components/landing/EmailCaptureBanner";
+import { spotlightEpisodes } from "./spotlight/spotlight-data";
 
 export const metadata = {
   title: "NeuroChiro | Find a Nervous System Chiropractor",
@@ -104,6 +105,57 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* NeuroChiro Spotlight */}
+      <section className="bg-white py-16 px-6 border-b border-gray-100">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.2em] mb-2">Live Interviews</p>
+            <h2 className="text-2xl font-heading font-black text-neuro-navy mb-2">The NeuroChiro Spotlight</h2>
+            <p className="text-gray-500 text-sm">Watch real doctors share their stories</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {spotlightEpisodes.slice(0, 3).map((episode) => (
+              <Link
+                key={episode.id}
+                href="/spotlight"
+                className="bg-neuro-cream rounded-2xl overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group"
+              >
+                <div className="relative aspect-video bg-gray-200 overflow-hidden">
+                  <Image
+                    src={episode.thumbnail}
+                    alt={episode.doctorName}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-12 h-12 rounded-full bg-neuro-orange flex items-center justify-center shadow-lg">
+                      <Play className="w-5 h-5 text-white ml-0.5" />
+                    </div>
+                  </div>
+                  <span className="absolute top-2 left-2 bg-neuro-navy/90 text-white text-[10px] font-black px-2 py-0.5 rounded-md">
+                    EP {String(episode.episodeNumber).padStart(2, "0")}
+                  </span>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-neuro-navy text-sm mb-1">{episode.doctorName}</h3>
+                  <p className="text-gray-500 text-xs italic line-clamp-2 mb-2">&ldquo;{episode.quote}&rdquo;</p>
+                  <span className="text-neuro-orange text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                    Watch <ArrowRight className="w-3 h-3" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center mt-8">
+            <Link href="/spotlight" className="inline-flex items-center gap-2 text-neuro-orange font-bold text-sm hover:underline">
+              See All Episodes <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* How It Works */}
       <section className="bg-white py-16 px-6">

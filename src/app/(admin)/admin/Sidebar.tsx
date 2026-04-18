@@ -27,7 +27,8 @@ import {
   Stethoscope,
   Tag,
   Briefcase,
-  Calendar
+  Calendar,
+  Video
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,6 +48,7 @@ const allNavItems = [
   { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
   { name: "Seminars", href: "/admin/seminars", icon: Calendar },
   { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert },
+  { name: "Spotlight", href: "/admin/spotlight", icon: Video },
   { name: "Announcements", href: "/admin/announcements", icon: Megaphone },
   { name: "Revenue", href: "/admin/revenue", icon: CreditCard },
   { name: "Logs", href: "/admin/logs", icon: History },
