@@ -116,7 +116,7 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {spotlightEpisodes.slice(0, 3).map((episode) => (
+            {[...spotlightEpisodes].reverse().slice(0, 3).map((episode) => (
               <Link
                 key={episode.id}
                 href="/spotlight"
