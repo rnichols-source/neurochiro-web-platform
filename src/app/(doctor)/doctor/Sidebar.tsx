@@ -15,25 +15,50 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
-const navItems = [
-  { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
-  { name: "Profile", href: "/doctor/profile", icon: User },
-  { name: "Jobs", href: "/doctor/jobs", icon: Briefcase },
-  { name: "Students", href: "/doctor/students", icon: GraduationCap },
-  { name: "Seminars", href: "/doctor/seminars", icon: Calendar },
-  { name: "Messages", href: "/doctor/messages", icon: MessageSquare },
-  { name: "Care Plan", href: "/doctor/care-plan", icon: Calculator },
-  { name: "Content Library", href: "/doctor/content-library", icon: Library },
-  { name: "Workshops", href: "/doctor/workshops", icon: Presentation },
-  { name: "Contracts", href: "/doctor/contracts", icon: FileCheck },
-  { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp },
-  { name: "P&L Analyzer", href: "/doctor/pl-analyzer", icon: DollarSign },
-  { name: "Scan Reports", href: "/doctor/scan-report", icon: Activity },
-  { name: "Billing Guide", href: "/doctor/billing-guide", icon: Receipt },
-  { name: "Analytics", href: "/doctor/analytics", icon: BarChart3 },
-  { name: "Notifications", href: "/doctor/notifications", icon: Bell },
-  { name: "Settings", href: "/doctor/settings", icon: Settings },
-  { name: "Billing", href: "/doctor/billing", icon: CreditCard },
+const navSections = [
+  {
+    label: "PRACTICE",
+    items: [
+      { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
+      { name: "Profile", href: "/doctor/profile", icon: User },
+      { name: "Messages", href: "/doctor/messages", icon: MessageSquare },
+      { name: "Notifications", href: "/doctor/notifications", icon: Bell },
+    ],
+  },
+  {
+    label: "PATIENTS",
+    items: [
+      { name: "Care Plan", href: "/doctor/care-plan", icon: Calculator },
+      { name: "Scan Reports", href: "/doctor/scan-report", icon: Activity },
+    ],
+  },
+  {
+    label: "TOOLS",
+    items: [
+      { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp },
+      { name: "P&L Analyzer", href: "/doctor/pl-analyzer", icon: DollarSign },
+      { name: "Content Library", href: "/doctor/content-library", icon: Library },
+      { name: "Billing Guide", href: "/doctor/billing-guide", icon: Receipt },
+    ],
+  },
+  {
+    label: "GROW",
+    items: [
+      { name: "Jobs & Hiring", href: "/doctor/jobs", icon: Briefcase },
+      { name: "Workshops", href: "/doctor/workshops", icon: Presentation },
+      { name: "Contracts", href: "/doctor/contracts", icon: FileCheck },
+      { name: "Students", href: "/doctor/students", icon: GraduationCap },
+      { name: "Seminars", href: "/doctor/seminars", icon: Calendar },
+    ],
+  },
+  {
+    label: "ACCOUNT",
+    items: [
+      { name: "Analytics", href: "/doctor/analytics", icon: BarChart3 },
+      { name: "Settings", href: "/doctor/settings", icon: Settings },
+      { name: "Billing", href: "/doctor/billing", icon: CreditCard },
+    ],
+  },
 ];
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
@@ -75,26 +100,33 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </Link>
       </div>
 
-      <nav className="px-4 space-y-1 flex-1">
-        {navItems.map((item) => {
-          const active = pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              onClick={onClose}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                active ? "bg-neuro-orange text-white" : "text-gray-400 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              <item.icon className={`w-5 h-5 ${active ? "text-white" : "text-gray-400"}`} />
-              {item.name}
-              {item.name === 'Notifications' && unreadNotifs > 0 && (
-                <span className="ml-auto bg-neuro-orange text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">{unreadNotifs > 9 ? '9+' : unreadNotifs}</span>
-              )}
-            </Link>
-          );
-        })}
+      <nav className="px-4 flex-1 overflow-y-auto">
+        {navSections.map((section, si) => (
+          <div key={section.label} className={si > 0 ? "mt-4" : ""}>
+            <p className="px-3 mb-1 text-[10px] font-black uppercase tracking-[0.15em] text-gray-500">{section.label}</p>
+            <div className="space-y-0.5">
+              {section.items.map((item) => {
+                const active = pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={onClose}
+                    className={`flex items-center gap-3 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors ${
+                      active ? "bg-neuro-orange text-white" : "text-gray-400 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <item.icon className={`w-4 h-4 ${active ? "text-white" : "text-gray-500"}`} />
+                    {item.name}
+                    {item.name === 'Notifications' && unreadNotifs > 0 && (
+                      <span className="ml-auto bg-neuro-orange text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">{unreadNotifs > 9 ? '9+' : unreadNotifs}</span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       <div className="p-4 border-t border-white/10">
