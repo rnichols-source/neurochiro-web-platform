@@ -65,6 +65,21 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 3,
     publishedAt: "2026-04-10T12:00:00Z",
   },
+  {
+    id: "ep-004",
+    doctorName: "Dr. Dakota Turgeon",
+    doctorSlug: "dakota-turgeon",
+    clinicName: "Envision Chiropractic",
+    city: "Bellingham",
+    state: "WA",
+    videoUrl: "https://www.youtube.com/embed/aPeMroYs4Vg",
+    thumbnail: getYouTubeThumbnail("https://www.youtube.com/embed/aPeMroYs4Vg"),
+    quote: "We don't do crack and go. We want to make sure we're the right solution for them — and if we're not, we'll be brutally honest about it.",
+    description:
+      "Dr. Dakota Turgeon of Envision Chiropractic in Bellingham, WA breaks down what sets his practice apart from the typical chiropractic office. He talks about taking the time to do thorough exams before ever adjusting, finding the root cause instead of chasing symptoms, and building a practice culture centered on honesty and personalized care.",
+    episodeNumber: 4,
+    publishedAt: "2026-04-17T12:00:00Z",
+  },
 ];
 
 export function getLatestEpisode(): SpotlightEpisode {
