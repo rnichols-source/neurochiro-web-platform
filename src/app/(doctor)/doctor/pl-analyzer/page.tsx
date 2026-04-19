@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
 import { createDoctorProductCheckout } from "../purchase-actions";
 
 // ---------------------------------------------------------------------------
-// Data imports (safe fallback if pl-data doesn't exist yet)
+// Data imports
 // ---------------------------------------------------------------------------
 
-let PL_CATEGORIES: any[] = [];
+let PL_SECTIONS: any[] = [];
 let SCALING_EXAMPLES: any[] = [];
 let PROFIT_COACHING: any[] = [];
 try {
   const data = require("./pl-data");
-  PL_CATEGORIES = data.PL_CATEGORIES || [];
+  PL_SECTIONS = data.PL_SECTIONS || [];
   SCALING_EXAMPLES = data.SCALING_EXAMPLES || [];
   PROFIT_COACHING = data.PROFIT_COACHING || [];
 } catch {}
@@ -24,6 +24,7 @@ try {
 
 interface LineItem {
   id: string;
+  code: string;
   label: string;
   tooltip?: string;
   minPct: number;
@@ -35,10 +36,18 @@ interface LineItem {
 
 interface PLCategory {
   id: string;
+  code: string;
   label: string;
   minPct: number;
   maxPct: number;
   items: LineItem[];
+}
+
+interface PLSectionType {
+  id: string;
+  type: "income" | "cogs" | "expenses";
+  label: string;
+  categories: PLCategory[];
 }
 
 interface Snapshot {
@@ -58,18 +67,30 @@ function fmtPct(n: number): string {
   return n.toFixed(1) + "%";
 }
 
+function fmtMoney(n: number): string {
+  const abs = Math.abs(n);
+  const formatted = abs.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return n < 0 ? `-$${formatted}` : `$${formatted}`;
+}
+
 function parseNumericInput(raw: string): number {
-  const cleaned = raw.replace(/[^0-9]/g, "");
-  return cleaned ? parseInt(cleaned, 10) : 0;
+  // Allow negative numbers (for refunds, sales tax)
+  const negative = raw.includes("-");
+  const cleaned = raw.replace(/[^0-9.]/g, "");
+  const val = cleaned ? parseFloat(cleaned) : 0;
+  return negative ? -Math.abs(val) : val;
 }
 
 function statusEmoji(userPct: number, minPct: number, maxPct: number): string {
-  if (userPct >= minPct && userPct <= maxPct) return "\u{1F7E2}"; // green
+  if (minPct === 0 && maxPct === 0) {
+    return userPct === 0 ? "\u{1F7E2}" : "\u{1F534}";
+  }
+  if (userPct >= minPct && userPct <= maxPct) return "\u{1F7E2}";
   const distMin = Math.abs(userPct - minPct);
   const distMax = Math.abs(userPct - maxPct);
   if ((userPct < minPct && distMin <= 2) || (userPct > maxPct && distMax <= 2))
-    return "\u{1F7E1}"; // yellow
-  return "\u{1F534}"; // red
+    return "\u{1F7E1}";
+  return "\u{1F534}";
 }
 
 function profitColor(pct: number): string {
@@ -84,16 +105,7 @@ function profitColor(pct: number): string {
 
 function DollarSignIcon({ size = 28 }: { size?: number }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <line x1="12" y1="1" x2="12" y2="23" />
       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
     </svg>
@@ -127,12 +139,15 @@ function InfoTooltip({ text }: { text: string }) {
             transform: "translateX(-50%)",
             background: "#1e293b",
             color: "#f8fafc",
-            padding: "6px 10px",
+            padding: "8px 12px",
             borderRadius: 6,
             fontSize: 12,
-            whiteSpace: "nowrap",
-            maxWidth: 260,
+            whiteSpace: "normal",
+            maxWidth: 300,
+            minWidth: 200,
             zIndex: 50,
+            lineHeight: 1.5,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
           }}
         >
           {text}
@@ -169,38 +184,68 @@ function TrendChart({ snapshots }: { snapshots: Snapshot[] }) {
   return (
     <div style={{ overflowX: "auto", marginTop: 16 }}>
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ display: "block" }}>
-        {/* grid lines */}
         {[0, 10, 20, 30, 40, 50].map((v) => {
           if (v > maxVal + 5) return null;
           const y = pad + ((maxVal - v) / range) * (h - pad * 2);
           return (
             <g key={v}>
               <line x1={pad} y1={y} x2={w - pad} y2={y} stroke="#e2e8f0" strokeDasharray="4" />
-              <text x={pad - 6} y={y + 4} textAnchor="end" fontSize={10} fill="#94a3b8">
-                {v}%
-              </text>
+              <text x={pad - 6} y={y + 4} textAnchor="end" fontSize={10} fill="#94a3b8">{v}%</text>
             </g>
           );
         })}
-        {/* 40% target line */}
         {(() => {
           const y40 = pad + ((maxVal - 40) / range) * (h - pad * 2);
-          return (
-            <line x1={pad} y1={y40} x2={w - pad} y2={y40} stroke="#22c55e" strokeWidth={1.5} strokeDasharray="6 3" />
-          );
+          return <line x1={pad} y1={y40} x2={w - pad} y2={y40} stroke="#22c55e" strokeWidth={1.5} strokeDasharray="6 3" />;
         })()}
-        {/* line */}
         <path d={pathD} fill="none" stroke="#1a2744" strokeWidth={2.5} />
-        {/* dots */}
         {points.map((p, i) => (
           <g key={i}>
             <circle cx={p.x} cy={p.y} r={4} fill={profitColor(p.value)} stroke="#fff" strokeWidth={1.5} />
-            <text x={p.x} y={h - 6} textAnchor="middle" fontSize={9} fill="#64748b">
-              {p.label.slice(5)}
-            </text>
+            <text x={p.x} y={h - 6} textAnchor="middle" fontSize={9} fill="#64748b">{p.label.slice(5)}</text>
           </g>
         ))}
       </svg>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Summary Line Component
+// ---------------------------------------------------------------------------
+
+function SummaryLine({
+  label,
+  amount,
+  bold,
+  bg,
+  borderTop,
+  color,
+}: {
+  label: string;
+  amount: number;
+  bold?: boolean;
+  bg?: string;
+  borderTop?: boolean;
+  color?: string;
+}) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 160px",
+        padding: "10px 16px",
+        background: bg || "transparent",
+        borderTop: borderTop ? "2px solid #1a2744" : undefined,
+        fontWeight: bold ? 800 : 600,
+        fontSize: bold ? 16 : 14,
+        color: color || "#1a2744",
+      }}
+    >
+      <span>{label}</span>
+      <span style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+        {fmtMoney(amount)}
+      </span>
     </div>
   );
 }
@@ -210,28 +255,21 @@ function TrendChart({ snapshots }: { snapshots: Snapshot[] }) {
 // ---------------------------------------------------------------------------
 
 export default function PLAnalyzerPage() {
-  const [collections, setCollections] = useState(50000);
-  const [userExpenses, setUserExpenses] = useState<Record<string, number>>({});
+  const [userValues, setUserValues] = useState<Record<string, number>>({});
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [isPurchased, setIsPurchased] = useState(false);
   const [checkingPurchase, setCheckingPurchase] = useState(true);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
-  const sliderRef = useRef<HTMLInputElement>(null);
 
   // ------ Purchase check ------
   useEffect(() => {
     (async () => {
       try {
         const supabase = createClient();
-        const {
-          data: { user },
-        } = await (supabase as any).auth.getUser();
-        if (!user) {
-          setCheckingPurchase(false);
-          return;
-        }
+        const { data: { user } } = await (supabase as any).auth.getUser();
+        if (!user) { setCheckingPurchase(false); return; }
         const { data } = await (supabase as any)
           .from("course_purchases")
           .select("id")
@@ -239,8 +277,6 @@ export default function PLAnalyzerPage() {
           .eq("course_id", "pl-analyzer")
           .limit(1);
         if (data && data.length > 0) setIsPurchased(true);
-
-        // Load snapshots
         const { data: snaps } = await (supabase as any)
           .from("pl_snapshots")
           .select("month, profit_margin")
@@ -248,58 +284,77 @@ export default function PLAnalyzerPage() {
           .order("month", { ascending: true })
           .limit(12);
         if (snaps) setSnapshots(snaps);
-      } catch {
-        // silent
-      } finally {
+      } catch {} finally {
         setCheckingPurchase(false);
       }
     })();
   }, []);
 
-  // ------ All line items flattened ------
-  const allItems: LineItem[] = useMemo(() => {
-    return (PL_CATEGORIES as PLCategory[]).flatMap((c) => c.items || []);
-  }, []);
+  // ------ Section helpers ------
+  const sections = PL_SECTIONS as PLSectionType[];
+  const incomeSection = sections.find((s) => s.type === "income");
+  const cogsSection = sections.find((s) => s.type === "cogs");
+  const expenseSection = sections.find((s) => s.type === "expenses");
 
-  // ------ Derived calcs ------
-  const hasAnyInput = useMemo(() => Object.values(userExpenses).some((v) => v > 0), [userExpenses]);
+  // ------ Computed totals ------
+  const totalIncome = useMemo(() => {
+    if (!incomeSection) return 0;
+    return incomeSection.categories
+      .flatMap((c) => c.items)
+      .reduce((sum, item) => sum + (userValues[item.id] || 0), 0);
+  }, [incomeSection, userValues]);
 
-  const perfectAmounts = useMemo(() => {
-    const map: Record<string, number> = {};
-    allItems.forEach((item) => {
-      map[item.id] = Math.round((collections * item.midPct) / 100);
-    });
-    return map;
-  }, [allItems, collections]);
+  const totalCOGS = useMemo(() => {
+    if (!cogsSection) return 0;
+    return cogsSection.categories
+      .flatMap((c) => c.items)
+      .reduce((sum, item) => sum + (userValues[item.id] || 0), 0);
+  }, [cogsSection, userValues]);
 
+  const grossProfit = totalIncome - totalCOGS;
+
+  const totalExpenses = useMemo(() => {
+    if (!expenseSection) return 0;
+    return expenseSection.categories
+      .flatMap((c) => c.items)
+      .reduce((sum, item) => sum + (userValues[item.id] || 0), 0);
+  }, [expenseSection, userValues]);
+
+  const netOperatingIncome = grossProfit - totalExpenses;
+  const profitMargin = totalIncome > 0 ? (netOperatingIncome / totalIncome) * 100 : 0;
+  const hasAnyInput = useMemo(() => Object.values(userValues).some((v) => v !== 0), [userValues]);
+
+  // ------ Percentage calculations ------
   const userPercentages = useMemo(() => {
     const map: Record<string, number> = {};
-    allItems.forEach((item) => {
-      const val = userExpenses[item.id] || 0;
-      map[item.id] = collections > 0 ? (val / collections) * 100 : 0;
+    sections.forEach((section) => {
+      section.categories.forEach((cat) => {
+        cat.items.forEach((item) => {
+          const val = userValues[item.id] || 0;
+          map[item.id] = totalIncome > 0 ? (Math.abs(val) / totalIncome) * 100 : 0;
+        });
+      });
     });
     return map;
-  }, [allItems, userExpenses, collections]);
+  }, [sections, userValues, totalIncome]);
 
-  const totalExpenses = useMemo(() => Object.values(userExpenses).reduce((s, v) => s + v, 0), [userExpenses]);
-  const profitMargin = useMemo(
-    () => (collections > 0 ? ((collections - totalExpenses) / collections) * 100 : 0),
-    [collections, totalExpenses],
-  );
-  const moneyLeftPerMonth = useMemo(() => 0.4 * collections - (collections - totalExpenses), [collections, totalExpenses]);
-  const moneyLeftPerYear = moneyLeftPerMonth * 12;
-
+  // ------ Gap analysis ------
   const biggestGap = useMemo(() => {
     let worst: { item: LineItem; gap: number } | null = null;
-    allItems.forEach((item) => {
-      const userPct = userPercentages[item.id] || 0;
-      if (userPct > item.maxPct) {
-        const gap = userPct - item.maxPct;
-        if (!worst || gap > worst.gap) worst = { item, gap };
-      }
-    });
+    if (!expenseSection && !cogsSection) return null;
+    [...(cogsSection?.categories || []), ...(expenseSection?.categories || [])]
+      .flatMap((c) => c.items)
+      .forEach((item) => {
+        const val = userValues[item.id] || 0;
+        if (val <= 0) return;
+        const userPct = userPercentages[item.id] || 0;
+        if (userPct > item.maxPct && item.maxPct > 0) {
+          const gap = userPct - item.maxPct;
+          if (!worst || gap > worst.gap) worst = { item, gap };
+        }
+      });
     return worst as { item: LineItem; gap: number } | null;
-  }, [allItems, userPercentages]);
+  }, [cogsSection, expenseSection, userValues, userPercentages]);
 
   const profitCoachingNote = useMemo(() => {
     if (!PROFIT_COACHING || PROFIT_COACHING.length === 0) return null;
@@ -310,48 +365,34 @@ export default function PLAnalyzerPage() {
     return sorted[sorted.length - 1] || null;
   }, [profitMargin]);
 
-  // ------ Category totals ------
+  // Category totals
   const categoryTotals = useMemo(() => {
-    const map: Record<string, { perfectDollar: number; perfectPct: number; userDollar: number; userPct: number }> = {};
-    (PL_CATEGORIES as PLCategory[]).forEach((cat) => {
-      const pDollar = (cat.items || []).reduce((s: number, it: LineItem) => s + (perfectAmounts[it.id] || 0), 0);
-      const uDollar = (cat.items || []).reduce((s: number, it: LineItem) => s + (userExpenses[it.id] || 0), 0);
-      map[cat.id] = {
-        perfectDollar: pDollar,
-        perfectPct: collections > 0 ? (pDollar / collections) * 100 : 0,
-        userDollar: uDollar,
-        userPct: collections > 0 ? (uDollar / collections) * 100 : 0,
-      };
+    const map: Record<string, { userDollar: number; userPct: number }> = {};
+    sections.forEach((section) => {
+      section.categories.forEach((cat) => {
+        const uDollar = cat.items.reduce((s, it) => s + (userValues[it.id] || 0), 0);
+        map[cat.id] = {
+          userDollar: uDollar,
+          userPct: totalIncome > 0 ? (Math.abs(uDollar) / totalIncome) * 100 : 0,
+        };
+      });
     });
     return map;
-  }, [perfectAmounts, userExpenses, collections]);
+  }, [sections, userValues, totalIncome]);
 
   // ------ Handlers ------
-  const handleCollections = useCallback((raw: string) => {
-    setCollections(parseNumericInput(raw));
-  }, []);
-
-  const handleSlider = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setCollections(parseInt(e.target.value, 10));
-  }, []);
-
-  const handleExpense = useCallback((id: string, raw: string) => {
-    setUserExpenses((prev) => ({ ...prev, [id]: parseNumericInput(raw) }));
+  const handleValue = useCallback((id: string, raw: string) => {
+    setUserValues((prev) => ({ ...prev, [id]: parseNumericInput(raw) }));
   }, []);
 
   const applyScalingExample = useCallback((example: any) => {
-    setCollections(example.collections || 50000);
-    const expenses: Record<string, number> = {};
-    if (example.items) {
-      for (const [id, val] of Object.entries(example.items)) {
-        expenses[id] = val as number;
-      }
-    }
-    setUserExpenses(expenses);
+    setUserValues(example.lineItems || {});
   }, []);
 
   const toggleCategory = useCallback((id: string) => {
-    setExpandedCategories((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
+    setExpandedCategories((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id],
+    );
   }, []);
 
   const saveSnapshot = useCallback(async () => {
@@ -359,26 +400,20 @@ export default function PLAnalyzerPage() {
     setSaveMsg("");
     try {
       const supabase = createClient();
-      const {
-        data: { user },
-      } = await (supabase as any).auth.getUser();
-      if (!user) {
-        setSaveMsg("Please log in to save.");
-        return;
-      }
-      const month = new Date().toISOString().slice(0, 7); // YYYY-MM
+      const { data: { user } } = await (supabase as any).auth.getUser();
+      if (!user) { setSaveMsg("Please log in to save."); return; }
+      const month = new Date().toISOString().slice(0, 7);
       await (supabase as any).from("pl_snapshots").upsert(
         {
           user_id: user.id,
           month,
-          collections_cents: Math.round(collections * 100),
-          expenses: userExpenses,
+          collections_cents: Math.round(totalIncome * 100),
+          expenses: userValues,
           profit_margin: Math.round(profitMargin * 100) / 100,
         },
         { onConflict: "user_id,month" },
       );
       setSaveMsg("Saved!");
-      // refresh snapshots
       const { data: snaps } = await (supabase as any)
         .from("pl_snapshots")
         .select("month, profit_margin")
@@ -391,18 +426,15 @@ export default function PLAnalyzerPage() {
     } finally {
       setSaving(false);
     }
-  }, [collections, userExpenses, profitMargin]);
-
-  const handlePrint = useCallback(() => {
-    window.print();
-  }, []);
+  }, [totalIncome, userValues, profitMargin]);
 
   // ------ Category status ------
-  function categoryStatus(cat: PLCategory): string {
-    const hasInput = cat.items.some((it) => (userExpenses[it.id] || 0) > 0);
+  function categoryStatus(cat: PLCategory, sectionType: string): string {
+    if (sectionType === "income") return "";
+    const hasInput = cat.items.some((it) => (userValues[it.id] || 0) !== 0);
     if (!hasInput) return "";
     const statuses = cat.items
-      .filter((it) => (userExpenses[it.id] || 0) > 0)
+      .filter((it) => (userValues[it.id] || 0) !== 0)
       .map((it) => statusEmoji(userPercentages[it.id] || 0, it.minPct, it.maxPct));
     if (statuses.includes("\u{1F534}")) return "\u{1F534}";
     if (statuses.includes("\u{1F7E1}")) return "\u{1F7E1}";
@@ -410,147 +442,221 @@ export default function PLAnalyzerPage() {
     return "";
   }
 
+  // ------ Section colors ------
+  function sectionStyle(type: string) {
+    switch (type) {
+      case "income":
+        return { headerBg: "#f0fdf4", headerBorder: "#bbf7d0", labelColor: "#166534" };
+      case "cogs":
+        return { headerBg: "#fef3c7", headerBorder: "#fde68a", labelColor: "#92400e" };
+      case "expenses":
+        return { headerBg: "#fef2f2", headerBorder: "#fecaca", labelColor: "#991b1b" };
+      default:
+        return { headerBg: "#f8fafc", headerBorder: "#e2e8f0", labelColor: "#1a2744" };
+    }
+  }
+
+  // ------ Render a category ------
+  function renderCategory(cat: PLCategory, sectionType: string) {
+    const isExpanded = expandedCategories.includes(cat.id);
+    const ct = categoryTotals[cat.id];
+    const catSt = categoryStatus(cat, sectionType);
+    const isIncome = sectionType === "income";
+
+    return (
+      <div key={cat.id} style={{ marginBottom: 4, border: "1px solid #e2e8f0", borderRadius: 8, overflow: "hidden" }}>
+        {/* Category header */}
+        <button
+          onClick={() => toggleCategory(cat.id)}
+          style={{
+            width: "100%",
+            display: "grid",
+            gridTemplateColumns: "1fr 160px 70px 36px",
+            alignItems: "center",
+            padding: "10px 16px",
+            background: isExpanded ? "#f8fafc" : "#fff",
+            border: "none",
+            cursor: "pointer",
+            fontWeight: 700,
+            fontSize: 13,
+            color: "#1a2744",
+            textAlign: "left",
+            gap: 4,
+          }}
+        >
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 10, color: "#94a3b8" }}>{isExpanded ? "\u25BC" : "\u25B6"}</span>
+            <span style={{ color: "#94a3b8", fontSize: 12, fontWeight: 500, minWidth: 36 }}>{cat.code}</span>
+            {cat.label}
+          </span>
+          <span style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+            {(ct?.userDollar || 0) !== 0 ? fmtMoney(ct.userDollar) : "\u2014"}
+          </span>
+          <span style={{ textAlign: "right", fontSize: 12, color: "#64748b" }}>
+            {(ct?.userDollar || 0) !== 0 && !isIncome ? fmtPct(ct.userPct) : ""}
+          </span>
+          <span style={{ textAlign: "center", fontSize: 14 }}>{catSt}</span>
+        </button>
+
+        {/* Expanded line items */}
+        {isExpanded && (
+          <div style={{ borderTop: "1px solid #e2e8f0" }}>
+            {/* Column headers */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 160px 70px 36px",
+                padding: "4px 16px",
+                fontSize: 10,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+                color: "#94a3b8",
+                fontWeight: 600,
+                gap: 4,
+              }}
+            >
+              <span>Account</span>
+              <span style={{ textAlign: "right" }}>Amount</span>
+              <span style={{ textAlign: "right" }}>% Rev</span>
+              <span style={{ textAlign: "center" }}></span>
+            </div>
+
+            {cat.items.map((item: LineItem) => {
+              const userVal = userValues[item.id] || 0;
+              const userPct = userPercentages[item.id] || 0;
+              const st = userVal !== 0 && !isIncome ? statusEmoji(userPct, item.minPct, item.maxPct) : "";
+              const isOver = userVal > 0 && userPct > item.maxPct && item.maxPct > 0;
+              const isUnder = userVal > 0 && userPct < item.minPct && item.minPct > 0;
+              const showCoaching = !isIncome && (isOver || isUnder) && st === "\u{1F534}";
+
+              return (
+                <div key={item.id}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 160px 70px 36px",
+                      padding: "6px 16px",
+                      fontSize: 13,
+                      alignItems: "center",
+                      gap: 4,
+                      borderTop: "1px solid #f8fafc",
+                    }}
+                  >
+                    <span style={{ display: "flex", alignItems: "center" }}>
+                      <span style={{ color: "#94a3b8", fontSize: 11, fontWeight: 500, minWidth: 36, marginRight: 4 }}>{item.code}</span>
+                      {item.label}
+                      {item.tooltip && <InfoTooltip text={item.tooltip} />}
+                    </span>
+                    <span style={{ textAlign: "right" }}>
+                      {isPurchased ? (
+                        <input
+                          className="pl-input"
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="0.00"
+                          value={userVal !== 0 ? (userVal < 0 ? "-" + fmt(Math.abs(userVal)) : fmt(userVal)) : ""}
+                          onChange={(e) => handleValue(item.id, e.target.value)}
+                          style={{
+                            width: 120,
+                            textAlign: "right",
+                            border: "1px solid #e2e8f0",
+                            borderRadius: 6,
+                            padding: "4px 8px",
+                            fontSize: 13,
+                            background: "#fafbfc",
+                            fontVariantNumeric: "tabular-nums",
+                          }}
+                        />
+                      ) : (
+                        <span style={{ color: "#cbd5e1" }}>\u2014</span>
+                      )}
+                    </span>
+                    <span style={{ textAlign: "right", fontSize: 12, color: "#64748b" }}>
+                      {userVal !== 0 && !isIncome ? fmtPct(userPct) : ""}
+                    </span>
+                    <span style={{ textAlign: "center", fontSize: 14 }}>{st}</span>
+                  </div>
+
+                  {/* Coaching note */}
+                  {isPurchased && showCoaching && (
+                    <div
+                      style={{
+                        margin: "0 16px 6px 56px",
+                        padding: "8px 12px",
+                        background: "#fff7ed",
+                        border: "1px solid #fed7aa",
+                        borderRadius: 6,
+                        fontSize: 12,
+                        color: "#9a3412",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {isOver
+                        ? (item.coachingOver || "").replace("[X]", fmtPct(userPct))
+                        : (item.coachingUnder || "").replace("[X]", fmtPct(userPct))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // ------ Render ------
   return (
     <>
-      {/* Print styles */}
       <style>{`
         @media print {
           nav, aside, header, footer, .no-print { display: none !important; }
-          .print-only { display: block !important; }
           body { background: #fff !important; }
           .pl-container { max-width: 100% !important; padding: 0 !important; }
         }
         .pl-input:focus { outline: 2px solid #e97325; outline-offset: 1px; }
       `}</style>
 
-      <div className="pl-container" style={{ maxWidth: 960, margin: "0 auto", padding: "24px 16px", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+      <div className="pl-container" style={{ maxWidth: 860, margin: "0 auto", padding: "24px 16px", fontFamily: "system-ui, -apple-system, sans-serif" }}>
         {/* ===== HEADER ===== */}
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 10, color: "#1a2744" }}>
             <DollarSignIcon size={32} />
-            <h1 style={{ fontSize: 28, fontWeight: 800, margin: 0, color: "#1a2744" }}>Perfect P&L Analyzer</h1>
+            <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0, color: "#1a2744" }}>Perfect P&L Analyzer</h1>
           </div>
-          <p style={{ color: "#64748b", marginTop: 8, fontSize: 15, maxWidth: 560, marginInline: "auto" }}>
-            See what a perfectly run practice looks like at YOUR revenue level. Then compare your numbers.
+          <p style={{ color: "#64748b", marginTop: 6, fontSize: 14, maxWidth: 520, marginInline: "auto" }}>
+            Your personal bookkeeper. Enter your numbers straight from QuickBooks and see exactly where your money is going.
           </p>
-        </div>
-
-        {/* ===== COLLECTIONS INPUT ===== */}
-        <div
-          style={{
-            background: "#1a2744",
-            borderRadius: 12,
-            padding: "24px 20px",
-            marginBottom: 20,
-            color: "#fff",
-          }}
-        >
-          <label style={{ display: "block", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8, color: "#94a3b8" }}>
-            Monthly Collections
-          </label>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 28, fontWeight: 700 }}>$</span>
-            <input
-              className="pl-input"
-              type="text"
-              inputMode="numeric"
-              value={fmt(collections)}
-              onChange={(e) => handleCollections(e.target.value)}
-              style={{
-                fontSize: 28,
-                fontWeight: 700,
-                background: "transparent",
-                border: "none",
-                borderBottom: "2px solid #e97325",
-                color: "#fff",
-                width: 200,
-                padding: "4px 0",
-              }}
-            />
-          </div>
-          <input
-            ref={sliderRef}
-            type="range"
-            min={10000}
-            max={200000}
-            step={1000}
-            value={collections}
-            onChange={handleSlider}
-            style={{ width: "100%", marginTop: 16, accentColor: "#e97325" }}
-          />
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748b", marginTop: 4 }}>
-            <span>$10,000</span>
-            <span>$200,000</span>
-          </div>
         </div>
 
         {/* ===== SCALING EXAMPLES ===== */}
         {SCALING_EXAMPLES.length > 0 && (
-          <div className="no-print" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 8, marginBottom: 24 }}>
-            {SCALING_EXAMPLES.map((ex: any) => (
-              <button
-                key={ex.label}
-                onClick={() => applyScalingExample(ex)}
-                style={{
-                  padding: "10px 12px",
-                  borderRadius: 8,
-                  border: "1.5px solid #e2e8f0",
-                  background: collections === ex.collections ? "#1a2744" : "#fff",
-                  color: collections === ex.collections ? "#fff" : "#1a2744",
-                  cursor: "pointer",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  transition: "all 0.15s",
-                }}
-              >
-                {ex.label}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* ===== GAP ANALYSIS SUMMARY ===== */}
-        {isPurchased && hasAnyInput && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: 12,
-              marginBottom: 28,
-            }}
-          >
-            {/* Your Profit Margin */}
-            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, padding: 16 }}>
-              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>Your Profit Margin</div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: profitColor(profitMargin) }}>{fmtPct(profitMargin)}</div>
+          <div className="no-print" style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, color: "#94a3b8", marginBottom: 6 }}>
+              Load Example
             </div>
-            {/* Perfect Target */}
-            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, padding: 16 }}>
-              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>Perfect Target</div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: "#22c55e" }}>40%</div>
-            </div>
-            {/* Money Left on the Table */}
-            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, padding: 16 }}>
-              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>Money Left on Table</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: moneyLeftPerMonth > 0 ? "#ef4444" : "#22c55e" }}>
-                ${fmt(Math.abs(Math.round(moneyLeftPerMonth)))}/mo
-              </div>
-              <div style={{ fontSize: 13, color: "#94a3b8" }}>${fmt(Math.abs(Math.round(moneyLeftPerYear)))}/yr</div>
-            </div>
-            {/* #1 Problem Area */}
-            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, padding: 16 }}>
-              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>#1 Problem Area</div>
-              {biggestGap ? (
-                <>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: "#ef4444" }}>{biggestGap.item.label}</div>
-                  <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>
-                    {biggestGap.item.coachingOver?.replace("[X]", fmtPct(userPercentages[biggestGap.item.id])).slice(0, 80) || "Over benchmark"}
-                  </div>
-                </>
-              ) : (
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#22c55e" }}>All within range!</div>
-              )}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 6 }}>
+              {SCALING_EXAMPLES.map((ex: any) => (
+                <button
+                  key={ex.id}
+                  onClick={() => applyScalingExample(ex)}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1.5px solid #e2e8f0",
+                    background: "#fff",
+                    color: "#1a2744",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    textAlign: "left",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <div>{ex.title}</div>
+                  <div style={{ fontSize: 11, color: "#64748b", fontWeight: 400 }}>{ex.subtitle}</div>
+                </button>
+              ))}
             </div>
           </div>
         )}
@@ -570,11 +676,11 @@ export default function PLAnalyzerPage() {
           >
             <h3 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 700 }}>Unlock Your Numbers</h3>
             <p style={{ color: "#94a3b8", margin: "0 0 16px", fontSize: 14 }}>
-              Input your real expenses, see gap analysis, coaching notes, and save monthly snapshots.
+              Input your real P&L, see gap analysis, coaching notes, and save monthly snapshots.
             </p>
             <button
               onClick={async () => {
-                const result = await createDoctorProductCheckout('pl-analyzer', 'Perfect P&L Analyzer', 2900);
+                const result = await createDoctorProductCheckout("pl-analyzer", "Perfect P&L Analyzer", 2900);
                 if (result.url) window.location.href = result.url;
                 else alert(result.error);
               }}
@@ -595,148 +701,76 @@ export default function PLAnalyzerPage() {
           </div>
         )}
 
+        {/* ===== SUMMARY CARDS (when data entered) ===== */}
+        {isPurchased && hasAnyInput && (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: 10,
+              marginBottom: 20,
+            }}
+          >
+            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, padding: 14 }}>
+              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>Total Income</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: "#166534" }}>{fmtMoney(totalIncome)}</div>
+            </div>
+            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, padding: 14 }}>
+              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>Gross Profit</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: "#1a2744" }}>{fmtMoney(grossProfit)}</div>
+            </div>
+            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, padding: 14 }}>
+              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>Net Income</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: profitColor(profitMargin) }}>{fmtMoney(netOperatingIncome)}</div>
+            </div>
+            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, padding: 14 }}>
+              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>Profit Margin</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: profitColor(profitMargin) }}>{fmtPct(profitMargin)}</div>
+              {biggestGap && (
+                <div style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>
+                  #1 Issue: {biggestGap.item.label}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* ===== P&L TABLE ===== */}
         <div style={{ overflowX: "auto" }}>
-          {(PL_CATEGORIES as PLCategory[]).map((cat) => {
-            const isExpanded = expandedCategories.includes(cat.id);
-            const ct = categoryTotals[cat.id];
-            const catSt = categoryStatus(cat);
-
+          {sections.map((section) => {
+            const style = sectionStyle(section.type);
             return (
-              <div key={cat.id} style={{ marginBottom: 8, border: "1px solid #e2e8f0", borderRadius: 10, overflow: "hidden" }}>
-                {/* Category header */}
-                <button
-                  onClick={() => toggleCategory(cat.id)}
+              <div key={section.id} style={{ marginBottom: 16 }}>
+                {/* Section header */}
+                <div
                   style={{
-                    width: "100%",
-                    display: "grid",
-                    gridTemplateColumns: "1fr repeat(4, 90px) 40px",
-                    alignItems: "center",
-                    padding: "12px 16px",
-                    background: isExpanded ? "#f1f5f9" : "#fff",
-                    border: "none",
-                    cursor: "pointer",
-                    fontWeight: 700,
-                    fontSize: 14,
-                    color: "#1a2744",
-                    textAlign: "left",
-                    gap: 4,
-                    minWidth: 600,
+                    background: style.headerBg,
+                    borderLeft: `4px solid ${style.labelColor}`,
+                    padding: "8px 16px",
+                    borderRadius: "6px 6px 0 0",
+                    marginBottom: 2,
                   }}
                 >
-                  <span>{isExpanded ? "\u25BC" : "\u25B6"} {cat.label}</span>
-                  <span style={{ textAlign: "right", fontSize: 13 }}>${fmt(ct?.perfectDollar || 0)}</span>
-                  <span style={{ textAlign: "right", fontSize: 13, color: "#64748b" }}>{fmtPct(ct?.perfectPct || 0)}</span>
-                  <span style={{ textAlign: "right", fontSize: 13 }}>{(ct?.userDollar || 0) > 0 ? `$${fmt(ct.userDollar)}` : "-"}</span>
-                  <span style={{ textAlign: "right", fontSize: 13, color: "#64748b" }}>{(ct?.userDollar || 0) > 0 ? fmtPct(ct.userPct) : "-"}</span>
-                  <span style={{ textAlign: "center" }}>{catSt}</span>
-                </button>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: style.labelColor, textTransform: "uppercase", letterSpacing: 1 }}>
+                    {section.label}
+                  </span>
+                </div>
 
-                {/* Expanded line items */}
-                {isExpanded && (
-                  <div style={{ borderTop: "1px solid #e2e8f0" }}>
-                    {/* Column headers */}
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr repeat(4, 90px) 40px",
-                        padding: "6px 16px",
-                        fontSize: 10,
-                        textTransform: "uppercase",
-                        letterSpacing: 0.5,
-                        color: "#94a3b8",
-                        fontWeight: 600,
-                        gap: 4,
-                        minWidth: 600,
-                      }}
-                    >
-                      <span>Line Item</span>
-                      <span style={{ textAlign: "right" }}>Perfect $</span>
-                      <span style={{ textAlign: "right" }}>Perfect %</span>
-                      <span style={{ textAlign: "right" }}>Your $</span>
-                      <span style={{ textAlign: "right" }}>Your %</span>
-                      <span style={{ textAlign: "center" }}>Status</span>
-                    </div>
+                {/* Categories */}
+                {section.categories.map((cat) => renderCategory(cat, section.type))}
 
-                    {(cat.items || []).map((item: LineItem) => {
-                      const perfectDollar = perfectAmounts[item.id] || 0;
-                      const userVal = userExpenses[item.id] || 0;
-                      const userPct = userPercentages[item.id] || 0;
-                      const st = userVal > 0 ? statusEmoji(userPct, item.minPct, item.maxPct) : "";
-                      const isOver = userVal > 0 && userPct > item.maxPct;
-                      const isUnder = userVal > 0 && userPct < item.minPct;
-                      const showCoaching = (isOver || isUnder) && st === "\u{1F534}";
-
-                      return (
-                        <div key={item.id}>
-                          <div
-                            style={{
-                              display: "grid",
-                              gridTemplateColumns: "1fr repeat(4, 90px) 40px",
-                              padding: "8px 16px",
-                              fontSize: 13,
-                              alignItems: "center",
-                              gap: 4,
-                              minWidth: 600,
-                              borderTop: "1px solid #f1f5f9",
-                            }}
-                          >
-                            <span style={{ display: "flex", alignItems: "center" }}>
-                              {item.label}
-                              {item.tooltip && <InfoTooltip text={item.tooltip} />}
-                            </span>
-                            <span style={{ textAlign: "right", color: "#1a2744" }}>${fmt(perfectDollar)}</span>
-                            <span style={{ textAlign: "right", color: "#64748b" }}>{fmtPct(item.midPct)}</span>
-                            <span style={{ textAlign: "right" }}>
-                              {isPurchased ? (
-                                <input
-                                  className="pl-input"
-                                  type="text"
-                                  inputMode="numeric"
-                                  placeholder="0"
-                                  value={userVal > 0 ? fmt(userVal) : ""}
-                                  onChange={(e) => handleExpense(item.id, e.target.value)}
-                                  style={{
-                                    width: 80,
-                                    textAlign: "right",
-                                    border: "1px solid #e2e8f0",
-                                    borderRadius: 6,
-                                    padding: "4px 6px",
-                                    fontSize: 13,
-                                    background: "#fafbfc",
-                                  }}
-                                />
-                              ) : (
-                                <span style={{ color: "#cbd5e1" }}>-</span>
-                              )}
-                            </span>
-                            <span style={{ textAlign: "right", color: "#64748b" }}>{userVal > 0 ? fmtPct(userPct) : "-"}</span>
-                            <span style={{ textAlign: "center" }}>{st}</span>
-                          </div>
-
-                          {/* Coaching note */}
-                          {isPurchased && showCoaching && (
-                            <div
-                              style={{
-                                margin: "0 16px 8px",
-                                padding: "8px 12px",
-                                background: "#fff7ed",
-                                border: "1px solid #fed7aa",
-                                borderRadius: 6,
-                                fontSize: 12,
-                                color: "#9a3412",
-                                lineHeight: 1.5,
-                              }}
-                            >
-                              {isOver
-                                ? (item.coachingOver || "").replace("[X]", fmtPct(userPct))
-                                : (item.coachingUnder || "").replace("[X]", fmtPct(userPct))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                {/* Section total */}
+                {section.type === "income" && (
+                  <SummaryLine label="Total for Income" amount={totalIncome} bold bg="#f0fdf4" borderTop color="#166534" />
+                )}
+                {section.type === "cogs" && (
+                  <>
+                    <SummaryLine label="Total Cost of Goods Sold" amount={totalCOGS} bold bg="#fef3c7" borderTop color="#92400e" />
+                    <SummaryLine label="Gross Profit" amount={grossProfit} bold bg="#e0f2fe" borderTop color="#0c4a6e" />
+                  </>
+                )}
+                {section.type === "expenses" && (
+                  <SummaryLine label="Total for Expenses" amount={totalExpenses} bold bg="#fef2f2" borderTop color="#991b1b" />
                 )}
               </div>
             );
@@ -746,39 +780,25 @@ export default function PLAnalyzerPage() {
         {/* ===== BOTTOM LINE ===== */}
         <div
           style={{
-            background: "#f8fafc",
-            border: "2px solid #e2e8f0",
+            background: "#1a2744",
             borderRadius: 12,
             padding: 20,
-            marginTop: 16,
-            marginBottom: 24,
+            marginBottom: 20,
+            color: "#fff",
           }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <span style={{ fontWeight: 700, fontSize: 15, color: "#1a2744" }}>Total Expenses</span>
-            <span style={{ fontWeight: 700, fontSize: 18 }}>
-              ${fmt(totalExpenses)}{" "}
-              <span style={{ fontSize: 13, color: "#64748b", fontWeight: 500 }}>
-                ({collections > 0 ? fmtPct((totalExpenses / collections) * 100) : "0%"})
-              </span>
-            </span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: "#94a3b8" }}>Net Operating Income</span>
+            <span style={{ fontSize: 22, fontWeight: 800 }}>{fmtMoney(netOperatingIncome)}</span>
           </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              paddingTop: 12,
-              borderTop: "2px solid #1a2744",
-            }}
-          >
-            <span style={{ fontWeight: 800, fontSize: 17, color: "#1a2744" }}>Owner&apos;s Take-Home</span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 16, fontWeight: 800 }}>Net Income</span>
             <div style={{ textAlign: "right" }}>
-              <span style={{ fontWeight: 800, fontSize: 28, color: profitColor(profitMargin) }}>
-                ${fmt(collections - totalExpenses)}
+              <span style={{ fontSize: 28, fontWeight: 800, color: profitColor(profitMargin) }}>
+                {fmtMoney(netOperatingIncome)}
               </span>
               <span style={{ fontSize: 14, color: profitColor(profitMargin), fontWeight: 600, marginLeft: 8 }}>
-                {fmtPct(profitMargin)}
+                {totalIncome > 0 ? fmtPct(profitMargin) : ""}
               </span>
             </div>
           </div>
@@ -789,15 +809,14 @@ export default function PLAnalyzerPage() {
               style={{
                 marginTop: 16,
                 padding: "12px 14px",
-                background: profitMargin >= 35 ? "#f0fdf4" : profitMargin >= 25 ? "#fefce8" : "#fef2f2",
-                border: `1px solid ${profitMargin >= 35 ? "#bbf7d0" : profitMargin >= 25 ? "#fef08a" : "#fecaca"}`,
+                background: "rgba(255,255,255,0.08)",
                 borderRadius: 8,
                 fontSize: 13,
-                color: "#1a2744",
+                color: "#e2e8f0",
                 lineHeight: 1.6,
               }}
             >
-              <strong>{profitCoachingNote.title || "Coaching Note"}:</strong> {profitCoachingNote.note || profitCoachingNote.message || ""}
+              <strong style={{ color: "#fff" }}>Coaching Note:</strong> {profitCoachingNote.note || ""}
             </div>
           )}
         </div>
@@ -829,11 +848,11 @@ export default function PLAnalyzerPage() {
                 opacity: !hasAnyInput ? 0.5 : 1,
               }}
             >
-              {saving ? "Saving..." : "Save This Month's P&L"}
+              {saving ? "Saving..." : "Save This Month\u2019s P&L"}
             </button>
           )}
           <button
-            onClick={handlePrint}
+            onClick={() => window.print()}
             style={{
               padding: "12px 24px",
               background: "#fff",
@@ -847,13 +866,16 @@ export default function PLAnalyzerPage() {
           >
             Print P&L Report
           </button>
-          {saveMsg && <span style={{ alignSelf: "center", fontSize: 13, color: saveMsg === "Saved!" ? "#22c55e" : "#ef4444" }}>{saveMsg}</span>}
+          {saveMsg && (
+            <span style={{ alignSelf: "center", fontSize: 13, color: saveMsg === "Saved!" ? "#22c55e" : "#ef4444" }}>
+              {saveMsg}
+            </span>
+          )}
         </div>
 
-        {/* Empty state when no data */}
-        {PL_CATEGORIES.length === 0 && (
+        {PL_SECTIONS.length === 0 && (
           <div style={{ textAlign: "center", padding: 40, color: "#94a3b8" }}>
-            <p style={{ fontSize: 15 }}>P&L categories are loading... If this persists, the data file may not be configured yet.</p>
+            <p style={{ fontSize: 15 }}>P&L data is loading...</p>
           </div>
         )}
       </div>

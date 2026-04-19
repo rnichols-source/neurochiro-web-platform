@@ -1,5 +1,5 @@
 // ============================================================================
-// P&L Analyzer Data — Benchmark Structure, Scaling Examples, Profit Coaching
+// P&L Analyzer Data — QuickBooks-Aligned Chart of Accounts
 // ============================================================================
 
 // ---------------------------------------------------------------------------
@@ -8,6 +8,7 @@
 
 export interface PLLineItem {
   id: string;
+  code: string;
   label: string;
   minPct: number;
   maxPct: number;
@@ -19,670 +20,801 @@ export interface PLLineItem {
 
 export interface PLCategory {
   id: string;
+  code: string;
   label: string;
   minPct: number;
   maxPct: number;
   items: PLLineItem[];
 }
 
+export interface PLSection {
+  id: string;
+  type: "income" | "cogs" | "expenses";
+  label: string;
+  categories: PLCategory[];
+}
+
 export interface ScalingExample {
   id: string;
   title: string;
   subtitle: string;
-  collections: number;
+  totalIncome: number;
   description: string;
   targetProfit: string;
   lineItems: Record<string, number>;
 }
 
 // ---------------------------------------------------------------------------
-// 1. PL_CATEGORIES — The Benchmark Structure
+// 1. PL_SECTIONS — The Full Chart of Accounts
 // ---------------------------------------------------------------------------
 
-export const PL_CATEGORIES: PLCategory[] = [
-  // ── Cost of Services ────────────────────────────────────────────────
+export const PL_SECTIONS: PLSection[] = [
+  // ════════════════════════════════════════════════════════════════════════
+  // INCOME
+  // ════════════════════════════════════════════════════════════════════════
   {
-    id: "cost-of-services",
-    label: "Cost of Services",
-    minPct: 8,
-    maxPct: 15,
-    items: [
+    id: "income",
+    type: "income",
+    label: "Income",
+    categories: [
       {
-        id: "associate-comp",
-        label: "Associate Compensation",
-        minPct: 8,
-        maxPct: 12,
-        midPct: 10,
-        tooltip:
-          "Base salary plus production bonuses for associate doctors. Includes any guaranteed minimums. Does NOT include the owner-doctor's draw — that comes out of profit.",
-        coachingOver:
-          "Associate comp is at [X]%. That means your associate is consuming more than 12 cents of every dollar collected. Check the math: are they producing at least 3x their total cost? If an associate costs you $8K/month, they need to be generating $24K+ in collections. If they're not, it's either a volume problem (not enough patients) or a case-average problem (too many single-visit plans). Fix the schedule first — most associates are under-booked.",
-        coachingUnder:
-          "Associate comp at [X]% is low, which likely means you're either solo or your associate is on a heavily production-based deal. If you're solo, ignore this. If you have an associate producing but only costing you 6-7%, make sure the comp plan is competitive enough to retain them. Losing a producing associate costs you 3-6 months of revenue disruption.",
-      },
-      {
-        id: "clinical-supplies",
-        label: "Clinical Supplies",
-        minPct: 1,
-        maxPct: 2,
-        midPct: 1.5,
-        tooltip:
-          "Table paper, cervical pillows, Biofreeze, traction supplies, KT tape, rehab bands, gowns, and any consumable used in patient care. Does NOT include durable equipment purchases — those go under Equipment Leases or capital expenditure.",
-        coachingOver:
-          "Clinical supplies at [X]% is higher than it should be. At $50K/month collections, that's over $1,000 on consumables. Are you tracking what gets used per visit? Common culprits: ordering name-brand when generics work, over-dispensing supplements without proper margin, or staff waste. Negotiate bulk pricing with your supplier and do a quarterly supply audit.",
-        coachingUnder:
-          "Supplies at [X]% — you're either extremely efficient or you're skimping on the patient experience. Make sure your tables have fresh paper, your rehab area is stocked, and you're not reusing single-use items to save $50/month. Patients notice.",
+        id: "4000-income",
+        code: "4000",
+        label: "Income",
+        minPct: 0,
+        maxPct: 100,
+        items: [
+          {
+            id: "4020",
+            code: "4020",
+            label: "Treatment Sales",
+            minPct: 80,
+            maxPct: 100,
+            midPct: 90,
+            tooltip:
+              "All revenue from patient visits — adjustments, therapies, exams, X-rays, and any billable clinical service. This is your core production number. In most healthy practices, treatment sales are 85-95% of total income.",
+            coachingOver: "",
+            coachingUnder:
+              "Treatment sales at [X]% of total income is low. If PI collections or other sources make up more than 20% of your revenue, your core practice model may be too dependent on injury cases. Build your cash/insurance base so treatment sales consistently drive 85%+ of income.",
+          },
+          {
+            id: "4035",
+            code: "4035",
+            label: "PI Collections",
+            minPct: 0,
+            maxPct: 20,
+            midPct: 8,
+            tooltip:
+              "Personal injury case collections — payments received from PI attorneys, liens settled, and any motor vehicle accident case revenue. PI cases can be high-value but are unpredictable and slow to pay.",
+            coachingOver:
+              "PI collections at [X]% of total income — you're running a PI-heavy practice. That's great for case averages, but be aware of the cash flow risk. PI cases can take 6-18 months to pay. Make sure you have enough cash/insurance patients to cover monthly overhead without relying on PI settlements. One bad quarter of settlements shouldn't threaten your payroll.",
+            coachingUnder: "",
+          },
+          {
+            id: "4500",
+            code: "4500",
+            label: "Refunds",
+            minPct: -3,
+            maxPct: 0,
+            midPct: -1,
+            tooltip:
+              "Patient refunds, insurance overpayment returns, and any credits issued. This should be a negative number reducing your total income. High refunds may indicate billing errors or overcharging.",
+            coachingOver:
+              "Refunds at [X]% is higher than typical. If you're refunding more than 2% of collections, investigate the root cause: billing errors, duplicate charges, or pricing disputes. Every refund also has an administrative cost. Clean up your billing process to reduce refunds at the source.",
+            coachingUnder: "",
+          },
+          {
+            id: "4600",
+            code: "4600",
+            label: "Sales Tax",
+            minPct: -5,
+            maxPct: 0,
+            midPct: -2,
+            tooltip:
+              "Sales tax collected on taxable goods (supplements, products, retail items). This is a pass-through liability — you collect it from patients and remit it to the state. Shows as negative because it's not really your revenue.",
+            coachingOver:
+              "Sales tax at [X]% — if this is higher than expected, you may be selling a significant volume of taxable products (supplements, retail). Make sure you're remitting sales tax quarterly and have proper tax nexus compliance. If you're not selling products, this line should be near zero.",
+            coachingUnder: "",
+          },
+        ],
       },
     ],
   },
 
-  // ── Staff & Payroll ─────────────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════════════════
+  // COST OF GOODS SOLD
+  // ════════════════════════════════════════════════════════════════════════
   {
-    id: "staff-payroll",
-    label: "Staff & Payroll",
-    minPct: 20,
-    maxPct: 28,
-    items: [
+    id: "cogs",
+    type: "cogs",
+    label: "Cost of Goods Sold",
+    categories: [
       {
-        id: "front-desk-ca",
-        label: "Front Desk / CA",
-        minPct: 10,
-        maxPct: 14,
-        midPct: 12,
-        tooltip:
-          "All wages for front desk staff and chiropractic assistants, including part-time. This covers reception, scheduling, therapy application, X-ray techs if separate from CA role. Does NOT include office manager — that's its own line.",
-        coachingOver:
-          "Front desk and CA costs at [X]% — that's heavy. Before you cut hours, ask two questions: (1) Is every CA producing billable therapy? If not, cross-train them. A CA who does intake AND applies therapies is worth 2x a CA who only checks people in. (2) Are you overstaffed for your volume? If you see 80 visits/week, you need 1.5-2 FTE CAs, not 3. Match staffing to visit volume, not 'what feels comfortable.'",
-        coachingUnder:
-          "CA costs at [X]% — this is lean, possibly too lean. If your front desk is slammed, calls go to voicemail, and patients wait 15 minutes to check out, you're losing more in missed appointments than you'd spend on another part-time CA. One missed new patient per week at $2,500 case average = $10K/month in lost revenue. Hire before you're desperate.",
-      },
-      {
-        id: "office-manager",
-        label: "Office Manager",
-        minPct: 4,
-        maxPct: 6,
-        midPct: 5,
-        tooltip:
-          "Salary for your office manager or practice administrator. If you don't have a dedicated OM, allocate the portion of your lead CA's salary that goes toward management duties. Includes any OM bonus or profit-sharing.",
-        coachingOver:
-          "Office manager at [X]% is above the healthy range. At $50K/month collections, 6% is $3,000 — which is fine for a great OM. But at 8%+, either your collections are too low for the salary, or you're paying OM wages for CA-level work. Your OM should be managing the P&L, running staff meetings, handling HR, and driving KPIs. If they're just answering phones and filing, you have an expensive CA, not an OM.",
-        coachingUnder:
-          "OM cost at [X]% — either you don't have one yet or you're underpaying them. If you're doing all the management yourself, calculate what your time is worth. If you could see 5 more patients a day instead of handling payroll and scheduling, that's $1,500-$2,500/week in production. A good OM pays for themselves in the first 90 days by freeing your clinical time.",
-      },
-      {
-        id: "payroll-taxes-benefits",
-        label: "Payroll Taxes & Benefits",
-        minPct: 3,
-        maxPct: 5,
-        midPct: 4,
-        tooltip:
-          "Employer-side payroll taxes (FICA, FUTA, SUTA), workers' comp insurance, health insurance contributions, retirement plan matching, and any other employee benefits. Rule of thumb: payroll taxes alone run 7.65-10% of gross wages.",
-        coachingOver:
-          "Payroll burden at [X]% is high. Check your workers' comp classification code — chiropractic offices should be on a clerical rate, not a medical rate. Also review your health insurance plan. You don't need a Cadillac plan to attract good staff — a solid ICHRA or QSEHRA can save $500-$1,000/month while still offering real coverage. Shop your workers' comp annually.",
-        coachingUnder:
-          "Payroll burden at [X]% — double-check that you're not misclassifying employees as 1099 contractors. The IRS has cracked down hard on this in healthcare. If your 'contractor' CA has a set schedule, uses your equipment, and you control how they work — that's an employee. The penalties for misclassification are severe. Also make sure you're actually withholding properly.",
-      },
-      {
-        id: "staff-ce",
-        label: "Staff CE / Training",
-        minPct: 0.5,
-        maxPct: 1,
-        midPct: 0.75,
-        tooltip:
-          "Continuing education for staff: CA training programs, front desk scripting workshops, billing certification courses, conference attendance for team members, and any staff development materials or subscriptions.",
-        coachingOver:
-          "Staff CE at [X]% — you're investing heavily in team development, which is admirable, but make sure there's ROI. Are the trainings translating into measurable improvements? Better retention, higher case acceptance, fewer billing errors? If your CA went to a $3,000 seminar and nothing changed in practice, that's entertainment, not education. Require a 'bring-back' report from every training.",
-        coachingUnder:
-          "Staff CE at [X]% — this is a red flag. Untrained CAs cost you more than trained ones. A CA who can't handle a financial conversation properly loses you 2-3 care plans per month. That's $5K-$10K in lost revenue because you didn't invest $500 in training. At minimum, budget for one major CA training per year and monthly in-house scripting practice.",
-      },
-    ],
-  },
-
-  // ── Facility ────────────────────────────────────────────────────────
-  {
-    id: "facility",
-    label: "Facility",
-    minPct: 7,
-    maxPct: 12,
-    items: [
-      {
-        id: "rent-lease",
-        label: "Rent / Lease",
-        minPct: 5,
-        maxPct: 8,
-        midPct: 6.5,
-        tooltip:
-          "Monthly lease payment including CAM (Common Area Maintenance) charges and property taxes if passed through. Does NOT include build-out loan payments — those go under equipment/loans. If you own the building, use the fair-market rent you'd charge a tenant as your number.",
-        coachingOver:
-          "Your rent is eating [X]% of revenue. For every dollar you collect, [X] cents goes straight to your landlord. Two moves: negotiate the lease down, or grow revenue so the percentage drops. Every $5K in new monthly collections drops your rent percentage by about 1%. If you're locked into an expensive lease, the fastest fix is always more volume. Also check: are you using all your square footage? If you have 2,000 sq ft but only use 1,200, you're paying for dead space.",
-        coachingUnder:
-          "Rent at [X]% — either you got a killer deal or your space is too small for growth. If patients are waiting in the hallway and you can't add a table because there's no room, cheap rent is costing you production. The right space should allow you to see 150-200+ visits/week without feeling cramped. Don't let a $500/month rent savings cap your growth at $30K/month.",
-      },
-      {
-        id: "utilities",
-        label: "Utilities",
-        minPct: 1,
-        maxPct: 1.5,
-        midPct: 1.25,
-        tooltip:
-          "Electric, gas, water, trash, internet, and phone service for the office. Does NOT include cell phone plans for personal devices — that's a personal expense or goes under communication tech.",
-        coachingOver:
-          "Utilities at [X]% — this is higher than normal. Check your HVAC system; old units can double your electric bill. Get a programmable thermostat, switch to LED lighting, and make sure you're not on a commercial electric rate when you could be on a small-business rate. Also, your internet plan might be overkill — most practices don't need more than 200 Mbps.",
-        coachingUnder:
-          "Utilities at [X]% — this is fine. Not much to optimize here below 1%. Just make sure your internet is reliable enough that your EHR and payment systems never go down during business hours. A $50/month savings on internet isn't worth one system outage.",
-      },
-      {
-        id: "maintenance-cleaning",
-        label: "Maintenance / Cleaning",
-        minPct: 0.5,
-        maxPct: 1,
-        midPct: 0.75,
-        tooltip:
-          "Janitorial service, office cleaning supplies, minor repairs, carpet cleaning, HVAC filter changes, pest control, and general upkeep. Does NOT include major renovations or build-out costs.",
-        coachingOver:
-          "Maintenance at [X]% — you're either overpaying your cleaning crew or dealing with a building that needs constant repair. Get competitive bids from 2-3 janitorial services. Most 1,500 sq ft offices should cost $400-$600/month to clean 3x/week. If repairs are the issue, talk to your landlord — most commercial leases put structural repairs on the landlord.",
-        coachingUnder:
-          "Maintenance at [X]% — make sure your office is actually clean. Walk through your office at 4pm on a Thursday and look at it through a new patient's eyes. Dust on the blinds, stains on the carpet, and a grimy bathroom will cost you more in lost referrals than a proper cleaning service. This is not where you save money.",
-      },
-      {
-        id: "equipment-leases",
-        label: "Equipment Leases",
-        minPct: 1,
-        maxPct: 3,
-        midPct: 2,
-        tooltip:
-          "Monthly payments on leased equipment: tables, digital X-ray, decompression, laser, shockwave, and any financed equipment purchases. Includes build-out loan payments if financed through an equipment lender. Does NOT include small items bought outright — those are clinical supplies.",
-        coachingOver:
-          "Equipment leases at [X]% — you might have too much equipment relative to your revenue. The shiny-object trap is real: that $120K decompression table sounds great, but if it's only generating $2K/month in billings, the math doesn't work. For every piece of leased equipment, calculate: monthly lease payment vs. monthly revenue generated. If the ratio isn't at least 3:1, you overpaid or you're underutilizing it.",
-        coachingUnder:
-          "Equipment at [X]% — either you own everything outright (great) or you're running outdated equipment. If your X-ray system is 15+ years old, your tables are worn, or you're missing revenue-generating modalities like decompression or laser, this is the wrong place to be frugal. Good equipment pays for itself. A $2K/month lease that generates $8K/month in new billings is a 4x return.",
-      },
-    ],
-  },
-
-  // ── Marketing ───────────────────────────────────────────────────────
-  {
-    id: "marketing",
-    label: "Marketing",
-    minPct: 5,
-    maxPct: 10,
-    items: [
-      {
-        id: "digital-marketing",
-        label: "Digital Marketing",
+        id: "5000-cogs",
+        code: "5000",
+        label: "Cost of Goods Sold",
         minPct: 2,
+        maxPct: 8,
+        items: [
+          {
+            id: "5010",
+            code: "5010",
+            label: "COGS — Equipment & Supplies",
+            minPct: 0.5,
+            maxPct: 3,
+            midPct: 1.5,
+            tooltip:
+              "Direct cost of clinical supplies consumed in patient care: table paper, cervical pillows, Biofreeze, KT tape, rehab bands, gowns, traction supplies, and any consumable used during treatment. Does NOT include durable equipment purchases.",
+            coachingOver:
+              "Equipment & supplies at [X]% is higher than it should be. At your revenue level, you're spending too much on consumables. Common culprits: ordering name-brand when generics work, not tracking per-visit supply costs, or staff waste. Negotiate bulk pricing with your supplier and do a quarterly supply audit. Track your cost-per-visit for supplies — it should be under $3.",
+            coachingUnder:
+              "Supplies at [X]% — either you're extremely efficient or you're skimping on the patient experience. Make sure your tables have fresh paper, your rehab area is stocked, and you're not reusing single-use items to save $50/month. Patients notice the details.",
+          },
+          {
+            id: "5020",
+            code: "5020",
+            label: "COGS — Lab & Diagnostic Costs",
+            minPct: 0,
+            maxPct: 2,
+            midPct: 0.8,
+            tooltip:
+              "Lab fees, diagnostic imaging costs (if outsourced), X-ray film/supplies, and any third-party diagnostic services. If you have in-house X-ray, include film, developer chemicals, and maintenance here.",
+            coachingOver:
+              "Lab & diagnostic costs at [X]% — if you're outsourcing imaging, compare costs with bringing X-ray in-house. At 100+ new patients per month, in-house digital X-ray typically pays for itself within 12-18 months. If you're already in-house, check your maintenance contract and supply costs against comparable practices.",
+            coachingUnder:
+              "Lab & diagnostic at [X]% — this is normal for practices with in-house digital X-ray and minimal lab work. Make sure you're still performing and documenting appropriate diagnostic workups for every new patient.",
+          },
+          {
+            id: "5050",
+            code: "5050",
+            label: "COGS — Supplements, Food & Drink",
+            minPct: 1,
+            maxPct: 5,
+            midPct: 2.5,
+            tooltip:
+              "Cost of supplements, nutritional products, protein powders, and any food/drink items you sell to patients. This is the wholesale cost of goods — the markup between this and your retail price is your product margin. A healthy supplement program runs 50-60% margin.",
+            coachingOver:
+              "Supplement COGS at [X]% — either you're selling a lot of product (which is great if margins are healthy) or your margins are too thin. Check your markup: if you're buying at $15 and selling at $25, that's only a 40% margin. You should be at 50-60% minimum. Also, watch for expired inventory — that's pure waste. Do a quarterly inventory check and return/discount anything approaching expiration.",
+            coachingUnder:
+              "Supplement COGS at [X]% — you're either not selling supplements or selling very little. A well-run supplement program adds $2,000-$5,000/month in profit with minimal effort. Start with 3-5 core products every chiropractor should carry: omega-3, vitamin D, magnesium, a quality multi, and a topical pain relief. Recommend based on findings, not hard selling.",
+          },
+        ],
+      },
+    ],
+  },
+
+  // ════════════════════════════════════════════════════════════════════════
+  // EXPENSES
+  // ════════════════════════════════════════════════════════════════════════
+  {
+    id: "expenses",
+    type: "expenses",
+    label: "Expenses",
+    categories: [
+      // ── 6100 Advertising & Marketing ──────────────────────────────
+      {
+        id: "6100-advertising-marketing",
+        code: "6100",
+        label: "Advertising & Marketing",
+        minPct: 3,
+        maxPct: 10,
+        items: [
+          {
+            id: "6110",
+            code: "6110",
+            label: "Marketing",
+            minPct: 3,
+            maxPct: 9,
+            midPct: 5,
+            tooltip:
+              "All marketing spend: Google Ads, Facebook/Instagram ads, SEO services, website hosting, social media management, spinal screenings, health fairs, community events, sponsorships, referral programs, patient appreciation events, brochures, business cards, and any patient acquisition costs.",
+            coachingOver:
+              "Marketing at [X]% — make sure you're tracking cost-per-new-patient for every channel. If Google Ads costs $150+ per new patient, optimize before spending more. The benchmark is $50-$100 per new patient from digital. If you can't attribute new patients to specific marketing spend, you're guessing, not marketing. Demand ROI data from every vendor and cut what doesn't produce.",
+            coachingUnder:
+              "Marketing at [X]% — in 2026, this is dangerously low. You need a steady flow of new patients to replace attrition. If your website looks dated, you have fewer than 100 Google reviews, and you're not running any digital ads, you're invisible to 80% of potential patients. Start with Google Business Profile optimization and a review campaign — nearly free and high impact.",
+          },
+          {
+            id: "6120",
+            code: "6120",
+            label: "Marketing Meals",
+            minPct: 0.1,
+            maxPct: 1,
+            midPct: 0.4,
+            tooltip:
+              "Meals and entertainment directly tied to marketing activities: lunch-and-learns with referral partners, doctor dinners, catered events for patient education, and meals at marketing events. Must have a business purpose to be deductible.",
+            coachingOver:
+              "Marketing meals at [X]% — are these meals actually generating referrals and new patients? Track every referral partner meal: who did you meet, what was discussed, and did it result in referrals? If you're having nice dinners that don't produce referrals, that's entertainment, not marketing. Focus on lunch-and-learns at attorney offices, MD offices, and gyms — those have the highest referral conversion.",
+            coachingUnder:
+              "Marketing meals at [X]% — this is fine. But if you're not doing any referral partner meals, you're missing a key relationship-building tool. One lunch per month with a PI attorney, family doctor, or gym owner can produce a steady stream of referrals. A $50 lunch that produces even one referral per month is a massive ROI.",
+          },
+        ],
+      },
+
+      // ── 6200 Team ─────────────────────────────────────────────────
+      {
+        id: "6200-team",
+        code: "6200",
+        label: "Team",
+        minPct: 20,
+        maxPct: 35,
+        items: [
+          {
+            id: "6221",
+            code: "6221",
+            label: "Employee Salary",
+            minPct: 18,
+            maxPct: 30,
+            midPct: 24,
+            tooltip:
+              "All employee wages: front desk, CAs, office manager, associate doctors, billing staff, and any other W-2 employees. Includes base salary, hourly wages, bonuses, and commissions. Does NOT include the owner-doctor's draw — that comes out of profit.",
+            coachingOver:
+              "Employee salary at [X]% — your team cost is consuming more than 30 cents of every dollar collected. Before you cut staff, ask: is every team member producing value equal to 3x their cost? A CA who does intake AND applies billable therapies is worth 2x one who only checks people in. Cross-train before you cut. If you're overstaffed for volume, reduce hours before eliminating positions. Also check: are you paying market rate, or above? Overpaying by $2/hour across 4 employees is $16K/year.",
+            coachingUnder:
+              "Salary at [X]% — this is lean, possibly too lean. If your front desk is slammed, calls go to voicemail, and patients wait 15 minutes to check out, you're losing more in missed appointments than you'd spend on help. One missed new patient per week at $2,500 case average = $10K/month in lost revenue. Hire before you're desperate — and hire for culture, not just cost.",
+          },
+          {
+            id: "6222",
+            code: "6222",
+            label: "Employee Employer Tax",
+            minPct: 2,
+            maxPct: 5,
+            midPct: 3.5,
+            tooltip:
+              "Employer-side payroll taxes: Social Security (6.2%), Medicare (1.45%), FUTA, SUTA, and workers' compensation insurance. Rule of thumb: employer taxes run 7.65-10% of gross wages, so this line should be roughly 7-10% of your total salary line above.",
+            coachingOver:
+              "Employer tax at [X]% — check your workers' comp classification code. Chiropractic offices should be on a clerical rate, not a medical rate — this alone can save $1,000-$2,000/year. Also review your state unemployment rate; if you've had turnover that triggered claims, your SUTA rate may be elevated. Focus on retention to bring it back down. Shop your workers' comp annually.",
+            coachingUnder:
+              "Employer tax at [X]% — double-check that you're not misclassifying employees as 1099 contractors. The IRS has cracked down hard on this in healthcare. If your 'contractor' has a set schedule, uses your equipment, and you control how they work — that's an employee. Penalties for misclassification are severe. Also make sure you're withholding and remitting properly.",
+          },
+          {
+            id: "6291",
+            code: "6291",
+            label: "Payroll Processing Fee",
+            minPct: 0.2,
+            maxPct: 0.8,
+            midPct: 0.4,
+            tooltip:
+              "Fees paid to your payroll processor (Gusto, ADP, Paychex, QuickBooks Payroll, etc.) for running payroll, filing tax forms, issuing W-2s, and handling direct deposits.",
+            coachingOver:
+              "Payroll processing at [X]% — you may be overpaying for payroll services. ADP and Paychex often charge per-employee fees that add up. Compare pricing: Gusto and QuickBooks Payroll are typically $40-$80/month base plus $6-$10/employee. If you're paying significantly more, switch. The actual payroll processing is commoditized — don't overpay for a brand name.",
+            coachingUnder:
+              "Payroll processing at [X]% — this is fine. Just make sure your payroll service is handling tax filings, W-2s, and state compliance correctly. A payroll tax penalty from the IRS because your $20/month service missed a filing costs far more than a proper payroll platform.",
+          },
+        ],
+      },
+
+      // ── 6600 Practice Costs ───────────────────────────────────────
+      {
+        id: "6600-practice-costs",
+        code: "6600",
+        label: "Practice Costs",
+        minPct: 5,
+        maxPct: 10,
+        items: [
+          {
+            id: "6620",
+            code: "6620",
+            label: "Rent",
+            minPct: 4,
+            maxPct: 8,
+            midPct: 6,
+            tooltip:
+              "Monthly lease payment including CAM (Common Area Maintenance) charges and property taxes if passed through. If you own the building, use the fair-market rent you'd charge a tenant. Does NOT include build-out loan payments.",
+            coachingOver:
+              "Rent at [X]% — for every dollar you collect, [X] cents goes straight to your landlord. Two moves: negotiate the lease down, or grow revenue so the percentage drops. Every $5K in new monthly collections drops your rent percentage by about 1%. If you're locked into an expensive lease, the fastest fix is more volume. Also check: are you using all your square footage? If you have 2,000 sq ft but only use 1,200, you're paying for dead space.",
+            coachingUnder:
+              "Rent at [X]% — either you got a killer deal or your space is too small for growth. If patients are waiting in the hallway and you can't add a table, cheap rent is costing you production. The right space should allow 150-200+ visits/week without feeling cramped. Don't let $500/month savings cap your growth.",
+          },
+          {
+            id: "6640",
+            code: "6640",
+            label: "Office Utilities",
+            minPct: 0.5,
+            maxPct: 2,
+            midPct: 1,
+            tooltip:
+              "Electric, gas, water, trash, and any utility costs for the office space. Does NOT include phone/internet (that's under Overhead) or personal utilities.",
+            coachingOver:
+              "Utilities at [X]% — check your HVAC system; old units can double your electric bill. Get a programmable thermostat, switch to LED lighting, and make sure you're not on a commercial electric rate when you could be on a small-business rate. Review your utility bills for the last 12 months and look for seasonal spikes you can address.",
+            coachingUnder:
+              "Utilities at [X]% — this is fine. Not much to optimize here. Just make sure your HVAC is working efficiently so patients and staff are comfortable year-round.",
+          },
+        ],
+      },
+
+      // ── 6800 Overhead ─────────────────────────────────────────────
+      {
+        id: "6800-overhead",
+        code: "6800",
+        label: "Overhead",
+        minPct: 8,
+        maxPct: 22,
+        items: [
+          {
+            id: "6811",
+            code: "6811",
+            label: "Bank Charges & Fees",
+            minPct: 0.3,
+            maxPct: 2,
+            midPct: 1,
+            tooltip:
+              "Monthly bank fees, wire transfer fees, NSF charges, lockbox fees, and any charges from your business banking accounts. If this is high, you may be on the wrong type of business account.",
+            coachingOver:
+              "Bank fees at [X]% — this is unusually high. Review your bank account type: many practices stay on basic checking when a business analysis account would waive fees based on your average balance. Also check for recurring NSF or overdraft charges — those indicate cash flow timing issues. Switch to a bank that offers free business checking with your balance level.",
+            coachingUnder: "",
+          },
+          {
+            id: "6812",
+            code: "6812",
+            label: "Cleaning",
+            minPct: 0.3,
+            maxPct: 1,
+            midPct: 0.5,
+            tooltip:
+              "Janitorial service, office cleaning supplies, carpet cleaning, and general cleaning. Does NOT include major maintenance or repairs.",
+            coachingOver:
+              "Cleaning at [X]% — get competitive bids from 2-3 janitorial services. Most 1,500 sq ft offices should cost $400-$600/month to clean 3x/week. If you're paying significantly more, you're overpaying. Also check: is your cleaning crew doing everything in the contract? Walk through at 4pm and verify.",
+            coachingUnder:
+              "Cleaning at [X]% — make sure your office is actually clean. Walk through at 4pm on a Thursday and look through a new patient's eyes. Dust on blinds, stains on carpet, and a grimy bathroom cost you more in lost referrals than a proper cleaning service.",
+          },
+          {
+            id: "6814",
+            code: "6814",
+            label: "Equipment",
+            minPct: 0.5,
+            maxPct: 3,
+            midPct: 1.5,
+            tooltip:
+              "Equipment purchases, leases, and maintenance: tables, digital X-ray, decompression, laser, shockwave, and any financed equipment. Includes monthly lease payments and small equipment purchases.",
+            coachingOver:
+              "Equipment at [X]% — you may have too much equipment relative to revenue. The shiny-object trap is real: that $120K decompression table sounds great, but if it's only generating $2K/month in billings, the math doesn't work. For every piece of equipment, calculate: monthly cost vs. monthly revenue generated. If the ratio isn't at least 3:1, you overpaid or you're underutilizing it.",
+            coachingUnder:
+              "Equipment at [X]% — either you own everything outright (great) or you're running outdated equipment. If your X-ray system is 15+ years old or you're missing revenue-generating modalities, this is the wrong place to be frugal. Good equipment pays for itself.",
+          },
+          {
+            id: "6816",
+            code: "6816",
+            label: "Gifts",
+            minPct: 0,
+            maxPct: 0.5,
+            midPct: 0.2,
+            tooltip:
+              "Patient gifts, referral thank-yous, staff appreciation gifts, holiday gifts, and any goodwill gifts. Business gifts are deductible up to $25 per recipient per year.",
+            coachingOver:
+              "Gifts at [X]% — you're generous, which builds goodwill, but make sure it's producing results. Track whether gift recipients actually send referrals. A $25 gift card to a patient who refers 3 friends is a great investment. Expensive gifts to people who never refer are just charity. Keep it simple and tied to referral behavior.",
+            coachingUnder: "",
+          },
+          {
+            id: "6817",
+            code: "6817",
+            label: "Insurance",
+            minPct: 0.5,
+            maxPct: 2,
+            midPct: 1,
+            tooltip:
+              "All business insurance: malpractice/professional liability, general liability, property insurance, business interruption, cyber liability, umbrella policies, and workers' comp. Does NOT include employee health insurance (that's part of payroll/benefits).",
+            coachingOver:
+              "Insurance at [X]% — shop your policies every 2-3 years. Bundle general liability + property + cyber with one carrier for 10-15% discount. Also verify you're not over-insured: review coverage limits against actual asset values. For malpractice, get quotes from NCMIC, ChiroSecure, and at least one other carrier.",
+            coachingUnder:
+              "Insurance at [X]% — make sure you have adequate coverage. At minimum: malpractice ($1M/$3M), general liability, property insurance, and cyber liability. One uncovered incident can bankrupt a practice. A data breach alone can cost $50K-$100K without cyber coverage. This is not where you save money.",
+          },
+          {
+            id: "6818",
+            code: "6818",
+            label: "Interest Paid",
+            minPct: 0,
+            maxPct: 2,
+            midPct: 0.5,
+            tooltip:
+              "Interest on business loans, lines of credit, equipment financing, credit card interest, and any other debt service interest. Does NOT include the principal portion of loan payments.",
+            coachingOver:
+              "Interest at [X]% — you're carrying significant debt. Prioritize paying down high-interest debt (credit cards, merchant cash advances) first. If you have multiple loans, consider consolidating with an SBA loan at a lower rate. Every dollar in interest is a dollar that doesn't go to your bottom line. Avoid taking on new debt unless the investment produces 3x+ returns.",
+            coachingUnder: "",
+          },
+          {
+            id: "6820",
+            code: "6820",
+            label: "Legal & Professional Fees",
+            minPct: 0.3,
+            maxPct: 1.5,
+            midPct: 0.7,
+            tooltip:
+              "Attorney fees, CPA/accounting fees, bookkeeping services, consulting fees, and any professional service providers. Includes tax preparation, contract reviews, and ongoing advisory retainers.",
+            coachingOver:
+              "Legal & professional at [X]% — unless you're in active litigation, this is high. You shouldn't need a lawyer on retainer for routine operations. For accounting, separate CPA work (taxes, quarterly reviews) from bookkeeping — a bookkeeper at $300-$500/month handles day-to-day; your CPA handles strategy. If your accountant charges $1,500+/month, make sure you're getting strategic tax advice, not just data entry.",
+            coachingUnder:
+              "Professional fees at [X]% — if you haven't had an attorney review your contracts or an accountant do a tax strategy session in the last 2 years, you're exposed. One employee lawsuit or missed tax deduction costs more than proactive professional help. Budget $3K-$5K/year for professional services and treat it as insurance.",
+          },
+          {
+            id: "6823",
+            code: "6823",
+            label: "Medical Billing",
+            minPct: 0,
+            maxPct: 3,
+            midPct: 1,
+            tooltip:
+              "Third-party billing service fees, claims clearinghouse fees, eligibility verification services, and any outsourced billing costs. If you use an outside billing company, their fee (typically 5-8% of collections) goes here. If you bill in-house, this may be minimal.",
+            coachingOver:
+              "Medical billing at [X]% — if you're using an outside billing company charging 8%+, negotiate or shop around. Market rate is 5-7% for chiropractic billing. If billing in-house, you may have too many overlapping software subscriptions. One good billing platform beats three mediocre ones. Also track your clean claims rate — if it's below 90%, your billing process needs work regardless of cost.",
+            coachingUnder:
+              "Billing at [X]% — are you doing all billing yourself? That's fine at $20K/month, but above $40K it's usually cheaper to outsource. Your clinical time is worth $200-$400/hour. If you spend 5 hours/week on billing, that's $4K-$8K/month in lost production. A billing service at $2K/month is a bargain by comparison.",
+          },
+          {
+            id: "6824",
+            code: "6824",
+            label: "Membership Fees",
+            minPct: 0,
+            maxPct: 0.3,
+            midPct: 0.1,
+            tooltip:
+              "Professional association dues (state and national chiropractic associations), chamber of commerce membership, BNI or networking group fees, and any professional memberships.",
+            coachingOver:
+              "Membership fees at [X]% — audit every membership. Are you actually attending BNI meetings? Getting value from your chamber membership? Using your association benefits? Cancel anything you haven't actively used in 6 months. Keep your state association (required for advocacy), one networking group that produces referrals, and nothing else unless you can prove ROI.",
+            coachingUnder: "",
+          },
+          {
+            id: "6825",
+            code: "6825",
+            label: "Merchant Processing Fees",
+            minPct: 1,
+            maxPct: 3.5,
+            midPct: 2.5,
+            tooltip:
+              "Credit card processing fees, debit card fees, payment terminal fees, and any charges from your payment processor (Square, Clover, Stripe, traditional merchant account). Typically 2.5-3.2% of card transaction volume.",
+            coachingOver:
+              "Merchant processing at [X]% — if you process $30K+/month in cards, you have negotiating leverage. Call your processor and ask for a rate reduction, or get competing quotes. Going from 3.2% to 2.6% on $30K saves $180/month ($2,160/year). Also check for hidden fees: PCI compliance fees, statement fees, batch fees, and monthly minimums add up. Consider a flat-rate processor if your average transaction is under $100.",
+            coachingUnder:
+              "Processing fees at [X]% — this is either very efficient or you're primarily collecting cash/checks. If you're discouraging card payments to avoid fees, you're likely losing revenue. Patients who can pay by card spend more and comply better with care plans. The 2-3% fee is a cost of doing business in 2026.",
+          },
+          {
+            id: "6826",
+            code: "6826",
+            label: "Office Expenses & Supplies",
+            minPct: 0.3,
+            maxPct: 1,
+            midPct: 0.5,
+            tooltip:
+              "General office supplies: paper, toner, pens, printer ink, folders, postage, stamps, and any non-clinical consumables used in daily operations.",
+            coachingOver:
+              "Office supplies at [X]% — do a supply audit. Most practices have a closet full of supplies they ordered in bulk and never used. Switch to just-in-time ordering through Amazon Business or Staples delivery. Track usage monthly and set reorder points instead of bulk-buying. Also check if staff is ordering personal items on the business account.",
+            coachingUnder: "",
+          },
+          {
+            id: "6828",
+            code: "6828",
+            label: "Software & Subscriptions",
+            minPct: 1,
+            maxPct: 3,
+            midPct: 1.8,
+            tooltip:
+              "All software subscriptions: EHR/practice management, scheduling software, patient communication platforms, accounting software, cloud storage, HIPAA compliance tools, Microsoft 365/Google Workspace, scanning/diagnostic software, and any SaaS tools.",
+            coachingOver:
+              "Software at [X]% — do a subscription audit right now. Log into every bank and credit card statement and list every recurring tech charge. Most practices find $200-$500/month in forgotten subscriptions: that old fax service, the website plugin, the trial that auto-renewed. Cancel anything unused in 60 days. Also look for overlap — do you need a separate texting platform AND your EHR's built-in reminders?",
+            coachingUnder:
+              "Software at [X]% — make sure you're not underinvesting in tech that saves time. A good EHR saves 15-30 minutes/day in documentation. Automated text reminders reduce no-shows by 30-40%. If you're doing things manually that software could automate, you're spending clinical time on admin work. That's the most expensive software savings possible.",
+          },
+          {
+            id: "6830",
+            code: "6830",
+            label: "Phone & Internet",
+            minPct: 0.5,
+            maxPct: 1.5,
+            midPct: 0.8,
+            tooltip:
+              "Business phone system (VoIP/landline), internet service, fax service, and cell phone costs if a dedicated business line. Includes monthly service fees and any equipment rentals.",
+            coachingOver:
+              "Phone & internet at [X]% — review your plans. Most practices don't need more than 200 Mbps internet. If you're paying for a legacy phone system, switch to VoIP (RingCentral, Ooma) and save 30-50%. Make sure you're not paying for unused phone lines or features you don't use. A reliable internet connection is critical — but enterprise-grade is overkill for a chiro office.",
+            coachingUnder:
+              "Phone & internet at [X]% — just make sure your internet is reliable enough that your EHR and payment systems never go down during business hours. A $50/month savings isn't worth one system outage that disrupts a full day of patients.",
+          },
+          {
+            id: "6831",
+            code: "6831",
+            label: "Royalty Fees",
+            minPct: 0,
+            maxPct: 8,
+            midPct: 4,
+            tooltip:
+              "Franchise royalty fees, licensing fees, or any ongoing fees paid to a parent organization or franchisor. If you're an independent practice, this should be zero. For franchise practices, this is typically 5-10% of gross revenue.",
+            coachingOver:
+              "Royalty fees at [X]% — if you're a franchise, this is the cost of the brand and systems. Make sure you're actually using the marketing, training, and operational support that comes with the franchise fee. If you're paying 8% for a brand name but doing all your own marketing and operations, you're getting poor value. Have a conversation with your franchisor about what's included and maximize every benefit you're paying for.",
+            coachingUnder: "",
+          },
+        ],
+      },
+
+      // ── 6870 Levy / Garnishment ───────────────────────────────────
+      {
+        id: "6870-levy",
+        code: "6870",
+        label: "Levy / Garnishment",
+        minPct: 0,
+        maxPct: 0,
+        items: [
+          {
+            id: "6870",
+            code: "6870",
+            label: "Levy / Garnishment",
+            minPct: 0,
+            maxPct: 0,
+            midPct: 0,
+            tooltip:
+              "IRS levies, state tax garnishments, legal judgments, or any court-ordered wage garnishments against the business. This should ideally be zero.",
+            coachingOver:
+              "Levy/garnishment at [X]% — this means you have an active IRS levy, state tax issue, or legal judgment against the business. This is a serious matter. Contact a tax attorney or enrolled agent immediately if this is a tax issue. Do not ignore levies — they escalate. Get on a payment plan and resolve the underlying issue before it grows.",
+            coachingUnder: "",
+          },
+        ],
+      },
+
+      // ── 7000 Business Development ─────────────────────────────────
+      {
+        id: "7000-business-development",
+        code: "7000",
+        label: "Business Development",
+        minPct: 1,
         maxPct: 4,
-        midPct: 3,
-        tooltip:
-          "Google Ads, Facebook/Instagram ads, SEO services, website hosting and maintenance, online review management, social media management, and any paid digital lead generation. Does NOT include your EHR's patient communication features — that's under technology.",
-        coachingOver:
-          "Digital marketing at [X]% — make sure you're tracking cost-per-lead and cost-per-new-patient. If Google Ads is costing you $150+ per new patient, optimize your campaigns before spending more. The benchmark is $50-$100 per new patient from Google Ads in most markets. If you're spending $2,000/month on SEO and can't point to specific ranking improvements and new patients from organic search, fire your SEO company. Demand monthly reports with real numbers.",
-        coachingUnder:
-          "Digital at [X]% — in 2026, this is dangerously low. 80%+ of new patients Google you before they call. If your website looks like it was built in 2015, you don't show up in 'chiropractor near me' searches, and you have 12 Google reviews while competitors have 200+, you're invisible. Start with Google Business Profile optimization and a review campaign — it's nearly free and moves the needle fast.",
-      },
-      {
-        id: "community-marketing",
-        label: "Community Marketing",
-        minPct: 1,
-        maxPct: 3,
-        midPct: 2,
-        tooltip:
-          "Spinal screenings, health fairs, corporate lunch-and-learns, gym partnerships, school events, community sponsorships, charity event participation, and any external outreach. Includes materials, booth fees, and any giveaway costs.",
-        coachingOver:
-          "Community marketing at [X]% — are you tracking ROI on each event? A spinal screening that costs $500 (staff time + materials) should produce at least 3-5 new patients within 30 days. If you're sponsoring every Little League team and 5K race in town but can't trace any new patients back, you're doing charity, not marketing. Pick 2-3 high-ROI events per month and do them exceptionally well.",
-        coachingUnder:
-          "Community at [X]% — you're missing the highest-trust marketing channel in chiropractic. A doctor who shows up at a health fair, does a corporate lunch-and-learn, or partners with a local gym builds trust that no ad can replicate. Start with one screening per month at a local employer. Bring your best CA, show up with energy, and track every lead. Most practices get 5-15 leads per event.",
-      },
-      {
-        id: "internal-marketing",
-        label: "Internal Marketing",
-        minPct: 1,
-        maxPct: 2,
-        midPct: 1.5,
-        tooltip:
-          "Patient appreciation events, referral reward programs, reactivation campaigns (mailers, emails, texts to inactive patients), in-office signage, patient education materials, and care class supplies. This is marketing to your EXISTING patient base.",
-        coachingOver:
-          "Internal marketing at [X]% — this is unusual to be over budget. Make sure you're not double-counting patient communication software here (that's tech). If you're running expensive patient appreciation events, scale them back. A pizza party and a heartfelt thank-you work better than an expensive catered affair. The ROI of internal marketing should be measured in reactivations and referrals per month.",
-        coachingUnder:
-          "Internal marketing at [X]% — your current patients are your cheapest source of new patients. A referred patient has 3x the lifetime value of a cold lead and costs almost nothing to acquire. If you're not running a referral program, doing care classes, and sending reactivation campaigns to patients who dropped off, you're leaving easy money on the table. Start a 'refer a friend' program this week — it costs almost nothing.",
-      },
-      {
-        id: "branding-print",
-        label: "Branding / Print",
-        minPct: 0.5,
-        maxPct: 1,
-        midPct: 0.75,
-        tooltip:
-          "Business cards, brochures, branded merchandise, print ads (newspapers, magazines), direct mail campaigns, signage (indoor and outdoor), and any physical branding materials. Does NOT include digital ad spend.",
-        coachingOver:
-          "Branding/print at [X]% — print is rarely the best use of marketing dollars in 2026. If you're spending heavily on newspaper ads or direct mail, test cutting them for 90 days and see if new patient numbers change. Most practices find they don't. Invest the savings in digital and community marketing where tracking is precise. Keep business cards and brochures — ditch the rest unless you have data proving ROI.",
-        coachingUnder:
-          "Branding at [X]% — this is probably fine as long as your basic materials are professional. You need clean business cards, a professional brochure for referral partners, and decent signage. If you don't have these basics, invest $500-$1,000 to get them right. After that, your branding budget can stay lean.",
-      },
-    ],
-  },
-
-  // ── Technology ──────────────────────────────────────────────────────
-  {
-    id: "technology",
-    label: "Technology",
-    minPct: 2,
-    maxPct: 4,
-    items: [
-      {
-        id: "ehr",
-        label: "EHR / Practice Management",
-        minPct: 0.5,
-        maxPct: 1,
-        midPct: 0.75,
-        tooltip:
-          "Your electronic health record and practice management system (ChiroTouch, Jane, Atlas, Platinum, etc.). Includes monthly subscription, per-provider fees, and any add-on modules. Does NOT include billing software if that's a separate service.",
-        coachingOver:
-          "EHR at [X]% — you might be paying for features you don't use or extra user licenses you don't need. Call your EHR vendor and audit your plan. Many practices pay for the top tier but only use basic SOAP notes and scheduling. Also check: are you paying per-provider fees for associates who left? Unused licenses add up. If your EHR is genuinely too expensive, it may be time to evaluate alternatives.",
-        coachingUnder:
-          "EHR at [X]% — make sure you're not using a cheap system that's costing you in other ways. If your EHR is slow, crashes regularly, or doesn't integrate with your billing, the lost productivity costs more than a better system. A good EHR saves 15-30 minutes per day in documentation time. That's 2-3 more patients you could see.",
-      },
-      {
-        id: "billing-software",
-        label: "Billing Software / Service",
-        minPct: 0.5,
-        maxPct: 1,
-        midPct: 0.75,
-        tooltip:
-          "Third-party billing service or claims software subscription. If you use an outside billing company, this is their fee (usually 6-8% of collections — include the full cost here). If you bill in-house using your EHR, this might be minimal. Includes clearinghouse fees, eligibility verification services, and any claims scrubbing tools.",
-        coachingOver:
-          "Billing at [X]% — if you're using an outside billing company and they're charging 8%+ of collections, negotiate or shop around. The market rate is 5-7% for chiropractic billing. If you're billing in-house and still spending this much, you may have too many separate software subscriptions that overlap. Consolidate where possible. One good billing platform beats three mediocre ones.",
-        coachingUnder:
-          "Billing at [X]% — are you doing all billing yourself? That's fine at $20K/month collections, but above $40K it's usually cheaper to outsource. Your time is worth $200-$400/hour clinically. If you spend 5 hours/week on billing, that's $4K-$8K/month in lost production. A billing service at $2K/month is a bargain by comparison.",
-      },
-      {
-        id: "scanning-software",
-        label: "Scanning / Diagnostic Software",
-        minPct: 0.5,
-        maxPct: 1,
-        midPct: 0.75,
-        tooltip:
-          "Surface EMG, thermography, posture analysis, Insight Subluxation Station, CORESCORE, or any other diagnostic scanning technology. Includes monthly subscription, calibration, and maintenance fees.",
-        coachingOver:
-          "Scanning software at [X]% — make sure you're using it on every patient, every re-exam. If you paid for a $15K scanning system and only scan 30% of patients, your cost-per-scan is triple what it should be. The scanning pays for itself through better case acceptance (patients who see objective findings start care at 2x the rate). But only if you use it consistently. Build it into your standard new patient flow, every time.",
-        coachingUnder:
-          "Scanning at [X]% — if you don't have any objective outcome measures beyond X-ray, you're missing a powerful case-acceptance tool. Patients are visual — when they see their scan results, case acceptance rates jump from 60% to 85%+. Even a basic posture analysis system at $200/month can move the needle. This is one of the highest-ROI investments in the practice.",
-      },
-      {
-        id: "communication-tech",
-        label: "Communication Tools",
-        minPct: 0.3,
-        maxPct: 0.5,
-        midPct: 0.4,
-        tooltip:
-          "Patient communication platforms (appointment reminders, two-way texting, email campaigns), phone systems (VoIP/RingCentral), and any patient engagement tools. Does NOT include social media ad spend — that's under digital marketing.",
-        coachingOver:
-          "Communication tools at [X]% — you may have overlapping systems. Do you need a separate texting platform AND your EHR's built-in reminders AND a third email tool? Consolidate. Most modern EHRs or a single platform like Demand Force or Podium can handle reminders, reviews, and two-way texting. You shouldn't need more than 2 communication tools total.",
-        coachingUnder:
-          "Communication at [X]% — are patients getting appointment reminders? If not, you're losing 5-10% of visits to no-shows. Automated text reminders alone reduce no-shows by 30-40%. At 100 visits/week, that's 3-4 extra visits per week or $1,200-$1,600/month in recovered revenue for a $150/month investment. This is a no-brainer.",
-      },
-      {
-        id: "other-tech",
-        label: "Other Technology",
-        minPct: 0.2,
-        maxPct: 0.5,
-        midPct: 0.35,
-        tooltip:
-          "Everything else: cloud storage, cybersecurity tools, HIPAA compliance software, Microsoft 365 or Google Workspace, printers/copiers, IT support, and any other tech subscriptions not covered above.",
-        coachingOver:
-          "Other tech at [X]% — do a subscription audit. Log into every bank and credit card statement and list every recurring tech charge. Most practices find $200-$500/month in forgotten subscriptions: that Dropbox account nobody uses, the old fax service, the website plugin you forgot about. Cancel anything you haven't used in 60 days.",
-        coachingUnder:
-          "Other tech at [X]% — this is probably fine. Just make sure you have HIPAA-compliant email, a backup system for your patient data, and basic cybersecurity. A ransomware attack on a practice with no backup can cost $50K-$100K. Basic protection costs $50-$100/month.",
-      },
-    ],
-  },
-
-  // ── Professional Services ───────────────────────────────────────────
-  {
-    id: "professional-services",
-    label: "Professional Services",
-    minPct: 1.5,
-    maxPct: 3,
-    items: [
-      {
-        id: "accounting",
-        label: "Accounting / Bookkeeping",
-        minPct: 0.5,
-        maxPct: 1,
-        midPct: 0.75,
-        tooltip:
-          "CPA fees, monthly bookkeeping, tax preparation, payroll processing (if outsourced), and any financial advisory services. Includes QuickBooks or accounting software subscriptions.",
-        coachingOver:
-          "Accounting at [X]% — are you paying CPA rates for bookkeeping work? A CPA should do your taxes and quarterly reviews. Day-to-day bookkeeping can be done by a bookkeeper at $300-$500/month or even your OM with QuickBooks training. If your accountant is charging $1,500+/month, make sure you're getting strategic tax advice, not just data entry. Also: a good accountant should save you more in taxes than they cost.",
-        coachingUnder:
-          "Accounting at [X]% — if you're doing your own books or using a cheap service, make sure your financials are actually accurate. Bad books lead to bad decisions. At minimum, have a CPA do quarterly reviews and annual taxes. If you don't know your exact profit margin within $500 right now, you need better bookkeeping. You can't manage what you don't measure.",
-      },
-      {
-        id: "legal",
-        label: "Legal",
-        minPct: 0.3,
-        maxPct: 0.5,
-        midPct: 0.4,
-        tooltip:
-          "Attorney fees for contract review, lease negotiations, employment law questions, entity structuring, and any ongoing legal retainer. Does NOT include malpractice insurance — that's a separate line item.",
-        coachingOver:
-          "Legal at [X]% — unless you're in active litigation, this is high. You shouldn't need a lawyer on retainer for routine operations. Build a relationship with a healthcare attorney, pay them for contract reviews as needed, and keep them on speed dial for emergencies. Budget $2K-$3K/year for proactive legal work (associate contracts, lease reviews) and keep the rest in reserve.",
-        coachingUnder:
-          "Legal at [X]% — this is fine for steady-state operations. But if you haven't had an attorney review your associate contract, your lease, or your employee handbook in the last 3 years, you're exposed. One employee lawsuit or lease dispute can cost $20K-$50K. Spend $1,000-$2,000 proactively to get your documents reviewed and sleep better at night.",
-      },
-      {
-        id: "coaching",
-        label: "Practice Coaching / Consulting",
-        minPct: 0.5,
-        maxPct: 1,
-        midPct: 0.75,
-        tooltip:
-          "Chiropractic coaching programs, practice management consulting, mastermind groups, and business coaching. Includes monthly coaching fees, program tuition, and related travel for coaching events.",
-        coachingOver:
-          "Coaching at [X]% — coaching should have a clear ROI. If you're paying $2K/month for coaching, you should be able to point to at least $6K/month in growth directly attributable to what you've implemented. If you've been in the same coaching program for 3+ years and your numbers are flat, it's become a comfort blanket, not a growth tool. Either re-engage with intensity or find a program that challenges you.",
-        coachingUnder:
-          "Coaching at [X]% — the practices that grow fastest almost always have a coach. Not because the coach is magic, but because accountability works. If you're stuck at $30-$40K/month and can't figure out why, an outside perspective can see what you can't. Budget $500-$1,500/month for a proven chiropractic coaching program. Interview 3 coaches, check their references, and pick the one who makes you uncomfortable in the right way.",
-      },
-      {
-        id: "malpractice-insurance",
-        label: "Malpractice Insurance",
-        minPct: 0.3,
-        maxPct: 0.5,
-        midPct: 0.4,
-        tooltip:
-          "Professional liability insurance for all providers. Includes the owner-doctor and any associates. Cost varies by state, coverage limits, and claims history. Does NOT include general liability or business insurance — those are separate.",
-        coachingOver:
-          "Malpractice at [X]% — shop your policy every 2-3 years. Get quotes from NCMIC, ChiroSecure, and at least one other carrier. Make sure your limits are appropriate — most practices need $1M/$3M occurrence-based coverage. If you're paying more because of claims history, focus on documentation quality. Clean notes are your best defense and will lower your premiums over time.",
-        coachingUnder:
-          "Malpractice at [X]% — make sure you actually have adequate coverage. Check your per-occurrence and aggregate limits. If you have an associate, make sure they're covered under your policy or have their own. An uncovered claim can bankrupt a practice. This is not negotiable — proper coverage is a cost of doing business.",
-      },
-      {
-        id: "general-insurance",
-        label: "General / Business Insurance",
-        minPct: 0.3,
-        maxPct: 0.5,
-        midPct: 0.4,
-        tooltip:
-          "General liability, property insurance, business interruption, cyber liability, and any umbrella policies. Covers the business itself — slip-and-fall in the office, fire damage, data breaches, etc. Does NOT include malpractice or health insurance for employees.",
-        coachingOver:
-          "General insurance at [X]% — you may be over-insured or paying premium rates. Bundle your policies (general liability + property + cyber) with one carrier for a 10-15% discount. Also, review your coverage limits — you may be insuring for $2M in property when your actual equipment and build-out is worth $200K. Right-size your coverage annually.",
-        coachingUnder:
-          "General insurance at [X]% — make sure you have cyber liability coverage. If a data breach exposes patient records, HIPAA fines start at $100 per record. With 2,000 active patients, that's $200K before you even pay for breach notification. A cyber policy costs $500-$1,000/year and covers breach response, notification, and fines. Add it today if you don't have it.",
-      },
-    ],
-  },
-
-  // ── Doctor CE ───────────────────────────────────────────────────────
-  {
-    id: "doctor-ce",
-    label: "Doctor CE",
-    minPct: 1,
-    maxPct: 3,
-    items: [
-      {
-        id: "doctor-ce-item",
-        label: "Seminars / Certifications / Travel",
-        minPct: 1,
-        maxPct: 3,
-        midPct: 2,
-        tooltip:
-          "All continuing education for the owner-doctor and associate doctors: seminar tuition, certification programs, technique training, travel and lodging for CE events, and any related books or online courses. Does NOT include staff CE — that's under Staff & Payroll.",
-        coachingOver:
-          "Doctor CE at [X]% — you're investing heavily in your skills, which is great, but are you implementing what you learn? The most expensive seminar is the one you attend and do nothing with. Pick 1-2 core techniques or systems per year, implement them fully, measure the results, then move to the next. Chasing every new technique while mastering none is expensive and exhausting. Also, prioritize CE that directly impacts revenue: case management, communication, and advanced techniques you'll use daily.",
-        coachingUnder:
-          "Doctor CE at [X]% — if you haven't attended a major seminar in over a year, you're falling behind. The clinical and business landscape changes fast. At minimum, budget for your state-required CE hours plus one major technique or practice management seminar per year. The energy and ideas you bring back from a great event often produce a 30-60 day surge in production. It's also how you avoid burnout — getting around other driven doctors recharges you.",
-      },
-    ],
-  },
-
-  // ── Miscellaneous ───────────────────────────────────────────────────
-  {
-    id: "miscellaneous",
-    label: "Miscellaneous",
-    minPct: 1,
-    maxPct: 2,
-    items: [
-      {
-        id: "misc-item",
-        label: "Office Supplies / Merchant Fees / Misc",
-        minPct: 1,
-        maxPct: 2,
-        midPct: 1.5,
-        tooltip:
-          "Everything that doesn't fit elsewhere: office supplies (paper, toner, pens), credit card processing / merchant fees (typically 2-3% of card transactions), postage, parking, bank fees, meals with referral partners, and any other small recurring expenses.",
-        coachingOver:
-          "Misc expenses at [X]% — this category is where expense creep hides. Pull every transaction from last month and categorize it. You'll likely find subscriptions you forgot about, meals that aren't generating referrals, and supplies you're overpaying for. Credit card processing fees alone can be negotiated — if you process $30K+/month in cards, you have leverage. Call your processor and ask for a rate reduction, or switch to a flat-rate processor. Going from 3.2% to 2.6% on $30K saves $180/month.",
-        coachingUnder:
-          "Misc at [X]% — this is fine and probably accurate. Just make sure you're not categorizing things as misc that should be in other categories. Accurate categorization is how you spot problems early. If this number is suspiciously low, double-check that merchant fees are accounted for — many practices forget to include credit card processing costs.",
+        items: [
+          {
+            id: "7010",
+            code: "7010",
+            label: "Auto",
+            minPct: 0,
+            maxPct: 1,
+            midPct: 0.3,
+            tooltip:
+              "Business use of vehicle: mileage for spinal screenings, community events, bank runs, supply pickups, and any practice-related driving. Track mileage using an app (MileIQ, Everlance) for IRS compliance. 2026 standard mileage rate applies.",
+            coachingOver:
+              "Auto at [X]% — unless you're doing extensive community outreach that requires driving, this is high. Make sure you're tracking actual business miles vs. personal use. The IRS scrutinizes auto deductions heavily. Use a mileage tracking app and only claim legitimate business use. If you're leasing a vehicle through the practice, compare the cost to simply reimbursing mileage.",
+            coachingUnder: "",
+          },
+          {
+            id: "7020",
+            code: "7020",
+            label: "Business Meals & Entertainment",
+            minPct: 0.3,
+            maxPct: 1.5,
+            midPct: 0.8,
+            tooltip:
+              "Business meals with referral partners, team meals, CE seminar meals, and any entertainment with a business purpose. Keep receipts and document the business purpose, attendees, and topics discussed for tax compliance.",
+            coachingOver:
+              "Business meals at [X]% — are these meals producing business results? Track every meal: who attended, what was discussed, and what came of it. If you're dining with the same referral partner monthly but they've never sent a patient, that's a friendship dinner, not a business meal. Focus meal spending on relationships that produce measurable referrals or business growth.",
+            coachingUnder:
+              "Business meals at [X]% — this is fine. But don't overlook team meals. Taking your staff to lunch once a month costs $100-$200 and builds morale that reduces turnover. The cost of replacing one CA ($3K-$5K in recruiting and training) makes occasional team meals one of the best investments you can make.",
+          },
+          {
+            id: "7040",
+            code: "7040",
+            label: "Travel",
+            minPct: 0.3,
+            maxPct: 1.5,
+            midPct: 0.7,
+            tooltip:
+              "Business travel: flights, hotels, rental cars, and transportation for CE seminars, conferences, coaching events, and practice-related trips. Does NOT include daily commuting to the office.",
+            coachingOver:
+              "Travel at [X]% — are your travel expenses tied to high-ROI events? A $2,000 trip to a coaching event that produces $10K in practice improvements is worth it. A $2,000 trip to a resort CE course where you learn nothing new is a vacation. Be honest about which is which. Consider virtual CE options that cost 80% less when the in-person experience isn't critical.",
+            coachingUnder:
+              "Travel at [X]% — if you haven't attended an out-of-town seminar or coaching event in over a year, you may be falling behind. The energy, ideas, and connections from great events often produce a 30-60 day production surge. It's also how you avoid burnout — getting around other driven doctors recharges you. Budget for at least one major event per year.",
+          },
+        ],
       },
     ],
   },
 ];
 
 // ---------------------------------------------------------------------------
+// Helper: Flatten all items from all sections
+// ---------------------------------------------------------------------------
+
+export function getAllItems(): PLLineItem[] {
+  return PL_SECTIONS.flatMap((section) =>
+    section.categories.flatMap((cat) => cat.items),
+  );
+}
+
+export function getExpenseItems(): PLLineItem[] {
+  return PL_SECTIONS.filter((s) => s.type === "expenses")
+    .flatMap((s) => s.categories.flatMap((c) => c.items));
+}
+
+export function getCOGSItems(): PLLineItem[] {
+  return PL_SECTIONS.filter((s) => s.type === "cogs")
+    .flatMap((s) => s.categories.flatMap((c) => c.items));
+}
+
+export function getIncomeItems(): PLLineItem[] {
+  return PL_SECTIONS.filter((s) => s.type === "income")
+    .flatMap((s) => s.categories.flatMap((c) => c.items));
+}
+
+// ---------------------------------------------------------------------------
 // 2. SCALING_EXAMPLES — 4 Pre-built P&L Snapshots
 // ---------------------------------------------------------------------------
 
 export const SCALING_EXAMPLES: ScalingExample[] = [
-  // ── The Solo Starter — $20,000/month ────────────────────────────────
   {
     id: "solo-starter",
     title: "The Solo Starter",
-    subtitle: "Just you and one CA. Lean, focused, building.",
-    collections: 20000,
+    subtitle: "$20K/mo — Just you and one CA",
+    totalIncome: 20000,
     description:
-      "You're doing everything: adjusting, marketing, managing. One CA handles the front. Every dollar matters at this stage. The goal is to get to $30K so you can hire your second team member and start breathing.",
+      "You're doing everything: adjusting, marketing, managing. One CA handles the front. Every dollar matters.",
     targetProfit: "$8,000 - $9,000/month (40-45%)",
     lineItems: {
-      // Cost of Services — no associate at this stage
-      "associate-comp": 0,
-      "clinical-supplies": 250, // 1.25%
-
-      // Staff & Payroll — just one CA
-      "front-desk-ca": 2400, // 12%
-      "office-manager": 0, // you are the OM
-      "payroll-taxes-benefits": 400, // 2% (taxes on CA only)
-      "staff-ce": 100, // 0.5%
-
-      // Facility
-      "rent-lease": 1200, // 6%
-      "utilities": 220, // 1.1%
-      "maintenance-cleaning": 120, // 0.6%
-      "equipment-leases": 350, // 1.75%
-
-      // Marketing — invest here to grow
-      "digital-marketing": 500, // 2.5%
-      "community-marketing": 250, // 1.25%
-      "internal-marketing": 200, // 1%
-      "branding-print": 100, // 0.5%
-
-      // Technology
-      ehr: 150, // 0.75%
-      "billing-software": 150, // 0.75%
-      "scanning-software": 150, // 0.75%
-      "communication-tech": 80, // 0.4%
-      "other-tech": 50, // 0.25%
-
-      // Professional Services
-      accounting: 150, // 0.75%
-      legal: 60, // 0.3%
-      coaching: 150, // 0.75%
-      "malpractice-insurance": 80, // 0.4%
-      "general-insurance": 70, // 0.35%
-
-      // Doctor CE
-      "doctor-ce-item": 300, // 1.5%
-
-      // Misc
-      "misc-item": 300, // 1.5%
+      // Income
+      "4020": 19500,
+      "4035": 1000,
+      "4500": -300,
+      "4600": -200,
+      // COGS
+      "5010": 250,
+      "5020": 100,
+      "5050": 300,
+      // Expenses
+      "6110": 500,
+      "6120": 50,
+      "6221": 2800,
+      "6222": 350,
+      "6291": 60,
+      "6620": 1200,
+      "6640": 220,
+      "6811": 50,
+      "6812": 120,
+      "6814": 350,
+      "6816": 25,
+      "6817": 180,
+      "6818": 100,
+      "6820": 200,
+      "6823": 0,
+      "6824": 30,
+      "6825": 450,
+      "6826": 80,
+      "6828": 400,
+      "6830": 150,
+      "6831": 0,
+      "6870": 0,
+      "7010": 50,
+      "7020": 100,
+      "7040": 150,
     },
-    // Total expenses: $7,280 → Profit: $12,720 (but owner draw ~$4,000-5,000 from this)
-    // Effective owner profit after reasonable draw: ~$8,000-$9,000
   },
-
-  // ── The Growing Practice — $50,000/month ────────────────────────────
   {
     id: "growing-practice",
     title: "The Growing Practice",
-    subtitle: "Doctor + associate + 2-3 staff. Investing in growth.",
-    collections: 50000,
+    subtitle: "$50K/mo — Doctor + associate + 2-3 staff",
+    totalIncome: 50000,
     description:
-      "You've got an associate seeing patients, 2 CAs, and maybe a part-time OM. Marketing is ramping up. You're reinvesting in growth while building real profit. This is the hardest stage — expenses grow faster than revenue if you're not careful.",
+      "You've got an associate, 2 CAs, and maybe a part-time OM. Marketing is ramping up. You're reinvesting in growth while building real profit.",
     targetProfit: "$18,000 - $22,000/month (36-44%)",
     lineItems: {
-      // Cost of Services
-      "associate-comp": 5000, // 10%
-      "clinical-supplies": 600, // 1.2%
-
-      // Staff & Payroll
-      "front-desk-ca": 6000, // 12% (2 CAs)
-      "office-manager": 2500, // 5%
-      "payroll-taxes-benefits": 2000, // 4%
-      "staff-ce": 300, // 0.6%
-
-      // Facility
-      "rent-lease": 3000, // 6%
-      "utilities": 550, // 1.1%
-      "maintenance-cleaning": 350, // 0.7%
-      "equipment-leases": 1000, // 2%
-
-      // Marketing
-      "digital-marketing": 1500, // 3%
-      "community-marketing": 750, // 1.5%
-      "internal-marketing": 600, // 1.2%
-      "branding-print": 300, // 0.6%
-
-      // Technology
-      ehr: 350, // 0.7%
-      "billing-software": 350, // 0.7%
-      "scanning-software": 300, // 0.6%
-      "communication-tech": 200, // 0.4%
-      "other-tech": 150, // 0.3%
-
-      // Professional Services
-      accounting: 400, // 0.8%
-      legal: 150, // 0.3%
-      coaching: 400, // 0.8%
-      "malpractice-insurance": 200, // 0.4%
-      "general-insurance": 175, // 0.35%
-
-      // Doctor CE
-      "doctor-ce-item": 750, // 1.5%
-
-      // Misc
-      "misc-item": 750, // 1.5%
+      // Income
+      "4020": 45000,
+      "4035": 6500,
+      "4500": -800,
+      "4600": -700,
+      // COGS
+      "5010": 600,
+      "5020": 300,
+      "5050": 1000,
+      // Expenses
+      "6110": 2000,
+      "6120": 200,
+      "6221": 11000,
+      "6222": 1600,
+      "6291": 120,
+      "6620": 3000,
+      "6640": 500,
+      "6811": 150,
+      "6812": 350,
+      "6814": 1000,
+      "6816": 75,
+      "6817": 500,
+      "6818": 300,
+      "6820": 400,
+      "6823": 800,
+      "6824": 50,
+      "6825": 1200,
+      "6826": 250,
+      "6828": 800,
+      "6830": 350,
+      "6831": 0,
+      "6870": 0,
+      "7010": 75,
+      "7020": 300,
+      "7040": 400,
     },
-    // Total expenses: $28,625 → Profit: $21,375 (42.75%)
   },
-
-  // ── The Established Practice — $80,000/month ────────────────────────
   {
     id: "established-practice",
     title: "The Established Practice",
-    subtitle: "Multi-provider, full team, mature systems.",
-    collections: 80000,
+    subtitle: "$80K/mo — Multi-provider, full team",
+    totalIncome: 80000,
     description:
-      "Two or three providers, a dedicated OM, 3-4 CAs, and systems that run without you in every adjustment room. Marketing is dialed. You're optimizing, not building. The focus now is protecting margin while scaling smart.",
+      "Two or three providers, a dedicated OM, 3-4 CAs, and systems that run without you in every adjustment room. You're optimizing, not building.",
     targetProfit: "$28,000 - $36,000/month (35-45%)",
     lineItems: {
-      // Cost of Services
-      "associate-comp": 8000, // 10%
-      "clinical-supplies": 960, // 1.2%
-
-      // Staff & Payroll
-      "front-desk-ca": 9600, // 12% (3 CAs)
-      "office-manager": 4000, // 5%
-      "payroll-taxes-benefits": 3200, // 4%
-      "staff-ce": 480, // 0.6%
-
-      // Facility
-      "rent-lease": 4400, // 5.5%
-      "utilities": 880, // 1.1%
-      "maintenance-cleaning": 560, // 0.7%
-      "equipment-leases": 1600, // 2%
-
-      // Marketing
-      "digital-marketing": 2400, // 3%
-      "community-marketing": 1200, // 1.5%
-      "internal-marketing": 960, // 1.2%
-      "branding-print": 560, // 0.7%
-
-      // Technology
-      ehr: 480, // 0.6%
-      "billing-software": 560, // 0.7%
-      "scanning-software": 480, // 0.6%
-      "communication-tech": 320, // 0.4%
-      "other-tech": 240, // 0.3%
-
-      // Professional Services
-      accounting: 560, // 0.7%
-      legal: 240, // 0.3%
-      coaching: 640, // 0.8%
-      "malpractice-insurance": 320, // 0.4%
-      "general-insurance": 280, // 0.35%
-
-      // Doctor CE
-      "doctor-ce-item": 1200, // 1.5%
-
-      // Misc
-      "misc-item": 1200, // 1.5%
+      // Income
+      "4020": 70000,
+      "4035": 13000,
+      "4500": -1500,
+      "4600": -1500,
+      // COGS
+      "5010": 1000,
+      "5020": 500,
+      "5050": 2000,
+      // Expenses
+      "6110": 3500,
+      "6120": 400,
+      "6221": 18000,
+      "6222": 2800,
+      "6291": 200,
+      "6620": 4400,
+      "6640": 880,
+      "6811": 300,
+      "6812": 560,
+      "6814": 1600,
+      "6816": 150,
+      "6817": 800,
+      "6818": 500,
+      "6820": 600,
+      "6823": 1200,
+      "6824": 80,
+      "6825": 2000,
+      "6826": 400,
+      "6828": 1200,
+      "6830": 560,
+      "6831": 0,
+      "6870": 0,
+      "7010": 120,
+      "7020": 500,
+      "7040": 600,
     },
-    // Total expenses: $44,720 → Profit: $35,280 (44.1%)
   },
-
-  // ── The High-Performance Practice — $150,000/month ──────────────────
   {
     id: "high-performance",
     title: "The High-Performance Practice",
-    subtitle: "Multi-doctor operation. COO in place. Optimized machine.",
-    collections: 150000,
+    subtitle: "$150K/mo — Multi-doctor machine",
+    totalIncome: 150000,
     description:
-      "3-4 doctors, a COO or senior OM running operations, 5+ support staff, and marketing that consistently delivers 30-50 new patients/month. You spend 60% of your time in the clinic and 40% on strategic growth. The machine runs without you for days at a time.",
+      "3-4 doctors, a COO running operations, 5+ support staff, and marketing that consistently delivers 30-50 new patients/month. The machine runs without you for days at a time.",
     targetProfit: "$52,000 - $67,000/month (35-45%)",
     lineItems: {
-      // Cost of Services
-      "associate-comp": 16500, // 11% (2-3 associates)
-      "clinical-supplies": 1800, // 1.2%
-
-      // Staff & Payroll
-      "front-desk-ca": 16500, // 11% (5+ CAs/support staff)
-      "office-manager": 7500, // 5% (COO-level salary)
-      "payroll-taxes-benefits": 6000, // 4%
-      "staff-ce": 1050, // 0.7%
-
-      // Facility
-      "rent-lease": 8250, // 5.5%
-      "utilities": 1500, // 1%
-      "maintenance-cleaning": 1050, // 0.7%
-      "equipment-leases": 3000, // 2%
-
-      // Marketing
-      "digital-marketing": 4500, // 3%
-      "community-marketing": 2250, // 1.5%
-      "internal-marketing": 1800, // 1.2%
-      "branding-print": 1050, // 0.7%
-
-      // Technology
-      ehr: 900, // 0.6%
-      "billing-software": 1050, // 0.7%
-      "scanning-software": 750, // 0.5%
-      "communication-tech": 600, // 0.4%
-      "other-tech": 450, // 0.3%
-
-      // Professional Services
-      accounting: 1050, // 0.7%
-      legal: 450, // 0.3%
-      coaching: 1200, // 0.8%
-      "malpractice-insurance": 600, // 0.4%
-      "general-insurance": 525, // 0.35%
-
-      // Doctor CE
-      "doctor-ce-item": 2250, // 1.5%
-
-      // Misc
-      "misc-item": 2250, // 1.5%
+      // Income
+      "4020": 130000,
+      "4035": 25000,
+      "4500": -2500,
+      "4600": -2500,
+      // COGS
+      "5010": 1800,
+      "5020": 900,
+      "5050": 4000,
+      // Expenses
+      "6110": 6000,
+      "6120": 800,
+      "6221": 35000,
+      "6222": 5500,
+      "6291": 400,
+      "6620": 8250,
+      "6640": 1500,
+      "6811": 600,
+      "6812": 1050,
+      "6814": 3000,
+      "6816": 300,
+      "6817": 1500,
+      "6818": 800,
+      "6820": 1100,
+      "6823": 2000,
+      "6824": 150,
+      "6825": 3800,
+      "6826": 750,
+      "6828": 2200,
+      "6830": 1000,
+      "6831": 10000,
+      "6870": 0,
+      "7010": 200,
+      "7020": 800,
+      "7040": 1200,
     },
-    // Total expenses: $84,825 → Profit: $65,175 (43.45%)
   },
 ];
 
@@ -698,31 +830,31 @@ export const PROFIT_COACHING: {
   {
     minPct: 0,
     maxPct: 15,
-    note: "This is a crisis. You're working full-time and barely covering costs. Something fundamental is broken — your collections are too low, your expenses are too high, or both. Don't try to fix everything at once. Look at your top 3 red items in the breakdown above. Those 3 line items are probably consuming 60-70% of the problem. Fix them first. If your total overhead is above 85%, you need to either dramatically increase collections or make hard cuts within 90 days. This is not sustainable.",
+    note: "This is a crisis. You're working full-time and barely covering costs. Something fundamental is broken — your collections are too low, your expenses are too high, or both. Don't try to fix everything at once. Look at your top 3 red items in the breakdown above — those are probably consuming 60-70% of the problem. Fix them first. If your total overhead is above 85%, you need to either dramatically increase collections or make hard cuts within 90 days. This is not sustainable.",
   },
   {
     minPct: 15,
     maxPct: 25,
-    note: "You're surviving but not thriving. There's likely $3,000-$8,000/month hiding in your expense structure that's being wasted. The fix is usually in 2-3 line items, not everything. Most commonly: you're overpaying for staff relative to revenue (grow volume before hiring again), your rent is too high for your collections (negotiate or grow), or you're not investing enough in marketing to drive growth. Fix the biggest red item first — that single change often shifts you 3-5 percentage points.",
+    note: "You're surviving but not thriving. There's likely $3,000-$8,000/month hiding in your expense structure. The fix is usually in 2-3 line items, not everything. Most commonly: team costs are too high relative to revenue (grow volume before hiring again), rent is too expensive for your collections (negotiate or grow), or you're not investing enough in marketing to drive growth. Fix the biggest red item first.",
   },
   {
     minPct: 25,
     maxPct: 35,
-    note: "Solid but not optimized. You're doing better than most chiropractic practices, but there's still meaningful room to improve. Focus on your yellow items — the ones that are close to the edge but not quite red. Small improvements across 3-4 categories can shift your profit margin by 5-8 points. At $50K/month collections, that's an extra $2,500-$4,000/month in your pocket. Also look at your revenue side: a $5 increase in visit average across 400 monthly visits is $2,000/month with zero additional expense.",
+    note: "Solid but not optimized. You're doing better than most chiropractic practices, but there's meaningful room to improve. Focus on your yellow items — the ones close to the edge. Small improvements across 3-4 categories can shift your profit margin by 5-8 points. Also look at your revenue side: a $5 increase in visit average across 400 monthly visits is $2,000/month with zero additional expense.",
   },
   {
     minPct: 35,
     maxPct: 45,
-    note: "This is the zone. You're running a healthy, profitable practice that rewards you well for your work. Protect this by not letting expenses creep — it's tempting to add staff, upgrade equipment, and expand when things are going well. Every new expense should pass the 3x test: will this dollar generate $3 back? If yes, invest. If no, wait. Your biggest risk now is complacency. Keep marketing, keep training, keep measuring. Practices at this level that stop tracking their P&L slip backward within 6-12 months.",
+    note: "This is the zone. You're running a healthy, profitable practice. Protect this by not letting expenses creep. Every new expense should pass the 3x test: will this dollar generate $3 back? If yes, invest. If no, wait. Your biggest risk now is complacency. Practices at this level that stop tracking their P&L slip backward within 6-12 months.",
   },
   {
     minPct: 45,
     maxPct: 55,
-    note: "Exceptional. You're in the top 10% of chiropractic practices by profitability. But make sure you're not under-investing in your future. Check: are you spending enough on marketing to sustain growth? Is your team compensated well enough to retain them? Are you investing in equipment and technology that keeps your practice competitive? Sometimes being too lean limits your ceiling. A practice at 48% profit on $50K is great, but a practice at 40% profit on $80K puts more dollars in your pocket. Don't let margin obsession cap your revenue growth.",
+    note: "Exceptional. You're in the top 10% of chiropractic practices by profitability. But make sure you're not under-investing in your future. Check: are you spending enough on marketing to sustain growth? Is your team compensated well enough to retain them? Sometimes being too lean limits your ceiling. A practice at 48% profit on $50K is great, but 40% on $80K puts more dollars in your pocket.",
   },
   {
     minPct: 55,
     maxPct: 100,
-    note: "Either you're a machine or you're not accounting for everything. Double-check that all expenses are captured: owner health insurance, retirement contributions, vehicle expenses used for practice, home office if applicable, and any personal expenses running through the business. Also verify that your associate compensation and all payroll taxes are included. If the numbers are truly accurate at 55%+, you've built something remarkable — but strongly consider whether reinvesting 5-10% back into marketing and team development could double your revenue within 18 months.",
+    note: "Either you're a machine or something's missing. Double-check that all expenses are captured: owner health insurance, retirement contributions, vehicle expenses, and any personal expenses running through the business. Verify that all payroll taxes are included. If the numbers are truly accurate at 55%+, you've built something remarkable — but consider whether reinvesting 5-10% could double your revenue within 18 months.",
   },
 ];
