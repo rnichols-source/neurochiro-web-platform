@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, User, Stethoscope, GraduationCap, Zap, MapPin, BookOpen, Crown, Users, Briefcase, Store, Calendar, Sparkles, Bell, Heart } from "lucide-react";
+import { Menu, X, ChevronDown, User, Stethoscope, GraduationCap, Zap, MapPin, BookOpen, Crown, Users, Briefcase, Store, ShoppingBag, Calendar, Sparkles, Bell, Heart } from "lucide-react";
 
 import RegionSwitcher from "./RegionSwitcher";
 import GetStartedModal from "./GetStartedModal";
@@ -54,6 +54,7 @@ export default function Navbar() {
     { name: "Seminars", href: "/seminars", icon: Calendar },
     { name: "Why NeuroChiro?", href: "/why-neurochiro", icon: Zap },
     { name: "About", href: "/about", icon: Users },
+    { name: "Store", href: "/store", icon: ShoppingBag },
     { name: "Marketplace", href: "/marketplace", icon: Store },
     { name: "Careers", href: "/careers", icon: Briefcase },
   ];
