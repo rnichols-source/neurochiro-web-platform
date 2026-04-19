@@ -169,18 +169,18 @@ Instructions:
 Full Presenter Guide — 45 Minutes + Q&A
 by [DOCTOR NAME], [PRACTICE NAME]
 
-Influenced by Roberto Monaco, Tony Robbins, and the world's best platform closers.
+This is not a lecture. This is a performance designed to move people to action.
 This is not a lecture. This is a performance. You are the guide. Own the room.
 
 ════════════════════════════════════════════════════════════════
 BEFORE YOU BEGIN — YOUR STATE COMES FIRST
 ════════════════════════════════════════════════════════════════
 
-ENERGY RULE (Tony Robbins): Your audience will never rise above YOUR energy level. If you walk out calm and polite, they'll sit calm and polite. If you walk out with FIRE and certainty, they'll lean in and follow. Before you step in front of the room, get your state right. Jump up and down backstage. Power pose. Blast your favorite song in the car on the way there. Say out loud: "These people are about to hear something that changes their life. I GET to be the one who gives it to them."
+ENERGY RULE: Your audience will never rise above YOUR energy level. If you walk out calm and polite, they'll sit calm and polite. If you walk out with FIRE and certainty, they'll lean in and follow. Before you step in front of the room, get your state right. Jump up and down backstage. Power pose. Blast your favorite song in the car on the way there. Say out loud: "These people are about to hear something that changes their life. I GET to be the one who gives it to them."
 
 Arrive 45 minutes early. Your team arrives 60 minutes early. Set the room. Dim the overhead lights — you want warmth, not a clinical feel. Scanning equipment powered on and tested. Water bottles near the entrance. Low background music as people arrive — upbeat but not distracting.
 
-THE DOOR STRATEGY (Roberto Monaco): YOU greet every single person at the door. Not your CA. YOU. Shake hands. Make eye contact. Say their name. Say "I'm really glad you're here tonight." Touch their shoulder or forearm briefly. This creates a micro-bond. When you ask them to take action later, they're not saying yes to a stranger on a stage — they're saying yes to someone who looked them in the eye and made them feel seen.
+THE DOOR STRATEGY: YOU greet every single person at the door. Not your CA. YOU. Shake hands. Make eye contact. Say their name. Say "I'm really glad you're here tonight." Touch their shoulder or forearm briefly. This creates a micro-bond. When you ask them to take action later, they're not saying yes to a stranger on a stage — they're saying yes to someone who looked them in the eye and made them feel seen.
 
 When it's time to start, kill the music. Walk to center stage. Plant your feet. Don't rush. Own the silence for 3 full seconds. Let the room come to you.
 
@@ -201,7 +201,7 @@ SECTION 1: THE PATTERN INTERRUPT + HOOK
 
 "Yeah. Most of the room. I want you to hold onto that for a second. I want you to notice what you just told me. You told me that your body — the most sophisticated machine ever created — cannot turn itself ON in the morning without a chemical. Think about how INSANE that is."
 
-(PATTERN INTERRUPT — Roberto Monaco technique: say something they don't expect.)
+(PATTERN INTERRUPT — say something they don't expect.)
 
 "Now here's what nobody in this room expects to hear tonight: I'm not going to talk to you about sleep. I'm not going to talk to you about stress management. I'm not going to tell you to meditate or take magnesium or turn off your phone at 8 PM. You've heard all that. It hasn't worked."
 
@@ -213,7 +213,7 @@ SECTION 1: THE PATTERN INTERRUPT + HOOK
 
 "But first — I need to tell you about Sarah."
 
-(STORY — Roberto Monaco teaches: never open with facts. Open with a person. Make the audience see themselves in the character.)
+(STORY — never open with facts. Open with a person. Make the audience see themselves in the character.)
 
 "Sarah was 42. Mom of two. Ran a small business. And she walked into my office eight months ago looking like someone had unplugged her from the wall. Not tired. Not stressed. Depleted. Like the light behind her eyes had gone out.
 
@@ -239,10 +239,10 @@ She'd tried everything. Melatonin. Magnesium. A $3,000 mattress. Blue light glas
 
 ════════════════════════════════════════════════════════════════
 SECTION 2: THE PROBLEM — MAKE THEM FEEL IT
-[8 MIN] [ENERGY: 🔥🔥🔥 — Drop to a 6/10 here. Serious. Grounded. This is where you build TENSION. You're showing them the gap between where they are and where they should be. Tony Robbins calls this "entering their world." Don't rush this. The more they FEEL the problem, the more they'll want the solution.]
+[8 MIN] [ENERGY: 🔥🔥🔥 — Drop to a 6/10 here. Serious. Grounded. This is where you build TENSION. You're showing them the gap between where they are and where they should be. This is about entering their world. Don't rush this. The more they FEEL the problem, the more they'll want the solution.]
 ════════════════════════════════════════════════════════════════
 
-(AUDIENCE ENGAGEMENT — Tony Robbins technique: get them physically involved EARLY. The body leads the mind. When people raise their hand, they're making micro-commitments.)
+(AUDIENCE ENGAGEMENT — get them physically involved EARLY. The body leads the mind. When people raise their hand, they're making micro-commitments.)
 
 "Before I show you anything, I need to know who I'm talking to. I'm going to ask you a few questions and I need TOTAL honesty. Deal?"
 
@@ -274,7 +274,7 @@ SECTION 2: THE PROBLEM — MAKE THEM FEEL IT
 
 "And I'm going to say something that might be controversial: NONE of those things are wrong. But they're all treating the SYMPTOM. Every single one. Not a single one of them addresses the ROOT CAUSE."
 
-(PAIN AMPLIFICATION — Tony Robbins' pain/pleasure principle: people move AWAY from pain 4x faster than they move toward pleasure. Make the cost of doing nothing crystal clear.)
+(PAIN AMPLIFICATION — The pain/pleasure principle: people move AWAY from pain 4x faster than they move toward pleasure. Make the cost of doing nothing crystal clear.)
 
 "Let me show you what the cost of ignoring this looks like. Because there IS a cost."
 
@@ -296,7 +296,7 @@ Three — and this is the one nobody talks about — you lose TIME with the peop
 
 ════════════════════════════════════════════════════════════════
 SECTION 3: THE NERVOUS SYSTEM EXPLAINED
-[10 MIN] [ENERGY: 🔥🔥🔥🔥 — This is TEACHING mode but with PASSION. You are not a professor. You are a guide who is genuinely FASCINATED by this and can't wait to show them. Think Tony Robbins explaining the reticular activating system — he makes neuroscience feel like the most exciting thing on earth. That's your energy here.]
+[10 MIN] [ENERGY: 🔥🔥🔥🔥 — This is TEACHING mode but with PASSION. You are not a professor. You are a guide who is genuinely FASCINATED by this and can't wait to show them. Think of someone who makes neuroscience feel like the most exciting thing on earth. That's your energy here.]
 ════════════════════════════════════════════════════════════════
 
 (Move to the whiteboard or visual. Before you start drawing, look at the audience.)
@@ -307,7 +307,7 @@ SECTION 3: THE NERVOUS SYSTEM EXPLAINED
 
 "This is your nervous system. Say it with me — NERVOUS SYSTEM."
 
-(Wait for them to say it. This is a Tony Robbins technique — when the audience speaks, they ENGAGE. They're no longer passive.)
+(Wait for them to say it. When the audience speaks, they ENGAGE. They're no longer passive.)
 
 "This right here is the most important system in your body. Period. Nothing else is even close. Your heart doesn't beat without it. Your lungs don't breathe without it. Your food doesn't digest without it. You don't sleep without it. You don't HEAL without it. It's the master control center for your entire body.
 
@@ -413,7 +413,7 @@ Now let me be clear — a chiropractic adjustment is NOT about cracking your bac
 
 "...your body does what it was DESIGNED to do. It heals. It regulates. It shifts back into GROW mode."
 
-(SOCIAL PROOF STACK — Roberto Monaco: pile up evidence until the audience can't argue with it.)
+(SOCIAL PROOF STACK — pile up evidence until the audience can't argue with it.)
 
 (Click to before/after scan comparison.)
 
@@ -449,12 +449,12 @@ That's why we see patients frequently at first — to build momentum, to retrain
 
 ════════════════════════════════════════════════════════════════
 SECTION 6: THE INVITATION — THE CLOSE
-[7 MIN] [ENERGY: 🔥🔥🔥🔥🔥 — This is the PEAK of the entire presentation. Roberto Monaco calls this "The Moment of Decision." Tony Robbins calls it "The Line." This is where you go from educator to LEADER. You are not asking. You are INVITING with certainty and conviction. You believe in what you do so deeply that NOT offering it would be irresponsible. That energy must come through.]
+[7 MIN] [ENERGY: 🔥🔥🔥🔥🔥 — This is the PEAK of the entire presentation. This is "The Moment of Decision." This is where you go from educator to LEADER. You are not asking. You are INVITING with certainty and conviction. You believe in what you do so deeply that NOT offering it would be irresponsible. That energy must come through.]
 ════════════════════════════════════════════════════════════════
 
 (Walk to center. No slides. This is just YOU. Plant your feet. Shoulders back. Speak from your chest, not your throat.)
 
-STEP 1: THE FUTURE PACE — THE DICKENS PATTERN (Tony Robbins)
+STEP 1: THE FUTURE PACE — THE DICKENS PATTERN
 Show them BOTH futures. Make the contrast so vivid they can FEEL it.
 
 "I want you to do something for me right now. Close your eyes for just a moment. Seriously. Close them."
@@ -475,7 +475,7 @@ Show them BOTH futures. Make the contrast so vivid they can FEEL it.
 
 "THAT is the difference between knowing what I just taught you... and DOING something about it."
 
-STEP 2: THE VALUE STACK (Roberto Monaco)
+STEP 2: THE VALUE STACK
 Stack the value so high that the offer feels like a gift, not a pitch.
 
 "So here's what I'd like to offer everyone in this room tonight. And I want you to understand — I don't do this at the practice for walk-ins. This is exclusively for people who showed up tonight.
@@ -512,7 +512,7 @@ The #1 objection is "I need to think about it." Handle it preemptively.
 
 "If that sounds like something worth 15 minutes of your time, put your name on that sheet. My team will call you tomorrow to schedule."
 
-STEP 5: SOCIAL PROOF IN REAL TIME (Roberto Monaco)
+STEP 5: SOCIAL PROOF IN REAL TIME
 Call out the action happening in the room.
 
 (As people start signing up, acknowledge it — this creates a cascade.)
@@ -521,7 +521,7 @@ Call out the action happening in the room.
 
 (Wait 60-90 seconds for sign-ups to happen. Don't rush this. Let social proof do its work.)
 
-STEP 6: THE EMOTIONAL CLOSE (Tony Robbins)
+STEP 6: THE EMOTIONAL CLOSE
 
 (Once sign-ups slow down, bring the energy back to gratitude and connection.)
 
@@ -544,7 +544,7 @@ SECTION 7: Q&A + WORKING THE ROOM
 
 "I'll take 2 or 3 quick questions. After that, I'm going to be right up here — and honestly, the best conversations always happen AFTER the formal part. So don't be shy. Who's got a question?"
 
-(QUESTION STRATEGY — Roberto Monaco: Every question is a chance to re-close.)
+(QUESTION STRATEGY — Every question is a chance to re-close.)
 
 (When someone asks about their specific condition, end your answer with: "That's exactly the kind of thing that shows up on the scan. Have you signed up yet? Good. I'll look for that specifically when I see you." This creates a personalized reason to show up.)
 

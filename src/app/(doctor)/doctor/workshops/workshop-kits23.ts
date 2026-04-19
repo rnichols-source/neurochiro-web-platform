@@ -179,18 +179,18 @@ Goal: 25+ RSVPs for 15-20 attendees`,
 Full Presenter Guide — 45 Minutes + Q&A
 by [DOCTOR NAME], [PRACTICE NAME]
 
-Influenced by Roberto Monaco, Tony Robbins, and the world's best platform closers.
+This is not a lecture. This is a performance designed to move people to action.
 This is not a lecture. This is a performance. You are the guide. Own the room.
 
 ════════════════════════════════════════════════════════════════
 BEFORE YOU BEGIN — YOUR STATE COMES FIRST
 ════════════════════════════════════════════════════════════════
 
-ENERGY RULE (Tony Robbins): Your audience will never rise above YOUR energy level. Parents are TIRED. They showed up after a full day of work, dinner, maybe fighting with their kid about shoes. If you match their exhaustion, they'll check out in five minutes. If you walk out with FIRE and warmth and genuine excitement about what you're about to give them, they'll lean in and follow. Before you step in front of the room: jump up and down backstage. Power pose for 2 minutes. Say out loud: "These parents are about to hear something that changes their child's life. I GET to be the one who gives it to them."
+ENERGY RULE: Your audience will never rise above YOUR energy level. Parents are TIRED. They showed up after a full day of work, dinner, maybe fighting with their kid about shoes. If you match their exhaustion, they'll check out in five minutes. If you walk out with FIRE and warmth and genuine excitement about what you're about to give them, they'll lean in and follow. Before you step in front of the room: jump up and down backstage. Power pose for 2 minutes. Say out loud: "These parents are about to hear something that changes their child's life. I GET to be the one who gives it to them."
 
 Arrive 45 minutes early. Your team arrives 60 minutes early. Set up kid-friendly — bright tablecloth, a few toys in the corner, coloring sheets on chairs if kids are present. Play upbeat but calm background music. Scanning equipment powered on and tested. Sticker packs or coloring pages as door gifts for kids. Water and light snacks near the entrance.
 
-THE DOOR STRATEGY (Roberto Monaco): YOU greet every single parent at the door. Not your CA. YOU. Shake hands. Make eye contact. Say their name. If they brought kids, crouch down and say hi to the child FIRST — this immediately bonds you with the parent. Say "I'm really glad you're here tonight." Touch their shoulder or forearm briefly. This creates a micro-bond. When you ask them to bring their child in later, they're not saying yes to a stranger on a stage — they're saying yes to someone who knelt down and said hello to their kid.
+THE DOOR STRATEGY: YOU greet every single parent at the door. Not your CA. YOU. Shake hands. Make eye contact. Say their name. If they brought kids, crouch down and say hi to the child FIRST — this immediately bonds you with the parent. Say "I'm really glad you're here tonight." Touch their shoulder or forearm briefly. This creates a micro-bond. When you ask them to bring their child in later, they're not saying yes to a stranger on a stage — they're saying yes to someone who knelt down and said hello to their kid.
 
 THE SPOUSE STRATEGY STARTS HERE (Best Closers): At a pediatric workshop, both parents are often present. This is GOLD. When both parents hear the same information at the same time, there is no "I need to talk to my spouse" objection later. As you greet them, note which parents came together. Address both of them. Make eye contact with BOTH.
 
@@ -203,7 +203,7 @@ SECTION 1: THE PATTERN INTERRUPT + HOOK
 
 (Stand center. No slides. No notes. Just you and the room. Plant your feet. Shoulders back. 3 seconds of silence. Then deliver the first line like a CANNON.)
 
-(PATTERN INTERRUPT — Roberto Monaco technique: say something they absolutely do not expect to hear at a "health workshop.")
+(PATTERN INTERRUPT — say something they absolutely do not expect to hear at a "health workshop.")
 
 "I need to tell you something before we start. And it might make some of you uncomfortable."
 
@@ -219,7 +219,7 @@ SECTION 1: THE PATTERN INTERRUPT + HOOK
 
 "My name is [DOCTOR NAME], I run [PRACTICE NAME], and I want to start by saying something real: the fact that you're here — after a full day of work, after bedtime negotiations, after everything you juggle as a parent — tells me everything I need to know about you. You would do ANYTHING for your child. And tonight, I'm going to give you information that most parents never get."
 
-(MICRO-COMMITMENT — Tony Robbins technique: get a verbal "yes" early.)
+(MICRO-COMMITMENT — get a verbal "yes" early.)
 
 "Can I ask you something? How many of you would agree that you'd rather PREVENT a problem in your child's health than react to one? Raise your hand."
 
@@ -231,10 +231,10 @@ SECTION 1: THE PATTERN INTERRUPT + HOOK
 
 ════════════════════════════════════════════════════════════════
 SECTION 2: THE LUCAS STORY — MAKE THEM FEEL IT
-[8 MIN] [ENERGY: 🔥🔥🔥 — Drop to a 6/10. Slower. Deeper. This is where you build TENSION and EMOTION. You're telling a story that every parent in the room is going to see their own child in. Tony Robbins calls this "entering their world." Don't rush. The more they FEEL the problem, the more they'll want the solution.]
+[8 MIN] [ENERGY: 🔥🔥🔥 — Drop to a 6/10. Slower. Deeper. This is where you build TENSION and EMOTION. You're telling a story that every parent in the room is going to see their own child in. This is about entering their world. Don't rush. The more they FEEL the problem, the more they'll want the solution.]
 ════════════════════════════════════════════════════════════════
 
-(STORY — Roberto Monaco teaches: never open with facts. Open with a person. Make the audience see their child in the character.)
+(STORY — never open with facts. Open with a person. Make the audience see their child in the character.)
 
 "About two years ago, a mom walked into our office. She was carrying her son on her hip. His name was — let's call him Lucas. Lucas was four."
 
@@ -275,7 +275,7 @@ SECTION 3: THE PROBLEM — THE NUMBERS + PHYSICAL ENGAGEMENT
 [7 MIN] [ENERGY: 🔥🔥🔥🔥 — Bring the energy back UP. You've pulled them into the emotional story. Now hit them with the data that makes it undeniable. Mix facts with physical engagement to keep the room ALIVE.]
 ════════════════════════════════════════════════════════════════
 
-(AUDIENCE ENGAGEMENT — Tony Robbins technique: get them physically involved. The body leads the mind. Standing up changes their physiology.)
+(AUDIENCE ENGAGEMENT — get them physically involved. The body leads the mind. Standing up changes their physiology.)
 
 "Alright, I need you to do something with me. Everybody stand up. Right now. Come on, up."
 
@@ -297,7 +297,7 @@ SECTION 3: THE PROBLEM — THE NUMBERS + PHYSICAL ENGAGEMENT
 
 "Okay, sit down. Look around for a second. MOST of this room stayed standing through every single one of those. You are not alone. And you are not crazy. Something IS going on. Let me show you what."
 
-(SAY IT WITH ME — Tony Robbins technique: when the audience speaks, they engage. They're no longer passive.)
+(SAY IT WITH ME — when the audience speaks, they engage. They're no longer passive.)
 
 "Here's the number I need every parent in this room to know. Say it with me: EIGHTY PERCENT."
 
@@ -309,7 +309,7 @@ SECTION 3: THE PROBLEM — THE NUMBERS + PHYSICAL ENGAGEMENT
 
 "Kids are getting tubes in their ears, rounds of antibiotics, behavioral diagnoses, and medications — and nobody is asking the most basic question: WHY is the body not functioning properly in the first place?"
 
-(PAIN AMPLIFICATION — Tony Robbins' pain/pleasure principle: when it's about someone's CHILD, the pain amplifier is already at maximum. You don't need to push hard. Just make it clear and specific.)
+(PAIN AMPLIFICATION — The pain/pleasure principle: when it's about someone's CHILD, the pain amplifier is already at maximum. You don't need to push hard. Just make it clear and specific.)
 
 "And here's the part that keeps me up at night as a doctor: every month that goes by with interference in that nervous system is a month of development that's compromised. Kids don't get those months back. The window for 80% of their neurological wiring is closing. And NOBODY is checking the ONE system that controls ALL of it."
 
@@ -326,7 +326,7 @@ SECTION 4: THE THREE STRESSORS + THE WIRING ANALOGY
 
 "Number one: BIRTH. Even a 'normal,' healthy birth puts 60 to 90 pounds of pressure on a newborn's neck. Sixty to ninety pounds on a baby. C-sections, vacuum extractions, forceps, prolonged labor — all of these increase the physical stress on your baby's spine and brainstem. And I want to be clear — this is nobody's fault. The doctors are doing their best. But nobody checks the nervous system afterward. Nobody. Your pediatrician checks weight, height, heart, lungs, reflexes — but they NEVER check the nervous system."
 
-(MICRO-COMMITMENT — Tony Robbins.)
+(MICRO-COMMITMENT — engagement.)
 
 "Quick question — how many of you had a C-section, vacuum, forceps, or a labor longer than 12 hours? Raise your hand."
 
@@ -348,7 +348,7 @@ SECTION 4: THE THREE STRESSORS + THE WIRING ANALOGY
 
 "So let me put all of this together in a way that's going to stick with you. Turn to the person next to you and say: 'THE WIRING.'"
 
-(SAY IT WITH ME — Tony Robbins. Wait for them to do it. They'll laugh. Good. Laughter bonds the room.)
+(SAY IT WITH ME — engagement. Wait for them to do it. They'll laugh. Good. Laughter bonds the room.)
 
 "Think of your child's nervous system as the wiring in a brand-new house. The brain is the electrical panel. The spinal cord is the main conduit. And the nerves are all the individual wires running to every room — every organ, every muscle, every system in the body."
 
@@ -393,7 +393,7 @@ SECTION 5: THE SCAN DEMO — THE "WOW" MOMENT
 
 "The ear infections stopped. Not because we treated the ears — but because we restored the communication between the brain and the body. We fixed the wiring."
 
-(SOCIAL PROOF — Roberto Monaco: pile up evidence.)
+(SOCIAL PROOF — pile up evidence.)
 
 "And this isn't one story. We see this EVERY WEEK. Kids who couldn't sleep — sleeping. Kids with daily meltdowns — regulated. Kids who were getting sick every month — healthy. Not because we're treating any of those things. Because we're removing the interference and letting their body do what it was DESIGNED to do."
 
@@ -438,12 +438,12 @@ SECTION 6: GENTLE ADJUSTMENTS + THE FAMILY CONNECTION
 
 ════════════════════════════════════════════════════════════════
 SECTION 7: THE INVITATION — THE CLOSE
-[8 MIN] [ENERGY: 🔥🔥🔥🔥🔥 — This is the PEAK of the entire presentation. Roberto Monaco calls this "The Moment of Decision." Tony Robbins calls it "The Line." You are not asking. You are INVITING with certainty and conviction. You believe in what you do so deeply that NOT offering it would be irresponsible.]
+[8 MIN] [ENERGY: 🔥🔥🔥🔥🔥 — This is the PEAK of the entire presentation. This is "The Moment of Decision." You are not asking. You are INVITING with certainty and conviction. You believe in what you do so deeply that NOT offering it would be irresponsible.]
 ════════════════════════════════════════════════════════════════
 
 (Walk to center. No slides. This is just YOU. Plant your feet. Shoulders back. Speak from your chest.)
 
-STEP 1: THE DICKENS PATTERN — FUTURE PACE (Tony Robbins)
+STEP 1: THE DICKENS PATTERN — FUTURE PACE
 Show them BOTH futures for their CHILD. This is where parents make the decision.
 
 "I want you to do something for me right now. And I need you to really do this — not just listen. Close your eyes. Both of you, if you came together. Close them."
@@ -468,7 +468,7 @@ Show them BOTH futures for their CHILD. This is where parents make the decision.
 
 "THAT is the difference between knowing what I just taught you... and DOING something about it. The window is open RIGHT NOW. Eighty percent of their neurological development. Right now. Don't wait."
 
-STEP 2: THE VALUE STACK (Roberto Monaco)
+STEP 2: THE VALUE STACK
 Stack the value so high that the offer feels like a gift, not a pitch. Count on your fingers — the physical counting creates perceived value.
 
 "So here's what I want to offer every family in this room tonight. And I need you to understand — this is not what we offer walk-ins at the practice. This is exclusively for parents who showed up tonight."
@@ -520,7 +520,7 @@ STEP 4: HANDLE THE OBJECTION BEFORE IT COMES (Best Closers)
 
 "Fifteen minutes. That's what stands between you and knowing."
 
-STEP 5: SOCIAL PROOF IN REAL TIME (Roberto Monaco)
+STEP 5: SOCIAL PROOF IN REAL TIME
 Call out the action happening in the room. This creates a cascade.
 
 (As people start signing up, acknowledge it.)
@@ -531,7 +531,7 @@ Call out the action happening in the room. This creates a cascade.
 
 "For those of you signing up — write FAMILY if you want the whole family scanned. Most of you should. I promise you — the parents' scans are going to be just as eye-opening as your child's."
 
-STEP 6: THE EMOTIONAL CLOSE (Tony Robbins)
+STEP 6: THE EMOTIONAL CLOSE
 
 (Once sign-ups slow down, bring the energy to gratitude and connection.)
 
@@ -554,7 +554,7 @@ SECTION 8: Q&A + WORKING THE ROOM
 
 "I'll take 2 or 3 quick questions. After that, I'm going to be right here — and honestly, the best conversations happen AFTER the formal part. So don't be shy. Who's got a question?"
 
-(QUESTION STRATEGY — Roberto Monaco: Every Q&A answer ends with a re-close.)
+(QUESTION STRATEGY — Every Q&A answer ends with a re-close.)
 
 (When a parent asks about their child's specific issue — e.g., "My son has been having ear infections constantly":)
 "That's one of the most common things we see. And honestly, that's EXACTLY what shows up on the scan — the interference in the upper cervical area that controls drainage and immune response. Have you signed up yet? Good. When I scan your son, I'm going to look for that specifically. I'll show you exactly what's going on."
@@ -911,7 +911,7 @@ Energy: 🔥🔥🔥 (Internal — high state, calm exterior)
 
 [STAGE DIRECTION: Arrive 15 minutes early. Dress sharp — business casual at minimum, one notch above the room. Set up quickly and cleanly — this is their space. Place handouts at each seat. Sign-up sheets go on the side table, NOT in anyone's face. Place a pen on top of each sign-up sheet. Have your slides loaded and tested on their AV before the first person walks in.]
 
-[PRE-FRAME: As people file in with their lunches, DO NOT stand at the front like a presenter waiting. Walk through the room. Shake hands. Ask names. Ask what they do. Say "What's the biggest thing that slows you down during your day?" — plant seeds. Remember 2-3 names to use during the talk. This is Roberto Monaco's room-working strategy — front-loaded.]
+[PRE-FRAME: As people file in with their lunches, DO NOT stand at the front like a presenter waiting. Walk through the room. Shake hands. Ask names. Ask what they do. Say "What's the biggest thing that slows you down during your day?" — plant seeds. Remember 2-3 names to use during the talk. This is your room-working strategy — front-loaded.]
 
 [STATE MANAGEMENT: Before you start, take 3 deep breaths. Roll your shoulders back. Plant your feet. You are not a guest begging for attention — you are an expert who was invited to deliver value. Own the room with calm authority.]
 
@@ -975,7 +975,7 @@ Technique: PAIN AMPLIFICATION — Career/performance focus, not just health
 
 "Think of it like the operating system on your computer. You can have the best hardware — the most talent, the most drive, the best education — but if the operating system is glitching, nothing runs right. You get the spinning wheel of death. Programs crash. Everything slows down."
 
-[PHYSICAL ENGAGEMENT — Tony Robbins technique]
+[PHYSICAL ENGAGEMENT]
 "Actually — everybody do something for me. Sit up straight right now."
 
 [STAGE DIRECTION: Demonstrate. Sit up tall, shoulders back.]
@@ -1064,7 +1064,7 @@ Technique: PROOF + EMBEDDED TRIAL CLOSE
 SECTION 5: THE DICKENS PATTERN — TWO FUTURES (17:00-21:00)
 ═══════════════════════════════════════════════════════════════
 Energy: 🔥🔥🔥🔥🔥 (Emotional peak — this is the turning point)
-Technique: DICKENS PATTERN FUTURE PACE (Tony Robbins)
+Technique: DICKENS PATTERN FUTURE PACE
 
 [SLIDE 8: Two paths diverging — "Two Futures"]
 
@@ -1146,7 +1146,7 @@ Technique: VALUE STACK + ASSUMPTIVE CLOSE + TWO-CHOICE CLOSE + PREEMPTIVE OBJECT
 
 "So here's what I want to do for everyone in this room — because your company brought me in, and I want to make sure this was worth more than just 30 minutes of information."
 
-[VALUE STACK — Roberto Monaco technique]
+[VALUE STACK]
 "I'd like to offer every person in this room a complimentary nervous system performance scan. Let me tell you what that includes, because this isn't just a quick check."
 
 "First — a full nervous system scan using the same technology I showed you. That scan alone, if you walked into our office, is a $197 value."
@@ -1179,7 +1179,7 @@ Technique: VALUE STACK + ASSUMPTIVE CLOSE + TWO-CHOICE CLOSE + PREEMPTIVE OBJECT
 SECTION 8: Q&A + ROOM WORKING (28:00-30:00+)
 ═══════════════════════════════════════════════════════════════
 Energy: 🔥🔥🔥 (Warm, approachable, every answer re-closes)
-Technique: Q&A RE-CLOSE + ROOM-WORKING STRATEGY (Roberto Monaco)
+Technique: Q&A RE-CLOSE + ROOM-WORKING STRATEGY
 
 [SLIDE 11: "[PRACTICE NAME] — [PHONE] — [WEBSITE]"]
 
@@ -1198,14 +1198,14 @@ Answer: "Most insurance plans do have chiropractic benefits, and our team handle
 Example Q: "How often would I need to come in?"
 Answer: "That depends entirely on what your scan shows. Some people need a short corrective plan. Some people are in great shape and just need maintenance. That's why the scan matters — it takes the guesswork out. Come see what yours looks like."
 
-[ROOM-WORKING STRATEGY — Roberto Monaco technique]
+[ROOM-WORKING STRATEGY]
 [STAGE DIRECTION: After Q&A, do NOT stand at the front. Do NOT hover near the sign-up sheet. Do the following:]
 
 1. Walk to people who asked questions and continue the conversation one-on-one. These are warm — they self-identified as interested.
 
 2. Approach the QUIET ones — the people who didn't raise their hand, didn't ask questions, but were clearly paying attention. Walk over casually. "Hey, what did you think? Anything resonate?" — then listen. Most of the time they'll share a specific problem. Respond with: "That's exactly what the scan would show us. You should come in."
 
-3. If someone says "I'll think about it" — respond with: "Totally fair. Tell you what — put your name down just to hold a spot. If you change your mind, no big deal. But this way you don't lose the complimentary offer." (Roberto Monaco — reduce the commitment to get the commitment.)
+3. If someone says "I'll think about it" — respond with: "Totally fair. Tell you what — put your name down just to hold a spot. If you change your mind, no big deal. But this way you don't lose the complimentary offer." (Reduce the commitment to get the commitment.)
 
 4. Have your team member quietly approach anyone who's lingering near the sign-up sheet but hasn't filled it out. Simple: "Want me to grab you a pen?"
 
