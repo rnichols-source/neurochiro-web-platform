@@ -175,139 +175,434 @@ Goal: 25+ RSVPs for 15-20 attendees`,
     },
     presentation: {
       title: 'Full Presenter Script — 45-Minute Pediatric Workshop',
-      content: `[STAGE DIRECTION: Arrive early. Set up kid-friendly — bright tablecloth, a few toys in the corner, coloring sheets on the chairs if kids are present. Play upbeat but calm background music. Greet every parent by name as they arrive. Have sign-in sheet at the door with a small gift — sticker pack or coloring page for their child.]
+      content: `YOUR CHILD'S NERVOUS SYSTEM — WHAT EVERY PARENT NEEDS TO KNOW
+Full Presenter Guide — 45 Minutes + Q&A
+by [DOCTOR NAME], [PRACTICE NAME]
 
-[SLIDE 1: Title slide — "Your Child's Nervous System: What Every Parent Needs to Know"]
+Influenced by Roberto Monaco, Tony Robbins, and the world's best platform closers.
+This is not a lecture. This is a performance. You are the guide. Own the room.
 
-[STAGE DIRECTION: Stand center. Smile. Make eye contact. Pause for 3 seconds before starting.]
+════════════════════════════════════════════════════════════════
+BEFORE YOU BEGIN — YOUR STATE COMES FIRST
+════════════════════════════════════════════════════════════════
 
-"Good evening, everyone. Thank you so much for being here tonight. I know how hard it is to carve out time as a parent — you've got bedtime routines, homework battles, sports practice, and a hundred other things pulling at you. So the fact that you're here tells me something about you: you care deeply about your child's health. And that's exactly why I put this together."
+ENERGY RULE (Tony Robbins): Your audience will never rise above YOUR energy level. Parents are TIRED. They showed up after a full day of work, dinner, maybe fighting with their kid about shoes. If you match their exhaustion, they'll check out in five minutes. If you walk out with FIRE and warmth and genuine excitement about what you're about to give them, they'll lean in and follow. Before you step in front of the room: jump up and down backstage. Power pose for 2 minutes. Say out loud: "These parents are about to hear something that changes their child's life. I GET to be the one who gives it to them."
 
-"My name is [DOCTOR NAME], and I run [PRACTICE NAME]. And tonight, I'm going to share something with you that I wish every parent knew — but almost none of them do."
+Arrive 45 minutes early. Your team arrives 60 minutes early. Set up kid-friendly — bright tablecloth, a few toys in the corner, coloring sheets on chairs if kids are present. Play upbeat but calm background music. Scanning equipment powered on and tested. Sticker packs or coloring pages as door gifts for kids. Water and light snacks near the entrance.
 
-"Here's where we're going to start."
+THE DOOR STRATEGY (Roberto Monaco): YOU greet every single parent at the door. Not your CA. YOU. Shake hands. Make eye contact. Say their name. If they brought kids, crouch down and say hi to the child FIRST — this immediately bonds you with the parent. Say "I'm really glad you're here tonight." Touch their shoulder or forearm briefly. This creates a micro-bond. When you ask them to bring their child in later, they're not saying yes to a stranger on a stage — they're saying yes to someone who knelt down and said hello to their kid.
 
-[SLIDE 2: "80% of neurological development happens before age 5."]
+THE SPOUSE STRATEGY STARTS HERE (Best Closers): At a pediatric workshop, both parents are often present. This is GOLD. When both parents hear the same information at the same time, there is no "I need to talk to my spouse" objection later. As you greet them, note which parents came together. Address both of them. Make eye contact with BOTH.
 
-"Eighty percent. That means by the time your child walks into kindergarten, the vast majority of their neurological wiring is already in place. Their ability to focus, to regulate emotions, to sleep, to fight off illness, to learn — all of that is being built right now, in these early years."
+When it's time to start, kill the music. Walk to center stage. Plant your feet. Don't rush. Own the silence for 3 full seconds. Let the room come to you.
 
-"And here's the part that keeps me up at night: the most common interference to that development starts at birth."
+════════════════════════════════════════════════════════════════
+SECTION 1: THE PATTERN INTERRUPT + HOOK
+[5 MIN] [ENERGY: 🔥🔥🔥🔥 — Start at an 8/10. Confident, certain, commanding but warm. You are not asking for attention. You are TAKING it. These are parents — they respond to someone who speaks with authority AND heart.]
+════════════════════════════════════════════════════════════════
 
-"I want to tell you a story. About two years ago, a mom brought her son into our office. His name was — well, let's call him Lucas. Lucas was four years old. He wasn't sleeping through the night. He was having meltdowns — not normal toddler tantrums, I'm talking full-body, 45-minute episodes. He'd been diagnosed with sensory processing issues. His daycare was suggesting an evaluation for ADHD."
+(Stand center. No slides. No notes. Just you and the room. Plant your feet. Shoulders back. 3 seconds of silence. Then deliver the first line like a CANNON.)
 
-"His mom was exhausted. She'd been to the pediatrician, the occupational therapist, tried elimination diets, weighted blankets — you name it. Nothing was working."
+(PATTERN INTERRUPT — Roberto Monaco technique: say something they absolutely do not expect to hear at a "health workshop.")
 
-"When she brought Lucas in, we ran a scan on his nervous system. And what we found was significant. His upper cervical area — the very top of his spine, right where the brainstem connects — was under massive stress. His nervous system was stuck in fight-or-flight mode. Twenty-four hours a day, seven days a week."
+"I need to tell you something before we start. And it might make some of you uncomfortable."
+
+(Pause. Let curiosity build.)
+
+"The most dangerous thing happening to your child's health right now... happened the day they were born."
+
+(Let it land. Don't explain yet. Hold the silence for a full 3 seconds.)
+
+"I know that sounds intense. Stay with me. By the end of tonight, every single one of you is going to understand exactly what I mean — and more importantly, what you can DO about it."
+
+(Shift to warmth. Smile.)
+
+"My name is [DOCTOR NAME], I run [PRACTICE NAME], and I want to start by saying something real: the fact that you're here — after a full day of work, after bedtime negotiations, after everything you juggle as a parent — tells me everything I need to know about you. You would do ANYTHING for your child. And tonight, I'm going to give you information that most parents never get."
+
+(MICRO-COMMITMENT — Tony Robbins technique: get a verbal "yes" early.)
+
+"Can I ask you something? How many of you would agree that you'd rather PREVENT a problem in your child's health than react to one? Raise your hand."
+
+(Hands go up. Nod.)
+
+"Yeah. Every hand in the room. Good. Hold onto that. Because what I'm about to show you is the most powerful prevention tool I've ever seen — and it takes 15 minutes."
+
+(EMBEDDED TRIAL CLOSE — plant the seed early.)
+
+════════════════════════════════════════════════════════════════
+SECTION 2: THE LUCAS STORY — MAKE THEM FEEL IT
+[8 MIN] [ENERGY: 🔥🔥🔥 — Drop to a 6/10. Slower. Deeper. This is where you build TENSION and EMOTION. You're telling a story that every parent in the room is going to see their own child in. Tony Robbins calls this "entering their world." Don't rush. The more they FEEL the problem, the more they'll want the solution.]
+════════════════════════════════════════════════════════════════
+
+(STORY — Roberto Monaco teaches: never open with facts. Open with a person. Make the audience see their child in the character.)
+
+"About two years ago, a mom walked into our office. She was carrying her son on her hip. His name was — let's call him Lucas. Lucas was four."
+
+(Walk toward the audience. Lower your voice. This is intimate.)
+
+"Lucas wasn't sleeping through the night. He was having meltdowns — not normal toddler tantrums. I'm talking full-body, 45-minute episodes where nothing could reach him. He'd been diagnosed with sensory processing issues. His daycare was pushing for an ADHD evaluation."
+
+(Pause. Make eye contact with a parent who's nodding.)
+
+"His mom had dark circles under her eyes. She told me she couldn't remember the last time she slept more than 4 hours. She'd been to the pediatrician — three times. The occupational therapist — weekly. She'd tried elimination diets, weighted blankets, essential oils, melatonin. She'd read every parenting book. She'd blamed herself. She told me — and I'll never forget this — she said, 'I feel like I'm failing him.'"
+
+(Let that hang. Some moms will feel their eyes sting.)
+
+"When she brought Lucas in, we ran a scan on his nervous system. And what we found was significant. His upper cervical area — the very top of his spine, right where the brainstem connects — was under massive stress. His nervous system was stuck in fight-or-flight mode. Not sometimes. Not when he was overstimulated. TWENTY-FOUR HOURS A DAY."
 
 "Now, his mom asked me — 'How did this happen? He's four!' And I asked her one question: 'How was his birth?'"
 
-"Turns out, Lucas had a difficult delivery. Vacuum extraction. And no one — not one provider — had ever checked to see if that had affected his nervous system."
+(Pause. Look around the room.)
 
-[STAGE DIRECTION: Pause. Let it land. Look around the room.]
+"Turns out, Lucas had a difficult delivery. Vacuum extraction. Forty minutes of pushing. And no one — not the OB, not the pediatrician, not the occupational therapist, not a single provider — had ever checked to see if that birth had affected his nervous system."
 
-"Within six weeks of gentle care, Lucas was sleeping through the night. The meltdowns dropped from daily to maybe once a week. His daycare teachers asked his mom what she had changed."
+(3-second pause. Plant your feet.)
 
-"She hadn't changed anything — except addressing the root cause."
+"Within six weeks of gentle care, Lucas was sleeping through the night. The meltdowns dropped from daily to maybe once a week. His daycare teachers pulled his mom aside and asked, 'What did you change? He's a different kid.'"
 
-[SLIDE 3: "The Problem: What's Happening to Our Kids"]
+"She hadn't changed anything — except addressing the ROOT CAUSE."
 
-"Let me share some numbers with you, because I think it's important to understand the landscape."
+(EMBEDDED TRIAL CLOSE — don't wait until the end.)
 
-"One in six children in the United States has a developmental disability. ADHD diagnoses have increased by 42% in the last decade. Childhood anxiety has doubled since 2003. One in four children has a chronic health condition."
+"Now let me ask you this — and I want you to be honest with yourself. How many of you heard that story and thought about YOUR child? Raise your hand."
 
-"And here's what most people don't connect: pediatric ear infections account for 30 million doctor visits per year. Kids are getting tubes in their ears, rounds of antibiotics, and still dealing with recurring infections — because nobody is looking at WHY the body isn't draining and healing properly."
+(Hands go up. Nod. Acknowledge them warmly.)
 
-"I'm not here to scare you. I'm here to tell you there's a reason this is happening — and it's not just genetics, and it's not just bad luck."
+"I see you. And I want you to know — that's exactly why I do these workshops. Because Lucas's mom almost didn't come to see us. She almost gave up. What if she had?"
 
-[SLIDE 4: "Birth Trauma, Falls, and Screen Time"]
+════════════════════════════════════════════════════════════════
+SECTION 3: THE PROBLEM — THE NUMBERS + PHYSICAL ENGAGEMENT
+[7 MIN] [ENERGY: 🔥🔥🔥🔥 — Bring the energy back UP. You've pulled them into the emotional story. Now hit them with the data that makes it undeniable. Mix facts with physical engagement to keep the room ALIVE.]
+════════════════════════════════════════════════════════════════
 
-"Let's talk about the three biggest stressors on your child's nervous system."
+(AUDIENCE ENGAGEMENT — Tony Robbins technique: get them physically involved. The body leads the mind. Standing up changes their physiology.)
 
-"Number one: birth. Even a 'normal' birth puts 60-90 pounds of pressure on a newborn's neck. C-sections, vacuum extractions, forceps, prolonged labor — all of these increase the physical stress on your baby's spine and brainstem. And it's nobody's fault — the doctors are doing their best. But nobody checks the nervous system afterward."
+"Alright, I need you to do something with me. Everybody stand up. Right now. Come on, up."
 
-"Number two: falls. The average child falls 2,500 times before the age of three. Two thousand five hundred. Every single one of those is a micro-trauma to the developing spine and nervous system. Most of them are fine. But some of them create interference that compounds over time."
+(Wait until everyone is standing. Smile. Energy UP.)
 
-"Number three: screen time. The average child under 8 now gets over 2 hours of screen time per day. That posture — chin down, shoulders forward, neck flexed — is reshaping their spinal development. We're seeing 'tech neck' in kids as young as six."
+"Stay standing if your child has EVER had trouble sleeping — falling asleep, staying asleep, or waking up rested."
 
-[SLIDE 5: "The Nervous System in Kids — The Wiring Analogy"]
+(Most stay standing.)
 
-"So let me explain what we're actually looking at here, because I want this to make sense."
+"Stay standing if your child has had more than TWO rounds of antibiotics or ear infections in the last year."
+
+"Stay standing if you've ever been told your child 'will grow out of it' — whatever 'it' is — and part of you isn't so sure."
+
+(Look around the room.)
+
+"Last one. Stay standing if — deep down — you feel like something is going on with your child that nobody can quite figure out."
+
+(Let the weight of that land.)
+
+"Okay, sit down. Look around for a second. MOST of this room stayed standing through every single one of those. You are not alone. And you are not crazy. Something IS going on. Let me show you what."
+
+(SAY IT WITH ME — Tony Robbins technique: when the audience speaks, they engage. They're no longer passive.)
+
+"Here's the number I need every parent in this room to know. Say it with me: EIGHTY PERCENT."
+
+(Wait for them to say it.)
+
+"Eighty percent of your child's neurological development happens before age five. That means by the time your kid walks into kindergarten, the vast majority of their wiring is already in place. Their ability to focus. To regulate emotions. To sleep. To fight off illness. To learn. ALL of it is being built RIGHT NOW."
+
+"Now here's what's happening to our kids. One in six children has a developmental disability. ADHD diagnoses — up 42% in the last decade. Childhood anxiety — DOUBLED since 2003. One in four children has a chronic health condition. Pediatric ear infections — 30 MILLION doctor visits per year."
+
+"Kids are getting tubes in their ears, rounds of antibiotics, behavioral diagnoses, and medications — and nobody is asking the most basic question: WHY is the body not functioning properly in the first place?"
+
+(PAIN AMPLIFICATION — Tony Robbins' pain/pleasure principle: when it's about someone's CHILD, the pain amplifier is already at maximum. You don't need to push hard. Just make it clear and specific.)
+
+"And here's the part that keeps me up at night as a doctor: every month that goes by with interference in that nervous system is a month of development that's compromised. Kids don't get those months back. The window for 80% of their neurological wiring is closing. And NOBODY is checking the ONE system that controls ALL of it."
+
+(Transition — but don't resolve the tension yet.)
+
+════════════════════════════════════════════════════════════════
+SECTION 4: THE THREE STRESSORS + THE WIRING ANALOGY
+[8 MIN] [ENERGY: 🔥🔥🔥🔥 — TEACHING mode with genuine passion. You are fascinated by this. You can't WAIT to show them. Make the complex simple. Use the analogy to make it unforgettable.]
+════════════════════════════════════════════════════════════════
+
+"Let me show you the three things that are interfering with your child's nervous system right now. And I promise — by the time I explain these, everything you've been dealing with is going to make sense."
+
+(Hold up one finger.)
+
+"Number one: BIRTH. Even a 'normal,' healthy birth puts 60 to 90 pounds of pressure on a newborn's neck. Sixty to ninety pounds on a baby. C-sections, vacuum extractions, forceps, prolonged labor — all of these increase the physical stress on your baby's spine and brainstem. And I want to be clear — this is nobody's fault. The doctors are doing their best. But nobody checks the nervous system afterward. Nobody. Your pediatrician checks weight, height, heart, lungs, reflexes — but they NEVER check the nervous system."
+
+(MICRO-COMMITMENT — Tony Robbins.)
+
+"Quick question — how many of you had a C-section, vacuum, forceps, or a labor longer than 12 hours? Raise your hand."
+
+(Hands go up.)
+
+"Look around. Half the room or more. And not one of your children had their nervous system checked after delivery. That's not a criticism of your doctor. It's a gap in the system. And tonight, you're going to close that gap."
+
+(EMBEDDED TRIAL CLOSE — assumptive language.)
+
+(Hold up two fingers.)
+
+"Number two: FALLS. The average child falls 2,500 times before the age of three. Two thousand five hundred. Every single one is a micro-trauma to the developing spine. Most of them are fine. But some of them create interference that compounds over time — like a kink in a garden hose that gets worse every time someone steps on it."
+
+(Hold up three fingers.)
+
+"Number three: SCREEN TIME. The average child under 8 gets over 2 hours of screen time per day. That posture — chin down, shoulders forward, neck flexed — is reshaping their spinal development. We're seeing 'tech neck' in kids as young as SIX. And it's not just posture — the nervous system stimulation from screens keeps their stress response firing. GO mode. All day long."
+
+(Transition to the analogy. Walk to center.)
+
+"So let me put all of this together in a way that's going to stick with you. Turn to the person next to you and say: 'THE WIRING.'"
+
+(SAY IT WITH ME — Tony Robbins. Wait for them to do it. They'll laugh. Good. Laughter bonds the room.)
 
 "Think of your child's nervous system as the wiring in a brand-new house. The brain is the electrical panel. The spinal cord is the main conduit. And the nerves are all the individual wires running to every room — every organ, every muscle, every system in the body."
 
 "If the wiring is installed correctly and there's no damage, everything works. The lights turn on. The outlets work. The heating and cooling runs perfectly."
 
-"But what happens if during construction, one of the main wires gets pinched? Or a conduit gets bent? It doesn't mean the house burns down. It means things start to malfunction. A light flickers. An outlet doesn't work. The AC runs all the time but the house is still too hot."
+"But what happens if during construction, one of the main wires gets pinched? A conduit gets bent? It doesn't mean the house burns down. It means things start to malfunction. A light flickers. An outlet doesn't work. The AC runs constantly but the house is still too hot."
 
-"That's what happens with your child's nervous system. When there's interference — from birth, from falls, from posture — the signals don't get through properly. And you see it show up as:"
+"THAT is what happens with your child's nervous system. When there's interference — from birth, from falls, from posture — the signals don't get through properly. And you see it show up as: Sleep problems. Ear infections. Digestive issues. Meltdowns. Trouble focusing. Anxiety. A weakened immune system."
 
-"Sleep problems. Digestive issues. Ear infections. Behavioral challenges. Trouble focusing. Anxiety. Immune system weakness."
+(Plant your feet. Deliver this line with total conviction.)
 
 "The body isn't broken. The wiring just needs attention."
 
-[SLIDE 6: "What a Pediatric Scan Reveals" — Show scan images]
+"And here's the best part — when you restore the wiring? The lights come back on. ALL of them."
 
-[STAGE DIRECTION: Bring up two scan images side by side. Point to the screen.]
+════════════════════════════════════════════════════════════════
+SECTION 5: THE SCAN DEMO — THE "WOW" MOMENT
+[7 MIN] [ENERGY: 🔥🔥🔥🔥🔥 — This is your PEAK teaching energy. You are about to show them something they have NEVER seen before. Be genuinely excited. When the scan images come up, react to them with real fascination — the audience mirrors YOUR reaction.]
+════════════════════════════════════════════════════════════════
 
-"This is what we do in our office — and it's one of the most powerful things I can show you tonight."
+(EMBEDDED TRIAL CLOSE — before showing the scans, plant the decision.)
 
-"On the left, this is a scan of a healthy four-year-old. See how balanced and symmetrical everything looks? Green across the board. The nervous system is calm, connected, and functioning well."
+"So here's the question every parent in this room is asking right now: 'How do I know if MY child's wiring has interference?' Right?"
 
-"On the right, this is a scan of a four-year-old who came in with chronic ear infections — four rounds of antibiotics in one year, and the pediatrician was recommending tubes."
+(Nod. Wait for nods back.)
 
-"See the red in the upper cervical area? That's telling us the nervous system is in overdrive right there. The nerves that control drainage, immune response, and inflammation in the ear — they're being interfered with."
+"This is my favorite part. And honestly — this is the part that makes parents say 'Why has nobody ever done this for me before?'"
+
+(Bring up scan images side by side. Point to the screen.)
+
+"This is what we do in our office. On the left — this is a scan of a healthy four-year-old. See how balanced and symmetrical everything looks? Green across the board. The nervous system is calm, connected, functioning beautifully. This is what a child's nervous system is SUPPOSED to look like."
+
+"On the right — this is a scan of a four-year-old who came in with chronic ear infections. Four rounds of antibiotics in one year. The pediatrician was recommending tubes."
+
+"See the red in the upper cervical area? That's telling us the nervous system is in OVERDRIVE right there. The nerves that control drainage, immune response, and inflammation in the ear — they're being interfered with. The wiring is pinched."
+
+(Click to progress scan.)
 
 "After eight weeks of gentle adjustments, we rescanned. Here's what it looked like."
 
-[SLIDE 7: Progress scan — show improvement]
+(Pause. Let them see the difference.)
 
-"The ear infections stopped. Not because we treated the ears — but because we restored the communication between the brain and the body."
+"The ear infections stopped. Not because we treated the ears — but because we restored the communication between the brain and the body. We fixed the wiring."
 
-"This is what I want every parent to see. Not because it means your child needs care — but because you deserve to know what's going on under the surface."
+(SOCIAL PROOF — Roberto Monaco: pile up evidence.)
 
-[SLIDE 8: "Gentle Pediatric Adjustments"]
+"And this isn't one story. We see this EVERY WEEK. Kids who couldn't sleep — sleeping. Kids with daily meltdowns — regulated. Kids who were getting sick every month — healthy. Not because we're treating any of those things. Because we're removing the interference and letting their body do what it was DESIGNED to do."
 
-"Now, I know what some of you are thinking. 'You're going to adjust my baby?' And I get it. It sounds intense."
+(EMBEDDED TRIAL CLOSE — assumptive language.)
 
-[STAGE DIRECTION: Smile. Use a light, reassuring tone.]
+"When you bring your child in for a scan, THIS is exactly what we'll show you. A clear picture of how their nervous system is actually functioning. No guesswork. No opinion. DATA."
 
-"Let me put your mind at ease. A pediatric adjustment is nothing like what you might picture. There's no twisting. There's no cracking. The pressure we use on an infant or toddler is about the same as checking a tomato for ripeness."
+════════════════════════════════════════════════════════════════
+SECTION 6: GENTLE ADJUSTMENTS + THE FAMILY CONNECTION
+[5 MIN] [ENERGY: 🔥🔥🔥 — Bring the energy DOWN slightly. This is reassurance mode. Parents need to hear that this is safe. Be warm. Be human. Then transition to the family angle — this is your upsell to whole-family care, but it has to feel genuine, not strategic.]
+════════════════════════════════════════════════════════════════
 
-[STAGE DIRECTION: Hold up your hand and gently press your fingertip against your other palm.]
+(PREEMPTIVE OBJECTION HANDLING — Best Closers: handle the fear before it becomes a reason not to come.)
 
-"That's it. That's the amount of force. Kids usually don't even flinch. Half the time, they sleep through it."
+"Now — I can see some of you thinking it. And I LOVE that you're thinking it, because it means you're a protective parent. You're thinking: 'You're going to adjust my CHILD?'"
 
-"What we're doing is removing interference. We're restoring the signal. We're helping your child's body do what it was designed to do — grow, develop, heal, and thrive."
+(Smile. Warm, reassuring tone.)
 
-"And the results speak for themselves. Parents come back and tell us their child is sleeping better, eating better, less anxious, fewer meltdowns, fewer sick days. Not because we're treating any of those things — but because we're addressing the root cause."
+"Let me put your mind completely at ease. A pediatric adjustment is NOTHING like what you might picture. There's no twisting. There's no cracking. The pressure we use on an infant or toddler..."
 
-[SLIDE 9: "The Family Connection"]
+(Hold up your hand. Gently press your fingertip against your other palm.)
 
-"Here's one more thing I want you to hear, and it's important."
+"...is about the same as checking a tomato for ripeness. That's it. THAT is the amount of force. Kids usually don't even flinch. Half the time, babies sleep right through it."
 
-"Kids learn their stress patterns from their parents. If mom's nervous system is stuck in stress mode, that affects how she parents, how she sleeps, how she handles the daily chaos. If dad is carrying tension from work, that shows up at the dinner table."
+"What we're doing is removing interference. Restoring the signal. Helping your child's body do what it was designed to do — grow, develop, heal, and thrive."
 
-"We see it in our office all the time. We start with the child, and pretty soon, the whole family is getting scanned — because the parents realize they've been running on survival mode too."
+(Transition to family connection. Shift your gaze to include BOTH parents in couples.)
 
-"Your nervous system matters. And if you want to give your child the best foundation, it starts with you."
+"Now here's something important — and both of you need to hear this if you came together tonight."
 
-[SLIDE 10: "Your Invitation"]
+(THE SPOUSE STRATEGY — Best Closers: when both parents are present, speak to BOTH. Make the family connection so that bringing the whole family feels like the obvious choice.)
 
-[STAGE DIRECTION: Soften your tone. Be genuine. No selling energy.]
+"Kids don't develop in isolation. They develop in a family system. And what we see in our office — all the time — is this: a child's nervous system often mirrors the stress patterns of their parents."
 
-"So here's what I'd like to offer."
+"If mom's nervous system is stuck in GO mode, that affects how she parents, how she sleeps, how she handles the daily chaos. If dad is carrying tension from work, that shows up at the dinner table. Kids are SPONGES. They absorb your stress. Not because you're doing anything wrong — because the nervous system is connected. Your family is a system."
 
-"If anything I shared tonight resonated — if you recognized your child in any of those stories — I'd love to invite you to bring your child in for a scan. No commitment. No pressure. Just information."
+"That's why when we scan a child, we almost always recommend scanning the whole family. Because the BEST thing you can do for your child's nervous system... is take care of your OWN."
 
-"We'll run the scan, show you exactly what's happening with their nervous system, and explain what we see. If there's something there, we'll talk about what we can do. If everything looks great, I'll be the first to celebrate that with you."
+(EMBEDDED TRIAL CLOSE.)
 
-"And honestly? I usually recommend the whole family gets scanned — because kids don't develop in isolation. They develop in a family system."
+"When you bring your family in, we'll scan everyone. And I can tell you right now — the parents are usually MORE surprised by their OWN results than their child's. That moment when you see YOUR nervous system on the screen and suddenly your sleep issues, your neck tension, your anxiety — all of it makes sense? That's a moment I live for."
 
-"On your chair, you'll find a sign-up sheet. If you'd like to bring your child in — or your whole family — just write down your name, your child's name, and a phone number. My team will reach out tomorrow to find a time that works."
+════════════════════════════════════════════════════════════════
+SECTION 7: THE INVITATION — THE CLOSE
+[8 MIN] [ENERGY: 🔥🔥🔥🔥🔥 — This is the PEAK of the entire presentation. Roberto Monaco calls this "The Moment of Decision." Tony Robbins calls it "The Line." You are not asking. You are INVITING with certainty and conviction. You believe in what you do so deeply that NOT offering it would be irresponsible.]
+════════════════════════════════════════════════════════════════
 
-"Thank you for being here tonight. The fact that you showed up tells me your child is in good hands."
+(Walk to center. No slides. This is just YOU. Plant your feet. Shoulders back. Speak from your chest.)
 
-[STAGE DIRECTION: Open for Q&A. Keep it to 10 minutes. After Q&A, mingle. Be available. Don't hover over the sign-up sheet — let people come to it naturally. Have a team member gently circulate.]`,
+STEP 1: THE DICKENS PATTERN — FUTURE PACE (Tony Robbins)
+Show them BOTH futures for their CHILD. This is where parents make the decision.
+
+"I want you to do something for me right now. And I need you to really do this — not just listen. Close your eyes. Both of you, if you came together. Close them."
+
+(Wait until eyes are closed. Lower your voice.)
+
+"I want you to picture your child. Right now. See their face. See those eyes looking up at you."
+
+(2-second pause.)
+
+"Now imagine it's one year from now. And nothing changed. The sleep is the same — or worse. The meltdowns haven't stopped. The ear infections keep coming. The teacher is calling again. Your child is struggling — and you can SEE it, but you can't figure out WHY. And you're exhausted. You're Googling symptoms at midnight. You're wondering if you should get ANOTHER referral, try ANOTHER specialist, start ANOTHER medication. Another year of watching your child struggle and feeling helpless."
+
+(3-second pause. Let it sink in.)
+
+"Now shift. Same child. Same face. One year from now. But THIS time, you brought them in. You got the scan. You found the interference. And now your child is sleeping through the night. The meltdowns are GONE. Their teacher says they're focused, they're calm, they're thriving. And YOU — you're sleeping too. You're not worried anymore. You're not Googling at midnight. You're watching your child FLOURISH. And you're thinking: 'Why didn't I do this sooner?'"
+
+(Pause. Let it breathe.)
+
+"Open your eyes."
+
+(Make eye contact with as many parents as possible. Some will have tears.)
+
+"THAT is the difference between knowing what I just taught you... and DOING something about it. The window is open RIGHT NOW. Eighty percent of their neurological development. Right now. Don't wait."
+
+STEP 2: THE VALUE STACK (Roberto Monaco)
+Stack the value so high that the offer feels like a gift, not a pitch. Count on your fingers — the physical counting creates perceived value.
+
+"So here's what I want to offer every family in this room tonight. And I need you to understand — this is not what we offer walk-ins at the practice. This is exclusively for parents who showed up tonight."
+
+(Count on your fingers.)
+
+"Number one: a complete nervous system scan for your child — the same technology I just showed you. That's a $150 value."
+
+(Second finger.)
+
+"Number two: a scan for BOTH parents. Because like I said — your family is a system. That's another $300 in value."
+
+(Third finger.)
+
+"Number three: a one-on-one sit-down with ME — not a front desk person, not a tech — ME. I will personally walk you through every scan, explain exactly what I see, and tell you honestly whether I think we can help. My time. Your family. No rushing."
+
+(Fourth finger.)
+
+"Number four: a custom report you take home that shows you exactly what's going on with your child's nervous system and what the plan looks like. Something you can look at together tonight after the kids go to bed."
+
+"That entire assessment — for your whole family — normally costs $600. For every family in this room tonight, it's complimentary. Zero dollars. My gift to you for caring enough to show up."
+
+STEP 3: THE ASSUMPTIVE CLOSE + SCARCITY (Best Closers)
+Do NOT say "if you're interested." Say "when you bring your child in." Assume the yes.
+
+"Now here's the reality — I can only do [8-10] family scans per week around my regular patients. And there are [20+] families in this room. So I cannot scan everyone this week. My team is coming around with a sign-up sheet right now. When you put your name down, you're reserving one of those slots."
+
+(Signal your team to start passing the sheets. This creates MOVEMENT and SOCIAL PROOF.)
+
+(TWO-CHOICE CLOSE — Best Closers: don't ask IF. Ask WHEN.)
+
+"When the sheet gets to you, write down your name, your child's name, and a phone number. Then — and this is important — write down whether you prefer mornings or afternoons. That way my team can get you scheduled tomorrow without the back-and-forth."
+
+STEP 4: HANDLE THE OBJECTION BEFORE IT COMES (Best Closers)
+
+"Now — some of you might be thinking 'This sounds great, but I want to think about it.' And I totally respect that. You're a thoughtful parent. But let me ask you a question."
+
+(PREEMPTIVE OBJECTION — "I need to talk to my spouse.")
+
+"If you're here with your partner tonight — turn and look at them right now."
+
+(Wait. Parents look at each other.)
+
+"You're BOTH here. You BOTH heard the same information. You don't need to go home and explain what a nervous system scan is over dinner while the kids are screaming. You're both informed. You can decide together — right now — with real information."
+
+(PREEMPTIVE OBJECTION — "I need to think about it.")
+
+"And for everyone — what is there to think about? It's free. It takes 15 minutes. The WORST thing that happens is I tell you your child's nervous system looks great and I shake your hand and say 'keep doing what you're doing.' The BEST thing that happens is you find the answer that explains EVERYTHING — the sleep, the meltdowns, the ear infections — and you get your child on a path to thriving."
+
+"Fifteen minutes. That's what stands between you and knowing."
+
+STEP 5: SOCIAL PROOF IN REAL TIME (Roberto Monaco)
+Call out the action happening in the room. This creates a cascade.
+
+(As people start signing up, acknowledge it.)
+
+"I see names going down. Thank you. Thank you. If you haven't gotten the sheet yet, it's coming — raise your hand and my team will bring it to you."
+
+(Wait 60-90 seconds for sign-ups to happen. Don't rush. Let social proof work.)
+
+"For those of you signing up — write FAMILY if you want the whole family scanned. Most of you should. I promise you — the parents' scans are going to be just as eye-opening as your child's."
+
+STEP 6: THE EMOTIONAL CLOSE (Tony Robbins)
+
+(Once sign-ups slow down, bring the energy to gratitude and connection.)
+
+"Whether you signed up tonight or not — I need to say something. You showed up. On a [DAY OF WEEK] night, when you could have been on the couch, you chose to invest in your child's health. In a world where most parents are just trying to get through the day, you chose to LEARN. That tells me everything about who you are as a parent. And I'm honored you trusted me with your evening."
+
+(Lower voice.)
+
+"For those who signed up — I can't wait to meet your kids. I can't wait to show you what's happening inside their nervous system. It's going to be one of the most eye-opening 15 minutes you've ever had as a parent."
+
+"For those who didn't — no pressure. Take the handout on your way out. My number is on it. And the next time your child can't sleep, or has a meltdown that doesn't make sense, or gets another ear infection — you're going to think about tonight. And you're going to know exactly who to call."
+
+(Smile. Let it land.)
+
+════════════════════════════════════════════════════════════════
+SECTION 8: Q&A + WORKING THE ROOM
+[5 MIN] [ENERGY: 🔥🔥🔥 — Stay at a 7/10. Confident. Approachable. The presentation is over. The CONVERSION happens now. Every question is a chance to re-close.]
+════════════════════════════════════════════════════════════════
+
+(Stay standing. Open posture. Feet planted.)
+
+"I'll take 2 or 3 quick questions. After that, I'm going to be right here — and honestly, the best conversations happen AFTER the formal part. So don't be shy. Who's got a question?"
+
+(QUESTION STRATEGY — Roberto Monaco: Every Q&A answer ends with a re-close.)
+
+(When a parent asks about their child's specific issue — e.g., "My son has been having ear infections constantly":)
+"That's one of the most common things we see. And honestly, that's EXACTLY what shows up on the scan — the interference in the upper cervical area that controls drainage and immune response. Have you signed up yet? Good. When I scan your son, I'm going to look for that specifically. I'll show you exactly what's going on."
+
+(When a parent asks "How young can you adjust?":)
+"Great question. We see babies as young as a few days old. The adjustment on an infant is so gentle — remember the tomato — that they usually sleep right through it. A lot of our families bring their newborns in within the first week. In fact — when you bring your child in for the scan, bring the baby too if you have one. We'll scan the whole crew."
+
+(RE-CLOSE on every answer — always bring it back to the scan and the appointment.)
+
+(When someone asks a complex question:)
+"I love that question and it deserves more than a 30-second answer. Grab me after — I want to give you the real answer. And make sure you've signed up so we can dig into it with real data."
+
+(After 2-3 questions, close the formal section.)
+
+"Thank you all. Seriously. Grab a handout on your way out — my number is on it. And for those who signed up, my team will be calling you first thing tomorrow morning."
+
+════════════════════════════════════════════════════════════════
+POST-PRESENTATION — WORKING THE ROOM
+[10 MIN] [This is where 30-40% of your sign-ups happen. Do NOT skip this.]
+════════════════════════════════════════════════════════════════
+
+THE ROBERTO MONACO ROOM STRATEGY:
+
+1. DO NOT retreat to a back room. Stand near the sign-up table. Be visible. Be approachable. If kids are there, interact with THEM. Pick up a coloring page. High-five a toddler. Parents are watching you with their child — and they're deciding if they trust you.
+
+2. YOUR JOB: Walk to every parent who did NOT sign up. Not to pressure them — to connect. Say: "Hey, what did you think? Did any of that resonate with [CHILD NAME]?" Then LISTEN. They'll tell you their concern. Then say: "You know what? That's exactly what the scan would show us. Why don't you put your name down and let's just take a look? Worst case, I tell you everything looks great and you leave with peace of mind."
+
+3. YOUR TEAM'S JOB: Work the parents who DID sign up. Confirm their info. Ask "Do you want a morning or afternoon appointment?" (TWO-CHOICE CLOSE — not "when works for you?" which creates decision paralysis.) Then ask: "And do you want to scan the whole family while you're there? Most families do." (UPSELL to family scan.)
+
+4. THE SPOUSE STRATEGY — IN THE ROOM (Best Closers): If one parent is hesitating and the other is ready, address the ready parent: "Are you both wanting to do this?" Often the enthusiastic parent will close the hesitant one FOR you. If one parent says "I think we should do this" — that's your close. Nod, hand them the pen, and say "Write your names down. We'll get you in this week."
+
+5. THE FENCE-SITTER: For any parent lingering but not signing up, walk over and say: "Can I be honest with you? The fact that you're still here tells me something resonated. What's holding you back?" Then listen. 90% of the time it's logistics (schedule, how to bring the kids in), not trust. Solve the logistics on the spot: "Bring them right after school. We'll make it quick and fun. Kids love it."
+
+6. LAST 5 MINUTES: Before people start leaving, raise your voice: "Hey everyone — before you head out. If you're still on the fence, I want you to know this offer is good for the next 7 days. After that, the family scan goes back to $600. My number is on the handout. Text me tonight if you change your mind. I check my texts. And remember — every week you wait is another week of that developmental window closing. Your child's nervous system isn't waiting. Don't you wait either."
+
+════════════════════════════════════════════════════════════════
+POST-EVENT DEBRIEF (Do this in the parking lot — not tomorrow)
+════════════════════════════════════════════════════════════════
+
+• Photograph the sign-up sheet IMMEDIATELY. Text the photo to yourself AND your team.
+• Count: How many attended? How many FAMILIES signed up? (Not individuals — families.) What's the conversion rate? TARGET: 50-70% of families.
+• Count family members: If 15 families signed up and most want whole-family scans, that's 45-60 scans. This is the MULTIPLIER that makes pediatric workshops the highest-ROI event you can run.
+• If you hit 60%+: Celebrate. Tell your team exactly what they did right.
+• If you hit below 40%: Don't panic. Ask: Was the energy right? Did I rush the close? Did I skip the Dickens Pattern? Did I lose them in the stats? Fix ONE thing for next time.
+• Enter all names into your CRM/tracking sheet TONIGHT. Not tomorrow. Tonight.
+• Send the same-night follow-up texts within 2 hours (see Post-Event Follow-Up section).
+• Special note for pediatric: if BOTH parents attended and signed up, note that in the CRM. These families close at 2x the rate because there's no spouse objection. Prioritize them for the first available scan slots.
+• Your energy RIGHT NOW sets the tone. If you're pumped and grateful, your team catches that. If you're deflated, they check out. Be the leader. Even if only 8 families signed up — those are 8 children whose lives you're about to change. That MATTERS.`,
     },
     materials: {
       title: 'Workshop Materials & Setup',
@@ -609,111 +904,342 @@ Lunch will be provided. No sign-up required — just show up!`,
     },
     presentation: {
       title: 'Full Presenter Script — 30-Minute Corporate Lunch & Learn',
-      content: `[STAGE DIRECTION: Arrive 15 minutes early. Set up quickly — this is someone else's space. Be professional. Dress business casual or better. Have sign-up sheets on the table, not in people's faces. Handouts placed at each seat. Be relaxed and approachable as people file in with their lunches. No hard sell energy — you're a guest here.]
+      content: `═══════════════════════════════════════════════════════════════
+PRE-EVENT SETUP & ENERGY PREPARATION
+═══════════════════════════════════════════════════════════════
+Energy: 🔥🔥🔥 (Internal — high state, calm exterior)
 
-[SLIDE 1: Title slide — "Peak Performance: How Your Nervous System Controls Your Productivity"]
+[STAGE DIRECTION: Arrive 15 minutes early. Dress sharp — business casual at minimum, one notch above the room. Set up quickly and cleanly — this is their space. Place handouts at each seat. Sign-up sheets go on the side table, NOT in anyone's face. Place a pen on top of each sign-up sheet. Have your slides loaded and tested on their AV before the first person walks in.]
 
-[STAGE DIRECTION: Wait until most people are seated. Stand confidently. Make eye contact. Keep energy high but professional.]
+[PRE-FRAME: As people file in with their lunches, DO NOT stand at the front like a presenter waiting. Walk through the room. Shake hands. Ask names. Ask what they do. Say "What's the biggest thing that slows you down during your day?" — plant seeds. Remember 2-3 names to use during the talk. This is Roberto Monaco's room-working strategy — front-loaded.]
 
-"Hey everyone, thanks for spending part of your lunch with me. I know you could be scrolling through your phone or enjoying some peace and quiet right now, so I'll make this worth your time."
+[STATE MANAGEMENT: Before you start, take 3 deep breaths. Roll your shoulders back. Plant your feet. You are not a guest begging for attention — you are an expert who was invited to deliver value. Own the room with calm authority.]
 
-"My name is [DOCTOR NAME], I run [PRACTICE NAME], and I'm here because I work with a lot of professionals like you — people who are high-performing but running on fumes. And I want to talk about why that happens and what you can actually do about it."
+═══════════════════════════════════════════════════════════════
+SECTION 1: PATTERN INTERRUPT OPENING (0:00-3:00)
+═══════════════════════════════════════════════════════════════
+Energy: 🔥🔥🔥🔥 (Confident, disruptive, commanding)
+Technique: PATTERN INTERRUPT — Do NOT open with "thanks for having me"
 
-"Let me start with a number."
+[SLIDE 1: Black screen with white text — "$1,685"]
 
-[SLIDE 2: "7.5 hours"]
+[STAGE DIRECTION: Stand center. Feet planted. Scan the room. Make eye contact with 3 people. Let the silence build for 4 full seconds. Then speak with authority.]
 
-"Seven and a half hours. That's how long the average American sits per day. Some of you are closer to ten."
+"Sixteen hundred and eighty-five dollars."
 
-"Your body was designed to move. To hunt, to gather, to walk 10 miles a day. And instead, we're sitting in ergonomic chairs — that aren't even ergonomic — staring at screens, eight to twelve hours a day."
+(Pause. Let them look at the slide.)
 
-"The disconnect between what your body was built for and what you're asking it to do is not just causing you pain. It's destroying your performance. Not in 20 years — right now."
+"That's how much the average American company loses PER EMPLOYEE PER WEEK — not from people calling in sick. From people showing up."
 
-"Quick show of hands."
+(Pause again.)
 
-[STAGE DIRECTION: Raise your own hand first to encourage participation.]
+"It's called presenteeism. You're here. You're at your desk. You're logged in. But your brain checked out at 1:30. You're running at 40% and you don't even know it. And nobody's talking about it — because you look fine."
 
-"How many of you have brain fog by 2 PM? Okay. How many of you have neck or back pain that you've just accepted as part of the job? And how many of you sleep seven or eight hours but still wake up exhausted?"
+"By the way — my name is [DOCTOR NAME], I run [PRACTICE NAME], and I'm not here to sell you anything. I'm here because your company cared enough to bring in someone who can show you WHY you're running on fumes — and what to do about it in the next 30 minutes."
 
-[STAGE DIRECTION: Acknowledge the response. Nod. Smile.]
+[MICRO-COMMITMENT #1]
+"Before I go any further — quick favor. If you have ever hit 2 PM and felt like your brain was running through mud... just raise your hand."
 
-"Yeah. That's pretty much every room I walk into. And here's what nobody's telling you: all of those things are connected. And they're all connected to one system."
+[STAGE DIRECTION: Raise your own hand FIRST. Wait. Scan the room. Nod at people as they raise theirs.]
 
-[SLIDE 3: "Your Nervous System: The Operating System"]
+"Yeah. Every single room. Keep that hand up for a second — look around. You're not alone. And more importantly — it's not your fault. Put 'em down."
 
-"Your nervous system is the master control system for your entire body. It controls everything. Your heartbeat. Your digestion. Your immune system. Your energy. Your focus. Your mood. Your sleep. Everything."
+[EMBEDDED TRIAL CLOSE #1]
+"What if I told you there's a physiological reason that happens — and it has nothing to do with how much coffee you drink or how much sleep you got? Would that be worth 30 minutes of your lunch? Good. Let's go."
 
-"It's like the operating system on your computer. You can have the best hardware in the world — the best processor, the most RAM — but if the operating system is glitching, nothing runs right. Programs freeze. Things slow down. You get the spinning wheel of death."
+═══════════════════════════════════════════════════════════════
+SECTION 2: THE PROBLEM — PROFESSIONAL PERFORMANCE DESTRUCTION (3:00-8:00)
+═══════════════════════════════════════════════════════════════
+Energy: 🔥🔥🔥 (Authoritative, data-driven, urgent)
+Technique: PAIN AMPLIFICATION — Career/performance focus, not just health
 
-"That's what's happening to most of you. Your hardware is fine. Your operating system needs a reboot."
+[SLIDE 2: "The Silent Performance Killer"]
 
-[SLIDE 4: "Why You Crash at 2 PM"]
+"Let me paint a picture of what's happening to most people in this room — and I say this with respect, because I see it every single day in my office."
 
-"Let me get specific, because I know this audience wants data, not stories."
+"You wake up tired. Not 'I didn't sleep' tired — 'I slept 7 hours and still feel like garbage' tired. You drive to work with tension in your neck that you've just... accepted. By 10 AM you've had two coffees. By 2 PM your focus is gone. By 4 PM you're making decisions you'd never make at 9 AM. You go home exhausted, can't fall asleep, and do it all again tomorrow."
 
-"When your spine is misaligned — from sitting, from posture, from old injuries, from stress — it creates interference in your nervous system. That interference triggers your stress response. Your body starts pumping cortisol. Your sympathetic nervous system — the fight-or-flight system — takes over."
+"Sound familiar?"
 
-"Now here's the problem. When you're in fight-or-flight, your body is prioritizing survival. It's sending blood to your muscles. It's increasing your heart rate. It's shutting down anything that isn't immediately necessary."
+[STAGE DIRECTION: Look at [NAME you learned earlier]. "Yeah, [NAME]? That track?"]
 
-"And you know what gets shut down first? Your prefrontal cortex. The CEO of your brain. The part responsible for focus, decision-making, creativity, and impulse control."
+"Here's what nobody connects for you: that's not a sleep problem. That's not a stress problem. That's not a caffeine deficiency."
 
-"That's why you can't focus at 2 PM. That's why you make worse decisions at 4 PM than you do at 9 AM. That's why you reach for sugar and caffeine every afternoon. Your brain is literally going offline because your nervous system is stuck in survival mode."
+(Pause.)
 
-"And by the way — this isn't a willpower problem. This is a physiology problem."
+"That is a nervous system problem."
 
-[SLIDE 5: "The Sitting-Stress-Pain Loop"]
+[SLIDE 3: "Your Nervous System: The Operating System You Never Update"]
 
-"Here's the cycle most of you are living in, whether you realize it or not."
+"Your nervous system controls EVERYTHING. Your focus. Your energy. Your decision-making. Your pain response. Your sleep quality. Your mood. Your immune system. Everything."
 
-"You sit all day. That compresses your spine and creates misalignment. The misalignment creates nervous system interference. The interference triggers your stress response. The stress response causes muscle tension, inflammation, and pain. The pain makes you less active. Less activity means more sitting. And the cycle repeats."
+"Think of it like the operating system on your computer. You can have the best hardware — the most talent, the most drive, the best education — but if the operating system is glitching, nothing runs right. You get the spinning wheel of death. Programs crash. Everything slows down."
 
-"It's a loop. And no amount of ibuprofen, coffee, or standing desks is going to break it — because none of those things address the actual interference in the nervous system."
+[PHYSICAL ENGAGEMENT — Tony Robbins technique]
+"Actually — everybody do something for me. Sit up straight right now."
 
-[SLIDE 6: "The Scan — Objective Data" — Show scan images]
+[STAGE DIRECTION: Demonstrate. Sit up tall, shoulders back.]
 
-[STAGE DIRECTION: Bring up scan examples. Keep it brief — corporate audiences want evidence, not long explanations.]
+"Feel the difference? Now slump back to how you were sitting."
 
-"In our office, we use a technology that measures how your nervous system is actually functioning. It's not based on how you feel — it's based on objective data."
+(Pause while they slump.)
 
-"This scan shows a 38-year-old executive who came in with chronic headaches and afternoon fatigue. See these red zones? That's where his nervous system was under the most stress. High sympathetic activity. Low recovery."
+"Now sit back up."
 
-"After 90 days of care, here's the same scan. Balanced. Recovered. And his headaches? Gone. His energy? Back to what it was in his twenties."
+"Notice how your ENERGY changed? That's not in your head. When you compress your spine, you literally compress the signals between your brain and your body. You just felt it in real time."
 
-"I show you this not to sell you anything — but to show you that this is measurable. It's not guesswork. It's data."
+[EMBEDDED TRIAL CLOSE #2]
+"If just changing your posture for 5 seconds shifted your energy, imagine what's happening over 8 hours a day, 5 days a week, 50 weeks a year. Makes you think, right?"
 
-[SLIDE 7: "The Solution"]
+═══════════════════════════════════════════════════════════════
+SECTION 3: THE VILLAIN — SITTING AND THE STRESS LOOP (8:00-13:00)
+═══════════════════════════════════════════════════════════════
+Energy: 🔥🔥🔥 (Building tension, controlled urgency)
+Technique: PAIN AMPLIFICATION + SOCIAL PROOF
 
-"So what's the fix?"
+[SLIDE 4: "The Sitting-Stress-Performance Death Loop"]
 
-"Regular nervous system care is like rebooting your operating system. We identify where the interference is, we correct it, and we restore proper communication between your brain and your body."
+"Here's the cycle most of you are stuck in — and I'll prove it."
 
-"It's not about cracking backs. It's about restoring function. And when function is restored, the symptoms — the pain, the fatigue, the brain fog, the poor sleep — they resolve, because the cause is resolved."
+"You sit 7 to 10 hours a day. That compresses your spine. The compression creates interference in your nervous system — like a kink in a garden hose. That interference triggers your stress response. Cortisol spikes. Your sympathetic nervous system — fight-or-flight — takes over."
 
-"Think of it this way: you service your car every 5,000 miles. You update your phone software regularly. But when was the last time you had your nervous system checked? Probably never."
+"And here's the part that should concern every person in this room who cares about their career:"
 
-[SLIDE 8: "3 Things You Can Do Today"]
+"When fight-or-flight takes over, your body shuts down your prefrontal cortex. That's the CEO of your brain. That's your focus. Your creativity. Your decision-making. Your strategic thinking."
 
-"Before I wrap up, I want to give you three things you can implement today — no appointment necessary."
+"That's why you can't focus at 2 PM. That's why you make worse decisions in the afternoon. That's why you reach for sugar and caffeine. Your brain is literally going OFFLINE — not because you're weak, but because your nervous system is stuck in survival mode."
 
-"One: Every 30 minutes, stand up and move for 60 seconds. Set a timer. It sounds simple, but it interrupts the sitting-stress-pain loop and gives your nervous system a reset."
+[SLIDE 5: "The Cost You're Not Counting"]
 
-"Two: Do chin tucks at your desk. Pull your chin straight back — like you're making a double chin on purpose. Hold for 5 seconds. Repeat 10 times. This counteracts the forward head posture that's compressing your upper cervical spine."
+"Let me make this real."
 
-"Three: Take 5 minutes at the end of your workday to do box breathing. Four seconds in, four seconds hold, four seconds out, four seconds hold. This manually shifts your nervous system from fight-or-flight into recovery mode. You'll sleep better, guaranteed."
+"How many of you have ever had a day where you KNEW you weren't sharp — but you pushed through anyway? Made a decision you'd take back? Sent an email you shouldn't have? Missed something obvious?"
 
-[SLIDE 9: "Your Invitation"]
+(Hands go up.)
 
-[STAGE DIRECTION: Keep it professional. No pressure. Matter-of-fact.]
+"Now think about this: what if that's not a 'bad day'? What if that's your DEFAULT after 1 PM because your nervous system is compromised?"
 
-"If what I shared today resonated with you, here's what I'd like to offer."
+[PAIN AMPLIFICATION — Career/Professional Impact]
+"What does that cost you? Not in dollars — in opportunities. The presentation you didn't nail. The creative solution you didn't see. The promotion conversation where you weren't at your best. The energy you don't have for your family when you get home."
 
-"My team will reach out to schedule a complimentary nervous system scan for anyone who's interested. It takes about 15 minutes. We'll run the scan, show you the data, and give you a clear picture of how your nervous system is performing."
+"This isn't just a health issue. This is a PERFORMANCE issue. And the people who figure this out have an unfair advantage over everyone else in the room."
 
-"There's a sign-up sheet on the table — just your name, email, and phone number. We'll take it from there."
+[SOCIAL PROOF]
+"I'll tell you — we've worked with teams from [EXAMPLE COMPANY / 'several companies in the area']. One group — 12 people from a tech company — came in after a lunch and learn just like this one. Within 90 days, their HR director told me sick days dropped, their project lead said afternoon productivity measurably improved, and three of them told me privately that they stopped needing afternoon coffee for the first time in years."
 
-"I appreciate your time. Enjoy the rest of your lunch, and if you have any questions, I'll be here for a few minutes."
+"That's not magic. That's what happens when you fix the operating system."
 
-[STAGE DIRECTION: Do NOT hover. Answer questions casually. Let the sign-up sheet work for you. If your team is there, have them quietly available. Leave within 10 minutes of finishing — respect their space.]`,
+═══════════════════════════════════════════════════════════════
+SECTION 4: THE EVIDENCE — SCAN DATA (13:00-17:00)
+═══════════════════════════════════════════════════════════════
+Energy: 🔥🔥🔥 (Confident authority — let the data do the heavy lifting)
+Technique: PROOF + EMBEDDED TRIAL CLOSE
+
+[SLIDE 6: "Objective Data — The Nervous System Scan" — Show scan images side by side]
+
+[STAGE DIRECTION: Step toward the screen. Point to specific areas.]
+
+"This is where it stops being theoretical and starts being measurable."
+
+"In our office, we use technology that scans your nervous system — not based on how you FEEL, but based on how you're actually FUNCTIONING. Objective. Quantifiable. Like a diagnostic on your car."
+
+"On the left — this is a 38-year-old project manager. Came in complaining about chronic headaches, brain fog, and afternoon crashes. See these red zones? That's where his nervous system was under massive stress. His body was running in fight-or-flight mode 18 hours a day. He had no idea."
+
+"On the right — same person, 90 days later. Balanced. Recovered. Headaches gone. Energy restored. And here's what he told me — 'I feel like I did in my twenties. I didn't know I could feel this good again.'"
+
+[EMBEDDED TRIAL CLOSE #3]
+"By the way — how many of you would want to see what YOUR scan looks like? Just out of curiosity? Yeah — most people are surprised by what it shows."
+
+[SLIDE 7: "Before & After — The Performance Transformation"]
+
+"Here's another one. A 42-year-old sales director. She wasn't in pain — she was just... flat. Couldn't get through the afternoon without crashing. Sleeping 8 hours but waking up exhausted. Her performance reviews were slipping for the first time in her career."
+
+"Her scan showed severe nervous system interference in her upper cervical area — the part that controls blood flow to the brain, sleep regulation, and cognitive function."
+
+"Twelve weeks later — scan is clean. She told me she got her edge back. Got promoted two months after that."
+
+"I'm not saying chiropractic care gets you promoted. I'm saying when your nervous system is running at 100%, YOU perform at 100%. And people notice."
+
+═══════════════════════════════════════════════════════════════
+SECTION 5: THE DICKENS PATTERN — TWO FUTURES (17:00-21:00)
+═══════════════════════════════════════════════════════════════
+Energy: 🔥🔥🔥🔥🔥 (Emotional peak — this is the turning point)
+Technique: DICKENS PATTERN FUTURE PACE (Tony Robbins)
+
+[SLIDE 8: Two paths diverging — "Two Futures"]
+
+[STAGE DIRECTION: Step away from the screen. Move closer to the audience. Lower your voice slightly. This section is personal and intense.]
+
+"I want you to do something with me for 60 seconds. And I mean really do it — not just listen."
+
+"Close your eyes."
+
+[STAGE DIRECTION: Wait until eyes are closed. Give them 3 seconds.]
+
+[MICRO-COMMITMENT #2]
+
+"I want you to imagine two versions of your future."
+
+"FUTURE ONE: Nothing changes. You keep doing what you're doing. The tension in your neck — you keep ignoring it. The afternoon crashes — you keep powering through with coffee. The foggy thinking — you keep blaming it on stress. The exhaustion when you get home — you keep telling yourself 'that's just how it is.'"
+
+"Fast-forward one year. You're more tired. You're in more pain. Your performance is slipping and you can feel it. You're irritable with your family. You're not sleeping well. You go to the doctor, they run blood work, everything comes back 'normal' — but you KNOW something is off."
+
+"Fast-forward five years. The pain is chronic now. You've tried everything — pills, stretches, new chairs, standing desks. Nothing sticks. You've lost a step at work and younger people are passing you. You've accepted this as 'getting older.'"
+
+(Pause. 3 seconds.)
+
+"Now — FUTURE TWO."
+
+[STAGE DIRECTION: Shift your tone. Lighter. More energized.]
+
+"You find out what's actually going on with your nervous system. You fix the interference. Within weeks, the brain fog lifts. Your energy comes back — not caffeine energy, real energy. You're sharp at 4 PM. You sleep deeply. You wake up ready to go."
+
+"Your performance improves. Your mood improves. Your family notices. You feel like yourself again — maybe better than yourself. You have an unfair advantage because your operating system is actually running clean while everyone else is still grinding on a glitchy one."
+
+"Open your eyes."
+
+[STAGE DIRECTION: Pause. Make eye contact with 3-4 people. Let the silence hold for 3 full seconds.]
+
+"That's the choice. And here's what I want you to understand — it's not a dramatic choice. It's a 15-minute scan. That's where it starts."
+
+═══════════════════════════════════════════════════════════════
+SECTION 6: THE 3 IMMEDIATE WINS (21:00-24:00)
+═══════════════════════════════════════════════════════════════
+Energy: 🔥🔥🔥 (Practical, generous, value-giving)
+Technique: VALUE DELIVERY + PHYSICAL ENGAGEMENT
+
+[SLIDE 9: "3 Things You Can Do Right Now"]
+
+"Before I make you an offer, I want to give you three things you can use TODAY. No appointment needed. Free. Right now."
+
+[PHYSICAL ENGAGEMENT — get them moving]
+"Number one — everybody stand up."
+
+[STAGE DIRECTION: Stand up yourself. Wave everyone up. "Come on, stand up. You've been sitting for hours — your nervous system will thank you."]
+
+"This is the 30/60 Rule. Every 30 minutes, stand and move for 60 seconds. Walk to the water cooler. Do 10 squats. Whatever. Just BREAK the sitting cycle. Set a timer on your phone — I'm serious. Do it right now. Set a recurring 30-minute timer."
+
+[MICRO-COMMITMENT #3]
+"Who's going to actually set that timer? Show me. Good."
+
+"Sit back down. Number two — chin tucks. Watch me."
+
+[STAGE DIRECTION: Demonstrate. Pull chin straight back, making a double chin.]
+
+"Do it with me. Pull your chin straight back. Hold 5 seconds."
+
+(Count to 5.)
+
+"That just took pressure off your brainstem. For every inch your head sits forward — and most of you are 2-3 inches forward right now — that's an extra 10 pounds of pressure on your cervical spine. Do 10 of these, 3 times a day. Your headaches will change."
+
+"Number three — box breathing. End of your workday: 4 seconds in, 4 hold, 4 out, 4 hold. Five minutes. This manually switches your nervous system from fight-or-flight to recovery mode. Navy SEALs use it. It works. You'll sleep better tonight if you do it today."
+
+═══════════════════════════════════════════════════════════════
+SECTION 7: THE VALUE STACK + CLOSE (24:00-28:00)
+═══════════════════════════════════════════════════════════════
+Energy: 🔥🔥🔥🔥🔥 (Peak closing energy — confident, assumptive, generous)
+Technique: VALUE STACK + ASSUMPTIVE CLOSE + TWO-CHOICE CLOSE + PREEMPTIVE OBJECTION HANDLING + SCARCITY
+
+[SLIDE 10: "Your Invitation — Complimentary Performance Scan"]
+
+[STAGE DIRECTION: Move to center. Plant your feet. This is the close. Be direct, confident, and generous — not salesy.]
+
+"So here's what I want to do for everyone in this room — because your company brought me in, and I want to make sure this was worth more than just 30 minutes of information."
+
+[VALUE STACK — Roberto Monaco technique]
+"I'd like to offer every person in this room a complimentary nervous system performance scan. Let me tell you what that includes, because this isn't just a quick check."
+
+"First — a full nervous system scan using the same technology I showed you. That scan alone, if you walked into our office, is a $197 value."
+
+"Second — a one-on-one consultation with me. Not a tech, not an assistant — me. I'll walk you through your results, explain exactly what's going on, and answer every question you have. That's another $97 value."
+
+"Third — a complete report of findings. You'll walk out with a clear picture of how your nervous system is performing and what, if anything, needs attention. That's an $81 value."
+
+"Total — that's $375 worth of evaluation. For everyone in this room today — complimentary. No cost. No obligation. No catch."
+
+[PREEMPTIVE OBJECTION HANDLING]
+"Now — I already know what some of you are thinking."
+
+"'I'm busy.' I know you are. That's why the whole thing takes 15 minutes. You can do it on a lunch break."
+
+"'I'm not in pain.' Great. This isn't about pain — it's about PERFORMANCE. The best time to check your operating system is BEFORE it crashes, not after."
+
+"'I'll think about it.' I respect that. But I'll be honest with you — I'm only holding [NUMBER] complimentary slots for this group, and once they're gone, the next available is at full price. So if you're even curious, grab a spot now and you can always cancel."
+
+[TWO-CHOICE CLOSE]
+"On the table there's a sign-up sheet. All I need is your name, phone number, and one thing — do you prefer a morning appointment or an afternoon appointment? That's it. My team will call you tomorrow and lock in a specific time."
+
+[THE "BRING YOUR FAMILY" UPSELL]
+"Oh — and one more thing. This offer extends to your immediate family. Spouse, kids — bring them. Because here's the truth: if YOUR nervous system is compromised from sitting all day, imagine what your kids' nervous systems look like after 6 hours of school desks and 4 hours of screens. Same scan. Same consultation. Same value. Still complimentary."
+
+[EMBEDDED TRIAL CLOSE #4]
+"Who in here has a spouse or a kid who would benefit from this? Yeah — bring them. Let's get the whole family checked."
+
+═══════════════════════════════════════════════════════════════
+SECTION 8: Q&A + ROOM WORKING (28:00-30:00+)
+═══════════════════════════════════════════════════════════════
+Energy: 🔥🔥🔥 (Warm, approachable, every answer re-closes)
+Technique: Q&A RE-CLOSE + ROOM-WORKING STRATEGY (Roberto Monaco)
+
+[SLIDE 11: "[PRACTICE NAME] — [PHONE] — [WEBSITE]"]
+
+"I'll take a couple of questions while you finish your lunch — and if you want to grab a sign-up sheet, go for it."
+
+[STAGE DIRECTION: Take 2-3 questions MAX. Keep answers to 60 seconds each.]
+
+[Q&A RE-CLOSE FRAMEWORK — Every answer ends with a redirect to the offer]
+
+Example Q: "Is this like cracking your back?"
+Answer: "Great question. No — what we do is very precise, very gentle. Nothing like what you might picture. And honestly, the best way to understand it is to come in and experience the scan. It's totally non-invasive — you're fully clothed, it takes 15 minutes, and you'll see exactly what I'm talking about. Grab a sheet if you haven't already."
+
+Example Q: "Does insurance cover this?"
+Answer: "Most insurance plans do have chiropractic benefits, and our team handles all of that for you. But the scan and consultation I'm offering today is complimentary regardless — so insurance doesn't even matter for this first step. Sign up, come in, and we'll sort out the details from there."
+
+Example Q: "How often would I need to come in?"
+Answer: "That depends entirely on what your scan shows. Some people need a short corrective plan. Some people are in great shape and just need maintenance. That's why the scan matters — it takes the guesswork out. Come see what yours looks like."
+
+[ROOM-WORKING STRATEGY — Roberto Monaco technique]
+[STAGE DIRECTION: After Q&A, do NOT stand at the front. Do NOT hover near the sign-up sheet. Do the following:]
+
+1. Walk to people who asked questions and continue the conversation one-on-one. These are warm — they self-identified as interested.
+
+2. Approach the QUIET ones — the people who didn't raise their hand, didn't ask questions, but were clearly paying attention. Walk over casually. "Hey, what did you think? Anything resonate?" — then listen. Most of the time they'll share a specific problem. Respond with: "That's exactly what the scan would show us. You should come in."
+
+3. If someone says "I'll think about it" — respond with: "Totally fair. Tell you what — put your name down just to hold a spot. If you change your mind, no big deal. But this way you don't lose the complimentary offer." (Roberto Monaco — reduce the commitment to get the commitment.)
+
+4. Have your team member quietly approach anyone who's lingering near the sign-up sheet but hasn't filled it out. Simple: "Want me to grab you a pen?"
+
+5. Before you leave, find the person who organized the event. Thank them personally. Then: "If your team liked this, I'd love to come back quarterly. And if you know anyone at other companies who'd want this for their team, I'm happy to do the same thing for them." (REFERRAL SEED.)
+
+[STAGE DIRECTION: Be out within 10-12 minutes of finishing. Respect their space. Leave them wanting more, not less. Take the sign-up sheets with you. Your team calls every single person within 24 hours.]
+
+═══════════════════════════════════════════════════════════════
+POST-PRESENTATION NOTES FOR THE DOCTOR
+═══════════════════════════════════════════════════════════════
+
+ENERGY MAP:
+- Opening (0-3 min): 🔥🔥🔥🔥 — High energy, pattern interrupt, command attention
+- Problem/Pain (3-13 min): 🔥🔥🔥 — Authoritative, data-driven, building tension
+- Scan Evidence (13-17 min): 🔥🔥🔥 — Confident, let data speak
+- Dickens Pattern (17-21 min): 🔥🔥🔥🔥🔥 — Emotional peak, personal, intense
+- 3 Wins (21-24 min): 🔥🔥🔥 — Practical, generous, get them moving
+- Value Stack/Close (24-28 min): 🔥🔥🔥🔥🔥 — Peak close energy, confident and direct
+- Q&A/Room Work (28-30+ min): 🔥🔥🔥 — Warm, conversational, every interaction re-closes
+
+KEY METRICS TO HIT:
+- At least 3 micro-commitments (hand raises, standing, timer setting)
+- At least 4 embedded trial closes before the formal close
+- Physical engagement minimum 2x (posture demo, standing for 30/60 rule)
+- Name-drop at least 2 attendees during the talk
+- Value stack total: $375 (scan $197 + consultation $97 + report $81)
+- Scarcity: limited slots — pick a number based on your actual schedule
+
+COMMON MISTAKES TO AVOID:
+- Do NOT open with "thanks for having me" — that's what every boring lunch speaker does
+- Do NOT skip the Dickens Pattern — it's the emotional engine of the close
+- Do NOT let Q&A run more than 3 minutes — every extra minute is sign-ups walking out
+- Do NOT leave without working the quiet people — they're often the best patients
+- Do NOT forget the family upsell — it can double your conversion from one event`,
     },
     materials: {
       title: 'Workshop Materials & Setup',
