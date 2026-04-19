@@ -235,27 +235,41 @@ export const PL_SECTIONS: PLSection[] = [
         id: "6200-team",
         code: "6200",
         label: "Team",
-        minPct: 20,
-        maxPct: 35,
+        minPct: 22,
+        maxPct: 40,
         items: [
+          {
+            id: "6210",
+            code: "6210",
+            label: "Associate Doctor Compensation",
+            minPct: 0,
+            maxPct: 12,
+            midPct: 8,
+            tooltip:
+              "Base salary plus production bonuses for associate doctors. Includes guaranteed minimums and any per-visit or percentage-of-collections compensation. Does NOT include the owner-doctor's draw — that comes out of profit. If you're solo with no associate, leave this at zero.",
+            coachingOver:
+              "Associate comp at [X]% — your associate is consuming more than 12 cents of every dollar collected. Check the math: are they producing at least 3x their total cost? If an associate costs $8K/month, they need to generate $24K+ in collections. If not, it's either a volume problem (not enough patients scheduled) or a case-average problem (too many single-visit plans). Fix the schedule first — most associates are under-booked, not overpaid.",
+            coachingUnder:
+              "Associate comp at [X]% is low, which likely means you're solo or your associate is on a heavily production-based deal. If you're solo, ignore this. If you have an associate producing but only costing 4-5%, make sure the comp plan is competitive enough to retain them. Losing a producing associate costs 3-6 months of revenue disruption.",
+          },
           {
             id: "6221",
             code: "6221",
-            label: "Employee Salary",
-            minPct: 18,
-            maxPct: 30,
-            midPct: 24,
+            label: "Staff Wages",
+            minPct: 10,
+            maxPct: 20,
+            midPct: 14,
             tooltip:
-              "All employee wages: front desk, CAs, office manager, associate doctors, billing staff, and any other W-2 employees. Includes base salary, hourly wages, bonuses, and commissions. Does NOT include the owner-doctor's draw — that comes out of profit.",
+              "All non-doctor employee wages: front desk staff, chiropractic assistants, office manager, X-ray techs, billing staff, and any other W-2 team members. Includes hourly wages, salary, bonuses, and overtime. Does NOT include associate doctor pay (separate line) or owner draw.",
             coachingOver:
-              "Employee salary at [X]% — your team cost is consuming more than 30 cents of every dollar collected. Before you cut staff, ask: is every team member producing value equal to 3x their cost? A CA who does intake AND applies billable therapies is worth 2x one who only checks people in. Cross-train before you cut. If you're overstaffed for volume, reduce hours before eliminating positions. Also check: are you paying market rate, or above? Overpaying by $2/hour across 4 employees is $16K/year.",
+              "Staff wages at [X]% — before you cut, ask: is every team member producing value equal to 3x their cost? A CA who does intake AND applies billable therapies is worth 2x one who only checks people in. Cross-train before you cut. If you're overstaffed for volume, reduce hours before eliminating positions. Match staffing to visit volume — at 80 visits/week you need 1.5-2 FTE CAs, not 3.",
             coachingUnder:
-              "Salary at [X]% — this is lean, possibly too lean. If your front desk is slammed, calls go to voicemail, and patients wait 15 minutes to check out, you're losing more in missed appointments than you'd spend on help. One missed new patient per week at $2,500 case average = $10K/month in lost revenue. Hire before you're desperate — and hire for culture, not just cost.",
+              "Staff wages at [X]% — this is lean, possibly too lean. If your front desk is slammed, calls go to voicemail, and patients wait 15 minutes to check out, you're losing more in missed appointments than you'd spend on help. One missed new patient per week at $2,500 case average = $10K/month in lost revenue. Hire before you're desperate.",
           },
           {
             id: "6222",
             code: "6222",
-            label: "Employee Employer Tax",
+            label: "Employer Payroll Tax",
             minPct: 2,
             maxPct: 5,
             midPct: 3.5,
@@ -264,7 +278,21 @@ export const PL_SECTIONS: PLSection[] = [
             coachingOver:
               "Employer tax at [X]% — check your workers' comp classification code. Chiropractic offices should be on a clerical rate, not a medical rate — this alone can save $1,000-$2,000/year. Also review your state unemployment rate; if you've had turnover that triggered claims, your SUTA rate may be elevated. Focus on retention to bring it back down. Shop your workers' comp annually.",
             coachingUnder:
-              "Employer tax at [X]% — double-check that you're not misclassifying employees as 1099 contractors. The IRS has cracked down hard on this in healthcare. If your 'contractor' has a set schedule, uses your equipment, and you control how they work — that's an employee. Penalties for misclassification are severe. Also make sure you're withholding and remitting properly.",
+              "Employer tax at [X]% — double-check that you're not misclassifying employees as 1099 contractors. The IRS has cracked down hard on this in healthcare. If your 'contractor' has a set schedule, uses your equipment, and you control how they work — that's an employee. Penalties for misclassification are severe.",
+          },
+          {
+            id: "6230",
+            code: "6230",
+            label: "Employee Benefits",
+            minPct: 1,
+            maxPct: 5,
+            midPct: 2.5,
+            tooltip:
+              "Employer health insurance contributions, dental/vision, retirement plan matching (401k, SEP-IRA, SIMPLE IRA), workers' comp insurance, disability insurance, and any other employee benefits. Does NOT include payroll taxes — those are a separate line.",
+            coachingOver:
+              "Benefits at [X]% — review your health insurance plan. You don't need a Cadillac plan to attract good staff. A solid ICHRA or QSEHRA can save $500-$1,000/month while still offering real coverage. For retirement, a SIMPLE IRA with 3% match is the most cost-effective option for small practices. Make sure your workers' comp is classified correctly — chiro offices should be on clerical rates.",
+            coachingUnder:
+              "Benefits at [X]% — if you're not offering any benefits, you'll struggle to attract and retain quality staff, especially at practices collecting $40K+/month. Even a basic health stipend ($200-$300/month) or SIMPLE IRA shows you invest in your team. The cost of replacing a good CA ($3K-$5K in recruiting and training) makes modest benefits a smart retention investment.",
           },
           {
             id: "6291",
@@ -276,9 +304,9 @@ export const PL_SECTIONS: PLSection[] = [
             tooltip:
               "Fees paid to your payroll processor (Gusto, ADP, Paychex, QuickBooks Payroll, etc.) for running payroll, filing tax forms, issuing W-2s, and handling direct deposits.",
             coachingOver:
-              "Payroll processing at [X]% — you may be overpaying for payroll services. ADP and Paychex often charge per-employee fees that add up. Compare pricing: Gusto and QuickBooks Payroll are typically $40-$80/month base plus $6-$10/employee. If you're paying significantly more, switch. The actual payroll processing is commoditized — don't overpay for a brand name.",
+              "Payroll processing at [X]% — you may be overpaying. ADP and Paychex often charge per-employee fees that add up. Compare pricing: Gusto and QuickBooks Payroll are typically $40-$80/month base plus $6-$10/employee. If you're paying significantly more, switch. Payroll processing is commoditized — don't overpay for a brand name.",
             coachingUnder:
-              "Payroll processing at [X]% — this is fine. Just make sure your payroll service is handling tax filings, W-2s, and state compliance correctly. A payroll tax penalty from the IRS because your $20/month service missed a filing costs far more than a proper payroll platform.",
+              "Payroll processing at [X]% — this is fine. Just make sure your payroll service handles tax filings, W-2s, and state compliance correctly. A payroll tax penalty because your $20/month service missed a filing costs far more than a proper platform.",
           },
         ],
       },
@@ -288,8 +316,8 @@ export const PL_SECTIONS: PLSection[] = [
         id: "6600-practice-costs",
         code: "6600",
         label: "Practice Costs",
-        minPct: 5,
-        maxPct: 10,
+        minPct: 6,
+        maxPct: 12,
         items: [
           {
             id: "6620",
@@ -318,6 +346,20 @@ export const PL_SECTIONS: PLSection[] = [
               "Utilities at [X]% — check your HVAC system; old units can double your electric bill. Get a programmable thermostat, switch to LED lighting, and make sure you're not on a commercial electric rate when you could be on a small-business rate. Review your utility bills for the last 12 months and look for seasonal spikes you can address.",
             coachingUnder:
               "Utilities at [X]% — this is fine. Not much to optimize here. Just make sure your HVAC is working efficiently so patients and staff are comfortable year-round.",
+          },
+          {
+            id: "6650",
+            code: "6650",
+            label: "Repairs & Maintenance",
+            minPct: 0.3,
+            maxPct: 1.5,
+            midPct: 0.7,
+            tooltip:
+              "Building repairs, HVAC service, plumbing, electrical work, equipment maintenance contracts, table servicing, X-ray calibration, and any physical upkeep of the practice. Does NOT include janitorial/cleaning (that's under Overhead).",
+            coachingOver:
+              "Repairs & maintenance at [X]% — if you're spending heavily here, your building or equipment may be aging out. Evaluate whether it's cheaper to keep repairing old equipment or replace it. For building issues, check your lease — most commercial leases put structural and major system repairs on the landlord. Make sure you're not paying for things that are the landlord's responsibility.",
+            coachingUnder:
+              "Repairs at [X]% — don't defer maintenance on critical equipment. A table that drops unexpectedly, an X-ray unit that's out of calibration, or an HVAC failure in August will cost you far more in emergency repairs and lost production than routine maintenance. Budget for annual equipment servicing and keep your space in top shape.",
           },
         ],
       },
@@ -520,6 +562,20 @@ export const PL_SECTIONS: PLSection[] = [
               "Royalty fees at [X]% — if you're a franchise, this is the cost of the brand and systems. Make sure you're actually using the marketing, training, and operational support that comes with the franchise fee. If you're paying 8% for a brand name but doing all your own marketing and operations, you're getting poor value. Have a conversation with your franchisor about what's included and maximize every benefit you're paying for.",
             coachingUnder: "",
           },
+          {
+            id: "6840",
+            code: "6840",
+            label: "Depreciation",
+            minPct: 0.5,
+            maxPct: 3,
+            midPct: 1.5,
+            tooltip:
+              "Non-cash expense reflecting the declining value of equipment and assets: adjusting tables, X-ray systems, decompression units, laser equipment, build-out improvements, and office furniture. Calculated by your accountant based on asset life and depreciation method (straight-line or accelerated/Section 179).",
+            coachingOver:
+              "Depreciation at [X]% — this isn't an expense you can reduce directly, but a high number means you have significant capital tied up in equipment. Make sure every piece of depreciating equipment is generating revenue that justifies its cost. Also confirm your accountant is using the most tax-advantageous depreciation method — Section 179 and bonus depreciation can accelerate deductions significantly in the year of purchase.",
+            coachingUnder:
+              "Depreciation at [X]% — either your equipment is fully depreciated (common in established practices) or you haven't been tracking depreciation properly. Talk to your accountant — depreciation is a valuable tax deduction that reduces your taxable income without costing you any cash. If you bought a $50K X-ray system and aren't depreciating it, you're overpaying on taxes.",
+          },
         ],
       },
 
@@ -571,6 +627,59 @@ export const PL_SECTIONS: PLSection[] = [
               "Travel at [X]% — are your travel expenses tied to high-ROI events? A $2,000 trip to a coaching event that produces $10K in practice improvements is worth it. A $2,000 trip to a resort CE course where you learn nothing new is a vacation. Be honest about which is which. Consider virtual CE options that cost 80% less when the in-person experience isn't critical.",
             coachingUnder:
               "Travel at [X]% — if you haven't attended an out-of-town seminar or coaching event in over a year, you may be falling behind. The energy, ideas, and connections from great events often produce a 30-60 day production surge. It's also how you avoid burnout — getting around other driven doctors recharges you. Budget for at least one major event per year.",
+          },
+        ],
+      },
+
+      // ── 7100 Continuing Education ─────────────────────────────────
+      {
+        id: "7100-continuing-education",
+        code: "7100",
+        label: "Continuing Education",
+        minPct: 1,
+        maxPct: 4,
+        items: [
+          {
+            id: "7110",
+            code: "7110",
+            label: "Doctor CE & Seminars",
+            minPct: 0.5,
+            maxPct: 3,
+            midPct: 1.5,
+            tooltip:
+              "All continuing education for the owner and associate doctors: seminar tuition, technique certifications (Gonstead, Thompson, Activator, SOT, upper cervical, etc.), state-required CE hours, online CE courses, and any clinical training programs. Does NOT include travel/lodging for CE events — that's under Travel.",
+            coachingOver:
+              "Doctor CE at [X]% — you're investing heavily in clinical skills, which is great, but are you implementing what you learn? The most expensive seminar is the one you attend and do nothing with. Pick 1-2 core techniques per year, implement them fully, measure the results, then move to the next. Chasing every new technique while mastering none is expensive and exhausting. Prioritize CE that directly impacts case acceptance and patient outcomes.",
+            coachingUnder:
+              "Doctor CE at [X]% — if you haven't attended a major seminar in over a year, you're falling behind. At minimum, budget for your state-required CE hours plus one major technique or practice management event per year. The energy and ideas from a great event often produce a 30-60 day production surge. It also prevents burnout — being around driven colleagues recharges you.",
+          },
+          {
+            id: "7120",
+            code: "7120",
+            label: "Staff Training",
+            minPct: 0.3,
+            maxPct: 1,
+            midPct: 0.5,
+            tooltip:
+              "Training and development for your team: CA training programs (ChiroMatchmakers, Front Desk Academy, etc.), billing certification courses, front desk scripting workshops, conference attendance for staff, CPR/first aid certification, HIPAA training, and any team development materials.",
+            coachingOver:
+              "Staff training at [X]% — make sure there's measurable ROI. Are trainings translating into better retention, higher case acceptance, fewer billing errors? If your CA went to a $3,000 seminar and nothing changed, that's entertainment, not education. Require a 'bring-back' report from every training with 3 specific things they'll implement.",
+            coachingUnder:
+              "Staff training at [X]% — untrained CAs cost you more than trained ones. A CA who can't handle a financial conversation loses 2-3 care plans per month. That's $5K-$10K in lost revenue because you didn't invest $500 in training. At minimum: one major CA training per year, monthly in-house scripting practice, and annual HIPAA compliance training.",
+          },
+          {
+            id: "7130",
+            code: "7130",
+            label: "Coaching & Consulting",
+            minPct: 0,
+            maxPct: 1.5,
+            midPct: 0.7,
+            tooltip:
+              "Practice management coaching (MaxLiving, Chiro Matchmakers, AMPED, etc.), business consulting, mastermind groups, and any ongoing coaching relationships. Includes monthly coaching fees, program tuition, and related event costs.",
+            coachingOver:
+              "Coaching at [X]% — coaching should have clear ROI. If you're paying $2K/month, you should point to at least $6K/month in growth directly from what you've implemented. If you've been in the same program 3+ years with flat numbers, it's become a comfort blanket, not a growth tool. Either re-engage with intensity or find a coach who challenges you differently.",
+            coachingUnder:
+              "Coaching at [X]% — the practices that grow fastest almost always have a coach. Not because the coach is magic, but because accountability works. If you're stuck at $30-$40K/month, an outside perspective can see what you can't. Budget $500-$1,500/month for a proven chiropractic coaching program. Interview 3 coaches, check references, and pick the one who makes you uncomfortable in the right way.",
           },
         ],
       },
@@ -629,11 +738,14 @@ export const SCALING_EXAMPLES: ScalingExample[] = [
       // Expenses
       "6110": 500,
       "6120": 50,
+      "6210": 0,
       "6221": 2800,
       "6222": 350,
+      "6230": 200,
       "6291": 60,
       "6620": 1200,
       "6640": 220,
+      "6650": 100,
       "6811": 50,
       "6812": 120,
       "6814": 350,
@@ -648,9 +760,13 @@ export const SCALING_EXAMPLES: ScalingExample[] = [
       "6828": 400,
       "6830": 150,
       "6831": 0,
+      "6840": 200,
       "7010": 50,
       "7020": 100,
       "7040": 150,
+      "7110": 300,
+      "7120": 100,
+      "7130": 0,
     },
   },
   {
@@ -674,11 +790,14 @@ export const SCALING_EXAMPLES: ScalingExample[] = [
       // Expenses
       "6110": 2000,
       "6120": 200,
-      "6221": 11000,
+      "6210": 5000,
+      "6221": 6000,
       "6222": 1600,
+      "6230": 800,
       "6291": 120,
       "6620": 3000,
       "6640": 500,
+      "6650": 300,
       "6811": 150,
       "6812": 350,
       "6814": 1000,
@@ -693,9 +812,13 @@ export const SCALING_EXAMPLES: ScalingExample[] = [
       "6828": 800,
       "6830": 350,
       "6831": 0,
+      "6840": 400,
       "7010": 75,
       "7020": 300,
       "7040": 400,
+      "7110": 750,
+      "7120": 300,
+      "7130": 400,
     },
   },
   {
@@ -719,11 +842,14 @@ export const SCALING_EXAMPLES: ScalingExample[] = [
       // Expenses
       "6110": 3500,
       "6120": 400,
-      "6221": 18000,
+      "6210": 8000,
+      "6221": 10000,
       "6222": 2800,
+      "6230": 1600,
       "6291": 200,
       "6620": 4400,
       "6640": 880,
+      "6650": 500,
       "6811": 300,
       "6812": 560,
       "6814": 1600,
@@ -738,9 +864,13 @@ export const SCALING_EXAMPLES: ScalingExample[] = [
       "6828": 1200,
       "6830": 560,
       "6831": 0,
+      "6840": 800,
       "7010": 120,
       "7020": 500,
       "7040": 600,
+      "7110": 1200,
+      "7120": 480,
+      "7130": 640,
     },
   },
   {
@@ -764,11 +894,14 @@ export const SCALING_EXAMPLES: ScalingExample[] = [
       // Expenses
       "6110": 6000,
       "6120": 800,
-      "6221": 35000,
+      "6210": 16500,
+      "6221": 18500,
       "6222": 5500,
+      "6230": 3000,
       "6291": 400,
       "6620": 8250,
       "6640": 1500,
+      "6650": 1000,
       "6811": 600,
       "6812": 1050,
       "6814": 3000,
@@ -783,9 +916,13 @@ export const SCALING_EXAMPLES: ScalingExample[] = [
       "6828": 2200,
       "6830": 1000,
       "6831": 10000,
+      "6840": 1500,
       "7010": 200,
       "7020": 800,
       "7040": 1200,
+      "7110": 2250,
+      "7120": 1050,
+      "7130": 1200,
     },
   },
 ];
