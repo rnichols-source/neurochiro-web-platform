@@ -1,20 +1,14 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase-admin';
-import { createServerSupabase } from '@/lib/supabase-server';
 
-async function checkAdminAuth() {
-  const supabase = createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-  return user;
-}
+import { checkAdminAuth } from '@/lib/admin-auth';
 
 export async function searchAllResources(query: string) {
   try {
     await checkAdminAuth();
     const supabase = createAdminClient();
-    const cleanQuery = query.trim();
+    const cleanQuery = query.trim().replace(/[%_(),.*\\]/g, '');
 
     const [
       { data: doctors },
@@ -28,7 +22,7 @@ export async function searchAllResources(query: string) {
         .limit(50),
       supabase.from('profiles')
         .select('id, full_name, email, role')
-        .or(`full_name.ilike.%${cleanQuery}%,email.ilike.%${searchAllResources}%`)
+        .or(`full_name.ilike.%${cleanQuery}%,email.ilike.%${cleanQuery}%`)
         .limit(50),
       supabase.from('seminars')
         .select('id, title, city, state')

@@ -13,8 +13,6 @@ export async function POST(req: Request) {
   const eventType = body.type; // 'email.bounced', 'email.complained', 'email.clicked', etc.
   const payload = body.data;
 
-  console.log(`[RESEND WEBHOOK] Received event: ${eventType}`, payload);
-
   try {
     // 2. Extract User ID and Event Data
     // Resend sends tags in the email metadata if we provided them.

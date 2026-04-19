@@ -5,12 +5,10 @@ import { executeAutomation } from '@/lib/automations';
 export const maxDuration = 60; // Allow function to run up to 60 seconds (for Pro plan)
 
 export async function GET(req: Request) {
-  // 1. Verify Authorization (Optional, usually via Vercel Cron Secret)
+  // 1. Verify Authorization
   const authHeader = req.headers.get('authorization');
-  if (
-    process.env.CRON_SECRET && 
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

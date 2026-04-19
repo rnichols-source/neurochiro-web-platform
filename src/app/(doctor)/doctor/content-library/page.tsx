@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, Copy, Check, Edit3, X, FileText, Mail, Share2, Layers, Sparkles, Lock, Zap } from "lucide-react";
+import { createDoctorSubscriptionCheckout, hasPurchased } from "../purchase-actions";
 
 // Will import from content-data.ts once it's created
 // For now, define the type
@@ -47,7 +48,11 @@ export default function ContentLibraryPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
-  const [isSubscribed] = useState(false); // TODO: check Supabase for subscription status
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  useEffect(() => {
+    hasPurchased('content-library').then(setIsSubscribed).catch(() => {});
+  }, []);
 
   const thirtyDaysAgo = useMemo(() => {
     const d = new Date();
@@ -140,7 +145,14 @@ export default function ContentLibraryPage() {
               <p className="text-gray-400 text-xs">New content added every month. Cancel anytime.</p>
             </div>
           </div>
-          <button className="px-5 py-2.5 bg-neuro-orange text-white rounded-lg font-bold text-xs hover:bg-neuro-orange/90 transition-colors whitespace-nowrap">
+          <button
+            onClick={async () => {
+              const result = await createDoctorSubscriptionCheckout('Patient Education Content Library', 2900, '/doctor/content-library');
+              if (result.url) window.location.href = result.url;
+              else alert(result.error);
+            }}
+            className="px-5 py-2.5 bg-neuro-orange text-white rounded-lg font-bold text-xs hover:bg-neuro-orange/90 transition-colors whitespace-nowrap"
+          >
             $29/month
           </button>
         </div>

@@ -51,8 +51,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (error || !data || data.length === 0) {
-      console.log("[SEARCH_API] No results or error, triggered FALLBACK FETCH (Location Ignored)");
-      
       // [FALLBACK FIX]: Ignore location filter entirely for fallback
       let fallbackQuery = supabase
         .from('doctors')

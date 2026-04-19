@@ -99,8 +99,8 @@ export default async function ArticlePage({ params }: Props) {
                       <h4 className="font-bold text-neuro-navy mb-2 text-xl">Ready to scale your practice?</h4>
                       <p className="text-gray-600 text-sm">Join the NeuroChiro Mastermind and get the exact blueprints to build a high-profit, cash-based clinic.</p>
                     </div>
-                    <Link href="/programs/mastermind" className="shrink-0 px-6 py-3 bg-neuro-navy text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange transition-all">
-                      Explore Mastermind
+                    <Link href="/learn" className="shrink-0 px-6 py-3 bg-neuro-navy text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange transition-all">
+                      Explore More
                     </Link>
                   </div>
                 )}

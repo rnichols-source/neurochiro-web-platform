@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
+import { createDoctorProductCheckout } from "../purchase-actions";
 
 // ---------------------------------------------------------------------------
 // Data imports (safe fallback if pl-data doesn't exist yet)
@@ -571,7 +572,12 @@ export default function PLAnalyzerPage() {
             <p style={{ color: "#94a3b8", margin: "0 0 16px", fontSize: 14 }}>
               Input your real expenses, see gap analysis, coaching notes, and save monthly snapshots.
             </p>
-            <div
+            <button
+              onClick={async () => {
+                const result = await createDoctorProductCheckout('pl-analyzer', 'Perfect P&L Analyzer', 2900);
+                if (result.url) window.location.href = result.url;
+                else alert(result.error);
+              }}
               style={{
                 display: "inline-block",
                 background: "#e97325",
@@ -580,10 +586,12 @@ export default function PLAnalyzerPage() {
                 borderRadius: 8,
                 fontWeight: 700,
                 fontSize: 16,
+                cursor: "pointer",
+                border: "none",
               }}
             >
               $29 one-time
-            </div>
+            </button>
           </div>
         )}
 

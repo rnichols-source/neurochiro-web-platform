@@ -4,7 +4,7 @@ import { createServerSupabase } from '@/lib/supabase-server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
 import { AuditLog } from '@/types/admin';
-import { isAdminRole } from '@/lib/founder';
+import { checkAdminAuth } from '@/lib/admin-auth';
 
 export interface ModerationAlert {
   id: string;
@@ -31,25 +31,7 @@ const globalSettings = {
   outboundScan: true,
 };
 
-async function checkAdminAuth() {
-  const supabase = createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-
-  // Explicitly define profile type to avoid 'never' type errors
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single() as { data: { role: string } | null };
-
-  // Harden isAdmin logic with metadata fallback and explicit string checks
-  const isAdmin = (profile && 'role' in profile && isAdminRole(profile.role)) ||
-                  isAdminRole(user.user_metadata?.role as string);
-  
-  if (!isAdmin) throw new Error("Forbidden: Admin access required");
-  return user;
-}
+// checkAdminAuth is imported from @/lib/admin-auth
 
 export async function getModerationData() {
   try {

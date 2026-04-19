@@ -282,8 +282,6 @@ export default function GlobalNetworkMap({
       const dataToSend = buildMarkerData();
       if (dataToSend.length === 0) return;
 
-      console.log('[MAP_PARENT] SYNCING ALL MARKERS:', dataToSend.length);
-
       iframeRef.current?.contentWindow?.postMessage({
         type: 'force-raw-markers',
         data: dataToSend,

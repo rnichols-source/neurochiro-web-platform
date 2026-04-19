@@ -3,8 +3,10 @@
 import { createAdminClient } from '@/lib/supabase-admin'
 import { revalidatePath } from 'next/cache'
 import { onSeminarApprovedAction, onSeminarRejectedAction } from '@/app/actions/automations'
+import { checkAdminAuth } from '@/lib/admin-auth'
 
 export async function getPendingSeminars() {
+  await checkAdminAuth();
   const supabase = createAdminClient()
 
   const { data, error } = await supabase
@@ -34,6 +36,7 @@ export async function getPendingSeminars() {
 }
 
 export async function approveSeminarAction(id: string) {
+  await checkAdminAuth();
   const supabase = createAdminClient()
 
   const { data: seminar, error: fetchError } = await supabase
@@ -65,6 +68,7 @@ export async function approveSeminarAction(id: string) {
 }
 
 export async function rejectSeminarAction(id: string, notes: string) {
+  await checkAdminAuth();
   const supabase = createAdminClient()
 
   const { data: seminar, error: fetchError } = await supabase

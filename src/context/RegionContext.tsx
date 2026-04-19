@@ -36,9 +36,6 @@ export function RegionProvider({ children }: { children: React.ReactNode }) {
     const newRegion = REGIONS[code];
     setRegionState(newRegion);
     localStorage.setItem("nc_region", code);
-    
-    // Optionally trigger a refresh or broadcast event for data refetching
-    console.log(`[REGION] Switched to ${code}`);
   }, []);
 
   const value = useMemo(() => ({ region, setRegion }), [region, setRegion]);

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import { Search, Copy, Check, Edit3, X, FileText, Users, Building2, Puzzle, Shield, Zap, Lock, ChevronDown } from "lucide-react";
+import { createDoctorProductCheckout, hasPurchased } from "../purchase-actions";
 
 interface ContractTemplate {
   id: string;
@@ -154,7 +155,14 @@ export default function ContractsPage() {
                 <span className="bg-neuro-orange/20 text-neuro-orange text-xs font-black px-2 py-0.5 rounded-full">Save ${totalIndividualPrice - 99}</span>
               </div>
             </div>
-            <button className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap">
+            <button
+              onClick={async () => {
+                const result = await createDoctorProductCheckout('contract-bundle', 'Complete Contract Templates Bundle', 9900);
+                if (result.url) window.location.href = result.url;
+                else alert(result.error);
+              }}
+              className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap"
+            >
               Get the Bundle — $99
             </button>
           </div>
@@ -290,7 +298,14 @@ export default function ContractsPage() {
                           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-50 to-transparent" />
                         </div>
                         <div className="flex items-center gap-3">
-                          <button className="px-5 py-2.5 bg-neuro-orange text-white rounded-lg font-bold text-xs hover:bg-neuro-orange/90 transition-colors flex items-center gap-1.5">
+                          <button
+                            onClick={async () => {
+                              const result = await createDoctorProductCheckout(item.id, item.title, item.price * 100);
+                              if (result.url) window.location.href = result.url;
+                              else alert(result.error);
+                            }}
+                            className="px-5 py-2.5 bg-neuro-orange text-white rounded-lg font-bold text-xs hover:bg-neuro-orange/90 transition-colors flex items-center gap-1.5"
+                          >
                             <Lock className="w-3.5 h-3.5" /> Unlock — ${item.price}
                           </button>
                           <span className="text-xs text-gray-400">or get all templates for $99</span>

@@ -1,6 +1,7 @@
 'use server'
 
 import { stripe } from "@/lib/stripe";
+import { checkAdminAuth } from '@/lib/admin-auth';
 
 /**
  * Fetches all records from a Stripe list API using async iteration.
@@ -18,7 +19,13 @@ export async function getRevenueData(timeRange: string) {
   const startDate = new Date();
   const previousStartDate = new Date();
   let previousEndDate = new Date();
-  
+
+  try {
+    await checkAdminAuth();
+  } catch {
+    return { success: false, error: "Unauthorized" };
+  }
+
   // 1. Establish Precise Time Windows
   if (timeRange === "7D") {
     startDate.setDate(now.getDate() - 7);

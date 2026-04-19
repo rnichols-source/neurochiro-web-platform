@@ -191,8 +191,8 @@ export default function NotificationBell() {
                   >
                     <Check className="w-4 h-4" />
                   </button>
-                  <Link 
-                    href="/settings/notifications"
+                  <Link
+                    href="/dashboard"
                     className="p-2 hover:bg-white rounded-xl text-gray-400 hover:text-neuro-navy transition-all border border-transparent hover:border-gray-100"
                     title="Notification Settings"
                   >
@@ -290,8 +290,8 @@ export default function NotificationBell() {
                 )}
               </div>
 
-              <Link 
-                href="/notifications"
+              <Link
+                href="/dashboard"
                 className="block p-4 bg-gray-50 hover:bg-gray-100 text-center text-[10px] font-black text-neuro-navy uppercase tracking-widest border-t border-gray-100 transition-colors"
                 onClick={() => setIsOpen(false)}
               >

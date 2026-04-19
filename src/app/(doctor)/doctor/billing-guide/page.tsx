@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
+import { createDoctorProductCheckout } from "../purchase-actions";
 import {
   Search,
   Copy,
@@ -310,7 +311,14 @@ export default function BillingGuidePage() {
                 )}
               </div>
             </div>
-            <button className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap flex-shrink-0">
+            <button
+              onClick={async () => {
+                const result = await createDoctorProductCheckout('billing-guide', 'Insurance & Billing Toolkit', 3900);
+                if (result.url) window.location.href = result.url;
+                else alert(result.error);
+              }}
+              className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap flex-shrink-0"
+            >
               Buy Now &mdash; $39
             </button>
           </div>
@@ -379,7 +387,14 @@ export default function BillingGuidePage() {
                         <p className="text-sm font-bold text-gray-400">
                           Purchase the Billing Toolkit to unlock this section
                         </p>
-                        <button className="px-5 py-2.5 bg-neuro-orange text-white rounded-lg font-bold text-xs hover:bg-neuro-orange/90 transition-colors">
+                        <button
+                          onClick={async () => {
+                            const result = await createDoctorProductCheckout('billing-guide', 'Insurance & Billing Toolkit', 3900);
+                            if (result.url) window.location.href = result.url;
+                            else alert(result.error);
+                          }}
+                          className="px-5 py-2.5 bg-neuro-orange text-white rounded-lg font-bold text-xs hover:bg-neuro-orange/90 transition-colors"
+                        >
                           Unlock for $39
                         </button>
                       </div>
@@ -497,7 +512,14 @@ export default function BillingGuidePage() {
               {totalTemplates > 0 ? `, ${totalTemplates} templates` : ""}.
               One-time purchase.
             </p>
-            <button className="px-8 py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 transition-colors">
+            <button
+              onClick={async () => {
+                const result = await createDoctorProductCheckout('billing-guide', 'Insurance & Billing Toolkit', 3900);
+                if (result.url) window.location.href = result.url;
+                else alert(result.error);
+              }}
+              className="px-8 py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 transition-colors"
+            >
               Buy Now &mdash; $39
             </button>
           </div>

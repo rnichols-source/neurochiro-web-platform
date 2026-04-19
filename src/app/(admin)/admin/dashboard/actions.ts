@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { stripe } from "@/lib/stripe"
 import { getAuditLogs } from "../logs/actions"
 import { AuditLog } from "@/types/admin"
+import { checkAdminAuth } from '@/lib/admin-auth'
 
 /**
  * Fetches all records from a Stripe list API using async iteration.
@@ -18,8 +19,9 @@ async function fetchAll<T>(stripeList: any): Promise<T[]> {
 
 export async function getAdminDashboardStats(regionCode?: string) {
   const supabase = createAdminClient()
-  
+
   try {
+    await checkAdminAuth();
     // 1. Establish precise time window for 30D
     const now = new Date()
     const thirtyDaysAgo = new Date(now)
@@ -191,6 +193,11 @@ export async function getAdminDashboardStats(regionCode?: string) {
 }
 
 export async function exportIntelligenceReport() {
+  try {
+    await checkAdminAuth();
+  } catch {
+    return { success: false };
+  }
   await new Promise(resolve => setTimeout(resolve, 1500))
   return { success: true }
 }

@@ -2,6 +2,7 @@
 
 import { AuditLog, LogCategory } from "@/types/admin";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { checkAdminAuth } from '@/lib/admin-auth';
 
 export async function getAuditLogs(options: { 
   category?: string; 
@@ -12,6 +13,7 @@ export async function getAuditLogs(options: {
   const supabase = createAdminClient();
 
   try {
+    await checkAdminAuth();
     let query = supabase
       .from('audit_logs')
       .select('*');
@@ -54,6 +56,7 @@ export async function logAuditAction(params: {
     severity: string;
     metadata?: any;
 }) {
+    await checkAdminAuth();
     const supabase = createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
     

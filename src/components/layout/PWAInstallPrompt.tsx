@@ -29,11 +29,8 @@ export default function PWAInstallPrompt() {
     const isSafariBrowser = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     setIsSafari(isSafariBrowser);
 
-    console.log("[PWA] Status:", { isStandaloneMode, isIOSDevice, isSafariBrowser });
-
     // Capture the install prompt event
     const handleBeforeInstallPrompt = (e: any) => {
-      console.log("[PWA] beforeinstallprompt event fired");
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
       // Stash the event so it can be triggered later.
@@ -42,7 +39,6 @@ export default function PWAInstallPrompt() {
       // Logic to show prompt (e.g., after 5 seconds)
       const hasSeenPrompt = localStorage.getItem('nc_pwa_prompt_seen');
       if (!isStandaloneMode && !hasSeenPrompt) {
-        console.log("[PWA] Scheduling prompt display in 5s");
         setTimeout(() => setShowPrompt(true), 5000);
       }
     };
@@ -52,7 +48,6 @@ export default function PWAInstallPrompt() {
     // If it's a device where we can't capture the event (iOS or Safari MacOS)
     // we show the instructions anyway because we can't trigger the native prompt
     if ((isIOSDevice || isSafariBrowser) && !isStandaloneMode && !localStorage.getItem('nc_pwa_prompt_seen')) {
-      console.log("[PWA] iOS or Safari detected, scheduling manual instructions in 5s");
       setTimeout(() => setShowPrompt(true), 5000);
     }
 
@@ -63,19 +58,16 @@ export default function PWAInstallPrompt() {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      console.warn("[PWA] handleInstallClick called but deferredPrompt is null");
       setDebugInfo("Please use your browser's menu to 'Install' or 'Add to Home Screen'.");
       return;
     }
 
     try {
       // Show the install prompt
-      console.log("[PWA] Triggering native install prompt");
       deferredPrompt.prompt();
 
       // Wait for the user to respond to the prompt
       const { outcome } = await deferredPrompt.userChoice;
-      console.log(`[PWA] User responded to the install prompt: ${outcome}`);
       
       if (outcome === 'accepted') {
         setShowPrompt(false);

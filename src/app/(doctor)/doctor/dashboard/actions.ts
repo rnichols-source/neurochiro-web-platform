@@ -28,10 +28,6 @@ export async function getDoctorDashboardStats() {
     const profile = profileRes.data;
     const doctor = doctorRes.data;
 
-    // Debug logging
-    console.log('[DASHBOARD] doctorRes error:', doctorRes.error?.message);
-    console.log('[DASHBOARD] doctor data:', doctor ? 'found' : 'null', 'profile_views:', (doctor as any)?.profile_views);
-
     const seminarCount = seminarsRes.count || 0;
     const jobCount = jobsRes.count || 0;
     const patientLeads = leadsRes.count || 0;

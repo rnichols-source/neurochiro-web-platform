@@ -34,7 +34,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
 
-  // Role-based access control
+  // Role-based access control (lightweight check in middleware)
+  // NOTE: For /admin routes, the actual admin role verification happens in server actions
+  // via checkAdminAuth() which queries the profiles table. The middleware only checks
+  // that the user is authenticated (handled above). For /doctor and /student routes,
+  // we use user_metadata as a hint — server actions should also verify if needed.
   const userRole = session?.user?.user_metadata?.role || '';
   const path = req.nextUrl.pathname;
 
@@ -44,9 +48,8 @@ export async function middleware(req: NextRequest) {
   if (path.startsWith('/student') && !['student', 'admin', 'founder', 'super_admin'].includes(userRole)) {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
-  if (path.startsWith('/admin') && !['admin', 'founder', 'super_admin', 'regional_admin'].includes(userRole)) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
+  // Admin routes: only require authentication here. Actual role verification
+  // is enforced by checkAdminAuth() in every admin server action.
 
   return res;
 }

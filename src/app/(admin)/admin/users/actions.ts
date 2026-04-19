@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase-admin'
+import { checkAdminAuth } from '@/lib/admin-auth'
 
 export type UserType = 'Students' | 'Doctors' | 'Vendors';
 
@@ -17,6 +18,7 @@ export async function getTalentUsers(options: {
   const supabase = createAdminClient();
 
   try {
+    await checkAdminAuth();
     const roleMap: Record<UserType, string> = {
       'Students': 'student',
       'Doctors': 'doctor',
@@ -78,8 +80,9 @@ export async function getTalentUsers(options: {
 
 export async function getTalentAuditStats() {
   const supabase = createAdminClient();
-  
+
   try {
+    await checkAdminAuth();
     const { count: students } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student');
     const { count: doctors } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'doctor');
     const { count: vendors } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'vendor');
@@ -108,6 +111,11 @@ export async function getTalentAuditStats() {
 }
 
 export async function dispatchTalentBroadcast(target: string, data: any) {
+  try {
+    await checkAdminAuth();
+  } catch {
+    return { success: false };
+  }
   // Log the action to audit system
   console.log(`[AUDIT] Broadcast sent to ${target} by Admin. Content:`, data);
   // Simulate network delay

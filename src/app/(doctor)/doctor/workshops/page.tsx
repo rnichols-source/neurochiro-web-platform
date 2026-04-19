@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
+import { createDoctorProductCheckout } from "../purchase-actions";
 import {
   Presentation,
   Copy,
@@ -280,7 +281,14 @@ export default function WorkshopsPage() {
               <p className="text-white font-bold">Unlock this kit to access all content</p>
               <p className="text-gray-400 text-xs">Preview available below — purchase to copy and customize.</p>
             </div>
-            <button className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap flex items-center gap-2">
+            <button
+              onClick={async () => {
+                const result = await createDoctorProductCheckout(selectedKit.id, selectedKit.title, selectedKit.price * 100);
+                if (result.url) window.location.href = result.url;
+                else alert(result.error);
+              }}
+              className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap flex items-center gap-2"
+            >
               <Lock className="w-4 h-4" /> Unlock Kit — ${selectedKit.price}
             </button>
           </div>
@@ -508,7 +516,14 @@ export default function WorkshopsPage() {
                             <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-50 to-transparent" />
                           </div>
                           <div className="mt-3 flex items-center gap-3">
-                            <button className="px-5 py-2.5 bg-neuro-orange text-white rounded-lg font-bold text-xs hover:bg-neuro-orange/90 transition-colors flex items-center gap-1.5">
+                            <button
+                              onClick={async () => {
+                                const result = await createDoctorProductCheckout(selectedKit.id, selectedKit.title, selectedKit.price * 100);
+                                if (result.url) window.location.href = result.url;
+                                else alert(result.error);
+                              }}
+                              className="px-5 py-2.5 bg-neuro-orange text-white rounded-lg font-bold text-xs hover:bg-neuro-orange/90 transition-colors flex items-center gap-1.5"
+                            >
                               <Lock className="w-3.5 h-3.5" /> Unlock Kit — $
                               {selectedKit.price}
                             </button>
@@ -613,7 +628,14 @@ export default function WorkshopsPage() {
                 </span>
               </div>
             </div>
-            <button className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap">
+            <button
+              onClick={async () => {
+                const result = await createDoctorProductCheckout('workshop-bundle', 'Workshop Mastery System', 14900);
+                if (result.url) window.location.href = result.url;
+                else alert(result.error);
+              }}
+              className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap"
+            >
               Get All 5 Kits &mdash; $149
             </button>
           </div>
@@ -701,7 +723,14 @@ export default function WorkshopsPage() {
                       >
                         Preview
                       </button>
-                      <button className="flex-1 px-4 py-2.5 bg-neuro-orange text-white rounded-lg font-bold text-xs hover:bg-neuro-orange/90 transition-colors flex items-center justify-center gap-1">
+                      <button
+                        onClick={async () => {
+                          const result = await createDoctorProductCheckout(kit.id, kit.title, kit.price * 100);
+                          if (result.url) window.location.href = result.url;
+                          else alert(result.error);
+                        }}
+                        className="flex-1 px-4 py-2.5 bg-neuro-orange text-white rounded-lg font-bold text-xs hover:bg-neuro-orange/90 transition-colors flex items-center justify-center gap-1"
+                      >
                         <Lock className="w-3 h-3" /> Unlock ${kit.price}
                       </button>
                     </div>

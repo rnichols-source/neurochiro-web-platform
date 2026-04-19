@@ -175,7 +175,6 @@ export default function Navbar() {
                       </Link>
                       <button 
                         onClick={async () => {
-                          console.log("Signing out...");
                           await supabase.auth.signOut();
                           window.location.replace('/');
                         }}

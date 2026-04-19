@@ -4,9 +4,11 @@ import { createServerSupabase } from '@/lib/supabase-server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
 import { unstable_noStore as noStore } from 'next/cache';
+import { checkAdminAuth } from '@/lib/admin-auth';
 
 export async function getAllDoctors(search?: string) {
   noStore();
+  await checkAdminAuth();
   // Using Admin Client to ensure admin sees all records regardless of RLS
   const supabase = createAdminClient();
   let query = supabase.from('doctors').select('*').order('last_name', { ascending: true });
@@ -21,6 +23,7 @@ export async function getAllDoctors(search?: string) {
 }
 
 export async function updateDoctorManually(doctorId: string, updates: any) {
+  await checkAdminAuth();
   // Use Admin Client for manual directory updates
   const supabase = createAdminClient();
   const { data: { user } } = await (supabase.auth as any).getUser(); // Auth might not work with admin client if token is not passed, but we don't strictly need user for update
@@ -67,6 +70,7 @@ export async function updateDoctorManually(doctorId: string, updates: any) {
 
 export async function bulkDeleteDoctors(doctorIds: string[]) {
   try {
+    await checkAdminAuth();
     const supabase = createAdminClient();
     let deleted = 0;
     let failed = 0;
@@ -107,6 +111,7 @@ export async function bulkDeleteDoctors(doctorIds: string[]) {
 }
 
 export async function migrateDoctorsFromCSV(rows: { name: string; email: string; stripeCustomerId: string; subscriptionId: string; amount: string }[]) {
+  await checkAdminAuth();
   const supabase = createAdminClient();
   let created = 0;
   let skipped = 0;
@@ -217,6 +222,7 @@ export async function migrateDoctorsFromCSV(rows: { name: string; email: string;
 }
 
 export async function registerAllUnlinkedDoctors() {
+  await checkAdminAuth();
   const supabase = createAdminClient();
 
   // Find all doctors without a user_id (no auth account)
@@ -322,6 +328,7 @@ export async function registerAllUnlinkedDoctors() {
 }
 
 export async function sendMigrationEmails(doctorIds: string[]) {
+  await checkAdminAuth();
   const supabase = createAdminClient();
   let sent = 0;
   let failed = 0;
@@ -478,6 +485,7 @@ export async function sendMigrationEmails(doctorIds: string[]) {
 
 export async function deleteDoctorManually(doctorId: string) {
   try {
+    await checkAdminAuth();
     // Use Admin Client to bypass RLS and ensure deletion works
     const supabase = createAdminClient();
     const serverSupabase = createServerSupabase();

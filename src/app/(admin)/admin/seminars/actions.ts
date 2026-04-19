@@ -2,8 +2,10 @@
 
 import { createAdminClient } from '@/lib/supabase-admin'
 import { revalidatePath } from 'next/cache'
+import { checkAdminAuth } from '@/lib/admin-auth'
 
 export async function getAdminSeminars() {
+  await checkAdminAuth();
   const supabase = createAdminClient()
 
   const { data, error } = await supabase
@@ -37,6 +39,7 @@ export async function getAdminSeminars() {
 }
 
 export async function toggleSeminarApproval(seminarId: string, isApproved: boolean) {
+  await checkAdminAuth();
   const supabase = createAdminClient()
 
   const { error } = await supabase
@@ -51,6 +54,7 @@ export async function toggleSeminarApproval(seminarId: string, isApproved: boole
 }
 
 export async function deleteSeminar(seminarId: string) {
+  await checkAdminAuth();
   const supabase = createAdminClient()
 
   const { error } = await supabase

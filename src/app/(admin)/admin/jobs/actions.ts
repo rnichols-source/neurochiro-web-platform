@@ -1,8 +1,10 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase-admin'
+import { checkAdminAuth } from '@/lib/admin-auth'
 
 export async function getAdminJobPostings() {
+  await checkAdminAuth();
   const supabase = createAdminClient()
 
   const { data, error } = await supabase
@@ -36,6 +38,7 @@ export async function getAdminJobPostings() {
 }
 
 export async function updateJobStatus(jobId: string, status: string) {
+  await checkAdminAuth();
   const supabase = createAdminClient()
 
   const { error } = await supabase
@@ -48,6 +51,7 @@ export async function updateJobStatus(jobId: string, status: string) {
 }
 
 export async function deleteJobPosting(jobId: string) {
+  await checkAdminAuth();
   const supabase = createAdminClient()
 
   const { error } = await supabase

@@ -44,7 +44,6 @@ const TWILIO_FROM = process.env.TWILIO_PHONE;
 const sendDiscordNotification = async (message: string) => {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
   if (!webhookUrl) {
-    console.log(`[DISCORD MOCK] ${message}`);
     return;
   }
 
@@ -138,7 +137,6 @@ const enqueue = async (eventType: string, payload: Record<string, unknown>, dela
   try {
     const supabaseAdmin = getSupabaseAdmin();
     if (!supabaseAdmin) {
-      console.log(`[AUTOMATION QUEUE MOCK] ${eventType}`, payload);
       return;
     }
 
@@ -170,12 +168,10 @@ const enqueue = async (eventType: string, payload: Record<string, unknown>, dela
 const sendSMS = async (phone: string, message: string) => {
   const client = await getTwilioClient();
   if (!client || !TWILIO_FROM) {
-    console.log(`[SMS MOCK] To ${phone}: ${message}`);
     return;
   }
   try {
     await client.messages.create({ body: message, from: TWILIO_FROM, to: phone });
-    console.log(`[SMS SENT] To ${phone}`);
   } catch (err) {
     console.error("[SMS FAILED]", err);
   }
@@ -977,7 +973,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             html: payload.html
           });
         } else {
-          console.log(`[ADMIN MOCK] ${payload.subject}`, payload.html);
+          // Admin email not configured, skipping
         }
         break;
     }

@@ -8,13 +8,18 @@ export async function POST(req: Request) {
   const signature = req.headers.get("Stripe-Signature") as string;
   const supabase = createServerSupabase();
 
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
+  }
+
   let event;
 
   try {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET || "whsec_mock"
+      webhookSecret
     );
   } catch (error: unknown) {
     const err = error as Error;
