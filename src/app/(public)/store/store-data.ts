@@ -2,11 +2,14 @@
 // Store Data — Public Product Catalog with Retail + Member Pricing
 // ============================================================================
 
+export type StoreAudience = "doctor" | "student" | "patient";
+
 export interface StoreProduct {
   id: string;
   name: string;
   description: string;
   category: StoreCategory;
+  audience: StoreAudience[];
   retailPrice: number; // cents
   memberPrice: number; // cents
   badge?: string;
@@ -15,6 +18,30 @@ export interface StoreProduct {
   popular?: boolean;
   bundleIds?: string[]; // products included in this bundle
 }
+
+export const AUDIENCE_INFO: Record<
+  StoreAudience,
+  { label: string; cta: string; tagline: string; memberLink: string }
+> = {
+  doctor: {
+    label: "For Doctors",
+    cta: "I'm a Doctor",
+    tagline: "Everything you need to run a high-performance chiropractic practice",
+    memberLink: "/pricing/doctors",
+  },
+  student: {
+    label: "For Students",
+    cta: "I'm a Student",
+    tagline: "Graduate ready to practice — not just ready to pass boards",
+    memberLink: "/pricing/students",
+  },
+  patient: {
+    label: "For Patients",
+    cta: "I'm a Patient",
+    tagline: "Tools to stay connected to your health between visits",
+    memberLink: "/pricing/patients",
+  },
+};
 
 export type StoreCategory =
   | "courses"
@@ -56,6 +83,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "Find your philosophy, build your brand, and create a 90-day game plan before graduation. 4 modules covering clinical identity, elevator pitch, online presence, and your first 90 days.",
     category: "courses",
+    audience: ["student"],
     retailPrice: 5900,
     memberPrice: 2900,
     features: [
@@ -72,6 +100,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "The business education chiropractic school skipped. 6 modules covering practice models, P&L fundamentals, contract negotiation, insurance vs cash, fee setting, and personal branding.",
     category: "courses",
+    audience: ["student", "doctor"],
     retailPrice: 7900,
     memberPrice: 3900,
     features: [
@@ -88,6 +117,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "Walk into day one and perform like you've been doing this for years. 6 modules covering first-day prep, Report of Findings, patient objections, difficult conversations, documentation, and referral relationships.",
     category: "courses",
+    audience: ["student"],
     retailPrice: 7900,
     memberPrice: 3900,
     features: [
@@ -104,6 +134,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "Produce more, earn more, and position yourself to own within 3 years. 4 modules covering what owners want, producing $30K+/month, when to stay vs leave, and transitioning to ownership.",
     category: "courses",
+    audience: ["student", "doctor"],
     retailPrice: 9900,
     memberPrice: 4900,
     features: [
@@ -121,6 +152,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "All 4 courses — 20 modules covering everything from clinical identity to practice ownership. The complete unfair advantage for chiropractic students.",
     category: "courses",
+    audience: ["student"],
     retailPrice: 24900,
     memberPrice: 9900,
     badge: "Save $68",
@@ -147,6 +179,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "The #1 community workshop kit. Complete presenter script, pre-event marketing, sign-up sheets, follow-up sequences, and conversion tracking. Ready to run in 48 hours.",
     category: "workshops",
+    audience: ["doctor"],
     retailPrice: 9900,
     memberPrice: 4900,
     features: [
@@ -163,6 +196,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "Pediatric workshop kit designed for moms groups, daycares, and preschools. Gentle, parent-friendly content that drives family sign-ups.",
     category: "workshops",
+    audience: ["doctor"],
     retailPrice: 9900,
     memberPrice: 4900,
     features: [
@@ -179,6 +213,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "30-minute corporate wellness presentation. Perfect for offices, gyms, and businesses. Includes the pitch email to get booked.",
     category: "workshops",
+    audience: ["doctor"],
     retailPrice: 9900,
     memberPrice: 4900,
     features: [
@@ -195,6 +230,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "Intimate 8-12 person dinner event. No slides, no projector — just guided conversation that converts at 80-90%. The highest-converting workshop format in chiropractic.",
     category: "workshops",
+    audience: ["doctor"],
     retailPrice: 9900,
     memberPrice: 4900,
     features: [
@@ -212,6 +248,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "Patient appreciation event that reactivates lapsed patients and generates guest referrals. 20-minute high-energy format.",
     category: "workshops",
+    audience: ["doctor"],
     retailPrice: 9900,
     memberPrice: 4900,
     features: [
@@ -228,6 +265,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "All 5 workshop kits. Run one per month and never worry about new patients again. Complete event marketing machine.",
     category: "workshops",
+    audience: ["doctor"],
     retailPrice: 34900,
     memberPrice: 14900,
     badge: "Save $150",
@@ -255,6 +293,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "Individual contract template for chiropractic practices. Includes compensation addendum, patient agreements, or vendor agreements with attorney annotations.",
     category: "contracts",
+    audience: ["doctor"],
     retailPrice: 6900,
     memberPrice: 2900,
     features: [
@@ -271,6 +310,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "Independent contractor agreement, non-compete/non-solicitation, or operations templates with attorney annotations and customizable placeholders.",
     category: "contracts",
+    audience: ["doctor"],
     retailPrice: 7900,
     memberPrice: 3900,
     features: [
@@ -287,6 +327,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "Comprehensive associate contract with 3 compensation models, non-compete provisions, IP ownership, termination clauses, and equity pathway language.",
     category: "contracts",
+    audience: ["doctor"],
     retailPrice: 9900,
     memberPrice: 4900,
     features: [
@@ -304,6 +345,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "12 professionally drafted chiropractic contract templates plus a 20-clause library. Everything from associate agreements to patient financial agreements to buy-sell agreements.",
     category: "contracts",
+    audience: ["doctor"],
     retailPrice: 24900,
     memberPrice: 9900,
     badge: "Save $87",
@@ -329,6 +371,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "Your personal bookkeeper. Enter your numbers straight from QuickBooks and see exactly where your money is going with benchmarks, coaching notes, and monthly trend tracking.",
     category: "tools",
+    audience: ["doctor"],
     retailPrice: 6900,
     memberPrice: 2900,
     features: [
@@ -346,6 +389,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "Complete CPT code guide (26 codes), modifier cheat sheet, insurance verification scripts, 5 denial appeal templates, superbill template, and payer-specific quick reference.",
     category: "tools",
+    audience: ["doctor"],
     retailPrice: 9900,
     memberPrice: 3900,
     features: [
@@ -362,6 +406,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "Generate beautiful, patient-friendly nervous system assessment reports. Input sEMG, thermography, and HRV values and get a printable report with spine diagrams and progress comparisons.",
     category: "tools",
+    audience: ["doctor"],
     retailPrice: 3900,
     memberPrice: 1900,
     features: [
@@ -378,6 +423,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "Daily business operating system. Log 5 numbers in 10 seconds, see weekly scorecards, track trends over time, and get smart coaching alerts.",
     category: "tools",
+    audience: ["doctor"],
     retailPrice: 5900,
     memberPrice: 2900,
     features: [
@@ -394,6 +440,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     description:
       "30+ pre-written patient education templates. Handouts, text/email templates, social media posts, and email sequences. Copy, customize, and send in seconds.",
     category: "tools",
+    audience: ["doctor"],
     retailPrice: 5900,
     memberPrice: 2900,
     features: [
@@ -404,12 +451,53 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     ],
     billing: "monthly",
   },
+
+  // ── Patient Products ───────────────────────────────────────────
+  {
+    id: "patient-premium",
+    name: "Patient Premium Membership",
+    description:
+      "Your health, between visits. Daily wellness check-in with trend tracking, personalized exercise library (32 exercises), health journey timeline, and 15 patient education articles.",
+    category: "tools",
+    audience: ["patient"],
+    retailPrice: 900,
+    memberPrice: 900,
+    features: [
+      "Daily wellness tracking",
+      "32-exercise video library",
+      "Health journey timeline",
+      "15 education articles",
+    ],
+    billing: "monthly",
+    popular: true,
+  },
 ];
 
 export function getProductsByCategory(
   category: StoreCategory,
+  audience?: StoreAudience,
 ): StoreProduct[] {
-  return STORE_PRODUCTS.filter((p) => p.category === category);
+  return STORE_PRODUCTS.filter(
+    (p) =>
+      p.category === category &&
+      (!audience || p.audience.includes(audience)),
+  );
+}
+
+export function getProductsByAudience(
+  audience: StoreAudience,
+): StoreProduct[] {
+  return STORE_PRODUCTS.filter((p) => p.audience.includes(audience));
+}
+
+export function getCategoriesForAudience(
+  audience: StoreAudience,
+): StoreCategory[] {
+  const cats = new Set<StoreCategory>();
+  STORE_PRODUCTS.filter((p) => p.audience.includes(audience)).forEach((p) =>
+    cats.add(p.category),
+  );
+  return Array.from(cats);
 }
 
 export function getPopularProducts(): StoreProduct[] {

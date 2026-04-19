@@ -25,13 +25,18 @@ import { createStoreCheckout } from "./actions";
 import {
   STORE_PRODUCTS,
   CATEGORY_INFO,
+  AUDIENCE_INFO,
   getProductsByCategory,
+  getProductsByAudience,
+  getCategoriesForAudience,
   getPopularProducts,
   getSavingsPercent,
   formatPrice,
   type StoreCategory,
+  type StoreAudience,
   type StoreProduct,
 } from "./store-data";
+import { Stethoscope, GraduationCap as GradCap, Heart } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // Category Icons
@@ -172,17 +177,83 @@ function ProductCard({
 }
 
 // ---------------------------------------------------------------------------
+// Audience Selector
+// ---------------------------------------------------------------------------
+
+const AUDIENCE_ICONS: Record<StoreAudience, React.ReactNode> = {
+  doctor: <Stethoscope className="w-5 h-5" />,
+  student: <GradCap className="w-5 h-5" />,
+  patient: <Heart className="w-5 h-5" />,
+};
+
+function AudienceSelector({
+  selected,
+  onSelect,
+}: {
+  selected: StoreAudience | null;
+  onSelect: (a: StoreAudience) => void;
+}) {
+  const audiences: StoreAudience[] = ["doctor", "student", "patient"];
+
+  return (
+    <div className="max-w-2xl mx-auto mb-10">
+      <p className="text-center text-sm font-semibold text-gray-500 mb-4 uppercase tracking-wider">
+        I&apos;m shopping as a...
+      </p>
+      <div className="grid grid-cols-3 gap-3">
+        {audiences.map((a) => {
+          const info = AUDIENCE_INFO[a];
+          const isActive = selected === a;
+          return (
+            <button
+              key={a}
+              onClick={() => onSelect(a)}
+              className={`flex flex-col items-center gap-2 p-4 md:p-5 rounded-2xl border-2 transition-all ${
+                isActive
+                  ? "border-neuro-orange bg-neuro-orange/5 shadow-md"
+                  : "border-gray-200 bg-white hover:border-neuro-navy/30 hover:shadow-sm"
+              }`}
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  isActive
+                    ? "bg-neuro-orange text-white"
+                    : "bg-gray-100 text-gray-500"
+                }`}
+              >
+                {AUDIENCE_ICONS[a]}
+              </div>
+              <span
+                className={`font-bold text-sm ${
+                  isActive ? "text-neuro-navy" : "text-gray-600"
+                }`}
+              >
+                {info.cta}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Member Savings Banner
 // ---------------------------------------------------------------------------
 
-function MemberBanner() {
-  const totalRetail = STORE_PRODUCTS.filter(
-    (p) => !p.bundleIds && p.billing === "one_time",
-  ).reduce((s, p) => s + p.retailPrice, 0);
-  const totalMember = STORE_PRODUCTS.filter(
-    (p) => !p.bundleIds && p.billing === "one_time",
-  ).reduce((s, p) => s + p.memberPrice, 0);
+function MemberBanner({ audience }: { audience: StoreAudience }) {
+  const info = AUDIENCE_INFO[audience];
+  const products = getProductsByAudience(audience);
+  const totalRetail = products
+    .filter((p) => !p.bundleIds && p.billing === "one_time")
+    .reduce((s, p) => s + p.retailPrice, 0);
+  const totalMember = products
+    .filter((p) => !p.bundleIds && p.billing === "one_time")
+    .reduce((s, p) => s + p.memberPrice, 0);
   const totalSaved = totalRetail - totalMember;
+
+  if (totalSaved <= 0) return null;
 
   return (
     <div className="bg-gradient-to-r from-neuro-navy to-[#2d3f5e] rounded-2xl p-6 md:p-8 text-white mb-10">
@@ -199,11 +270,11 @@ function MemberBanner() {
           </h2>
           <p className="text-gray-400 text-sm">
             Members get every product at the lowest price — plus the full
-            NeuroChiro platform, directory listing, job board, and more.
+            NeuroChiro platform.
           </p>
         </div>
         <Link
-          href="/pricing/doctors"
+          href={info.memberLink}
           className="inline-flex items-center gap-2 px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap flex-shrink-0"
         >
           See Membership Plans <ArrowRight className="w-4 h-4" />
@@ -267,6 +338,7 @@ export default function StorePage() {
 
 function StoreContent() {
   const searchParams = useSearchParams();
+  const [audience, setAudience] = useState<StoreAudience | null>(null);
   const [activeCategory, setActiveCategory] = useState<StoreCategory | "all">("all");
   const [buying, setBuying] = useState<string | null>(null);
   const [purchasedId, setPurchasedId] = useState<string | null>(null);
@@ -277,10 +349,15 @@ function StoreContent() {
     const purchased = searchParams.get("purchased");
     if (purchased) {
       setPurchasedId(purchased);
-      // Clean URL
       window.history.replaceState({}, "", "/store");
     }
   }, [searchParams]);
+
+  // Reset category when audience changes
+  const handleAudienceSelect = (a: StoreAudience) => {
+    setAudience(a);
+    setActiveCategory("all");
+  };
 
   const handleBuy = (product: StoreProduct) => {
     setBuying(product.id);
@@ -300,13 +377,23 @@ function StoreContent() {
     });
   };
 
-  const categories = Object.keys(CATEGORY_INFO) as StoreCategory[];
-  const popular = getPopularProducts();
+  // Filter products by audience
+  const audienceProducts = audience
+    ? getProductsByAudience(audience)
+    : STORE_PRODUCTS;
+  const availableCategories = audience
+    ? getCategoriesForAudience(audience)
+    : (Object.keys(CATEGORY_INFO) as StoreCategory[]);
+  const popular = audience
+    ? audienceProducts.filter((p) => p.popular)
+    : getPopularProducts();
 
   const displayProducts =
     activeCategory === "all"
-      ? STORE_PRODUCTS
-      : getProductsByCategory(activeCategory);
+      ? audienceProducts
+      : audienceProducts.filter((p) => p.category === activeCategory);
+
+  const audienceInfo = audience ? AUDIENCE_INFO[audience] : null;
 
   return (
     <div className="min-h-dvh bg-[#fafbfc]">
@@ -326,15 +413,17 @@ function StoreContent() {
         </div>
         <div className="max-w-5xl mx-auto relative z-10 text-center">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-3">
-            Practice Growth Tools
+            {audience ? AUDIENCE_INFO[audience].label : "Practice Growth Tools"}
           </p>
           <h1 className="text-4xl md:text-5xl font-heading font-black text-white mb-4">
             The NeuroChiro Store
           </h1>
           <p className="text-gray-400 text-lg max-w-xl mx-auto mb-6">
-            Courses, workshop kits, contract templates, and practice tools — everything you need to grow a thriving chiropractic practice.
+            {audienceInfo
+              ? audienceInfo.tagline
+              : "Courses, workshop kits, contract templates, and practice tools for chiropractors, students, and patients."}
           </p>
-          <div className="flex items-center justify-center gap-6 text-sm text-gray-400">
+          <div className="flex items-center justify-center gap-6 text-sm text-gray-400 flex-wrap">
             <span className="flex items-center gap-1.5">
               <Zap className="w-4 h-4 text-neuro-orange" />
               Instant access
@@ -353,39 +442,56 @@ function StoreContent() {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-10">
-        {/* Member Savings Banner */}
-        <MemberBanner />
+        {/* Audience Selector */}
+        <AudienceSelector selected={audience} onSelect={handleAudienceSelect} />
 
-        {/* Category Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          <button
-            onClick={() => setActiveCategory("all")}
-            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-              activeCategory === "all"
-                ? "bg-neuro-navy text-white"
-                : "bg-white text-gray-600 border border-gray-200 hover:border-neuro-navy/30"
-            }`}
-          >
-            All Products
-          </button>
-          {categories.map((cat) => (
+        {/* Member Savings Banner */}
+        {audience && <MemberBanner audience={audience} />}
+
+        {/* Category Tabs (only when audience is selected) */}
+        {audience && availableCategories.length > 1 && (
+          <div className="flex flex-wrap gap-2 mb-8">
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-1.5 ${
-                activeCategory === cat
+              onClick={() => setActiveCategory("all")}
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                activeCategory === "all"
                   ? "bg-neuro-navy text-white"
                   : "bg-white text-gray-600 border border-gray-200 hover:border-neuro-navy/30"
               }`}
             >
-              {CATEGORY_ICONS[cat]}
-              {CATEGORY_INFO[cat].label}
+              All Products
             </button>
-          ))}
-        </div>
+            {availableCategories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-1.5 ${
+                  activeCategory === cat
+                    ? "bg-neuro-navy text-white"
+                    : "bg-white text-gray-600 border border-gray-200 hover:border-neuro-navy/30"
+                }`}
+              >
+                {CATEGORY_ICONS[cat]}
+                {CATEGORY_INFO[cat].label}
+              </button>
+            ))}
+          </div>
+        )}
 
-        {/* Popular Section (only on "all") */}
-        {activeCategory === "all" && (
+        {/* No audience selected yet */}
+        {!audience && (
+          <div className="text-center py-12 text-gray-400">
+            <p className="text-lg font-semibold text-neuro-navy mb-2">
+              Select who you are above to see products curated for you
+            </p>
+            <p className="text-sm">
+              Doctors, students, and patients each get a personalized store experience
+            </p>
+          </div>
+        )}
+
+        {/* Popular Section (only on "all" with audience selected) */}
+        {audience && activeCategory === "all" && popular.length > 0 && (
           <div className="mb-12">
             <div className="flex items-center gap-2 mb-5">
               <Sparkles className="w-5 h-5 text-neuro-orange" />
@@ -406,8 +512,8 @@ function StoreContent() {
           </div>
         )}
 
-        {/* Products Grid */}
-        {activeCategory !== "all" && (
+        {/* Category header for filtered view */}
+        {audience && activeCategory !== "all" && (
           <div className="mb-4">
             <h2 className="text-xl font-black text-neuro-navy mb-1">
               {CATEGORY_INFO[activeCategory].label}
@@ -419,9 +525,10 @@ function StoreContent() {
         )}
 
         {/* Category sections (all view) or filtered grid */}
-        {activeCategory === "all" ? (
-          categories.map((cat) => {
-            const products = getProductsByCategory(cat);
+        {audience && activeCategory === "all" ? (
+          availableCategories.map((cat) => {
+            const products = audienceProducts.filter((p) => p.category === cat);
+            if (products.length === 0) return null;
             return (
               <div key={cat} className="mb-12">
                 <div className="flex items-center gap-2 mb-5">
@@ -429,7 +536,7 @@ function StoreContent() {
                   <h2 className="text-lg font-black text-neuro-navy">
                     {CATEGORY_INFO[cat].label}
                   </h2>
-                  <span className="text-xs text-gray-400 ml-1">
+                  <span className="text-xs text-gray-400 ml-1 hidden md:inline">
                     {CATEGORY_INFO[cat].tagline}
                   </span>
                 </div>
@@ -446,7 +553,7 @@ function StoreContent() {
               </div>
             );
           })
-        ) : (
+        ) : audience ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {displayProducts.map((product) => (
               <ProductCard
@@ -457,26 +564,30 @@ function StoreContent() {
               />
             ))}
           </div>
-        )}
+        ) : null}
 
         {/* Bottom CTA */}
-        <div className="mt-16 mb-8 text-center bg-white rounded-2xl border border-gray-100 p-8 md:p-12">
-          <Crown className="w-10 h-10 text-neuro-orange mx-auto mb-4" />
-          <h2 className="text-2xl font-black text-neuro-navy mb-2">
-            Why pay retail?
-          </h2>
-          <p className="text-gray-500 max-w-lg mx-auto mb-6">
-            NeuroChiro members get every product at the lowest price — plus
-            directory listing, job board, seminars, patient portal, and the full
-            platform. Starting at $49/month.
-          </p>
-          <Link
-            href="/pricing/doctors"
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors"
-          >
-            View Membership Plans <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+        {audience && (
+          <div className="mt-16 mb-8 text-center bg-white rounded-2xl border border-gray-100 p-8 md:p-12">
+            <Crown className="w-10 h-10 text-neuro-orange mx-auto mb-4" />
+            <h2 className="text-2xl font-black text-neuro-navy mb-2">
+              Why pay retail?
+            </h2>
+            <p className="text-gray-500 max-w-lg mx-auto mb-6">
+              NeuroChiro members get every product at the lowest price — plus
+              the full platform, directory listing, and community.
+              {audience === "doctor" && " Starting at $49/month."}
+              {audience === "student" && " Starting at $9/month."}
+              {audience === "patient" && " Starting at $9/month."}
+            </p>
+            <Link
+              href={AUDIENCE_INFO[audience].memberLink}
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors"
+            >
+              View Membership Plans <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
       </div>
 
       <Footer />
