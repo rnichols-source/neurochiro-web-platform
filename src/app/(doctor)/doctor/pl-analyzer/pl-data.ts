@@ -523,30 +523,6 @@ export const PL_SECTIONS: PLSection[] = [
         ],
       },
 
-      // ── 6870 Levy / Garnishment ───────────────────────────────────
-      {
-        id: "6870-levy",
-        code: "6870",
-        label: "Levy / Garnishment",
-        minPct: 0,
-        maxPct: 0,
-        items: [
-          {
-            id: "6870",
-            code: "6870",
-            label: "Levy / Garnishment",
-            minPct: 0,
-            maxPct: 0,
-            midPct: 0,
-            tooltip:
-              "IRS levies, state tax garnishments, legal judgments, or any court-ordered wage garnishments against the business. This should ideally be zero.",
-            coachingOver:
-              "Levy/garnishment at [X]% — this means you have an active IRS levy, state tax issue, or legal judgment against the business. This is a serious matter. Contact a tax attorney or enrolled agent immediately if this is a tax issue. Do not ignore levies — they escalate. Get on a payment plan and resolve the underlying issue before it grows.",
-            coachingUnder: "",
-          },
-        ],
-      },
-
       // ── 7000 Business Development ─────────────────────────────────
       {
         id: "7000-business-development",
@@ -672,7 +648,6 @@ export const SCALING_EXAMPLES: ScalingExample[] = [
       "6828": 400,
       "6830": 150,
       "6831": 0,
-      "6870": 0,
       "7010": 50,
       "7020": 100,
       "7040": 150,
@@ -718,7 +693,6 @@ export const SCALING_EXAMPLES: ScalingExample[] = [
       "6828": 800,
       "6830": 350,
       "6831": 0,
-      "6870": 0,
       "7010": 75,
       "7020": 300,
       "7040": 400,
@@ -764,7 +738,6 @@ export const SCALING_EXAMPLES: ScalingExample[] = [
       "6828": 1200,
       "6830": 560,
       "6831": 0,
-      "6870": 0,
       "7010": 120,
       "7020": 500,
       "7040": 600,
@@ -810,7 +783,6 @@ export const SCALING_EXAMPLES: ScalingExample[] = [
       "6828": 2200,
       "6830": 1000,
       "6831": 10000,
-      "6870": 0,
       "7010": 200,
       "7020": 800,
       "7040": 1200,
