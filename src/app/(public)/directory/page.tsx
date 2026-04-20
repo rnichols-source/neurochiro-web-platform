@@ -13,7 +13,7 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function PublicDirectory() {
-  const initialData = await getDoctors({ limit: 20 });
+  const initialData = await getDoctors({ limit: 500 });
 
   return (
     <ErrorBoundary title="Directory Content Error">

@@ -193,7 +193,7 @@ export default function GlobalNetworkMap({
         const result = await getStudentsForMap({ bounds, limit: 100 });
         setStudents(result);
       } else {
-        const result = await getDoctors({ bounds, regionCode: region.code, limit: 100 });
+        const result = await getDoctors({ bounds, regionCode: region.code, limit: 500 });
         setDoctors(result.doctors);
       }
     } catch (e) {
