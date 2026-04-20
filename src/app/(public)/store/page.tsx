@@ -283,8 +283,8 @@ function MemberBanner({ audience }: { audience: StoreAudience }) {
               Member Pricing
             </span>
           </div>
-          <h2 className="text-xl md:text-2xl font-black mb-1">
-            Save up to ${formatPrice(totalSaved)} with a membership
+          <h2 className="text-xl md:text-2xl font-black mb-1 text-white">
+            Save up to <span className="text-neuro-orange">${formatPrice(totalSaved)}</span> with a membership
           </h2>
           <p className="text-gray-400 text-sm">
             Members get every product at the lowest price — plus the full
