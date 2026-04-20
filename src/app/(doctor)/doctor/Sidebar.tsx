@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
-  MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck, TrendingUp, Activity, Presentation, Receipt, DollarSign,
+  MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck, TrendingUp, Activity, Presentation, Receipt, DollarSign, Target,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -46,6 +46,7 @@ const navSections = [
     items: [
       { name: "Jobs & Hiring", href: "/doctor/jobs", icon: Briefcase },
       { name: "Workshops", href: "/doctor/workshops", icon: Presentation },
+      { name: "Screenings", href: "/doctor/screenings", icon: Target },
       { name: "Contracts", href: "/doctor/contracts", icon: FileCheck },
       { name: "Students", href: "/doctor/students", icon: GraduationCap },
       { name: "Seminars", href: "/doctor/seminars", icon: Calendar },
