@@ -390,8 +390,114 @@ function WeekendContent() {
         </div>
       </section>
 
+      {/* ═══ SCREENING OS PREVIEW ═══ */}
+      <section className="py-20 px-6 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-black uppercase tracking-widest text-neuro-orange mb-2">Included With Your Seat</p>
+            <h2 className="text-3xl font-black text-neuro-navy mb-2">The Screening OS</h2>
+            <p className="text-gray-500 max-w-xl mx-auto">Your live operating system for screening events. Track everything. Grow everything. Access it from your phone like an app.</p>
+          </div>
+
+          {/* Mock App Frame */}
+          <div className="bg-neuro-navy rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+            {/* Tab Bar */}
+            <div className="flex border-b border-white/10">
+              {[
+                { label: "Events", active: true },
+                { label: "Network", active: false },
+                { label: "Vendors", active: false },
+                { label: "Outreach", active: false },
+              ].map((tab) => (
+                <div
+                  key={tab.label}
+                  className={`flex-1 text-center py-3 text-sm font-bold transition-colors ${
+                    tab.active
+                      ? "text-neuro-orange border-b-2 border-neuro-orange"
+                      : "text-gray-500"
+                  }`}
+                >
+                  {tab.label}
+                </div>
+              ))}
+            </div>
+
+            {/* Mock Events Tab Content */}
+            <div className="p-5 md:p-8">
+              {/* Stats Row */}
+              <div className="grid grid-cols-4 gap-3 mb-6">
+                {[
+                  { label: "Total Events", value: "12", color: "text-white" },
+                  { label: "Patients Booked", value: "47", color: "text-green-400" },
+                  { label: "Revenue", value: "$117,500", color: "text-neuro-orange" },
+                  { label: "Avg ROI", value: "38x", color: "text-blue-400" },
+                ].map((stat) => (
+                  <div key={stat.label} className="bg-white/5 rounded-xl p-3 text-center">
+                    <div className={`text-lg md:text-xl font-black ${stat.color}`}>{stat.value}</div>
+                    <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Mock Event Cards */}
+              <div className="space-y-3">
+                {[
+                  { name: "Greenville Farmer's Market", date: "May 3, 2026", status: "Completed", screened: 18, booked: 11, revenue: "$27,500", statusColor: "bg-green-500" },
+                  { name: "CrossFit Pelham Falls", date: "May 10, 2026", status: "Confirmed", screened: "—", booked: "—", revenue: "—", statusColor: "bg-blue-500" },
+                  { name: "First Baptist Health Fair", date: "May 17, 2026", status: "Planned", screened: "—", booked: "—", revenue: "—", statusColor: "bg-yellow-500" },
+                ].map((event, i) => (
+                  <div key={i} className="bg-white/5 rounded-xl p-4 flex items-center gap-4">
+                    <div className={`w-2 h-10 rounded-full ${event.statusColor} flex-shrink-0`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-bold truncate">{event.name}</p>
+                      <p className="text-gray-500 text-xs">{event.date}</p>
+                    </div>
+                    <div className="hidden md:flex items-center gap-6 text-xs">
+                      <div className="text-center"><div className="text-white font-bold">{event.screened}</div><div className="text-gray-600">Screened</div></div>
+                      <div className="text-center"><div className="text-green-400 font-bold">{event.booked}</div><div className="text-gray-600">Booked</div></div>
+                      <div className="text-center"><div className="text-neuro-orange font-bold">{event.revenue}</div><div className="text-gray-600">Revenue</div></div>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold text-white ${event.statusColor}`}>
+                      {event.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Mock Outreach Preview */}
+              <div className="mt-6 pt-6 border-t border-white/10">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Outreach Pipeline — Pre-Loaded in Your Area</p>
+                  <span className="text-xs text-neuro-orange font-bold">47 opportunities</span>
+                </div>
+                <div className="grid md:grid-cols-3 gap-2">
+                  {[
+                    { name: "Pelham Falls Farmer's Market", type: "Market", status: "To Contact" },
+                    { name: "Greer Community Center", type: "Health Fair", status: "To Contact" },
+                    { name: "F45 Training — Greenville", type: "Gym", status: "To Contact" },
+                  ].map((opp, i) => (
+                    <div key={i} className="bg-white/5 rounded-lg p-3">
+                      <p className="text-white text-xs font-semibold truncate">{opp.name}</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-[10px] text-gray-500">{opp.type}</span>
+                        <span className="text-[10px] text-yellow-400 font-bold">{opp.status}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Caption */}
+          <p className="text-center text-sm text-gray-400 mt-4">
+            This is what YOUR dashboard looks like on Sunday. Events pre-loaded. Pipeline ready. Just start calling.
+          </p>
+        </div>
+      </section>
+
       {/* ═══ PRICING ═══ */}
-      <section ref={pricingRef} className="py-20 px-6 bg-white" id="pricing">
+      <section ref={pricingRef} className="py-20 px-6" id="pricing">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-xs font-black uppercase tracking-widest text-neuro-orange mb-2">Investment</p>
