@@ -128,6 +128,234 @@ function RegistrationForm({
 // Main Page
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Interactive Screening OS Preview
+// ---------------------------------------------------------------------------
+
+type OSTab = "events" | "network" | "vendors" | "outreach";
+
+function ScreeningOSPreview() {
+  const [activeTab, setActiveTab] = useState<OSTab>("events");
+
+  const tabs: { key: OSTab; label: string }[] = [
+    { key: "events", label: "Events" },
+    { key: "network", label: "Network" },
+    { key: "vendors", label: "Vendors" },
+    { key: "outreach", label: "Outreach" },
+  ];
+
+  return (
+    <section className="py-20 px-6 bg-white">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-10">
+          <p className="text-xs font-black uppercase tracking-widest text-neuro-orange mb-2">Included With Your Seat</p>
+          <h2 className="text-3xl font-black text-neuro-navy mb-2">The Screening OS</h2>
+          <p className="text-gray-500 max-w-xl mx-auto">Your live operating system for screening events. Click each tab to explore.</p>
+        </div>
+
+        <div className="bg-neuro-navy rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+          {/* Tab Bar */}
+          <div className="flex border-b border-white/10">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex-1 text-center py-3.5 text-sm font-bold transition-all cursor-pointer ${
+                  activeTab === tab.key
+                    ? "text-neuro-orange border-b-2 border-neuro-orange bg-white/5"
+                    : "text-gray-500 hover:text-gray-300"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="p-5 md:p-8 min-h-[380px]">
+            {/* ── EVENTS TAB ── */}
+            {activeTab === "events" && (
+              <div>
+                <div className="grid grid-cols-4 gap-3 mb-6">
+                  {[
+                    { label: "Total Events", value: "12", color: "text-white" },
+                    { label: "Patients Booked", value: "47", color: "text-green-400" },
+                    { label: "Revenue", value: "$117,500", color: "text-neuro-orange" },
+                    { label: "Avg ROI", value: "38x", color: "text-blue-400" },
+                  ].map((stat) => (
+                    <div key={stat.label} className="bg-white/5 rounded-xl p-3 text-center">
+                      <div className={`text-lg md:text-xl font-black ${stat.color}`}>{stat.value}</div>
+                      <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { name: "Greenville Farmer's Market", date: "May 3, 2026", status: "Completed", screened: "18", booked: "11", revenue: "$27,500", statusColor: "bg-green-500" },
+                    { name: "CrossFit Pelham Falls", date: "May 10, 2026", status: "Confirmed", screened: "—", booked: "—", revenue: "—", statusColor: "bg-blue-500" },
+                    { name: "First Baptist Health Fair", date: "May 17, 2026", status: "Planned", screened: "—", booked: "—", revenue: "—", statusColor: "bg-yellow-500" },
+                  ].map((event, i) => (
+                    <div key={i} className="bg-white/5 rounded-xl p-4 flex items-center gap-4">
+                      <div className={`w-2 h-10 rounded-full ${event.statusColor} flex-shrink-0`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-bold truncate">{event.name}</p>
+                        <p className="text-gray-500 text-xs">{event.date}</p>
+                      </div>
+                      <div className="hidden md:flex items-center gap-6 text-xs">
+                        <div className="text-center"><div className="text-white font-bold">{event.screened}</div><div className="text-gray-600">Screened</div></div>
+                        <div className="text-center"><div className="text-green-400 font-bold">{event.booked}</div><div className="text-gray-600">Booked</div></div>
+                        <div className="text-center"><div className="text-neuro-orange font-bold">{event.revenue}</div><div className="text-gray-600">Revenue</div></div>
+                      </div>
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold text-white ${event.statusColor}`}>{event.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── NETWORK TAB ── */}
+            {activeTab === "network" && (
+              <div>
+                <div className="grid grid-cols-4 gap-3 mb-6">
+                  {[
+                    { label: "Total Contacts", value: "23", color: "text-white" },
+                    { label: "Booked Events", value: "8", color: "text-green-400" },
+                    { label: "Pending Follow-Up", value: "5", color: "text-yellow-400" },
+                    { label: "Recurring Partners", value: "4", color: "text-blue-400" },
+                  ].map((stat) => (
+                    <div key={stat.label} className="bg-white/5 rounded-xl p-3 text-center">
+                      <div className={`text-lg md:text-xl font-black ${stat.color}`}>{stat.value}</div>
+                      <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { name: "Lisa Martinez", business: "Greenville Farmer's Market", type: "Venue Owner", status: "Recurring Partner", statusColor: "bg-green-500" },
+                    { name: "James Thornton", business: "CrossFit Pelham Falls", type: "Gym Owner", status: "Booked", statusColor: "bg-blue-500" },
+                    { name: "Pastor Williams", business: "First Baptist Church", type: "Event Organizer", status: "Contacted", statusColor: "bg-yellow-500" },
+                    { name: "Karen Chen", business: "Greer Chamber of Commerce", type: "Business Director", status: "Follow Up", statusColor: "bg-yellow-500" },
+                    { name: "Mike Rodriguez", business: "Pelham Brewing Co.", type: "Business Owner", status: "New", statusColor: "bg-gray-500" },
+                  ].map((contact, i) => (
+                    <div key={i} className="bg-white/5 rounded-xl p-4 flex items-center gap-4">
+                      <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        {contact.name.split(" ").map(n => n[0]).join("")}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-bold truncate">{contact.name}</p>
+                        <p className="text-gray-500 text-xs">{contact.business}</p>
+                      </div>
+                      <span className="hidden md:block text-xs text-gray-400">{contact.type}</span>
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold text-white ${contact.statusColor}`}>{contact.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── VENDORS TAB ── */}
+            {activeTab === "vendors" && (
+              <div>
+                <div className="grid grid-cols-4 gap-3 mb-6">
+                  {[
+                    { label: "Vendor Partners", value: "9", color: "text-white" },
+                    { label: "Referrals Sent", value: "34", color: "text-neuro-orange" },
+                    { label: "Referrals Received", value: "21", color: "text-green-400" },
+                    { label: "Active Partners", value: "6", color: "text-blue-400" },
+                  ].map((stat) => (
+                    <div key={stat.label} className="bg-white/5 rounded-xl p-3 text-center">
+                      <div className={`text-lg md:text-xl font-black ${stat.color}`}>{stat.value}</div>
+                      <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { company: "Greenville Massage & Bodywork", contact: "Sarah Kim", service: "Massage Therapy", sent: 12, received: 8, status: "Active", statusColor: "bg-green-500" },
+                    { company: "Pure Life Supplements", contact: "David Nguyen", service: "Nutritional Supplements", sent: 8, received: 5, status: "Active", statusColor: "bg-green-500" },
+                    { company: "Upstate Personal Training", contact: "Marcus Johnson", service: "Personal Training", sent: 7, received: 4, status: "Active", statusColor: "bg-green-500" },
+                    { company: "Align Acupuncture", contact: "Dr. Amy Wells", service: "Acupuncture", sent: 4, received: 3, status: "Active", statusColor: "bg-green-500" },
+                    { company: "Greer Nutrition Co.", contact: "Taylor Reed", service: "Meal Prep / Coaching", sent: 3, received: 1, status: "New", statusColor: "bg-yellow-500" },
+                  ].map((vendor, i) => (
+                    <div key={i} className="bg-white/5 rounded-xl p-4 flex items-center gap-4">
+                      <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-neuro-orange text-xs font-bold flex-shrink-0">
+                        {vendor.company.split(" ").slice(0, 2).map(n => n[0]).join("")}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-bold truncate">{vendor.company}</p>
+                        <p className="text-gray-500 text-xs">{vendor.contact} — {vendor.service}</p>
+                      </div>
+                      <div className="hidden md:flex items-center gap-5 text-xs">
+                        <div className="text-center"><div className="text-neuro-orange font-bold">{vendor.sent}</div><div className="text-gray-600">Sent</div></div>
+                        <div className="text-center"><div className="text-green-400 font-bold">{vendor.received}</div><div className="text-gray-600">Received</div></div>
+                      </div>
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold text-white ${vendor.statusColor}`}>{vendor.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── OUTREACH TAB ── */}
+            {activeTab === "outreach" && (
+              <div>
+                <div className="grid grid-cols-4 gap-3 mb-6">
+                  {[
+                    { label: "Opportunities", value: "47", color: "text-white" },
+                    { label: "Contacted", value: "12", color: "text-blue-400" },
+                    { label: "Booked", value: "5", color: "text-green-400" },
+                    { label: "Conversion", value: "42%", color: "text-neuro-orange" },
+                  ].map((stat) => (
+                    <div key={stat.label} className="bg-white/5 rounded-xl p-3 text-center">
+                      <div className={`text-lg md:text-xl font-black ${stat.color}`}>{stat.value}</div>
+                      <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pre-Loaded Events in Your Area</p>
+                  <div className="flex gap-2">
+                    {["All", "Markets", "Gyms", "Fairs", "Corporate"].map((f, i) => (
+                      <span key={f} className={`text-[10px] px-2.5 py-1 rounded-full font-bold ${i === 0 ? "bg-neuro-orange text-white" : "bg-white/5 text-gray-500"}`}>{f}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { name: "Pelham Falls Farmer's Market", type: "Market", date: "Every Saturday", status: "Booked", statusColor: "text-green-400" },
+                    { name: "F45 Training — Greenville", type: "Gym", date: "Open", status: "Contacted", statusColor: "text-blue-400" },
+                    { name: "Greer Community Center", type: "Health Fair", date: "Jun 14, 2026", status: "Contacted", statusColor: "text-blue-400" },
+                    { name: "TD Convention Center", type: "Expo", date: "Jul 8-9, 2026", status: "To Contact", statusColor: "text-yellow-400" },
+                    { name: "Greenville Tech — Wellness Week", type: "Corporate", date: "May 19-23", status: "To Contact", statusColor: "text-yellow-400" },
+                    { name: "Planet Fitness — Woodruff Rd", type: "Gym", date: "Open", status: "To Contact", statusColor: "text-yellow-400" },
+                    { name: "Travelers Rest Harvest Festival", type: "Festival", date: "Oct 10, 2026", status: "To Contact", statusColor: "text-yellow-400" },
+                  ].map((opp, i) => (
+                    <div key={i} className="bg-white/5 rounded-xl p-3.5 flex items-center gap-4">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-semibold truncate">{opp.name}</p>
+                        <p className="text-gray-500 text-xs">{opp.date}</p>
+                      </div>
+                      <span className="text-[10px] text-gray-500 hidden md:block">{opp.type}</span>
+                      <span className={`text-xs font-bold ${opp.statusColor}`}>{opp.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <p className="text-center text-sm text-gray-400 mt-4">
+          Click each tab to explore. This is what YOUR dashboard looks like on Sunday — pre-loaded and ready to go.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main Page
+// ---------------------------------------------------------------------------
+
 function WeekendContent() {
   const searchParams = useSearchParams();
   const [registerTier, setRegisterTier] = useState<"intensive" | "vip" | null>(null);
@@ -390,111 +618,8 @@ function WeekendContent() {
         </div>
       </section>
 
-      {/* ═══ SCREENING OS PREVIEW ═══ */}
-      <section className="py-20 px-6 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-xs font-black uppercase tracking-widest text-neuro-orange mb-2">Included With Your Seat</p>
-            <h2 className="text-3xl font-black text-neuro-navy mb-2">The Screening OS</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">Your live operating system for screening events. Track everything. Grow everything. Access it from your phone like an app.</p>
-          </div>
-
-          {/* Mock App Frame */}
-          <div className="bg-neuro-navy rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-            {/* Tab Bar */}
-            <div className="flex border-b border-white/10">
-              {[
-                { label: "Events", active: true },
-                { label: "Network", active: false },
-                { label: "Vendors", active: false },
-                { label: "Outreach", active: false },
-              ].map((tab) => (
-                <div
-                  key={tab.label}
-                  className={`flex-1 text-center py-3 text-sm font-bold transition-colors ${
-                    tab.active
-                      ? "text-neuro-orange border-b-2 border-neuro-orange"
-                      : "text-gray-500"
-                  }`}
-                >
-                  {tab.label}
-                </div>
-              ))}
-            </div>
-
-            {/* Mock Events Tab Content */}
-            <div className="p-5 md:p-8">
-              {/* Stats Row */}
-              <div className="grid grid-cols-4 gap-3 mb-6">
-                {[
-                  { label: "Total Events", value: "12", color: "text-white" },
-                  { label: "Patients Booked", value: "47", color: "text-green-400" },
-                  { label: "Revenue", value: "$117,500", color: "text-neuro-orange" },
-                  { label: "Avg ROI", value: "38x", color: "text-blue-400" },
-                ].map((stat) => (
-                  <div key={stat.label} className="bg-white/5 rounded-xl p-3 text-center">
-                    <div className={`text-lg md:text-xl font-black ${stat.color}`}>{stat.value}</div>
-                    <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Mock Event Cards */}
-              <div className="space-y-3">
-                {[
-                  { name: "Greenville Farmer's Market", date: "May 3, 2026", status: "Completed", screened: 18, booked: 11, revenue: "$27,500", statusColor: "bg-green-500" },
-                  { name: "CrossFit Pelham Falls", date: "May 10, 2026", status: "Confirmed", screened: "—", booked: "—", revenue: "—", statusColor: "bg-blue-500" },
-                  { name: "First Baptist Health Fair", date: "May 17, 2026", status: "Planned", screened: "—", booked: "—", revenue: "—", statusColor: "bg-yellow-500" },
-                ].map((event, i) => (
-                  <div key={i} className="bg-white/5 rounded-xl p-4 flex items-center gap-4">
-                    <div className={`w-2 h-10 rounded-full ${event.statusColor} flex-shrink-0`} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-bold truncate">{event.name}</p>
-                      <p className="text-gray-500 text-xs">{event.date}</p>
-                    </div>
-                    <div className="hidden md:flex items-center gap-6 text-xs">
-                      <div className="text-center"><div className="text-white font-bold">{event.screened}</div><div className="text-gray-600">Screened</div></div>
-                      <div className="text-center"><div className="text-green-400 font-bold">{event.booked}</div><div className="text-gray-600">Booked</div></div>
-                      <div className="text-center"><div className="text-neuro-orange font-bold">{event.revenue}</div><div className="text-gray-600">Revenue</div></div>
-                    </div>
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold text-white ${event.statusColor}`}>
-                      {event.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Mock Outreach Preview */}
-              <div className="mt-6 pt-6 border-t border-white/10">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Outreach Pipeline — Pre-Loaded in Your Area</p>
-                  <span className="text-xs text-neuro-orange font-bold">47 opportunities</span>
-                </div>
-                <div className="grid md:grid-cols-3 gap-2">
-                  {[
-                    { name: "Pelham Falls Farmer's Market", type: "Market", status: "To Contact" },
-                    { name: "Greer Community Center", type: "Health Fair", status: "To Contact" },
-                    { name: "F45 Training — Greenville", type: "Gym", status: "To Contact" },
-                  ].map((opp, i) => (
-                    <div key={i} className="bg-white/5 rounded-lg p-3">
-                      <p className="text-white text-xs font-semibold truncate">{opp.name}</p>
-                      <div className="flex items-center justify-between mt-1">
-                        <span className="text-[10px] text-gray-500">{opp.type}</span>
-                        <span className="text-[10px] text-yellow-400 font-bold">{opp.status}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Caption */}
-          <p className="text-center text-sm text-gray-400 mt-4">
-            This is what YOUR dashboard looks like on Sunday. Events pre-loaded. Pipeline ready. Just start calling.
-          </p>
-        </div>
-      </section>
+      {/* ═══ SCREENING OS PREVIEW (Interactive) ═══ */}
+      <ScreeningOSPreview />
 
       {/* ═══ PRICING ═══ */}
       <section ref={pricingRef} className="py-20 px-6" id="pricing">
