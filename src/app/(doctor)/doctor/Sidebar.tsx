@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
-  MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck, TrendingUp, Activity, Presentation, Receipt, DollarSign, Target,
+  MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck, TrendingUp, Activity, Presentation, Receipt, DollarSign, Target, ChevronDown,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -92,6 +92,33 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const initials = userName?.split(" ").map((n) => n[0]).join("").toUpperCase() || "--";
 
+  // Auto-open the section that contains the active page
+  const getDefaultOpen = () => {
+    const open: string[] = [];
+    for (const section of navSections) {
+      if (section.items.some((item) => pathname === item.href || pathname?.startsWith(item.href + "/"))) {
+        open.push(section.label);
+      }
+    }
+    // Always keep PRACTICE open
+    if (!open.includes("PRACTICE")) open.push("PRACTICE");
+    return open;
+  };
+
+  const [openSections, setOpenSections] = useState<string[]>(getDefaultOpen);
+
+  // Update when pathname changes
+  useEffect(() => {
+    setOpenSections(getDefaultOpen());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
+  const toggleSection = (label: string) => {
+    setOpenSections((prev) =>
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
+    );
+  };
+
   const Content = (
     <div className="flex flex-col h-full bg-neuro-navy">
       <div className="p-6">
@@ -102,32 +129,53 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </div>
 
       <nav className="px-4 flex-1 overflow-y-auto">
-        {navSections.map((section, si) => (
-          <div key={section.label} className={si > 0 ? "mt-4" : ""}>
-            <p className="px-3 mb-1 text-[10px] font-black uppercase tracking-[0.15em] text-gray-500">{section.label}</p>
-            <div className="space-y-0.5">
-              {section.items.map((item) => {
-                const active = pathname === item.href;
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={onClose}
-                    className={`flex items-center gap-3 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors ${
-                      active ? "bg-neuro-orange text-white" : "text-gray-400 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <item.icon className={`w-4 h-4 ${active ? "text-white" : "text-gray-500"}`} />
-                    {item.name}
-                    {item.name === 'Notifications' && unreadNotifs > 0 && (
-                      <span className="ml-auto bg-neuro-orange text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">{unreadNotifs > 9 ? '9+' : unreadNotifs}</span>
-                    )}
-                  </Link>
-                );
-              })}
+        {navSections.map((section, si) => {
+          const isOpen2 = openSections.includes(section.label);
+          const hasActive = section.items.some((item) => pathname === item.href || pathname?.startsWith(item.href + "/"));
+
+          return (
+            <div key={section.label} className={si > 0 ? "mt-2" : ""}>
+              <button
+                onClick={() => toggleSection(section.label)}
+                className="w-full flex items-center justify-between px-3 py-1.5 group"
+              >
+                <span className={`text-[10px] font-black uppercase tracking-[0.15em] transition-colors ${
+                  hasActive ? "text-neuro-orange" : "text-gray-500 group-hover:text-gray-400"
+                }`}>
+                  {section.label}
+                </span>
+                <ChevronDown
+                  className={`w-3 h-3 text-gray-600 transition-transform duration-200 ${
+                    isOpen2 ? "" : "-rotate-90"
+                  }`}
+                />
+              </button>
+              {isOpen2 && (
+                <div className="space-y-0.5 mt-0.5">
+                  {section.items.map((item) => {
+                    const active = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        onClick={onClose}
+                        className={`flex items-center gap-3 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors ${
+                          active ? "bg-neuro-orange text-white" : "text-gray-400 hover:text-white hover:bg-white/5"
+                        }`}
+                      >
+                        <item.icon className={`w-4 h-4 ${active ? "text-white" : "text-gray-500"}`} />
+                        {item.name}
+                        {item.name === 'Notifications' && unreadNotifs > 0 && (
+                          <span className="ml-auto bg-neuro-orange text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">{unreadNotifs > 9 ? '9+' : unreadNotifs}</span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </nav>
 
       <div className="p-4 border-t border-white/10">
