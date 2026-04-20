@@ -8,7 +8,7 @@ import {
   ShoppingCart,
   Zap,
   GraduationCap,
-  Presentation,
+  Users,
   FileText,
   Wrench,
   Tag,
@@ -24,6 +24,8 @@ import {
 import Footer from '@/components/landing/Footer'
 import ReviewSection, { StarRating } from '../review-section'
 import { getReviewSummary, type ReviewSummary } from '../review-actions'
+import { createStoreCheckout } from '../actions'
+import { useCart } from '../cart-context'
 
 // ============================================================================
 // Helpers
@@ -31,7 +33,7 @@ import { getReviewSummary, type ReviewSummary } from '../review-actions'
 
 const CATEGORY_ICONS: Record<StoreCategory, React.ReactNode> = {
   courses: <GraduationCap className="w-5 h-5" />,
-  workshops: <Presentation className="w-5 h-5" />,
+  workshops: <Users className="w-5 h-5" />,
   contracts: <FileText className="w-5 h-5" />,
   tools: <Wrench className="w-5 h-5" />,
 }
@@ -55,6 +57,34 @@ export default function ProductDetailClient({
   const savings = getSavingsPercent(product)
   const relatedProducts = getRelatedProducts(product)
   const isMonthly = product.billing === 'monthly'
+  const { addItem, openCart } = useCart()
+  const [buying, setBuying] = useState(false)
+
+  const handleAddToCart = () => {
+    addItem({
+      productId: product.id,
+      name: product.name,
+      retailPrice: product.retailPrice,
+      billing: product.billing,
+    })
+    openCart()
+  }
+
+  const handleBuyNow = async () => {
+    setBuying(true)
+    const result = await createStoreCheckout(
+      product.id,
+      product.name,
+      product.retailPrice,
+      product.billing,
+    )
+    if (result.url) {
+      window.location.href = result.url
+    } else {
+      alert(result.error || 'Something went wrong')
+      setBuying(false)
+    }
+  }
 
   return (
     <div className="min-h-dvh bg-neuro-cream">
@@ -207,14 +237,34 @@ export default function ProductDetailClient({
               <hr className="border-gray-100" />
 
               {/* CTA buttons */}
-              <button className="w-full bg-neuro-orange hover:bg-neuro-orange-light text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+              <button
+                onClick={handleAddToCart}
+                className="w-full bg-neuro-orange hover:bg-neuro-orange/90 text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 active:scale-[0.98]"
+              >
                 <ShoppingCart className="w-5 h-5" />
                 Add to Cart
               </button>
 
-              <button className="w-full bg-neuro-navy hover:bg-neuro-navy-light text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2">
-                <Zap className="w-5 h-5" />
-                Buy Now
+              <button
+                onClick={handleBuyNow}
+                disabled={buying}
+                className={`w-full font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 ${
+                  buying
+                    ? 'bg-gray-200 text-gray-400 cursor-wait'
+                    : 'bg-neuro-navy hover:bg-neuro-navy/90 text-white active:scale-[0.98]'
+                }`}
+              >
+                {buying ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-5 h-5" />
+                    Buy Now
+                  </>
+                )}
               </button>
 
               {/* Audience tags */}
