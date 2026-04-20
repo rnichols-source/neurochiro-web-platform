@@ -403,9 +403,15 @@ function WeekendContent() {
             3 days on Zoom. Complete transformation. Walk in with zero screening experience. Walk out with your first event booked, scripts memorized, and a live operating system that fills your schedule every month.
           </p>
 
-          <div className="inline-flex items-center gap-2 text-sm text-gray-500 mb-8 bg-white/5 px-4 py-2 rounded-full">
-            <Monitor className="w-4 h-4" />
-            Live on Zoom — attend from anywhere, recordings included
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
+            <div className="inline-flex items-center gap-2 text-sm text-white bg-white/10 px-4 py-2 rounded-full border border-white/10">
+              <Calendar className="w-4 h-4 text-neuro-orange" />
+              <span className="font-bold">May 22-24, 2026</span>
+            </div>
+            <div className="inline-flex items-center gap-2 text-sm text-gray-500 bg-white/5 px-4 py-2 rounded-full">
+              <Monitor className="w-4 h-4" />
+              Live on Zoom — recordings included
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -492,7 +498,7 @@ function WeekendContent() {
           <div className="mb-10">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-10 h-10 bg-neuro-orange rounded-xl flex items-center justify-center"><Calendar className="w-5 h-5 text-white" /></div>
-              <div><h3 className="font-black text-neuro-navy text-lg">Friday Evening</h3><p className="text-sm text-gray-400">6:00 - 8:30 PM EST</p></div>
+              <div><h3 className="font-black text-neuro-navy text-lg">Friday, May 22</h3><p className="text-sm text-gray-400">6:00 - 8:30 PM EST</p></div>
               <span className="ml-auto px-3 py-1 bg-neuro-orange/10 text-neuro-orange text-xs font-bold rounded-full uppercase">The Foundation</span>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
@@ -515,7 +521,7 @@ function WeekendContent() {
           <div className="mb-10">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-10 h-10 bg-neuro-navy rounded-xl flex items-center justify-center"><Zap className="w-5 h-5 text-white" /></div>
-              <div><h3 className="font-black text-neuro-navy text-lg">Saturday Full Day</h3><p className="text-sm text-gray-400">9:00 AM - 3:00 PM EST</p></div>
+              <div><h3 className="font-black text-neuro-navy text-lg">Saturday, May 23</h3><p className="text-sm text-gray-400">9:00 AM - 3:00 PM EST</p></div>
               <span className="ml-auto px-3 py-1 bg-neuro-navy/10 text-neuro-navy text-xs font-bold rounded-full uppercase">The System</span>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
@@ -544,7 +550,7 @@ function WeekendContent() {
           <div>
             <div className="flex items-center gap-3 mb-5">
               <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center"><TrendingUp className="w-5 h-5 text-white" /></div>
-              <div><h3 className="font-black text-neuro-navy text-lg">Sunday Morning</h3><p className="text-sm text-gray-400">9:00 AM - 12:30 PM EST</p></div>
+              <div><h3 className="font-black text-neuro-navy text-lg">Sunday, May 24</h3><p className="text-sm text-gray-400">9:00 AM - 12:30 PM EST</p></div>
               <span className="ml-auto px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full uppercase">The Launch</span>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
@@ -684,7 +690,7 @@ function WeekendContent() {
               { q: "What's the Screening OS?", a: "A live dashboard inside NeuroChiro where you track all your screening events, network contacts, vendor relationships, and outreach pipeline. We pre-load 25-50 real events in YOUR area so you have a pipeline ready to go." },
               { q: "What's the difference between the $79 kit and the $1,997 weekend?", a: "The kit gives you the WHAT — scripts and templates. The weekend gives you the HOW — live coaching, breakout room practice, direct feedback, accountability, the Screening OS, and pre-loaded events in your area. The kit is included with the weekend." },
               { q: "Is there a payment plan?", a: "Yes. Both tiers offer 2 monthly payments. Intensive: $1,099 x 2. VIP: $2,599 x 2. First payment due at registration." },
-              { q: "When is the next weekend?", a: "Dates are announced to registered attendees first. Reserve your seat to get on the priority list." },
+              { q: "When is the next weekend?", a: "May 22-24, 2026. Friday evening 6-8:30 PM, Saturday 9 AM-3 PM, Sunday 9 AM-12:30 PM. All times EST. Seats are limited to 15 — reserve yours now." },
             ].map((faq, i) => (
               <details key={i} className="group bg-white rounded-xl border border-gray-100">
                 <summary className="flex items-center justify-between p-5 cursor-pointer list-none">
@@ -706,7 +712,7 @@ function WeekendContent() {
           <button onClick={scrollToPricing} className="px-10 py-4 bg-neuro-orange text-white font-bold rounded-xl text-lg hover:bg-neuro-orange/90 transition-all active:scale-[0.98] inline-flex items-center gap-2">
             Reserve Your Seat <ArrowRight className="w-5 h-5" />
           </button>
-          <p className="text-sm text-gray-500 mt-4">Limited to 15 seats. Payment plans available.</p>
+          <p className="text-sm text-gray-500 mt-4">May 22-24, 2026. Limited to 15 seats. Payment plans available.</p>
         </div>
       </section>
 
