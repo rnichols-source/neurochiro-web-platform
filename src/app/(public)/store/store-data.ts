@@ -4,6 +4,12 @@
 
 export type StoreAudience = "doctor" | "student" | "patient";
 
+export interface ProductPreview {
+  title: string;
+  type: "script" | "template" | "checklist" | "data" | "guide";
+  content: string; // A real sample snippet from the product
+}
+
 export interface StoreProduct {
   id: string;
   name: string;
@@ -15,6 +21,7 @@ export interface StoreProduct {
   memberPrice: number; // cents
   badge?: string;
   features: string[];
+  previews?: ProductPreview[];
   billing: "one_time" | "monthly";
   popular?: boolean;
   bundleIds?: string[]; // products included in this bundle

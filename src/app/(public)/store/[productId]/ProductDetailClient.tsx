@@ -26,6 +26,8 @@ import ReviewSection, { StarRating } from '../review-section'
 import { getReviewSummary, type ReviewSummary } from '../review-actions'
 import { createStoreCheckout } from '../actions'
 import { useCart } from '../cart-context'
+import { PRODUCT_PREVIEWS } from '../store-previews'
+import { Eye, FileText as FileIcon, CheckSquare, BarChart3, BookOpen } from 'lucide-react'
 
 // ============================================================================
 // Helpers
@@ -199,6 +201,51 @@ export default function ProductDetailClient({
                         </div>
                         <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
                       </Link>
+                    )
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* Preview What's Inside */}
+            {PRODUCT_PREVIEWS[product.id] && PRODUCT_PREVIEWS[product.id].length > 0 && (
+              <section>
+                <div className="flex items-center gap-2 mb-4">
+                  <Eye className="w-5 h-5 text-neuro-orange" />
+                  <h2 className="text-2xl font-black text-neuro-navy">
+                    Preview What&apos;s Inside
+                  </h2>
+                </div>
+                <div className="space-y-4">
+                  {PRODUCT_PREVIEWS[product.id].map((preview, i) => {
+                    const typeIcons: Record<string, React.ReactNode> = {
+                      script: <FileIcon className="w-4 h-4" />,
+                      template: <FileIcon className="w-4 h-4" />,
+                      checklist: <CheckSquare className="w-4 h-4" />,
+                      data: <BarChart3 className="w-4 h-4" />,
+                      guide: <BookOpen className="w-4 h-4" />,
+                    }
+                    const typeLabels: Record<string, string> = {
+                      script: "Script Sample",
+                      template: "Template Preview",
+                      checklist: "Checklist Preview",
+                      data: "Data Preview",
+                      guide: "Guide Preview",
+                    }
+                    return (
+                      <div key={i} className="rounded-2xl border border-gray-100 overflow-hidden bg-white">
+                        <div className="flex items-center gap-2 px-5 py-3 bg-gray-50 border-b border-gray-100">
+                          <span className="text-neuro-orange">{typeIcons[preview.type] || typeIcons.guide}</span>
+                          <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                            {typeLabels[preview.type] || "Preview"}
+                          </span>
+                          <span className="mx-1 text-gray-200">|</span>
+                          <span className="text-sm font-bold text-neuro-navy">{preview.title}</span>
+                        </div>
+                        <pre className="px-5 py-4 text-sm text-gray-600 leading-relaxed whitespace-pre-wrap font-sans overflow-x-auto">
+                          {preview.content}
+                        </pre>
+                      </div>
                     )
                   })}
                 </div>
