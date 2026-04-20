@@ -27,9 +27,8 @@ export async function createStoreCheckout(
       metadata: {
         type: "store_purchase",
         productId,
-        source: "public_store",
       },
-      customer_creation: "always",
+      ...(billing !== "monthly" && { customer_creation: "always" as const }),
       success_url: `${baseUrl}/store/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/store`,
     });

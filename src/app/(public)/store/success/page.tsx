@@ -26,9 +26,13 @@ function SuccessContent() {
 
       // Store purchased IDs in localStorage for "already purchased" state
       if (result?.productIds) {
+        // Track purchases in localStorage for "already purchased" state
         const existing = JSON.parse(localStorage.getItem("neurochiro-purchases") || "[]");
         const updated = [...new Set([...existing, ...result.productIds])];
         localStorage.setItem("neurochiro-purchases", JSON.stringify(updated));
+
+        // Clear the cart
+        localStorage.removeItem("neurochiro-cart");
       }
     })();
   }, [sessionId]);

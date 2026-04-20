@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ShoppingCart, Trash2, X, ArrowRight, Sparkles } from "lucide-react";
 import { useCart, getBundleSuggestions, type CartItem } from "./cart-context";
 import { STORE_PRODUCTS } from "./store-data";
@@ -63,8 +63,11 @@ export function CartDrawer() {
     });
   }
 
+  const [checkingOut, setCheckingOut] = useState(false);
+
   async function handleCheckout() {
-    if (items.length === 0) return;
+    if (items.length === 0 || checkingOut) return;
+    setCheckingOut(true);
 
     const result = await createCartCheckout(
       items.map((i) => ({
@@ -77,6 +80,9 @@ export function CartDrawer() {
 
     if (result.url) {
       window.location.href = result.url;
+    } else {
+      alert(result.error || "Something went wrong");
+      setCheckingOut(false);
     }
   }
 
@@ -213,10 +219,15 @@ export function CartDrawer() {
             {/* Checkout */}
             <button
               onClick={handleCheckout}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-[#e97325] text-white font-bold text-base hover:bg-[#d4651e] transition-colors"
+              disabled={checkingOut}
+              className={`w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-base transition-colors ${
+                checkingOut
+                  ? "bg-gray-300 text-gray-500 cursor-wait"
+                  : "bg-[#e97325] text-white hover:bg-[#d4651e]"
+              }`}
             >
-              Checkout
-              <ArrowRight className="h-4 w-4" />
+              {checkingOut ? "Processing..." : "Checkout"}
+              {!checkingOut && <ArrowRight className="h-4 w-4" />}
             </button>
 
             {/* Continue Shopping */}

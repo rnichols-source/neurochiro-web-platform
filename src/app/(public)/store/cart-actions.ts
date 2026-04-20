@@ -18,19 +18,23 @@ export async function createCartCheckout(items: CartLineItem[]) {
     const baseUrl =
       process.env.NEXT_PUBLIC_SITE_URL || "https://neurochiro.co";
 
+    // Separate one-time and monthly items
     const oneTimeItems = items.filter((i) => i.billing === "one_time");
     const recurringItems = items.filter((i) => i.billing === "monthly");
 
-    // Stripe doesn't allow mixing payment + subscription modes in a single
-    // session. If the cart contains both one-time and recurring items we need
-    // to use subscription mode with one-time items added via `price_data`
-    // without `recurring`. Stripe supports this when mode = "subscription".
-    const hasRecurring = recurringItems.length > 0;
-    const mode = hasRecurring ? "subscription" : "payment";
+    // If there are monthly items, we can't mix with one-time in one session.
+    // Process only one-time items per cart checkout. Monthly items use
+    // individual Buy Now (which creates a subscription session).
+    const checkoutItems = recurringItems.length > 0 && oneTimeItems.length > 0
+      ? oneTimeItems // Only checkout one-time items; monthly must be bought individually
+      : items;
 
-    const lineItems = items.map((item) => ({
+    const hasRecurring = checkoutItems.some((i) => i.billing === "monthly");
+    const mode = hasRecurring ? ("subscription" as const) : ("payment" as const);
+
+    const lineItems = checkoutItems.map((item) => ({
       price_data: {
-        currency: "usd",
+        currency: "usd" as const,
         product_data: { name: item.name },
         unit_amount: item.retailPrice,
         ...(item.billing === "monthly" && {
@@ -40,17 +44,16 @@ export async function createCartCheckout(items: CartLineItem[]) {
       quantity: 1,
     }));
 
-    const allProductIds = items.map((i) => i.productId).join(",");
+    const allProductIds = checkoutItems.map((i) => i.productId).join(",");
 
     const session = await stripe.checkout.sessions.create({
       mode,
       line_items: lineItems,
       metadata: {
-        type: "store_cart_purchase",
+        type: "store_cart",
         productIds: allProductIds,
-        source: "public_store_cart",
       },
-      customer_creation: mode === "payment" ? "always" : undefined,
+      ...(mode === "payment" && { customer_creation: "always" as const }),
       success_url: `${baseUrl}/store/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/store`,
     });
