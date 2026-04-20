@@ -141,6 +141,24 @@ function SuccessContent() {
                   </p>
                 </div>
               </div>
+              <div className="flex gap-3">
+                <Check className="w-5 h-5 text-neuro-orange flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-sm text-neuro-navy">
+                    Access your purchases
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Once you&apos;re signed in, all your purchases will be
+                    waiting for you.
+                  </p>
+                  <Link
+                    href="/account/purchases"
+                    className="inline-flex items-center gap-1.5 mt-2 px-4 py-2 bg-gray-100 text-neuro-navy text-xs font-bold rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    My Purchases <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
 
