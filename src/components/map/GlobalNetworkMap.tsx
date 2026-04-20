@@ -266,6 +266,10 @@ export default function GlobalNetworkMap({
           cluster: false,
           doctorId: doc.id,
           name: `Dr. ${doc.first_name || ''} ${doc.last_name || ''}`.trim(),
+          slug: doc.slug,
+          clinic: doc.clinic_name,
+          city: doc.city,
+          state: doc.state,
           type: 'doctor' as const,
           isFiltered: listDoctors.length > 0 ? listDoctors.some(ld => ld.id === doc.id) : true
         }
