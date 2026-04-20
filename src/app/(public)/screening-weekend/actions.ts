@@ -14,13 +14,13 @@ export async function createWeekendCheckout(
   const baseTier = tier.replace("-plan", "") as "intensive" | "vip";
 
   const tiers = {
-    intensive: { price: 299700, label: "Screening Mastery Weekend Intensive" },
-    vip: { price: 599700, label: "Screening Mastery Weekend — VIP + 90-Day Coaching" },
+    intensive: { price: 199700, label: "Screening Mastery Weekend Intensive" },
+    vip: { price: 499700, label: "Screening Mastery Weekend — VIP + 90-Day Coaching" },
   };
 
   const planPrices = {
-    intensive: 109900, // $1,099/mo x 3
-    vip: 219900, // $2,199/mo x 3
+    intensive: 109900, // $1,099 x 2
+    vip: 259900, // $2,599 x 2
   };
 
   const selected = tiers[baseTier];
@@ -45,7 +45,7 @@ export async function createWeekendCheckout(
           metadata: {
             type: "weekend_intensive",
             tier: baseTier,
-            paymentPlan: "3-month",
+            paymentPlan: "2-month",
             attendeeName: name,
           },
         },

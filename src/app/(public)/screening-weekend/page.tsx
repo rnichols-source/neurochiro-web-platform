@@ -43,8 +43,8 @@ function RegistrationForm({
   const [submitting, setSubmitting] = useState(false);
 
   const label = tier === "vip" ? "VIP + 90-Day Coaching" : "Weekend Intensive";
-  const fullPrice = tier === "vip" ? "$5,997" : "$2,997";
-  const planPrice = tier === "vip" ? "$2,199" : "$1,099";
+  const fullPrice = tier === "vip" ? "$4,997" : "$1,997";
+  const planPrice = tier === "vip" ? "$2,599" : "$1,099";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +92,7 @@ function RegistrationForm({
               paymentPlan ? "bg-white text-neuro-navy shadow-sm" : "text-gray-500"
             }`}
           >
-            3 Payments — {planPrice}/mo
+            2 Payments — {planPrice}/mo
           </button>
         </div>
 
@@ -116,7 +116,7 @@ function RegistrationForm({
           </button>
           <p className="text-xs text-gray-400 text-center">
             Secure checkout powered by Stripe. Limited to 15 seats.
-            {paymentPlan && " 3 monthly payments, cancel anytime."}
+            {paymentPlan && " 2 monthly payments."}
           </p>
         </form>
       </div>
@@ -415,7 +415,7 @@ function WeekendContent() {
             >
               Reserve Your Seat <ArrowRight className="w-5 h-5" />
             </button>
-            <span className="text-sm text-gray-500">or 3 payments of $1,099</span>
+            <span className="text-sm text-gray-500">or 2 payments of $1,099</span>
           </div>
 
           <div className="grid grid-cols-3 gap-6 max-w-lg mx-auto mt-14">
@@ -635,8 +635,8 @@ function WeekendContent() {
             <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 flex flex-col">
               <h3 className="text-xl font-black text-neuro-navy mb-1">Weekend Intensive</h3>
               <p className="text-sm text-gray-500 mb-4">The full 3-day virtual experience</p>
-              <div className="mb-1"><span className="text-4xl font-black text-neuro-navy">$2,997</span></div>
-              <p className="text-sm text-gray-400 mb-6">or 3 payments of $1,099/mo</p>
+              <div className="mb-1"><span className="text-4xl font-black text-neuro-navy">$1,997</span></div>
+              <p className="text-sm text-gray-400 mb-6">or 2 payments of $1,099</p>
               <div className="space-y-3 flex-1 mb-8">
                 {["Full Friday-Sunday Zoom program", "Complete Screening Mastery Kit included", "Live role-play in breakout rooms", "All scripts, forms, and trackers", "Screening OS with events in your area", "Accountability partner pairing", "30-day group chat access", "Lifetime access to recordings", "PDF workbook"].map((f, i) => (
                   <div key={i} className="flex items-start gap-2.5"><CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" /><span className="text-sm text-gray-700">{f}</span></div>
@@ -652,8 +652,8 @@ function WeekendContent() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-neuro-orange text-white text-xs font-black uppercase tracking-widest rounded-full">Most Popular</div>
               <h3 className="text-xl font-black text-neuro-navy mb-1">VIP + 90-Day Coaching</h3>
               <p className="text-sm text-gray-500 mb-4">Full weekend + personal coaching with Dr. Ray</p>
-              <div className="mb-1"><span className="text-4xl font-black text-neuro-navy">$5,997</span></div>
-              <p className="text-sm text-gray-400 mb-6">or 3 payments of $2,199/mo</p>
+              <div className="mb-1"><span className="text-4xl font-black text-neuro-navy">$4,997</span></div>
+              <p className="text-sm text-gray-400 mb-6">or 2 payments of $2,599</p>
               <div className="space-y-3 flex-1 mb-8">
                 {["Everything in Weekend Intensive", "90 days of 1-on-1 coaching with Dr. Ray", "Weekly 30-min coaching calls", "Direct text/call access for 90 days", "Screening debrief after every event", "Custom screening strategy for your market", "Priority seating at future events", "Lifetime access to recordings + updates", "VIP-only quarterly mastermind call"].map((f, i) => (
                   <div key={i} className="flex items-start gap-2.5"><CheckCircle className="w-4 h-4 text-neuro-orange flex-shrink-0 mt-0.5" /><span className="text-sm text-gray-700">{f}</span></div>
@@ -682,8 +682,8 @@ function WeekendContent() {
               { q: "What if I miss a session?", a: "Every session is recorded and available within 24 hours. But attend live if at all possible — the breakout room practice is where the transformation happens." },
               { q: "Can I bring my CA or office manager?", a: "Your ticket covers you. Team members can be added at a reduced rate — they're half the screening team, so it's highly recommended. Email us for details." },
               { q: "What's the Screening OS?", a: "A live dashboard inside NeuroChiro where you track all your screening events, network contacts, vendor relationships, and outreach pipeline. We pre-load 25-50 real events in YOUR area so you have a pipeline ready to go." },
-              { q: "What's the difference between the $79 kit and the $2,997 weekend?", a: "The kit gives you the WHAT — scripts and templates. The weekend gives you the HOW — live coaching, breakout room practice, direct feedback, accountability, the Screening OS, and pre-loaded events in your area. The kit is included with the weekend." },
-              { q: "Is there a payment plan?", a: "Yes. Both tiers offer 3 monthly payments. Intensive: $1,099/mo x 3. VIP: $2,199/mo x 3. First payment due at registration." },
+              { q: "What's the difference between the $79 kit and the $1,997 weekend?", a: "The kit gives you the WHAT — scripts and templates. The weekend gives you the HOW — live coaching, breakout room practice, direct feedback, accountability, the Screening OS, and pre-loaded events in your area. The kit is included with the weekend." },
+              { q: "Is there a payment plan?", a: "Yes. Both tiers offer 2 monthly payments. Intensive: $1,099 x 2. VIP: $2,599 x 2. First payment due at registration." },
               { q: "When is the next weekend?", a: "Dates are announced to registered attendees first. Reserve your seat to get on the priority list." },
             ].map((faq, i) => (
               <details key={i} className="group bg-white rounded-xl border border-gray-100">
