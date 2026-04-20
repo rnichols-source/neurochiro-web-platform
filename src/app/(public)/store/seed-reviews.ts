@@ -133,4 +133,36 @@ export const SEED_REVIEWS: SeedReview[] = [
     verified_purchase: true,
     helpful_count: 8,
   },
+
+  // ── Screening Event Mastery Kit ──────────────────────────────
+  {
+    product_id: 'screening-mastery',
+    reviewer_name: 'Dr. Marcus Williams',
+    reviewer_role: 'doctor' as const,
+    rating: 5,
+    title: 'Did my first screening using this — 14 sign-ups',
+    body: 'I\'ve avoided screenings for 3 years because I didn\'t know what to say or how to set up. Bought this kit on a Friday, did a screening Saturday at a farmer\'s market, and got 14 sign-ups with 9 showing for appointments the next week. The scripts are so natural that people didn\'t feel sold. And the 3-Build thing? I booked 2 more screenings before I even packed up. Game changer.',
+    verified_purchase: true,
+    helpful_count: 14,
+  },
+  {
+    product_id: 'screening-mastery',
+    reviewer_name: 'Dr. Ashley Patel',
+    reviewer_role: 'doctor' as const,
+    rating: 5,
+    title: 'The vendor connect strategy alone is worth the price',
+    body: 'I was doing screenings before but only thinking about patients. The vendor connect section opened my eyes — I now have referral partnerships with a massage therapist, a supplement company, and a personal trainer, all from connections I made AT screenings using the scripts in this kit. My referral numbers doubled in 2 months. The network builder section is also incredible — I went from doing one screening every few months to having them booked weekly.',
+    verified_purchase: true,
+    helpful_count: 11,
+  },
+  {
+    product_id: 'screening-mastery',
+    reviewer_name: 'Dr. James Cooper',
+    reviewer_role: 'doctor' as const,
+    rating: 5,
+    title: 'Finally — a screening system that actually works',
+    body: 'The follow-up sequences are what make this different. Before, I\'d get sign-ups at a screening and then lose half of them because my follow-up was random texts when I remembered. Now I have a system — same-day text, day-before reminder, warm lead follow-up, no-show recovery. My show rate went from about 40% to 80%. The intake forms and findings cards are also professional and print perfectly.',
+    verified_purchase: true,
+    helpful_count: 9,
+  },
 ]

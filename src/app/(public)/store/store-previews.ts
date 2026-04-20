@@ -595,4 +595,71 @@ WHAT TO EXPECT AT YOUR FIRST VISIT:
 • If care is recommended, they'll present a plan`,
     },
   ],
+
+  "screening-mastery": [
+    {
+      title: "The 3-Build Philosophy",
+      type: "guide",
+      content: `Most chiropractors go to a screening and think about ONE thing: getting patients.
+
+You should be building THREE things from every single event:
+
+BUILD 1: YOUR PATIENT BASE
+The obvious one. Screen people, adjust them, schedule them. The kit gives you the complete 6-step flow, every script, every objection handler.
+
+BUILD 2: YOUR NETWORK BASE
+Every screening location has connections. The gym owner, the farmer's market organizer, the HR director. Before you leave, you should have 1-2 NEW screening opportunities booked from connections you made AT this event.
+
+BUILD 3: YOUR VENDOR BASE
+Every event has other vendors — supplement companies, massage therapists, fitness brands, nutritionists. These are pre-qualified referral partners. Start the relationship on the spot.
+
+THE MATH: If you do 2 screenings/month and each one books 2 more, you'll have screenings every week within 90 days. That's 3 new patients per week × $2,500 avg case value = $30,000/month in new patient revenue from screenings ALONE.
+
+Nobody else is teaching this. They teach you to show up, screen, and leave. That's playing checkers. This is chess.`,
+    },
+    {
+      title: "Step 1: The Greeter Script",
+      type: "script",
+      content: `Stand IN FRONT of the booth, not behind it. Make eye contact. Smile. Don't wait for them to come to you.
+
+"Hey! Have you ever had your spine checked?"
+[Pause for answer]
+"We're doing free spinal screenings today — takes about 3 minutes. Want to see what's going on?"
+
+IF THEY HESITATE:
+"It's completely free and takes less time than waiting in line for coffee. Plus [DOCTOR NAME] is doing adjustments today — you might walk away feeling better than you have in weeks."
+
+IF THEY SAY NO:
+"No problem! Here's our card — if you ever want a free screening, just call us."
+[Hand them a card and move to the NEXT person. Don't dwell.]`,
+    },
+    {
+      title: "The $97 Offer Script",
+      type: "script",
+      content: `Show them the findings card. Point to what you circled. Then:
+
+"Here's what I'd like to do. Our full initial visit — exam, x-rays, scans, everything — is normally $197. Because you're here today, I'm going to do it for $97. That's $100 off, today only."
+
+"All I need is $40 right now to hold your spot, and you pay the remaining $57 when you come in. We can get you on the schedule right now — what does this week look like for you?"
+
+KEY LANGUAGE: "What does this week look like?" — not "Would you like to schedule?"
+Give them a choice of WHEN, not IF.
+
+IF THEY SAY "I need to think about it":
+"I totally get it. But this $100 savings is only available right now at this event. I can't offer this in the office. Can I at least hold a spot for you this week? The $40 is fully refundable if something comes up."`,
+    },
+    {
+      title: "Network Builder — Venue Owner Script",
+      type: "script",
+      content: `BEFORE YOU PACK UP — approach the venue owner or event organizer:
+
+"Hey [NAME], we had a fantastic response today — thank you for having us. Quick question: do you do these events regularly? We'd love to make this a monthly thing. We bring the value, your [customers/members/attendees] love it, and it's completely free. Would you be open to booking us for next month?"
+
+FOR NEARBY BUSINESSES (walk to 2-3 shops/gyms/offices near the event):
+
+"Hey, I'm [DOCTOR NAME] from [PRACTICE]. We're doing free health screenings at the [EVENT] right now and getting a great response. Do you ever do wellness events for your team or your customers? We do free 30-minute lunch-and-learns — no cost, no catch, just good health info. Want me to send you some info?"
+
+GOAL: Leave every event with 1-2 new screening bookings or warm connections. Write them down on your Network Tracker before you drive away.`,
+    },
+  ],
 };

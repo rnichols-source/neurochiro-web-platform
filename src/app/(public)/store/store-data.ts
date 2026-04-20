@@ -500,6 +500,33 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     billing: "monthly",
   },
 
+  // ── Screening Kit ──────────────────────────────────────────────
+  {
+    id: "screening-mastery",
+    name: "Screening Event Mastery Kit",
+    description:
+      "The complete system for high-converting health screenings. Not just scripts — a full business-building machine. The only kit that teaches the 3-Build Philosophy: build your patient base, your network, and your vendor pipeline from every single event.",
+    longDescription:
+      "Most chiropractors go to a screening and come back with a few sign-ups. You should come back with new patients, your next 2 screening bookings, and 2 new referral partners. This kit gives you the complete 6-step screening flow (greet → intake → screen → adjust → offer → book), every script and objection handler, printable intake forms and findings cards, a network builder system to book your next event FROM this one, a vendor connect playbook to build referral partnerships on the spot, follow-up text sequences, and an ROI calculator. Nobody else is teaching this. Follow it to a T and you'll have screenings booked every week within 90 days.",
+    category: "tools",
+    audience: ["doctor"],
+    retailPrice: 14900,
+    memberPrice: 7900,
+    badge: "New",
+    features: [
+      "Complete 6-step screening flow with scripts",
+      "The 3-Build Philosophy (patients + network + vendors)",
+      "Printable intake forms & nerve findings cards",
+      "Network Builder — book your next event FROM this one",
+      "Vendor Connect — build referral partnerships on the spot",
+      "Full follow-up text sequences",
+      "Event ROI calculator",
+      "Pre-event checklist & marketing templates",
+    ],
+    billing: "one_time",
+    popular: true,
+  },
+
   // ── Patient Products ───────────────────────────────────────────
   {
     id: "patient-premium",
