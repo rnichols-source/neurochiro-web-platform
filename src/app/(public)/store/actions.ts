@@ -30,7 +30,7 @@ export async function createStoreCheckout(
         source: "public_store",
       },
       customer_creation: "always",
-      success_url: `${baseUrl}/store?purchased=${productId}`,
+      success_url: `${baseUrl}/store/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/store`,
     });
 

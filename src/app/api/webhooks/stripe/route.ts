@@ -107,6 +107,32 @@ export async function POST(req: Request) {
             }
           }
 
+          if (metaType === 'store_purchase') {
+            const productId = session.metadata?.productId;
+            if (productId) {
+              await (supabase as any).from('course_purchases').insert({
+                user_id: userId,
+                course_id: productId,
+                stripe_session_id: session.id,
+                amount: session.amount_total,
+                source: 'store',
+              });
+            }
+          }
+
+          if (metaType === 'store_cart') {
+            const productIds = (session.metadata?.productIds || '').split(',').filter(Boolean);
+            for (const pid of productIds) {
+              await (supabase as any).from('course_purchases').upsert({
+                user_id: userId,
+                course_id: pid,
+                stripe_session_id: session.id,
+                amount: session.amount_total,
+                source: 'store',
+              }, { onConflict: 'user_id,course_id' });
+            }
+          }
+
           if (metaType === 'course_bundle') {
             const courseIds = (session.metadata?.courseIds || '').split(',').filter(Boolean);
             for (const courseId of courseIds) {
@@ -136,6 +162,38 @@ export async function POST(req: Request) {
               expires_at: expiresAt,
               status: 'Active',
             });
+          }
+        }
+
+        // Handle guest store purchases (no userId)
+        if (!userId) {
+          const metaType = session.metadata?.type;
+          const customerEmail = session.customer_details?.email || session.customer_email;
+
+          if (metaType === 'store_purchase' && customerEmail) {
+            const productId = session.metadata?.productId;
+            if (productId) {
+              await (supabase as any).from('course_purchases').insert({
+                course_id: productId,
+                stripe_session_id: session.id,
+                amount: session.amount_total,
+                source: 'store',
+                guest_email: customerEmail,
+              });
+            }
+          }
+
+          if (metaType === 'store_cart' && customerEmail) {
+            const productIds = (session.metadata?.productIds || '').split(',').filter(Boolean);
+            for (const pid of productIds) {
+              await (supabase as any).from('course_purchases').insert({
+                course_id: pid,
+                stripe_session_id: session.id,
+                amount: session.amount_total,
+                source: 'store',
+                guest_email: customerEmail,
+              });
+            }
           }
         }
 

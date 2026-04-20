@@ -36,7 +36,8 @@ import {
   type StoreAudience,
   type StoreProduct,
 } from "./store-data";
-import { Stethoscope, GraduationCap as GradCap, Heart } from "lucide-react";
+import { getUserPurchases } from "./purchase-check";
+import { Stethoscope, GraduationCap as GradCap, Heart, Search } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // Category Icons
@@ -57,10 +58,12 @@ function ProductCard({
   product,
   onBuy,
   buying,
+  purchased,
 }: {
   product: StoreProduct;
   onBuy: (p: StoreProduct) => void;
   buying: string | null;
+  purchased?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const savings = getSavingsPercent(product);
@@ -149,28 +152,43 @@ function ProductCard({
           </div>
         </div>
 
-        {/* Buy button */}
-        <button
-          onClick={() => onBuy(product)}
-          disabled={isBuying}
-          className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-            isBuying
-              ? "bg-gray-200 text-gray-400 cursor-wait"
-              : "bg-neuro-navy text-white hover:bg-neuro-navy/90 active:scale-[0.98]"
-          }`}
-        >
-          {isBuying ? (
-            <>
-              <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <ShoppingCart className="w-4 h-4" />
-              Buy Now
-            </>
-          )}
-        </button>
+        {/* Buy button or purchased state */}
+        {purchased ? (
+          <div className="w-full py-3 rounded-xl font-bold text-sm bg-green-50 text-green-700 flex items-center justify-center gap-2 border border-green-200">
+            <Check className="w-4 h-4" />
+            You own this
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <button
+              onClick={() => onBuy(product)}
+              disabled={isBuying}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                isBuying
+                  ? "bg-gray-200 text-gray-400 cursor-wait"
+                  : "bg-neuro-navy text-white hover:bg-neuro-navy/90 active:scale-[0.98]"
+              }`}
+            >
+              {isBuying ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4" />
+                  Buy Now
+                </>
+              )}
+            </button>
+            <Link
+              href={`/store/${product.id}`}
+              className="block w-full py-2 text-center text-xs font-semibold text-gray-400 hover:text-neuro-navy transition-colors"
+            >
+              View Details
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -341,17 +359,23 @@ function StoreContent() {
   const [audience, setAudience] = useState<StoreAudience | null>(null);
   const [activeCategory, setActiveCategory] = useState<StoreCategory | "all">("all");
   const [buying, setBuying] = useState<string | null>(null);
-  const [purchasedId, setPurchasedId] = useState<string | null>(null);
+  const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  // Check for purchase success
+  // Load purchased products
   useEffect(() => {
-    const purchased = searchParams.get("purchased");
-    if (purchased) {
-      setPurchasedId(purchased);
-      window.history.replaceState({}, "", "/store");
-    }
-  }, [searchParams]);
+    // From localStorage (guest purchases)
+    const local = JSON.parse(localStorage.getItem("neurochiro-purchases") || "[]");
+    setPurchasedIds(local);
+
+    // From Supabase (logged-in user)
+    getUserPurchases().then((ids) => {
+      if (ids.length > 0) {
+        setPurchasedIds((prev) => [...new Set([...prev, ...ids])]);
+      }
+    });
+  }, []);
 
   // Reset category when audience changes
   const handleAudienceSelect = (a: StoreAudience) => {
@@ -377,34 +401,38 @@ function StoreContent() {
     });
   };
 
-  // Filter products by audience
+  // Filter products by audience and search
   const audienceProducts = audience
     ? getProductsByAudience(audience)
     : STORE_PRODUCTS;
+
+  const searchFiltered = searchQuery.trim()
+    ? audienceProducts.filter((p) => {
+        const q = searchQuery.toLowerCase();
+        return (
+          p.name.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q) ||
+          p.features.some((f) => f.toLowerCase().includes(q))
+        );
+      })
+    : audienceProducts;
+
   const availableCategories = audience
     ? getCategoriesForAudience(audience)
     : (Object.keys(CATEGORY_INFO) as StoreCategory[]);
   const popular = audience
-    ? audienceProducts.filter((p) => p.popular)
+    ? searchFiltered.filter((p) => p.popular)
     : getPopularProducts();
 
   const displayProducts =
     activeCategory === "all"
-      ? audienceProducts
-      : audienceProducts.filter((p) => p.category === activeCategory);
+      ? searchFiltered
+      : searchFiltered.filter((p) => p.category === activeCategory);
 
   const audienceInfo = audience ? AUDIENCE_INFO[audience] : null;
 
   return (
     <div className="min-h-dvh bg-[#fafbfc]">
-      {/* Success Toast */}
-      {purchasedId && (
-        <SuccessToast
-          productId={purchasedId}
-          onClose={() => setPurchasedId(null)}
-        />
-      )}
-
       {/* Hero */}
       <section className="bg-neuro-navy text-white pt-32 pb-14 px-6 relative overflow-hidden">
         <div className="absolute inset-0 opacity-5">
@@ -445,8 +473,30 @@ function StoreContent() {
         {/* Audience Selector */}
         <AudienceSelector selected={audience} onSelect={handleAudienceSelect} />
 
+        {/* Search Bar */}
+        {audience && (
+          <div className="relative mb-6">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-11 pr-10 py-3 rounded-xl border border-gray-200 bg-white text-sm text-neuro-navy placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Member Savings Banner */}
-        {audience && <MemberBanner audience={audience} />}
+        {audience && !searchQuery && <MemberBanner audience={audience} />}
 
         {/* Category Tabs (only when audience is selected) */}
         {audience && availableCategories.length > 1 && (
@@ -490,8 +540,25 @@ function StoreContent() {
           </div>
         )}
 
-        {/* Popular Section (only on "all" with audience selected) */}
-        {audience && activeCategory === "all" && popular.length > 0 && (
+        {/* No search results */}
+        {audience && searchQuery && searchFiltered.length === 0 && (
+          <div className="text-center py-16">
+            <Search className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+            <h3 className="font-bold text-neuro-navy mb-1">No products found</h3>
+            <p className="text-sm text-gray-400 mb-4">
+              Try a different search term or{" "}
+              <button
+                onClick={() => setSearchQuery("")}
+                className="text-neuro-orange font-semibold hover:underline"
+              >
+                clear your search
+              </button>
+            </p>
+          </div>
+        )}
+
+        {/* Popular Section (only on "all" with audience selected, no search) */}
+        {audience && activeCategory === "all" && !searchQuery && popular.length > 0 && (
           <div className="mb-12">
             <div className="flex items-center gap-2 mb-5">
               <Sparkles className="w-5 h-5 text-neuro-orange" />
@@ -506,6 +573,7 @@ function StoreContent() {
                   product={product}
                   onBuy={handleBuy}
                   buying={buying}
+                  purchased={purchasedIds.includes(product.id)}
                 />
               ))}
             </div>
@@ -527,7 +595,7 @@ function StoreContent() {
         {/* Category sections (all view) or filtered grid */}
         {audience && activeCategory === "all" ? (
           availableCategories.map((cat) => {
-            const products = audienceProducts.filter((p) => p.category === cat);
+            const products = searchFiltered.filter((p) => p.category === cat);
             if (products.length === 0) return null;
             return (
               <div key={cat} className="mb-12">
