@@ -554,19 +554,19 @@ export const STORE_PRODUCTS: StoreProduct[] = [
   },
   {
     id: "patient-exercise-library",
-    name: "Exercise & Rehab Video Library",
+    name: "Home Exercise & Rehab Library",
     description:
-      "Full 32-exercise video library with follow-along routines for home care between visits. New exercises added monthly.",
+      "32 guided exercises with step-by-step instructions for home care between visits. Organized by body region with modifications for every fitness level.",
     longDescription:
-      "On-demand access to 32 follow-along exercise videos organized by body region, with clear instructions and modifications for every fitness level. Exercises recommended by your chiropractor to accelerate results and help your body hold adjustments longer. New content added monthly.",
+      "Your chiropractor recommends exercises for a reason — they accelerate your results and help your body hold adjustments longer. This library gives you access to 32 guided exercises with clear step-by-step instructions, organized by body region (neck, upper back, lower back, hips, full body). Each exercise includes modifications for beginners and advanced levels. New exercises added monthly.",
     category: "tools",
     audience: ["patient"],
     retailPrice: 499,
     memberPrice: 499,
     features: [
-      "32 follow-along exercise videos",
+      "32 guided exercises with instructions",
       "Organized by body region",
-      "Modifications for all fitness levels",
+      "Beginner & advanced modifications",
       "New exercises added monthly",
     ],
     billing: "monthly",
