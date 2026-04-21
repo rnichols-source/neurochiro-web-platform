@@ -1380,14 +1380,14 @@ export default function CarePlanBuilder() {
         </button>
       </div>
 
-      <StepTabs />
+      {StepTabs()}
 
-      {state.currentStep === 1 && <Step1 />}
-      {state.currentStep === 2 && <Step2 />}
-      {state.currentStep === 3 && <Step3 />}
-      {state.currentStep === 4 && <Step4 />}
+      {state.currentStep === 1 && Step1()}
+      {state.currentStep === 2 && Step2()}
+      {state.currentStep === 3 && Step3()}
+      {state.currentStep === 4 && Step4()}
 
-      {state.currentStep < 4 && <NavButtons />}
+      {state.currentStep < 4 && NavButtons()}
     </div>
   );
 }
