@@ -183,14 +183,17 @@ export default function CarePlanBuilder() {
     setLoaded(true);
   }, []);
 
-  // Save to localStorage on every change
+  // Save to localStorage on change (debounced to prevent re-render loop)
+  const stateRef = useRef(state);
+  stateRef.current = state;
   useEffect(() => {
     if (!loaded) return;
-    try {
-      localStorage.setItem(LS_KEY, JSON.stringify(state));
-    } catch {
-      // ignore
-    }
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(LS_KEY, JSON.stringify(stateRef.current));
+      } catch {}
+    }, 500);
+    return () => clearTimeout(timer);
   }, [state, loaded]);
 
   const set = useCallback(
