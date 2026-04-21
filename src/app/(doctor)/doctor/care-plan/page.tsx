@@ -445,7 +445,7 @@ export default function CarePlanBuilder() {
   // ─── Timeline Bar (reusable) ─────────────────────────────────────────────
 
   const TimelineBar = ({ height = "h-12" }: { height?: string }) => (
-    <div className={`flex rounded-xl overflow-hidden ${height} mb-4`}>
+    <div className={`timeline-bar flex rounded-xl overflow-hidden ${height} mb-4`}>
       {state.phases.map((phase, i) => {
         const pct = totalWeeks > 0 ? (phase.weeks / totalWeeks) * 100 : 100 / state.phases.length;
         return (
@@ -1081,18 +1081,23 @@ export default function CarePlanBuilder() {
       {/* Print Report */}
       <div ref={printRef} className="print-area bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {/* Report Header */}
-        <div className="bg-neuro-navy p-8 sm:p-10" style={{ backgroundColor: "#1a2744" }}>
-          <p className="text-white/50 text-sm font-bold uppercase tracking-widest">
+        <div className="print-header bg-neuro-navy p-8 sm:p-10" style={{ backgroundColor: "#1a2744" }}>
+          <p className="text-white/50 text-xs font-bold uppercase tracking-[0.2em]">
             {state.practiceName}
           </p>
-          <h1 className="font-heading text-2xl sm:text-3xl font-black text-white mt-3">
+          <h1 className="font-heading text-2xl sm:text-3xl font-black text-white mt-2">
             {state.patientName || "Patient"}
           </h1>
-          <p className="text-white/60 text-base mt-1">Personalized Care Plan</p>
-          <p className="text-white/40 text-sm mt-2">{state.date} &middot; {state.doctorName}</p>
+          <div className="flex items-center gap-3 mt-2">
+            <span className="text-white/60 text-sm">Personalized Care Plan</span>
+            <span className="text-white/30">|</span>
+            <span className="text-white/40 text-sm">{state.date}</span>
+            <span className="text-white/30">|</span>
+            <span className="text-white/40 text-sm">{state.doctorName}</span>
+          </div>
         </div>
 
-        <div className="p-6 sm:p-10 space-y-8">
+        <div className="print-body p-6 sm:p-10 space-y-6">
           {/* Assessment Section */}
           {hasScoring && (
             <section>
@@ -1328,37 +1333,105 @@ export default function CarePlanBuilder() {
           )}
         </div>
 
+          {/* Signature Block */}
+          <section className="pt-4 border-t-2 border-neuro-navy mt-6">
+            <p className="text-xs text-gray-500 leading-relaxed mb-6">
+              By signing below, I confirm that I have reviewed this care plan and understand the recommended treatment,
+              visit schedule, and financial investment. I have had the opportunity to ask questions.
+            </p>
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <div className="sig-line border-b-2 border-neuro-navy h-8" />
+                <p className="text-[10px] text-gray-400 mt-1">Patient Signature</p>
+                <div className="border-b border-gray-300 h-6 mt-4" />
+                <p className="text-[10px] text-gray-400 mt-1">Print Name</p>
+              </div>
+              <div>
+                <div className="sig-line border-b-2 border-neuro-navy h-8" />
+                <p className="text-[10px] text-gray-400 mt-1">Date</p>
+                <div className="border-b border-gray-300 h-6 mt-4" />
+                <p className="text-[10px] text-gray-400 mt-1">Doctor Signature / Date</p>
+              </div>
+            </div>
+          </section>
+
         {/* Report Footer */}
-        <div className="px-6 sm:px-10 py-4 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center text-xs text-gray-400 gap-2">
-          <span>{state.practiceName} &middot; {state.doctorName}</span>
-          <span className="text-center italic">
+        <div className="px-6 sm:px-10 py-3 border-t border-gray-100 bg-gray-50">
+          <p className="text-center text-xs text-gray-400 italic mb-1">
             Your care plan is designed around your specific needs. Consistency is key to lasting correction.
-          </span>
-          <span>{state.date}</span>
+          </p>
+          <div className="flex justify-between text-[10px] text-gray-300">
+            <span>{state.practiceName}</span>
+            <span>{state.doctorName}</span>
+            <span>{state.date}</span>
+          </div>
         </div>
       </div>
     </div>
   );
 
-  // ─── Render ──────────────────────────────────────────────────────────────
+  // ─── Render ─────────────────────────────────────────────────────────────
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto">
+    <div className="care-plan-wrapper p-4 md:p-8 max-w-6xl mx-auto">
       <style jsx global>{`
         @media print {
-          .no-print { display: none !important; }
-          .print-only { display: block !important; }
-          body { background: white !important; }
-          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          @page { margin: 0.4in; }
-          /* Hide everything except print area */
-          body > *:not(.print-area) { }
-          nav, header, aside, [data-sidebar], [role="navigation"] { display: none !important; }
+          /* Hide EVERYTHING except the report */
+          .no-print,
+          nav, header, footer, aside,
+          [data-sidebar], [role="navigation"],
+          button, .step-tabs-container {
+            display: none !important;
+          }
+
+          /* Reset page */
+          html, body {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          @page { margin: 0.3in 0.4in; }
+
+          /* Force colors to print */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          /* Make the report fill the page cleanly */
           .print-area {
             border: none !important;
             box-shadow: none !important;
             border-radius: 0 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
           }
+
+          /* The parent wrapper should be invisible */
+          .care-plan-wrapper {
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+          }
+
+          /* Tighten spacing for print */
+          .print-area .print-section { margin-bottom: 14px !important; }
+          .print-area .print-header { padding: 20px 24px !important; }
+          .print-area .print-body { padding: 16px 24px !important; }
+          .print-area .print-body > section { margin-bottom: 16px !important; }
+          .print-area .phase-card { padding: 10px !important; }
+
+          /* Prevent page breaks inside sections */
+          section { page-break-inside: avoid; }
+
+          /* Ensure timeline bar prints */
+          .timeline-bar, .timeline-bar > div {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          /* Signature lines */
+          .sig-line { border-bottom: 1.5px solid #1a2744; height: 28px; }
         }
       `}</style>
 
