@@ -1,6 +1,24 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Users,
+  DollarSign,
+  Calendar,
+  Target,
+  Flame,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  X,
+  Settings,
+  AlertTriangle,
+  Award,
+  BarChart3,
+  Activity,
+} from "lucide-react";
 import { logDailyEntry, getTodayEntry, getWeeklyData, getDailyEntries, getStreak } from "./actions";
 import type { KpiEntry, WeeklySummary } from "./actions";
 
@@ -8,14 +26,53 @@ import type { KpiEntry, WeeklySummary } from "./actions";
 // Constants
 // ---------------------------------------------------------------------------
 
-const ENERGY_EMOJIS = ["😩", "😐", "😊", "😎", "🔥"] as const;
+const ENERGY_EMOJIS = ["\u{1F629}", "\u{1F610}", "\u{1F642}", "\u{1F60E}", "\u{1F525}"] as const;
 
-const NETWORK_BENCHMARKS = {
-  patientVisitsWeek: 72,
-  newPatientsWeek: 4,
-  collectionsWeek: 4800_00, // cents
-  showRate: 84,
+const LS_GOALS_KEY = "neurochiro-kpi-goals";
+const LS_EXTRAS_KEY = "neurochiro-kpi-extras";
+
+interface Goals {
+  visits: number;
+  newPatients: number;
+  collections: number; // cents
+  noShows: number;
+  referrals: number;
+}
+
+const DEFAULT_GOALS: Goals = {
+  visits: 40,
+  newPatients: 2,
+  collections: 280000,
+  noShows: 2,
+  referrals: 3,
 };
+
+interface FormState {
+  patientVisits: string;
+  newPatients: string;
+  collections: string;
+  noShows: string;
+  referrals: string;
+  reactivations: string;
+  caseAcceptance: string;
+  servicesPerVisit: string;
+  energyLevel: number;
+}
+
+const INITIAL_FORM: FormState = {
+  patientVisits: "",
+  newPatients: "",
+  collections: "",
+  noShows: "",
+  referrals: "",
+  reactivations: "",
+  caseAcceptance: "",
+  servicesPerVisit: "",
+  energyLevel: 0,
+};
+
+const DAYS_OF_WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+const WORKING_DAYS_DEFAULT = [true, true, true, true, true, false, false];
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -28,56 +85,44 @@ function getGreeting(): string {
   return "Good evening";
 }
 
+function formatDate(d: Date): string {
+  return d.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 function fmtDollars(cents: number): string {
   return "$" + (cents / 100).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
-function showRate(visits: number, noShows: number): number {
-  const total = visits + noShows;
-  if (total === 0) return 0;
-  return Math.round((visits / total) * 100);
+function getMonday(d: Date): Date {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  date.setDate(diff);
+  date.setHours(0, 0, 0, 0);
+  return date;
 }
 
-function pctChange(current: number, previous: number): number | null {
-  if (previous === 0) return current === 0 ? null : 100;
-  return Math.round(((current - previous) / previous) * 100);
+function formatWeekLabel(monday: Date): string {
+  const friday = new Date(monday);
+  friday.setDate(friday.getDate() + 4);
+  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
+  return `${monday.toLocaleDateString("en-US", opts)} - ${friday.toLocaleDateString("en-US", opts)}`;
 }
 
-function percentileLabel(value: number, benchmark: number): { label: string; tier: "gold" | "silver" | "neutral" | "none" } {
-  const ratio = value / benchmark;
-  if (ratio >= 1.3) return { label: "Top 10%", tier: "gold" };
-  if (ratio >= 1.1) return { label: "Top 25%", tier: "silver" };
-  if (ratio >= 0.9) return { label: "Top 50%", tier: "neutral" };
-  return { label: "", tier: "none" };
-}
-
-function groupByWeek(entries: KpiEntry[]): WeeklySummary[] {
-  const map = new Map<string, KpiEntry[]>();
-  for (const e of entries) {
-    const d = new Date(e.date + "T00:00:00");
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    const mon = new Date(d);
-    mon.setDate(diff);
-    const ws = mon.toISOString().slice(0, 10);
-    const list = map.get(ws) ?? [];
-    list.push(e);
-    map.set(ws, list);
+function getStatusColor(value: number, target: number, invert: boolean): string {
+  if (invert) {
+    if (value <= target) return "#22c55e";
+    if (value <= target * 1.2) return "#eab308";
+    return "#ef4444";
   }
-  const out: WeeklySummary[] = [];
-  for (const [weekStart, items] of map) {
-    out.push({
-      weekStart,
-      patientVisits: items.reduce((s, e) => s + (e.patient_visits ?? 0), 0),
-      newPatients: items.reduce((s, e) => s + (e.new_patients ?? 0), 0),
-      collections: items.reduce((s, e) => s + (e.collections ?? 0), 0),
-      noShows: items.reduce((s, e) => s + (e.no_shows ?? 0), 0),
-      energyLevel: items.length > 0 ? Math.round(items.reduce((s, e) => s + (e.energy_level ?? 0), 0) / items.length) : 0,
-      entryCount: items.length,
-    });
-  }
-  out.sort((a, b) => a.weekStart.localeCompare(b.weekStart));
-  return out;
+  if (value >= target) return "#22c55e";
+  if (value >= target * 0.8) return "#eab308";
+  return "#ef4444";
 }
 
 // ---------------------------------------------------------------------------
@@ -87,24 +132,31 @@ function groupByWeek(entries: KpiEntry[]): WeeklySummary[] {
 export default function KpiTrackerPage() {
   // Data state
   const [todayEntry, setTodayEntry] = useState<KpiEntry | null>(null);
-  const [weeklyData, setWeeklyData] = useState<WeeklySummary[]>([]);
-  const [dailyEntries, setDailyEntries] = useState<KpiEntry[]>([]);
+  const [entries, setEntries] = useState<KpiEntry[]>([]);
   const [streak, setStreak] = useState<{ current: number; longest: number }>({ current: 0, longest: 0 });
 
   // UI state
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [chartRange, setChartRange] = useState<30 | 60 | 90>(30);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showMoreMetrics, setShowMoreMetrics] = useState(false);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [trendPeriod, setTrendPeriod] = useState<7 | 30 | 60 | 90>(30);
+  const [showGoals, setShowGoals] = useState(false);
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<number>>(new Set());
 
   // Form state
-  const [patientVisits, setPatientVisits] = useState("");
-  const [newPatients, setNewPatients] = useState("");
-  const [collectionsDollars, setCollectionsDollars] = useState("");
-  const [noShows, setNoShows] = useState("");
-  const [energyLevel, setEnergyLevel] = useState<number>(0);
+  const [form, setForm] = useState<FormState>(INITIAL_FORM);
+
+  // Goals state
+  const [goals, setGoals] = useState<Goals>(DEFAULT_GOALS);
+  const [workingDays, setWorkingDays] = useState(WORKING_DAYS_DEFAULT);
+  const [monthlyRevenueGoal, setMonthlyRevenueGoal] = useState("");
+
+  // Refs for localStorage debounce
+  const goalsRef = useRef(goals);
+  goalsRef.current = goals;
 
   // -----------------------------------------------------------------------
   // Data loading
@@ -112,19 +164,17 @@ export default function KpiTrackerPage() {
 
   const loadData = useCallback(async () => {
     try {
-      const [entry, weekly, daily, streakData] = await Promise.all([
+      const [entry, daily, streakData] = await Promise.all([
         getTodayEntry(),
-        getWeeklyData(14),
         getDailyEntries(90),
         getStreak(),
       ]);
       setTodayEntry(entry);
-      setWeeklyData(weekly);
-      setDailyEntries(daily);
+      setEntries(daily);
       setStreak(streakData);
       setError(null);
     } catch {
-      setError("Unable to load data. Showing empty state.");
+      setError("Unable to load data.");
     } finally {
       setLoading(false);
     }
@@ -134,253 +184,246 @@ export default function KpiTrackerPage() {
     loadData();
   }, [loadData]);
 
+  // Load goals from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LS_GOALS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setGoals({ ...DEFAULT_GOALS, ...parsed });
+      }
+    } catch {}
+  }, []);
+
+  // Pre-fill form if today is already logged
+  useEffect(() => {
+    if (todayEntry) {
+      setForm({
+        patientVisits: String(todayEntry.patient_visits),
+        newPatients: String(todayEntry.new_patients),
+        collections: String(todayEntry.collections / 100),
+        noShows: String(todayEntry.no_shows),
+        referrals: "",
+        reactivations: "",
+        caseAcceptance: "",
+        servicesPerVisit: "",
+        energyLevel: todayEntry.energy_level,
+      });
+      // Load extras from localStorage
+      try {
+        const extras = localStorage.getItem(LS_EXTRAS_KEY);
+        if (extras) {
+          const parsed = JSON.parse(extras);
+          setForm(prev => ({
+            ...prev,
+            referrals: parsed.referrals ?? "",
+            reactivations: parsed.reactivations ?? "",
+            caseAcceptance: parsed.caseAcceptance ?? "",
+            servicesPerVisit: parsed.servicesPerVisit ?? "",
+          }));
+        }
+      } catch {}
+    }
+  }, [todayEntry]);
+
   // -----------------------------------------------------------------------
   // Form helpers
   // -----------------------------------------------------------------------
 
-  const hasLogged = todayEntry !== null && !editing;
-
-  const populateFormFromEntry = useCallback((entry: KpiEntry) => {
-    setPatientVisits(String(entry.patient_visits));
-    setNewPatients(String(entry.new_patients));
-    setCollectionsDollars(String(entry.collections / 100));
-    setNoShows(String(entry.no_shows));
-    setEnergyLevel(entry.energy_level);
+  const updateForm = useCallback((field: keyof FormState, value: string | number) => {
+    setForm(prev => ({ ...prev, [field]: value }));
   }, []);
 
   const handleSubmit = async () => {
-    if (energyLevel === 0) return;
+    if (form.energyLevel === 0) return;
     setSubmitting(true);
+    setError(null);
+
     const result = await logDailyEntry({
-      patientVisits: parseInt(patientVisits) || 0,
-      newPatients: parseInt(newPatients) || 0,
-      collections: Math.round((parseFloat(collectionsDollars) || 0) * 100),
-      noShows: parseInt(noShows) || 0,
-      energyLevel,
+      patientVisits: parseInt(form.patientVisits) || 0,
+      newPatients: parseInt(form.newPatients) || 0,
+      collections: Math.round((parseFloat(form.collections) || 0) * 100),
+      noShows: parseInt(form.noShows) || 0,
+      energyLevel: form.energyLevel,
     });
+
     setSubmitting(false);
+
     if ("error" in result) {
       setError(result.error);
       return;
     }
-    setEditing(false);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+
+    // Save extras to localStorage
+    try {
+      localStorage.setItem(LS_EXTRAS_KEY, JSON.stringify({
+        referrals: form.referrals,
+        reactivations: form.reactivations,
+        caseAcceptance: form.caseAcceptance,
+        servicesPerVisit: form.servicesPerVisit,
+        date: new Date().toISOString().slice(0, 10),
+      }));
+    } catch {}
+
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
     await loadData();
+  };
+
+  const saveGoals = () => {
+    try {
+      localStorage.setItem(LS_GOALS_KEY, JSON.stringify(goals));
+    } catch {}
   };
 
   // -----------------------------------------------------------------------
   // Derived data
   // -----------------------------------------------------------------------
 
-  const sevenDayAvg = useMemo(() => {
-    const last7 = dailyEntries.slice(-7);
-    if (last7.length === 0) return null;
-    const n = last7.length;
+  const thirtyDayAvg = useMemo(() => {
+    const last30 = entries.slice(-30);
+    if (last30.length === 0) return null;
+    const n = last30.length;
     return {
-      patient_visits: Math.round(last7.reduce((s, e) => s + e.patient_visits, 0) / n),
-      new_patients: Math.round(last7.reduce((s, e) => s + e.new_patients, 0) / n),
-      collections: Math.round(last7.reduce((s, e) => s + e.collections, 0) / n),
-      no_shows: Math.round(last7.reduce((s, e) => s + e.no_shows, 0) / n),
-      energy_level: Math.round(last7.reduce((s, e) => s + e.energy_level, 0) / n),
+      visits: Math.round(last30.reduce((s, e) => s + e.patient_visits, 0) / n),
+      newPatients: Math.round(last30.reduce((s, e) => s + e.new_patients, 0) / n),
+      collections: Math.round(last30.reduce((s, e) => s + e.collections, 0) / n),
+      noShows: Math.round(last30.reduce((s, e) => s + e.no_shows, 0) / n),
     };
-  }, [dailyEntries]);
+  }, [entries]);
 
-  const thisWeek = weeklyData.length > 0 ? weeklyData[weeklyData.length - 1] : null;
-  const lastWeek = weeklyData.length > 1 ? weeklyData[weeklyData.length - 2] : null;
+  // Weekly data for the weekly scorecard
+  const weeklyScorecard = useMemo(() => {
+    const now = new Date();
+    const targetMonday = getMonday(now);
+    targetMonday.setDate(targetMonday.getDate() + weekOffset * 7);
 
-  const chartWeeks = useMemo(() => {
-    const weeksNeeded = Math.ceil(chartRange / 7);
-    const allWeeks = groupByWeek(dailyEntries);
-    return allWeeks.slice(-weeksNeeded);
-  }, [dailyEntries, chartRange]);
+    const weekDates: string[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(targetMonday);
+      d.setDate(d.getDate() + i);
+      weekDates.push(d.toISOString().slice(0, 10));
+    }
 
-  // Smart alerts
+    const dayEntries: (KpiEntry | null)[] = weekDates.map(date =>
+      entries.find(e => e.date === date) ?? null
+    );
+
+    return { monday: targetMonday, weekDates, dayEntries };
+  }, [entries, weekOffset]);
+
+  // Trend data
+  const trendData = useMemo(() => {
+    const periodEntries = entries.slice(-trendPeriod);
+    return periodEntries;
+  }, [entries, trendPeriod]);
+
+  // Previous period for comparison
+  const previousPeriodData = useMemo(() => {
+    if (entries.length < trendPeriod * 2) return null;
+    return entries.slice(-(trendPeriod * 2), -trendPeriod);
+  }, [entries, trendPeriod]);
+
+  // Coaching alerts
   const alerts = useMemo(() => {
-    const result: { type: "warning" | "positive" | "info"; message: string }[] = [];
-    if (result.length >= 2) return result;
+    const result: { type: "green" | "orange" | "blue"; icon: "streak" | "warning" | "milestone" | "info"; title: string; description: string }[] = [];
 
-    // Show rate < 80%
-    if (thisWeek) {
-      const sr = showRate(thisWeek.patientVisits, thisWeek.noShows);
-      if (sr > 0 && sr < 80) {
-        result.push({ type: "warning", message: "Your show rate is below 80% this week. Consider tightening confirmation calls and same-day reminders." });
-      }
+    if (entries.length === 0) {
+      result.push({
+        type: "blue",
+        icon: "info",
+        title: "Welcome!",
+        description: "Start logging to unlock coaching insights.",
+      });
+      return result;
     }
-    if (result.length >= 2) return result;
 
-    // New patients declining 3 weeks
-    if (weeklyData.length >= 3) {
-      const recent3 = weeklyData.slice(-3);
-      if (recent3[0].newPatients > recent3[1].newPatients && recent3[1].newPatients > recent3[2].newPatients) {
-        result.push({ type: "warning", message: "New patients have declined 3 weeks in a row. Time to review your marketing funnels and community events." });
-      }
+    // 1. Streak
+    if (streak.current > 0) {
+      result.push({
+        type: "green",
+        icon: "streak",
+        title: `${streak.current}-day streak!`,
+        description: "Keep it going.",
+      });
     }
-    if (result.length >= 2) return result;
 
-    // Energy avg < 2.5 for 2 weeks
-    if (weeklyData.length >= 2) {
-      const last2 = weeklyData.slice(-2);
-      if (last2.every(w => w.energyLevel > 0 && w.energyLevel < 2.5)) {
-        result.push({ type: "warning", message: "Your energy has been low for two weeks. Consider delegating, taking a half-day, or adjusting your schedule." });
-      }
-    }
-    if (result.length >= 2) return result;
+    const last5 = entries.slice(-5);
 
-    // Collections up + visits down
-    if (thisWeek && lastWeek && lastWeek.collections > 0 && lastWeek.patientVisits > 0) {
-      if (thisWeek.collections > lastWeek.collections && thisWeek.patientVisits < lastWeek.patientVisits) {
-        result.push({ type: "positive", message: "Collections are up while visits are down. Great ROF and case compliance." });
-      }
-    }
-    if (result.length >= 2) return result;
-
-    // Everything up
-    if (thisWeek && lastWeek && lastWeek.patientVisits > 0) {
-      if (
-        thisWeek.patientVisits > lastWeek.patientVisits &&
-        thisWeek.newPatients >= lastWeek.newPatients &&
-        thisWeek.collections > lastWeek.collections
-      ) {
-        result.push({ type: "positive", message: "All key metrics are trending up. You are in a growth phase. Keep the momentum going!" });
+    // 2. Collections below target 3+ of last 5
+    if (last5.length >= 3) {
+      const belowCount = last5.filter(e => e.collections < goals.collections).length;
+      if (belowCount >= 3) {
+        result.push({
+          type: "orange",
+          icon: "warning",
+          title: "Collections below target",
+          description: `Collections have been below your ${fmtDollars(goals.collections)} target ${belowCount} of the last 5 days. Review your billing and case acceptance.`,
+        });
       }
     }
 
-    return result.slice(0, 2);
-  }, [thisWeek, lastWeek, weeklyData]);
+    // 3. No-shows above goal 3+ of last 5
+    if (last5.length >= 3 && result.length < 3) {
+      const highNoShows = last5.filter(e => e.no_shows > goals.noShows).length;
+      if (highNoShows >= 3) {
+        result.push({
+          type: "orange",
+          icon: "warning",
+          title: "No-shows trending high",
+          description: "Consider tightening confirmation calls and same-day reminders.",
+        });
+      }
+    }
+
+    // 4. New patients = 0 for last 3 days
+    if (entries.length >= 3 && result.length < 3) {
+      const last3 = entries.slice(-3);
+      if (last3.every(e => e.new_patients === 0)) {
+        result.push({
+          type: "orange",
+          icon: "warning",
+          title: "New patient drought",
+          description: "No new patients in 3 days. Review your marketing funnels and community events.",
+        });
+      }
+    }
+
+    // 5. This week collections > any previous week
+    if (result.length < 3) {
+      const thisWeekEntries = weeklyScorecard.dayEntries.filter(Boolean) as KpiEntry[];
+      const thisWeekCollections = thisWeekEntries.reduce((s, e) => s + e.collections, 0);
+      if (thisWeekCollections > 0) {
+        // Get previous weeks
+        const fourWeeksAgo = new Date();
+        fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 30);
+        const prevEntries = entries.filter(e => {
+          const d = new Date(e.date + "T00:00:00");
+          return d >= fourWeeksAgo && !weeklyScorecard.weekDates.includes(e.date);
+        });
+        // Group by week
+        const weekTotals = new Map<string, number>();
+        for (const e of prevEntries) {
+          const mon = getMonday(new Date(e.date + "T00:00:00")).toISOString().slice(0, 10);
+          weekTotals.set(mon, (weekTotals.get(mon) ?? 0) + e.collections);
+        }
+        const maxPrevWeek = Math.max(...Array.from(weekTotals.values()), 0);
+        if (thisWeekCollections > maxPrevWeek && maxPrevWeek > 0) {
+          result.push({
+            type: "green",
+            icon: "milestone",
+            title: "Best week in 30 days!",
+            description: `This week's collections (${fmtDollars(thisWeekCollections)}) are your best in the last month.`,
+          });
+        }
+      }
+    }
+
+    return result.slice(0, 3);
+  }, [entries, streak, goals, weeklyScorecard]);
 
   // -----------------------------------------------------------------------
-  // Render helpers
-  // -----------------------------------------------------------------------
-
-  const CompareIndicator = ({ current, average, invert }: { current: number; average: number; invert?: boolean }) => {
-    if (average === 0) return null;
-    const diff = current - average;
-    const pct = Math.round((diff / average) * 100);
-    const isGood = invert ? diff <= 0 : diff >= 0;
-    const within2 = Math.abs(pct) <= 2;
-    if (within2) return <span className="text-xs text-gray-400 ml-1">--</span>;
-    return (
-      <span className={`text-xs ml-1 font-bold ${isGood ? "text-emerald-600" : "text-red-500"}`}>
-        {diff > 0 ? "+" : ""}{pct}%
-      </span>
-    );
-  };
-
-  const WeekCompareRow = ({ label, current, previous, isCurrency, isRate, invert }: {
-    label: string; current: number; previous: number; isCurrency?: boolean; isRate?: boolean; invert?: boolean;
-  }) => {
-    const pct = pctChange(current, previous);
-    const within2 = pct !== null && Math.abs(pct) <= 2;
-    const isGood = invert ? (pct !== null && pct <= 0) : (pct !== null && pct >= 0);
-    const arrow = within2 || pct === null ? "→" : (pct > 0 ? "↑" : "↓");
-    const color = within2 || pct === null ? "text-gray-400" : isGood ? "text-emerald-600" : "text-red-500";
-    const display = isCurrency ? fmtDollars(current) : isRate ? `${current}%` : String(current);
-    const prevDisplay = isCurrency ? fmtDollars(previous) : isRate ? `${previous}%` : String(previous);
-    return (
-      <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-        <span className="text-sm text-gray-600 font-medium">{label}</span>
-        <div className="flex items-center gap-3 text-right">
-          <span className="text-xs text-gray-400 w-16 text-right">{prevDisplay}</span>
-          <span className={`text-sm font-bold ${color}`}>{arrow}</span>
-          <span className="text-sm font-black text-neuro-navy w-16 text-right">{display}</span>
-        </div>
-      </div>
-    );
-  };
-
-  // -----------------------------------------------------------------------
-  // SVG Charts
-  // -----------------------------------------------------------------------
-
-  const CollectionsBarChart = () => {
-    const data = chartWeeks;
-    if (data.length === 0) return <p className="text-sm text-gray-400 text-center py-10">No data yet</p>;
-    const maxVal = Math.max(...data.map(w => w.collections), 1);
-    const barWidth = Math.max(20, Math.floor(100 / data.length) - 4);
-    const chartH = 180;
-    const [hovered, setHovered] = useState<number | null>(null);
-    return (
-      <svg viewBox={`0 0 ${data.length * (barWidth + 8) + 20} ${chartH + 30}`} className="w-full" style={{ maxHeight: 200 }}>
-        {data.map((w, i) => {
-          const h = (w.collections / maxVal) * chartH;
-          const x = i * (barWidth + 8) + 10;
-          const y = chartH - h;
-          return (
-            <g key={w.weekStart} onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)} onTouchStart={() => setHovered(i)}>
-              <rect x={x} y={y} width={barWidth} height={h} rx={4} className="fill-neuro-orange/80 hover:fill-neuro-orange transition-colors" />
-              {hovered === i && (
-                <text x={x + barWidth / 2} y={y - 6} textAnchor="middle" className="fill-neuro-navy text-[10px] font-bold">
-                  {fmtDollars(w.collections)}
-                </text>
-              )}
-              <text x={x + barWidth / 2} y={chartH + 16} textAnchor="middle" className="fill-gray-400 text-[8px]">
-                {w.weekStart.slice(5)}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-    );
-  };
-
-  const ShowRateLineChart = () => {
-    const data = chartWeeks;
-    if (data.length === 0) return <p className="text-sm text-gray-400 text-center py-10">No data yet</p>;
-    const chartW = 300;
-    const chartH = 180;
-    const target = 85;
-    const minR = Math.min(...data.map(w => showRate(w.patientVisits, w.noShows)), target - 10);
-    const maxR = Math.max(...data.map(w => showRate(w.patientVisits, w.noShows)), target + 10);
-    const range = maxR - minR || 1;
-    const points = data.map((w, i) => {
-      const sr = showRate(w.patientVisits, w.noShows);
-      const x = data.length === 1 ? chartW / 2 : (i / (data.length - 1)) * (chartW - 40) + 20;
-      const y = chartH - ((sr - minR) / range) * (chartH - 30) - 15;
-      return { x, y, sr };
-    });
-    const targetY = chartH - ((target - minR) / range) * (chartH - 30) - 15;
-    const pathD = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
-    return (
-      <svg viewBox={`0 0 ${chartW} ${chartH + 10}`} className="w-full" style={{ maxHeight: 200 }}>
-        <line x1={0} y1={targetY} x2={chartW} y2={targetY} stroke="#9CA3AF" strokeWidth={1} strokeDasharray="6 4" />
-        <text x={chartW - 4} y={targetY - 4} textAnchor="end" className="fill-gray-400 text-[9px]">85% target</text>
-        <path d={pathD} fill="none" stroke="#EA580C" strokeWidth={2.5} strokeLinejoin="round" />
-        {points.map((p, i) => (
-          <g key={i}>
-            <circle cx={p.x} cy={p.y} r={4} className={p.sr >= target ? "fill-emerald-500" : "fill-neuro-orange"} />
-            <text x={p.x} y={p.y - 8} textAnchor="middle" className="fill-neuro-navy text-[9px] font-bold">{p.sr}%</text>
-          </g>
-        ))}
-      </svg>
-    );
-  };
-
-  const EnergySparkline = () => {
-    const data = chartWeeks;
-    if (data.length === 0) return <p className="text-sm text-gray-400 text-center py-10">No data yet</p>;
-    const chartW = 300;
-    const chartH = 80;
-    const points = data.map((w, i) => {
-      const x = data.length === 1 ? chartW / 2 : (i / (data.length - 1)) * (chartW - 40) + 20;
-      const y = chartH - ((w.energyLevel / 5) * (chartH - 20)) - 10;
-      return { x, y, level: w.energyLevel };
-    });
-    const pathD = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
-    return (
-      <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full" style={{ maxHeight: 100 }}>
-        <path d={pathD} fill="none" stroke="#F97316" strokeWidth={2} strokeLinejoin="round" />
-        {points.map((p, i) => (
-          <text key={i} x={p.x} y={p.y - 2} textAnchor="middle" className="text-[12px]">
-            {ENERGY_EMOJIS[Math.min(Math.max(p.level - 1, 0), 4)]}
-          </text>
-        ))}
-      </svg>
-    );
-  };
-
-  // -----------------------------------------------------------------------
-  // Loading
+  // Loading state
   // -----------------------------------------------------------------------
 
   if (loading) {
@@ -392,377 +435,754 @@ export default function KpiTrackerPage() {
   }
 
   // -----------------------------------------------------------------------
-  // Main Render
+  // Section renderers (called as functions, not JSX components)
   // -----------------------------------------------------------------------
 
-  return (
-    <>
-      {/* Print styles */}
-      <style>{`
-        @media print {
-          nav, header, .no-print, [data-mobile-nav], .fixed { display: none !important; }
-          body { background: white !important; font-size: 12px; }
-          .print-break { page-break-before: always; }
-          .print-title::before { content: "KPI Monthly Report"; font-size: 24px; font-weight: 900; display: block; margin-bottom: 12px; }
-        }
-      `}</style>
-
-      <div className="space-y-6 pb-32 md:pb-8 max-w-2xl mx-auto">
-        {/* Error banner */}
-        {error && (
-          <div className="bg-amber-50 border border-amber-200 text-amber-800 text-sm px-4 py-3 rounded-xl">
-            {error}
-          </div>
-        )}
-
-        {/* Toast */}
-        {showToast && (
-          <div className="fixed top-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-50 bg-emerald-600 text-white px-5 py-3 rounded-xl font-bold text-center shadow-lg animate-pulse">
-            Logged! Keep the streak alive.
-          </div>
-        )}
-
-        {/* ============================================================= */}
-        {/* Section 1: Streak + Greeting */}
-        {/* ============================================================= */}
-        <div className="flex items-center justify-between py-2">
-          <span className="text-sm font-bold text-neuro-navy">
-            {streak.current > 0
-              ? <span className="inline-flex items-center gap-1"><span className="text-base">🔥</span> {streak.current}-day streak</span>
-              : "Start your streak!"}
+  const TopBar = () => (
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-4">
+      <div>
+        <h1 className="text-xl font-black text-neuro-navy">
+          {getGreeting()}, Doc
+        </h1>
+        <p className="text-sm text-gray-500">{formatDate(new Date())}</p>
+      </div>
+      <div className="flex items-center gap-3">
+        {streak.current > 0 && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 border border-orange-200 rounded-full text-sm font-bold text-neuro-navy">
+            <Flame className="w-4 h-4 text-neuro-orange" />
+            {streak.current}-day streak
           </span>
-          <span className="text-sm text-gray-500">{getGreeting()}, Doc</span>
+        )}
+      </div>
+    </div>
+  );
+
+  // ─── Section 1: Log Today's Numbers ─────────────────────────────────────
+
+  const Section1 = () => (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <h2 className="text-lg font-black text-neuro-navy mb-5">
+        {todayEntry ? "Update Today\u2019s Log" : "Log Today\u2019s Numbers"}
+      </h2>
+
+      {/* Core metrics grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Patient Visits</label>
+          <input
+            type="number"
+            inputMode="numeric"
+            value={form.patientVisits}
+            onChange={e => updateForm("patientVisits", e.target.value)}
+            placeholder="0"
+            className="w-full min-h-[48px] py-3 px-4 text-lg font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange outline-none transition-all"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">New Patients</label>
+          <input
+            type="number"
+            inputMode="numeric"
+            value={form.newPatients}
+            onChange={e => updateForm("newPatients", e.target.value)}
+            placeholder="0"
+            className="w-full min-h-[48px] py-3 px-4 text-lg font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange outline-none transition-all"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Collections ($)</label>
+          <input
+            type="number"
+            inputMode="decimal"
+            value={form.collections}
+            onChange={e => updateForm("collections", e.target.value)}
+            placeholder="0"
+            className="w-full min-h-[48px] py-3 px-4 text-lg font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange outline-none transition-all"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">No-Shows</label>
+          <input
+            type="number"
+            inputMode="numeric"
+            value={form.noShows}
+            onChange={e => updateForm("noShows", e.target.value)}
+            placeholder="0"
+            className="w-full min-h-[48px] py-3 px-4 text-lg font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange outline-none transition-all"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Referrals</label>
+          <input
+            type="number"
+            inputMode="numeric"
+            value={form.referrals}
+            onChange={e => updateForm("referrals", e.target.value)}
+            placeholder="0"
+            className="w-full min-h-[48px] py-3 px-4 text-lg font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange outline-none transition-all"
+          />
+        </div>
+      </div>
+
+      {/* Collapsible More Metrics */}
+      <button
+        onClick={() => setShowMoreMetrics(!showMoreMetrics)}
+        className="text-sm font-bold text-neuro-orange mb-4 hover:underline"
+      >
+        {showMoreMetrics ? "Hide" : "More Metrics"} {showMoreMetrics ? "\u25B2" : "\u25BC"}
+      </button>
+
+      {showMoreMetrics && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Reactivations</label>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={form.reactivations}
+              onChange={e => updateForm("reactivations", e.target.value)}
+              placeholder="0"
+              className="w-full min-h-[44px] py-2 px-4 text-base font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Case Acceptance %</label>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={100}
+              value={form.caseAcceptance}
+              onChange={e => updateForm("caseAcceptance", e.target.value)}
+              placeholder="0"
+              className="w-full min-h-[44px] py-2 px-4 text-base font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Services per Visit</label>
+            <input
+              type="number"
+              inputMode="decimal"
+              step={0.1}
+              value={form.servicesPerVisit}
+              onChange={e => updateForm("servicesPerVisit", e.target.value)}
+              placeholder="0"
+              className="w-full min-h-[44px] py-2 px-4 text-base font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange outline-none transition-all"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Energy emoji row */}
+      <div className="mb-5">
+        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Energy Level</label>
+        <div className="flex items-center gap-2">
+          {ENERGY_EMOJIS.map((emoji, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => updateForm("energyLevel", i + 1)}
+              className={`flex-1 min-h-[48px] text-2xl rounded-xl border-2 transition-all ${
+                form.energyLevel === i + 1
+                  ? "border-white bg-neuro-navy ring-2 ring-neuro-navy shadow-md scale-105"
+                  : "border-gray-200 bg-gray-50 hover:border-gray-300"
+              }`}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Submit button */}
+      <button
+        onClick={handleSubmit}
+        disabled={submitting || form.energyLevel === 0}
+        className="w-full py-4 bg-neuro-orange text-white font-black text-lg rounded-xl hover:bg-neuro-orange/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+      >
+        {submitting ? "Saving..." : showSuccess ? (
+          <span className="inline-flex items-center gap-2"><Check className="w-5 h-5" /> Saved!</span>
+        ) : todayEntry ? "Update Today\u2019s Log" : "Log Today"}
+      </button>
+
+      {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+    </div>
+  );
+
+  // ─── Section 2: Today's Scorecard ───────────────────────────────────────
+
+  const Section2 = () => {
+    const today = todayEntry;
+    if (!today) {
+      return (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h2 className="text-lg font-black text-neuro-navy mb-3">Today&apos;s Scorecard</h2>
+          <p className="text-sm text-gray-400 text-center py-6">Log today&apos;s numbers to see your scorecard.</p>
+        </div>
+      );
+    }
+
+    const cards = [
+      {
+        label: "Patient Visits",
+        value: today.patient_visits,
+        target: goals.visits,
+        avg: thirtyDayAvg?.visits ?? 0,
+        invert: false,
+        format: (v: number) => String(v),
+      },
+      {
+        label: "New Patients",
+        value: today.new_patients,
+        target: goals.newPatients,
+        avg: thirtyDayAvg?.newPatients ?? 0,
+        invert: false,
+        format: (v: number) => String(v),
+      },
+      {
+        label: "Collections",
+        value: today.collections,
+        target: goals.collections,
+        avg: thirtyDayAvg?.collections ?? 0,
+        invert: false,
+        format: (v: number) => fmtDollars(v),
+      },
+      {
+        label: "No-Shows",
+        value: today.no_shows,
+        target: goals.noShows,
+        avg: thirtyDayAvg?.noShows ?? 0,
+        invert: true,
+        format: (v: number) => String(v),
+      },
+    ];
+
+    return (
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <h2 className="text-lg font-black text-neuro-navy mb-4">Today&apos;s Scorecard</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {cards.map(card => {
+            const statusColor = getStatusColor(card.value, card.target, card.invert);
+            return (
+              <div key={card.label} className="bg-gray-50 rounded-xl p-4">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">{card.label}</p>
+                <p className="text-2xl font-black text-neuro-navy">{card.format(card.value)}</p>
+                <div className="flex items-center gap-1.5 mt-2">
+                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
+                  <span className="text-[10px] text-gray-500">Target: {card.format(card.target)}</span>
+                </div>
+                {thirtyDayAvg && (
+                  <p className="text-[10px] text-gray-400 mt-1">30d avg: {card.format(card.avg)}</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // ─── Section 3: Weekly Scorecard ────────────────────────────────────────
+
+  const Section3 = () => {
+    const { monday, weekDates, dayEntries } = weeklyScorecard;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayDayIndex = weekDates.indexOf(todayStr);
+
+    // Calculate totals and averages from logged days only
+    const loggedEntries = dayEntries.filter(Boolean) as KpiEntry[];
+    const loggedCount = loggedEntries.length;
+
+    const totals = {
+      visits: loggedEntries.reduce((s, e) => s + e.patient_visits, 0),
+      newPatients: loggedEntries.reduce((s, e) => s + e.new_patients, 0),
+      collections: loggedEntries.reduce((s, e) => s + e.collections, 0),
+      noShows: loggedEntries.reduce((s, e) => s + e.no_shows, 0),
+    };
+
+    const avgs = loggedCount > 0 ? {
+      visits: Math.round(totals.visits / loggedCount),
+      newPatients: Math.round(totals.newPatients / loggedCount),
+      collections: Math.round(totals.collections / loggedCount),
+      noShows: Math.round(totals.noShows / loggedCount),
+    } : null;
+
+    const rows = [
+      { label: "Visits", key: "patient_visits" as const, target: goals.visits, fmt: (v: number) => String(v) },
+      { label: "New Pts", key: "new_patients" as const, target: goals.newPatients, fmt: (v: number) => String(v) },
+      { label: "Collections", key: "collections" as const, target: goals.collections, fmt: (v: number) => fmtDollars(v) },
+      { label: "No-Shows", key: "no_shows" as const, target: goals.noShows, fmt: (v: number) => String(v), invert: true },
+      { label: "Energy", key: "energy_level" as const, target: 0, fmt: (v: number) => v > 0 ? ENERGY_EMOJIS[Math.min(v - 1, 4)] : "\u2014" },
+    ];
+
+    return (
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-black text-neuro-navy">Weekly Scorecard</h2>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setWeekOffset(prev => prev - 1)} className="p-1 rounded hover:bg-gray-100">
+              <ChevronLeft className="w-4 h-4 text-gray-500" />
+            </button>
+            <span className="text-xs font-bold text-gray-600 min-w-[130px] text-center">
+              {formatWeekLabel(monday)}
+            </span>
+            <button
+              onClick={() => setWeekOffset(prev => Math.min(prev + 1, 0))}
+              disabled={weekOffset >= 0}
+              className="p-1 rounded hover:bg-gray-100 disabled:opacity-30"
+            >
+              <ChevronRight className="w-4 h-4 text-gray-500" />
+            </button>
+          </div>
         </div>
 
-        {/* ============================================================= */}
-        {/* Section 2: Daily Check-In Card */}
-        {/* ============================================================= */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          {hasLogged ? (
-            /* --- Already logged view --- */
-            <div className="p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-black text-neuro-navy">Today&apos;s Numbers</h2>
-                <button
-                  onClick={() => { populateFormFromEntry(todayEntry!); setEditing(true); }}
-                  className="text-xs font-bold text-neuro-orange hover:underline no-print"
-                >
-                  Update
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-xs text-gray-500 mb-1">Patient Visits</p>
-                  <p className="text-xl font-black text-neuro-navy">
-                    {todayEntry!.patient_visits}
-                    {sevenDayAvg && <CompareIndicator current={todayEntry!.patient_visits} average={sevenDayAvg.patient_visits} />}
-                  </p>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-xs text-gray-500 mb-1">New Patients</p>
-                  <p className="text-xl font-black text-neuro-navy">
-                    {todayEntry!.new_patients}
-                    {sevenDayAvg && <CompareIndicator current={todayEntry!.new_patients} average={sevenDayAvg.new_patients} />}
-                  </p>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-xs text-gray-500 mb-1">Collections</p>
-                  <p className="text-xl font-black text-neuro-navy">
-                    {fmtDollars(todayEntry!.collections)}
-                    {sevenDayAvg && <CompareIndicator current={todayEntry!.collections} average={sevenDayAvg.collections} />}
-                  </p>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-xs text-gray-500 mb-1">No-Shows</p>
-                  <p className="text-xl font-black text-neuro-navy">
-                    {todayEntry!.no_shows}
-                    {sevenDayAvg && <CompareIndicator current={todayEntry!.no_shows} average={sevenDayAvg.no_shows} invert />}
-                  </p>
-                </div>
-              </div>
-              <div className="mt-4 bg-gray-50 rounded-xl p-4 text-center">
-                <p className="text-xs text-gray-500 mb-1">Energy Level</p>
-                <p className="text-2xl">{ENERGY_EMOJIS[Math.min(Math.max(todayEntry!.energy_level - 1, 0), 4)]}</p>
-              </div>
-            </div>
-          ) : (
-            /* --- Log form view --- */
-            <div className="p-5">
-              <h2 className="text-lg font-black text-neuro-navy mb-4">Log Today&apos;s Numbers</h2>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Patient Visits</label>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    value={patientVisits}
-                    onChange={e => setPatientVisits(e.target.value)}
-                    placeholder="0"
-                    className="w-full min-h-[48px] py-4 px-4 text-lg font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">New Patients</label>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    value={newPatients}
-                    onChange={e => setNewPatients(e.target.value)}
-                    placeholder="0"
-                    className="w-full min-h-[48px] py-4 px-4 text-lg font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Collections ($)</label>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    value={collectionsDollars}
-                    onChange={e => setCollectionsDollars(e.target.value)}
-                    placeholder="0"
-                    className="w-full min-h-[48px] py-4 px-4 text-lg font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">No-Shows</label>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    value={noShows}
-                    onChange={e => setNoShows(e.target.value)}
-                    placeholder="0"
-                    className="w-full min-h-[48px] py-4 px-4 text-lg font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Energy Level</label>
-                  <div className="flex items-center gap-2 justify-between">
-                    {ENERGY_EMOJIS.map((emoji, i) => (
-                      <button
+        <div className="overflow-x-auto -mx-2">
+          <table className="w-full text-xs min-w-[600px]">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left py-2 px-2 font-bold text-gray-400 uppercase w-24"></th>
+                {DAYS_OF_WEEK.map((day, i) => (
+                  <th
+                    key={day}
+                    className={`py-2 px-2 font-bold text-gray-500 text-center ${
+                      i === todayDayIndex ? "bg-orange-50 rounded-t-lg" : ""
+                    }`}
+                  >
+                    {day}
+                  </th>
+                ))}
+                <th className="py-2 px-2 font-bold text-neuro-navy text-center">TOTAL</th>
+                <th className="py-2 px-2 font-bold text-neuro-navy text-center">AVG</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(row => (
+                <tr key={row.label} className="border-b border-gray-50">
+                  <td className="py-2 px-2 font-bold text-gray-600">{row.label}</td>
+                  {dayEntries.map((entry, i) => {
+                    const val = entry ? (entry as any)[row.key] : null;
+                    const isToday = i === todayDayIndex;
+                    let cellText = "\u2014";
+                    let textColor = "text-gray-400";
+
+                    if (val !== null && val !== undefined) {
+                      cellText = row.fmt(val);
+                      if (row.target > 0 && row.key !== "energy_level") {
+                        const isInvert = !!(row as any).invert;
+                        if (isInvert) {
+                          textColor = val <= row.target ? "text-green-600 font-bold" : "text-red-500 font-bold";
+                        } else {
+                          textColor = val >= row.target ? "text-green-600 font-bold" : "text-red-500 font-bold";
+                        }
+                      } else {
+                        textColor = "text-neuro-navy font-bold";
+                      }
+                    }
+
+                    return (
+                      <td
                         key={i}
-                        type="button"
-                        onClick={() => setEnergyLevel(i + 1)}
-                        className={`flex-1 min-h-[48px] text-2xl rounded-xl border-2 transition-all ${
-                          energyLevel === i + 1
-                            ? "border-neuro-orange bg-neuro-orange/10 ring-2 ring-neuro-orange shadow-sm scale-105"
-                            : "border-gray-200 bg-gray-50 hover:border-gray-300"
-                        }`}
+                        className={`py-2 px-2 text-center ${textColor} ${isToday ? "bg-orange-50" : ""}`}
                       >
-                        {emoji}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                        {cellText}
+                      </td>
+                    );
+                  })}
+                  <td className="py-2 px-2 text-center font-black text-neuro-navy">
+                    {row.key === "energy_level"
+                      ? (loggedCount > 0 ? ENERGY_EMOJIS[Math.min(Math.round(loggedEntries.reduce((s, e) => s + e.energy_level, 0) / loggedCount) - 1, 4)] : "\u2014")
+                      : row.key === "collections"
+                      ? fmtDollars(totals.collections)
+                      : row.key === "patient_visits"
+                      ? String(totals.visits)
+                      : row.key === "new_patients"
+                      ? String(totals.newPatients)
+                      : String(totals.noShows)
+                    }
+                  </td>
+                  <td className="py-2 px-2 text-center font-bold text-gray-600">
+                    {row.key === "energy_level"
+                      ? (loggedCount > 0 ? ENERGY_EMOJIS[Math.min(Math.round(loggedEntries.reduce((s, e) => s + e.energy_level, 0) / loggedCount) - 1, 4)] : "\u2014")
+                      : avgs
+                      ? row.key === "collections"
+                        ? fmtDollars(avgs.collections)
+                        : row.key === "patient_visits"
+                        ? String(avgs.visits)
+                        : row.key === "new_patients"
+                        ? String(avgs.newPatients)
+                        : String(avgs.noShows)
+                      : "\u2014"
+                    }
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
+  // ─── Section 4: Trends ──────────────────────────────────────────────────
+
+  const Section4 = () => {
+    if (trendData.length === 0) {
+      return (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h2 className="text-lg font-black text-neuro-navy mb-4">Trends</h2>
+          <div className="text-center py-12">
+            <BarChart3 className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+            <p className="text-sm text-gray-400 font-bold">Log your first day to see trends!</p>
+            <p className="text-xs text-gray-300 mt-1">Charts will appear here once you have data.</p>
+          </div>
+        </div>
+      );
+    }
+
+    // SVG chart builder
+    const buildLineChart = (
+      data: { date: string; value: number }[],
+      targetValue: number,
+      formatValue: (v: number) => string,
+      color: string
+    ) => {
+      if (data.length === 0) return null;
+
+      const W = 600;
+      const H = 200;
+      const PAD_X = 50;
+      const PAD_Y = 30;
+      const chartW = W - PAD_X * 2;
+      const chartH = H - PAD_Y * 2;
+
+      const values = data.map(d => d.value);
+      const minVal = Math.min(...values, targetValue) * 0.9;
+      const maxVal = Math.max(...values, targetValue) * 1.1;
+      const range = maxVal - minVal || 1;
+
+      const points = data.map((d, i) => ({
+        x: PAD_X + (data.length === 1 ? chartW / 2 : (i / (data.length - 1)) * chartW),
+        y: PAD_Y + chartH - ((d.value - minVal) / range) * chartH,
+        value: d.value,
+        date: d.date,
+      }));
+
+      const pathD = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+
+      // Area fill
+      const areaD = pathD + ` L ${points[points.length - 1].x} ${PAD_Y + chartH} L ${points[0].x} ${PAD_Y + chartH} Z`;
+
+      const targetY = PAD_Y + chartH - ((targetValue - minVal) / range) * chartH;
+
+      // X labels: show every Nth
+      const labelInterval = Math.max(1, Math.floor(data.length / 6));
+
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 200 }}>
+          {/* Area fill */}
+          <path d={areaD} fill={color} opacity={0.08} />
+
+          {/* Target dashed line */}
+          <line x1={PAD_X} y1={targetY} x2={W - PAD_X} y2={targetY} stroke="#9CA3AF" strokeWidth={1} strokeDasharray="6 4" />
+          <text x={W - PAD_X + 4} y={targetY + 3} className="fill-gray-400" style={{ fontSize: 9 }}>Target</text>
+
+          {/* Line */}
+          <path d={pathD} fill="none" stroke={color} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+
+          {/* Points */}
+          {points.map((p, i) => (
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r={3}
+              fill={p.value >= targetValue ? "#22c55e" : "#ef4444"}
+            />
+          ))}
+
+          {/* X axis labels */}
+          {points.map((p, i) => {
+            if (i % labelInterval !== 0 && i !== points.length - 1) return null;
+            const label = data[i].date.slice(5); // MM-DD
+            return (
+              <text key={i} x={p.x} y={H - 5} textAnchor="middle" className="fill-gray-400" style={{ fontSize: 9 }}>
+                {label}
+              </text>
+            );
+          })}
+
+          {/* Y axis labels */}
+          {[0, 0.5, 1].map(frac => {
+            const val = minVal + frac * range;
+            const y = PAD_Y + chartH - frac * chartH;
+            return (
+              <text key={frac} x={PAD_X - 8} y={y + 3} textAnchor="end" className="fill-gray-400" style={{ fontSize: 9 }}>
+                {formatValue(Math.round(val))}
+              </text>
+            );
+          })}
+        </svg>
+      );
+    };
+
+    const collectionsData = trendData.map(e => ({ date: e.date, value: e.collections }));
+    const visitsData = trendData.map(e => ({ date: e.date, value: e.patient_visits }));
+
+    // Metric summary
+    const periodTotal = trendData.reduce((s, e) => s + e.collections, 0);
+    const dailyAvg = trendData.length > 0 ? Math.round(periodTotal / trendData.length) : 0;
+    const bestDay = trendData.length > 0
+      ? trendData.reduce((best, e) => e.collections > best.collections ? e : best, trendData[0])
+      : null;
+
+    let trendPct: number | null = null;
+    if (previousPeriodData && previousPeriodData.length > 0) {
+      const prevTotal = previousPeriodData.reduce((s, e) => s + e.collections, 0);
+      if (prevTotal > 0) {
+        trendPct = Math.round(((periodTotal - prevTotal) / prevTotal) * 100);
+      }
+    }
+
+    return (
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-black text-neuro-navy">Trends</h2>
+          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+            {([7, 30, 60, 90] as const).map(d => (
+              <button
+                key={d}
+                onClick={() => setTrendPeriod(d)}
+                className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                  trendPeriod === d ? "bg-white text-neuro-navy shadow-sm" : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {d}d
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {/* Collections chart */}
+          <div>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Collections</p>
+            {buildLineChart(collectionsData, goals.collections, (v) => fmtDollars(v), "#e97325")}
+          </div>
+
+          {/* Visits chart */}
+          <div>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Patient Visits</p>
+            {buildLineChart(visitsData, goals.visits, (v) => String(v), "#1a2744")}
+          </div>
+
+          {/* Metric summary */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-gray-100">
+            <div className="text-center">
+              <p className="text-[10px] text-gray-400 uppercase font-bold">Period Total</p>
+              <p className="text-sm font-black text-neuro-navy">{fmtDollars(periodTotal)}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] text-gray-400 uppercase font-bold">Daily Avg</p>
+              <p className="text-sm font-black text-neuro-navy">{fmtDollars(dailyAvg)}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] text-gray-400 uppercase font-bold">Best Day</p>
+              <p className="text-sm font-black text-neuro-navy">
+                {bestDay ? `${fmtDollars(bestDay.collections)} (${bestDay.date.slice(5)})` : "\u2014"}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] text-gray-400 uppercase font-bold">Trend</p>
+              <p className={`text-sm font-black ${trendPct !== null ? (trendPct >= 0 ? "text-green-600" : "text-red-500") : "text-gray-400"}`}>
+                {trendPct !== null ? `${trendPct > 0 ? "+" : ""}${trendPct}%` : "\u2014"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ─── Section 5: Coaching Alerts ─────────────────────────────────────────
+
+  const Section5 = () => {
+    const visibleAlerts = alerts.filter((_, i) => !dismissedAlerts.has(i));
+    if (visibleAlerts.length === 0) return null;
+
+    const alertStyles = {
+      green: "border-l-green-500 bg-green-50",
+      orange: "border-l-orange-500 bg-orange-50",
+      blue: "border-l-blue-500 bg-blue-50",
+    };
+
+    const alertIcons = {
+      streak: <Flame className="w-4 h-4 text-green-600" />,
+      warning: <AlertTriangle className="w-4 h-4 text-orange-600" />,
+      milestone: <Award className="w-4 h-4 text-green-600" />,
+      info: <Activity className="w-4 h-4 text-blue-600" />,
+    };
+
+    return (
+      <div className="space-y-3">
+        <h2 className="text-lg font-black text-neuro-navy">Coaching Alerts</h2>
+        {alerts.map((alert, i) => {
+          if (dismissedAlerts.has(i)) return null;
+          return (
+            <div
+              key={i}
+              className={`border-l-4 rounded-xl p-4 flex items-start gap-3 ${alertStyles[alert.type]}`}
+            >
+              <span className="mt-0.5">{alertIcons[alert.icon]}</span>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-neuro-navy">{alert.title}</p>
+                <p className="text-xs text-gray-600 mt-0.5">{alert.description}</p>
               </div>
               <button
-                onClick={handleSubmit}
-                disabled={submitting || energyLevel === 0}
-                className="w-full mt-5 py-4 bg-neuro-orange text-white font-black text-lg rounded-xl hover:bg-neuro-orange/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+                onClick={() => setDismissedAlerts(prev => new Set([...prev, i]))}
+                className="text-gray-300 hover:text-gray-500"
               >
-                {submitting ? "Saving..." : "Log Today ✓"}
+                <X className="w-4 h-4" />
               </button>
             </div>
-          )}
-        </div>
+          );
+        })}
+      </div>
+    );
+  };
 
-        {/* ============================================================= */}
-        {/* Section 3: Weekly Scorecard */}
-        {/* ============================================================= */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <h2 className="text-lg font-black text-neuro-navy mb-4">Weekly Scorecard</h2>
-          {thisWeek ? (
+  // ─── Section 6: Goals & Settings ────────────────────────────────────────
+
+  const Section6 = () => (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <button
+        onClick={() => setShowGoals(!showGoals)}
+        className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
+      >
+        <span className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2">
+          <Settings className="w-4 h-4 text-neuro-orange" /> Goals &amp; Settings
+        </span>
+        <span className="text-xs text-gray-400">{showGoals ? "\u25B2" : "\u25BC"}</span>
+      </button>
+
+      {showGoals && (
+        <div className="px-5 pb-5 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-gray-400 uppercase tracking-wide font-bold">Last Week</span>
-                <span className="text-xs text-gray-400 uppercase tracking-wide font-bold">This Week</span>
-              </div>
-              <WeekCompareRow
-                label="Patient Visits"
-                current={thisWeek.patientVisits}
-                previous={lastWeek?.patientVisits ?? 0}
-              />
-              <WeekCompareRow
-                label="New Patients"
-                current={thisWeek.newPatients}
-                previous={lastWeek?.newPatients ?? 0}
-              />
-              <WeekCompareRow
-                label="Collections"
-                current={thisWeek.collections}
-                previous={lastWeek?.collections ?? 0}
-                isCurrency
-              />
-              <WeekCompareRow
-                label="Show Rate"
-                current={showRate(thisWeek.patientVisits, thisWeek.noShows)}
-                previous={lastWeek ? showRate(lastWeek.patientVisits, lastWeek.noShows) : 0}
-                isRate
-              />
-              <WeekCompareRow
-                label="Avg Energy"
-                current={thisWeek.energyLevel}
-                previous={lastWeek?.energyLevel ?? 0}
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Daily Visit Target</label>
+              <input
+                type="number"
+                value={goals.visits}
+                onChange={e => setGoals(prev => ({ ...prev, visits: parseInt(e.target.value) || 0 }))}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange"
               />
             </div>
-          ) : (
-            <p className="text-sm text-gray-400 text-center py-6">Log a few days to see your weekly scorecard.</p>
-          )}
-        </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Daily New Patient Target</label>
+              <input
+                type="number"
+                value={goals.newPatients}
+                onChange={e => setGoals(prev => ({ ...prev, newPatients: parseInt(e.target.value) || 0 }))}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Daily Collections Target ($)</label>
+              <input
+                type="number"
+                value={goals.collections / 100}
+                onChange={e => setGoals(prev => ({ ...prev, collections: Math.round((parseFloat(e.target.value) || 0) * 100) }))}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Daily No-Show Goal (stay below)</label>
+              <input
+                type="number"
+                value={goals.noShows}
+                onChange={e => setGoals(prev => ({ ...prev, noShows: parseInt(e.target.value) || 0 }))}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Daily Referral Target</label>
+              <input
+                type="number"
+                value={goals.referrals}
+                onChange={e => setGoals(prev => ({ ...prev, referrals: parseInt(e.target.value) || 0 }))}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Monthly Revenue Goal ($)</label>
+              <input
+                type="number"
+                value={monthlyRevenueGoal}
+                onChange={e => {
+                  setMonthlyRevenueGoal(e.target.value);
+                  const monthly = parseFloat(e.target.value) || 0;
+                  if (monthly > 0) {
+                    setGoals(prev => ({ ...prev, collections: Math.round((monthly / 22) * 100) }));
+                  }
+                }}
+                placeholder="Auto-calculates daily target (\u00F7 22 days)"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange"
+              />
+              {monthlyRevenueGoal && (
+                <p className="text-[10px] text-gray-400 mt-1">
+                  = {fmtDollars(Math.round((parseFloat(monthlyRevenueGoal) / 22) * 100))}/day
+                </p>
+              )}
+            </div>
+          </div>
 
-        {/* ============================================================= */}
-        {/* Section 4: Trend Charts */}
-        {/* ============================================================= */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 print-break">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-black text-neuro-navy">Trends</h2>
-            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 no-print">
-              {([30, 60, 90] as const).map(d => (
+          {/* Working days */}
+          <div>
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Working Days</label>
+            <div className="flex gap-2">
+              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, i) => (
                 <button
-                  key={d}
-                  onClick={() => setChartRange(d)}
-                  className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${
-                    chartRange === d ? "bg-white text-neuro-navy shadow-sm" : "text-gray-500 hover:text-gray-700"
+                  key={day}
+                  onClick={() => {
+                    const next = [...workingDays];
+                    next[i] = !next[i];
+                    setWorkingDays(next);
+                  }}
+                  className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                    workingDays[i]
+                      ? "bg-neuro-navy text-white"
+                      : "bg-gray-100 text-gray-400"
                   }`}
                 >
-                  {d}d
+                  {day}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="space-y-6">
-            {/* Collections bar chart */}
-            <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Collections by Week</p>
-              <CollectionsBarChart />
-            </div>
-
-            {/* Show rate line chart */}
-            <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Show Rate</p>
-              <ShowRateLineChart />
-            </div>
-
-            {/* Energy sparkline */}
-            <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Energy Trend</p>
-              <EnergySparkline />
-            </div>
-          </div>
-        </div>
-
-        {/* ============================================================= */}
-        {/* Section 5: Network Benchmarks */}
-        {/* ============================================================= */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <h2 className="text-lg font-black text-neuro-navy mb-4">Network Benchmarks</h2>
-          <p className="text-xs text-gray-400 mb-3">Compared to NeuroChiro network averages</p>
-          <div className="space-y-3">
-            {[
-              {
-                label: "Patient Visits/Week",
-                yours: thisWeek?.patientVisits ?? 0,
-                bench: NETWORK_BENCHMARKS.patientVisitsWeek,
-                fmt: (v: number) => String(v),
-              },
-              {
-                label: "New Patients/Week",
-                yours: thisWeek?.newPatients ?? 0,
-                bench: NETWORK_BENCHMARKS.newPatientsWeek,
-                fmt: (v: number) => String(v),
-              },
-              {
-                label: "Collections/Week",
-                yours: thisWeek?.collections ?? 0,
-                bench: NETWORK_BENCHMARKS.collectionsWeek,
-                fmt: (v: number) => fmtDollars(v),
-              },
-              {
-                label: "Show Rate",
-                yours: thisWeek ? showRate(thisWeek.patientVisits, thisWeek.noShows) : 0,
-                bench: NETWORK_BENCHMARKS.showRate,
-                fmt: (v: number) => `${v}%`,
-              },
-            ].map(({ label, yours, bench, fmt }) => {
-              const p = percentileLabel(yours, bench);
-              return (
-                <div key={label} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">{label}</p>
-                    <p className="text-xs text-gray-400">Network avg: {fmt(bench)}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-black text-neuro-navy">{fmt(yours)}</span>
-                    {p.tier !== "none" && (
-                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                        p.tier === "gold"
-                          ? "bg-amber-100 text-amber-700"
-                          : p.tier === "silver"
-                          ? "bg-gray-100 text-gray-600"
-                          : "bg-blue-50 text-blue-600"
-                      }`}>
-                        {p.label}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ============================================================= */}
-        {/* Section 6: Smart Alerts */}
-        {/* ============================================================= */}
-        {alerts.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-lg font-black text-neuro-navy">Insights</h2>
-            {alerts.map((alert, i) => (
-              <div
-                key={i}
-                className={`rounded-2xl p-4 text-sm font-medium ${
-                  alert.type === "warning"
-                    ? "bg-amber-50 border border-amber-200 text-amber-800"
-                    : alert.type === "positive"
-                    ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
-                    : "bg-blue-50 border border-blue-200 text-blue-800"
-                }`}
-              >
-                {alert.message}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* ============================================================= */}
-        {/* Section 7: Monthly Report Button */}
-        {/* ============================================================= */}
-        <div className="no-print">
           <button
-            onClick={() => window.print()}
-            className="w-full py-4 bg-neuro-navy text-white font-bold rounded-xl hover:bg-neuro-navy/90 transition-all active:scale-[0.98] text-sm"
+            onClick={saveGoals}
+            className="w-full py-3 bg-neuro-navy text-white font-bold text-sm rounded-xl hover:bg-neuro-navy/90 transition-all active:scale-[0.98]"
           >
-            Generate Monthly Report
+            Save Goals
           </button>
         </div>
+      )}
+    </div>
+  );
 
-        {/* ============================================================= */}
-        {/* Fixed mobile "Log Today" button */}
-        {/* ============================================================= */}
-        {!hasLogged && !loading && (
-          <div className="fixed bottom-20 left-4 right-4 md:hidden z-40 no-print">
-            <button
-              onClick={() => {
-                document.querySelector<HTMLInputElement>("input[type=number]")?.focus();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className="w-full py-4 bg-neuro-orange text-white font-black text-lg rounded-xl shadow-xl shadow-neuro-orange/30 active:scale-[0.98] transition-all"
-            >
-              Log Today ✓
-            </button>
-          </div>
-        )}
-      </div>
-    </>
+  // -----------------------------------------------------------------------
+  // Main Render
+  // -----------------------------------------------------------------------
+
+  return (
+    <div className="space-y-6 pb-32 md:pb-8 max-w-4xl mx-auto">
+      {TopBar()}
+      {Section1()}
+      {Section2()}
+      {Section3()}
+      {Section4()}
+      {Section5()}
+      {Section6()}
+    </div>
   );
 }
