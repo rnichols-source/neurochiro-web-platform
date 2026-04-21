@@ -1278,8 +1278,8 @@ export default function PLAnalyzerPage() {
       return { label: s.month.slice(5), value: inc - profit };
     });
 
-    // Category sparklines
-    const categoryTrends = useMemo(() => {
+    // Category sparklines (no useMemo — this is a regular function, not a component)
+    const categoryTrends = (() => {
       if (sortedSnapshots.length < 2) return [];
       return expenseSection.categories
         .map((cat) => {
@@ -1298,7 +1298,7 @@ export default function PLAnalyzerPage() {
           return { category: cat, pcts, trend };
         })
         .filter((c) => c.pcts.some((p) => p > 0));
-    }, [sortedSnapshots]);
+    })();
 
     return (
       <PurchaseGate>
