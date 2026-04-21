@@ -36,7 +36,7 @@ interface PlanPhase {
 interface Supplement {
   id: string;
   name: string;
-  monthlyCost: number;
+  price: number;
   selected: boolean;
 }
 
@@ -90,11 +90,11 @@ const DEFAULT_PHASES: PlanPhase[] = [
 ];
 
 const DEFAULT_SUPPLEMENTS: Supplement[] = [
-  { id: uid(), name: "Omega-3", monthlyCost: 35, selected: false },
-  { id: uid(), name: "Vitamin D", monthlyCost: 20, selected: false },
-  { id: uid(), name: "Magnesium", monthlyCost: 25, selected: false },
-  { id: uid(), name: "Probiotics", monthlyCost: 40, selected: false },
-  { id: uid(), name: "Whole Food Multi", monthlyCost: 45, selected: false },
+  { id: uid(), name: "Omega-3", price: 35, selected: false },
+  { id: uid(), name: "Vitamin D", price: 20, selected: false },
+  { id: uid(), name: "Magnesium", price: 25, selected: false },
+  { id: uid(), name: "Probiotics", price: 40, selected: false },
+  { id: uid(), name: "Whole Food Multi", price: 45, selected: false },
 ];
 
 const DEFAULT_LIFESTYLE: LifestyleRec[] = [
@@ -225,8 +225,8 @@ export default function CarePlanBuilder() {
   const biWeeklyPayment = biWeeklyPeriods > 0 ? Math.round(netTotal / biWeeklyPeriods) : 0;
 
   const selectedSupps = state.supplements.filter((s) => s.selected);
-  const monthlySupplementTotal = selectedSupps.reduce((s, sup) => s + sup.monthlyCost, 0);
-  const supplementCareTotal = monthlySupplementTotal * totalMonths;
+  const supplementTotal = selectedSupps.reduce((s, sup) => s + sup.price, 0);
+  const supplementCareTotal = supplementTotal;
 
   const checkedLifestyle = state.lifestyleRecs.filter((l) => l.checked);
 
@@ -342,7 +342,7 @@ export default function CarePlanBuilder() {
   const addSupplement = () => {
     set("supplements", [
       ...state.supplements,
-      { id: uid(), name: "New Supplement", monthlyCost: 30, selected: false },
+      { id: uid(), name: "New Supplement", price: 30, selected: false },
     ]);
   };
 
@@ -868,7 +868,7 @@ export default function CarePlanBuilder() {
               <p className="text-[10px] font-bold text-neuro-navy">Monthly</p>
               <p className="text-lg font-black text-neuro-navy">
                 ${fmt(monthlyPayment)}
-                <span className="text-[10px] text-gray-400 font-normal">/mo</span>
+                <span className="text-[10px] text-gray-400 font-normal">/ea</span>
               </p>
               <p className="text-[10px] text-gray-400">{totalMonths} payments</p>
             </div>
@@ -941,13 +941,13 @@ export default function CarePlanBuilder() {
                   <span className="text-xs text-gray-400">$</span>
                   <input
                     type="number"
-                    value={sup.monthlyCost}
+                    value={sup.price}
                     onChange={(e) =>
-                      updateSupplement(sup.id, "monthlyCost", Number(e.target.value) || 0)
+                      updateSupplement(sup.id, "price", Number(e.target.value) || 0)
                     }
                     className="w-14 text-sm font-bold text-right bg-transparent border-b border-gray-200 focus:outline-none focus:border-neuro-orange"
                   />
-                  <span className="text-xs text-gray-400">/mo</span>
+                  <span className="text-xs text-gray-400">/ea</span>
                 </div>
               </div>
             ))}
@@ -961,8 +961,8 @@ export default function CarePlanBuilder() {
             {selectedSupps.length > 0 && (
               <div className="bg-neuro-navy rounded-xl p-4 text-white mt-3">
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-white/60">Monthly Total</span>
-                  <span className="font-bold">${fmt(monthlySupplementTotal)}/mo</span>
+                  <span className="text-white/60">Supplement Total</span>
+                  <span className="font-bold">${fmt(supplementTotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-white/60">
@@ -1221,7 +1221,7 @@ export default function CarePlanBuilder() {
               {hasSupplements && (
                 <div className="flex justify-between text-sm py-1 border-b border-gray-100">
                   <span className="text-gray-600">
-                    Supplements ({selectedSupps.length} items, {totalMonths} months)
+                    Supplements ({selectedSupps.length} items)
                   </span>
                   <span className="font-bold text-neuro-navy">${fmt(supplementCareTotal)}</span>
                 </div>
@@ -1246,7 +1246,7 @@ export default function CarePlanBuilder() {
                 <p className="font-bold text-neuro-navy text-sm">Monthly</p>
                 <p className="text-2xl font-black text-neuro-navy mt-1">
                   ${fmt(monthlyPayment)}
-                  <span className="text-xs text-gray-400 font-normal">/mo</span>
+                  <span className="text-xs text-gray-400 font-normal">/ea</span>
                 </p>
                 <p className="text-xs text-gray-400 mt-1">{totalMonths} payments</p>
               </div>
@@ -1284,12 +1284,12 @@ export default function CarePlanBuilder() {
                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                       >
                         <span className="text-sm text-gray-700">{sup.name}</span>
-                        <span className="text-sm font-bold text-neuro-navy">${sup.monthlyCost}/mo</span>
+                        <span className="text-sm font-bold text-neuro-navy">${sup.price}/ea</span>
                       </div>
                     ))}
                   </div>
                   <p className="text-xs text-gray-500 mt-2 text-right">
-                    Monthly: ${fmt(monthlySupplementTotal)} &middot; Total for care: ${fmt(supplementCareTotal)}
+                    Supplement Total: ${fmt(supplementTotal)}
                   </p>
                 </div>
               )}
