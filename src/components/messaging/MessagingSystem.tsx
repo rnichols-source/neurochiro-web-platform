@@ -158,10 +158,10 @@ function truncate(str: string, len: number): string {
 }
 
 function linkify(text: string) {
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const parts = text.split(urlRegex);
+  const urlPattern = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlPattern);
   return parts.map((part, i) =>
-    urlRegex.test(part) ? (
+    /^https?:\/\//.test(part) ? (
       <a
         key={i}
         href={part}
