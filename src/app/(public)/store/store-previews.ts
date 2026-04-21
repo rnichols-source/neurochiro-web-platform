@@ -815,4 +815,90 @@ NET WORTH PROJECTION:
 for the rest of your career. Start now."`,
     },
   ],
+
+  "technique-guide": [
+    {
+      title: "Technique Breakdown: Gonstead",
+      type: "guide",
+      content: `GONSTEAD
+
+Category: Structural | Popularity: Common
+Evidence: Moderate | Cert Cost: $3,000-$15,000
+
+WHAT IT IS:
+Specific, analytical, precision-based chiropractic. Famous for
+the cervical chair, knee-chest table, and detailed X-ray analysis.
+"Find it, fix it, leave it alone."
+
+PHILOSOPHY:
+The Gonstead system believes in specificity above all else. Don't
+adjust what doesn't need adjusting. Use detailed X-ray analysis,
+instrumentation (Nervoscope), static and motion palpation, and
+visualization to find the EXACT subluxation — then deliver one
+precise correction. Nothing more.
+
+PRACTICE BUILDING IMPACT:
+Patient Volume: Medium (40-80/day)
+Visit Time: 8-15 min
+Best For: Patients who want precision and thorough analysis
+Income: Supports high-production practices with premium positioning
+
+THE PERSONALITY FIT:
+"If you're the person who measures twice and cuts once, who reads
+the manual before assembling the furniture, who wants to KNOW
+you're right before you act — Gonstead is your technique."
+
+PROS:
++ Patients love the thorough analysis
++ High case acceptance due to X-ray evidence
++ Strong mentorship community (Gonstead seminars)
++ Premium positioning justifies higher fees
+
+CONS:
+- Steep learning curve (years to master)
+- Certification investment: $3K-$15K
+- Requires specific equipment (cervical chair, knee-chest)
+- Some insurance pushback on X-ray frequency`,
+    },
+    {
+      title: "Quiz Sample: Find Your Fit",
+      type: "guide",
+      content: `FIND YOUR FIT — 10-Question Technique Quiz
+
+Question 1: How do you view the adjustment?
+  A) A specific biomechanical correction
+  B) An input to the nervous system
+  C) A precise correction at the top of the spine
+  D) Soft tissue is just as important
+  E) Different patients need different approaches
+
+Question 7: Which statement resonates most?
+  A) "Find the subluxation, fix it, move on."
+  B) "Remove interference and the body heals itself."
+  C) "Fix C1 and the body reorganizes."
+  D) "Soft tissue is the missing piece."
+  E) "Help as many people as possible, efficiently."
+
+YOUR RESULTS:
+┌─────────────────────────────────────────────────┐
+│  YOUR TOP 3 TECHNIQUE MATCHES                   │
+│                                                 │
+│  1. Gonstead (82% match)                        │
+│     You value precision and specificity.        │
+│                                                 │
+│  2. NUCCA (71% match)                           │
+│     Your analytical side is strong.             │
+│                                                 │
+│  3. Diversified (65% match)                     │
+│     You want versatility as a foundation.       │
+│                                                 │
+│  TECHNIQUE PROFILE:                             │
+│  Structural ████████░░  78%                     │
+│  Upper Cerv ██████░░░░  55%                     │
+│  Tonal      ███░░░░░░░  28%                     │
+│  Instrument ████░░░░░░  35%                     │
+│  Soft Tissue██░░░░░░░░  18%                     │
+└─────────────────────────────────────────────────┘`,
+    },
+  ],
 };

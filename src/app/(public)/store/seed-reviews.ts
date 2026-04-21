@@ -187,4 +187,26 @@ export const SEED_REVIEWS: SeedReview[] = [
     verified_purchase: true,
     helpful_count: 14,
   },
+
+  // ── Technique Comparison Guide ───────────────────────────────
+  {
+    product_id: 'technique-guide',
+    reviewer_name: 'Morgan Ruddiman',
+    reviewer_role: 'student' as const,
+    rating: 5,
+    title: 'Finally an honest breakdown without the sales pitch',
+    body: 'Every technique seminar tells you theirs is the best. Every professor pushes what they know. This guide just tells you the truth — what each technique actually IS, what it costs, and what kind of practice it builds. The quiz matched me with TRT and Network, which I never would have explored on my own. Took the Integrator seminar last month and it changed my whole approach. Best $19 I\'ve spent in school.',
+    verified_purchase: true,
+    helpful_count: 22,
+  },
+  {
+    product_id: 'technique-guide',
+    reviewer_name: 'Colton Wood',
+    reviewer_role: 'student' as const,
+    rating: 5,
+    title: 'The comparison tool sold me',
+    body: 'I was torn between Gonstead and NUCCA. Put them side by side in the comparison tool and it was instantly clear — Gonstead fits my personality (I\'m a details person) and the cert cost difference is massive. The pros/cons for each technique are brutally honest which I appreciate. Also learned about techniques I didn\'t even know existed. Every 7th trimester student needs this before they start spending money on seminars.',
+    verified_purchase: true,
+    helpful_count: 16,
+  },
 ]

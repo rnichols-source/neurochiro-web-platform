@@ -216,6 +216,31 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     popular: true,
   },
 
+  {
+    id: "technique-guide",
+    name: "Technique Comparison Guide",
+    description:
+      "The unbiased guide to 18 chiropractic techniques that nobody else will give you. Interactive quiz to find your fit, side-by-side comparison tool, and honest breakdowns with philosophy, evidence, costs, and career impact.",
+    longDescription:
+      "Every professor pushes their technique. Every seminar says theirs is the best. This guide cuts through the bias with honest breakdowns of 18 techniques — Diversified, Gonstead, Thompson, Network Spinal, NUCCA, Activator, ART, Graston, and more. For each: what it is, the philosophy behind it, what a patient visit looks like, who it works best for, the evidence base, what it costs to learn, how it affects your practice style, and what personality type gravitates toward it. Take the 10-question 'Find Your Fit' quiz to discover which techniques match YOUR personality. Compare any 2-3 techniques side-by-side. No agenda. No sales pitch. Just the information you need to make the most important decision of your career.",
+    category: "tools",
+    audience: ["student"],
+    retailPrice: 2900,
+    memberPrice: 1900,
+    features: [
+      "18 techniques with full breakdowns",
+      "10-question personality quiz",
+      "Side-by-side comparison tool",
+      "Philosophy, evidence & cost for each",
+      "Patient population fit analysis",
+      "Learning path with cert costs & timeline",
+      "Practice building impact analysis",
+      "Honest pros & cons from students",
+    ],
+    billing: "one_time",
+    popular: true,
+  },
+
   // ── Workshop Kits ──────────────────────────────────────────────
   {
     id: "workshop-stress-sleep",
