@@ -1,6 +1,23 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import {
+  Activity,
+  Thermometer,
+  Heart,
+  Printer,
+  Save,
+  RotateCcw,
+  ChevronDown,
+  ChevronRight,
+  ChevronLeft,
+  Check,
+  FileText,
+  Clock,
+  Search,
+  X,
+  ClipboardList,
+} from "lucide-react";
 import { saveReport, getReportHistory, getReport, getReportCount } from "./actions";
 
 /* ─── Types ─── */
@@ -10,14 +27,16 @@ interface FormData {
   patientAge: number;
   scanDate: string;
   scanType: "Initial Scan" | "Progress Scan" | "Re-Evaluation" | "Wellness Check";
+  doctorName: string;
+  practiceName: string;
   semgPattern: "Symmetric/Normal" | "Mild Asymmetry" | "Moderate Asymmetry" | "Severe Asymmetry";
   semgRegion: string;
-  semgEnergy: string;
+  semgEnergy: "Normal" | "Moderate Exhaustion" | "Significant Exhaustion";
   semgNotes: string;
   thermoPattern: "Balanced" | "Mild Imbalance" | "Moderate Imbalance" | "Significant Imbalance";
   thermoRegion: string;
   thermoMaxDiff: number;
-  thermoConsistency: string;
+  thermoConsistency: "First scan" | "Improving" | "Stable" | "Worsening";
   hrvSDNN: number;
   hrvLFHF: number;
   hrvRMSSD: number;
@@ -27,14 +46,11 @@ interface FormData {
   prevThermoDiff: number;
   visitsCompleted: number;
   weeksInCare: number;
-}
-
-interface ReportData extends FormData {
-  id?: string;
-  score: number;
-  scoreLabel: string;
-  scoreColor: string;
-  createdAt?: string;
+  editSummary: string;
+  doctorNotes: string;
+  showProgress: boolean;
+  showNotes: boolean;
+  currentStep: number;
 }
 
 interface HistoryItem {
@@ -43,14 +59,7 @@ interface HistoryItem {
   scan_date: string;
   scan_type: string;
   score: number;
-}
-
-function scoreLabelFromScore(score: number): string {
-  if (score >= 80) return "Thriving";
-  if (score >= 60) return "Adapting Well";
-  if (score >= 40) return "Stressed";
-  if (score >= 20) return "Struggling";
-  return "In Crisis";
+  created_at: string;
 }
 
 /* ─── Constants ─── */
@@ -77,14 +86,31 @@ const REGION_SYMPTOMS: Record<string, string> = {
   "Multiple Regions": "a wide range of symptoms across the body",
 };
 
-const SPINE_SEGMENTS = [
-  { key: "Upper Cervical (C1-C2)", label: "C1-C2", y: 30 },
-  { key: "Mid Cervical (C3-C5)", label: "C3-C5", y: 55 },
-  { key: "Lower Cervical (C5-C7)", label: "C5-C7", y: 80 },
-  { key: "Upper Thoracic (T1-T4)", label: "T1-T4", y: 110 },
-  { key: "Mid Thoracic (T5-T8)", label: "T5-T8", y: 140 },
-  { key: "Lower Thoracic (T9-T12)", label: "T9-T12", y: 170 },
-  { key: "Lumbar (L1-L5)", label: "L1-L5", y: 200 },
+const SPINE_SEGMENTS: { label: string; region: string; group: string }[] = [
+  { label: "C1", region: "Upper Cervical (C1-C2)", group: "Cervical" },
+  { label: "C2", region: "Upper Cervical (C1-C2)", group: "Cervical" },
+  { label: "C3", region: "Mid Cervical (C3-C5)", group: "Cervical" },
+  { label: "C4", region: "Mid Cervical (C3-C5)", group: "Cervical" },
+  { label: "C5", region: "Mid Cervical (C3-C5)", group: "Cervical" },
+  { label: "C6", region: "Lower Cervical (C5-C7)", group: "Cervical" },
+  { label: "C7", region: "Lower Cervical (C5-C7)", group: "Cervical" },
+  { label: "T1", region: "Upper Thoracic (T1-T4)", group: "Thoracic" },
+  { label: "T2", region: "Upper Thoracic (T1-T4)", group: "Thoracic" },
+  { label: "T3", region: "Upper Thoracic (T1-T4)", group: "Thoracic" },
+  { label: "T4", region: "Upper Thoracic (T1-T4)", group: "Thoracic" },
+  { label: "T5", region: "Mid Thoracic (T5-T8)", group: "Thoracic" },
+  { label: "T6", region: "Mid Thoracic (T5-T8)", group: "Thoracic" },
+  { label: "T7", region: "Mid Thoracic (T5-T8)", group: "Thoracic" },
+  { label: "T8", region: "Mid Thoracic (T5-T8)", group: "Thoracic" },
+  { label: "T9", region: "Lower Thoracic (T9-T12)", group: "Thoracic" },
+  { label: "T10", region: "Lower Thoracic (T9-T12)", group: "Thoracic" },
+  { label: "T11", region: "Lower Thoracic (T9-T12)", group: "Thoracic" },
+  { label: "T12", region: "Lower Thoracic (T9-T12)", group: "Thoracic" },
+  { label: "L1", region: "Lumbar (L1-L5)", group: "Lumbar" },
+  { label: "L2", region: "Lumbar (L1-L5)", group: "Lumbar" },
+  { label: "L3", region: "Lumbar (L1-L5)", group: "Lumbar" },
+  { label: "L4", region: "Lumbar (L1-L5)", group: "Lumbar" },
+  { label: "L5", region: "Lumbar (L1-L5)", group: "Lumbar" },
 ];
 
 const todayStr = () => {
@@ -92,11 +118,15 @@ const todayStr = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
+const LS_KEY = "neurochiro-scan-report";
+
 const DEFAULT_FORM: FormData = {
   patientFirstName: "",
   patientAge: 35,
   scanDate: todayStr(),
   scanType: "Initial Scan",
+  doctorName: "[DOCTOR NAME]",
+  practiceName: "[PRACTICE NAME]",
   semgPattern: "Symmetric/Normal",
   semgRegion: "Upper Cervical (C1-C2)",
   semgEnergy: "Normal",
@@ -107,60 +137,104 @@ const DEFAULT_FORM: FormData = {
   thermoConsistency: "First scan",
   hrvSDNN: 55,
   hrvLFHF: 1.5,
-  hrvRMSSD: 0,
-  hrvTotalPower: 0,
+  hrvRMSSD: 35,
+  hrvTotalPower: 1200,
   prevSDNN: 0,
   prevSemgPattern: "Symmetric/Normal",
   prevThermoDiff: 0,
-  visitsCompleted: 0,
-  weeksInCare: 0,
+  visitsCompleted: 12,
+  weeksInCare: 6,
+  editSummary: "",
+  doctorNotes: "",
+  showProgress: true,
+  showNotes: true,
+  currentStep: 1,
 };
 
-/* ─── Score helpers ─── */
+const STEP_LABELS = ["1. Scan Data", "2. Preview & Edit", "3. Final & Print"];
 
-function calcScore(fd: FormData): { score: number; label: string; color: string } {
-  const semgMap: Record<string, number> = { "Symmetric/Normal": 25, "Mild Asymmetry": 20, "Moderate Asymmetry": 12, "Severe Asymmetry": 5 };
-  const thermoMap: Record<string, number> = { "Balanced": 25, "Mild Imbalance": 20, "Moderate Imbalance": 12, "Significant Imbalance": 5 };
+/* ─── Score Calculation ─── */
 
-  const semgScore = semgMap[fd.semgPattern] ?? 12;
-  const thermoScore = thermoMap[fd.thermoPattern] ?? 12;
-  const sdnnScore = fd.hrvSDNN > 70 ? 25 : fd.hrvSDNN >= 50 ? 20 : fd.hrvSDNN >= 35 ? 12 : 5;
-  const lfhfScore = fd.hrvLFHF < 1.5 ? 25 : fd.hrvLFHF <= 2.5 ? 20 : fd.hrvLFHF <= 4 ? 12 : 5;
+function calcScores(fd: FormData) {
+  const semgMap: Record<string, number> = { "Symmetric/Normal": 35, "Mild Asymmetry": 25, "Moderate Asymmetry": 15, "Severe Asymmetry": 5 };
+  const thermoMap: Record<string, number> = { "Balanced": 35, "Mild Imbalance": 25, "Moderate Imbalance": 15, "Significant Imbalance": 5 };
 
-  const score = semgScore + thermoScore + sdnnScore + lfhfScore;
+  const semgScore = semgMap[fd.semgPattern] ?? 15;
+  let thermoScore = thermoMap[fd.thermoPattern] ?? 15;
+  if (fd.thermoMaxDiff > 2.0) thermoScore -= 5;
+  else if (fd.thermoMaxDiff > 1.5) thermoScore -= 3;
+  thermoScore = Math.max(0, thermoScore);
+
+  let hrvScore = 3;
+  if (fd.hrvSDNN >= 80) hrvScore = 30;
+  else if (fd.hrvSDNN >= 60) hrvScore = 25;
+  else if (fd.hrvSDNN >= 40) hrvScore = 18;
+  else if (fd.hrvSDNN >= 20) hrvScore = 10;
+
+  const total = Math.min(100, semgScore + thermoScore + hrvScore);
 
   let label: string;
   let color: string;
-  if (score >= 80) { label = "Thriving"; color = "#22c55e"; }
-  else if (score >= 60) { label = "Adapting Well"; color = "#3b82f6"; }
-  else if (score >= 40) { label = "Stressed"; color = "#f97316"; }
-  else if (score >= 20) { label = "Struggling"; color = "#ea580c"; }
+  if (total >= 80) { label = "Thriving"; color = "#22c55e"; }
+  else if (total >= 60) { label = "Adapting Well"; color = "#4ade80"; }
+  else if (total >= 40) { label = "Stressed"; color = "#facc15"; }
+  else if (total >= 20) { label = "Struggling"; color = "#f97316"; }
   else { label = "In Crisis"; color = "#ef4444"; }
 
-  return { score, label, color };
+  return { total, semgScore, thermoScore, hrvScore, label, color };
 }
 
-function prevScore(fd: FormData): number | null {
+function calcPrevScore(fd: FormData): number | null {
   if (fd.scanType !== "Progress Scan" && fd.scanType !== "Re-Evaluation") return null;
-  const semgMap: Record<string, number> = { "Symmetric/Normal": 25, "Mild Asymmetry": 20, "Moderate Asymmetry": 12, "Severe Asymmetry": 5 };
-  const thermoMap: Record<string, number> = { "Balanced": 25, "Mild Imbalance": 20, "Moderate Imbalance": 12, "Significant Imbalance": 5 };
-  const prevSemg = semgMap[fd.prevSemgPattern] ?? 12;
-  const prevThermo = fd.prevThermoDiff <= 0.3 ? 25 : fd.prevThermoDiff <= 0.7 ? 20 : fd.prevThermoDiff <= 1.2 ? 12 : 5;
-  const prevSdnn = fd.prevSDNN > 70 ? 25 : fd.prevSDNN >= 50 ? 20 : fd.prevSDNN >= 35 ? 12 : 5;
-  return prevSemg + prevThermo + prevSdnn + 15; // approximate LF/HF middle
+  if (!fd.prevSDNN && !fd.prevSemgPattern && !fd.prevThermoDiff) return null;
+  const semgMap: Record<string, number> = { "Symmetric/Normal": 35, "Mild Asymmetry": 25, "Moderate Asymmetry": 15, "Severe Asymmetry": 5 };
+  const prevSemg = semgMap[fd.prevSemgPattern] ?? 15;
+  let prevThermo = fd.prevThermoDiff <= 0.3 ? 35 : fd.prevThermoDiff <= 0.7 ? 25 : fd.prevThermoDiff <= 1.2 ? 15 : 5;
+  if (fd.prevThermoDiff > 2.0) prevThermo -= 5;
+  else if (fd.prevThermoDiff > 1.5) prevThermo -= 3;
+  prevThermo = Math.max(0, prevThermo);
+  let prevHrv = 3;
+  if (fd.prevSDNN >= 80) prevHrv = 30;
+  else if (fd.prevSDNN >= 60) prevHrv = 25;
+  else if (fd.prevSDNN >= 40) prevHrv = 18;
+  else if (fd.prevSDNN >= 20) prevHrv = 10;
+  return Math.min(100, prevSemg + prevThermo + prevHrv);
 }
 
-/* ─── Age-adaptive language ─── */
+/* ─── Summary Generation ─── */
 
-function ageLang(age: number) {
-  if (age <= 5) return { subject: "Your little one's nervous system", possessive: "their", audience: "parent" as const };
-  if (age <= 12) return { subject: "Your child's nervous system", possessive: "their", audience: "parent" as const };
-  if (age <= 17) return { subject: "Your nervous system", possessive: "your", audience: "teen" as const };
-  if (age <= 64) return { subject: "Your nervous system", possessive: "your", audience: "adult" as const };
-  return { subject: "Your nervous system", possessive: "your", audience: "senior" as const };
+function generateSummary(fd: FormData, scores: ReturnType<typeof calcScores>): string {
+  const age = fd.patientAge;
+  const prefix = age <= 12 ? "Your child's" : "Your";
+  const symptoms = REGION_SYMPTOMS[fd.semgRegion] || "various symptoms";
+
+  let levelDesc = "";
+  if (scores.total >= 80) levelDesc = "performing excellently";
+  else if (scores.total >= 60) levelDesc = "adapting well with some areas to optimize";
+  else if (scores.total >= 40) levelDesc = "showing signs of moderate stress";
+  else if (scores.total >= 20) levelDesc = "under significant stress";
+  else levelDesc = "in a state of crisis that needs immediate attention";
+
+  let semgDesc = "";
+  if (fd.semgPattern === "Symmetric/Normal") semgDesc = "The muscle patterns along your spine are balanced and healthy.";
+  else if (fd.semgPattern === "Mild Asymmetry") semgDesc = `There is a mild imbalance in muscle activity around the ${fd.semgRegion.toLowerCase()} area, commonly associated with ${symptoms}.`;
+  else if (fd.semgPattern === "Moderate Asymmetry") semgDesc = `There is a moderate imbalance in muscle activity, particularly in the ${fd.semgRegion.toLowerCase()} area. This pattern is commonly associated with ${symptoms}.`;
+  else semgDesc = `There is a significant imbalance in muscle activity around the ${fd.semgRegion.toLowerCase()} area, strongly associated with ${symptoms}.`;
+
+  let hrvDesc = "";
+  if (fd.hrvSDNN >= 80) hrvDesc = "Your heart rate variability shows excellent adaptability and resilience.";
+  else if (fd.hrvSDNN >= 60) hrvDesc = "Your heart rate variability is in a good range, showing healthy nervous system adaptability.";
+  else if (fd.hrvSDNN >= 40) hrvDesc = "Your heart rate variability indicates your body is working harder than normal to adapt to daily stressors.";
+  else hrvDesc = "Your heart rate variability is low, indicating significant stress on your nervous system's ability to adapt.";
+
+  let ageNote = "";
+  if (age >= 13 && age <= 17) ageNote = " This can affect focus at school and athletic performance.";
+  else if (age >= 65) ageNote = " Improving nervous system function is one of the most impactful things you can do for quality of life and independence.";
+
+  return `${prefix} nervous system is ${levelDesc}. ${semgDesc} ${hrvDesc}${ageNote}`;
 }
 
-/* ─── SVG Gauge arc helper ─── */
+/* ─── SVG Components ─── */
 
 function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number): string {
   const rad = (a: number) => ((a - 90) * Math.PI) / 180;
@@ -172,622 +246,855 @@ function describeArc(cx: number, cy: number, r: number, startAngle: number, endA
   return `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`;
 }
 
+function ScoreGauge({ score, size = 200, label, color }: { score: number; size?: number; label: string; color: string }) {
+  const sweepStart = -140;
+  const sweepEnd = 140;
+  const sweepRange = sweepEnd - sweepStart;
+  const fillEnd = sweepStart + (score / 100) * sweepRange;
+
+  // Segment colors for the background arc
+  const segments = [
+    { start: sweepStart, end: sweepStart + sweepRange * 0.2, color: "#ef4444" },
+    { start: sweepStart + sweepRange * 0.2, end: sweepStart + sweepRange * 0.4, color: "#f97316" },
+    { start: sweepStart + sweepRange * 0.4, end: sweepStart + sweepRange * 0.6, color: "#facc15" },
+    { start: sweepStart + sweepRange * 0.6, end: sweepStart + sweepRange * 0.8, color: "#4ade80" },
+    { start: sweepStart + sweepRange * 0.8, end: sweepEnd, color: "#22c55e" },
+  ];
+
+  return (
+    <svg viewBox="0 0 200 200" width={size} height={size}>
+      {segments.map((seg, i) => (
+        <path key={i} d={describeArc(100, 115, 70, seg.start, seg.end)} fill="none" stroke={seg.color} strokeWidth={12} strokeLinecap="butt" opacity={0.2} />
+      ))}
+      <path d={describeArc(100, 115, 70, sweepStart, fillEnd)} fill="none" stroke={color} strokeWidth={14} strokeLinecap="round" />
+      <text x="100" y="108" textAnchor="middle" fontSize="38" fontWeight="800" fill={color}>{score}</text>
+      <text x="100" y="128" textAnchor="middle" fontSize="11" fill="#6b7280">out of 100</text>
+      <text x="100" y="155" textAnchor="middle" fontSize="14" fontWeight="700" fill={color}>{label}</text>
+    </svg>
+  );
+}
+
+function SpineDiagram({ region, severity }: { region: string; severity: string }) {
+  const severityColor: Record<string, string> = {
+    "Symmetric/Normal": "#22c55e",
+    "Mild Asymmetry": "#facc15",
+    "Moderate Asymmetry": "#f97316",
+    "Severe Asymmetry": "#ef4444",
+    "Balanced": "#22c55e",
+    "Mild Imbalance": "#facc15",
+    "Moderate Imbalance": "#f97316",
+    "Significant Imbalance": "#ef4444",
+  };
+  const activeColor = severityColor[severity] || "#f97316";
+
+  // Group label positions
+  const groupLabels = [
+    { label: "Cervical", y: 48 },
+    { label: "Thoracic", y: 152 },
+    { label: "Lumbar", y: 272 },
+  ];
+
+  return (
+    <svg viewBox="0 0 120 310" width={100} height={260}>
+      {groupLabels.map((g) => (
+        <text key={g.label} x="2" y={g.y} fontSize="8" fill="#6b7280" fontWeight="600">{g.label}</text>
+      ))}
+      {SPINE_SEGMENTS.map((seg, i) => {
+        const isActive = region === seg.region || region === "Multiple Regions";
+        const y = 20 + i * 12;
+        return (
+          <rect key={seg.label} x="50" y={y} width="40" height="9" rx="3" fill={isActive ? activeColor : "#e2e8f0"} />
+        );
+      })}
+    </svg>
+  );
+}
+
+function SDNNBar({ value }: { value: number }) {
+  // Zones: Critical <20, Low 20-40, Below Avg 40-60, Normal 60-80, Optimal 80+
+  // Map to 0-100% width: each zone = 20%
+  const zones = [
+    { label: "Critical", color: "#ef4444", min: 0, max: 20 },
+    { label: "Low", color: "#f97316", min: 20, max: 40 },
+    { label: "Below Avg", color: "#facc15", min: 40, max: 60 },
+    { label: "Normal", color: "#86efac", min: 60, max: 80 },
+    { label: "Optimal", color: "#22c55e", min: 80, max: 120 },
+  ];
+
+  // Position marker: clamp value 0-120, map to 0-100%
+  const clamped = Math.max(0, Math.min(120, value));
+  const pct = (clamped / 120) * 100;
+
+  return (
+    <div>
+      <div className="relative h-6 rounded-full overflow-hidden flex">
+        {zones.map((z) => (
+          <div key={z.label} className="h-full flex items-center justify-center" style={{ width: `${((z.max - z.min) / 120) * 100}%`, backgroundColor: z.color }}>
+            <span className="text-[8px] text-white font-bold">{z.label}</span>
+          </div>
+        ))}
+      </div>
+      <div className="relative h-4">
+        <div className="absolute -top-1" style={{ left: `${pct}%`, transform: "translateX(-50%)" }}>
+          <svg width="12" height="8" viewBox="0 0 12 8"><polygon points="6,0 0,8 12,8" fill="#1a2744" /></svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Component ─── */
 
 export default function ScanReportGenerator() {
-  const [mode, setMode] = useState<"builder" | "report">("builder");
-  const [formData, setFormData] = useState<FormData>(DEFAULT_FORM);
-  const [reportData, setReportData] = useState<ReportData | null>(null);
-  const [reportHistory, setReportHistory] = useState<HistoryItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [state, setState] = useState<FormData>(DEFAULT_FORM);
+  const [loaded, setLoaded] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [progressOpen, setProgressOpen] = useState(false);
 
-  const set = useCallback(<K extends keyof FormData>(key: K, val: FormData[K]) => {
-    setFormData(prev => ({ ...prev, [key]: val }));
-  }, []);
-
-  /* Load history */
+  // Load from localStorage on mount
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setHistoryLoading(true);
-      try {
-        const h = await getReportHistory();
-        if (!cancelled && Array.isArray(h)) setReportHistory(h);
-      } catch { /* ignore */ }
-      if (!cancelled) setHistoryLoading(false);
-    })();
-    return () => { cancelled = true; };
-  }, [mode]);
-
-  /* Generate report */
-  const handleGenerate = async () => {
-    setLoading(true);
-    const { score, label, color } = calcScore(formData);
-    const rd: ReportData = { ...formData, score, scoreLabel: label, scoreColor: color };
-
     try {
-      const saved = await saveReport({
-        patientName: rd.patientFirstName,
-        patientAge: rd.patientAge,
-        scanDate: rd.scanDate,
-        scanType: rd.scanType,
-        reportData: rd as unknown as Record<string, unknown>,
-        score: rd.score,
-      });
-      if ("id" in saved) rd.id = saved.id;
-    } catch { /* still show report */ }
-
-    setReportData(rd);
-    setMode("report");
-    setLoading(false);
-  };
-
-  /* Load from history */
-  const handleLoadReport = async (id: string) => {
-    setLoading(true);
-    try {
-      const r = await getReport(id);
-      if (r) {
-        // report_data is the jsonb blob that contains all the FormData fields
-        const blob = (r.report_data ?? {}) as Record<string, unknown>;
-        const rd: ReportData = {
-          ...(DEFAULT_FORM),
-          ...(blob as Partial<FormData>),
-          id: r.id,
-          patientFirstName: (blob.patientFirstName as string) || r.patient_name || "",
-          patientAge: (blob.patientAge as number) || r.patient_age || 35,
-          scanDate: (blob.scanDate as string) || r.scan_date || "",
-          scanType: ((blob.scanType as string) || r.scan_type || "Initial Scan") as FormData["scanType"],
-          score: r.score,
-          scoreLabel: scoreLabelFromScore(r.score),
-          scoreColor: r.score >= 80 ? "#22c55e" : r.score >= 60 ? "#3b82f6" : r.score >= 40 ? "#f97316" : r.score >= 20 ? "#ea580c" : "#ef4444",
-          createdAt: r.created_at,
-        };
-        setReportData(rd);
-        setMode("report");
+      const saved = localStorage.getItem(LS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as Partial<FormData>;
+        setState((prev) => ({ ...prev, ...parsed }));
       }
     } catch { /* ignore */ }
-    setLoading(false);
+    setLoaded(true);
+  }, []);
+
+  // Save to localStorage (debounced)
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  useEffect(() => {
+    if (!loaded) return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(LS_KEY, JSON.stringify(stateRef.current));
+      } catch { /* ignore */ }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [state, loaded]);
+
+  const set = useCallback(<K extends keyof FormData>(key: K, value: FormData[K]) => {
+    setState((prev) => ({ ...prev, [key]: value }));
+  }, []);
+
+  // Derived
+  const scores = calcScores(state);
+  const prevScoreVal = calcPrevScore(state);
+  const isProgressType = state.scanType === "Progress Scan" || state.scanType === "Re-Evaluation";
+  const summary = state.editSummary || generateSummary(state, scores);
+
+  // Navigation
+  const goToStep = (step: number) => set("currentStep", step as FormData["currentStep"]);
+  const nextStep = () => { if (state.currentStep < 3) goToStep(state.currentStep + 1); };
+  const prevStep = () => { if (state.currentStep > 1) goToStep(state.currentStep - 1); };
+
+  const resetAll = () => {
+    localStorage.removeItem(LS_KEY);
+    setState({ ...DEFAULT_FORM, scanDate: todayStr() });
+    setSaveSuccess(null);
   };
 
-  const showProgress = formData.scanType === "Progress Scan" || formData.scanType === "Re-Evaluation";
+  // Save
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveSuccess(null);
+    try {
+      const result = await saveReport({
+        patientName: state.patientFirstName,
+        patientAge: state.patientAge,
+        scanDate: state.scanDate,
+        scanType: state.scanType,
+        reportData: { ...state, score: scores.total, scoreLabel: scores.label } as unknown as Record<string, unknown>,
+        score: scores.total,
+      });
+      if ("id" in result) {
+        setSaveSuccess(result.id);
+      }
+    } catch { /* ignore */ }
+    setSaving(false);
+  };
 
-  /* ─── Select helper ─── */
-  const Select = ({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: string[] }) => (
-    <label className="block">
-      <span className="text-sm font-semibold text-neuro-navy">{label}</span>
-      <select value={value} onChange={e => onChange(e.target.value)} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base focus:border-neuro-orange focus:ring-2 focus:ring-neuro-orange/30 outline-none">
-        {options.map(o => <option key={o} value={o}>{o}</option>)}
-      </select>
-    </label>
+  // History
+  const loadHistory = async () => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    try {
+      const h = await getReportHistory();
+      if (Array.isArray(h)) setHistory(h);
+    } catch { /* ignore */ }
+    setHistoryLoading(false);
+  };
+
+  const loadReport = async (id: string) => {
+    try {
+      const r = await getReport(id);
+      if (r && r.report_data) {
+        const blob = r.report_data as Partial<FormData>;
+        setState((prev) => ({ ...prev, ...blob, currentStep: 3 }));
+        setHistoryOpen(false);
+      }
+    } catch { /* ignore */ }
+  };
+
+  if (!loaded) return null;
+
+  /* ═══════════════════════════════════════════════════════
+     STEP TABS
+     ═══════════════════════════════════════════════════════ */
+
+  const StepTabs = () => (
+    <div className="step-tabs-container no-print flex rounded-2xl overflow-hidden border border-gray-200 mb-6">
+      {STEP_LABELS.map((label, i) => {
+        const step = i + 1;
+        const isActive = state.currentStep === step;
+        return (
+          <button
+            key={step}
+            onClick={() => goToStep(step)}
+            className={`flex-1 py-3 px-2 text-xs sm:text-sm font-bold transition-all border-r last:border-r-0 border-gray-200 ${
+              isActive ? "bg-neuro-navy text-white" : "bg-white text-gray-500 hover:bg-gray-50"
+            }`}
+          >
+            {label}
+          </button>
+        );
+      })}
+    </div>
   );
 
-  const NumberInput = ({ label, value, onChange, step, min, suffix }: { label: string; value: number; onChange: (v: number) => void; step?: number; min?: number; suffix?: string }) => (
-    <label className="block">
-      <span className="text-sm font-semibold text-neuro-navy">{label}{suffix ? ` (${suffix})` : ""}</span>
-      <input type="number" value={value} step={step ?? 1} min={min ?? 0} onChange={e => onChange(parseFloat(e.target.value) || 0)} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base focus:border-neuro-orange focus:ring-2 focus:ring-neuro-orange/30 outline-none" />
-    </label>
-  );
-
-  /* ════════════════════════════════════════════════════
-     BUILDER MODE
-     ════════════════════════════════════════════════════ */
-  if (mode === "builder") {
-    return (
-      <div className="p-4 md:p-8 max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-heading font-black text-neuro-navy flex items-center gap-3">
-            <svg className="w-7 h-7 text-neuro-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-            Scan Report Generator
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">Input scan data, generate a beautiful patient-friendly report.</p>
-        </div>
-
-        {/* ── Patient Info ── */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-          <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Patient Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label className="block">
-              <span className="text-sm font-semibold text-neuro-navy">Patient First Name</span>
-              <input type="text" value={formData.patientFirstName} onChange={e => set("patientFirstName", e.target.value)} placeholder="e.g. Sarah" className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base focus:border-neuro-orange focus:ring-2 focus:ring-neuro-orange/30 outline-none" />
-            </label>
-            <NumberInput label="Patient Age" value={formData.patientAge} onChange={v => set("patientAge", v)} min={0} />
-            <label className="block">
-              <span className="text-sm font-semibold text-neuro-navy">Scan Date</span>
-              <input type="date" value={formData.scanDate} onChange={e => set("scanDate", e.target.value)} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base focus:border-neuro-orange focus:ring-2 focus:ring-neuro-orange/30 outline-none" />
-            </label>
-            <Select label="Scan Type" value={formData.scanType} onChange={v => set("scanType", v as FormData["scanType"])} options={["Initial Scan", "Progress Scan", "Re-Evaluation", "Wellness Check"]} />
-          </div>
-        </section>
-
-        {/* ── sEMG ── */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-          <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">sEMG (Surface Electromyography)</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select label="Overall Pattern" value={formData.semgPattern} onChange={v => set("semgPattern", v as FormData["semgPattern"])} options={["Symmetric/Normal", "Mild Asymmetry", "Moderate Asymmetry", "Severe Asymmetry"]} />
-            <Select label="Primary Region" value={formData.semgRegion} onChange={v => set("semgRegion", v)} options={REGIONS} />
-            <Select label="Energy Level" value={formData.semgEnergy} onChange={v => set("semgEnergy", v)} options={["Exhausted/Suppressed", "Below Normal", "Normal", "Elevated/Guarding", "Hyperactive/Defensive"]} />
-          </div>
-          <label className="block mt-4">
-            <span className="text-sm font-semibold text-neuro-navy">Notes (optional)</span>
-            <textarea value={formData.semgNotes} onChange={e => set("semgNotes", e.target.value)} rows={2} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base focus:border-neuro-orange focus:ring-2 focus:ring-neuro-orange/30 outline-none resize-y" />
-          </label>
-        </section>
-
-        {/* ── Thermography ── */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-          <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Thermography</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select label="Overall Pattern" value={formData.thermoPattern} onChange={v => set("thermoPattern", v as FormData["thermoPattern"])} options={["Balanced", "Mild Imbalance", "Moderate Imbalance", "Significant Imbalance"]} />
-            <Select label="Primary Region" value={formData.thermoRegion} onChange={v => set("thermoRegion", v)} options={REGIONS} />
-            <NumberInput label="Max Temp Differential" value={formData.thermoMaxDiff} onChange={v => set("thermoMaxDiff", v)} step={0.1} suffix="°C" />
-            <Select label="Pattern Consistency" value={formData.thermoConsistency} onChange={v => set("thermoConsistency", v)} options={["First scan", "Consistent with previous", "Improved from previous", "Worsened from previous"]} />
-          </div>
-        </section>
-
-        {/* ── HRV ── */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-          <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Heart Rate Variability (HRV)</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <NumberInput label="SDNN" value={formData.hrvSDNN} onChange={v => set("hrvSDNN", v)} suffix="ms" />
-            <NumberInput label="LF/HF Ratio" value={formData.hrvLFHF} onChange={v => set("hrvLFHF", v)} step={0.1} />
-            <NumberInput label="RMSSD (optional)" value={formData.hrvRMSSD} onChange={v => set("hrvRMSSD", v)} suffix="ms" />
-            <NumberInput label="Total Power (optional)" value={formData.hrvTotalPower} onChange={v => set("hrvTotalPower", v)} />
-          </div>
-        </section>
-
-        {/* ── Progress Comparison ── */}
-        {showProgress && (
-          <section className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-            <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Progress Comparison</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <NumberInput label="Previous SDNN" value={formData.prevSDNN} onChange={v => set("prevSDNN", v)} suffix="ms" />
-              <Select label="Previous sEMG Pattern" value={formData.prevSemgPattern} onChange={v => set("prevSemgPattern", v)} options={["Symmetric/Normal", "Mild Asymmetry", "Moderate Asymmetry", "Severe Asymmetry"]} />
-              <NumberInput label="Previous Thermo Differential" value={formData.prevThermoDiff} onChange={v => set("prevThermoDiff", v)} step={0.1} suffix="°C" />
-              <NumberInput label="Visits Completed" value={formData.visitsCompleted} onChange={v => set("visitsCompleted", v)} />
-              <NumberInput label="Weeks in Care" value={formData.weeksInCare} onChange={v => set("weeksInCare", v)} />
-            </div>
-          </section>
-        )}
-
-        {/* ── Generate Button ── */}
-        <button onClick={handleGenerate} disabled={loading || !formData.patientFirstName} className="w-full py-4 rounded-xl bg-neuro-orange text-white font-heading font-bold text-lg hover:bg-neuro-orange-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg">
-          {loading ? "Generating..." : "Generate Report"}
+  const NavButtons = () => (
+    <div className="no-print flex justify-between mt-8">
+      {state.currentStep > 1 ? (
+        <button onClick={prevStep} className="flex items-center gap-2 px-5 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors">
+          <ChevronLeft className="w-4 h-4" /> Back
         </button>
+      ) : <div />}
+      {state.currentStep < 3 ? (
+        <button onClick={nextStep} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-neuro-orange text-white text-sm font-bold hover:bg-neuro-orange/90 transition-colors">
+          Next <ChevronRight className="w-4 h-4" />
+        </button>
+      ) : <div />}
+    </div>
+  );
 
-        {/* ── History ── */}
-        <section className="mt-10">
-          <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Report History</h2>
-          {historyLoading ? (
-            <p className="text-gray-400 text-sm">Loading history...</p>
-          ) : reportHistory.length === 0 ? (
-            <p className="text-gray-400 text-sm">No previous reports yet.</p>
-          ) : (
-            <div className="space-y-2">
-              {reportHistory.map(h => {
-                const label = scoreLabelFromScore(h.score);
-                const badgeColor = h.score >= 80 ? "bg-green-100 text-green-700" : h.score >= 60 ? "bg-blue-100 text-blue-700" : h.score >= 40 ? "bg-orange-100 text-orange-700" : h.score >= 20 ? "bg-red-100 text-red-600" : "bg-red-200 text-red-800";
-                return (
-                  <button key={h.id} onClick={() => handleLoadReport(h.id)} className="w-full text-left flex items-center justify-between bg-white rounded-lg border border-gray-200 px-4 py-3 hover:border-neuro-orange/40 transition-colors">
-                    <div>
-                      <span className="font-semibold text-neuro-navy">{h.patient_name}</span>
-                      <span className="text-gray-400 text-sm ml-3">{h.scan_date}</span>
-                      <span className="text-gray-400 text-sm ml-3">{h.scan_type}</span>
-                    </div>
-                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${badgeColor}`}>{h.score} &middot; {label}</span>
+  /* ═══════════════════════════════════════════════════════
+     STEP 1: Scan Data Input
+     ═══════════════════════════════════════════════════════ */
+
+  const Step1 = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Left Column — Form */}
+      <div className="lg:col-span-2 space-y-6">
+        {/* Patient Info */}
+        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
+            <FileText className="w-4 h-4 text-neuro-orange" /> Patient Information
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Patient First Name *</label>
+              <input type="text" value={state.patientFirstName} onChange={(e) => set("patientFirstName", e.target.value)} placeholder="e.g. Sarah" className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Patient Age</label>
+              <input type="number" value={state.patientAge} onChange={(e) => set("patientAge", Number(e.target.value) || 0)} min={0} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Scan Date</label>
+              <input type="date" value={state.scanDate} onChange={(e) => set("scanDate", e.target.value)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Scan Type</label>
+              <select value={state.scanType} onChange={(e) => set("scanType", e.target.value as FormData["scanType"])} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors">
+                <option>Initial Scan</option>
+                <option>Progress Scan</option>
+                <option>Re-Evaluation</option>
+                <option>Wellness Check</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Doctor Name</label>
+              <input type="text" value={state.doctorName} onChange={(e) => set("doctorName", e.target.value)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Practice Name</label>
+              <input type="text" value={state.practiceName} onChange={(e) => set("practiceName", e.target.value)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+            </div>
+          </div>
+        </section>
+
+        {/* sEMG */}
+        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
+            <Activity className="w-4 h-4 text-neuro-orange" /> sEMG
+          </h3>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Overall Pattern</label>
+              <div className="flex flex-wrap gap-2">
+                {(["Symmetric/Normal", "Mild Asymmetry", "Moderate Asymmetry", "Severe Asymmetry"] as const).map((opt) => (
+                  <button key={opt} onClick={() => set("semgPattern", opt)} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${state.semgPattern === opt ? "bg-[#1a2744] text-white" : "bg-white border border-gray-300 text-gray-600 hover:border-gray-400"}`}>
+                    {opt}
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          )}
-        </section>
-      </div>
-    );
-  }
-
-  /* ════════════════════════════════════════════════════
-     REPORT MODE
-     ════════════════════════════════════════════════════ */
-
-  if (!reportData) return null;
-
-  const rd = reportData;
-  const lang = ageLang(rd.patientAge);
-  const isProgress = rd.scanType === "Progress Scan" || rd.scanType === "Re-Evaluation";
-  const pScore = isProgress ? prevScore(rd) : null;
-  const scoreDelta = pScore !== null ? rd.score - pScore : 0;
-  const scorePct = pScore && pScore > 0 ? Math.round((scoreDelta / pScore) * 100) : 0;
-
-  /* Gauge arc math */
-  const sweepStart = -140;
-  const sweepEnd = 140;
-  const sweepRange = sweepEnd - sweepStart; // 280
-  const fillEnd = sweepStart + (rd.score / 100) * sweepRange;
-
-  /* SDNN age-adjusted interpretation */
-  const sdnnInterp = (() => {
-    const age = rd.patientAge;
-    const sdnn = rd.hrvSDNN;
-    if (age < 30) {
-      if (sdnn > 80) return "excellent for your age";
-      if (sdnn > 55) return "within a healthy range for your age";
-      if (sdnn > 35) return "below optimal for your age";
-      return "significantly low for your age";
-    }
-    if (age < 50) {
-      if (sdnn > 70) return "excellent for your age";
-      if (sdnn > 50) return "within a healthy range for your age";
-      if (sdnn > 35) return "below optimal for your age";
-      return "significantly low for your age";
-    }
-    if (age < 65) {
-      if (sdnn > 60) return "excellent for your age";
-      if (sdnn > 40) return "within a healthy range for your age";
-      if (sdnn > 25) return "below optimal for your age";
-      return "significantly low for your age";
-    }
-    if (sdnn > 50) return "excellent for your age";
-    if (sdnn > 35) return "within a healthy range for your age";
-    if (sdnn > 20) return "below optimal for your age";
-    return "significantly low for your age";
-  })();
-
-  /* LF/HF tilt */
-  const beamAngle = Math.max(-25, Math.min(25, (rd.hrvLFHF - 1.5) * 8));
-
-  /* sEMG narrative */
-  const semgNarrative = (() => {
-    const symptoms = REGION_SYMPTOMS[rd.semgRegion] ?? "various symptoms";
-    const sub = lang.subject;
-    switch (rd.semgPattern) {
-      case "Symmetric/Normal":
-        return `${sub} is showing a beautifully balanced muscle pattern. The muscles along ${lang.possessive} spine are firing symmetrically, which is exactly what we want to see. This balanced pattern in the ${rd.semgRegion} area supports healthy function and good communication between the brain and body.`;
-      case "Mild Asymmetry":
-        return `${sub} is showing a mild imbalance in muscle activity around the ${rd.semgRegion} area. This is a small deviation from ideal, meaning the muscles on one side are working slightly harder than the other. This kind of pattern is often associated with ${symptoms}. The good news is that mild imbalances typically respond well to care.`;
-      case "Moderate Asymmetry":
-        return `${sub} is showing a moderate imbalance in muscle activity, particularly in the ${rd.semgRegion} area. This means the muscles on one side of the spine are working noticeably harder than the other, creating uneven stress on the joints and nerves. This pattern is commonly linked to ${symptoms}. Addressing this imbalance is an important part of ${lang.possessive} care plan.`;
-      case "Severe Asymmetry":
-        return `${sub} is showing a significant imbalance in muscle activity around the ${rd.semgRegion} area. This level of asymmetry indicates that the muscles are under considerable stress, with one side working much harder than the other. This pattern is strongly associated with ${symptoms}. The important thing to know is that even significant imbalances can improve with consistent, focused care.`;
-      default:
-        return "";
-    }
-  })();
-
-  /* Thermo narrative */
-  const thermoNarrative = (() => {
-    const sub = lang.subject;
-    const diff = rd.thermoMaxDiff.toFixed(1);
-    switch (rd.thermoPattern) {
-      case "Balanced":
-        return `The temperature scan shows a well-balanced pattern with only a ${diff}°C differential. ${sub} is regulating autonomic function beautifully. Even temperatures on both sides of the spine indicate that the nerves controlling blood flow and organ function are working in harmony.`;
-      case "Mild Imbalance":
-        return `The temperature scan reveals a mild imbalance with a ${diff}°C differential in the ${rd.thermoRegion} area. ${sub} is showing a small difference in autonomic regulation between the left and right sides. This suggests the nerves in this area are under slight stress, which can subtly affect how the body manages internal functions like circulation and digestion.`;
-      case "Moderate Imbalance":
-        return `The temperature scan shows a moderate imbalance with a ${diff}°C differential in the ${rd.thermoRegion} area. ${sub} has a noticeable difference in autonomic regulation. This means the nerves controlling blood vessel diameter and organ function are not communicating evenly, which can affect energy levels, immune response, and overall adaptability.`;
-      case "Significant Imbalance":
-        return `The temperature scan reveals a significant imbalance with a ${diff}°C differential in the ${rd.thermoRegion} area. ${sub} is showing a substantial difference in autonomic control between the left and right sides. This level of imbalance indicates that the nervous system is under considerable stress in this region, impacting the body's ability to self-regulate effectively. Targeted care can help restore balance over time.`;
-      default:
-        return "";
-    }
-  })();
-
-  /* Summary sentences */
-  const summaryText = (() => {
-    const name = rd.patientFirstName;
-    const lines: string[] = [];
-
-    if (rd.score >= 80) {
-      lines.push(`${name}, ${lang.possessive} nervous system is performing at an excellent level.`);
-      lines.push(`The muscle balance, temperature regulation, and heart rate variability are all showing strong, healthy patterns.`);
-    } else if (rd.score >= 60) {
-      lines.push(`${name}, ${lang.possessive} nervous system is adapting well overall, with some areas where we can help it function even better.`);
-      lines.push(`We saw solid results in several areas, and there are clear opportunities for improvement that targeted care can address.`);
-    } else if (rd.score >= 40) {
-      lines.push(`${name}, ${lang.possessive} nervous system is showing signs of stress in several areas.`);
-      lines.push(`This is common and very treatable. The scan gives us a clear roadmap for exactly where to focus ${lang.possessive} care.`);
-    } else {
-      lines.push(`${name}, ${lang.possessive} nervous system is working hard to compensate for some significant stressors.`);
-      lines.push(`While the numbers show the body is under strain, this also means there is tremendous room for improvement with the right care plan.`);
-    }
-
-    if (lang.audience === "senior") {
-      lines.push(`Supporting nervous system health is one of the most impactful things you can do for vitality and independence as we age.`);
-    }
-
-    lines.push(`Every step forward in nervous system health translates to better function, better energy, and a better quality of life.`);
-    return lines.join(" ");
-  })();
-
-  /* Next steps */
-  const nextSteps = isProgress
-    ? `Based on ${lang.possessive} progress scan results, we can see how the body is responding to care. We will continue to refine the approach, building on the improvements we have seen. The next phase of care will be tailored to the areas that still need attention, ensuring we keep the positive momentum going. ${rd.patientFirstName}'s next scan will help us track continued progress and adjust as needed.`
-    : `Now that we have a comprehensive baseline of ${lang.possessive} nervous system function, we can create a targeted care plan designed specifically for ${rd.patientFirstName}. The initial phase of care will focus on the areas where we saw the most stress, helping the nervous system begin to re-establish healthy patterns. We will re-scan at key milestones to measure progress and make sure the care plan is delivering results.`;
-
-  /* SDNN bar position (clamped 0–120ms range mapped to 0–100%) */
-  const sdnnBarPct = Math.min(100, Math.max(0, (rd.hrvSDNN / 120) * 100));
-
-  return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto">
-      <style jsx global>{`
-        @media print {
-          body * { visibility: hidden !important; }
-          [data-print-area], [data-print-area] * { visibility: visible !important; }
-          [data-print-area] {
-            position: fixed !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            padding: 20px 30px !important;
-          }
-          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          .no-print { display: none !important; }
-        }
-      `}</style>
-
-      {/* Controls */}
-      <div className="flex items-center gap-3 mb-6 no-print">
-        <button onClick={() => { setMode("builder"); setReportData(null); }} className="px-4 py-2 rounded-lg bg-gray-100 text-neuro-navy font-semibold hover:bg-gray-200 transition-colors text-sm">
-          &larr; Back to Builder
-        </button>
-        <button onClick={() => window.print()} className="px-6 py-2 rounded-lg bg-neuro-orange text-white font-bold hover:bg-neuro-orange-light transition-colors text-sm shadow">
-          Print Report
-        </button>
-      </div>
-
-      {/* ── Print Area ── */}
-      <div data-print-area="">
-        {/* Header */}
-        <div className="bg-neuro-navy text-white rounded-xl p-6 mb-6 text-center">
-          <h1 className="text-2xl font-heading font-black tracking-tight">Nervous System Assessment Report</h1>
-          <div className="mt-2 flex items-center justify-center gap-4 text-sm text-gray-300">
-            <span>Patient: <strong className="text-white">{rd.patientFirstName}</strong></span>
-            <span className="opacity-50">|</span>
-            <span>{rd.scanDate}</span>
-            <span className="opacity-50">|</span>
-            <span>{rd.scanType}</span>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Primary Region</label>
+              <select value={state.semgRegion} onChange={(e) => set("semgRegion", e.target.value)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors">
+                {REGIONS.map((r) => <option key={r}>{r}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Energy Level</label>
+              <div className="flex flex-wrap gap-2">
+                {(["Normal", "Moderate Exhaustion", "Significant Exhaustion"] as const).map((opt) => (
+                  <button key={opt} onClick={() => set("semgEnergy", opt)} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${state.semgEnergy === opt ? "bg-[#1a2744] text-white" : "bg-white border border-gray-300 text-gray-600 hover:border-gray-400"}`}>
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Notes (optional)</label>
+              <textarea value={state.semgNotes} onChange={(e) => set("semgNotes", e.target.value)} rows={2} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors resize-y" />
+            </div>
           </div>
-        </div>
-
-        {/* Section 1: Score Gauge */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm text-center">
-          <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Overall Nervous System Score</h2>
-          <div className="flex justify-center">
-            <svg viewBox="0 0 200 200" width="220" height="220">
-              {/* Background arc */}
-              <path d={describeArc(100, 110, 70, sweepStart, sweepEnd)} fill="none" stroke="#e5e7eb" strokeWidth={14} strokeLinecap="round" />
-              {/* Foreground arc */}
-              <path d={describeArc(100, 110, 70, sweepStart, fillEnd)} fill="none" stroke={rd.scoreColor} strokeWidth={14} strokeLinecap="round" />
-              {/* Score text */}
-              <text x="100" y="105" textAnchor="middle" fontSize="40" fontWeight="800" fill={rd.scoreColor}>{rd.score}</text>
-              <text x="100" y="125" textAnchor="middle" fontSize="13" fontWeight="600" fill="#6b7280">out of 100</text>
-              <text x="100" y="155" textAnchor="middle" fontSize="16" fontWeight="700" fill={rd.scoreColor}>{rd.scoreLabel}</text>
-            </svg>
-          </div>
-          <p className="text-gray-600 mt-2 max-w-md mx-auto text-sm">
-            {rd.score >= 80 && `${rd.patientFirstName}'s nervous system is performing at an outstanding level.`}
-            {rd.score >= 60 && rd.score < 80 && `${rd.patientFirstName}'s nervous system is adapting well with room for optimization.`}
-            {rd.score >= 40 && rd.score < 60 && `${rd.patientFirstName}'s nervous system is showing signs of stress that we can address together.`}
-            {rd.score < 40 && `${rd.patientFirstName}'s nervous system is under significant stress — a clear care plan will make a real difference.`}
-          </p>
         </section>
 
-        {/* Section 2: sEMG */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-          <h2 className="text-lg font-heading font-bold text-neuro-navy mb-1">What Your Muscles Are Telling Us</h2>
-          <p className="text-xs text-gray-400 mb-4">Surface Electromyography (sEMG)</p>
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Spine diagram */}
-            <div className="flex-shrink-0">
-              <svg viewBox="0 0 160 230" width="140" height="210">
-                {/* Spine line */}
-                <line x1="40" y1="20" x2="40" y2="210" stroke="#d1d5db" strokeWidth={3} strokeLinecap="round" />
-                {SPINE_SEGMENTS.map(seg => {
-                  const isAffected = rd.semgRegion === seg.key || rd.semgRegion === "Multiple Regions";
-                  const color = isAffected
-                    ? rd.semgPattern === "Severe Asymmetry" ? "#ef4444" : rd.semgPattern === "Moderate Asymmetry" ? "#f97316" : rd.semgPattern === "Mild Asymmetry" ? "#facc15" : "#22c55e"
-                    : "#22c55e";
-                  return (
-                    <g key={seg.key}>
-                      <circle cx={40} cy={seg.y} r={8} fill={color} opacity={0.85} />
-                      <text x={56} y={seg.y + 4} fontSize="10" fill="#374151" fontWeight={isAffected ? "700" : "400"}>{seg.label}</text>
-                    </g>
-                  );
-                })}
-              </svg>
+        {/* Thermography */}
+        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
+            <Thermometer className="w-4 h-4 text-neuro-orange" /> Thermography
+          </h3>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Overall Pattern</label>
+              <div className="flex flex-wrap gap-2">
+                {(["Balanced", "Mild Imbalance", "Moderate Imbalance", "Significant Imbalance"] as const).map((opt) => (
+                  <button key={opt} onClick={() => set("thermoPattern", opt)} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${state.thermoPattern === opt ? "bg-[#1a2744] text-white" : "bg-white border border-gray-300 text-gray-600 hover:border-gray-400"}`}>
+                    {opt}
+                  </button>
+                ))}
+              </div>
             </div>
-            {/* Narrative */}
-            <div className="flex-1">
-              <p className="text-gray-700 text-sm leading-relaxed mb-3">{semgNarrative}</p>
-              <div className="bg-gray-50 rounded-lg p-3 text-sm">
-                <span className="font-semibold text-neuro-navy">Energy Level:</span>{" "}
-                <span className="text-gray-600">{rd.semgEnergy}</span>
-                {rd.semgNotes && (
-                  <p className="text-gray-500 text-xs mt-1">Note: {rd.semgNotes}</p>
-                )}
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Primary Region</label>
+              <select value={state.thermoRegion} onChange={(e) => set("thermoRegion", e.target.value)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors">
+                {REGIONS.map((r) => <option key={r}>{r}</option>)}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Max Temp Differential</label>
+                <input type="number" step={0.1} value={state.thermoMaxDiff} onChange={(e) => set("thermoMaxDiff", parseFloat(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Pattern Consistency</label>
+                <div className="flex flex-wrap gap-1">
+                  {(["First scan", "Improving", "Stable", "Worsening"] as const).map((opt) => (
+                    <button key={opt} onClick={() => set("thermoConsistency", opt)} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${state.thermoConsistency === opt ? "bg-[#1a2744] text-white" : "bg-white border border-gray-300 text-gray-600 hover:border-gray-400"}`}>
+                      {opt}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Section 3: Thermography */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-          <h2 className="text-lg font-heading font-bold text-neuro-navy mb-1">What Your Temperature Pattern Reveals</h2>
-          <p className="text-xs text-gray-400 mb-4">Infrared Thermography</p>
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Spine diagram — temperature variant */}
-            <div className="flex-shrink-0">
-              <svg viewBox="0 0 160 230" width="140" height="210">
-                <line x1="40" y1="20" x2="40" y2="210" stroke="#d1d5db" strokeWidth={3} strokeLinecap="round" />
-                {SPINE_SEGMENTS.map(seg => {
-                  const isAffected = rd.thermoRegion === seg.key || rd.thermoRegion === "Multiple Regions";
-                  const intensity = isAffected ? Math.min(1, rd.thermoMaxDiff / 2) : 0;
-                  const r = Math.round(34 + intensity * 200);
-                  const g = Math.round(197 - intensity * 150);
-                  const b = Math.round(94 - intensity * 50);
-                  const color = isAffected ? `rgb(${r},${g},${b})` : "#22c55e";
-                  return (
-                    <g key={seg.key}>
-                      <circle cx={40} cy={seg.y} r={8} fill={color} opacity={0.85} />
-                      <text x={56} y={seg.y + 4} fontSize="10" fill="#374151" fontWeight={isAffected ? "700" : "400"}>{seg.label}</text>
-                    </g>
-                  );
-                })}
-              </svg>
+        {/* HRV */}
+        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
+            <Heart className="w-4 h-4 text-neuro-orange" /> HRV
+          </h3>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">SDNN (ms)</label>
+              <input type="number" value={state.hrvSDNN} onChange={(e) => set("hrvSDNN", Number(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
             </div>
-            <div className="flex-1">
-              <p className="text-gray-700 text-sm leading-relaxed mb-3">{thermoNarrative}</p>
-              <div className="bg-gray-50 rounded-lg p-3 text-sm">
-                <span className="font-semibold text-neuro-navy">Pattern Consistency:</span>{" "}
-                <span className="text-gray-600">{rd.thermoConsistency}</span>
-              </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">LF/HF Ratio</label>
+              <input type="number" step={0.1} value={state.hrvLFHF} onChange={(e) => set("hrvLFHF", parseFloat(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
             </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">RMSSD (ms)</label>
+              <input type="number" value={state.hrvRMSSD} onChange={(e) => set("hrvRMSSD", Number(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Total Power (ms2)</label>
+              <input type="number" value={state.hrvTotalPower} onChange={(e) => set("hrvTotalPower", Number(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+            </div>
+          </div>
+          <div className="mt-2">
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">SDNN Zones</p>
+            {SDNNBar({ value: state.hrvSDNN })}
           </div>
         </section>
 
-        {/* Section 4: HRV */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-          <h2 className="text-lg font-heading font-bold text-neuro-navy mb-1">Your Heart Rate Variability</h2>
-          <p className="text-xs text-gray-400 mb-4">HRV Analysis</p>
-
-          {/* SDNN Bar */}
-          <div className="mb-6">
-            <p className="text-sm font-semibold text-neuro-navy mb-2">SDNN: {rd.hrvSDNN} ms</p>
-            <div className="relative h-8 rounded-full overflow-hidden flex">
-              <div className="h-full bg-red-400" style={{ width: "25%" }} />
-              <div className="h-full bg-orange-400" style={{ width: "15%" }} />
-              <div className="h-full bg-blue-400" style={{ width: "25%" }} />
-              <div className="h-full bg-green-400" style={{ width: "35%" }} />
-              {/* Labels */}
-              <span className="absolute left-[5%] top-1/2 -translate-y-1/2 text-[9px] text-white font-bold">Low</span>
-              <span className="absolute left-[28%] top-1/2 -translate-y-1/2 text-[9px] text-white font-bold">Fair</span>
-              <span className="absolute left-[50%] top-1/2 -translate-y-1/2 text-[9px] text-white font-bold">Good</span>
-              <span className="absolute left-[78%] top-1/2 -translate-y-1/2 text-[9px] text-white font-bold">Excellent</span>
-            </div>
-            {/* Triangle marker */}
-            <div className="relative h-4">
-              <div className="absolute -top-1" style={{ left: `${sdnnBarPct}%`, transform: "translateX(-50%)" }}>
-                <svg width="14" height="10" viewBox="0 0 14 10"><polygon points="7,0 0,10 14,10" fill={rd.scoreColor} /></svg>
+        {/* Progress Section */}
+        {isProgressType && (
+          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <button onClick={() => setProgressOpen(!progressOpen)} className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors">
+              <span className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2">
+                <Clock className="w-4 h-4 text-neuro-orange" /> Progress Comparison
+              </span>
+              {progressOpen ? <ChevronDown className="w-5 h-5 text-gray-400" /> : <ChevronRight className="w-5 h-5 text-gray-400" />}
+            </button>
+            {progressOpen && (
+              <div className="px-5 pb-5 grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Previous SDNN (ms)</label>
+                  <input type="number" value={state.prevSDNN} onChange={(e) => set("prevSDNN", Number(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Previous sEMG Pattern</label>
+                  <select value={state.prevSemgPattern} onChange={(e) => set("prevSemgPattern", e.target.value)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors">
+                    <option>Symmetric/Normal</option>
+                    <option>Mild Asymmetry</option>
+                    <option>Moderate Asymmetry</option>
+                    <option>Severe Asymmetry</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Previous Thermo Differential</label>
+                  <input type="number" step={0.1} value={state.prevThermoDiff} onChange={(e) => set("prevThermoDiff", parseFloat(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Visits Completed</label>
+                  <input type="number" value={state.visitsCompleted} onChange={(e) => set("visitsCompleted", Number(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Weeks in Care</label>
+                  <input type="number" value={state.weeksInCare} onChange={(e) => set("weeksInCare", Number(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+                </div>
               </div>
-            </div>
-            <p className="text-gray-600 text-sm mt-2">
-              {lang.possessive === "their" ? "Their" : "Your"} SDNN of {rd.hrvSDNN} ms is {sdnnInterp}. SDNN measures the overall adaptability of the nervous system — higher values generally indicate a more resilient and flexible system.
-            </p>
-          </div>
-
-          {/* LF/HF Balance Beam */}
-          <div className="mb-4">
-            <p className="text-sm font-semibold text-neuro-navy mb-2">Autonomic Balance (LF/HF Ratio: {rd.hrvLFHF})</p>
-            <div className="flex justify-center">
-              <svg viewBox="0 0 300 80" width="300" height="80">
-                {/* Fulcrum triangle */}
-                <polygon points="150,45 140,65 160,65" fill="#9ca3af" />
-                {/* Beam */}
-                <g transform={`rotate(${beamAngle}, 150, 40)`}>
-                  <line x1="40" y1="40" x2="260" y2="40" stroke="#374151" strokeWidth={3} strokeLinecap="round" />
-                  <circle cx="40" cy="40" r="6" fill="#ef4444" />
-                  <circle cx="260" cy="40" r="6" fill="#3b82f6" />
-                </g>
-                <text x="40" y="77" textAnchor="middle" fontSize="9" fill="#ef4444" fontWeight="600">Fight or Flight</text>
-                <text x="260" y="77" textAnchor="middle" fontSize="9" fill="#3b82f6" fontWeight="600">Rest &amp; Digest</text>
-              </svg>
-            </div>
-            <p className="text-gray-600 text-sm mt-2">
-              {rd.hrvLFHF < 1.5
-                ? `${lang.possessive === "their" ? "Their" : "Your"} autonomic nervous system is well balanced, with a healthy emphasis on the rest-and-digest (parasympathetic) branch. This is ideal for recovery and healing.`
-                : rd.hrvLFHF <= 2.5
-                  ? `${lang.possessive === "their" ? "Their" : "Your"} autonomic balance is within a normal range. There is a slight lean toward the fight-or-flight (sympathetic) side, which is common and within healthy limits.`
-                  : rd.hrvLFHF <= 4
-                    ? `${lang.possessive === "their" ? "Their" : "Your"} autonomic nervous system is leaning more toward the fight-or-flight (sympathetic) side. This suggests the body is in a heightened state of alertness, which over time can affect recovery, sleep, and energy.`
-                    : `${lang.possessive === "their" ? "Their" : "Your"} autonomic nervous system is strongly shifted toward fight-or-flight mode. This level of sympathetic dominance means the body is spending too much energy on stress response and not enough on healing, digestion, and recovery.`
-              }
-            </p>
-          </div>
-
-          {/* Optional metrics */}
-          {(rd.hrvRMSSD > 0 || rd.hrvTotalPower > 0) && (
-            <div className="bg-gray-50 rounded-lg p-3 text-sm flex gap-6">
-              {rd.hrvRMSSD > 0 && <span><strong className="text-neuro-navy">RMSSD:</strong> {rd.hrvRMSSD} ms</span>}
-              {rd.hrvTotalPower > 0 && <span><strong className="text-neuro-navy">Total Power:</strong> {rd.hrvTotalPower}</span>}
-            </div>
-          )}
-        </section>
-
-        {/* Section 5: Summary */}
-        <section className="bg-neuro-cream rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-          <h2 className="text-lg font-heading font-bold text-neuro-navy mb-3">Summary</h2>
-          <p className="text-gray-700 text-sm leading-relaxed">{summaryText}</p>
-        </section>
-
-        {/* Section 6: Progress (conditional) */}
-        {isProgress && pScore !== null && (
-          <section className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-            <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Progress Since Last Scan</h2>
-            <div className="flex items-center justify-center gap-8 mb-4">
-              <div className="text-center">
-                <p className="text-xs text-gray-400 uppercase tracking-wider">Previous</p>
-                <p className="text-3xl font-heading font-black text-gray-400">{pScore}</p>
-              </div>
-              <div className="text-center">
-                {scoreDelta > 0 && (
-                  <svg viewBox="0 0 40 40" width="48" height="48"><polygon points="20,5 35,30 5,30" fill="#22c55e" /></svg>
-                )}
-                {scoreDelta < 0 && (
-                  <svg viewBox="0 0 40 40" width="48" height="48"><polygon points="20,35 35,10 5,10" fill="#ef4444" /></svg>
-                )}
-                {scoreDelta === 0 && (
-                  <svg viewBox="0 0 40 20" width="48" height="24"><rect x="5" y="8" width="30" height="4" rx="2" fill="#9ca3af" /></svg>
-                )}
-                <p className="text-sm font-bold mt-1" style={{ color: scoreDelta > 0 ? "#22c55e" : scoreDelta < 0 ? "#ef4444" : "#9ca3af" }}>
-                  {scoreDelta > 0 ? "+" : ""}{scoreDelta} pts ({scorePct > 0 ? "+" : ""}{scorePct}%)
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-400 uppercase tracking-wider">Current</p>
-                <p className="text-3xl font-heading font-black" style={{ color: rd.scoreColor }}>{rd.score}</p>
-              </div>
-            </div>
-
-            {/* Metric comparisons */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-center text-sm">
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-400">sEMG Pattern</p>
-                <p className="text-gray-500">{rd.prevSemgPattern}</p>
-                <p className="font-bold text-neuro-navy">&darr; {rd.semgPattern}</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-400">Thermo Diff</p>
-                <p className="text-gray-500">{rd.prevThermoDiff}°C</p>
-                <p className="font-bold text-neuro-navy">&darr; {rd.thermoMaxDiff}°C</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-400">SDNN</p>
-                <p className="text-gray-500">{rd.prevSDNN} ms</p>
-                <p className="font-bold text-neuro-navy">&darr; {rd.hrvSDNN} ms</p>
-              </div>
-            </div>
-
-            {rd.visitsCompleted > 0 && (
-              <p className="text-gray-600 text-sm text-center mt-4">
-                After <strong>{rd.visitsCompleted} visits</strong> over <strong>{rd.weeksInCare} weeks</strong>, {rd.patientFirstName} has {scoreDelta > 0 ? "made meaningful progress" : scoreDelta === 0 ? "maintained their baseline" : "experienced some changes in nervous system function"}.
-              </p>
             )}
           </section>
         )}
+      </div>
 
-        {/* Section 7: Next Steps */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-          <h2 className="text-lg font-heading font-bold text-neuro-navy mb-3">Next Steps</h2>
-          <p className="text-gray-700 text-sm leading-relaxed">{nextSteps}</p>
-        </section>
+      {/* Right Column — Live Score Preview */}
+      <div className="space-y-4">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sticky top-4">
+          <h3 className="text-xs font-black text-gray-400 uppercase tracking-wide mb-4">Live Score Preview</h3>
+          <div className="flex justify-center">
+            {ScoreGauge({ score: scores.total, size: 180, label: scores.label, color: scores.color })}
+          </div>
 
-        {/* Footer */}
-        <div className="text-center text-xs text-gray-400 pt-4 border-t border-gray-200">
-          <p className="font-semibold text-gray-500">Powered by NeuroChiro</p>
-          <p className="mt-1">{rd.scanDate}</p>
-          <p className="mt-1 italic">This report is for informational purposes only and does not constitute medical advice. Please consult your healthcare provider for diagnosis and treatment decisions.</p>
+          {/* Mini progress bars */}
+          <div className="space-y-3 mt-4">
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="font-bold text-gray-600">sEMG</span>
+                <span className="font-bold text-neuro-navy">{scores.semgScore}/35</span>
+              </div>
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full rounded-full transition-all" style={{ width: `${(scores.semgScore / 35) * 100}%`, backgroundColor: scores.semgScore >= 25 ? "#22c55e" : scores.semgScore >= 15 ? "#facc15" : "#ef4444" }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="font-bold text-gray-600">Thermal</span>
+                <span className="font-bold text-neuro-navy">{scores.thermoScore}/35</span>
+              </div>
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full rounded-full transition-all" style={{ width: `${(scores.thermoScore / 35) * 100}%`, backgroundColor: scores.thermoScore >= 25 ? "#22c55e" : scores.thermoScore >= 15 ? "#facc15" : "#ef4444" }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="font-bold text-gray-600">HRV</span>
+                <span className="font-bold text-neuro-navy">{scores.hrvScore}/30</span>
+              </div>
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full rounded-full transition-all" style={{ width: `${(scores.hrvScore / 30) * 100}%`, backgroundColor: scores.hrvScore >= 25 ? "#22c55e" : scores.hrvScore >= 18 ? "#facc15" : "#ef4444" }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Patient + Date */}
+          <div className="mt-4 pt-4 border-t border-gray-100 text-center">
+            <p className="text-sm font-bold text-neuro-navy">{state.patientFirstName || "Patient Name"}</p>
+            <p className="text-xs text-gray-400">{state.scanDate}</p>
+          </div>
         </div>
       </div>
+    </div>
+  );
+
+  /* ═══════════════════════════════════════════════════════
+     REPORT RENDER (shared between Step 2 and Step 3)
+     ═══════════════════════════════════════════════════════ */
+
+  const ReportContent = () => {
+    const lfhfInterp = state.hrvLFHF < 0.8 ? "Parasympathetic Dominant (Recovery Mode)" : state.hrvLFHF <= 2.0 ? "Balanced" : "Sympathetic Dominant (Stress Mode)";
+    const hasProgress = isProgressType && prevScoreVal !== null;
+    const scoreDelta = hasProgress ? scores.total - (prevScoreVal ?? 0) : 0;
+
+    return (
+      <div className="print-area bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        {/* Header */}
+        <div className="p-8" style={{ backgroundColor: "#1a2744" }}>
+          <p className="text-white/50 text-xs font-bold uppercase tracking-[0.2em]">{state.practiceName}</p>
+          <h1 className="font-heading text-2xl font-black text-white mt-1">Nervous System Assessment</h1>
+          <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-white/60">
+            <span className="text-white font-bold">{state.patientFirstName || "Patient"}</span>
+            <span>&middot;</span>
+            <span>Age {state.patientAge}</span>
+            <span>&middot;</span>
+            <span>{state.scanDate}</span>
+            <span>&middot;</span>
+            <span>{state.scanType}</span>
+            <span>&middot;</span>
+            <span>{state.doctorName}</span>
+          </div>
+        </div>
+
+        <div className="p-6 sm:p-8 space-y-8">
+          {/* Section 1: Your Nervous System Score */}
+          <section>
+            <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Your Nervous System Score</h2>
+            <div className="flex justify-center mb-4">
+              {ScoreGauge({ score: scores.total, size: 220, label: scores.label, color: scores.color })}
+            </div>
+            {/* 3 sub-score cards */}
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              <div className="bg-gray-50 rounded-xl p-4 text-center">
+                <p className="text-xs text-gray-500 font-bold uppercase">sEMG</p>
+                <p className="text-xl font-black text-neuro-navy mt-1">{scores.semgScore}<span className="text-sm text-gray-400">/35</span></p>
+                <div className="h-2 bg-gray-200 rounded-full mt-2 overflow-hidden">
+                  <div className="h-full rounded-full" style={{ width: `${(scores.semgScore / 35) * 100}%`, backgroundColor: scores.semgScore >= 25 ? "#22c55e" : scores.semgScore >= 15 ? "#facc15" : "#ef4444" }} />
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4 text-center">
+                <p className="text-xs text-gray-500 font-bold uppercase">Thermal</p>
+                <p className="text-xl font-black text-neuro-navy mt-1">{scores.thermoScore}<span className="text-sm text-gray-400">/35</span></p>
+                <div className="h-2 bg-gray-200 rounded-full mt-2 overflow-hidden">
+                  <div className="h-full rounded-full" style={{ width: `${(scores.thermoScore / 35) * 100}%`, backgroundColor: scores.thermoScore >= 25 ? "#22c55e" : scores.thermoScore >= 15 ? "#facc15" : "#ef4444" }} />
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4 text-center">
+                <p className="text-xs text-gray-500 font-bold uppercase">HRV</p>
+                <p className="text-xl font-black text-neuro-navy mt-1">{scores.hrvScore}<span className="text-sm text-gray-400">/30</span></p>
+                <div className="h-2 bg-gray-200 rounded-full mt-2 overflow-hidden">
+                  <div className="h-full rounded-full" style={{ width: `${(scores.hrvScore / 30) * 100}%`, backgroundColor: scores.hrvScore >= 25 ? "#22c55e" : scores.hrvScore >= 18 ? "#facc15" : "#ef4444" }} />
+                </div>
+              </div>
+            </div>
+            {/* Summary text */}
+            <p className="text-gray-700 text-sm leading-relaxed">{summary}</p>
+          </section>
+
+          {/* Section 2: Scan Findings */}
+          <section>
+            <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Scan Findings</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* sEMG Card */}
+              <div className="bg-gray-50 rounded-xl p-4">
+                <h4 className="text-xs font-black text-neuro-navy uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-neuro-orange" /> Muscle & Nerve Activity
+                </h4>
+                <div className="flex justify-center mb-3">
+                  {SpineDiagram({ region: state.semgRegion, severity: state.semgPattern })}
+                </div>
+                <p className="text-sm font-bold text-neuro-navy">{state.semgPattern}</p>
+                <p className="text-xs text-gray-500 mt-1">Region: {state.semgRegion}</p>
+                <div className="mt-2">
+                  <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full ${state.semgEnergy === "Normal" ? "bg-green-100 text-green-700" : state.semgEnergy === "Moderate Exhaustion" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>
+                    {state.semgEnergy}
+                  </span>
+                </div>
+              </div>
+
+              {/* Thermo Card */}
+              <div className="bg-gray-50 rounded-xl p-4">
+                <h4 className="text-xs font-black text-neuro-navy uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                  <Thermometer className="w-3.5 h-3.5 text-neuro-orange" /> Temperature Regulation
+                </h4>
+                {/* Symmetric bar visualization */}
+                <div className="flex items-center justify-center my-4">
+                  <svg viewBox="0 0 120 60" width={120} height={60}>
+                    <line x1="60" y1="5" x2="60" y2="55" stroke="#d1d5db" strokeWidth={1} />
+                    {/* Left bar */}
+                    <rect x={60 - Math.min(50, state.thermoMaxDiff * 25)} y="20" width={Math.min(50, state.thermoMaxDiff * 25)} height="20" rx="3"
+                      fill={state.thermoPattern === "Balanced" ? "#22c55e" : state.thermoPattern === "Mild Imbalance" ? "#facc15" : state.thermoPattern === "Moderate Imbalance" ? "#f97316" : "#ef4444"} opacity={0.7} />
+                    {/* Right bar */}
+                    <rect x="60" y="20" width={Math.min(50, state.thermoMaxDiff * 20)} height="20" rx="3"
+                      fill={state.thermoPattern === "Balanced" ? "#22c55e" : state.thermoPattern === "Mild Imbalance" ? "#facc15" : state.thermoPattern === "Moderate Imbalance" ? "#f97316" : "#ef4444"} opacity={0.5} />
+                    <text x="60" y="52" textAnchor="middle" fontSize="7" fill="#6b7280">{state.thermoMaxDiff.toFixed(1)} C diff</text>
+                  </svg>
+                </div>
+                <p className="text-sm font-bold text-neuro-navy">{state.thermoPattern}</p>
+                <p className="text-xs text-gray-500 mt-1">Max differential: {state.thermoMaxDiff.toFixed(1)} C</p>
+                <div className="mt-2">
+                  <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full ${state.thermoConsistency === "Improving" ? "bg-green-100 text-green-700" : state.thermoConsistency === "Worsening" ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-700"}`}>
+                    {state.thermoConsistency}
+                  </span>
+                </div>
+              </div>
+
+              {/* HRV Card */}
+              <div className="bg-gray-50 rounded-xl p-4">
+                <h4 className="text-xs font-black text-neuro-navy uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                  <Heart className="w-3.5 h-3.5 text-neuro-orange" /> Stress Adaptability
+                </h4>
+                <div className="my-3">
+                  {SDNNBar({ value: state.hrvSDNN })}
+                </div>
+                <p className="text-2xl font-black text-neuro-navy text-center">{state.hrvSDNN} <span className="text-sm text-gray-400 font-normal">ms</span></p>
+                <p className="text-xs text-gray-500 mt-2">LF/HF: {state.hrvLFHF} - <span className="font-bold">{lfhfInterp}</span></p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {state.hrvSDNN >= 80 ? "Excellent nervous system adaptability" : state.hrvSDNN >= 60 ? "Good adaptability" : state.hrvSDNN >= 40 ? "Below average adaptability" : state.hrvSDNN >= 20 ? "Low adaptability" : "Critical - very low adaptability"}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 3: What This Means For You */}
+          <section className="bg-gray-50 rounded-xl p-6">
+            <h2 className="text-lg font-heading font-bold text-neuro-navy mb-3">What This Means For You</h2>
+            <p className="text-gray-700 text-sm leading-relaxed">{summary}</p>
+          </section>
+
+          {/* Section 4: Progress */}
+          {hasProgress && state.showProgress && (
+            <section>
+              <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Progress</h2>
+              <div className="flex items-center justify-center gap-8 mb-4">
+                <div className="text-center">
+                  <p className="text-xs text-gray-400 uppercase tracking-wider">Previous</p>
+                  <p className="text-3xl font-heading font-black text-gray-400">{prevScoreVal}</p>
+                </div>
+                <div className="text-center">
+                  <span className={`text-2xl font-black ${scoreDelta > 0 ? "text-green-500" : scoreDelta < 0 ? "text-red-500" : "text-gray-400"}`}>
+                    {scoreDelta > 0 ? "+" : ""}{scoreDelta}
+                  </span>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-400 uppercase tracking-wider">Current</p>
+                  <p className="text-3xl font-heading font-black" style={{ color: scores.color }}>{scores.total}</p>
+                </div>
+              </div>
+              {/* Metric comparisons */}
+              <div className="grid grid-cols-3 gap-3 text-center text-sm">
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-400">sEMG Pattern</p>
+                  <p className="text-gray-500 text-xs">{state.prevSemgPattern}</p>
+                  <p className="font-bold text-neuro-navy text-xs">{state.semgPattern}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-400">Thermo Diff</p>
+                  <p className="text-gray-500 text-xs">{state.prevThermoDiff} C</p>
+                  <p className="font-bold text-neuro-navy text-xs">{state.thermoMaxDiff} C</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-400">SDNN</p>
+                  <p className="text-gray-500 text-xs">{state.prevSDNN} ms</p>
+                  <p className="font-bold text-neuro-navy text-xs">{state.hrvSDNN} ms</p>
+                </div>
+              </div>
+              {state.weeksInCare > 0 && (
+                <p className="text-gray-600 text-sm text-center mt-4">
+                  Since starting care {state.weeksInCare} weeks ago ({state.visitsCompleted} visits), your score has {scoreDelta >= 0 ? "improved" : "changed"} from {prevScoreVal} to {scores.total}.
+                </p>
+              )}
+            </section>
+          )}
+
+          {/* Section 5: Doctor Notes */}
+          {state.doctorNotes && state.showNotes && (
+            <section>
+              <h2 className="text-lg font-heading font-bold text-neuro-navy mb-3">Doctor&apos;s Notes</h2>
+              <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{state.doctorNotes}</p>
+            </section>
+          )}
+
+          {/* Footer */}
+          <div className="pt-4 border-t border-gray-200 text-center">
+            <p className="text-xs text-gray-500 font-bold">{state.practiceName} &middot; {state.doctorName}</p>
+            <p className="text-xs text-gray-400 mt-1 italic">Your nervous system controls every function in your body. These scans help us measure your progress objectively.</p>
+            <p className="text-xs text-gray-300 mt-1">{state.scanDate}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ═══════════════════════════════════════════════════════
+     STEP 2: Report Preview + Edit
+     ═══════════════════════════════════════════════════════ */
+
+  const Step2 = () => (
+    <div>
+      {ReportContent()}
+
+      {/* Edit controls below report */}
+      <div className="no-print mt-6 space-y-4">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide mb-3">Edit Summary</h3>
+          <textarea
+            value={state.editSummary}
+            onChange={(e) => set("editSummary", e.target.value)}
+            rows={4}
+            placeholder={generateSummary(state, scores)}
+            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors resize-y"
+          />
+          <p className="text-xs text-gray-400 mt-1">Leave blank to use auto-generated summary.</p>
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide mb-3">Add Notes</h3>
+          <textarea
+            value={state.doctorNotes}
+            onChange={(e) => set("doctorNotes", e.target.value)}
+            rows={3}
+            placeholder="Any additional notes for this patient..."
+            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors resize-y"
+          />
+        </div>
+        <div className="flex flex-wrap gap-4">
+          {isProgressType && (
+            <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+              <input type="checkbox" checked={state.showProgress} onChange={(e) => set("showProgress", e.target.checked)} className="rounded" />
+              Show Progress Section
+            </label>
+          )}
+          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+            <input type="checkbox" checked={state.showNotes} onChange={(e) => set("showNotes", e.target.checked)} className="rounded" />
+            Show Doctor Notes
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ═══════════════════════════════════════════════════════
+     STEP 3: Final + Print
+     ═══════════════════════════════════════════════════════ */
+
+  const Step3 = () => (
+    <div>
+      {/* Action buttons */}
+      <div className="no-print flex flex-wrap items-center gap-3 mb-6">
+        <button onClick={() => window.print()} className="flex items-center gap-2 px-6 py-3 bg-neuro-navy text-white text-sm font-bold rounded-xl hover:bg-neuro-navy/90 transition-colors">
+          <Printer className="w-4 h-4" /> Print for Patient
+        </button>
+        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-6 py-3 bg-neuro-orange text-white text-sm font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors disabled:opacity-50">
+          <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Report"}
+        </button>
+        <button onClick={() => goToStep(1)} className="flex items-center gap-2 px-5 py-3 border border-gray-200 text-sm font-bold text-gray-600 rounded-xl hover:bg-gray-50 transition-colors">
+          <FileText className="w-4 h-4" /> Edit
+        </button>
+        <button onClick={resetAll} className="flex items-center gap-2 px-5 py-3 border border-gray-200 text-sm font-bold text-gray-400 rounded-xl hover:bg-gray-50 hover:text-red-500 transition-colors">
+          <RotateCcw className="w-4 h-4" /> New Report
+        </button>
+        <button onClick={loadHistory} className="flex items-center gap-2 px-5 py-3 border border-gray-200 text-sm font-bold text-gray-600 rounded-xl hover:bg-gray-50 transition-colors">
+          <Clock className="w-4 h-4" /> Report History
+        </button>
+      </div>
+
+      {/* Save success */}
+      {saveSuccess && (
+        <div className="no-print mb-4 bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
+          <Check className="w-5 h-5 text-green-600" />
+          <div>
+            <p className="text-sm font-bold text-green-700">Report saved successfully!</p>
+            <p className="text-xs text-green-600">ID: {saveSuccess}</p>
+          </div>
+          <button onClick={() => setSaveSuccess(null)} className="ml-auto text-green-400 hover:text-green-600">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* History panel */}
+      {historyOpen && (
+        <div className="no-print mb-6 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between p-4 border-b border-gray-100">
+            <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide">Report History</h3>
+            <button onClick={() => setHistoryOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="p-4 max-h-64 overflow-y-auto">
+            {historyLoading ? (
+              <p className="text-sm text-gray-400">Loading...</p>
+            ) : history.length === 0 ? (
+              <p className="text-sm text-gray-400">No previous reports.</p>
+            ) : (
+              <div className="space-y-2">
+                {history.map((h) => {
+                  const lbl = h.score >= 80 ? "Thriving" : h.score >= 60 ? "Adapting Well" : h.score >= 40 ? "Stressed" : h.score >= 20 ? "Struggling" : "In Crisis";
+                  const badgeColor = h.score >= 80 ? "bg-green-100 text-green-700" : h.score >= 60 ? "bg-blue-100 text-blue-700" : h.score >= 40 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700";
+                  return (
+                    <button key={h.id} onClick={() => loadReport(h.id)} className="w-full text-left flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 hover:bg-gray-100 transition-colors">
+                      <div>
+                        <span className="font-bold text-neuro-navy text-sm">{h.patient_name}</span>
+                        <span className="text-gray-400 text-xs ml-2">{h.scan_date}</span>
+                        <span className="text-gray-400 text-xs ml-2">{h.scan_type}</span>
+                      </div>
+                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${badgeColor}`}>{h.score} &middot; {lbl}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Report */}
+      {ReportContent()}
+    </div>
+  );
+
+  /* ═══════════════════════════════════════════════════════
+     RENDER
+     ═══════════════════════════════════════════════════════ */
+
+  return (
+    <div className="scan-report-wrapper p-4 md:p-8 max-w-6xl mx-auto">
+      <style jsx global>{`
+        @media print {
+          .no-print, nav, header, footer, aside, button, .step-tabs-container { display: none !important; }
+          html, body { background: white !important; margin: 0 !important; padding: 0 !important; }
+          @page { margin: 0.3in 0.4in; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          .print-area { border: none !important; box-shadow: none !important; border-radius: 0 !important; }
+          .scan-report-wrapper { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
+          section { page-break-inside: avoid; }
+        }
+      `}</style>
+
+      {/* Page Header */}
+      <div className="no-print flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-heading font-black text-neuro-navy flex items-center gap-3">
+            <ClipboardList className="w-7 h-7 text-neuro-orange" /> Scan Report Generator
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Input scan data, preview, and print a patient-friendly report.
+          </p>
+        </div>
+        <button onClick={resetAll} className="px-3 py-2 text-gray-400 hover:text-neuro-navy text-xs font-bold rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-1.5">
+          <RotateCcw className="w-3.5 h-3.5" /> Reset
+        </button>
+      </div>
+
+      {StepTabs()}
+
+      {state.currentStep === 1 && Step1()}
+      {state.currentStep === 2 && Step2()}
+      {state.currentStep === 3 && Step3()}
+
+      {state.currentStep < 3 && NavButtons()}
     </div>
   );
 }
