@@ -165,4 +165,26 @@ export const SEED_REVIEWS: SeedReview[] = [
     verified_purchase: true,
     helpful_count: 9,
   },
+
+  // ── Student Financial Planner ────────────────────────────────
+  {
+    product_id: 'student-financial-planner',
+    reviewer_name: 'Dr. Kaylee Conlan',
+    reviewer_role: 'student' as const,
+    rating: 5,
+    title: 'I wish I had this 2 years ago',
+    body: 'I graduated with $280K in debt and had NO idea what to do. I was on the wrong repayment plan for 18 months before someone told me about SAVE. This planner walked me through everything in 10 minutes — showed me I was overpaying by $2,200/month. The budget allocation bar made me realize I was spending $600/month on stuff I didn\'t need. Already saved $4K in 3 months just by following the plan.',
+    verified_purchase: true,
+    helpful_count: 18,
+  },
+  {
+    product_id: 'student-financial-planner',
+    reviewer_name: 'Tyler Shearer',
+    reviewer_role: 'student' as const,
+    rating: 5,
+    title: 'The 1099 section saved me from a huge tax mistake',
+    body: 'I\'m classified as a 1099 contractor and had NO idea I needed to pay quarterly taxes. This planner flagged it immediately and told me to set aside 30% of every paycheck. Without this, I would\'ve owed $8K+ at tax time with no money saved. The take-home calculator showing W-2 vs 1099 side by side was eye-opening. Every student contractor needs this.',
+    verified_purchase: true,
+    helpful_count: 14,
+  },
 ]

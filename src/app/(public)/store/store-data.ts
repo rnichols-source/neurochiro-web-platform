@@ -190,6 +190,32 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     ],
   },
 
+  // ── Student Tools ───────────────────────────────────────────────
+  {
+    id: "student-financial-planner",
+    name: "Student-to-Practice Financial Planner",
+    description:
+      "The money guide nobody gave you in school. Enter your loans, salary, and expenses — get a personalized financial roadmap with loan repayment strategy, take-home pay calculator, monthly budget, tax deductions, and a 3-year plan.",
+    longDescription:
+      "Graduate with $250K in debt and no financial plan? Not anymore. This interactive planner takes YOUR actual numbers — student loans, expected salary, monthly expenses — and builds a personalized financial roadmap for your first 3 years out of school. Get a recommended loan repayment strategy (SAVE, Standard, Aggressive, or Refinance) with a side-by-side comparison table, a take-home pay calculator with tax estimates for W-2 and 1099, a monthly budget allocation showing where every dollar goes, a 90-day financial checklist, tax deductions you're probably missing, and a visual 3-year roadmap showing when you'll hit positive net worth. Print a professional financial plan to share with family or a financial advisor.",
+    category: "tools",
+    audience: ["student"],
+    retailPrice: 4900,
+    memberPrice: 2900,
+    features: [
+      "Loan repayment strategy comparison (4 plans)",
+      "Take-home pay calculator (W-2 & 1099)",
+      "Monthly budget allocation with visual bar",
+      "First 90 days financial checklist",
+      "Tax deductions you're missing (with $ savings)",
+      "3-year roadmap with milestones",
+      "Loan payoff & net worth projection charts",
+      "Print-ready financial plan",
+    ],
+    billing: "one_time",
+    popular: true,
+  },
+
   // ── Workshop Kits ──────────────────────────────────────────────
   {
     id: "workshop-stress-sleep",

@@ -726,4 +726,93 @@ FOR NEARBY BUSINESSES (walk to 2-3 shops/gyms/offices near the event):
 GOAL: Leave every event with 1-2 new screening bookings or warm connections. Write them down on your Network Tracker before you drive away.`,
     },
   ],
+
+  "student-financial-planner": [
+    {
+      title: "Loan Repayment Strategy Comparison",
+      type: "data",
+      content: `YOUR LOAN SITUATION: $250,000 at 6.5% | Salary: $60,000
+
+RECOMMENDED PLAN: SAVE (Income-Driven)
+
+PLAN COMPARISON:
+───────────────────────────────────────────────────────────────
+Plan              Monthly    Total Paid    Years    Forgiveness
+───────────────────────────────────────────────────────────────
+SAVE Plan ←       $287       $86,100       25 yrs   Yes ✓
+Standard          $2,836     $340,320      10 yrs   No
+Aggressive (7yr)  $3,887     $326,508      7 yrs    No
+Refinance (5%)    $2,652     $318,240      10 yrs   No
+───────────────────────────────────────────────────────────────
+
+WHY SAVE: At $60K income, your SAVE payment is only $287/month
+vs $2,836 standard. That's $2,549/month you can use to build
+an emergency fund, start retirement savings, and actually live.
+After 25 years of payments, the remaining balance is forgiven.
+
+⚠ WARNING: Don't refinance federal loans unless you're SURE —
+you lose income-driven repayment AND Public Service Loan
+Forgiveness eligibility permanently.`,
+    },
+    {
+      title: "Monthly Budget Allocation",
+      type: "data",
+      content: `YOUR MONTHLY BUDGET — $60,000/year (W-2)
+
+TAKE-HOME CALCULATION:
+  Gross Monthly:                    $5,000
+  Federal Tax (est):                -$456
+  State Tax (SC, est):              -$275
+  FICA (7.65%):                     -$383
+  ─────────────────────────────────────
+  Net Monthly Take-Home:            $3,886
+
+WHERE EVERY DOLLAR GOES:
+  ████ Loan Payment (SAVE):    $287    (7.4%)
+  ████████ Housing:            $1,450  (37.3%)
+  █████ Transport:             $650    (16.7%)
+  ████ Living:                 $780    (20.1%)
+  ██ Professional:             $255    (6.6%)
+  ██ Health:                   $400    (10.3%)
+  █ Retirement:                $100    (2.6%)
+  ─────────────────────────────────────
+  Discretionary (what's left): -$36   🔴
+
+💡 You're $36/month over. Cut dining out from $150 to $100
+and subscriptions from $50 to $30 — that frees up $70/month.`,
+    },
+    {
+      title: "3-Year Roadmap Preview",
+      type: "guide",
+      content: `YOUR 3-YEAR FINANCIAL ROADMAP
+
+YEAR 1: SURVIVE & STABILIZE
+  Month 1-3:  Build 1-month emergency fund ($3,886)
+  Month 3-6:  Start SAVE loan payments ($287/mo)
+  Month 6-9:  Build emergency fund to 3 months ($11,658)
+  Month 9-12: Start retirement savings ($100/mo)
+  Year 1 End: Loans paid: $3,444 | Emergency: $11,658
+
+YEAR 2: BUILD & GROW
+  Negotiate raise to $68,000 (+13%)
+  Emergency fund to 6 months ($23,316)
+  Increase loan payments if surplus allows
+  Year 2 End: Loans paid: $6,888 | Balance: $258,792
+
+YEAR 3: ACCELERATE
+  Expected income: $75,000 (with bonuses)
+  Decision point: stay associate or open practice
+  If opening: need ~$50K startup capital
+  Year 3 End: Loans paid: $10,332 | Savings: $18,200
+
+NET WORTH PROJECTION:
+  Graduation: -$250,000
+  Year 1:     -$238,000
+  Year 3:     -$211,000
+  Break Even:  Year 12 (estimated)
+
+"Every dollar you manage intentionally in Year 1 compounds
+for the rest of your career. Start now."`,
+    },
+  ],
 };
