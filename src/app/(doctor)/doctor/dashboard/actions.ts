@@ -34,16 +34,17 @@ export async function getDoctorDashboardStats() {
     const profileViews = (doctor as any)?.profile_views || 0;
 
     // 3. Profile Completeness Calculation (specific weights per item)
-    const completenessItems = [
-      { key: 'photo', label: 'Upload a profile photo', weight: 20, done: !!doctor?.photo_url },
-      { key: 'bio', label: 'Write a bio (50+ characters)', weight: 20, done: !!(doctor?.bio && doctor.bio.length >= 50) },
-      { key: 'clinic_name', label: 'Add your clinic name', weight: 15, done: !!doctor?.clinic_name },
-      { key: 'specialties', label: 'Add at least one specialty', weight: 15, done: !!(doctor?.specialties && doctor.specialties.length > 0) },
-      { key: 'location', label: 'Fill in city and state', weight: 10, done: !!(doctor?.city && doctor?.state) },
-      { key: 'website', label: 'Add your website URL', weight: 10, done: !!doctor?.website_url },
-      { key: 'socials', label: 'Add a social media link', weight: 10, done: !!(doctor?.instagram_url || doctor?.facebook_url) },
-    ];
-    const completeness = completenessItems.filter(i => i.done).reduce((sum, i) => sum + i.weight, 0);
+    // If no doctor row found, skip the checklist entirely
+    const completenessItems = doctor ? [
+      { key: 'photo', label: 'Upload a profile photo', weight: 20, done: !!doctor.photo_url },
+      { key: 'bio', label: 'Write a bio (50+ characters)', weight: 20, done: !!(doctor.bio && doctor.bio.length >= 50) },
+      { key: 'clinic_name', label: 'Add your clinic name', weight: 15, done: !!doctor.clinic_name },
+      { key: 'specialties', label: 'Add at least one specialty', weight: 15, done: !!(doctor.specialties && doctor.specialties.length > 0) },
+      { key: 'location', label: 'Fill in city and state', weight: 10, done: !!(doctor.city && doctor.state) },
+      { key: 'website', label: 'Add your website URL', weight: 10, done: !!doctor.website_url },
+      { key: 'socials', label: 'Add a social media link', weight: 10, done: !!(doctor.instagram_url || doctor.facebook_url) },
+    ] : [];
+    const completeness = doctor ? completenessItems.filter(i => i.done).reduce((sum, i) => sum + i.weight, 0) : 100;
     const missingItems = completenessItems.filter(i => !i.done);
 
     const userRole = profile?.role || 'doctor';
