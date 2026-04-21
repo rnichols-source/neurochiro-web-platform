@@ -404,42 +404,60 @@ Mix and match clauses for custom contracts: arbitration, indemnification, HIPAA 
   // ── Practice Tools ─────────────────────────────────────────────
   "pl-analyzer": [
     {
-      title: "P&L Breakdown (Live Preview)",
+      title: "Financial Health Score",
       type: "data",
-      content: `YOUR P&L AT A GLANCE
+      content: `FINANCIAL HEALTH SCORE: 58 / 100 — "Healthy"
 
-INCOME
-  4020 Treatment Sales          $184,559
-  4035 PI Collections            $21,615
-  4500 Refunds                   -$2,842
-  Total Income                 $197,182
+BREAKDOWN:
+  Profit Margin (40 pts):     28/40  (24.3% — target is 35%+)
+  Expense Ratios (30 pts):    18/30  (4 of 7 categories within benchmark)
+  Revenue Diversity (15 pts): 15/15  (multiple income sources)
+  COGS Efficiency (15 pts):   10/15  (COGS at 4.2% — within range)
 
-COST OF GOODS SOLD
-  5010 Equipment & Supplies       $2,277
-  5050 Supplements                $4,314
-  Total COGS                     $8,183
-  ─────────────────────────────────────
-  GROSS PROFIT                 $188,999
+TOP 3 PROBLEMS:
+#1  Employee Salary at 31.8% (benchmark: 18-30%)
+    Overspending by $3,548/month
+#2  Royalty Fees at 6.4% (benchmark: 0-8%)
+    At upper boundary — review franchise value
+#3  Merchant Processing at 3.2% (benchmark: 1-3.5%)
+    Negotiate rate to 2.6% = $180/month savings
 
-EXPENSES
-  6200 Team                     $62,709
-  6800 Overhead                 $38,225
-  6100 Marketing                $23,854
-  ...
-  ─────────────────────────────────────
-  NET INCOME                    $47,884  (24.3%)
+QUICK WINS:
+→ Subscription audit: most practices find $200-500/mo in unused tools
+→ Renegotiate merchant processing: $180/mo savings on $30K card volume
+→ Cross-train CAs to handle billing: reduce medical billing by $400/mo`,
+    },
+    {
+      title: "Expense Donut Chart & Gap Analysis",
+      type: "data",
+      content: `WHERE YOUR MONEY GOES (Visual Donut Chart)
 
-⚠ Your profit margin is below the 35% target.
-📍 #1 Problem: Team costs at 31.8% — benchmark is 20-28%.`,
+  Team ██████████████████  $62,709  31.8%  🔴
+  Overhead █████████████   $38,225  19.4%  🟡
+  Marketing ████████       $23,854  12.1%  🔴
+  Practice Costs ███       $5,073    2.6%  🟢
+  Business Dev ██          $3,269    1.7%  🟢
+  Continuing Ed █          $2,250    1.1%  🟢
+  COGS ████                $8,183    4.2%  🟢
+
+  ─────────────────────────────
+  NET INCOME: $47,884 (24.3%)
+  "What's left for you"
+
+  Gap Analysis: 3 areas need attention, 4 are healthy
+  Click any red/yellow category for specific coaching.`,
     },
     {
       title: "Coaching Note (Sample)",
       type: "guide",
-      content: `When your marketing spend hits 🔴 (over benchmark):
+      content: `#1 PROBLEM: Employee Salary at 31.8% (benchmark: 18-30%)
 
-"Marketing at 12.3% — make sure you're tracking cost-per-new-patient for every channel. If Google Ads costs $150+ per new patient, optimize before spending more. The benchmark is $50-$100 per new patient from digital. If you can't attribute new patients to specific marketing spend, you're guessing, not marketing. Demand ROI data from every vendor and cut what doesn't produce."
+"Your team cost is consuming more than 30 cents of every dollar collected. Before you cut staff, ask: is every team member producing value equal to 3x their cost? A CA who does intake AND applies billable therapies is worth 2x one who only checks people in. Cross-train before you cut. If you're overstaffed for volume, reduce hours before eliminating positions."
 
-Every line item gets a coaching note like this — personalized to YOUR numbers, with specific action steps. Not generic advice. Real guidance based on chiropractic benchmarks.`,
+DOLLAR IMPACT: You're $3,548/month over the benchmark max.
+If you brought this to 28%: that's $42,576/year back in your pocket.
+
+Every line item gets a coaching note like this — personalized to YOUR actual numbers, not generic advice.`,
     },
   ],
 
@@ -496,58 +514,104 @@ Respectfully,
 
   "kpi-tracker": [
     {
-      title: "Daily Dashboard (What You'll See)",
+      title: "Today's Scorecard (Instant Feedback)",
       type: "data",
-      content: `TODAY'S NUMBERS              TARGET    ACTUAL    STATUS
-────────────────────────────────────────────────────────
-New Patients                   2         3        🟢
-Total Patient Visits          40        37        🟡
-Collections                $2,800    $2,450      🟡
-Case Acceptance Rate          80%       85%       🟢
-Referrals                      3         1        🔴
+      content: `TODAY'S SCORECARD
 
-WEEKLY SCORECARD
-──────────────────
-Mon: 38 visits | $2,200 | 2 NP
-Tue: 42 visits | $2,800 | 3 NP
-Wed: 37 visits | $2,450 | 1 NP  ← Today
-Thu: __ visits | $_____ | _ NP
-Fri: __ visits | $_____ | _ NP
+  ┌──────────────────┬──────────────────┬──────────────────┬──────────────────┐
+  │  Patient Visits   │   New Patients   │   Collections    │    No-Shows      │
+  │       37          │       3          │     $2,450       │       1          │
+  │  🟡 Target: 40   │  🟢 Target: 2   │  🟡 Target: $2,800│  🟢 Goal: <2    │
+  │  30d avg: 39     │  30d avg: 2.1   │  30d avg: $2,600 │  30d avg: 1.8    │
+  └──────────────────┴──────────────────┴──────────────────┴──────────────────┘
 
-📈 TREND: Collections up 8% vs. last week
-⚠ ALERT: Referrals trending below target 3 weeks in a row`,
+Status: 🟢 At/above target | 🟡 Within 20% | 🔴 Below 80%
+No-shows use inverted logic — green when LOW.`,
+    },
+    {
+      title: "Weekly Scorecard + Coaching Alerts",
+      type: "data",
+      content: `WEEKLY SCORECARD — Apr 14-18, 2026
+
+         Mon    Tue    Wed    Thu    Fri    TOTAL   AVG
+Visits    38     42     37     —      —     117     39
+New Pts    2      3      1     —      —       6      2
+Collect $2,200 $2,800 $2,450   —      —   $7,450 $2,483
+No-Shows   1      0      2     —      —       3      1
+Referrals  2      4      1     —      —       7    2.3
+Energy    😎     🔥     🙂     —      —       —      —
+
+COACHING ALERTS:
+🟢 12-day logging streak! Consistency is the foundation of growth.
+🟠 Collections below target 3 of last 5 days. Review your fee schedule.
+🟠 Referrals trending below target — activate your referral program.
+
+TRENDS (30-Day):
+  Collections: $62,400 total | $2,080/day avg | Best: $3,200 (Apr 8)
+  Visits: 1,170 total | 39/day avg | Up 8% vs previous 30 days`,
     },
   ],
 
   "scan-report": [
     {
-      title: "Sample Patient Report",
+      title: "Nervous System Score & Findings",
       type: "data",
-      content: `╔══════════════════════════════════════════════╗
-║   NERVOUS SYSTEM ASSESSMENT REPORT           ║
-║   Patient: Sarah M.  |  Age: 42              ║
-║   Date: April 19, 2026                       ║
-╚══════════════════════════════════════════════╝
+      content: `NERVOUS SYSTEM ASSESSMENT — Sarah M., Age 42
 
-NERVOUS SYSTEM SCORE: 62/100
+═══════════════════════════════════
+  NERVOUS SYSTEM SCORE: 62 / 100
+  Status: "Adapting Well"
+═══════════════════════════════════
 
-sEMG — Muscle Balance:
-  Upper Cervical:  ■■■■■■■■░░  Right-dominant
-  Mid Thoracic:    ■■■■■░░░░░  Balanced
-  Lower Lumbar:    ■■■■■■■■■░  Left-dominant
+SCORE BREAKDOWN:
+  sEMG (Muscle & Nerve):    25/35  Mild Asymmetry
+  Thermal (Temp Regulation): 25/35  Mild Imbalance
+  HRV (Adaptability):        18/30  SDNN: 48ms
 
-Thermal Scan — Autonomic Function:
-  Pattern: Sympathetic dominance (fight-or-flight)
-  Significance: High — consistent with sleep disruption
-  and stress-related symptoms
+THREE SCAN FINDINGS:
 
-HRV — Adaptability Score: 38
-  (Below average for age group. Target: 55+)
+1. Muscle & Nerve Activity (sEMG)
+   [Spine diagram: Upper Cervical highlighted orange]
+   Pattern: Mild asymmetry in C1-C2 region
+   Energy: Moderate exhaustion
+   "The muscles along your upper neck are working
+   harder on one side than the other."
 
-SUMMARY: Your nervous system is working harder than
-it should. The patterns we see are consistent with
-chronic stress adaptation. Targeted care can help
-restore balance.`,
+2. Temperature Regulation (Thermography)
+   Pattern: Mild imbalance | Differential: 1.2°C
+   "Your autonomic nervous system shows slight
+   temperature differences, suggesting your body's
+   internal regulation is under stress."
+
+3. Stress Adaptability (HRV)
+   SDNN: 48ms — Below Average (Target: 60+)
+   LF/HF: 2.4 — Sympathetic Dominant (Stress Mode)
+   "Your body's ability to adapt to stress is lower
+   than normal for your age group."`,
+    },
+    {
+      title: "Plain-Language Summary (Age-Adaptive)",
+      type: "guide",
+      content: `WHAT THIS MEANS FOR YOU:
+
+"Your nervous system is showing signs of moderate stress,
+particularly in the upper cervical area. This pattern is
+commonly associated with headaches, brain fog, and sleep
+issues. Your heart rate variability indicates your body is
+working harder than normal to adapt to daily stressors.
+The good news: these patterns respond well to consistent
+chiropractic care."
+
+The summary auto-adjusts based on patient age:
+• Child (0-12): "Your child's nervous system is..."
+• Teen (13-17): References school, sports, growth
+• Adult (18-64): Standard clinical but plain language
+• Senior (65+): Mentions adaptability, quality of life
+
+PROGRESS COMPARISON (for follow-up scans):
+  Previous Score: 48 → Current Score: 62  ↑ +14 points
+  "Since starting care 6 weeks ago (12 visits), your
+  nervous system score has improved by 29%."`,
     },
   ],
 
