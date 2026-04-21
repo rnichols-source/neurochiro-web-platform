@@ -241,6 +241,31 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     popular: true,
   },
 
+  {
+    id: "interview-playbook",
+    name: "The Interview Playbook",
+    description:
+      "Walk into your associate interview as the most prepared candidate they've ever seen. 20 interview questions with answer frameworks, 15 questions to ask the owner with red flag detection, an offer evaluation calculator, 8 negotiation scripts, and post-interview templates.",
+    longDescription:
+      "Most students wing their first interview and take the first offer. The Interview Playbook makes that impossible. Get the 20 most common associate interview questions with 'why they ask this', strong answer frameworks, example answers, and red flags to avoid — plus a practice mode with a 60-second timer. Learn the 15 questions you MUST ask the owner, with green light vs red flag answer comparisons and an interactive scorecard. Evaluate any offer with the compensation calculator that shows total comp, market comparison, hidden costs, and an Offer Score. Master 8 negotiation scenarios with word-for-word scripts. Follow up professionally with 3 thank-you email templates and a follow-up timeline.",
+    category: "tools",
+    audience: ["student"],
+    retailPrice: 4900,
+    memberPrice: 2900,
+    features: [
+      "20 interview questions with answer coaching",
+      "Practice mode with 60-second timer",
+      "15 questions to ask owners + red flag scorecard",
+      "Offer evaluation calculator with market comparison",
+      "8 negotiation scripts (salary, non-compete, equity)",
+      "3 thank-you email templates (copy & paste)",
+      "Offer decision framework (10-point checklist)",
+      "Walk-away checklist (8 deal-breakers)",
+    ],
+    billing: "one_time",
+    popular: true,
+  },
+
   // ── Workshop Kits ──────────────────────────────────────────────
   {
     id: "workshop-stress-sleep",

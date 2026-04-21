@@ -816,6 +816,69 @@ for the rest of your career. Start now."`,
     },
   ],
 
+  "interview-playbook": [
+    {
+      title: "Interview Question #3: Report of Findings",
+      type: "guide",
+      content: `"Walk me through your Report of Findings process."
+
+DIFFICULTY: Medium | CATEGORY: Clinical
+
+WHY THEY ASK THIS:
+This is a revenue question disguised as a clinical question. They
+want to know if you can present findings AND convert patients to
+care plans. An associate who can't deliver an ROF costs the
+practice money every single day.
+
+STRONG ANSWER FRAMEWORK:
+1. Start with how you review objective findings with the patient
+2. Explain how you connect findings to their chief complaint
+3. Describe how you present the care plan recommendation
+4. Show that you close with confidence, not pressure
+
+EXAMPLE ANSWER:
+"I start by showing the patient their scan results — I make it
+visual so they can SEE what's happening. I connect the findings
+directly to why they came in. Then I present the care plan as my
+professional recommendation, explain the phases, and show them
+the investment. I ask if they have questions, not if they want
+to proceed. Assumptive, not pushy."
+
+RED FLAGS TO AVOID:
+- "I just tell them what's wrong and let them decide"
+  (passive = low case acceptance)
+- "I haven't done many ROFs yet"
+  (be honest but show you've practiced)`,
+    },
+    {
+      title: "Question to Ask: New Patient Assignment",
+      type: "guide",
+      content: `ASK THE OWNER: "How are new patients assigned between doctors?"
+
+CATEGORY: Patients | WHY THIS MATTERS:
+This is THE question that determines your income ceiling. If the
+owner keeps all new patients and you only get their overflow or
+walk-ins, your production will always be capped.
+
+GOOD ANSWER (🟢):
+"We rotate new patients evenly. You'll get your fair share from
+day one. We also track each doctor's PVA separately so you can
+see your own numbers."
+
+RED FLAG ANSWER (🔴):
+"I handle most of the new patients since they're coming to see
+me specifically. You'll mostly see established patients and
+overflow."
+
+→ Translation: You'll be adjusting the owner's leftover schedule
+and will never build your own patient base.
+
+FOLLOW-UP QUESTION:
+"Can I see the new patient distribution from the last 3 months
+to understand the volume?"`,
+    },
+  ],
+
   "technique-guide": [
     {
       title: "Technique Breakdown: Gonstead",

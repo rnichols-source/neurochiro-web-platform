@@ -188,6 +188,28 @@ export const SEED_REVIEWS: SeedReview[] = [
     helpful_count: 14,
   },
 
+  // ── Interview Playbook ────────────────────────────────────────
+  {
+    product_id: 'interview-playbook',
+    reviewer_name: 'Bailey Backhuus',
+    reviewer_role: 'student' as const,
+    rating: 5,
+    title: 'Used this for my first 3 interviews — got 2 offers',
+    body: 'I practiced every question using the 60-second timer mode and it made a MASSIVE difference. The "Questions to Ask" section is where the real value is though — I asked about new patient assignment and the owner\'s face told me everything before he even answered. Dodged a bullet on one practice and found the right one. The negotiation scripts helped me get $5K more than the initial offer. Paid for itself 170 times over.',
+    verified_purchase: true,
+    helpful_count: 24,
+  },
+  {
+    product_id: 'interview-playbook',
+    reviewer_name: 'Mackenzie Hoy',
+    reviewer_role: 'student' as const,
+    rating: 5,
+    title: 'The offer calculator showed me I was being lowballed',
+    body: 'Got an offer for $52K as a 1099 contractor. Plugged it into the calculator and it showed my true net comp was only $38K after self-employment tax and buying my own insurance. The "Hidden Costs" section literally saved me from making a $15K/year mistake. Used the 1099-to-W-2 negotiation script and they converted it to W-2 at $58K. This tool should be required before any student signs anything.',
+    verified_purchase: true,
+    helpful_count: 19,
+  },
+
   // ── Technique Comparison Guide ───────────────────────────────
   {
     product_id: 'technique-guide',

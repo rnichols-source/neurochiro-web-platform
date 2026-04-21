@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
-  MessageSquare, FileText, LogOut, X, Settings, CreditCard, DollarSign, Compass,
+  MessageSquare, FileText, LogOut, X, Settings, CreditCard, DollarSign, Compass, ClipboardList,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,6 +24,7 @@ const navItems = [
   { name: "Contract Lab", href: "/student/contract-lab", icon: FileText },
   { name: "Financial Planner", href: "/student/financial-planner", icon: DollarSign },
   { name: "Techniques", href: "/student/techniques", icon: Compass },
+  { name: "Interview Prep", href: "/student/interview-prep", icon: ClipboardList },
   { name: "Settings", href: "/student/settings", icon: Settings },
   { name: "Billing", href: "/student/billing", icon: CreditCard },
   { name: "Messages", href: "/student/messages", icon: MessageSquare },
