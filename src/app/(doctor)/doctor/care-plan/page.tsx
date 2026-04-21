@@ -37,6 +37,7 @@ interface Supplement {
   id: string;
   name: string;
   price: number;
+  qty: number;
   selected: boolean;
 }
 
@@ -90,11 +91,11 @@ const DEFAULT_PHASES: PlanPhase[] = [
 ];
 
 const DEFAULT_SUPPLEMENTS: Supplement[] = [
-  { id: uid(), name: "Omega-3", price: 35, selected: false },
-  { id: uid(), name: "Vitamin D", price: 20, selected: false },
-  { id: uid(), name: "Magnesium", price: 25, selected: false },
-  { id: uid(), name: "Probiotics", price: 40, selected: false },
-  { id: uid(), name: "Whole Food Multi", price: 45, selected: false },
+  { id: uid(), name: "Omega-3", price: 35, qty: 1, selected: false },
+  { id: uid(), name: "Vitamin D", price: 45, qty: 1, selected: false },
+  { id: uid(), name: "Magnesium", price: 25, qty: 1, selected: false },
+  { id: uid(), name: "Probiotics", price: 40, qty: 1, selected: false },
+  { id: uid(), name: "Whole Food Multi", price: 45, qty: 1, selected: false },
 ];
 
 const DEFAULT_LIFESTYLE: LifestyleRec[] = [
@@ -225,7 +226,7 @@ export default function CarePlanBuilder() {
   const biWeeklyPayment = biWeeklyPeriods > 0 ? Math.round(netTotal / biWeeklyPeriods) : 0;
 
   const selectedSupps = state.supplements.filter((s) => s.selected);
-  const supplementTotal = selectedSupps.reduce((s, sup) => s + sup.price, 0);
+  const supplementTotal = selectedSupps.reduce((s, sup) => s + sup.price * sup.qty, 0);
   const supplementCareTotal = supplementTotal;
 
   const checkedLifestyle = state.lifestyleRecs.filter((l) => l.checked);
@@ -342,7 +343,7 @@ export default function CarePlanBuilder() {
   const addSupplement = () => {
     set("supplements", [
       ...state.supplements,
-      { id: uid(), name: "New Supplement", price: 30, selected: false },
+      { id: uid(), name: "New Supplement", price: 30, qty: 1, selected: false },
     ]);
   };
 
@@ -947,7 +948,20 @@ export default function CarePlanBuilder() {
                     }
                     className="w-14 text-sm font-bold text-right bg-transparent border-b border-gray-200 focus:outline-none focus:border-neuro-orange"
                   />
-                  <span className="text-xs text-gray-400">/ea</span>
+                  <span className="text-xs text-gray-400 mr-2">/ea</span>
+                  <span className="text-xs text-gray-400">x</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={sup.qty}
+                    onChange={(e) =>
+                      updateSupplement(sup.id, "qty", Math.max(1, Number(e.target.value) || 1))
+                    }
+                    className="w-10 text-sm font-bold text-center bg-transparent border-b border-gray-200 focus:outline-none focus:border-neuro-orange"
+                  />
+                  {sup.qty > 1 && (
+                    <span className="text-xs font-bold text-neuro-navy ml-1">= ${fmt(sup.price * sup.qty)}</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -1284,7 +1298,9 @@ export default function CarePlanBuilder() {
                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                       >
                         <span className="text-sm text-gray-700">{sup.name}</span>
-                        <span className="text-sm font-bold text-neuro-navy">${sup.price}/ea</span>
+                        <span className="text-sm font-bold text-neuro-navy">
+                          {sup.qty > 1 ? `${sup.qty} x $${sup.price} = $${fmt(sup.price * sup.qty)}` : `$${sup.price}`}
+                        </span>
                       </div>
                     ))}
                   </div>
