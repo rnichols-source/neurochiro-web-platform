@@ -944,8 +944,26 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
       case 'broadcast_announcement': {
         const { title, audience_type } = payload;
         let query = supabaseAdmin!.from('profiles').select('id');
+
+        // Filter by audience — only send to matching roles
         if (audience_type && audience_type !== 'all') {
-          query = query.eq('role', audience_type);
+          // Map audience types to actual database roles
+          const audienceRoleMap: Record<string, string> = {
+            doctor: 'doctor',
+            student: 'student',
+            patient: 'patient',
+            vendor: 'vendor',
+          };
+
+          const dbRole = audienceRoleMap[audience_type];
+          if (dbRole) {
+            query = query.eq('role', dbRole);
+          } else {
+            // Unknown audience type (e.g., 'mastermind', 'council') — skip to prevent
+            // sending to everyone. These require a separate membership tracking system.
+            console.warn(`[AUTOMATIONS] Skipping broadcast: unknown audience "${audience_type}" has no matching role in DB`);
+            break;
+          }
         }
         const { data: users } = await query.limit(1000);
 

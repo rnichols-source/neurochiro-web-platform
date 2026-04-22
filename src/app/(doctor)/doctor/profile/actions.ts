@@ -88,8 +88,11 @@ export async function updateDoctorProfile(formData: FormData) {
       return { error: `Failed to update name: ${profileError.message}` }
     }
 
-    // 2. Update Doctor table
-    const { error: doctorError } = await supabase
+    // 2. Update Doctor table (use admin client to bypass RLS)
+    const { createAdminClient } = await import('@/lib/supabase-admin')
+    const adminSupabase = createAdminClient()
+
+    const { error: doctorError } = await adminSupabase
       .from('doctors')
       .update({
         clinic_name: clinicName,
