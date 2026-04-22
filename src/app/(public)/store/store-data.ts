@@ -693,6 +693,29 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     ],
     billing: "monthly",
   },
+  {
+    id: "patient-supplement-guide",
+    name: "Supplement & Nutrition Guide",
+    description:
+      "Understand why your chiropractor recommends specific supplements, how to take them properly, what to look for when buying, and how to eat to support your healing. Includes daily supplement tracker with streaks.",
+    longDescription:
+      "70% of patients don't take their supplements consistently. This interactive guide fixes that. Track your daily supplement stack with streaks and compliance scores. Learn about 12 common supplements your chiropractor recommends — why they matter for your nervous system, how to take them, and what to look for when buying. Discover anti-inflammatory eating basics that accelerate your chiropractic results. Get 20 simple meal ideas with ingredients and prep times under 30 minutes.",
+    category: "tools",
+    audience: ["patient"],
+    retailPrice: 999,
+    memberPrice: 999,
+    features: [
+      "Daily supplement tracker with streaks",
+      "12 supplement breakdowns (why, how, what to buy)",
+      "Anti-inflammatory nutrition education",
+      "20 simple meal ideas (under 30 min)",
+      "Shopping list (screenshot & go)",
+      "Hydration calculator",
+      "Weekly compliance report",
+      "Connected to your chiropractic care",
+    ],
+    billing: "one_time",
+  },
 ];
 
 export function getProductsByCategory(

@@ -5,7 +5,7 @@
 export interface SeedReview {
   product_id: string
   reviewer_name: string
-  reviewer_role: 'doctor' | 'student'
+  reviewer_role: 'doctor' | 'student' | 'patient'
   rating: number
   title: string
   body: string
@@ -230,5 +230,27 @@ export const SEED_REVIEWS: SeedReview[] = [
     body: 'I was torn between Gonstead and NUCCA. Put them side by side in the comparison tool and it was instantly clear — Gonstead fits my personality (I\'m a details person) and the cert cost difference is massive. The pros/cons for each technique are brutally honest which I appreciate. Also learned about techniques I didn\'t even know existed. Every 7th trimester student needs this before they start spending money on seminars.',
     verified_purchase: true,
     helpful_count: 16,
+  },
+
+  // ── Supplement & Nutrition Guide ─────────────────────────────
+  {
+    product_id: 'patient-supplement-guide',
+    reviewer_name: 'Jennifer H.',
+    reviewer_role: 'patient' as const,
+    rating: 5,
+    title: 'Finally understand why I was told to take all these pills',
+    body: 'My chiropractor recommended 4 supplements and I had no idea why. I just bought the cheapest ones at Walmart and took them whenever I remembered. This guide explained WHY each one matters for my nervous system and showed me I was buying the wrong forms (magnesium oxide — basically useless). Now I take the right ones at the right time and I actually feel a difference. The daily tracker with streaks keeps me accountable too.',
+    verified_purchase: true,
+    helpful_count: 12,
+  },
+  {
+    product_id: 'patient-supplement-guide',
+    reviewer_name: 'Marcus T.',
+    reviewer_role: 'patient' as const,
+    rating: 5,
+    title: 'The meal ideas alone are worth it',
+    body: 'I knew I needed to eat better but had no idea where to start. The anti-inflammatory plate visual is so simple — I literally took a screenshot and put it on my fridge. The sheet pan salmon recipe takes 25 minutes and my wife loves it. Already cut out the processed oils and I swear my joints feel less stiff in the morning. My chiropractor noticed my scans improving faster too.',
+    verified_purchase: true,
+    helpful_count: 9,
   },
 ]

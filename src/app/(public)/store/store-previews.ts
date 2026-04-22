@@ -964,4 +964,75 @@ YOUR RESULTS:
 └─────────────────────────────────────────────────┘`,
     },
   ],
+
+  "patient-supplement-guide": [
+    {
+      title: "Omega-3 Fish Oil — Why Your Chiropractor Recommends It",
+      type: "guide",
+      content: `🐟 OMEGA-3 FISH OIL
+
+WHY YOUR CHIROPRACTOR RECOMMENDS IT:
+Your adjustments remove physical interference in your nervous
+system. Omega-3s remove CHEMICAL interference — chronic
+inflammation that slows your healing. Together, they're
+exponentially more powerful than either one alone.
+
+HOW TO TAKE IT:
+• 2,000-3,000mg combined EPA+DHA daily
+• Take with a meal that has fat (breakfast or dinner)
+• Split into 2 doses if the amount is large
+
+WHAT TO LOOK FOR WHEN BUYING:
+✅ Minimum 1,000mg combined EPA+DHA per serving
+✅ Third-party tested (IFOS, NSF, or ConsumerLab certified)
+✅ Triglyceride form (better absorbed than ethyl ester)
+❌ Fish burps = low quality or rancid oil
+❌ "1,000mg fish oil" is NOT the same as 1,000mg EPA+DHA
+   (check the supplement facts label, not the front)
+
+SIGNS IT'S WORKING (2-4 weeks):
+• Less joint stiffness in the morning
+• Better recovery after adjustments
+• Skin feels less dry
+• General sense of less inflammation`,
+    },
+    {
+      title: "The Anti-Inflammatory Plate",
+      type: "guide",
+      content: `THE ANTI-INFLAMMATORY PLATE
+
+You don't need a diet plan. You need a simple visual:
+
+┌──────────────────────────────────────────┐
+│                                          │
+│        🥦🥕🫑 VEGETABLES (50%)          │
+│        Colorful. "Eat the rainbow."      │
+│                                          │
+│   🍗 PROTEIN     │   🥑 HEALTHY FATS    │
+│     (25%)        │   + COMPLEX CARBS    │
+│   Grass-fed meat │     (25%)            │
+│   Wild fish      │   Avocado, nuts      │
+│   Organic eggs   │   Sweet potatoes     │
+│   Legumes        │   Whole grains       │
+│                                          │
+└──────────────────────────────────────────┘
+
+"You don't need to be perfect.
+Just make this plate MOST of your meals."
+
+WHY THIS MATTERS FOR YOUR CHIROPRACTIC CARE:
+Inflammation works AGAINST your adjustments. Every time
+your chiropractor removes nerve interference, your body
+starts healing. But chronic inflammation from poor
+nutrition slows that healing down. Anti-inflammatory
+eating is like giving your body premium fuel to do the
+repair work your adjustments make possible.
+
+HYDRATION RULE:
+Half your body weight in ounces of water daily.
+200 lbs = 100 oz of water.
+Your spinal discs are 80% water. Dehydrated discs
+don't respond to adjustments as well.`,
+    },
+  ],
 };

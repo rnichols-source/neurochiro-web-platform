@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Zap, Flame, Search, Heart, BookOpen, Activity, ArrowRight, Loader2, Dumbbell, Calendar, TrendingUp } from "lucide-react";
+import { Zap, Flame, Search, Heart, BookOpen, Activity, ArrowRight, Loader2, Dumbbell, Calendar, TrendingUp, Apple } from "lucide-react";
 import Link from "next/link";
 import { getPatientDashboardData } from "./actions";
 import { isPremiumMember, createPremiumCheckout } from "../premium-actions";
@@ -32,12 +32,13 @@ export default function PatientDashboard() {
 
       {/* Premium Quick Actions */}
       {premium && (
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-5 gap-2">
           {[
             { label: "Check In", href: "/portal/track", icon: Activity, bg: "bg-blue-50", iconColor: "text-blue-500" },
             { label: "Exercises", href: "/portal/exercises", icon: Dumbbell, bg: "bg-orange-50", iconColor: "text-neuro-orange" },
             { label: "Learn", href: "/portal/learn", icon: BookOpen, bg: "bg-green-50", iconColor: "text-green-500" },
             { label: "My Journey", href: "/portal/journey", icon: Calendar, bg: "bg-purple-50", iconColor: "text-purple-500" },
+            { label: "Nutrition", href: "/portal/supplements", icon: Apple, bg: "bg-red-50", iconColor: "text-red-500" },
           ].map((item) => (
             <Link
               key={item.href}
