@@ -47,6 +47,7 @@ const navSections = [
       { name: "Jobs & Hiring", href: "/doctor/jobs", icon: Briefcase },
       { name: "Workshops", href: "/doctor/workshops", icon: Presentation },
       { name: "Screenings", href: "/doctor/screenings", icon: Target },
+      { name: "Command Center", href: "/doctor/command-center", icon: Target },
       { name: "Contracts", href: "/doctor/contracts", icon: FileCheck },
       { name: "Students", href: "/doctor/students", icon: GraduationCap },
       { name: "Seminars", href: "/doctor/seminars", icon: Calendar },
