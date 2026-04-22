@@ -42,9 +42,9 @@ function RegistrationForm({
   const [paymentPlan, setPaymentPlan] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const label = tier === "vip" ? "VIP + 90-Day Coaching" : "Weekend Intensive";
-  const fullPrice = tier === "vip" ? "$4,997" : "$1,997";
-  const planPrice = tier === "vip" ? "$2,599" : "$1,099";
+  const label = tier === "vip" ? "The Screening Accelerator" : "The Screening Intensive";
+  const fullPrice = tier === "vip" ? "$1,750" : "$750";
+  const planPrice = tier === "vip" ? "$634" : "$300";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +92,7 @@ function RegistrationForm({
               paymentPlan ? "bg-white text-neuro-navy shadow-sm" : "text-gray-500"
             }`}
           >
-            2 Payments — {planPrice}/mo
+            3 Payments — {planPrice}/mo
           </button>
         </div>
 
@@ -129,7 +129,7 @@ function RegistrationForm({
 // ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
-// Interactive Screening OS Preview
+// Interactive Screening Command Center Preview
 // ---------------------------------------------------------------------------
 
 type OSTab = "events" | "network" | "vendors" | "outreach";
@@ -148,8 +148,8 @@ function ScreeningOSPreview() {
     <section className="py-20 px-6 bg-white">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <p className="text-xs font-black uppercase tracking-widest text-neuro-orange mb-2">Included With Your Seat</p>
-          <h2 className="text-3xl font-black text-neuro-navy mb-2">The Screening OS</h2>
+          <p className="text-xs font-black uppercase tracking-widest text-neuro-orange mb-2">Included With The Accelerator</p>
+          <h2 className="text-3xl font-black text-neuro-navy mb-2">The Screening Command Center</h2>
           <p className="text-gray-500 max-w-xl mx-auto">Your live operating system for screening events. Click each tab to explore.</p>
         </div>
 
@@ -396,7 +396,7 @@ function WeekendContent() {
 
           <h1 className="text-4xl md:text-6xl font-heading font-black mb-6 leading-tight">
             <span className="text-white">Screening Mastery</span><br />
-            <span className="text-neuro-orange">Weekend Intensive</span>
+            <span className="text-neuro-orange">Screening Intensive</span>
           </h1>
 
           <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-4">
@@ -421,7 +421,7 @@ function WeekendContent() {
             >
               Reserve Your Seat <ArrowRight className="w-5 h-5" />
             </button>
-            <span className="text-sm text-gray-500">or 2 payments of $1,099</span>
+            <span className="text-sm text-gray-500">or 3 payments of $300</span>
           </div>
 
           <div className="grid grid-cols-3 gap-6 max-w-lg mx-auto mt-14">
@@ -557,9 +557,9 @@ function WeekendContent() {
               {[
                 { time: "9:00-9:15", title: "Energy Check", desc: "Everyone shares one thing from Saturday that clicked." },
                 { time: "9:15-10:00", title: "Follow-Up Systems", desc: "Complete sequence: same-day text, day-before reminder, warm lead, no-show recovery. Load templates into your phone NOW." },
-                { time: "10:00-10:45", title: "ROI Tracking + Your Numbers", desc: "The metrics that matter. Walk through the Screening OS dashboard. Everyone sets up their account live." },
+                { time: "10:00-10:45", title: "ROI Tracking + Your Numbers", desc: "The metrics that matter. Walk through the Screening Command Center dashboard. Everyone sets up their account live." },
                 { time: "10:45-11:00", title: "Break", desc: "" },
-                { time: "11:00-11:30", title: "Screening OS — Live Setup", desc: "Events, Network, Vendors, Outreach tabs. See the pre-loaded events in YOUR area. Pick your top 5 and mark them 'To Contact.'" },
+                { time: "11:00-11:30", title: "Screening Command Center — Live Setup", desc: "Events, Network, Vendors, Outreach tabs. See the pre-loaded events in YOUR area. Pick your top 5 and mark them 'To Contact.'" },
                 { time: "11:30-12:00", title: "Hot Seat Coaching", desc: "Each doctor presents their plan: venue, date, who's coming, concerns. Direct feedback from Dr. Ray and the room." },
                 { time: "12:00-12:15", title: "The 90-Day Game Plan", desc: "Write it down: screening dates, network targets, vendor targets, revenue goals. Accountability partner reviews." },
                 { time: "12:15-12:30", title: "The Close", desc: "You have everything. Scripts practiced. System built. First event booked. Now go execute." },
@@ -582,7 +582,7 @@ function WeekendContent() {
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { icon: Monitor, title: "Your laptop is right there", desc: "Set up the Screening OS live during the session. Not after. Not later. Right now." },
+              { icon: Monitor, title: "Your laptop is right there", desc: "Set up the Screening Command Center live during the session. Not after. Not later. Right now." },
               { icon: Headphones, title: "Less self-conscious", desc: "Breakout room role-play is actually easier than practicing in front of a room of strangers." },
               { icon: Video, title: "Every session recorded", desc: "Lifetime access to all recordings. Rewatch the scripts, the role-plays, the coaching — anytime." },
             ].map((b, i) => (
@@ -605,7 +605,7 @@ function WeekendContent() {
               "Your first screening booked within 14 days",
               "Every script memorized — practiced, not just read",
               "The Screening Event Mastery Kit ($149 value)",
-              "The Screening OS with 25-50 events pre-loaded in YOUR area",
+              "The Screening Command Center with 25-50 events pre-loaded in YOUR area",
               "Follow-up text sequences loaded on your phone",
               "A network of 15 doctors doing the same thing",
               "Your accountability partner for 30 days",
@@ -633,18 +633,18 @@ function WeekendContent() {
           <div className="text-center mb-12">
             <p className="text-xs font-black uppercase tracking-widest text-neuro-orange mb-2">Investment</p>
             <h2 className="text-3xl font-black text-neuro-navy">Choose Your Level</h2>
-            <p className="text-gray-500 mt-2">Both include the full weekend + Screening OS. VIP adds 90 days of personal coaching.</p>
+            <p className="text-gray-500 mt-2">Learn the system — or learn it AND get the tools + coaching to execute immediately.</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
             {/* Intensive */}
             <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 flex flex-col">
-              <h3 className="text-xl font-black text-neuro-navy mb-1">Weekend Intensive</h3>
-              <p className="text-sm text-gray-500 mb-4">The full 3-day virtual experience</p>
-              <div className="mb-1"><span className="text-4xl font-black text-neuro-navy">$1,997</span></div>
-              <p className="text-sm text-gray-400 mb-6">or 2 payments of $1,099</p>
+              <h3 className="text-xl font-black text-neuro-navy mb-1">The Screening Intensive</h3>
+              <p className="text-sm text-gray-500 mb-4">Learn the system</p>
+              <div className="mb-1"><span className="text-4xl font-black text-neuro-navy">$750</span></div>
+              <p className="text-sm text-gray-400 mb-6">or 3 payments of $300</p>
               <div className="space-y-3 flex-1 mb-8">
-                {["Full Friday-Sunday Zoom program", "Complete Screening Mastery Kit included", "Live role-play in breakout rooms", "All scripts, forms, and trackers", "Screening OS with events in your area", "Accountability partner pairing", "30-day group chat access", "Lifetime access to recordings", "PDF workbook"].map((f, i) => (
+                {["Full Friday-Sunday Zoom program", "Live role-play in breakout rooms", "All scripts, forms, and trackers (PDF)", "Accountability partner pairing", "30-day group chat access", "Lifetime access to recordings", "PDF workbook with all scripts"].map((f, i) => (
                   <div key={i} className="flex items-start gap-2.5"><CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" /><span className="text-sm text-gray-700">{f}</span></div>
                 ))}
               </div>
@@ -656,12 +656,12 @@ function WeekendContent() {
             {/* VIP */}
             <div className="bg-white rounded-2xl border-2 border-neuro-orange p-8 flex flex-col relative shadow-lg ring-1 ring-neuro-orange/20">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-neuro-orange text-white text-xs font-black uppercase tracking-widest rounded-full">Most Popular</div>
-              <h3 className="text-xl font-black text-neuro-navy mb-1">VIP + 90-Day Coaching</h3>
-              <p className="text-sm text-gray-500 mb-4">Full weekend + personal coaching with Dr. Ray</p>
-              <div className="mb-1"><span className="text-4xl font-black text-neuro-navy">$4,997</span></div>
-              <p className="text-sm text-gray-400 mb-6">or 2 payments of $2,599</p>
+              <h3 className="text-xl font-black text-neuro-navy mb-1">The Screening Accelerator</h3>
+              <p className="text-sm text-gray-500 mb-4">Learn it + Build it + Get coached through it</p>
+              <div className="mb-1"><span className="text-4xl font-black text-neuro-navy">$1,750</span></div>
+              <p className="text-sm text-gray-400 mb-6">or 3 payments of $634</p>
               <div className="space-y-3 flex-1 mb-8">
-                {["Everything in Weekend Intensive", "90 days of 1-on-1 coaching with Dr. Ray", "Weekly 30-min coaching calls", "Direct text/call access for 90 days", "Screening debrief after every event", "Custom screening strategy for your market", "Priority seating at future events", "Lifetime access to recordings + updates", "VIP-only quarterly mastermind call"].map((f, i) => (
+                {["Everything in The Screening Intensive", "The Screening Command Center (live dashboard)", "25-50 events pre-loaded in YOUR area", "Screening Event Mastery Kit ($149 value)", "90-day group coaching — 6 bi-weekly Zoom calls", "Private group chat for 90 days", "Screening debriefs after every event", "Lifetime access to recordings + updates", "Founding cohort priority access"].map((f, i) => (
                   <div key={i} className="flex items-start gap-2.5"><CheckCircle className="w-4 h-4 text-neuro-orange flex-shrink-0 mt-0.5" /><span className="text-sm text-gray-700">{f}</span></div>
                 ))}
               </div>
@@ -687,9 +687,11 @@ function WeekendContent() {
               { q: "How does Zoom work for role-play?", a: "Breakout rooms. We pair you up and you practice in private 2-person rooms. You rotate partners throughout the day. It's actually less intimidating than practicing in front of a big room — and just as effective." },
               { q: "What if I miss a session?", a: "Every session is recorded and available within 24 hours. But attend live if at all possible — the breakout room practice is where the transformation happens." },
               { q: "Can I bring my CA or office manager?", a: "Your ticket covers you. Team members can be added at a reduced rate — they're half the screening team, so it's highly recommended. Email us for details." },
-              { q: "What's the Screening OS?", a: "A live dashboard inside NeuroChiro where you track all your screening events, network contacts, vendor relationships, and outreach pipeline. We pre-load 25-50 real events in YOUR area so you have a pipeline ready to go." },
-              { q: "What's the difference between the $79 kit and the $1,997 weekend?", a: "The kit gives you the WHAT — scripts and templates. The weekend gives you the HOW — live coaching, breakout room practice, direct feedback, accountability, the Screening OS, and pre-loaded events in your area. The kit is included with the weekend." },
-              { q: "Is there a payment plan?", a: "Yes. Both tiers offer 2 monthly payments. Intensive: $1,099 x 2. VIP: $2,599 x 2. First payment due at registration." },
+              { q: "What's the Screening Command Center?", a: "A live dashboard inside NeuroChiro where you track all your screening events, network contacts, vendor relationships, and outreach pipeline. We pre-load 25-50 real events in YOUR area so you have a pipeline ready to go." },
+              { q: "What's the difference between the Intensive and the Accelerator?", a: "The Intensive ($750) is the 3-day training — you learn the complete screening system. The Accelerator ($1,750) includes everything in the Intensive PLUS the Screening Command Center (your live dashboard), 25-50 pre-loaded events in your area, the Screening Mastery Kit, and 90 days of bi-weekly group coaching calls. The Intensive teaches you. The Accelerator teaches you AND gives you everything you need to execute immediately." },
+              { q: "Is there a payment plan?", a: "Yes. The Intensive: 3 payments of $300 ($900 total). The Accelerator: 3 payments of $634 ($1,902 total). First payment due at registration." },
+              { q: "What is the Screening Command Center?", a: "It's a live dashboard inside NeuroChiro where you track all your screening events, network contacts, vendor relationships, and outreach pipeline. We pre-load 25-50 real screening opportunities in YOUR area so you have a pipeline ready to go before the weekend even starts. It's only available with the Accelerator tier." },
+              { q: "What does the 90-day group coaching include?", a: "Six bi-weekly Zoom calls over 90 days with a small group of 10-15 doctors all running screenings. You bring your results, get feedback, troubleshoot what didn't work, and plan your next event. Plus a private group chat between calls for quick questions and sharing wins." },
               { q: "When is the next weekend?", a: "May 22-24, 2026. Friday evening 6-8:30 PM, Saturday 9 AM-3 PM, Sunday 9 AM-12:30 PM. All times EST. Seats are limited to 15 — reserve yours now." },
             ].map((faq, i) => (
               <details key={i} className="group bg-white rounded-xl border border-gray-100">
@@ -712,7 +714,7 @@ function WeekendContent() {
           <button onClick={scrollToPricing} className="px-10 py-4 bg-neuro-orange text-white font-bold rounded-xl text-lg hover:bg-neuro-orange/90 transition-all active:scale-[0.98] inline-flex items-center gap-2">
             Reserve Your Seat <ArrowRight className="w-5 h-5" />
           </button>
-          <p className="text-sm text-gray-500 mt-4">May 22-24, 2026. Limited to 15 seats. Payment plans available.</p>
+          <p className="text-sm text-gray-500 mt-4">May 22-24, 2026. Founding cohort — 15 seats. Payment plans available.</p>
         </div>
       </section>
 

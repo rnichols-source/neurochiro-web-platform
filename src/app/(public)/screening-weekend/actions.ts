@@ -14,13 +14,13 @@ export async function createWeekendCheckout(
   const baseTier = tier.replace("-plan", "") as "intensive" | "vip";
 
   const tiers = {
-    intensive: { price: 199700, label: "Screening Mastery Weekend Intensive" },
-    vip: { price: 499700, label: "Screening Mastery Weekend — VIP + 90-Day Coaching" },
+    intensive: { price: 75000, label: "The Screening Intensive" },
+    vip: { price: 175000, label: "The Screening Accelerator + Command Center" },
   };
 
   const planPrices = {
-    intensive: 109900, // $1,099 x 2
-    vip: 259900, // $2,599 x 2
+    intensive: 30000, // $300 x 3 = $900
+    vip: 63400, // $634 x 3 = $1,902 (~$150 more than PIF)
   };
 
   const selected = tiers[baseTier];
@@ -45,7 +45,7 @@ export async function createWeekendCheckout(
           metadata: {
             type: "weekend_intensive",
             tier: baseTier,
-            paymentPlan: "2-month",
+            paymentPlan: "3-month",
             attendeeName: name,
           },
         },
