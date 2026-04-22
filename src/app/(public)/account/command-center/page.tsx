@@ -21,6 +21,12 @@ import {
   MapPin,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
+import {
+  getEvents, upsertEvent, deleteEvent as deleteEventAction,
+  getContacts, upsertContact, deleteContact as deleteContactAction,
+  getVendors as getVendorsList, upsertVendor, deleteVendor as deleteVendorAction,
+  getOutreach, upsertOutreach, deleteOutreach as deleteOutreachAction,
+} from "./actions";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -228,10 +234,13 @@ export default function CommandCenterPage() {
   }, []);
 
   // -------------------------------------------------------------------------
-  // Load / save localStorage
+  // Load from Supabase (with localStorage cache for speed)
   // -------------------------------------------------------------------------
 
   useEffect(() => {
+    if (authorized !== true) return;
+
+    // Load from localStorage cache first (instant)
     try {
       const raw = localStorage.getItem(LS_KEY);
       if (raw) {
@@ -244,17 +253,48 @@ export default function CommandCenterPage() {
         });
       }
     } catch { /* empty */ }
-    setLoaded(true);
-  }, []);
 
+    // Then load from Supabase (authoritative)
+    Promise.all([getEvents(), getContacts(), getVendorsList(), getOutreach()])
+      .then(([events, contacts, vendors, outreach]) => {
+        const freshData = {
+          events: (events || []).map((e: any) => ({
+            id: e.id, name: e.name, date: e.date || "", venue: e.venue || "",
+            type: e.type || "other", status: e.status || "planned",
+            screened: e.screened || 0, signedUp: e.signed_up || 0,
+            showed: e.showed || 0, revenue: e.revenue || 0, notes: e.notes || "",
+          })),
+          contacts: (contacts || []).map((c: any) => ({
+            id: c.id, name: c.name, business: c.business || "",
+            phone: c.phone || "", email: c.email || "",
+            type: c.type || "other", status: c.status || "new",
+            followUpDate: c.follow_up_date || "", notes: c.notes || "",
+          })),
+          vendors: (vendors || []).map((v: any) => ({
+            id: v.id, company: v.company, contact: v.contact || "",
+            phone: v.phone || "", email: v.email || "",
+            service: v.service || "", referralsSent: v.referrals_sent || 0,
+            referralsReceived: v.referrals_received || 0,
+            status: v.status || "new", notes: v.notes || "",
+          })),
+          outreach: (outreach || []).map((o: any) => ({
+            id: o.id, name: o.name, type: o.type || "other",
+            date: o.date || "", status: o.status || "to-contact",
+            contactInfo: o.contact_info || "", notes: o.notes || "",
+          })),
+        };
+        setData(freshData);
+        try { localStorage.setItem(LS_KEY, JSON.stringify(freshData)); } catch {}
+      })
+      .catch(() => {})
+      .finally(() => setLoaded(true));
+  }, [authorized]);
+
+  // Save to both Supabase and localStorage
   const scheduleSave = useCallback((newData: CommandCenterData) => {
     setData(newData);
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      try {
-        localStorage.setItem(LS_KEY, JSON.stringify(newData));
-      } catch { /* empty */ }
-    }, 500);
+    // Cache locally immediately
+    try { localStorage.setItem(LS_KEY, JSON.stringify(newData)); } catch {}
   }, []);
 
   // -------------------------------------------------------------------------
@@ -262,51 +302,78 @@ export default function CommandCenterPage() {
   // -------------------------------------------------------------------------
 
   const updateEvent = useCallback((id: string, patch: Partial<EventItem>) => {
-    scheduleSave({
-      ...dataRef.current,
-      events: dataRef.current.events.map((e) => (e.id === id ? { ...e, ...patch } : e)),
-    });
+    const updated = dataRef.current.events.map((e) => (e.id === id ? { ...e, ...patch } : e));
+    scheduleSave({ ...dataRef.current, events: updated });
+    const ev = updated.find((e) => e.id === id);
+    if (ev) {
+      upsertEvent({
+        id: ev.id, name: ev.name, date: ev.date || null, venue: ev.venue,
+        type: ev.type, status: ev.status, screened: ev.screened,
+        signed_up: ev.signedUp, showed: ev.showed, revenue: ev.revenue, notes: ev.notes,
+      }).catch(() => {});
+    }
   }, [scheduleSave]);
 
   const deleteEvent = useCallback((id: string) => {
     if (!confirm("Delete this event?")) return;
     scheduleSave({ ...dataRef.current, events: dataRef.current.events.filter((e) => e.id !== id) });
+    deleteEventAction(id).catch(() => {});
   }, [scheduleSave]);
 
   const updateContact = useCallback((id: string, patch: Partial<ContactItem>) => {
-    scheduleSave({
-      ...dataRef.current,
-      contacts: dataRef.current.contacts.map((c) => (c.id === id ? { ...c, ...patch } : c)),
-    });
+    const updated = dataRef.current.contacts.map((c) => (c.id === id ? { ...c, ...patch } : c));
+    scheduleSave({ ...dataRef.current, contacts: updated });
+    const ct = updated.find((c) => c.id === id);
+    if (ct) {
+      upsertContact({
+        id: ct.id, name: ct.name, business: ct.business, phone: ct.phone,
+        email: ct.email, type: ct.type, status: ct.status,
+        follow_up_date: ct.followUpDate || null, notes: ct.notes,
+      }).catch(() => {});
+    }
   }, [scheduleSave]);
 
   const deleteContact = useCallback((id: string) => {
     if (!confirm("Delete this contact?")) return;
     scheduleSave({ ...dataRef.current, contacts: dataRef.current.contacts.filter((c) => c.id !== id) });
+    deleteContactAction(id).catch(() => {});
   }, [scheduleSave]);
 
   const updateVendor = useCallback((id: string, patch: Partial<VendorItem>) => {
-    scheduleSave({
-      ...dataRef.current,
-      vendors: dataRef.current.vendors.map((v) => (v.id === id ? { ...v, ...patch } : v)),
-    });
+    const updated = dataRef.current.vendors.map((v) => (v.id === id ? { ...v, ...patch } : v));
+    scheduleSave({ ...dataRef.current, vendors: updated });
+    const vn = updated.find((v) => v.id === id);
+    if (vn) {
+      upsertVendor({
+        id: vn.id, company: vn.company, contact: vn.contact, phone: vn.phone,
+        email: vn.email, service: vn.service, referrals_sent: vn.referralsSent,
+        referrals_received: vn.referralsReceived, status: vn.status, notes: vn.notes,
+      }).catch(() => {});
+    }
   }, [scheduleSave]);
 
   const deleteVendor = useCallback((id: string) => {
     if (!confirm("Delete this vendor?")) return;
     scheduleSave({ ...dataRef.current, vendors: dataRef.current.vendors.filter((v) => v.id !== id) });
+    deleteVendorAction(id).catch(() => {});
   }, [scheduleSave]);
 
   const updateOutreach = useCallback((id: string, patch: Partial<OutreachItem>) => {
-    scheduleSave({
-      ...dataRef.current,
-      outreach: dataRef.current.outreach.map((o) => (o.id === id ? { ...o, ...patch } : o)),
-    });
+    const updated = dataRef.current.outreach.map((o) => (o.id === id ? { ...o, ...patch } : o));
+    scheduleSave({ ...dataRef.current, outreach: updated });
+    const ou = updated.find((o) => o.id === id);
+    if (ou) {
+      upsertOutreach({
+        id: ou.id, name: ou.name, type: ou.type, date: ou.date || null,
+        status: ou.status, contact_info: ou.contactInfo, notes: ou.notes,
+      }).catch(() => {});
+    }
   }, [scheduleSave]);
 
   const deleteOutreach = useCallback((id: string) => {
     if (!confirm("Delete this opportunity?")) return;
     scheduleSave({ ...dataRef.current, outreach: dataRef.current.outreach.filter((o) => o.id !== id) });
+    deleteOutreachAction(id).catch(() => {});
   }, [scheduleSave]);
 
   const toggleNotes = useCallback((id: string) => {
@@ -403,6 +470,11 @@ export default function CommandCenterPage() {
         status: "planned", screened: 0, signedUp: 0, showed: 0, revenue: 0, notes: "",
       };
       scheduleSave({ ...dataRef.current, events: [...dataRef.current.events, newEvent] });
+      upsertEvent({
+        id: newEvent.id, name: newEvent.name, date: newEvent.date || null,
+        venue: newEvent.venue, type: newEvent.type, status: newEvent.status,
+        screened: 0, signed_up: 0, showed: 0, revenue: 0, notes: "",
+      }).catch(() => {});
       setShowEventForm(false);
     };
 
@@ -572,6 +644,11 @@ export default function CommandCenterPage() {
         notes: ((fd.get("notes") as string) || "").trim(),
       };
       scheduleSave({ ...dataRef.current, contacts: [...dataRef.current.contacts, newContact] });
+      upsertContact({
+        id: newContact.id, name: newContact.name, business: newContact.business,
+        phone: newContact.phone, email: newContact.email, type: newContact.type,
+        status: newContact.status, follow_up_date: null, notes: newContact.notes,
+      }).catch(() => {});
       setShowContactForm(false);
     };
 
@@ -734,6 +811,11 @@ export default function CommandCenterPage() {
         notes: ((fd.get("notes") as string) || "").trim(),
       };
       scheduleSave({ ...dataRef.current, vendors: [...dataRef.current.vendors, newVendor] });
+      upsertVendor({
+        id: newVendor.id, company: newVendor.company, contact: newVendor.contact,
+        phone: newVendor.phone, email: newVendor.email, service: newVendor.service,
+        referrals_sent: 0, referrals_received: 0, status: newVendor.status, notes: newVendor.notes,
+      }).catch(() => {});
       setShowVendorForm(false);
     };
 
@@ -901,6 +983,11 @@ export default function CommandCenterPage() {
         notes: ((fd.get("notes") as string) || "").trim(),
       };
       scheduleSave({ ...dataRef.current, outreach: [...dataRef.current.outreach, newOpp] });
+      upsertOutreach({
+        id: newOpp.id, name: newOpp.name, type: newOpp.type,
+        date: newOpp.date || null, status: newOpp.status,
+        contact_info: newOpp.contactInfo, notes: newOpp.notes,
+      }).catch(() => {});
       setShowOutreachForm(false);
     };
 
