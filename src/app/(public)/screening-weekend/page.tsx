@@ -115,7 +115,7 @@ function RegistrationForm({
             {submitting ? "Processing..." : paymentPlan ? `Start Plan — ${planPrice} today` : `Reserve My Seat — ${fullPrice}`}
           </button>
           <p className="text-xs text-gray-400 text-center">
-            Secure checkout powered by Stripe. Limited to 15 seats.
+            Secure checkout powered by Stripe. Limited to 40 seats (15 Accelerator spots).
             {paymentPlan && " 2 monthly payments."}
           </p>
         </form>
@@ -430,7 +430,7 @@ function WeekendContent() {
               <div className="text-xs text-gray-500 uppercase tracking-wider mt-1">Days</div>
             </div>
             <div>
-              <div className="text-3xl font-black text-white">15</div>
+              <div className="text-3xl font-black text-white">40</div>
               <div className="text-xs text-gray-500 uppercase tracking-wider mt-1">Max Seats</div>
             </div>
             <div>
@@ -607,7 +607,7 @@ function WeekendContent() {
               "The Screening Event Mastery Kit ($149 value)",
               "The Screening Command Center with 25-50 events pre-loaded in YOUR area",
               "Follow-up text sequences loaded on your phone",
-              "A network of 15 doctors doing the same thing",
+              "A network of 40 doctors doing the same thing",
               "Your accountability partner for 30 days",
               "30 days of group chat access with Dr. Ray",
               "Lifetime access to all session recordings",
@@ -655,7 +655,7 @@ function WeekendContent() {
 
             {/* VIP */}
             <div className="bg-white rounded-2xl border-2 border-neuro-orange p-8 flex flex-col relative shadow-lg ring-1 ring-neuro-orange/20">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-neuro-orange text-white text-xs font-black uppercase tracking-widest rounded-full">Most Popular</div>
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-neuro-orange text-white text-xs font-black uppercase tracking-widest rounded-full">Only 15 Spots</div>
               <h3 className="text-xl font-black text-neuro-navy mb-1">The Screening Accelerator</h3>
               <p className="text-sm text-gray-500 mb-4">Learn it + Build it + Get coached through it</p>
               <div className="mb-1"><span className="text-4xl font-black text-neuro-navy">$1,750</span></div>
@@ -714,7 +714,7 @@ function WeekendContent() {
           <button onClick={scrollToPricing} className="px-10 py-4 bg-neuro-orange text-white font-bold rounded-xl text-lg hover:bg-neuro-orange/90 transition-all active:scale-[0.98] inline-flex items-center gap-2">
             Reserve Your Seat <ArrowRight className="w-5 h-5" />
           </button>
-          <p className="text-sm text-gray-500 mt-4">May 22-24, 2026. Founding cohort — 15 seats. Payment plans available.</p>
+          <p className="text-sm text-gray-500 mt-4">May 22-24, 2026. Founding cohort — 40 seats (only 15 Accelerator spots). Payment plans available.</p>
         </div>
       </section>
 
