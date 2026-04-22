@@ -28,6 +28,7 @@ import {
   BarChart3,
   Star,
   Filter,
+  ArrowRight,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import {
@@ -41,6 +42,17 @@ import {
 // Types
 // ---------------------------------------------------------------------------
 
+interface EventPatient {
+  name: string;
+  showed: boolean;
+  signedCare: boolean;
+  carePlanAmount: number;
+  referred: boolean;
+  referralName: string;
+  referralSignedCare: boolean;
+  referralCarePlanAmount: number;
+}
+
 interface EventItem {
   id: string;
   name: string;
@@ -48,10 +60,17 @@ interface EventItem {
   venue: string;
   type: string;
   status: string;
+  estimatedAttendance: number;
   screened: number;
-  signedUp: number;
-  showed: number;
+  bookedPaid: number;
+  showedForVisit: number;
+  signedCare: number;
+  referralsFromEvent: number;
+  investment: number;
   revenue: number;
+  networkContactsMet: number;
+  newEventsDiscovered: number;
+  patients: EventPatient[];
   notes: string;
 }
 
@@ -397,12 +416,25 @@ export default function CommandCenterPage() {
     Promise.all([getEvents(), getContacts(), getVendorsList(), getOutreach()])
       .then(([events, contacts, vendors, outreach]) => {
         const freshData = {
-          events: (events || []).map((e: any) => ({
-            id: e.id, name: e.name, date: e.date || "", venue: e.venue || "",
-            type: e.type || "other", status: e.status || "planned",
-            screened: e.screened || 0, signedUp: e.signed_up || 0,
-            showed: e.showed || 0, revenue: e.revenue || 0, notes: e.notes || "",
-          })),
+          events: (events || []).map((e: any) => {
+            let patients: EventPatient[] = [];
+            try {
+              const raw = e.patients_data;
+              if (raw) patients = typeof raw === "string" ? JSON.parse(raw) : raw;
+            } catch { /* ignore */ }
+            return {
+              id: e.id, name: e.name, date: e.date || "", venue: e.venue || "",
+              type: e.type || "other", status: e.status || "planned",
+              estimatedAttendance: e.estimated_attendance || 0,
+              screened: e.screened || 0, bookedPaid: e.booked_paid || 0,
+              showedForVisit: e.showed_for_visit || 0, signedCare: e.signed_care || 0,
+              referralsFromEvent: e.referrals_from_event || 0,
+              investment: e.investment || 0, revenue: e.revenue || 0,
+              networkContactsMet: e.network_contacts_met || 0,
+              newEventsDiscovered: e.new_events_discovered || 0,
+              patients, notes: e.notes || "",
+            };
+          }),
           contacts: (contacts || []).map((c: any) => ({
             id: c.id, name: c.name, business: c.business || "",
             phone: c.phone || "", email: c.email || "",
@@ -446,8 +478,12 @@ export default function CommandCenterPage() {
     if (ev) {
       upsertEvent({
         id: ev.id, name: ev.name, date: ev.date || null, venue: ev.venue,
-        type: ev.type, status: ev.status, screened: ev.screened,
-        signed_up: ev.signedUp, showed: ev.showed, revenue: ev.revenue, notes: ev.notes,
+        type: ev.type, status: ev.status, estimated_attendance: ev.estimatedAttendance,
+        screened: ev.screened, booked_paid: ev.bookedPaid, showed_for_visit: ev.showedForVisit,
+        signed_care: ev.signedCare, referrals_from_event: ev.referralsFromEvent,
+        investment: ev.investment, revenue: ev.revenue,
+        network_contacts_met: ev.networkContactsMet, new_events_discovered: ev.newEventsDiscovered,
+        patients_data: JSON.stringify(ev.patients), notes: ev.notes,
       }).catch(() => {});
     }
   }, [scheduleSave]);
@@ -467,13 +503,18 @@ export default function CommandCenterPage() {
     if (!name.trim()) return;
     const newEvent: EventItem = {
       id: genId(), name: name.trim(), date, venue: venue.trim(), type,
-      status: "planned", screened: 0, signedUp: 0, showed: 0, revenue: 0, notes: notes.trim(),
+      status: "planned", estimatedAttendance: 0, screened: 0, bookedPaid: 0,
+      showedForVisit: 0, signedCare: 0, referralsFromEvent: 0,
+      investment: 0, revenue: 0, networkContactsMet: 0, newEventsDiscovered: 0,
+      patients: [], notes: notes.trim(),
     };
     scheduleSave({ ...dataRef.current, events: [...dataRef.current.events, newEvent] });
     upsertEvent({
       id: newEvent.id, name: newEvent.name, date: newEvent.date || null,
       venue: newEvent.venue, type: newEvent.type, status: newEvent.status,
-      screened: 0, signed_up: 0, showed: 0, revenue: 0, notes: newEvent.notes,
+      estimated_attendance: 0, screened: 0, booked_paid: 0, showed_for_visit: 0,
+      signed_care: 0, referrals_from_event: 0, investment: 0, revenue: 0,
+      network_contacts_met: 0, new_events_discovered: 0, patients_data: "[]", notes: newEvent.notes,
     }).catch(() => {});
     setShowEventForm(false);
   }, [scheduleSave]);
@@ -634,7 +675,9 @@ export default function CommandCenterPage() {
     .filter((e) => e.date && e.date >= today)
     .sort((a, b) => a.date.localeCompare(b.date));
   const totalScreened = data.events.reduce((s, e) => s + e.screened, 0);
-  const totalBooked = data.events.reduce((s, e) => s + e.showed, 0);
+  const totalBooked = data.events.reduce((s, e) => s + e.bookedPaid, 0);
+  const totalSignedCare = data.events.reduce((s, e) => s + e.signedCare, 0);
+  const totalRevenueDash = data.events.reduce((s, e) => s + e.revenue, 0);
 
   const avgRevenue = completedEvents.length > 0
     ? completedEvents.reduce((s, e) => s + e.revenue, 0) / completedEvents.length
@@ -753,17 +796,13 @@ export default function CommandCenterPage() {
     return (
       <div>
         {/* Stat cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
           <StatCard label="Total Events" value={data.events.length} icon={<Calendar className="w-4 h-4 text-[#1a2744]" />} />
           <StatCard label="Upcoming" value={upcomingEvents.length} color="text-blue-600" icon={<Clock className="w-4 h-4 text-blue-600" />} />
           <StatCard label="Total Screened" value={totalScreened} color="text-[#e97325]" icon={<Users className="w-4 h-4 text-[#e97325]" />} />
           <StatCard label="Total Booked" value={totalBooked} color="text-green-600" icon={<TrendingUp className="w-4 h-4 text-green-600" />} />
-          <StatCard
-            label="Avg ROI Grade"
-            value={completedEvents.length > 0 ? avgRoiGrade : "--"}
-            color={avgRoiGrade === "A" ? "text-green-600" : avgRoiGrade === "B" ? "text-blue-600" : avgRoiGrade === "C" ? "text-[#e97325]" : "text-red-500"}
-            icon={<BarChart3 className="w-4 h-4 text-gray-400" />}
-          />
+          <StatCard label="Started Care" value={totalSignedCare} color="text-purple-600" icon={<Check className="w-4 h-4 text-purple-600" />} />
+          <StatCard label="Total Revenue" value={`$${totalRevenueDash.toLocaleString()}`} color="text-green-600" icon={<DollarSign className="w-4 h-4 text-green-600" />} />
         </div>
 
         {/* Two column layout */}
@@ -880,6 +919,202 @@ export default function CommandCenterPage() {
 
     const isMetricsVisible = (status: string) => status === "completed" || status === "followed-up";
 
+    const convRate = (a: number, b: number) => (a > 0 ? `${Math.round((b / a) * 100)}%` : "—");
+
+    // Helper: recalculate derived fields from patients array
+    const syncFromPatients = (evId: string, patients: EventPatient[]) => {
+      const showedForVisit = patients.filter((p) => p.showed).length;
+      const signedCare = patients.filter((p) => p.signedCare).length;
+      const referralsFromEvent = patients.filter((p) => p.referred).length;
+      const revenue = patients.reduce((s, p) => s + (p.carePlanAmount || 0) + (p.referralCarePlanAmount || 0), 0);
+      updateEvent(evId, { patients, showedForVisit, signedCare, referralsFromEvent, revenue });
+    };
+
+    const addPatient = (evId: string, currentPatients: EventPatient[]) => {
+      const newPatient: EventPatient = {
+        name: "", showed: false, signedCare: false, carePlanAmount: 0,
+        referred: false, referralName: "", referralSignedCare: false, referralCarePlanAmount: 0,
+      };
+      syncFromPatients(evId, [...currentPatients, newPatient]);
+    };
+
+    const updatePatient = (evId: string, patients: EventPatient[], idx: number, patch: Partial<EventPatient>) => {
+      const updated = patients.map((p, i) => (i === idx ? { ...p, ...patch } : p));
+      syncFromPatients(evId, updated);
+    };
+
+    const removePatient = (evId: string, patients: EventPatient[], idx: number) => {
+      syncFromPatients(evId, patients.filter((_, i) => i !== idx));
+    };
+
+    // Expanded results panel for a single event
+    const EventResultsPanel = ({ ev }: { ev: EventItem }) => {
+      const roi = ev.investment > 0 ? (ev.revenue / ev.investment) : 0;
+      return (
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mt-3 space-y-5">
+          {/* Conversion Funnel */}
+          <div>
+            <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Conversion Funnel</h5>
+            <div className="flex flex-wrap items-end gap-1">
+              {[
+                { label: "Est. Attendance", value: ev.estimatedAttendance, field: "estimatedAttendance" as const },
+                { label: "Screened", value: ev.screened, field: "screened" as const },
+                { label: "Booked & Paid", value: ev.bookedPaid, field: "bookedPaid" as const },
+                { label: "Showed", value: ev.showedForVisit, field: null },
+                { label: "Signed Care", value: ev.signedCare, field: null },
+                { label: "Referrals", value: ev.referralsFromEvent, field: null },
+              ].map((step, idx, arr) => (
+                <div key={step.label} className="flex items-end gap-1">
+                  <div className="text-center">
+                    <label className="text-[10px] font-bold text-gray-400 block mb-1 whitespace-nowrap">{step.label}</label>
+                    {step.field ? (
+                      <input
+                        type="number" min={0} value={step.value}
+                        onChange={(e) => updateEvent(ev.id, { [step.field!]: parseInt(e.target.value) || 0 })}
+                        className="w-16 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-sm font-bold text-center focus:outline-none focus:border-[#e97325]"
+                      />
+                    ) : (
+                      <div className="w-16 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-sm font-bold text-center text-gray-700">
+                        {step.value}
+                      </div>
+                    )}
+                  </div>
+                  {idx < arr.length - 1 && (
+                    <div className="flex flex-col items-center pb-1 px-0.5">
+                      <span className="text-[9px] font-bold text-[#e97325] whitespace-nowrap mb-0.5">
+                        {convRate(arr[idx].value, arr[idx + 1].value)}
+                      </span>
+                      <ArrowRight className="w-3 h-3 text-gray-300" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Investment & Revenue + Networking */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Investment & Revenue</h5>
+              <div className="flex flex-wrap items-center gap-3">
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 block mb-1">Investment $</label>
+                  <input type="number" min={0} value={ev.investment}
+                    onChange={(e) => updateEvent(ev.id, { investment: parseInt(e.target.value) || 0 })}
+                    className="w-24 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-sm font-bold text-center focus:outline-none focus:border-[#e97325]" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 block mb-1">Revenue</label>
+                  <div className="w-24 px-2 py-1.5 bg-green-50 border border-green-200 rounded-lg text-sm font-bold text-center text-green-700">
+                    ${ev.revenue.toLocaleString()}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 block mb-1">ROI</label>
+                  <div className="w-20 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-sm font-bold text-center">
+                    {ev.investment > 0 ? `${Math.round(roi)}x` : "—"}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Networking from This Event</h5>
+              <div className="flex flex-wrap items-center gap-3">
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 block mb-1">Contacts Met</label>
+                  <input type="number" min={0} value={ev.networkContactsMet}
+                    onChange={(e) => updateEvent(ev.id, { networkContactsMet: parseInt(e.target.value) || 0 })}
+                    className="w-20 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-sm font-bold text-center focus:outline-none focus:border-[#e97325]" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 block mb-1">Events Found</label>
+                  <input type="number" min={0} value={ev.newEventsDiscovered}
+                    onChange={(e) => updateEvent(ev.id, { newEventsDiscovered: parseInt(e.target.value) || 0 })}
+                    className="w-20 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-sm font-bold text-center focus:outline-none focus:border-[#e97325]" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Patient Tracker */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Patient Tracker</h5>
+              <button onClick={() => addPatient(ev.id, ev.patients)} className="px-3 py-1 bg-[#e97325] text-white text-[10px] font-bold rounded-lg hover:bg-[#e97325]/90 transition-all inline-flex items-center gap-1">
+                <Plus className="w-3 h-3" /> Add Patient
+              </button>
+            </div>
+            {ev.patients.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left px-2 py-1.5 text-[10px] font-bold text-gray-500 uppercase">Name</th>
+                      <th className="text-center px-2 py-1.5 text-[10px] font-bold text-gray-500 uppercase">Showed</th>
+                      <th className="text-center px-2 py-1.5 text-[10px] font-bold text-gray-500 uppercase">Signed</th>
+                      <th className="text-right px-2 py-1.5 text-[10px] font-bold text-gray-500 uppercase">Care Plan $</th>
+                      <th className="text-center px-2 py-1.5 text-[10px] font-bold text-gray-500 uppercase">Referred?</th>
+                      <th className="text-left px-2 py-1.5 text-[10px] font-bold text-gray-500 uppercase">Referral Name</th>
+                      <th className="text-center px-2 py-1.5 text-[10px] font-bold text-gray-500 uppercase">Ref Signed</th>
+                      <th className="text-right px-2 py-1.5 text-[10px] font-bold text-gray-500 uppercase">Ref Care $</th>
+                      <th className="px-2 py-1.5"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ev.patients.map((p, idx) => (
+                      <tr key={idx} className="border-b border-gray-100">
+                        <td className="px-2 py-1.5">
+                          <input value={p.name} onChange={(e) => updatePatient(ev.id, ev.patients, idx, { name: e.target.value })}
+                            placeholder="Patient name" className="w-full min-w-[100px] px-2 py-1 bg-white border border-gray-200 rounded text-xs focus:outline-none focus:border-[#e97325]" />
+                        </td>
+                        <td className="px-2 py-1.5 text-center">
+                          <input type="checkbox" checked={p.showed} onChange={(e) => updatePatient(ev.id, ev.patients, idx, { showed: e.target.checked })} className="accent-[#e97325]" />
+                        </td>
+                        <td className="px-2 py-1.5 text-center">
+                          <input type="checkbox" checked={p.signedCare} onChange={(e) => updatePatient(ev.id, ev.patients, idx, { signedCare: e.target.checked })} className="accent-[#e97325]" />
+                        </td>
+                        <td className="px-2 py-1.5 text-right">
+                          <input type="number" min={0} value={p.carePlanAmount} onChange={(e) => updatePatient(ev.id, ev.patients, idx, { carePlanAmount: parseInt(e.target.value) || 0 })}
+                            className="w-20 px-2 py-1 bg-white border border-gray-200 rounded text-xs font-bold text-right focus:outline-none focus:border-[#e97325]" />
+                        </td>
+                        <td className="px-2 py-1.5 text-center">
+                          <input type="checkbox" checked={p.referred} onChange={(e) => updatePatient(ev.id, ev.patients, idx, { referred: e.target.checked })} className="accent-[#e97325]" />
+                        </td>
+                        <td className="px-2 py-1.5">
+                          <input value={p.referralName} onChange={(e) => updatePatient(ev.id, ev.patients, idx, { referralName: e.target.value })}
+                            placeholder="Referral" className="w-full min-w-[80px] px-2 py-1 bg-white border border-gray-200 rounded text-xs focus:outline-none focus:border-[#e97325]" />
+                        </td>
+                        <td className="px-2 py-1.5 text-center">
+                          <input type="checkbox" checked={p.referralSignedCare} onChange={(e) => updatePatient(ev.id, ev.patients, idx, { referralSignedCare: e.target.checked })} className="accent-[#e97325]" />
+                        </td>
+                        <td className="px-2 py-1.5 text-right">
+                          <input type="number" min={0} value={p.referralCarePlanAmount} onChange={(e) => updatePatient(ev.id, ev.patients, idx, { referralCarePlanAmount: parseInt(e.target.value) || 0 })}
+                            className="w-20 px-2 py-1 bg-white border border-gray-200 rounded text-xs font-bold text-right focus:outline-none focus:border-[#e97325]" />
+                        </td>
+                        <td className="px-2 py-1.5">
+                          <button onClick={() => removePatient(ev.id, ev.patients, idx)} className="text-gray-300 hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {ev.patients.length === 0 && (
+              <p className="text-xs text-gray-400 text-center py-3">No patients tracked yet. Click &quot;Add Patient&quot; to start.</p>
+            )}
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="text-[10px] font-bold text-gray-400 uppercase block mb-1">Notes</label>
+            <textarea value={ev.notes} onChange={(e) => updateEvent(ev.id, { notes: e.target.value })} placeholder="Add notes..."
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#e97325] resize-y min-h-[60px]" />
+          </div>
+        </div>
+      );
+    };
+
     return (
       <div>
         {/* Header */}
@@ -952,29 +1187,17 @@ export default function CommandCenterPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         {isMetricsVisible(ev.status) ? (
-                          <input
-                            type="number" min={0} value={ev.screened}
-                            onChange={(e) => updateEvent(ev.id, { screened: parseInt(e.target.value) || 0 })}
-                            className="w-16 px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-center focus:outline-none focus:border-[#e97325]"
-                          />
+                          <span className="font-bold">{ev.screened}</span>
                         ) : <span className="text-gray-300">—</span>}
                       </td>
                       <td className="px-4 py-3 text-right">
                         {isMetricsVisible(ev.status) ? (
-                          <input
-                            type="number" min={0} value={ev.showed}
-                            onChange={(e) => updateEvent(ev.id, { showed: parseInt(e.target.value) || 0 })}
-                            className="w-16 px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-center focus:outline-none focus:border-[#e97325]"
-                          />
+                          <span className="font-bold">{ev.bookedPaid}</span>
                         ) : <span className="text-gray-300">—</span>}
                       </td>
                       <td className="px-4 py-3 text-right">
                         {isMetricsVisible(ev.status) ? (
-                          <input
-                            type="number" min={0} value={ev.revenue}
-                            onChange={(e) => updateEvent(ev.id, { revenue: parseInt(e.target.value) || 0 })}
-                            className="w-20 px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-center focus:outline-none focus:border-[#e97325]"
-                          />
+                          <span className="font-bold text-green-600">${ev.revenue.toLocaleString()}</span>
                         ) : <span className="text-gray-300">—</span>}
                       </td>
                       <td className="px-4 py-3 text-center">
@@ -982,9 +1205,9 @@ export default function CommandCenterPage() {
                           <button
                             onClick={() => setEditingEventId(editingEventId === ev.id ? null : ev.id)}
                             className="text-gray-400 hover:text-[#e97325] transition-colors"
-                            title="Edit"
+                            title={isMetricsVisible(ev.status) ? "Event Results" : "Edit"}
                           >
-                            <Edit3 className="w-4 h-4" />
+                            {isMetricsVisible(ev.status) ? <BarChart3 className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
                           </button>
                           <button onClick={() => deleteEvent(ev.id)} className="text-gray-300 hover:text-red-400 transition-colors" title="Delete">
                             <Trash2 className="w-4 h-4" />
@@ -1021,46 +1244,57 @@ export default function CommandCenterPage() {
                 </div>
                 {isMetricsVisible(ev.status) && (
                   <div className="grid grid-cols-3 gap-2 mt-3">
-                    <div>
+                    <div className="text-center">
                       <label className="text-[10px] font-bold text-gray-400 uppercase block mb-1">Screened</label>
-                      <input type="number" min={0} value={ev.screened} onChange={(e) => updateEvent(ev.id, { screened: parseInt(e.target.value) || 0 })}
-                        className="w-full px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-center focus:outline-none focus:border-[#e97325]" />
+                      <span className="text-sm font-bold">{ev.screened}</span>
                     </div>
-                    <div>
+                    <div className="text-center">
                       <label className="text-[10px] font-bold text-gray-400 uppercase block mb-1">Booked</label>
-                      <input type="number" min={0} value={ev.showed} onChange={(e) => updateEvent(ev.id, { showed: parseInt(e.target.value) || 0 })}
-                        className="w-full px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-center focus:outline-none focus:border-[#e97325]" />
+                      <span className="text-sm font-bold">{ev.bookedPaid}</span>
                     </div>
-                    <div>
+                    <div className="text-center">
                       <label className="text-[10px] font-bold text-gray-400 uppercase block mb-1">Revenue</label>
-                      <input type="number" min={0} value={ev.revenue} onChange={(e) => updateEvent(ev.id, { revenue: parseInt(e.target.value) || 0 })}
-                        className="w-full px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-center focus:outline-none focus:border-[#e97325]" />
+                      <span className="text-sm font-bold text-green-600">${ev.revenue.toLocaleString()}</span>
                     </div>
                   </div>
                 )}
                 <div className="flex items-center gap-2 mt-2">
-                  <button onClick={() => toggleNotes(ev.id)} className="text-xs text-gray-400 hover:text-gray-600 font-bold flex items-center gap-1">
-                    {expandedNotes.has(ev.id) ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />} Notes
-                  </button>
+                  {isMetricsVisible(ev.status) && (
+                    <button onClick={() => setEditingEventId(editingEventId === ev.id ? null : ev.id)} className="text-xs text-[#e97325] hover:text-[#e97325]/80 font-bold flex items-center gap-1">
+                      <BarChart3 className="w-3 h-3" /> {editingEventId === ev.id ? "Hide Results" : "Event Results"}
+                    </button>
+                  )}
+                  {!isMetricsVisible(ev.status) && (
+                    <button onClick={() => toggleNotes(ev.id)} className="text-xs text-gray-400 hover:text-gray-600 font-bold flex items-center gap-1">
+                      {expandedNotes.has(ev.id) ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />} Notes
+                    </button>
+                  )}
                   <button onClick={() => deleteEvent(ev.id)} className="ml-auto text-gray-300 hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
                 </div>
-                {expandedNotes.has(ev.id) && (
+                {expandedNotes.has(ev.id) && !isMetricsVisible(ev.status) && (
                   <textarea value={ev.notes} onChange={(e) => updateEvent(ev.id, { notes: e.target.value })} placeholder="Add notes..."
                     className="mt-2 w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#e97325] resize-y min-h-[60px]" />
+                )}
+                {editingEventId === ev.id && isMetricsVisible(ev.status) && (
+                  <EventResultsPanel ev={ev} />
                 )}
               </div>
             ))}
           </div>
         )}
 
-        {/* Inline edit row (desktop) */}
-        {editingEventId && (
-          <div className="hidden md:block mt-4 bg-white rounded-2xl border border-[#e97325]/30 shadow-sm p-5">
-            <h4 className="text-sm font-bold text-[#1a2744] mb-3">Edit Event</h4>
-            {(() => {
-              const ev = data.events.find((e) => e.id === editingEventId);
-              if (!ev) return null;
-              return (
+        {/* Expanded results / edit panel (desktop) */}
+        {editingEventId && (() => {
+          const ev = data.events.find((e) => e.id === editingEventId);
+          if (!ev) return null;
+          const showResults = isMetricsVisible(ev.status);
+          return (
+            <div className="hidden md:block mt-4 bg-white rounded-2xl border border-[#e97325]/30 shadow-sm p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-bold text-[#1a2744]">{showResults ? "Event Results" : "Edit Event"} — {ev.name}</h4>
+                <button onClick={() => setEditingEventId(null)} className={btnSecondary}>Close</button>
+              </div>
+              {!showResults ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <input value={ev.name} onChange={(e) => updateEvent(ev.id, { name: e.target.value })} placeholder="Event name" className={inputCls} />
                   <input type="date" value={ev.date} onChange={(e) => updateEvent(ev.id, { date: e.target.value })} className={inputCls} />
@@ -1069,12 +1303,13 @@ export default function CommandCenterPage() {
                     {EVENT_TYPES.map((t) => <option key={t} value={t.toLowerCase()}>{t}</option>)}
                   </select>
                   <textarea value={ev.notes} onChange={(e) => updateEvent(ev.id, { notes: e.target.value })} placeholder="Notes" className={`${inputCls} md:col-span-2`} />
-                  <button onClick={() => setEditingEventId(null)} className={btnSecondary}>Done</button>
                 </div>
-              );
-            })()}
-          </div>
-        )}
+              ) : (
+                <EventResultsPanel ev={ev} />
+              )}
+            </div>
+          );
+        })()}
       </div>
     );
   };
@@ -1507,8 +1742,10 @@ export default function CommandCenterPage() {
   const RoiTab = () => {
     const completed = completedEvents;
     const totalRevenue = completed.reduce((s, e) => s + e.revenue, 0);
-    const totalPatients = completed.reduce((s, e) => s + e.showed, 0);
-    const avgCostPerPatient = totalPatients > 0 ? Math.round(totalRevenue / totalPatients) : 0;
+    const totalInvestment = completed.reduce((s, e) => s + e.investment, 0);
+    const totalBookedRoi = completed.reduce((s, e) => s + e.bookedPaid, 0);
+    const totalSignedCareRoi = completed.reduce((s, e) => s + e.signedCare, 0);
+    const avgCostPerPatient = totalBookedRoi > 0 ? Math.round(totalRevenue / totalBookedRoi) : 0;
 
     // Grade helper
     const getGrade = (revenue: number, cost: number) => {
@@ -1523,8 +1760,8 @@ export default function CommandCenterPage() {
     // Avg grade across events
     const avgGradeVal = completed.length > 0
       ? completed.reduce((s, e) => {
-          const cost = 150;
-          const roi = cost > 0 ? e.revenue / cost : 10;
+          const cost = e.investment || 1;
+          const roi = e.revenue / cost;
           return s + roi;
         }, 0) / completed.length
       : 0;
@@ -1533,11 +1770,19 @@ export default function CommandCenterPage() {
     // Best event
     const bestEvent = completed.length > 0
       ? completed.reduce((best, e) => {
-          const bestRoi = best.revenue / 150;
-          const thisRoi = e.revenue / 150;
+          const bestRoi = best.investment > 0 ? best.revenue / best.investment : best.revenue;
+          const thisRoi = e.investment > 0 ? e.revenue / e.investment : e.revenue;
           return thisRoi > bestRoi ? e : best;
         })
       : null;
+
+    // Aggregate funnel
+    const totalAttendance = completed.reduce((s, e) => s + e.estimatedAttendance, 0);
+    const totalScreenedRoi = completed.reduce((s, e) => s + e.screened, 0);
+    const totalShowedRoi = completed.reduce((s, e) => s + e.showedForVisit, 0);
+    const totalReferralsRoi = completed.reduce((s, e) => s + e.referralsFromEvent, 0);
+
+    const convRate = (a: number, b: number) => (a > 0 ? `${Math.round((b / a) * 100)}%` : "—");
 
     if (completed.length === 0) {
       return (
@@ -1554,9 +1799,39 @@ export default function CommandCenterPage() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
           <StatCard label="Events Completed" value={completed.length} icon={<Calendar className="w-4 h-4 text-[#1a2744]" />} />
           <StatCard label="Total Revenue" value={`$${totalRevenue.toLocaleString()}`} color="text-green-600" icon={<DollarSign className="w-4 h-4 text-green-600" />} />
-          <StatCard label="Patients Booked" value={totalPatients} color="text-blue-600" icon={<Users className="w-4 h-4 text-blue-600" />} />
+          <StatCard label="Total Investment" value={`$${totalInvestment.toLocaleString()}`} color="text-gray-600" icon={<DollarSign className="w-4 h-4 text-gray-500" />} />
           <StatCard label="Avg $/Patient" value={`$${avgCostPerPatient}`} color="text-[#e97325]" icon={<TrendingUp className="w-4 h-4 text-[#e97325]" />} />
           <StatCard label="Avg ROI Grade" value={avgGrade} color={avgGrade === "A" ? "text-green-600" : avgGrade === "B" ? "text-blue-600" : avgGrade === "C" ? "text-[#e97325]" : "text-red-500"} icon={<Star className="w-4 h-4 text-yellow-500" />} />
+        </div>
+
+        {/* Aggregate Funnel */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
+          <h3 className="text-sm font-bold text-[#1a2744] mb-3">Aggregate Funnel (All Completed Events)</h3>
+          <div className="flex flex-wrap items-end gap-2">
+            {[
+              { label: "Attendance", value: totalAttendance },
+              { label: "Screened", value: totalScreenedRoi },
+              { label: "Booked", value: totalBookedRoi },
+              { label: "Showed", value: totalShowedRoi },
+              { label: "Signed Care", value: totalSignedCareRoi },
+              { label: "Referrals", value: totalReferralsRoi },
+            ].map((step, idx, arr) => (
+              <div key={step.label} className="flex items-end gap-1">
+                <div className="text-center">
+                  <label className="text-[10px] font-bold text-gray-400 block mb-1">{step.label}</label>
+                  <div className="w-16 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-center">{step.value}</div>
+                </div>
+                {idx < arr.length - 1 && (
+                  <div className="flex flex-col items-center pb-1 px-0.5">
+                    <span className="text-[9px] font-bold text-[#e97325] whitespace-nowrap mb-0.5">
+                      {convRate(arr[idx].value, arr[idx + 1].value)}
+                    </span>
+                    <ArrowRight className="w-3 h-3 text-gray-300" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* ROI Table */}
@@ -1567,9 +1842,11 @@ export default function CommandCenterPage() {
                 <tr className="bg-gray-50 border-b border-gray-100">
                   <th className="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Event</th>
                   <th className="text-left px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="text-right px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Cost</th>
+                  <th className="text-right px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Investment</th>
                   <th className="text-right px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Screened</th>
                   <th className="text-right px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Booked</th>
+                  <th className="text-right px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Signed</th>
+                  <th className="text-right px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Referrals</th>
                   <th className="text-right px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Revenue</th>
                   <th className="text-right px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">ROI</th>
                   <th className="text-center px-4 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Grade</th>
@@ -1577,16 +1854,18 @@ export default function CommandCenterPage() {
               </thead>
               <tbody>
                 {completed.map((ev) => {
-                  const cost = 150;
+                  const cost = ev.investment;
                   const roi = cost > 0 ? ev.revenue / cost : 0;
                   const grade = getGrade(ev.revenue, cost);
                   return (
                     <tr key={ev.id} className="border-b border-gray-50 hover:bg-gray-50/50">
                       <td className="px-4 py-3 font-bold text-[#1a2744]">{ev.name}</td>
                       <td className="px-4 py-3 text-gray-600 text-xs">{formatDate(ev.date)}</td>
-                      <td className="px-4 py-3 text-right text-gray-600">${cost}</td>
+                      <td className="px-4 py-3 text-right text-gray-600">{cost > 0 ? `$${cost.toLocaleString()}` : "—"}</td>
                       <td className="px-4 py-3 text-right font-bold">{ev.screened}</td>
-                      <td className="px-4 py-3 text-right font-bold">{ev.showed}</td>
+                      <td className="px-4 py-3 text-right font-bold">{ev.bookedPaid}</td>
+                      <td className="px-4 py-3 text-right font-bold">{ev.signedCare}</td>
+                      <td className="px-4 py-3 text-right font-bold">{ev.referralsFromEvent}</td>
                       <td className="px-4 py-3 text-right font-bold text-green-600">${ev.revenue.toLocaleString()}</td>
                       <td className="px-4 py-3 text-right font-bold">{roi > 0 ? `${Math.round(roi)}x` : "—"}</td>
                       <td className="px-4 py-3 text-center">
@@ -1613,9 +1892,10 @@ export default function CommandCenterPage() {
             <div className="flex flex-wrap gap-4 mt-2 text-sm text-white/80">
               <span>{formatDate(bestEvent.date)}</span>
               <span>{bestEvent.screened} screened</span>
-              <span>{bestEvent.showed} booked</span>
+              <span>{bestEvent.bookedPaid} booked</span>
+              <span>{bestEvent.signedCare} signed care</span>
               <span className="font-bold text-green-400">${bestEvent.revenue.toLocaleString()} revenue</span>
-              <span className="font-bold text-yellow-400">{Math.round(bestEvent.revenue / 150)}x ROI</span>
+              <span className="font-bold text-yellow-400">{bestEvent.investment > 0 ? `${Math.round(bestEvent.revenue / bestEvent.investment)}x ROI` : "No cost"}</span>
             </div>
           </div>
         )}
