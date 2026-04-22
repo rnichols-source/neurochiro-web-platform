@@ -471,11 +471,11 @@ export default function CommandCenterPage() {
   // Data updaters
   // -------------------------------------------------------------------------
 
-  const updateEvent = useCallback((id: string, patch: Partial<EventItem>) => {
-    const updated = dataRef.current.events.map((e) => (e.id === id ? { ...e, ...patch } : e));
-    scheduleSave({ ...dataRef.current, events: updated });
-    const ev = updated.find((e) => e.id === id);
-    if (ev) {
+  const dbSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const debouncedUpsertEvent = useCallback((ev: EventItem) => {
+    if (dbSaveTimers.current[ev.id]) clearTimeout(dbSaveTimers.current[ev.id]);
+    dbSaveTimers.current[ev.id] = setTimeout(() => {
       upsertEvent({
         id: ev.id, name: ev.name, date: ev.date || null, venue: ev.venue,
         type: ev.type, status: ev.status, estimated_attendance: ev.estimatedAttendance,
@@ -485,8 +485,15 @@ export default function CommandCenterPage() {
         network_contacts_met: ev.networkContactsMet, new_events_discovered: ev.newEventsDiscovered,
         patients_data: JSON.stringify(ev.patients), notes: ev.notes,
       }).catch(() => {});
-    }
-  }, [scheduleSave]);
+    }, 800);
+  }, []);
+
+  const updateEvent = useCallback((id: string, patch: Partial<EventItem>) => {
+    const updated = dataRef.current.events.map((e) => (e.id === id ? { ...e, ...patch } : e));
+    scheduleSave({ ...dataRef.current, events: updated });
+    const ev = updated.find((e) => e.id === id);
+    if (ev) debouncedUpsertEvent(ev);
+  }, [scheduleSave, debouncedUpsertEvent]);
 
   const deleteEvent = useCallback((id: string) => {
     if (!confirm("Delete this event?")) return;
@@ -524,11 +531,14 @@ export default function CommandCenterPage() {
     scheduleSave({ ...dataRef.current, contacts: updated });
     const ct = updated.find((c) => c.id === id);
     if (ct) {
-      upsertContact({
-        id: ct.id, name: ct.name, business: ct.business, phone: ct.phone,
-        email: ct.email, type: ct.type, status: ct.status,
-        follow_up_date: ct.followUpDate || null, notes: ct.notes,
-      }).catch(() => {});
+      if (dbSaveTimers.current["c-" + id]) clearTimeout(dbSaveTimers.current["c-" + id]);
+      dbSaveTimers.current["c-" + id] = setTimeout(() => {
+        upsertContact({
+          id: ct.id, name: ct.name, business: ct.business, phone: ct.phone,
+          email: ct.email, type: ct.type, status: ct.status,
+          follow_up_date: ct.followUpDate || null, notes: ct.notes,
+        }).catch(() => {});
+      }, 800);
     }
   }, [scheduleSave]);
 
@@ -566,11 +576,14 @@ export default function CommandCenterPage() {
     scheduleSave({ ...dataRef.current, vendors: updated });
     const vn = updated.find((v) => v.id === id);
     if (vn) {
-      upsertVendor({
-        id: vn.id, company: vn.company, contact: vn.contact, phone: vn.phone,
-        email: vn.email, service: vn.service, referrals_sent: vn.referralsSent,
-        referrals_received: vn.referralsReceived, status: vn.status, notes: vn.notes,
-      }).catch(() => {});
+      if (dbSaveTimers.current["v-" + id]) clearTimeout(dbSaveTimers.current["v-" + id]);
+      dbSaveTimers.current["v-" + id] = setTimeout(() => {
+        upsertVendor({
+          id: vn.id, company: vn.company, contact: vn.contact, phone: vn.phone,
+          email: vn.email, service: vn.service, referrals_sent: vn.referralsSent,
+          referrals_received: vn.referralsReceived, status: vn.status, notes: vn.notes,
+        }).catch(() => {});
+      }, 800);
     }
   }, [scheduleSave]);
 
@@ -609,10 +622,13 @@ export default function CommandCenterPage() {
     scheduleSave({ ...dataRef.current, outreach: updated });
     const ou = updated.find((o) => o.id === id);
     if (ou) {
-      upsertOutreach({
-        id: ou.id, name: ou.name, type: ou.type, date: ou.date || null,
-        status: ou.status, contact_info: ou.contactInfo, notes: ou.notes,
-      }).catch(() => {});
+      if (dbSaveTimers.current["o-" + id]) clearTimeout(dbSaveTimers.current["o-" + id]);
+      dbSaveTimers.current["o-" + id] = setTimeout(() => {
+        upsertOutreach({
+          id: ou.id, name: ou.name, type: ou.type, date: ou.date || null,
+          status: ou.status, contact_info: ou.contactInfo, notes: ou.notes,
+        }).catch(() => {});
+      }, 800);
     }
   }, [scheduleSave]);
 
