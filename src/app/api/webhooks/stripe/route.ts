@@ -131,6 +131,36 @@ export async function POST(req: Request) {
             }
           }
 
+          if (metaType === 'weekend_intensive') {
+            const tier = session.metadata?.tier || 'intensive';
+            const attendeeName = session.metadata?.attendeeName || 'Unknown';
+            const attendeeEmail = session.metadata?.attendeeEmail || session.customer_details?.email || '';
+
+            // Record the purchase
+            if (userId) {
+              await (supabase as any).from('course_purchases').insert({
+                user_id: userId,
+                course_id: `weekend-${tier}`,
+                stripe_session_id: session.id,
+                amount: session.amount_total,
+              });
+            }
+
+            // Send Discord notification
+            const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+            if (discordUrl) {
+              const tierLabel = tier === 'vip' ? 'Screening Accelerator ($1,750)' : 'Screening Intensive ($750)';
+              const isPlan = session.mode === 'subscription';
+              await fetch(discordUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  content: `🎯 **NEW SCREENING WEEKEND REGISTRATION**\n\n**Name:** ${attendeeName}\n**Email:** ${attendeeEmail}\n**Tier:** ${tierLabel}${isPlan ? ' (Payment Plan)' : ' (Paid in Full)'}\n**Amount:** $${((session.amount_total || 0) / 100).toFixed(2)}\n**Date:** ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`,
+                }),
+              }).catch(() => {});
+            }
+          }
+
           if (metaType === 'course_bundle') {
             const courseIds = (session.metadata?.courseIds || '').split(',').filter(Boolean);
             for (const courseId of courseIds) {
@@ -194,6 +224,45 @@ export async function POST(req: Request) {
             }
           }
 
+          if (metaType === 'weekend_intensive') {
+            const tier = session.metadata?.tier || 'intensive';
+            const attendeeName = session.metadata?.attendeeName || 'Unknown';
+            const attendeeEmail = session.metadata?.attendeeEmail || customerEmail || '';
+
+            // Try to link to existing user
+            let guestUserId: string | null = null;
+            if (customerEmail) {
+              const { data: existingUser } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('email', customerEmail)
+                .maybeSingle();
+              if (existingUser) guestUserId = existingUser.id;
+            }
+            if (guestUserId) {
+              await (supabase as any).from('course_purchases').insert({
+                user_id: guestUserId,
+                course_id: `weekend-${tier}`,
+                stripe_session_id: session.id,
+                amount: session.amount_total,
+              });
+            }
+
+            // Discord notification (same as authenticated path)
+            const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+            if (discordUrl) {
+              const tierLabel = tier === 'vip' ? 'Screening Accelerator ($1,750)' : 'Screening Intensive ($750)';
+              const isPlan = session.mode === 'subscription';
+              await fetch(discordUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  content: `🎯 **NEW SCREENING WEEKEND REGISTRATION**\n\n**Name:** ${attendeeName}\n**Email:** ${attendeeEmail}\n**Tier:** ${tierLabel}${isPlan ? ' (Payment Plan)' : ' (Paid in Full)'}\n**Amount:** $${((session.amount_total || 0) / 100).toFixed(2)}`,
+                }),
+              }).catch(() => {});
+            }
+          }
+
           if (metaType === 'store_cart') {
             const productIds = (session.metadata?.productIds || '').split(',').filter(Boolean);
             let guestUserId: string | null = null;
@@ -238,6 +307,30 @@ export async function POST(req: Request) {
             .from('profiles')
             .update({ subscription_status: 'active', tier: 'active' })
             .eq('id', profile.id);
+        }
+
+        // Auto-cancel payment plan subscriptions after 3 payments
+        const subscriptionId = invoice.subscription;
+        if (subscriptionId) {
+          try {
+            const sub = await stripe.subscriptions.retrieve(subscriptionId as string);
+            const paymentPlan = sub.metadata?.paymentPlan;
+            if (paymentPlan === '3-month') {
+              // Count invoices paid for this subscription
+              const invoices = await stripe.invoices.list({
+                subscription: subscriptionId as string,
+                status: 'paid',
+                limit: 10,
+              });
+              if (invoices.data.length >= 3) {
+                // All 3 payments received — cancel the subscription
+                await stripe.subscriptions.cancel(subscriptionId as string);
+                console.log(`[WEBHOOK] Auto-canceled 3-payment plan subscription: ${subscriptionId}`);
+              }
+            }
+          } catch (cancelErr) {
+            console.error('[WEBHOOK] Error checking/canceling payment plan:', cancelErr);
+          }
         }
 
         Automations.onPaymentSuccess(invoice);
