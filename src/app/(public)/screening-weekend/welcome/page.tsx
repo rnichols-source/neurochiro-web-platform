@@ -81,7 +81,7 @@ export default function WelcomePage() {
           </div>
           <div className="space-y-3">
             {[
-              { text: "Create your free NeuroChiro account (if you haven't already)", link: "/register", linkText: "Create Account" },
+              { text: "Create your free NeuroChiro account as a Doctor (if you haven't already)", link: "/register?role=doctor", linkText: "Create Doctor Account" },
               { text: "Test your Zoom — make sure your camera and mic work", link: null, linkText: null },
               { text: "Block your calendar for all 3 sessions (no double-booking!)", link: null, linkText: null },
               { text: "Have a notebook or notes app ready — you'll want to write things down", link: null, linkText: null },
