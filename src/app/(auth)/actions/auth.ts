@@ -102,6 +102,8 @@ export async function createAccountAction(formData: FormData, role: string, tier
   const password = formData.get('password') as string
   const name = formData.get('name') as string
   const phone = formData.get('phone') as string
+  const licenseNumber = formData.get('licenseNumber') as string || ''
+  const licenseState = formData.get('licenseState') as string || ''
   const supabase = createServerSupabase()
 
   const { data, error } = await supabase.auth.signUp({
@@ -113,7 +115,9 @@ export async function createAccountAction(formData: FormData, role: string, tier
         role: role,
         tier: tier,
         billing_cycle: billingCycle,
-        phone: phone
+        phone: phone,
+        license_number: licenseNumber,
+        license_state: licenseState,
       }
     }
   })
@@ -127,8 +131,24 @@ export async function createAccountAction(formData: FormData, role: string, tier
 
   if (data?.user) {
     Automations.onSignup(data.user.id, email, name, role, phone);
-    return { 
-      success: true, 
+
+    // Discord notification for new signups
+    try {
+      const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+      if (discordUrl) {
+        const roleLabel = role === 'doctor' ? 'DOCTOR' : role === 'student' ? 'STUDENT' : 'PATIENT';
+        await fetch(discordUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: `🆕 **NEW ${roleLabel} SIGNUP**\n\n**Name:** ${name}\n**Email:** ${email}${phone ? `\n**Phone:** ${phone}` : ''}${licenseNumber ? `\n**License:** ${licenseNumber} (${licenseState})` : ''}`,
+          }),
+        }).catch(() => {});
+      }
+    } catch {}
+
+    return {
+      success: true,
       user: data.user,
       sessionActive: !!data.session
     };

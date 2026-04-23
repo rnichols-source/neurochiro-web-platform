@@ -50,12 +50,16 @@ export async function POST(req: Request) {
 
         if (userId) {
           // Update profile with Stripe customer ID and activate membership
+          // Determine tier from the price paid
+          const amountPaid = (session.amount_total || 0) / 100;
+          const membershipTier = amountPaid >= 199 ? 'pro' : amountPaid >= 99 ? 'growth' : 'starter';
+
           await supabase
             .from('profiles')
             .update({
               stripe_customer_id: customer,
               subscription_status: 'active',
-              tier: 'active',
+              tier: membershipTier,
             })
             .eq('id', userId);
 
@@ -69,7 +73,7 @@ export async function POST(req: Request) {
           if (profile?.role === 'doctor') {
             await supabase
               .from('doctors')
-              .update({ verification_status: 'verified' })
+              .update({ verification_status: 'verified', membership_tier: membershipTier })
               .eq('user_id', userId);
           }
 

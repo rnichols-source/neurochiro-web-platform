@@ -36,6 +36,8 @@ function RegisterForm() {
     formData.append("email", email);
     formData.append("password", password);
     formData.append("phone", phone);
+    if (licenseNumber) formData.append("licenseNumber", licenseNumber);
+    if (licenseState) formData.append("licenseState", licenseState);
     if (billing) formData.append("billing", billing);
 
     const result = await createAccountAction(formData, role, "starter", "monthly");
