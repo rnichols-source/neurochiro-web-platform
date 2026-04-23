@@ -36,10 +36,12 @@ export async function GET(req: NextRequest) {
     const results: any[] = [];
 
     for (const doc of doctors) {
+      // Expand state abbreviations
+      const expandedState = doc.state ? (STATE_ABBREV[doc.state.toUpperCase()] || doc.state) : null;
+
       // Build the best search query from available data
-      const parts = [doc.address, doc.city, doc.state, doc.country || "United States"].filter(Boolean);
+      const parts = [doc.address, doc.city, expandedState, doc.country || "United States"].filter(Boolean);
       if (parts.length < 2) {
-        // Not enough location data to geocode
         skipped++;
         continue;
       }
@@ -150,9 +152,25 @@ export async function GET(req: NextRequest) {
   }
 }
 
+const STATE_ABBREV: Record<string, string> = {
+  'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+  'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+  'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+  'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+  'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+  'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+  'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+  'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+  'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+  'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming',
+  'DC': 'District of Columbia',
+};
+
 // Rough bounding boxes for US states to detect obviously wrong coordinates
 function isCoordReasonableForState(lat: number, lng: number, state: string | null): boolean {
-  if (!state) return true; // Can't validate without state
+  if (!state) return true;
+
+  const stateName = STATE_ABBREV[state.toUpperCase()] || state.trim();
 
   const bounds: Record<string, [number, number, number, number]> = {
     // [minLat, maxLat, minLng, maxLng]
@@ -208,7 +226,6 @@ function isCoordReasonableForState(lat: number, lng: number, state: string | nul
     "Wyoming": [41.0, 45.0, -111.1, -104.1],
   };
 
-  const stateName = state.trim();
   const box = bounds[stateName];
   if (!box) return true; // Unknown state, assume valid
 
