@@ -192,6 +192,202 @@ export async function getAdminDashboardStats(regionCode?: string) {
   }
 }
 
+export async function getActivityFeed(limit: number = 30) {
+  try {
+    await checkAdminAuth();
+    const supabase = createAdminClient();
+    const activities: any[] = [];
+
+    // 1. Recent signups (profiles created in last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const [signups, leads, notifications, recentJobs, recentSeminars, recentPurchases] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('id, full_name, email, role, created_at')
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(20),
+
+      // 2. Recent leads (appointment requests, applications, etc.)
+      supabase
+        .from('leads')
+        .select('id, email, first_name, source, role, created_at, doctor_id')
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(20),
+
+      // 3. Recent notifications (portal logins, applications, appointments)
+      supabase
+        .from('notifications')
+        .select('id, user_id, title, body, type, created_at')
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(30),
+
+      // 4. Recent job postings
+      supabase
+        .from('job_postings')
+        .select('id, title, doctor_id, status, created_at')
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(10),
+
+      // 5. Recent seminars
+      supabase
+        .from('seminars')
+        .select('id, title, host_id, is_approved, created_at')
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(10),
+
+      // 6. Recent purchases
+      (supabase as any)
+        .from('course_purchases')
+        .select('id, user_id, course_id, amount, created_at')
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(15),
+    ]);
+
+    // Transform into unified activity feed
+    for (const s of (signups.data || [])) {
+      const icon = s.role === 'doctor' ? '🩺' : s.role === 'student' ? '🎓' : '👤';
+      activities.push({
+        id: `signup-${s.id}`,
+        icon,
+        type: 'signup',
+        title: `New ${s.role} signed up`,
+        detail: `${s.full_name || s.email}`,
+        time: s.created_at,
+        link: '/admin/users',
+      });
+    }
+
+    for (const l of (leads.data || [])) {
+      const sourceLabel: Record<string, string> = {
+        appointment_request: '📅 Appointment request',
+        directory_zero_state: '🔔 Notify me request',
+        report_concern: '🚩 Concern reported',
+        manychat: '📱 ManyChat lead',
+      };
+      activities.push({
+        id: `lead-${l.id}`,
+        icon: (l.source && sourceLabel[l.source])?.split(' ')[0] || '📋',
+        type: 'lead',
+        title: (l.source && sourceLabel[l.source])?.slice(2) || `New lead (${l.source || 'unknown'})`,
+        detail: `${l.first_name || l.email}`,
+        time: l.created_at,
+        link: null,
+      });
+    }
+
+    for (const n of (notifications.data || [])) {
+      if (n.type === 'portal_login') {
+        activities.push({
+          id: `login-${n.id}`,
+          icon: '🔑',
+          type: 'login',
+          title: 'Portal login',
+          detail: n.body?.replace('logged into the doctor portal', '').trim() || 'Unknown',
+          time: n.created_at,
+          link: null,
+        });
+      } else if (n.type === 'appointment') {
+        activities.push({
+          id: `appt-${n.id}`,
+          icon: '📅',
+          type: 'appointment',
+          title: 'Appointment request',
+          detail: n.body?.slice(0, 80) || '',
+          time: n.created_at,
+          link: null,
+        });
+      } else if (n.type === 'job_application') {
+        activities.push({
+          id: `jobapp-${n.id}`,
+          icon: '📋',
+          type: 'job_application',
+          title: 'Job application',
+          detail: n.body?.slice(0, 80) || '',
+          time: n.created_at,
+          link: '/admin/jobs',
+        });
+      }
+    }
+
+    for (const j of (recentJobs.data || [])) {
+      activities.push({
+        id: `job-${j.id}`,
+        icon: '💼',
+        type: 'job',
+        title: 'Job posted',
+        detail: j.title,
+        time: j.created_at,
+        link: '/admin/jobs',
+      });
+    }
+
+    for (const s of (recentSeminars.data || [])) {
+      activities.push({
+        id: `seminar-${s.id}`,
+        icon: '📢',
+        type: 'seminar',
+        title: s.is_approved ? 'Seminar published' : 'Seminar submitted (pending)',
+        detail: s.title,
+        time: s.created_at,
+        link: '/admin/seminars',
+      });
+    }
+
+    for (const p of (recentPurchases.data || [])) {
+      activities.push({
+        id: `purchase-${p.id}`,
+        icon: '💳',
+        type: 'purchase',
+        title: 'Store purchase',
+        detail: `${p.course_id} — $${((p.amount || 0) / 100).toFixed(0)}`,
+        time: p.created_at,
+        link: '/admin/revenue',
+      });
+    }
+
+    // Sort all by time, newest first
+    activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+    return activities.slice(0, limit);
+  } catch (e) {
+    console.error('Activity feed error:', e);
+    return [];
+  }
+}
+
+export async function getQuickStats() {
+  try {
+    await checkAdminAuth();
+    const supabase = createAdminClient();
+
+    const today = new Date().toISOString().slice(0, 10) + 'T00:00:00';
+
+    const [todaySignups, todayLeads, todayLogins, totalPatients] = await Promise.all([
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', today),
+      supabase.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', today),
+      supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('type', 'portal_login').gte('created_at', today),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'patient'),
+    ]);
+
+    return {
+      todaySignups: todaySignups.count || 0,
+      todayLeads: todayLeads.count || 0,
+      todayLogins: todayLogins.count || 0,
+      totalPatients: totalPatients.count || 0,
+    };
+  } catch {
+    return { todaySignups: 0, todayLeads: 0, todayLogins: 0, totalPatients: 0 };
+  }
+}
+
 export async function exportIntelligenceReport() {
   try {
     await checkAdminAuth();
