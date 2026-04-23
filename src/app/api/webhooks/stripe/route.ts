@@ -77,12 +77,66 @@ export async function POST(req: Request) {
           const metaType = session.metadata?.type;
 
           if (metaType === 'vendor') {
-            await supabase.from('vendors').insert({
+            const vendorName = session.metadata?.companyName || session.metadata?.company_name || 'Unnamed Vendor';
+            const vendorSlug = vendorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
+
+            await (supabase as any).from('vendors').insert({
               id: userId,
-              name: session.metadata?.company_name || '',
+              name: vendorName,
+              slug: vendorSlug,
               short_description: session.metadata?.description || '',
+              website_url: session.metadata?.website || '',
+              categories: session.metadata?.category ? [session.metadata.category] : [],
               is_active: false,
+              tier: 'basic',
             });
+
+            // Confirmation email
+            const vendorEmail = session.metadata?.email || session.customer_details?.email;
+            if (vendorEmail) {
+              try {
+                const resend = new Resend(process.env.RESEND_API_KEY || '');
+                await resend.emails.send({
+                  from: 'NeuroChiro <support@neurochirodirectory.com>',
+                  to: [vendorEmail],
+                  subject: `Welcome to NeuroChiro Marketplace — ${vendorName}`,
+                  html: `
+                    <div style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;">
+                      <div style="background:#1a2744;padding:28px;text-align:center;">
+                        <h1 style="color:white;font-size:22px;margin:0;">NeuroChiro Marketplace</h1>
+                        <p style="color:#e97325;font-size:16px;font-weight:bold;margin:8px 0 0;">Application Received!</p>
+                      </div>
+                      <div style="padding:28px;background:white;">
+                        <p style="color:#333;font-size:15px;">Thanks for joining the NeuroChiro Marketplace, <strong>${vendorName}</strong>!</p>
+                        <p style="color:#666;line-height:1.6;">Your listing is under review. Our team will activate it within 24 hours. In the meantime:</p>
+                        <ol style="color:#666;line-height:1.8;">
+                          <li>Log in to your <a href="https://neurochiro.co/vendor/dashboard" style="color:#e97325;font-weight:bold;">Vendor Dashboard</a></li>
+                          <li>Upload your company logo</li>
+                          <li>Add your exclusive discount for NeuroChiro members</li>
+                        </ol>
+                        <div style="text-align:center;margin:24px 0;">
+                          <a href="https://neurochiro.co/vendor/dashboard" style="display:inline-block;background:#e97325;color:white;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:bold;">Go to Vendor Dashboard</a>
+                        </div>
+                      </div>
+                    </div>
+                  `,
+                });
+              } catch (emailErr) {
+                console.error('[WEBHOOK] Vendor email failed:', emailErr);
+              }
+            }
+
+            // Discord notification
+            const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+            if (discordUrl) {
+              await fetch(discordUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  content: `🏢 **NEW VENDOR APPLICATION**\n\n**Company:** ${vendorName}\n**Category:** ${session.metadata?.category || 'N/A'}\n**Website:** ${session.metadata?.website || 'N/A'}\n**Email:** ${session.metadata?.email || 'N/A'}\n**Amount:** $${((session.amount_total || 0) / 100).toFixed(2)}/mo\n**Status:** Pending approval — activate at /admin/marketplace`,
+                }),
+              }).catch(() => {});
+            }
           }
 
           if (metaType === 'seminar_listing') {
