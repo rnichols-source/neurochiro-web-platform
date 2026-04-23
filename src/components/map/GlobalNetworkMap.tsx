@@ -271,11 +271,13 @@ export default function GlobalNetworkMap({
           city: doc.city,
           state: doc.state,
           type: 'doctor' as const,
-          isFiltered: listDoctors.length > 0 ? listDoctors.some(ld => ld.id === doc.id) : true
+          isFiltered: (externalSearchQuery || externalLocationQuery) && listDoctors.length > 0
+            ? listDoctors.some(ld => ld.id === doc.id)
+            : true
         }
       };
     }).filter((f): f is NonNullable<typeof f> => f !== null);
-  }, [initialDoctors, listDoctors]);
+  }, [initialDoctors, listDoctors, externalSearchQuery, externalLocationQuery]);
 
   // Re-sync markers when data, layer, or map state changes
   // Uses retry to handle iframe not being ready on first attempt
