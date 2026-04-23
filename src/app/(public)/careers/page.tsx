@@ -95,7 +95,7 @@ export default function CareersPage() {
               const salary = fmtSalary(job.salary_min, job.salary_max);
               const location = [job.city || job.clinic_city, job.state || job.clinic_state].filter(Boolean).join(", ");
               return (
-                <div key={job.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+                <Link key={job.id} href={`/careers/${job.id}`} className="block bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-neuro-orange/20 transition-all group cursor-pointer">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -110,11 +110,11 @@ export default function CareersPage() {
                         {job.created_at && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {fmtDate(job.created_at)}</span>}
                       </div>
                     </div>
-                    <Link href={`/careers/${job.id}`} className="shrink-0 px-6 py-3 bg-neuro-navy text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-neuro-navy/90 transition-colors">
-                      View Details
-                    </Link>
+                    <span className="shrink-0 px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-xs uppercase tracking-widest group-hover:bg-neuro-orange/90 transition-colors flex items-center gap-2">
+                      Apply Now <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

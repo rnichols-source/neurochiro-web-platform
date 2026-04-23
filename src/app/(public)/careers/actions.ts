@@ -93,6 +93,10 @@ export async function applyToJob(
 
   if (error) {
     console.error("Error inserting application:", error);
+    // Handle duplicate application gracefully
+    if (error.code === '23505') {
+      throw new Error("You've already applied for this position.");
+    }
     throw new Error("Failed to submit application");
   }
 
@@ -122,12 +126,24 @@ export async function applyToJob(
         .single();
 
       await Automations.onJobApplication(
-        "guest",
+        user?.id || "guest",
         data.email,
         jobId,
         job.title,
         doctorProfile?.email || "support@neurochirodirectory.com"
       );
+
+      // Discord notification
+      const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+      if (discordUrl) {
+        await fetch(discordUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: `📋 **NEW JOB APPLICATION**\n\n**Position:** ${job.title}\n**Applicant:** ${data.name}\n**Email:** ${data.email}${data.phone ? `\n**Phone:** ${data.phone}` : ''}`,
+          }),
+        }).catch(() => {});
+      }
     }
   } catch (e) {
     console.error("Notification/automation error:", e);

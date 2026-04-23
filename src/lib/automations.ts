@@ -668,7 +668,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             title: 'Talent Marketplace',
             body: `<p>Your application for <strong>${payload.jobTitle}</strong> has been successfully submitted. The clinic will review your profile and reach out directly.</p>`,
             ctaText: 'Explore More Jobs',
-            ctaUrl: 'https://neurochiro.co/marketplace'
+            ctaUrl: 'https://neurochiro.co/careers'
           });
 
           // 🛡️ PHASE 1: Notify Hiring Doctor
