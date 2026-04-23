@@ -198,11 +198,13 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
         if (!hasTag) return false;
       }
 
-      const matchesName = 
-        (doc.first_name || "").toLowerCase().includes(q) || 
+      const matchesName =
+        (doc.first_name || "").toLowerCase().includes(q) ||
         (doc.last_name || "").toLowerCase().includes(q) ||
         (doc.clinic_name || "").toLowerCase().includes(q) ||
-        (doc.region_code || "").toLowerCase().includes(q);
+        (doc.region_code || "").toLowerCase().includes(q) ||
+        (doc.specialties || []).some((s: string) => (s || "").toLowerCase().includes(q)) ||
+        (doc.bio || "").toLowerCase().includes(q);
       
       const matchesLocation = 
         (doc.city || "").toLowerCase().includes(l) ||

@@ -328,7 +328,7 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                 onClick={async () => {
                   setSubmittingAppointment(true);
                   try {
-                    await fetch('/api/appointment', {
+                    const res = await fetch('/api/appointment', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
@@ -340,8 +340,11 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                         doctorId: doctor.id,
                       }),
                     });
+                    if (!res.ok) throw new Error();
                     setAppointmentSubmitted(true);
-                  } catch { setAppointmentSubmitted(true); }
+                  } catch {
+                    alert('Something went wrong. Please try again or call the office directly.');
+                  }
                   setSubmittingAppointment(false);
                 }}
                 className="w-full py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 disabled:opacity-50 flex items-center justify-center gap-2"

@@ -33,7 +33,9 @@ export async function GET(request: NextRequest) {
     if (query) {
       const nameConditions = SEARCHABLE_NAME_COLUMNS.map(col => `${col}.ilike.%${query}%`);
       const locationConditions = SEARCHABLE_LOCATION_COLUMNS.map(col => `${col}.ilike.%${query}%`);
-      dbQuery = dbQuery.or([...nameConditions, ...locationConditions].join(','));
+      // Also search bio for condition keywords (e.g. "migraines", "upper cervical", "sciatica")
+      const allConditions = [...nameConditions, ...locationConditions, `bio.ilike.%${query}%`];
+      dbQuery = dbQuery.or(allConditions.join(','));
     }
 
     if (location) {

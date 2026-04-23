@@ -110,6 +110,20 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Discord notification
+    try {
+      const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+      if (discordUrl) {
+        await fetch(discordUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: `📅 **NEW APPOINTMENT REQUEST**\n\n**Patient:** ${patientName}\n**Email:** ${patientEmail}${patientPhone ? `\n**Phone:** ${patientPhone}` : ''}${preferredDate ? `\n**Preferred Date:** ${preferredDate}` : ''}\n**Doctor:** Dr. ${doctor.first_name} ${doctor.last_name}\n**Clinic:** ${doctor.clinic_name || 'N/A'}${message ? `\n**Message:** ${message}` : ''}`,
+          }),
+        }).catch(() => {});
+      }
+    } catch {}
+
     // Send confirmation email to the patient
     await resend.emails.send({
       from: 'NeuroChiro <support@neurochirodirectory.com>',
