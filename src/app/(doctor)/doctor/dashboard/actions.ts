@@ -73,6 +73,48 @@ export async function getDoctorDashboardStats() {
       }
     ];
 
+    // Discord notification — doctor portal login (once per day per doctor)
+    try {
+      const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+      if (discordUrl) {
+        const today = new Date().toISOString().slice(0, 10);
+        const cacheKey = `portal_login_${user.id}_${today}`;
+        // Use a simple in-memory check via admin table or just send it
+        // To avoid spam, check if we already notified today for this user
+        const { data: existing } = await (admin as any)
+          .from('notifications')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('type', 'portal_login')
+          .gte('created_at', `${today}T00:00:00`)
+          .limit(1);
+
+        if (!existing || existing.length === 0) {
+          // Record that we notified
+          await (admin as any).from('notifications').insert({
+            user_id: user.id,
+            title: 'Portal login',
+            body: `${profile?.full_name || user.email} logged into the doctor portal`,
+            type: 'portal_login',
+            priority: 'info',
+          });
+
+          // Send Discord notification
+          const docName = profile?.full_name || user.email || 'Unknown';
+          const docCity = doctor?.city ? `${doctor.city}, ${doctor.state || ''}` : '';
+          await fetch(discordUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: `🩺 **DOCTOR PORTAL LOGIN**\n\n**${docName}**${docCity ? ` — ${docCity}` : ''}\n${doctor?.clinic_name || ''}\nProfile: ${completeness}% complete`,
+            }),
+          }).catch(() => {});
+        }
+      }
+    } catch {
+      // Don't let notification errors break the dashboard
+    }
+
     return {
       profile: {
         name: profile?.full_name || user.email?.split('@')[0] || "Doctor",
