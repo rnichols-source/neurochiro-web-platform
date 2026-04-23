@@ -131,6 +131,8 @@ export async function createSeminarAction(formData: FormData) {
   const location = formData.get('location') as string
   const dates = formData.get('dates') as string
   const registration_link = formData.get('registration_link') as string
+  const price = Number(formData.get('price')) || 0
+  const max_capacity = Number(formData.get('max_capacity')) || null
   const tier = formData.get('tier') as string || 'basic'
 
   // New Fields
@@ -164,6 +166,8 @@ export async function createSeminarAction(formData: FormData) {
       country,
       dates,
       registration_link,
+      price,
+      max_capacity,
       listing_tier: tier,
       target_audience: target_audience.length > 0 ? target_audience : ['Doctors', 'Students'],
       tags,
