@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
-  MessageSquare, FileText, LogOut, X, Settings, CreditCard, DollarSign, Compass, ClipboardList, Target,
+  MessageSquare, FileText, LogOut, X, Settings, CreditCard, DollarSign, Compass, ClipboardList, Target, HelpCircle,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -29,6 +29,7 @@ const navItems = [
   { name: "Settings", href: "/student/settings", icon: Settings },
   { name: "Billing", href: "/student/billing", icon: CreditCard },
   { name: "Messages", href: "/student/messages", icon: MessageSquare },
+  { name: "Help & Support", href: "/contact", icon: HelpCircle },
 ];
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {

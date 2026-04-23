@@ -15,6 +15,7 @@ import {
   Settings,
   Dumbbell,
   TrendingUp,
+  HelpCircle,
 } from "lucide-react";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
@@ -27,6 +28,7 @@ const navItems = [
   { name: "My Journey", href: "/portal/journey", icon: TrendingUp },
   { name: "Learn", href: "/portal/learn", icon: BookOpen },
   { name: "Settings", href: "/portal/settings", icon: Settings },
+  { name: "Help & Support", href: "/contact", icon: HelpCircle },
 ];
 
 function PortalShell({ children }: { children: React.ReactNode }) {

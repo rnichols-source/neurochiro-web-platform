@@ -57,7 +57,14 @@ export default function Error({
             </Link>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-gray-100 flex items-center justify-center gap-2 text-gray-400">
+          <div className="mt-8">
+            <p className="text-sm text-gray-400 mb-2">Still having trouble?</p>
+            <a href="mailto:support@neurochirodirectory.com?subject=Bug Report — {error.digest || 'NC-500'}" className="text-neuro-orange font-bold text-sm hover:underline">
+              Email support@neurochirodirectory.com
+            </a>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-center gap-2 text-gray-400">
             <Zap className="w-4 h-4" />
             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Diagnostic ID: {error.digest || "NC-500-INTERNAL"}</span>
           </div>

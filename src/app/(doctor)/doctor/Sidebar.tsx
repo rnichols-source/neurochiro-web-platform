@@ -59,6 +59,7 @@ const navSections = [
       { name: "Analytics", href: "/doctor/analytics", icon: BarChart3 },
       { name: "Settings", href: "/doctor/settings", icon: Settings },
       { name: "Billing", href: "/doctor/billing", icon: CreditCard },
+      { name: "Help & Support", href: "/contact", icon: MessageSquare },
     ],
   },
 ];
