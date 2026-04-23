@@ -52,7 +52,7 @@ export async function createJobListingCheckout(
       type: "job_listing",
       duration,
       title: jobData.title,
-      description: jobData.description.slice(0, 450),
+      description: jobData.description.slice(0, 2000),
       category: jobData.category,
       employment_type: jobData.employment_type,
       salary_min: String(jobData.salary_min || 0),

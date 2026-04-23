@@ -191,10 +191,67 @@ export async function createSeminarAction(formData: FormData) {
     console.warn("Geocoding queue trigger failed (non-critical):", e)
   }
 
+  // 6. Send confirmation email to doctor
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('email, full_name')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.email) {
+      const { Resend } = await import('resend');
+      const resend = new Resend(process.env.RESEND_API_KEY || '');
+      await resend.emails.send({
+        from: 'NeuroChiro <support@neurochirodirectory.com>',
+        to: [profile.email],
+        subject: `Your seminar "${title}" is live on NeuroChiro!`,
+        html: `
+          <div style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;">
+            <div style="background:#1a2744;padding:28px;text-align:center;">
+              <h1 style="color:white;font-size:22px;margin:0;">NeuroChiro Seminars</h1>
+              <p style="color:#e97325;font-size:16px;font-weight:bold;margin:8px 0 0;">Seminar Published!</p>
+            </div>
+            <div style="padding:28px;background:white;">
+              <p style="font-size:15px;color:#1a2744;">Hey Dr. ${profile.full_name?.split(' ')[0] || 'there'},</p>
+              <p style="color:#666;line-height:1.6;">Your seminar is now live and visible to the NeuroChiro community.</p>
+              <div style="background:#f8f9fa;border-radius:10px;padding:16px;margin:20px 0;">
+                <p style="margin:0;font-weight:bold;color:#1a2744;">${title}</p>
+                <p style="margin:4px 0 0;color:#666;font-size:14px;">${location} &middot; ${dates}</p>
+              </div>
+              <div style="text-align:center;margin:24px 0;">
+                <a href="https://neurochiro.co/doctor/seminars" style="display:inline-block;background:#e97325;color:white;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:bold;">Manage Your Seminars</a>
+              </div>
+              <p style="color:#999;font-size:13px;">You'll be notified when people register.</p>
+            </div>
+          </div>
+        `,
+      });
+    }
+  } catch (emailErr) {
+    console.error('Seminar confirmation email failed:', emailErr);
+  }
+
+  // 7. Discord notification
+  try {
+    const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+    if (discordUrl) {
+      await fetch(discordUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: `📢 **NEW SEMINAR CREATED**\n\n**Title:** ${title}\n**Host:** Dr. ${user.email?.split('@')[0] || 'Unknown'}\n**Location:** ${location}\n**Date:** ${dates}\n**Status:** Auto-approved (verified member)`,
+        }),
+      }).catch(() => {});
+    }
+  } catch {
+    // Don't break flow for Discord errors
+  }
+
   revalidatePath('/doctor/seminars')
 
-  return { 
-    success: true, 
+  return {
+    success: true,
     seminar: data
   }
 }

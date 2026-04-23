@@ -86,14 +86,69 @@ export async function POST(req: Request) {
           }
 
           if (metaType === 'seminar_listing') {
+            const seminarTitle = session.metadata?.title || 'Untitled Seminar';
+            const seminarLocation = session.metadata?.location || '';
+            const seminarDates = session.metadata?.dates || new Date().toISOString();
+            const hostEmail = session.metadata?.hostEmail || session.customer_details?.email || '';
+
             await supabase.from('seminars').insert({
               host_id: userId,
-              title: session.metadata?.title || 'Untitled Seminar',
+              title: seminarTitle,
               description: session.metadata?.description || '',
-              dates: session.metadata?.dates || new Date().toISOString(),
-              location: session.metadata?.location || null,
+              dates: seminarDates,
+              location: seminarLocation,
+              city: seminarLocation,
+              registration_link: session.metadata?.registrationLink || null,
+              price: parseFloat(session.metadata?.price || '0') || 0,
+              max_capacity: parseInt(session.metadata?.capacity || '0') || null,
+              payment_status: 'paid',
               is_approved: false,
+              listing_tier: 'basic',
+              host_type_at_submission: 'external',
             });
+
+            // Confirmation email
+            if (hostEmail) {
+              try {
+                const resend = new Resend(process.env.RESEND_API_KEY || '');
+                await resend.emails.send({
+                  from: 'NeuroChiro <support@neurochirodirectory.com>',
+                  to: [hostEmail],
+                  subject: `Seminar submitted: "${seminarTitle}" — under review`,
+                  html: `
+                    <div style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;">
+                      <div style="background:#1a2744;padding:28px;text-align:center;">
+                        <h1 style="color:white;font-size:22px;margin:0;">NeuroChiro Seminars</h1>
+                        <p style="color:#e97325;font-size:16px;font-weight:bold;margin:8px 0 0;">Submission Received!</p>
+                      </div>
+                      <div style="padding:28px;background:white;">
+                        <p style="color:#333;font-size:15px;">Your seminar has been submitted and is under review.</p>
+                        <div style="background:#f8f9fa;border-radius:10px;padding:16px;margin:20px 0;">
+                          <p style="margin:0;font-weight:bold;color:#1a2744;">${seminarTitle}</p>
+                          <p style="margin:4px 0 0;color:#666;font-size:14px;">${seminarLocation} &middot; ${seminarDates}</p>
+                        </div>
+                        <p style="color:#666;line-height:1.6;">Our team will review your listing and notify you once it's approved. This typically takes less than 24 hours.</p>
+                        <p style="color:#999;font-size:13px;">Questions? Reply to this email.</p>
+                      </div>
+                    </div>
+                  `,
+                });
+              } catch (emailErr) {
+                console.error('[WEBHOOK] Seminar listing email failed:', emailErr);
+              }
+            }
+
+            // Discord notification
+            const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+            if (discordUrl) {
+              await fetch(discordUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  content: `📢 **NEW PAID SEMINAR LISTING**\n\n**Title:** ${seminarTitle}\n**Location:** ${seminarLocation}\n**Date:** ${seminarDates}\n**Host Email:** ${hostEmail}\n**Amount:** $${((session.amount_total || 0) / 100).toFixed(2)}\n**Status:** Pending approval`,
+                }),
+              }).catch(() => {});
+            }
           }
 
           if (metaType === 'course_purchase') {
@@ -299,7 +354,7 @@ export async function POST(req: Request) {
             const durationDays = parseInt(session.metadata?.duration || '30', 10);
             const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString();
             await supabase.from('job_postings').insert({
-              doctor_id: userId || session.metadata?.contact_email || 'guest',
+              doctor_id: userId,
               title: session.metadata?.title || 'Untitled Position',
               description: session.metadata?.description || '',
               category: session.metadata?.category || null,
@@ -308,10 +363,57 @@ export async function POST(req: Request) {
               salary_max: parseInt(session.metadata?.salary_max || '0', 10) || null,
               city: session.metadata?.city || null,
               state: session.metadata?.state || null,
-              apply_method: 'neurochiro',
+              apply_method: session.metadata?.apply_method || 'neurochiro',
+              apply_url: session.metadata?.apply_url || null,
               expires_at: expiresAt,
               status: 'Active',
             });
+
+            // Confirmation email
+            const contactEmail = session.metadata?.contact_email || session.customer_details?.email;
+            if (contactEmail) {
+              try {
+                const resend = new Resend(process.env.RESEND_API_KEY || '');
+                await resend.emails.send({
+                  from: 'NeuroChiro <support@neurochirodirectory.com>',
+                  to: [contactEmail],
+                  subject: 'Your job listing is live on NeuroChiro!',
+                  html: `
+                    <div style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;">
+                      <div style="background:#1a2744;padding:28px;text-align:center;">
+                        <h1 style="color:white;font-size:22px;margin:0;">NeuroChiro Careers</h1>
+                        <p style="color:#e97325;font-size:16px;font-weight:bold;margin:8px 0 0;">Job Listing Published!</p>
+                      </div>
+                      <div style="padding:28px;background:white;">
+                        <p style="color:#333;font-size:15px;">Your job listing is now live and visible to candidates.</p>
+                        <div style="background:#f8f9fa;border-radius:10px;padding:16px;margin:20px 0;">
+                          <p style="margin:0;font-weight:bold;color:#1a2744;">${session.metadata?.title || 'Your Position'}</p>
+                          <p style="margin:4px 0 0;color:#666;font-size:14px;">Duration: ${durationDays} days &middot; Expires: ${new Date(expiresAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                        </div>
+                        <div style="text-align:center;margin:24px 0;">
+                          <a href="https://neurochiro.co/careers" style="display:inline-block;background:#e97325;color:white;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:bold;">View Your Listing</a>
+                        </div>
+                        <p style="color:#999;font-size:13px;">You'll receive email notifications when candidates apply.</p>
+                      </div>
+                    </div>
+                  `,
+                });
+              } catch (emailErr) {
+                console.error('[WEBHOOK] Job listing email failed:', emailErr);
+              }
+            }
+
+            // Discord notification
+            const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+            if (discordUrl) {
+              await fetch(discordUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  content: `💼 **NEW PAID JOB LISTING**\n\n**Title:** ${session.metadata?.title || 'Untitled'}\n**Duration:** ${durationDays} days\n**Location:** ${session.metadata?.city || 'N/A'}, ${session.metadata?.state || ''}\n**Amount:** $${((session.amount_total || 0) / 100).toFixed(2)}`,
+                }),
+              }).catch(() => {});
+            }
           }
         }
 
@@ -457,6 +559,82 @@ export async function POST(req: Request) {
                   amount: session.amount_total,
                 }, { onConflict: 'user_id,course_id' });
               }
+            }
+          }
+
+          if (metaType === 'job_listing') {
+            // Guest paid job listing — try to find the doctor by email
+            let guestDoctorId: string | null = null;
+            if (customerEmail) {
+              const { data: existingUser } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('email', customerEmail)
+                .maybeSingle();
+              if (existingUser) guestDoctorId = existingUser.id;
+            }
+
+            const durationDays = parseInt(session.metadata?.duration || '30', 10);
+            const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString();
+            await (supabase as any).from('job_postings').insert({
+              doctor_id: guestDoctorId,
+              title: session.metadata?.title || 'Untitled Position',
+              description: session.metadata?.description || '',
+              category: session.metadata?.category || null,
+              employment_type: session.metadata?.employment_type || null,
+              salary_min: parseInt(session.metadata?.salary_min || '0', 10) || null,
+              salary_max: parseInt(session.metadata?.salary_max || '0', 10) || null,
+              city: session.metadata?.city || null,
+              state: session.metadata?.state || null,
+              apply_method: session.metadata?.apply_method || 'neurochiro',
+              apply_url: session.metadata?.apply_url || null,
+              expires_at: expiresAt,
+              status: 'Active',
+            });
+
+            // Confirmation email
+            const contactEmail = session.metadata?.contact_email || customerEmail;
+            if (contactEmail) {
+              try {
+                const resend = new Resend(process.env.RESEND_API_KEY || '');
+                await resend.emails.send({
+                  from: 'NeuroChiro <support@neurochirodirectory.com>',
+                  to: [contactEmail],
+                  subject: 'Your job listing is live on NeuroChiro!',
+                  html: `
+                    <div style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;">
+                      <div style="background:#1a2744;padding:28px;text-align:center;">
+                        <h1 style="color:white;font-size:22px;margin:0;">NeuroChiro Careers</h1>
+                        <p style="color:#e97325;font-size:16px;font-weight:bold;margin:8px 0 0;">Job Listing Published!</p>
+                      </div>
+                      <div style="padding:28px;background:white;">
+                        <p style="color:#333;font-size:15px;">Your job listing is now live and visible to candidates.</p>
+                        <div style="background:#f8f9fa;border-radius:10px;padding:16px;margin:20px 0;">
+                          <p style="margin:0;font-weight:bold;color:#1a2744;">${session.metadata?.title || 'Your Position'}</p>
+                          <p style="margin:4px 0 0;color:#666;font-size:14px;">Duration: ${durationDays} days</p>
+                        </div>
+                        <div style="text-align:center;margin:24px 0;">
+                          <a href="https://neurochiro.co/careers" style="display:inline-block;background:#e97325;color:white;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:bold;">View Your Listing</a>
+                        </div>
+                      </div>
+                    </div>
+                  `,
+                });
+              } catch (emailErr) {
+                console.error('[WEBHOOK] Guest job listing email failed:', emailErr);
+              }
+            }
+
+            // Discord notification
+            const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+            if (discordUrl) {
+              await fetch(discordUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  content: `💼 **NEW PAID JOB LISTING (Guest)**\n\n**Title:** ${session.metadata?.title || 'Untitled'}\n**Duration:** ${durationDays} days\n**Location:** ${session.metadata?.city || 'N/A'}, ${session.metadata?.state || ''}\n**Email:** ${customerEmail || 'Unknown'}\n**Amount:** $${((session.amount_total || 0) / 100).toFixed(2)}`,
+                }),
+              }).catch(() => {});
             }
           }
         }

@@ -78,9 +78,13 @@ export async function applyToJob(
 ) {
   const supabase = createServerSupabase();
 
+  // Check if user is logged in to link their account
+  const { data: { user } } = await supabase.auth.getUser();
+
   // Insert application
-  const { error } = await supabase.from("job_applications").insert({
+  const { error } = await (supabase as any).from("job_applications").insert({
     job_id: jobId,
+    applicant_id: user?.id || null,
     applicant_name: data.name,
     applicant_email: data.email,
     applicant_phone: data.phone || null,

@@ -175,12 +175,14 @@ export default function JobsPage() {
     e.preventDefault();
     setSubmitting(true);
     const fd = new FormData(e.currentTarget);
+    const benefitsRaw = (fd.get("benefits") as string) || "";
     await createJobPosting({
       title: fd.get("title") as string,
       description: fd.get("description") as string,
       type: fd.get("type") as string,
       salary_min: Number(fd.get("salary_min")) || 0,
       salary_max: Number(fd.get("salary_max")) || 0,
+      benefits: benefitsRaw ? benefitsRaw.split(",").map((b: string) => b.trim()).filter(Boolean) : [],
       category: fd.get("category") as string,
       employment_type: fd.get("employment_type") as string,
       apply_method: fd.get("apply_method") as string,
