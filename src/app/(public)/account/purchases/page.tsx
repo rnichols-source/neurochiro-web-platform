@@ -23,45 +23,42 @@ import { getMyPurchases, type PurchaseRecord } from "./actions";
 
 // Map product IDs to where they can be accessed
 function getAccessLink(productId: string): { href: string; label: string } | null {
-  // Courses -> student academy
-  if (productId.startsWith("course-")) {
-    return { href: "/student/academy", label: "Go to Academy" };
-  }
-  // Workshop kits -> doctor workshops
-  if (productId.startsWith("workshop-")) {
-    return { href: "/doctor/workshops", label: "Open Workshop Kit" };
-  }
-  // Contracts -> doctor contract lab
-  if (productId.startsWith("contract-")) {
-    return { href: "/student/contract-lab", label: "Open Contract Lab" };
-  }
-  // P&L Analyzer
-  if (productId === "pl-analyzer") {
-    return { href: "/doctor/pl-analyzer", label: "Open P&L Analyzer" };
-  }
-  // KPI Tracker
-  if (productId === "kpi-tracker") {
-    return { href: "/doctor/kpi", label: "Open KPI Tracker" };
-  }
-  // Scan Report Generator
-  if (productId === "scan-report") {
-    return { href: "/doctor/scan-reports", label: "Open Scan Reports" };
-  }
-  // Billing Guide
-  if (productId === "billing-guide") {
-    return { href: "/doctor/billing", label: "Open Billing Toolkit" };
-  }
-  // Content Library
-  if (productId === "content-library") {
-    return { href: "/doctor/content-library", label: "Open Content Library" };
-  }
-  // Patient products
-  if (productId === "patient-premium") {
-    return { href: "/portal/dashboard", label: "Go to Patient Portal" };
-  }
-  if (productId.startsWith("patient-")) {
-    return { href: "/portal/dashboard", label: "Go to Patient Portal" };
-  }
+  const ACCESS_MAP: Record<string, { href: string; label: string }> = {
+    // Student courses
+    "course-clinical-identity": { href: "/student/academy", label: "Go to Academy" },
+    "course-business": { href: "/student/academy", label: "Go to Academy" },
+    "course-clinical-confidence": { href: "/student/academy", label: "Go to Academy" },
+    "course-associate-playbook": { href: "/student/academy", label: "Go to Academy" },
+    "course-bundle": { href: "/student/academy", label: "Go to Academy" },
+    // Student tools
+    "student-financial-planner": { href: "/student/financial-planner", label: "Open Financial Planner" },
+    "technique-guide": { href: "/student/techniques", label: "Open Technique Guide" },
+    "interview-playbook": { href: "/student/interview-prep", label: "Open Interview Playbook" },
+    // Doctor tools
+    "pl-analyzer": { href: "/doctor/pl-analyzer", label: "Open P&L Analyzer" },
+    "kpi-tracker": { href: "/doctor/kpi", label: "Open KPI Tracker" },
+    "scan-report": { href: "/doctor/scan-report", label: "Open Scan Reports" },
+    "billing-guide": { href: "/doctor/billing-guide", label: "Open Billing Toolkit" },
+    "content-library": { href: "/doctor/content-library", label: "Open Content Library" },
+    "screening-mastery": { href: "/doctor/screenings", label: "Open Screening Kit" },
+    // Patient tools
+    "patient-premium": { href: "/portal/dashboard", label: "Go to Patient Portal" },
+    "patient-supplement-guide": { href: "/portal/supplements", label: "Open Supplement Guide" },
+    "patient-ns-guide": { href: "/portal/learn", label: "Open Health Guide" },
+    "patient-family-guide": { href: "/portal/learn", label: "Open Family Guide" },
+    "patient-exercise-library": { href: "/portal/exercises", label: "Open Exercise Library" },
+  };
+
+  // Direct match
+  if (ACCESS_MAP[productId]) return ACCESS_MAP[productId];
+
+  // Fallback patterns
+  if (productId.startsWith("course-")) return { href: "/student/academy", label: "Go to Academy" };
+  if (productId.startsWith("workshop-")) return { href: "/doctor/workshops", label: "Open Workshop Kit" };
+  if (productId.startsWith("contract-")) return { href: "/student/contract-lab", label: "Open Contract Lab" };
+  if (productId.startsWith("patient-")) return { href: "/portal/dashboard", label: "Go to Patient Portal" };
+  if (productId.startsWith("weekend-")) return { href: "/account/command-center", label: "Open Command Center" };
+
   return null;
 }
 

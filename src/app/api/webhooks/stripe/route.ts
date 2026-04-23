@@ -118,6 +118,66 @@ export async function POST(req: Request) {
                 amount: session.amount_total,
               });
             }
+
+            // Confirmation email + Discord for store purchases
+            const customerEmail = session.customer_details?.email || session.customer_email || '';
+            const customerName = session.customer_details?.name || 'there';
+            const productName = session.line_items?.data?.[0]?.description || productId || 'your purchase';
+            const amountPaid = ((session.amount_total || 0) / 100).toFixed(2);
+
+            if (customerEmail) {
+              try {
+                const resend = new Resend(process.env.RESEND_API_KEY || '');
+                await resend.emails.send({
+                  from: 'NeuroChiro <support@neurochirodirectory.com>',
+                  to: [customerEmail],
+                  subject: `Your NeuroChiro purchase is ready!`,
+                  html: `
+                    <div style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;">
+                      <div style="background:#1a2744;padding:28px;text-align:center;">
+                        <h1 style="color:white;font-size:22px;margin:0;">NeuroChiro Store</h1>
+                        <p style="color:#e97325;font-size:16px;font-weight:bold;margin:8px 0 0;">Purchase Complete!</p>
+                      </div>
+                      <div style="padding:28px;background:white;">
+                        <p style="font-size:15px;color:#1a2744;">Hey ${customerName},</p>
+                        <p style="color:#666;line-height:1.6;">Your purchase is confirmed and ready to access.</p>
+                        <div style="background:#f8f9fa;border-radius:10px;padding:16px;margin:20px 0;">
+                          <p style="margin:0;font-weight:bold;color:#1a2744;">${productName}</p>
+                          <p style="margin:4px 0 0;color:#666;font-size:14px;">Amount: $${amountPaid}</p>
+                        </div>
+                        <h3 style="color:#1a2744;">How to access:</h3>
+                        <ol style="color:#666;line-height:1.8;">
+                          <li>Log in at <a href="https://neurochiro.co/login" style="color:#e97325;font-weight:bold;">neurochiro.co</a></li>
+                          <li>Go to <a href="https://neurochiro.co/account/purchases" style="color:#e97325;font-weight:bold;">My Purchases</a></li>
+                          <li>Click the access button next to your purchase</li>
+                        </ol>
+                        <div style="text-align:center;margin:24px 0;">
+                          <a href="https://neurochiro.co/account/purchases" style="display:inline-block;background:#e97325;color:white;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:bold;">Access My Purchase</a>
+                        </div>
+                        <p style="color:#999;font-size:13px;">Questions? Reply to this email.</p>
+                      </div>
+                      <div style="background:#f0f0f0;padding:14px;text-align:center;font-size:12px;color:#999;">
+                        NeuroChiro Network &middot; neurochiro.co
+                      </div>
+                    </div>
+                  `,
+                });
+              } catch (emailErr) {
+                console.error('[WEBHOOK] Store confirmation email failed:', emailErr);
+              }
+            }
+
+            // Discord notification
+            const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+            if (discordUrl) {
+              await fetch(discordUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  content: `🛒 **NEW STORE PURCHASE**\n\n**Product:** ${productName}\n**Amount:** $${amountPaid}\n**Email:** ${customerEmail}\n**Name:** ${customerName}`,
+                }),
+              }).catch(() => {});
+            }
           }
 
           if (metaType === 'store_cart') {
