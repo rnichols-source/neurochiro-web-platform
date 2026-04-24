@@ -36,6 +36,21 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 1,
     publishedAt: "2026-04-17T12:00:00Z",
   },
+  {
+    id: "ep-002",
+    doctorName: "Dr. Jordan Wolff",
+    doctorSlug: "dr.-jordan-wolff",
+    clinicName: "Wolff Chiropractic",
+    city: "New York City",
+    state: "NY",
+    videoUrl: "https://www.youtube.com/embed/brqOe37KgTU",
+    thumbnail: getYouTubeThumbnail("https://www.youtube.com/embed/brqOe37KgTU"),
+    quote: "I was adjusted the day I was born. I've never not known what it feels like to be under chiropractic care.",
+    description:
+      "Dr. Jordan Wolff is a second-generation chiropractor practicing in the same Midtown Manhattan office his father opened 40 years ago. Adjusted from birth, he shares why chiropractic is a way of life — not just pain relief. He talks about real patient transformations happening daily, why every pregnant woman and baby should be adjusted, and the full-circle moment of adjusting his daughter in the delivery room.",
+    episodeNumber: 2,
+    publishedAt: "2026-04-23T12:00:00Z",
+  },
 ];
 
 export function getLatestEpisode(): SpotlightEpisode {
