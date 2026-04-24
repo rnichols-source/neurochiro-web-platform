@@ -5,6 +5,7 @@ import { Zap, Flame, Search, Heart, BookOpen, Activity, ArrowRight, Loader2, Dum
 import Link from "next/link";
 import { getPatientDashboardData } from "./actions";
 import { isPremiumMember, createPremiumCheckout } from "../premium-actions";
+import WhatsNew from "@/components/common/WhatsNew";
 
 // Daily tip — auto-rotates based on day of year
 let todaysTip: any = null;
@@ -35,6 +36,7 @@ export default function PatientDashboard() {
 
   return (
     <div className="space-y-6 pb-20">
+      <WhatsNew />
       <h1 className="text-2xl font-heading font-black text-neuro-navy">Hi, {data?.name || 'there'}</h1>
 
       {/* Premium Quick Actions */}

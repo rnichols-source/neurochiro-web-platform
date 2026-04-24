@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import { getStudentDashboardData, getAcademyProgress, transitionToDoctorAction } from "./actions";
 import { useRouter } from "next/navigation";
 import { useRegion } from "@/context/RegionContext";
+import WhatsNew from "@/components/common/WhatsNew";
 
 export default function StudentDashboard() {
   const [data, setData] = useState<any>(null);
@@ -72,6 +73,7 @@ export default function StudentDashboard() {
 
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto space-y-8">
+      <WhatsNew />
       <header>
         <h1 className="text-2xl font-heading font-black text-neuro-navy">
           {studentName}

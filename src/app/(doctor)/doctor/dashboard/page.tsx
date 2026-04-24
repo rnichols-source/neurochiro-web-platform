@@ -7,6 +7,7 @@ import { getDoctorDashboardStats } from "./actions";
 import { useRegion } from "@/context/RegionContext";
 import { getOrCreateReferralCode, getReferralStats } from "@/app/actions/referral-program";
 import { createClient } from "@/lib/supabase";
+import WhatsNew from "@/components/common/WhatsNew";
 
 export default function DoctorDashboard() {
   const { region } = useRegion();
@@ -52,6 +53,7 @@ export default function DoctorDashboard() {
 
   return (
     <div className="space-y-8">
+      <WhatsNew />
       {/* Header */}
       <header className="flex items-center justify-between">
         <div>
