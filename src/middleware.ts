@@ -34,22 +34,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
 
-  // Role-based access control (lightweight check in middleware)
-  // NOTE: For /admin routes, the actual admin role verification happens in server actions
-  // via checkAdminAuth() which queries the profiles table. The middleware only checks
-  // that the user is authenticated (handled above). For /doctor and /student routes,
-  // we use user_metadata as a hint — server actions should also verify if needed.
-  const userRole = session?.user?.user_metadata?.role || '';
-  const path = req.nextUrl.pathname;
-
-  if (path.startsWith('/doctor') && !['doctor', 'admin', 'founder', 'super_admin'].includes(userRole)) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
-  if (path.startsWith('/student') && !['student', 'admin', 'founder', 'super_admin'].includes(userRole)) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
-  // Admin routes: only require authentication here. Actual role verification
-  // is enforced by checkAdminAuth() in every admin server action.
+  // Role-based access control: only enforce authentication in middleware.
+  // The authoritative role lives in the `profiles` table, not user_metadata.
+  // Checking user_metadata here caused redirect loops for doctors whose
+  // metadata was out of sync (claimed profiles, seeded data, role changes).
+  // Actual role verification is handled by server actions and page components.
 
   return res;
 }

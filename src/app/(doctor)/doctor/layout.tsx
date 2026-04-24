@@ -28,14 +28,6 @@ export default function DoctorLayout({
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
-      const { data } = await supabase
-        .from('notifications')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .is('read_at', null);
-      if (data !== null) {
-        // count is in the response headers, use length as fallback
-      }
       const { count } = await supabase
         .from('notifications')
         .select('*', { count: 'exact', head: true })

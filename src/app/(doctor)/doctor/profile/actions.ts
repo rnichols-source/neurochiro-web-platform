@@ -271,8 +271,10 @@ export async function uploadAvatar(formData: FormData) {
 
         const publicUrl = data?.publicUrl || ""
 
-        // Update doctor photo_url
-        const { error: updateError } = await supabase
+        // Update doctor photo_url (use admin client to bypass RLS)
+        const { createAdminClient } = await import('@/lib/supabase-admin')
+        const adminSupabase = createAdminClient()
+        const { error: updateError } = await adminSupabase
             .from('doctors')
             .update({ photo_url: publicUrl })
             .eq('user_id', user.id)

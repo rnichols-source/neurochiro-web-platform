@@ -19,8 +19,6 @@ export async function GET(request: Request) {
       }
 
       console.log(`[AUTH_CALLBACK] Successfully exchanged code. Redirecting to: ${next}`);
-      // Small delay to ensure database triggers (profiles/doctors) have finished
-      await new Promise(resolve => setTimeout(resolve, 2000));
       return NextResponse.redirect(`${origin}${next}`)
     } else {
       console.error("[AUTH_CALLBACK] Exchange error:", error.message);
