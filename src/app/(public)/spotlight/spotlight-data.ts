@@ -17,7 +17,7 @@ export function getYouTubeThumbnail(videoUrl: string): string {
   const match = videoUrl.match(/\/embed\/([a-zA-Z0-9_-]+)/);
   const videoId = match ? match[1] : "";
   if (!videoId) return "";
-  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 }
 
 export const spotlightEpisodes: SpotlightEpisode[] = [
