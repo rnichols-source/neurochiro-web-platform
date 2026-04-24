@@ -23,21 +23,6 @@ export function getYouTubeThumbnail(videoUrl: string): string {
 export const spotlightEpisodes: SpotlightEpisode[] = [
   {
     id: "ep-001",
-    doctorName: "Dr. Dakota Turgeon",
-    doctorSlug: "dakota-turgeon",
-    clinicName: "Envision Chiropractic",
-    city: "Bellingham",
-    state: "WA",
-    videoUrl: "https://www.youtube.com/embed/aPeMroYs4Vg",
-    thumbnail: getYouTubeThumbnail("https://www.youtube.com/embed/aPeMroYs4Vg"),
-    quote: "We don't do crack and go. We want to make sure we're the right solution for them — and if we're not, we'll be brutally honest about it.",
-    description:
-      "Dr. Dakota Turgeon of Envision Chiropractic in Bellingham, WA breaks down what sets his practice apart from the typical chiropractic office. He talks about taking the time to do thorough exams before ever adjusting, finding the root cause instead of chasing symptoms, and building a practice culture centered on honesty and personalized care.",
-    episodeNumber: 1,
-    publishedAt: "2026-04-17T12:00:00Z",
-  },
-  {
-    id: "ep-002",
     doctorName: "Dr. Jordan Wolff",
     doctorSlug: "dr.-jordan-wolff",
     clinicName: "Wolff Chiropractic",
@@ -48,7 +33,7 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     quote: "I was adjusted the day I was born. I've never not known what it feels like to be under chiropractic care.",
     description:
       "Dr. Jordan Wolff is a second-generation chiropractor practicing in the same Midtown Manhattan office his father opened 40 years ago. Adjusted from birth, he shares why chiropractic is a way of life — not just pain relief. He talks about real patient transformations happening daily, why every pregnant woman and baby should be adjusted, and the full-circle moment of adjusting his daughter in the delivery room.",
-    episodeNumber: 2,
+    episodeNumber: 1,
     publishedAt: "2026-04-23T12:00:00Z",
   },
 ];
