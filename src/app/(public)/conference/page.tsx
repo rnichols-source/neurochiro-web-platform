@@ -15,7 +15,7 @@ export default function ConferenceLandingPage() {
 
   const prices = {
     doctor: { monthly: 49, annual: 490 },
-    student: { monthly: 9, annual: 90 },
+    student: { monthly: 12, annual: 120 },
   };
 
   const price = prices[role][billing];
@@ -135,7 +135,7 @@ export default function ConferenceLandingPage() {
             </button>
             <span className={`text-sm font-bold ${billing === 'annual' ? 'text-neuro-navy' : 'text-gray-400'}`}>
               Annual <span className="text-green-500 text-xs">
-                (Save ${role === 'doctor' ? 98 : 18})
+                (Save ${role === 'doctor' ? 98 : 24})
               </span>
             </span>
           </div>

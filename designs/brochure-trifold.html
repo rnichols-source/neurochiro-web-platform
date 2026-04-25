@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro Tri-Fold Brochure — 11" x 8.5"</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+
+  :root {
+    --navy: #1E2D3B;
+    --navy-dark: #15202B;
+    --orange: #D66829;
+    --cream: #F5F3EF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #555;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: 'Montserrat', sans-serif;
+    gap: 48px;
+  }
+
+  .print-note {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 32px;
+    max-width: 700px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .print-note h3 {
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    color: var(--navy);
+  }
+
+  .print-note strong { color: var(--orange); }
+
+  .side-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .side-sublabel {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  /* ═══════════════════════════════════
+     BROCHURE — 11" x 8.5" (landscape)
+     Three panels: each ~3.67" x 8.5"
+     Scale: 1" = 72px
+     Total: 792px x 612px
+     Panel: 264px x 612px
+     ═══════════════════════════════════ */
+
+  .brochure {
+    width: 792px;
+    height: 612px;
+    display: flex;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .panel {
+    width: 264px;
+    height: 612px;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ─── Shared typography ─── */
+  .panel-title {
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+
+  .panel-subtitle {
+    font-size: 9px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: 8.5px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  .feature-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .feature-category {
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+
+  .section-line {
+    width: 100%;
+    height: 1px;
+    margin: 8px 0;
+  }
+
+  /* ═══════════════════════════════
+     OUTSIDE — What you see when folded
+     Left: Back | Middle: Inside Flap | Right: Cover (front)
+     ═══════════════════════════════ */
+
+  /* COVER (outside right — front when folded) */
+  .cover {
+    background: linear-gradient(170deg, var(--navy) 0%, var(--navy-dark) 100%);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(214,104,41,0.05) 0%, transparent 70%);
+  }
+
+  .cover .accent-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: var(--orange);
+  }
+
+  .cover .accent-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 5px;
+    background: var(--orange);
+  }
+
+  .cover .logo {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover .wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 3px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover .wordmark span { color: var(--orange); }
+
+  .cover .tagline {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-top: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover .cover-divider {
+    width: 50px;
+    height: 2px;
+    background: var(--orange);
+    margin: 24px 0;
+    border-radius: 1px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover .cover-description {
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.7;
+    max-width: 200px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover .cover-roles {
+    display: flex;
+    gap: 6px;
+    margin-top: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover .role-tag {
+    font-size: 7px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+
+  .role-tag-orange { background: var(--orange); color: white; }
+  .role-tag-outline { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.12); }
+
+  .cover .url {
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.4);
+    position: absolute;
+    bottom: 24px;
+    z-index: 1;
+  }
+
+  .cover .url span { color: var(--orange); opacity: 0.7; }
+
+  /* BACK (outside left) */
+  .back {
+    background: var(--cream);
+    justify-content: space-between;
+  }
+
+  .back .back-top {
+    text-align: center;
+  }
+
+  .back .back-wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--navy);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+
+  .back .back-wordmark span { color: var(--orange); }
+
+  .back .back-info {
+    font-size: 9px;
+    color: rgba(30,45,59,0.5);
+    line-height: 2.2;
+    font-weight: 500;
+  }
+
+  .back .back-info a {
+    color: var(--orange);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .back .back-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+
+  .back .back-qr img {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+  }
+
+  .back .back-qr-label {
+    font-size: 7px;
+    font-weight: 700;
+    color: rgba(30,45,59,0.35);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 6px;
+  }
+
+  .back .back-bottom {
+    text-align: center;
+  }
+
+  .back .back-guarantee {
+    background: white;
+    border: 1px solid rgba(30,45,59,0.08);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .back .back-guarantee-title {
+    font-size: 8px;
+    font-weight: 800;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .back .back-guarantee-text {
+    font-size: 7.5px;
+    color: rgba(30,45,59,0.5);
+    line-height: 1.5;
+  }
+
+  .back .back-copyright {
+    font-size: 7px;
+    color: rgba(30,45,59,0.3);
+  }
+
+  /* INSIDE FLAP (outside middle) */
+  .flap {
+    background: var(--navy);
+    color: white;
+    border-left: 1px solid rgba(255,255,255,0.05);
+    border-right: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .flap .panel-title { color: var(--orange); }
+  .flap .panel-subtitle { color: rgba(255,255,255,0.4); }
+  .flap .feature-dot { background: var(--orange); }
+  .flap .feature-item { color: rgba(255,255,255,0.7); }
+  .flap .feature-category { color: var(--orange); }
+  .flap .section-line { background: rgba(255,255,255,0.08); }
+
+  .flap .stat-row {
+    display: flex;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 16px;
+  }
+
+  .flap .stat-box {
+    flex: 1;
+    text-align: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 10px 4px;
+  }
+
+  .flap .stat-number {
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--orange);
+  }
+
+  .flap .stat-label {
+    font-size: 6px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  /* ═══════════════════════════════
+     INSIDE — Three panels when unfolded
+     Left: Doctors | Center: Students | Right: Patients
+     ═══════════════════════════════ */
+
+  /* DOCTORS (inside left) */
+  .doctors-panel {
+    background: white;
+  }
+
+  .doctors-panel .panel-title { color: var(--navy); }
+  .doctors-panel .panel-subtitle { color: rgba(30,45,59,0.5); }
+  .doctors-panel .feature-dot { background: var(--orange); }
+  .doctors-panel .feature-item { color: rgba(30,45,59,0.7); }
+  .doctors-panel .feature-category { color: var(--orange); }
+  .doctors-panel .section-line { background: rgba(30,45,59,0.08); }
+
+  .doctors-panel .price-badge {
+    display: inline-block;
+    background: var(--navy);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    margin-top: auto;
+    align-self: center;
+  }
+
+  .doctors-panel .price-badge span {
+    font-size: 9px;
+    font-weight: 600;
+    opacity: 0.6;
+  }
+
+  .doctors-panel .price-note {
+    font-size: 7px;
+    color: rgba(30,45,59,0.4);
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  /* STUDENTS (inside center) */
+  .students-panel {
+    background: var(--cream);
+    border-left: 1px solid rgba(30,45,59,0.06);
+    border-right: 1px solid rgba(30,45,59,0.06);
+  }
+
+  .students-panel .panel-title { color: var(--navy); }
+  .students-panel .panel-subtitle { color: rgba(30,45,59,0.5); }
+  .students-panel .feature-dot { background: #3B82F6; }
+  .students-panel .feature-item { color: rgba(30,45,59,0.7); }
+  .students-panel .feature-category { color: #3B82F6; }
+  .students-panel .section-line { background: rgba(30,45,59,0.08); }
+
+  .students-panel .price-badge {
+    display: inline-block;
+    background: #3B82F6;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    margin-top: auto;
+    align-self: center;
+  }
+
+  .students-panel .price-badge span {
+    font-size: 9px;
+    font-weight: 600;
+    opacity: 0.8;
+  }
+
+  .students-panel .price-note {
+    font-size: 7px;
+    color: rgba(30,45,59,0.4);
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  /* PATIENTS (inside right) */
+  .patients-panel {
+    background: white;
+  }
+
+  .patients-panel .panel-title { color: var(--navy); }
+  .patients-panel .panel-subtitle { color: rgba(30,45,59,0.5); }
+  .patients-panel .feature-dot { background: #2ECC71; }
+  .patients-panel .feature-item { color: rgba(30,45,59,0.7); }
+  .patients-panel .feature-category { color: #2ECC71; }
+  .patients-panel .section-line { background: rgba(30,45,59,0.08); }
+
+  .patients-panel .price-badge {
+    display: inline-block;
+    background: #2ECC71;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    margin-top: auto;
+    align-self: center;
+  }
+
+  .patients-panel .price-note {
+    font-size: 7px;
+    color: rgba(30,45,59,0.4);
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  /* Icon header for each inside panel */
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .panel-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .icon-orange { background: rgba(214,104,41,0.1); }
+  .icon-blue { background: rgba(59,130,246,0.1); }
+  .icon-green { background: rgba(46,204,113,0.1); }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .print-note, .side-label, .side-sublabel { display: none; }
+    .brochure { box-shadow: none; border: 1px solid #ddd; }
+  }
+</style>
+</head>
+<body>
+
+<div class="print-note">
+  <h3>NeuroChiro Tri-Fold Brochure</h3>
+  <p>
+    <strong>Size:</strong> 11" x 8.5" (standard tri-fold, landscape)<br>
+    Two sides shown below: <strong>Outside</strong> (folded view) and <strong>Inside</strong> (unfolded).<br>
+    Order from <strong>Vistaprint</strong> — upload front and back as separate images.
+  </p>
+</div>
+
+<!-- ═══════════════════════════════
+     OUTSIDE (when folded)
+     ═══════════════════════════════ -->
+
+<div class="side-label">Outside (Folded View)</div>
+<div class="side-sublabel">Left = Back | Middle = Inside flap | Right = Front cover</div>
+
+<div class="brochure">
+
+  <!-- BACK (outside left) -->
+  <div class="panel back">
+    <div class="back-top">
+      <div class="back-wordmark">NEURO<span>CHIRO</span></div>
+      <div class="back-info">
+        <a href="#">neurochiro.co</a><br>
+        support@neurochirodirectory.com<br><br>
+        The global directory for<br>
+        nervous system chiropractors.<br><br>
+        Connecting doctors, students,<br>
+        and patients worldwide.
+      </div>
+      <div class="back-qr">
+        <img src="../public/qr-conference.png" alt="QR">
+        <div class="back-qr-label">Scan to Join</div>
+      </div>
+    </div>
+    <div class="back-bottom">
+      <div class="back-guarantee">
+        <div class="back-guarantee-title">30-Day Money-Back Guarantee</div>
+        <div class="back-guarantee-text">Try NeuroChiro risk-free. Full refund within 30 days if you're not satisfied.</div>
+      </div>
+      <div class="back-copyright">&copy; 2026 NeuroChiro. All rights reserved.</div>
+    </div>
+  </div>
+
+  <!-- INSIDE FLAP (outside middle) -->
+  <div class="panel flap">
+    <div class="panel-title">What is<br>NeuroChiro?</div>
+    <div class="panel-subtitle">The first and only platform built exclusively for the nervous system chiropractic community.</div>
+
+    <div class="section-line"></div>
+
+    <div class="feature-category">For Doctors</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>Get found by patients searching Google</li>
+      <li class="feature-item"><span class="feature-dot"></span>Your own verified profile page</li>
+      <li class="feature-item"><span class="feature-dot"></span>Recruit students and post jobs</li>
+    </ul>
+
+    <div class="feature-category">For Students</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>Job board and clinic matching</li>
+      <li class="feature-item"><span class="feature-dot"></span>Academy courses and mentorship</li>
+      <li class="feature-item"><span class="feature-dot"></span>Listed in directory at graduation</li>
+    </ul>
+
+    <div class="feature-category">For Patients</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>Find a nervous system chiropractor</li>
+      <li class="feature-item"><span class="feature-dot"></span>Daily health tracker</li>
+      <li class="feature-item"><span class="feature-dot"></span>Exercise library and education</li>
+    </ul>
+
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-number">120+</div>
+        <div class="stat-label">Doctors</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">30+</div>
+        <div class="stat-label">States</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">4</div>
+        <div class="stat-label">Countries</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COVER (outside right — front when folded) -->
+  <div class="panel cover">
+    <div class="accent-top"></div>
+    <div class="accent-bottom"></div>
+    <img class="logo" src="../public/logo.png" alt="NeuroChiro">
+    <div class="wordmark">NEURO<span>CHIRO</span></div>
+    <div class="tagline">Nervous System First</div>
+    <div class="cover-divider"></div>
+    <div class="cover-description">
+      The global directory and platform for nervous system chiropractors, students, and patients.
+    </div>
+    <div class="cover-roles">
+      <div class="role-tag role-tag-orange">Doctors</div>
+      <div class="role-tag role-tag-outline">Students</div>
+      <div class="role-tag role-tag-outline">Patients</div>
+    </div>
+    <div class="url">neurochiro<span>.co</span></div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════
+     INSIDE (when unfolded)
+     ═══════════════════════════════ -->
+
+<div class="side-label" style="margin-top: 32px;">Inside (Unfolded View)</div>
+<div class="side-sublabel">Left = Doctors | Center = Students | Right = Patients</div>
+
+<div class="brochure">
+
+  <!-- DOCTORS (inside left) -->
+  <div class="panel doctors-panel">
+    <div class="panel-header">
+      <div class="panel-icon icon-orange">&#9733;</div>
+      <div class="panel-title" style="margin-bottom: 0;">Doctors</div>
+    </div>
+    <div class="panel-subtitle">Everything you need to grow your practice and get found.</div>
+
+    <div class="feature-category">Profile &amp; Directory</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>Your own SEO-optimized profile page</li>
+      <li class="feature-item"><span class="feature-dot"></span>AI-powered bio generator</li>
+      <li class="feature-item"><span class="feature-dot"></span>Photo, video, and specialties</li>
+      <li class="feature-item"><span class="feature-dot"></span>Verified badge for your website</li>
+      <li class="feature-item"><span class="feature-dot"></span>Priority placement in search results</li>
+    </ul>
+
+    <div class="section-line"></div>
+
+    <div class="feature-category">Analytics &amp; Leads</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>Profile views, clicks, and phone taps</li>
+      <li class="feature-item"><span class="feature-dot"></span>Patient lead tracking</li>
+      <li class="feature-item"><span class="feature-dot"></span>ROI dashboard with revenue estimates</li>
+    </ul>
+
+    <div class="section-line"></div>
+
+    <div class="feature-category">Recruit &amp; Connect</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>Post unlimited job listings</li>
+      <li class="feature-item"><span class="feature-dot"></span>Search and recruit students</li>
+      <li class="feature-item"><span class="feature-dot"></span>Host and list seminars</li>
+      <li class="feature-item"><span class="feature-dot"></span>Send and receive patient referrals</li>
+      <li class="feature-item"><span class="feature-dot"></span>Direct messaging with anyone</li>
+    </ul>
+
+    <div class="section-line"></div>
+
+    <div class="feature-category">Practice Tools</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>Care plan builder with PDF export</li>
+      <li class="feature-item"><span class="feature-dot"></span>Screening event mastery kit</li>
+      <li class="feature-item"><span class="feature-dot"></span>Referral program (invite &amp; earn)</li>
+    </ul>
+
+    <div class="price-badge">$49<span>/mo</span></div>
+    <div class="price-note">or $490/yr (save $98) &middot; Cancel anytime</div>
+  </div>
+
+  <!-- STUDENTS (inside center) -->
+  <div class="panel students-panel">
+    <div class="panel-header">
+      <div class="panel-icon icon-blue">&#127891;</div>
+      <div class="panel-title" style="margin-bottom: 0;">Students</div>
+    </div>
+    <div class="panel-subtitle">Launch your career before you graduate.</div>
+
+    <div class="feature-category">Jobs &amp; Career</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>Browse and apply to job listings</li>
+      <li class="feature-item"><span class="feature-dot"></span>Clinic matching with top practices</li>
+      <li class="feature-item"><span class="feature-dot"></span>Application tracking and status</li>
+      <li class="feature-item"><span class="feature-dot"></span>Interview prep resources</li>
+      <li class="feature-item"><span class="feature-dot"></span>Profile visible to hiring doctors</li>
+    </ul>
+
+    <div class="section-line"></div>
+
+    <div class="feature-category">Learning &amp; Growth</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>3 full academy courses included</li>
+      <li class="feature-item"><span class="feature-dot"></span>Module-based learning with progress</li>
+      <li class="feature-item"><span class="feature-dot"></span>Seminar discovery and registration</li>
+      <li class="feature-item"><span class="feature-dot"></span>AI contract analysis lab</li>
+    </ul>
+
+    <div class="section-line"></div>
+
+    <div class="feature-category">Financial Planning</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>Loan and repayment calculator</li>
+      <li class="feature-item"><span class="feature-dot"></span>Salary and tax projections</li>
+      <li class="feature-item"><span class="feature-dot"></span>Practice opening budget planner</li>
+      <li class="feature-item"><span class="feature-dot"></span>Retirement savings planning</li>
+    </ul>
+
+    <div class="section-line"></div>
+
+    <div class="feature-category">Network</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>Direct messaging with doctors</li>
+      <li class="feature-item"><span class="feature-dot"></span>Listed in directory at graduation</li>
+      <li class="feature-item"><span class="feature-dot"></span>Transition to Doctor membership</li>
+    </ul>
+
+    <div class="price-badge">$12<span>/mo</span></div>
+    <div class="price-note">or $120/yr (save $24) &middot; Cancel anytime</div>
+  </div>
+
+  <!-- PATIENTS (inside right) -->
+  <div class="panel patients-panel">
+    <div class="panel-header">
+      <div class="panel-icon icon-green">&#9829;</div>
+      <div class="panel-title" style="margin-bottom: 0;">Patients</div>
+    </div>
+    <div class="panel-subtitle">Take control of your nervous system health.</div>
+
+    <div class="feature-category">Find Your Doctor</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>Search the global directory</li>
+      <li class="feature-item"><span class="feature-dot"></span>Filter by location and specialty</li>
+      <li class="feature-item"><span class="feature-dot"></span>View verified doctor profiles</li>
+      <li class="feature-item"><span class="feature-dot"></span>Save your favorite doctors</li>
+      <li class="feature-item"><span class="feature-dot"></span>Request appointments</li>
+    </ul>
+
+    <div class="section-line"></div>
+
+    <div class="feature-category">Daily Health Tracking</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>30-second daily check-in</li>
+      <li class="feature-item"><span class="feature-dot"></span>Track energy, pain, sleep, stress</li>
+      <li class="feature-item"><span class="feature-dot"></span>Streak tracking for consistency</li>
+      <li class="feature-item"><span class="feature-dot"></span>AI-powered daily recommendations</li>
+    </ul>
+
+    <div class="section-line"></div>
+
+    <div class="feature-category">Exercise &amp; Education</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>Video exercise library by category</li>
+      <li class="feature-item"><span class="feature-dot"></span>Breathing, core, cervical routines</li>
+      <li class="feature-item"><span class="feature-dot"></span>Difficulty levels (beginner to advanced)</li>
+      <li class="feature-item"><span class="feature-dot"></span>Educational articles and daily tips</li>
+    </ul>
+
+    <div class="section-line"></div>
+
+    <div class="feature-category">Your Journey</div>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-dot"></span>Health journey timeline</li>
+      <li class="feature-item"><span class="feature-dot"></span>Progress visualization</li>
+      <li class="feature-item"><span class="feature-dot"></span>Supplement tracking</li>
+    </ul>
+
+    <div class="price-badge">Free</div>
+    <div class="price-note">Always free for patients &middot; No credit card needed</div>
+  </div>
+
+</div>
+
+</body>
+</html>
