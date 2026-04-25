@@ -218,7 +218,7 @@ function LoginContent() {
         <div className="mt-10 text-center space-y-4">
           <p className="text-sm text-gray-400">Don't have an account yet?</p>
           <Link 
-            href="/register" 
+            href="/pricing/doctors"
             className="inline-flex items-center gap-2 px-8 py-3 border-2 border-gray-50 rounded-xl text-xs font-black text-neuro-navy uppercase tracking-widest hover:border-neuro-orange transition-all"
           >
             Create Account <ArrowRight className="w-4 h-4 text-neuro-orange" />

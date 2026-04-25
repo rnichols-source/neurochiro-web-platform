@@ -95,7 +95,7 @@ export default function BentoGrid() {
 
             <div className="relative z-10">
                <Link 
-                 href="/register?role=student" 
+                 href="/pricing/students"
                  className="px-8 py-4 bg-white text-neuro-navy rounded-full font-bold hover:bg-gray-100 transition-colors inline-block min-h-[44px] flex items-center"
                  aria-label="Register as a student"
                >

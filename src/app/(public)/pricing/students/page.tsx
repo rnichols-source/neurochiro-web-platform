@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, Zap } from "lucide-react";
 import Link from "next/link";
 import { useRegion } from "@/context/RegionContext";
+import { STRIPE_PAYMENT_LINKS } from "@/lib/stripe-links";
 
 export default function StudentPricing() {
   const { region } = useRegion();
@@ -67,12 +68,12 @@ export default function StudentPricing() {
           ))}
         </div>
 
-        <Link
-          href={`/register?role=student&billing=${billingCycle}`}
+        <a
+          href={STRIPE_PAYMENT_LINKS.student[billingCycle]}
           className="w-full py-5 bg-neuro-orange text-white font-black uppercase tracking-widest text-sm rounded-2xl hover:bg-neuro-orange/90 transition-all flex items-center justify-center gap-2 shadow-xl shadow-neuro-orange/20"
         >
-          Get Started <ArrowRight className="w-5 h-5" />
-        </Link>
+          <Zap className="w-5 h-5" /> Get Started
+        </a>
       </div>
 
       {/* Student Value Prop */}

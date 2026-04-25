@@ -110,7 +110,7 @@ export default function IntentGateway() {
                   <p className="text-gray-500">Access mentorship, seminars, and job placements at elite nervous system focused clinics.</p>
                 </div>
                 <div className="w-full md:w-auto flex flex-col gap-4 min-w-[300px]">
-                   <Link href="/register?role=student" className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
+                   <Link href="/pricing/students" className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
                      Join Student Platform <ArrowRight className="w-5 h-5" />
                    </Link>
                    <div className="flex justify-between text-sm font-medium text-gray-500 px-2">
@@ -141,7 +141,7 @@ export default function IntentGateway() {
                       <Link href="/login" className="flex-1 py-4 bg-neuro-cream text-neuro-navy font-bold rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors">
                         Login
                       </Link>
-                      <Link href="/register?role=doctor" className="flex-1 py-4 bg-neuro-navy text-white font-bold rounded-xl flex items-center justify-center hover:bg-neuro-navy-light transition-all shadow-lg shadow-neuro-navy/20">
+                      <Link href="/pricing/doctors" className="flex-1 py-4 bg-neuro-navy text-white font-bold rounded-xl flex items-center justify-center hover:bg-neuro-navy-light transition-all shadow-lg shadow-neuro-navy/20">
                         Join
                       </Link>
                    </div>

@@ -136,7 +136,7 @@ export default function MyPurchasesPage() {
             <p className="text-xs text-gray-400 mt-4">
               Don&apos;t have an account?{" "}
               <Link
-                href="/register"
+                href="/pricing/doctors"
                 className="text-neuro-orange font-semibold hover:underline"
               >
                 Create one free

@@ -110,7 +110,7 @@ export default function WhyNeuroChiroPage() {
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/register?role=doctor"
+              href="/pricing/doctors"
               className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors inline-flex items-center justify-center gap-2"
             >
               Join the Network <ArrowRight className="w-5 h-5" />
@@ -267,7 +267,7 @@ export default function WhyNeuroChiroPage() {
             Join the growing network of nervous system specialists. Your patients are already looking for you.
           </p>
           <Link
-            href="/register?role=doctor"
+            href="/pricing/doctors"
             className="inline-flex items-center gap-2 px-10 py-5 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors shadow-xl shadow-neuro-orange/20"
           >
             Join NeuroChiro Today <ArrowRight className="w-5 h-5" />
