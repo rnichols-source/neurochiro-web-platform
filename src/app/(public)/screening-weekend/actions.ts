@@ -6,6 +6,7 @@ export async function createWeekendCheckout(
   tier: "intensive" | "intensive-plan" | "vip" | "vip-plan",
   name: string,
   email: string,
+  isStudent: boolean = false,
 ) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://neurochiro.co";
 
@@ -13,16 +14,28 @@ export async function createWeekendCheckout(
   const isPaymentPlan = tier.endsWith("-plan");
   const baseTier = tier.replace("-plan", "") as "intensive" | "vip";
 
-  const tiers = {
-    intensive: { price: 75000, label: "The Screening Intensive" },
-    vip: { price: 175000, label: "The Screening Accelerator + Command Center" },
+  // Doctor pricing
+  const docTiers = {
+    intensive: { price: 49700, label: "The Screening Intensive" },
+    vip: { price: 99700, label: "The Screening Accelerator + Command Center" },
+  };
+  const docPlanPrices = {
+    intensive: 24900, // $249 x 2 = $498
+    vip: 49900, // $499 x 2 = $998
   };
 
-  const planPrices = {
-    intensive: 30000, // $300 x 3 = $900
-    vip: 63400, // $634 x 3 = $1,902 (~$150 more than PIF)
+  // Student pricing (50% off)
+  const studentTiers = {
+    intensive: { price: 24700, label: "The Screening Intensive (Student)" },
+    vip: { price: 49700, label: "The Screening Accelerator + Command Center (Student)" },
+  };
+  const studentPlanPrices = {
+    intensive: 12400, // $124 x 2 = $248
+    vip: 24900, // $249 x 2 = $498
   };
 
+  const tiers = isStudent ? studentTiers : docTiers;
+  const planPrices = isStudent ? studentPlanPrices : docPlanPrices;
   const selected = tiers[baseTier];
 
   try {
@@ -45,13 +58,15 @@ export async function createWeekendCheckout(
           metadata: {
             type: "weekend_intensive",
             tier: baseTier,
-            paymentPlan: "3-month",
+            paymentPlan: "2-month",
+            isStudent: isStudent ? "true" : "false",
             attendeeName: name,
           },
         },
         metadata: {
           type: "weekend_intensive",
           tier: baseTier,
+          isStudent: isStudent ? "true" : "false",
           attendeeName: name,
           attendeeEmail: email,
         },
@@ -77,6 +92,7 @@ export async function createWeekendCheckout(
         metadata: {
           type: "weekend_intensive",
           tier: baseTier,
+          isStudent: isStudent ? "true" : "false",
           attendeeName: name,
           attendeeEmail: email,
         },

@@ -39,12 +39,19 @@ function RegistrationForm({
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [isStudent, setIsStudent] = useState(false);
   const [paymentPlan, setPaymentPlan] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const label = tier === "vip" ? "The Screening Accelerator" : "The Screening Intensive";
-  const fullPrice = tier === "vip" ? "$1,750" : "$750";
-  const planPrice = tier === "vip" ? "$634" : "$300";
+
+  const prices = {
+    intensive: { doc: 497, student: 247, docPlan: 249, studentPlan: 124 },
+    vip: { doc: 997, student: 497, docPlan: 499, studentPlan: 249 },
+  };
+  const p = prices[tier];
+  const fullPrice = isStudent ? `$${p.student}` : `$${p.doc}`;
+  const planPrice = isStudent ? `$${p.studentPlan}` : `$${p.docPlan}`;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +59,7 @@ function RegistrationForm({
     setSubmitting(true);
 
     const checkoutTier = paymentPlan ? `${tier}-plan` as any : tier;
-    const result = await createWeekendCheckout(checkoutTier, name.trim(), email.trim());
+    const result = await createWeekendCheckout(checkoutTier, name.trim(), email.trim(), isStudent);
     if (result.url) {
       window.location.href = result.url;
     } else {
@@ -76,6 +83,26 @@ function RegistrationForm({
           <h3 className="text-xl font-black text-neuro-navy">{label}</h3>
         </div>
 
+        {/* Student Toggle */}
+        <div className="flex rounded-xl bg-gray-100 p-1 mb-4">
+          <button
+            onClick={() => setIsStudent(false)}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
+              !isStudent ? "bg-white text-neuro-navy shadow-sm" : "text-gray-500"
+            }`}
+          >
+            Doctor
+          </button>
+          <button
+            onClick={() => setIsStudent(true)}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
+              isStudent ? "bg-white text-neuro-navy shadow-sm" : "text-gray-500"
+            }`}
+          >
+            Student — 50% Off
+          </button>
+        </div>
+
         {/* Payment Toggle */}
         <div className="flex rounded-xl bg-gray-100 p-1 mb-6">
           <button
@@ -92,7 +119,7 @@ function RegistrationForm({
               paymentPlan ? "bg-white text-neuro-navy shadow-sm" : "text-gray-500"
             }`}
           >
-            3 Payments — {planPrice}/mo
+            2 Payments — {planPrice}/mo
           </button>
         </div>
 
@@ -116,7 +143,7 @@ function RegistrationForm({
           </button>
           <p className="text-xs text-gray-400 text-center">
             Secure checkout powered by Stripe. Limited to 40 seats (15 Accelerator spots).
-            {paymentPlan && " 2 monthly payments."}
+            {paymentPlan && " 1 additional monthly payment."}
           </p>
         </form>
       </div>
@@ -421,7 +448,7 @@ function WeekendContent() {
             >
               Reserve Your Seat <ArrowRight className="w-5 h-5" />
             </button>
-            <span className="text-sm text-gray-500">or 3 payments of $300</span>
+            <span className="text-sm text-gray-500">Students get 50% off</span>
           </div>
 
           <div className="grid grid-cols-3 gap-6 max-w-lg mx-auto mt-14">
@@ -631,9 +658,13 @@ function WeekendContent() {
       <section ref={pricingRef} className="py-20 px-6" id="pricing">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-xs font-black uppercase tracking-widest text-neuro-orange mb-2">Investment</p>
+            <p className="text-xs font-black uppercase tracking-widest text-neuro-orange mb-2">Founding Cohort Pricing</p>
             <h2 className="text-3xl font-black text-neuro-navy">Choose Your Level</h2>
             <p className="text-gray-500 mt-2">Learn the system — or learn it AND get the tools + coaching to execute immediately.</p>
+            <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-neuro-orange/10 rounded-full">
+              <Star className="w-4 h-4 text-neuro-orange" />
+              <span className="text-sm font-bold text-neuro-navy">Chiropractic students get 50% off all tiers</span>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -641,8 +672,15 @@ function WeekendContent() {
             <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 flex flex-col">
               <h3 className="text-xl font-black text-neuro-navy mb-1">The Screening Intensive</h3>
               <p className="text-sm text-gray-500 mb-4">Learn the system</p>
-              <div className="mb-1"><span className="text-4xl font-black text-neuro-navy">$750</span></div>
-              <p className="text-sm text-gray-400 mb-6">or 3 payments of $300</p>
+              <div className="mb-1">
+                <span className="text-4xl font-black text-neuro-navy">$497</span>
+                <span className="text-sm text-gray-400 ml-2">doctor</span>
+              </div>
+              <div className="mb-1">
+                <span className="text-2xl font-black text-neuro-orange">$247</span>
+                <span className="text-sm text-neuro-orange/70 ml-2">student</span>
+              </div>
+              <p className="text-sm text-gray-400 mb-6">or 2 payments of $249/mo (doc) &middot; $124/mo (student)</p>
               <div className="space-y-3 flex-1 mb-8">
                 {["Full Friday-Sunday Zoom program", "Live role-play in breakout rooms", "All scripts, forms, and trackers (PDF)", "Accountability partner pairing", "30-day group chat access", "Lifetime access to recordings", "PDF workbook with all scripts"].map((f, i) => (
                   <div key={i} className="flex items-start gap-2.5"><CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" /><span className="text-sm text-gray-700">{f}</span></div>
@@ -658,8 +696,15 @@ function WeekendContent() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-neuro-orange text-white text-xs font-black uppercase tracking-widest rounded-full">Only 15 Spots</div>
               <h3 className="text-xl font-black text-neuro-navy mb-1">The Screening Accelerator</h3>
               <p className="text-sm text-gray-500 mb-4">Learn it + Build it + Get coached through it</p>
-              <div className="mb-1"><span className="text-4xl font-black text-neuro-navy">$1,750</span></div>
-              <p className="text-sm text-gray-400 mb-6">or 3 payments of $634</p>
+              <div className="mb-1">
+                <span className="text-4xl font-black text-neuro-navy">$997</span>
+                <span className="text-sm text-gray-400 ml-2">doctor</span>
+              </div>
+              <div className="mb-1">
+                <span className="text-2xl font-black text-neuro-orange">$497</span>
+                <span className="text-sm text-neuro-orange/70 ml-2">student</span>
+              </div>
+              <p className="text-sm text-gray-400 mb-6">or 2 payments of $499/mo (doc) &middot; $249/mo (student)</p>
               <div className="space-y-3 flex-1 mb-8">
                 {["Everything in The Screening Intensive", "The Screening Command Center (live dashboard)", "25-50 events pre-loaded in YOUR area", "Screening Event Mastery Kit ($149 value)", "90-day group coaching — 6 bi-weekly Zoom calls", "Private group chat for 90 days", "Screening debriefs after every event", "Lifetime access to recordings + updates", "Founding cohort priority access"].map((f, i) => (
                   <div key={i} className="flex items-start gap-2.5"><CheckCircle className="w-4 h-4 text-neuro-orange flex-shrink-0 mt-0.5" /><span className="text-sm text-gray-700">{f}</span></div>
@@ -672,7 +717,7 @@ function WeekendContent() {
           </div>
 
           <div className="mt-10 bg-gray-50 rounded-2xl p-6 text-center">
-            <p className="text-sm text-gray-600"><strong className="text-neuro-navy">The math:</strong> 4 new patients from one screening at $2,500 avg = $10,000. Your investment pays for itself from <strong className="text-neuro-navy">one Saturday morning</strong>.</p>
+            <p className="text-sm text-gray-600"><strong className="text-neuro-navy">The math:</strong> 4 new patients from one screening at $2,500 avg = $10,000. A $497 investment pays for itself from <strong className="text-neuro-navy">one Saturday morning</strong>.</p>
           </div>
         </div>
       </section>
@@ -688,8 +733,9 @@ function WeekendContent() {
               { q: "What if I miss a session?", a: "Every session is recorded and available within 24 hours. But attend live if at all possible — the breakout room practice is where the transformation happens." },
               { q: "Can I bring my CA or office manager?", a: "Your ticket covers you. Team members can be added at a reduced rate — they're half the screening team, so it's highly recommended. Email us for details." },
               { q: "What's the Screening Command Center?", a: "A live dashboard inside NeuroChiro where you track all your screening events, network contacts, vendor relationships, and outreach pipeline. We pre-load 25-50 real events in YOUR area so you have a pipeline ready to go." },
-              { q: "What's the difference between the Intensive and the Accelerator?", a: "The Intensive ($750) is the 3-day training — you learn the complete screening system. The Accelerator ($1,750) includes everything in the Intensive PLUS the Screening Command Center (your live dashboard), 25-50 pre-loaded events in your area, the Screening Mastery Kit, and 90 days of bi-weekly group coaching calls. The Intensive teaches you. The Accelerator teaches you AND gives you everything you need to execute immediately." },
-              { q: "Is there a payment plan?", a: "Yes. The Intensive: 3 payments of $300 ($900 total). The Accelerator: 3 payments of $634 ($1,902 total). First payment due at registration." },
+              { q: "What's the difference between the Intensive and the Accelerator?", a: "The Intensive ($497) is the 3-day training — you learn the complete screening system. The Accelerator ($997) includes everything in the Intensive PLUS the Screening Command Center (your live dashboard), 25-50 pre-loaded events in your area, the Screening Mastery Kit, and 90 days of bi-weekly group coaching calls. The Intensive teaches you. The Accelerator teaches you AND gives you everything you need to execute immediately." },
+              { q: "Is there a payment plan?", a: "Yes. The Intensive: 2 payments of $249. The Accelerator: 2 payments of $499. First payment due at registration." },
+              { q: "Is there student pricing?", a: "Yes — chiropractic students get 50% off both tiers. The Intensive is $247 (or 2x $124) and the Accelerator is $497 (or 2x $249). You'll select 'Student' during registration." },
               { q: "What is the Screening Command Center?", a: "It's a live dashboard inside NeuroChiro where you track all your screening events, network contacts, vendor relationships, and outreach pipeline. We pre-load 25-50 real screening opportunities in YOUR area so you have a pipeline ready to go before the weekend even starts. It's only available with the Accelerator tier." },
               { q: "What does the 90-day group coaching include?", a: "Six bi-weekly Zoom calls over 90 days with a small group of 10-15 doctors all running screenings. You bring your results, get feedback, troubleshoot what didn't work, and plan your next event. Plus a private group chat between calls for quick questions and sharing wins." },
               { q: "When is the next weekend?", a: "May 22-24, 2026. Friday evening 6-8:30 PM, Saturday 9 AM-3 PM, Sunday 9 AM-12:30 PM. All times EST. Seats are limited to 15 — reserve yours now." },
@@ -714,7 +760,7 @@ function WeekendContent() {
           <button onClick={scrollToPricing} className="px-10 py-4 bg-neuro-orange text-white font-bold rounded-xl text-lg hover:bg-neuro-orange/90 transition-all active:scale-[0.98] inline-flex items-center gap-2">
             Reserve Your Seat <ArrowRight className="w-5 h-5" />
           </button>
-          <p className="text-sm text-gray-500 mt-4">May 22-24, 2026. Founding cohort — 40 seats (only 15 Accelerator spots). Payment plans available.</p>
+          <p className="text-sm text-gray-500 mt-4">May 22-24, 2026. Founding cohort — 40 seats (only 15 Accelerator spots). Student pricing &amp; payment plans available.</p>
         </div>
       </section>
 
