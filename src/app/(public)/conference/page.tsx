@@ -87,37 +87,28 @@ export default function ConferenceLandingPage() {
   return (
     <div className="min-h-dvh bg-neuro-cream">
       {/* Hero */}
-      <section className="bg-neuro-navy text-white pt-16 pb-12 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-neuro-navy via-neuro-navy to-neuro-navy-dark" />
-        <div className="max-w-2xl mx-auto text-center relative z-10">
-          {/* Logo */}
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <Image src="/logo-white.png" alt="NeuroChiro" width={48} height={48} />
-            <span className="text-2xl font-heading font-black tracking-tight">
-              NEURO<span className="text-neuro-orange">CHIRO</span>
-            </span>
-          </div>
-
+      <section className="bg-neuro-navy text-white pt-32 pb-14 px-6">
+        <div className="max-w-2xl mx-auto text-center">
           {/* Event badge */}
-          <div className="inline-flex items-center gap-2 bg-neuro-orange/15 border border-neuro-orange/30 rounded-full px-4 py-2 mb-6">
+          <div className="inline-flex items-center gap-2 bg-neuro-orange/15 border border-neuro-orange/30 rounded-full px-4 py-2 mb-8">
             <Calendar className="w-4 h-4 text-neuro-orange" />
             <span className="text-xs font-bold text-neuro-orange uppercase tracking-wider">
               Live at New Beginnings 2026
             </span>
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-heading font-black tracking-tight leading-tight mb-3">
+          <h1 className="text-3xl md:text-4xl font-heading font-black tracking-tight leading-tight mb-4 text-white">
             Get Found by Patients Looking for{" "}
             <span className="text-neuro-orange">Nervous System</span> Chiropractors
           </h1>
 
-          <p className="text-gray-400 text-base mb-6 max-w-lg mx-auto">
+          <p className="text-gray-300 text-base mb-8 max-w-lg mx-auto">
             The only directory built exclusively for doctors like you.
             Join 120+ verified chiropractors across 30+ states.
           </p>
 
           {/* Event info */}
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-400">
             <div className="flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-neuro-orange" />
               <span>Asbury Park, NJ</span>
