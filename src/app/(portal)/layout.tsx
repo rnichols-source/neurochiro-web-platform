@@ -112,9 +112,7 @@ function PortalShell({ children }: { children: React.ReactNode }) {
         {/* Logo */}
         <div className="p-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl bg-neuro-orange flex items-center justify-center font-black text-white text-lg shadow-lg shadow-neuro-orange/20 group-hover:scale-105 transition-transform">
-              N
-            </div>
+            <img src="/logo-white.png" alt="NeuroChiro" className="w-9 h-9 object-contain group-hover:scale-105 transition-transform" />
             <div className="flex flex-col">
               <span className="text-lg font-heading font-black tracking-tight text-white leading-none">
                 NeuroChiro
