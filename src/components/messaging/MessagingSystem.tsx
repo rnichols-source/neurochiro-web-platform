@@ -20,6 +20,7 @@ import {
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
+import { notifyNewMessage } from "@/app/actions/comms-actions";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -554,6 +555,9 @@ export default function MessagingSystem({
       });
 
       if (error) throw error;
+
+      // Notify recipient (in-app + email)
+      notifyNewMessage(selectedConversation.otherUser.id, selectedConversation.otherUser.role);
 
       if (selectedConversation.isTemp) {
         fetchMessages(convId);

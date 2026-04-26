@@ -879,14 +879,17 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           const { data: sender } = await supabaseAdmin.from('profiles').select('full_name').eq('id', sender_id).single();
           
           if (recipient?.email) {
-            const dashboardUrl = recipient.role === 'student' ? 'https://neurochiro.co/student/messages' : 'https://neurochiro.co/doctor/messages';
+            const messagesUrl = recipient.role === 'student' ? 'https://neurochiro.co/student/messages'
+              : recipient.role === 'patient' ? 'https://neurochiro.co/portal/messages'
+              : recipient.role === 'admin' || recipient.role === 'super_admin' || recipient.role === 'founder' ? 'https://neurochiro.co/admin/inbox'
+              : 'https://neurochiro.co/doctor/messages';
             await sendPremiumEmail({
               to: recipient.email,
               subject: `New Message from ${sender?.full_name || 'a member'}`,
               title: 'New Message',
               body: `<p>Hi ${recipient.full_name || 'Member'}, you have a new unread message from ${sender?.full_name || 'someone in the network'}. Please log in to reply to keep the conversation active.</p>`,
               ctaText: 'View Message',
-              ctaUrl: dashboardUrl
+              ctaUrl: messagesUrl
             });
           }
         }
@@ -1084,6 +1087,23 @@ export const Automations = {
   },
   onSubscriptionCanceled: async (data: any) => {
     await enqueue('subscription_canceled', { stripeData: data });
+  },
+  onMessageSent: async (senderId: string, senderName: string, recipientId: string, recipientRole: string) => {
+    const messagesLink = recipientRole === 'student' ? '/student/messages'
+      : recipientRole === 'patient' ? '/portal/messages'
+      : recipientRole === 'admin' || recipientRole === 'super_admin' || recipientRole === 'founder' ? '/admin/inbox'
+      : '/doctor/messages';
+    // In-app notification
+    await insertNotification(
+      recipientId,
+      'New Message',
+      `You have a new message from ${senderName}.`,
+      'system',
+      messagesLink,
+      'info'
+    );
+    // Delayed email (2 min) — only sent if still unread
+    await enqueue('unread_message_email', { userId: recipientId, recipient_id: recipientId, sender_id: senderId }, 2);
   },
   retryAutomation: async (queueId: string) => {
     const supabaseAdmin = getSupabaseAdmin();

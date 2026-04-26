@@ -2,6 +2,26 @@
 
 import { createServerSupabase } from "@/lib/supabase-server";
 import { Resend } from "resend";
+import { Automations } from "@/lib/automations";
+
+export async function notifyNewMessage(recipientId: string, recipientRole: string) {
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', user.id)
+    .single();
+
+  await Automations.onMessageSent(
+    user.id,
+    profile?.full_name || 'A member',
+    recipientId,
+    recipientRole
+  );
+}
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
