@@ -77,8 +77,12 @@ export async function updateDoctorProfile(formData: FormData) {
     const instagramUrl = formData.get('instagram_url') as string
     const facebookUrl = formData.get('facebook_url') as string
 
+    // Use admin client for all updates to bypass RLS
+    const { createAdminClient } = await import('@/lib/supabase-admin')
+    const adminSupabase = createAdminClient()
+
     // 1. Update Profile (Name)
-    const { error: profileError } = await supabase
+    const { error: profileError } = await adminSupabase
       .from('profiles')
       .update({ full_name: fullName })
       .eq('id', user.id)
@@ -88,9 +92,7 @@ export async function updateDoctorProfile(formData: FormData) {
       return { error: `Failed to update name: ${profileError.message}` }
     }
 
-    // 2. Update Doctor table (use admin client to bypass RLS)
-    const { createAdminClient } = await import('@/lib/supabase-admin')
-    const adminSupabase = createAdminClient()
+    // 2. Update Doctor table
 
     const { error: doctorError } = await adminSupabase
       .from('doctors')
@@ -242,12 +244,15 @@ export async function uploadAvatar(formData: FormData) {
             return { error: "No valid image file detected." }
         }
 
+        // Use admin client for storage to bypass RLS policies
+        const { createAdminClient } = await import('@/lib/supabase-admin')
+        const adminSupabase = createAdminClient()
+
         const fileExt = file.name.split('.').pop()?.toLowerCase() || 'png'
         const fileName = `${Date.now()}.${fileExt}`
-        // RLS expects folder to be the user ID
         const filePath = `${user.id}/${fileName}`
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { data: uploadData, error: uploadError } = await adminSupabase.storage
             .from('clinic-photos')
             .upload(filePath, file, {
                 cacheControl: '3600',
@@ -259,21 +264,16 @@ export async function uploadAvatar(formData: FormData) {
             if (uploadError.message.includes('bucket not found')) {
                 return { error: "Storage setup incomplete: 'clinic-photos' bucket missing." }
             }
-            if (uploadError.message.includes('row-level security')) {
-                return { error: "Permission denied: Storage policies not configured." }
-            }
             return { error: `Upload failed: ${uploadError.message}` }
         }
 
-        const { data } = supabase.storage
+        const { data } = adminSupabase.storage
             .from('clinic-photos')
             .getPublicUrl(filePath)
 
         const publicUrl = data?.publicUrl || ""
 
-        // Update doctor photo_url (use admin client to bypass RLS)
-        const { createAdminClient } = await import('@/lib/supabase-admin')
-        const adminSupabase = createAdminClient()
+        // Update doctor photo_url
         const { error: updateError } = await adminSupabase
             .from('doctors')
             .update({ photo_url: publicUrl })
