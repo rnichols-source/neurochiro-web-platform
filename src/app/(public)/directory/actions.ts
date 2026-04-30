@@ -98,7 +98,7 @@ export async function getDoctors(options: {
        
        if (fallbackData && fallbackData.length > 0) {
          return {
-           doctors: fallbackData as Doctor[],
+           doctors: fallbackData as unknown as Doctor[],
            total: fallbackCount || fallbackData.length,
            error: false,
            isFallback: true
@@ -107,7 +107,7 @@ export async function getDoctors(options: {
     }
     
     return {
-      doctors: (data || []) as Doctor[],
+      doctors: (data || []) as unknown as Doctor[],
       total: count || 0,
       error: false
     };
@@ -156,7 +156,7 @@ export async function getDoctorBySlug(slug: string) {
       return { doctor: null, error: true };
     }
 
-    return { doctor: data as Doctor | null, error: false }
+    return { doctor: data as unknown as Doctor | null, error: false }
   } catch (e) {
     console.error("[DIRECTORY_ACTION] Critical Crash in getDoctorBySlug:", e);
     return { doctor: null, error: true }
