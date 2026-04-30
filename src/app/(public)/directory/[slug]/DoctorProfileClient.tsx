@@ -124,7 +124,7 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                   <p className="text-xs text-gray-500 mt-1">Claim your NeuroChiro profile to add your photo, bio, and start connecting with patients.</p>
                 </div>
                 <a
-                  href={`/register?claim=${slug}&role=doctor`}
+                  href={`/register?claim_id=${doctor.id}&role=doctor`}
                   className="px-5 py-2.5 bg-neuro-orange text-white rounded-xl text-sm font-bold hover:bg-neuro-orange-light transition-all whitespace-nowrap"
                 >
                   Claim This Profile

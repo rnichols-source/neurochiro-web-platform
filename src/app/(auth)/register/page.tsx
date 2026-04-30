@@ -95,7 +95,13 @@ function RegisterForm() {
   return (
     <div className="min-h-dvh flex items-center justify-center bg-gray-50 px-4 py-12">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-2xl font-bold text-gray-900 text-center mb-6">Create your account</h1>
+        <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">
+          {claimId ? "Claim Your Profile" : "Create your account"}
+        </h1>
+        {claimId && (
+          <p className="text-center text-gray-500 text-sm mb-6">Create an account to manage your NeuroChiro listing. Takes 30 seconds.</p>
+        )}
+        {!claimId && <div className="mb-6" />}
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
@@ -104,7 +110,8 @@ function RegisterForm() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Role toggle — first so fields adjust */}
+          {/* Role toggle — hide when claiming (always doctor) */}
+          {!claimId && (
           <div className="flex rounded-lg border border-gray-300 overflow-hidden">
             <button type="button" onClick={() => setRole("doctor")}
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${role === "doctor" ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>
@@ -119,6 +126,7 @@ function RegisterForm() {
               Patient
             </button>
           </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
@@ -153,8 +161,8 @@ function RegisterForm() {
             />
           </div>
 
-          {/* License info for doctors */}
-          {role === "doctor" && (
+          {/* License info for doctors — skip for claim flow to reduce friction */}
+          {role === "doctor" && !claimId && (
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">License # <span className="text-gray-400">(required)</span></label>
@@ -177,7 +185,7 @@ function RegisterForm() {
 
           <button type="submit" disabled={pending}
             className="w-full py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-60">
-            {pending ? "Creating..." : "Create Account"}
+            {pending ? "Creating..." : claimId ? "Claim My Profile" : "Create Account"}
           </button>
         </form>
 

@@ -253,12 +253,14 @@ export async function updateProfileAction(userId: string, profileData: any) {
  * Called after registration when a claim_id is present.
  */
 export async function claimDoctorProfileAction(userId: string, claimId: string) {
-  const supabase = createServerSupabase();
+  // Use admin client to bypass RLS for claiming
+  const { createAdminClient } = await import('@/lib/supabase-admin');
+  const supabase = createAdminClient();
 
   // Verify the doctor record exists and is unclaimed
   const { data: doctor, error: fetchError } = await supabase
     .from('doctors')
-    .select('id, user_id, first_name, last_name')
+    .select('id, user_id, first_name, last_name, full_name')
     .eq('id', claimId)
     .single();
 
@@ -281,11 +283,15 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
     return { error: 'Failed to claim profile. Please contact support.' };
   }
 
-  // Update the user's profile role to doctor
+  // Update the user's profile role to doctor and set their name
+  const doctorName = `${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
   await supabase
     .from('profiles')
-    .update({ role: 'doctor' })
+    .update({
+      role: 'doctor',
+      full_name: doctorName || undefined,
+    })
     .eq('id', userId);
 
-  return { success: true, doctorName: `${doctor.first_name} ${doctor.last_name}` };
+  return { success: true, doctorName };
 }
