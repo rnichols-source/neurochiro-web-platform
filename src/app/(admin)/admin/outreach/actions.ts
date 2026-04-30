@@ -378,7 +378,7 @@ export async function preBuildProfile(prospectId: string) {
     longitude: 0,
     bio: '',
     specialties: [],
-    verification_status: 'pending',
+    verification_status: 'verified',
     membership_tier: 'starter',
     region_code: 'US',
     profile_views: 0,
