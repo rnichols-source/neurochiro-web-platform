@@ -454,11 +454,19 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
 
   const handlePreBuild = async () => {
     setBuilding(true);
-    const result = await preBuildProfile(prospect.id);
-    setBuilding(false);
-    if (result.success && result.profileUrl) {
-      navigator.clipboard.writeText(result.profileUrl);
-      onRefresh();
+    try {
+      const result = await preBuildProfile(prospect.id);
+      setBuilding(false);
+      if (result.success && result.profileUrl) {
+        navigator.clipboard.writeText(result.profileUrl);
+        onRefresh();
+        alert(`Profile created! Link copied: ${result.profileUrl}`);
+      } else {
+        alert(`Error: ${result.error || 'Unknown error'}`);
+      }
+    } catch (err: any) {
+      setBuilding(false);
+      alert(`Error: ${err.message || 'Failed to pre-build profile'}`);
     }
   };
 

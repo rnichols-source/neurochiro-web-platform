@@ -365,7 +365,7 @@ export async function preBuildProfile(prospectId: string) {
   }
 
   // Create the unclaimed doctor listing
-  const { error: insertError } = await supabase.from('doctors' as any).insert({
+  const insertData: any = {
     first_name: firstName,
     last_name: lastName,
     slug: slug,
@@ -385,10 +385,13 @@ export async function preBuildProfile(prospectId: string) {
     patient_leads: 0,
     is_founding_member: false,
     phone: p.phone || null,
+    email: p.email || null,
     website_url: p.website || null,
     instagram_url: p.instagram_handle ? `https://instagram.com/${p.instagram_handle.replace('@', '')}` : null,
     // No user_id — this is an unclaimed profile
-  });
+  };
+
+  const { error: insertError } = await supabase.from('doctors' as any).insert(insertData);
 
   if (insertError) {
     console.error('Pre-build profile error:', insertError);
