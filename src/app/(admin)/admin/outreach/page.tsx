@@ -11,7 +11,7 @@ import {
 import {
   getProspects, getPipelineStats, getDailyQueue, addProspect,
   bulkAddProspects, updateProspectStatus, updateProspect, deleteProspect,
-  getDMScripts, getProspectStates,
+  getDMScripts, getProspectStates, preBuildProfile,
   type Prospect, type ProspectStatus,
 } from "./actions";
 
@@ -85,6 +85,10 @@ export default function OutreachPage() {
       text = text.replace(/\{name\}/g, prospect.name.split(" ")[0] || prospect.name);
       text = text.replace(/\{city\}/g, prospect.city);
       text = text.replace(/\{state\}/g, prospect.state);
+      // Extract profile link from notes if pre-built
+      const linkMatch = prospect.notes?.match(/neurochiro\.co\/directory\/[\w-]+/);
+      const profileLink = linkMatch ? linkMatch[0] : "neurochiro.co";
+      text = text.replace(/\{profile_link\}/g, profileLink);
     }
     navigator.clipboard.writeText(text);
     setCopiedScript(template);
@@ -217,7 +221,7 @@ export default function OutreachPage() {
                   </h3>
                   <div className="space-y-2">
                     {queue.followUps.map((p) => (
-                      <QueueCard key={p.id} prospect={p} scripts={scripts} onCopy={copyScript} onMarkDone={markContacted} onStatusChange={changeStatus} onViewDetails={setShowDetailModal} />
+                      <QueueCard key={p.id} prospect={p} scripts={scripts} onCopy={copyScript} onMarkDone={markContacted} onStatusChange={changeStatus} onViewDetails={setShowDetailModal} onRefresh={fetchData} />
                     ))}
                   </div>
                 </div>
@@ -230,7 +234,7 @@ export default function OutreachPage() {
                   </h3>
                   <div className="space-y-2">
                     {queue.newProspects.map((p) => (
-                      <QueueCard key={p.id} prospect={p} scripts={scripts} onCopy={copyScript} onMarkDone={markContacted} onStatusChange={changeStatus} onViewDetails={setShowDetailModal} />
+                      <QueueCard key={p.id} prospect={p} scripts={scripts} onCopy={copyScript} onMarkDone={markContacted} onStatusChange={changeStatus} onViewDetails={setShowDetailModal} onRefresh={fetchData} />
                     ))}
                   </div>
                 </div>
@@ -432,17 +436,31 @@ export default function OutreachPage() {
 }
 
 // ── Queue Card Component ──
-function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onViewDetails }: {
+function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onViewDetails, onRefresh }: {
   prospect: Prospect;
   scripts: any[];
   onCopy: (template: string, prospect: Prospect) => void;
   onMarkDone: (prospect: Prospect, scriptId?: string) => void;
   onStatusChange: (prospect: Prospect, status: ProspectStatus) => void;
   onViewDetails: (prospect: Prospect) => void;
+  onRefresh: () => void;
 }) {
   const [showScripts, setShowScripts] = useState(false);
+  const [building, setBuilding] = useState(false);
   const isFollowUp = prospect.status === "contacted" || prospect.status === "followed_up";
   const relevantScripts = scripts.filter((s) => isFollowUp ? s.category === "follow_up" : s.category === "first_contact");
+  const hasProfile = prospect.notes?.includes("neurochiro.co/directory/");
+  const profileLink = prospect.notes?.match(/neurochiro\.co\/directory\/[\w-]+/)?.[0];
+
+  const handlePreBuild = async () => {
+    setBuilding(true);
+    const result = await preBuildProfile(prospect.id);
+    setBuilding(false);
+    if (result.success && result.profileUrl) {
+      navigator.clipboard.writeText(result.profileUrl);
+      onRefresh();
+    }
+  };
 
   return (
     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 hover:bg-white/[0.03] transition-all">
@@ -454,9 +472,20 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
           <div>
             <p className="text-sm font-bold text-white">{prospect.name}</p>
             <p className="text-xs text-gray-500">{prospect.city}, {prospect.state} {prospect.instagram_handle ? `· @${prospect.instagram_handle.replace("@", "")}` : ""}</p>
+            {hasProfile && profileLink && (
+              <p className="text-xs text-green-400 font-bold mt-0.5 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3" /> Profile live: {profileLink}
+              </p>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {!hasProfile && (
+            <button onClick={handlePreBuild} disabled={building} className="px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg text-xs font-bold text-green-400 hover:bg-green-500/20 flex items-center gap-1.5 disabled:opacity-50">
+              {building ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+              {building ? "Building..." : "Pre-Build Profile"}
+            </button>
+          )}
           <button onClick={() => setShowScripts(!showScripts)} className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-gray-300 hover:bg-white/10 flex items-center gap-1.5">
             <Copy className="w-3 h-3" /> {showScripts ? "Hide Scripts" : "Copy DM"}
           </button>
@@ -470,6 +499,11 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
       </div>
       {showScripts && (
         <div className="mt-4 pt-4 border-t border-white/5 space-y-2">
+          {!hasProfile && (
+            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-2">
+              <p className="text-xs font-bold text-yellow-400">Click "Pre-Build Profile" first — then copy a DM script with their profile link auto-filled.</p>
+            </div>
+          )}
           {relevantScripts.map((script) => (
             <div key={script.id} className="flex items-center justify-between bg-white/5 rounded-lg p-3">
               <div>
@@ -483,7 +517,7 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
           ))}
         </div>
       )}
-      {prospect.notes && <p className="mt-3 text-xs text-gray-500 italic">Note: {prospect.notes}</p>}
+      {prospect.notes && !hasProfile && <p className="mt-3 text-xs text-gray-500 italic">Note: {prospect.notes}</p>}
     </div>
   );
 }

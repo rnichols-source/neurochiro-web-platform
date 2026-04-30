@@ -311,71 +311,179 @@ export async function deleteProspect(id: string) {
   return { success: true };
 }
 
+// ── Pre-Build Profile ──
+export async function preBuildProfile(prospectId: string) {
+  await requireAdmin();
+  const supabase = createAdminClient();
+
+  // Get the prospect data
+  const { data: prospect } = await supabase
+    .from('outreach_prospects' as any)
+    .select('*')
+    .eq('id', prospectId)
+    .single();
+
+  if (!prospect) return { success: false, error: 'Prospect not found' };
+  const p = prospect as any;
+
+  // Parse name into first/last
+  const fullName = (p.name || '').replace(/^Dr\.?\s*/i, '').trim();
+  const nameParts = fullName.split(/\s+/);
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
+
+  // Generate slug
+  const baseSlug = `${firstName}-${lastName}-${(p.city || '').replace(/\s+/g, '-')}`
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-');
+  const slug = `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`;
+
+  // Check if a doctor with this name + city already exists
+  const { data: existing } = await supabase
+    .from('doctors' as any)
+    .select('id, slug')
+    .ilike('first_name', firstName)
+    .ilike('last_name', lastName || '%')
+    .ilike('city', p.city || '%')
+    .limit(1);
+
+  if (existing && (existing as any[]).length > 0) {
+    const existingDoc = (existing as any[])[0];
+    // Already exists — update the prospect with the link
+    await supabase.from('outreach_prospects' as any).update({
+      notes: `Profile already exists: neurochiro.co/directory/${existingDoc.slug}`,
+      updated_at: new Date().toISOString(),
+    }).eq('id', prospectId);
+
+    return {
+      success: true,
+      slug: existingDoc.slug,
+      profileUrl: `https://neurochiro.co/directory/${existingDoc.slug}`,
+      alreadyExisted: true,
+    };
+  }
+
+  // Create the unclaimed doctor listing
+  const { error: insertError } = await supabase.from('doctors' as any).insert({
+    first_name: firstName,
+    last_name: lastName,
+    slug: slug,
+    clinic_name: p.clinic_name || `${firstName} ${lastName} Chiropractic`,
+    city: p.city || '',
+    state: p.state || '',
+    country: 'United States',
+    address: '',
+    latitude: 0,
+    longitude: 0,
+    bio: '',
+    specialties: [],
+    verification_status: 'pending',
+    membership_tier: 'starter',
+    region_code: 'US',
+    profile_views: 0,
+    patient_leads: 0,
+    is_founding_member: false,
+    phone: p.phone || null,
+    website_url: p.website || null,
+    instagram_url: p.instagram_handle ? `https://instagram.com/${p.instagram_handle.replace('@', '')}` : null,
+    // No user_id — this is an unclaimed profile
+  });
+
+  if (insertError) {
+    console.error('Pre-build profile error:', insertError);
+    return { success: false, error: insertError.message };
+  }
+
+  const profileUrl = `https://neurochiro.co/directory/${slug}`;
+
+  // Update the prospect with the profile link
+  await supabase.from('outreach_prospects' as any).update({
+    notes: `Pre-built profile: ${profileUrl}`,
+    updated_at: new Date().toISOString(),
+  }).eq('id', prospectId);
+
+  revalidatePath('/admin/outreach');
+  return {
+    success: true,
+    slug: slug,
+    profileUrl: profileUrl,
+    alreadyExisted: false,
+  };
+}
+
 // ── DM Scripts ──
 export async function getDMScripts() {
   return [
     {
-      id: 'cold_open',
-      name: 'Cold Open',
+      id: 'pre_built_gift',
+      name: 'Pre-Built Profile (Primary)',
       category: 'first_contact',
-      description: 'Warm introduction — works best for first DM',
-      template: `Hey {name} — I came across your page and love what you're doing in {city}. I built a platform called NeuroChiro that's basically the global directory for nervous system chiropractors. We're growing the network in {state} right now and I think your practice would be a great fit. Would you be open to checking it out? No pressure at all. Here's the link: neurochiro.co`,
+      description: 'YOUR #1 SCRIPT — Send after clicking "Pre-Build Profile"',
+      template: `Hey {name} — I built a profile for you on NeuroChiro. It's the global directory for nervous system chiropractors and patients in {city} are already using it to find docs like you. Your listing is live here: {profile_link}. You can claim it and add your photo + bio in about 2 minutes. No cost. Just thought you should know it exists.`,
     },
     {
-      id: 'value_lead',
-      name: 'Value Lead',
+      id: 'pre_built_short',
+      name: 'Pre-Built Short Version',
       category: 'first_contact',
-      description: 'Lead with what they get — higher conversion for skeptical docs',
-      template: `Hey {name} — quick question. Are you showing up when patients in {city} search for a nervous system chiropractor online? I built neurochiro.co — it's a directory specifically for docs like you. You get a full profile page, patient leads, messaging, analytics, and a community of docs who practice the same way. We're building out {state} right now. Want me to send you more info?`,
+      description: 'Shorter version — gets to the point faster',
+      template: `Hey {name} — I made you a profile on NeuroChiro, the directory for nervous system chiropractors. It's already live: {profile_link}. Claim it, add your photo, done. No cost. Patients in {city} can find you through it.`,
     },
     {
-      id: 'social_proof',
-      name: 'Social Proof',
+      id: 'pre_built_value',
+      name: 'Pre-Built Value Lead',
       category: 'first_contact',
-      description: 'Use your numbers to build credibility',
-      template: `Hey {name} — I don't usually cold DM but I'm building something I think you'd genuinely benefit from. NeuroChiro is a platform with doctors listed across multiple states. Patients use it to find nervous system chiropractors near them. We're expanding in {state} and your practice would be a solid addition. Takes 5 min to set up. Want the link?`,
+      description: 'Lead with the patient-finding angle',
+      template: `Hey {name} — quick question. When patients in {city} search for a nervous system chiropractor, are they finding you? I built you a profile on NeuroChiro so they can: {profile_link}. It's free to claim. Add your photo and bio and you're live in the directory. Takes 2 minutes.`,
     },
     {
       id: 'follow_up_1',
-      name: 'Follow-Up #1',
+      name: 'Follow-Up #1 (Profile Live)',
       category: 'follow_up',
-      description: 'Gentle nudge after 5 days of no response',
-      template: `Hey {name} — just circling back on this. No pressure at all — just didn't want you to miss it if it got buried. Let me know if you have any questions about NeuroChiro. Happy to walk you through it.`,
+      description: 'Nudge after 5 days — remind them their profile exists',
+      template: `Hey {name} — just making sure you saw this. Your NeuroChiro profile is live and patients in {city} can find it: {profile_link}. If you want to update it with your photo and bio, takes 2 min. Either way, the listing is there for you.`,
     },
     {
       id: 'follow_up_2',
-      name: 'Follow-Up #2',
+      name: 'Follow-Up #2 (Getting Views)',
       category: 'follow_up',
-      description: 'Final follow-up — respectful close',
-      template: `Hey {name} — last one from me! If the timing isn't right, totally understand. If you ever want to check it out, neurochiro.co is always there. Wishing you the best with your practice in {city}.`,
+      description: 'Final follow-up — create urgency with views',
+      template: `Last one from me — your profile at {profile_link} is getting views. Figured you'd want to know. Claim it whenever you're ready.`,
     },
     {
       id: 'responded_interested',
       name: 'They\'re Interested',
       category: 'response',
-      description: 'They responded positively — give them the full pitch',
-      template: `That's awesome — glad it resonated. Here's the quick version: you set up your profile (bio, photo, specialties, location), and patients in your area can find you through the directory. You also get messaging, analytics on your profile views, and access to tools like the care plan builder and KPI tracker. Here's the link to get started: neurochiro.co. Takes about 5 minutes. Let me know if you have any questions — happy to help you get set up.`,
+      description: 'They responded — guide them to claim',
+      template: `Glad it resonated! Here's all you need to do: go to {profile_link}, click "Claim This Profile," and create a quick account. Then add your photo, bio, and specialties. That's it — you're live in the directory. Patients in {city} will be able to find and message you directly. Let me know if you need any help getting set up.`,
     },
     {
       id: 'signed_up',
-      name: 'Welcome Message',
+      name: 'Welcome — They Claimed It',
       category: 'response',
-      description: 'Send after they create their account',
-      template: `Welcome to NeuroChiro! Glad to have you in the network. Quick tip — make sure you complete your profile (photo + bio makes a huge difference for patient clicks). If you need help with anything, just message me anytime. We're building something special here and you're now part of it.`,
+      description: 'Send after they claim their profile',
+      template: `Welcome to NeuroChiro! Glad to have you in the network. Quick tips: make sure your photo and bio are filled out — it makes a huge difference for patient clicks. Patients in {city} are already searching. You're now showing up. If you need anything at all, just message me.`,
     },
     {
       id: 'objection_cost',
-      name: 'Objection: Cost',
+      name: 'Objection: Is It Free?',
       category: 'objection',
-      description: 'When they ask about pricing',
-      template: `Great question. The membership is {price}/month and includes your full directory listing, patient leads, messaging, analytics, and all the practice tools. Most docs spend way more than that on Google ads that don't even target the right patients. This is purpose-built for nervous system chiropractors. And you can cancel anytime. Want to try it out?`,
+      description: 'When they ask about cost',
+      template: `100% free to claim your profile and be listed in the directory. Patients can find you, see your bio, specialties, and location. If you ever want access to advanced tools like the KPI tracker, care plan builder, and patient messaging, those are on a paid plan. But the directory listing? That's yours. Free. Forever.`,
     },
     {
       id: 'objection_time',
       name: 'Objection: No Time',
       category: 'objection',
       description: 'When they say they\'re too busy',
-      template: `Totally get it — you're running a practice. The setup literally takes 5 minutes. Add your name, photo, city, and a quick bio. That's it. Once it's live, patients find YOU — you don't have to do anything else. It works while you work. Want me to send the link and you can do it between patients?`,
+      template: `I already built it for you — it's live right now at {profile_link}. All you'd need to do is click "Claim," add your photo, and you're done. Literally 2 minutes between patients. And after that, it works for you 24/7 without you touching it.`,
+    },
+    {
+      id: 'objection_why',
+      name: 'Objection: Why Should I?',
+      category: 'objection',
+      description: 'When they want to know what makes this different',
+      template: `Fair question. NeuroChiro is the only directory built specifically for nervous system chiropractors. When a patient searches for a chiropractor, they get YOU — not a list of random practices mixed with physical therapists and massage chains. It's built by someone in the profession, for the profession. Your profile is already live: {profile_link}. Take a look and decide for yourself.`,
     },
   ];
 }

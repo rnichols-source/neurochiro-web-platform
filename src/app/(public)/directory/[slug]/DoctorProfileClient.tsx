@@ -115,6 +115,24 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
             </button>
           </div>
 
+          {/* Claim Banner — shows for unclaimed profiles */}
+          {!doctor.user_id && (
+            <div className="bg-neuro-orange/5 border border-neuro-orange/20 rounded-2xl p-5 mb-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <p className="font-black text-neuro-navy text-sm">Is this you?</p>
+                  <p className="text-xs text-gray-500 mt-1">Claim your NeuroChiro profile to add your photo, bio, and start connecting with patients.</p>
+                </div>
+                <a
+                  href={`/register?claim=${slug}&role=doctor`}
+                  className="px-5 py-2.5 bg-neuro-orange text-white rounded-xl text-sm font-bold hover:bg-neuro-orange-light transition-all whitespace-nowrap"
+                >
+                  Claim This Profile
+                </a>
+              </div>
+            </div>
+          )}
+
           {/* Doctor Info with Profile Picture */}
           <div className="flex items-start gap-5 mb-6">
             <div className="w-20 h-20 rounded-xl bg-neuro-navy overflow-hidden flex-shrink-0 flex items-center justify-center shadow-md relative">
