@@ -351,7 +351,7 @@ export async function deleteProspect(id: string) {
 }
 
 // ── DM Scripts ──
-export function getDMScripts() {
+export async function getDMScripts() {
   return [
     {
       id: 'cold_open',
