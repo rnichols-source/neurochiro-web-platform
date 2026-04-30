@@ -85,6 +85,7 @@ export default function OutreachPage() {
       text = text.replace(/\{name\}/g, prospect.name.split(" ")[0] || prospect.name);
       text = text.replace(/\{city\}/g, prospect.city);
       text = text.replace(/\{state\}/g, prospect.state);
+      text = text.replace(/\{clinic_name\}/g, prospect.clinic_name || prospect.name);
       // Extract profile link from notes if pre-built
       const linkMatch = prospect.notes?.match(/neurochiro\.co\/directory\/[\w-]+/);
       const profileLink = linkMatch ? linkMatch[0] : "neurochiro.co";

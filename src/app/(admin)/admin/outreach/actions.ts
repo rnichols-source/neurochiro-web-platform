@@ -490,6 +490,41 @@ export async function getDMScripts() {
       description: 'When they want to know what makes this different',
       template: `Fair question. NeuroChiro is the only directory built specifically for nervous system chiropractors. When a patient searches for a chiropractor, they get YOU — not a list of random practices mixed with physical therapists and massage chains. It's built by someone in the profession, for the profession. Your profile is already live: {profile_link}. Take a look and decide for yourself.`,
     },
+    {
+      id: 'email_first_contact',
+      name: 'Email: First Contact',
+      category: 'email',
+      description: 'Professional email when no Instagram/Facebook available',
+      template: `Subject: Your NeuroChiro profile is live\n\nHi {name},\n\nI hope this email finds you well. My name is Ray Nichols, and I'm the founder of NeuroChiro — the global directory built specifically for nervous system chiropractors.\n\nI took the time to create a profile for your practice on our platform, and it's already live:\n\n{profile_link}\n\nPatients in {city} are actively using NeuroChiro to find chiropractors like you. All you need to do is claim your profile, add your photo and bio, and you're set. It takes about 2 minutes and there's no cost.\n\nWe're building the largest network of nervous system chiropractors in the world, and I'd love to have {clinic_name} be part of it.\n\nLet me know if you have any questions — happy to walk you through it.\n\nBest,\nRay Nichols\nFounder, NeuroChiro\nneurochiro.co`,
+    },
+    {
+      id: 'email_follow_up',
+      name: 'Email: Follow-Up',
+      category: 'email',
+      description: 'Follow-up email after 5-7 days with no response',
+      template: `Subject: Quick follow-up — your NeuroChiro profile\n\nHi {name},\n\nJust wanted to make sure my last email didn't get buried. I created a profile for your practice on NeuroChiro and it's live here:\n\n{profile_link}\n\nPatients in {city} can already find you through the directory. If you'd like to add your photo and bio to make it yours, it takes about 2 minutes.\n\nNo pressure at all — just didn't want you to miss it.\n\nBest,\nRay Nichols\nFounder, NeuroChiro`,
+    },
+    {
+      id: 'email_final',
+      name: 'Email: Final Follow-Up',
+      category: 'email',
+      description: 'Last email — respectful close',
+      template: `Subject: Last note from me\n\nHi {name},\n\nI know you're busy running your practice, so I'll keep this short. Your profile on NeuroChiro is still live:\n\n{profile_link}\n\nIt's there whenever you're ready to claim it. If the timing isn't right, no worries at all. Wishing you and your practice the best.\n\nRay Nichols\nFounder, NeuroChiro`,
+    },
+    {
+      id: 'email_warm_intro',
+      name: 'Email: Warm / Referral Intro',
+      category: 'email',
+      description: 'When someone referred you or you have a connection',
+      template: `Subject: {name} — thought you should see this\n\nHi {name},\n\nI came across your practice while building out the NeuroChiro network in {state} and was really impressed with what you're doing at {clinic_name}.\n\nNeuroChiro is the global directory for nervous system chiropractors. I already built a profile for you — it's live here:\n\n{profile_link}\n\nWe have doctors across the country listed, and patients are using it daily to find chiropractors who focus on the nervous system. I think your practice would be a great addition.\n\nClaiming your profile takes 2 minutes — no cost, no catch. Just thought you should know it exists.\n\nWould love to have you in the network.\n\nRay Nichols\nFounder, NeuroChiro\nneurochiro.co`,
+    },
+    {
+      id: 'email_phone_follow_up',
+      name: 'Email: After Phone Call',
+      category: 'email',
+      description: 'Send after speaking with them on the phone',
+      template: `Subject: Here's the link we talked about\n\nHi {name},\n\nGreat speaking with you! As promised, here's your NeuroChiro profile:\n\n{profile_link}\n\nJust click "Claim This Profile," add your photo and bio, and you're all set. Takes about 2 minutes.\n\nIf you need anything at all, just reply to this email. I'm here to help.\n\nLooking forward to having {clinic_name} in the network.\n\nRay Nichols\nFounder, NeuroChiro`,
+    },
   ];
 }
 
