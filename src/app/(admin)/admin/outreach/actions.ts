@@ -83,7 +83,7 @@ export async function getProspects(options: {
   }
 
   return {
-    prospects: (data || []) as Prospect[],
+    prospects: (data || []) as unknown as Prospect[],
     total: count || 0,
     hasMore: (count || 0) > to + 1,
   };
@@ -144,8 +144,8 @@ export async function getDailyQueue(dailyGoal: number = 10) {
     .limit(dailyGoal);
 
   return {
-    newProspects: (newProspects || []) as Prospect[],
-    followUps: (followUps || []) as Prospect[],
+    newProspects: (newProspects || []) as unknown as Prospect[],
+    followUps: (followUps || []) as unknown as Prospect[],
   };
 }
 
