@@ -47,7 +47,7 @@ async function ensureTable() {
   const { error } = await supabase.from('outreach_prospects' as any).select('id').limit(1);
   if (error?.code === '42P01' || error?.message?.includes('does not exist')) {
     // Table doesn't exist — create it
-    await supabase.rpc('exec_sql', {
+    await supabase.rpc('exec_sql' as any, {
       sql: `
         CREATE TABLE IF NOT EXISTS outreach_prospects (
           id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
