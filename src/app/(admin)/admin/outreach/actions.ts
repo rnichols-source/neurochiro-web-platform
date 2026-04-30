@@ -381,8 +381,6 @@ export async function preBuildProfile(prospectId: string) {
     verification_status: 'verified',
     membership_tier: 'starter',
     region_code: 'US',
-    profile_views: 0,
-    patient_leads: 0,
     is_founding_member: false,
     phone: p.phone || null,
     email: p.email || null,
