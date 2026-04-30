@@ -31,6 +31,8 @@ export interface Prospect {
   notes: string | null;
   script_used: string | null;
   source: string | null;
+  facebook: string | null;
+  contact_method: string | null;
   contacted_at: string | null;
   follow_up_at: string | null;
   follow_up_count: number;
@@ -153,6 +155,7 @@ export async function getDailyQueue(dailyGoal: number = 10) {
 export async function addProspect(data: {
   name: string;
   instagram_handle?: string;
+  facebook?: string;
   email?: string;
   website?: string;
   phone?: string;
@@ -168,6 +171,7 @@ export async function addProspect(data: {
   const { error } = await supabase.from('outreach_prospects' as any).insert({
     name: data.name,
     instagram_handle: data.instagram_handle || null,
+    facebook: data.facebook || null,
     email: data.email || null,
     website: data.website || null,
     phone: data.phone || null,

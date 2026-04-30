@@ -480,7 +480,14 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
           <div>
             <p className="text-sm font-bold text-white">{prospect.name}</p>
             {prospect.clinic_name && <p className="text-xs text-neuro-orange font-bold">{prospect.clinic_name}</p>}
-            <p className="text-xs text-gray-500">{prospect.city}, {prospect.state} {prospect.instagram_handle ? `· @${prospect.instagram_handle.replace("@", "")}` : ""}</p>
+            <p className="text-xs text-gray-500">
+              {prospect.city}, {prospect.state}
+              {prospect.instagram_handle && <span className="ml-2 text-pink-400">IG: @{prospect.instagram_handle.replace("@", "")}</span>}
+              {(prospect as any).facebook && <span className="ml-2 text-blue-400">FB</span>}
+              {prospect.email && <span className="ml-2 text-green-400">Email</span>}
+              {prospect.phone && <span className="ml-2 text-yellow-400">Phone</span>}
+              {!prospect.instagram_handle && !(prospect as any).facebook && !prospect.email && !prospect.phone && <span className="ml-2 text-red-400">No contact info</span>}
+            </p>
             {hasProfile && profileLink && (
               <p className="text-xs text-green-400 font-bold mt-0.5 flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3" /> Profile live: {profileLink}
@@ -542,6 +549,7 @@ function AddProspectModal({ onClose, onAdded }: { onClose: () => void; onAdded: 
     const result = await addProspect({
       name: form.get("name") as string,
       instagram_handle: form.get("instagram_handle") as string || undefined,
+      facebook: form.get("facebook") as string || undefined,
       email: form.get("email") as string || undefined,
       website: form.get("website") as string || undefined,
       phone: form.get("phone") as string || undefined,
@@ -566,8 +574,9 @@ function AddProspectModal({ onClose, onAdded }: { onClose: () => void; onAdded: 
           <div className="grid grid-cols-2 gap-4">
             <input name="name" required placeholder="Full Name *" className="col-span-2 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-neuro-orange" />
             <input name="instagram_handle" placeholder="@instagram" className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-neuro-orange" />
-            <input name="email" type="email" placeholder="Email" className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-neuro-orange" />
-            <input name="clinic_name" placeholder="Clinic Name" className="col-span-2 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-neuro-orange" />
+            <input name="facebook" placeholder="Facebook page URL" className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-neuro-orange" />
+            <input name="email" type="email" placeholder="Email" className="col-span-2 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-neuro-orange" />
+            <input name="clinic_name" placeholder="Clinic / Office Name" className="col-span-2 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-neuro-orange" />
             <input name="city" required placeholder="City *" className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-neuro-orange" />
             <select name="state" required className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 focus:outline-none focus:border-neuro-orange">
               <option value="">State *</option>
