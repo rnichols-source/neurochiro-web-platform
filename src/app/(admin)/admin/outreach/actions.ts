@@ -44,7 +44,7 @@ export interface Prospect {
 async function ensureTable() {
   const supabase = createAdminClient();
   // Try a simple query — if it fails, create the table
-  const { error } = await supabase.from('outreach_prospects').select('id').limit(1);
+  const { error } = await supabase.from('outreach_prospects' as any).select('id').limit(1);
   if (error?.code === '42P01' || error?.message?.includes('does not exist')) {
     // Table doesn't exist — create it
     await supabase.rpc('exec_sql', {
@@ -99,7 +99,7 @@ export async function getProspects(options: {
   const supabase = createAdminClient();
 
   let query = supabase
-    .from('outreach_prospects')
+    .from('outreach_prospects' as any)
     .select('*', { count: 'exact' });
 
   if (state && state !== 'all') {
@@ -133,7 +133,7 @@ export async function getPipelineStats(state?: string) {
   await requireAdmin();
   const supabase = createAdminClient();
 
-  let query = supabase.from('outreach_prospects').select('status');
+  let query = supabase.from('outreach_prospects' as any).select('status');
   if (state && state !== 'all') {
     query = query.eq('state', state);
   }
@@ -166,7 +166,7 @@ export async function getDailyQueue(dailyGoal: number = 10) {
 
   // Get new prospects (never contacted)
   const { data: newProspects } = await supabase
-    .from('outreach_prospects')
+    .from('outreach_prospects' as any)
     .select('*')
     .eq('status', 'new')
     .order('created_at', { ascending: true })
@@ -175,7 +175,7 @@ export async function getDailyQueue(dailyGoal: number = 10) {
   // Get follow-ups due today or overdue
   const now = new Date().toISOString();
   const { data: followUps } = await supabase
-    .from('outreach_prospects')
+    .from('outreach_prospects' as any)
     .select('*')
     .in('status', ['contacted', 'followed_up'])
     .lte('follow_up_at', now)
@@ -204,7 +204,7 @@ export async function addProspect(data: {
   await requireAdmin();
   const supabase = createAdminClient();
 
-  const { error } = await supabase.from('outreach_prospects').insert({
+  const { error } = await supabase.from('outreach_prospects' as any).insert({
     name: data.name,
     instagram_handle: data.instagram_handle || null,
     email: data.email || null,
@@ -254,7 +254,7 @@ export async function bulkAddProspects(prospects: Array<{
     source: 'csv_import',
   }));
 
-  const { error, data } = await supabase.from('outreach_prospects').insert(rows).select();
+  const { error, data } = await supabase.from('outreach_prospects' as any).insert(rows).select();
 
   if (error) {
     console.error('Bulk import error:', error);
@@ -287,7 +287,7 @@ export async function updateProspectStatus(id: string, status: ProspectStatus, n
     updates.follow_up_at = followUp.toISOString();
     updates.follow_up_count = 1;
   } else if (status === 'followed_up') {
-    const { data: current } = await supabase.from('outreach_prospects').select('follow_up_count').eq('id', id).single();
+    const { data: current } = await supabase.from('outreach_prospects' as any).select('follow_up_count').eq('id', id).single();
     const count = ((current as any)?.follow_up_count || 1) + 1;
     updates.follow_up_count = count;
     if (count >= 3) {
@@ -310,7 +310,7 @@ export async function updateProspectStatus(id: string, status: ProspectStatus, n
   }
 
   const { error } = await supabase
-    .from('outreach_prospects')
+    .from('outreach_prospects' as any)
     .update(updates)
     .eq('id', id);
 
@@ -329,7 +329,7 @@ export async function updateProspect(id: string, data: Partial<Prospect>) {
   const supabase = createAdminClient();
 
   const { error } = await supabase
-    .from('outreach_prospects')
+    .from('outreach_prospects' as any)
     .update({ ...data, updated_at: new Date().toISOString() })
     .eq('id', id);
 
@@ -343,7 +343,7 @@ export async function deleteProspect(id: string) {
   await requireAdmin();
   const supabase = createAdminClient();
 
-  const { error } = await supabase.from('outreach_prospects').delete().eq('id', id);
+  const { error } = await supabase.from('outreach_prospects' as any).delete().eq('id', id);
   if (error) return { success: false, error: error.message };
 
   revalidatePath('/admin/outreach');
@@ -425,7 +425,7 @@ export async function getProspectStates() {
   const supabase = createAdminClient();
 
   const { data } = await supabase
-    .from('outreach_prospects')
+    .from('outreach_prospects' as any)
     .select('state')
     .order('state');
 
