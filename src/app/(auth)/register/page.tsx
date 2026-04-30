@@ -14,7 +14,7 @@ function RegisterForm() {
   const urlRole = searchParams.get("role");
   const billing = searchParams.get("billing");
 
-  const [role, setRole] = useState<Role>(urlRole === "student" ? "student" : urlRole === "patient" ? "patient" : "doctor");
+  const [role, setRole] = useState<Role>(claimId ? "doctor" : urlRole === "student" ? "student" : urlRole === "patient" ? "patient" : "doctor");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

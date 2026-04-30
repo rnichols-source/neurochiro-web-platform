@@ -257,6 +257,10 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
   const { createAdminClient } = await import('@/lib/supabase-admin');
   const supabase = createAdminClient();
 
+  // Auto-confirm the user's email so they get a session immediately
+  // Without this, email verification would block them from accessing their dashboard
+  await supabase.auth.admin.updateUser(userId, { email_confirm: true });
+
   // Verify the doctor record exists and is unclaimed
   const { data: doctor, error: fetchError } = await supabase
     .from('doctors')
