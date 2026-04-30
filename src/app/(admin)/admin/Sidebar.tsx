@@ -51,6 +51,7 @@ const allNavItems = [
   { name: "Spotlight", href: "/admin/spotlight", icon: Video },
   { name: "Announcements", href: "/admin/announcements", icon: Megaphone },
   { name: "Inbox", href: "/admin/inbox", icon: MessageSquare },
+  { name: "Outreach", href: "/admin/outreach", icon: Mail },
   { name: "Revenue", href: "/admin/revenue", icon: CreditCard },
   { name: "Logs", href: "/admin/logs", icon: History },
 ];
