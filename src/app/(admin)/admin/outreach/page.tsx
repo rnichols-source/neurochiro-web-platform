@@ -368,10 +368,10 @@ export default function OutreachPage() {
       {/* ═══════════ DM SCRIPTS TAB ═══════════ */}
       {activeTab === "scripts" && (
         <div className="space-y-4">
-          {["first_contact", "follow_up", "response", "objection"].map((category) => {
+          {["first_contact", "follow_up", "response", "objection", "email"].map((category) => {
             const categoryScripts = scripts.filter((s) => s.category === category);
             if (categoryScripts.length === 0) return null;
-            const categoryLabels: Record<string, string> = { first_contact: "First Contact", follow_up: "Follow-Ups", response: "Responses", objection: "Objection Handling" };
+            const categoryLabels: Record<string, string> = { first_contact: "First Contact", follow_up: "Follow-Ups", response: "Responses", objection: "Objection Handling", email: "Email Scripts" };
             return (
               <div key={category}>
                 <h3 className="text-sm font-black text-neuro-orange uppercase tracking-widest mb-3">{categoryLabels[category]}</h3>
