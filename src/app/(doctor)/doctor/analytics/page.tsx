@@ -1,4 +1,5 @@
 "use client";
+import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 import { useState, useEffect } from "react";
 import { Loader2, Eye, MousePointer, Phone, Globe } from "lucide-react";
@@ -7,6 +8,14 @@ import { getDoctorROIData } from "../dashboard/actions";
 import { createClient } from "@/lib/supabase";
 
 export default function DoctorAnalytics() {
+  return (
+    <UpgradeGate feature="Analytics Dashboard" requiredTier="growth" description="See where your profile views come from, track trends over time, and understand how patients find you.">
+      <DoctorAnalyticsContent />
+    </UpgradeGate>
+  );
+}
+
+function DoctorAnalyticsContent() {
   const [period, setPeriod] = useState<"7D" | "30D" | "90D" | "1Y">("30D");
   const [roiData, setRoiData] = useState<ROIData | null>(null);
   const [loading, setLoading] = useState(true);

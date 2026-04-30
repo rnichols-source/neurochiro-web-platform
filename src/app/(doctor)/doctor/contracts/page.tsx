@@ -1,4 +1,5 @@
 "use client";
+import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 import { useState, useMemo, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
@@ -49,6 +50,14 @@ try {
 }
 
 export default function ContractsPage() {
+  return (
+    <UpgradeGate feature="Contracts" requiredTier="pro" description="Access contract templates for associate agreements, patient intake forms, and practice operations.">
+      <ContractsContent />
+    </UpgradeGate>
+  );
+}
+
+function ContractsContent() {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);

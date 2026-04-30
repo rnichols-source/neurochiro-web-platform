@@ -1,4 +1,5 @@
 "use client";
+import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 import { useState, useMemo, useEffect } from "react";
 import { Search, Copy, Check, Edit3, X, FileText, Mail, Share2, Layers, Sparkles, Lock, Zap } from "lucide-react";
@@ -42,6 +43,14 @@ try {
 }
 
 export default function ContentLibraryPage() {
+  return (
+    <UpgradeGate feature="Content Library" requiredTier="growth" description="Access ready-to-use patient education content, social media templates, and practice resources.">
+      <ContentLibraryContent />
+    </UpgradeGate>
+  );
+}
+
+function ContentLibraryContent() {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);

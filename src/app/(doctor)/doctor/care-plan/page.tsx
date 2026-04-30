@@ -1,4 +1,5 @@
 "use client";
+import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -166,6 +167,14 @@ function fmt(n: number) {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function CarePlanBuilder() {
+  return (
+    <UpgradeGate feature="Care Plan Builder" requiredTier="pro" description="Build custom care plans for every patient. Present professional treatment recommendations with confidence.">
+      <CarePlanContent />
+    </UpgradeGate>
+  );
+}
+
+function CarePlanContent() {
   const [state, setState] = useState<CarePlanState>(INITIAL_STATE);
   const [loaded, setLoaded] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);

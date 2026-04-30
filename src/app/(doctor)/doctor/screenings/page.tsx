@@ -1,4 +1,5 @@
 "use client";
+import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
@@ -71,6 +72,14 @@ function CopyButton({ text }: { text: string }) {
 }
 
 export default function ScreeningsPage() {
+  return (
+    <UpgradeGate feature="Screenings" requiredTier="pro" description="Access the complete community screening system with scripts, event planning tools, and conversion tracking.">
+      <ScreeningsContent />
+    </UpgradeGate>
+  );
+}
+
+function ScreeningsContent() {
   const [isPurchased, setIsPurchased] = useState(false);
   const [checking, setChecking] = useState(true);
   const [expandedSections, setExpandedSections] = useState<string[]>([]);

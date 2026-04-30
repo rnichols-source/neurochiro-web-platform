@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
   MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck, TrendingUp, Activity, Presentation, Receipt, DollarSign, Target, ChevronDown,
-  ShieldCheck,
+  ShieldCheck, Lock,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,23 +23,23 @@ const navSections = [
     items: [
       { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
       { name: "Profile", href: "/doctor/profile", icon: User },
-      { name: "Messages", href: "/doctor/messages", icon: MessageSquare },
+      { name: "Messages", href: "/doctor/messages", icon: MessageSquare, tier: "growth" as const },
       { name: "Notifications", href: "/doctor/notifications", icon: Bell },
     ],
   },
   {
     label: "PATIENTS",
     items: [
-      { name: "Care Plan", href: "/doctor/care-plan", icon: Calculator },
-      { name: "Scan Reports", href: "/doctor/scan-report", icon: Activity },
+      { name: "Care Plan", href: "/doctor/care-plan", icon: Calculator, tier: "pro" as const },
+      { name: "Scan Reports", href: "/doctor/scan-report", icon: Activity, tier: "pro" as const },
     ],
   },
   {
     label: "TOOLS",
     items: [
-      { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp },
-      { name: "P&L Analyzer", href: "/doctor/pl-analyzer", icon: DollarSign },
-      { name: "Content Library", href: "/doctor/content-library", icon: Library },
+      { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp, tier: "growth" as const },
+      { name: "P&L Analyzer", href: "/doctor/pl-analyzer", icon: DollarSign, tier: "pro" as const },
+      { name: "Content Library", href: "/doctor/content-library", icon: Library, tier: "growth" as const },
       { name: "Billing Guide", href: "/doctor/billing-guide", icon: Receipt },
     ],
   },
@@ -47,10 +47,10 @@ const navSections = [
     label: "GROW",
     items: [
       { name: "Jobs & Hiring", href: "/doctor/jobs", icon: Briefcase },
-      { name: "Workshops", href: "/doctor/workshops", icon: Presentation },
-      { name: "Screenings", href: "/doctor/screenings", icon: Target },
+      { name: "Workshops", href: "/doctor/workshops", icon: Presentation, tier: "pro" as const },
+      { name: "Screenings", href: "/doctor/screenings", icon: Target, tier: "pro" as const },
       { name: "Command Center", href: "/account/command-center", icon: Target },
-      { name: "Contracts", href: "/doctor/contracts", icon: FileCheck },
+      { name: "Contracts", href: "/doctor/contracts", icon: FileCheck, tier: "pro" as const },
       { name: "Students", href: "/doctor/students", icon: GraduationCap },
       { name: "Seminars", href: "/doctor/seminars", icon: Calendar },
     ],
@@ -58,7 +58,7 @@ const navSections = [
   {
     label: "ACCOUNT",
     items: [
-      { name: "Analytics", href: "/doctor/analytics", icon: BarChart3 },
+      { name: "Analytics", href: "/doctor/analytics", icon: BarChart3, tier: "growth" as const },
       { name: "Settings", href: "/doctor/settings", icon: Settings },
       { name: "Billing", href: "/doctor/billing", icon: CreditCard },
       { name: "Help & Support", href: "/contact", icon: MessageSquare },
@@ -66,11 +66,14 @@ const navSections = [
   },
 ];
 
+const TIER_LEVELS: Record<string, number> = { free: 0, starter: 0, growth: 1, pro: 2 };
+
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [userName, setUserName] = useState<string | null>(null);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
+  const [memberTier, setMemberTier] = useState<string>("starter");
 
   useEffect(() => {
     const supabase = createClient();
@@ -81,6 +84,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         supabase.from("notifications").select("*", { count: "exact", head: true })
           .eq("user_id", user.id).is("read_at", null)
           .then(({ count }) => setUnreadNotifs(count || 0));
+        supabase.from("doctors").select("membership_tier").eq("user_id", user.id).single()
+          .then(({ data }) => setMemberTier(data?.membership_tier || "starter"));
       }
     });
   }, []);
@@ -175,8 +180,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     className="overflow-hidden"
                   >
                     <div className="space-y-0.5 mt-0.5 pb-1">
-                      {section.items.map((item) => {
+                      {section.items.map((item: any) => {
                         const active = pathname === item.href;
+                        const itemTierLevel = item.tier ? TIER_LEVELS[item.tier] || 0 : 0;
+                        const userTierLevel = TIER_LEVELS[memberTier] || 0;
+                        const isLocked = item.tier && userTierLevel < itemTierLevel;
                         return (
                           <Link
                             key={item.name}
@@ -185,11 +193,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                             className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 group/item relative ${
                               active
                                 ? "bg-neuro-orange text-white shadow-lg shadow-neuro-orange/20"
+                                : isLocked
+                                ? "text-gray-600 hover:text-gray-400 hover:bg-white/5"
                                 : "text-gray-400 hover:text-white hover:bg-white/5"
                             }`}
                           >
-                            <item.icon className={`w-4 h-4 transition-colors ${active ? "text-white" : "text-gray-500 group-hover/item:text-neuro-orange"}`} />
+                            <item.icon className={`w-4 h-4 transition-colors ${active ? "text-white" : isLocked ? "text-gray-700" : "text-gray-500 group-hover/item:text-neuro-orange"}`} />
                             {item.name}
+                            {isLocked && (
+                              <Lock className="w-3 h-3 text-gray-600 ml-auto flex-shrink-0" />
+                            )}
                             {item.name === 'Notifications' && unreadNotifs > 0 && (
                               <span className="ml-auto bg-neuro-orange text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">{unreadNotifs > 9 ? '9+' : unreadNotifs}</span>
                             )}

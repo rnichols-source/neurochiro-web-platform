@@ -1,4 +1,5 @@
 "use client";
+import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
@@ -474,6 +475,14 @@ function DualTrendLine({
 // =============================================================================
 
 export default function PLAnalyzerPage() {
+  return (
+    <UpgradeGate feature="P&L Analyzer" requiredTier="pro" description="Analyze your profit and loss, track revenue vs expenses, and make smarter financial decisions for your practice.">
+      <PLAnalyzerContent />
+    </UpgradeGate>
+  );
+}
+
+function PLAnalyzerContent() {
   const [activeTab, setActiveTab] = useState(1);
   const [month, setMonth] = useState(getCurrentMonth());
   const [values, setValues] = useState<Record<string, number>>({});

@@ -1,4 +1,5 @@
 "use client";
+import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 import { useState, useMemo, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
@@ -143,6 +144,14 @@ const SECTION_ORDER: { key: SectionKey; label: string }[] = [
 /* ------------------------------------------------------------------ */
 
 export default function WorkshopsPage() {
+  return (
+    <UpgradeGate feature="Workshops" requiredTier="pro" description="Access workshop kits with slides, scripts, and materials to educate your community and attract new patients.">
+      <WorkshopsContent />
+    </UpgradeGate>
+  );
+}
+
+function WorkshopsContent() {
   /* ---------- state ---------- */
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [selectedKitId, setSelectedKitId] = useState<string | null>(null);

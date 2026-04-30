@@ -1,4 +1,5 @@
 "use client";
+import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
@@ -130,6 +131,14 @@ function getStatusColor(value: number, target: number, invert: boolean): string 
 // ---------------------------------------------------------------------------
 
 export default function KpiTrackerPage() {
+  return (
+    <UpgradeGate feature="KPI Tracker" requiredTier="growth" description="Track your daily practice metrics, monitor trends, and keep your finger on the pulse of your business.">
+      <KpiTrackerContent />
+    </UpgradeGate>
+  );
+}
+
+function KpiTrackerContent() {
   // Data state
   const [todayEntry, setTodayEntry] = useState<KpiEntry | null>(null);
   const [entries, setEntries] = useState<KpiEntry[]>([]);

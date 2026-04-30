@@ -1,4 +1,5 @@
 "use client";
+import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -346,6 +347,14 @@ function SDNNBar({ value }: { value: number }) {
 /* ─── Component ─── */
 
 export default function ScanReportGenerator() {
+  return (
+    <UpgradeGate feature="Scan Reports" requiredTier="pro" description="Generate professional scan reports for your patients. Present objective findings with clarity.">
+      <ScanReportContent />
+    </UpgradeGate>
+  );
+}
+
+function ScanReportContent() {
   const [state, setState] = useState<FormData>(DEFAULT_FORM);
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
