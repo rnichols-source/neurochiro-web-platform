@@ -40,46 +40,7 @@ export interface Prospect {
   updated_at: string;
 }
 
-// ── Ensure table exists ──
-async function ensureTable() {
-  const supabase = createAdminClient();
-  // Try a simple query — if it fails, create the table
-  const { error } = await supabase.from('outreach_prospects' as any).select('id').limit(1);
-  if (error?.code === '42P01' || error?.message?.includes('does not exist')) {
-    // Table doesn't exist — create it
-    await supabase.rpc('exec_sql' as any, {
-      sql: `
-        CREATE TABLE IF NOT EXISTS outreach_prospects (
-          id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-          name TEXT NOT NULL,
-          instagram_handle TEXT,
-          email TEXT,
-          website TEXT,
-          phone TEXT,
-          clinic_name TEXT,
-          city TEXT NOT NULL DEFAULT '',
-          state TEXT NOT NULL DEFAULT '',
-          status TEXT NOT NULL DEFAULT 'new',
-          notes TEXT,
-          script_used TEXT,
-          source TEXT DEFAULT 'manual',
-          contacted_at TIMESTAMPTZ,
-          follow_up_at TIMESTAMPTZ,
-          follow_up_count INT DEFAULT 0,
-          responded_at TIMESTAMPTZ,
-          signed_up_at TIMESTAMPTZ,
-          created_at TIMESTAMPTZ DEFAULT NOW(),
-          updated_at TIMESTAMPTZ DEFAULT NOW()
-        );
-        CREATE INDEX IF NOT EXISTS idx_outreach_state ON outreach_prospects(state);
-        CREATE INDEX IF NOT EXISTS idx_outreach_status ON outreach_prospects(status);
-      `
-    }).catch(() => {
-      // RPC might not exist, try raw SQL via admin
-      console.warn('Could not auto-create outreach_prospects table. Please create it manually.');
-    });
-  }
-}
+// Table must be created manually via sql_archive/OUTREACH_PROSPECTS_TABLE.sql
 
 // ── Get Prospects ──
 export async function getProspects(options: {
@@ -90,7 +51,7 @@ export async function getProspects(options: {
   limit?: number;
 }) {
   await requireAdmin();
-  await ensureTable();
+
 
   const { state, status, search, page = 1, limit = 50 } = options;
   const from = (page - 1) * limit;
