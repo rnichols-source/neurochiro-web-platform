@@ -27,6 +27,13 @@ import GoogleReviews from "@/components/directory/GoogleReviews";
 import Image from "next/image";
 import { getEpisodeByDoctorSlug } from "../../spotlight/spotlight-data";
 
+function formatUrl(url: string | null | undefined): string | null {
+  if (!url || !url.trim()) return null;
+  const trimmed = url.trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  return `https://${trimmed}`;
+}
+
 export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slug: string }) {
   const { toggleSave, isSaved } = useUserPreferences();
   const [copied, setCopied] = useState(false);
@@ -180,8 +187,8 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                 <Phone className="w-4 h-4" /> Call
               </a>
             )}
-            {doctor.website_url && (
-              <a href={doctor.website_url} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('website_click')} className="flex-1 py-3 bg-neuro-navy text-white font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-neuro-navy/90 transition-colors">
+            {formatUrl(doctor.website_url) && (
+              <a href={formatUrl(doctor.website_url)!} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('website_click')} className="flex-1 py-3 bg-neuro-navy text-white font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-neuro-navy/90 transition-colors">
                 <Globe className="w-4 h-4" /> Website
               </a>
             )}
@@ -461,9 +468,9 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
       {/* Sticky mobile bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 px-4 z-40 lg:hidden">
         <div className="flex gap-3 max-w-3xl mx-auto">
-          {doctor.website_url ? (
+          {formatUrl(doctor.website_url) ? (
             <a
-              href={doctor.website_url}
+              href={formatUrl(doctor.website_url)!}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackEvent('booking_click')}
