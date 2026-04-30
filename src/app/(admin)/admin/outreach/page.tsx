@@ -479,6 +479,7 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
           </div>
           <div>
             <p className="text-sm font-bold text-white">{prospect.name}</p>
+            {prospect.clinic_name && <p className="text-xs text-neuro-orange font-bold">{prospect.clinic_name}</p>}
             <p className="text-xs text-gray-500">{prospect.city}, {prospect.state} {prospect.instagram_handle ? `· @${prospect.instagram_handle.replace("@", "")}` : ""}</p>
             {hasProfile && profileLink && (
               <p className="text-xs text-green-400 font-bold mt-0.5 flex items-center gap-1">
