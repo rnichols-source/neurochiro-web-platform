@@ -259,7 +259,7 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
 
   // Auto-confirm the user's email so they get a session immediately
   // Without this, email verification would block them from accessing their dashboard
-  await supabase.auth.admin.updateUser(userId, { email_confirm: true });
+  await (supabase.auth.admin as any).updateUserById(userId, { email_confirm: true });
 
   // Verify the doctor record exists and is unclaimed
   const { data: doctor, error: fetchError } = await supabase
