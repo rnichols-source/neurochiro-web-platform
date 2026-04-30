@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import NextImage from "next/image";
-import { ShieldCheck, ArrowRight, Heart, Phone, MapPin } from "lucide-react";
+import { ShieldCheck, ArrowRight, Heart, Phone, MapPin, Star } from "lucide-react";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -76,6 +76,11 @@ export default function DoctorCard({ doc, index }: DoctorCardProps) {
           <div className="flex items-center gap-1.5">
             <h3 className="font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors truncate">{name}</h3>
             <ShieldCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />
+            {doc.is_founding_member && (
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-neuro-orange/10 text-neuro-orange text-[9px] font-black rounded-md border border-neuro-orange/20 flex-shrink-0 uppercase tracking-wider">
+                <Star className="w-2.5 h-2.5 fill-neuro-orange" /> Founder
+              </span>
+            )}
           </div>
           <p className="text-xs text-gray-500 truncate">{doc.clinic_name || 'Private Practice'}</p>
           {location && (

@@ -16,6 +16,7 @@ import {
   Send,
   Globe,
   Users,
+  Star,
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
@@ -127,6 +128,11 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                 <div className="flex items-center gap-2 mb-1">
                   <h1 className="text-2xl font-black text-neuro-navy">{name}</h1>
                   <ShieldCheck className="w-5 h-5 text-blue-500" />
+                  {doctor.is_founding_member && (
+                    <span className="flex items-center gap-1 px-2 py-1 bg-neuro-orange/10 text-neuro-orange text-[10px] font-black rounded-lg border border-neuro-orange/20 uppercase tracking-wider">
+                      <Star className="w-3 h-3 fill-neuro-orange" /> Founding Member
+                    </span>
+                  )}
                 </div>
                 <p className="text-gray-500 text-sm font-medium">{doctor.clinic_name || 'Private Practice'}</p>
                 {location && (

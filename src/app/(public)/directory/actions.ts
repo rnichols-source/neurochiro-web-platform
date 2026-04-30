@@ -17,7 +17,7 @@ export async function getDoctors(options: {
   try {
     // DATA MINIMIZATION: Only fetch essential columns for the LIST view
     // Removed: email, website_url, instagram_url, facebook_url, address (private-ish)
-    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, latitude, longitude, bio, specialties, region_code';
+    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code';
     
     let query = supabase
       .from('doctors')
@@ -77,10 +77,15 @@ export async function getDoctors(options: {
       return { doctors: [], total: 0, error: true };
     }
 
-    // Priority sort: Pro first, then Growth, then Starter
+    // Priority sort: Founding members first, then by tier (Pro > Growth > Starter)
     const tierPriority: Record<string, number> = { pro: 1, growth: 2, starter: 3 };
     if (data) {
-      data.sort((a, b) => (tierPriority[a.membership_tier] || 3) - (tierPriority[b.membership_tier] || 3));
+      data.sort((a: any, b: any) => {
+        const aFounder = a.is_founding_member ? 0 : 1;
+        const bFounder = b.is_founding_member ? 0 : 1;
+        if (aFounder !== bFounder) return aFounder - bFounder;
+        return (tierPriority[a.membership_tier] || 3) - (tierPriority[b.membership_tier] || 3);
+      });
     }
 
     // FALLBACK: If specific search/region returns nothing, return a subset of verified doctors
@@ -117,7 +122,7 @@ export async function getDoctorBySlug(slug: string) {
   
   // DATA MINIMIZATION: Fetch columns needed for full profile
   // Removed google_place_id as it does not exist in the schema
-  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, address, latitude, longitude, bio, specialties, region_code, email, phone, website_url, instagram_url, facebook_url, user_id, photo_url, video_url';
+  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, address, latitude, longitude, bio, specialties, region_code, email, phone, website_url, instagram_url, facebook_url, user_id, photo_url, video_url';
   
   try {
     let { data, error } = await supabase
