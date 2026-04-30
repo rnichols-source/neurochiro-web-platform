@@ -71,7 +71,7 @@ export default function OutreachPage() {
       setStats(statsRes);
       setQueue(queueRes);
       setProspectStates(statesRes);
-      setScripts(getDMScripts());
+      setScripts(await getDMScripts());
     } catch (e) { console.error(e); }
     setLoading(false);
   }, [stateFilter, statusFilter, searchQuery]);
