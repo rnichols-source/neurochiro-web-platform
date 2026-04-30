@@ -264,7 +264,7 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
   // Verify the doctor record exists and is unclaimed
   const { data: doctor, error: fetchError } = await supabase
     .from('doctors')
-    .select('id, user_id, first_name, last_name, full_name')
+    .select('id, user_id, first_name, last_name')
     .eq('id', claimId)
     .single();
 
