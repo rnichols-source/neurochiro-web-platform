@@ -509,6 +509,9 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
           <button onClick={() => onMarkDone(prospect)} className="px-3 py-2 bg-neuro-orange rounded-lg text-xs font-bold text-white hover:bg-neuro-orange-light flex items-center gap-1.5">
             <Check className="w-3 h-3" /> {isFollowUp ? "Followed Up" : "Contacted"}
           </button>
+          <button onClick={() => onStatusChange(prospect, "not_interested")} className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg" title="Skip — not a good fit">
+            <XCircle className="w-3.5 h-3.5" />
+          </button>
           <button onClick={() => onViewDetails(prospect)} className="p-2 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg">
             <Edit3 className="w-3.5 h-3.5" />
           </button>
