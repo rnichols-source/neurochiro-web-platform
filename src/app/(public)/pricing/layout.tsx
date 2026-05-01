@@ -2,7 +2,7 @@ import PricingShell from "./PricingShell";
 
 export const metadata = {
   title: "Pricing | NeuroChiro",
-  description: "Membership plans for doctors, students, and patients. Invest in your chiropractic career or health journey.",
+  description: "Join NeuroChiro for free. Upgrade to unlock premium tools for your practice or career.",
 };
 
 export default function PricingLayout({

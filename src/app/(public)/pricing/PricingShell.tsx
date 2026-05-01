@@ -28,10 +28,10 @@ export default function PricingShell({
 
         {/* Unified Pricing Header */}
         <div className="text-center mb-16 space-y-4">
-          <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-xs">Membership Tiers</span>
-          <h1 className="text-5xl md:text-5xl font-heading font-black text-neuro-navy">Invest in your <span className="text-neuro-orange">Evolution.</span></h1>
+          <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-xs">Join Free. Upgrade Anytime.</span>
+          <h1 className="text-5xl md:text-5xl font-heading font-black text-neuro-navy">Start Free. <span className="text-neuro-orange">Grow From There.</span></h1>
           <p className="text-gray-500 text-xl max-w-2xl mx-auto font-medium">
-            Choose the path that fits your clinical or personal journey.
+            Every plan starts free. Upgrade when you&apos;re ready for more.
           </p>
         </div>
 
