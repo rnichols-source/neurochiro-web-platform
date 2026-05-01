@@ -114,18 +114,18 @@ export default function Navbar() {
               </button>
               <div className="absolute top-full right-0 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all">
                 <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 w-64 overflow-hidden">
-                  <Link href="/pricing/doctors" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors">
+                  <Link href="/register?role=doctor" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors">
                     <div className="p-2 bg-neuro-orange/10 rounded-lg text-neuro-orange"><Stethoscope className="w-4 h-4" /></div>
                     <div>
                       <p className="text-sm font-bold text-neuro-navy">I&apos;m a Doctor</p>
-                      <p className="text-xs text-gray-500">Get listed in the directory</p>
+                      <p className="text-xs text-gray-500">Get listed free</p>
                     </div>
                   </Link>
-                  <Link href="/pricing/students" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">
+                  <Link href="/register?role=student" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">
                     <div className="p-2 bg-blue-50 rounded-lg text-blue-600"><GraduationCap className="w-4 h-4" /></div>
                     <div>
                       <p className="text-sm font-bold text-blue-900">I&apos;m a Student</p>
-                      <p className="text-xs text-gray-500">Jobs, seminars &amp; career tools</p>
+                      <p className="text-xs text-gray-500">Free career tools &amp; jobs</p>
                     </div>
                   </Link>
                   <Link href="/register?role=patient" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">
@@ -256,11 +256,11 @@ export default function Navbar() {
               </div>
 
               <div className="space-y-4 pt-8 border-t border-white/10">
-                <p className="text-xs font-black uppercase tracking-widest text-gray-500">Join the Network</p>
-                <Link href="/pricing/doctors" className="flex items-center gap-4 text-xl font-bold text-gray-300">
+                <p className="text-xs font-black uppercase tracking-widest text-gray-500">Join Free</p>
+                <Link href="/register?role=doctor" className="flex items-center gap-4 text-xl font-bold text-gray-300">
                   <Stethoscope className="w-5 h-5 text-neuro-orange" /> I&apos;m a Doctor
                 </Link>
-                <Link href="/pricing/students" className="flex items-center gap-4 text-xl font-bold text-gray-300">
+                <Link href="/register?role=student" className="flex items-center gap-4 text-xl font-bold text-gray-300">
                   <GraduationCap className="w-5 h-5 text-blue-500" /> I&apos;m a Student
                 </Link>
                 <Link href="/register?role=patient" className="flex items-center gap-4 text-xl font-bold text-gray-300">
@@ -280,7 +280,7 @@ export default function Navbar() {
                 }}
                 className="w-full py-4 bg-neuro-orange text-white font-black uppercase tracking-widest text-sm rounded-xl shadow-lg"
               >
-                Join the Network
+                Join Free
               </button>
               <Link href="/login" className="w-full py-4 bg-white/10 text-white font-bold rounded-xl flex items-center justify-center gap-2">
                 <User className="w-5 h-5" /> Log In to Dashboard

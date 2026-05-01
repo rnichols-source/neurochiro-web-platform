@@ -196,8 +196,8 @@ export default async function HomePage() {
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl font-heading font-black text-white mb-4">Are you a chiropractor?</h2>
           <p className="text-gray-400 mb-8">Join the global network of nervous system specialists. Get your verified listing, connect with students, and grow your practice.</p>
-          <Link href="/pricing/doctors" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
-            Join the Network <ArrowRight className="w-5 h-5" />
+          <Link href="/register?role=doctor" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
+            Get Listed Free <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>

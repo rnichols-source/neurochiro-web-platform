@@ -176,24 +176,24 @@ export default function StudentDashboard() {
         </motion.div>
       )}
 
-      {/* Payment Prompt */}
+      {/* Upgrade Prompt — only show for free students */}
       {data?.profile?.subscription_status !== 'active' && (
         <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.08 }}>
           <div className="bg-neuro-navy rounded-3xl p-8 md:p-10 relative overflow-hidden">
             <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "var(--grid-pattern)" }} />
             <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div className="flex-1">
-                <p className="text-neuro-orange text-[10px] font-black uppercase tracking-[0.2em] mb-3">Membership</p>
-                <h3 className="text-white font-heading font-black text-2xl tracking-tight mb-2">Activate your membership</h3>
+                <p className="text-neuro-orange text-[10px] font-black uppercase tracking-[0.2em] mb-3">Student Pro</p>
+                <h3 className="text-white font-heading font-black text-2xl tracking-tight mb-2">Unlock All Career Tools</h3>
                 <p className="text-gray-400 text-sm leading-relaxed max-w-lg">
-                  Unlock full access to career tools, job applications, and the student network.
+                  Get access to Interview Prep, Contract Lab, Financial Planner, Techniques Library, and priority in talent drops.
                 </p>
                 <p className="text-gray-300 text-xs font-black mt-3 uppercase tracking-widest">
-                  {region.currency.symbol}{region.pricing.student.foundation.monthly}/month
+                  $29/month &middot; Cancel anytime
                 </p>
               </div>
               <Link href="/student/billing" className="px-8 py-4 bg-neuro-orange text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-neuro-orange/30 hover:shadow-neuro-orange/50 hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap text-center">
-                Activate Membership
+                Upgrade to Pro
               </Link>
             </div>
           </div>

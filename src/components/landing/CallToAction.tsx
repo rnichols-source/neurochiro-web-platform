@@ -40,9 +40,9 @@ export default function CallToAction() {
           viewport={{ once: true }}
           className="flex flex-col sm:flex-row gap-6 justify-center"
         >
-           <Link href="/pricing/doctors" className="group relative px-10 py-5 bg-neuro-orange text-white rounded-full font-bold text-xl overflow-hidden shadow-2xl shadow-neuro-orange/30 hover:shadow-neuro-orange/50 transition-all hover:-translate-y-1">
+           <Link href="/register?role=doctor" className="group relative px-10 py-5 bg-neuro-orange text-white rounded-full font-bold text-xl overflow-hidden shadow-2xl shadow-neuro-orange/30 hover:shadow-neuro-orange/50 transition-all hover:-translate-y-1">
             <span className="relative z-10 flex items-center gap-2">
-              Get Started Now <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              Get Listed Free <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
             </span>
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
           </Link>

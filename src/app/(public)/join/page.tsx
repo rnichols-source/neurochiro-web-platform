@@ -39,7 +39,7 @@ export default async function JoinReferralPage({ searchParams }: Props) {
                 {referrer.location}
               </p>
               <p className="text-gray-400 mb-10">
-                Join the NeuroChiro network and you&apos;ll both get a free month of membership.
+                Join the NeuroChiro network for free. When you upgrade, you&apos;ll both get a free month.
               </p>
             </>
           ) : (

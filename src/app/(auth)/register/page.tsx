@@ -96,12 +96,13 @@ function RegisterForm() {
     <div className="min-h-dvh flex items-center justify-center bg-gray-50 px-4 py-12">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
         <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">
-          {claimId ? "Claim Your Profile" : "Create your account"}
+          {claimId ? "Claim Your Profile" : "Create your free account"}
         </h1>
-        {claimId && (
+        {claimId ? (
           <p className="text-center text-gray-500 text-sm mb-6">Create an account to manage your NeuroChiro listing. Takes 30 seconds.</p>
+        ) : (
+          <p className="text-center text-gray-500 text-sm mb-6">Free to join. No credit card required.</p>
         )}
-        {!claimId && <div className="mb-6" />}
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
@@ -185,7 +186,7 @@ function RegisterForm() {
 
           <button type="submit" disabled={pending}
             className="w-full py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-60">
-            {pending ? "Creating..." : claimId ? "Claim My Profile" : "Create Account"}
+            {pending ? "Creating..." : claimId ? "Claim My Profile" : "Create Free Account"}
           </button>
         </form>
 

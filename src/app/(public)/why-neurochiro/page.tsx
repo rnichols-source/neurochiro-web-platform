@@ -106,20 +106,20 @@ export default function WhyNeuroChiroPage() {
           <div className="flex flex-wrap justify-center gap-6 mb-10 text-sm">
             <span className="text-gray-400"><span className="text-white font-bold">120+</span> Verified Doctors</span>
             <span className="text-gray-400"><span className="text-white font-bold">6</span> Countries</span>
-            <span className="text-gray-400"><span className="text-white font-bold">$49</span>/month &middot; Cancel Anytime</span>
+            <span className="text-gray-400"><span className="text-white font-bold">Free</span> to join</span>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/pricing/doctors"
+              href="/register?role=doctor"
               className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors inline-flex items-center justify-center gap-2"
             >
-              Join the Network <ArrowRight className="w-5 h-5" />
+              Get Listed Free <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
-              href="/pricing/doctors"
+              href="/directory"
               className="px-8 py-4 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-colors border border-white/20"
             >
-              See Pricing
+              Browse Directory
             </Link>
           </div>
         </div>
@@ -267,10 +267,10 @@ export default function WhyNeuroChiroPage() {
             Join the growing network of nervous system specialists. Your patients are already looking for you.
           </p>
           <Link
-            href="/pricing/doctors"
+            href="/register?role=doctor"
             className="inline-flex items-center gap-2 px-10 py-5 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors shadow-xl shadow-neuro-orange/20"
           >
-            Join NeuroChiro Today <ArrowRight className="w-5 h-5" />
+            Get Listed Free <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>
