@@ -1,4 +1,5 @@
 "use client";
+import StudentUpgradeGate from "@/components/student/UpgradeGate";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -859,6 +860,14 @@ const DECISION_ITEMS = [
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function InterviewPlaybook() {
+  return (
+    <StudentUpgradeGate feature="Interview Prep" description="Practice real interview questions, learn what doctors are looking for, and walk into your first interview with confidence.">
+      <InterviewPlaybookContent />
+    </StudentUpgradeGate>
+  );
+}
+
+function InterviewPlaybookContent() {
   const [activeTab, setActiveTab] = useState(0);
   const [purchased, setPurchased] = useState(false);
   const [loaded, setLoaded] = useState(false);

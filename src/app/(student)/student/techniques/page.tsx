@@ -1,4 +1,5 @@
 "use client";
+import StudentUpgradeGate from "@/components/student/UpgradeGate";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -91,6 +92,14 @@ const INITIAL_QUIZ: QuizState = {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function TechniqueComparisonGuide() {
+  return (
+    <StudentUpgradeGate feature="Techniques Library" description="Compare every adjustment technique side by side. Learn the pros, cons, and applications before you commit to your path.">
+      <TechniqueComparisonContent />
+    </StudentUpgradeGate>
+  );
+}
+
+function TechniqueComparisonContent() {
   const [activeTab, setActiveTab] = useState(0);
   const [purchased, setPurchased] = useState(false);
   const [loaded, setLoaded] = useState(false);

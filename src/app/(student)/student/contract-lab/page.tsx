@@ -1,4 +1,5 @@
 "use client";
+import StudentUpgradeGate from "@/components/student/UpgradeGate";
 
 import { useState, useEffect, useRef } from "react";
 import {
@@ -412,6 +413,14 @@ function Disclaimer() {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ContractLabPage() {
+  return (
+    <StudentUpgradeGate feature="Contract Lab" description="Review real associate contracts, understand what to look for, and protect yourself before signing your first deal.">
+      <ContractLabContent />
+    </StudentUpgradeGate>
+  );
+}
+
+function ContractLabContent() {
   const [activeTab, setActiveTab] = useState<1 | 2 | 3>(1);
 
   // Tab 1 state

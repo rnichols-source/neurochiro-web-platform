@@ -1,4 +1,5 @@
 "use client";
+import StudentUpgradeGate from "@/components/student/UpgradeGate";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -209,6 +210,14 @@ function calcSAVEPayment(agi: number): number {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function FinancialPlanner() {
+  return (
+    <StudentUpgradeGate feature="Financial Planner" description="Plan your first year finances, calculate loan payments, project your salary, and build a budget before you graduate.">
+      <FinancialPlannerContent />
+    </StudentUpgradeGate>
+  );
+}
+
+function FinancialPlannerContent() {
   const [state, setState] = useState<PlannerState>(INITIAL_STATE);
   const [loaded, setLoaded] = useState(false);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
