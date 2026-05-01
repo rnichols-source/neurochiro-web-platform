@@ -52,6 +52,22 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 2,
     publishedAt: "2026-04-30T12:00:00Z",
   },
+  {
+    id: "ep-003",
+    doctorName: "Dr. Matt Lawrence",
+    doctorSlug: "dr.-matt-lawrence",
+    clinicName: "AlignLife",
+    city: "Cary",
+    state: "NC",
+    videoUrl: "https://www.youtube.com/embed/yH8wrzxt-lI",
+    thumbnail: "https://img.youtube.com/vi/yH8wrzxt-lI/hqdefault.jpg",
+    quote:
+      "My journey into chiropractic started as a teenager when I was dealing with my own back injury. That experience changed everything.",
+    description:
+      "Dr. Matt Lawrence is the owner of AlignLife Preston in Cary, North Carolina, where he helps families get to the root cause of their health problems through structural restoration, functional nutrition, and neurofunctional care. A graduate of Life University, Dr. Matt shares his personal story of how a teenage back injury led him to chiropractic, why he goes beyond symptom relief to find the real issue, and how he uses x-rays, labs, and nutrition alongside adjustments to serve the whole family.",
+    episodeNumber: 3,
+    publishedAt: "2026-05-01T12:00:00Z",
+  },
 ];
 
 export function getLatestEpisode(): SpotlightEpisode {
