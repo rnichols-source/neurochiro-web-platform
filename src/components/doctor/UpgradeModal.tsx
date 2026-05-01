@@ -16,8 +16,9 @@ const tiers = [
   {
     id: "free",
     name: "Free",
-    price: "$0",
-    period: "forever",
+    monthlyPrice: "$0",
+    annualPrice: "$0",
+    annualTotal: "",
     description: "Basic directory listing",
     icon: Star,
     color: "text-gray-400",
@@ -42,8 +43,9 @@ const tiers = [
   {
     id: "growth",
     name: "Growth",
-    price: "$69",
-    period: "/mo",
+    monthlyPrice: "$69",
+    annualPrice: "$59",
+    annualTotal: "$708/yr",
     description: "Everything to grow your practice",
     icon: Zap,
     color: "text-neuro-orange",
@@ -69,8 +71,9 @@ const tiers = [
   {
     id: "pro",
     name: "Pro",
-    price: "$129",
-    period: "/mo",
+    monthlyPrice: "$129",
+    annualPrice: "$109",
+    annualTotal: "$1,308/yr",
     description: "Full suite — every tool unlocked",
     icon: Crown,
     color: "text-yellow-400",
@@ -94,23 +97,30 @@ const tiers = [
   },
 ];
 
-// Map Stripe price IDs — update these with your actual Stripe price IDs
-const PRICE_IDS: Record<string, string> = {
-  growth: process.env.NEXT_PUBLIC_STRIPE_GROWTH_PRICE_ID || "",
-  pro: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || "",
+const PRICE_IDS: Record<string, Record<string, string>> = {
+  growth: {
+    monthly: "price_1TS56YQ4WJOENoxriuU4hW5Z",
+    annual: "price_1TS57ZQ4WJOENoxrgnvf6O2h",
+  },
+  pro: {
+    monthly: "price_1TS58UQ4WJOENoxrnxgbtIbQ",
+    annual: "price_1TS59FQ4WJOENoxrJewp6dwT",
+  },
 };
 
 export default function UpgradeModal({ isOpen, onClose, currentTier = "free", userId, highlightFeature }: UpgradeModalProps) {
   const [loading, setLoading] = useState<string | null>(null);
+  const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
 
   const handleUpgrade = async (tierId: string) => {
-    if (!userId || !PRICE_IDS[tierId]) return;
+    const priceId = PRICE_IDS[tierId]?.[billing];
+    if (!userId || !priceId) return;
     setLoading(tierId);
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId: PRICE_IDS[tierId], userId }),
+        body: JSON.stringify({ priceId, userId }),
       });
       const data = await res.json();
       if (data.url) {
@@ -151,6 +161,22 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "free", us
               </button>
             </div>
 
+            {/* Billing Toggle */}
+            <div className="px-8 flex items-center justify-center gap-3 mb-2">
+              <button
+                onClick={() => setBilling("monthly")}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${billing === "monthly" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-300"}`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBilling("annual")}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${billing === "annual" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-300"}`}
+              >
+                Annual <span className="text-[10px] font-black text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">Save 15%</span>
+              </button>
+            </div>
+
             {/* Tiers */}
             <div className="p-8 pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
               {tiers.map((tier) => {
@@ -180,9 +206,12 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "free", us
                     </div>
 
                     <div className="flex items-baseline gap-1 mb-1">
-                      <span className="text-3xl font-black text-white">{tier.price}</span>
-                      <span className="text-sm text-gray-500">{tier.period}</span>
+                      <span className="text-3xl font-black text-white">{billing === "annual" ? (tier as any).annualPrice : (tier as any).monthlyPrice}</span>
+                      <span className="text-sm text-gray-500">{tier.id === "free" ? "forever" : "/mo"}</span>
                     </div>
+                    {billing === "annual" && (tier as any).annualTotal && (
+                      <p className="text-xs text-green-400 font-bold mb-2">Billed at {(tier as any).annualTotal}</p>
+                    )}
                     <p className="text-xs text-gray-500 mb-5">{tier.description}</p>
 
                     {/* Features */}
