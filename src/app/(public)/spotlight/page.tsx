@@ -60,6 +60,7 @@ export default function SpotlightPage() {
             <blockquote className="text-gray-300 italic text-lg max-w-2xl mx-auto leading-relaxed">
               &ldquo;{featured.quote}&rdquo;
             </blockquote>
+            {featured.doctorSlug && (
             <div className="mt-5">
               <Link
                 href={`/directory/${featured.doctorSlug}`}
@@ -69,6 +70,7 @@ export default function SpotlightPage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
+            )}
           </div>
         </div>
       </section>
