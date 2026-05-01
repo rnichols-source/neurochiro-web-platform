@@ -644,9 +644,9 @@ function StoreContent() {
             <p className="text-gray-500 max-w-lg mx-auto mb-6">
               NeuroChiro members get every product at the lowest price — plus
               the full platform, directory listing, and community.
-              {audience === "doctor" && " Starting at $49/month."}
-              {audience === "student" && " Starting at $9/month."}
-              {audience === "patient" && " Starting at $9/month."}
+              {audience === "doctor" && " Free to join."}
+              {audience === "student" && " Free to join."}
+              {audience === "patient" && " Free to join."}
             </p>
             <Link
               href={AUDIENCE_INFO[audience].memberLink}
