@@ -55,7 +55,7 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
   {
     id: "ep-003",
     doctorName: "Dr. Matt Lawrence",
-    doctorSlug: "",
+    doctorSlug: "dr.-matthew-lawrence",
     clinicName: "AlignLife",
     city: "Cary",
     state: "NC",
