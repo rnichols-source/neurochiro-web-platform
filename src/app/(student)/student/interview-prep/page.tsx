@@ -2185,6 +2185,14 @@ function InterviewPlaybookContent() {
       {activeTab === 2 && renderOfferCalculator()}
       {activeTab === 3 && renderNegotiationScripts()}
       {activeTab === 4 && renderAfterInterview()}
+
+      {/* Cross-link to Jobs */}
+      <div className="mt-8 p-6 rounded-2xl border border-gray-100 bg-gradient-to-r from-orange-50 to-white text-center">
+        <p className="text-sm font-bold text-gray-700 mb-2">Ready to put this into practice?</p>
+        <a href="/student/jobs" className="inline-block px-6 py-3 bg-[#e97325] text-white rounded-xl font-bold text-sm hover:bg-[#e97325]/90 transition-colors">
+          Browse Open Positions &rarr;
+        </a>
+      </div>
     </div>
   );
 }

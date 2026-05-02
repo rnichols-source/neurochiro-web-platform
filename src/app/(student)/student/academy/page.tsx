@@ -847,12 +847,20 @@ export default function AcademyPage() {
                 </button>
               </div>
             )}
-            <button
-              onClick={goToCatalog}
-              className="text-sm font-bold text-gray-400 hover:text-[#1a2744] transition-colors"
-            >
-              Back to Academy
-            </button>
+            <div className="flex items-center justify-center gap-4 mt-2">
+              <button
+                onClick={goToCatalog}
+                className="text-sm font-bold text-gray-400 hover:text-[#1a2744] transition-colors"
+              >
+                Back to Academy
+              </button>
+              <a
+                href="/student/jobs"
+                className="text-sm font-bold text-[#e97325] hover:underline"
+              >
+                Browse Jobs &rarr;
+              </a>
+            </div>
           </div>
         </div>
       );
