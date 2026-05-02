@@ -498,11 +498,64 @@ export async function preBuildProfile(prospectId: string) {
 
   const profileUrl = `https://neurochiro.co/directory/${slug}`;
 
-  // Update the prospect with the profile link
-  await supabase.from('outreach_prospects' as any).update({
-    notes: `Pre-built profile: ${profileUrl}`,
+  // Auto-send initial outreach email if we have an email
+  let emailSent = false;
+  if (p.email) {
+    try {
+      const { Resend } = await import('resend');
+      const resend = new Resend(process.env.RESEND_API_KEY || '');
+      const name = firstName || p.name?.split(' ')[0] || 'Doctor';
+      const clinicName = p.clinic_name || `${firstName} ${lastName} Chiropractic`;
+
+      await resend.emails.send({
+        from: 'NeuroChiro <support@neurochirodirectory.com>',
+        to: p.email,
+        subject: 'Your NeuroChiro profile is live',
+        html: `<!DOCTYPE html><html><head>
+          <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+          <style>body{font-family:'Lato',Helvetica,Arial,sans-serif;margin:0;padding:0;background:#FCF9F5;}
+          .wrapper{max-width:600px;margin:40px auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.08);border:1px solid #E5E7EB;}
+          .header{background:#1E2D3B;padding:30px;text-align:center;}
+          .content{padding:40px;color:#1E2D3B;font-size:16px;line-height:1.7;}
+          .footer{text-align:center;padding:30px;font-size:11px;color:#9CA3AF;letter-spacing:1px;text-transform:uppercase;font-weight:700;}</style>
+          </head><body><div class="wrapper">
+          <div class="header"><img src="https://neurochiro.co/logo-white.png" alt="NeuroChiro" width="120" style="display:block;margin:0 auto;"></div>
+          <div class="content">
+            <p>Hi ${name},</p>
+            <p>I hope this email finds you well. My name is Dr. Raymond Nichols, and I'm the founder of NeuroChiro — the global directory built specifically for nervous system chiropractors.</p>
+            <p>I took the time to create a profile for ${clinicName} on our platform, and it's already live:</p>
+            <p style="margin: 20px 0;"><a href="${profileUrl}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">View Your Profile</a></p>
+            <p>Patients in ${p.city || 'your area'} are actively using NeuroChiro to find chiropractors like you. All you need to do is claim your profile, add your photo and bio, and you're set. It takes about 2 minutes and there's no cost.</p>
+            <p>Let me know if you have any questions — happy to walk you through it.</p>
+            <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro<br>neurochiro.co</p>
+          </div>
+          <div class="footer">&copy; 2026 NeuroChiro Network</div>
+          </div></body></html>`,
+      });
+      emailSent = true;
+    } catch (err) {
+      console.error('Auto-email failed:', err);
+    }
+  }
+
+  // Update the prospect with the profile link + mark contacted if email sent
+  const updates: any = {
+    notes: `Pre-built profile: ${profileUrl}${emailSent ? ' | Auto-email sent' : ''}`,
     updated_at: new Date().toISOString(),
-  }).eq('id', prospectId);
+  };
+
+  if (emailSent) {
+    updates.status = 'contacted';
+    updates.contacted_at = new Date().toISOString();
+    updates.script_used = 'auto_initial_email';
+    // Set follow-up for 5 days from now
+    const followUp = new Date();
+    followUp.setDate(followUp.getDate() + 5);
+    updates.follow_up_at = followUp.toISOString();
+    updates.follow_up_count = 1;
+  }
+
+  await supabase.from('outreach_prospects' as any).update(updates).eq('id', prospectId);
 
   revalidatePath('/admin/outreach');
   return {
@@ -510,6 +563,7 @@ export async function preBuildProfile(prospectId: string) {
     slug: slug,
     profileUrl: profileUrl,
     alreadyExisted: false,
+    emailSent,
   };
 }
 

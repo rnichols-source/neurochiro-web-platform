@@ -478,7 +478,7 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
       if (result.success && result.profileUrl) {
         navigator.clipboard.writeText(result.profileUrl);
         onRefresh();
-        alert(`Profile created! Link copied: ${result.profileUrl}`);
+        alert(`Profile created!${result.emailSent ? ' Initial email sent automatically!' : ' No email on file — DM them manually.'}\n\nLink copied: ${result.profileUrl}`);
       } else {
         alert(`Error: ${result.error || 'Unknown error'}`);
       }
