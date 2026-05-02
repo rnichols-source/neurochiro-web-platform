@@ -30,15 +30,17 @@ export async function GET(req: Request) {
     const resend = getResend();
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Total counts
-    const [doctorsRes, studentsRes, patientsRes, allProfilesRes] = await Promise.all([
-      supabase.from('doctors').select('id', { count: 'exact', head: true }).eq('verification_status', 'verified'),
+    // Total counts — only count doctors with actual accounts (user_id set)
+    const [claimedDoctorsRes, unclaimedDoctorsRes, studentsRes, patientsRes, allProfilesRes] = await Promise.all([
+      supabase.from('doctors').select('id', { count: 'exact', head: true }).eq('verification_status', 'verified').not('user_id', 'is', null),
+      supabase.from('doctors').select('id', { count: 'exact', head: true }).eq('verification_status', 'verified').is('user_id', null),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'student'),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'patient'),
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
     ]);
 
-    const totalDoctors = doctorsRes.count || 0;
+    const totalDoctors = claimedDoctorsRes.count || 0;
+    const unclaimedListings = unclaimedDoctorsRes.count || 0;
     const totalStudents = studentsRes.count || 0;
     const totalPatients = patientsRes.count || 0;
     const totalUsers = allProfilesRes.count || 0;
@@ -77,14 +79,20 @@ export async function GET(req: Request) {
     const incompleteCount = (incompleteDocs || []).filter((d: any) => !d.photo_url || !d.bio || d.bio?.length < 20).length;
     const profileComplete = (incompleteDocs || []).length - incompleteCount;
 
-    // Paid vs free doctors
+    // Paid vs free doctors — only count doctors with actual accounts
     const { count: paidDoctors } = await supabase
-      .from('doctors')
+      .from('profiles')
       .select('id', { count: 'exact', head: true })
-      .not('user_id', 'is', null)
-      .not('membership_tier', 'in', '("starter","free")');
+      .eq('role', 'doctor')
+      .not('tier', 'in', '("starter","free")');
 
-    const freeDoctors = totalDoctors - (paidDoctors || 0);
+    const { count: freeDoctorAccounts } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('role', 'doctor')
+      .in('tier', ['starter', 'free']);
+
+    const freeDoctors = freeDoctorAccounts || 0;
 
     // Build the email
     const founderEmail = 'drray@neurochirodirectory.com';
@@ -104,16 +112,17 @@ export async function GET(req: Request) {
       <h2 style="font-size: 20px; color: #D66829; margin-bottom: 20px;">Weekly Platform Report</h2>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
-        ${stat('Total Doctors', totalDoctors, newDoctors)}
+        ${stat('Doctors (with accounts)', totalDoctors, newDoctors)}
         ${stat('Total Students', totalStudents, newStudents)}
         ${stat('Total Patients', totalPatients, newPatients)}
         ${stat('Total Users', totalUsers, newDoctors + newStudents + newPatients)}
       </div>
 
       <h3 style="font-size: 16px; color: #1E2D3B; margin: 24px 0 12px;">Membership</h3>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px;">
         ${stat('Paid Doctors', paidDoctors || 0)}
         ${stat('Free Doctors', freeDoctors)}
+        ${stat('Unclaimed Listings', unclaimedListings)}
       </div>
 
       <h3 style="font-size: 16px; color: #1E2D3B; margin: 24px 0 12px;">Outreach Pipeline</h3>
@@ -147,7 +156,7 @@ export async function GET(req: Request) {
       target: 'founder',
       status: 'Success',
       severity: 'Low',
-      metadata: { totalDoctors, totalStudents, totalPatients, newDoctors, newStudents, newPatients, outreachTotal, outreachContacted, outreachSignedUp },
+      metadata: { totalDoctors, unclaimedListings, totalStudents, totalPatients, newDoctors, newStudents, newPatients, paidDoctors, freeDoctors, outreachTotal, outreachContacted, outreachSignedUp },
     });
 
     return NextResponse.json({ success: true, message: 'Weekly report sent', stats: { totalDoctors, totalStudents, totalPatients } });
