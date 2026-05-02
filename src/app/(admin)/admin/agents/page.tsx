@@ -104,6 +104,24 @@ const AGENTS = [
     color: "text-violet-400",
     bg: "bg-violet-500/10",
   },
+  {
+    id: "daily-talent-drop",
+    name: "Daily Talent Drop",
+    description: "Sends top student matches to verified doctors via SMS and notification",
+    schedule: "Every Tuesday at 8 AM",
+    icon: Zap,
+    color: "text-amber-400",
+    bg: "bg-amber-500/10",
+  },
+  {
+    id: "profile-reminders",
+    name: "Profile Reminders",
+    description: "Sends reminders to doctors with incomplete or outdated profiles",
+    schedule: "Every day at 2 PM",
+    icon: UserCheck,
+    color: "text-teal-400",
+    bg: "bg-teal-500/10",
+  },
 ];
 
 export default function AgentsPage() {
