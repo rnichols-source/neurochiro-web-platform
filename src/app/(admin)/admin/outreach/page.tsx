@@ -11,7 +11,7 @@ import {
 import {
   getProspects, getPipelineStats, getDailyQueue, addProspect,
   bulkAddProspects, updateProspectStatus, updateProspect, deleteProspect,
-  getDMScripts, getProspectStates, preBuildProfile,
+  getDMScripts, getProspectStates, preBuildProfile, findProspectEmail,
   type Prospect, type ProspectStatus,
 } from "./actions";
 
@@ -448,10 +448,27 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
 }) {
   const [showScripts, setShowScripts] = useState(false);
   const [building, setBuilding] = useState(false);
+  const [findingEmail, setFindingEmail] = useState(false);
   const isFollowUp = prospect.status === "contacted" || prospect.status === "followed_up";
   const relevantScripts = scripts.filter((s) => isFollowUp ? s.category === "follow_up" : s.category === "first_contact");
   const hasProfile = prospect.notes?.includes("neurochiro.co/directory/");
   const profileLink = prospect.notes?.match(/neurochiro\.co\/directory\/[\w-]+/)?.[0];
+
+  const handleFindEmail = async () => {
+    setFindingEmail(true);
+    try {
+      const result = await findProspectEmail(prospect.id);
+      if (result.success && result.email) {
+        alert(result.alreadyHad ? `Already has email: ${result.email}` : `Found email: ${result.email}`);
+        onRefresh();
+      } else {
+        alert(result.error || "No email found");
+      }
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    }
+    setFindingEmail(false);
+  };
 
   const handlePreBuild = async () => {
     setBuilding(true);
@@ -497,6 +514,12 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {!prospect.email && prospect.website && (
+            <button onClick={handleFindEmail} disabled={findingEmail} className="px-3 py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg text-xs font-bold text-cyan-400 hover:bg-cyan-500/20 flex items-center gap-1.5 disabled:opacity-50">
+              {findingEmail ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />}
+              {findingEmail ? "Finding..." : "Find Email"}
+            </button>
+          )}
           {!hasProfile && (
             <button onClick={handlePreBuild} disabled={building} className="px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg text-xs font-bold text-green-400 hover:bg-green-500/20 flex items-center gap-1.5 disabled:opacity-50">
               {building ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}

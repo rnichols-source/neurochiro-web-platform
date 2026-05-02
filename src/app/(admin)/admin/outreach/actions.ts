@@ -315,6 +315,89 @@ export async function deleteProspect(id: string) {
   return { success: true };
 }
 
+// ── Find Email for Existing Prospect ──
+export async function findProspectEmail(prospectId: string) {
+  await requireAdmin();
+  const supabase = createAdminClient();
+
+  const { data: prospect } = await supabase
+    .from('outreach_prospects' as any)
+    .select('*')
+    .eq('id', prospectId)
+    .single();
+
+  if (!prospect) return { success: false, error: 'Prospect not found' };
+  const p = prospect as any;
+
+  if (p.email) return { success: true, email: p.email, alreadyHad: true };
+
+  const foundEmail = await findEmailFromWebsite(p.website);
+
+  if (foundEmail) {
+    await supabase.from('outreach_prospects' as any).update({
+      email: foundEmail,
+      updated_at: new Date().toISOString(),
+    }).eq('id', prospectId);
+
+    return { success: true, email: foundEmail, alreadyHad: false };
+  }
+
+  return { success: false, error: 'No email found on their website' };
+}
+
+// ── Auto Email Finder ──
+async function findEmailFromWebsite(websiteUrl: string | null): Promise<string | null> {
+  if (!websiteUrl) return null;
+
+  // Normalize URL
+  let url = websiteUrl.trim();
+  if (!url.startsWith('http')) url = `https://${url}`;
+
+  // Try multiple pages where emails are commonly found
+  const pagesToTry = [
+    url,
+    `${url}/contact`,
+    `${url}/contact-us`,
+    `${url}/about`,
+    `${url}/about-us`,
+  ];
+
+  for (const pageUrl of pagesToTry) {
+    try {
+      const res = await fetch(pageUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; NeuroChiro/1.0)' },
+        signal: AbortSignal.timeout(5000),
+      });
+
+      if (!res.ok) continue;
+
+      const html = await res.text();
+
+      // Find email addresses in the HTML
+      const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+      const emails = html.match(emailRegex) || [];
+
+      // Filter out common junk emails
+      const junkPatterns = ['example.com', 'sentry.io', 'wix.com', 'squarespace.com', 'wordpress.com', 'google.com', 'facebook.com', 'cloudflare', '.png', '.jpg', '.svg', '.css', '.js'];
+      const validEmails = emails.filter(email => {
+        const lower = email.toLowerCase();
+        return !junkPatterns.some(junk => lower.includes(junk));
+      });
+
+      if (validEmails.length > 0) {
+        // Prefer emails that look like contact/info/office emails
+        const preferred = validEmails.find(e => /^(info|contact|office|hello|admin|support|dr|doc)/i.test(e));
+        return preferred || validEmails[0];
+      }
+    } catch {
+      // Timeout or fetch error — try next page
+      continue;
+    }
+  }
+
+  return null;
+}
+
 // ── Pre-Build Profile ──
 export async function preBuildProfile(prospectId: string) {
   await requireAdmin();
@@ -329,6 +412,19 @@ export async function preBuildProfile(prospectId: string) {
 
   if (!prospect) return { success: false, error: 'Prospect not found' };
   const p = prospect as any;
+
+  // Auto-find email if missing
+  if (!p.email && p.website) {
+    const foundEmail = await findEmailFromWebsite(p.website);
+    if (foundEmail) {
+      p.email = foundEmail;
+      // Save the found email back to the prospect
+      await supabase.from('outreach_prospects' as any).update({
+        email: foundEmail,
+        updated_at: new Date().toISOString(),
+      }).eq('id', prospectId);
+    }
+  }
 
   // Parse name into first/last
   const fullName = (p.name || '').replace(/^Dr\.?\s*/i, '').trim();
