@@ -56,6 +56,12 @@ const navSections = [
     ],
   },
   {
+    label: "PRO",
+    items: [
+      { name: "Coaching", href: "/doctor/coaching", icon: ShieldCheck },
+    ],
+  },
+  {
     label: "ACCOUNT",
     items: [
       { name: "Analytics", href: "/doctor/analytics", icon: BarChart3, tier: "growth" as const },
