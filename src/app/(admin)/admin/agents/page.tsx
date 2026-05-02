@@ -105,6 +105,15 @@ const AGENTS = [
     bg: "bg-violet-500/10",
   },
   {
+    id: "vendor-outreach",
+    name: "Vendor Outreach",
+    description: "Auto-discovers emails and sends vendor directory pitch to 10 new vendor prospects daily",
+    schedule: "Weekdays at 10 AM",
+    icon: Send,
+    color: "text-indigo-400",
+    bg: "bg-indigo-500/10",
+  },
+  {
     id: "chiro-finder",
     name: "Chiropractor Finder",
     description: "Searches Google Maps for chiropractors state by state, scrapes contact info, auto-adds to outreach",
