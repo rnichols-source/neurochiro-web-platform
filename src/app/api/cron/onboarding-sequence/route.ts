@@ -1,3 +1,4 @@
+import { wrapEmail } from '@/lib/email-template';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
@@ -179,17 +180,3 @@ export async function GET(req: Request) {
   }
 }
 
-function wrapEmail(body: string) {
-  return `<!DOCTYPE html><html><head>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>body{font-family:'Lato',Helvetica,Arial,sans-serif;margin:0;padding:0;background:#FCF9F5;}
-    .wrapper{max-width:600px;margin:40px auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.08);border:1px solid #E5E7EB;}
-    .header{background:#1E2D3B;padding:30px;text-align:center;}
-    .content{padding:40px;color:#1E2D3B;font-size:16px;line-height:1.7;}
-    .footer{text-align:center;padding:30px;font-size:11px;color:#9CA3AF;letter-spacing:1px;text-transform:uppercase;font-weight:700;}</style>
-    </head><body><div class="wrapper">
-    <div class="header"><img src="https://neurochiro.co/logo-white.png" alt="NeuroChiro" width="120" style="display:block;margin:0 auto;"></div>
-    <div class="content">${body}</div>
-    <div class="footer">&copy; 2026 NeuroChiro Network</div>
-    </div></body></html>`;
-}

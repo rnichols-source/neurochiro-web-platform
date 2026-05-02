@@ -244,6 +244,9 @@ function wrapEmail(name: string, title: string, body: string, role?: string) {
         <div class="footer">
           &copy; 2026 NeuroChiro Network. All Rights Reserved.
         </div>
+        <div style="text-align: center; padding: 0 30px 20px; font-size: 11px; color: #D1D5DB;">
+          <a href="https://neurochiro.co/doctor/settings" style="color: #D1D5DB; text-decoration: underline;">Manage email preferences</a> &middot; NeuroChiro &middot; neurochiro.co
+        </div>
       </div>
     </body>
     </html>
