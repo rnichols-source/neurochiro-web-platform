@@ -1,5 +1,6 @@
 "use client";
 import UpgradeGate from "@/components/doctor/UpgradeGate";
+import { saveToolData, loadToolData } from "../tool-data-actions";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -179,30 +180,44 @@ function CarePlanContent() {
   const [loaded, setLoaded] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
-  // Load from localStorage on mount
+  // Load from Supabase on mount (localStorage fallback)
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LS_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<CarePlanState>;
-        setState((prev) => ({ ...prev, ...parsed }));
+    async function load() {
+      try {
+        const cloud = await loadToolData('care_plan');
+        if (cloud) {
+          setState((prev) => ({ ...prev, ...cloud }));
+        } else {
+          // Fallback: migrate from localStorage if exists
+          const saved = localStorage.getItem(LS_KEY);
+          if (saved) {
+            const parsed = JSON.parse(saved) as Partial<CarePlanState>;
+            setState((prev) => ({ ...prev, ...parsed }));
+          }
+        }
+      } catch {
+        // Offline fallback
+        try {
+          const saved = localStorage.getItem(LS_KEY);
+          if (saved) setState((prev) => ({ ...prev, ...JSON.parse(saved) }));
+        } catch {}
       }
-    } catch {
-      // ignore
+      setLoaded(true);
     }
-    setLoaded(true);
+    load();
   }, []);
 
-  // Save to localStorage on change (debounced to prevent re-render loop)
+  // Save to Supabase on change (debounced)
   const stateRef = useRef(state);
   stateRef.current = state;
   useEffect(() => {
     if (!loaded) return;
     const timer = setTimeout(() => {
-      try {
-        localStorage.setItem(LS_KEY, JSON.stringify(stateRef.current));
-      } catch {}
-    }, 500);
+      const data = stateRef.current;
+      // Save to both Supabase and localStorage (offline fallback)
+      saveToolData('care_plan', data).catch(() => {});
+      try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch {}
+    }, 1000);
     return () => clearTimeout(timer);
   }, [state, loaded]);
 
@@ -268,6 +283,7 @@ function CarePlanContent() {
 
   const resetAll = () => {
     localStorage.removeItem(LS_KEY);
+    saveToolData('care_plan', null).catch(() => {});
     setState({
       ...INITIAL_STATE,
       date: today(),
