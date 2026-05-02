@@ -16,6 +16,7 @@ async function requireAdmin() {
 
 // ── Types ──
 export type ProspectStatus = 'new' | 'contacted' | 'followed_up' | 'responded' | 'interested' | 'signed_up' | 'not_interested';
+export type ProspectType = 'doctor' | 'vendor' | 'seminar_host';
 
 export interface Prospect {
   id: string;
@@ -28,6 +29,7 @@ export interface Prospect {
   city: string;
   state: string;
   status: ProspectStatus;
+  prospect_type: ProspectType;
   notes: string | null;
   script_used: string | null;
   source: string | null;
@@ -49,13 +51,14 @@ export async function getProspects(options: {
   state?: string;
   status?: string;
   search?: string;
+  prospect_type?: ProspectType;
   page?: number;
   limit?: number;
 }) {
   await requireAdmin();
 
 
-  const { state, status, search, page = 1, limit = 50 } = options;
+  const { state, status, search, prospect_type, page = 1, limit = 50 } = options;
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
@@ -65,6 +68,9 @@ export async function getProspects(options: {
     .from('outreach_prospects' as any)
     .select('*', { count: 'exact' });
 
+  if (prospect_type) {
+    query = query.eq('prospect_type', prospect_type);
+  }
   if (state && state !== 'all') {
     query = query.eq('state', state);
   }
@@ -92,11 +98,14 @@ export async function getProspects(options: {
 }
 
 // ── Get Pipeline Stats ──
-export async function getPipelineStats(state?: string) {
+export async function getPipelineStats(state?: string, prospect_type?: ProspectType) {
   await requireAdmin();
   const supabase = createAdminClient();
 
   let query = supabase.from('outreach_prospects' as any).select('status');
+  if (prospect_type) {
+    query = query.eq('prospect_type', prospect_type);
+  }
   if (state && state !== 'all') {
     query = query.eq('state', state);
   }
@@ -123,25 +132,29 @@ export async function getPipelineStats(state?: string) {
 }
 
 // ── Get Today's Queue ──
-export async function getDailyQueue(dailyGoal: number = 10) {
+export async function getDailyQueue(dailyGoal: number = 10, prospect_type?: ProspectType) {
   await requireAdmin();
   const supabase = createAdminClient();
 
   // Get new prospects (never contacted)
-  const { data: newProspects } = await supabase
+  let newQuery = supabase
     .from('outreach_prospects' as any)
     .select('*')
-    .eq('status', 'new')
+    .eq('status', 'new');
+  if (prospect_type) newQuery = newQuery.eq('prospect_type', prospect_type);
+  const { data: newProspects } = await newQuery
     .order('created_at', { ascending: true })
     .limit(dailyGoal);
 
   // Get follow-ups due today or overdue
   const now = new Date().toISOString();
-  const { data: followUps } = await supabase
+  let followQuery = supabase
     .from('outreach_prospects' as any)
     .select('*')
     .in('status', ['contacted', 'followed_up'])
-    .lte('follow_up_at', now)
+    .lte('follow_up_at', now);
+  if (prospect_type) followQuery = followQuery.eq('prospect_type', prospect_type);
+  const { data: followUps } = await followQuery
     .order('follow_up_at', { ascending: true })
     .limit(dailyGoal);
 
@@ -164,6 +177,7 @@ export async function addProspect(data: {
   state: string;
   notes?: string;
   source?: string;
+  prospect_type?: ProspectType;
 }) {
   await requireAdmin();
   const supabase = createAdminClient();
@@ -180,6 +194,7 @@ export async function addProspect(data: {
     state: data.state,
     notes: data.notes || null,
     source: data.source || 'manual',
+    prospect_type: data.prospect_type || 'doctor',
     status: 'new',
   });
 
@@ -202,6 +217,7 @@ export async function bulkAddProspects(prospects: Array<{
   clinic_name?: string;
   city: string;
   state: string;
+  prospect_type?: ProspectType;
 }>) {
   await requireAdmin();
   const supabase = createAdminClient();
@@ -215,6 +231,7 @@ export async function bulkAddProspects(prospects: Array<{
     clinic_name: p.clinic_name || null,
     city: p.city,
     state: p.state,
+    prospect_type: p.prospect_type || 'doctor',
     status: 'new' as const,
     source: 'csv_import',
   }));
@@ -622,7 +639,9 @@ export async function preBuildProfile(prospectId: string) {
 }
 
 // ── DM Scripts ──
-export async function getDMScripts() {
+export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
+  if (prospect_type === 'vendor') return getVendorScripts();
+  if (prospect_type === 'seminar_host') return getSeminarHostScripts();
   return [
     {
       id: 'pre_built_gift',
@@ -732,15 +751,113 @@ export async function getDMScripts() {
   ];
 }
 
+// ── Vendor Scripts ──
+function getVendorScripts() {
+  return [
+    {
+      id: 'vendor_intro',
+      name: 'Vendor: Introduction',
+      category: 'first_contact',
+      description: 'Initial outreach to vendors — pitch the vendor directory',
+      template: `Subject: Partnership opportunity — NeuroChiro Vendor Directory\n\nHi {name},\n\nMy name is Dr. Raymond Nichols, founder of NeuroChiro — the global platform for nervous system chiropractors.\n\nWe're building a vendor directory to connect our network of chiropractors with the best tools, technology, and services in the industry. I think {clinic_name} would be a great fit.\n\nHere's what a vendor listing includes:\n- Company profile visible to our entire doctor network\n- Category placement so doctors find you when searching for solutions\n- Option to feature exclusive discounts or demo links for our members\n\nWould you be interested in learning more? I'd love to set up a quick call or send over the details.\n\nBest,\nDr. Raymond Nichols\nFounder, NeuroChiro\nneurochiro.co`,
+    },
+    {
+      id: 'vendor_short_dm',
+      name: 'Vendor: Short DM',
+      category: 'first_contact',
+      description: 'Quick DM version for social media outreach',
+      template: `Hey {name} — I run NeuroChiro, the global directory for nervous system chiropractors. We're building a vendor marketplace and I think {clinic_name} would be a great fit. Interested in a listing? It gets your product in front of our entire doctor network.`,
+    },
+    {
+      id: 'vendor_value_lead',
+      name: 'Vendor: Value Lead',
+      category: 'first_contact',
+      description: 'Lead with the audience access angle',
+      template: `Subject: Get {clinic_name} in front of thousands of chiropractors\n\nHi {name},\n\nNeuroChiro is the fastest-growing platform for nervous system chiropractors, and our doctors are always asking us to recommend vendors they can trust.\n\nThat's why we're launching a curated vendor directory — and I'd love to feature {clinic_name}.\n\nYour listing would include your company profile, product details, and the option to offer exclusive deals to our members. It's a direct line to chiropractors who are actively looking for solutions like yours.\n\nWant me to send over the details?\n\nDr. Raymond Nichols\nFounder, NeuroChiro\nneurochiro.co`,
+    },
+    {
+      id: 'vendor_follow_up_1',
+      name: 'Vendor: Follow-Up #1',
+      category: 'follow_up',
+      description: 'First follow-up after 5 days',
+      template: `Subject: Quick follow-up — NeuroChiro vendor directory\n\nHi {name},\n\nJust circling back on my note about featuring {clinic_name} in the NeuroChiro vendor directory.\n\nOur doctors are actively searching for trusted vendors in your category. A listing takes minutes to set up and puts you directly in front of our network.\n\nHappy to answer any questions or walk you through it.\n\nDr. Raymond Nichols\nFounder, NeuroChiro`,
+    },
+    {
+      id: 'vendor_follow_up_2',
+      name: 'Vendor: Follow-Up #2',
+      category: 'follow_up',
+      description: 'Final follow-up — keep it short',
+      template: `Subject: Last note — vendor directory\n\nHi {name},\n\nLast follow-up from me. The NeuroChiro vendor directory is growing and I think {clinic_name} would be a strong addition.\n\nIf the timing is right, I'd love to get you set up. If not, no worries at all.\n\nDr. Raymond Nichols\nFounder, NeuroChiro`,
+    },
+    {
+      id: 'vendor_interested',
+      name: 'Vendor: They\'re Interested',
+      category: 'response',
+      description: 'They responded — guide them to sign up',
+      template: `Great to hear! Here's how to get started:\n\n1. Go to neurochiro.co/vendor-application\n2. Fill out your company details (takes about 5 minutes)\n3. Add your logo, product description, and any discount codes you'd like to offer our members\n\nOnce submitted, I'll review and approve it personally. Your listing will be live in the directory within 24 hours.\n\nLet me know if you have any questions!`,
+    },
+    {
+      id: 'vendor_objection_cost',
+      name: 'Vendor: Objection — Cost',
+      category: 'objection',
+      description: 'When they ask about pricing',
+      template: `Great question. We have a basic listing tier that gets you in the directory with your company profile. Premium tiers with featured placement, analytics, and enhanced visibility are available too. Happy to walk you through the options — what works best for your budget?`,
+    },
+  ];
+}
+
+// ── Seminar Host Scripts ──
+function getSeminarHostScripts() {
+  return [
+    {
+      id: 'seminar_intro',
+      name: 'Seminar Host: Introduction',
+      category: 'first_contact',
+      description: 'Initial outreach to seminar hosts — pitch the seminar marketplace',
+      template: `Subject: List your seminars on NeuroChiro\n\nHi {name},\n\nMy name is Dr. Raymond Nichols, founder of NeuroChiro — the global platform for nervous system chiropractors.\n\nI came across your seminars and they look incredible. We've built a seminar marketplace on NeuroChiro where chiropractors discover and register for continuing education, and I think your events would be a perfect fit.\n\nHere's what you get:\n- Your seminars listed in our searchable directory with map view\n- Exposure to our entire network of nervous system chiropractors\n- Registration tracking and attendee management\n- Featured placement options for maximum visibility\n\nWould you be interested in listing your upcoming events? I can walk you through it — takes about 5 minutes.\n\nDr. Raymond Nichols\nFounder, NeuroChiro\nneurochiro.co`,
+    },
+    {
+      id: 'seminar_short_dm',
+      name: 'Seminar Host: Short DM',
+      category: 'first_contact',
+      description: 'Quick DM for social media',
+      template: `Hey {name} — I run NeuroChiro, the global directory for nervous system chiropractors. We have a seminar marketplace where our docs find CE events. Would you be interested in listing your seminars? It's a direct line to chiropractors looking for exactly what you teach.`,
+    },
+    {
+      id: 'seminar_follow_up_1',
+      name: 'Seminar Host: Follow-Up #1',
+      category: 'follow_up',
+      description: 'First follow-up after 5 days',
+      template: `Subject: Quick follow-up — NeuroChiro seminar marketplace\n\nHi {name},\n\nJust following up on my note about listing your seminars on NeuroChiro.\n\nOur chiropractors are actively looking for CE opportunities, especially in functional neurology and nervous system techniques. Your events would get great visibility.\n\nHappy to help you get set up if you're interested.\n\nDr. Raymond Nichols\nFounder, NeuroChiro`,
+    },
+    {
+      id: 'seminar_follow_up_2',
+      name: 'Seminar Host: Follow-Up #2',
+      category: 'follow_up',
+      description: 'Final follow-up',
+      template: `Subject: Last note — seminar listing\n\nHi {name},\n\nLast follow-up from me. Our seminar marketplace is growing and I think your events would be a great addition for our network.\n\nWhenever the timing is right, I'd love to get your seminars listed. No pressure at all.\n\nDr. Raymond Nichols\nFounder, NeuroChiro`,
+    },
+    {
+      id: 'seminar_interested',
+      name: 'Seminar Host: They\'re Interested',
+      category: 'response',
+      description: 'Guide them to list their seminar',
+      template: `Awesome! Here's how to list your seminar:\n\n1. Go to neurochiro.co/host-a-seminar\n2. Fill in the details — title, dates, location, price, description\n3. Submit for review (I approve these personally)\n\nYour seminar will show up in our directory with map placement so chiropractors in the area can find it easily. If you're a member, your listings are auto-approved.\n\nLet me know if you need help getting set up!`,
+    },
+  ];
+}
+
 // ── Get States List ──
-export async function getProspectStates() {
+export async function getProspectStates(prospect_type?: ProspectType) {
   await requireAdmin();
   const supabase = createAdminClient();
 
-  const { data } = await supabase
+  let query = supabase
     .from('outreach_prospects' as any)
     .select('state')
     .order('state');
+  if (prospect_type) query = query.eq('prospect_type', prospect_type);
+  const { data } = await query;
 
   const states = [...new Set((data || []).map((d: any) => d.state).filter(Boolean))];
   return states as string[];

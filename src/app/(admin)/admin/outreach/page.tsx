@@ -12,8 +12,14 @@ import {
   getProspects, getPipelineStats, getDailyQueue, addProspect,
   bulkAddProspects, updateProspectStatus, updateProspect, deleteProspect,
   getDMScripts, getProspectStates, preBuildProfile, findProspectEmail,
-  type Prospect, type ProspectStatus,
+  type Prospect, type ProspectStatus, type ProspectType,
 } from "./actions";
+
+const TYPE_CONFIG: Record<ProspectType, { label: string; description: string }> = {
+  doctor: { label: "Doctors", description: "Find chiropractors. Send DMs. Grow the network." },
+  vendor: { label: "Vendors", description: "Recruit vendors for the marketplace directory." },
+  seminar_host: { label: "Seminar Hosts", description: "Find seminar hosts to list events on NeuroChiro." },
+};
 
 const STATUS_CONFIG: Record<ProspectStatus, { label: string; color: string; bg: string; icon: any }> = {
   new: { label: "New", color: "text-blue-400", bg: "bg-blue-500/10", icon: Plus },
@@ -35,6 +41,7 @@ const US_STATES = [
 
 export default function OutreachPage() {
   // ── State ──
+  const [prospectType, setProspectType] = useState<ProspectType>("doctor");
   const [activeTab, setActiveTab] = useState<"queue" | "prospects" | "scripts">("queue");
   const [prospects, setProspects] = useState<Prospect[]>([]);
   const [stats, setStats] = useState<any>(null);
@@ -62,19 +69,19 @@ export default function OutreachPage() {
     setLoading(true);
     try {
       const [prospectsRes, statsRes, queueRes, statesRes] = await Promise.all([
-        getProspects({ state: stateFilter, status: statusFilter, search: searchQuery }),
-        getPipelineStats(stateFilter),
-        getDailyQueue(10),
-        getProspectStates(),
+        getProspects({ state: stateFilter, status: statusFilter, search: searchQuery, prospect_type: prospectType }),
+        getPipelineStats(stateFilter, prospectType),
+        getDailyQueue(10, prospectType),
+        getProspectStates(prospectType),
       ]);
       setProspects(prospectsRes.prospects);
       setStats(statsRes);
       setQueue(queueRes);
       setProspectStates(statesRes);
-      setScripts(await getDMScripts());
+      setScripts(await getDMScripts(prospectType));
     } catch (e) { console.error(e); }
     setLoading(false);
-  }, [stateFilter, statusFilter, searchQuery]);
+  }, [stateFilter, statusFilter, searchQuery, prospectType]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -132,7 +139,7 @@ export default function OutreachPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-heading font-black text-white uppercase tracking-tight">Outreach</h1>
-          <p className="text-gray-400 mt-1">Find chiropractors. Send DMs. Grow the network.</p>
+          <p className="text-gray-400 mt-1">{TYPE_CONFIG[prospectType].description}</p>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => setShowImportModal(true)} className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-gray-300 hover:bg-white/10 transition-all flex items-center gap-2">
@@ -142,6 +149,23 @@ export default function OutreachPage() {
             <Plus className="w-4 h-4" /> Add Prospect
           </button>
         </div>
+      </div>
+
+      {/* Prospect Type Tabs */}
+      <div className="flex gap-2">
+        {(Object.keys(TYPE_CONFIG) as ProspectType[]).map((type) => (
+          <button
+            key={type}
+            onClick={() => { setProspectType(type); setStateFilter("all"); setStatusFilter("all"); setSearchQuery(""); }}
+            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              prospectType === type
+                ? "bg-neuro-orange text-white shadow-lg shadow-neuro-orange/20"
+                : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10"
+            }`}
+          >
+            {TYPE_CONFIG[type].label}
+          </button>
+        ))}
       </div>
 
       {/* Pipeline Stats */}
@@ -415,10 +439,10 @@ export default function OutreachPage() {
       )}
 
       {/* ═══════════ ADD PROSPECT MODAL ═══════════ */}
-      {showAddModal && <AddProspectModal onClose={() => setShowAddModal(false)} onAdded={() => { setShowAddModal(false); fetchData(); showToast("Prospect added"); }} />}
+      {showAddModal && <AddProspectModal prospectType={prospectType} onClose={() => setShowAddModal(false)} onAdded={() => { setShowAddModal(false); fetchData(); showToast("Prospect added"); }} />}
 
       {/* ═══════════ IMPORT CSV MODAL ═══════════ */}
-      {showImportModal && <ImportCSVModal onClose={() => setShowImportModal(false)} onImported={(count) => { setShowImportModal(false); fetchData(); showToast(`${count} prospects imported`); }} />}
+      {showImportModal && <ImportCSVModal prospectType={prospectType} onClose={() => setShowImportModal(false)} onImported={(count) => { setShowImportModal(false); fetchData(); showToast(`${count} prospects imported`); }} />}
 
       {/* ═══════════ DETAIL/EDIT MODAL ═══════════ */}
       {showDetailModal && (
@@ -525,7 +549,7 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
               {findingEmail ? "Finding..." : "Find Email"}
             </button>
           )}
-          {!hasProfile && (
+          {!hasProfile && prospect.prospect_type === 'doctor' && (
             <button onClick={handlePreBuild} disabled={building} className="px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg text-xs font-bold text-green-400 hover:bg-green-500/20 flex items-center gap-1.5 disabled:opacity-50">
               {building ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
               {building ? "Building..." : "Pre-Build Profile"}
@@ -571,7 +595,7 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
 }
 
 // ── Add Prospect Modal ──
-function AddProspectModal({ onClose, onAdded }: { onClose: () => void; onAdded: () => void }) {
+function AddProspectModal({ onClose, onAdded, prospectType }: { onClose: () => void; onAdded: () => void; prospectType: ProspectType }) {
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -589,6 +613,7 @@ function AddProspectModal({ onClose, onAdded }: { onClose: () => void; onAdded: 
       city: form.get("city") as string,
       state: form.get("state") as string,
       notes: form.get("notes") as string || undefined,
+      prospect_type: prospectType,
     });
     setSaving(false);
     if (result.success) onAdded();
@@ -629,7 +654,7 @@ function AddProspectModal({ onClose, onAdded }: { onClose: () => void; onAdded: 
 }
 
 // ── Import CSV Modal ──
-function ImportCSVModal({ onClose, onImported }: { onClose: () => void; onImported: (count: number) => void }) {
+function ImportCSVModal({ onClose, onImported, prospectType }: { onClose: () => void; onImported: (count: number) => void; prospectType: ProspectType }) {
   const [importing, setImporting] = useState(false);
   const [preview, setPreview] = useState<any[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -664,7 +689,8 @@ function ImportCSVModal({ onClose, onImported }: { onClose: () => void; onImport
       clinic_name: row.clinic || row.clinic_name || row.practice || "",
       city: row.city || "",
       state: row.state || "",
-    })).filter((p) => p.name && p.city);
+      prospect_type: (row.prospect_type || row.type || prospectType) as ProspectType,
+    })).filter((p) => p.name);
 
     const result = await bulkAddProspects(prospects);
     setImporting(false);
