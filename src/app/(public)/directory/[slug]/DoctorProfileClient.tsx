@@ -34,7 +34,7 @@ function formatUrl(url: string | null | undefined): string | null {
   return `https://${trimmed}`;
 }
 
-export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slug: string }) {
+export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs = [] }: { doctor: any, slug: string, seminars?: any[], jobs?: any[] }) {
   const { toggleSave, isSaved } = useUserPreferences();
   const [copied, setCopied] = useState(false);
   const [session, setSession] = useState<any>(null);
@@ -263,6 +263,59 @@ export default function DoctorProfileClient({ doctor, slug }: { doctor: any, slu
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
+            </div>
+          </div>
+        )}
+
+        {/* Seminars Hosted */}
+        {seminars.length > 0 && (
+          <div className="mt-6 bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+            <h2 className="text-lg font-black text-neuro-navy mb-4">Seminars & Events</h2>
+            <div className="space-y-3">
+              {seminars.map((sem: any) => (
+                <Link key={sem.id} href={`/seminars/${sem.id}`} className="block bg-gray-50 hover:bg-orange-50 rounded-xl p-4 transition-colors group">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-sm font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">{sem.title}</h3>
+                      <div className="flex items-center gap-3 mt-1.5">
+                        {sem.dates && <span className="text-xs text-gray-500 flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(sem.dates).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>}
+                        {(sem.city || sem.location) && <span className="text-xs text-gray-500 flex items-center gap-1"><MapPin className="w-3 h-3" /> {sem.city || sem.location}</span>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {sem.is_past && <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Past</span>}
+                      {sem.price ? <span className="text-xs font-bold text-neuro-orange">${sem.price}</span> : <span className="text-xs font-bold text-green-600">Free</span>}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Jobs & Hiring */}
+        {jobs.length > 0 && (
+          <div className="mt-6 bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+            <h2 className="text-lg font-black text-neuro-navy mb-4">Open Positions</h2>
+            <div className="space-y-3">
+              {jobs.map((job: any) => (
+                <Link key={job.id} href={`/careers/${job.id}`} className="block bg-gray-50 hover:bg-orange-50 rounded-xl p-4 transition-colors group">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-sm font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">{job.title}</h3>
+                      <div className="flex items-center gap-3 mt-1.5">
+                        {job.employment_type && <span className="text-xs text-gray-500">{job.employment_type}</span>}
+                        {(job.salary_min || job.salary_max) && (
+                          <span className="text-xs text-gray-500">
+                            {job.salary_min && job.salary_max ? `$${(job.salary_min/1000).toFixed(0)}k–$${(job.salary_max/1000).toFixed(0)}k` : job.salary_min ? `From $${(job.salary_min/1000).toFixed(0)}k` : `Up to $${(job.salary_max/1000).toFixed(0)}k`}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Hiring</span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         )}

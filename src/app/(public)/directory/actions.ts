@@ -172,6 +172,36 @@ export async function incrementDoctorViews(slug: string) {
   }
 }
 
+// ── Get seminars hosted by a doctor ──
+export async function getDoctorSeminars(userId: string) {
+  const supabase = createServerSupabase();
+  try {
+    const { data } = await supabase
+      .from('seminars')
+      .select('id, title, dates, location, city, country, price, is_past')
+      .eq('host_id', userId)
+      .eq('is_approved', true)
+      .order('dates', { ascending: false })
+      .limit(6);
+    return data || [];
+  } catch { return []; }
+}
+
+// ── Get jobs posted by a doctor ──
+export async function getDoctorJobs(doctorId: string) {
+  const supabase = createServerSupabase();
+  try {
+    const { data } = await supabase
+      .from('job_postings')
+      .select('id, title, employment_type, salary_min, salary_max, created_at, status')
+      .eq('doctor_id', doctorId)
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(5);
+    return data || [];
+  } catch { return []; }
+}
+
 export async function getStudentsForMap(options: {
   bounds?: [number, number, number, number]; // [minLng, minLat, maxLng, maxLat]
   limit?: number;

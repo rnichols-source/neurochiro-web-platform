@@ -119,18 +119,31 @@ export async function incrementSeminarStats(id: string, column: 'page_views' | '
 }
 
 export async function getSeminarById(id: string) {
-  
+
     const supabase = createServerSupabase()
     const { data, error } = await supabase
         .from('seminars')
         .select('*')
         .eq('id', id)
         .single()
-    
+
     if (error) {
         console.error("Error fetching seminar:", error)
         return null
     }
+
+    // Look up host doctor's directory slug for cross-linking
+    if (data?.host_id) {
+      const { data: doctor } = await supabase
+        .from('doctors')
+        .select('slug, first_name, last_name, photo_url, clinic_name')
+        .eq('user_id', data.host_id)
+        .maybeSingle()
+      if (doctor) {
+        (data as any).host_doctor = doctor;
+      }
+    }
+
     return data
 }
 

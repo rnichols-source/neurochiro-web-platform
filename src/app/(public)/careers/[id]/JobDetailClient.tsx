@@ -52,7 +52,11 @@ export default function JobDetailClient({ job }: { job: any }) {
               {job.employment_type && <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{job.employment_type}</span>}
             </div>
             <h1 className="text-3xl font-heading font-black text-neuro-navy">{job.title}</h1>
-            <p className="text-gray-500 mt-1">{job.clinic_name}</p>
+            {job.slug ? (
+              <Link href={`/directory/${job.slug}`} className="text-neuro-orange font-bold mt-1 inline-block hover:underline">{job.clinic_name}</Link>
+            ) : (
+              <p className="text-gray-500 mt-1">{job.clinic_name}</p>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-5 text-sm text-gray-500">
