@@ -140,19 +140,24 @@ const enqueue = async (eventType: string, payload: Record<string, unknown>, dela
       return;
     }
 
+    const now = new Date();
+    const scheduledFor = delayMinutes > 0
+      ? new Date(now.getTime() + delayMinutes * 60 * 1000).toISOString()
+      : now.toISOString();
+
     const { data, error } = await supabaseAdmin
       .from('automation_queue')
       .insert({
         event_type: eventType,
-        payload: payload,
-        status: 'pending',
-        created_at: new Date().toISOString()
+        payload: { ...payload, scheduled_for: scheduledFor },
+        status: delayMinutes > 0 ? 'scheduled' : 'pending',
+        created_at: now.toISOString()
       })
       .select()
       .single();
 
     if (error) throw error;
-    
+
     // Only execute immediately if not delayed
     if (delayMinutes === 0) {
       executeAutomation(data.id, eventType, payload);
@@ -341,8 +346,8 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             // Enqueue subsequent vendor onboarding emails
             await enqueue('vendor_profile_reminder', payload, 24 * 60); // 24 hours later
             await enqueue('vendor_optimization_tips', payload, 3 * 24 * 60); // 3 days later
-          } else {
-            // Patient / Public / Default
+          } else if (payload.role === 'patient') {
+            // Patient only — NOT the default fallback for unknown roles
             await sendPremiumEmail({
               to: payload.email,
               subject: 'Your Journey to True Healing Starts Here 🌱',
@@ -361,8 +366,19 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             });
 
             // Enqueue Patient Onboarding Sequence
-            await enqueue('patient_education_1', payload, 24 * 60); // 1 day later
-            await enqueue('patient_directory_reminder', payload, 3 * 24 * 60); // 3 days later
+            await enqueue('patient_education_1', { ...payload, role: 'patient' }, 24 * 60);
+            await enqueue('patient_directory_reminder', { ...payload, role: 'patient' }, 3 * 24 * 60);
+          } else {
+            // Unknown role — send a generic welcome, no follow-up sequence
+            await sendPremiumEmail({
+              to: payload.email,
+              subject: 'Welcome to NeuroChiro 🧠',
+              title: 'Account Created',
+              body: `<h1>Welcome to NeuroChiro, ${payload.name || payload.full_name || 'there'}.</h1>
+                    <p>Your account is active. Log in to explore the platform.</p>`,
+              ctaText: 'Go to Dashboard',
+              ctaUrl: 'https://neurochiro.co/login'
+            });
           }
         }
         if (smsEnabled && payload.phone) {
@@ -489,7 +505,8 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         break;
 
       case 'patient_education_1':
-        if (emailEnabled && payload.email) {
+        // Only send to actual patients — not doctors or students
+        if (emailEnabled && payload.email && payload.role === 'patient') {
           await sendPremiumEmail({
             to: payload.email,
             subject: 'Why the Nervous System Matters 🧠',
@@ -504,7 +521,8 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         break;
 
       case 'patient_directory_reminder':
-        if (emailEnabled && payload.email) {
+        // Only send to actual patients — not doctors or students
+        if (emailEnabled && payload.email && payload.role === 'patient') {
           await sendPremiumEmail({
             to: payload.email,
             subject: 'Find your clinical partner today 📍',

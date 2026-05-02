@@ -16,11 +16,13 @@ export async function GET(req: Request) {
   
   try {
     // 2. Fetch pending items from the queue that are scheduled for now or earlier
+    //    Also process 'scheduled' items whose scheduled_for time has passed
+    const now = new Date().toISOString();
     const { data: queueItems, error } = await supabase
       .from('automation_queue')
       .select('*')
-      .eq('status', 'pending')
-      .lte('created_at', new Date().toISOString())
+      .in('status', ['pending', 'scheduled'])
+      .lte('created_at', now)
       .order('created_at', { ascending: true })
       .limit(50);
 
@@ -30,25 +32,37 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: true, processed: 0, message: 'No pending items' });
     }
 
+    // Filter out scheduled items that haven't reached their scheduled time yet
+    const readyItems = queueItems.filter((item: any) => {
+      if (item.status === 'scheduled' && item.payload?.scheduled_for) {
+        return new Date(item.payload.scheduled_for) <= new Date();
+      }
+      return true; // pending items always process
+    });
+
+    if (readyItems.length === 0) {
+      return NextResponse.json({ success: true, processed: 0, message: 'No ready items' });
+    }
+
     // 3. Mark them as processing immediately to prevent race conditions
-    const itemIds = queueItems.map((item: any) => item.id);
+    const itemIds = readyItems.map((item: any) => item.id);
     await supabase
       .from('automation_queue')
       .update({ status: 'processing', updated_at: new Date().toISOString() })
       .in('id', itemIds);
 
     // 4. Process all items (in parallel with Promise.allSettled)
-    const processingPromises = queueItems.map((item: any) => 
+    const processingPromises = readyItems.map((item: any) =>
       executeAutomation(item.id, item.event_type, item.payload)
     );
 
     const results = await Promise.allSettled(processingPromises);
 
-    // Any that rejected at the promise level (should be rare since executeAutomation catches errors internally)
+    // Any that rejected at the promise level
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
       if (result.status === 'rejected') {
-        const item = queueItems[i];
+        const item = readyItems[i];
         await supabase
           .from('automation_queue')
           .update({ 
@@ -61,8 +75,8 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({ 
-      success: true, 
-      processed: queueItems.length 
+      success: true,
+      processed: readyItems.length
     });
 
   } catch (error: any) {
