@@ -1,5 +1,6 @@
 "use client";
 import StudentUpgradeGate from "@/components/student/UpgradeGate";
+import { saveToolData, loadToolData } from "@/app/actions/tool-data";
 
 import { useState, useEffect, useRef } from "react";
 import {
@@ -435,26 +436,37 @@ function ContractLabContent() {
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [loaded, setLoaded] = useState(false);
 
-  // localStorage debounce
+  // Supabase + localStorage persistence
   const qRef = useRef(questionnaire);
   qRef.current = questionnaire;
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LS_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<QuestionnaireState>;
-        setQuestionnaire((prev) => ({ ...prev, ...parsed }));
+    loadToolData('contract_lab').then((cloud) => {
+      if (cloud) {
+        setQuestionnaire((prev) => ({ ...prev, ...cloud }));
+      } else {
+        try {
+          const saved = localStorage.getItem(LS_KEY);
+          if (saved) setQuestionnaire((prev) => ({ ...prev, ...JSON.parse(saved) }));
+        } catch {}
       }
-    } catch { /* ignore */ }
-    setLoaded(true);
+      setLoaded(true);
+    }).catch(() => {
+      try {
+        const saved = localStorage.getItem(LS_KEY);
+        if (saved) setQuestionnaire((prev) => ({ ...prev, ...JSON.parse(saved) }));
+      } catch {}
+      setLoaded(true);
+    });
   }, []);
 
   useEffect(() => {
     if (!loaded) return;
     const timer = setTimeout(() => {
-      try { localStorage.setItem(LS_KEY, JSON.stringify(qRef.current)); } catch { /* ignore */ }
-    }, 500);
+      const data = qRef.current;
+      saveToolData('contract_lab', data).catch(() => {});
+      try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch {}
+    }, 1000);
     return () => clearTimeout(timer);
   }, [questionnaire, loaded]);
 

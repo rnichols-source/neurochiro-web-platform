@@ -59,7 +59,9 @@ export async function getStudentDashboardData() {
 export async function getAcademyProgress() {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { completed: 0, total: 12 }
+  // 6 courses: 4+4+4+6+6+4 = 28 modules total
+  const TOTAL_MODULES = 28
+  if (!user) return { completed: 0, total: TOTAL_MODULES }
 
   const { data } = await supabase
     .from('course_progress')
@@ -74,7 +76,7 @@ export async function getAcademyProgress() {
     })
   }
 
-  return { completed, total: 12 } // 3 courses × 4 modules each
+  return { completed, total: TOTAL_MODULES }
 }
 
 export async function getJobsForRadar() {

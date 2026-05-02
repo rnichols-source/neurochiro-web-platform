@@ -20,23 +20,26 @@ export default function JobsPage() {
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
-      const { data } = await supabase
-        .from('job_applications')
-        .select('job_id')
-        .eq('applicant_id', user.id);
-      if (data) {
-        setAppliedJobIds(new Set(data.map(a => a.job_id)));
-      }
-      // Also check applications table for stage info
-      const { data: apps } = await supabase
-        .from('applications')
-        .select('job_id, stage')
-        .eq('candidate_id', user.id);
-      if (apps) {
-        const stageMap: Record<string, string> = {};
-        apps.forEach((a: any) => { stageMap[a.job_id] = a.stage || 'Applied'; });
-        setAppliedStages(stageMap);
-      }
+      try {
+        const { data } = await supabase
+          .from('job_applications')
+          .select('job_id')
+          .eq('applicant_id', user.id);
+        if (data) {
+          setAppliedJobIds(new Set(data.map(a => a.job_id)));
+        }
+      } catch {}
+      try {
+        const { data: apps } = await (supabase as any)
+          .from('applications')
+          .select('job_id, stage')
+          .eq('candidate_id', user.id);
+        if (apps) {
+          const stageMap: Record<string, string> = {};
+          apps.forEach((a: any) => { stageMap[a.job_id] = a.stage || 'Applied'; });
+          setAppliedStages(stageMap);
+        }
+      } catch {}
     });
   }, []);
 

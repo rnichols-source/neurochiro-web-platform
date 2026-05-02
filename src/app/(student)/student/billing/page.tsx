@@ -40,7 +40,7 @@ export default function StudentBilling() {
     );
   }
 
-  if (!billingData || billingData.noCustomer) {
+  if (!billingData || billingData.noCustomer || billingData.error) {
     return (
       <div className="space-y-8">
         <h1 className="text-2xl font-black text-neuro-navy">Billing</h1>

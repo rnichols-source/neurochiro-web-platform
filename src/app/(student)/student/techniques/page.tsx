@@ -1,5 +1,6 @@
 "use client";
 import StudentUpgradeGate from "@/components/student/UpgradeGate";
+import { saveToolData, loadToolData } from "@/app/actions/tool-data";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -151,31 +152,36 @@ function TechniqueComparisonContent() {
     };
   }, []);
 
-  // ─── Load quiz from localStorage ───────────────────────────────────────────
+  // ─── Load quiz from Supabase (localStorage fallback) ──────────────────────
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LS_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<QuizState>;
-        setQuiz((prev) => ({ ...prev, ...parsed }));
+    loadToolData('technique_quiz').then((cloud) => {
+      if (cloud) {
+        setQuiz((prev) => ({ ...prev, ...cloud }));
+      } else {
+        try {
+          const saved = localStorage.getItem(LS_KEY);
+          if (saved) setQuiz((prev) => ({ ...prev, ...JSON.parse(saved) }));
+        } catch {}
       }
-    } catch {
-      // ignore
-    }
-    setLoaded(true);
+      setLoaded(true);
+    }).catch(() => {
+      try {
+        const saved = localStorage.getItem(LS_KEY);
+        if (saved) setQuiz((prev) => ({ ...prev, ...JSON.parse(saved) }));
+      } catch {}
+      setLoaded(true);
+    });
   }, []);
 
-  // ─── Save quiz to localStorage (debounced) ────────────────────────────────
+  // ─── Save quiz to Supabase + localStorage (debounced) ────────────────────
 
   useEffect(() => {
     if (!loaded) return;
     const timer = setTimeout(() => {
-      try {
-        localStorage.setItem(LS_KEY, JSON.stringify(quizRef.current));
-      } catch {
-        // ignore
-      }
+      const data = quizRef.current;
+      saveToolData('technique_quiz', data).catch(() => {});
+      try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch {}
     }, 500);
     return () => clearTimeout(timer);
   }, [quiz, loaded]);
@@ -282,6 +288,7 @@ function TechniqueComparisonContent() {
   const resetQuiz = useCallback(() => {
     setQuiz(INITIAL_QUIZ);
     localStorage.removeItem(LS_KEY);
+    saveToolData('technique_quiz', null).catch(() => {});
   }, []);
 
   // ─── Comparison helpers ────────────────────────────────────────────────────
@@ -336,6 +343,24 @@ function TechniqueComparisonContent() {
 
   // ─── Purchase Gate Overlay ─────────────────────────────────────────────────
 
+  const [purchasing, setPurchasing] = useState(false);
+  const handlePurchase = async () => {
+    setPurchasing(true);
+    try {
+      const { createCourseCheckout } = await import("../academy/purchase-actions");
+      const result = await createCourseCheckout("course-clinical-identity");
+      if (result.url) {
+        window.location.href = result.url;
+      } else {
+        alert(result.error || "Unable to start checkout.");
+        setPurchasing(false);
+      }
+    } catch {
+      alert("Unable to start checkout. Please try again.");
+      setPurchasing(false);
+    }
+  };
+
   const PurchaseGate = ({ message }: { message?: string }) => (
     <div className="absolute inset-0 z-10 backdrop-blur-sm bg-white/70 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
       <Lock className="w-8 h-8 mb-3" style={{ color: BRAND_NAVY }} />
@@ -346,10 +371,12 @@ function TechniqueComparisonContent() {
         Get access to all 18 techniques, the full quiz, and the comparison tool.
       </p>
       <button
-        className="mt-4 px-6 py-3 rounded-xl text-white font-bold text-sm transition-colors hover:opacity-90"
+        onClick={handlePurchase}
+        disabled={purchasing}
+        className="mt-4 px-6 py-3 rounded-xl text-white font-bold text-sm transition-colors hover:opacity-90 disabled:opacity-50"
         style={{ backgroundColor: BRAND_ORANGE }}
       >
-        Unlock for $19
+        {purchasing ? "Loading..." : "Unlock for $19"}
       </button>
     </div>
   );

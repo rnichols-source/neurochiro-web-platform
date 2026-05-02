@@ -12,7 +12,7 @@ export default function StudentNotificationsPage() {
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return;
+      if (!user) { setLoading(false); return; }
       const { data } = await supabase
         .from('notifications')
         .select('*')

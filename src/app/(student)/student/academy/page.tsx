@@ -1,5 +1,6 @@
 "use client";
 
+import { saveToolData, loadToolData } from "@/app/actions/tool-data";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   GraduationCap,
@@ -126,11 +127,15 @@ function loadProgress(): AllProgress {
 }
 
 function saveProgress(p: AllProgress) {
+  // Save to both Supabase and localStorage (offline fallback)
+  saveToolData('academy_progress', p).catch(() => {});
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); } catch {}
+}
+
+async function loadProgressFromCloud(): Promise<AllProgress | null> {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
-  } catch {
-    /* noop */
-  }
+    return await loadToolData('academy_progress');
+  } catch { return null; }
 }
 
 function parseReadTime(s: string): number {
@@ -297,9 +302,11 @@ export default function AcademyPage() {
   const [showCourseComplete, setShowCourseComplete] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load data on mount
+  // Load data on mount (Supabase first, localStorage fallback)
   useEffect(() => {
-    setProgress(loadProgress());
+    loadProgressFromCloud().then((cloud) => {
+      setProgress(cloud || loadProgress());
+    });
     getPurchasedCourses()
       .then(setPurchasedIds)
       .catch(() => {});

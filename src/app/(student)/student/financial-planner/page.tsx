@@ -1,5 +1,6 @@
 "use client";
 import StudentUpgradeGate from "@/components/student/UpgradeGate";
+import { saveToolData, loadToolData } from "@/app/actions/tool-data";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -222,12 +223,11 @@ function FinancialPlannerContent() {
   const [loaded, setLoaded] = useState(false);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
 
-  // Load from localStorage on mount
+  // Load from Supabase (localStorage fallback)
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LS_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<PlannerState>;
+    loadToolData('financial_planner').then((cloud) => {
+      const parsed = cloud || (() => { try { const s = localStorage.getItem(LS_KEY); return s ? JSON.parse(s) : null; } catch { return null; } })();
+      if (parsed) {
         setState((prev) => ({
           ...prev,
           ...parsed,
@@ -235,10 +235,17 @@ function FinancialPlannerContent() {
           expenses: { ...DEFAULT_EXPENSES, ...(parsed.expenses || {}) },
         }));
       }
-    } catch {
-      // ignore
-    }
-    setLoaded(true);
+      setLoaded(true);
+    }).catch(() => {
+      try {
+        const saved = localStorage.getItem(LS_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved) as Partial<PlannerState>;
+          setState((prev) => ({ ...prev, ...parsed, checkingPurchase: true, expenses: { ...DEFAULT_EXPENSES, ...(parsed.expenses || {}) } }));
+        }
+      } catch {}
+      setLoaded(true);
+    });
   }, []);
 
   // Check purchase status
@@ -274,14 +281,11 @@ function FinancialPlannerContent() {
   useEffect(() => {
     if (!loaded) return;
     const timer = setTimeout(() => {
-      try {
-        const toSave = { ...stateRef.current };
-        delete (toSave as Record<string, unknown>).checkingPurchase;
-        localStorage.setItem(LS_KEY, JSON.stringify(toSave));
-      } catch {
-        // ignore
-      }
-    }, 500);
+      const toSave = { ...stateRef.current };
+      delete (toSave as Record<string, unknown>).checkingPurchase;
+      saveToolData('financial_planner', toSave).catch(() => {});
+      try { localStorage.setItem(LS_KEY, JSON.stringify(toSave)); } catch {}
+    }, 1000);
     return () => clearTimeout(timer);
   }, [state, loaded]);
 
@@ -370,6 +374,7 @@ function FinancialPlannerContent() {
 
   const resetAll = () => {
     localStorage.removeItem(LS_KEY);
+    saveToolData('financial_planner', null).catch(() => {});
     setState({ ...INITIAL_STATE, checkingPurchase: false, isPurchased: state.isPurchased });
   };
 
