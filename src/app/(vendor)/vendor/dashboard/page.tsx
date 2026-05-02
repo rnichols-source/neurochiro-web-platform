@@ -1,6 +1,7 @@
 "use client";
 
-import { Tag, Settings, Eye, MousePointerClick, CheckCircle2, Save, Loader2 } from "lucide-react";
+import { Tag, Settings, Eye, MousePointerClick, CheckCircle2, Save, Loader2, Users, ExternalLink } from "lucide-react";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getVendorDashboardData } from "./actions";
 import { updateVendorOffer, updateVendorProfile } from "@/app/actions/vendors";
@@ -69,7 +70,7 @@ export default function VendorDashboard() {
       </header>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Profile Views</p>
@@ -91,7 +92,24 @@ export default function VendorDashboard() {
           </div>
           <div className="w-12 h-12 bg-neuro-orange/10 text-neuro-orange rounded-2xl flex items-center justify-center"><Tag className="w-6 h-6" /></div>
         </div>
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Network Reach</p>
+            <p className="text-3xl font-black text-green-600">{data?.stats?.networkDoctors?.toLocaleString() ?? 0}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">verified doctors</p>
+          </div>
+          <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center"><Users className="w-6 h-6" /></div>
+        </div>
       </div>
+
+      {/* Quick Links */}
+      {data?.profile?.slug && (
+        <div className="flex gap-3">
+          <Link href={`/marketplace/${data.profile.slug}`} target="_blank" className="flex items-center gap-2 px-5 py-3 bg-white border border-gray-100 rounded-xl text-sm font-bold text-neuro-navy hover:border-neuro-orange/30 hover:bg-neuro-orange/5 transition-all">
+            <ExternalLink className="w-4 h-4" /> View Public Profile
+          </Link>
+        </div>
+      )}
 
       {/* Offer Management */}
       <section className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

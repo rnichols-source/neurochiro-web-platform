@@ -21,18 +21,26 @@ export async function getVendorDashboardData() {
       .eq('id', user.id)
       .single()
 
+    // Get network reach stats
+    const { count: doctorCount } = await supabase
+      .from('doctors')
+      .select('id', { count: 'exact', head: true })
+      .eq('verification_status', 'verified')
+
     return {
       profile: {
         name: (vendor as any)?.name || (profile as any)?.full_name || user.email?.split('@')[0],
         role: (profile as any)?.role,
         website_url: (vendor as any)?.website_url || "",
         short_description: (vendor as any)?.short_description || "",
-        categories: (vendor as any)?.categories || []
+        categories: (vendor as any)?.categories || [],
+        slug: (vendor as any)?.slug || null,
       },
       stats: {
         views: (vendor as any)?.profile_views || 0,
         clicks: (vendor as any)?.website_clicks || 0,
-        engagement: (vendor as any)?.discount_clicks || 0
+        engagement: (vendor as any)?.discount_clicks || 0,
+        networkDoctors: doctorCount || 0,
       },
       offer: {
         title: (vendor as any)?.discount_description?.split(' - ')[0] || "NeuroChiro Partner Discount",
