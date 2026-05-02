@@ -87,7 +87,7 @@ export async function GET(req: Request) {
     const freeDoctors = totalDoctors - (paidDoctors || 0);
 
     // Build the email
-    const founderEmail = process.env.FOUNDER_EMAIL || 'ray@neurochiro.co';
+    const founderEmail = 'drray@neurochirodirectory.com';
 
     const stat = (label: string, value: number | string, change?: number) => {
       const changeHtml = change !== undefined && change > 0
