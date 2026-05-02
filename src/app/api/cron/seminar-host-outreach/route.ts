@@ -100,10 +100,10 @@ export async function GET(req: Request) {
         continue;
       }
 
-      // Step 3: Update prospect status
+      // Step 3: Update prospect status (critical — prevents re-emailing)
       const followUp = new Date();
       followUp.setDate(followUp.getDate() + 5);
-      await supabase.from('outreach_prospects').update({
+      const { error: updateError } = await supabase.from('outreach_prospects').update({
         status: 'contacted',
         contacted_at: new Date().toISOString(),
         follow_up_at: followUp.toISOString(),
@@ -112,6 +112,7 @@ export async function GET(req: Request) {
         notes: `Auto-email sent by Seminar Host Outreach Agent`,
         updated_at: new Date().toISOString(),
       }).eq('id', p.id);
+      if (updateError) console.error(`[SEMINAR HOST OUTREACH] Status update failed for ${p.name}:`, updateError);
     }
 
     // Audit log

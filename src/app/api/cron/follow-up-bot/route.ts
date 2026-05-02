@@ -95,7 +95,7 @@ export async function GET(req: Request) {
         .update({
           status: 'followed_up',
           follow_up_count: followUpCount,
-          follow_up_at: followUpCount >= 3 ? null : nextFollowUp.toISOString(),
+          follow_up_at: nextFollowUp.toISOString(),
           script_used: `auto_follow_up_${followUpCount}`,
           updated_at: now,
         })
