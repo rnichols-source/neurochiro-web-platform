@@ -82,7 +82,7 @@ export default function ProfilePage() {
   // Client-side image compression
   const compressImage = (file: File, maxWidth: number, quality: number): Promise<File> => {
     return new Promise((resolve, reject) => {
-      const img = new Image();
+      const img = document.createElement('img');
       img.onload = () => {
         const canvas = document.createElement('canvas');
         let width = img.width;
