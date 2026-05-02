@@ -19,6 +19,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  MessageSquare,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
@@ -28,6 +29,7 @@ const navItems = [
   { name: "Dashboard", href: "/portal/dashboard", icon: LayoutDashboard },
   { name: "Find a Doctor", href: "/directory", icon: Search },
   { name: "Saved", href: "/portal/saved", icon: Heart },
+  { name: "Messages", href: "/portal/messages", icon: MessageSquare },
   { name: "Health Tracker", href: "/portal/track", icon: Activity },
   { name: "Exercises", href: "/portal/exercises", icon: Dumbbell },
   { name: "My Journey", href: "/portal/journey", icon: TrendingUp },
