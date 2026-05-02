@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bot, RefreshCw, CheckCircle2, XCircle, Clock, Loader2, Send, Mail, UserCheck, Zap } from "lucide-react";
+import { Bot, RefreshCw, CheckCircle2, XCircle, Clock, Loader2, Send, Mail, UserCheck, Zap, TrendingUp, BarChart3, Trash2, ShieldCheck, Play, GraduationCap, Database } from "lucide-react";
 import { getAgentStatus, triggerAgent } from "./actions";
 
 const AGENTS = [
@@ -40,6 +40,69 @@ const AGENTS = [
     icon: Zap,
     color: "text-purple-400",
     bg: "bg-purple-500/10",
+  },
+  {
+    id: "upgrade-nudger",
+    name: "Upgrade Nudger",
+    description: "Sends milestone-based upgrade emails to free doctors (1st view, 25, 50, 100 views, 14 & 30 days)",
+    schedule: "Every day at 11 AM",
+    icon: TrendingUp,
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+  },
+  {
+    id: "outreach-sender",
+    name: "Outreach Sender",
+    description: "Auto pre-builds profiles and sends initial emails to 10 new prospects daily",
+    schedule: "Weekdays at 8 AM",
+    icon: Send,
+    color: "text-orange-400",
+    bg: "bg-orange-500/10",
+  },
+  {
+    id: "analytics-compiler",
+    name: "Analytics Compiler",
+    description: "Compiles and emails you the weekly platform report with all key metrics",
+    schedule: "Every Monday at 7 AM",
+    icon: BarChart3,
+    color: "text-cyan-400",
+    bg: "bg-cyan-500/10",
+  },
+  {
+    id: "database-cleaner",
+    name: "Database Cleaner",
+    description: "Fixes broken slugs, cleans old queue items, reports data issues",
+    schedule: "Every Sunday at 3 AM",
+    icon: Database,
+    color: "text-gray-400",
+    bg: "bg-gray-500/10",
+  },
+  {
+    id: "churn-preventer",
+    name: "Churn Preventer",
+    description: "Sends retention emails to doctors with payment issues or 30+ days inactive",
+    schedule: "Every day at 6 AM",
+    icon: ShieldCheck,
+    color: "text-red-400",
+    bg: "bg-red-500/10",
+  },
+  {
+    id: "spotlight-promoter",
+    name: "Spotlight Promoter",
+    description: "Auto-promotes new Spotlight episodes to all doctors and students via email",
+    schedule: "Every Thursday at 10 AM",
+    icon: Play,
+    color: "text-pink-400",
+    bg: "bg-pink-500/10",
+  },
+  {
+    id: "student-opportunity",
+    name: "Student Opportunity",
+    description: "Sends weekly digest of new jobs and seminars to all students",
+    schedule: "Every Wednesday at 9 AM",
+    icon: GraduationCap,
+    color: "text-violet-400",
+    bg: "bg-violet-500/10",
   },
 ];
 

@@ -18,6 +18,13 @@ const AGENT_EVENT_MAP: Record<string, string> = {
   'follow-up-bot': 'Follow-Up Bot',
   'profile-nudger': 'profile_nudge',
   'onboarding-sequence': 'onboarding_email',
+  'upgrade-nudger': 'Upgrade Nudger',
+  'outreach-sender': 'Outreach Sender',
+  'analytics-compiler': 'Analytics Compiler',
+  'database-cleaner': 'Database Cleaner',
+  'churn-preventer': 'Churn Preventer',
+  'spotlight-promoter': 'Spotlight Promoter',
+  'student-opportunity': 'Student Opportunity',
 };
 
 export async function getAgentStatus() {
