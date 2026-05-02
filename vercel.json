@@ -11,6 +11,22 @@
     {
       "path": "/api/cron/profile-reminders",
       "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-digest",
+      "schedule": "0 12 * * 1"
+    },
+    {
+      "path": "/api/cron/follow-up-bot",
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/cron/profile-nudger",
+      "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/onboarding-sequence",
+      "schedule": "0 14 * * *"
     }
   ]
 }
