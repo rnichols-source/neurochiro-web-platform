@@ -329,7 +329,7 @@ export async function findProspectEmail(prospectId: string) {
   if (!prospect) return { success: false, error: 'Prospect not found' };
   const p = prospect as any;
 
-  if (p.email) return { success: true, email: p.email, alreadyHad: true };
+  if (p.email) return { success: true, email: p.email, alreadyHad: true, emailSent: false };
 
   const foundEmail = await findEmailFromWebsite(p.website);
 
@@ -339,7 +339,61 @@ export async function findProspectEmail(prospectId: string) {
       updated_at: new Date().toISOString(),
     }).eq('id', prospectId);
 
-    return { success: true, email: foundEmail, alreadyHad: false };
+    // If they already have a pre-built profile, send the outreach email now
+    let emailSent = false;
+    const profileLink = p.notes?.match(/neurochiro\.co\/directory\/[\w-]+/)?.[0];
+    if (profileLink) {
+      try {
+        const { Resend } = await import('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY || '');
+        const name = (p.name || 'Doctor').replace(/^Dr\.?\s*/i, '').split(' ')[0];
+        const clinicName = p.clinic_name || p.name;
+
+        await resend.emails.send({
+          from: 'NeuroChiro <support@neurochirodirectory.com>',
+          to: foundEmail,
+          subject: 'Your NeuroChiro profile is live',
+          html: `<!DOCTYPE html><html><head>
+            <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+            <style>body{font-family:'Lato',Helvetica,Arial,sans-serif;margin:0;padding:0;background:#FCF9F5;}
+            .wrapper{max-width:600px;margin:40px auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.08);border:1px solid #E5E7EB;}
+            .header{background:#1E2D3B;padding:30px;text-align:center;}
+            .content{padding:40px;color:#1E2D3B;font-size:16px;line-height:1.7;}
+            .footer{text-align:center;padding:30px;font-size:11px;color:#9CA3AF;letter-spacing:1px;text-transform:uppercase;font-weight:700;}</style>
+            </head><body><div class="wrapper">
+            <div class="header"><img src="https://neurochiro.co/logo-white.png" alt="NeuroChiro" width="120" style="display:block;margin:0 auto;"></div>
+            <div class="content">
+              <p>Hi ${name},</p>
+              <p>My name is Dr. Raymond Nichols, and I'm the founder of NeuroChiro — the global directory built specifically for nervous system chiropractors.</p>
+              <p>I created a profile for ${clinicName} on our platform, and it's already live:</p>
+              <p style="margin: 20px 0;"><a href="https://${profileLink}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">View Your Profile</a></p>
+              <p>Patients in ${p.city || 'your area'} are actively using NeuroChiro to find chiropractors like you. All you need to do is claim your profile, add your photo and bio, and you're set. Takes about 2 minutes. No cost.</p>
+              <p>Let me know if you have any questions.</p>
+              <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro<br>neurochiro.co</p>
+            </div>
+            <div class="footer">&copy; 2026 NeuroChiro Network</div>
+            </div></body></html>`,
+        });
+        emailSent = true;
+
+        // Mark as contacted with follow-up
+        const followUp = new Date();
+        followUp.setDate(followUp.getDate() + 5);
+        await supabase.from('outreach_prospects' as any).update({
+          status: 'contacted',
+          contacted_at: new Date().toISOString(),
+          follow_up_at: followUp.toISOString(),
+          follow_up_count: 1,
+          script_used: 'auto_initial_email',
+          notes: (p.notes || '') + ' | Auto-email sent after email found',
+          updated_at: new Date().toISOString(),
+        }).eq('id', prospectId);
+      } catch (err) {
+        console.error('Auto-email after find failed:', err);
+      }
+    }
+
+    return { success: true, email: foundEmail, alreadyHad: false, emailSent };
   }
 
   return { success: false, error: 'No email found on their website' };

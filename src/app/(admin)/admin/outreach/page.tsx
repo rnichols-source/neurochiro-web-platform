@@ -459,7 +459,12 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
     try {
       const result = await findProspectEmail(prospect.id);
       if (result.success && result.email) {
-        alert(result.alreadyHad ? `Already has email: ${result.email}` : `Found email: ${result.email}`);
+        const msg = result.alreadyHad
+          ? `Already has email: ${result.email}`
+          : result.emailSent
+          ? `Found email: ${result.email}\nOutreach email sent automatically!`
+          : `Found email: ${result.email}\nNo pre-built profile yet — email saved for later.`;
+        alert(msg);
         onRefresh();
       } else {
         alert(result.error || "No email found");
