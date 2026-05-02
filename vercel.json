@@ -60,6 +60,10 @@
     {
       "path": "/api/cron/vendor-outreach",
       "schedule": "0 14 * * 1-5"
+    },
+    {
+      "path": "/api/cron/seminar-host-outreach",
+      "schedule": "0 15 * * 2,4"
     }
   ]
 }

@@ -114,6 +114,15 @@ const AGENTS = [
     bg: "bg-indigo-500/10",
   },
   {
+    id: "seminar-host-outreach",
+    name: "Seminar Host Outreach",
+    description: "Auto-discovers emails and pitches seminar hosts to list events on NeuroChiro marketplace",
+    schedule: "Tue & Thu at 11 AM",
+    icon: Send,
+    color: "text-rose-400",
+    bg: "bg-rose-500/10",
+  },
+  {
     id: "chiro-finder",
     name: "Chiropractor Finder",
     description: "Searches Google Maps for chiropractors state by state, scrapes contact info, auto-adds to outreach",

@@ -26,6 +26,7 @@ const AGENT_EVENT_MAP: Record<string, string> = {
   'spotlight-promoter': 'Spotlight Promoter',
   'student-opportunity': 'Student Opportunity',
   'vendor-outreach': 'Vendor Outreach',
+  'seminar-host-outreach': 'Seminar Host Outreach',
   'chiro-finder': 'Chiro Finder',
   'daily-talent-drop': 'Daily Talent Drop',
   'profile-reminders': 'Profile Reminder',
