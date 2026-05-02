@@ -56,6 +56,10 @@
     {
       "path": "/api/cron/student-opportunity",
       "schedule": "0 13 * * 3"
+    },
+    {
+      "path": "/api/cron/vendor-outreach",
+      "schedule": "0 14 * * 1-5"
     }
   ]
 }

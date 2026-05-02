@@ -34,11 +34,12 @@ export async function GET(req: Request) {
     const resend = getResend();
     const DAILY_LIMIT = 10;
 
-    // Get new prospects with websites (so we can find emails)
+    // Get new doctor prospects with websites (so we can find emails)
     const { data: prospects } = await supabase
       .from('outreach_prospects')
       .select('*')
       .eq('status', 'new')
+      .in('prospect_type', ['doctor'])
       .not('website', 'is', null)
       .order('created_at', { ascending: true })
       .limit(DAILY_LIMIT);
