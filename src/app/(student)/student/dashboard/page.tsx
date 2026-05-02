@@ -30,7 +30,7 @@ const fadeUp = {
 
 export default function StudentDashboard() {
   const [data, setData] = useState<any>(null);
-  const [academyData, setAcademyData] = useState<{ completed: number; total: number }>({ completed: 0, total: 12 });
+  const [academyData, setAcademyData] = useState<{ completed: number; total: number }>({ completed: 0, total: 28 });
   const [loading, setLoading] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
   const router = useRouter();
