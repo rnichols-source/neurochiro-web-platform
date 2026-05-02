@@ -44,15 +44,19 @@ export async function GET(req: Request) {
 
     // 2. Clean up completed/failed automation queue items older than 30 days
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const { count: cleanedQueue } = await supabase
+    const { count: staleCount } = await supabase
       .from('automation_queue')
-      .delete()
+      .select('id', { count: 'exact', head: true })
       .in('status', ['completed', 'failed'])
-      .lt('created_at', thirtyDaysAgo)
-      .select('id', { count: 'exact', head: true });
+      .lt('created_at', thirtyDaysAgo);
 
-    if (cleanedQueue && cleanedQueue > 0) {
-      issues.push(`Cleaned ${cleanedQueue} old automation queue items`);
+    if (staleCount && staleCount > 0) {
+      await supabase
+        .from('automation_queue')
+        .delete()
+        .in('status', ['completed', 'failed'])
+        .lt('created_at', thirtyDaysAgo);
+      issues.push(`Cleaned ${staleCount} old automation queue items`);
     }
 
     // 3. Find doctors with latitude/longitude of 0 (needs geocoding)
