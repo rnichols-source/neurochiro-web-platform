@@ -1,18 +1,23 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabase } from '@/lib/supabase-server';
+import { createClient } from '@supabase/supabase-js';
 import { executeAutomation } from '@/lib/automations';
 
-export const maxDuration = 60; // Allow function to run up to 60 seconds (for Pro plan)
+export const maxDuration = 60;
+
+const getSupabase = () => createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { autoRefreshToken: false, persistSession: false } }
+);
 
 export async function GET(req: Request) {
-  // 1. Verify Authorization
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const supabase = createServerSupabase();
+  const supabase = getSupabase();
   
   try {
     // 2. Fetch pending items from the queue that are scheduled for now or earlier

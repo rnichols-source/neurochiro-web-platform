@@ -79,7 +79,10 @@ export async function GET(req: Request) {
       sent++;
     }
 
-    // 2. Find doctors who haven't logged in for 30+ days (check last login via audit_logs)
+    // Track who we already emailed in this run to prevent duplicates
+    const emailedThisRun = new Set((atRiskDocs || []).map((d: any) => d.id));
+
+    // 2. Find doctors who haven't logged in for 30+ days
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     const { data: allDoctors } = await supabase
       .from('profiles')
@@ -88,7 +91,7 @@ export async function GET(req: Request) {
       .lt('updated_at', thirtyDaysAgo);
 
     for (const doc of (allDoctors || []) as any[]) {
-      if (recentlyEmailed.has(doc.id)) continue;
+      if (recentlyEmailed.has(doc.id) || emailedThisRun.has(doc.id)) continue;
 
       const name = doc.full_name?.split(' ')[0] || 'Doctor';
 

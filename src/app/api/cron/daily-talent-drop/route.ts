@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
 import { Automations } from '@/lib/automations';
+import { createClient } from '@supabase/supabase-js';
 
-export const maxDuration = 300; // 5 minutes for large batches of SMS/Notifications
+export const maxDuration = 300;
 
-/**
- * TRIGGER: Every Tuesday Morning (via Vercel Cron)
- * Goal: Move time-delay from "whenever they remember" to "Instant" by pushing
- * the top 3 matches directly to Growth Tier Doctors' phones.
- */
+const getSupabase = () => createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { autoRefreshToken: false, persistSession: false } }
+);
+
 export async function GET(req: Request) {
-  // 1. Verify Authorization
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
@@ -17,16 +18,36 @@ export async function GET(req: Request) {
   }
 
   try {
-    // 2. Trigger the "Grand Slam" Automation
     await Automations.triggerDailyTalentDrop();
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Daily Talent Drop enqueued for processing.' 
+    const supabase = getSupabase();
+    await supabase.from('audit_logs').insert({
+      category: 'AUTOMATION',
+      event: 'Daily Talent Drop: triggered successfully',
+      user_name: 'System',
+      target: 'verified_doctors',
+      status: 'Success',
+      severity: 'Low',
+      metadata: {},
     });
 
+    return NextResponse.json({ success: true, message: 'Daily Talent Drop triggered.' });
   } catch (error: any) {
-    console.error('Daily Talent Drop Trigger Error:', error);
+    console.error('Daily Talent Drop Error:', error);
+
+    try {
+      const supabase = getSupabase();
+      await supabase.from('audit_logs').insert({
+        category: 'AUTOMATION',
+        event: `Daily Talent Drop: FAILED — ${error.message}`,
+        user_name: 'System',
+        target: 'verified_doctors',
+        status: 'Failed',
+        severity: 'High',
+        metadata: { error: error.message },
+      });
+    } catch {}
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

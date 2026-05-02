@@ -74,7 +74,8 @@ export async function GET(req: Request) {
 
     const missingPhoto = (incompleteDocs || []).filter((d: any) => !d.photo_url).length;
     const missingBio = (incompleteDocs || []).filter((d: any) => !d.bio || d.bio.length < 20).length;
-    const profileComplete = (incompleteDocs || []).length - Math.max(missingPhoto, missingBio);
+    const incompleteCount = (incompleteDocs || []).filter((d: any) => !d.photo_url || !d.bio || d.bio?.length < 20).length;
+    const profileComplete = (incompleteDocs || []).length - incompleteCount;
 
     // Paid vs free doctors
     const { count: paidDoctors } = await supabase

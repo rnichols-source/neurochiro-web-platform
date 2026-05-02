@@ -96,6 +96,18 @@ export async function GET(req: Request) {
       }
     }
 
+    if (sent > 0) {
+      await supabase.from('audit_logs').insert({
+        category: 'AUTOMATION',
+        event: `Weekly Digest: ${sent} emails sent`,
+        user_name: 'System',
+        target: 'all_doctors',
+        status: 'Success',
+        severity: 'Low',
+        metadata: { sent, totalDoctors: doctors.length },
+      });
+    }
+
     return NextResponse.json({ success: true, message: `Weekly digest sent to ${sent} doctors`, count: sent });
   } catch (err: any) {
     console.error('[WEEKLY DIGEST ERROR]', err);
