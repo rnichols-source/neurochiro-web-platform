@@ -51,15 +51,59 @@ export default function ProfilePage() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast("Image too large. Please use a photo under 5MB.", "error");
+      return;
+    }
+
+    // Compress image client-side before uploading
+    let uploadFile = file;
+    if (file.size > 1 * 1024 * 1024) {
+      try {
+        uploadFile = await compressImage(file, 800, 0.8);
+      } catch {
+        // If compression fails, use original
+      }
+    }
+
     setSaving(true);
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", uploadFile);
     const result = await uploadAvatar(formData);
     setSaving(false);
     if (result.success) {
       setProfile((p: any) => ({ ...p, photo_url: result.publicUrl }));
       toast("Photo updated.");
     } else toast(result.error || "Upload failed.", "error");
+  };
+
+  // Client-side image compression
+  const compressImage = (file: File, maxWidth: number, quality: number): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { reject(new Error('No canvas context')); return; }
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          if (!blob) { reject(new Error('Compression failed')); return; }
+          resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
   };
 
   const handleGenerateBio = async () => {
