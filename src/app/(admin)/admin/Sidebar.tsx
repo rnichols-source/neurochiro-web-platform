@@ -28,7 +28,8 @@ import {
   Tag,
   Briefcase,
   Calendar,
-  Video
+  Video,
+  Bot
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -52,6 +53,7 @@ const allNavItems = [
   { name: "Announcements", href: "/admin/announcements", icon: Megaphone },
   { name: "Inbox", href: "/admin/inbox", icon: MessageSquare },
   { name: "Outreach", href: "/admin/outreach", icon: Mail },
+  { name: "Agents", href: "/admin/agents", icon: Bot },
   { name: "Revenue", href: "/admin/revenue", icon: CreditCard },
   { name: "Logs", href: "/admin/logs", icon: History },
 ];
