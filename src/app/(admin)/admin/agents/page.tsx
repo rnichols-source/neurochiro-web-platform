@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bot, RefreshCw, CheckCircle2, XCircle, Clock, Loader2, Send, Mail, UserCheck, Zap, TrendingUp, BarChart3, Trash2, ShieldCheck, Play, GraduationCap, Database } from "lucide-react";
+import { Bot, RefreshCw, CheckCircle2, XCircle, Clock, Loader2, Send, Mail, UserCheck, Zap, TrendingUp, BarChart3, Trash2, ShieldCheck, Play, GraduationCap, Database, Search } from "lucide-react";
 import { getAgentStatus, triggerAgent } from "./actions";
 
 const AGENTS = [
@@ -103,6 +103,15 @@ const AGENTS = [
     icon: GraduationCap,
     color: "text-violet-400",
     bg: "bg-violet-500/10",
+  },
+  {
+    id: "chiro-finder",
+    name: "Chiropractor Finder",
+    description: "Searches Google Maps for chiropractors state by state, scrapes contact info, auto-adds to outreach",
+    schedule: "On demand (Run Now)",
+    icon: Search,
+    color: "text-lime-400",
+    bg: "bg-lime-500/10",
   },
   {
     id: "daily-talent-drop",
