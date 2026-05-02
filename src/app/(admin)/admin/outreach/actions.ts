@@ -222,19 +222,23 @@ export async function bulkAddProspects(prospects: Array<{
   await requireAdmin();
   const supabase = createAdminClient();
 
-  const rows = prospects.map(p => ({
-    name: p.name,
-    instagram_handle: p.instagram_handle || null,
-    email: p.email || null,
-    website: p.website || null,
-    phone: p.phone || null,
-    clinic_name: p.clinic_name || null,
-    city: p.city,
-    state: p.state,
-    prospect_type: p.prospect_type || 'doctor',
-    status: 'new' as const,
-    source: 'csv_import',
-  }));
+  const validTypes = ['doctor', 'vendor', 'seminar_host'];
+  const rows = prospects.map(p => {
+    const pType = (p.prospect_type || 'doctor').trim();
+    return {
+      name: p.name.trim(),
+      instagram_handle: p.instagram_handle?.trim() || null,
+      email: p.email?.trim() || null,
+      website: p.website?.trim() || null,
+      phone: p.phone?.trim() || null,
+      clinic_name: p.clinic_name?.trim() || null,
+      city: (p.city || '').trim(),
+      state: (p.state || '').trim(),
+      prospect_type: validTypes.includes(pType) ? pType : 'doctor',
+      status: 'new' as const,
+      source: 'csv_import',
+    };
+  });
 
   const { error, data } = await supabase.from('outreach_prospects' as any).insert(rows).select();
 
