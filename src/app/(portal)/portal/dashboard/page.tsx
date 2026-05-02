@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { getPatientDashboardData } from "./actions";
+import { getPatientDashboardData, getUpcomingSeminars } from "./actions";
 import { isPremiumMember, createPremiumCheckout } from "../premium-actions";
 import WhatsNew from "@/components/common/WhatsNew";
 
@@ -43,15 +43,18 @@ export default function PatientDashboard() {
   const [loading, setLoading] = useState(true);
   const [premium, setPremium] = useState(false);
   const [error, setError] = useState(false);
+  const [seminars, setSeminars] = useState<any[]>([]);
 
   useEffect(() => {
     Promise.all([
       getPatientDashboardData(),
       isPremiumMember().catch(() => false),
+      getUpcomingSeminars().catch(() => []),
     ])
-      .then(([d, p]) => {
+      .then(([d, p, s]) => {
         setData(d);
         setPremium(p);
+        setSeminars(s);
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
@@ -399,6 +402,34 @@ export default function PatientDashboard() {
               >
                 Start Free Trial &mdash; 7 Days Free
               </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Upcoming Seminars */}
+      {seminars.length > 0 && (
+        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.25 }}>
+          <div className="bg-white rounded-3xl border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-heading font-black text-neuro-navy text-lg">Upcoming Events</h3>
+              <Link href="/seminars" className="text-xs font-bold text-neuro-orange hover:underline flex items-center gap-1">View All <ChevronRight className="w-3 h-3" /></Link>
+            </div>
+            <div className="space-y-3">
+              {seminars.map((sem: any) => (
+                <Link key={sem.id} href={`/seminars/${sem.id}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-neuro-orange/10 flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-5 h-5 text-neuro-orange" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">{sem.title}</p>
+                      <p className="text-xs text-gray-400">{sem.dates ? new Date(sem.dates).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''} {sem.city ? `· ${sem.city}` : ''}</p>
+                    </div>
+                  </div>
+                  {sem.price ? <span className="text-xs font-bold text-neuro-navy">${sem.price}</span> : <span className="text-xs font-bold text-green-600">Free</span>}
+                </Link>
+              ))}
             </div>
           </div>
         </motion.div>
