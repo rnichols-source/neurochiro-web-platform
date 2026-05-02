@@ -692,9 +692,18 @@ function ImportCSVModal({ onClose, onImported, prospectType }: { onClose: () => 
       prospect_type: (row.prospect_type || row.type || prospectType) as ProspectType,
     })).filter((p) => p.name);
 
-    const result = await bulkAddProspects(prospects);
-    setImporting(false);
-    if (result.success) onImported(result.count);
+    try {
+      const result = await bulkAddProspects(prospects);
+      setImporting(false);
+      if (result.success) {
+        onImported(result.count);
+      } else {
+        alert(`Import failed: ${result.error || 'Unknown error'}`);
+      }
+    } catch (err: any) {
+      setImporting(false);
+      alert(`Import error: ${err.message || 'Unknown error'}`);
+    }
   };
 
   return (
