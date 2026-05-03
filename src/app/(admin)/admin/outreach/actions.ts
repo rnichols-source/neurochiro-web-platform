@@ -397,15 +397,8 @@ export async function findProspectEmail(prospectId: string) {
         });
         emailSent = true;
 
-        // Mark as contacted with follow-up
-        const followUp = new Date();
-        followUp.setDate(followUp.getDate() + 5);
+        // Save note but do NOT auto-mark as contacted — let admin review first
         await supabase.from('outreach_prospects' as any).update({
-          status: 'contacted',
-          contacted_at: new Date().toISOString(),
-          follow_up_at: followUp.toISOString(),
-          follow_up_count: 1,
-          script_used: 'auto_initial_email',
           notes: (p.notes || '') + ' | Auto-email sent after email found',
           updated_at: new Date().toISOString(),
         }).eq('id', prospectId);
@@ -613,22 +606,12 @@ export async function preBuildProfile(prospectId: string) {
     }
   }
 
-  // Update the prospect with the profile link + mark contacted if email sent
+  // Update the prospect with the profile link — do NOT auto-mark as contacted
+  // so the admin can copy a DM script first before clicking "Contacted"
   const updates: any = {
     notes: `Pre-built profile: ${profileUrl}${emailSent ? ' | Auto-email sent' : ''}`,
     updated_at: new Date().toISOString(),
   };
-
-  if (emailSent) {
-    updates.status = 'contacted';
-    updates.contacted_at = new Date().toISOString();
-    updates.script_used = 'auto_initial_email';
-    // Set follow-up for 5 days from now
-    const followUp = new Date();
-    followUp.setDate(followUp.getDate() + 5);
-    updates.follow_up_at = followUp.toISOString();
-    updates.follow_up_count = 1;
-  }
 
   await supabase.from('outreach_prospects' as any).update(updates).eq('id', prospectId);
 
