@@ -68,6 +68,30 @@ export async function GET(req: Request) {
     const outreachContacted = outreachContactedRes.count || 0;
     const outreachSignedUp = outreachSignedUpRes.count || 0;
 
+    // Outreach by type
+    const [vendorProspectsRes, seminarProspectsRes, vendorContactedRes, seminarContactedRes] = await Promise.all([
+      supabase.from('outreach_prospects').select('id', { count: 'exact', head: true }).eq('prospect_type', 'vendor'),
+      supabase.from('outreach_prospects').select('id', { count: 'exact', head: true }).eq('prospect_type', 'seminar_host'),
+      supabase.from('outreach_prospects').select('id', { count: 'exact', head: true }).eq('prospect_type', 'vendor').eq('status', 'contacted'),
+      supabase.from('outreach_prospects').select('id', { count: 'exact', head: true }).eq('prospect_type', 'seminar_host').eq('status', 'contacted'),
+    ]);
+
+    const vendorProspects = vendorProspectsRes.count || 0;
+    const seminarProspects = seminarProspectsRes.count || 0;
+    const vendorContacted = vendorContactedRes.count || 0;
+    const seminarContacted = seminarContactedRes.count || 0;
+
+    // Seminars and jobs counts
+    const [seminarsRes, jobsRes, vendorsRes] = await Promise.all([
+      supabase.from('seminars').select('id', { count: 'exact', head: true }).eq('is_approved', true),
+      supabase.from('job_postings').select('id', { count: 'exact', head: true }).eq('status', 'open'),
+      supabase.from('vendors').select('id', { count: 'exact', head: true }).eq('is_active', true),
+    ]);
+
+    const totalSeminars = seminarsRes.count || 0;
+    const openJobs = jobsRes.count || 0;
+    const activeVendors = vendorsRes.count || 0;
+
     // Incomplete profiles
     const { data: incompleteDocs } = await supabase
       .from('doctors')
@@ -126,11 +150,26 @@ export async function GET(req: Request) {
         ${stat('Unclaimed Listings', unclaimedListings)}
       </div>
 
-      <h3 style="font-size: 16px; color: #1E2D3B; margin: 24px 0 12px;">Outreach Pipeline</h3>
+      <h3 style="font-size: 16px; color: #1E2D3B; margin: 24px 0 12px;">Ecosystem</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+        ${stat('Live Seminars', totalSeminars)}
+        ${stat('Open Jobs', openJobs)}
+        ${stat('Active Vendors', activeVendors)}
+      </div>
+
+      <h3 style="font-size: 16px; color: #1E2D3B; margin: 24px 0 12px;">Doctor Outreach</h3>
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px;">
         ${stat('Total Prospects', outreachTotal)}
         ${stat('Contacted', outreachContacted)}
         ${stat('Signed Up', outreachSignedUp)}
+      </div>
+
+      <h3 style="font-size: 16px; color: #1E2D3B; margin: 24px 0 12px;">Vendor & Seminar Host Outreach</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+        ${stat('Vendor Prospects', vendorProspects)}
+        ${stat('Vendors Contacted', vendorContacted)}
+        ${stat('Seminar Prospects', seminarProspects)}
+        ${stat('Hosts Contacted', seminarContacted)}
       </div>
 
       <h3 style="font-size: 16px; color: #1E2D3B; margin: 24px 0 12px;">Profile Health</h3>
@@ -157,7 +196,7 @@ export async function GET(req: Request) {
       target: 'founder',
       status: 'Success',
       severity: 'Low',
-      metadata: { totalDoctors, unclaimedListings, totalStudents, totalPatients, newDoctors, newStudents, newPatients, paidDoctors, freeDoctors, outreachTotal, outreachContacted, outreachSignedUp },
+      metadata: { totalDoctors, unclaimedListings, totalStudents, totalPatients, newDoctors, newStudents, newPatients, paidDoctors, freeDoctors, outreachTotal, outreachContacted, outreachSignedUp, vendorProspects, vendorContacted, seminarProspects, seminarContacted, totalSeminars, openJobs, activeVendors },
     });
 
     return NextResponse.json({ success: true, message: 'Weekly report sent', stats: { totalDoctors, totalStudents, totalPatients } });
