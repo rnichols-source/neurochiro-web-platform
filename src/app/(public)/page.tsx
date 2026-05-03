@@ -17,6 +17,25 @@ export const metadata = {
 
 export const revalidate = 300; // Cache for 5 minutes
 
+async function getPlatformStats() {
+  try {
+    const supabase = createAdminClient();
+    const [doctors, seminars, countries] = await Promise.all([
+      supabase.from('doctors').select('id', { count: 'exact', head: true }).eq('verification_status', 'verified'),
+      supabase.from('seminars').select('id', { count: 'exact', head: true }).eq('is_approved', true).eq('is_past', false),
+      supabase.from('doctors').select('country').eq('verification_status', 'verified'),
+    ]);
+    const uniqueCountries = new Set((countries.data || []).map((d: any) => d.country).filter(Boolean)).size;
+    return {
+      doctors: doctors.count || 0,
+      seminars: seminars.count || 0,
+      countries: uniqueCountries || 1,
+    };
+  } catch {
+    return { doctors: 0, seminars: 0, countries: 0 };
+  }
+}
+
 async function getFeaturedDoctors() {
   try {
     const supabase = createAdminClient();
@@ -33,7 +52,7 @@ async function getFeaturedDoctors() {
 }
 
 export default async function HomePage() {
-  const featured = await getFeaturedDoctors();
+  const [featured, stats] = await Promise.all([getFeaturedDoctors(), getPlatformStats()]);
 
   return (
     <div className="min-h-dvh bg-neuro-cream">
@@ -65,8 +84,29 @@ export default async function HomePage() {
           </form>
         </div>
 
-        {/* Trust Stats — Dynamic */}
-        <SocialProof doctorCount={featured.length > 0 ? undefined : 0} />
+        {/* Live Platform Stats */}
+        {stats.doctors > 0 && (
+          <div className="max-w-2xl mx-auto mt-12 flex items-center justify-center gap-8 md:gap-12">
+            <div className="text-center">
+              <p className="text-2xl md:text-3xl font-black text-white">{stats.doctors}+</p>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Verified Doctors</p>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="text-center">
+              <p className="text-2xl md:text-3xl font-black text-white">{stats.countries}</p>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Countries</p>
+            </div>
+            {stats.seminars > 0 && (
+              <>
+                <div className="w-px h-8 bg-white/10" />
+                <div className="text-center">
+                  <p className="text-2xl md:text-3xl font-black text-white">{stats.seminars}</p>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Upcoming Events</p>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Featured Doctors */}
