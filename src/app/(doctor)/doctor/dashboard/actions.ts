@@ -299,3 +299,74 @@ export async function confirmPatient(leadId: string) {
     return { error: e.message }
   }
 }
+
+export async function getDoctorActivityFeed() {
+  try {
+    const supabase = createServerSupabase()
+    const { createAdminClient } = await import('@/lib/supabase-admin')
+    const admin = createAdminClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
+    const { data: doctorRow } = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
+    const doctorId = (doctorRow as any)?.id || user.id
+
+    const activities: { type: string; title: string; detail: string; time: string; link: string }[] = []
+
+    // Recent notifications
+    const { data: notifs } = await supabase
+      .from('notifications')
+      .select('title, body, type, link, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(5)
+
+    if (notifs) {
+      notifs.forEach((n: any) => {
+        activities.push({
+          type: n.type || 'system',
+          title: n.title,
+          detail: n.body?.slice(0, 80) || '',
+          time: n.created_at,
+          link: n.link || '/doctor/notifications',
+        })
+      })
+    }
+
+    // Recent job applications
+    const { data: apps } = await admin
+      .from('job_applications')
+      .select('id, job_id, name, created_at')
+      .eq('doctor_id', doctorId)
+      .order('created_at', { ascending: false })
+      .limit(3)
+
+    if (apps) {
+      apps.forEach((a: any) => {
+        activities.push({
+          type: 'job',
+          title: 'New Job Applicant',
+          detail: `${a.name} applied to your position`,
+          time: a.created_at,
+          link: '/doctor/jobs',
+        })
+      })
+    }
+
+    // Recent seminar registrations
+    const { data: regs } = await admin
+      .from('seminar_registrations')
+      .select('id, seminar_id, created_at, profile_id')
+      .eq('seminar_id', doctorId)
+      .order('created_at', { ascending: false })
+      .limit(3)
+
+    // Sort by time, newest first
+    activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+
+    return activities.slice(0, 8)
+  } catch (e) {
+    console.error("Activity Feed Error:", e)
+    return []
+  }
+}
