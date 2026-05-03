@@ -100,9 +100,18 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   const toggleSave = useCallback((type: keyof SavedItems, id: string) => {
     setSaved(prev => {
       const current = prev[type];
-      const next = current.includes(id)
-        ? current.filter(itemId => itemId !== id)
-        : [...current, id];
+      const isSaving = !current.includes(id);
+      const next = isSaving
+        ? [...current, id]
+        : current.filter(itemId => itemId !== id);
+
+      // Notify doctor when a patient saves their profile
+      if (type === 'doctors' && isSaving) {
+        import('@/app/actions/notify-save').then(({ notifyDoctorSaved }) => {
+          notifyDoctorSaved(id).catch(() => {});
+        });
+      }
+
       return { ...prev, [type]: next };
     });
   }, []);
