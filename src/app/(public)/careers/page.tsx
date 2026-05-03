@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Search, Briefcase, MapPin, Clock, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { getPublicJobs } from "./actions";
+import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
 
 export default function CareersPage() {
   const [jobs, setJobs] = useState<any[]>([]);
@@ -120,8 +121,20 @@ export default function CareersPage() {
           </div>
         )}
 
+        {/* Student Lead Capture */}
+        <div className="mt-12 max-w-md mx-auto">
+          <LeadCaptureInline
+            source="careers_page"
+            role="student"
+            headline="Get notified about new positions"
+            description="We'll email you when new jobs are posted that match your interests."
+            buttonText="Subscribe"
+            variant="card"
+          />
+        </div>
+
         {/* Bottom CTA */}
-        <section className="mt-16 bg-neuro-orange rounded-2xl p-10 text-white text-center shadow-xl">
+        <section className="mt-12 bg-neuro-orange rounded-2xl p-10 text-white text-center shadow-xl">
           <h2 className="text-2xl font-heading font-black mb-2">Hiring?</h2>
           <p className="opacity-90 mb-6">Members post for free. Non-members can post a single listing starting at $49.</p>
           <Link href="/careers/post" className="inline-flex items-center gap-2 px-8 py-3 bg-neuro-navy text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-neuro-navy-light transition-all">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, X, ArrowRight, GraduationCap, Crown } from "lucide-react";
 import Link from "next/link";
+import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
 
 export default function StudentPricing() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
@@ -136,6 +137,18 @@ export default function StudentPricing() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Lead Capture */}
+      <div className="max-w-md mx-auto mt-12">
+        <LeadCaptureInline
+          source="pricing_students"
+          role="student"
+          headline="Not ready to sign up?"
+          description="Get career tips and job alerts sent to your inbox."
+          buttonText="Subscribe"
+          variant="card"
+        />
       </div>
     </div>
   );

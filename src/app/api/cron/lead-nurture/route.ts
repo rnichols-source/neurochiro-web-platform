@@ -135,6 +135,7 @@ export async function GET(req: Request) {
 
 function getEmailContent(step: number, role: string, name: string, location: string): { subject: string; body: string } | null {
   if (role === 'doctor') return getDoctorEmail(step, name);
+  if (role === 'student') return getStudentEmail(step, name);
   return getPatientEmail(step, name, location);
 }
 
@@ -284,6 +285,83 @@ function getDoctorEmail(step: number, name: string): { subject: string; body: st
             <a href="https://neurochiro.co/register?role=doctor" style="color: #D66829; font-weight: bold;">Create your profile here</a>
           </p>
           <p>No pressure. We're here when you're ready.</p>
+          <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
+        `,
+      };
+    default:
+      return null;
+  }
+}
+
+function getStudentEmail(step: number, name: string): { subject: string; body: string } | null {
+  switch (step) {
+    case 1:
+      return {
+        subject: "Your chiropractic career starts here",
+        body: `
+          <p>Hi ${name},</p>
+          <p>Welcome to NeuroChiro — the platform where chiropractic students build their careers before graduation.</p>
+          <p>Here's what you get with a free account:</p>
+          <ul style="color: #1E2D3B; line-height: 2;">
+            <li><strong>Job board</strong> — associate positions, internships, and contract roles</li>
+            <li><strong>Seminar calendar</strong> — find CE events and technique training</li>
+            <li><strong>Academy</strong> — free courses on nervous system foundations and neuroplasticity</li>
+            <li><strong>Doctor directory</strong> — find mentors and potential employers</li>
+          </ul>
+          <p style="margin: 24px 0;">
+            <a href="https://neurochiro.co/register?role=student" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Create Free Account</a>
+          </p>
+          <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
+        `,
+      };
+    case 2:
+      return {
+        subject: "The tools your school doesn't teach you",
+        body: `
+          <p>Hi ${name},</p>
+          <p>School teaches you how to adjust. NeuroChiro teaches you how to <strong>build a career</strong>.</p>
+          <p>Our Student Pro members get access to:</p>
+          <ul style="color: #1E2D3B; line-height: 2;">
+            <li><strong>Interview Prep</strong> — 20 real interview questions with frameworks and example answers</li>
+            <li><strong>Contract Lab</strong> — analyze associate agreements and spot red flags before you sign</li>
+            <li><strong>Financial Planner</strong> — model your salary, student loans, and first-year budget</li>
+            <li><strong>Technique Explorer</strong> — compare 18 techniques to find your fit</li>
+          </ul>
+          <p>Start with a free account — upgrade when you're ready.</p>
+          <p style="margin: 24px 0;">
+            <a href="https://neurochiro.co/careers" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Browse Open Positions</a>
+          </p>
+          <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
+        `,
+      };
+    case 3:
+      return {
+        subject: "Doctors are hiring on NeuroChiro",
+        body: `
+          <p>Hi ${name},</p>
+          <p>Practices across the country are posting associate positions on NeuroChiro. Don't wait until graduation to start looking.</p>
+          <p>Create your free student profile so employers can find you:</p>
+          <ol style="color: #1E2D3B; line-height: 2;">
+            <li>Sign up (free, 2 minutes)</li>
+            <li>Add your school, graduation year, and interests</li>
+            <li>Browse jobs and message doctors directly</li>
+          </ol>
+          <p style="margin: 24px 0;">
+            <a href="https://neurochiro.co/register?role=student" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Join Free — 2 Minutes</a>
+          </p>
+          <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
+        `,
+      };
+    case 4:
+      return {
+        subject: "Last note — your free student account",
+        body: `
+          <p>Hi ${name},</p>
+          <p>Final reminder. Your free NeuroChiro student account is ready whenever you are:</p>
+          <p style="margin: 20px 0;">
+            <a href="https://neurochiro.co/register?role=student" style="color: #D66829; font-weight: bold;">Create your account here</a>
+          </p>
+          <p>We won't email you again. Best of luck with school and your career.</p>
           <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
         `,
       };
