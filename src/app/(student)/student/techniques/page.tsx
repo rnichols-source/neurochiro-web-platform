@@ -604,7 +604,7 @@ function TechniqueComparisonContent() {
                   <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-gray-100">
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Next:</span>
                     <a href="/student/seminars" className="text-xs font-bold text-[#e97325] hover:underline">Find Seminars &rarr;</a>
-                    <a href="/directory" className="text-xs font-bold text-[#e97325] hover:underline">Find Doctors Who Use This &rarr;</a>
+                    <a href={`/directory?q=${encodeURIComponent(t.name)}`} className="text-xs font-bold text-[#e97325] hover:underline">Find Doctors Who Use {t.name} &rarr;</a>
                   </div>
                 </div>
               )}
