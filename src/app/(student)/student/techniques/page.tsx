@@ -599,6 +599,13 @@ function TechniqueComparisonContent() {
                       </ul>
                     </div>
                   </div>
+
+                  {/* Cross-links */}
+                  <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-gray-100">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Next:</span>
+                    <a href="/student/seminars" className="text-xs font-bold text-[#e97325] hover:underline">Find Seminars &rarr;</a>
+                    <a href="/directory" className="text-xs font-bold text-[#e97325] hover:underline">Find Doctors Who Use This &rarr;</a>
+                  </div>
                 </div>
               )}
             </div>
