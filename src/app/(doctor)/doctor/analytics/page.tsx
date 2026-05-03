@@ -113,20 +113,26 @@ function DoctorAnalyticsContent() {
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-sm font-semibold text-gray-900 mb-4">Lead Sources</h2>
               <div className="space-y-3">
-                {roiData.patient_acquisition.map((channel, i) => (
-                  <div key={i}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-700">{channel.source}</span>
-                      <span className="text-gray-500">{channel.count}%</span>
-                    </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gray-900 rounded-full"
-                        style={{ width: `${channel.count}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                {(() => {
+                  const totalLeads = roiData.patient_acquisition.reduce((sum: number, c: any) => sum + c.count, 0) || 1;
+                  return roiData.patient_acquisition.map((channel: any, i: number) => {
+                    const pct = Math.round((channel.count / totalLeads) * 100);
+                    return (
+                      <div key={i}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-gray-700">{channel.source}</span>
+                          <span className="text-gray-500">{channel.count} ({pct}%)</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gray-900 rounded-full"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </div>
           )}

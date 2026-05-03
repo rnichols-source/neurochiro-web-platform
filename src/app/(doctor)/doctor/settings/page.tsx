@@ -35,7 +35,7 @@ export default function SettingsPage() {
       // Load notification preferences
       const { data } = await supabase.from('profiles').select('notification_preferences').eq('id', user.id).single();
       if (data?.notification_preferences) {
-        setNotifPrefs({ ...notifPrefs, ...(data.notification_preferences as any) });
+        setNotifPrefs(prev => ({ ...prev, ...(data.notification_preferences as any) }));
       }
     });
   }, []);

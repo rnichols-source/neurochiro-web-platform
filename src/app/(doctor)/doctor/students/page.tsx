@@ -17,6 +17,7 @@ export default function StudentsPage() {
       .then((data) => {
         const normalized = (data || []).map((s: any) => ({
           id: s.id,
+          user_id: s.user_id || s.id,
           name: s.name || s.full_name || "Student",
           school: s.school || "",
           gradYear: s.graduation_year ? String(s.graduation_year) : "",

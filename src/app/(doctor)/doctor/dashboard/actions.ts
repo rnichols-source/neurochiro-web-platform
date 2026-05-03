@@ -215,10 +215,10 @@ export async function getDoctorROIData(period: string = '30d') {
       .gte('created_at', sixMonthsAgo.toISOString());
 
     // 6. Fetch Acquisition Channels
-    const { data: acquisitionData } = await supabase
+    const { data: acquisitionData } = await admin
       .from('leads')
       .select('source')
-      .eq('doctor_id', user.id);
+      .eq('doctor_id', doctorTableId);
 
     // Grouping historical data by month
     const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -267,8 +267,12 @@ export async function getDoctorROIData(period: string = '30d') {
 
 export async function confirmPatient(leadId: string) {
   const supabase = createServerSupabase()
+  const { createAdminClient } = await import('@/lib/supabase-admin')
+  const admin = createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: "Unauthorized" }
+  const { data: doctorRow } = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
+  const doctorTableId = (doctorRow as any)?.id || user.id
 
   try {
     const { error } = await supabase
@@ -278,13 +282,13 @@ export async function confirmPatient(leadId: string) {
         confirmed_at: new Date().toISOString() 
       })
       .eq('id', leadId)
-      .eq('doctor_id', user.id)
+      .eq('doctor_id', doctorTableId)
 
     if (error) throw error;
-    
+
     // Log the conversion event
-    await supabase.from('analytics_events').insert({
-      doctor_id: user.id,
+    await admin.from('analytics_events').insert({
+      doctor_id: doctorTableId,
       event_type: 'patient_confirmed',
       metadata: { leadId }
     });
