@@ -7,7 +7,7 @@ import WhoIsItFor from "@/components/landing/WhoIsItFor";
 import Testimonials from "@/components/landing/Testimonials";
 import SocialProof from "@/components/landing/SocialProof";
 import DoctorValueProp from "@/components/landing/DoctorValueProp";
-import EmailCaptureBanner from "@/components/landing/EmailCaptureBanner";
+import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
 import { spotlightEpisodes } from "./spotlight/spotlight-data";
 
 export const metadata = {
@@ -229,7 +229,20 @@ export default async function HomePage() {
       <DoctorValueProp />
 
       {/* Email Capture for Non-Account Patients */}
-      <EmailCaptureBanner />
+      {/* Lead Capture */}
+      <section className="bg-neuro-cream py-12 px-6">
+        <div className="max-w-md mx-auto">
+          <LeadCaptureInline
+            source="homepage"
+            role="patient"
+            headline="Can't find a doctor near you?"
+            description="Enter your email and city — we'll notify you when a specialist joins your area."
+            buttonText="Notify Me"
+            showLocation
+            variant="card"
+          />
+        </div>
+      </section>
 
       {/* Doctor CTA */}
       <section className="bg-neuro-navy py-16 px-6">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Calendar, MapPin, Users, ArrowRight, ExternalLink, Zap } from "lucide-react";
 import { getSeminars } from "./actions";
 import Footer from "@/components/landing/Footer";
+import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
 
 export default function SeminarsPage() {
   const [seminars, setSeminars] = useState<any[]>([]);
@@ -134,6 +135,20 @@ export default function SeminarsPage() {
             </Link>
           </div>
         )}
+      </section>
+
+      {/* Lead Capture */}
+      <section className="bg-neuro-cream py-12 px-6">
+        <div className="max-w-md mx-auto">
+          <LeadCaptureInline
+            source="seminars_page"
+            role="doctor"
+            headline="Get notified about new events"
+            description="We'll email you when new seminars and CE events are posted."
+            buttonText="Subscribe"
+            variant="card"
+          />
+        </div>
       </section>
 
       {/* Host CTA */}

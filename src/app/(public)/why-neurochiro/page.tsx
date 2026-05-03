@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
 import {
   ArrowRight,
   Globe,
@@ -272,6 +273,17 @@ export default function WhyNeuroChiroPage() {
           >
             Get Listed Free <ArrowRight className="w-5 h-5" />
           </Link>
+          <p className="text-gray-400 text-xs mt-4">or</p>
+          <div className="max-w-md mx-auto mt-4">
+            <LeadCaptureInline
+              source="why_neurochiro"
+              role="doctor"
+              headline="Not ready yet?"
+              description="Leave your email and we'll send you a free practice growth guide."
+              buttonText="Send Me the Guide"
+              variant="card"
+            />
+          </div>
         </div>
       </section>
 
