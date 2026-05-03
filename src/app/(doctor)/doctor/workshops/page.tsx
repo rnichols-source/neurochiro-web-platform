@@ -751,8 +751,15 @@ function WorkshopsContent() {
         </div>
       )}
 
+      {/* Cross-links */}
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+        <a href="/marketplace" className="px-4 py-2 bg-white border border-gray-200 text-xs font-bold text-neuro-navy rounded-xl hover:border-neuro-orange/30 hover:bg-neuro-orange/5 transition-all">Browse Vendor Marketplace</a>
+        <a href="/doctor/screenings" className="px-4 py-2 bg-white border border-gray-200 text-xs font-bold text-neuro-navy rounded-xl hover:border-neuro-orange/30 hover:bg-neuro-orange/5 transition-all">Screening Events</a>
+        <a href="/doctor/seminars" className="px-4 py-2 bg-white border border-gray-200 text-xs font-bold text-neuro-navy rounded-xl hover:border-neuro-orange/30 hover:bg-neuro-orange/5 transition-all">Host a Seminar</a>
+      </div>
+
       {/* Bottom note */}
-      <div className="mt-8 text-center">
+      <div className="mt-6 text-center">
         <p className="text-[10px] text-gray-300 max-w-lg mx-auto leading-relaxed">
           All templates include [BRACKETED PLACEHOLDERS] highlighted in orange for easy customization. Replace all placeholders with your specific information before use.
         </p>

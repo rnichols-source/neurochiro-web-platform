@@ -307,6 +307,14 @@ function ScreeningsContent() {
           <p className="text-xs text-gray-400 mt-2">One-time purchase. Lifetime access.</p>
         </div>
       )}
+      {/* Vendor Marketplace CTA */}
+      <div className="mt-6 p-5 rounded-xl bg-gradient-to-r from-violet-50 to-white border border-violet-100 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-bold text-neuro-navy">Need screening supplies or equipment?</p>
+          <p className="text-xs text-gray-400 mt-0.5">Browse trusted vendors in the NeuroChiro marketplace.</p>
+        </div>
+        <a href="/marketplace" className="px-4 py-2 bg-neuro-navy text-white text-xs font-bold rounded-xl hover:bg-neuro-navy/90 transition-colors whitespace-nowrap">Browse Vendors</a>
+      </div>
     </div>
   );
 }
