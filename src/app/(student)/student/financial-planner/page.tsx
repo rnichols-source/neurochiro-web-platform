@@ -1439,6 +1439,14 @@ function FinancialPlannerContent() {
           </button>
         </div>
 
+        {/* Cross-links */}
+        <div className="no-print mt-4 p-4 rounded-xl bg-gradient-to-r from-orange-50 to-white border border-orange-100 flex flex-wrap items-center gap-4">
+          <span className="text-xs font-bold text-gray-500">Next steps:</span>
+          <a href="/student/contract-lab" className="text-xs font-bold text-[#e97325] hover:underline">Analyze a Contract &rarr;</a>
+          <a href="/student/interview-prep" className="text-xs font-bold text-[#e97325] hover:underline">Interview Prep &rarr;</a>
+          <a href="/student/jobs" className="text-xs font-bold text-[#e97325] hover:underline">Browse Jobs &rarr;</a>
+        </div>
+
         <div className="print-area bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           {/* Header */}
           <div className="print-header bg-neuro-navy p-8 sm:p-10" style={{ backgroundColor: "#1a2744" }}>

@@ -720,9 +720,14 @@ function ContractLabContent() {
                 <CheckCircle className="w-12 h-12 text-green-500 mb-3" />
                 <h3 className="font-bold text-green-900 mb-1">Analysis Complete</h3>
                 <p className="text-sm text-green-700 mb-4">Review your results on the right.</p>
-                <button onClick={resetAnalysis} className="text-xs font-bold uppercase tracking-widest text-[#1a2744] hover:underline">
-                  Analyze Another
-                </button>
+                <div className="flex items-center gap-4">
+                  <button onClick={resetAnalysis} className="text-xs font-bold uppercase tracking-widest text-[#1a2744] hover:underline">
+                    Analyze Another
+                  </button>
+                  <a href="/student/jobs" className="text-xs font-bold text-[#e97325] hover:underline">
+                    Browse Jobs &rarr;
+                  </a>
+                </div>
               </div>
             )}
           </div>
