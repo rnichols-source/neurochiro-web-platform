@@ -20,6 +20,7 @@ import {
   X,
   ChevronRight,
   MessageSquare,
+  Calendar,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
@@ -34,6 +35,7 @@ const navItems = [
   { name: "Exercises", href: "/portal/exercises", icon: Dumbbell },
   { name: "My Journey", href: "/portal/journey", icon: TrendingUp },
   { name: "Learn", href: "/portal/learn", icon: BookOpen },
+  { name: "Seminars", href: "/seminars", icon: Calendar },
   { name: "Settings", href: "/portal/settings", icon: Settings },
   { name: "Help & Support", href: "/contact", icon: HelpCircle },
 ];
