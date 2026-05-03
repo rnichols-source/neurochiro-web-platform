@@ -25,6 +25,7 @@ const AGENT_EVENT_MAP: Record<string, string> = {
   'churn-preventer': 'Churn Preventer',
   'spotlight-promoter': 'Spotlight Promoter',
   'student-opportunity': 'Student Opportunity',
+  'lead-nurture': 'Lead Nurture',
   'vendor-outreach': 'Vendor Outreach',
   'seminar-host-outreach': 'Seminar Host Outreach',
   'chiro-finder': 'Chiro Finder',

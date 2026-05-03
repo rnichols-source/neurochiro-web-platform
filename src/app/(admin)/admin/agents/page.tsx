@@ -114,6 +114,15 @@ const AGENTS = [
     bg: "bg-indigo-500/10",
   },
   {
+    id: "lead-nurture",
+    name: "Lead Nurture",
+    description: "Sends timed email sequences to captured leads — 4-step funnel converting cold leads to signups",
+    schedule: "Weekdays at 9 AM",
+    icon: Mail,
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+  },
+  {
     id: "seminar-host-outreach",
     name: "Seminar Host Outreach",
     description: "Auto-discovers emails and pitches seminar hosts to list events on NeuroChiro marketplace",
