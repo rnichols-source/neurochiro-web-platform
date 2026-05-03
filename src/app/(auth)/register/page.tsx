@@ -49,7 +49,12 @@ function RegisterForm() {
     }
 
     if (result.user && claimId) {
-      await claimDoctorProfileAction(result.user.id, claimId);
+      const claimResult = await claimDoctorProfileAction(result.user.id, claimId);
+      if (claimResult?.error) {
+        setError(claimResult.error);
+        setPending(false);
+        return;
+      }
     }
 
     // Patient: redirect immediately (free, no verification needed)
@@ -60,7 +65,7 @@ function RegisterForm() {
 
     // Claiming flow: redirect immediately
     if (claimId) {
-      router.push(role === "doctor" ? "/doctor/dashboard" : "/student/dashboard");
+      router.push("/doctor/dashboard?claimed=true");
       return;
     }
 

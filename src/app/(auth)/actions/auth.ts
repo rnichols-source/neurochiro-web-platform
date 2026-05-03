@@ -297,5 +297,17 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
     })
     .eq('id', userId);
 
+  // Send welcome notification
+  try {
+    await supabase.from('notifications').insert({
+      user_id: userId,
+      title: 'Profile Claimed Successfully!',
+      body: 'Welcome to NeuroChiro! Your profile is live. Add your photo and bio to start attracting patients.',
+      type: 'system',
+      link: '/doctor/profile',
+      priority: 'important',
+    });
+  } catch {}
+
   return { success: true, doctorName };
 }
