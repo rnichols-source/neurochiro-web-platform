@@ -17,7 +17,7 @@ import {
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { getStudentDashboardData, getAcademyProgress, transitionToDoctorAction } from "./actions";
+import { getStudentDashboardData, getAcademyProgress, transitionToDoctorAction, getUpcomingSeminarsForStudent } from "./actions";
 import { useRouter } from "next/navigation";
 import { useRegion } from "@/context/RegionContext";
 import WhatsNew from "@/components/common/WhatsNew";
@@ -31,6 +31,7 @@ const fadeUp = {
 export default function StudentDashboard() {
   const [data, setData] = useState<any>(null);
   const [academyData, setAcademyData] = useState<{ completed: number; total: number }>({ completed: 0, total: 28 });
+  const [seminars, setSeminars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
   const router = useRouter();
@@ -40,9 +41,11 @@ export default function StudentDashboard() {
     Promise.all([
       getStudentDashboardData(),
       getAcademyProgress(),
-    ]).then(([dashResult, academyResult]) => {
+      getUpcomingSeminarsForStudent().catch(() => []),
+    ]).then(([dashResult, academyResult, semResult]) => {
       if (dashResult) setData(dashResult);
       if (academyResult) setAcademyData(academyResult);
+      setSeminars(semResult);
       setLoading(false);
     });
   }, []);
@@ -244,6 +247,37 @@ export default function StudentDashboard() {
           </div>
         </div>
       </motion.div>
+
+      {/* Upcoming Seminars */}
+      {seminars.length > 0 && (
+        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.13 }}>
+          <div className="bg-white rounded-3xl border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-neuro-orange" />
+                <h3 className="font-heading font-black text-neuro-navy text-sm">Upcoming Seminars</h3>
+              </div>
+              <Link href="/student/seminars" className="text-xs font-bold text-neuro-orange hover:underline flex items-center gap-1">View All <ChevronRight className="w-3 h-3" /></Link>
+            </div>
+            <div className="space-y-2">
+              {seminars.map((sem: any) => (
+                <Link key={sem.id} href={`/seminars/${sem.id}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-4 h-4 text-violet-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">{sem.title}</p>
+                      <p className="text-xs text-gray-400">{sem.dates ? new Date(sem.dates).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''} {sem.city ? `· ${sem.city}` : ''}</p>
+                    </div>
+                  </div>
+                  {sem.price ? <span className="text-xs font-bold text-neuro-navy">${sem.price}</span> : <span className="text-xs font-bold text-green-600">Free</span>}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Quick actions */}
       <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.15 }}>

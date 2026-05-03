@@ -79,6 +79,20 @@ export async function getAcademyProgress() {
   return { completed, total: TOTAL_MODULES }
 }
 
+export async function getUpcomingSeminarsForStudent() {
+  const supabase = createServerSupabase()
+  try {
+    const { data } = await supabase
+      .from('seminars')
+      .select('id, title, dates, city, country, price, instructor_name')
+      .eq('is_approved', true)
+      .eq('is_past', false)
+      .order('dates', { ascending: true })
+      .limit(3)
+    return data || []
+  } catch { return [] }
+}
+
 export async function getJobsForRadar() {
   const supabase = createServerSupabase()
   
