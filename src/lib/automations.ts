@@ -140,6 +140,26 @@ const enqueue = async (eventType: string, payload: Record<string, unknown>, dela
       return;
     }
 
+    // Deduplication: check if this event was already queued for this user in the last hour
+    if (payload.email || payload.userId) {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      let dupeQuery = supabaseAdmin
+        .from('automation_queue')
+        .select('id', { count: 'exact', head: true })
+        .eq('event_type', eventType)
+        .gte('created_at', oneHourAgo);
+
+      // Match by email in the payload JSONB
+      if (payload.email) {
+        dupeQuery = dupeQuery.contains('payload', { email: payload.email });
+      }
+
+      const { count } = await dupeQuery;
+      if (count && count > 0) {
+        return; // Already queued — skip duplicate
+      }
+    }
+
     const now = new Date();
     const scheduledFor = delayMinutes > 0
       ? new Date(now.getTime() + delayMinutes * 60 * 1000).toISOString()
