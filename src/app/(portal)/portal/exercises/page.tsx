@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Loader2, CheckCircle2, Lock, ChevronDown, ChevronUp, Dumbbell, Wind, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { createPremiumCheckout } from "../premium-actions";
 import { EXERCISES, EXERCISE_CATEGORIES, type Exercise } from "../exercises-data";
 import {
   markExerciseComplete,
@@ -406,7 +407,7 @@ export default function ExercisesPage() {
           <p className="text-white font-bold mb-4">
             $9/month &middot; Cancel anytime
           </p>
-          <button className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-all">
+          <button onClick={async () => { const r = await createPremiumCheckout(); if (r?.url) window.location.href = r.url; }} className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-all">
             Start Free Trial &mdash; 7 Days Free
           </button>
         </div>

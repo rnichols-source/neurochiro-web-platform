@@ -151,17 +151,17 @@ export default async function ArticlePage({ params }: Props) {
            </Link>
            
            <div className="pt-8 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-              <Link href="/learn/repetition" className="p-6 bg-gray-50 rounded-2xl flex items-center justify-between group hover:bg-white hover:shadow-lg transition-all">
+              <Link href="/learn/vagus-nerve-basics" className="p-6 bg-gray-50 rounded-2xl flex items-center justify-between group hover:bg-white hover:shadow-lg transition-all">
                  <div className="text-left">
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Next Reading</p>
-                    <p className="font-bold text-neuro-navy">Why Repetition Matters</p>
+                    <p className="font-bold text-neuro-navy">Vagus Nerve Basics</p>
                  </div>
                  <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-neuro-orange group-hover:translate-x-1 transition-all" />
               </Link>
-              <Link href="/learn/faq" className="p-6 bg-gray-50 rounded-2xl flex items-center justify-between group hover:bg-white hover:shadow-lg transition-all">
+              <Link href="/learn/traditional-vs-nervous-system-chiropractic" className="p-6 bg-gray-50 rounded-2xl flex items-center justify-between group hover:bg-white hover:shadow-lg transition-all">
                  <div className="text-left">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Questions?</p>
-                    <p className="font-bold text-neuro-navy">View Patient FAQs</p>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Compare</p>
+                    <p className="font-bold text-neuro-navy">Traditional vs. NS Chiropractic</p>
                  </div>
                  <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-neuro-orange group-hover:translate-x-1 transition-all" />
               </Link>

@@ -49,10 +49,16 @@ const mobileNavItems = [
 function PortalShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [fullName, setFullName] = useState("");
   const [initials, setInitials] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Auth guard — redirect to login if not authenticated
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) router.push("/login");
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (!user?.id) return;
