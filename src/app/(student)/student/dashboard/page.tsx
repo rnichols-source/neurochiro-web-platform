@@ -17,7 +17,7 @@ import {
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { getStudentDashboardData, getAcademyProgress, transitionToDoctorAction, getUpcomingSeminarsForStudent } from "./actions";
+import { getStudentDashboardData, getAcademyProgress, transitionToDoctorAction, getUpcomingSeminarsForStudent, getRecentJobs } from "./actions";
 import { useRouter } from "next/navigation";
 import { useRegion } from "@/context/RegionContext";
 import WhatsNew from "@/components/common/WhatsNew";
@@ -32,6 +32,7 @@ export default function StudentDashboard() {
   const [data, setData] = useState<any>(null);
   const [academyData, setAcademyData] = useState<{ completed: number; total: number }>({ completed: 0, total: 28 });
   const [seminars, setSeminars] = useState<any[]>([]);
+  const [recentJobs, setRecentJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
   const router = useRouter();
@@ -42,10 +43,12 @@ export default function StudentDashboard() {
       getStudentDashboardData(),
       getAcademyProgress(),
       getUpcomingSeminarsForStudent().catch(() => []),
-    ]).then(([dashResult, academyResult, semResult]) => {
+      getRecentJobs().catch(() => []),
+    ]).then(([dashResult, academyResult, semResult, jobsResult]) => {
       if (dashResult) setData(dashResult);
       if (academyResult) setAcademyData(academyResult);
       setSeminars(semResult);
+      setRecentJobs(jobsResult);
       setLoading(false);
     });
   }, []);
@@ -279,12 +282,47 @@ export default function StudentDashboard() {
         </motion.div>
       )}
 
+      {/* Recent Job Postings */}
+      {recentJobs.length > 0 && (
+        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.14 }}>
+          <div className="bg-white rounded-3xl border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-blue-500" />
+                <h3 className="font-heading font-black text-neuro-navy text-sm">New Job Postings</h3>
+              </div>
+              <Link href="/student/jobs" className="text-xs font-bold text-neuro-orange hover:underline flex items-center gap-1">View All <ChevronRight className="w-3 h-3" /></Link>
+            </div>
+            <div className="space-y-2">
+              {recentJobs.map((job: any) => (
+                <Link key={job.id} href={`/careers/${job.id}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                      <Briefcase className="w-4 h-4 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">{job.title}</p>
+                      <p className="text-xs text-gray-400">{job.clinic?.clinic_name || ''} {job.clinic?.city ? `· ${job.clinic.city}` : ''}</p>
+                    </div>
+                  </div>
+                  {(job.salary_min || job.salary_max) && (
+                    <span className="text-xs font-bold text-neuro-navy">
+                      {job.salary_min && job.salary_max ? `$${(job.salary_min/1000).toFixed(0)}k–$${(job.salary_max/1000).toFixed(0)}k` : job.salary_max ? `Up to $${(job.salary_max/1000).toFixed(0)}k` : ''}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Quick actions */}
       <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.15 }}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: "Browse Jobs", desc: "Find positions", href: "/student/jobs", icon: Search, gradient: "from-blue-50 to-white", border: "border-blue-100" },
-            { label: "Find Seminars", desc: "Upcoming events", href: "/student/seminars", icon: Calendar, gradient: "from-violet-50 to-white", border: "border-violet-100" },
+            { label: "Find Mentors", desc: "Connect with doctors", href: "/directory", icon: GraduationCap, gradient: "from-violet-50 to-white", border: "border-violet-100" },
             { label: "Academy", desc: "Continue learning", href: "/student/academy", icon: BookOpen, gradient: "from-emerald-50 to-white", border: "border-emerald-100" },
             { label: "Edit Profile", desc: "Update your info", href: "/student/profile", icon: UserCircle, gradient: "from-orange-50 to-white", border: "border-orange-100" },
           ].map((action) => (

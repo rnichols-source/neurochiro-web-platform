@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
   MessageSquare, FileText, LogOut, X, Settings, CreditCard, DollarSign, Compass, ClipboardList, Target, HelpCircle, ChevronDown,
-  ShieldCheck, Lock, Search,
+  ShieldCheck, Lock, Search, ShoppingBag,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -40,6 +40,7 @@ const navSections = [
       { name: "Find Doctors", href: "/directory", icon: Search },
       { name: "Jobs", href: "/student/jobs", icon: Briefcase },
       { name: "Seminars", href: "/student/seminars", icon: Calendar },
+      { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
       { name: "Financial Planner", href: "/student/financial-planner", icon: DollarSign, pro: true },
       { name: "Command Center", href: "/account/command-center", icon: Target, pro: true },
     ],
