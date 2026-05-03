@@ -338,6 +338,24 @@ export default function StudentDashboard() {
           ))}
         </div>
       </motion.div>
+
+      {/* Invite Classmates */}
+      <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.18 }}>
+        <div className="bg-neuro-navy rounded-3xl p-6 md:p-8 text-white relative overflow-hidden">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-neuro-orange/20 flex items-center justify-center flex-shrink-0">
+              <GraduationCap className="w-5 h-5 text-neuro-orange" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-heading font-black text-sm">Invite Your Classmates</h3>
+              <p className="text-gray-400 text-xs mt-0.5">Share NeuroChiro with your cohort. Build your professional network before graduation.</p>
+            </div>
+            <Link href="/join" className="px-4 py-2 bg-neuro-orange text-white text-xs font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors whitespace-nowrap">
+              Share Link
+            </Link>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }
