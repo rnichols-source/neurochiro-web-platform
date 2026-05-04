@@ -60,14 +60,14 @@ function ContentLibraryContent() {
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
-    // Check membership tier first — Growth and Pro get full access
-    const supabase = (async () => {
+    // Check membership tier + founding member status — they get full access
+    (async () => {
       const { createClient } = await import("@/lib/supabase");
       const sb = createClient();
       const { data: { user } } = await sb.auth.getUser();
       if (!user) return;
-      const { data: doctor } = await sb.from("doctors").select("membership_tier").eq("user_id", user.id).single();
-      if (doctor?.membership_tier === 'growth' || doctor?.membership_tier === 'pro') {
+      const { data: doctor } = await sb.from("doctors").select("membership_tier, is_founding_member").eq("user_id", user.id).single() as any;
+      if (doctor?.is_founding_member || doctor?.membership_tier === 'growth' || doctor?.membership_tier === 'pro') {
         setIsSubscribed(true);
         return;
       }

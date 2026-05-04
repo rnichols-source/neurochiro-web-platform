@@ -85,8 +85,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         supabase.from("notifications").select("*", { count: "exact", head: true })
           .eq("user_id", user.id).is("read_at", null)
           .then(({ count }) => setUnreadNotifs(count || 0));
-        supabase.from("doctors").select("membership_tier").eq("user_id", user.id).single()
-          .then(({ data }) => setMemberTier(data?.membership_tier || "starter"));
+        supabase.from("doctors").select("membership_tier, is_founding_member").eq("user_id", user.id).single()
+          .then(({ data }: any) => {
+            // Founding members get full Pro access to everything
+            if (data?.is_founding_member) {
+              setMemberTier("pro");
+            } else {
+              setMemberTier(data?.membership_tier || "starter");
+            }
+          });
       }
     });
   }, []);

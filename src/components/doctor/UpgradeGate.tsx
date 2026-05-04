@@ -26,25 +26,31 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
+  const [isFounder, setIsFounder] = useState(false);
+
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { setLoading(false); return; }
       setUserId(user.id);
 
-      // Check doctor's membership tier
+      // Check doctor's membership tier + founding member status
       const { data: doctor } = await supabase
         .from("doctors")
-        .select("membership_tier")
+        .select("membership_tier, is_founding_member")
         .eq("user_id", user.id)
-        .single();
+        .single() as any;
 
       setTier(doctor?.membership_tier || "starter");
+      setIsFounder(doctor?.is_founding_member || false);
       setLoading(false);
     });
   }, []);
 
   if (loading) return <>{children}</>;
+
+  // Founding members get access to EVERYTHING
+  if (isFounder) return <>{children}</>;
 
   const currentLevel = TIER_LEVELS[tier || "starter"] || 0;
   const requiredLevel = TIER_LEVELS[requiredTier] || 1;
