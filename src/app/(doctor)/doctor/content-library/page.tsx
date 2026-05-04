@@ -60,7 +60,20 @@ function ContentLibraryContent() {
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
-    hasPurchased('content-library').then(setIsSubscribed).catch(() => {});
+    // Check membership tier first — Growth and Pro get full access
+    const supabase = (async () => {
+      const { createClient } = await import("@/lib/supabase");
+      const sb = createClient();
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return;
+      const { data: doctor } = await sb.from("doctors").select("membership_tier").eq("user_id", user.id).single();
+      if (doctor?.membership_tier === 'growth' || doctor?.membership_tier === 'pro') {
+        setIsSubscribed(true);
+        return;
+      }
+      // Fallback: check for separate content library purchase
+      hasPurchased('content-library').then(setIsSubscribed).catch(() => {});
+    })();
   }, []);
 
   const thirtyDaysAgo = useMemo(() => {
