@@ -519,13 +519,18 @@ function PLAnalyzerContent() {
           setCheckingPurchase(false);
           return;
         }
-        const { data } = await (supabase as any)
-          .from("course_purchases")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("course_id", "pl-analyzer")
-          .limit(1);
-        if (data && data.length > 0) setIsPurchased(true);
+        // Founding members get everything
+        const { data: doc } = await supabase.from("doctors").select("is_founding_member").eq("user_id", user.id).single() as any;
+        if (doc?.is_founding_member) { setIsPurchased(true); }
+        else {
+          const { data } = await (supabase as any)
+            .from("course_purchases")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("course_id", "pl-analyzer")
+            .limit(1);
+          if (data && data.length > 0) setIsPurchased(true);
+        }
 
         const { data: snaps } = await (supabase as any)
           .from("pl_snapshots")

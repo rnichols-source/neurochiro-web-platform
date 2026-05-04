@@ -166,6 +166,12 @@ function WorkshopsContent() {
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
+      // Founding members get everything
+      const { data: doc } = await supabase.from("doctors").select("is_founding_member").eq("user_id", user.id).single() as any;
+      if (doc?.is_founding_member) {
+        setPurchasedIds(["workshop-bundle", "workshop-stress-sleep", "workshop-pediatric", "workshop-lunch-learn", "workshop-corporate", "workshop-community"]);
+        return;
+      }
       try {
         const { data } = await (supabase as any)
           .from("course_purchases")
