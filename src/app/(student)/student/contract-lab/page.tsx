@@ -1,5 +1,4 @@
 "use client";
-import StudentUpgradeGate from "@/components/student/UpgradeGate";
 
 import { useState, useEffect, useRef } from "react";
 import {
@@ -22,6 +21,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { getContractsAction, analyzeContractAction } from "./actions";
+import { createClient } from "@/lib/supabase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -413,11 +413,7 @@ function Disclaimer() {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ContractLabPage() {
-  return (
-    <StudentUpgradeGate feature="Contract Lab" description="Review real associate contracts, understand what to look for, and protect yourself before signing your first deal.">
-      <ContractLabContent />
-    </StudentUpgradeGate>
-  );
+  return <ContractLabContent />;
 }
 
 function ContractLabContent() {
@@ -435,25 +431,41 @@ function ContractLabContent() {
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [loaded, setLoaded] = useState(false);
 
-  // localStorage debounce
+  // Supabase debounce
   const qRef = useRef(questionnaire);
   qRef.current = questionnaire;
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LS_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<QuestionnaireState>;
-        setQuestionnaire((prev) => ({ ...prev, ...parsed }));
-      }
-    } catch { /* ignore */ }
-    setLoaded(true);
+    async function loadDraft() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { setLoaded(true); return; }
+        const { data } = await supabase
+          .from("contract_drafts")
+          .select("draft_data")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (data?.draft_data) {
+          setQuestionnaire((prev) => ({ ...prev, ...data.draft_data as Partial<QuestionnaireState> }));
+        }
+      } catch { /* ignore */ }
+      setLoaded(true);
+    }
+    loadDraft();
   }, []);
 
   useEffect(() => {
     if (!loaded) return;
-    const timer = setTimeout(() => {
-      try { localStorage.setItem(LS_KEY, JSON.stringify(qRef.current)); } catch { /* ignore */ }
+    const timer = setTimeout(async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        await supabase
+          .from("contract_drafts")
+          .upsert({ user_id: user.id, draft_data: qRef.current, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+      } catch { /* ignore */ }
     }, 500);
     return () => clearTimeout(timer);
   }, [questionnaire, loaded]);

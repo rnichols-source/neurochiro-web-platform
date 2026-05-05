@@ -1,5 +1,4 @@
 "use client";
-import StudentUpgradeGate from "@/components/student/UpgradeGate";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -7,7 +6,6 @@ import {
   Search,
   ChevronDown,
   ChevronRight,
-  Lock,
   X,
   Check,
   Star,
@@ -23,13 +21,9 @@ import {
   type Technique,
   type QuizQuestion,
 } from "./technique-data";
-import { createClient } from "@/lib/supabase";
-
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const LS_KEY = "neurochiro-technique-quiz";
-const FREE_TECHNIQUE_LIMIT = 5;
-const FREE_QUIZ_LIMIT = 5;
 const BRAND_NAVY = "#1a2744";
 const BRAND_ORANGE = "#e97325";
 
@@ -92,16 +86,7 @@ const INITIAL_QUIZ: QuizState = {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function TechniqueComparisonGuide() {
-  return (
-    <StudentUpgradeGate feature="Techniques Library" description="Compare every adjustment technique side by side. Learn the pros, cons, and applications before you commit to your path.">
-      <TechniqueComparisonContent />
-    </StudentUpgradeGate>
-  );
-}
-
-function TechniqueComparisonContent() {
   const [activeTab, setActiveTab] = useState(0);
-  const [purchased, setPurchased] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   // Tab 1 state
@@ -120,36 +105,6 @@ function TechniqueComparisonContent() {
   // localStorage debounce
   const quizRef = useRef(quiz);
   quizRef.current = quiz;
-
-  // ─── Purchase check ────────────────────────────────────────────────────────
-
-  useEffect(() => {
-    let cancelled = false;
-    async function checkPurchase() {
-      try {
-        const supabase = createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (user) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data } = await (supabase as any)
-            .from("course_purchases")
-            .select("id")
-            .eq("course_id", "technique-guide")
-            .eq("user_id", user.id)
-            .maybeSingle();
-          if (!cancelled && data) setPurchased(true);
-        }
-      } catch {
-        // Not logged in or table missing — treat as unpurchased
-      }
-    }
-    checkPurchase();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   // ─── Load quiz from localStorage ───────────────────────────────────────────
 
@@ -268,15 +223,14 @@ function TechniqueComparisonContent() {
       advanceTimer.current = setTimeout(() => {
         setQuiz((prev) => {
           const qIdx = prev.currentQuestion;
-          const maxFree = purchased ? QUIZ_QUESTIONS.length : FREE_QUIZ_LIMIT;
-          if (qIdx < QUIZ_QUESTIONS.length - 1 && qIdx < maxFree - 1) {
+          if (qIdx < QUIZ_QUESTIONS.length - 1) {
             return { ...prev, currentQuestion: qIdx + 1 };
           }
           return { ...prev, completed: true };
         });
       }, 500);
     },
-    [purchased]
+    []
   );
 
   const resetQuiz = useCallback(() => {
@@ -333,26 +287,6 @@ function TechniqueComparisonContent() {
   }, [comparedTechniques]);
 
   if (!loaded) return null;
-
-  // ─── Purchase Gate Overlay ─────────────────────────────────────────────────
-
-  const PurchaseGate = ({ message }: { message?: string }) => (
-    <div className="absolute inset-0 z-10 backdrop-blur-sm bg-white/70 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
-      <Lock className="w-8 h-8 mb-3" style={{ color: BRAND_NAVY }} />
-      <p className="font-bold text-lg" style={{ color: BRAND_NAVY }}>
-        {message || "$19 — Unlock Full Guide"}
-      </p>
-      <p className="text-gray-500 text-sm mt-1 max-w-xs">
-        Get access to all 18 techniques, the full quiz, and the comparison tool.
-      </p>
-      <button
-        className="mt-4 px-6 py-3 rounded-xl text-white font-bold text-sm transition-colors hover:opacity-90"
-        style={{ backgroundColor: BRAND_ORANGE }}
-      >
-        Unlock for $19
-      </button>
-    </div>
-  );
 
   // ─── Tab 1: Technique Explorer ─────────────────────────────────────────────
 
@@ -417,8 +351,6 @@ function TechniqueComparisonContent() {
       {/* Technique cards */}
       <div className="space-y-3">
         {filteredTechniques.map((t, idx) => {
-          const globalIdx = TECHNIQUES.indexOf(t);
-          const isFree = globalIdx < FREE_TECHNIQUE_LIMIT || purchased;
           const isExpanded = expandedId === t.id;
           const catColor = CATEGORY_COLORS[t.category] || BRAND_NAVY;
 
@@ -429,9 +361,7 @@ function TechniqueComparisonContent() {
             >
               {/* Collapsed header — always visible */}
               <button
-                onClick={() => {
-                  if (isFree) setExpandedId(isExpanded ? null : t.id);
-                }}
+                onClick={() => setExpandedId(isExpanded ? null : t.id)}
                 className="w-full text-left p-5 flex items-start gap-4"
               >
                 <div className="flex-1 min-w-0">
@@ -484,25 +414,16 @@ function TechniqueComparisonContent() {
                   </div>
                 </div>
                 <div className="flex-shrink-0 mt-1">
-                  {isFree ? (
-                    isExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
-                    ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
-                    )
+                  {isExpanded ? (
+                    <ChevronDown className="w-5 h-5 text-gray-400" />
                   ) : (
-                    <Lock className="w-5 h-5 text-gray-300" />
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
                   )}
                 </div>
               </button>
 
-              {/* Locked overlay for techniques 6+ */}
-              {!isFree && (
-                <PurchaseGate />
-              )}
-
               {/* Expanded details */}
-              {isExpanded && isFree && (
+              {isExpanded && (
                 <div className="px-5 pb-6 pt-0 space-y-5 border-t border-gray-100">
                   {renderDetailSection("What It Is", t.whatItIs)}
                   {renderDetailSection("Philosophy", t.philosophy)}
@@ -593,8 +514,6 @@ function TechniqueComparisonContent() {
 
     const qIdx = quiz.currentQuestion;
     const q = QUIZ_QUESTIONS[qIdx];
-    const maxFree = purchased ? QUIZ_QUESTIONS.length : FREE_QUIZ_LIMIT;
-    const isLocked = qIdx >= maxFree;
     const progress = ((qIdx + 1) / QUIZ_QUESTIONS.length) * 100;
 
     return (
@@ -630,8 +549,7 @@ function TechniqueComparisonContent() {
 
         {/* Question */}
         <div className="relative">
-          {isLocked && <PurchaseGate message="Unlock remaining questions for $19" />}
-          <div className={isLocked ? "pointer-events-none select-none" : ""}>
+          <div>
             <h3
               className="text-lg font-bold mb-5"
               style={{ color: BRAND_NAVY }}
@@ -689,7 +607,7 @@ function TechniqueComparisonContent() {
           ) : (
             <div />
           )}
-          {quiz.answers[q.id] && qIdx < QUIZ_QUESTIONS.length - 1 && !isLocked && (
+          {quiz.answers[q.id] && qIdx < QUIZ_QUESTIONS.length - 1 && (
             <button
               onClick={() =>
                 setQuiz((prev) => ({
@@ -888,19 +806,7 @@ function TechniqueComparisonContent() {
 
   // ─── Tab 3: Comparison Tool ────────────────────────────────────────────────
 
-  const renderComparison = () => {
-    if (!purchased) {
-      return (
-        <div className="relative min-h-[400px]">
-          <PurchaseGate message="Unlock the Comparison Tool for $19" />
-          <div className="pointer-events-none select-none opacity-30">
-            {renderComparisonContent()}
-          </div>
-        </div>
-      );
-    }
-    return renderComparisonContent();
-  };
+  const renderComparison = () => renderComparisonContent();
 
   const renderComparisonContent = () => {
     const cols = comparedTechniques;

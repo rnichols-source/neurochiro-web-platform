@@ -19,11 +19,7 @@ import {
   Menu,
 } from "lucide-react";
 import { SEED_COURSES } from "./courses-data";
-import {
-  createCourseCheckout,
-  createBundleCheckout,
-  getPurchasedCourses,
-} from "./purchase-actions";
+import { createClient } from "@/lib/supabase";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -43,8 +39,6 @@ type ViewState =
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-
-const STORAGE_KEY = "neurochiro-academy-progress";
 
 const TAGS_MAP: Record<string, string[]> = {
   "course-ns-foundations": ["Nervous System", "Foundation"],
@@ -100,12 +94,6 @@ const ACTION_ITEMS: Record<string, string[]> = {
   ],
 };
 
-const COURSE_PRICES: Record<string, number> = {
-  "course-clinical-identity": 29,
-  "course-business": 39,
-  "course-clinical-confidence": 39,
-  "course-associate-playbook": 49,
-};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -115,19 +103,43 @@ function cn(...inputs: (string | false | null | undefined)[]) {
   return inputs.filter(Boolean).join(" ");
 }
 
-function loadProgress(): AllProgress {
-  if (typeof window === "undefined") return {};
+async function loadProgressFromSupabase(): Promise<AllProgress> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return {};
+    const { data } = await supabase
+      .from("course_progress")
+      .select("course_id, completed_modules")
+      .eq("user_id", user.id);
+    if (!data) return {};
+    const result: AllProgress = {};
+    for (const row of data) {
+      result[row.course_id] = {
+        completed: row.completed_modules || [],
+        lastModule: (row.completed_modules || []).slice(-1)[0] || "",
+      };
+    }
+    return result;
   } catch {
     return {};
   }
 }
 
-function saveProgress(p: AllProgress) {
+async function saveProgressToSupabase(courseId: string, completed: string[]) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase
+      .from("course_progress")
+      .upsert({
+        user_id: user.id,
+        course_id: courseId,
+        completed_modules: completed,
+        started_at: new Date().toISOString(),
+        ...(completed.length > 0 ? {} : {}),
+      }, { onConflict: "user_id,course_id" });
   } catch {
     /* noop */
   }
@@ -289,35 +301,32 @@ function ProgressRing({
 export default function AcademyPage() {
   const [view, setView] = useState<ViewState>({ kind: "catalog" });
   const [progress, setProgress] = useState<AllProgress>({});
-  const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
-  const [loadingPurchase, setLoadingPurchase] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [completionFlash, setCompletionFlash] = useState(false);
   const [showCourseComplete, setShowCourseComplete] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load data on mount
+  // Load data from Supabase on mount
   useEffect(() => {
-    setProgress(loadProgress());
-    getPurchasedCourses()
-      .then(setPurchasedIds)
-      .catch(() => {});
+    loadProgressFromSupabase().then(setProgress);
   }, []);
 
-  // Debounced save
-  const debouncedSave = useCallback((p: AllProgress) => {
+  // Debounced save to Supabase
+  const debouncedSave = useCallback((p: AllProgress, courseId: string) => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => saveProgress(p), 500);
+    saveTimer.current = setTimeout(() => {
+      const cp = p[courseId];
+      if (cp) saveProgressToSupabase(courseId, cp.completed);
+    }, 500);
   }, []);
 
-  // Course helpers
+  // Course helpers — all courses are included with subscription
   const courses = useMemo(() => SEED_COURSES, []);
 
   const isOwned = useCallback(
-    (c: (typeof SEED_COURSES)[number]) =>
-      c.tier_required === "free" || purchasedIds.includes(c.id),
-    [purchasedIds]
+    () => true,
+    []
   );
 
   const courseProgress = useCallback(
@@ -341,37 +350,6 @@ export default function AcademyPage() {
 
   const overallPct = totalModules > 0 ? Math.round((totalCompleted / totalModules) * 100) : 0;
 
-  // Purchase handlers
-  const handlePurchase = async (courseId: string) => {
-    setLoadingPurchase(courseId);
-    try {
-      const result = await createCourseCheckout(courseId);
-      if (result.url) {
-        window.location.href = result.url;
-      } else {
-        alert(result.error || "Something went wrong");
-      }
-    } catch {
-      alert("Something went wrong. Please try again.");
-    }
-    setLoadingPurchase(null);
-  };
-
-  const handleBundlePurchase = async () => {
-    setLoadingPurchase("bundle");
-    try {
-      const result = await createBundleCheckout();
-      if (result.url) {
-        window.location.href = result.url;
-      } else {
-        alert(result.error || "Something went wrong");
-      }
-    } catch {
-      alert("Something went wrong. Please try again.");
-    }
-    setLoadingPurchase(null);
-  };
-
   // Mark module complete / incomplete
   const toggleComplete = useCallback(
     (courseId: string, moduleId: string) => {
@@ -385,7 +363,7 @@ export default function AcademyPage() {
           ...prev,
           [courseId]: { completed: newCompleted, lastModule: moduleId },
         };
-        debouncedSave(next);
+        debouncedSave(next, courseId);
 
         // Check course completion (adding, not removing)
         if (!alreadyDone) {
@@ -438,27 +416,15 @@ export default function AcademyPage() {
   // ---------------------------------------------------------------------------
 
   function renderCatalog() {
-    const freeCourses = courses.filter((c) => c.tier_required === "free");
-    const paidCourses = courses.filter((c) => c.tier_required === "paid");
-    const allPaidPurchased = paidCourses.every((c) => isOwned(c));
-
     const q = searchQuery.toLowerCase().trim();
-    const filtered = q
+    const displayCourses = q
       ? courses.filter(
           (c) =>
             c.title.toLowerCase().includes(q) ||
             c.description.toLowerCase().includes(q) ||
             c.modules.some((m) => m.title.toLowerCase().includes(q))
         )
-      : null;
-
-    const displayCourses = filtered || courses;
-    const displayFree = filtered
-      ? displayCourses.filter((c) => c.tier_required === "free")
-      : freeCourses;
-    const displayPaid = filtered
-      ? displayCourses.filter((c) => c.tier_required === "paid")
-      : paidCourses;
+      : courses;
 
     return (
       <div className="space-y-10 pb-20">
@@ -566,65 +532,19 @@ export default function AcademyPage() {
           )}
         </div>
 
-        {/* Free Courses */}
-        {displayFree.length > 0 && (
+        {/* All Courses */}
+        {displayCourses.length > 0 && (
           <section>
             <h2 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
-              Free Courses
+              Your Courses
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {displayFree.map((course) => renderCourseCard(course))}
+              {displayCourses.map((course) => renderCourseCard(course))}
             </div>
           </section>
         )}
 
-        {/* Bundle Banner */}
-        {!allPaidPurchased && !filtered && (
-          <section className="bg-[#1a2744] rounded-2xl p-6 sm:p-8 text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <Zap className="w-5 h-5 text-[#e97325]" />
-              <span className="text-xs font-black uppercase tracking-widest text-[#e97325]">
-                Best Value
-              </span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-black mb-1">
-              School-to-Practice System — All 4 Courses
-            </h2>
-            <p className="text-gray-300 mb-4">
-              The complete unfair advantage for your career.
-            </p>
-            <div className="flex items-center gap-4 mb-6">
-              <span className="text-3xl font-black">$99</span>
-              <span className="text-gray-400 line-through text-lg">$156</span>
-              <span className="bg-[#e97325]/20 text-[#e97325] text-xs font-black px-3 py-1 rounded-full">
-                Save $57
-              </span>
-            </div>
-            <button
-              onClick={handleBundlePurchase}
-              disabled={loadingPurchase === "bundle"}
-              className="px-8 py-3 bg-[#e97325] text-white rounded-xl font-black text-sm hover:bg-[#e97325]/90 disabled:opacity-50 transition-colors"
-            >
-              {loadingPurchase === "bundle"
-                ? "Loading..."
-                : "Unlock All — $99"}
-            </button>
-          </section>
-        )}
-
-        {/* Paid Courses */}
-        {displayPaid.length > 0 && (
-          <section>
-            <h2 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
-              Premium Courses
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {displayPaid.map((course) => renderCourseCard(course))}
-            </div>
-          </section>
-        )}
-
-        {filtered && displayCourses.length === 0 && (
+        {q && displayCourses.length === 0 && (
           <div className="text-center py-12">
             <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-400 font-bold">
@@ -641,7 +561,6 @@ export default function AcademyPage() {
   // ---------------------------------------------------------------------------
 
   function renderCourseCard(course: (typeof SEED_COURSES)[number]) {
-    const owned = isOwned(course);
     const cp = courseProgress(course.id);
     const doneCount = cp.completed.length;
     const modCount = course.modules.length;
@@ -650,15 +569,11 @@ export default function AcademyPage() {
     const inProg = doneCount > 0 && !isDone;
     const tags = TAGS_MAP[course.id] || [];
     const time = totalReadTime(course.modules);
-    const price = COURSE_PRICES[course.id];
 
     let actionLabel = "Start";
     let actionStyle =
       "bg-[#1a2744] text-white hover:bg-[#1a2744]/90";
-    if (!owned && price) {
-      actionLabel = `Unlock $${price}`;
-      actionStyle = "bg-[#e97325] text-white hover:bg-[#e97325]/90";
-    } else if (isDone) {
+    if (isDone) {
       actionLabel = "Completed";
       actionStyle = "bg-green-500 text-white";
     } else if (inProg) {
@@ -668,14 +583,8 @@ export default function AcademyPage() {
     return (
       <div
         key={course.id}
-        onClick={() => {
-          if (!owned && price) return;
-          openCourse(course.id);
-        }}
-        className={cn(
-          "bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-gray-200 transition-all",
-          owned ? "cursor-pointer" : ""
-        )}
+        onClick={() => openCourse(course.id)}
+        className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-gray-200 transition-all cursor-pointer"
       >
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           {tags.map((tag) => (
@@ -702,8 +611,7 @@ export default function AcademyPage() {
         </p>
 
         {/* Progress bar */}
-        {owned && (
-          <div className="mb-3">
+        <div className="mb-3">
             <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 mb-1">
               <span>
                 {doneCount}/{modCount} complete
@@ -720,40 +628,24 @@ export default function AcademyPage() {
               />
             </div>
           </div>
-        )}
 
         {/* Status + action */}
         <div className="flex items-center justify-between">
-          {course.tier_required === "free" ? (
-            <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-              FREE
-            </span>
-          ) : owned ? (
-            <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-2 py-0.5 rounded-full flex items-center gap-1">
-              <CheckCircle className="w-3 h-3" /> Owned
-            </span>
-          ) : (
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#e97325]">
-              ${price}
-            </span>
-          )}
+          <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+            {isDone ? <><CheckCircle className="w-3 h-3" /> Complete</> : "Included"}
+          </span>
 
           <button
             onClick={(e) => {
               e.stopPropagation();
-              if (!owned && price) {
-                handlePurchase(course.id);
-                return;
-              }
               openCourse(course.id);
             }}
-            disabled={loadingPurchase === course.id}
             className={cn(
-              "px-4 py-2 rounded-lg font-bold text-xs transition-colors disabled:opacity-50",
+              "px-4 py-2 rounded-lg font-bold text-xs transition-colors",
               actionStyle
             )}
           >
-            {loadingPurchase === course.id ? "Loading..." : actionLabel}
+            {actionLabel}
           </button>
         </div>
       </div>
@@ -768,7 +660,6 @@ export default function AcademyPage() {
     const course = courses.find((c) => c.id === courseId);
     if (!course) return null;
 
-    const owned = isOwned(course);
     const cp = courseProgress(courseId);
     const doneCount = cp.completed.length;
     const modCount = course.modules.length;
@@ -778,8 +669,7 @@ export default function AcademyPage() {
     const activeMod = activeIdx >= 0 ? course.modules[activeIdx] : course.modules[0];
     const resolvedIdx = activeIdx >= 0 ? activeIdx : 0;
 
-    const isModuleLocked = (idx: number) =>
-      !owned && idx > 0;
+    const isModuleLocked = () => false;
 
     const isCompleted = (moduleId: string) =>
       cp.completed.includes(moduleId);
@@ -939,52 +829,12 @@ export default function AcademyPage() {
               isModuleLocked,
               isCompleted
             )}
-            {/* Purchase CTA in sidebar */}
-            {!owned && (
-              <div className="p-4 bg-[#1a2744] text-white">
-                <h4 className="font-black text-sm mb-1">
-                  Unlock Full Course
-                </h4>
-                <p className="text-gray-300 text-xs mb-3">
-                  Get access to all {modCount} modules.
-                </p>
-                <button
-                  onClick={() => handlePurchase(courseId)}
-                  disabled={loadingPurchase === courseId}
-                  className="w-full py-2.5 bg-[#e97325] text-white rounded-lg font-black text-sm hover:bg-[#e97325]/90 disabled:opacity-50 transition-colors"
-                >
-                  {loadingPurchase === courseId
-                    ? "Loading..."
-                    : `Unlock for $${COURSE_PRICES[courseId] || ""}`}
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
         {/* Main content area */}
         <div className="flex-1 min-w-0">
-          {currentModLocked && activeMod ? (
-            // Locked overlay
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 sm:p-12 text-center">
-              <Lock className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h2 className="text-xl font-black text-[#1a2744] mb-2">
-                Module Locked
-              </h2>
-              <p className="text-gray-500 mb-6">
-                Unlock this course to access all modules.
-              </p>
-              <button
-                onClick={() => handlePurchase(courseId)}
-                disabled={loadingPurchase === courseId}
-                className="px-8 py-3 bg-[#e97325] text-white rounded-xl font-bold text-sm hover:bg-[#e97325]/90 disabled:opacity-50 transition-colors"
-              >
-                {loadingPurchase === courseId
-                  ? "Loading..."
-                  : `Unlock for $${COURSE_PRICES[courseId] || ""}`}
-              </button>
-            </div>
-          ) : activeMod ? (
+          {activeMod ? (
             <div className="space-y-6">
               {/* Breadcrumb */}
               <div className="hidden lg:flex items-center gap-2 text-xs text-gray-400">
@@ -1248,7 +1098,7 @@ export default function AcademyPage() {
                     ...prev,
                     [course.id]: { ...cp2, lastModule: mod.id },
                   };
-                  debouncedSave(next);
+                  debouncedSave(next, course.id);
                   return next;
                 });
               }}

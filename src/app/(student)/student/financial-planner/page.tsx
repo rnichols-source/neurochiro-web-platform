@@ -1,5 +1,4 @@
 "use client";
-import StudentUpgradeGate from "@/components/student/UpgradeGate";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -210,77 +209,58 @@ function calcSAVEPayment(agi: number): number {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function FinancialPlanner() {
-  return (
-    <StudentUpgradeGate feature="Financial Planner" description="Plan your first year finances, calculate loan payments, project your salary, and build a budget before you graduate.">
-      <FinancialPlannerContent />
-    </StudentUpgradeGate>
-  );
+  return <FinancialPlannerContent />;
 }
 
 function FinancialPlannerContent() {
-  const [state, setState] = useState<PlannerState>(INITIAL_STATE);
+  const [state, setState] = useState<PlannerState>({ ...INITIAL_STATE, isPurchased: true, checkingPurchase: false });
   const [loaded, setLoaded] = useState(false);
-  const [purchaseLoading, setPurchaseLoading] = useState(false);
 
-  // Load from localStorage on mount
+  // Load from Supabase on mount
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LS_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<PlannerState>;
-        setState((prev) => ({
-          ...prev,
-          ...parsed,
-          checkingPurchase: true,
-          expenses: { ...DEFAULT_EXPENSES, ...(parsed.expenses || {}) },
-        }));
-      }
-    } catch {
-      // ignore
-    }
-    setLoaded(true);
-  }, []);
-
-  // Check purchase status
-  useEffect(() => {
-    if (!loaded) return;
-    const check = async () => {
+    async function loadPlan() {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data } = await (supabase as any)
-            .from("course_purchases")
-            .select("id")
-            .eq("user_id", user.id)
-            .eq("course_id", "student-financial-planner")
-            .limit(1);
-          if (data && data.length > 0) {
-            setState((prev) => ({ ...prev, isPurchased: true, checkingPurchase: false }));
-            return;
-          }
+        if (!user) { setLoaded(true); return; }
+        const { data } = await supabase
+          .from("financial_plans")
+          .select("plan_data")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (data?.plan_data) {
+          const parsed = data.plan_data as Partial<PlannerState>;
+          setState((prev) => ({
+            ...prev,
+            ...parsed,
+            isPurchased: true,
+            checkingPurchase: false,
+            expenses: { ...DEFAULT_EXPENSES, ...(parsed.expenses || {}) },
+          }));
         }
-      } catch {
-        // ignore
-      }
-      setState((prev) => ({ ...prev, checkingPurchase: false }));
-    };
-    check();
-  }, [loaded]);
+      } catch { /* ignore */ }
+      setLoaded(true);
+    }
+    loadPlan();
+  }, []);
 
-  // Save to localStorage (debounced)
+  // Save to Supabase (debounced)
   const stateRef = useRef(state);
   stateRef.current = state;
   useEffect(() => {
     if (!loaded) return;
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
       try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
         const toSave = { ...stateRef.current };
         delete (toSave as Record<string, unknown>).checkingPurchase;
-        localStorage.setItem(LS_KEY, JSON.stringify(toSave));
-      } catch {
-        // ignore
-      }
+        delete (toSave as Record<string, unknown>).isPurchased;
+        await supabase
+          .from("financial_plans")
+          .upsert({ user_id: user.id, plan_data: toSave, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+      } catch { /* ignore */ }
     }, 500);
     return () => clearTimeout(timer);
   }, [state, loaded]);
@@ -368,38 +348,19 @@ function FinancialPlannerContent() {
     if (state.step > 1) goToStep(state.step - 1);
   };
 
-  const resetAll = () => {
-    localStorage.removeItem(LS_KEY);
-    setState({ ...INITIAL_STATE, checkingPurchase: false, isPurchased: state.isPurchased });
+  const resetAll = async () => {
+    setState({ ...INITIAL_STATE, isPurchased: true, checkingPurchase: false });
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("financial_plans").delete().eq("user_id", user.id);
+      }
+    } catch { /* ignore */ }
   };
 
   const resetExpenses = () => {
     set("expenses", { ...DEFAULT_EXPENSES });
-  };
-
-  // ─── Purchase ────────────────────────────────────────────────────────────
-
-  const handlePurchase = async () => {
-    setPurchaseLoading(true);
-    try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          courseId: "student-financial-planner",
-          courseName: "Student Financial Planner",
-          price: 2900,
-          returnPath: "/student/financial-planner",
-        }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch {
-      // ignore
-    }
-    setPurchaseLoading(false);
   };
 
   // ─── Print ───────────────────────────────────────────────────────────────
