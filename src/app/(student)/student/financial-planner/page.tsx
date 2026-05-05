@@ -1608,7 +1608,7 @@ function FinancialPlannerContent() {
           <p className="text-gray-500 text-sm mt-1">
             Plan your first-year finances before you graduate.
           </p>
-          <div className="mt-2 bg-cyan-50 border border-cyan-100 rounded-xl p-3 text-xs text-cyan-800">
+          <div className="mt-2 bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3 text-xs text-[#1E2D3B]/70">
             <strong>How to use this:</strong> Step 1 — enter your loans and salary. Step 2 — see your take-home pay after taxes. Step 3 — set your monthly budget. Step 4 — get your complete financial roadmap with loan repayment strategies. Your data saves automatically.
           </div>
         </div>
@@ -1630,14 +1630,14 @@ function FinancialPlannerContent() {
       {state.step < 4 && NavButtons()}
 
       {/* Pipeline CTA */}
-      <div className="bg-gray-50 rounded-2xl p-6 flex items-center justify-between mt-8">
+      <div className="bg-[#F5F3EF] rounded-2xl p-6 flex items-center justify-between mt-8">
         <div>
-          <p className="text-sm font-bold text-[#1a2744]">Financial plan complete?</p>
-          <p className="text-xs text-gray-400">You&apos;ve completed the career pipeline. Review your progress.</p>
+          <p className="text-sm font-semibold text-[#1E2D3B]">Financial plan complete?</p>
+          <p className="text-xs text-[#1E2D3B]/40">You&apos;ve completed the career pipeline. Review your progress.</p>
         </div>
         <Link
           href="/student/career-pipeline"
-          className="px-5 py-2.5 bg-[#e97325] text-white rounded-xl text-xs font-bold hover:bg-[#e97325]/90 transition-colors flex items-center gap-2"
+          className="px-5 py-2.5 bg-[#D66829] text-white rounded-xl text-xs font-bold hover:bg-[#D66829]/90 transition-colors flex items-center gap-2"
         >
           Career Pipeline <ArrowRight className="w-3.5 h-3.5" />
         </Link>

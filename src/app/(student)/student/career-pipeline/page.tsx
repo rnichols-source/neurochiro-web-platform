@@ -18,11 +18,10 @@ import {
   Target,
   Award,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { getCareerReadinessData } from "../dashboard/actions";
 
-const BRAND_NAVY = "#1a2744";
-const BRAND_ORANGE = "#e97325";
+const BRAND_NAVY = "#1E2D3B";
+const BRAND_ORANGE = "#D66829";
 
 interface StageConfig {
   id: string;
@@ -159,11 +158,6 @@ const STAGES: StageConfig[] = [
   },
 ];
 
-const fadeUp = {
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
-};
 
 export default function CareerPipelinePage() {
   const [readiness, setReadiness] = useState<any>(null);
@@ -180,10 +174,10 @@ export default function CareerPipelinePage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-neuro-orange/10 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-neuro-orange animate-spin" />
+          <div className="w-12 h-12 rounded-2xl bg-[#D66829]/10 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 text-[#D66829] animate-spin" />
           </div>
-          <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Loading pipeline...</p>
+          <p className="text-sm font-semibold text-[#1E2D3B]/40">Loading pipeline...</p>
         </div>
       </div>
     );
@@ -196,23 +190,23 @@ export default function CareerPipelinePage() {
   return (
     <div className="p-6 md:p-10 max-w-4xl mx-auto space-y-8 pb-20">
       {/* Header */}
-      <motion.div {...fadeUp}>
+      <div>
         <div className="flex items-center gap-3 mb-2">
-          <Map className="w-8 h-8 text-neuro-orange" />
+          <Map className="w-8 h-8 text-[#D66829]" />
           <div>
-            <h1 className="text-2xl md:text-3xl font-heading font-black text-neuro-navy">
+            <h1 className="text-2xl md:text-3xl font-heading font-semibold text-[#1E2D3B]">
               Career Pipeline
             </h1>
-            <p className="text-gray-400 text-sm">
+            <p className="text-xs text-[#1E2D3B]/40">
               Your guided path from student to associate
             </p>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Progress summary */}
-      <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.05 }}>
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 flex items-center gap-6">
+      <div>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex items-center gap-6">
           <div className="flex items-center gap-1.5">
             {STAGES.map((stage) => {
               const done = stage.checkComplete(milestones, modulesCompleted);
@@ -220,16 +214,16 @@ export default function CareerPipelinePage() {
                 <div
                   key={stage.id}
                   className="w-8 h-2 rounded-full transition-colors"
-                  style={{ backgroundColor: done ? stage.color : "#e5e7eb" }}
+                  style={{ backgroundColor: done ? "#1E2D3B" : "#e5e7eb" }}
                 />
               );
             })}
           </div>
           <div className="flex-1">
-            <p className="text-sm font-bold text-neuro-navy">
+            <p className="text-sm font-semibold text-[#1E2D3B]">
               {completedStages} of {STAGES.length} stages complete
             </p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-[#1E2D3B]/40">
               {completedStages === STAGES.length
                 ? "You've completed the entire pipeline. You're ready."
                 : completedStages === 0
@@ -238,13 +232,13 @@ export default function CareerPipelinePage() {
             </p>
           </div>
           {readiness && (
-            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-neuro-orange/10 rounded-full">
-              <Zap className="w-4 h-4 text-neuro-orange" />
-              <span className="text-sm font-black text-neuro-orange">{readiness.totalScore}%</span>
+            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#D66829]/10 rounded-full">
+              <Zap className="w-4 h-4 text-[#D66829]" />
+              <span className="text-sm font-light text-[#D66829]">{readiness.totalScore}%</span>
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
 
       {/* Stages */}
       <div className="space-y-4">
@@ -254,17 +248,15 @@ export default function CareerPipelinePage() {
           const Icon = stage.icon;
 
           return (
-            <motion.div
+            <div
               key={stage.id}
-              {...fadeUp}
-              transition={{ ...fadeUp.transition, delay: 0.1 + idx * 0.05 }}
             >
               <div
-                className={`bg-white rounded-3xl border shadow-sm overflow-hidden transition-all ${
+                className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all ${
                   done
                     ? "border-gray-100"
                     : active
-                    ? "border-[#e97325]/30 shadow-md"
+                    ? "border-[#D66829]/30 shadow-md"
                     : "border-gray-100 opacity-75"
                 }`}
               >
@@ -274,13 +266,13 @@ export default function CareerPipelinePage() {
                     <div
                       className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
                       style={{
-                        backgroundColor: done ? stage.color : active ? `${stage.color}15` : "#f3f4f6",
+                        backgroundColor: done ? "#1E2D3B" : active ? "#1E2D3B10" : "#f3f4f6",
                       }}
                     >
                       {done ? (
                         <CheckCircle className="w-6 h-6 text-white" />
                       ) : (
-                        <Icon className="w-6 h-6" style={{ color: active ? stage.color : "#9ca3af" }} />
+                        <Icon className="w-6 h-6" style={{ color: active ? "#1E2D3B" : "#9ca3af" }} />
                       )}
                     </div>
 
@@ -288,26 +280,25 @@ export default function CareerPipelinePage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span
-                          className="text-[10px] font-black uppercase tracking-widest"
-                          style={{ color: done ? stage.color : active ? stage.color : "#9ca3af" }}
+                          className="text-[10px] font-semibold text-[#1E2D3B]/50"
                         >
                           Stage {stage.number}
                         </span>
                         {done && (
-                          <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                            Complete
+                          <span className="text-[10px] text-[#1E2D3B]/50 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Complete
                           </span>
                         )}
                         {active && (
-                          <span className="text-[10px] font-black uppercase tracking-widest text-neuro-orange bg-neuro-orange/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <Zap className="w-2.5 h-2.5" /> Current
+                          <span className="text-[10px] text-[#1E2D3B]/50 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#D66829]" /> Current
                           </span>
                         )}
                       </div>
-                      <h3 className="text-lg font-heading font-black text-neuro-navy mb-0.5">
+                      <h3 className="text-lg font-heading font-semibold text-[#1E2D3B] mb-0.5">
                         {stage.title}
                       </h3>
-                      <p className="text-xs font-bold text-gray-400 mb-2">{stage.subtitle}</p>
+                      <p className="text-xs text-[#1E2D3B]/40 mb-2">{stage.subtitle}</p>
                       <p className="text-sm text-gray-500 leading-relaxed mb-4">
                         {stage.description}
                       </p>
@@ -342,12 +333,12 @@ export default function CareerPipelinePage() {
                         {stage.secondaryHref && (
                           <Link
                             href={stage.secondaryHref}
-                            className="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-neuro-orange transition-colors"
+                            className="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-[#D66829] transition-colors"
                           >
                             {stage.secondaryLabel} <ChevronRight className="w-3 h-3" />
                           </Link>
                         )}
-                        <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest ml-auto">
+                        <span className="text-[10px] text-[#1E2D3B]/40 ml-auto">
                           ~{stage.estimatedTime}
                         </span>
                       </div>
@@ -358,25 +349,25 @@ export default function CareerPipelinePage() {
                 {/* Connecting line between stages */}
                 {idx < STAGES.length - 1 && (
                   <div className="flex justify-start px-8 md:px-12">
-                    <div className="w-0.5 h-4" style={{ backgroundColor: done ? stage.color : "#e5e7eb" }} />
+                    <div className="w-0.5 h-4" style={{ backgroundColor: done ? "#1E2D3B" : "#e5e7eb" }} />
                   </div>
                 )}
               </div>
-            </motion.div>
+            </div>
           );
         })}
       </div>
 
       {/* Completion state */}
       {completedStages === STAGES.length && (
-        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.5 }}>
-          <div className="bg-neuro-navy rounded-3xl p-8 md:p-10 text-center relative overflow-hidden">
+        <div>
+          <div className="bg-[#1E2D3B] rounded-2xl p-8 md:p-10 text-center relative overflow-hidden">
             <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "var(--grid-pattern)" }} />
             <div className="relative">
-              <div className="w-16 h-16 bg-neuro-orange/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Award className="w-8 h-8 text-neuro-orange" />
+              <div className="w-16 h-16 bg-[#D66829]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Award className="w-8 h-8 text-[#D66829]" />
               </div>
-              <h2 className="text-2xl font-heading font-black text-white mb-2">
+              <h2 className="text-2xl font-heading font-semibold text-white mb-2">
                 Pipeline Complete
               </h2>
               <p className="text-gray-400 max-w-md mx-auto">
@@ -385,7 +376,7 @@ export default function CareerPipelinePage() {
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   );

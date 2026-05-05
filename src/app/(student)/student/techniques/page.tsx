@@ -25,8 +25,8 @@ import {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const LS_KEY = "neurochiro-technique-quiz";
-const BRAND_NAVY = "#1a2744";
-const BRAND_ORANGE = "#e97325";
+const BRAND_NAVY = "#1E2D3B";
+const BRAND_ORANGE = "#D66829";
 
 const CATEGORY_COLORS: Record<string, string> = {
   structural: "#3b82f6",
@@ -1002,7 +1002,7 @@ export default function TechniqueComparisonGuide() {
         <p className="text-gray-500 text-sm mt-1">
           Explore, compare, and find the chiropractic techniques that fit your future practice.
         </p>
-        <div className="mt-3 bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-800">
+        <div className="mt-3 bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3 text-xs text-[#1E2D3B]/70">
           <strong>3 tools in one:</strong> Browse all 18 techniques in the <strong>Technique Explorer</strong>. Take the <strong>Find Your Fit</strong> quiz to discover which match your personality. Then use the <strong>Comparison Tool</strong> to see them side by side.
         </div>
       </div>
@@ -1033,14 +1033,14 @@ export default function TechniqueComparisonGuide() {
       {activeTab === 2 && renderComparison()}
 
       {/* Pipeline CTA */}
-      <div className="bg-gray-50 rounded-2xl p-6 flex items-center justify-between mt-8">
+      <div className="bg-[#F5F3EF] rounded-2xl p-6 flex items-center justify-between mt-8">
         <div>
-          <p className="text-sm font-bold text-[#1a2744]">Found your technique?</p>
-          <p className="text-xs text-gray-400">Now prep for interviews where you&apos;ll talk about it.</p>
+          <p className="text-sm font-semibold text-[#1E2D3B]">Found your technique?</p>
+          <p className="text-xs text-[#1E2D3B]/40">Now prep for interviews where you&apos;ll talk about it.</p>
         </div>
         <Link
           href="/student/interview-prep"
-          className="px-5 py-2.5 bg-[#e97325] text-white rounded-xl text-xs font-bold hover:bg-[#e97325]/90 transition-colors flex items-center gap-2"
+          className="px-5 py-2.5 bg-[#D66829] text-white rounded-xl text-xs font-bold hover:bg-[#D66829]/90 transition-colors flex items-center gap-2"
         >
           Interview Prep <ArrowRight className="w-3.5 h-3.5" />
         </Link>

@@ -112,10 +112,10 @@ export default function CommunityPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-neuro-orange/10 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-neuro-orange animate-spin" />
+          <div className="w-12 h-12 rounded-2xl bg-[#D66829]/10 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 text-[#D66829] animate-spin" />
           </div>
-          <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Loading community...</p>
+          <p className="text-sm font-semibold text-[#1E2D3B]/40">Loading community...</p>
         </div>
       </div>
     );
@@ -127,31 +127,31 @@ export default function CommunityPage() {
     <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8">
       {/* Header */}
       <header>
-        <h1 className="text-2xl font-heading font-black text-neuro-navy flex items-center gap-3">
-          <Users className="w-7 h-7 text-neuro-orange" />
+        <h1 className="text-2xl font-heading font-semibold text-[#1E2D3B] flex items-center gap-3">
+          <Users className="w-7 h-7 text-[#D66829]" />
           Student Network
         </h1>
-        <p className="text-sm text-gray-400 mt-1">
+        <p className="text-xs text-[#1E2D3B]/40 mt-1">
           You&apos;re not alone. See who else is on the platform.
         </p>
       </header>
 
       {/* Overview Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-b from-blue-50 to-white rounded-3xl border border-blue-100 p-6 text-center">
-          <Users className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-          <p className="text-3xl font-black text-neuro-navy">{totalStudents}</p>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Students on NeuroChiro</p>
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
+          <Users className="w-8 h-8 text-[#1E2D3B] mx-auto mb-2" />
+          <p className="text-3xl font-light text-[#1E2D3B]">{totalStudents}</p>
+          <p className="text-xs text-[#1E2D3B]/40">Students on NeuroChiro</p>
         </div>
-        <div className="bg-gradient-to-b from-violet-50 to-white rounded-3xl border border-violet-100 p-6 text-center">
-          <GraduationCap className="w-8 h-8 text-violet-500 mx-auto mb-2" />
-          <p className="text-3xl font-black text-neuro-navy">{schools.length}</p>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Schools Represented</p>
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
+          <GraduationCap className="w-8 h-8 text-[#1E2D3B] mx-auto mb-2" />
+          <p className="text-3xl font-light text-[#1E2D3B]">{schools.length}</p>
+          <p className="text-xs text-[#1E2D3B]/40">Schools Represented</p>
         </div>
-        <div className="bg-gradient-to-b from-orange-50 to-white rounded-3xl border border-orange-100 p-6 text-center">
-          <MapPin className="w-8 h-8 text-neuro-orange mx-auto mb-2" />
-          <p className="text-3xl font-black text-neuro-navy">{nearbyCount}</p>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
+          <MapPin className="w-8 h-8 text-[#D66829] mx-auto mb-2" />
+          <p className="text-3xl font-light text-[#1E2D3B]">{nearbyCount}</p>
+          <p className="text-xs text-[#1E2D3B]/40">
             {studentRegion ? "In Your Region" : "Near You"}
           </p>
         </div>
@@ -160,7 +160,7 @@ export default function CommunityPage() {
       {/* Schools */}
       {schools.length > 0 && (
         <section>
-          <h2 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Schools</h2>
+          <h2 className="text-sm font-semibold text-[#1E2D3B] mb-4">Schools</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {schools.map((school) => (
               <div
@@ -168,13 +168,13 @@ export default function CommunityPage() {
                 className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
-                    <GraduationCap className="w-5 h-5 text-violet-600" />
+                  <div className="w-10 h-10 rounded-xl bg-[#F5F3EF] flex items-center justify-center">
+                    <GraduationCap className="w-5 h-5 text-[#1E2D3B]" />
                   </div>
-                  <span className="text-2xl font-black text-neuro-navy">{school.count}</span>
+                  <span className="text-2xl font-light text-[#1E2D3B]">{school.count}</span>
                 </div>
-                <h3 className="font-bold text-neuro-navy text-sm mb-1 line-clamp-1">{school.school}</h3>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2">
+                <h3 className="font-semibold text-[#1E2D3B] text-sm mb-1 line-clamp-1">{school.school}</h3>
+                <p className="text-[10px] text-[#1E2D3B]/40 mb-2">
                   {school.count === 1 ? "1 student" : `${school.count} students`}
                 </p>
                 {school.topInterests.length > 0 && (
@@ -198,7 +198,7 @@ export default function CommunityPage() {
       {/* Graduation Years */}
       {years.length > 0 && (
         <section>
-          <h2 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">By Graduation Year</h2>
+          <h2 className="text-sm font-semibold text-[#1E2D3B] mb-4">By Graduation Year</h2>
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <div className="flex items-end gap-2 h-32">
               {years.map((y) => {
@@ -208,27 +208,27 @@ export default function CommunityPage() {
 
                 return (
                   <div key={y.year} className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-[10px] font-black text-gray-400">{y.count}</span>
+                    <span className="text-[10px] text-[#1E2D3B]/40">{y.count}</span>
                     <div
                       className="w-full rounded-t-lg transition-all"
                       style={{
                         height: `${Math.max(height, 4)}%`,
-                        backgroundColor: isCurrentOrPast ? "#22c55e" : "#e97325",
+                        backgroundColor: isCurrentOrPast ? "#1E2D3B" : "#1E2D3B50",
                       }}
                     />
-                    <span className={`text-[10px] font-bold ${isCurrentOrPast ? "text-green-600" : "text-gray-500"}`}>
+                    <span className={`text-[10px] font-bold ${isCurrentOrPast ? "text-[#1E2D3B]" : "text-[#1E2D3B]/40"}`}>
                       &apos;{y.year.toString().slice(-2)}
                     </span>
                   </div>
                 );
               })}
             </div>
-            <div className="flex items-center gap-4 mt-4 text-[10px] font-bold text-gray-400">
+            <div className="flex items-center gap-4 mt-4 text-[10px] font-bold text-[#1E2D3B]/40">
               <span className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-green-500" /> Graduated
+                <div className="w-2 h-2 rounded-full bg-[#1E2D3B]" /> Graduated
               </span>
               <span className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-neuro-orange" /> Upcoming
+                <div className="w-2 h-2 rounded-full bg-[#1E2D3B]/30" /> Upcoming
               </span>
             </div>
           </div>
@@ -236,14 +236,14 @@ export default function CommunityPage() {
       )}
 
       {/* Pipeline CTA */}
-      <div className="bg-gray-50 rounded-2xl p-6 flex items-center justify-between">
+      <div className="bg-[#F5F3EF] rounded-2xl p-6 flex items-center justify-between">
         <div>
-          <p className="text-sm font-bold text-neuro-navy">Want to find a mentor?</p>
-          <p className="text-xs text-gray-400">Connect with doctors who are ready to help you grow.</p>
+          <p className="text-sm font-semibold text-[#1E2D3B]">Want to find a mentor?</p>
+          <p className="text-xs text-[#1E2D3B]/40">Connect with doctors who are ready to help you grow.</p>
         </div>
         <Link
           href="/student/mentors"
-          className="px-5 py-2.5 bg-neuro-orange text-white rounded-xl text-xs font-bold hover:bg-neuro-orange/90 transition-colors flex items-center gap-2"
+          className="px-5 py-2.5 bg-[#D66829] text-white rounded-xl text-xs font-bold hover:bg-[#D66829]/90 transition-colors flex items-center gap-2"
         >
           Find Mentors <ArrowRight className="w-3.5 h-3.5" />
         </Link>

@@ -135,8 +135,8 @@ export default function MentorDiscoveryPage() {
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
       <header>
-        <h1 className="text-2xl font-heading font-black text-neuro-navy flex items-center gap-3">
-          <Heart className="w-7 h-7 text-neuro-orange" />
+        <h1 className="text-2xl font-heading font-semibold text-[#1E2D3B] flex items-center gap-3">
+          <Heart className="w-7 h-7 text-[#D66829]" />
           Find a Mentor
         </h1>
         <p className="text-sm text-gray-400 mt-1">
@@ -154,25 +154,25 @@ export default function MentorDiscoveryPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, clinic, city, or specialty..."
-              className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 shadow-sm text-sm"
+              className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#D66829]/20 shadow-sm text-sm"
             />
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setSortBy("match")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${sortBy === "match" ? "bg-neuro-navy text-white" : "bg-white border border-gray-200 text-gray-500"}`}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${sortBy === "match" ? "bg-[#1E2D3B] text-white" : "bg-white border border-gray-200 text-gray-500"}`}
             >
               Best Match
             </button>
             <button
               onClick={() => setSortBy("rating")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${sortBy === "rating" ? "bg-neuro-navy text-white" : "bg-white border border-gray-200 text-gray-500"}`}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${sortBy === "rating" ? "bg-[#1E2D3B] text-white" : "bg-white border border-gray-200 text-gray-500"}`}
             >
               Highest Rated
             </button>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${showFilters ? "bg-neuro-orange text-white" : "bg-white border border-gray-200 text-gray-500"}`}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${showFilters ? "bg-[#D66829] text-white" : "bg-white border border-gray-200 text-gray-500"}`}
             >
               <Filter className="w-3.5 h-3.5" /> Filters
               <ChevronDown className={`w-3 h-3 transition-transform ${showFilters ? "rotate-180" : ""}`} />
@@ -187,7 +187,7 @@ export default function MentorDiscoveryPage() {
                 type="checkbox"
                 checked={filterHiring}
                 onChange={(e) => setFilterHiring(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-neuro-orange focus:ring-neuro-orange"
+                className="w-4 h-4 rounded border-gray-300 text-[#D66829] focus:ring-[#D66829]"
               />
               <span className="text-sm font-bold text-gray-600">Hiring New Graduates</span>
             </label>
@@ -198,13 +198,13 @@ export default function MentorDiscoveryPage() {
       {/* Results */}
       {loading ? (
         <div className="py-20 text-center">
-          <div className="w-6 h-6 border-2 border-gray-200 border-t-neuro-orange rounded-full animate-spin mx-auto mb-3" />
+          <div className="w-6 h-6 border-2 border-gray-200 border-t-[#D66829] rounded-full animate-spin mx-auto mb-3" />
           <p className="text-sm text-gray-400">Finding mentors...</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200">
           <Users className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-neuro-navy mb-1">No mentors found</h3>
+          <h3 className="text-xl font-semibold text-[#1E2D3B] mb-1">No mentors found</h3>
           <p className="text-gray-400 text-sm max-w-md mx-auto">
             No mentors match your current filters. Try expanding your search or check back — we&apos;re growing every week.
           </p>
@@ -223,11 +223,11 @@ export default function MentorDiscoveryPage() {
               >
                 <div className="flex items-start gap-4">
                   {/* Avatar */}
-                  <div className="w-14 h-14 rounded-2xl bg-neuro-navy/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  <div className="w-14 h-14 rounded-2xl bg-[#1E2D3B]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {mentor.photo_url ? (
                       <img src={mentor.photo_url} alt={fullName} className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-lg font-black text-neuro-navy">
+                      <span className="text-lg font-semibold text-[#1E2D3B]">
                         {mentor.first_name?.[0]}{mentor.last_name?.[0]}
                       </span>
                     )}
@@ -235,16 +235,11 @@ export default function MentorDiscoveryPage() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <h3 className="font-bold text-neuro-navy">{fullName}</h3>
+                      <h3 className="font-semibold text-[#1E2D3B]">{fullName}</h3>
                       {matchScore > 0 && (
-                        <span
-                          className="text-[10px] font-black px-2 py-0.5 rounded-full"
-                          style={{
-                            backgroundColor: matchScore >= 60 ? "#22c55e15" : "#f59e0b15",
-                            color: matchScore >= 60 ? "#22c55e" : "#f59e0b",
-                          }}
-                        >
-                          {matchScore}% match
+                        <span className="text-[10px] text-[#1E2D3B]/50 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: matchScore >= 60 ? "#22c55e" : "#f59e0b" }} />
+                          {matchScore}%
                         </span>
                       )}
                     </div>
@@ -269,11 +264,11 @@ export default function MentorDiscoveryPage() {
 
                     {/* Badges */}
                     <div className="flex flex-wrap gap-1.5 mb-3">
-                      <span className="text-[10px] font-bold bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span className="text-[10px] font-bold bg-white border border-gray-100 text-[#1E2D3B]/50 px-2 py-0.5 rounded-full flex items-center gap-1">
                         <Heart className="w-2.5 h-2.5" /> Open to Mentoring
                       </span>
                       {mentor.is_hiring && (
-                        <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span className="text-[10px] font-bold bg-white border border-gray-100 text-[#1E2D3B]/50 px-2 py-0.5 rounded-full flex items-center gap-1">
                           <Briefcase className="w-2.5 h-2.5" /> Hiring
                         </span>
                       )}
@@ -296,7 +291,7 @@ export default function MentorDiscoveryPage() {
                     {/* CTA */}
                     <Link
                       href={`/student/messages?to=${mentor.user_id}`}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-neuro-navy text-white rounded-xl text-xs font-bold hover:bg-neuro-navy/90 transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#1E2D3B] text-white rounded-xl text-xs font-bold hover:bg-[#1E2D3B]/90 transition-colors"
                     >
                       <MessageSquare className="w-3.5 h-3.5" /> Send Message
                     </Link>
@@ -309,14 +304,14 @@ export default function MentorDiscoveryPage() {
       )}
 
       {/* Pipeline CTA */}
-      <div className="bg-gray-50 rounded-2xl p-6 flex items-center justify-between">
+      <div className="bg-[#F5F3EF] rounded-2xl p-6 flex items-center justify-between">
         <div>
-          <p className="text-sm font-bold text-neuro-navy">Ready to start applying?</p>
-          <p className="text-xs text-gray-400">Browse matched job openings based on your profile.</p>
+          <p className="text-sm font-semibold text-[#1E2D3B]">Ready to start applying?</p>
+          <p className="text-xs text-[#1E2D3B]/40">Browse matched job openings based on your profile.</p>
         </div>
         <Link
           href="/student/jobs"
-          className="px-5 py-2.5 bg-neuro-orange text-white rounded-xl text-xs font-bold hover:bg-neuro-orange/90 transition-colors flex items-center gap-2"
+          className="px-5 py-2.5 bg-[#D66829] text-white rounded-xl text-xs font-bold hover:bg-[#D66829]/90 transition-colors flex items-center gap-2"
         >
           Browse Jobs <ArrowRight className="w-3.5 h-3.5" />
         </Link>

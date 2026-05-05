@@ -85,8 +85,8 @@ interface ScoredResult {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const LS_KEY = "neurochiro-contract-lab-draft";
-const BRAND_NAVY = "#1a2744";
-const BRAND_ORANGE = "#e97325";
+const BRAND_NAVY = "#1E2D3B";
+const BRAND_ORANGE = "#D66829";
 
 const BENEFITS_OPTIONS = [
   "Health Insurance",
@@ -1068,7 +1068,7 @@ function ContractLabContent() {
             </div>
             <p className="text-xs text-gray-500 mt-2">* Approximate. 1099 costs $4,590 MORE annually in self-employment taxes alone, before accounting for benefits you must purchase yourself.</p>
           </div>
-          <p className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm"><strong>What to say:</strong> &quot;Based on the work arrangement described, this position appears to meet the IRS criteria for W-2 classification. Can we discuss either reclassifying as W-2, or adjusting compensation to offset the additional tax burden?&quot;</p>
+          <p className="bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3 text-sm"><strong>What to say:</strong> &quot;Based on the work arrangement described, this position appears to meet the IRS criteria for W-2 classification. Can we discuss either reclassifying as W-2, or adjusting compensation to offset the additional tax burden?&quot;</p>
         </div>
       </Accordion>
 
@@ -1102,7 +1102,7 @@ function ContractLabContent() {
             <li>Add a sunset clause — the non-compete expires if you&apos;re terminated without cause</li>
             <li>Define the restricted activities precisely — &quot;chiropractic practice&quot; not &quot;healthcare services&quot;</li>
           </ul>
-          <p className="bg-blue-50 border border-blue-200 rounded-xl p-3"><strong>What to say:</strong> &quot;I respect the need to protect the practice, and I&apos;m willing to agree to a reasonable non-compete. Could we adjust the terms to a 10-mile radius for 12 months, with a buyout option? I&apos;d also like the restriction to expire if I&apos;m terminated without cause.&quot;</p>
+          <p className="bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I respect the need to protect the practice, and I&apos;m willing to agree to a reasonable non-compete. Could we adjust the terms to a 10-mile radius for 12 months, with a buyout option? I&apos;d also like the restriction to expire if I&apos;m terminated without cause.&quot;</p>
         </div>
       </Accordion>
 
@@ -1123,7 +1123,7 @@ function ContractLabContent() {
             <li>Broad definitions of &quot;patient&quot; — some clauses cover anyone who visited the practice in the last 2-3 years, even if you never treated them</li>
             <li>Staff solicitation — prevents you from hiring any former coworkers</li>
           </ul>
-          <p className="bg-blue-50 border border-blue-200 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;d like to clarify the non-solicitation clause. I&apos;m comfortable agreeing not to actively solicit patients, but I want to ensure that patients who independently choose to seek care from me are free to do so. Can we change &apos;solicit or accept&apos; to just &apos;directly solicit&apos;?&quot;</p>
+          <p className="bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;d like to clarify the non-solicitation clause. I&apos;m comfortable agreeing not to actively solicit patients, but I want to ensure that patients who independently choose to seek care from me are free to do so. Can we change &apos;solicit or accept&apos; to just &apos;directly solicit&apos;?&quot;</p>
         </div>
       </Accordion>
 
@@ -1135,7 +1135,7 @@ function ContractLabContent() {
           <p><strong>Percentage of Collections:</strong> You earn a percentage (typically 25-35%) of what the practice collects on your patients. Important distinction: collections (what the practice actually receives) vs. billings (what they charge). Collections are always lower. Also ask about patient assignment — if you only see overflow patients, your collections will be low regardless of the percentage.</p>
           <p><strong>Hybrid:</strong> Typically a lower base salary combined with a percentage of collections above a threshold. Example: $50K base + 25% of collections above $200K. This aligns incentives but requires understanding the practice&apos;s historical collection data.</p>
           <p><strong>Patient Assignment Matters:</strong> No compensation model works if you do not have patients. Ask: How are new patients assigned? What is the current patient volume? How many patients will be on my schedule from day one? Do I have a ramp-up period with guaranteed minimum compensation?</p>
-          <p className="bg-blue-50 border border-blue-200 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;d like to understand the bonus structure better. Can you show me the last 12 months of collections for the associate position so I can see what&apos;s realistically achievable? And can we put the exact bonus formula in the contract?&quot;</p>
+          <p className="bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;d like to understand the bonus structure better. Can you show me the last 12 months of collections for the associate position so I can see what&apos;s realistically achievable? And can we put the exact bonus formula in the contract?&quot;</p>
         </div>
       </Accordion>
 
@@ -1147,7 +1147,7 @@ function ContractLabContent() {
           <p><strong>For Cause vs. Without Cause:</strong> &quot;For cause&quot; termination means there must be a specific reason (malpractice, theft, breach of contract). &quot;Without cause&quot; means either party can end it for any reason. You want the option for either party to terminate without cause with appropriate notice.</p>
           <p><strong>Malpractice Tail Coverage:</strong> If the practice provides claims-made malpractice insurance, who pays for &quot;tail coverage&quot; when you leave? Tail coverage can cost $5,000-15,000. The contract should specify this — ideally the employer pays if they terminate you.</p>
           <p><strong>Patient Ownership on Exit:</strong> What happens to your patients when you leave? Can you notify them? Can they choose to follow you? A fair contract allows you to send a brief departure notice and lets patients choose their provider.</p>
-          <p className="bg-blue-50 border border-blue-200 rounded-xl p-3"><strong>What to say:</strong> &quot;I want to ensure the termination clause is fair to both of us. Can we agree on mutual termination rights with 90 days notice, and include language about malpractice tail coverage and patient notification?&quot;</p>
+          <p className="bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I want to ensure the termination clause is fair to both of us. Can we agree on mutual termination rights with 90 days notice, and include language about malpractice tail coverage and patient notification?&quot;</p>
         </div>
       </Accordion>
 
@@ -1165,7 +1165,7 @@ function ContractLabContent() {
             <li>Are there performance milestones that accelerate the timeline?</li>
           </ul>
           <p><strong>Red flags:</strong> Vague promises (&quot;we&apos;ll talk about it later&quot;), unreasonable valuations (3x+ revenue), no written timeline, restrictive conditions that make buy-in practically impossible.</p>
-          <p className="bg-blue-50 border border-blue-200 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;m interested in a long-term relationship and eventually having an ownership stake. Can we include language about a buy-in discussion after two years, with right of first refusal if the practice is sold?&quot;</p>
+          <p className="bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;m interested in a long-term relationship and eventually having an ownership stake. Can we include language about a buy-in discussion after two years, with right of first refusal if the practice is sold?&quot;</p>
         </div>
       </Accordion>
 
@@ -1193,7 +1193,7 @@ function ContractLabContent() {
             <p>PTO (2 weeks): ~$2,500/year</p>
             <p className="font-bold text-neuro-navy mt-2 pt-2 border-t">Total Benefits Value: ~$15,800/year</p>
           </div>
-          <p className="bg-blue-50 border border-blue-200 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;d like to discuss the benefits package. Malpractice coverage, health insurance contribution, and a CE allowance are all important to me. What does the current benefits package include?&quot;</p>
+          <p className="bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;d like to discuss the benefits package. Malpractice coverage, health insurance contribution, and a CE allowance are all important to me. What does the current benefits package include?&quot;</p>
         </div>
       </Accordion>
 
@@ -1212,7 +1212,7 @@ function ContractLabContent() {
             <li><strong>What equipment and support staff will be available?</strong> — Your efficiency and income depend on having adequate support. Ask about CA staffing, equipment quality, and technology systems.</li>
             <li><strong>Have you had the contract reviewed by a healthcare attorney?</strong> — Spending $500-1,000 on an attorney review is always worth it. They will catch issues you will miss. Ask the employer if they are open to mutually agreed modifications.</li>
           </ol>
-          <p className="bg-blue-50 border border-blue-200 rounded-xl p-3"><strong>Bottom line:</strong> Never sign a contract the same day you receive it. Take at least a week to review it, have it reviewed by an attorney, and prepare your negotiation points. A good employer will respect this process.</p>
+          <p className="bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>Bottom line:</strong> Never sign a contract the same day you receive it. Take at least a week to review it, have it reviewed by an attorney, and prepare your negotiation points. A good employer will respect this process.</p>
         </div>
       </Accordion>
     </div>
@@ -1318,7 +1318,7 @@ function ContractLabContent() {
           <Shield className="w-7 h-7 text-[#e97325]" /> Contract Lab
         </h1>
         <p className="text-gray-500 mt-1 text-sm">Analyze contracts, know your rights, and negotiate with confidence.</p>
-        <div className="mt-3 bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-xs text-emerald-800">
+        <div className="mt-3 bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3 text-xs text-[#1E2D3B]/70">
           <strong>How to use this:</strong> Use the <strong>Questionnaire</strong> tab to input your contract terms and get an instant analysis with red flags and negotiation scripts. Or paste your full contract text in the <strong>AI Analysis</strong> tab for a detailed clause-by-clause review. Check <strong>Past Reviews</strong> to see your history.
         </div>
       </header>
@@ -1340,14 +1340,14 @@ function ContractLabContent() {
       {activeTab === 3 && Tab3()}
 
       {/* Pipeline CTA */}
-      <div className="bg-gray-50 rounded-2xl p-6 flex items-center justify-between mt-8">
+      <div className="bg-[#F5F3EF] rounded-2xl p-6 flex items-center justify-between mt-8">
         <div>
-          <p className="text-sm font-bold text-[#1a2744]">Contract reviewed?</p>
-          <p className="text-xs text-gray-400">Plan your finances before day one.</p>
+          <p className="text-sm font-semibold text-[#1E2D3B]">Contract reviewed?</p>
+          <p className="text-xs text-[#1E2D3B]/40">Plan your finances before day one.</p>
         </div>
         <Link
           href="/student/financial-planner"
-          className="px-5 py-2.5 bg-[#e97325] text-white rounded-xl text-xs font-bold hover:bg-[#e97325]/90 transition-colors flex items-center gap-2"
+          className="px-5 py-2.5 bg-[#D66829] text-white rounded-xl text-xs font-bold hover:bg-[#D66829]/90 transition-colors flex items-center gap-2"
         >
           Financial Planner <ArrowRight className="w-3.5 h-3.5" />
         </Link>

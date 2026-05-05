@@ -45,7 +45,7 @@ function getActionLabel(n: any): string | null {
 function getPriorityDot(n: any): string {
   const priority = (n.priority || "").toLowerCase();
   if (priority === "high" || priority === "urgent") return "bg-red-500";
-  return "bg-neuro-orange";
+  return "bg-[#D66829]";
 }
 
 export default function StudentNotificationsPage() {
@@ -114,7 +114,7 @@ export default function StudentNotificationsPage() {
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-4 border-neuro-orange border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-[#D66829] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -124,8 +124,8 @@ export default function StudentNotificationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-heading font-black text-neuro-navy flex items-center gap-3">
-            <Bell className="w-7 h-7 text-neuro-orange" />
+          <h1 className="text-2xl font-heading font-semibold text-[#1E2D3B] flex items-center gap-3">
+            <Bell className="w-7 h-7 text-[#D66829]" />
             Notifications
           </h1>
           <p className="text-gray-500 text-sm mt-1">
@@ -135,7 +135,7 @@ export default function StudentNotificationsPage() {
         {unreadCount > 0 && (
           <button
             onClick={markAllRead}
-            className="text-xs font-bold text-neuro-orange hover:underline flex items-center gap-1"
+            className="text-xs font-bold text-[#D66829] hover:underline flex items-center gap-1"
           >
             <CheckCheck className="w-4 h-4" /> Mark All Read
           </button>
@@ -155,7 +155,7 @@ export default function StudentNotificationsPage() {
               key={key}
               onClick={() => setActiveTab(key)}
               className={`flex-1 py-2.5 px-2 text-xs font-bold transition-all flex items-center justify-center gap-1.5 border-r last:border-r-0 border-gray-200 ${
-                isActive ? "bg-neuro-navy text-white" : "bg-white text-gray-400 hover:text-gray-600"
+                isActive ? "bg-[#1E2D3B] text-white" : "bg-white text-gray-400 hover:text-gray-600"
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -163,7 +163,7 @@ export default function StudentNotificationsPage() {
               {count > 0 && (
                 <span
                   className={`w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center ${
-                    isActive ? "bg-neuro-orange text-white" : "bg-gray-200 text-gray-500"
+                    isActive ? "bg-[#D66829] text-white" : "bg-gray-200 text-gray-500"
                   }`}
                 >
                   {count}
@@ -196,9 +196,9 @@ export default function StudentNotificationsPage() {
             return (
               <div
                 key={n.id}
-                className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                className={`p-4 rounded-2xl border transition-all cursor-pointer ${
                   !n.read_at
-                    ? "bg-neuro-orange/5 border-neuro-orange/20 hover:bg-neuro-orange/10"
+                    ? "bg-white border-gray-100 border-l-2 border-l-[#D66829] hover:bg-gray-50"
                     : "bg-white border-gray-100 hover:bg-gray-50"
                 }`}
                 onClick={() => {
@@ -209,17 +209,17 @@ export default function StudentNotificationsPage() {
                   {/* Category icon */}
                   <div
                     className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                      !n.read_at ? "bg-neuro-orange/10" : "bg-gray-100"
+                      !n.read_at ? "bg-[#D66829]/10" : "bg-gray-100"
                     }`}
                   >
                     <CatIcon
-                      className={`w-4 h-4 ${!n.read_at ? "text-neuro-orange" : "text-gray-400"}`}
+                      className={`w-4 h-4 ${!n.read_at ? "text-[#D66829]" : "text-gray-400"}`}
                     />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <p className="text-sm font-bold text-neuro-navy">{n.title}</p>
+                      <p className="text-sm font-semibold text-[#1E2D3B]">{n.title}</p>
                       {!n.read_at && <span className={`w-2 h-2 rounded-full ${getPriorityDot(n)}`} />}
                     </div>
                     <p className="text-gray-500 text-sm">{n.body}</p>
@@ -232,7 +232,7 @@ export default function StudentNotificationsPage() {
                         <Link
                           href={actionLink}
                           onClick={(e) => e.stopPropagation()}
-                          className="text-xs font-bold text-neuro-orange hover:underline flex items-center gap-1"
+                          className="text-xs font-bold text-[#D66829] hover:underline flex items-center gap-1"
                         >
                           {actionLabel} <ArrowRight className="w-3 h-3" />
                         </Link>

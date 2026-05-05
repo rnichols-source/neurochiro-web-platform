@@ -27,8 +27,8 @@ import { createClient } from "@/lib/supabase";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const BRAND_NAVY = "#1a2744";
-const BRAND_ORANGE = "#e97325";
+const BRAND_NAVY = "#1E2D3B";
+const BRAND_ORANGE = "#D66829";
 
 const LS_PRACTICE = "neurochiro-interview-practice";
 const LS_SCORECARD = "neurochiro-interview-scorecard";
@@ -2150,7 +2150,7 @@ function InterviewPlaybookContent() {
         <p className="text-gray-500 text-sm mt-1">
           Everything you need to ace the interview, evaluate the offer, and negotiate like a pro.
         </p>
-        <div className="mt-3 bg-amber-50 border border-amber-100 rounded-xl p-3 text-xs text-amber-800">
+        <div className="mt-3 bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3 text-xs text-[#1E2D3B]/70">
           <strong>How to use this:</strong> Start with <strong>Interview Questions</strong> to practice what doctors actually ask. Then review <strong>Questions to Ask</strong> them. When you get an offer, use <strong>Evaluate the Offer</strong> and <strong>Negotiation Scripts</strong> to make sure it&apos;s fair. After the interview, check <strong>After the Interview</strong> for follow-up steps.
         </div>
       </div>
@@ -2186,14 +2186,14 @@ function InterviewPlaybookContent() {
       {activeTab === 4 && renderAfterInterview()}
 
       {/* Pipeline CTA */}
-      <div className="bg-gray-50 rounded-2xl p-6 flex items-center justify-between mt-8">
+      <div className="bg-[#F5F3EF] rounded-2xl p-6 flex items-center justify-between mt-8">
         <div>
-          <p className="text-sm font-bold text-[#1a2744]">Feeling confident?</p>
-          <p className="text-xs text-gray-400">Browse matched jobs and submit your first application.</p>
+          <p className="text-sm font-semibold text-[#1E2D3B]">Feeling confident?</p>
+          <p className="text-xs text-[#1E2D3B]/40">Browse matched jobs and submit your first application.</p>
         </div>
         <Link
           href="/student/jobs"
-          className="px-5 py-2.5 bg-[#e97325] text-white rounded-xl text-xs font-bold hover:bg-[#e97325]/90 transition-colors flex items-center gap-2"
+          className="px-5 py-2.5 bg-[#D66829] text-white rounded-xl text-xs font-bold hover:bg-[#D66829]/90 transition-colors flex items-center gap-2"
         >
           Browse Jobs <ArrowRight className="w-3.5 h-3.5" />
         </Link>
