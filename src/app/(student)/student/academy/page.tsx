@@ -117,9 +117,10 @@ async function loadProgressFromSupabase(): Promise<AllProgress> {
     if (!data) return {};
     const result: AllProgress = {};
     for (const row of data) {
+      const mods = Array.isArray(row.completed_modules) ? row.completed_modules as string[] : [];
       result[row.course_id] = {
-        completed: row.completed_modules || [],
-        lastModule: (row.completed_modules || []).slice(-1)[0] || "",
+        completed: mods,
+        lastModule: mods.slice(-1)[0] || "",
       };
     }
     return result;
