@@ -71,7 +71,7 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
   {
     id: "ep-004",
     doctorName: "Dr. Maryanne Shiozawa",
-    doctorSlug: "dr.-maryanne-shiozawa",
+    doctorSlug: "maryanne-shiozawa",
     clinicName: "Shiozawa Wellness",
     city: "London",
     state: "UK",
