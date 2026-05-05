@@ -1603,7 +1603,7 @@ function FinancialPlannerContent() {
       <div className="no-print flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-heading font-black text-white flex items-center gap-3">
-            <GraduationCap className="w-7 h-7 text-[#D66829]" /> Financial Planner
+            <DollarSign className="w-7 h-7 text-[#D66829]" /> Financial Planner
           </h1>
           <p className="text-white/40 text-sm mt-1">
             Plan your first-year finances before you graduate.

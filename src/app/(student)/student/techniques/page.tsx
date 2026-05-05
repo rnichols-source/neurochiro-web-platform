@@ -992,7 +992,7 @@ export default function TechniqueComparisonGuide() {
           className="text-2xl font-heading font-bold flex items-center gap-3 text-white"
         >
           <Compass className="w-7 h-7" style={{ color: BRAND_ORANGE }} />
-          Technique Comparison Guide
+          Techniques
         </h1>
         <p className="text-xs text-white/35 mt-1">
           Explore, compare, and find the chiropractic techniques that fit your future practice.

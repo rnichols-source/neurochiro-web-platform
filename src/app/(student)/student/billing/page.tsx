@@ -44,10 +44,11 @@ export default function StudentBilling() {
     return (
       <div className="space-y-8 p-6 md:p-8 max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold text-white">Billing</h1>
+        <p className="text-xs text-white/35 mt-1">Your membership includes every tool on this platform — no upgrades, no limits.</p>
         <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-8 text-center">
           <CreditCard className="w-10 h-10 text-white/10 mx-auto mb-4" />
           <p className="text-lg font-bold text-white mb-2">No active subscription</p>
-          <p className="text-sm text-white/40 mb-6">Subscribe to access all student tools — Interview Prep, Contract Lab, Financial Planner, and more.</p>
+          <p className="text-sm text-white/40 mb-6">Subscribe to unlock all student tools — Academy courses, Interview Playbook, Contract Lab, Financial Planner, job matching, and mentor discovery. One price, everything included.</p>
           <Link
             href="/pricing/students"
             className="inline-block px-6 py-3 bg-[#D66829] text-white font-bold rounded-lg text-sm hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors"
@@ -65,6 +66,7 @@ export default function StudentBilling() {
   return (
     <div className="space-y-8 p-6 md:p-8 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold text-white">Billing</h1>
+      <p className="text-xs text-white/35 mt-1">Your $12/mo membership includes every tool on this platform — no upgrades, no limits.</p>
 
       <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 space-y-4">
         <div className="flex items-center justify-between">

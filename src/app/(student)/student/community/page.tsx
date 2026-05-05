@@ -132,7 +132,7 @@ export default function CommunityPage() {
           Student Network
         </h1>
         <p className="text-xs text-white/35 mt-1">
-          You&apos;re not alone. See who else is on the platform.
+          See which schools, graduation years, and regions are represented. You&apos;re not alone on this journey.
         </p>
       </header>
 

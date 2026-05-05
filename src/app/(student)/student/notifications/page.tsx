@@ -181,8 +181,10 @@ export default function StudentNotificationsPage() {
           <p className="text-white/30 font-bold text-sm">
             {activeTab === "all" ? "No notifications yet" : `No ${NOTIFICATION_CATEGORIES[activeTab].label.toLowerCase()} notifications`}
           </p>
-          <p className="text-white/20 text-xs mt-1">
-            You&apos;ll see updates about job matches, mentor activity, and progress here.
+          <p className="text-white/20 text-xs mt-1 max-w-sm mx-auto">
+            {activeTab === "all"
+              ? "Notifications appear when new jobs match your profile, mentors respond, or you hit a milestone. Complete your profile and start a course to get your first ones."
+              : `You'll see ${NOTIFICATION_CATEGORIES[activeTab].label.toLowerCase()} updates here as they happen.`}
           </p>
         </div>
       ) : (

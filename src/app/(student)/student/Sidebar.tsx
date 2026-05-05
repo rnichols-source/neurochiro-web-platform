@@ -30,7 +30,7 @@ const navSections = [
     items: [
       { name: "Academy", href: "/student/academy", icon: GraduationCap },
       { name: "Techniques", href: "/student/techniques", icon: Compass },
-      { name: "Interview Prep", href: "/student/interview-prep", icon: ClipboardList },
+      { name: "Interview Playbook", href: "/student/interview-prep", icon: ClipboardList },
     ],
   },
   {

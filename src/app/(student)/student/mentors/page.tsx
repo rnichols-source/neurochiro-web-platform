@@ -204,10 +204,11 @@ export default function MentorDiscoveryPage() {
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center bg-[#162231] rounded-2xl border border-dashed border-white/[0.08]">
           <Users className="w-12 h-12 text-white/10 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-1">No mentors found</h3>
-          <p className="text-white/40 text-sm max-w-md mx-auto">
-            No mentors match your current filters. Try expanding your search or check back — we&apos;re growing every week.
+          <h3 className="text-xl font-semibold text-white mb-1">No mentors match your filters</h3>
+          <p className="text-white/40 text-sm max-w-md mx-auto mb-4">
+            Try broadening your search or removing the hiring filter. New doctors join NeuroChiro every week.
           </p>
+          <Link href="/student/profile" className="text-sm font-bold text-[#D66829] hover:underline">Add interests to your profile for better matches</Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

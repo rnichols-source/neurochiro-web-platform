@@ -323,8 +323,9 @@ export default function JobsPage() {
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center bg-[#162231] rounded-2xl border border-dashed border-white/[0.08]">
           <Briefcase className="w-12 h-12 text-white/10 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-1">No open positions match your filters.</h3>
-          <p className="text-white/40 text-sm">Try adjusting your search or check back soon.</p>
+          <h3 className="text-xl font-semibold text-white mb-1">No positions match your current filters</h3>
+          <p className="text-white/40 text-sm mb-4">Try broadening your search, removing filters, or check back soon — new jobs are posted weekly.</p>
+          <Link href="/student/profile" className="text-sm font-bold text-[#D66829] hover:underline">Update your profile to improve match scores</Link>
         </div>
       ) : (
         <div className="space-y-3">

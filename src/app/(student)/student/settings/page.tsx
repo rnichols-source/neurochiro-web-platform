@@ -73,6 +73,7 @@ export default function StudentSettingsPage() {
   return (
     <div className="max-w-xl mx-auto py-8 px-6 space-y-10">
       <h1 className="text-2xl font-heading font-bold text-white">Settings</h1>
+      <p className="text-xs text-white/35 mt-1">Manage your email, password, notification preferences, and account.</p>
 
       <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
         <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Email</h2>
