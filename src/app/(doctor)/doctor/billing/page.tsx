@@ -61,7 +61,7 @@ export default function DoctorBilling() {
           <CreditCard className="w-10 h-10 text-gray-300 mx-auto mb-4" />
           <p className="text-lg font-bold text-neuro-navy mb-2">No active subscription</p>
           <p className="text-sm text-gray-500 mb-6">
-            You are on the <span className="font-bold capitalize">{billingData?.tier || "free"}</span> tier.
+            You are on the <span className="font-bold capitalize">{billingData?.tier || "basic"}</span> tier.
           </p>
           <Link
             href="/pricing/doctors"

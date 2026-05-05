@@ -357,7 +357,7 @@ function getStudentEmail(step: number, name: string): { subject: string; body: s
         subject: "Last note — your student account",
         body: `
           <p>Hi ${name},</p>
-          <p>Final reminder. Your free NeuroChiro student account is ready whenever you are:</p>
+          <p>Final reminder. Your NeuroChiro student account is ready whenever you are:</p>
           <p style="margin: 20px 0;">
             <a href="https://neurochiro.co/register?role=student" style="color: #D66829; font-weight: bold;">Create your account here</a>
           </p>

@@ -120,7 +120,7 @@ export default function HostSeminarPage() {
           )}
           {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
           <button type="submit" disabled={loading} className="w-full py-4 bg-neuro-orange text-white font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange-dark transition-all disabled:opacity-50">
-            {loading ? "Processing..." : isMember ? "List Your Seminar — Free with Membership" : `List Your Seminar — ${region.currency.symbol}199`}
+            {loading ? "Processing..." : isMember ? "List Your Seminar — Included with Membership" : `List Your Seminar — ${region.currency.symbol}199`}
           </button>
         </form>
 

@@ -760,7 +760,7 @@ export async function POST(req: Request) {
         if (profile) {
           await supabase
             .from('profiles')
-            .update({ subscription_status: 'past_due', tier: 'free' })
+            .update({ subscription_status: 'past_due', tier: 'basic' })
             .eq('id', profile.id);
         }
 
@@ -802,7 +802,7 @@ export async function POST(req: Request) {
         if (profile) {
           await supabase
             .from('profiles')
-            .update({ subscription_status: 'canceled', tier: 'free' })
+            .update({ subscription_status: 'canceled', tier: 'basic' })
             .eq('id', profile.id);
         }
 
