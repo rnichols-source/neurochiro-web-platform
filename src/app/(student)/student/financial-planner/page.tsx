@@ -1261,7 +1261,7 @@ function FinancialPlannerContent() {
           </svg>
           <div className="flex items-center justify-center gap-6 mt-3">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-0.5 bg-gray-400" style={{ borderTop: "2px dashed #9ca3af" }} />
+              <div className="w-6 h-0.5 bg-white/30" style={{ borderTop: "2px dashed rgba(255,255,255,0.3)" }} />
               <span className="text-xs text-white/40">Minimum Payments (25yr)</span>
             </div>
             <div className="flex items-center gap-2">
@@ -1370,7 +1370,7 @@ function FinancialPlannerContent() {
 
         <div className="print-area bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden">
           {/* Header */}
-          <div className="print-header bg-[#162231] p-8 sm:p-10" style={{ backgroundColor: "#1a2744" }}>
+          <div className="print-header bg-[#162231] p-8 sm:p-10">
             <p className="text-white/50 text-xs font-bold uppercase tracking-[0.2em]">NeuroChiro</p>
             <h1 className="font-heading text-2xl sm:text-3xl font-black text-white mt-2">
               Your Financial Roadmap

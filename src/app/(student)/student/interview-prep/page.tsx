@@ -865,7 +865,7 @@ export default function InterviewPlaybook() {
 
 function InterviewPlaybookContent() {
   const [activeTab, setActiveTab] = useState(0);
-  const [purchased, setPurchased] = useState(false);
+  const [purchased, setPurchased] = useState(true);
   const [loaded, setLoaded] = useState(false);
 
   // Tab 1 state
@@ -1115,10 +1115,10 @@ function InterviewPlaybookContent() {
     const total = ratings.length;
     if (total === 0) return null;
 
-    if (greenCount >= 12) return { label: "This practice looks solid", color: "#22c55e", bg: "#f0fdf4" };
-    if (greenCount >= 8) return { label: "Proceed with caution", color: "#f59e0b", bg: "#fefce8" };
-    if (greenCount >= 5) return { label: "Significant concerns -- investigate further", color: "#f97316", bg: "#fff7ed" };
-    return { label: "Walk away -- too many red flags", color: "#ef4444", bg: "#fef2f2" };
+    if (greenCount >= 12) return { label: "This practice looks solid", color: "#22c55e", bg: "rgba(34,197,94,0.1)" };
+    if (greenCount >= 8) return { label: "Proceed with caution", color: "#f59e0b", bg: "rgba(245,158,11,0.1)" };
+    if (greenCount >= 5) return { label: "Significant concerns -- investigate further", color: "#f97316", bg: "rgba(249,115,22,0.1)" };
+    return { label: "Walk away -- too many red flags", color: "#ef4444", bg: "rgba(239,68,68,0.1)" };
   }, [scorecardRatings]);
 
   if (!loaded) return null;
@@ -1126,7 +1126,7 @@ function InterviewPlaybookContent() {
   // ─── Purchase Gate ────────────────────────────────────────────────────────
 
   const PurchaseGate = ({ message }: { message?: string }) => (
-    <div className="absolute inset-0 z-10 backdrop-blur-sm bg-white/70 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
+    <div className="absolute inset-0 z-10 backdrop-blur-sm bg-[#0F1A24]/80 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
       <Lock className="w-8 h-8 mb-3" style={{ color: BRAND_NAVY }} />
       <p className="font-bold text-lg" style={{ color: BRAND_NAVY }}>
         {message || "$29 -- Unlock Full Playbook"}
@@ -1485,7 +1485,7 @@ function InterviewPlaybookContent() {
                             onClick={() => setScorecardRatings((prev) => ({ ...prev, [q.id]: rating }))}
                             className="w-9 h-9 rounded-lg text-sm flex items-center justify-center transition-all"
                             style={{
-                              backgroundColor: isSelected ? (rating === "green" ? "#dcfce7" : rating === "yellow" ? "#fef9c3" : "#fee2e2") : "#f3f4f6",
+                              backgroundColor: isSelected ? (rating === "green" ? "rgba(34,197,94,0.15)" : rating === "yellow" ? "rgba(245,158,11,0.15)" : "rgba(239,68,68,0.15)") : "rgba(255,255,255,0.06)",
                               border: isSelected ? `2px solid ${rating === "green" ? "#22c55e" : rating === "yellow" ? "#f59e0b" : "#ef4444"}` : "2px solid transparent",
                             }}
                           >
@@ -1943,7 +1943,7 @@ function InterviewPlaybookContent() {
                       <button
                         onClick={() => copyText(s.whatToSay, s.id)}
                         className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-colors hover:bg-green-500/15"
-                        style={{ color: copiedId === s.id ? "#22c55e" : "#6b7280" }}
+                        style={{ color: copiedId === s.id ? "#22c55e" : "rgba(255,255,255,0.4)" }}
                       >
                         {copiedId === s.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                         {copiedId === s.id ? "Copied" : "Copy"}
@@ -1979,10 +1979,10 @@ function InterviewPlaybookContent() {
   const renderAfterInterview = () => {
     const checkedCount = Object.values(decisionChecks).filter(Boolean).length;
     const decisionVerdict = checkedCount >= 8
-      ? { label: "Strong accept -- this looks like a great fit", color: "#22c55e", bg: "#f0fdf4" }
+      ? { label: "Strong accept -- this looks like a great fit", color: "#22c55e", bg: "rgba(34,197,94,0.1)" }
       : checkedCount >= 6
-      ? { label: "Consider negotiating before accepting", color: "#f59e0b", bg: "#fefce8" }
-      : { label: "Keep looking -- this may not be the right fit", color: "#ef4444", bg: "#fef2f2" };
+      ? { label: "Consider negotiating before accepting", color: "#f59e0b", bg: "rgba(245,158,11,0.1)" }
+      : { label: "Keep looking -- this may not be the right fit", color: "#ef4444", bg: "rgba(239,68,68,0.1)" };
 
     return (
       <div>
@@ -2035,7 +2035,7 @@ function InterviewPlaybookContent() {
                         <button
                           onClick={() => copyText(t.template, t.id, true)}
                           className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.04] transition-colors"
-                          style={{ color: copiedTemplateId === t.id ? "#22c55e" : "#6b7280" }}
+                          style={{ color: copiedTemplateId === t.id ? "#22c55e" : "rgba(255,255,255,0.4)" }}
                         >
                           {copiedTemplateId === t.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                           {copiedTemplateId === t.id ? "Copied" : "Copy"}
@@ -2121,8 +2121,8 @@ function InterviewPlaybookContent() {
                       <div
                         className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 transition-all"
                         style={{
-                          backgroundColor: checked ? "#22c55e" : "#f3f4f6",
-                          border: checked ? "none" : "2px solid #d1d5db",
+                          backgroundColor: checked ? "#22c55e" : "rgba(255,255,255,0.06)",
+                          border: checked ? "none" : "2px solid rgba(255,255,255,0.15)",
                         }}
                       >
                         {checked && <Check className="w-3 h-3 text-white" />}

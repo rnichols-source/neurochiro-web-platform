@@ -439,12 +439,12 @@ export default function TechniqueComparisonGuide() {
                       </span>
                     )}
                     {t.popularity === "Common" && (
-                      <span className="text-[10px] font-bold text-gray-400">
+                      <span className="text-[10px] font-bold text-white/40">
                         {t.popularity}
                       </span>
                     )}
                     {(t.popularity === "Specialized" || t.popularity === "Niche") && (
-                      <span className="text-[10px] font-bold text-gray-400 italic">
+                      <span className="text-[10px] font-bold text-white/40 italic">
                         {t.popularity}
                       </span>
                     )}

@@ -1232,7 +1232,7 @@ function ContractLabContent() {
           {SAMPLE_CLAUSES.map((clause, i) => (
             <Accordion key={i} title={clause.title} icon={<span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${clause.ratingColor}`}>{clause.rating}</span>}>
               <div className="space-y-3">
-                <blockquote className="bg-white/[0.04] border-l-4 border-[#1a2744] p-4 rounded-r-xl font-mono text-xs text-white/60 leading-relaxed whitespace-pre-wrap">
+                <blockquote className="bg-white/[0.04] border-l-4 border-[#D66829]/30 p-4 rounded-r-xl font-mono text-xs text-white/60 leading-relaxed whitespace-pre-wrap">
                   {clause.language}
                 </blockquote>
                 <div className="flex gap-2">
