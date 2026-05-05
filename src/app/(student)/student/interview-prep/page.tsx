@@ -1104,7 +1104,7 @@ function InterviewPlaybookContent() {
     <div className="absolute inset-0 z-10 backdrop-blur-sm bg-white/70 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
       <Lock className="w-8 h-8 mb-3" style={{ color: BRAND_NAVY }} />
       <p className="font-bold text-lg" style={{ color: BRAND_NAVY }}>
-        {message || "$29 -- Unlock Full Playbook"}
+        {message || "$12 -- Unlock Full Playbook"}
       </p>
       <p className="text-gray-500 text-sm mt-1 max-w-xs">
         Get access to all questions, the offer calculator, negotiation scripts, and follow-up templates.
@@ -1113,7 +1113,7 @@ function InterviewPlaybookContent() {
         className="mt-4 px-6 py-3 rounded-xl text-white font-bold text-sm transition-colors hover:opacity-90"
         style={{ backgroundColor: BRAND_ORANGE }}
       >
-        Unlock for $29
+        Unlock for $12
       </button>
     </div>
   );
@@ -1433,7 +1433,7 @@ function InterviewPlaybookContent() {
         {/* Red Flag Scorecard */}
         <div className="relative">
           {!purchased && (
-            <PurchaseGate message="Unlock the Red Flag Scorecard for $29" />
+            <PurchaseGate message="Unlock the Red Flag Scorecard for $12" />
           )}
           <div className={!purchased ? "pointer-events-none select-none opacity-30" : ""}>
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -1702,7 +1702,7 @@ function InterviewPlaybookContent() {
 
         {/* Output Section (purchase-gated) */}
         <div className="relative">
-          {!purchased && <PurchaseGate message="Unlock Full Offer Analysis for $29" />}
+          {!purchased && <PurchaseGate message="Unlock Full Offer Analysis for $12" />}
           <div className={!purchased ? "pointer-events-none select-none opacity-30" : ""}>
             {/* Total Comp Breakdown */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-4">
@@ -2027,7 +2027,7 @@ function InterviewPlaybookContent() {
 
         {/* Section 2: Follow-Up Timeline */}
         <div className="relative mb-10">
-          {!purchased && <PurchaseGate message="Unlock Follow-Up Timeline for $29" />}
+          {!purchased && <PurchaseGate message="Unlock Follow-Up Timeline for $12" />}
           <div className={!purchased ? "pointer-events-none select-none opacity-30" : ""}>
             <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: BRAND_NAVY }}>
               Follow-Up Timeline
@@ -2078,7 +2078,7 @@ function InterviewPlaybookContent() {
 
         {/* Section 3: Decision Checklist */}
         <div className="relative mb-10">
-          {!purchased && <PurchaseGate message="Unlock Decision Tools for $29" />}
+          {!purchased && <PurchaseGate message="Unlock Decision Tools for $12" />}
           <div className={!purchased ? "pointer-events-none select-none opacity-30" : ""}>
             <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: BRAND_NAVY }}>
               Offer Decision Checklist
@@ -2121,7 +2121,7 @@ function InterviewPlaybookContent() {
 
         {/* Section 4: Walk-Away Checklist */}
         <div className="relative">
-          {!purchased && <PurchaseGate message="Unlock Walk-Away Guide for $29" />}
+          {!purchased && <PurchaseGate message="Unlock Walk-Away Guide for $12" />}
           <div className={!purchased ? "pointer-events-none select-none opacity-30" : ""}>
             <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: BRAND_NAVY }}>
               Walk-Away Checklist

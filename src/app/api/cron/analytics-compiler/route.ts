@@ -109,13 +109,13 @@ export async function GET(req: Request) {
       .from('profiles')
       .select('id', { count: 'exact', head: true })
       .eq('role', 'doctor')
-      .not('tier', 'in', '("starter","free")');
+      .not('tier', 'in', '("basic","free")');
 
     const { count: freeDoctorAccounts } = await supabase
       .from('profiles')
       .select('id', { count: 'exact', head: true })
       .eq('role', 'doctor')
-      .in('tier', ['starter', 'free']);
+      .in('tier', ['basic', 'free']);
 
     const freeDoctors = freeDoctorAccounts || 0;
 

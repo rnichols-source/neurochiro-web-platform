@@ -842,7 +842,7 @@ function FinancialPlannerContent() {
             disabled={purchaseLoading}
             className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors text-lg disabled:opacity-50"
           >
-            {purchaseLoading ? "Loading..." : "$29 — Unlock Your Financial Plan"}
+            {purchaseLoading ? "Loading..." : "$12 — Unlock Your Financial Plan"}
           </button>
         </div>
       </div>

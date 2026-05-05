@@ -48,7 +48,7 @@ export default function Footer() {
             <li><Link href="/careers" className="text-gray-400 hover:text-neuro-orange transition-colors">Careers</Link></li>
             <li><Link href="/about" className="text-gray-400 hover:text-neuro-orange transition-colors">About Us</Link></li>
             <li><Link href="/contact" className="text-gray-400 hover:text-neuro-orange transition-colors">Contact</Link></li>
-            <li><Link href="/register" className="text-gray-400 hover:text-neuro-orange transition-colors">Join Free</Link></li>
+            <li><Link href="/register" className="text-gray-400 hover:text-neuro-orange transition-colors">Join Now</Link></li>
             <li><a href="mailto:support@neurochiro.com" className="text-gray-400 hover:text-neuro-orange transition-colors">Feedback</a></li>
           </ul>
         </div>

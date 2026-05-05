@@ -118,7 +118,7 @@ export default function Navbar() {
                     <div className="p-2 bg-neuro-orange/10 rounded-lg text-neuro-orange"><Stethoscope className="w-4 h-4" /></div>
                     <div>
                       <p className="text-sm font-bold text-neuro-navy">I&apos;m a Doctor</p>
-                      <p className="text-xs text-gray-500">Get listed free</p>
+                      <p className="text-xs text-gray-500">Get Listed</p>
                     </div>
                   </Link>
                   <Link href="/register?role=student" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">
@@ -256,7 +256,7 @@ export default function Navbar() {
               </div>
 
               <div className="space-y-4 pt-8 border-t border-white/10">
-                <p className="text-xs font-black uppercase tracking-widest text-gray-500">Join Free</p>
+                <p className="text-xs font-black uppercase tracking-widest text-gray-500">Join Now</p>
                 <Link href="/register?role=doctor" className="flex items-center gap-4 text-xl font-bold text-gray-300">
                   <Stethoscope className="w-5 h-5 text-neuro-orange" /> I&apos;m a Doctor
                 </Link>
@@ -280,7 +280,7 @@ export default function Navbar() {
                 }}
                 className="w-full py-4 bg-neuro-orange text-white font-black uppercase tracking-widest text-sm rounded-xl shadow-lg"
               >
-                Join Free
+                Join Now
               </button>
               <Link href="/login" className="w-full py-4 bg-white/10 text-white font-bold rounded-xl flex items-center justify-center gap-2">
                 <User className="w-5 h-5" /> Log In to Dashboard

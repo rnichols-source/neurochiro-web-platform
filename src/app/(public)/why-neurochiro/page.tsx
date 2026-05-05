@@ -114,7 +114,7 @@ export default function WhyNeuroChiroPage() {
               href="/register?role=doctor"
               className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors inline-flex items-center justify-center gap-2"
             >
-              Get Listed Free <ArrowRight className="w-5 h-5" />
+              Get Listed <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/directory"
@@ -271,7 +271,7 @@ export default function WhyNeuroChiroPage() {
             href="/register?role=doctor"
             className="inline-flex items-center gap-2 px-10 py-5 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors shadow-xl shadow-neuro-orange/20"
           >
-            Get Listed Free <ArrowRight className="w-5 h-5" />
+            Get Listed <ArrowRight className="w-5 h-5" />
           </Link>
           <p className="text-gray-400 text-xs mt-4">or</p>
           <div className="max-w-md mx-auto mt-4">

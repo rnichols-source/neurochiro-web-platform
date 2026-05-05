@@ -105,7 +105,7 @@ export async function GET(req: Request) {
           bio: '',
           specialties: [],
           verification_status: 'verified',
-          membership_tier: 'starter',
+          membership_tier: 'basic',
           region_code: 'US',
           is_founding_member: false,
           phone: p.phone || null,
@@ -136,7 +136,7 @@ export async function GET(req: Request) {
             <p>My name is Dr. Raymond Nichols, and I'm the founder of NeuroChiro — the global directory built specifically for nervous system chiropractors.</p>
             <p>I created a profile for ${clinicName} on our platform, and it's already live:</p>
             <p style="margin: 20px 0;"><a href="${profileUrl}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">View Your Profile</a></p>
-            <p>Patients in ${p.city || 'your area'} are actively using NeuroChiro to find chiropractors like you. Claim your profile, add your photo and bio, and you're set. Takes about 2 minutes. No cost.</p>
+            <p>Patients in ${p.city || 'your area'} are actively using NeuroChiro to find chiropractors like you. Claim your profile, add your photo and bio, and you're set. Takes about 2 minutes.</p>
             <p>Let me know if you have any questions.</p>
             <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro<br>neurochiro.co</p>
           `),

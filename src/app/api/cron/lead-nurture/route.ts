@@ -186,7 +186,7 @@ function getPatientEmail(step: number, name: string, location: string): { subjec
         body: `
           <p>Hi ${name},</p>
           <p>Our network is growing every week. Verified nervous system specialists are joining from across the country — and we're expanding into ${location}.</p>
-          <p>Create a free account to:</p>
+          <p>Create a account to:</p>
           <ul style="color: #1E2D3B; line-height: 2;">
             <li>Save your favorite doctors and get notified when they post updates</li>
             <li>Track your daily health with our free check-in tool</li>
@@ -194,7 +194,7 @@ function getPatientEmail(step: number, name: string, location: string): { subjec
             <li>Message doctors directly through the platform</li>
           </ul>
           <p style="margin: 24px 0;">
-            <a href="https://neurochiro.co/register?role=patient" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Create Free Account</a>
+            <a href="https://neurochiro.co/register?role=patient" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Create Account</a>
           </p>
           <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
         `,
@@ -221,11 +221,11 @@ function getDoctorEmail(step: number, name: string): { subject: string; body: st
   switch (step) {
     case 1:
       return {
-        subject: "Your free NeuroChiro profile",
+        subject: "Your NeuroChiro profile",
         body: `
           <p>Hi ${name},</p>
           <p>Thanks for your interest in NeuroChiro — the global directory built specifically for nervous system chiropractors.</p>
-          <p>A free listing gets you:</p>
+          <p>Your Basic listing includes:</p>
           <ul style="color: #1E2D3B; line-height: 2;">
             <li>Your own profile page visible to patients searching for care</li>
             <li>Verification badge showing you're a legitimate practitioner</li>
@@ -233,7 +233,7 @@ function getDoctorEmail(step: number, name: string): { subject: string; body: st
           </ul>
           <p>It takes about 2 minutes to set up. No credit card required.</p>
           <p style="margin: 24px 0;">
-            <a href="https://neurochiro.co/register?role=doctor" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Get Listed Free</a>
+            <a href="https://neurochiro.co/register?role=doctor" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Get Listed</a>
           </p>
           <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
         `,
@@ -265,22 +265,22 @@ function getDoctorEmail(step: number, name: string): { subject: string; body: st
           <p>Every day, patients search NeuroChiro for nervous system chiropractors. If you're not listed, they're finding someone else.</p>
           <p>Getting listed takes 2 minutes:</p>
           <ol style="color: #1E2D3B; line-height: 2;">
-            <li>Create your free account</li>
+            <li>Create your account</li>
             <li>Add your photo and bio</li>
             <li>Start showing up in patient searches</li>
           </ol>
           <p style="margin: 24px 0;">
-            <a href="https://neurochiro.co/register?role=doctor" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Get Listed Now — Free</a>
+            <a href="https://neurochiro.co/register?role=doctor" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Get Listed Now</a>
           </p>
           <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
         `,
       };
     case 4:
       return {
-        subject: "Last note — your free listing",
+        subject: "Last note — your listing",
         body: `
           <p>Hi ${name},</p>
-          <p>Last email from me. Your free NeuroChiro listing is ready whenever you are:</p>
+          <p>Last email from me. Your NeuroChiro listing is ready whenever you are:</p>
           <p style="margin: 20px 0;">
             <a href="https://neurochiro.co/register?role=doctor" style="color: #D66829; font-weight: bold;">Create your profile here</a>
           </p>
@@ -301,7 +301,7 @@ function getStudentEmail(step: number, name: string): { subject: string; body: s
         body: `
           <p>Hi ${name},</p>
           <p>Welcome to NeuroChiro — the platform where chiropractic students build their careers before graduation.</p>
-          <p>Here's what you get with a free account:</p>
+          <p>Here's what you get with a account:</p>
           <ul style="color: #1E2D3B; line-height: 2;">
             <li><strong>Job board</strong> — associate positions, internships, and contract roles</li>
             <li><strong>Seminar calendar</strong> — find CE events and technique training</li>
@@ -309,7 +309,7 @@ function getStudentEmail(step: number, name: string): { subject: string; body: s
             <li><strong>Doctor directory</strong> — find mentors and potential employers</li>
           </ul>
           <p style="margin: 24px 0;">
-            <a href="https://neurochiro.co/register?role=student" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Create Free Account</a>
+            <a href="https://neurochiro.co/register?role=student" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Create Account</a>
           </p>
           <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
         `,
@@ -327,7 +327,7 @@ function getStudentEmail(step: number, name: string): { subject: string; body: s
             <li><strong>Financial Planner</strong> — model your salary, student loans, and first-year budget</li>
             <li><strong>Technique Explorer</strong> — compare 18 techniques to find your fit</li>
           </ul>
-          <p>Start with a free account — upgrade when you're ready.</p>
+          <p>Start with a account — upgrade when you're ready.</p>
           <p style="margin: 24px 0;">
             <a href="https://neurochiro.co/careers" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Browse Open Positions</a>
           </p>
@@ -340,21 +340,21 @@ function getStudentEmail(step: number, name: string): { subject: string; body: s
         body: `
           <p>Hi ${name},</p>
           <p>Practices across the country are posting associate positions on NeuroChiro. Don't wait until graduation to start looking.</p>
-          <p>Create your free student profile so employers can find you:</p>
+          <p>Create your student profile so employers can find you:</p>
           <ol style="color: #1E2D3B; line-height: 2;">
-            <li>Sign up (free, 2 minutes)</li>
+            <li>Sign up ($12/mo, 2 minutes)</li>
             <li>Add your school, graduation year, and interests</li>
             <li>Browse jobs and message doctors directly</li>
           </ol>
           <p style="margin: 24px 0;">
-            <a href="https://neurochiro.co/register?role=student" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Join Free — 2 Minutes</a>
+            <a href="https://neurochiro.co/register?role=student" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Join Now — 2 Minutes</a>
           </p>
           <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
         `,
       };
     case 4:
       return {
-        subject: "Last note — your free student account",
+        subject: "Last note — your student account",
         body: `
           <p>Hi ${name},</p>
           <p>Final reminder. Your free NeuroChiro student account is ready whenever you are:</p>

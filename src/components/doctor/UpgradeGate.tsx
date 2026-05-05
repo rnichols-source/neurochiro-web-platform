@@ -15,6 +15,7 @@ interface UpgradeGateProps {
 // Which tiers unlock which level
 const TIER_LEVELS: Record<string, number> = {
   free: 0,
+  basic: 0,
   starter: 0,
   growth: 1,
   pro: 2,
@@ -41,7 +42,7 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
         .eq("user_id", user.id)
         .single() as any;
 
-      setTier(doctor?.membership_tier || "starter");
+      setTier(doctor?.membership_tier || "basic");
       setIsFounder(doctor?.is_founding_member || false);
       setLoading(false);
     });
@@ -52,7 +53,7 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
   // Founding members get access to EVERYTHING
   if (isFounder) return <>{children}</>;
 
-  const currentLevel = TIER_LEVELS[tier || "starter"] || 0;
+  const currentLevel = TIER_LEVELS[tier || "basic"] || 0;
   const requiredLevel = TIER_LEVELS[requiredTier] || 1;
   const isLocked = currentLevel < requiredLevel;
 
@@ -102,7 +103,7 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
       <UpgradeModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        currentTier={tier || "starter"}
+        currentTier={tier || "basic"}
         userId={userId || undefined}
         highlightFeature={feature}
       />

@@ -452,7 +452,7 @@ export default function DirectoryManager() {
                     onChange={(e) => setSelectedDoctor({ ...selectedDoctor, membership_tier: e.target.value })}
                     className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-white/30"
                   >
-                    <option value="starter">Starter</option>
+                    <option value="basic">Starter</option>
                     <option value="growth">Growth</option>
                     <option value="pro">Pro</option>
                   </select>

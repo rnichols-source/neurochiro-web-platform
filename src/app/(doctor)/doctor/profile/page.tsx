@@ -242,7 +242,7 @@ export default function ProfilePage() {
 
       {/* Verified Badge */}
       <div className="mt-8">
-        <VerifiedBadge doctorSlug={profile?.slug || ''} doctorName={profile?.full_name || ''} tier={profile?.membership_tier || 'starter'} />
+        <VerifiedBadge doctorSlug={profile?.slug || ''} doctorName={profile?.full_name || ''} tier={profile?.membership_tier || 'basic'} />
       </div>
     </div>
   );

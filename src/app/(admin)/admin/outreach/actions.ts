@@ -388,7 +388,7 @@ export async function findProspectEmail(prospectId: string) {
               <p>My name is Dr. Raymond Nichols, and I'm the founder of NeuroChiro — the global directory built specifically for nervous system chiropractors.</p>
               <p>I created a profile for ${clinicName} on our platform, and it's already live:</p>
               <p style="margin: 20px 0;"><a href="https://${profileLink}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">View Your Profile</a></p>
-              <p>Patients in ${p.city || 'your area'} are actively using NeuroChiro to find chiropractors like you. All you need to do is claim your profile, add your photo and bio, and you're set. Takes about 2 minutes. No cost.</p>
+              <p>Patients in ${p.city || 'your area'} are actively using NeuroChiro to find chiropractors like you. All you need to do is claim your profile, add your photo and bio, and you're set. Takes about 2 minutes.</p>
               <p>Let me know if you have any questions.</p>
               <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro<br>neurochiro.co</p>
             </div>
@@ -547,7 +547,7 @@ export async function preBuildProfile(prospectId: string) {
     bio: '',
     specialties: [],
     verification_status: 'verified',
-    membership_tier: 'starter',
+    membership_tier: 'basic',
     region_code: 'US',
     is_founding_member: false,
     phone: p.phone || null,
@@ -593,7 +593,7 @@ export async function preBuildProfile(prospectId: string) {
             <p>I hope this email finds you well. My name is Dr. Raymond Nichols, and I'm the founder of NeuroChiro — the global directory built specifically for nervous system chiropractors.</p>
             <p>I took the time to create a profile for ${clinicName} on our platform, and it's already live:</p>
             <p style="margin: 20px 0;"><a href="${profileUrl}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">View Your Profile</a></p>
-            <p>Patients in ${p.city || 'your area'} are actively using NeuroChiro to find chiropractors like you. All you need to do is claim your profile, add your photo and bio, and you're set. It takes about 2 minutes and there's no cost.</p>
+            <p>Patients in ${p.city || 'your area'} are actively using NeuroChiro to find chiropractors like you. All you need to do is claim your profile, add your photo and bio, and you're set. It takes about 2 minutes.</p>
             <p>Let me know if you have any questions — happy to walk you through it.</p>
             <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro<br>neurochiro.co</p>
           </div>
@@ -635,21 +635,21 @@ export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
       name: 'Pre-Built Profile (Primary)',
       category: 'first_contact',
       description: 'YOUR #1 SCRIPT — Send after clicking "Pre-Build Profile"',
-      template: `Hey {name} — I built a profile for you on NeuroChiro. It's the global directory for nervous system chiropractors and patients in {city} are already using it to find docs like you. Your listing is live here: {profile_link}. You can claim it and add your photo + bio in about 2 minutes. No cost. Just thought you should know it exists.`,
+      template: `Hey {name} — I built a profile for you on NeuroChiro. It's the global directory for nervous system chiropractors and patients in {city} are already using it to find docs like you. Your listing is live here: {profile_link}. You can claim it and add your photo + bio in about 2 minutes. Just thought you should know it exists.`,
     },
     {
       id: 'pre_built_short',
       name: 'Pre-Built Short Version',
       category: 'first_contact',
       description: 'Shorter version — gets to the point faster',
-      template: `Hey {name} — I made you a profile on NeuroChiro, the directory for nervous system chiropractors. It's already live: {profile_link}. Claim it, add your photo, done. No cost. Patients in {city} can find you through it.`,
+      template: `Hey {name} — I made you a profile on NeuroChiro, the directory for nervous system chiropractors. It's already live: {profile_link}. Claim it, add your photo, done. Patients in {city} can find you through it.`,
     },
     {
       id: 'pre_built_value',
       name: 'Pre-Built Value Lead',
       category: 'first_contact',
       description: 'Lead with the patient-finding angle',
-      template: `Hey {name} — quick question. When patients in {city} search for a nervous system chiropractor, are they finding you? I built you a profile on NeuroChiro so they can: {profile_link}. It's free to claim. Add your photo and bio and you're live in the directory. Takes 2 minutes.`,
+      template: `Hey {name} — quick question. When patients in {city} search for a nervous system chiropractor, are they finding you? I built you a profile on NeuroChiro so they can: {profile_link}. Claim it, add your photo and bio and you're live in the directory. Takes 2 minutes.`,
     },
     {
       id: 'follow_up_1',
@@ -684,7 +684,7 @@ export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
       name: 'Objection: Is It Free?',
       category: 'objection',
       description: 'When they ask about cost',
-      template: `100% free to claim your profile and be listed in the directory. Patients can find you, see your bio, specialties, and location. If you ever want access to advanced tools like the KPI tracker, care plan builder, and patient messaging, those are on a paid plan. But the directory listing? That's yours. Free. Forever.`,
+      template: `You can claim your profile and be listed in the directory. Patients can find you, see your bio, specialties, and location. The Basic listing is $49/mo and includes analytics, messaging, and your verified badge. Claim it and see if it's right for your practice — we have a 30-day money-back guarantee.`,
     },
     {
       id: 'objection_time',
@@ -705,7 +705,7 @@ export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
       name: 'Email: First Contact',
       category: 'email',
       description: 'Professional email when no Instagram/Facebook available',
-      template: `Subject: Your NeuroChiro profile is live\n\nHi {name},\n\nI hope this email finds you well. My name is Dr. Raymond Nichols, and I'm the founder of NeuroChiro — the global directory built specifically for nervous system chiropractors.\n\nI took the time to create a profile for your practice on our platform, and it's already live:\n\n{profile_link}\n\nPatients in {city} are actively using NeuroChiro to find chiropractors like you. All you need to do is claim your profile, add your photo and bio, and you're set. It takes about 2 minutes and there's no cost.\n\nWe're building the largest network of nervous system chiropractors in the world, and I'd love to have {clinic_name} be part of it.\n\nLet me know if you have any questions — happy to walk you through it.\n\nBest,\nDr. Raymond Nichols\nFounder, NeuroChiro\nneurochiro.co`,
+      template: `Subject: Your NeuroChiro profile is live\n\nHi {name},\n\nI hope this email finds you well. My name is Dr. Raymond Nichols, and I'm the founder of NeuroChiro — the global directory built specifically for nervous system chiropractors.\n\nI took the time to create a profile for your practice on our platform, and it's already live:\n\n{profile_link}\n\nPatients in {city} are actively using NeuroChiro to find chiropractors like you. All you need to do is claim your profile, add your photo and bio, and you're set. It takes about 2 minutes.\n\nWe're building the largest network of nervous system chiropractors in the world, and I'd love to have {clinic_name} be part of it.\n\nLet me know if you have any questions — happy to walk you through it.\n\nBest,\nDr. Raymond Nichols\nFounder, NeuroChiro\nneurochiro.co`,
     },
     {
       id: 'email_follow_up',
@@ -726,7 +726,7 @@ export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
       name: 'Email: Warm / Referral Intro',
       category: 'email',
       description: 'When someone referred you or you have a connection',
-      template: `Subject: {name} — thought you should see this\n\nHi {name},\n\nI came across your practice while building out the NeuroChiro network in {state} and was really impressed with what you're doing at {clinic_name}.\n\nNeuroChiro is the global directory for nervous system chiropractors. I already built a profile for you — it's live here:\n\n{profile_link}\n\nWe have doctors across the country listed, and patients are using it daily to find chiropractors who focus on the nervous system. I think your practice would be a great addition.\n\nClaiming your profile takes 2 minutes — no cost, no catch. Just thought you should know it exists.\n\nWould love to have you in the network.\n\nDr. Raymond Nichols\nFounder, NeuroChiro\nneurochiro.co`,
+      template: `Subject: {name} — thought you should see this\n\nHi {name},\n\nI came across your practice while building out the NeuroChiro network in {state} and was really impressed with what you're doing at {clinic_name}.\n\nNeuroChiro is the global directory for nervous system chiropractors. I already built a profile for you — it's live here:\n\n{profile_link}\n\nWe have doctors across the country listed, and patients are using it daily to find chiropractors who focus on the nervous system. I think your practice would be a great addition.\n\nClaiming your profile takes 2 minutes — Just thought you should know it exists.\n\nWould love to have you in the network.\n\nDr. Raymond Nichols\nFounder, NeuroChiro\nneurochiro.co`,
     },
     {
       id: 'email_phone_follow_up',

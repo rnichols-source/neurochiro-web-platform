@@ -136,7 +136,7 @@ export default function CareersPage() {
         {/* Bottom CTA */}
         <section className="mt-12 bg-neuro-orange rounded-2xl p-10 text-white text-center shadow-xl">
           <h2 className="text-2xl font-heading font-black mb-2">Hiring?</h2>
-          <p className="opacity-90 mb-6">Members post for free. Non-members can post a single listing starting at $49.</p>
+          <p className="opacity-90 mb-6">Members can post unlimited listings. Non-members can post starting at $49.</p>
           <Link href="/careers/post" className="inline-flex items-center gap-2 px-8 py-3 bg-neuro-navy text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-neuro-navy-light transition-all">
             Post a Listing <ArrowRight className="w-4 h-4" />
           </Link>

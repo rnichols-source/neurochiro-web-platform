@@ -200,7 +200,7 @@ export default function StudentDashboard() {
                   Get access to Interview Prep, Contract Lab, Financial Planner, Techniques Library, and priority in talent drops.
                 </p>
                 <p className="text-gray-300 text-xs font-black mt-3 uppercase tracking-widest">
-                  $29/month &middot; Cancel anytime
+                  $12/month &middot; Cancel anytime
                 </p>
               </div>
               <Link href="/student/billing" className="px-8 py-4 bg-neuro-orange text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-neuro-orange/30 hover:shadow-neuro-orange/50 hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap text-center">

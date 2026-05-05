@@ -12,7 +12,7 @@ interface VerifiedBadgeProps {
 
 export default function VerifiedBadge({ doctorSlug, doctorName, tier }: VerifiedBadgeProps) {
   const [copied, setCopy] = useState(false);
-  const isStarter = tier === 'starter';
+  const isStarter = tier === 'basic';
   
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co';
   

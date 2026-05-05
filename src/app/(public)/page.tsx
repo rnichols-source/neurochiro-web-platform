@@ -250,7 +250,7 @@ export default async function HomePage() {
           <h2 className="text-2xl font-heading font-black text-white mb-4">Are you a chiropractor?</h2>
           <p className="text-gray-400 mb-8">Join the global network of nervous system specialists. Get your verified listing, connect with students, and grow your practice.</p>
           <Link href="/register?role=doctor" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
-            Get Listed Free <ArrowRight className="w-5 h-5" />
+            Get Listed <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>

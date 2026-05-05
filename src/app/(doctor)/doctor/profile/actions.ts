@@ -37,7 +37,7 @@ export async function getDoctorProfile() {
       full_name: profileData?.full_name || "",
       email: profileData?.email || "",
       role: profileData?.role || "doctor",
-      tier: profileData?.tier || "starter",
+      tier: profileData?.tier || "basic",
       notification_preferences: profileData?.notification_preferences || {},
       ...doctorData,
       profile_views: 0,
@@ -49,7 +49,7 @@ export async function getDoctorProfile() {
       full_name: "", 
       email: "", 
       role: "doctor", 
-      tier: "starter", 
+      tier: "basic", 
       notification_preferences: {},
       profile_views: 0,
       patient_leads: 0

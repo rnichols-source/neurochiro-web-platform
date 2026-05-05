@@ -221,7 +221,7 @@ function LoginContent() {
             href="/register"
             className="inline-flex items-center gap-2 px-8 py-3 border-2 border-gray-50 rounded-xl text-xs font-black text-neuro-navy uppercase tracking-widest hover:border-neuro-orange transition-all"
           >
-            Create Free Account <ArrowRight className="w-4 h-4 text-neuro-orange" />
+            Create Account <ArrowRight className="w-4 h-4 text-neuro-orange" />
           </Link>
         </div>
       </div>

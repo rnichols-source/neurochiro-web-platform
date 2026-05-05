@@ -67,14 +67,14 @@ const navSections = [
   },
 ];
 
-const TIER_LEVELS: Record<string, number> = { free: 0, starter: 0, growth: 1, pro: 2 };
+const TIER_LEVELS: Record<string, number> = { free: 0, basic: 0, starter: 0, growth: 1, pro: 2 };
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [userName, setUserName] = useState<string | null>(null);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
-  const [memberTier, setMemberTier] = useState<string>("starter");
+  const [memberTier, setMemberTier] = useState<string>("basic");
 
   useEffect(() => {
     const supabase = createClient();
@@ -91,7 +91,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             if (data?.is_founding_member) {
               setMemberTier("pro");
             } else {
-              setMemberTier(data?.membership_tier || "starter");
+              setMemberTier(data?.membership_tier || "basic");
             }
           });
       }

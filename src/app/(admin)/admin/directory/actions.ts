@@ -163,7 +163,7 @@ export async function migrateDoctorsFromCSV(rows: { name: string; email: string;
         bio: '',
         specialties: [],
         verification_status: 'verified',
-        membership_tier: 'starter',
+        membership_tier: 'basic',
         region_code: 'US',
         profile_views: 0,
         patient_leads: 0,
@@ -193,7 +193,7 @@ export async function migrateDoctorsFromCSV(rows: { name: string; email: string;
           full_name: row.name,
           role: 'doctor',
           subscription_status: 'active',
-          tier: 'starter',
+          tier: 'basic',
           stripe_customer_id: row.stripeCustomerId,
         });
 
@@ -275,7 +275,7 @@ export async function registerAllUnlinkedDoctors() {
             full_name: `${doctor.first_name} ${doctor.last_name}`,
             role: 'doctor',
             subscription_status: 'active',
-            tier: 'starter',
+            tier: 'basic',
           });
 
           registered++;
@@ -295,7 +295,7 @@ export async function registerAllUnlinkedDoctors() {
           full_name: `${doctor.first_name} ${doctor.last_name}`,
           role: 'doctor',
           subscription_status: 'active',
-          tier: 'starter',
+          tier: 'basic',
         });
 
         // Link doctor record

@@ -180,8 +180,8 @@ export async function getDoctorROIData(period: string = '30d') {
       admin.from('analytics_events').select('*').eq('doctor_id', doctorTableId)
     ]);
 
-    const tier = doctorRes.data?.membership_tier || 'starter';
-    const isStarter = tier === 'starter';
+    const tier = doctorRes.data?.membership_tier || 'basic';
+    const isStarter = tier === 'basic';
     const membershipCost = tier === 'pro' ? 199 : tier === 'growth' ? 99 : 49;
     const averageCaseValue = Number((doctorRes.data as any)?.average_case_value) || 2500;
     

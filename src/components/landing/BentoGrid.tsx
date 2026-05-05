@@ -99,7 +99,7 @@ export default function BentoGrid() {
                  className="px-8 py-4 bg-white text-neuro-navy rounded-full font-bold hover:bg-gray-100 transition-colors inline-block min-h-[44px] flex items-center"
                  aria-label="Register as a student"
                >
-                 Join Free as Student
+                 Join as Student
                </Link>
             </div>
           </motion.article>

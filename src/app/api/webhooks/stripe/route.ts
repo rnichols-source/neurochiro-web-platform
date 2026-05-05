@@ -52,7 +52,7 @@ export async function POST(req: Request) {
           // Update profile with Stripe customer ID and activate membership
           // Determine tier from the price paid
           const amountPaid = (session.amount_total || 0) / 100;
-          const membershipTier = amountPaid >= 199 ? 'pro' : amountPaid >= 99 ? 'growth' : 'starter';
+          const membershipTier = amountPaid >= 199 ? 'pro' : amountPaid >= 99 ? 'growth' : 'basic';
 
           await supabase
             .from('profiles')
@@ -564,7 +564,7 @@ export async function POST(req: Request) {
                       </div>
                       <h3 style="color:#1a2744;">What's Next:</h3>
                       <ol style="color:#666;line-height:1.8;">
-                        <li><strong>Create your free Doctor account</strong> at <a href="https://neurochiro.co/register?role=doctor" style="color:#e97325;">neurochiro.co/register</a> (use this same email — select "Doctor" when registering)</li>
+                        <li><strong>Create your Doctor account</strong> at <a href="https://neurochiro.co/register?role=doctor" style="color:#e97325;">neurochiro.co/register</a> (use this same email — select "Doctor" when registering)</li>
                         <li><strong>Zoom link</strong> will be sent 48 hours before</li>
                         <li>Visit your <a href="https://neurochiro.co/screening-weekend/welcome" style="color:#e97325;font-weight:bold;">Welcome Page</a> for prep materials</li>
                       </ol>

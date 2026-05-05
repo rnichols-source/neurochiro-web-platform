@@ -59,7 +59,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [userName, setUserName] = useState<string | null>(null);
-  const [memberTier, setMemberTier] = useState<string>("starter");
+  const [memberTier, setMemberTier] = useState<string>("basic");
 
   useEffect(() => {
     const supabase = createClient();
@@ -68,7 +68,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         supabase.from("profiles").select("full_name, tier").eq("id", user.id).single()
           .then(({ data }) => {
             setUserName(data?.full_name || null);
-            setMemberTier(data?.tier || "starter");
+            setMemberTier(data?.tier || "basic");
           });
       }
     });
@@ -166,7 +166,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <div className="space-y-0.5 mt-0.5 pb-1">
                       {section.items.map((item: any) => {
                         const active = pathname === item.href;
-                        const isLocked = item.pro && ["free", "starter"].includes(memberTier);
+                        const isLocked = item.pro && ["free", "basic"].includes(memberTier);
                         return (
                           <Link
                             key={item.name}

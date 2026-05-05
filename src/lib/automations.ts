@@ -578,7 +578,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
       case 'doctor_growth_upsell':
         if (supabaseAdmin && emailEnabled && payload.email && payload.userId) {
            const { data: profile } = await supabaseAdmin.from('profiles').select('tier').eq('id', payload.userId).single();
-           if (profile && profile.tier === 'starter') {
+           if (profile && profile.tier === 'basic') {
               await sendPremiumEmail({
                 to: payload.email,
                 subject: 'Ready to expand your clinical influence? 🚀',
@@ -833,8 +833,8 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           
           // 🛡️ CENTRALIZED PRICE ID TO TIER MAPPING (Last 3 chars of Stripe Price ID)
           const priceToTier: Record<string, string> = {
-            'A0q': 'starter',      // Doctor Starter Monthly
-            'A0s': 'starter',      // Doctor Starter Annual
+            'A0q': 'basic',      // Doctor Starter Monthly
+            'A0s': 'basic',      // Doctor Starter Annual
             'A0p': 'growth',       // Doctor Growth Monthly
             'A0r': 'pro',          // Doctor Pro Monthly
             'A0v': 'foundation',   // Student Foundation Monthly
@@ -847,7 +847,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
 
           // Find match by substring
           const matchedKey = Object.keys(priceToTier).find(key => priceId.includes(key));
-          const newTier = matchedKey ? priceToTier[matchedKey] : 'starter';
+          const newTier = matchedKey ? priceToTier[matchedKey] : 'basic';
 
           if (customerId) {
             const { data: profile } = await supabaseAdmin
@@ -899,7 +899,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
               await supabaseAdmin.from('profiles').update({ tier: 'free' }).eq('id', profile.id);
               // [FOREVER FIX] Do not hide from directory on subscription cancelation.
               // We want listings to stay visible to preserve the platform's value.
-              // They will be downgraded to 'starter' tier instead (handled in profiles update above).
+              // They will be downgraded to 'basic' tier instead (handled in profiles update above).
               /*
               if (profile.role === 'doctor') {
                 await supabaseAdmin.from('doctors').update({ verification_status: 'hidden' }).eq('user_id', profile.id);

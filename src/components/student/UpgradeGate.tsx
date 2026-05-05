@@ -76,8 +76,8 @@ function StudentUpgradeModal({ isOpen, onClose, userId, currentTier, highlightFe
 
             <div className="p-8 pt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Free */}
-              <div className={`rounded-2xl border p-6 border-white/10 bg-white/[0.02] ${currentTier === "free" || currentTier === "starter" ? "ring-2 ring-neuro-orange" : ""}`}>
-                {(currentTier === "free" || currentTier === "starter") && (
+              <div className={`rounded-2xl border p-6 border-white/10 bg-white/[0.02] ${currentTier === "free" || currentTier === "basic" ? "ring-2 ring-neuro-orange" : ""}`}>
+                {(currentTier === "free" || currentTier === "basic") && (
                   <div className="text-[10px] font-black text-neuro-orange uppercase tracking-widest mb-3">Current Plan</div>
                 )}
                 <div className="flex items-center gap-2 mb-3">
@@ -144,14 +144,14 @@ export default function StudentUpgradeGate({ children, feature, description }: S
       if (!user) { setLoading(false); return; }
       setUserId(user.id);
       const { data: profile } = await supabase.from("profiles").select("tier").eq("id", user.id).single();
-      setTier(profile?.tier || "starter");
+      setTier(profile?.tier || "basic");
       setLoading(false);
     });
   }, []);
 
   if (loading) return <>{children}</>;
 
-  const isPaid = tier && !["free", "starter"].includes(tier);
+  const isPaid = tier && !["free", "basic"].includes(tier);
   if (isPaid) return <>{children}</>;
 
   return (
@@ -179,7 +179,7 @@ export default function StudentUpgradeGate({ children, feature, description }: S
         </div>
       </div>
 
-      <StudentUpgradeModal isOpen={showModal} onClose={() => setShowModal(false)} currentTier={tier || "starter"} userId={userId || undefined} highlightFeature={feature} />
+      <StudentUpgradeModal isOpen={showModal} onClose={() => setShowModal(false)} currentTier={tier || "basic"} userId={userId || undefined} highlightFeature={feature} />
     </>
   );
 }
