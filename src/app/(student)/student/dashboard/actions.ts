@@ -19,7 +19,7 @@ export async function getStudentDashboardData() {
       .from('students')
       .select('school, graduation_year, interests, skills, location_city, is_looking_for_mentorship, resume_url')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     const { count: applicationsCount } = await supabase
       .from('job_applications')
@@ -92,7 +92,7 @@ export async function getCareerReadinessData() {
       .from('students')
       .select('full_name, school, graduation_year, location_city, interests, skills, resume_url')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     const s = student as any
     let profileScore = 0

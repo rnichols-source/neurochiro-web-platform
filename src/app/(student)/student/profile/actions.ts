@@ -14,18 +14,18 @@ export async function getStudentProfile() {
     .eq('id', user.id)
     .single()
 
-  const { data: student, error: studentError } = await supabase
+  const { data: student } = await supabase
     .from('students')
     .select('*')
-    .eq('id', user.id) // Assuming id is the PK referencing auth.users similar to doctors before the fix, let's just use id for now
-    .single()
+    .eq('id', user.id)
+    .maybeSingle()
 
   if (profileError) {
     console.error("Error fetching student profile:", profileError)
     return null
   }
 
-  return { ...(profile as any), ...(student as any) }
+  return { ...(profile as any), ...(student || {}) }
 }
 
 export async function updateStudentProfile(formData: FormData) {
