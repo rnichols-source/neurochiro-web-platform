@@ -46,8 +46,8 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await dbQuery
       .limit(limit);
 
-    // Priority sort: Pro first, then Growth, then Starter
-    const tierPriority: Record<string, number> = { pro: 1, growth: 2, starter: 3 };
+    // Priority sort: Pro first, then Growth, then Basic
+    const tierPriority: Record<string, number> = { pro: 1, growth: 2, basic: 3, starter: 3 };
     if (data) {
       data.sort((a: any, b: any) => (tierPriority[a.membership_tier] || 3) - (tierPriority[b.membership_tier] || 3));
     }
