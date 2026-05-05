@@ -72,9 +72,9 @@ export default function StudentPricing() {
 
           <Link
             href="/register?role=student"
-            className="w-full py-4 bg-gray-100 text-neuro-navy font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-gray-200 transition-all"
+            className="w-full py-4 bg-neuro-navy text-white font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-neuro-navy/90 transition-all"
           >
-            Join Free
+            Join Now
           </Link>
         </div>
 
@@ -126,10 +126,9 @@ export default function StudentPricing() {
         <h3 className="font-bold text-neuro-navy text-center mb-6">Common Questions</h3>
         <div className="space-y-4">
           {[
-            { q: "Is the free plan really free?", a: "Yes. Your profile, job applications, academy access, and seminars browsing are free forever. No credit card required." },
-            { q: "Can I start free and upgrade later?", a: "Yes. Most students start free and upgrade to Pro when they're ready for advanced career tools like Interview Prep and the Contract Lab." },
+            { q: "What do I get for $12/month?", a: "Everything. Job board, seminars, academy, messaging, interview prep, contract lab, financial planner, and technique explorer. All included." },
             { q: "What happens when I graduate?", a: "You can transition your account to a Doctor account and get listed in the directory. Your student data is preserved." },
-            { q: "Can I cancel Pro anytime?", a: "Yes. Cancel anytime from your dashboard. Your free features stay even if you cancel Pro." },
+            { q: "Can I cancel anytime?", a: "Yes. Cancel anytime from your dashboard. No lock-in contracts." },
           ].map((item, i) => (
             <div key={i} className="bg-white rounded-xl border border-gray-100 p-5">
               <p className="font-bold text-neuro-navy text-sm">{item.q}</p>

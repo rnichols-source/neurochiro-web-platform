@@ -139,7 +139,7 @@ export async function GET(req: Request) {
             <p style="margin-top: 24px;">
               <a href="https://neurochiro.co/doctor/billing" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">See Upgrade Options</a>
             </p>
-            <p style="margin-top: 16px; font-size: 13px; color: #9CA3AF;">Your free listing stays active regardless. Upgrade whenever you're ready.</p>`),
+            <p style="margin-top: 16px; font-size: 13px; color: #9CA3AF;">Your Basic listing stays active. Upgrade whenever you're ready.</p>`),
         });
 
         // Log so we don't send again

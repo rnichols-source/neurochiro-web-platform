@@ -150,7 +150,7 @@ export default function ConferenceLandingPage() {
                 href={`/register?role=${role}`}
                 className="w-full py-4 bg-neuro-navy text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-navy/90 transition-colors text-base"
               >
-                Get Listed Free
+                Get Listed
               </Link>
             </div>
 

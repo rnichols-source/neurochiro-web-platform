@@ -824,7 +824,7 @@ function PLAnalyzerContent() {
               }}
               className="bg-[#e97325] text-white px-6 py-3 rounded-lg font-bold text-base hover:bg-[#d4631e] transition-colors"
             >
-              Unlock P&L Intelligence &mdash; $29
+              Upgrade to Pro
             </button>
           </div>
           <div className="opacity-20 pointer-events-none">{children}</div>

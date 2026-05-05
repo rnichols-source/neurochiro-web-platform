@@ -28,10 +28,10 @@ export default function PricingShell({
 
         {/* Unified Pricing Header */}
         <div className="text-center mb-16 space-y-4">
-          <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-xs">Join Free. Upgrade Anytime.</span>
-          <h1 className="text-5xl md:text-5xl font-heading font-black text-neuro-navy">Start Free. <span className="text-neuro-orange">Grow From There.</span></h1>
+          <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-xs">Simple, Transparent Pricing</span>
+          <h1 className="text-5xl md:text-5xl font-heading font-black text-neuro-navy">Plans That <span className="text-neuro-orange">Grow With You.</span></h1>
           <p className="text-gray-500 text-xl max-w-2xl mx-auto font-medium">
-            Every plan starts free. Upgrade when you&apos;re ready for more.
+            Choose the plan that fits your practice. Patients are always free.
           </p>
         </div>
 

@@ -107,10 +107,10 @@ function StudentUpgradeModal({ isOpen, onClose, userId, currentTier, highlightFe
                   <h3 className="text-lg font-black text-white">Student Pro</h3>
                 </div>
                 <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-3xl font-black text-white">{billing === "annual" ? "$25" : "$29"}</span>
+                  <span className="text-3xl font-black text-white">{billing === "annual" ? "$10" : "$12"}</span>
                   <span className="text-sm text-gray-500">/mo</span>
                 </div>
-                {billing === "annual" && <p className="text-xs text-green-400 font-bold mb-2">Billed at $300/yr</p>}
+                {billing === "annual" && <p className="text-xs text-green-400 font-bold mb-2">Billed at $120/yr</p>}
                 <p className="text-xs text-gray-500 mb-5">Everything to launch your career</p>
                 <div className="space-y-2.5 mb-6">
                   {features.map((f) => (
@@ -170,7 +170,7 @@ export default function StudentUpgradeGate({ children, feature, description }: S
               {description || `This tool is available on Student Pro. Upgrade to unlock all career tools and get ahead of your classmates.`}
             </p>
             <button onClick={() => setShowModal(true)} className="w-full py-4 bg-neuro-orange text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-neuro-orange/20 hover:bg-neuro-orange-light transition-all flex items-center justify-center gap-2">
-              <Zap className="w-4 h-4" /> Unlock for $29/mo
+              <Zap className="w-4 h-4" /> Unlock for $12/mo
             </button>
             <button onClick={() => setShowModal(true)} className="mt-3 text-xs font-bold text-neuro-orange hover:underline flex items-center justify-center gap-1 mx-auto">
               See plans <ArrowRight className="w-3 h-3" />
