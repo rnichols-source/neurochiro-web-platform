@@ -29,9 +29,9 @@ const navSections = [
     label: "LEARN",
     items: [
       { name: "Academy", href: "/student/academy", icon: GraduationCap },
-      { name: "Techniques", href: "/student/techniques", icon: Compass, pro: true },
-      { name: "Contract Lab", href: "/student/contract-lab", icon: FileText, pro: true },
-      { name: "Interview Prep", href: "/student/interview-prep", icon: ClipboardList, pro: true },
+      { name: "Techniques", href: "/student/techniques", icon: Compass },
+      { name: "Contract Lab", href: "/student/contract-lab", icon: FileText },
+      { name: "Interview Prep", href: "/student/interview-prep", icon: ClipboardList },
     ],
   },
   {
@@ -41,8 +41,8 @@ const navSections = [
       { name: "Jobs", href: "/student/jobs", icon: Briefcase },
       { name: "Seminars", href: "/student/seminars", icon: Calendar },
       { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
-      { name: "Financial Planner", href: "/student/financial-planner", icon: DollarSign, pro: true },
-      { name: "Command Center", href: "/account/command-center", icon: Target, pro: true },
+      { name: "Financial Planner", href: "/student/financial-planner", icon: DollarSign },
+      { name: "Command Center", href: "/account/command-center", icon: Target },
     ],
   },
   {

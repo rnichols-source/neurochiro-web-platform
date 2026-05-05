@@ -1,18 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Check, X, ArrowRight, GraduationCap, Crown } from "lucide-react";
+import { Check, ArrowRight, GraduationCap } from "lucide-react";
 import Link from "next/link";
 import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
 
 export default function StudentPricing() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
 
-  const proPrice = billingCycle === "monthly" ? "12" : "10";
-  const proAnnualTotal = "$120/yr";
+  const price = billingCycle === "monthly" ? "12" : "10";
+  const annualTotal = "$120/yr";
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-heading font-black text-neuro-navy uppercase tracking-tight">
           Launch Your <span className="text-neuro-orange">Career.</span>
@@ -32,78 +32,40 @@ export default function StudentPricing() {
           <div className={`absolute top-0.5 w-6 h-6 bg-neuro-orange rounded-full transition-all ${billingCycle === 'annual' ? 'left-7' : 'left-0.5'}`} />
         </button>
         <span className={`text-sm font-bold ${billingCycle === 'annual' ? 'text-neuro-navy' : 'text-gray-400'}`}>
-          Annual <span className="text-green-500 text-xs font-black">(Save 15%)</span>
+          Annual <span className="text-green-500 text-xs font-black">(Save 17%)</span>
         </span>
       </div>
 
-      {/* 2 Tier Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* STUDENT */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
-          <div className="flex items-center gap-2 mb-4">
-            <GraduationCap className="w-5 h-5 text-neuro-navy" />
-            <h3 className="text-lg font-black text-neuro-navy">Student</h3>
+      {/* Single pricing card */}
+      <div className="max-w-md mx-auto">
+        <div className="bg-white rounded-2xl border-2 border-neuro-orange p-8 shadow-xl shadow-neuro-orange/10">
+          <div className="text-center mb-6">
+            <div className="w-14 h-14 bg-neuro-orange/10 rounded-full flex items-center justify-center mx-auto mb-3">
+              <GraduationCap className="w-7 h-7 text-neuro-orange" />
+            </div>
+            <h3 className="text-xl font-black text-neuro-navy">Student Membership</h3>
+            <div className="flex items-baseline justify-center gap-1 mt-2">
+              <span className="text-lg text-gray-400">$</span>
+              <span className="text-5xl font-black text-neuro-navy">{price}</span>
+              <span className="text-gray-400 font-bold">/mo</span>
+            </div>
+            {billingCycle === "annual" && <p className="text-xs text-green-500 font-bold mt-1">Billed at {annualTotal}</p>}
           </div>
-          <div className="flex items-baseline gap-1 mb-1">
-            <span className="text-5xl font-black text-neuro-navy">$12</span>
-            <span className="text-gray-400 font-bold">/mo</span>
-          </div>
-          <p className="text-sm text-gray-500 mb-8">Everything included — one plan</p>
 
           <div className="space-y-3 mb-8">
             {[
-              { name: "Profile + job applications", included: true },
-              { name: "Job board access", included: true },
-              { name: "Seminars browsing", included: true },
-              { name: "Academy (basic modules)", included: true },
-              { name: "Messages", included: true },
-              { name: "Interview Prep", included: false },
-              { name: "Contract Lab", included: false },
-              { name: "Financial Planner", included: false },
-              { name: "Techniques Library", included: false },
-              { name: "Priority in talent drops", included: false },
-            ].map((f, i) => (
-              <div key={i} className={`flex items-center gap-2 text-sm ${f.included ? 'text-gray-700' : 'text-gray-300'}`}>
-                {f.included ? <Check className="w-4 h-4 text-green-500 flex-shrink-0" /> : <X className="w-4 h-4 text-gray-200 flex-shrink-0" />}
-                {f.name}
-              </div>
-            ))}
-          </div>
-
-          <Link
-            href="/register?role=student"
-            className="w-full py-4 bg-neuro-navy text-white font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-neuro-navy/90 transition-all"
-          >
-            Join Now
-          </Link>
-        </div>
-
-        {/* STUDENT PRO */}
-        <div className="bg-white rounded-2xl border-2 border-neuro-orange p-8 relative shadow-xl shadow-neuro-orange/10">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-neuro-orange rounded-full text-[10px] font-black text-white uppercase tracking-widest">
-            Recommended
-          </div>
-          <div className="flex items-center gap-2 mb-4 mt-1">
-            <Crown className="w-5 h-5 text-neuro-orange" />
-            <h3 className="text-lg font-black text-neuro-navy">Student Pro</h3>
-          </div>
-          <div className="flex items-baseline gap-1 mb-1">
-            <span className="text-lg text-gray-400">$</span>
-            <span className="text-5xl font-black text-neuro-navy">{proPrice}</span>
-            <span className="text-gray-400 font-bold">/mo</span>
-          </div>
-          {billingCycle === "annual" && <p className="text-xs text-green-500 font-bold mb-2">Billed at {proAnnualTotal}</p>}
-          <p className="text-sm text-gray-500 mb-8">Everything to launch your career</p>
-
-          <div className="space-y-3 mb-8">
-            {[
-              "Everything included",
-              "Interview Prep",
-              "Contract Lab",
-              "Financial Planner",
-              "Techniques Library",
+              "Profile + job applications",
+              "Full job board access",
+              "Seminar calendar & registration",
+              "Academy courses",
+              "Direct messaging with doctors",
+              "Interview Prep — 20 real questions with scripts",
+              "Contract Lab — analyze any associate agreement",
+              "Financial Planner — model salary, loans, budget",
+              "Techniques Library — compare 18 techniques",
               "Command Center",
               "Priority in talent drops",
+              "Transition to Doctor account at graduation",
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-2 text-sm text-gray-700">
                 <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
@@ -113,11 +75,13 @@ export default function StudentPricing() {
           </div>
 
           <Link
-            href="/register?role=student&billing=pro"
-            className="w-full py-4 bg-neuro-orange text-white font-black uppercase tracking-wider text-sm rounded-xl text-center flex items-center justify-center gap-2 hover:bg-neuro-orange-light transition-all shadow-lg shadow-neuro-orange/20"
+            href="/register?role=student"
+            className="w-full py-4 bg-neuro-orange text-white font-black uppercase tracking-wider text-sm rounded-xl text-center flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-all shadow-lg shadow-neuro-orange/20"
           >
-            <Crown className="w-4 h-4" /> Start with Student Pro
+            Join Now — ${price}/mo <ArrowRight className="w-4 h-4" />
           </Link>
+
+          <p className="text-center text-xs text-gray-400 mt-3">Cancel anytime. No lock-in contracts.</p>
         </div>
       </div>
 
@@ -126,9 +90,10 @@ export default function StudentPricing() {
         <h3 className="font-bold text-neuro-navy text-center mb-6">Common Questions</h3>
         <div className="space-y-4">
           {[
-            { q: "What do I get for $12/month?", a: "Everything. Job board, seminars, academy, messaging, interview prep, contract lab, financial planner, and technique explorer. All included." },
+            { q: "What do I get for $12/month?", a: "Everything. Job board, seminars, academy, messaging, interview prep, contract lab, financial planner, technique explorer, and command center. All included in one plan." },
             { q: "What happens when I graduate?", a: "You can transition your account to a Doctor account and get listed in the directory. Your student data is preserved." },
             { q: "Can I cancel anytime?", a: "Yes. Cancel anytime from your dashboard. No lock-in contracts." },
+            { q: "Is there a free trial?", a: "We offer a 30-day money-back guarantee. If it's not for you, we'll refund you — no questions asked." },
           ].map((item, i) => (
             <div key={i} className="bg-white rounded-xl border border-gray-100 p-5">
               <p className="font-bold text-neuro-navy text-sm">{item.q}</p>

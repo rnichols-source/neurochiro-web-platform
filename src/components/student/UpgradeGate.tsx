@@ -167,7 +167,7 @@ export default function StudentUpgradeGate({ children, feature, description }: S
             </div>
             <h3 className="text-xl font-heading font-black text-neuro-navy mb-2">{feature}</h3>
             <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-              {description || `This tool is available on Student Pro. Upgrade to unlock all career tools and get ahead of your classmates.`}
+              {description || `This tool requires an active student membership ($12/mo). Subscribe to unlock all career tools.`}
             </p>
             <button onClick={() => setShowModal(true)} className="w-full py-4 bg-neuro-orange text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-neuro-orange/20 hover:bg-neuro-orange-light transition-all flex items-center justify-center gap-2">
               <Zap className="w-4 h-4" /> Unlock for $12/mo
