@@ -56,17 +56,35 @@ export async function updateStudentProfile(formData: FormData) {
       id: user.id,
       user_id: user.id,
       full_name: fullName,
-      school: school,
+      school: school || null,
       graduation_year: gradYear ? parseInt(gradYear, 10) : null,
       location_city: locationCity || null,
+      region_code: locationCity || 'unknown',
       interests: interests,
       skills: skills,
       is_looking_for_mentorship: isLookingForMentorship
     }, { onConflict: 'id' })
 
   if (studentError) {
-      console.error("Student error:", studentError);
-      throw studentError;
+      console.error("Student upsert error:", JSON.stringify(studentError));
+      // Try update instead of upsert as fallback
+      const { error: updateError } = await supabase
+        .from('students')
+        .update({
+          full_name: fullName,
+          school: school || null,
+          graduation_year: gradYear ? parseInt(gradYear, 10) : null,
+          location_city: locationCity || null,
+          interests: interests,
+          skills: skills,
+          is_looking_for_mentorship: isLookingForMentorship
+        })
+        .eq('id', user.id)
+
+      if (updateError) {
+        console.error("Student update fallback error:", JSON.stringify(updateError));
+        throw updateError;
+      }
   }
 
   revalidatePath('/student/profile')
