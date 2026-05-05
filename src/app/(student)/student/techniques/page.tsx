@@ -339,27 +339,15 @@ function TechniqueComparisonContent() {
     return parts.join(". ") + ". Consider which factors align best with your practice goals.";
   }, [comparedTechniques]);
 
+  const [purchasing, setPurchasing] = useState(false);
+  const handlePurchase = () => {
+    // Everything included at $12/mo — redirect to pricing
+    window.location.href = "/pricing/students";
+  };
+
   if (!loaded) return null;
 
   // ─── Purchase Gate Overlay ─────────────────────────────────────────────────
-
-  const [purchasing, setPurchasing] = useState(false);
-  const handlePurchase = async () => {
-    setPurchasing(true);
-    try {
-      const { createCourseCheckout } = await import("../academy/purchase-actions");
-      const result = await createCourseCheckout("course-clinical-identity");
-      if (result.url) {
-        window.location.href = result.url;
-      } else {
-        alert(result.error || "Unable to start checkout.");
-        setPurchasing(false);
-      }
-    } catch {
-      alert("Unable to start checkout. Please try again.");
-      setPurchasing(false);
-    }
-  };
 
   const PurchaseGate = ({ message }: { message?: string }) => (
     <div className="absolute inset-0 z-10 backdrop-blur-sm bg-white/70 rounded-2xl flex flex-col items-center justify-center p-6 text-center">

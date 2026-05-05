@@ -248,31 +248,10 @@ function FinancialPlannerContent() {
     });
   }, []);
 
-  // Check purchase status
+  // All features included at $12/mo — if they passed the UpgradeGate, they've paid
   useEffect(() => {
     if (!loaded) return;
-    const check = async () => {
-      try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data } = await (supabase as any)
-            .from("course_purchases")
-            .select("id")
-            .eq("user_id", user.id)
-            .eq("course_id", "student-financial-planner")
-            .limit(1);
-          if (data && data.length > 0) {
-            setState((prev) => ({ ...prev, isPurchased: true, checkingPurchase: false }));
-            return;
-          }
-        }
-      } catch {
-        // ignore
-      }
-      setState((prev) => ({ ...prev, checkingPurchase: false }));
-    };
-    check();
+    setState((prev) => ({ ...prev, isPurchased: true, checkingPurchase: false }));
   }, [loaded]);
 
   // Save to localStorage (debounced)

@@ -21,22 +21,11 @@ function StudentUpgradeModal({ isOpen, onClose, userId, currentTier, highlightFe
   const [loading, setLoading] = useState(false);
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
 
-  const PRICE_IDS: Record<string, string> = {
-    monthly: "price_STUDENT_PRO_MONTHLY", // TODO: Add real Stripe price ID
-    annual: "price_STUDENT_PRO_ANNUAL",   // TODO: Add real Stripe price ID
-  };
-
   const handleUpgrade = async () => {
-    if (!userId || !PRICE_IDS[billing]) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId: PRICE_IDS[billing], userId }),
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
+      // Route to student pricing page for Stripe payment
+      window.location.href = "/pricing/students";
     } catch (err) { console.error(err); }
     setLoading(false);
   };
@@ -75,35 +64,10 @@ function StudentUpgradeModal({ isOpen, onClose, userId, currentTier, highlightFe
             </div>
 
             <div className="p-8 pt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Free */}
-              <div className={`rounded-2xl border p-6 border-white/10 bg-white/[0.02] ${currentTier === "free" || currentTier === "basic" ? "ring-2 ring-neuro-orange" : ""}`}>
-                {(currentTier === "free" || currentTier === "basic") && (
-                  <div className="text-[10px] font-black text-neuro-orange uppercase tracking-widest mb-3">Current Plan</div>
-                )}
+              {/* Single tier — everything included */}
+              <div className="rounded-2xl border p-6 border-neuro-orange/30 bg-neuro-orange/5 relative col-span-2 max-w-md mx-auto w-full">
                 <div className="flex items-center gap-2 mb-3">
-                  <GraduationCap className="w-5 h-5 text-gray-400" />
-                  <h3 className="text-lg font-black text-white">Your Plan</h3>
-                </div>
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-3xl font-black text-white">$12</span>
-                  <span className="text-sm text-gray-500">/mo</span>
-                </div>
-                <p className="text-xs text-gray-500 mb-5">Everything included</p>
-                <div className="space-y-2.5">
-                  {features.map((f) => (
-                    <div key={f.name} className={`flex items-center gap-2 text-xs ${f.free ? "text-gray-300" : "text-gray-600"} ${highlightFeature === f.name && !f.free ? "text-red-400 font-bold" : ""}`}>
-                      {f.free ? <Check className="w-3.5 h-3.5 text-green-500" /> : <X className="w-3.5 h-3.5 text-gray-700" />}
-                      {f.name}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Pro */}
-              <div className="rounded-2xl border p-6 border-neuro-orange/30 bg-neuro-orange/5 relative">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-neuro-orange rounded-full text-[10px] font-black text-white uppercase tracking-widest">Recommended</div>
-                <div className="flex items-center gap-2 mb-3 mt-1">
-                  <Crown className="w-5 h-5 text-neuro-orange" />
+                  <GraduationCap className="w-5 h-5 text-neuro-orange" />
                   <h3 className="text-lg font-black text-white">Student Membership</h3>
                 </div>
                 <div className="flex items-baseline gap-1 mb-1">
@@ -111,7 +75,7 @@ function StudentUpgradeModal({ isOpen, onClose, userId, currentTier, highlightFe
                   <span className="text-sm text-gray-500">/mo</span>
                 </div>
                 {billing === "annual" && <p className="text-xs text-green-400 font-bold mb-2">Billed at $120/yr</p>}
-                <p className="text-xs text-gray-500 mb-5">Everything to launch your career</p>
+                <p className="text-xs text-gray-500 mb-5">One plan — everything included</p>
                 <div className="space-y-2.5 mb-6">
                   {features.map((f) => (
                     <div key={f.name} className="flex items-center gap-2 text-xs text-gray-300">
