@@ -451,7 +451,7 @@ function FinancialPlannerContent() {
                   type="number"
                   value={state.loanBalance}
                   onChange={(e) => set("loanBalance", Number(e.target.value) || 0)}
-                  className="w-full pl-8 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors"
+                  className="w-full pl-8 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold text-white focus:border-[#D66829]/40 outline-none transition-colors"
                 />
               </div>
             </div>
@@ -462,7 +462,7 @@ function FinancialPlannerContent() {
                 step="0.1"
                 value={state.interestRate}
                 onChange={(e) => set("interestRate", Number(e.target.value) || 0)}
-                className="mt-1 w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors"
+                className="mt-1 w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold text-white focus:border-[#D66829]/40 outline-none transition-colors"
               />
             </div>
           </div>
@@ -496,7 +496,7 @@ function FinancialPlannerContent() {
                 type="number"
                 value={state.currentPayment}
                 onChange={(e) => set("currentPayment", Number(e.target.value) || 0)}
-                className="w-full pl-8 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors"
+                className="w-full pl-8 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold text-white focus:border-[#D66829]/40 outline-none transition-colors"
               />
             </div>
           </div>
@@ -534,7 +534,7 @@ function FinancialPlannerContent() {
                   type="number"
                   value={state.annualSalary}
                   onChange={(e) => set("annualSalary", Number(e.target.value) || 0)}
-                  className="w-full pl-8 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors"
+                  className="w-full pl-8 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold text-white focus:border-[#D66829]/40 outline-none transition-colors"
                 />
               </div>
             </div>
@@ -544,7 +544,7 @@ function FinancialPlannerContent() {
                 <select
                   value={state.compModel}
                   onChange={(e) => set("compModel", e.target.value)}
-                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold text-white focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
                 >
                   {COMP_MODELS.map((m) => (
                     <option key={m} value={m}>{m}</option>
@@ -563,7 +563,7 @@ function FinancialPlannerContent() {
                   type="number"
                   value={state.monthlyBonus}
                   onChange={(e) => set("monthlyBonus", Number(e.target.value) || 0)}
-                  className="w-full pl-8 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors"
+                  className="w-full pl-8 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold text-white focus:border-[#D66829]/40 outline-none transition-colors"
                 />
               </div>
             </div>
@@ -573,7 +573,7 @@ function FinancialPlannerContent() {
                 <select
                   value={state.state}
                   onChange={(e) => set("state", e.target.value)}
-                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold text-white focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
                 >
                   {US_STATES.map((s) => (
                     <option key={s} value={s}>{s}</option>
@@ -639,7 +639,7 @@ function FinancialPlannerContent() {
                 <select
                   value={state.emergencyMonths}
                   onChange={(e) => set("emergencyMonths", Number(e.target.value))}
-                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold text-white focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
                 >
                   <option value={3}>3 months</option>
                   <option value={6}>6 months</option>
@@ -654,7 +654,7 @@ function FinancialPlannerContent() {
                 <select
                   value={state.retirementSaving}
                   onChange={(e) => set("retirementSaving", Number(e.target.value))}
-                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold text-white focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
                 >
                   <option value={0}>$0/mo</option>
                   <option value={100}>$100/mo</option>
@@ -690,7 +690,7 @@ function FinancialPlannerContent() {
                 <select
                   value={state.practiceTimeline}
                   onChange={(e) => set("practiceTimeline", Number(e.target.value))}
-                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold text-white focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
                 >
                   <option value={1}>1 year</option>
                   <option value={2}>2 years</option>
