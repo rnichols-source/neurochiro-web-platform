@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import {
   Briefcase,
   MessageSquare,
@@ -2180,6 +2181,20 @@ function InterviewPlaybookContent() {
       {activeTab === 2 && renderOfferCalculator()}
       {activeTab === 3 && renderNegotiationScripts()}
       {activeTab === 4 && renderAfterInterview()}
+
+      {/* Pipeline CTA */}
+      <div className="bg-gray-50 rounded-2xl p-6 flex items-center justify-between mt-8">
+        <div>
+          <p className="text-sm font-bold text-[#1a2744]">Feeling confident?</p>
+          <p className="text-xs text-gray-400">Browse matched jobs and submit your first application.</p>
+        </div>
+        <Link
+          href="/student/jobs"
+          className="px-5 py-2.5 bg-[#e97325] text-white rounded-xl text-xs font-bold hover:bg-[#e97325]/90 transition-colors flex items-center gap-2"
+        >
+          Browse Jobs <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
     </div>
   );
 }

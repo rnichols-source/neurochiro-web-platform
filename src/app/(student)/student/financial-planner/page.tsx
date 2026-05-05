@@ -17,7 +17,9 @@ import {
   AlertTriangle,
   GraduationCap,
   RotateCcw,
+  ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1650,6 +1652,20 @@ function FinancialPlannerContent() {
       {state.step === 4 && Step4()}
 
       {state.step < 4 && NavButtons()}
+
+      {/* Pipeline CTA */}
+      <div className="bg-gray-50 rounded-2xl p-6 flex items-center justify-between mt-8">
+        <div>
+          <p className="text-sm font-bold text-[#1a2744]">Financial plan complete?</p>
+          <p className="text-xs text-gray-400">You&apos;ve completed the career pipeline. Review your progress.</p>
+        </div>
+        <Link
+          href="/student/career-pipeline"
+          className="px-5 py-2.5 bg-[#e97325] text-white rounded-xl text-xs font-bold hover:bg-[#e97325]/90 transition-colors flex items-center gap-2"
+        >
+          Career Pipeline <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
     </div>
   );
 }

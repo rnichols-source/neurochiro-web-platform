@@ -14,6 +14,7 @@ import {
   BarChart3,
   Filter,
 } from "lucide-react";
+import Link from "next/link";
 import {
   TECHNIQUES,
   QUIZ_QUESTIONS,
@@ -1027,6 +1028,20 @@ export default function TechniqueComparisonGuide() {
       {activeTab === 0 && renderExplorer()}
       {activeTab === 1 && renderQuiz()}
       {activeTab === 2 && renderComparison()}
+
+      {/* Pipeline CTA */}
+      <div className="bg-gray-50 rounded-2xl p-6 flex items-center justify-between mt-8">
+        <div>
+          <p className="text-sm font-bold text-[#1a2744]">Found your technique?</p>
+          <p className="text-xs text-gray-400">Now prep for interviews where you&apos;ll talk about it.</p>
+        </div>
+        <Link
+          href="/student/interview-prep"
+          className="px-5 py-2.5 bg-[#e97325] text-white rounded-xl text-xs font-bold hover:bg-[#e97325]/90 transition-colors flex items-center gap-2"
+        >
+          Interview Prep <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
     </div>
   );
 }

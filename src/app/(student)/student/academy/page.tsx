@@ -13,11 +13,13 @@ import {
   Zap,
   Search,
   ArrowLeft,
+  ArrowRight,
   Target,
   Award,
   X,
   Menu,
 } from "lucide-react";
+import Link from "next/link";
 import { SEED_COURSES } from "./courses-data";
 import { createClient } from "@/lib/supabase";
 
@@ -552,6 +554,20 @@ export default function AcademyPage() {
             </p>
           </div>
         )}
+
+        {/* Pipeline CTA */}
+        <div className="bg-gray-50 rounded-2xl p-6 flex items-center justify-between mt-8">
+          <div>
+            <p className="text-sm font-bold text-[#1a2744]">Finished a course?</p>
+            <p className="text-xs text-gray-400">Explore techniques that match what you learned.</p>
+          </div>
+          <Link
+            href="/student/techniques"
+            className="px-5 py-2.5 bg-[#e97325] text-white rounded-xl text-xs font-bold hover:bg-[#e97325]/90 transition-colors flex items-center gap-2"
+          >
+            Explore Techniques <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       </div>
     );
   }

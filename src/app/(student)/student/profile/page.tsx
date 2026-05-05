@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { getStudentProfile, updateStudentProfile } from "./actions";
 
 export default function ProfilePage() {
@@ -148,6 +149,20 @@ export default function ProfilePage() {
           Save
         </button>
       </form>
+
+      {/* Pipeline CTA */}
+      <div className="bg-gray-50 rounded-2xl p-6 flex items-center justify-between mt-8">
+        <div>
+          <p className="text-sm font-bold text-[#1a2744]">Profile updated?</p>
+          <p className="text-xs text-gray-400">See how it affects your Career Readiness Score.</p>
+        </div>
+        <Link
+          href="/student/dashboard"
+          className="px-5 py-2.5 bg-[#e97325] text-white rounded-xl text-xs font-bold hover:bg-[#e97325]/90 transition-colors flex items-center gap-2"
+        >
+          Dashboard <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
     </div>
   );
 }
