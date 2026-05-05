@@ -88,7 +88,7 @@ export default function StudentDashboard() {
   const totalScore = readiness?.totalScore || 0;
 
   return (
-    <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-8">
+    <div className="p-4 md:p-10 max-w-6xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex items-end justify-between">
         <div>
@@ -117,9 +117,9 @@ export default function StudentDashboard() {
             : { label: "Applications", value: readiness?.raw?.appsSubmitted || 0 },
         ].map((stat, i) => {
           const inner = (
-            <div className="px-5 py-6 text-center">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/25 mb-2">{stat.label}</p>
-              <p className="text-3xl font-bold text-white tabular-nums">
+            <div className="px-3 sm:px-5 py-4 sm:py-6 text-center">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/25 mb-1 sm:mb-2 truncate">{stat.label}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums">
                 {stat.value}
                 {stat.unit && <span className="text-base text-white/20 font-normal">{stat.unit}</span>}
               </p>
@@ -135,7 +135,7 @@ export default function StudentDashboard() {
 
       {/* First-time guidance */}
       {totalScore < 20 && (
-        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 md:p-8">
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-4 sm:p-6 md:p-8">
           <p className="text-[13px] font-semibold text-white mb-5">Here&apos;s how this works</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <div className="border-l-2 border-[#D66829] pl-4">
@@ -198,7 +198,7 @@ export default function StudentDashboard() {
       {/* Quick actions */}
       <div>
         <p className="text-[10px] uppercase tracking-[0.2em] text-white/25 font-semibold mb-4">Quick actions</p>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
           {[
             { label: "Jobs", href: "/student/jobs", icon: Briefcase },
             { label: "Mentors", href: "/student/mentors", icon: Users },
@@ -210,9 +210,9 @@ export default function StudentDashboard() {
             <Link
               key={action.href}
               href={action.href}
-              className="bg-[#162231] rounded-xl border border-white/[0.08] p-4 text-center hover:border-[#D66829]/30 hover:-translate-y-0.5 transition-all group shadow-md shadow-black/10"
+              className="bg-[#162231] rounded-xl border border-white/[0.08] p-3 sm:p-4 text-center hover:border-[#D66829]/30 hover:-translate-y-0.5 transition-all group shadow-md shadow-black/10 min-h-[64px] flex flex-col items-center justify-center"
             >
-              <action.icon className="w-5 h-5 text-white/15 group-hover:text-[#D66829] transition-colors mx-auto mb-2" />
+              <action.icon className="w-5 h-5 text-white/15 group-hover:text-[#D66829] transition-colors mx-auto mb-1.5 sm:mb-2" />
               <p className="text-[11px] font-medium text-white/35 group-hover:text-white/70">{action.label}</p>
             </Link>
           ))}
@@ -221,7 +221,7 @@ export default function StudentDashboard() {
 
       {/* Graduation */}
       {isGraduating && (
-        <div className="bg-gradient-to-r from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="bg-gradient-to-r from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-4 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <p className="text-[10px] uppercase tracking-[0.2em] text-[#D66829] font-semibold mb-2">Congratulations</p>
             <h3 className="text-xl font-bold text-white">Transition to Doctor</h3>
@@ -230,7 +230,7 @@ export default function StudentDashboard() {
           <button
             onClick={handleTransition}
             disabled={transitioning}
-            className="px-6 py-3 bg-[#D66829] text-white font-semibold text-sm rounded-lg hover:bg-[#e8834a] transition-colors disabled:opacity-50 flex items-center gap-2 whitespace-nowrap shadow-lg shadow-[#D66829]/20"
+            className="w-full md:w-auto px-6 py-3 bg-[#D66829] text-white font-semibold text-sm rounded-lg hover:bg-[#e8834a] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap shadow-lg shadow-[#D66829]/20"
           >
             {transitioning && <Loader2 className="w-4 h-4 animate-spin" />}
             Transition Account <ArrowRight className="w-4 h-4" />

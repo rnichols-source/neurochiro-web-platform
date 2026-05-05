@@ -77,7 +77,7 @@ export default function ProfilePage() {
     "w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 focus:ring-1 focus:ring-[#D66829]/20 outline-none transition-colors";
 
   return (
-    <div className="p-6 md:p-10 max-w-2xl mx-auto space-y-6">
+    <div className="p-4 md:p-10 max-w-2xl mx-auto space-y-6">
       {toast && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-[#D66829] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-lg shadow-[#D66829]/20">
           {toast}
@@ -168,14 +168,14 @@ export default function ProfilePage() {
       </form>
 
       {/* Pipeline CTA */}
-      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between">
+      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <p className="text-[13px] font-semibold text-white">Profile updated?</p>
           <p className="text-xs text-white/30">See how it affects your Career Readiness Score.</p>
         </div>
         <Link
           href="/student/dashboard"
-          className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg text-xs font-semibold hover:text-white hover:bg-white/[0.1] transition-all flex items-center gap-2"
+          className="w-full sm:w-auto px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg text-xs font-semibold hover:text-white hover:bg-white/[0.1] transition-all flex items-center justify-center gap-2"
         >
           Dashboard <ArrowRight className="w-3.5 h-3.5" />
         </Link>

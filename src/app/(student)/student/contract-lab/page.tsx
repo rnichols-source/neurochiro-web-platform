@@ -604,7 +604,7 @@ function ContractLabContent() {
 
                 {/* Bonus fields */}
                 {(questionnaire.compModel === "Base + Bonus" || questionnaire.compModel === "Hybrid") && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Bonus %</label>
                       <div className="relative">
@@ -631,7 +631,7 @@ function ContractLabContent() {
                 </div>
 
                 {questionnaire.hasNonCompete === "Yes" && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Radius (miles)</label>
                       <input type="number" value={questionnaire.nonCompeteRadius} onChange={(e) => setQ("nonCompeteRadius", Number(e.target.value) || 0)}
@@ -652,7 +652,7 @@ function ContractLabContent() {
                 </div>
 
                 {/* Termination */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Termination Notice</label>
                     <select value={questionnaire.terminationNotice} onChange={(e) => setQ("terminationNotice", e.target.value)}
@@ -803,7 +803,7 @@ function ContractLabContent() {
           <DollarSign className="w-4 h-4 text-[#e97325]" />
           <h3 className="text-sm font-bold text-white">Compensation Benchmark</h3>
         </div>
-        <div className="grid grid-cols-2 gap-3 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <div>
             <p className="text-white/40">New Grad Range: <span className="font-bold text-white">$55-75K</span></p>
             <p className="text-white/40">1-2 Years: <span className="font-bold text-white">$65-85K</span></p>
@@ -1047,7 +1047,7 @@ function ContractLabContent() {
           <p><strong>Signs of Misclassification:</strong> You work set hours at the employer&apos;s location, use their equipment, follow their protocols, cannot work elsewhere, but are paid as 1099. This is a red flag.</p>
           <div className="bg-white/[0.04] rounded-xl p-4 mt-3">
             <p className="font-bold text-white mb-2">Side-by-Side Take-Home Comparison at $60,000:</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-white/[0.04] rounded-lg p-3 border border-white/[0.08]">
                 <p className="font-bold text-green-600 text-xs uppercase tracking-widest mb-2">W-2 Employee</p>
                 <p>Gross: $60,000</p>
@@ -1076,7 +1076,7 @@ function ContractLabContent() {
           <p>A non-compete clause restricts where you can practice after leaving an employer. These are common in chiropractic contracts but vary wildly in enforceability and reasonableness. Understanding the landscape is critical before you sign.</p>
           <p><strong>State Enforceability:</strong> Not all states enforce non-competes equally. California, Oklahoma, and North Dakota essentially ban them for employees. Other states like Colorado and Illinois have placed significant restrictions on their use. Many states will only enforce &quot;reasonable&quot; non-competes, meaning a court could throw out overly aggressive terms.</p>
           <p><strong>Reasonable vs. Excessive Benchmarks:</strong></p>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-green-500/10 rounded-lg p-3 border border-green-500/20">
               <p className="font-bold text-green-600 text-xs uppercase mb-1">Reasonable</p>
               <p>5-10 mile radius</p>
@@ -1339,14 +1339,14 @@ function ContractLabContent() {
       {activeTab === 3 && Tab3()}
 
       {/* Pipeline CTA */}
-      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between mt-8">
+      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
         <div>
           <p className="text-[13px] font-semibold text-white">Contract reviewed?</p>
           <p className="text-xs text-white/30">Plan your finances before day one.</p>
         </div>
         <Link
           href="/student/financial-planner"
-          className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center gap-2"
+          className="w-full sm:w-auto px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
           Financial Planner <ArrowRight className="w-3.5 h-3.5" />
         </Link>

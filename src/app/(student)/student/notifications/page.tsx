@@ -123,7 +123,7 @@ export default function StudentNotificationsPage() {
   }
 
   return (
-    <div className="p-6 md:p-10 max-w-2xl mx-auto space-y-6">
+    <div className="p-4 md:p-10 max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -146,7 +146,7 @@ export default function StudentNotificationsPage() {
       </div>
 
       {/* Category Tabs */}
-      <div className="flex rounded-2xl overflow-hidden border border-white/[0.08]">
+      <div className="flex rounded-2xl overflow-x-auto border border-white/[0.08]">
         {(Object.keys(NOTIFICATION_CATEGORIES) as CategoryKey[]).map((key) => {
           const cat = NOTIFICATION_CATEGORIES[key];
           const isActive = activeTab === key;
@@ -157,11 +157,11 @@ export default function StudentNotificationsPage() {
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`flex-1 py-2.5 px-2 text-xs font-bold transition-all flex items-center justify-center gap-1.5 border-r last:border-r-0 border-white/[0.08] ${
+              className={`flex-1 min-w-0 py-3 px-1.5 sm:px-2 text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 sm:gap-1.5 border-r last:border-r-0 border-white/[0.08] ${
                 isActive ? "bg-[#D66829] text-white" : "bg-white/[0.04] text-white/40 hover:text-white/60"
               }`}
             >
-              <Icon className="w-3.5 h-3.5" />
+              <Icon className="w-3.5 h-3.5 flex-shrink-0" />
               <span className="hidden sm:inline">{cat.label}</span>
               {count > 0 && (
                 <span

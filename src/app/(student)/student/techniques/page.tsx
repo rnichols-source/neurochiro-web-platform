@@ -904,13 +904,13 @@ export default function TechniqueComparisonGuide() {
         </p>
 
         {/* Dropdowns */}
-        <div className="flex flex-wrap items-center gap-3 mb-6">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 mb-6">
           {cols.map((t, idx) => (
             <select
               key={idx}
               value={t.id}
               onChange={(e) => setCompareId(idx, e.target.value)}
-              className="px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white min-w-[180px]"
+              className="w-full sm:w-auto px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white sm:min-w-[180px]"
             >
               {TECHNIQUES.map((tech) => (
                 <option key={tech.id} value={tech.id}>
@@ -1079,14 +1079,14 @@ export default function TechniqueComparisonGuide() {
       {activeTab === 2 && renderComparison()}
 
       {/* Pipeline CTA */}
-      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between mt-8">
+      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
         <div>
           <p className="text-[13px] font-semibold text-white">Found your technique?</p>
           <p className="text-xs text-white/30">Now prep for interviews where you&apos;ll talk about it.</p>
         </div>
         <Link
           href="/student/interview-prep"
-          className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center gap-2"
+          className="w-full sm:w-auto px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
           Interview Prep <ArrowRight className="w-3.5 h-3.5" />
         </Link>

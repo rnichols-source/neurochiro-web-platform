@@ -71,7 +71,7 @@ export default function StudentSettingsPage() {
   const dotClass = (on: boolean) => `absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${on ? 'left-5' : 'left-0.5'}`;
 
   return (
-    <div className="max-w-xl mx-auto py-8 px-6 space-y-10">
+    <div className="max-w-xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-8 sm:space-y-10">
       <h1 className="text-2xl font-heading font-bold text-white">Settings</h1>
       <p className="text-xs text-white/35 mt-1">Manage your email, password, notification preferences, and account.</p>
 
@@ -101,7 +101,7 @@ export default function StudentSettingsPage() {
             </div>
           ))}
         </div>
-        <button onClick={handleSavePrefs} disabled={savingPrefs} className="mt-4 px-5 py-2 bg-[#D66829] text-white rounded-lg font-semibold text-sm disabled:opacity-50 hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors">
+        <button onClick={handleSavePrefs} disabled={savingPrefs} className="mt-4 w-full sm:w-auto px-5 py-3 bg-[#D66829] text-white rounded-lg font-semibold text-sm disabled:opacity-50 hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors">
           {prefsSaved ? 'Saved!' : savingPrefs ? 'Saving...' : 'Save Preferences'}
         </button>
       </div>
@@ -112,7 +112,7 @@ export default function StudentSettingsPage() {
         <form onSubmit={handleUpdatePassword} className="space-y-3">
           <input type="password" placeholder="New password (8+ characters)" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={8} className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none" />
           <input type="password" placeholder="Confirm new password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none" />
-          <button type="submit" className="px-5 py-2 bg-[#D66829] text-white rounded-lg font-semibold text-sm hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors">Update Password</button>
+          <button type="submit" className="w-full sm:w-auto px-5 py-3 bg-[#D66829] text-white rounded-lg font-semibold text-sm hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors">Update Password</button>
         </form>
       </div>
 

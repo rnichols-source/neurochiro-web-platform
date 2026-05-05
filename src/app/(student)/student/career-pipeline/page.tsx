@@ -173,7 +173,7 @@ export default function CareerPipelinePage() {
   const completedStages = STAGES.filter((s) => s.checkComplete(milestones, modulesCompleted)).length;
 
   return (
-    <div className="p-6 md:p-10 max-w-4xl mx-auto space-y-6 pb-20">
+    <div className="p-4 md:p-10 max-w-4xl mx-auto space-y-6 pb-20">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Map className="w-6 h-6 text-[#D66829]" />
@@ -184,14 +184,14 @@ export default function CareerPipelinePage() {
       </div>
 
       {/* Progress summary */}
-      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-5 flex items-center gap-5">
-        <div className="flex items-center gap-1">
+      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5">
+        <div className="flex items-center gap-1 w-full sm:w-auto">
           {STAGES.map((stage) => {
             const done = stage.checkComplete(milestones, modulesCompleted);
             return (
               <div
                 key={stage.id}
-                className={`w-8 h-2.5 rounded-sm ${done ? "bg-gradient-to-r from-[#D66829] to-[#e8834a]" : "bg-white/[0.06]"}`}
+                className={`flex-1 sm:flex-none sm:w-8 h-2.5 rounded-sm ${done ? "bg-gradient-to-r from-[#D66829] to-[#e8834a]" : "bg-white/[0.06]"}`}
               />
             );
           })}
@@ -232,7 +232,7 @@ export default function CareerPipelinePage() {
                     : "border-white/[0.08]"
                 } ${!done && !active ? "opacity-60" : ""}`}
               >
-                <div className="p-6 md:p-8">
+                <div className="p-4 sm:p-6 md:p-8">
                   <div className="flex items-start gap-4">
                     {/* Stage icon */}
                     <div
@@ -296,7 +296,7 @@ export default function CareerPipelinePage() {
                       <div className="flex items-center gap-3 flex-wrap">
                         <Link
                           href={stage.href}
-                          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                          className={`flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold transition-all w-full sm:w-auto ${
                             done
                               ? "bg-white/[0.04] text-white/30"
                               : active
@@ -337,7 +337,7 @@ export default function CareerPipelinePage() {
 
       {/* Completion */}
       {completedStages === STAGES.length && (
-        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-8 md:p-10 text-center">
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 md:p-10 text-center">
           <div className="w-14 h-14 bg-[#D66829]/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <Award className="w-7 h-7 text-[#D66829]" />
           </div>

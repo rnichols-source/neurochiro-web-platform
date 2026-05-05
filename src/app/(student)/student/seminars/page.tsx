@@ -36,7 +36,7 @@ export default function SeminarsPage() {
   }, [seminars, search]);
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-8">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-8">
       <header>
         <h1 className="text-2xl font-heading font-bold text-white">Seminars</h1>
         <p className="text-xs text-white/35 mt-1">
@@ -51,7 +51,7 @@ export default function SeminarsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by title, city, or instructor..."
-          className="w-full pl-12 pr-4 py-4 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none"
+          className="w-full pl-12 pr-4 py-3.5 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none"
         />
       </div>
 
@@ -109,14 +109,14 @@ export default function SeminarsPage() {
       )}
 
       {/* Pipeline CTA */}
-      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between mt-8">
+      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
         <div>
           <p className="text-[13px] font-semibold text-white">Looking for more career tools?</p>
           <p className="text-xs text-white/30">Check your career pipeline for what to do next.</p>
         </div>
         <Link
           href="/student/career-pipeline"
-          className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center gap-2"
+          className="w-full sm:w-auto px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
           Career Pipeline <ArrowRight className="w-3.5 h-3.5" />
         </Link>

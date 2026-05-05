@@ -372,7 +372,7 @@ function FinancialPlannerContent() {
   // ─── Step Tabs ───────────────────────────────────────────────────────────
 
   const StepTabs = () => (
-    <div className="no-print flex rounded-2xl overflow-hidden border border-white/[0.08] mb-6">
+    <div className="no-print flex rounded-2xl overflow-x-auto border border-white/[0.08] mb-6">
       {STEP_LABELS.map((label, i) => {
         const step = i + 1;
         const isActive = state.step === step;
@@ -382,7 +382,7 @@ function FinancialPlannerContent() {
           <button
             key={step}
             onClick={() => clickable && goToStep(step)}
-            className={`flex-1 py-3 px-2 text-xs sm:text-sm font-bold transition-all border-r last:border-r-0 border-white/[0.08] ${
+            className={`flex-1 min-w-0 py-3 px-1 sm:px-2 text-[10px] sm:text-sm font-bold transition-all border-r last:border-r-0 border-white/[0.08] ${
               isActive
                 ? "bg-[#D66829] text-white"
                 : isCompleted
@@ -440,7 +440,7 @@ function FinancialPlannerContent() {
           <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2">
             <GraduationCap className="w-4 h-4 text-[#D66829]" /> Student Loans
           </h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Loan Balance</label>
               <div className="relative mt-1">
@@ -523,7 +523,7 @@ function FinancialPlannerContent() {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Annual Salary</label>
               <div className="relative mt-1">
@@ -552,7 +552,7 @@ function FinancialPlannerContent() {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Monthly Bonus (optional)</label>
               <div className="relative mt-1">
@@ -601,7 +601,7 @@ function FinancialPlannerContent() {
               <p className="text-xs font-bold text-white/35 uppercase tracking-wide mb-2">
                 {group.icon} {group.label}
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {group.keys.map((k) => (
                   <div key={k}>
                     <label className="text-[10px] font-bold text-white/35 uppercase">{EXPENSE_LABELS[k]}</label>
@@ -611,7 +611,7 @@ function FinancialPlannerContent() {
                         type="number"
                         value={state.expenses[k] ?? 0}
                         onChange={(e) => setExpense(k, Number(e.target.value) || 0)}
-                        className="w-full pl-7 pr-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm font-bold text-white focus:border-[#D66829]/40 outline-none transition-colors"
+                        className="w-full pl-7 pr-3 py-3 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm font-bold text-white focus:border-[#D66829]/40 outline-none transition-colors"
                       />
                     </div>
                   </div>
@@ -630,7 +630,7 @@ function FinancialPlannerContent() {
           <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2">
             <Target className="w-4 h-4 text-[#D66829]" /> Goals
           </h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Emergency Fund (months)</label>
               <div className="relative mt-1">
@@ -912,7 +912,7 @@ function FinancialPlannerContent() {
           <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2 mb-4">
             <DollarSign className="w-4 h-4 text-[#D66829]" /> Take-Home Pay Breakdown
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
             <div className="bg-white/[0.04] rounded-xl p-4 text-center">
               <p className="text-[10px] font-bold text-white/35 uppercase">Gross Monthly</p>
               <p className="text-lg font-black text-white">${fmt(Math.round(grossAnnual / 12))}</p>
@@ -1031,7 +1031,7 @@ function FinancialPlannerContent() {
               );
             })}
           </div>
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
             {budgetSegments.map((seg) => (
               <div key={seg.label} className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: seg.color }} />
@@ -1347,22 +1347,22 @@ function FinancialPlannerContent() {
 
     return (
       <div>
-        <div className="no-print flex items-center gap-3 mb-6">
+        <div className="no-print flex flex-wrap items-center gap-3 mb-6">
           <button
             onClick={handlePrint}
-            className="flex items-center gap-2 px-6 py-3 bg-[#162231] text-white text-sm font-bold rounded-xl hover:bg-[#162231]/90 transition-colors"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#162231] text-white text-sm font-bold rounded-xl hover:bg-[#162231]/90 transition-colors flex-1 sm:flex-none"
           >
             <Printer className="w-4 h-4" /> Print Report
           </button>
           <button
             onClick={() => goToStep(1)}
-            className="flex items-center gap-2 px-5 py-3 border border-white/[0.08] text-sm font-bold text-white/50 rounded-xl hover:bg-white/[0.04] transition-colors"
+            className="flex items-center justify-center gap-2 px-5 py-3 border border-white/[0.08] text-sm font-bold text-white/50 rounded-xl hover:bg-white/[0.04] transition-colors flex-1 sm:flex-none"
           >
             <FileText className="w-4 h-4" /> Edit Inputs
           </button>
           <button
             onClick={resetAll}
-            className="flex items-center gap-2 px-5 py-3 border border-white/[0.08] text-sm font-bold text-white/35 rounded-xl hover:bg-white/[0.04] hover:text-red-500 transition-colors"
+            className="flex items-center justify-center gap-2 px-5 py-3 border border-white/[0.08] text-sm font-bold text-white/35 rounded-xl hover:bg-white/[0.04] hover:text-red-500 transition-colors flex-1 sm:flex-none"
           >
             <RotateCcw className="w-4 h-4" /> Start Over
           </button>
@@ -1490,7 +1490,7 @@ function FinancialPlannerContent() {
                   Monthly Budget
                 </h3>
               </div>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                 {budgetSegments.map((seg) => (
                   <div key={seg.label} className="text-center bg-white/[0.04] rounded-xl p-3">
                     <div className="w-4 h-4 rounded-sm mx-auto mb-1" style={{ backgroundColor: seg.color }} />
@@ -1510,7 +1510,7 @@ function FinancialPlannerContent() {
                   3-Year Roadmap
                 </h3>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
                   { yr: "Year 1", sub: "Survive & Stabilize" },
                   { yr: "Year 2", sub: "Build & Grow" },
@@ -1628,14 +1628,14 @@ function FinancialPlannerContent() {
       {state.step < 4 && NavButtons()}
 
       {/* Pipeline CTA */}
-      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between mt-8">
+      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
         <div>
           <p className="text-[13px] font-semibold text-white">Financial plan complete?</p>
           <p className="text-xs text-white/30">You&apos;ve completed the career pipeline. Review your progress.</p>
         </div>
         <Link
           href="/student/career-pipeline"
-          className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center gap-2"
+          className="w-full sm:w-auto px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
           Career Pipeline <ArrowRight className="w-3.5 h-3.5" />
         </Link>

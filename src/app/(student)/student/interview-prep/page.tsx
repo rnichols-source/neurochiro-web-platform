@@ -2191,7 +2191,7 @@ function InterviewPlaybookContent() {
       </div>
 
       {/* Tabs */}
-      <div className="flex rounded-2xl overflow-hidden border border-white/[0.08] mb-6">
+      <div className="flex rounded-2xl overflow-x-auto border border-white/[0.08] mb-6">
         {TAB_LABELS.map((label, i) => {
           const isActive = activeTab === i;
           const Icon = TAB_ICONS[i];
@@ -2199,15 +2199,15 @@ function InterviewPlaybookContent() {
             <button
               key={i}
               onClick={() => setActiveTab(i)}
-              className="flex-1 py-3 px-1 text-[10px] sm:text-xs font-bold transition-all border-r last:border-r-0 border-white/[0.08] flex flex-col sm:flex-row items-center justify-center gap-1"
+              className="flex-1 min-w-0 py-3 px-1 text-[9px] sm:text-xs font-bold transition-all border-r last:border-r-0 border-white/[0.08] flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1"
               style={{
                 backgroundColor: isActive ? "#D66829" : "rgba(255,255,255,0.04)",
                 color: isActive ? "#fff" : "rgba(255,255,255,0.4)",
               }}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
               <span className="hidden sm:inline">{label}</span>
-              <span className="sm:hidden">{label.split(" ")[0]}</span>
+              <span className="sm:hidden leading-tight text-center">{label.split(" ")[0]}</span>
             </button>
           );
         })}
@@ -2221,14 +2221,14 @@ function InterviewPlaybookContent() {
       {activeTab === 4 && renderAfterInterview()}
 
       {/* Pipeline CTA */}
-      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between mt-8">
+      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
         <div>
           <p className="text-[13px] font-semibold text-white">Feeling confident?</p>
           <p className="text-xs text-white/30">Browse matched jobs and submit your first application.</p>
         </div>
         <Link
           href="/student/jobs"
-          className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center gap-2"
+          className="w-full sm:w-auto px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
           Browse Jobs <ArrowRight className="w-3.5 h-3.5" />
         </Link>

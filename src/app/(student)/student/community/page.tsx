@@ -57,7 +57,7 @@ export default function CommunityPage() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-8">
       {/* Header */}
       <header>
         <h1 className="text-2xl font-heading font-bold text-white flex items-center gap-3">
@@ -169,14 +169,14 @@ export default function CommunityPage() {
       )}
 
       {/* Pipeline CTA */}
-      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between">
+      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <p className="text-[13px] font-semibold text-white">Want to find a mentor?</p>
           <p className="text-xs text-white/30">Connect with doctors who are ready to help you grow.</p>
         </div>
         <Link
           href="/student/mentors"
-          className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center gap-2"
+          className="w-full sm:w-auto px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
           Find Mentors <ArrowRight className="w-3.5 h-3.5" />
         </Link>

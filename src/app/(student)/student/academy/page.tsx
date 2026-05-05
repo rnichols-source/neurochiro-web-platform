@@ -574,14 +574,14 @@ export default function AcademyPage() {
         )}
 
         {/* Pipeline CTA */}
-        <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between mt-8">
+        <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
           <div>
             <p className="text-[13px] font-semibold text-white">Finished a course?</p>
             <p className="text-xs text-white/30">Explore techniques that match what you learned.</p>
           </div>
           <Link
             href="/student/techniques"
-            className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center gap-2"
+            className="w-full sm:w-auto px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center justify-center gap-2"
           >
             Explore Techniques <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -1031,7 +1031,7 @@ export default function AcademyPage() {
 
         {/* Mobile bottom nav */}
         {activeMod && !currentModLocked && (
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#162231] border-t border-white/[0.08] px-4 py-3 flex items-center justify-between z-50">
+          <div className="lg:hidden fixed bottom-16 left-0 right-0 bg-[#162231] border-t border-white/[0.08] px-4 py-3 flex items-center justify-between z-50" style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}>
             <button
               onClick={() => {
                 if (prevModule) {

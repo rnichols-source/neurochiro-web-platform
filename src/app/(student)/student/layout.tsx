@@ -58,7 +58,7 @@ export default function StudentLayout({
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden p-2 -ml-2 text-white/40 hover:text-white rounded-lg transition-colors"
+              className="md:hidden p-2.5 -ml-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-white/40 hover:text-white rounded-lg transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>

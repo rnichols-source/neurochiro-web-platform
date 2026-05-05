@@ -201,7 +201,7 @@ export default function JobsPage() {
   }, [jobs]);
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-heading font-bold text-white flex items-center gap-3">
@@ -264,19 +264,19 @@ export default function JobsPage() {
               className="w-full pl-12 pr-4 py-3.5 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-1 -mb-1">
             {(["match", "newest", "salary"] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setSortBy(s)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${sortBy === s ? "bg-[#D66829] text-white" : "bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white/60"}`}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${sortBy === s ? "bg-[#D66829] text-white" : "bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white/60"}`}
               >
                 {s === "match" ? "Best Match" : s === "newest" ? "Newest" : "Highest Pay"}
               </button>
             ))}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${showFilters ? "bg-[#D66829] text-white" : "bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white/60"}`}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${showFilters ? "bg-[#D66829] text-white" : "bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white/60"}`}
             >
               <Filter className="w-3.5 h-3.5" /> Filters
               <ChevronDown className={`w-3 h-3 transition-transform ${showFilters ? "rotate-180" : ""}`} />
@@ -402,14 +402,14 @@ export default function JobsPage() {
       )}
 
       {/* Pipeline CTA */}
-      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between">
+      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <p className="text-[13px] font-semibold text-white">Applied to a job?</p>
           <p className="text-xs text-white/30">Head to Contract Lab to review your offer before signing.</p>
         </div>
         <Link
           href="/student/contract-lab"
-          className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center gap-2"
+          className="w-full sm:w-auto px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
           Contract Lab <ArrowRight className="w-3.5 h-3.5" />
         </Link>
