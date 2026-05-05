@@ -68,6 +68,22 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 3,
     publishedAt: "2026-05-01T12:00:00Z",
   },
+  {
+    id: "ep-004",
+    doctorName: "Dr. Maryanne Shiozawa",
+    doctorSlug: "dr.-maryanne-shiozawa",
+    clinicName: "Shiozawa Wellness",
+    city: "London",
+    state: "UK",
+    videoUrl: "https://www.youtube.com/embed/2ftGcUjed4I",
+    thumbnail: "https://img.youtube.com/vi/2ftGcUjed4I/hqdefault.jpg",
+    quote:
+      "The more I do this, the more I want and the more I learn. And the less I feel like I know. That's a level of mastery.",
+    description:
+      "Dr. Maryanne Shiozawa is a NetworkSpinal practitioner based in London — and the first NeuroChiro member in the UK. With nearly 30 years in practice, she shares a powerful story of a single mother who went from bedridden and planning to end her life to completely transforming her health through chiropractic care. Dr. Maryanne talks about why chiropractic is rooted in salutogenesis, how she tests primitive reflexes and brain function in children, and why parents should trust their intuition when something feels off with their child.",
+    episodeNumber: 4,
+    publishedAt: "2026-05-04T12:00:00Z",
+  },
 ];
 
 export function getLatestEpisode(): SpotlightEpisode {
