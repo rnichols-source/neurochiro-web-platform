@@ -22,15 +22,6 @@ const CATEGORY_LINKS: Record<string, string> = {
   financial: "/student/financial-planner",
 };
 
-function getGrade(score: number): string {
-  if (score >= 90) return "A+";
-  if (score >= 80) return "A";
-  if (score >= 70) return "B";
-  if (score >= 60) return "C";
-  if (score >= 50) return "D";
-  return "F";
-}
-
 function getLowestCategory(breakdown: Record<string, ReadinessBreakdown>): { key: string; label: string; href: string; score: number } | null {
   let lowest: { key: string; score: number } | null = null;
   for (const [key, val] of Object.entries(breakdown)) {
@@ -44,78 +35,53 @@ function getLowestCategory(breakdown: Record<string, ReadinessBreakdown>): { key
 }
 
 export default function CareerReadiness({ totalScore, breakdown }: CareerReadinessProps) {
-  const grade = getGrade(totalScore);
   const lowest = getLowestCategory(breakdown);
-  const circumference = 2 * Math.PI * 58;
-  const strokeDashoffset = circumference - (totalScore / 100) * circumference;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-      <div className="flex flex-col sm:flex-row items-center gap-8">
-        {/* Score Ring */}
-        <div className="relative flex-shrink-0">
-          <svg width="140" height="140" viewBox="0 0 140 140">
-            <circle cx="70" cy="70" r="58" fill="none" stroke="#f0eeea" strokeWidth="6" />
-            <circle
-              cx="70" cy="70" r="58" fill="none"
-              stroke="#D66829"
-              strokeWidth="6"
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              transform="rotate(-90 70 70)"
-              className="transition-all duration-1000"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-4xl font-light text-[#1E2D3B]">{totalScore}</span>
-            <span className="text-[10px] font-medium text-[#1E2D3B]/40 uppercase tracking-wider">{grade}</span>
-          </div>
-        </div>
-
-        {/* Breakdown */}
-        <div className="flex-1 w-full">
-          <h2 className="text-sm font-semibold text-[#1E2D3B] mb-1">Career Readiness</h2>
-          <p className="text-xs text-[#1E2D3B]/40 mb-5">Progress across all dimensions</p>
-          <div className="space-y-3">
-            {Object.entries(breakdown).map(([key, cat]) => (
-              <Link key={key} href={CATEGORY_LINKS[key] || "#"} className="group block">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-[#1E2D3B]/60 group-hover:text-[#D66829] transition-colors">
-                    {cat.label}
-                  </span>
-                  <span className="text-[10px] text-[#1E2D3B]/30 tabular-nums">{cat.score}%</span>
-                </div>
-                <div className="h-1 bg-[#F5F3EF] rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-700"
-                    style={{
-                      width: `${Math.max(cat.score, 2)}%`,
-                      backgroundColor: cat.score >= 80 ? "#1E2D3B" : cat.score >= 40 ? "#D66829" : "#1E2D3B20",
-                    }}
-                  />
-                </div>
-              </Link>
-            ))}
-          </div>
+    <div>
+      {/* Score hero */}
+      <div className="flex items-end gap-4 mb-8">
+        <span className="text-7xl font-extralight text-white leading-none tabular-nums">{totalScore}</span>
+        <div className="pb-2">
+          <span className="text-lg text-white/15 font-light">/100</span>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/25 mt-1">Career Readiness</p>
         </div>
       </div>
 
-      {/* Next action */}
+      {/* Dimension bars */}
+      <div className="space-y-3">
+        {Object.entries(breakdown).map(([key, cat]) => (
+          <Link key={key} href={CATEGORY_LINKS[key] || "#"} className="group block">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] text-white/40 group-hover:text-[#D66829] transition-colors">
+                {cat.label}
+              </span>
+              <span className="text-[10px] text-white/20 tabular-nums">{cat.score}%</span>
+            </div>
+            <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width: `${Math.max(cat.score, 2)}%`,
+                  backgroundColor: cat.score >= 80 ? "#D66829" : cat.score >= 40 ? "#D66829" : "rgba(255,255,255,0.1)",
+                }}
+              />
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Boost prompt */}
       {lowest && lowest.score < 100 && (
         <Link
           href={lowest.href}
-          className="mt-6 flex items-center justify-between p-3.5 rounded-xl bg-[#F5F3EF] hover:bg-[#eae7e1] transition-colors group"
+          className="mt-6 flex items-center justify-between p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-[#D66829]/20 transition-all group"
         >
           <div>
-            <p className="text-xs font-medium text-[#1E2D3B]">Boost your score</p>
-            <p className="text-[11px] text-[#1E2D3B]/40">
-              {lowest.label} needs attention
-            </p>
+            <p className="text-xs text-white/60">Boost your score</p>
+            <p className="text-[11px] text-white/25">{lowest.label} needs attention</p>
           </div>
-          <span className="text-[#D66829] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-            Go &rarr;
-          </span>
+          <span className="text-[#D66829] text-xs opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
         </Link>
       )}
     </div>
