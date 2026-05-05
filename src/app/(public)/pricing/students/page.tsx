@@ -8,8 +8,8 @@ import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
 export default function StudentPricing() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
 
-  const proPrice = billingCycle === "monthly" ? "29" : "25";
-  const proAnnualTotal = "$300/yr";
+  const proPrice = billingCycle === "monthly" ? "12" : "10";
+  const proAnnualTotal = "$120/yr";
 
   return (
     <div className="max-w-3xl mx-auto">

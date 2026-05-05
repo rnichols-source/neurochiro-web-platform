@@ -59,8 +59,8 @@ export default function DoctorPricing() {
               { name: "Profile page with photo & bio", included: true },
               { name: "Profile view analytics", included: true },
               { name: "Show up in patient searches", included: true },
-              { name: "Patient messaging", included: true },
-              { name: "Verified badge", included: true },
+              { name: "Patient messaging", included: false },
+              { name: "Verified badge", included: false },
               { name: "AI Bio Generator", included: false },
               { name: "KPI Tracker", included: false },
               { name: "Priority search placement", included: false },
@@ -107,6 +107,7 @@ export default function DoctorPricing() {
               { name: "Job posting", included: true },
               { name: "Referral program", included: true },
               { name: "Verified badge", included: true },
+              { name: "Content Library", included: true },
               { name: "Care Plan Builder", included: false },
               { name: "P&L Analyzer", included: false },
               { name: "Priority search placement", included: false },
@@ -178,7 +179,7 @@ export default function DoctorPricing() {
         <h3 className="font-bold text-neuro-navy text-center mb-6">Common Questions</h3>
         <div className="space-y-4">
           {[
-            { q: "What does Basic include?", a: "Basic at $49/mo gives you a verified directory listing, profile page, patient messaging, profile analytics, and a verified badge. It's everything you need to be found by patients." },
+            { q: "What does Basic include?", a: "Basic at $49/mo gives you a directory listing, profile page, and profile view analytics. Upgrade to Growth to unlock patient messaging, verified badge, KPI tracker, and more." },
             { q: "Can I upgrade later?", a: "Yes. Start with Basic and upgrade to Growth or Pro anytime from your dashboard. All your data carries over." },
             { q: "Can I cancel anytime?", a: "Yes. Cancel from your dashboard anytime. No lock-in contracts, no cancellation fees. You keep access through the end of your billing period." },
             { q: "Will patients actually find me?", a: "NeuroChiro is the only directory focused exclusively on nervous system chiropractors. Patients searching for this specific type of care find you here, not competing with generalists on Google." },

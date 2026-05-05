@@ -106,14 +106,14 @@ export default function WhyNeuroChiroPage() {
           <div className="flex flex-wrap justify-center gap-6 mb-10 text-sm">
             <span className="text-gray-400"><span className="text-white font-bold">120+</span> Verified Doctors</span>
             <span className="text-gray-400"><span className="text-white font-bold">6</span> Countries</span>
-            <span className="text-gray-400">From <span className="text-white font-bold">$49</span>/mo</span>
+            <span className="text-gray-400"><span className="text-white font-bold">Free</span> to join</span>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/register?role=doctor"
               className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors inline-flex items-center justify-center gap-2"
             >
-              Get Listed <ArrowRight className="w-5 h-5" />
+              Get Listed Free <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/directory"
@@ -270,7 +270,7 @@ export default function WhyNeuroChiroPage() {
             href="/register?role=doctor"
             className="inline-flex items-center gap-2 px-10 py-5 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors shadow-xl shadow-neuro-orange/20"
           >
-            Get Listed <ArrowRight className="w-5 h-5" />
+            Get Listed Free <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>
