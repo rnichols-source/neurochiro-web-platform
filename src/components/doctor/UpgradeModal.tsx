@@ -14,12 +14,12 @@ interface UpgradeModalProps {
 
 const tiers = [
   {
-    id: "free",
-    name: "Free",
-    monthlyPrice: "$0",
-    annualPrice: "$0",
-    annualTotal: "",
-    description: "Basic directory listing",
+    id: "basic",
+    name: "Basic",
+    monthlyPrice: "$49",
+    annualPrice: "$42",
+    annualTotal: "$490/yr",
+    description: "Directory listing + messaging",
     icon: Star,
     color: "text-gray-400",
     bg: "bg-white/5",
@@ -108,7 +108,7 @@ const PRICE_IDS: Record<string, Record<string, string>> = {
   },
 };
 
-export default function UpgradeModal({ isOpen, onClose, currentTier = "free", userId, highlightFeature }: UpgradeModalProps) {
+export default function UpgradeModal({ isOpen, onClose, currentTier = "basic", userId, highlightFeature }: UpgradeModalProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
 

@@ -41,14 +41,14 @@ export default function StudentPricing() {
         {/* FREE */}
         <div className="bg-white rounded-2xl border border-gray-200 p-8">
           <div className="flex items-center gap-2 mb-4">
-            <GraduationCap className="w-5 h-5 text-gray-400" />
-            <h3 className="text-lg font-black text-neuro-navy">Free</h3>
+            <GraduationCap className="w-5 h-5 text-neuro-navy" />
+            <h3 className="text-lg font-black text-neuro-navy">Student</h3>
           </div>
           <div className="flex items-baseline gap-1 mb-1">
-            <span className="text-5xl font-black text-neuro-navy">$0</span>
-            <span className="text-gray-400 font-bold">/forever</span>
+            <span className="text-5xl font-black text-neuro-navy">$12</span>
+            <span className="text-gray-400 font-bold">/mo</span>
           </div>
-          <p className="text-sm text-gray-500 mb-8">Get started on your career</p>
+          <p className="text-sm text-gray-500 mb-8">Everything included — one plan</p>
 
           <div className="space-y-3 mb-8">
             {[
