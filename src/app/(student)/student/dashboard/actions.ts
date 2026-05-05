@@ -136,7 +136,7 @@ export async function getCareerReadinessData() {
 
     // Financial plan (10%)
     const { data: planData } = await supabase
-      .from('financial_plans')
+      .from('financial_plans' as any)
       .select('id')
       .eq('user_id', user.id)
       .maybeSingle()
