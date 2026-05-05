@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight, User } from "lucide-react";
 import Link from "next/link";
 import { getStudentProfile, updateStudentProfile } from "./actions";
 
@@ -63,107 +63,110 @@ export default function ProfilePage() {
 
   if (loading) return (
     <div className="min-h-dvh flex items-center justify-center">
-      <Loader2 className="w-8 h-8 text-neuro-orange animate-spin" />
+      <Loader2 className="w-5 h-5 text-[#D66829] animate-spin" />
     </div>
   );
 
   const inputClass =
-    "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-neuro-orange/20 focus:border-neuro-orange outline-none transition-colors";
+    "w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 focus:ring-1 focus:ring-[#D66829]/20 outline-none transition-colors";
 
   return (
     <div className="p-6 md:p-10 max-w-2xl mx-auto space-y-6">
       {toast && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-neuro-navy text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-[#D66829] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-lg shadow-[#D66829]/20">
           {toast}
         </div>
       )}
 
-      <div className="mb-2">
-        <h1 className="text-2xl font-heading font-black text-neuro-navy">Profile</h1>
-        <p className="text-sm text-gray-400 mt-1">
-          Your profile powers everything — job matching, mentor discovery, and your Career Readiness Score. The more complete it is, the better your matches.
-        </p>
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <User className="w-6 h-6 text-[#D66829]" />
+        <div>
+          <h1 className="text-2xl font-bold text-white">Profile</h1>
+          <p className="text-xs text-white/35">
+            Powers job matching, mentor discovery, and your Career Readiness Score.
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-5">
+      <form onSubmit={handleSave} className="space-y-4">
         {/* Personal Info */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">Personal Info</h2>
-          <label className="block text-sm font-medium text-neuro-navy mb-1">Full Name <span className="text-red-400">*</span></label>
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+          <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Personal Info</h2>
+          <label className="block text-[12px] font-medium text-white/60 mb-1.5">Full Name <span className="text-[#D66829]">*</span></label>
           <input className={inputClass} value={form.name} onChange={(e) => update("name", e.target.value)} />
         </div>
 
         {/* Education */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Education</h2>
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 space-y-4">
+          <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-2">Education</h2>
           <div>
-            <label className="block text-sm font-medium text-neuro-navy mb-1">School <span className="text-red-400">*</span></label>
+            <label className="block text-[12px] font-medium text-white/60 mb-1.5">School <span className="text-[#D66829]">*</span></label>
             <input className={inputClass} value={form.school} onChange={(e) => update("school", e.target.value)} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neuro-navy mb-1">Graduation Year <span className="text-red-400">*</span></label>
+            <label className="block text-[12px] font-medium text-white/60 mb-1.5">Graduation Year <span className="text-[#D66829]">*</span></label>
             <input className={inputClass} type="number" min="2020" max="2035" value={form.gradYear} onChange={(e) => update("gradYear", e.target.value)} placeholder="e.g. 2027" />
           </div>
         </div>
 
         {/* Location */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">Location</h2>
-          <label className="block text-sm font-medium text-neuro-navy mb-1">City</label>
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+          <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Location</h2>
+          <label className="block text-[12px] font-medium text-white/60 mb-1.5">City</label>
           <input className={inputClass} value={form.city} onChange={(e) => update("city", e.target.value)} />
         </div>
 
         {/* Interests */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">Interests</h2>
-          <label className="block text-sm font-medium text-neuro-navy mb-1">Clinical Interests</label>
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+          <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Interests</h2>
+          <label className="block text-[12px] font-medium text-white/60 mb-1.5">Clinical Interests</label>
           <input className={inputClass} placeholder="Pediatrics, Sports Performance" value={form.interests} onChange={(e) => update("interests", e.target.value)} />
         </div>
 
         {/* Skills */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">Skills</h2>
-          <label className="block text-sm font-medium text-neuro-navy mb-1">Skills</label>
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+          <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Skills</h2>
+          <label className="block text-[12px] font-medium text-white/60 mb-1.5">Skills</label>
           <input className={inputClass} placeholder="Diversified, Activator, Dry Needling" value={form.skills} onChange={(e) => update("skills", e.target.value)} />
         </div>
 
         {/* Mentorship */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide">Mentorship</h2>
-              <p className="text-xs text-gray-400 mt-1">Are you looking for a mentor?</p>
+              <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829]">Mentorship</h2>
+              <p className="text-xs text-white/35 mt-1">Are you looking for a mentor?</p>
             </div>
             <button
               type="button"
               onClick={() => update("mentorship", !form.mentorship)}
-              className={`relative w-12 h-6 rounded-full transition-colors ${form.mentorship ? 'bg-green-500' : 'bg-gray-200'}`}
+              className={`relative w-11 h-6 rounded-full transition-colors ${form.mentorship ? 'bg-[#D66829]' : 'bg-white/[0.08]'}`}
             >
-              <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${form.mentorship ? 'left-6' : 'left-0.5'}`} />
+              <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${form.mentorship ? 'left-[22px]' : 'left-0.5'}`} />
             </button>
           </div>
-          {/* Mentorship value handled in form state, not hidden input */}
         </div>
 
         <button
           type="submit"
           disabled={saving}
-          className="w-full py-3 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange-light transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full py-3.5 bg-[#D66829] text-white font-semibold rounded-lg hover:bg-[#e8834a] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-[#D66829]/20"
         >
           {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-          Save
+          Save Profile
         </button>
       </form>
 
       {/* Pipeline CTA */}
-      <div className="bg-gray-50 rounded-2xl p-6 flex items-center justify-between mt-8">
+      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between">
         <div>
-          <p className="text-sm font-bold text-[#1a2744]">Profile updated?</p>
-          <p className="text-xs text-gray-400">See how it affects your Career Readiness Score.</p>
+          <p className="text-[13px] font-semibold text-white">Profile updated?</p>
+          <p className="text-xs text-white/30">See how it affects your Career Readiness Score.</p>
         </div>
         <Link
           href="/student/dashboard"
-          className="px-5 py-2.5 bg-[#e97325] text-white rounded-xl text-xs font-bold hover:bg-[#e97325]/90 transition-colors flex items-center gap-2"
+          className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg text-xs font-semibold hover:text-white hover:bg-white/[0.1] transition-all flex items-center gap-2"
         >
           Dashboard <ArrowRight className="w-3.5 h-3.5" />
         </Link>
