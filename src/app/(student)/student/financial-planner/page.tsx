@@ -374,7 +374,7 @@ function FinancialPlannerContent() {
   // ─── Step Tabs ───────────────────────────────────────────────────────────
 
   const StepTabs = () => (
-    <div className="no-print flex rounded-2xl overflow-hidden border border-gray-200 mb-6">
+    <div className="no-print flex rounded-2xl overflow-hidden border border-white/[0.08] mb-6">
       {STEP_LABELS.map((label, i) => {
         const step = i + 1;
         const isActive = state.step === step;
@@ -384,14 +384,14 @@ function FinancialPlannerContent() {
           <button
             key={step}
             onClick={() => clickable && goToStep(step)}
-            className={`flex-1 py-3 px-2 text-xs sm:text-sm font-bold transition-all border-r last:border-r-0 border-gray-200 ${
+            className={`flex-1 py-3 px-2 text-xs sm:text-sm font-bold transition-all border-r last:border-r-0 border-white/[0.08] ${
               isActive
-                ? "bg-neuro-navy text-white"
+                ? "bg-[#D66829] text-white"
                 : isCompleted
                 ? "bg-green-600 text-white"
                 : clickable
-                ? "bg-white text-gray-500 hover:bg-gray-50 cursor-pointer"
-                : "bg-gray-50 text-gray-300 cursor-not-allowed"
+                ? "bg-white/[0.04] text-white/40 hover:text-white/60 cursor-pointer"
+                : "bg-white/[0.04] text-white/20 cursor-not-allowed"
             }`}
           >
             <span className="flex items-center justify-center gap-1.5">
@@ -409,7 +409,7 @@ function FinancialPlannerContent() {
       {state.step > 1 ? (
         <button
           onClick={prevStep}
-          className="flex items-center gap-2 px-5 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/[0.08] text-sm font-bold text-white/50 hover:bg-white/[0.04] transition-colors"
         >
           <ChevronLeft className="w-4 h-4" /> Back
         </button>
@@ -419,7 +419,7 @@ function FinancialPlannerContent() {
       {state.step < 4 ? (
         <button
           onClick={nextStep}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-neuro-orange text-white text-sm font-bold hover:bg-neuro-orange/90 transition-colors"
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#D66829] text-white text-sm font-bold hover:bg-[#D66829]/90 transition-colors"
         >
           Next <ChevronRight className="w-4 h-4" />
         </button>
@@ -438,31 +438,31 @@ function FinancialPlannerContent() {
       {/* Left: Form */}
       <div className="lg:col-span-2 space-y-6">
         {/* Section A: Student Loans */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2">
-            <GraduationCap className="w-4 h-4 text-neuro-orange" /> Student Loans
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 space-y-4">
+          <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2">
+            <GraduationCap className="w-4 h-4 text-[#D66829]" /> Student Loans
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Loan Balance</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Loan Balance</label>
               <div className="relative mt-1">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 font-bold">$</span>
                 <input
                   type="number"
                   value={state.loanBalance}
                   onChange={(e) => set("loanBalance", Number(e.target.value) || 0)}
-                  className="w-full pl-8 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange transition-colors"
+                  className="w-full pl-8 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors"
                 />
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Interest Rate (%)</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Interest Rate (%)</label>
               <input
                 type="number"
                 step="0.1"
                 value={state.interestRate}
                 onChange={(e) => set("interestRate", Number(e.target.value) || 0)}
-                className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange transition-colors"
+                className="mt-1 w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors"
               />
             </div>
           </div>
@@ -471,8 +471,8 @@ function FinancialPlannerContent() {
               onClick={() => set("hasPrivateLoans", !state.hasPrivateLoans)}
               className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-colors ${
                 state.hasPrivateLoans
-                  ? "border-neuro-navy bg-neuro-navy text-white"
-                  : "border-gray-200 text-gray-500 hover:border-gray-300"
+                  ? "border-white/[0.08] bg-[#162231] text-white"
+                  : "border-white/[0.08] text-white/40 hover:border-white/[0.15]"
               }`}
             >
               {state.hasPrivateLoans && <Check className="w-3 h-3 inline mr-1" />}Has Private Loans
@@ -481,34 +481,34 @@ function FinancialPlannerContent() {
               onClick={() => set("hasConsolidated", !state.hasConsolidated)}
               className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-colors ${
                 state.hasConsolidated
-                  ? "border-neuro-navy bg-neuro-navy text-white"
-                  : "border-gray-200 text-gray-500 hover:border-gray-300"
+                  ? "border-white/[0.08] bg-[#162231] text-white"
+                  : "border-white/[0.08] text-white/40 hover:border-white/[0.15]"
               }`}
             >
               {state.hasConsolidated && <Check className="w-3 h-3 inline mr-1" />}Has Consolidated
             </button>
           </div>
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Current Monthly Payment (optional)</label>
+            <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Current Monthly Payment (optional)</label>
             <div className="relative mt-1">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 font-bold">$</span>
               <input
                 type="number"
                 value={state.currentPayment}
                 onChange={(e) => set("currentPayment", Number(e.target.value) || 0)}
-                className="w-full pl-8 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange transition-colors"
+                className="w-full pl-8 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors"
               />
             </div>
           </div>
         </div>
 
         {/* Section B: Income */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-neuro-orange" /> Income
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 space-y-4">
+          <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-[#D66829]" /> Income
           </h3>
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Employment Type</label>
+            <label className="text-xs font-bold text-white/40 uppercase tracking-wide mb-2 block">Employment Type</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {EMPLOYMENT_TYPES.map((t) => (
                 <button
@@ -516,8 +516,8 @@ function FinancialPlannerContent() {
                   onClick={() => set("employmentType", t)}
                   className={`px-3 py-3 rounded-xl text-xs font-bold border-2 transition-colors ${
                     state.employmentType === t
-                      ? "border-neuro-orange bg-neuro-orange text-white"
-                      : "border-gray-200 text-gray-500 hover:border-gray-300"
+                      ? "border-[#D66829] bg-[#D66829] text-white"
+                      : "border-white/[0.08] text-white/40 hover:border-white/[0.15]"
                   }`}
                 >
                   {t}
@@ -527,93 +527,93 @@ function FinancialPlannerContent() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Annual Salary</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Annual Salary</label>
               <div className="relative mt-1">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 font-bold">$</span>
                 <input
                   type="number"
                   value={state.annualSalary}
                   onChange={(e) => set("annualSalary", Number(e.target.value) || 0)}
-                  className="w-full pl-8 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange transition-colors"
+                  className="w-full pl-8 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors"
                 />
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Comp Model</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Comp Model</label>
               <div className="relative mt-1">
                 <select
                   value={state.compModel}
                   onChange={(e) => set("compModel", e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange transition-colors appearance-none"
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
                 >
                   {COMP_MODELS.map((m) => (
                     <option key={m} value={m}>{m}</option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35 pointer-events-none" />
               </div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Monthly Bonus (optional)</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Monthly Bonus (optional)</label>
               <div className="relative mt-1">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 font-bold">$</span>
                 <input
                   type="number"
                   value={state.monthlyBonus}
                   onChange={(e) => set("monthlyBonus", Number(e.target.value) || 0)}
-                  className="w-full pl-8 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange transition-colors"
+                  className="w-full pl-8 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors"
                 />
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">State</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-wide">State</label>
               <div className="relative mt-1">
                 <select
                   value={state.state}
                   onChange={(e) => set("state", e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange transition-colors appearance-none"
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
                 >
                   {US_STATES.map((s) => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35 pointer-events-none" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Section C: Monthly Expenses */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2">
-              <Calculator className="w-4 h-4 text-neuro-orange" /> Monthly Expenses
+            <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2">
+              <Calculator className="w-4 h-4 text-[#D66829]" /> Monthly Expenses
             </h3>
             <button
               onClick={resetExpenses}
-              className="text-xs font-bold text-neuro-orange hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-[#D66829] hover:underline flex items-center gap-1"
             >
               <RotateCcw className="w-3 h-3" /> Use Defaults
             </button>
           </div>
           {EXPENSE_GROUPS.map((group) => (
             <div key={group.label}>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">
+              <p className="text-xs font-bold text-white/35 uppercase tracking-wide mb-2">
                 {group.icon} {group.label}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {group.keys.map((k) => (
                   <div key={k}>
-                    <label className="text-[10px] font-bold text-gray-400 uppercase">{EXPENSE_LABELS[k]}</label>
+                    <label className="text-[10px] font-bold text-white/35 uppercase">{EXPENSE_LABELS[k]}</label>
                     <div className="relative mt-0.5">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35 text-xs">$</span>
                       <input
                         type="number"
                         value={state.expenses[k] ?? 0}
                         onChange={(e) => setExpense(k, Number(e.target.value) || 0)}
-                        className="w-full pl-7 pr-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-bold focus:outline-none focus:border-neuro-orange transition-colors"
+                        className="w-full pl-7 pr-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors"
                       />
                     </div>
                   </div>
@@ -621,52 +621,52 @@ function FinancialPlannerContent() {
               </div>
             </div>
           ))}
-          <div className="bg-neuro-navy rounded-xl p-4 text-white flex justify-between items-center">
+          <div className="bg-[#162231] rounded-xl p-4 text-white flex justify-between items-center">
             <span className="text-sm font-bold text-white/70">Total Monthly Expenses</span>
             <span className="text-xl font-black">${fmt(totalExpenses)}</span>
           </div>
         </div>
 
         {/* Section D: Goals */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2">
-            <Target className="w-4 h-4 text-neuro-orange" /> Goals
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 space-y-4">
+          <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2">
+            <Target className="w-4 h-4 text-[#D66829]" /> Goals
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Emergency Fund (months)</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Emergency Fund (months)</label>
               <div className="relative mt-1">
                 <select
                   value={state.emergencyMonths}
                   onChange={(e) => set("emergencyMonths", Number(e.target.value))}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange transition-colors appearance-none"
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
                 >
                   <option value={3}>3 months</option>
                   <option value={6}>6 months</option>
                   <option value={12}>12 months</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35 pointer-events-none" />
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Retirement Saving (/mo)</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Retirement Saving (/mo)</label>
               <div className="relative mt-1">
                 <select
                   value={state.retirementSaving}
                   onChange={(e) => set("retirementSaving", Number(e.target.value))}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange transition-colors appearance-none"
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
                 >
                   <option value={0}>$0/mo</option>
                   <option value={100}>$100/mo</option>
                   <option value={300}>$300/mo</option>
                   <option value={500}>$500/mo</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35 pointer-events-none" />
               </div>
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Open Your Own Practice?</label>
+            <label className="text-xs font-bold text-white/40 uppercase tracking-wide mb-2 block">Open Your Own Practice?</label>
             <div className="flex gap-2">
               {["Yes", "No", "Maybe"].map((v) => (
                 <button
@@ -674,8 +674,8 @@ function FinancialPlannerContent() {
                   onClick={() => set("openPractice", v)}
                   className={`flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-colors ${
                     state.openPractice === v
-                      ? "border-neuro-orange bg-neuro-orange text-white"
-                      : "border-gray-200 text-gray-500 hover:border-gray-300"
+                      ? "border-[#D66829] bg-[#D66829] text-white"
+                      : "border-white/[0.08] text-white/40 hover:border-white/[0.15]"
                   }`}
                 >
                   {v}
@@ -685,19 +685,19 @@ function FinancialPlannerContent() {
           </div>
           {state.openPractice === "Yes" && (
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Practice Timeline</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Practice Timeline</label>
               <div className="relative mt-1">
                 <select
                   value={state.practiceTimeline}
                   onChange={(e) => set("practiceTimeline", Number(e.target.value))}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange transition-colors appearance-none"
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
                 >
                   <option value={1}>1 year</option>
                   <option value={2}>2 years</option>
                   <option value={3}>3 years</option>
                   <option value={5}>5 years</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35 pointer-events-none" />
               </div>
             </div>
           )}
@@ -706,8 +706,8 @@ function FinancialPlannerContent() {
 
       {/* Right: Live Summary Card */}
       <div className="lg:col-span-1">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden sticky top-8">
-          <div className="bg-neuro-navy p-6">
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden sticky top-8">
+          <div className="bg-[#162231] p-6">
             <p className="text-xs text-white/50 uppercase tracking-wide font-bold">Live Summary</p>
             <h2 className="text-xl font-heading font-black text-white mt-2">
               {state.name || "Your Finances"}
@@ -715,45 +715,45 @@ function FinancialPlannerContent() {
           </div>
           <div className="p-6 space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-gray-400 uppercase">Monthly Take-Home</span>
-              <span className="text-lg font-black text-neuro-navy">${fmt(Math.round(netMonthly))}</span>
+              <span className="text-xs font-bold text-white/35 uppercase">Monthly Take-Home</span>
+              <span className="text-lg font-black text-white">${fmt(Math.round(netMonthly))}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-gray-400 uppercase">Total Expenses</span>
-              <span className="text-lg font-black text-neuro-navy">${fmt(totalExpenses)}</span>
+              <span className="text-xs font-bold text-white/35 uppercase">Total Expenses</span>
+              <span className="text-lg font-black text-white">${fmt(totalExpenses)}</span>
             </div>
-            <div className="h-px bg-gray-100" />
+            <div className="h-px bg-white/[0.06]" />
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-gray-400 uppercase">
+              <span className="text-xs font-bold text-white/35 uppercase">
                 {surplus >= 0 ? "Monthly Surplus" : "Monthly Deficit"}
               </span>
               <span className={`text-lg font-black ${surplus >= 0 ? "text-green-600" : "text-red-600"}`}>
                 {surplus >= 0 ? "+" : ""}${fmt(Math.round(surplus))}
               </span>
             </div>
-            <div className="h-px bg-gray-100" />
+            <div className="h-px bg-white/[0.06]" />
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-gray-400 uppercase">Debt-to-Income</span>
-              <span className={`text-sm font-black ${dti > 200 ? "text-red-600" : dti > 100 ? "text-neuro-orange" : "text-green-600"}`}>
+              <span className="text-xs font-bold text-white/35 uppercase">Debt-to-Income</span>
+              <span className={`text-sm font-black ${dti > 200 ? "text-red-600" : dti > 100 ? "text-[#D66829]" : "text-green-600"}`}>
                 {fmtDec(dti, 0)}%
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-gray-400 uppercase">Std. Payoff</span>
-              <span className="text-sm font-black text-neuro-navy">{yearsToPayOff} years</span>
+              <span className="text-xs font-bold text-white/35 uppercase">Std. Payoff</span>
+              <span className="text-sm font-black text-white">{yearsToPayOff} years</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-gray-400 uppercase">Std. Payment</span>
-              <span className="text-sm font-black text-neuro-navy">${fmt(Math.round(standardPayment))}/mo</span>
+              <span className="text-xs font-bold text-white/35 uppercase">Std. Payment</span>
+              <span className="text-sm font-black text-white">${fmt(Math.round(standardPayment))}/mo</span>
             </div>
             {/* Visual bar */}
             <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Income Allocation</p>
+              <p className="text-[10px] font-bold text-white/35 uppercase mb-1">Income Allocation</p>
               <div className="flex rounded-lg overflow-hidden h-4">
                 {netMonthly > 0 && (
                   <>
                     <div
-                      className="bg-neuro-navy"
+                      className="bg-[#162231]"
                       style={{ width: `${Math.min(100, (totalExpenses / netMonthly) * 100)}%` }}
                       title={`Expenses: ${Math.round((totalExpenses / netMonthly) * 100)}%`}
                     />
@@ -765,7 +765,7 @@ function FinancialPlannerContent() {
                   </>
                 )}
               </div>
-              <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+              <div className="flex justify-between text-[10px] text-white/35 mt-1">
                 <span>Expenses {netMonthly > 0 ? Math.round((totalExpenses / netMonthly) * 100) : 0}%</span>
                 <span className={surplus >= 0 ? "text-green-600" : "text-red-600"}>
                   {surplus >= 0 ? "Free" : "Over"} {netMonthly > 0 ? Math.abs(Math.round((surplus / netMonthly) * 100)) : 0}%
@@ -898,7 +898,7 @@ function FinancialPlannerContent() {
     if (state.checkingPurchase) {
       return (
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin w-8 h-8 border-4 border-neuro-orange border-t-transparent rounded-full" />
+          <div className="animate-spin w-8 h-8 border-4 border-[#D66829] border-t-transparent rounded-full" />
         </div>
       );
     }
@@ -910,25 +910,25 @@ function FinancialPlannerContent() {
     return (
       <div className="space-y-8">
         {/* Section A: Take-Home Pay Calculator */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
-            <DollarSign className="w-4 h-4 text-neuro-orange" /> Take-Home Pay Breakdown
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+          <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2 mb-4">
+            <DollarSign className="w-4 h-4 text-[#D66829]" /> Take-Home Pay Breakdown
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="bg-gray-50 rounded-xl p-4 text-center">
-              <p className="text-[10px] font-bold text-gray-400 uppercase">Gross Monthly</p>
-              <p className="text-lg font-black text-neuro-navy">${fmt(Math.round(grossAnnual / 12))}</p>
+            <div className="bg-white/[0.04] rounded-xl p-4 text-center">
+              <p className="text-[10px] font-bold text-white/35 uppercase">Gross Monthly</p>
+              <p className="text-lg font-black text-white">${fmt(Math.round(grossAnnual / 12))}</p>
             </div>
-            <div className="bg-gray-50 rounded-xl p-4 text-center">
-              <p className="text-[10px] font-bold text-gray-400 uppercase">Federal Tax</p>
+            <div className="bg-white/[0.04] rounded-xl p-4 text-center">
+              <p className="text-[10px] font-bold text-white/35 uppercase">Federal Tax</p>
               <p className="text-lg font-black text-red-600">-${fmt(Math.round(federalTaxAnnual / 12))}</p>
             </div>
-            <div className="bg-gray-50 rounded-xl p-4 text-center">
-              <p className="text-[10px] font-bold text-gray-400 uppercase">State Tax ({state.state})</p>
+            <div className="bg-white/[0.04] rounded-xl p-4 text-center">
+              <p className="text-[10px] font-bold text-white/35 uppercase">State Tax ({state.state})</p>
               <p className="text-lg font-black text-red-600">-${fmt(Math.round(stateTaxAnnual / 12))}</p>
             </div>
-            <div className="bg-gray-50 rounded-xl p-4 text-center">
-              <p className="text-[10px] font-bold text-gray-400 uppercase">FICA {is1099 ? "(SE)" : ""}</p>
+            <div className="bg-white/[0.04] rounded-xl p-4 text-center">
+              <p className="text-[10px] font-bold text-white/35 uppercase">FICA {is1099 ? "(SE)" : ""}</p>
               <p className="text-lg font-black text-red-600">-${fmt(Math.round(ficaAnnual / 12))}</p>
             </div>
             {is1099 && (
@@ -937,7 +937,7 @@ function FinancialPlannerContent() {
                 <p className="text-lg font-black text-yellow-700">${fmt(Math.round(totalTaxAnnual / 4))}</p>
               </div>
             )}
-            <div className="bg-neuro-navy rounded-xl p-4 text-center">
+            <div className="bg-[#162231] rounded-xl p-4 text-center">
               <p className="text-[10px] font-bold text-white/60 uppercase">Net Take-Home</p>
               <p className="text-lg font-black text-white">${fmt(Math.round(netMonthly))}</p>
             </div>
@@ -953,41 +953,41 @@ function FinancialPlannerContent() {
         </div>
 
         {/* Section B: Loan Repayment Strategy */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 text-neuro-orange" /> Loan Repayment Strategies
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+          <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2 mb-4">
+            <TrendingUp className="w-4 h-4 text-[#D66829]" /> Loan Repayment Strategies
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b-2 border-gray-100">
-                  <th className="text-left py-3 px-3 text-xs font-black text-gray-400 uppercase">Plan</th>
-                  <th className="text-right py-3 px-3 text-xs font-black text-gray-400 uppercase">Monthly</th>
-                  <th className="text-right py-3 px-3 text-xs font-black text-gray-400 uppercase">Total Paid</th>
-                  <th className="text-right py-3 px-3 text-xs font-black text-gray-400 uppercase">Years</th>
-                  <th className="text-right py-3 px-3 text-xs font-black text-gray-400 uppercase">Forgiveness?</th>
+                <tr className="border-b-2 border-white/[0.08]">
+                  <th className="text-left py-3 px-3 text-xs font-black text-white/35 uppercase">Plan</th>
+                  <th className="text-right py-3 px-3 text-xs font-black text-white/35 uppercase">Monthly</th>
+                  <th className="text-right py-3 px-3 text-xs font-black text-white/35 uppercase">Total Paid</th>
+                  <th className="text-right py-3 px-3 text-xs font-black text-white/35 uppercase">Years</th>
+                  <th className="text-right py-3 px-3 text-xs font-black text-white/35 uppercase">Forgiveness?</th>
                 </tr>
               </thead>
               <tbody>
                 {loanPlans.map((plan) => (
                   <tr
                     key={plan.name}
-                    className={`border-b border-gray-50 ${
-                      plan.recommended ? "bg-neuro-orange/5 border-l-4 border-l-neuro-orange" : ""
+                    className={`border-b border-white/[0.04] ${
+                      plan.recommended ? "bg-[#D66829]/5 border-l-4 border-l-[#D66829]" : ""
                     }`}
                   >
-                    <td className="py-3 px-3 font-bold text-neuro-navy">
+                    <td className="py-3 px-3 font-bold text-white">
                       {plan.name}
                       {plan.recommended && (
-                        <span className="ml-2 text-[10px] font-black text-neuro-orange bg-neuro-orange/10 px-2 py-0.5 rounded-full uppercase">
+                        <span className="ml-2 text-[10px] font-black text-[#D66829] bg-[#D66829]/10 px-2 py-0.5 rounded-full uppercase">
                           Recommended
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-3 text-right font-black text-neuro-navy">${fmt(plan.payment)}</td>
-                    <td className="py-3 px-3 text-right font-bold text-gray-600">${fmt(plan.totalPaid)}</td>
-                    <td className="py-3 px-3 text-right font-bold text-gray-600">{plan.years}</td>
-                    <td className="py-3 px-3 text-right font-bold text-gray-600">{plan.forgiveness}</td>
+                    <td className="py-3 px-3 text-right font-black text-white">${fmt(plan.payment)}</td>
+                    <td className="py-3 px-3 text-right font-bold text-white/50">${fmt(plan.totalPaid)}</td>
+                    <td className="py-3 px-3 text-right font-bold text-white/50">{plan.years}</td>
+                    <td className="py-3 px-3 text-right font-bold text-white/50">{plan.forgiveness}</td>
                   </tr>
                 ))}
               </tbody>
@@ -996,26 +996,26 @@ function FinancialPlannerContent() {
         </div>
 
         {/* Section C: First 90 Days Checklist */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
-            <FileText className="w-4 h-4 text-neuro-orange" /> First 90 Days Checklist ({isW2 ? "W-2" : "1099"})
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+          <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2 mb-4">
+            <FileText className="w-4 h-4 text-[#D66829]" /> First 90 Days Checklist ({isW2 ? "W-2" : "1099"})
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {activeChecklist.map((item, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                <div className="w-5 h-5 rounded border-2 border-neuro-navy flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Check className="w-3 h-3 text-neuro-navy" />
+              <div key={i} className="flex items-start gap-3 p-3 bg-white/[0.04] rounded-xl">
+                <div className="w-5 h-5 rounded border-2 border-white/[0.08] flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Check className="w-3 h-3 text-white" />
                 </div>
-                <span className="text-sm text-gray-700">{item}</span>
+                <span className="text-sm text-white/60">{item}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Section D: Budget Allocation Bar */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
-            <Wallet className="w-4 h-4 text-neuro-orange" /> Budget Allocation
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+          <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2 mb-4">
+            <Wallet className="w-4 h-4 text-[#D66829]" /> Budget Allocation
           </h3>
           <div className="flex rounded-xl overflow-hidden h-12 mb-4">
             {budgetSegments.map((seg) => {
@@ -1038,9 +1038,9 @@ function FinancialPlannerContent() {
               <div key={seg.label} className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: seg.color }} />
                 <div>
-                  <p className="text-[10px] font-bold text-gray-500">{seg.label}</p>
-                  <p className="text-xs font-black text-neuro-navy">
-                    ${fmt(seg.value)} <span className="text-gray-400 font-normal">({budgetTotal > 0 ? Math.round((seg.value / budgetTotal) * 100) : 0}%)</span>
+                  <p className="text-[10px] font-bold text-white/40">{seg.label}</p>
+                  <p className="text-xs font-black text-white">
+                    ${fmt(seg.value)} <span className="text-white/35 font-normal">({budgetTotal > 0 ? Math.round((seg.value / budgetTotal) * 100) : 0}%)</span>
                   </p>
                 </div>
               </div>
@@ -1049,16 +1049,16 @@ function FinancialPlannerContent() {
         </div>
 
         {/* Section E: Tax Deductions */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
-            <Calculator className="w-4 h-4 text-neuro-orange" /> Tax Deductions ({Math.round(marginalRate * 100)}% Marginal Rate)
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+          <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2 mb-4">
+            <Calculator className="w-4 h-4 text-[#D66829]" /> Tax Deductions ({Math.round(marginalRate * 100)}% Marginal Rate)
           </h3>
           <div className="space-y-2">
             {deductions.map((d) => (
-              <div key={d.label} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+              <div key={d.label} className="flex items-center justify-between p-3 bg-white/[0.04] rounded-xl">
                 <div>
-                  <p className="text-sm font-bold text-neuro-navy">{d.label}</p>
-                  <p className="text-xs text-gray-400">${fmt(d.annualCost)}/yr deductible</p>
+                  <p className="text-sm font-bold text-white">{d.label}</p>
+                  <p className="text-xs text-white/35">${fmt(d.annualCost)}/yr deductible</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-black text-green-600">Save ${fmt(d.saved)}/yr</p>
@@ -1205,7 +1205,7 @@ function FinancialPlannerContent() {
         {/* Year Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {yearCards.map((card) => (
-            <div key={card.title} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div key={card.title} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden">
               <div className="p-5" style={{ backgroundColor: card.color }}>
                 <p className="text-xs font-bold text-white/60 uppercase tracking-wide">{card.title}</p>
                 <h3 className="text-lg font-heading font-black text-white mt-1">{card.subtitle}</h3>
@@ -1219,7 +1219,7 @@ function FinancialPlannerContent() {
                     >
                       {i + 1}
                     </div>
-                    <p className="text-sm text-gray-700">{m}</p>
+                    <p className="text-sm text-white/60">{m}</p>
                   </div>
                 ))}
               </div>
@@ -1228,9 +1228,9 @@ function FinancialPlannerContent() {
         </div>
 
         {/* Loan Payoff Chart */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 text-neuro-orange" /> Loan Payoff Projection
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+          <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2 mb-4">
+            <TrendingUp className="w-4 h-4 text-[#D66829]" /> Loan Payoff Projection
           </h3>
           <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full" style={{ maxHeight: "300px" }}>
             {/* Grid lines */}
@@ -1264,19 +1264,19 @@ function FinancialPlannerContent() {
           <div className="flex items-center justify-center gap-6 mt-3">
             <div className="flex items-center gap-2">
               <div className="w-6 h-0.5 bg-gray-400" style={{ borderTop: "2px dashed #9ca3af" }} />
-              <span className="text-xs text-gray-500">Minimum Payments (25yr)</span>
+              <span className="text-xs text-white/40">Minimum Payments (25yr)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-0.5 bg-neuro-orange" />
-              <span className="text-xs text-gray-500">Your Plan ({recommendedPlan})</span>
+              <div className="w-6 h-0.5 bg-[#D66829]" />
+              <span className="text-xs text-white/40">Your Plan ({recommendedPlan})</span>
             </div>
           </div>
         </div>
 
         {/* Net Worth Projection */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
-            <DollarSign className="w-4 h-4 text-neuro-orange" /> Net Worth Projection
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+          <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2 mb-4">
+            <DollarSign className="w-4 h-4 text-[#D66829]" /> Net Worth Projection
           </h3>
           <svg viewBox={`0 0 ${nwChartW} ${nwChartH}`} className="w-full" style={{ maxHeight: "250px" }}>
             {/* Zero line */}
@@ -1323,7 +1323,7 @@ function FinancialPlannerContent() {
             )}
           </svg>
           {monthsToEmergency < 999 && (
-            <p className="text-xs text-gray-500 text-center mt-2">
+            <p className="text-xs text-white/40 text-center mt-2">
               Emergency fund target ({state.emergencyMonths} months): ~{monthsToEmergency} months to reach at current surplus
             </p>
           )}
@@ -1352,27 +1352,27 @@ function FinancialPlannerContent() {
         <div className="no-print flex items-center gap-3 mb-6">
           <button
             onClick={handlePrint}
-            className="flex items-center gap-2 px-6 py-3 bg-neuro-navy text-white text-sm font-bold rounded-xl hover:bg-neuro-navy/90 transition-colors"
+            className="flex items-center gap-2 px-6 py-3 bg-[#162231] text-white text-sm font-bold rounded-xl hover:bg-[#162231]/90 transition-colors"
           >
             <Printer className="w-4 h-4" /> Print Report
           </button>
           <button
             onClick={() => goToStep(1)}
-            className="flex items-center gap-2 px-5 py-3 border border-gray-200 text-sm font-bold text-gray-600 rounded-xl hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 px-5 py-3 border border-white/[0.08] text-sm font-bold text-white/50 rounded-xl hover:bg-white/[0.04] transition-colors"
           >
             <FileText className="w-4 h-4" /> Edit Inputs
           </button>
           <button
             onClick={resetAll}
-            className="flex items-center gap-2 px-5 py-3 border border-gray-200 text-sm font-bold text-gray-400 rounded-xl hover:bg-gray-50 hover:text-red-500 transition-colors"
+            className="flex items-center gap-2 px-5 py-3 border border-white/[0.08] text-sm font-bold text-white/35 rounded-xl hover:bg-white/[0.04] hover:text-red-500 transition-colors"
           >
             <RotateCcw className="w-4 h-4" /> Start Over
           </button>
         </div>
 
-        <div className="print-area bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="print-area bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden">
           {/* Header */}
-          <div className="print-header bg-neuro-navy p-8 sm:p-10" style={{ backgroundColor: "#1a2744" }}>
+          <div className="print-header bg-[#162231] p-8 sm:p-10" style={{ backgroundColor: "#1a2744" }}>
             <p className="text-white/50 text-xs font-bold uppercase tracking-[0.2em]">NeuroChiro</p>
             <h1 className="font-heading text-2xl sm:text-3xl font-black text-white mt-2">
               Your Financial Roadmap
@@ -1387,27 +1387,27 @@ function FinancialPlannerContent() {
           <div className="print-body p-6 sm:p-10 space-y-8">
             {/* Section 1: Financial Snapshot */}
             <section>
-              <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-neuro-orange/30">
-                <div className="w-2 h-2 rounded-full bg-neuro-orange" />
-                <h3 className="text-xs font-black text-neuro-orange uppercase tracking-widest">
+              <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-[#D66829]/30">
+                <div className="w-2 h-2 rounded-full bg-[#D66829]" />
+                <h3 className="text-xs font-black text-[#D66829] uppercase tracking-widest">
                   Financial Snapshot
                 </h3>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase">Loan Balance</p>
-                  <p className="text-xl font-black text-neuro-navy">${fmt(state.loanBalance)}</p>
+                <div className="bg-white/[0.04] rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-white/35 uppercase">Loan Balance</p>
+                  <p className="text-xl font-black text-white">${fmt(state.loanBalance)}</p>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase">Annual Income</p>
-                  <p className="text-xl font-black text-neuro-navy">${fmt(grossAnnual)}</p>
+                <div className="bg-white/[0.04] rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-white/35 uppercase">Annual Income</p>
+                  <p className="text-xl font-black text-white">${fmt(grossAnnual)}</p>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase">Net Monthly</p>
-                  <p className="text-xl font-black text-neuro-navy">${fmt(Math.round(netMonthly))}</p>
+                <div className="bg-white/[0.04] rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-white/35 uppercase">Net Monthly</p>
+                  <p className="text-xl font-black text-white">${fmt(Math.round(netMonthly))}</p>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase">Surplus/Deficit</p>
+                <div className="bg-white/[0.04] rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-white/35 uppercase">Surplus/Deficit</p>
                   <p className={`text-xl font-black ${surplus >= 0 ? "text-green-600" : "text-red-600"}`}>
                     {surplus >= 0 ? "+" : ""}${fmt(Math.round(surplus))}
                   </p>
@@ -1417,61 +1417,61 @@ function FinancialPlannerContent() {
 
             {/* Section 2: Take-Home Breakdown */}
             <section>
-              <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-neuro-orange/30">
-                <div className="w-2 h-2 rounded-full bg-neuro-orange" />
-                <h3 className="text-xs font-black text-neuro-orange uppercase tracking-widest">
+              <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-[#D66829]/30">
+                <div className="w-2 h-2 rounded-full bg-[#D66829]" />
+                <h3 className="text-xs font-black text-[#D66829] uppercase tracking-widest">
                   Take-Home Pay
                 </h3>
               </div>
               <div className="space-y-2">
-                <div className="flex justify-between text-sm py-1 border-b border-gray-100">
-                  <span className="text-gray-600">Gross Monthly Income</span>
-                  <span className="font-bold text-neuro-navy">${fmt(Math.round(grossAnnual / 12))}</span>
+                <div className="flex justify-between text-sm py-1 border-b border-white/[0.08]">
+                  <span className="text-white/50">Gross Monthly Income</span>
+                  <span className="font-bold text-white">${fmt(Math.round(grossAnnual / 12))}</span>
                 </div>
-                <div className="flex justify-between text-sm py-1 border-b border-gray-100">
-                  <span className="text-gray-600">Federal Tax</span>
+                <div className="flex justify-between text-sm py-1 border-b border-white/[0.08]">
+                  <span className="text-white/50">Federal Tax</span>
                   <span className="font-bold text-red-600">-${fmt(Math.round(federalTaxAnnual / 12))}</span>
                 </div>
-                <div className="flex justify-between text-sm py-1 border-b border-gray-100">
-                  <span className="text-gray-600">State Tax ({state.state})</span>
+                <div className="flex justify-between text-sm py-1 border-b border-white/[0.08]">
+                  <span className="text-white/50">State Tax ({state.state})</span>
                   <span className="font-bold text-red-600">-${fmt(Math.round(stateTaxAnnual / 12))}</span>
                 </div>
-                <div className="flex justify-between text-sm py-1 border-b border-gray-100">
-                  <span className="text-gray-600">FICA{is1099 ? " (Self-Employment)" : ""}</span>
+                <div className="flex justify-between text-sm py-1 border-b border-white/[0.08]">
+                  <span className="text-white/50">FICA{is1099 ? " (Self-Employment)" : ""}</span>
                   <span className="font-bold text-red-600">-${fmt(Math.round(ficaAnnual / 12))}</span>
                 </div>
-                <div className="flex justify-between text-base pt-2 border-t-2 border-neuro-navy">
-                  <span className="font-black text-neuro-navy">Net Monthly Take-Home</span>
-                  <span className="text-xl font-black text-neuro-navy">${fmt(Math.round(netMonthly))}</span>
+                <div className="flex justify-between text-base pt-2 border-t-2 border-white/[0.08]">
+                  <span className="font-black text-white">Net Monthly Take-Home</span>
+                  <span className="text-xl font-black text-white">${fmt(Math.round(netMonthly))}</span>
                 </div>
               </div>
             </section>
 
             {/* Section 3: Loan Repayment */}
             <section>
-              <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-neuro-orange/30">
-                <div className="w-2 h-2 rounded-full bg-neuro-orange" />
-                <h3 className="text-xs font-black text-neuro-orange uppercase tracking-widest">
+              <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-[#D66829]/30">
+                <div className="w-2 h-2 rounded-full bg-[#D66829]" />
+                <h3 className="text-xs font-black text-[#D66829] uppercase tracking-widest">
                   Recommended Repayment: {recommendedPlan}
                 </h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b-2 border-gray-100">
-                      <th className="text-left py-2 px-3 text-xs font-black text-gray-400 uppercase">Plan</th>
-                      <th className="text-right py-2 px-3 text-xs font-black text-gray-400 uppercase">Monthly</th>
-                      <th className="text-right py-2 px-3 text-xs font-black text-gray-400 uppercase">Total</th>
-                      <th className="text-right py-2 px-3 text-xs font-black text-gray-400 uppercase">Years</th>
+                    <tr className="border-b-2 border-white/[0.08]">
+                      <th className="text-left py-2 px-3 text-xs font-black text-white/35 uppercase">Plan</th>
+                      <th className="text-right py-2 px-3 text-xs font-black text-white/35 uppercase">Monthly</th>
+                      <th className="text-right py-2 px-3 text-xs font-black text-white/35 uppercase">Total</th>
+                      <th className="text-right py-2 px-3 text-xs font-black text-white/35 uppercase">Years</th>
                     </tr>
                   </thead>
                   <tbody>
                     {loanPlans.map((plan) => (
                       <tr
                         key={plan.name}
-                        className={plan.recommended ? "bg-neuro-orange/5 font-bold" : ""}
+                        className={plan.recommended ? "bg-[#D66829]/5 font-bold" : ""}
                       >
-                        <td className="py-2 px-3 text-neuro-navy">
+                        <td className="py-2 px-3 text-white">
                           {plan.name} {plan.recommended && " *"}
                         </td>
                         <td className="py-2 px-3 text-right">${fmt(plan.payment)}</td>
@@ -1486,19 +1486,19 @@ function FinancialPlannerContent() {
 
             {/* Section 4: Budget */}
             <section>
-              <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-neuro-orange/30">
-                <div className="w-2 h-2 rounded-full bg-neuro-orange" />
-                <h3 className="text-xs font-black text-neuro-orange uppercase tracking-widest">
+              <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-[#D66829]/30">
+                <div className="w-2 h-2 rounded-full bg-[#D66829]" />
+                <h3 className="text-xs font-black text-[#D66829] uppercase tracking-widest">
                   Monthly Budget
                 </h3>
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                 {budgetSegments.map((seg) => (
-                  <div key={seg.label} className="text-center bg-gray-50 rounded-xl p-3">
+                  <div key={seg.label} className="text-center bg-white/[0.04] rounded-xl p-3">
                     <div className="w-4 h-4 rounded-sm mx-auto mb-1" style={{ backgroundColor: seg.color }} />
-                    <p className="text-[10px] font-bold text-gray-500">{seg.label}</p>
-                    <p className="text-sm font-black text-neuro-navy">${fmt(seg.value)}</p>
-                    <p className="text-[10px] text-gray-400">{budgetTotal > 0 ? Math.round((seg.value / budgetTotal) * 100) : 0}%</p>
+                    <p className="text-[10px] font-bold text-white/40">{seg.label}</p>
+                    <p className="text-sm font-black text-white">${fmt(seg.value)}</p>
+                    <p className="text-[10px] text-white/35">{budgetTotal > 0 ? Math.round((seg.value / budgetTotal) * 100) : 0}%</p>
                   </div>
                 ))}
               </div>
@@ -1506,9 +1506,9 @@ function FinancialPlannerContent() {
 
             {/* Section 5: 3-Year Milestones */}
             <section>
-              <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-neuro-orange/30">
-                <div className="w-2 h-2 rounded-full bg-neuro-orange" />
-                <h3 className="text-xs font-black text-neuro-orange uppercase tracking-widest">
+              <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-[#D66829]/30">
+                <div className="w-2 h-2 rounded-full bg-[#D66829]" />
+                <h3 className="text-xs font-black text-[#D66829] uppercase tracking-widest">
                   3-Year Roadmap
                 </h3>
               </div>
@@ -1518,9 +1518,9 @@ function FinancialPlannerContent() {
                   { yr: "Year 2", sub: "Build & Grow" },
                   { yr: "Year 3", sub: "Accelerate" },
                 ].map((card) => (
-                  <div key={card.yr} className="text-center bg-gray-50 rounded-xl p-4">
-                    <p className="text-xs font-black text-neuro-navy uppercase">{card.yr}</p>
-                    <p className="text-sm font-bold text-neuro-orange">{card.sub}</p>
+                  <div key={card.yr} className="text-center bg-white/[0.04] rounded-xl p-4">
+                    <p className="text-xs font-black text-white uppercase">{card.yr}</p>
+                    <p className="text-sm font-bold text-[#D66829]">{card.sub}</p>
                   </div>
                 ))}
               </div>
@@ -1528,9 +1528,9 @@ function FinancialPlannerContent() {
 
             {/* Section 6: Tax Savings */}
             <section>
-              <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-neuro-orange/30">
-                <div className="w-2 h-2 rounded-full bg-neuro-orange" />
-                <h3 className="text-xs font-black text-neuro-orange uppercase tracking-widest">
+              <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-[#D66829]/30">
+                <div className="w-2 h-2 rounded-full bg-[#D66829]" />
+                <h3 className="text-xs font-black text-[#D66829] uppercase tracking-widest">
                   Estimated Tax Savings
                 </h3>
               </div>
@@ -1542,12 +1542,12 @@ function FinancialPlannerContent() {
           </div>
 
           {/* Footer */}
-          <div className="px-6 sm:px-10 py-4 border-t border-gray-100 bg-gray-50">
-            <p className="text-center text-xs text-gray-400 italic mb-2">
+          <div className="px-6 sm:px-10 py-4 border-t border-white/[0.08] bg-white/[0.04]">
+            <p className="text-center text-xs text-white/35 italic mb-2">
               This report is for educational and planning purposes only. It does not constitute financial, tax, or legal advice.
               Consult a licensed financial advisor or CPA for personalized guidance.
             </p>
-            <div className="flex justify-between text-[10px] text-gray-300">
+            <div className="flex justify-between text-[10px] text-white/20">
               <span>NeuroChiro Student Financial Planner</span>
               <span>{state.name || "Student"}</span>
               <span>{today}</span>
@@ -1602,19 +1602,19 @@ function FinancialPlannerContent() {
       {/* Page Header */}
       <div className="no-print flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-heading font-black text-neuro-navy flex items-center gap-3">
-            <GraduationCap className="w-7 h-7 text-neuro-orange" /> Financial Planner
+          <h1 className="text-2xl font-heading font-black text-white flex items-center gap-3">
+            <GraduationCap className="w-7 h-7 text-[#D66829]" /> Financial Planner
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-white/40 text-sm mt-1">
             Plan your first-year finances before you graduate.
           </p>
-          <div className="mt-2 bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3 text-xs text-[#1E2D3B]/70">
-            <strong>How to use this:</strong> Step 1 — enter your loans and salary. Step 2 — see your take-home pay after taxes. Step 3 — set your monthly budget. Step 4 — get your complete financial roadmap with loan repayment strategies. Your data saves automatically.
+          <div className="mt-2 bg-[#162231] border-l-2 border-[#D66829]/40 rounded-lg p-3 text-[12px] text-white/50">
+            <strong className="text-white/70">How to use this:</strong> Step 1 — enter your loans and salary. Step 2 — see your take-home pay after taxes. Step 3 — set your monthly budget. Step 4 — get your complete financial roadmap with loan repayment strategies. Your data saves automatically.
           </div>
         </div>
         <button
           onClick={resetAll}
-          className="px-3 py-2 text-gray-400 hover:text-neuro-navy text-xs font-bold rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-1.5"
+          className="px-3 py-2 text-white/35 hover:text-white text-xs font-bold rounded-lg hover:bg-white/[0.06] transition-colors flex items-center gap-1.5"
         >
           <RotateCcw className="w-3.5 h-3.5" /> Reset
         </button>
@@ -1630,14 +1630,14 @@ function FinancialPlannerContent() {
       {state.step < 4 && NavButtons()}
 
       {/* Pipeline CTA */}
-      <div className="bg-[#F5F3EF] rounded-2xl p-6 flex items-center justify-between mt-8">
+      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between mt-8">
         <div>
-          <p className="text-sm font-semibold text-[#1E2D3B]">Financial plan complete?</p>
-          <p className="text-xs text-[#1E2D3B]/40">You&apos;ve completed the career pipeline. Review your progress.</p>
+          <p className="text-[13px] font-semibold text-white">Financial plan complete?</p>
+          <p className="text-xs text-white/30">You&apos;ve completed the career pipeline. Review your progress.</p>
         </div>
         <Link
           href="/student/career-pipeline"
-          className="px-5 py-2.5 bg-[#D66829] text-white rounded-xl text-xs font-bold hover:bg-[#D66829]/90 transition-colors flex items-center gap-2"
+          className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center gap-2"
         >
           Career Pipeline <ArrowRight className="w-3.5 h-3.5" />
         </Link>

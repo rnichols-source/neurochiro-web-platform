@@ -25,7 +25,7 @@ import {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const LS_KEY = "neurochiro-technique-quiz";
-const BRAND_NAVY = "#1E2D3B";
+const BRAND_NAVY = "#162231";
 const BRAND_ORANGE = "#D66829";
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -302,24 +302,24 @@ export default function TechniqueComparisonGuide() {
           Technique Explorer
         </h2>
       </div>
-      <p className="text-gray-500 text-sm mb-6">
+      <p className="text-white/40 text-sm mb-6">
         Browse all 18 chiropractic techniques. Search, filter, and expand any card for the complete breakdown.
       </p>
 
       {/* Search */}
       <div className="relative mb-4">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search techniques by name, category, or keyword..."
-          className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#e97325] transition-colors"
+          className="w-full pl-11 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none transition-colors"
         />
         {search && (
           <button
             onClick={() => setSearch("")}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/40"
           >
             <X className="w-4 h-4" />
           </button>
@@ -358,7 +358,7 @@ export default function TechniqueComparisonGuide() {
           return (
             <div
               key={t.id}
-              className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden relative"
+              className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden relative"
             >
               {/* Collapsed header — always visible */}
               <button
@@ -396,36 +396,36 @@ export default function TechniqueComparisonGuide() {
                       </span>
                     )}
                   </div>
-                  <p className="text-gray-500 text-sm leading-relaxed">
+                  <p className="text-white/40 text-sm leading-relaxed">
                     {t.summary}
                   </p>
-                  <div className="flex flex-wrap gap-3 mt-2 text-[11px] text-gray-400">
+                  <div className="flex flex-wrap gap-3 mt-2 text-[11px] text-white/30">
                     <span>
-                      <span className="font-bold text-gray-600">Learn:</span>{" "}
+                      <span className="font-bold text-white/50">Learn:</span>{" "}
                       {t.learningTime}
                     </span>
                     <span>
-                      <span className="font-bold text-gray-600">Cert:</span>{" "}
+                      <span className="font-bold text-white/50">Cert:</span>{" "}
                       {t.certCost}
                     </span>
                     <span>
-                      <span className="font-bold text-gray-600">Evidence:</span>{" "}
+                      <span className="font-bold text-white/50">Evidence:</span>{" "}
                       {t.evidenceLevel}
                     </span>
                   </div>
                 </div>
                 <div className="flex-shrink-0 mt-1">
                   {isExpanded ? (
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                    <ChevronDown className="w-5 h-5 text-white/30" />
                   ) : (
-                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                    <ChevronRight className="w-5 h-5 text-white/30" />
                   )}
                 </div>
               </button>
 
               {/* Expanded details */}
               {isExpanded && (
-                <div className="px-5 pb-6 pt-0 space-y-5 border-t border-gray-100">
+                <div className="px-5 pb-6 pt-0 space-y-5 border-t border-white/[0.08]">
                   {renderDetailSection("What It Is", t.whatItIs)}
                   {renderDetailSection("Philosophy", t.philosophy)}
                   {renderDetailSection("In Practice", t.inPractice)}
@@ -445,17 +445,17 @@ export default function TechniqueComparisonGuide() {
 
                   {/* Best For & Personality */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="bg-green-50 rounded-xl p-4">
-                      <p className="text-[10px] font-bold text-green-700 uppercase tracking-wide mb-1">
+                    <div className="bg-white/[0.04] rounded-xl p-4">
+                      <p className="text-[10px] font-bold text-[#D66829] uppercase tracking-wide mb-1">
                         Best For
                       </p>
-                      <p className="text-sm text-green-900">{t.bestFor}</p>
+                      <p className="text-sm text-white/50">{t.bestFor}</p>
                     </div>
-                    <div className="bg-blue-50 rounded-xl p-4">
-                      <p className="text-[10px] font-bold text-blue-700 uppercase tracking-wide mb-1">
+                    <div className="bg-white/[0.04] rounded-xl p-4">
+                      <p className="text-[10px] font-bold text-[#D66829] uppercase tracking-wide mb-1">
                         Personality Fit
                       </p>
-                      <p className="text-sm text-blue-900">{t.personalityFit}</p>
+                      <p className="text-sm text-white/50">{t.personalityFit}</p>
                     </div>
                   </div>
 
@@ -464,14 +464,14 @@ export default function TechniqueComparisonGuide() {
                     <div>
                       <p
                         className="text-[10px] font-bold uppercase tracking-wide mb-2"
-                        style={{ color: "#16a34a" }}
+                        style={{ color: "#22c55e" }}
                       >
                         Pros
                       </p>
                       <ul className="space-y-1.5">
                         {t.pros.map((p, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                            <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                          <li key={i} className="flex items-start gap-2 text-sm text-white/50">
+                            <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
                             {p}
                           </li>
                         ))}
@@ -480,13 +480,13 @@ export default function TechniqueComparisonGuide() {
                     <div>
                       <p
                         className="text-[10px] font-bold uppercase tracking-wide mb-2"
-                        style={{ color: "#dc2626" }}
+                        style={{ color: "#ef4444" }}
                       >
                         Cons
                       </p>
                       <ul className="space-y-1.5">
                         {t.cons.map((c, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                          <li key={i} className="flex items-start gap-2 text-sm text-white/50">
                             <X className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
                             {c}
                           </li>
@@ -500,7 +500,7 @@ export default function TechniqueComparisonGuide() {
           );
         })}
         {filteredTechniques.length === 0 && (
-          <p className="text-center text-gray-400 py-12">
+          <p className="text-center text-white/30 py-12">
             No techniques match your search.
           </p>
         )}
@@ -528,19 +528,19 @@ export default function TechniqueComparisonGuide() {
             Find Your Fit
           </h2>
         </div>
-        <p className="text-gray-500 text-sm mb-6">
+        <p className="text-white/40 text-sm mb-6">
           Answer 10 questions to discover which techniques match your personality and goals.
         </p>
 
         {/* Progress bar */}
         <div className="mb-6">
           <div className="flex justify-between text-xs font-bold mb-1.5">
-            <span style={{ color: BRAND_NAVY }}>
+            <span className="text-white">
               Question {qIdx + 1} of {QUIZ_QUESTIONS.length}
             </span>
-            <span className="text-gray-400">{Math.round(progress)}%</span>
+            <span className="text-white/35">{Math.round(progress)}%</span>
           </div>
-          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
             <div
               className="h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress}%`, backgroundColor: BRAND_ORANGE }}
@@ -566,21 +566,21 @@ export default function TechniqueComparisonGuide() {
                     onClick={() => handleAnswer(q.id, opt.label)}
                     className="w-full text-left p-4 rounded-xl border-2 transition-all"
                     style={{
-                      borderColor: selected ? BRAND_ORANGE : "#e5e7eb",
-                      backgroundColor: selected ? `${BRAND_ORANGE}10` : "#fff",
+                      borderColor: selected ? BRAND_ORANGE : "rgba(255,255,255,0.08)",
+                      backgroundColor: selected ? `${BRAND_ORANGE}10` : "rgba(255,255,255,0.02)",
                     }}
                   >
                     <div className="flex items-start gap-3">
                       <span
                         className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                         style={{
-                          backgroundColor: selected ? BRAND_ORANGE : "#f3f4f6",
-                          color: selected ? "#fff" : "#6b7280",
+                          backgroundColor: selected ? BRAND_ORANGE : "rgba(255,255,255,0.06)",
+                          color: selected ? "#fff" : "rgba(255,255,255,0.5)",
                         }}
                       >
                         {opt.label}
                       </span>
-                      <span className="text-sm" style={{ color: BRAND_NAVY }}>
+                      <span className="text-sm text-white">
                         {opt.text}
                       </span>
                     </div>
@@ -601,7 +601,7 @@ export default function TechniqueComparisonGuide() {
                   currentQuestion: prev.currentQuestion - 1,
                 }))
               }
-              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/[0.08] text-sm font-bold text-white/50 hover:bg-white/[0.04] transition-colors"
             >
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
@@ -649,7 +649,7 @@ export default function TechniqueComparisonGuide() {
             Your Top 3 Technique Matches
           </h2>
         </div>
-        <p className="text-gray-500 text-sm mb-6">
+        <p className="text-white/40 text-sm mb-6">
           Based on your answers, here are the technique categories that fit you best.
         </p>
 
@@ -660,8 +660,8 @@ export default function TechniqueComparisonGuide() {
             return (
               <div
                 key={item.technique.id}
-                className="bg-white rounded-2xl border-2 p-5 flex items-start gap-4"
-                style={{ borderColor: rank === 0 ? BRAND_ORANGE : "#e5e7eb" }}
+                className="bg-[#162231] rounded-2xl border-2 p-5 flex items-start gap-4"
+                style={{ borderColor: rank === 0 ? BRAND_ORANGE : "rgba(255,255,255,0.08)" }}
               >
                 <div
                   className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm flex-shrink-0"
@@ -686,7 +686,7 @@ export default function TechniqueComparisonGuide() {
                       {item.pct}% match
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-white/40">
                     {item.technique.personalityFit}
                   </p>
                   <button
@@ -708,7 +708,7 @@ export default function TechniqueComparisonGuide() {
         </div>
 
         {/* Pentagon radar chart */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 mb-8">
           <h3
             className="text-xs font-black uppercase tracking-wide mb-4"
             style={{ color: BRAND_NAVY }}
@@ -795,8 +795,8 @@ export default function TechniqueComparisonGuide() {
         <div className="text-center">
           <button
             onClick={resetQuiz}
-            className="px-6 py-3 rounded-xl border-2 text-sm font-bold transition-colors hover:bg-gray-50"
-            style={{ borderColor: BRAND_NAVY, color: BRAND_NAVY }}
+            className="px-6 py-3 rounded-xl border-2 text-sm font-bold transition-colors hover:bg-white/[0.04]"
+            style={{ borderColor: "rgba(255,255,255,0.08)", color: "#fff" }}
           >
             Retake Quiz
           </button>
@@ -846,7 +846,7 @@ export default function TechniqueComparisonGuide() {
             Comparison Tool
           </h2>
         </div>
-        <p className="text-gray-500 text-sm mb-6">
+        <p className="text-white/40 text-sm mb-6">
           Compare techniques side-by-side to see the key differences at a glance.
         </p>
 
@@ -857,8 +857,7 @@ export default function TechniqueComparisonGuide() {
               key={idx}
               value={t.id}
               onChange={(e) => setCompareId(idx, e.target.value)}
-              className="px-4 py-3 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-[#e97325] bg-white min-w-[180px]"
-              style={{ color: BRAND_NAVY }}
+              className="px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white min-w-[180px]"
             >
               {TECHNIQUES.map((tech) => (
                 <option key={tech.id} value={tech.id}>
@@ -870,14 +869,14 @@ export default function TechniqueComparisonGuide() {
           {!showThird ? (
             <button
               onClick={addThirdColumn}
-              className="px-4 py-3 rounded-xl border-2 border-dashed border-gray-300 text-sm font-bold text-gray-400 hover:border-[#e97325] hover:text-[#e97325] transition-colors"
+              className="px-4 py-3 rounded-xl border-2 border-dashed border-white/[0.08] text-sm font-bold text-white/30 hover:border-[#D66829] hover:text-[#D66829] transition-colors"
             >
               + Add Third
             </button>
           ) : (
             <button
               onClick={removeThirdColumn}
-              className="px-4 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-400 hover:text-red-500 transition-colors"
+              className="px-4 py-3 rounded-xl border border-white/[0.08] text-sm font-bold text-white/30 hover:text-red-400 transition-colors"
             >
               <X className="w-4 h-4 inline mr-1" />
               Remove
@@ -886,10 +885,10 @@ export default function TechniqueComparisonGuide() {
         </div>
 
         {/* Comparison table */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
+        <div className="bg-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ backgroundColor: BRAND_NAVY }}>
+              <tr style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
                 <th className="text-left p-4 text-white text-xs font-bold uppercase tracking-wide w-36">
                   Field
                 </th>
@@ -907,11 +906,10 @@ export default function TechniqueComparisonGuide() {
               {rows.map((row, rIdx) => (
                 <tr
                   key={row.key}
-                  className={rIdx % 2 === 0 ? "bg-gray-50" : "bg-white"}
+                  className={rIdx % 2 === 0 ? "bg-white/[0.02]" : ""}
                 >
                   <td
-                    className="p-4 font-bold text-xs uppercase tracking-wide"
-                    style={{ color: BRAND_NAVY }}
+                    className="p-4 font-bold text-xs uppercase tracking-wide text-[#D66829]"
                   >
                     {row.label}
                   </td>
@@ -931,7 +929,7 @@ export default function TechniqueComparisonGuide() {
                       );
                     }
                     return (
-                      <td key={t.id} className="p-4 text-gray-700">
+                      <td key={t.id} className="p-4 text-white/50">
                         {val}
                       </td>
                     );
@@ -944,16 +942,14 @@ export default function TechniqueComparisonGuide() {
 
         {/* Summary */}
         <div
-          className="mt-6 rounded-2xl p-6"
-          style={{ backgroundColor: `${BRAND_NAVY}08` }}
+          className="mt-6 rounded-2xl p-6 bg-white/[0.04] border border-white/[0.08]"
         >
           <h3
-            className="text-xs font-black uppercase tracking-wide mb-2"
-            style={{ color: BRAND_NAVY }}
+            className="text-xs font-black uppercase tracking-wide mb-2 text-[#D66829]"
           >
             Which should I choose?
           </h3>
-          <p className="text-sm text-gray-600 leading-relaxed">
+          <p className="text-sm text-white/50 leading-relaxed">
             {generateSummary()}
           </p>
         </div>
@@ -971,16 +967,16 @@ export default function TechniqueComparisonGuide() {
       >
         {title}
       </h4>
-      <p className="text-sm text-gray-700 leading-relaxed">{content}</p>
+      <p className="text-sm text-white/50 leading-relaxed">{content}</p>
     </div>
   );
 
   const renderStatCard = (label: string, value: string) => (
-    <div className="bg-gray-50 rounded-xl p-3">
-      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-0.5">
+    <div className="bg-white/[0.04] rounded-xl p-3">
+      <p className="text-[10px] font-bold text-white/30 uppercase tracking-wide mb-0.5">
         {label}
       </p>
-      <p className="text-sm font-bold" style={{ color: BRAND_NAVY }}>
+      <p className="text-sm font-bold text-white">
         {value}
       </p>
     </div>
@@ -993,33 +989,30 @@ export default function TechniqueComparisonGuide() {
       {/* Page header */}
       <div className="mb-6">
         <h1
-          className="text-2xl font-heading font-black flex items-center gap-3"
-          style={{ color: BRAND_NAVY }}
+          className="text-2xl font-heading font-bold flex items-center gap-3 text-white"
         >
           <Compass className="w-7 h-7" style={{ color: BRAND_ORANGE }} />
           Technique Comparison Guide
         </h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <p className="text-xs text-white/35 mt-1">
           Explore, compare, and find the chiropractic techniques that fit your future practice.
         </p>
-        <div className="mt-3 bg-white border-l-2 border-[#D66829]/30 rounded-xl p-3 text-xs text-[#1E2D3B]/70">
-          <strong>3 tools in one:</strong> Browse all 18 techniques in the <strong>Technique Explorer</strong>. Take the <strong>Find Your Fit</strong> quiz to discover which match your personality. Then use the <strong>Comparison Tool</strong> to see them side by side.
+        <div className="mt-3 bg-[#162231] border-l-2 border-[#D66829]/40 rounded-lg p-3 text-[12px] text-white/50">
+          <strong className="text-white/70">3 tools in one:</strong> Browse all 18 techniques in the <strong className="text-white/70">Technique Explorer</strong>. Take the <strong className="text-white/70">Find Your Fit</strong> quiz to discover which match your personality. Then use the <strong className="text-white/70">Comparison Tool</strong> to see them side by side.
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex rounded-2xl overflow-hidden border border-gray-200 mb-6">
+      <div className="flex rounded-2xl overflow-hidden border border-white/[0.08] mb-6">
         {TAB_LABELS.map((label, i) => {
           const isActive = activeTab === i;
           return (
             <button
               key={i}
               onClick={() => setActiveTab(i)}
-              className="flex-1 py-3 px-2 text-xs sm:text-sm font-bold transition-all border-r last:border-r-0 border-gray-200"
-              style={{
-                backgroundColor: isActive ? BRAND_NAVY : "#fff",
-                color: isActive ? "#fff" : "#9ca3af",
-              }}
+              className={`flex-1 py-3 px-2 text-xs sm:text-sm font-bold transition-all border-r last:border-r-0 border-white/[0.08] ${
+                isActive ? "bg-[#D66829] text-white" : "bg-white/[0.04] text-white/40 hover:text-white/60"
+              }`}
             >
               {label}
             </button>
@@ -1033,14 +1026,14 @@ export default function TechniqueComparisonGuide() {
       {activeTab === 2 && renderComparison()}
 
       {/* Pipeline CTA */}
-      <div className="bg-[#F5F3EF] rounded-2xl p-6 flex items-center justify-between mt-8">
+      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between mt-8">
         <div>
-          <p className="text-sm font-semibold text-[#1E2D3B]">Found your technique?</p>
-          <p className="text-xs text-[#1E2D3B]/40">Now prep for interviews where you&apos;ll talk about it.</p>
+          <p className="text-[13px] font-semibold text-white">Found your technique?</p>
+          <p className="text-xs text-white/30">Now prep for interviews where you&apos;ll talk about it.</p>
         </div>
         <Link
           href="/student/interview-prep"
-          className="px-5 py-2.5 bg-[#D66829] text-white rounded-xl text-xs font-bold hover:bg-[#D66829]/90 transition-colors flex items-center gap-2"
+          className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center gap-2"
         >
           Interview Prep <ArrowRight className="w-3.5 h-3.5" />
         </Link>

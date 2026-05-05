@@ -124,11 +124,11 @@ export default function StudentNotificationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-heading font-semibold text-[#1E2D3B] flex items-center gap-3">
+          <h1 className="text-2xl font-heading font-bold text-white flex items-center gap-3">
             <Bell className="w-7 h-7 text-[#D66829]" />
             Notifications
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-xs text-white/35 mt-1">
             {unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
           </p>
         </div>
@@ -143,7 +143,7 @@ export default function StudentNotificationsPage() {
       </div>
 
       {/* Category Tabs */}
-      <div className="flex rounded-2xl overflow-hidden border border-gray-200">
+      <div className="flex rounded-2xl overflow-hidden border border-white/[0.08]">
         {(Object.keys(NOTIFICATION_CATEGORIES) as CategoryKey[]).map((key) => {
           const cat = NOTIFICATION_CATEGORIES[key];
           const isActive = activeTab === key;
@@ -154,8 +154,8 @@ export default function StudentNotificationsPage() {
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`flex-1 py-2.5 px-2 text-xs font-bold transition-all flex items-center justify-center gap-1.5 border-r last:border-r-0 border-gray-200 ${
-                isActive ? "bg-[#1E2D3B] text-white" : "bg-white text-gray-400 hover:text-gray-600"
+              className={`flex-1 py-2.5 px-2 text-xs font-bold transition-all flex items-center justify-center gap-1.5 border-r last:border-r-0 border-white/[0.08] ${
+                isActive ? "bg-[#D66829] text-white" : "bg-white/[0.04] text-white/40 hover:text-white/60"
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -163,7 +163,7 @@ export default function StudentNotificationsPage() {
               {count > 0 && (
                 <span
                   className={`w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center ${
-                    isActive ? "bg-[#D66829] text-white" : "bg-gray-200 text-gray-500"
+                    isActive ? "bg-white/20 text-white" : "bg-white/[0.08] text-white/50"
                   }`}
                 >
                   {count}
@@ -177,11 +177,11 @@ export default function StudentNotificationsPage() {
       {/* Notification List */}
       {filtered.length === 0 ? (
         <div className="text-center py-16">
-          <Bell className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-          <p className="text-gray-400 font-bold text-sm">
+          <Bell className="w-12 h-12 text-white/10 mx-auto mb-4" />
+          <p className="text-white/30 font-bold text-sm">
             {activeTab === "all" ? "No notifications yet" : `No ${NOTIFICATION_CATEGORIES[activeTab].label.toLowerCase()} notifications`}
           </p>
-          <p className="text-gray-400 text-xs mt-1">
+          <p className="text-white/20 text-xs mt-1">
             You&apos;ll see updates about job matches, mentor activity, and progress here.
           </p>
         </div>
@@ -198,8 +198,8 @@ export default function StudentNotificationsPage() {
                 key={n.id}
                 className={`p-4 rounded-2xl border transition-all cursor-pointer ${
                   !n.read_at
-                    ? "bg-white border-gray-100 border-l-2 border-l-[#D66829] hover:bg-gray-50"
-                    : "bg-white border-gray-100 hover:bg-gray-50"
+                    ? "bg-[#162231] border-white/[0.08] border-l-2 border-l-[#D66829] hover:bg-white/[0.04]"
+                    : "bg-[#162231] border-white/[0.08] hover:bg-white/[0.04]"
                 }`}
                 onClick={() => {
                   if (!n.read_at) markRead(n.id);
@@ -209,23 +209,23 @@ export default function StudentNotificationsPage() {
                   {/* Category icon */}
                   <div
                     className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                      !n.read_at ? "bg-[#D66829]/10" : "bg-gray-100"
+                      !n.read_at ? "bg-[#D66829]/10" : "bg-white/[0.06]"
                     }`}
                   >
                     <CatIcon
-                      className={`w-4 h-4 ${!n.read_at ? "text-[#D66829]" : "text-gray-400"}`}
+                      className={`w-4 h-4 ${!n.read_at ? "text-[#D66829]" : "text-white/30"}`}
                     />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <p className="text-sm font-semibold text-[#1E2D3B]">{n.title}</p>
+                      <p className="text-sm font-semibold text-white">{n.title}</p>
                       {!n.read_at && <span className={`w-2 h-2 rounded-full ${getPriorityDot(n)}`} />}
                     </div>
-                    <p className="text-gray-500 text-sm">{n.body}</p>
+                    <p className="text-white/40 text-sm">{n.body}</p>
 
                     <div className="flex items-center justify-between mt-2">
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-white/30">
                         {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
                       </p>
                       {actionLink && actionLabel && (

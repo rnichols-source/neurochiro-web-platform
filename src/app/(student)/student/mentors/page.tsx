@@ -135,11 +135,11 @@ export default function MentorDiscoveryPage() {
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
       <header>
-        <h1 className="text-2xl font-heading font-semibold text-[#1E2D3B] flex items-center gap-3">
+        <h1 className="text-2xl font-heading font-bold text-white flex items-center gap-3">
           <Heart className="w-7 h-7 text-[#D66829]" />
           Find a Mentor
         </h1>
-        <p className="text-sm text-gray-400 mt-1">
+        <p className="text-xs text-white/35 mt-1">
           Connect with doctors who are open to mentoring, hosting externs, or hiring new graduates.
         </p>
       </header>
@@ -148,31 +148,31 @@ export default function MentorDiscoveryPage() {
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, clinic, city, or specialty..."
-              className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#D66829]/20 shadow-sm text-sm"
+              className="w-full pl-12 pr-4 py-3.5 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none"
             />
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setSortBy("match")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${sortBy === "match" ? "bg-[#1E2D3B] text-white" : "bg-white border border-gray-200 text-gray-500"}`}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${sortBy === "match" ? "bg-[#D66829] text-white" : "bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white/60"}`}
             >
               Best Match
             </button>
             <button
               onClick={() => setSortBy("rating")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${sortBy === "rating" ? "bg-[#1E2D3B] text-white" : "bg-white border border-gray-200 text-gray-500"}`}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${sortBy === "rating" ? "bg-[#D66829] text-white" : "bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white/60"}`}
             >
               Highest Rated
             </button>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${showFilters ? "bg-[#D66829] text-white" : "bg-white border border-gray-200 text-gray-500"}`}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${showFilters ? "bg-[#D66829] text-white" : "bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white/60"}`}
             >
               <Filter className="w-3.5 h-3.5" /> Filters
               <ChevronDown className={`w-3 h-3 transition-transform ${showFilters ? "rotate-180" : ""}`} />
@@ -181,15 +181,15 @@ export default function MentorDiscoveryPage() {
         </div>
 
         {showFilters && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+          <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={filterHiring}
                 onChange={(e) => setFilterHiring(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-[#D66829] focus:ring-[#D66829]"
+                className="w-4 h-4 rounded border-white/[0.08] text-[#D66829] focus:ring-[#D66829]"
               />
-              <span className="text-sm font-bold text-gray-600">Hiring New Graduates</span>
+              <span className="text-sm font-bold text-white/50">Hiring New Graduates</span>
             </label>
           </div>
         )}
@@ -198,14 +198,14 @@ export default function MentorDiscoveryPage() {
       {/* Results */}
       {loading ? (
         <div className="py-20 text-center">
-          <div className="w-6 h-6 border-2 border-gray-200 border-t-[#D66829] rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Finding mentors...</p>
+          <div className="w-6 h-6 border-2 border-white/[0.08] border-t-[#D66829] rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm text-white/40">Finding mentors...</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200">
-          <Users className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-[#1E2D3B] mb-1">No mentors found</h3>
-          <p className="text-gray-400 text-sm max-w-md mx-auto">
+        <div className="py-20 text-center bg-[#162231] rounded-2xl border border-dashed border-white/[0.08]">
+          <Users className="w-12 h-12 text-white/10 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-white mb-1">No mentors found</h3>
+          <p className="text-white/40 text-sm max-w-md mx-auto">
             No mentors match your current filters. Try expanding your search or check back — we&apos;re growing every week.
           </p>
         </div>
@@ -219,15 +219,15 @@ export default function MentorDiscoveryPage() {
             return (
               <div
                 key={mentor.id}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-all"
+                className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-5 hover:border-[#D66829]/20 transition-all"
               >
                 <div className="flex items-start gap-4">
                   {/* Avatar */}
-                  <div className="w-14 h-14 rounded-2xl bg-[#1E2D3B]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  <div className="w-14 h-14 rounded-2xl bg-white/[0.06] flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {mentor.photo_url ? (
                       <img src={mentor.photo_url} alt={fullName} className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-lg font-semibold text-[#1E2D3B]">
+                      <span className="text-lg font-semibold text-white">
                         {mentor.first_name?.[0]}{mentor.last_name?.[0]}
                       </span>
                     )}
@@ -235,9 +235,9 @@ export default function MentorDiscoveryPage() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <h3 className="font-semibold text-[#1E2D3B]">{fullName}</h3>
+                      <h3 className="font-semibold text-white">{fullName}</h3>
                       {matchScore > 0 && (
-                        <span className="text-[10px] text-[#1E2D3B]/50 flex items-center gap-1">
+                        <span className="text-[10px] text-white/40 flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: matchScore >= 60 ? "#22c55e" : "#f59e0b" }} />
                           {matchScore}%
                         </span>
@@ -245,30 +245,30 @@ export default function MentorDiscoveryPage() {
                     </div>
 
                     {mentor.clinic_name && (
-                      <p className="text-xs text-gray-500 mb-1">{mentor.clinic_name}</p>
+                      <p className="text-xs text-white/40 mb-1">{mentor.clinic_name}</p>
                     )}
 
-                    <div className="flex flex-wrap gap-2 text-xs text-gray-400 mb-3">
+                    <div className="flex flex-wrap gap-2 text-xs text-white/35 mb-3">
                       {location && (
                         <span className="flex items-center gap-1">
                           <MapPin className="w-3 h-3" /> {location}
                         </span>
                       )}
                       {mentor.rating > 0 && (
-                        <span className="flex items-center gap-1 text-amber-500">
+                        <span className="flex items-center gap-1 text-amber-400">
                           <Star className="w-3 h-3 fill-amber-400" /> {mentor.rating.toFixed(1)}
-                          {mentor.review_count > 0 && <span className="text-gray-300">({mentor.review_count})</span>}
+                          {mentor.review_count > 0 && <span className="text-white/20">({mentor.review_count})</span>}
                         </span>
                       )}
                     </div>
 
                     {/* Badges */}
                     <div className="flex flex-wrap gap-1.5 mb-3">
-                      <span className="text-[10px] font-bold bg-white border border-gray-100 text-[#1E2D3B]/50 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span className="text-[10px] font-medium bg-white/[0.06] text-white/50 px-2 py-0.5 rounded-full flex items-center gap-1">
                         <Heart className="w-2.5 h-2.5" /> Open to Mentoring
                       </span>
                       {mentor.is_hiring && (
-                        <span className="text-[10px] font-bold bg-white border border-gray-100 text-[#1E2D3B]/50 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span className="text-[10px] font-medium bg-white/[0.06] text-white/50 px-2 py-0.5 rounded-full flex items-center gap-1">
                           <Briefcase className="w-2.5 h-2.5" /> Hiring
                         </span>
                       )}
@@ -278,12 +278,12 @@ export default function MentorDiscoveryPage() {
                     {mentor.specialties?.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
                         {mentor.specialties.slice(0, 4).map((spec) => (
-                          <span key={spec} className="text-[10px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                          <span key={spec} className="text-[10px] font-medium bg-white/[0.06] text-white/50 px-2 py-0.5 rounded-full">
                             {spec}
                           </span>
                         ))}
                         {mentor.specialties.length > 4 && (
-                          <span className="text-[10px] text-gray-400">+{mentor.specialties.length - 4} more</span>
+                          <span className="text-[10px] text-white/30">+{mentor.specialties.length - 4} more</span>
                         )}
                       </div>
                     )}
@@ -291,7 +291,7 @@ export default function MentorDiscoveryPage() {
                     {/* CTA */}
                     <Link
                       href={`/student/messages?to=${mentor.user_id}`}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#1E2D3B] text-white rounded-xl text-xs font-bold hover:bg-[#1E2D3B]/90 transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#D66829] text-white rounded-lg text-xs font-bold hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors"
                     >
                       <MessageSquare className="w-3.5 h-3.5" /> Send Message
                     </Link>
@@ -304,14 +304,14 @@ export default function MentorDiscoveryPage() {
       )}
 
       {/* Pipeline CTA */}
-      <div className="bg-[#F5F3EF] rounded-2xl p-6 flex items-center justify-between">
+      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-[#1E2D3B]">Ready to start applying?</p>
-          <p className="text-xs text-[#1E2D3B]/40">Browse matched job openings based on your profile.</p>
+          <p className="text-[13px] font-semibold text-white">Ready to start applying?</p>
+          <p className="text-xs text-white/30">Browse matched job openings based on your profile.</p>
         </div>
         <Link
           href="/student/jobs"
-          className="px-5 py-2.5 bg-[#D66829] text-white rounded-xl text-xs font-bold hover:bg-[#D66829]/90 transition-colors flex items-center gap-2"
+          className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center gap-2"
         >
           Browse Jobs <ArrowRight className="w-3.5 h-3.5" />
         </Link>

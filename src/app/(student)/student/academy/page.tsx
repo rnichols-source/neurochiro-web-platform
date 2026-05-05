@@ -180,7 +180,7 @@ function renderContent(content: string) {
       elements.push(
         <div
           key={i}
-          className="bg-orange-50 border-l-4 border-orange-300 p-4 rounded-r-lg mb-4 italic text-gray-700 leading-relaxed"
+          className="bg-[#162231] border-l-2 border-[#D66829]/40 p-4 rounded-r-lg mb-4 italic text-white/50 leading-relaxed"
           dangerouslySetInnerHTML={{
             __html: inlineBold(block),
           }}
@@ -194,7 +194,7 @@ function renderContent(content: string) {
     if (lines[0].trim().startsWith("- ")) {
       const items = lines.filter((l) => l.trim().startsWith("- "));
       elements.push(
-        <ul key={i} className="list-disc pl-6 space-y-1 mb-4 text-gray-700 leading-relaxed">
+        <ul key={i} className="list-disc pl-6 space-y-1 mb-4 text-white/50 leading-relaxed">
           {items.map((item, j) => (
             <li
               key={j}
@@ -212,7 +212,7 @@ function renderContent(content: string) {
     if (/^\d+\.\s/.test(lines[0].trim())) {
       const items = lines.filter((l) => /^\d+\.\s/.test(l.trim()));
       elements.push(
-        <ol key={i} className="list-decimal pl-6 space-y-1 mb-4 text-gray-700 leading-relaxed">
+        <ol key={i} className="list-decimal pl-6 space-y-1 mb-4 text-white/50 leading-relaxed">
           {items.map((item, j) => (
             <li
               key={j}
@@ -230,7 +230,7 @@ function renderContent(content: string) {
     elements.push(
       <p
         key={i}
-        className="mb-4 text-gray-700 leading-relaxed"
+        className="mb-4 text-white/50 leading-relaxed"
         dangerouslySetInnerHTML={{ __html: inlineBold(block) }}
       />
     );
@@ -242,7 +242,7 @@ function renderContent(content: string) {
 function inlineBold(text: string): string {
   return text.replace(
     /\*\*(.*?)\*\*/g,
-    '<strong class="text-[#1a2744] font-bold">$1</strong>'
+    '<strong class="text-white font-bold">$1</strong>'
   );
 }
 
@@ -278,7 +278,7 @@ function ProgressRing({
         cy={size / 2}
         r={r}
         fill="none"
-        stroke="#e5e7eb"
+        stroke="rgba(255,255,255,0.06)"
         strokeWidth={stroke}
       />
       <circle
@@ -286,7 +286,7 @@ function ProgressRing({
         cy={size / 2}
         r={r}
         fill="none"
-        stroke="#e97325"
+        stroke="#D66829"
         strokeWidth={stroke}
         strokeDasharray={circ}
         strokeDashoffset={offset}
@@ -435,20 +435,20 @@ export default function AcademyPage() {
         <header className="flex flex-col sm:flex-row sm:items-center gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              <GraduationCap className="w-8 h-8 text-[#e97325]" />
-              <h1 className="text-2xl font-heading font-black text-[#1a2744]">
+              <GraduationCap className="w-8 h-8 text-[#D66829]" />
+              <h1 className="text-2xl font-heading font-bold text-white">
                 NeuroChiro Academy
               </h1>
             </div>
-            <p className="text-gray-500">
+            <p className="text-white/40">
               The education chiropractic school didn&apos;t give you. All 6 courses are included with your membership — tap any course to start.
             </p>
           </div>
           <div className="flex items-center gap-3">
             <ProgressRing pct={overallPct} size={48} stroke={4} />
             <div className="text-sm">
-              <p className="font-bold text-[#1a2744]">{overallPct}%</p>
-              <p className="text-gray-400">
+              <p className="font-bold text-white">{overallPct}%</p>
+              <p className="text-white/35">
                 {totalCompleted} of {totalModules} modules
               </p>
             </div>
@@ -480,7 +480,7 @@ export default function AcademyPage() {
                                 c.modules.length
                             )
                             ? "bg-green-400"
-                            : "bg-gray-200"
+                            : "bg-white/[0.08]"
                         )}
                       />
                     </div>
@@ -495,8 +495,8 @@ export default function AcademyPage() {
                         isDone
                           ? "bg-green-500 border-green-500 text-white"
                           : inProgress
-                          ? "bg-orange-100 border-[#e97325] text-[#e97325]"
-                          : "bg-gray-100 border-gray-300 text-gray-400"
+                          ? "bg-[#D66829]/20 border-[#D66829] text-[#D66829]"
+                          : "bg-white/[0.06] border-white/[0.08] text-white/30"
                       )}
                     >
                       {isDone ? (
@@ -505,7 +505,7 @@ export default function AcademyPage() {
                         idx + 1
                       )}
                     </div>
-                    <span className="text-[10px] text-gray-500 mt-1 text-center leading-tight line-clamp-2 group-hover:text-[#1a2744] transition-colors">
+                    <span className="text-[10px] text-white/35 mt-1 text-center leading-tight line-clamp-2 group-hover:text-white transition-colors">
                       {course.title}
                     </span>
                   </button>
@@ -517,20 +517,20 @@ export default function AcademyPage() {
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
           <input
             type="text"
             placeholder="Search courses, modules..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-10 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#e97325] focus:ring-1 focus:ring-[#e97325]/30 transition-colors"
+            className="w-full pl-10 pr-10 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none transition-colors"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
               className="absolute right-3 top-1/2 -translate-y-1/2"
             >
-              <X className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+              <X className="w-4 h-4 text-white/20 hover:text-white/40" />
             </button>
           )}
         </div>
@@ -538,7 +538,7 @@ export default function AcademyPage() {
         {/* All Courses */}
         {displayCourses.length > 0 && (
           <section>
-            <h2 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
+            <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">
               Your Courses
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -549,22 +549,22 @@ export default function AcademyPage() {
 
         {q && displayCourses.length === 0 && (
           <div className="text-center py-12">
-            <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-400 font-bold">
+            <Search className="w-10 h-10 text-white/10 mx-auto mb-3" />
+            <p className="text-white/30 font-bold">
               No courses match &ldquo;{searchQuery}&rdquo;
             </p>
           </div>
         )}
 
         {/* Pipeline CTA */}
-        <div className="bg-gray-50 rounded-2xl p-6 flex items-center justify-between mt-8">
+        <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center justify-between mt-8">
           <div>
-            <p className="text-sm font-bold text-[#1a2744]">Finished a course?</p>
-            <p className="text-xs text-gray-400">Explore techniques that match what you learned.</p>
+            <p className="text-[13px] font-semibold text-white">Finished a course?</p>
+            <p className="text-xs text-white/30">Explore techniques that match what you learned.</p>
           </div>
           <Link
             href="/student/techniques"
-            className="px-5 py-2.5 bg-[#e97325] text-white rounded-xl text-xs font-bold hover:bg-[#e97325]/90 transition-colors flex items-center gap-2"
+            className="px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center gap-2"
           >
             Explore Techniques <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -589,7 +589,7 @@ export default function AcademyPage() {
 
     let actionLabel = "Start";
     let actionStyle =
-      "bg-[#1a2744] text-white hover:bg-[#1a2744]/90";
+      "bg-[#D66829] text-white hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20";
     if (isDone) {
       actionLabel = "Completed";
       actionStyle = "bg-green-500 text-white";
@@ -601,45 +601,45 @@ export default function AcademyPage() {
       <div
         key={course.id}
         onClick={() => openCourse(course.id)}
-        className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-gray-200 transition-all cursor-pointer"
+        className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-6 shadow-lg shadow-black/20 hover:border-[#D66829]/20 transition-all cursor-pointer"
       >
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           {tags.map((tag) => (
             <span
               key={tag}
-              className="text-[10px] font-bold uppercase tracking-wider text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full"
+              className="text-[10px] font-medium uppercase tracking-wider text-white/50 bg-white/[0.06] px-2 py-0.5 rounded-full"
             >
               {tag}
             </span>
           ))}
-          <span className="text-[10px] font-bold text-gray-400">
+          <span className="text-[10px] font-bold text-white/30">
             {modCount} modules
           </span>
-          <span className="text-[10px] font-bold text-gray-400">
+          <span className="text-[10px] font-bold text-white/30">
             ~{time} min total
           </span>
         </div>
 
-        <h3 className="text-lg font-bold text-[#1a2744] mb-1">
+        <h3 className="text-lg font-bold text-white mb-1">
           {course.title}
         </h3>
-        <p className="text-gray-500 text-sm line-clamp-2 mb-3">
+        <p className="text-white/40 text-sm line-clamp-2 mb-3">
           {course.description}
         </p>
 
         {/* Progress bar */}
         <div className="mb-3">
-            <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 mb-1">
+            <div className="flex items-center justify-between text-[10px] font-bold text-white/30 mb-1">
               <span>
                 {doneCount}/{modCount} complete
               </span>
               <span>{pct}%</span>
             </div>
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
               <div
                 className={cn(
                   "h-full rounded-full transition-all duration-500",
-                  isDone ? "bg-green-500" : "bg-[#e97325]"
+                  isDone ? "bg-green-500" : "bg-gradient-to-r from-[#D66829] to-[#e8834a]"
                 )}
                 style={{ width: `${pct}%` }}
               />
@@ -648,7 +648,7 @@ export default function AcademyPage() {
 
         {/* Status + action */}
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-[#D66829] bg-[#D66829]/15 px-2 py-0.5 rounded-full flex items-center gap-1">
             {isDone ? <><CheckCircle className="w-3 h-3" /> Complete</> : "Included"}
           </span>
 
@@ -727,28 +727,28 @@ export default function AcademyPage() {
       const time = totalReadTime(course.modules);
       return (
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-lg p-8 sm:p-12 text-center max-w-md mx-auto">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Award className="w-10 h-10 text-green-500" />
+          <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-8 sm:p-12 text-center max-w-md mx-auto">
+            <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Award className="w-10 h-10 text-green-400" />
             </div>
-            <h2 className="text-2xl font-heading font-black text-[#1a2744] mb-2">
+            <h2 className="text-2xl font-heading font-bold text-white mb-2">
               Course Complete!
             </h2>
-            <p className="text-gray-500 text-lg mb-1">{course.title}</p>
-            <p className="text-gray-400 text-sm mb-8">
+            <p className="text-white/40 text-lg mb-1">{course.title}</p>
+            <p className="text-white/30 text-sm mb-8">
               {modCount} modules &middot; ~{time} minutes of learning
             </p>
             {nextCourse && (
               <div className="mb-6">
-                <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-2">
                   Next recommended course
                 </p>
-                <p className="font-bold text-[#1a2744]">
+                <p className="font-bold text-white">
                   {nextCourse.title}
                 </p>
                 <button
                   onClick={() => openCourse(nextCourse.id)}
-                  className="mt-3 px-6 py-3 bg-[#e97325] text-white rounded-xl font-bold text-sm hover:bg-[#e97325]/90 transition-colors"
+                  className="mt-3 px-6 py-3 bg-[#D66829] text-white rounded-lg font-bold text-sm hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors"
                 >
                   Start Next Course
                 </button>
@@ -756,7 +756,7 @@ export default function AcademyPage() {
             )}
             <button
               onClick={goToCatalog}
-              className="text-sm font-bold text-gray-400 hover:text-[#1a2744] transition-colors"
+              className="text-sm font-bold text-white/30 hover:text-white transition-colors"
             >
               Back to Academy
             </button>
@@ -777,7 +777,7 @@ export default function AcademyPage() {
           </button>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="flex items-center gap-1 text-sm font-bold text-[#1a2744] bg-gray-100 px-3 py-2 rounded-lg"
+            className="flex items-center gap-1 text-sm font-bold text-white bg-white/[0.06] px-3 py-2 rounded-lg"
           >
             <Menu className="w-4 h-4" />
             Modules
@@ -792,7 +792,7 @@ export default function AcademyPage() {
 
         {/* Mobile dropdown sidebar */}
         {sidebarOpen && (
-          <div className="lg:hidden bg-white rounded-xl border border-gray-100 shadow-lg mb-4 overflow-hidden">
+          <div className="lg:hidden bg-[#162231] rounded-xl border border-white/[0.08] shadow-lg shadow-black/20 mb-4 overflow-hidden">
             {renderSidebarContent(
               course,
               true,
@@ -809,27 +809,27 @@ export default function AcademyPage() {
 
         {/* Desktop sidebar */}
         <div className="hidden lg:block w-72 flex-shrink-0">
-          <div className="sticky top-4 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-gray-100">
+          <div className="sticky top-4 bg-[#162231] rounded-xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden">
+            <div className="p-4 border-b border-white/[0.08]">
               <button
                 onClick={goToCatalog}
-                className="text-sm font-bold text-[#e97325] hover:underline flex items-center gap-1 mb-3"
+                className="text-sm font-bold text-[#D66829] hover:underline flex items-center gap-1 mb-3"
               >
                 <ArrowLeft className="w-4 h-4" /> Back to Academy
               </button>
-              <h3 className="font-bold text-[#1a2744] text-sm leading-tight">
+              <h3 className="font-bold text-white text-sm leading-tight">
                 {course.title}
               </h3>
               <div className="mt-2">
-                <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 mb-1">
+                <div className="flex items-center justify-between text-[10px] font-bold text-white/30 mb-1">
                   <span>
                     {doneCount} of {modCount} complete
                   </span>
                   <span>{pct}%</span>
                 </div>
-                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#e97325] rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-[#D66829] to-[#e8834a] rounded-full transition-all duration-500"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -854,27 +854,27 @@ export default function AcademyPage() {
           {activeMod ? (
             <div className="space-y-6">
               {/* Breadcrumb */}
-              <div className="hidden lg:flex items-center gap-2 text-xs text-gray-400">
+              <div className="hidden lg:flex items-center gap-2 text-xs text-white/30">
                 <button
                   onClick={goToCatalog}
-                  className="hover:text-[#1a2744] transition-colors"
+                  className="hover:text-white transition-colors"
                 >
                   Academy
                 </button>
                 <ChevronRight className="w-3 h-3" />
-                <span className="text-gray-500">{course.title}</span>
+                <span className="text-white/40">{course.title}</span>
                 <ChevronRight className="w-3 h-3" />
-                <span className="text-[#1a2744] font-bold">
+                <span className="text-white font-bold">
                   Module {resolvedIdx + 1}
                 </span>
               </div>
 
               {/* Module header */}
               <div>
-                <h2 className="text-2xl font-heading font-black text-[#1a2744] mb-1">
+                <h2 className="text-2xl font-heading font-bold text-white mb-1">
                   {activeMod.title}
                 </h2>
-                <div className="flex items-center gap-3 text-sm text-gray-400">
+                <div className="flex items-center gap-3 text-sm text-white/35">
                   <span>
                     Module {resolvedIdx + 1} of {modCount}
                   </span>
@@ -896,24 +896,24 @@ export default function AcademyPage() {
                       isCompleted(m.id)
                         ? "bg-green-400"
                         : idx === resolvedIdx
-                        ? "bg-[#e97325]"
-                        : "bg-gray-200"
+                        ? "bg-[#D66829]"
+                        : "bg-white/[0.08]"
                     )}
                   />
                 ))}
               </div>
 
               {/* Content */}
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+              <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 sm:p-8">
                 <div className="max-w-none">
                   {renderContent(activeMod.content)}
                 </div>
               </div>
 
               {/* Key Takeaways */}
-              <div className="bg-[#1a2744] text-white rounded-xl p-6">
+              <div className="bg-[#162231] border border-white/[0.08] text-white rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <Zap className="w-5 h-5 text-[#e97325]" />
+                  <Zap className="w-5 h-5 text-[#D66829]" />
                   <h3 className="font-black text-sm uppercase tracking-widest">
                     Key Takeaways
                   </h3>
@@ -922,9 +922,9 @@ export default function AcademyPage() {
                   {takeaways.slice(0, 4).map((t, i) => (
                     <li
                       key={i}
-                      className="flex items-start gap-2 text-sm text-gray-300"
+                      className="flex items-start gap-2 text-sm text-white/50"
                     >
-                      <CheckCircle className="w-4 h-4 text-[#e97325] mt-0.5 flex-shrink-0" />
+                      <CheckCircle className="w-4 h-4 text-[#D66829] mt-0.5 flex-shrink-0" />
                       <span>{t}</span>
                     </li>
                   ))}
@@ -932,14 +932,14 @@ export default function AcademyPage() {
               </div>
 
               {/* Put It Into Practice */}
-              <div className="border-2 border-[#e97325] rounded-xl p-6">
+              <div className="border border-[#D66829]/30 bg-[#162231] rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <Target className="w-5 h-5 text-[#e97325]" />
-                  <h3 className="font-black text-sm uppercase tracking-widest text-[#1a2744]">
+                  <Target className="w-5 h-5 text-[#D66829]" />
+                  <h3 className="font-bold text-sm uppercase tracking-widest text-white">
                     Put It Into Practice
                   </h3>
                 </div>
-                <p className="text-gray-700 text-sm leading-relaxed">
+                <p className="text-white/50 text-sm leading-relaxed">
                   {actionItem}
                 </p>
               </div>
@@ -957,7 +957,7 @@ export default function AcademyPage() {
                     }
                   }}
                   disabled={!prevModule}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-400 hover:text-[#1a2744] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white/30 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" /> Previous
                 </button>
@@ -968,12 +968,12 @@ export default function AcademyPage() {
                     toggleComplete(courseId, activeMod.id)
                   }
                   className={cn(
-                    "px-8 py-3 rounded-xl font-black text-sm transition-all",
+                    "px-8 py-3 rounded-xl font-bold text-sm transition-all",
                     completionFlash
                       ? "bg-green-500 text-white scale-105"
                       : currentModCompleted
                       ? "bg-green-500 text-white hover:bg-green-600"
-                      : "bg-[#e97325] text-white hover:bg-[#e97325]/90"
+                      : "bg-[#D66829] text-white hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20"
                   )}
                 >
                   {completionFlash
@@ -996,16 +996,16 @@ export default function AcademyPage() {
                   disabled={
                     !nextModule || isModuleLocked(resolvedIdx + 1)
                   }
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-400 hover:text-[#1a2744] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white/30 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   Next <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           ) : (
-            <div className="bg-gray-50 rounded-2xl border border-gray-100 p-12 text-center">
-              <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-400 font-bold">
+            <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-12 text-center">
+              <BookOpen className="w-12 h-12 text-white/10 mx-auto mb-4" />
+              <p className="text-white/30 font-bold">
                 Select a module to start learning
               </p>
             </div>
@@ -1014,7 +1014,7 @@ export default function AcademyPage() {
 
         {/* Mobile bottom nav */}
         {activeMod && !currentModLocked && (
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between z-50">
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#162231] border-t border-white/[0.08] px-4 py-3 flex items-center justify-between z-50">
             <button
               onClick={() => {
                 if (prevModule) {
@@ -1026,7 +1026,7 @@ export default function AcademyPage() {
                 }
               }}
               disabled={!prevModule}
-              className="p-2 text-gray-400 disabled:opacity-30"
+              className="p-2 text-white/30 disabled:opacity-30"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -1036,12 +1036,12 @@ export default function AcademyPage() {
                 activeMod && toggleComplete(courseId, activeMod.id)
               }
               className={cn(
-                "px-6 py-2.5 rounded-xl font-black text-sm transition-all",
+                "px-6 py-2.5 rounded-xl font-bold text-sm transition-all",
                 completionFlash
                   ? "bg-green-500 text-white scale-105"
                   : currentModCompleted
                   ? "bg-green-500 text-white"
-                  : "bg-[#e97325] text-white"
+                  : "bg-[#D66829] text-white"
               )}
             >
               {completionFlash
@@ -1062,7 +1062,7 @@ export default function AcademyPage() {
                 }
               }}
               disabled={!nextModule || isModuleLocked(resolvedIdx + 1)}
-              className="p-2 text-gray-400 disabled:opacity-30"
+              className="p-2 text-white/30 disabled:opacity-30"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -1125,20 +1125,20 @@ export default function AcademyPage() {
                 locked
                   ? "opacity-50 cursor-not-allowed border-transparent"
                   : active
-                  ? "bg-orange-50 border-[#e97325]"
-                  : "border-transparent hover:bg-gray-50"
+                  ? "bg-[#D66829]/10 border-[#D66829]"
+                  : "border-transparent hover:bg-white/[0.04]"
               )}
             >
               <div
                 className={cn(
                   "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0",
                   completed
-                    ? "bg-green-100 text-green-600"
+                    ? "bg-green-500/10 text-green-400"
                     : active
-                    ? "bg-[#e97325] text-white"
+                    ? "bg-[#D66829] text-white"
                     : locked
-                    ? "bg-gray-100 text-gray-400"
-                    : "bg-gray-100 text-gray-500"
+                    ? "bg-white/[0.04] text-white/20"
+                    : "bg-white/[0.06] text-white/40"
                 )}
               >
                 {completed ? (
@@ -1154,15 +1154,15 @@ export default function AcademyPage() {
                   className={cn(
                     "text-xs font-bold truncate",
                     active
-                      ? "text-[#1a2744]"
+                      ? "text-white"
                       : locked
-                      ? "text-gray-400"
-                      : "text-gray-600"
+                      ? "text-white/20"
+                      : "text-white/50"
                   )}
                 >
                   {mod.title}
                 </p>
-                <p className="text-[10px] text-gray-400">{mod.readTime}</p>
+                <p className="text-[10px] text-white/30">{mod.readTime}</p>
               </div>
             </button>
           );
