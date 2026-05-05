@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 interface ReadinessBreakdown {
   score: number;
@@ -21,15 +20,6 @@ const CATEGORY_LINKS: Record<string, string> = {
   jobs: "/student/jobs",
   contract: "/student/contract-lab",
   financial: "/student/financial-planner",
-};
-
-const CATEGORY_COLORS: Record<string, string> = {
-  profile: "#3b82f6",
-  academy: "#8b5cf6",
-  interview: "#f59e0b",
-  jobs: "#e97325",
-  contract: "#22c55e",
-  financial: "#06b6d4",
 };
 
 function getGrade(score: number): string {
@@ -56,56 +46,52 @@ function getLowestCategory(breakdown: Record<string, ReadinessBreakdown>): { key
 export default function CareerReadiness({ totalScore, breakdown }: CareerReadinessProps) {
   const grade = getGrade(totalScore);
   const lowest = getLowestCategory(breakdown);
-  const circumference = 2 * Math.PI * 54;
+  const circumference = 2 * Math.PI * 58;
   const strokeDashoffset = circumference - (totalScore / 100) * circumference;
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8">
-      <div className="flex flex-col sm:flex-row items-center gap-6">
+    <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+      <div className="flex flex-col sm:flex-row items-center gap-8">
         {/* Score Ring */}
         <div className="relative flex-shrink-0">
-          <svg width="128" height="128" viewBox="0 0 128 128">
-            <circle cx="64" cy="64" r="54" fill="none" stroke="#f3f4f6" strokeWidth="8" />
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="58" fill="none" stroke="#f0eeea" strokeWidth="6" />
             <circle
-              cx="64" cy="64" r="54" fill="none"
-              stroke="#e97325"
-              strokeWidth="8"
+              cx="70" cy="70" r="58" fill="none"
+              stroke="#D66829"
+              strokeWidth="6"
               strokeLinecap="round"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
-              transform="rotate(-90 64 64)"
+              transform="rotate(-90 70 70)"
               className="transition-all duration-1000"
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl font-black text-[#1a2744]">{totalScore}</span>
-            <span className="text-xs font-bold text-gray-400">{grade}</span>
+            <span className="text-4xl font-light text-[#1E2D3B]">{totalScore}</span>
+            <span className="text-[10px] font-medium text-[#1E2D3B]/40 uppercase tracking-wider">{grade}</span>
           </div>
         </div>
 
         {/* Breakdown */}
         <div className="flex-1 w-full">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-lg font-heading font-black text-[#1a2744]">Career Readiness</h2>
-              <p className="text-xs text-gray-400">Your score across all career dimensions</p>
-            </div>
-          </div>
-          <div className="space-y-2.5">
+          <h2 className="text-sm font-semibold text-[#1E2D3B] mb-1">Career Readiness</h2>
+          <p className="text-xs text-[#1E2D3B]/40 mb-5">Progress across all dimensions</p>
+          <div className="space-y-3">
             {Object.entries(breakdown).map(([key, cat]) => (
               <Link key={key} href={CATEGORY_LINKS[key] || "#"} className="group block">
-                <div className="flex items-center justify-between mb-0.5">
-                  <span className="text-xs font-bold text-gray-600 group-hover:text-[#e97325] transition-colors">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-[#1E2D3B]/60 group-hover:text-[#D66829] transition-colors">
                     {cat.label}
                   </span>
-                  <span className="text-[10px] font-bold text-gray-400">{cat.score}%</span>
+                  <span className="text-[10px] text-[#1E2D3B]/30 tabular-nums">{cat.score}%</span>
                 </div>
-                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-1 bg-[#F5F3EF] rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-700"
                     style={{
-                      width: `${cat.score}%`,
-                      backgroundColor: CATEGORY_COLORS[key] || "#e97325",
+                      width: `${Math.max(cat.score, 2)}%`,
+                      backgroundColor: cat.score >= 80 ? "#1E2D3B" : cat.score >= 40 ? "#D66829" : "#1E2D3B20",
                     }}
                   />
                 </div>
@@ -119,17 +105,17 @@ export default function CareerReadiness({ totalScore, breakdown }: CareerReadine
       {lowest && lowest.score < 100 && (
         <Link
           href={lowest.href}
-          className="mt-5 flex items-center gap-3 p-3 rounded-xl bg-[#e97325]/5 border border-[#e97325]/10 hover:bg-[#e97325]/10 transition-colors group"
+          className="mt-6 flex items-center justify-between p-3.5 rounded-xl bg-[#F5F3EF] hover:bg-[#eae7e1] transition-colors group"
         >
-          <div className="w-8 h-8 rounded-lg bg-[#e97325] flex items-center justify-center flex-shrink-0">
-            <ArrowRight className="w-4 h-4 text-white" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-[#1a2744]">Boost your score</p>
-            <p className="text-xs text-gray-500">
-              Your {lowest.label.toLowerCase()} needs attention — start there.
+          <div>
+            <p className="text-xs font-medium text-[#1E2D3B]">Boost your score</p>
+            <p className="text-[11px] text-[#1E2D3B]/40">
+              {lowest.label} needs attention
             </p>
           </div>
+          <span className="text-[#D66829] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+            Go &rarr;
+          </span>
         </Link>
       )}
     </div>

@@ -1,18 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  UserCircle,
-  BookOpen,
-  Award,
-  Briefcase,
-  FileText,
-  DollarSign,
-  CheckCircle,
-  ChevronRight,
-  Compass,
-  Star,
-} from "lucide-react";
+import { Check } from "lucide-react";
 
 interface MilestoneData {
   profileComplete: boolean;
@@ -30,13 +19,13 @@ interface MilestoneTimelineProps {
 }
 
 const MILESTONES = [
-  { key: "profileComplete", label: "Profile Completed", icon: UserCircle, href: "/student/profile", color: "#3b82f6" },
-  { key: "firstCourseStarted", label: "First Course Started", icon: BookOpen, href: "/student/academy", color: "#8b5cf6" },
-  { key: "firstCourseCompleted", label: "First Course Completed", icon: Award, href: "/student/academy", color: "#8b5cf6" },
-  { key: "firstJobApp", label: "First Job Application", icon: Briefcase, href: "/student/jobs", color: "#e97325" },
-  { key: "contractReviewed", label: "First Contract Reviewed", icon: FileText, href: "/student/contract-lab", color: "#22c55e" },
-  { key: "financialPlanCreated", label: "Financial Plan Created", icon: DollarSign, href: "/student/financial-planner", color: "#06b6d4" },
-  { key: "allCoursesComplete", label: "All Courses Completed", icon: Star, href: "/student/academy", color: "#f59e0b" },
+  { key: "profileComplete", label: "Profile completed", href: "/student/profile" },
+  { key: "firstCourseStarted", label: "First course started", href: "/student/academy" },
+  { key: "firstCourseCompleted", label: "First course finished", href: "/student/academy" },
+  { key: "firstJobApp", label: "First application sent", href: "/student/jobs" },
+  { key: "contractReviewed", label: "Contract reviewed", href: "/student/contract-lab" },
+  { key: "financialPlanCreated", label: "Financial plan created", href: "/student/financial-planner" },
+  { key: "allCoursesComplete", label: "All courses completed", href: "/student/academy" },
 ] as const;
 
 export default function MilestoneTimeline({ milestones }: MilestoneTimelineProps) {
@@ -44,66 +33,60 @@ export default function MilestoneTimeline({ milestones }: MilestoneTimelineProps
   const total = MILESTONES.length;
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8">
+    <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-lg font-heading font-black text-[#1a2744]">Milestones</h2>
-          <p className="text-xs text-gray-400">
-            {completedCount} of {total} achieved
-          </p>
+          <h2 className="text-sm font-semibold text-[#1E2D3B]">Milestones</h2>
+          <p className="text-xs text-[#1E2D3B]/40">{completedCount} of {total}</p>
         </div>
-        <div className="flex items-center gap-1.5">
+        {/* Progress dots */}
+        <div className="flex items-center gap-1">
           {MILESTONES.map((m) => (
             <div
               key={m.key}
-              className="w-2 h-2 rounded-full"
-              style={{
-                backgroundColor: milestones[m.key as keyof MilestoneData] ? m.color : "#e5e7eb",
-              }}
+              className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                milestones[m.key as keyof MilestoneData] ? "bg-[#1E2D3B]" : "bg-gray-200"
+              }`}
             />
           ))}
         </div>
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {MILESTONES.map((m, idx) => {
           const done = milestones[m.key as keyof MilestoneData];
-          const Icon = m.icon;
           const isNext = !done && (idx === 0 || milestones[MILESTONES[idx - 1].key as keyof MilestoneData]);
 
           return (
             <Link
               key={m.key}
               href={m.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${
-                done
-                  ? "bg-gray-50"
-                  : isNext
-                  ? "bg-[#e97325]/5 border border-[#e97325]/10"
-                  : "hover:bg-gray-50"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group ${
+                isNext ? "bg-[#F5F3EF]" : "hover:bg-[#F5F3EF]/60"
               }`}
             >
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{
-                  backgroundColor: done ? `${m.color}15` : isNext ? `${m.color}15` : "#f3f4f6",
-                }}
+                className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  done
+                    ? "bg-[#1E2D3B]"
+                    : isNext
+                    ? "border-2 border-[#D66829]"
+                    : "border border-gray-200"
+                }`}
               >
-                {done ? (
-                  <CheckCircle className="w-4 h-4" style={{ color: m.color }} />
-                ) : (
-                  <Icon className="w-4 h-4" style={{ color: isNext ? m.color : "#9ca3af" }} />
-                )}
+                {done && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
               </div>
               <span
-                className={`text-sm font-medium flex-1 ${
-                  done ? "text-gray-500 line-through" : isNext ? "text-[#1a2744] font-bold" : "text-gray-400"
+                className={`text-[13px] flex-1 ${
+                  done ? "text-[#1E2D3B]/40 line-through" : isNext ? "text-[#1E2D3B] font-medium" : "text-[#1E2D3B]/30"
                 }`}
               >
                 {m.label}
               </span>
               {isNext && (
-                <ChevronRight className="w-4 h-4 text-[#e97325] group-hover:translate-x-0.5 transition-transform" />
+                <span className="text-[10px] text-[#D66829] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  Start &rarr;
+                </span>
               )}
             </Link>
           );

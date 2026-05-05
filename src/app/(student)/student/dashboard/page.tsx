@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import {
   getStudentDashboardData,
   getAcademyProgress,
@@ -21,16 +20,9 @@ import {
   getMatchedJobsCount,
   transitionToDoctorAction,
 } from "./actions";
-import { useRouter } from "next/navigation";
 import CareerReadiness from "./career-readiness";
 import PipelinePreview from "./pipeline-preview";
 import MilestoneTimeline from "./milestone-timeline";
-
-const fadeUp = {
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
-};
 
 export default function StudentDashboard() {
   const [data, setData] = useState<any>(null);
@@ -39,7 +31,6 @@ export default function StudentDashboard() {
   const [jobCount, setJobCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     Promise.all([
@@ -71,12 +62,7 @@ export default function StudentDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-neuro-orange/10 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-neuro-orange animate-spin" />
-          </div>
-          <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Loading your dashboard...</p>
-        </div>
+        <Loader2 className="w-5 h-5 text-[#D66829] animate-spin" />
       </div>
     );
   }
@@ -90,7 +76,6 @@ export default function StudentDashboard() {
   const gradYear = data?.profile?.gradYear ? parseInt(data.profile.gradYear, 10) : null;
   const isGraduating = gradYear && gradYear <= currentYear;
 
-  // Days until graduation (assume June 15 of grad year)
   const daysUntilGrad = gradYear
     ? Math.max(0, Math.ceil((new Date(`${gradYear}-06-15`).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : null;
@@ -98,291 +83,175 @@ export default function StudentDashboard() {
   const totalScore = readiness?.totalScore || 0;
 
   return (
-    <div className="p-6 md:p-10 max-w-5xl mx-auto space-y-6">
+    <div className="p-6 md:p-10 max-w-5xl mx-auto space-y-8">
       {/* Header */}
-      <motion.div {...fadeUp}>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.2em] mb-1">Mission Control</p>
-            <h1 className="text-3xl md:text-4xl font-heading font-black text-neuro-navy tracking-tight">
-              {studentName}
-            </h1>
-            {schoolInfo && <p className="text-gray-400 mt-1">{schoolInfo}</p>}
-          </div>
-          <Link
-            href="/student/career-pipeline"
-            className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#e97325]/10 border border-[#e97325]/20 rounded-full hover:bg-[#e97325]/20 transition-colors"
-          >
-            <Map className="w-4 h-4 text-[#e97325]" />
-            <span className="text-sm font-black text-[#e97325]">Career Pipeline</span>
-          </Link>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-heading font-bold text-[#1E2D3B] tracking-tight">
+            {studentName}
+          </h1>
+          {schoolInfo && <p className="text-[#1E2D3B]/40 text-sm mt-1">{schoolInfo}</p>}
         </div>
-      </motion.div>
+        <Link
+          href="/student/career-pipeline"
+          className="hidden sm:flex items-center gap-2 text-xs text-[#D66829] font-medium hover:underline"
+        >
+          <Map className="w-3.5 h-3.5" /> Career Pipeline
+        </Link>
+      </div>
 
-      {/* First-time guidance */}
+      {/* Stats — clean, minimal */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-gray-100 rounded-2xl overflow-hidden">
+        {[
+          { label: "Readiness", value: `${totalScore}`, unit: "/100" },
+          { label: "Open Jobs", value: `${jobCount}`, href: "/student/jobs" },
+          { label: "Modules", value: `${academyData.completed}`, unit: `/${academyData.total}`, href: "/student/academy" },
+          daysUntilGrad !== null && daysUntilGrad > 0
+            ? { label: "Graduation", value: `${daysUntilGrad}`, unit: " days" }
+            : { label: "Applications", value: `${readiness?.raw?.appsSubmitted || 0}` },
+        ].map((stat, i) => {
+          const inner = (
+            <div key={i} className="bg-white p-5 text-center">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-[#1E2D3B]/30 mb-1">{stat.label}</p>
+              <p className="text-2xl font-light text-[#1E2D3B] tabular-nums">
+                {stat.value}
+                {stat.unit && <span className="text-sm text-[#1E2D3B]/25">{stat.unit}</span>}
+              </p>
+            </div>
+          );
+          return stat.href ? <Link key={i} href={stat.href} className="hover:bg-[#F5F3EF] transition-colors">{inner}</Link> : <div key={i}>{inner}</div>;
+        })}
+      </div>
+
+      {/* First-time guidance — only for brand new students */}
       {totalScore < 20 && (
-        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.03 }}>
-          <div className="bg-white rounded-3xl border border-[#e97325]/15 p-6 md:p-8 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-[#e97325]/10 rounded-xl flex items-center justify-center">
-                <Map className="w-5 h-5 text-[#e97325]" />
-              </div>
-              <div>
-                <h2 className="font-heading font-black text-[#1a2744] text-lg">Here&apos;s How This Works</h2>
-                <p className="text-gray-400 text-sm">Your portal has everything you need to launch your career</p>
-              </div>
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+          <h2 className="text-sm font-semibold text-[#1E2D3B] mb-1">Here&apos;s how this works</h2>
+          <p className="text-xs text-[#1E2D3B]/40 mb-5">Your portal has everything you need to launch your career.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="border-l-2 border-[#1E2D3B]/10 pl-4">
+              <p className="text-xs font-medium text-[#1E2D3B] mb-0.5">1. Learn</p>
+              <p className="text-[11px] text-[#1E2D3B]/40 leading-relaxed">Courses, techniques, and interview prep. All included.</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-              <div className="bg-violet-50 rounded-xl p-4 border border-violet-100">
-                <p className="font-bold text-[#1a2744] mb-1">1. Learn</p>
-                <p className="text-gray-500 text-xs">Take courses in the <strong>Academy</strong>, explore <strong>Techniques</strong>, and prep for <strong>Interviews</strong>. All included with your membership.</p>
-              </div>
-              <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-                <p className="font-bold text-[#1a2744] mb-1">2. Connect</p>
-                <p className="text-gray-500 text-xs">Browse matched <strong>Jobs</strong>, find <strong>Mentors</strong> who want to help you, and see your <strong>Student Network</strong>.</p>
-              </div>
-              <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
-                <p className="font-bold text-[#1a2744] mb-1">3. Launch</p>
-                <p className="text-gray-500 text-xs">Review contracts in <strong>Contract Lab</strong> and plan your finances in <strong>Financial Planner</strong> before day one.</p>
-              </div>
+            <div className="border-l-2 border-[#D66829]/30 pl-4">
+              <p className="text-xs font-medium text-[#1E2D3B] mb-0.5">2. Connect</p>
+              <p className="text-[11px] text-[#1E2D3B]/40 leading-relaxed">Matched jobs, mentors, and your student network.</p>
             </div>
-            <p className="text-xs text-gray-400 mt-4">
-              Your <strong>Career Readiness Score</strong> below tracks your progress across everything. Follow the <Link href="/student/career-pipeline" className="text-[#e97325] font-bold hover:underline">Career Pipeline</Link> for a step-by-step guide.
-            </p>
+            <div className="border-l-2 border-[#1E2D3B]/10 pl-4">
+              <p className="text-xs font-medium text-[#1E2D3B] mb-0.5">3. Launch</p>
+              <p className="text-[11px] text-[#1E2D3B]/40 leading-relaxed">Contract review and financial planning before day one.</p>
+            </div>
           </div>
-        </motion.div>
+          <p className="text-[11px] text-[#1E2D3B]/30 mt-5">
+            Your Career Readiness score tracks progress across everything. Follow the <Link href="/student/career-pipeline" className="text-[#D66829] hover:underline">Career Pipeline</Link> for a step-by-step guide.
+          </p>
+        </div>
       )}
 
-      {/* Quick Stats Row */}
-      <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.05 }}>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-gradient-to-b from-orange-50 to-white rounded-2xl border border-orange-100 p-4">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Readiness</p>
-            <p className="text-2xl font-black text-neuro-navy">{totalScore}<span className="text-sm text-gray-400">/100</span></p>
-          </div>
-          <Link href="/student/jobs" className="bg-gradient-to-b from-blue-50 to-white rounded-2xl border border-blue-100 p-4 hover:shadow-md transition-shadow">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Open Jobs</p>
-            <p className="text-2xl font-black text-neuro-navy">{jobCount}</p>
-          </Link>
-          <Link href="/student/academy" className="bg-gradient-to-b from-violet-50 to-white rounded-2xl border border-violet-100 p-4 hover:shadow-md transition-shadow">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Courses</p>
-            <p className="text-2xl font-black text-neuro-navy">{academyData.completed}<span className="text-sm text-gray-400">/{academyData.total} modules</span></p>
-          </Link>
-          {daysUntilGrad !== null && daysUntilGrad > 0 ? (
-            <div className="bg-gradient-to-b from-emerald-50 to-white rounded-2xl border border-emerald-100 p-4">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Graduation</p>
-              <p className="text-2xl font-black text-neuro-navy">{daysUntilGrad}<span className="text-sm text-gray-400"> days</span></p>
-            </div>
-          ) : (
-            <div className="bg-gradient-to-b from-emerald-50 to-white rounded-2xl border border-emerald-100 p-4">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Applications</p>
-              <p className="text-2xl font-black text-neuro-navy">{readiness?.raw?.appsSubmitted || 0}</p>
-            </div>
-          )}
-        </div>
-      </motion.div>
-
-      {/* Career Readiness Score + Pipeline Preview */}
+      {/* Readiness + Pipeline */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.1 }}>
-          {readiness && (
-            <CareerReadiness
-              totalScore={totalScore}
-              breakdown={readiness.breakdown}
-            />
-          )}
-        </motion.div>
-        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.15 }}>
-          {readiness && (
-            <PipelinePreview
-              milestones={readiness.milestones}
-              modulesCompleted={readiness.raw.modulesCompleted}
-            />
-          )}
-        </motion.div>
+        {readiness && (
+          <CareerReadiness totalScore={totalScore} breakdown={readiness.breakdown} />
+        )}
+        {readiness && (
+          <div className="space-y-6">
+            <PipelinePreview milestones={readiness.milestones} modulesCompleted={readiness.raw.modulesCompleted} />
+            <MilestoneTimeline milestones={readiness.milestones} />
+          </div>
+        )}
       </div>
 
-      {/* Smart Next Steps */}
-      <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.2 }}>
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8">
-          <h2 className="text-lg font-heading font-black text-[#1a2744] mb-4">What To Do Next</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {getSmartActions(data, readiness, jobCount).map((action, i) => (
-              <Link
-                key={i}
-                href={action.href}
-                className={`p-4 rounded-2xl border transition-all group hover:shadow-md hover:-translate-y-0.5 ${action.borderClass}`}
-              >
-                <action.icon className={`w-5 h-5 mb-2 ${action.iconClass}`} />
-                <p className="text-sm font-bold text-[#1a2744] mb-0.5">{action.title}</p>
-                <p className="text-xs text-gray-400">{action.desc}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Milestones + Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.25 }}>
-          {readiness && <MilestoneTimeline milestones={readiness.milestones} />}
-        </motion.div>
-
-        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.3 }}>
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8">
-            <h2 className="text-lg font-heading font-black text-[#1a2744] mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: "Browse Jobs", desc: "Find positions", href: "/student/jobs", icon: Briefcase, bg: "bg-blue-50", border: "border-blue-100" },
-                { label: "Find Mentors", desc: "Get guidance", href: "/student/mentors", icon: Users, bg: "bg-rose-50", border: "border-rose-100" },
-                { label: "Academy", desc: "Continue learning", href: "/student/academy", icon: BookOpen, bg: "bg-violet-50", border: "border-violet-100" },
-                { label: "Techniques", desc: "Explore methods", href: "/student/techniques", icon: Compass, bg: "bg-emerald-50", border: "border-emerald-100" },
-                { label: "Seminars", desc: "Upcoming events", href: "/student/seminars", icon: Calendar, bg: "bg-amber-50", border: "border-amber-100" },
-                { label: "Community", desc: "Student network", href: "/student/community", icon: GraduationCap, bg: "bg-cyan-50", border: "border-cyan-100" },
-              ].map((action) => (
-                <Link
-                  key={action.href}
-                  href={action.href}
-                  className={`${action.bg} rounded-2xl border ${action.border} p-4 hover:shadow-md hover:-translate-y-0.5 transition-all group`}
-                >
-                  <action.icon className="w-5 h-5 text-neuro-navy/60 group-hover:text-neuro-orange transition-colors mb-2" />
-                  <p className="font-bold text-[#1a2744] text-xs">{action.label}</p>
-                  <p className="text-[10px] text-gray-400">{action.desc}</p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Graduation transition banner */}
-      {isGraduating && (
-        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.35 }}>
-          <div className="bg-neuro-navy rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "var(--grid-pattern)" }} />
-            <div className="relative">
-              <p className="text-neuro-orange text-[10px] font-black uppercase tracking-[0.2em] mb-2">Congratulations</p>
-              <h3 className="text-2xl font-heading font-black text-white tracking-tight">Transition to Doctor</h3>
-              <p className="text-gray-400 mt-1">Switch to a Doctor account to access the full provider dashboard.</p>
-            </div>
-            <button
-              onClick={handleTransition}
-              disabled={transitioning}
-              className="relative px-8 py-4 bg-neuro-orange text-white font-black text-sm uppercase tracking-wider rounded-xl shadow-lg shadow-neuro-orange/30 hover:shadow-neuro-orange/50 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
+      {/* What to do next */}
+      <div>
+        <h2 className="text-sm font-semibold text-[#1E2D3B] mb-4">What to do next</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {getSmartActions(data, readiness, jobCount).map((action, i) => (
+            <Link
+              key={i}
+              href={action.href}
+              className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-[#D66829]/20 transition-all group"
             >
-              {transitioning && <Loader2 className="w-4 h-4 animate-spin" />}
-              Transition Account <ArrowRight className="w-4 h-4" />
-            </button>
+              <action.icon className="w-4 h-4 text-[#1E2D3B]/20 group-hover:text-[#D66829] transition-colors mb-3" />
+              <p className="text-[13px] font-medium text-[#1E2D3B] mb-0.5">{action.title}</p>
+              <p className="text-[11px] text-[#1E2D3B]/40 leading-relaxed">{action.desc}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick actions */}
+      <div>
+        <h2 className="text-sm font-semibold text-[#1E2D3B] mb-4">Quick actions</h2>
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+          {[
+            { label: "Jobs", href: "/student/jobs", icon: Briefcase },
+            { label: "Mentors", href: "/student/mentors", icon: Users },
+            { label: "Academy", href: "/student/academy", icon: BookOpen },
+            { label: "Techniques", href: "/student/techniques", icon: Compass },
+            { label: "Seminars", href: "/student/seminars", icon: Calendar },
+            { label: "Community", href: "/student/community", icon: GraduationCap },
+          ].map((action) => (
+            <Link
+              key={action.href}
+              href={action.href}
+              className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:border-[#D66829]/20 hover:-translate-y-0.5 transition-all group"
+            >
+              <action.icon className="w-4 h-4 text-[#1E2D3B]/20 group-hover:text-[#D66829] transition-colors mx-auto mb-2" />
+              <p className="text-[11px] font-medium text-[#1E2D3B]/60 group-hover:text-[#1E2D3B]">{action.label}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Graduation transition */}
+      {isGraduating && (
+        <div className="bg-[#1E2D3B] rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-wider text-[#D66829] mb-2">Congratulations</p>
+            <h3 className="text-xl font-heading font-bold text-white">Transition to Doctor</h3>
+            <p className="text-white/40 text-sm mt-1">Switch to a Doctor account to access the provider dashboard.</p>
           </div>
-        </motion.div>
+          <button
+            onClick={handleTransition}
+            disabled={transitioning}
+            className="px-6 py-3 bg-[#D66829] text-white font-medium text-sm rounded-xl hover:bg-[#D66829]/90 transition-colors disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
+          >
+            {transitioning && <Loader2 className="w-4 h-4 animate-spin" />}
+            Transition Account <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       )}
     </div>
   );
 }
 
-// Generate personalized next steps based on user state
 function getSmartActions(data: any, readiness: any, jobCount: number) {
-  const actions: {
-    title: string;
-    desc: string;
-    href: string;
-    icon: any;
-    borderClass: string;
-    iconClass: string;
-  }[] = [];
-
+  const actions: { title: string; desc: string; href: string; icon: any }[] = [];
   const milestones = readiness?.milestones;
 
   if (!milestones?.profileComplete) {
-    actions.push({
-      title: "Complete your profile",
-      desc: "Appear in job searches and get matched to opportunities",
-      href: "/student/profile",
-      icon: Users,
-      borderClass: "border-blue-100 bg-blue-50/50",
-      iconClass: "text-blue-500",
-    });
+    actions.push({ title: "Complete your profile", desc: "Powers job matching and mentor discovery", href: "/student/profile", icon: Users });
   }
-
   if (!milestones?.firstCourseStarted) {
-    actions.push({
-      title: "Start your first course",
-      desc: "Begin with Nervous System Foundations — it changes everything",
-      href: "/student/academy",
-      icon: BookOpen,
-      borderClass: "border-violet-100 bg-violet-50/50",
-      iconClass: "text-violet-500",
-    });
+    actions.push({ title: "Start your first course", desc: "Begin with Nervous System Foundations", href: "/student/academy", icon: BookOpen });
   }
-
   if (jobCount > 0 && milestones?.firstCourseCompleted) {
-    actions.push({
-      title: `${jobCount} jobs available`,
-      desc: "Browse positions and find your match",
-      href: "/student/jobs",
-      icon: Briefcase,
-      borderClass: "border-orange-100 bg-orange-50/50",
-      iconClass: "text-[#e97325]",
-    });
+    actions.push({ title: `${jobCount} jobs available`, desc: "Browse positions matched to your profile", href: "/student/jobs", icon: Briefcase });
   }
-
   if (milestones?.firstCourseCompleted && !milestones?.firstJobApp) {
-    actions.push({
-      title: "Apply to your first job",
-      desc: "You've got the knowledge — now put it to work",
-      href: "/student/jobs",
-      icon: Briefcase,
-      borderClass: "border-orange-100 bg-orange-50/50",
-      iconClass: "text-[#e97325]",
-    });
+    actions.push({ title: "Apply to your first job", desc: "You have the knowledge — put it to work", href: "/student/jobs", icon: Briefcase });
   }
-
   if (milestones?.firstJobApp && !milestones?.contractReviewed) {
-    actions.push({
-      title: "Review a contract",
-      desc: "Don't sign anything without running it through Contract Lab",
-      href: "/student/contract-lab",
-      icon: Compass,
-      borderClass: "border-emerald-100 bg-emerald-50/50",
-      iconClass: "text-emerald-500",
-    });
+    actions.push({ title: "Review a contract", desc: "Don't sign without running it through Contract Lab", href: "/student/contract-lab", icon: Compass });
   }
-
   if (milestones?.contractReviewed && !milestones?.financialPlanCreated) {
-    actions.push({
-      title: "Create your financial plan",
-      desc: "Know your numbers before day one",
-      href: "/student/financial-planner",
-      icon: Calendar,
-      borderClass: "border-cyan-100 bg-cyan-50/50",
-      iconClass: "text-cyan-500",
-    });
+    actions.push({ title: "Create your financial plan", desc: "Know your numbers before day one", href: "/student/financial-planner", icon: Calendar });
   }
-
-  // Default actions if we have fewer than 3
   if (actions.length < 3) {
-    if (!actions.some((a) => a.href === "/student/techniques")) {
-      actions.push({
-        title: "Explore techniques",
-        desc: "Find the chiropractic technique that fits your style",
-        href: "/student/techniques",
-        icon: Compass,
-        borderClass: "border-emerald-100 bg-emerald-50/50",
-        iconClass: "text-emerald-500",
-      });
-    }
+    actions.push({ title: "Explore techniques", desc: "Find the method that fits your style", href: "/student/techniques", icon: Compass });
   }
-
   if (actions.length < 3) {
-    actions.push({
-      title: "Find a mentor",
-      desc: "Connect with doctors who want to help you succeed",
-      href: "/student/mentors",
-      icon: Users,
-      borderClass: "border-rose-100 bg-rose-50/50",
-      iconClass: "text-rose-500",
-    });
+    actions.push({ title: "Find a mentor", desc: "Connect with doctors who want to help", href: "/student/mentors", icon: Users });
   }
-
   return actions.slice(0, 3);
 }
