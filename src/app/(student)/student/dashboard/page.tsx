@@ -50,10 +50,15 @@ export default function StudentDashboard() {
   const handleTransition = async () => {
     if (!confirm("This will switch your account from Student to Doctor. Your student data will be preserved. This can't be undone. Continue?")) return;
     setTransitioning(true);
-    const result = await transitionToDoctorAction();
-    if (result.success) {
-      window.location.href = "/doctor/dashboard";
-    } else {
+    try {
+      const result = await transitionToDoctorAction();
+      if (result.success) {
+        window.location.href = "/doctor/dashboard";
+      } else {
+        alert("Failed to transition account. Please try again.");
+        setTransitioning(false);
+      }
+    } catch {
       alert("Failed to transition account. Please try again.");
       setTransitioning(false);
     }

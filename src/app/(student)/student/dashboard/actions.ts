@@ -269,7 +269,7 @@ export async function transitionToDoctorAction() {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) throw new Error("Unauthorized")
+  if (!user) return { error: "Unauthorized" }
 
   try {
     // 1. Update Profile Role

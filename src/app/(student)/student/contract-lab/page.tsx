@@ -84,7 +84,6 @@ interface ScoredResult {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const LS_KEY = "neurochiro-contract-lab-draft";
 const BRAND_NAVY = "#ffffff";
 const BRAND_ORANGE = "#D66829";
 

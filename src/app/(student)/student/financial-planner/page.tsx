@@ -49,8 +49,6 @@ interface PlannerState {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const LS_KEY = "neurochiro-financial-planner";
-
 const DEFAULT_EXPENSES: Record<string, number> = {
   Rent: 1200,
   Utilities: 150,
