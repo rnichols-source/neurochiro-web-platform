@@ -613,7 +613,7 @@ function FinancialPlannerContent() {
                         type="number"
                         value={state.expenses[k] ?? 0}
                         onChange={(e) => setExpense(k, Number(e.target.value) || 0)}
-                        className="w-full pl-7 pr-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm font-bold focus:border-[#D66829]/40 outline-none transition-colors"
+                        className="w-full pl-7 pr-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm font-bold text-white focus:border-[#D66829]/40 outline-none transition-colors"
                       />
                     </div>
                   </div>
