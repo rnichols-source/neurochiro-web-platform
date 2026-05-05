@@ -106,7 +106,7 @@ export default function WhyNeuroChiroPage() {
           <div className="flex flex-wrap justify-center gap-6 mb-10 text-sm">
             <span className="text-gray-400"><span className="text-white font-bold">120+</span> Verified Doctors</span>
             <span className="text-gray-400"><span className="text-white font-bold">6</span> Countries</span>
-            <span className="text-gray-400"><span className="text-white font-bold">Free</span> to join</span>
+            <span className="text-gray-400">From <span className="text-white font-bold">$49</span>/mo</span>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

@@ -155,7 +155,7 @@ export default function SeminarsPage() {
       <section className="bg-neuro-navy py-16 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl font-heading font-black text-white mb-4">Want to Host a Seminar?</h2>
-          <p className="text-gray-400 mb-8">Share your expertise with the global nervous system chiropractic community. Members list seminars for free.</p>
+          <p className="text-gray-400 mb-8">Share your expertise with the global nervous system chiropractic community. Seminar listings are included with membership.</p>
           <Link href="/host-a-seminar" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
             Get Started <ArrowRight className="w-5 h-5" />
           </Link>

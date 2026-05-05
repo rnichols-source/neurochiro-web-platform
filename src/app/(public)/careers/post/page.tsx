@@ -53,7 +53,7 @@ export default function PostJobPage() {
           <h1 className="text-3xl font-heading font-black text-neuro-navy">Post a Job Listing</h1>
           <p className="text-gray-500 text-sm">Not a member? Post a single listing and pay once.</p>
           <p className="text-xs text-gray-400">
-            Already a member? <Link href="/doctor/jobs" className="text-neuro-orange font-bold hover:underline">Post for free from your dashboard</Link>
+            Already a member? <Link href="/doctor/jobs" className="text-neuro-orange font-bold hover:underline">Post from your dashboard</Link>
           </p>
         </div>
 

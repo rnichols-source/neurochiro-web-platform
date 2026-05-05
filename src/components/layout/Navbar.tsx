@@ -125,7 +125,7 @@ export default function Navbar() {
                     <div className="p-2 bg-blue-50 rounded-lg text-blue-600"><GraduationCap className="w-4 h-4" /></div>
                     <div>
                       <p className="text-sm font-bold text-blue-900">I&apos;m a Student</p>
-                      <p className="text-xs text-gray-500">Free career tools &amp; jobs</p>
+                      <p className="text-xs text-gray-500">Career tools, jobs &amp; more</p>
                     </div>
                   </Link>
                   <Link href="/register?role=patient" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">
