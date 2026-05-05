@@ -795,7 +795,7 @@ export default function AcademyPage() {
           <div className="lg:hidden bg-white rounded-xl border border-gray-100 shadow-lg mb-4 overflow-hidden">
             {renderSidebarContent(
               course,
-              owned,
+              true,
               cp,
               doneCount,
               modCount,
@@ -837,7 +837,7 @@ export default function AcademyPage() {
             </div>
             {renderSidebarContent(
               course,
-              owned,
+              true,
               cp,
               doneCount,
               modCount,
