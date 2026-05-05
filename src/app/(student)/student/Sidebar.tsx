@@ -90,7 +90,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const initials = userName?.split(" ").map((n) => n[0]).join("").toUpperCase() || "--";
 
   const Content = (
-    <div className="flex flex-col h-full bg-[#0F1A24]">
+    <div className="flex flex-col h-full bg-[#0A1018]">
       {/* Logo */}
       <div className="px-6 pt-7 pb-8 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
@@ -161,7 +161,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <>
-      <aside className="hidden md:flex w-56 h-dvh flex-col shrink-0 overflow-y-auto border-r border-white/[0.06]">
+      <aside className="hidden md:flex w-56 h-dvh flex-col shrink-0 overflow-y-auto border-r border-white/[0.04]">
         {Content}
       </aside>
 
