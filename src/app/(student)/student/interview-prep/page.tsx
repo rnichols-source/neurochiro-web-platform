@@ -27,7 +27,7 @@ import { createClient } from "@/lib/supabase";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const BRAND_NAVY = "#162231";
+const BRAND_NAVY = "#ffffff";
 const BRAND_ORANGE = "#D66829";
 
 const LS_PRACTICE = "neurochiro-interview-practice";

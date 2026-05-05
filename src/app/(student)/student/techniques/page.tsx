@@ -25,7 +25,7 @@ import {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const LS_KEY = "neurochiro-technique-quiz";
-const BRAND_NAVY = "#162231";
+const BRAND_NAVY = "#ffffff";
 const BRAND_ORANGE = "#D66829";
 
 const CATEGORY_COLORS: Record<string, string> = {
