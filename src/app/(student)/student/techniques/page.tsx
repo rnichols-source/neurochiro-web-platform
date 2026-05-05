@@ -1002,6 +1002,9 @@ export default function TechniqueComparisonGuide() {
         <p className="text-gray-500 text-sm mt-1">
           Explore, compare, and find the chiropractic techniques that fit your future practice.
         </p>
+        <div className="mt-3 bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-800">
+          <strong>3 tools in one:</strong> Browse all 18 techniques in the <strong>Technique Explorer</strong>. Take the <strong>Find Your Fit</strong> quiz to discover which match your personality. Then use the <strong>Comparison Tool</strong> to see them side by side.
+        </div>
       </div>
 
       {/* Tabs */}

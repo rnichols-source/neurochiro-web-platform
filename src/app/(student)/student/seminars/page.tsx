@@ -39,6 +39,9 @@ export default function SeminarsPage() {
     <div className="p-8 max-w-5xl mx-auto space-y-8">
       <header>
         <h1 className="text-2xl font-heading font-black text-neuro-navy">Seminars</h1>
+        <p className="text-sm text-gray-400 mt-1">
+          Browse upcoming seminars, workshops, and CE events. Learn new techniques and connect with the community in person.
+        </p>
       </header>
 
       <div className="relative">

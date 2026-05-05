@@ -2150,6 +2150,9 @@ function InterviewPlaybookContent() {
         <p className="text-gray-500 text-sm mt-1">
           Everything you need to ace the interview, evaluate the offer, and negotiate like a pro.
         </p>
+        <div className="mt-3 bg-amber-50 border border-amber-100 rounded-xl p-3 text-xs text-amber-800">
+          <strong>How to use this:</strong> Start with <strong>Interview Questions</strong> to practice what doctors actually ask. Then review <strong>Questions to Ask</strong> them. When you get an offer, use <strong>Evaluate the Offer</strong> and <strong>Negotiation Scripts</strong> to make sure it&apos;s fair. After the interview, check <strong>After the Interview</strong> for follow-up steps.
+        </div>
       </div>
 
       {/* Tabs */}

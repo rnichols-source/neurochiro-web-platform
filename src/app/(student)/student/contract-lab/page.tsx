@@ -1318,6 +1318,9 @@ function ContractLabContent() {
           <Shield className="w-7 h-7 text-[#e97325]" /> Contract Lab
         </h1>
         <p className="text-gray-500 mt-1 text-sm">Analyze contracts, know your rights, and negotiate with confidence.</p>
+        <div className="mt-3 bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-xs text-emerald-800">
+          <strong>How to use this:</strong> Use the <strong>Questionnaire</strong> tab to input your contract terms and get an instant analysis with red flags and negotiation scripts. Or paste your full contract text in the <strong>AI Analysis</strong> tab for a detailed clause-by-clause review. Check <strong>Past Reviews</strong> to see your history.
+        </div>
       </header>
 
       {/* Tab Bar */}

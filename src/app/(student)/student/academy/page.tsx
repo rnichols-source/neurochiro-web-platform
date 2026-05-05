@@ -441,7 +441,7 @@ export default function AcademyPage() {
               </h1>
             </div>
             <p className="text-gray-500">
-              The education chiropractic school didn&apos;t give you.
+              The education chiropractic school didn&apos;t give you. All 6 courses are included with your membership — tap any course to start.
             </p>
           </div>
           <div className="flex items-center gap-3">

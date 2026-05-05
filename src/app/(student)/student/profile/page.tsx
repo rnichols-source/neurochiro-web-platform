@@ -78,7 +78,12 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <h1 className="text-2xl font-heading font-black text-neuro-navy">Profile</h1>
+      <div className="mb-2">
+        <h1 className="text-2xl font-heading font-black text-neuro-navy">Profile</h1>
+        <p className="text-sm text-gray-400 mt-1">
+          Your profile powers everything — job matching, mentor discovery, and your Career Readiness Score. The more complete it is, the better your matches.
+        </p>
+      </div>
 
       <form onSubmit={handleSave} className="space-y-5">
         {/* Personal Info */}

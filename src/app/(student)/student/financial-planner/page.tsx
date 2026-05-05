@@ -1606,8 +1606,11 @@ function FinancialPlannerContent() {
             <GraduationCap className="w-7 h-7 text-neuro-orange" /> Financial Planner
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            Student-to-practice financial planning in 4 steps.
+            Plan your first-year finances before you graduate.
           </p>
+          <div className="mt-2 bg-cyan-50 border border-cyan-100 rounded-xl p-3 text-xs text-cyan-800">
+            <strong>How to use this:</strong> Step 1 — enter your loans and salary. Step 2 — see your take-home pay after taxes. Step 3 — set your monthly budget. Step 4 — get your complete financial roadmap with loan repayment strategies. Your data saves automatically.
+          </div>
         </div>
         <button
           onClick={resetAll}

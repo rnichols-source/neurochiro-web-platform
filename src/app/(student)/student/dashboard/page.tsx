@@ -119,6 +119,40 @@ export default function StudentDashboard() {
         </div>
       </motion.div>
 
+      {/* First-time guidance */}
+      {totalScore < 20 && (
+        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.03 }}>
+          <div className="bg-white rounded-3xl border border-[#e97325]/15 p-6 md:p-8 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-[#e97325]/10 rounded-xl flex items-center justify-center">
+                <Map className="w-5 h-5 text-[#e97325]" />
+              </div>
+              <div>
+                <h2 className="font-heading font-black text-[#1a2744] text-lg">Here&apos;s How This Works</h2>
+                <p className="text-gray-400 text-sm">Your portal has everything you need to launch your career</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+              <div className="bg-violet-50 rounded-xl p-4 border border-violet-100">
+                <p className="font-bold text-[#1a2744] mb-1">1. Learn</p>
+                <p className="text-gray-500 text-xs">Take courses in the <strong>Academy</strong>, explore <strong>Techniques</strong>, and prep for <strong>Interviews</strong>. All included with your membership.</p>
+              </div>
+              <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                <p className="font-bold text-[#1a2744] mb-1">2. Connect</p>
+                <p className="text-gray-500 text-xs">Browse matched <strong>Jobs</strong>, find <strong>Mentors</strong> who want to help you, and see your <strong>Student Network</strong>.</p>
+              </div>
+              <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
+                <p className="font-bold text-[#1a2744] mb-1">3. Launch</p>
+                <p className="text-gray-500 text-xs">Review contracts in <strong>Contract Lab</strong> and plan your finances in <strong>Financial Planner</strong> before day one.</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-4">
+              Your <strong>Career Readiness Score</strong> below tracks your progress across everything. Follow the <Link href="/student/career-pipeline" className="text-[#e97325] font-bold hover:underline">Career Pipeline</Link> for a step-by-step guide.
+            </p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Quick Stats Row */}
       <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.05 }}>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
