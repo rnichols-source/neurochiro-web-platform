@@ -1322,7 +1322,7 @@ function InterviewPlaybookContent() {
                       value={practiceAnswers[q.id] || ""}
                       onChange={(e) => setPracticeAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
                       placeholder="Type your answer here..."
-                      className="w-full h-32 p-4 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none transition-colors resize-none"
+                      className="w-full h-32 p-4 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none transition-colors resize-none"
                     />
 
                     <div className="flex gap-3">
