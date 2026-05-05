@@ -135,8 +135,8 @@ export async function getCareerReadinessData() {
     const contractScore = (contractCount || 0) > 0 ? 100 : 0
 
     // Financial plan (10%)
-    const { data: planData } = await supabase
-      .from('financial_plans' as any)
+    const { data: planData } = await (supabase as any)
+      .from('financial_plans')
       .select('id')
       .eq('user_id', user.id)
       .maybeSingle()

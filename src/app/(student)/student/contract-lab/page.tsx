@@ -443,8 +443,8 @@ function ContractLabContent() {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { setLoaded(true); return; }
-        const { data } = await supabase
-          .from("contract_drafts" as any)
+        const { data } = await (supabase as any)
+          .from("contract_drafts")
           .select("draft_data")
           .eq("user_id", user.id)
           .maybeSingle();
@@ -464,8 +464,8 @@ function ContractLabContent() {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
-        await supabase
-          .from("contract_drafts" as any)
+        await (supabase as any)
+          .from("contract_drafts")
           .upsert({ user_id: user.id, draft_data: qRef.current, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
       } catch { /* ignore */ }
     }, 500);

@@ -225,8 +225,8 @@ function FinancialPlannerContent() {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { setLoaded(true); return; }
-        const { data } = await supabase
-          .from("financial_plans" as any)
+        const { data } = await (supabase as any)
+          .from("financial_plans")
           .select("plan_data")
           .eq("user_id", user.id)
           .maybeSingle();
@@ -259,8 +259,8 @@ function FinancialPlannerContent() {
         const toSave = { ...stateRef.current };
         delete (toSave as Record<string, unknown>).checkingPurchase;
         delete (toSave as Record<string, unknown>).isPurchased;
-        await supabase
-          .from("financial_plans" as any)
+        await (supabase as any)
+          .from("financial_plans")
           .upsert({ user_id: user.id, plan_data: toSave, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
       } catch { /* ignore */ }
     }, 500);
@@ -356,7 +356,7 @@ function FinancialPlannerContent() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase.from("financial_plans" as any).delete().eq("user_id", user.id);
+        await (supabase as any).from("financial_plans").delete().eq("user_id", user.id);
       }
     } catch { /* ignore */ }
   };
