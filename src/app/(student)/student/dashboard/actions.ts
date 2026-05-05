@@ -4,7 +4,7 @@ import { createServerSupabase } from '@/lib/supabase-server'
 
 export async function getStudentDashboardData() {
   const supabase = createServerSupabase()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
@@ -17,7 +17,7 @@ export async function getStudentDashboardData() {
 
     const { data: student } = await supabase
       .from('students')
-      .select('school, graduation_year, interests, location_city')
+      .select('school, graduation_year, interests, skills, location_city, is_looking_for_mentorship, resume_url')
       .eq('id', user.id)
       .single()
 
@@ -42,7 +42,11 @@ export async function getStudentDashboardData() {
         subscription_status: (profile as any)?.subscription_status || null,
         school: (student as any)?.school || null,
         gradYear: (student as any)?.graduation_year || null,
-        city: (student as any)?.location_city || null
+        city: (student as any)?.location_city || null,
+        interests: (student as any)?.interests || [],
+        skills: (student as any)?.skills || [],
+        hasResume: !!(student as any)?.resume_url,
+        isMentoring: (student as any)?.is_looking_for_mentorship || false,
       },
       stats: {
         readiness: readiness,
@@ -59,7 +63,7 @@ export async function getStudentDashboardData() {
 export async function getAcademyProgress() {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { completed: 0, total: 12 }
+  if (!user) return { completed: 0, total: 22 }
 
   const { data } = await supabase
     .from('course_progress')
@@ -74,12 +78,137 @@ export async function getAcademyProgress() {
     })
   }
 
-  return { completed, total: 12 } // 3 courses × 4 modules each
+  return { completed, total: 22 } // 6 courses, 22 total modules
+}
+
+export async function getCareerReadinessData() {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  try {
+    // Profile completeness (20%)
+    const { data: student } = await supabase
+      .from('students')
+      .select('full_name, school, graduation_year, location_city, interests, skills, resume_url')
+      .eq('id', user.id)
+      .single()
+
+    const s = student as any
+    let profileScore = 0
+    if (s?.full_name) profileScore += 15
+    if (s?.school) profileScore += 15
+    if (s?.graduation_year) profileScore += 15
+    if (s?.location_city) profileScore += 15
+    if (s?.interests?.length > 0) profileScore += 15
+    if (s?.skills?.length > 0) profileScore += 15
+    if (s?.resume_url) profileScore += 10
+    profileScore = Math.min(profileScore, 100)
+
+    // Academy progress (25%)
+    const { data: courseData } = await supabase
+      .from('course_progress')
+      .select('completed_modules')
+      .eq('user_id', user.id)
+    let totalModulesCompleted = 0
+    if (courseData) {
+      courseData.forEach(row => {
+        const mods = Array.isArray(row.completed_modules) ? row.completed_modules : []
+        totalModulesCompleted += mods.length
+      })
+    }
+    const academyScore = Math.min(Math.round((totalModulesCompleted / 22) * 100), 100)
+
+    // Job applications (20%)
+    const { count: appCount } = await supabase
+      .from('job_applications')
+      .select('*', { count: 'exact', head: true })
+      .eq('applicant_id', user.id)
+    const appsSubmitted = appCount || 0
+    const jobScore = Math.min(appsSubmitted * 20, 100)
+
+    // Contract reviews (10%)
+    const { count: contractCount } = await supabase
+      .from('contracts')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+    const contractScore = (contractCount || 0) > 0 ? 100 : 0
+
+    // Financial plan (10%)
+    const { data: planData } = await supabase
+      .from('financial_plans')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    const financialScore = planData ? 100 : 0
+
+    // Interview prep (15%) — check if they've used the interview prep page
+    // We'll use a simple heuristic: if they have any course progress in clinical confidence or associate playbook
+    const interviewScore = totalModulesCompleted >= 10 ? 100 : totalModulesCompleted >= 5 ? 50 : 0
+
+    // Weighted total
+    const totalScore = Math.round(
+      profileScore * 0.20 +
+      academyScore * 0.25 +
+      interviewScore * 0.15 +
+      jobScore * 0.20 +
+      contractScore * 0.10 +
+      financialScore * 0.10
+    )
+
+    return {
+      totalScore,
+      breakdown: {
+        profile: { score: profileScore, weight: 20, label: "Profile" },
+        academy: { score: academyScore, weight: 25, label: "Academy" },
+        interview: { score: interviewScore, weight: 15, label: "Interview Prep" },
+        jobs: { score: jobScore, weight: 20, label: "Job Applications" },
+        contract: { score: contractScore, weight: 10, label: "Contract Review" },
+        financial: { score: financialScore, weight: 10, label: "Financial Plan" },
+      },
+      milestones: {
+        profileComplete: profileScore >= 80,
+        firstCourseStarted: totalModulesCompleted > 0,
+        firstCourseCompleted: (courseData || []).some(row => {
+          const mods = Array.isArray(row.completed_modules) ? row.completed_modules : []
+          return mods.length >= 3
+        }),
+        firstJobApp: appsSubmitted > 0,
+        contractReviewed: (contractCount || 0) > 0,
+        financialPlanCreated: !!planData,
+        allCoursesComplete: totalModulesCompleted >= 22,
+      },
+      raw: {
+        modulesCompleted: totalModulesCompleted,
+        appsSubmitted,
+        contractsReviewed: contractCount || 0,
+      }
+    }
+  } catch (e) {
+    console.error("Career Readiness Error:", e)
+    return null
+  }
+}
+
+export async function getMatchedJobsCount() {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return 0
+
+  try {
+    const { count } = await supabase
+      .from('job_postings')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'open')
+    return count || 0
+  } catch {
+    return 0
+  }
 }
 
 export async function getJobsForRadar() {
   const supabase = createServerSupabase()
-  
+
   try {
     const { data: jobs, error } = await supabase
       .from('job_postings')
@@ -98,7 +227,7 @@ export async function getJobsForRadar() {
 export async function transitionToDoctorAction() {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   if (!user) throw new Error("Unauthorized")
 
   try {
@@ -116,7 +245,7 @@ export async function transitionToDoctorAction() {
         .select('full_name')
         .eq('id', user.id)
         .single()
-        
+
     const fullName = (profile as any)?.full_name || "New Doctor"
     const nameParts = fullName.split(' ')
     const firstName = nameParts[0]
@@ -140,7 +269,7 @@ export async function transitionToDoctorAction() {
       }, { onConflict: 'user_id' })
 
     if (doctorError) throw doctorError
-    
+
     return { success: true }
   } catch (error) {
     console.error("Failed to transition to doctor:", error)

@@ -1,26 +1,30 @@
 "use client";
 
 import {
-  Search,
-  Calendar,
-  BookOpen,
-  UserCircle,
   Loader2,
-  ChevronRight,
-  Sparkles,
-  CheckCircle2,
   ArrowRight,
   GraduationCap,
   Briefcase,
-  TrendingUp,
+  Calendar,
+  Map,
+  Users,
+  Compass,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { getStudentDashboardData, getAcademyProgress, transitionToDoctorAction } from "./actions";
+import {
+  getStudentDashboardData,
+  getAcademyProgress,
+  getCareerReadinessData,
+  getMatchedJobsCount,
+  transitionToDoctorAction,
+} from "./actions";
 import { useRouter } from "next/navigation";
-import { useRegion } from "@/context/RegionContext";
-import WhatsNew from "@/components/common/WhatsNew";
+import CareerReadiness from "./career-readiness";
+import PipelinePreview from "./pipeline-preview";
+import MilestoneTimeline from "./milestone-timeline";
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
@@ -30,25 +34,30 @@ const fadeUp = {
 
 export default function StudentDashboard() {
   const [data, setData] = useState<any>(null);
-  const [academyData, setAcademyData] = useState<{ completed: number; total: number }>({ completed: 0, total: 12 });
+  const [academyData, setAcademyData] = useState<{ completed: number; total: number }>({ completed: 0, total: 22 });
+  const [readiness, setReadiness] = useState<any>(null);
+  const [jobCount, setJobCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
   const router = useRouter();
-  const { region } = useRegion();
 
   useEffect(() => {
     Promise.all([
       getStudentDashboardData(),
       getAcademyProgress(),
-    ]).then(([dashResult, academyResult]) => {
+      getCareerReadinessData(),
+      getMatchedJobsCount(),
+    ]).then(([dashResult, academyResult, readinessResult, jobsResult]) => {
       if (dashResult) setData(dashResult);
       if (academyResult) setAcademyData(academyResult);
+      if (readinessResult) setReadiness(readinessResult);
+      setJobCount(jobsResult);
       setLoading(false);
     });
   }, []);
 
   const handleTransition = async () => {
-    if (!confirm("This will switch your account from Student to Doctor. Your student data (courses, applications) will be preserved, but you'll access the Doctor dashboard going forward. This can't be undone. Continue?")) return;
+    if (!confirm("This will switch your account from Student to Doctor. Your student data will be preserved. This can't be undone. Continue?")) return;
     setTransitioning(true);
     const result = await transitionToDoctorAction();
     if (result.success) {
@@ -77,92 +86,150 @@ export default function StudentDashboard() {
     ? `${data.profile.school} '${data.profile.gradYear?.toString().slice(-2) || "27"}`
     : null;
 
-  const profileCompleteness = data?.stats?.readiness || 0;
-  const applications = data?.stats?.applications || 0;
-
-  const missingItems: { label: string; href: string }[] = [];
-  if (!data?.profile?.fullName) missingItems.push({ label: "Add your full name", href: "/student/profile" });
-  if (!data?.profile?.school) missingItems.push({ label: "Add your school", href: "/student/profile" });
-  if (!data?.profile?.gradYear) missingItems.push({ label: "Add graduation year", href: "/student/profile" });
-  if (!data?.profile?.city) missingItems.push({ label: "Add your location", href: "/student/profile" });
-
   const currentYear = new Date().getFullYear();
   const gradYear = data?.profile?.gradYear ? parseInt(data.profile.gradYear, 10) : null;
   const isGraduating = gradYear && gradYear <= currentYear;
 
-  const academyPercent = academyData.total > 0 ? Math.round((academyData.completed / academyData.total) * 100) : 0;
+  // Days until graduation (assume June 15 of grad year)
+  const daysUntilGrad = gradYear
+    ? Math.max(0, Math.ceil((new Date(`${gradYear}-06-15`).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : null;
+
+  const totalScore = readiness?.totalScore || 0;
 
   return (
-    <div className="p-6 md:p-10 max-w-5xl mx-auto space-y-8">
-      <WhatsNew />
-
+    <div className="p-6 md:p-10 max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <motion.div {...fadeUp}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.2em] mb-1">Welcome back</p>
+            <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.2em] mb-1">Mission Control</p>
             <h1 className="text-3xl md:text-4xl font-heading font-black text-neuro-navy tracking-tight">
               {studentName}
             </h1>
             {schoolInfo && <p className="text-gray-400 mt-1">{schoolInfo}</p>}
           </div>
-          {academyData.completed > 0 && (
-            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-violet-50 border border-violet-100 rounded-full">
-              <GraduationCap className="w-4 h-4 text-violet-500" />
-              <span className="text-sm font-black text-violet-600">
-                {academyPercent}% complete
-              </span>
+          <Link
+            href="/student/career-pipeline"
+            className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#e97325]/10 border border-[#e97325]/20 rounded-full hover:bg-[#e97325]/20 transition-colors"
+          >
+            <Map className="w-4 h-4 text-[#e97325]" />
+            <span className="text-sm font-black text-[#e97325]">Career Pipeline</span>
+          </Link>
+        </div>
+      </motion.div>
+
+      {/* Quick Stats Row */}
+      <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.05 }}>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-gradient-to-b from-orange-50 to-white rounded-2xl border border-orange-100 p-4">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Readiness</p>
+            <p className="text-2xl font-black text-neuro-navy">{totalScore}<span className="text-sm text-gray-400">/100</span></p>
+          </div>
+          <Link href="/student/jobs" className="bg-gradient-to-b from-blue-50 to-white rounded-2xl border border-blue-100 p-4 hover:shadow-md transition-shadow">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Open Jobs</p>
+            <p className="text-2xl font-black text-neuro-navy">{jobCount}</p>
+          </Link>
+          <Link href="/student/academy" className="bg-gradient-to-b from-violet-50 to-white rounded-2xl border border-violet-100 p-4 hover:shadow-md transition-shadow">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Courses</p>
+            <p className="text-2xl font-black text-neuro-navy">{academyData.completed}<span className="text-sm text-gray-400">/{academyData.total} modules</span></p>
+          </Link>
+          {daysUntilGrad !== null && daysUntilGrad > 0 ? (
+            <div className="bg-gradient-to-b from-emerald-50 to-white rounded-2xl border border-emerald-100 p-4">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Graduation</p>
+              <p className="text-2xl font-black text-neuro-navy">{daysUntilGrad}<span className="text-sm text-gray-400"> days</span></p>
+            </div>
+          ) : (
+            <div className="bg-gradient-to-b from-emerald-50 to-white rounded-2xl border border-emerald-100 p-4">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Applications</p>
+              <p className="text-2xl font-black text-neuro-navy">{readiness?.raw?.appsSubmitted || 0}</p>
             </div>
           )}
         </div>
       </motion.div>
 
-      {/* Onboarding */}
-      {profileCompleteness < 80 && (
-        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.05 }}>
-          <div className="bg-white rounded-3xl border border-neuro-orange/15 p-8 shadow-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-neuro-orange/10 rounded-xl flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-neuro-orange" />
-              </div>
-              <div>
-                <h2 className="font-heading font-black text-neuro-navy text-lg">Welcome to NeuroChiro</h2>
-                <p className="text-gray-400 text-sm">Get the most out of your membership</p>
-              </div>
-            </div>
-            <div className="space-y-3 mt-6">
+      {/* Career Readiness Score + Pipeline Preview */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.1 }}>
+          {readiness && (
+            <CareerReadiness
+              totalScore={totalScore}
+              breakdown={readiness.breakdown}
+            />
+          )}
+        </motion.div>
+        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.15 }}>
+          {readiness && (
+            <PipelinePreview
+              milestones={readiness.milestones}
+              modulesCompleted={readiness.raw.modulesCompleted}
+            />
+          )}
+        </motion.div>
+      </div>
+
+      {/* Smart Next Steps */}
+      <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.2 }}>
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8">
+          <h2 className="text-lg font-heading font-black text-[#1a2744] mb-4">What To Do Next</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {getSmartActions(data, readiness, jobCount).map((action, i) => (
+              <Link
+                key={i}
+                href={action.href}
+                className={`p-4 rounded-2xl border transition-all group hover:shadow-md hover:-translate-y-0.5 ${action.borderClass}`}
+              >
+                <action.icon className={`w-5 h-5 mb-2 ${action.iconClass}`} />
+                <p className="text-sm font-bold text-[#1a2744] mb-0.5">{action.title}</p>
+                <p className="text-xs text-gray-400">{action.desc}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Milestones + Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.25 }}>
+          {readiness && <MilestoneTimeline milestones={readiness.milestones} />}
+        </motion.div>
+
+        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.3 }}>
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8">
+            <h2 className="text-lg font-heading font-black text-[#1a2744] mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-2 gap-3">
               {[
-                { done: profileCompleteness >= 50, label: "Complete your profile", desc: "Add your school, graduation year, and interests", href: "/student/profile" },
-                { done: academyData.completed > 0, label: "Start the Academy", desc: "Begin your first course module", href: "/student/academy" },
-                { done: applications > 0, label: "Browse the job board", desc: "See what positions are available near you", href: "/student/jobs" },
-              ].map((step, i) => (
-                <Link key={i} href={step.href} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all group ${step.done ? 'bg-emerald-50/50 border-emerald-200' : 'bg-gray-50/50 border-gray-100 hover:border-neuro-orange/20 hover:bg-neuro-orange/[0.02]'}`}>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-black ${step.done ? 'bg-emerald-500 text-white' : 'bg-neuro-navy text-white'}`}>
-                    {step.done ? <CheckCircle2 className="w-5 h-5" /> : i + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-bold ${step.done ? 'text-emerald-700 line-through' : 'text-neuro-navy'}`}>{step.label}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{step.desc}</p>
-                  </div>
-                  {!step.done && <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-neuro-orange group-hover:translate-x-0.5 transition-all shrink-0" />}
+                { label: "Browse Jobs", desc: "Find positions", href: "/student/jobs", icon: Briefcase, bg: "bg-blue-50", border: "border-blue-100" },
+                { label: "Find Mentors", desc: "Get guidance", href: "/student/mentors", icon: Users, bg: "bg-rose-50", border: "border-rose-100" },
+                { label: "Academy", desc: "Continue learning", href: "/student/academy", icon: BookOpen, bg: "bg-violet-50", border: "border-violet-100" },
+                { label: "Techniques", desc: "Explore methods", href: "/student/techniques", icon: Compass, bg: "bg-emerald-50", border: "border-emerald-100" },
+                { label: "Seminars", desc: "Upcoming events", href: "/student/seminars", icon: Calendar, bg: "bg-amber-50", border: "border-amber-100" },
+                { label: "Community", desc: "Student network", href: "/student/community", icon: GraduationCap, bg: "bg-cyan-50", border: "border-cyan-100" },
+              ].map((action) => (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className={`${action.bg} rounded-2xl border ${action.border} p-4 hover:shadow-md hover:-translate-y-0.5 transition-all group`}
+                >
+                  <action.icon className="w-5 h-5 text-neuro-navy/60 group-hover:text-neuro-orange transition-colors mb-2" />
+                  <p className="font-bold text-[#1a2744] text-xs">{action.label}</p>
+                  <p className="text-[10px] text-gray-400">{action.desc}</p>
                 </Link>
               ))}
             </div>
           </div>
         </motion.div>
-      )}
+      </div>
 
       {/* Graduation transition banner */}
       {isGraduating && (
-        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.08 }}>
+        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.35 }}>
           <div className="bg-neuro-navy rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
             <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "var(--grid-pattern)" }} />
             <div className="relative">
               <p className="text-neuro-orange text-[10px] font-black uppercase tracking-[0.2em] mb-2">Congratulations</p>
               <h3 className="text-2xl font-heading font-black text-white tracking-tight">Transition to Doctor</h3>
-              <p className="text-gray-400 mt-1">
-                Switch to a Doctor account to access the full provider dashboard.
-              </p>
+              <p className="text-gray-400 mt-1">Switch to a Doctor account to access the full provider dashboard.</p>
             </div>
             <button
               onClick={handleTransition}
@@ -175,92 +242,113 @@ export default function StudentDashboard() {
           </div>
         </motion.div>
       )}
-
-      {/* Upgrade Prompt — only show for free students */}
-      {data?.profile?.subscription_status !== 'active' && (
-        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.08 }}>
-          <div className="bg-neuro-navy rounded-3xl p-8 md:p-10 relative overflow-hidden">
-            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "var(--grid-pattern)" }} />
-            <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div className="flex-1">
-                <p className="text-neuro-orange text-[10px] font-black uppercase tracking-[0.2em] mb-3">Student Pro</p>
-                <h3 className="text-white font-heading font-black text-2xl tracking-tight mb-2">Unlock All Career Tools</h3>
-                <p className="text-gray-400 text-sm leading-relaxed max-w-lg">
-                  Get access to Interview Prep, Contract Lab, Financial Planner, Techniques Library, and priority in talent drops.
-                </p>
-                <p className="text-gray-300 text-xs font-black mt-3 uppercase tracking-widest">
-                  $29/month &middot; Cancel anytime
-                </p>
-              </div>
-              <Link href="/student/billing" className="px-8 py-4 bg-neuro-orange text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-neuro-orange/30 hover:shadow-neuro-orange/50 hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap text-center">
-                Upgrade to Pro
-              </Link>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Stat cards */}
-      <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.1 }}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-b from-blue-50 to-white rounded-3xl border border-blue-100 p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="w-4 h-4 text-blue-500" />
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Profile Completeness</p>
-            </div>
-            <p className="text-3xl font-black text-neuro-navy">{profileCompleteness}%</p>
-            <div className="mt-3 h-2 bg-blue-100 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${profileCompleteness}%` }} />
-            </div>
-            {missingItems.length > 0 && (
-              <ul className="mt-4 space-y-1.5">
-                {missingItems.map((item) => (
-                  <li key={item.label}>
-                    <Link href={item.href} className="text-xs text-neuro-orange hover:underline font-bold">{item.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-          <div className="bg-gradient-to-b from-violet-50 to-white rounded-3xl border border-violet-100 p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <GraduationCap className="w-4 h-4 text-violet-500" />
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Academy Progress</p>
-            </div>
-            <p className="text-3xl font-black text-neuro-navy">{academyData.completed}<span className="text-lg text-gray-400 font-bold"> / {academyData.total}</span></p>
-            <p className="text-xs text-gray-400 mt-1">{academyData.completed === 0 ? "Start learning" : `${academyPercent}% complete`}</p>
-          </div>
-          <div className="bg-gradient-to-b from-orange-50 to-white rounded-3xl border border-orange-100 p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <Briefcase className="w-4 h-4 text-neuro-orange" />
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Job Applications</p>
-            </div>
-            <p className="text-3xl font-black text-neuro-navy">{applications}</p>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Quick actions */}
-      <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.15 }}>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: "Browse Jobs", desc: "Find positions", href: "/student/jobs", icon: Search, gradient: "from-blue-50 to-white", border: "border-blue-100" },
-            { label: "Find Seminars", desc: "Upcoming events", href: "/student/seminars", icon: Calendar, gradient: "from-violet-50 to-white", border: "border-violet-100" },
-            { label: "Academy", desc: "Continue learning", href: "/student/academy", icon: BookOpen, gradient: "from-emerald-50 to-white", border: "border-emerald-100" },
-            { label: "Edit Profile", desc: "Update your info", href: "/student/profile", icon: UserCircle, gradient: "from-orange-50 to-white", border: "border-orange-100" },
-          ].map((action) => (
-            <Link
-              key={action.href}
-              href={action.href}
-              className={`bg-gradient-to-b ${action.gradient} rounded-3xl border ${action.border} p-6 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group`}
-            >
-              <action.icon className="w-6 h-6 text-neuro-navy/60 group-hover:text-neuro-orange transition-colors mb-3" />
-              <p className="font-heading font-black text-neuro-navy text-sm">{action.label}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{action.desc}</p>
-            </Link>
-          ))}
-        </div>
-      </motion.div>
     </div>
   );
+}
+
+// Generate personalized next steps based on user state
+function getSmartActions(data: any, readiness: any, jobCount: number) {
+  const actions: {
+    title: string;
+    desc: string;
+    href: string;
+    icon: any;
+    borderClass: string;
+    iconClass: string;
+  }[] = [];
+
+  const milestones = readiness?.milestones;
+
+  if (!milestones?.profileComplete) {
+    actions.push({
+      title: "Complete your profile",
+      desc: "Appear in job searches and get matched to opportunities",
+      href: "/student/profile",
+      icon: Users,
+      borderClass: "border-blue-100 bg-blue-50/50",
+      iconClass: "text-blue-500",
+    });
+  }
+
+  if (!milestones?.firstCourseStarted) {
+    actions.push({
+      title: "Start your first course",
+      desc: "Begin with Nervous System Foundations — it changes everything",
+      href: "/student/academy",
+      icon: BookOpen,
+      borderClass: "border-violet-100 bg-violet-50/50",
+      iconClass: "text-violet-500",
+    });
+  }
+
+  if (jobCount > 0 && milestones?.firstCourseCompleted) {
+    actions.push({
+      title: `${jobCount} jobs available`,
+      desc: "Browse positions and find your match",
+      href: "/student/jobs",
+      icon: Briefcase,
+      borderClass: "border-orange-100 bg-orange-50/50",
+      iconClass: "text-[#e97325]",
+    });
+  }
+
+  if (milestones?.firstCourseCompleted && !milestones?.firstJobApp) {
+    actions.push({
+      title: "Apply to your first job",
+      desc: "You've got the knowledge — now put it to work",
+      href: "/student/jobs",
+      icon: Briefcase,
+      borderClass: "border-orange-100 bg-orange-50/50",
+      iconClass: "text-[#e97325]",
+    });
+  }
+
+  if (milestones?.firstJobApp && !milestones?.contractReviewed) {
+    actions.push({
+      title: "Review a contract",
+      desc: "Don't sign anything without running it through Contract Lab",
+      href: "/student/contract-lab",
+      icon: Compass,
+      borderClass: "border-emerald-100 bg-emerald-50/50",
+      iconClass: "text-emerald-500",
+    });
+  }
+
+  if (milestones?.contractReviewed && !milestones?.financialPlanCreated) {
+    actions.push({
+      title: "Create your financial plan",
+      desc: "Know your numbers before day one",
+      href: "/student/financial-planner",
+      icon: Calendar,
+      borderClass: "border-cyan-100 bg-cyan-50/50",
+      iconClass: "text-cyan-500",
+    });
+  }
+
+  // Default actions if we have fewer than 3
+  if (actions.length < 3) {
+    if (!actions.some((a) => a.href === "/student/techniques")) {
+      actions.push({
+        title: "Explore techniques",
+        desc: "Find the chiropractic technique that fits your style",
+        href: "/student/techniques",
+        icon: Compass,
+        borderClass: "border-emerald-100 bg-emerald-50/50",
+        iconClass: "text-emerald-500",
+      });
+    }
+  }
+
+  if (actions.length < 3) {
+    actions.push({
+      title: "Find a mentor",
+      desc: "Connect with doctors who want to help you succeed",
+      href: "/student/mentors",
+      icon: Users,
+      borderClass: "border-rose-100 bg-rose-50/50",
+      iconClass: "text-rose-500",
+    });
+  }
+
+  return actions.slice(0, 3);
 }
