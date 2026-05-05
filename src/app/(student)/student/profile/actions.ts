@@ -49,18 +49,20 @@ export async function updateStudentProfile(formData: FormData) {
 
   if (profileError) throw profileError
 
-  // 2. Update Student table
+  // 2. Upsert Student table (creates row if it doesn't exist)
   const { error: studentError } = await supabase
     .from('students')
-    .update({
+    .upsert({
+      id: user.id,
+      user_id: user.id,
+      full_name: fullName,
       school: school,
       graduation_year: gradYear ? parseInt(gradYear, 10) : null,
       location_city: locationCity || null,
       interests: interests,
       skills: skills,
       is_looking_for_mentorship: isLookingForMentorship
-    })
-    .eq('id', user.id)
+    }, { onConflict: 'id' })
 
   if (studentError) {
       console.error("Student error:", studentError);
