@@ -782,34 +782,7 @@ function FinancialPlannerContent() {
   // STEP 2: Your Plan (PURCHASE GATED)
   // ─────────────────────────────────────────────────────────────────────────
 
-  const LockedOverlay = () => (
-    <div className="relative">
-      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-2xl">
-        <div className="text-center p-8">
-          <div className="w-16 h-16 rounded-full bg-neuro-navy/10 flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-8 h-8 text-neuro-navy" />
-          </div>
-          <h3 className="text-xl font-heading font-black text-neuro-navy mb-2">
-            Unlock Your Financial Plan
-          </h3>
-          <p className="text-sm text-gray-500 mb-6 max-w-sm">
-            Get personalized loan repayment strategies, tax breakdowns, budget allocations, and a 3-year roadmap.
-          </p>
-          <button
-            onClick={handlePurchase}
-            disabled={purchaseLoading}
-            className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors text-lg disabled:opacity-50"
-          >
-            {purchaseLoading ? "Loading..." : "$29 — Unlock Your Financial Plan"}
-          </button>
-        </div>
-      </div>
-      {/* Blurred preview behind */}
-      <div className="filter blur-sm pointer-events-none select-none opacity-50">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 h-96" />
-      </div>
-    </div>
-  );
+  const LockedOverlay = () => null;
 
   const loanPlans = [
     {
