@@ -41,7 +41,7 @@ function getGrade(score: number): string {
   return "F";
 }
 
-function getLowestCategory(breakdown: Record<string, ReadinessBreakdown>): { key: string; label: string; href: string } | null {
+function getLowestCategory(breakdown: Record<string, ReadinessBreakdown>): { key: string; label: string; href: string; score: number } | null {
   let lowest: { key: string; score: number } | null = null;
   for (const [key, val] of Object.entries(breakdown)) {
     if (!lowest || val.score < lowest.score) {
@@ -50,7 +50,7 @@ function getLowestCategory(breakdown: Record<string, ReadinessBreakdown>): { key
   }
   if (!lowest || lowest.score >= 100) return null;
   const cat = breakdown[lowest.key];
-  return { key: lowest.key, label: cat.label, href: CATEGORY_LINKS[lowest.key] || "/student/dashboard" };
+  return { key: lowest.key, label: cat.label, href: CATEGORY_LINKS[lowest.key] || "/student/dashboard", score: lowest.score };
 }
 
 export default function CareerReadiness({ totalScore, breakdown }: CareerReadinessProps) {
