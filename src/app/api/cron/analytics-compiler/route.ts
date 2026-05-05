@@ -146,7 +146,7 @@ export async function GET(req: Request) {
       <h3 style="font-size: 16px; color: #1E2D3B; margin: 24px 0 12px;">Membership</h3>
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px;">
         ${stat('Paid Doctors', paidDoctors || 0)}
-        ${stat('Free Doctors', freeDoctors)}
+        ${stat('Basic Doctors', freeDoctors)}
         ${stat('Unclaimed Listings', unclaimedListings)}
       </div>
 

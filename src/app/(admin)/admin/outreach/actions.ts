@@ -681,9 +681,9 @@ export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
     },
     {
       id: 'objection_cost',
-      name: 'Objection: Is It Free?',
+      name: 'Objection: What Does It Cost?',
       category: 'objection',
-      description: 'When they ask about cost',
+      description: 'When they ask about pricing',
       template: `You can claim your profile and be listed in the directory. Patients can find you, see your bio, specialties, and location. The Basic listing is $49/mo and includes analytics, messaging, and your verified badge. Claim it and see if it's right for your practice — we have a 30-day money-back guarantee.`,
     },
     {

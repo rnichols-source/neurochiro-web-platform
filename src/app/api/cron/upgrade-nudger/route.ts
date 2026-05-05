@@ -15,7 +15,7 @@ const getResend = () => new Resend(process.env.RESEND_API_KEY || '');
 
 /**
  * UPGRADE NUDGER — Runs daily at 11 AM EST
- * Monitors free doctor activity and sends targeted upgrade emails
+ * Monitors Basic tier doctor activity and sends targeted upgrade emails
  * based on real milestones. Each nudge type fires ONCE per doctor.
  *
  * Triggers:
@@ -24,8 +24,8 @@ const getResend = () => new Resend(process.env.RESEND_API_KEY || '');
  * - 50 total profile views
  * - 100 total profile views
  * - Profile saved by a patient (if trackable)
- * - 14 days as free member
- * - 30 days as free member
+ * - 14 days as Basic member
+ * - 30 days as Basic member
  */
 export async function GET(req: Request) {
   const authHeader = req.headers.get('authorization');
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
       .in('membership_tier', ['basic', 'free']);
 
     if (!doctors || doctors.length === 0) {
-      return NextResponse.json({ success: true, message: 'No free doctors to nudge', sent: 0 });
+      return NextResponse.json({ success: true, message: 'No Basic tier doctors to nudge', sent: 0 });
     }
 
     // Get emails
@@ -160,7 +160,7 @@ export async function GET(req: Request) {
         category: 'AUTOMATION',
         event: `Upgrade Nudger: ${sent} nudges sent`,
         user_name: 'System',
-        target: 'free_doctors',
+        target: 'basic_doctors',
         status: 'Success',
         severity: 'Low',
         metadata: { sent },
