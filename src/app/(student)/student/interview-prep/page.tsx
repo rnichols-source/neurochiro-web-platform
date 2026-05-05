@@ -1545,7 +1545,7 @@ function InterviewPlaybookContent() {
                 type="number"
                 value={offer.baseSalary}
                 onChange={(e) => setOffer((prev) => ({ ...prev, baseSalary: Number(e.target.value) }))}
-                className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none"
+                className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
               />
             </div>
 
@@ -1555,7 +1555,7 @@ function InterviewPlaybookContent() {
               <select
                 value={offer.compModel}
                 onChange={(e) => setOffer((prev) => ({ ...prev, compModel: e.target.value }))}
-                className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white"
+                className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
               >
                 {["Base Only", "Base + Bonus", "% Collections", "Hybrid"].map((m) => (
                   <option key={m} value={m}>{m}</option>
@@ -1572,7 +1572,7 @@ function InterviewPlaybookContent() {
                     type="number"
                     value={offer.bonusPct}
                     onChange={(e) => setOffer((prev) => ({ ...prev, bonusPct: Number(e.target.value) }))}
-                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none"
+                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
                   />
                 </div>
                 <div>
@@ -1581,7 +1581,7 @@ function InterviewPlaybookContent() {
                     type="number"
                     value={offer.bonusThreshold}
                     onChange={(e) => setOffer((prev) => ({ ...prev, bonusThreshold: Number(e.target.value) }))}
-                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none"
+                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
                   />
                 </div>
                 <div className="sm:col-span-2">
@@ -1590,7 +1590,7 @@ function InterviewPlaybookContent() {
                     type="number"
                     value={offer.estMonthlyCollections}
                     onChange={(e) => setOffer((prev) => ({ ...prev, estMonthlyCollections: Number(e.target.value) }))}
-                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none"
+                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
                   />
                 </div>
               </>
@@ -1606,9 +1606,9 @@ function InterviewPlaybookContent() {
                     onClick={() => setOffer((prev) => ({ ...prev, employmentType: type }))}
                     className="flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all"
                     style={{
-                      borderColor: offer.employmentType === type ? BRAND_NAVY : "#e5e7eb",
-                      backgroundColor: offer.employmentType === type ? BRAND_NAVY : "#fff",
-                      color: offer.employmentType === type ? "#fff" : "#6b7280",
+                      borderColor: offer.employmentType === type ? BRAND_NAVY : "rgba(255,255,255,0.08)",
+                      backgroundColor: offer.employmentType === type ? BRAND_NAVY : "rgba(255,255,255,0.04)",
+                      color: offer.employmentType === type ? "#0F1A24" : "rgba(255,255,255,0.5)",
                     }}
                   >
                     {type}
@@ -1634,9 +1634,9 @@ function InterviewPlaybookContent() {
                       }}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold border transition-all"
                       style={{
-                        borderColor: checked ? "#22c55e" : "#e5e7eb",
-                        backgroundColor: checked ? "#f0fdf4" : "#fff",
-                        color: checked ? "#16a34a" : "#6b7280",
+                        borderColor: checked ? "#22c55e" : "rgba(255,255,255,0.08)",
+                        backgroundColor: checked ? "rgba(34,197,94,0.1)" : "rgba(255,255,255,0.04)",
+                        color: checked ? "#22c55e" : "rgba(255,255,255,0.5)",
                       }}
                     >
                       {checked ? <Check className="w-3 h-3" /> : <div className="w-3 h-3 rounded border border-white/[0.08]" />}
@@ -1657,9 +1657,9 @@ function InterviewPlaybookContent() {
                     onClick={() => setOffer((prev) => ({ ...prev, hasNonCompete: val }))}
                     className="flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all"
                     style={{
-                      borderColor: offer.hasNonCompete === val ? (val ? "#ef4444" : "#22c55e") : "#e5e7eb",
-                      backgroundColor: offer.hasNonCompete === val ? (val ? "#fef2f2" : "#f0fdf4") : "#fff",
-                      color: offer.hasNonCompete === val ? (val ? "#ef4444" : "#16a34a") : "#6b7280",
+                      borderColor: offer.hasNonCompete === val ? (val ? "#ef4444" : "#22c55e") : "rgba(255,255,255,0.08)",
+                      backgroundColor: offer.hasNonCompete === val ? (val ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)") : "rgba(255,255,255,0.04)",
+                      color: offer.hasNonCompete === val ? (val ? "#ef4444" : "#22c55e") : "rgba(255,255,255,0.5)",
                     }}
                   >
                     {val ? "Yes" : "No"}
@@ -1676,7 +1676,7 @@ function InterviewPlaybookContent() {
                     type="number"
                     value={offer.nonCompeteRadius}
                     onChange={(e) => setOffer((prev) => ({ ...prev, nonCompeteRadius: Number(e.target.value) }))}
-                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none"
+                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
                   />
                 </div>
                 <div>
@@ -1685,7 +1685,7 @@ function InterviewPlaybookContent() {
                     type="number"
                     value={offer.nonCompeteDuration}
                     onChange={(e) => setOffer((prev) => ({ ...prev, nonCompeteDuration: Number(e.target.value) }))}
-                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none"
+                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
                   />
                 </div>
               </>
@@ -1701,9 +1701,9 @@ function InterviewPlaybookContent() {
                     onClick={() => setOffer((prev) => ({ ...prev, hasEquityPath: val }))}
                     className="flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all"
                     style={{
-                      borderColor: offer.hasEquityPath === val ? BRAND_NAVY : "#e5e7eb",
-                      backgroundColor: offer.hasEquityPath === val ? BRAND_NAVY : "#fff",
-                      color: offer.hasEquityPath === val ? "#fff" : "#6b7280",
+                      borderColor: offer.hasEquityPath === val ? BRAND_NAVY : "rgba(255,255,255,0.08)",
+                      backgroundColor: offer.hasEquityPath === val ? BRAND_NAVY : "rgba(255,255,255,0.04)",
+                      color: offer.hasEquityPath === val ? "#0F1A24" : "rgba(255,255,255,0.5)",
                     }}
                   >
                     {val ? "Yes" : "No"}
@@ -1719,7 +1719,7 @@ function InterviewPlaybookContent() {
                 type="number"
                 value={offer.signingBonus}
                 onChange={(e) => setOffer((prev) => ({ ...prev, signingBonus: Number(e.target.value) }))}
-                className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none"
+                className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
               />
             </div>
           </div>
@@ -1839,7 +1839,7 @@ function InterviewPlaybookContent() {
                   <path
                     d="M 20 100 A 80 80 0 0 1 180 100"
                     fill="none"
-                    stroke="#e5e7eb"
+                    stroke="rgba(255,255,255,0.08)"
                     strokeWidth="12"
                     strokeLinecap="round"
                   />
@@ -2127,7 +2127,7 @@ function InterviewPlaybookContent() {
                       >
                         {checked && <Check className="w-3 h-3 text-white" />}
                       </div>
-                      <span className="text-sm" style={{ color: checked ? BRAND_NAVY : "#6b7280" }}>{item}</span>
+                      <span className="text-sm" style={{ color: checked ? BRAND_NAVY : "rgba(255,255,255,0.4)" }}>{item}</span>
                     </button>
                   );
                 })}

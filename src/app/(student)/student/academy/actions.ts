@@ -139,7 +139,7 @@ export async function completeModule(courseId: string, moduleId: string) {
     .select('*')
     .eq('user_id', user.id)
     .eq('course_id', courseId)
-    .single()
+    .maybeSingle()
 
   if (existing) {
     const completed = Array.isArray(existing.completed_modules) ? existing.completed_modules as string[] : [];

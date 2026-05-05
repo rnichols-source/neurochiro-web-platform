@@ -111,7 +111,7 @@ export default function JobsPage() {
         .from("students")
         .select("location_city, region_code, interests, graduation_year, is_looking_for_mentorship")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
       if (student) {
         setProfile({
           city: (student as any).location_city || null,

@@ -354,7 +354,7 @@ function ScoreGauge({ score, label, color }: { score: number; label: string; col
       <svg width="140" height="140" viewBox="0 0 128 128">
         <circle
           cx="64" cy="64" r={radius}
-          fill="none" stroke="#e5e7eb" strokeWidth={stroke}
+          fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke}
           strokeDasharray={`${arcLength} ${circumference}`}
           strokeLinecap="round"
           transform={`rotate(${rotation} 64 64)`}
@@ -589,7 +589,7 @@ function ContractLabContent() {
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 font-bold">$</span>
                     <input type="number" value={questionnaire.baseSalary} onChange={(e) => setQ("baseSalary", Number(e.target.value) || 0)}
-                      className="w-full pl-8 pr-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white" />
+                      className="w-full pl-8 pr-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white bg-white/[0.04]" />
                   </div>
                 </div>
 
@@ -597,7 +597,7 @@ function ContractLabContent() {
                 <div>
                   <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Compensation Model</label>
                   <select value={questionnaire.compModel} onChange={(e) => setQ("compModel", e.target.value)}
-                    className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white">
+                    className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white">
                     {COMP_MODELS.map((m) => <option key={m} value={m}>{m}</option>)}
                   </select>
                 </div>
@@ -609,7 +609,7 @@ function ContractLabContent() {
                       <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Bonus %</label>
                       <div className="relative">
                         <input type="number" value={questionnaire.bonusPct} onChange={(e) => setQ("bonusPct", Number(e.target.value) || 0)}
-                          className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white" />
+                          className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white bg-white/[0.04]" />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/35">%</span>
                       </div>
                     </div>
@@ -618,7 +618,7 @@ function ContractLabContent() {
                       <div className="relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 font-bold">$</span>
                         <input type="number" value={questionnaire.bonusThreshold} onChange={(e) => setQ("bonusThreshold", Number(e.target.value) || 0)}
-                          className="w-full pl-8 pr-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white" />
+                          className="w-full pl-8 pr-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white bg-white/[0.04]" />
                       </div>
                     </div>
                   </div>
@@ -635,12 +635,12 @@ function ContractLabContent() {
                     <div>
                       <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Radius (miles)</label>
                       <input type="number" value={questionnaire.nonCompeteRadius} onChange={(e) => setQ("nonCompeteRadius", Number(e.target.value) || 0)}
-                        className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white" />
+                        className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white bg-white/[0.04]" />
                     </div>
                     <div>
                       <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Duration (months)</label>
                       <input type="number" value={questionnaire.nonCompeteDuration} onChange={(e) => setQ("nonCompeteDuration", Number(e.target.value) || 0)}
-                        className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white" />
+                        className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white bg-white/[0.04]" />
                     </div>
                   </div>
                 )}
@@ -656,14 +656,14 @@ function ContractLabContent() {
                   <div>
                     <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Termination Notice</label>
                     <select value={questionnaire.terminationNotice} onChange={(e) => setQ("terminationNotice", e.target.value)}
-                      className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white">
+                      className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white">
                       {TERMINATION_NOTICES.map((n) => <option key={n} value={n}>{n}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Who Can Terminate?</label>
                     <select value={questionnaire.whoTerminates} onChange={(e) => setQ("whoTerminates", e.target.value)}
-                      className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white">
+                      className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white">
                       {WHO_TERMINATES.map((w) => <option key={w} value={w}>{w}</option>)}
                     </select>
                   </div>
@@ -690,7 +690,7 @@ function ContractLabContent() {
                 <div>
                   <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Contract Duration</label>
                   <select value={questionnaire.contractDuration} onChange={(e) => setQ("contractDuration", e.target.value)}
-                    className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white">
+                    className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white">
                     {CONTRACT_DURATIONS.map((d) => <option key={d} value={d}>{d}</option>)}
                   </select>
                 </div>

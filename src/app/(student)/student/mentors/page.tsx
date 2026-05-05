@@ -90,7 +90,7 @@ export default function MentorDiscoveryPage() {
         .from("students")
         .select("location_city, region_code, interests")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
       if (student) {
         setProfile({
           city: (student as any).location_city || null,

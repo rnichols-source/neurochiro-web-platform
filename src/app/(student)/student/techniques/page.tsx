@@ -780,7 +780,7 @@ export default function TechniqueComparisonGuide() {
                     return `${x},${y}`;
                   }).join(" ")}
                   fill="none"
-                  stroke="#e5e7eb"
+                  stroke="rgba(255,255,255,0.1)"
                   strokeWidth="0.5"
                 />
               ))}
@@ -795,7 +795,7 @@ export default function TechniqueComparisonGuide() {
                     y1={cy}
                     x2={x}
                     y2={y}
-                    stroke="#e5e7eb"
+                    stroke="rgba(255,255,255,0.1)"
                     strokeWidth="0.5"
                   />
                 );
@@ -834,7 +834,7 @@ export default function TechniqueComparisonGuide() {
                     textAnchor="middle"
                     dominantBaseline="central"
                     className="text-[8px] font-bold"
-                    fill="#6b7280"
+                    fill="rgba(255,255,255,0.4)"
                   >
                     {axis.label}
                   </text>

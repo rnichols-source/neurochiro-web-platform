@@ -860,7 +860,7 @@ function FinancialPlannerContent() {
 
     return [
       { label: "Loans", value: loanPmt, color: "#dc2626" },
-      { label: "Housing", value: housing, color: "#1a2744" },
+      { label: "Housing", value: housing, color: "#3b82f6" },
       { label: "Transport", value: transport, color: "#6366f1" },
       { label: "Living", value: living, color: "#8b5cf6" },
       { label: "Professional", value: professional, color: "#0891b2" },
@@ -1102,7 +1102,7 @@ function FinancialPlannerContent() {
       {
         title: "Year 2",
         subtitle: "Build & Grow",
-        color: "#1a2744",
+        color: "#3b82f6",
         milestones: [
           `Loan balance target: $${fmt(Math.max(0, state.loanBalance - loanPmt * 24))}`,
           surplus > 500 ? `Increase loan payments by $${fmt(Math.min(500, Math.round(surplus * 0.3)))}/mo` : "Seek income growth through CE or specialization",
@@ -1236,7 +1236,7 @@ function FinancialPlannerContent() {
               const y = chartPadT + pct * plotH;
               return (
                 <g key={pct}>
-                  <line x1={chartPadL} y1={y} x2={chartW - chartPadR} y2={y} stroke="#e5e7eb" strokeWidth="1" />
+                  <line x1={chartPadL} y1={y} x2={chartW - chartPadR} y2={y} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
                   <text x={chartPadL - 8} y={y + 4} textAnchor="end" className="text-[10px]" fill="#9ca3af">
                     ${fmt(Math.round(maxBalance * (1 - pct) / 1000))}k
                   </text>
@@ -1297,7 +1297,7 @@ function FinancialPlannerContent() {
               );
             })}
             {/* Net worth line */}
-            <path d={toPath(nwPoints)} fill="none" stroke="#1a2744" strokeWidth="3" />
+            <path d={toPath(nwPoints)} fill="none" stroke="#3b82f6" strokeWidth="3" />
             {/* Break-even marker */}
             {breakEvenYear >= 0 && breakEvenYear <= nwYears && (
               <>

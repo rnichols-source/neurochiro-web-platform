@@ -82,7 +82,7 @@ export async function getCommunityData(): Promise<CommunityData> {
       .from("students")
       .select("region_code")
       .eq("id", user.id)
-      .single()
+      .maybeSingle()
     if (studentData && (studentData as any).region_code) {
       const region = (studentData as any).region_code
       studentRegion = region
