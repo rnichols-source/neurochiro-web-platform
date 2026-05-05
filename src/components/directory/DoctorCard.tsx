@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import NextImage from "next/image";
-import { ShieldCheck, ArrowRight, Heart, Phone, MapPin, Star } from "lucide-react";
+import { ShieldCheck, ArrowRight, Heart, Phone, MapPin, Star, Sparkles } from "lucide-react";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -79,6 +79,11 @@ export default function DoctorCard({ doc, index }: DoctorCardProps) {
             {doc.is_founding_member && (
               <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-neuro-orange/10 text-neuro-orange text-[9px] font-black rounded-md border border-neuro-orange/20 flex-shrink-0 uppercase tracking-wider">
                 <Star className="w-2.5 h-2.5 fill-neuro-orange" /> Founder
+              </span>
+            )}
+            {doc.membership_tier === 'pro' && (
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-violet-50 text-violet-600 text-[9px] font-black rounded-md border border-violet-200 flex-shrink-0 uppercase tracking-wider">
+                <Sparkles className="w-2.5 h-2.5" /> Pro
               </span>
             )}
           </div>

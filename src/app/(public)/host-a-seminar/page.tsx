@@ -120,13 +120,13 @@ export default function HostSeminarPage() {
           )}
           {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
           <button type="submit" disabled={loading} className="w-full py-4 bg-neuro-orange text-white font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange-dark transition-all disabled:opacity-50">
-            {loading ? "Processing..." : isMember ? "List Your Seminar — Free with Membership" : `List Your Seminar — ${region.currency.symbol}199`}
+            {loading ? "Processing..." : isMember ? "List Your Seminar — Included with Membership" : `List Your Seminar — ${region.currency.symbol}199`}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
-          NeuroChiro members host seminars for free. Not a member?{" "}
-          <Link href="/register?role=doctor" className="text-neuro-orange font-bold hover:underline">Join free</Link>.
+          NeuroChiro members host seminars at no extra cost. Not a member?{" "}
+          <Link href="/register?role=doctor" className="text-neuro-orange font-bold hover:underline">Join now</Link>.
         </p>
       </div>
     </div>

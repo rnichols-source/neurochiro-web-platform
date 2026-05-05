@@ -1,5 +1,6 @@
 "use client";
 
+import { saveToolData, loadToolData } from "@/app/actions/tool-data";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Apple,
@@ -125,9 +126,17 @@ export default function SupplementsPage() {
   const [purchaseLoading, setPurchaseLoading] = useState(true);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load from localStorage
+  // Load from Supabase (localStorage fallback)
   useEffect(() => {
-    setLocalData(loadLocal());
+    loadToolData('supplements').then((cloud) => {
+      if (cloud) {
+        setLocalData({ ...getDefaultData(), ...cloud });
+      } else {
+        setLocalData(loadLocal());
+      }
+    }).catch(() => {
+      setLocalData(loadLocal());
+    });
   }, []);
 
   // Purchase check
@@ -156,16 +165,13 @@ export default function SupplementsPage() {
     checkPurchase();
   }, []);
 
-  // Debounced save
+  // Debounced save to Supabase + localStorage
   const persist = useCallback((data: LocalData) => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      } catch {
-        // storage full
-      }
-    }, 500);
+      saveToolData('supplements', data).catch(() => {});
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+    }, 1000);
   }, []);
 
   const update = useCallback(
@@ -898,7 +904,7 @@ function NutritionTab({
             more.
           </p>
           <p className="text-neuro-navy font-bold mb-4">$9.99 one-time purchase</p>
-          <button className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-all">
+          <button onClick={async () => { const { createPremiumCheckout } = await import("../premium-actions"); const r = await createPremiumCheckout(); if (r?.url) window.location.href = r.url; }} className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-all">
             Unlock Full Guide
           </button>
         </div>

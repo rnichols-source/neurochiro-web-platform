@@ -1,10 +1,11 @@
 "use client";
 
-import { Loader2, User, Briefcase, GraduationCap, BarChart3, Gift, Copy, CheckCircle2, ExternalLink, ChevronRight, ArrowRight, Sparkles, Eye, Users, Calendar, FileText } from "lucide-react";
+import { Loader2, User, Briefcase, GraduationCap, BarChart3, Gift, Copy, CheckCircle2, ExternalLink, ChevronRight, ArrowRight, Sparkles, Eye, Users, Calendar, FileText, Bell, Mail, Zap } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { getDoctorDashboardStats } from "./actions";
+import { getDoctorDashboardStats, getDoctorActivityFeed } from "./actions";
+import { formatDistanceToNow } from "date-fns";
 import { useRegion } from "@/context/RegionContext";
 import { getOrCreateReferralCode, getReferralStats } from "@/app/actions/referral-program";
 import { createClient } from "@/lib/supabase";
@@ -21,12 +22,17 @@ export default function DoctorDashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [views, setViews] = useState<number | null>(null);
+  const [activity, setActivity] = useState<any[]>([]);
 
   useEffect(() => {
     getDoctorDashboardStats()
       .then((res) => setData(res))
       .catch(() => setData(null))
       .finally(() => setLoading(false));
+
+    getDoctorActivityFeed()
+      .then(setActivity)
+      .catch(() => setActivity([]));
 
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -170,6 +176,39 @@ export default function DoctorDashboard() {
           <div className="bg-blue-50 border border-blue-100 rounded-3xl p-6 shadow-sm">
             <p className="text-sm text-blue-700 font-bold">Your stats are warming up</p>
             <p className="text-xs text-blue-600 mt-1">As patients find you in the directory, you&apos;ll see profile views, leads, and more here. Make sure your profile is complete to appear in search results.</p>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Activity Feed */}
+      {activity.length > 0 && (
+        <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.12 }}>
+          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-neuro-orange" />
+                <h3 className="font-heading font-black text-neuro-navy text-sm">Recent Activity</h3>
+              </div>
+              <Link href="/doctor/notifications" className="text-xs font-bold text-gray-400 hover:text-neuro-orange transition-colors">View All</Link>
+            </div>
+            <div className="space-y-1">
+              {activity.map((item, i) => {
+                const iconMap: Record<string, any> = { job: Briefcase, seminar: Calendar, referral: Users, message: Mail, system: Bell };
+                const Icon = iconMap[item.type] || Bell;
+                return (
+                  <Link key={i} href={item.link} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                    <div className="w-8 h-8 rounded-lg bg-gray-50 group-hover:bg-neuro-orange/10 flex items-center justify-center flex-shrink-0 transition-colors">
+                      <Icon className="w-4 h-4 text-gray-400 group-hover:text-neuro-orange transition-colors" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-neuro-navy truncate">{item.title}</p>
+                      <p className="text-[11px] text-gray-400 truncate">{item.detail}</p>
+                    </div>
+                    <span className="text-[10px] text-gray-300 flex-shrink-0">{formatDistanceToNow(new Date(item.time), { addSuffix: true })}</span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </motion.div>
       )}

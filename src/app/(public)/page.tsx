@@ -7,7 +7,7 @@ import WhoIsItFor from "@/components/landing/WhoIsItFor";
 import Testimonials from "@/components/landing/Testimonials";
 import SocialProof from "@/components/landing/SocialProof";
 import DoctorValueProp from "@/components/landing/DoctorValueProp";
-import EmailCaptureBanner from "@/components/landing/EmailCaptureBanner";
+import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
 import { spotlightEpisodes } from "./spotlight/spotlight-data";
 
 export const metadata = {
@@ -16,6 +16,25 @@ export const metadata = {
 };
 
 export const revalidate = 300; // Cache for 5 minutes
+
+async function getPlatformStats() {
+  try {
+    const supabase = createAdminClient();
+    const [doctors, seminars, countries] = await Promise.all([
+      supabase.from('doctors').select('id', { count: 'exact', head: true }).eq('verification_status', 'verified'),
+      supabase.from('seminars').select('id', { count: 'exact', head: true }).eq('is_approved', true).eq('is_past', false),
+      supabase.from('doctors').select('country').eq('verification_status', 'verified'),
+    ]);
+    const uniqueCountries = new Set((countries.data || []).map((d: any) => d.country).filter(Boolean)).size;
+    return {
+      doctors: doctors.count || 0,
+      seminars: seminars.count || 0,
+      countries: uniqueCountries || 1,
+    };
+  } catch {
+    return { doctors: 0, seminars: 0, countries: 0 };
+  }
+}
 
 async function getFeaturedDoctors() {
   try {
@@ -33,7 +52,7 @@ async function getFeaturedDoctors() {
 }
 
 export default async function HomePage() {
-  const featured = await getFeaturedDoctors();
+  const [featured, stats] = await Promise.all([getFeaturedDoctors(), getPlatformStats()]);
 
   return (
     <div className="min-h-dvh bg-neuro-cream">
@@ -65,8 +84,29 @@ export default async function HomePage() {
           </form>
         </div>
 
-        {/* Trust Stats — Dynamic */}
-        <SocialProof doctorCount={featured.length > 0 ? undefined : 0} />
+        {/* Live Platform Stats */}
+        {stats.doctors > 0 && (
+          <div className="max-w-2xl mx-auto mt-12 flex items-center justify-center gap-8 md:gap-12">
+            <div className="text-center">
+              <p className="text-2xl md:text-3xl font-black text-white">{stats.doctors}+</p>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Verified Doctors</p>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="text-center">
+              <p className="text-2xl md:text-3xl font-black text-white">{stats.countries}</p>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Countries</p>
+            </div>
+            {stats.seminars > 0 && (
+              <>
+                <div className="w-px h-8 bg-white/10" />
+                <div className="text-center">
+                  <p className="text-2xl md:text-3xl font-black text-white">{stats.seminars}</p>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Upcoming Events</p>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Featured Doctors */}
@@ -189,7 +229,20 @@ export default async function HomePage() {
       <DoctorValueProp />
 
       {/* Email Capture for Non-Account Patients */}
-      <EmailCaptureBanner />
+      {/* Lead Capture */}
+      <section className="bg-neuro-cream py-12 px-6">
+        <div className="max-w-md mx-auto">
+          <LeadCaptureInline
+            source="homepage"
+            role="patient"
+            headline="Can't find a doctor near you?"
+            description="Enter your email and city — we'll notify you when a specialist joins your area."
+            buttonText="Notify Me"
+            showLocation
+            variant="card"
+          />
+        </div>
+      </section>
 
       {/* Doctor CTA */}
       <section className="bg-neuro-navy py-16 px-6">
@@ -197,7 +250,7 @@ export default async function HomePage() {
           <h2 className="text-2xl font-heading font-black text-white mb-4">Are you a chiropractor?</h2>
           <p className="text-gray-400 mb-8">Join the global network of nervous system specialists. Get your verified listing, connect with students, and grow your practice.</p>
           <Link href="/register?role=doctor" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
-            Get Listed Free <ArrowRight className="w-5 h-5" />
+            Get Listed <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>

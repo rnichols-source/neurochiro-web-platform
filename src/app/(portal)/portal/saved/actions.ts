@@ -7,7 +7,7 @@ export async function getSavedDoctors(ids: string[]) {
   const supabase = createServerSupabase()
   const { data } = await supabase
     .from('doctors')
-    .select('id, first_name, last_name, clinic_name, slug, city, state, specialties, photo_url, membership_tier')
+    .select('id, user_id, first_name, last_name, clinic_name, slug, city, state, specialties, photo_url, membership_tier')
     .in('id', ids)
   return data || []
 }

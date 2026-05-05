@@ -14,12 +14,12 @@ interface UpgradeModalProps {
 
 const tiers = [
   {
-    id: "free",
-    name: "Free",
-    monthlyPrice: "$0",
-    annualPrice: "$0",
-    annualTotal: "",
-    description: "Basic directory listing",
+    id: "basic",
+    name: "Basic",
+    monthlyPrice: "$49",
+    annualPrice: "$42",
+    annualTotal: "$490/yr",
+    description: "Directory listing + messaging",
     icon: Star,
     color: "text-gray-400",
     bg: "bg-white/5",
@@ -108,7 +108,7 @@ const PRICE_IDS: Record<string, Record<string, string>> = {
   },
 };
 
-export default function UpgradeModal({ isOpen, onClose, currentTier = "free", userId, highlightFeature }: UpgradeModalProps) {
+export default function UpgradeModal({ isOpen, onClose, currentTier = "basic", userId, highlightFeature }: UpgradeModalProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
 
@@ -181,7 +181,7 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "free", us
             <div className="p-8 pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
               {tiers.map((tier) => {
                 const isCurrent = tier.id === currentTier;
-                const isUpgrade = !isCurrent && tier.id !== "free";
+                const isUpgrade = !isCurrent && tier.id !== "basic";
                 return (
                   <div
                     key={tier.id}
@@ -207,7 +207,7 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "free", us
 
                     <div className="flex items-baseline gap-1 mb-1">
                       <span className="text-3xl font-black text-white">{billing === "annual" ? (tier as any).annualPrice : (tier as any).monthlyPrice}</span>
-                      <span className="text-sm text-gray-500">{tier.id === "free" ? "forever" : "/mo"}</span>
+                      <span className="text-sm text-gray-500">/mo</span>
                     </div>
                     {billing === "annual" && (tier as any).annualTotal && (
                       <p className="text-xs text-green-400 font-bold mb-2">Billed at {(tier as any).annualTotal}</p>
@@ -252,7 +252,7 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "free", us
                       </button>
                     ) : (
                       <div className="py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-widest">
-                        Free Forever
+                        Current Plan
                       </div>
                     )}
                   </div>

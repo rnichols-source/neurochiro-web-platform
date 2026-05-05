@@ -1,5 +1,6 @@
 "use client";
 import UpgradeGate from "@/components/doctor/UpgradeGate";
+import { saveToolData, loadToolData } from "../tool-data-actions";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -364,28 +365,37 @@ function ScanReportContent() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [progressOpen, setProgressOpen] = useState(false);
 
-  // Load from localStorage on mount
+  // Load from Supabase (localStorage fallback)
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LS_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<FormData>;
-        setState((prev) => ({ ...prev, ...parsed }));
+    loadToolData('scan_report').then((cloud) => {
+      if (cloud) {
+        setState((prev) => ({ ...prev, ...cloud }));
+      } else {
+        try {
+          const saved = localStorage.getItem(LS_KEY);
+          if (saved) setState((prev) => ({ ...prev, ...JSON.parse(saved) }));
+        } catch {}
       }
-    } catch { /* ignore */ }
-    setLoaded(true);
+      setLoaded(true);
+    }).catch(() => {
+      try {
+        const saved = localStorage.getItem(LS_KEY);
+        if (saved) setState((prev) => ({ ...prev, ...JSON.parse(saved) }));
+      } catch {}
+      setLoaded(true);
+    });
   }, []);
 
-  // Save to localStorage (debounced)
+  // Save to Supabase + localStorage (debounced)
   const stateRef = useRef(state);
   stateRef.current = state;
   useEffect(() => {
     if (!loaded) return;
     const timer = setTimeout(() => {
-      try {
-        localStorage.setItem(LS_KEY, JSON.stringify(stateRef.current));
-      } catch { /* ignore */ }
-    }, 500);
+      const data = stateRef.current;
+      saveToolData('scan_report', data).catch(() => {});
+      try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch {}
+    }, 1000);
     return () => clearTimeout(timer);
   }, [state, loaded]);
 
@@ -406,6 +416,7 @@ function ScanReportContent() {
 
   const resetAll = () => {
     localStorage.removeItem(LS_KEY);
+    saveToolData('scan_report', null).catch(() => {});
     setState({ ...DEFAULT_FORM, scanDate: todayStr() });
     setSaveSuccess(null);
   };

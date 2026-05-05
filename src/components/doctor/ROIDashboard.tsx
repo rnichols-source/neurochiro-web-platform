@@ -59,7 +59,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
     setIsRefreshing(false);
   };
 
-  const isLocked = tier === 'starter';
+  const isLocked = tier === 'basic';
   const isLimited = tier === 'growth';
   
   const stats = data.stats;

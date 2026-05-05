@@ -72,3 +72,17 @@ export async function getPatientDashboardData() {
     return null
   }
 }
+
+export async function getUpcomingSeminars() {
+  const supabase = createServerSupabase()
+  try {
+    const { data } = await supabase
+      .from('seminars')
+      .select('id, title, dates, city, country, price, instructor_name')
+      .eq('is_approved', true)
+      .eq('is_past', false)
+      .order('dates', { ascending: true })
+      .limit(3)
+    return data || []
+  } catch { return [] }
+}

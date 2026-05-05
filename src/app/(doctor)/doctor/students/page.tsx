@@ -17,6 +17,7 @@ export default function StudentsPage() {
       .then((data) => {
         const normalized = (data || []).map((s: any) => ({
           id: s.id,
+          user_id: s.user_id || s.id,
           name: s.name || s.full_name || "Student",
           school: s.school || "",
           gradYear: s.graduation_year ? String(s.graduation_year) : "",
@@ -34,7 +35,10 @@ export default function StudentsPage() {
 
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-8">
-      <h1 className="text-2xl font-heading font-black text-neuro-navy">Students</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-heading font-black text-neuro-navy">Students</h1>
+        <a href="/doctor/jobs" className="px-4 py-2 bg-neuro-orange text-white text-xs font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">Post a Job</a>
+      </div>
 
       {/* Search + Filters */}
       <div className="space-y-3">

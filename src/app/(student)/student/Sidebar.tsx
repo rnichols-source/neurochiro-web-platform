@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
-  MessageSquare, FileText, LogOut, X, Settings, CreditCard, DollarSign, Compass, ClipboardList, Target, HelpCircle, ChevronDown,
-  Map, Users, Heart,
+  MessageSquare, FileText, LogOut, X, Settings, CreditCard, DollarSign, Compass, ClipboardList, HelpCircle, ChevronDown,
+  Map, Users, Heart, Search, ShoppingBag,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -37,11 +37,13 @@ const navSections = [
   {
     label: "CAREER",
     items: [
+      { name: "Find Doctors", href: "/directory", icon: Search },
       { name: "Jobs", href: "/student/jobs", icon: Briefcase },
       { name: "Mentors", href: "/student/mentors", icon: Heart },
       { name: "Contract Lab", href: "/student/contract-lab", icon: FileText },
       { name: "Financial Planner", href: "/student/financial-planner", icon: DollarSign },
       { name: "Seminars", href: "/student/seminars", icon: Calendar },
+      { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
     ],
   },
   {

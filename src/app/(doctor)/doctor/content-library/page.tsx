@@ -60,7 +60,20 @@ function ContentLibraryContent() {
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
-    hasPurchased('content-library').then(setIsSubscribed).catch(() => {});
+    // Check membership tier + founding member status — they get full access
+    (async () => {
+      const { createClient } = await import("@/lib/supabase");
+      const sb = createClient();
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return;
+      const { data: doctor } = await sb.from("doctors").select("membership_tier, is_founding_member").eq("user_id", user.id).single() as any;
+      if (doctor?.is_founding_member || doctor?.membership_tier === 'growth' || doctor?.membership_tier === 'pro') {
+        setIsSubscribed(true);
+        return;
+      }
+      // Fallback: check for separate content library purchase
+      hasPurchased('content-library').then(setIsSubscribed).catch(() => {});
+    })();
   }, []);
 
   const thirtyDaysAgo = useMemo(() => {
@@ -162,7 +175,7 @@ function ContentLibraryContent() {
             }}
             className="px-5 py-2.5 bg-neuro-orange text-white rounded-lg font-bold text-xs hover:bg-neuro-orange/90 transition-colors whitespace-nowrap"
           >
-            $29/month
+            Upgrade to Growth
           </button>
         </div>
       )}

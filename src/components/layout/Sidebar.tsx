@@ -124,7 +124,7 @@ export default function Sidebar() {
             <p className="text-xs font-bold text-white truncate">{profile?.full_name || "Loading..."}</p>
             <p className="text-[10px] text-gray-400 truncate flex items-center gap-1">
               <ShieldCheck className="w-2 h-2 text-gray-500" />
-              {profile?.role === 'student_paid' ? 'Student (Paid)' : 'Student (Free)'}
+              Student Member
             </p>
           </div>
           <button 

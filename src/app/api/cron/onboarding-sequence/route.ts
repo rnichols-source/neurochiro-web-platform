@@ -125,9 +125,9 @@ export async function GET(req: Request) {
              <p>You also unlock your full analytics dashboard so you can see exactly who's finding you and how.</p>
              <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/billing" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Upgrade to Growth — $69/mo</a></p>`
           : `<p>Hi ${name},</p>
-             <p>Ready to take your career prep to the next level? Student Pro unlocks Interview Prep, the Contract Lab, Financial Planner, and Techniques Library.</p>
+             <p>Your student membership includes everything — Interview Prep, Contract Lab, Financial Planner, Techniques Library, and more. All for $12/mo.</p>
              <p>These are the tools that help you land your first job and negotiate your first contract with confidence.</p>
-             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/billing" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Upgrade to Student Pro — $29/mo</a></p>`;
+             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/billing" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Subscribe — $12/mo</a></p>`;
       } else if (daysSinceSignup === 30) {
         day = 30;
         subject = `Your first month on NeuroChiro`;

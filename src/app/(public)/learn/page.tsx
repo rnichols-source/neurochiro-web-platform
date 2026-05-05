@@ -30,21 +30,21 @@ const learningPaths = [
   {
     title: "New to NeuroChiro?",
     description: "Start here to understand the foundational philosophy of nervous-system centered care.",
-    link: "/learn/foundations",
+    link: "/learn/what-is-nervous-system-chiropractic",
     icon: Stethoscope,
     cta: "Start Foundations"
   },
   {
     title: "Why Repetition Matters",
     description: "Learn how the nervous system adapts and why consistency is the key to lasting change.",
-    link: "/learn/repetition",
+    link: "/learn/vagus-nerve-basics",
     icon: Dumbbell,
     cta: "Explore Neuroplasticity"
   },
   {
     title: "The Clinic Experience",
     description: "What happens during your first visit, the scans, and your personalized care plan.",
-    link: "/learn/experience",
+    link: "/learn/signs-of-nervous-system-dysregulation",
     icon: ShieldCheck,
     cta: "See Your Journey"
   }
@@ -127,7 +127,7 @@ export default function EducationHub() {
                <HelpCircle className="w-8 h-8 text-neuro-orange mb-4" />
                <h4 className="text-xl font-bold mb-2">Common Questions</h4>
                <p className="text-xs text-gray-400 mb-6">Find quick answers to billing, safety, and results.</p>
-               <Link href="/learn/faq" className="text-neuro-orange font-bold text-xs uppercase tracking-widest flex items-center gap-2">
+               <Link href="/learn/traditional-vs-nervous-system-chiropractic" className="text-neuro-orange font-bold text-xs uppercase tracking-widest flex items-center gap-2">
                   View FAQ <ArrowRight className="w-4 h-4" />
                </Link>
             </div>

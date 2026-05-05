@@ -140,6 +140,26 @@ const enqueue = async (eventType: string, payload: Record<string, unknown>, dela
       return;
     }
 
+    // Deduplication: check if this event was already queued for this user in the last hour
+    if (payload.email || payload.userId) {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      let dupeQuery = supabaseAdmin
+        .from('automation_queue')
+        .select('id', { count: 'exact', head: true })
+        .eq('event_type', eventType)
+        .gte('created_at', oneHourAgo);
+
+      // Match by email in the payload JSONB
+      if (payload.email) {
+        dupeQuery = dupeQuery.contains('payload', { email: payload.email });
+      }
+
+      const { count } = await dupeQuery;
+      if (count && count > 0) {
+        return; // Already queued — skip duplicate
+      }
+    }
+
     const now = new Date();
     const scheduledFor = delayMinutes > 0
       ? new Date(now.getTime() + delayMinutes * 60 * 1000).toISOString()
@@ -540,7 +560,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         if (supabaseAdmin && emailEnabled && payload.email && payload.userId) {
            // Check if they already paid/completed
            const { data: profile } = await supabaseAdmin.from('profiles').select('tier').eq('id', payload.userId).single();
-           if (!profile || profile.tier === 'free' || profile.tier === null) {
+           if (!profile || profile.tier === 'basic' || profile.tier === null) {
               await sendPremiumEmail({
                 to: payload.email,
                 subject: 'Did you forget something? 🌍',
@@ -558,13 +578,13 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
       case 'doctor_growth_upsell':
         if (supabaseAdmin && emailEnabled && payload.email && payload.userId) {
            const { data: profile } = await supabaseAdmin.from('profiles').select('tier').eq('id', payload.userId).single();
-           if (profile && profile.tier === 'starter') {
+           if (profile && profile.tier === 'basic') {
               await sendPremiumEmail({
                 to: payload.email,
                 subject: 'Ready to expand your clinical influence? 🚀',
                 title: 'Growth Tier Unlock',
                 body: `<h1>Dr. ${payload.name || payload.full_name || ''}, level up your practice.</h1>
-                       <p>Your Starter tier gets you on the map, but the Growth tier unlocks powerful student recruiting tools, seminar hosting capabilities, and advanced analytics to track your referral sources.</p>
+                       <p>Your Basic tier gets you on the map, but the Growth tier unlocks powerful student recruiting tools, seminar hosting capabilities, and advanced analytics to track your referral sources.</p>
                        <p>Upgrade today and see what the full network can do for your clinic.</p>`,
                 ctaText: 'View Upgrade Options',
                 ctaUrl: 'https://neurochiro.co/doctor/settings'
@@ -813,8 +833,8 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           
           // 🛡️ CENTRALIZED PRICE ID TO TIER MAPPING (Last 3 chars of Stripe Price ID)
           const priceToTier: Record<string, string> = {
-            'A0q': 'starter',      // Doctor Starter Monthly
-            'A0s': 'starter',      // Doctor Starter Annual
+            'A0q': 'basic',      // Doctor Starter Monthly
+            'A0s': 'basic',      // Doctor Starter Annual
             'A0p': 'growth',       // Doctor Growth Monthly
             'A0r': 'pro',          // Doctor Pro Monthly
             'A0v': 'foundation',   // Student Foundation Monthly
@@ -827,7 +847,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
 
           // Find match by substring
           const matchedKey = Object.keys(priceToTier).find(key => priceId.includes(key));
-          const newTier = matchedKey ? priceToTier[matchedKey] : 'starter';
+          const newTier = matchedKey ? priceToTier[matchedKey] : 'basic';
 
           if (customerId) {
             const { data: profile } = await supabaseAdmin
@@ -854,7 +874,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           if (customerId) {
             const { data: profile } = await supabaseAdmin.from('profiles').select('id, email, full_name').eq('stripe_customer_id', customerId).single();
             if (profile) {
-              await supabaseAdmin.from('profiles').update({ tier: 'free' }).eq('id', profile.id);
+              await supabaseAdmin.from('profiles').update({ tier: 'basic' }).eq('id', profile.id);
               if (emailEnabled && profile.email) {
                 await sendPremiumEmail({
                   to: profile.email,
@@ -876,10 +896,10 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           if (customerId) {
             const { data: profile } = await supabaseAdmin.from('profiles').select('id, role').eq('stripe_customer_id', customerId).single();
             if (profile) {
-              await supabaseAdmin.from('profiles').update({ tier: 'free' }).eq('id', profile.id);
+              await supabaseAdmin.from('profiles').update({ tier: 'basic' }).eq('id', profile.id);
               // [FOREVER FIX] Do not hide from directory on subscription cancelation.
               // We want listings to stay visible to preserve the platform's value.
-              // They will be downgraded to 'starter' tier instead (handled in profiles update above).
+              // They will be downgraded to 'basic' tier instead (handled in profiles update above).
               /*
               if (profile.role === 'doctor') {
                 await supabaseAdmin.from('doctors').update({ verification_status: 'hidden' }).eq('user_id', profile.id);

@@ -46,13 +46,13 @@ export default function StudentBilling() {
         <h1 className="text-2xl font-black text-neuro-navy">Billing</h1>
         <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
           <CreditCard className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-          <p className="text-lg font-bold text-neuro-navy mb-2">You&apos;re on the free plan</p>
-          <p className="text-sm text-gray-500 mb-6">Upgrade to Student Pro for $29/month to unlock Interview Prep, Contract Lab, Financial Planner, and more.</p>
+          <p className="text-lg font-bold text-neuro-navy mb-2">No active subscription</p>
+          <p className="text-sm text-gray-500 mb-6">Subscribe to access all student tools — Interview Prep, Contract Lab, Financial Planner, and more.</p>
           <Link
             href="/pricing/students"
             className="inline-block px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm hover:bg-neuro-orange-light transition-colors"
           >
-            Upgrade to Student Pro — $29/mo
+            Subscribe — $12/mo
           </Link>
         </div>
       </div>

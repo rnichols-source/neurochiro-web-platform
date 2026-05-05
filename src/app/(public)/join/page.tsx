@@ -39,7 +39,7 @@ export default async function JoinReferralPage({ searchParams }: Props) {
                 {referrer.location}
               </p>
               <p className="text-gray-400 mb-10">
-                Join the NeuroChiro network for free. When you upgrade, you&apos;ll both get a free month.
+                Join the NeuroChiro network. When a colleague signs up through your link, you both get one month free.
               </p>
             </>
           ) : (
@@ -74,7 +74,7 @@ export default async function JoinReferralPage({ searchParams }: Props) {
           {/* Benefits */}
           <div className="flex flex-wrap justify-center gap-8 mt-12">
             {[
-              { icon: Gift, label: referrer ? "1 Month Free for Both" : "Free Trial Available" },
+              { icon: Gift, label: referrer ? "1 Month Free for Both" : "30-Day Money-Back Guarantee" },
               { icon: Users, label: "140+ Verified Doctors" },
               { icon: ShieldCheck, label: "100% Verified Network" },
             ].map((item, i) => (

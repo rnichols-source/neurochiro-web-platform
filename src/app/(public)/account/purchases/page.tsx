@@ -139,7 +139,7 @@ export default function MyPurchasesPage() {
                 href="/pricing/doctors"
                 className="text-neuro-orange font-semibold hover:underline"
               >
-                Create one free
+                Create one now
               </Link>{" "}
               — your purchases will link automatically.
             </p>

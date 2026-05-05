@@ -2,6 +2,7 @@ import { ArrowLeft, BookOpen, Clock, Zap, ShieldCheck, CheckCircle2, MapPin, Bra
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ARTICLES } from "@/lib/articles";
+import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
 import { Metadata } from "next";
 import SchemaMarkup from "@/components/seo/SchemaMarkup";
 
@@ -149,19 +150,32 @@ export default async function ArticlePage({ params }: Props) {
            <Link href="/directory" className="inline-flex items-center gap-3 px-12 py-6 bg-neuro-orange text-white font-black uppercase tracking-widest rounded-2xl hover:bg-neuro-orange-light shadow-2xl transition-all group">
               Find a Doctor Near You <MapPin className="w-5 h-5 group-hover:animate-bounce" />
            </Link>
-           
+
+           {/* Lead Capture */}
+           <div className="max-w-md mx-auto pt-8">
+             <LeadCaptureInline
+               source={`learn_${slug}`}
+               role="patient"
+               headline="Can't find a doctor near you?"
+               description="Enter your email and city — we'll notify you when a specialist joins your area."
+               buttonText="Notify Me"
+               showLocation
+               variant="card"
+             />
+           </div>
+
            <div className="pt-8 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-              <Link href="/learn/repetition" className="p-6 bg-gray-50 rounded-2xl flex items-center justify-between group hover:bg-white hover:shadow-lg transition-all">
+              <Link href="/learn/vagus-nerve-basics" className="p-6 bg-gray-50 rounded-2xl flex items-center justify-between group hover:bg-white hover:shadow-lg transition-all">
                  <div className="text-left">
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Next Reading</p>
-                    <p className="font-bold text-neuro-navy">Why Repetition Matters</p>
+                    <p className="font-bold text-neuro-navy">Vagus Nerve Basics</p>
                  </div>
                  <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-neuro-orange group-hover:translate-x-1 transition-all" />
               </Link>
-              <Link href="/learn/faq" className="p-6 bg-gray-50 rounded-2xl flex items-center justify-between group hover:bg-white hover:shadow-lg transition-all">
+              <Link href="/learn/traditional-vs-nervous-system-chiropractic" className="p-6 bg-gray-50 rounded-2xl flex items-center justify-between group hover:bg-white hover:shadow-lg transition-all">
                  <div className="text-left">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Questions?</p>
-                    <p className="font-bold text-neuro-navy">View Patient FAQs</p>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Compare</p>
+                    <p className="font-bold text-neuro-navy">Traditional vs. NS Chiropractic</p>
                  </div>
                  <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-neuro-orange group-hover:translate-x-1 transition-all" />
               </Link>

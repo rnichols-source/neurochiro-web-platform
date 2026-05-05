@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { getSavedDoctors } from "./actions";
-import { Heart, MapPin, X } from "lucide-react";
+import { Heart, MapPin, X, MessageSquare } from "lucide-react";
 import Link from "next/link";
 
 type Doctor = {
   id: string;
+  user_id: string | null;
   first_name: string;
   last_name: string;
   clinic_name: string | null;
@@ -96,12 +97,22 @@ export default function SavedPage() {
                   ))}
                 </div>
               )}
-              <Link
-                href={`/directory/${doc.slug}`}
-                className="block text-center py-2.5 bg-neuro-navy text-white text-xs font-bold rounded-xl hover:bg-neuro-navy/90 transition-colors"
-              >
-                View Profile
-              </Link>
+              <div className="flex gap-2">
+                {doc.user_id && (
+                  <Link
+                    href={`/portal/messages?to=${doc.user_id}`}
+                    className="flex-1 text-center py-2.5 bg-neuro-orange/10 text-neuro-orange text-xs font-bold rounded-xl hover:bg-neuro-orange/20 transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" /> Message
+                  </Link>
+                )}
+                <Link
+                  href={`/directory/${doc.slug}`}
+                  className="flex-1 text-center py-2.5 bg-neuro-navy text-white text-xs font-bold rounded-xl hover:bg-neuro-navy/90 transition-colors"
+                >
+                  View Profile
+                </Link>
+              </div>
             </div>
           ))}
         </div>

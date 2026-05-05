@@ -152,8 +152,8 @@ export async function sendFoundingMemberEmail() {
     <p>Starting today, we're making some changes to the platform to grow the network and bring more patients to doctors like you. Here's what's happening and what it means for you specifically.</p>
 
     <h2 style="font-size: 20px; color: #D66829; margin-top: 30px;">WHAT'S CHANGING</h2>
-    <p>We're opening NeuroChiro to more chiropractors across the country with a free directory listing. More doctors in the directory means more patients using the platform to search — and more patients finding <strong>YOU</strong>.</p>
-    <p>New doctors who join will have access to a basic listing. To unlock the full suite of tools — messaging, analytics, KPI tracker, care plans, scan reports, and everything else — they'll pay $69 or $129 per month.</p>
+    <p>We're opening NeuroChiro to more chiropractors across the country. More doctors in the directory means more patients using the platform to search — and more patients finding <strong>YOU</strong>.</p>
+    <p>New doctors will join at $49/mo for Basic, $69/mo for Growth, or $129/mo for Pro.</p>
 
     <h2 style="font-size: 20px; color: #D66829; margin-top: 30px;">WHAT THIS MEANS FOR YOU</h2>
     <p>You were here first. So here's what you get that nobody else ever will:</p>
@@ -164,14 +164,14 @@ export async function sendFoundingMemberEmail() {
 
     <p><strong style="color: #D66829;">YOUR PRICE IS LOCKED</strong> — Whatever you're paying now is your price for life. New members will pay more. Your rate will never increase.</p>
 
-    <p><strong style="color: #D66829;">PRIORITY SEARCH PLACEMENT</strong> — When patients search for a chiropractor, you show up above free listings. Always.</p>
+    <p><strong style="color: #D66829;">PRIORITY SEARCH PLACEMENT</strong> — When patients search for a chiropractor, you show up above Basic listings. Always.</p>
 
-    <p><strong style="color: #D66829;">VERIFIED PROVIDER BADGE</strong> — The trust signal patients look for. Free listings don't get this. You do.</p>
+    <p><strong style="color: #D66829;">VERIFIED PROVIDER BADGE</strong> — The trust signal patients look for. Basic listings don't get this. You do.</p>
 
     <p><strong style="color: #D66829;">EARLY ACCESS</strong> — Any new feature we build, you get it first.</p>
 
     <h2 style="font-size: 20px; color: #D66829; margin-top: 30px;">WHY WE'RE DOING THIS</h2>
-    <p>The bigger the directory gets, the more patients use it. The more patients use it, the more they find <strong>YOU</strong>. Every doctor who joins — even on a free listing — makes the platform more valuable for the doctors who invested early.</p>
+    <p>The bigger the directory gets, the more patients use it. The more patients use it, the more they find <strong>YOU</strong>. Every doctor who joins makes the platform more valuable for the doctors who invested early.</p>
     <p>You're not being diluted. <strong>You're being amplified.</strong></p>
     <p>Thank you for believing in this before it was proven. Thank you for being part of the foundation we're building everything on.</p>
     <p>This is just the beginning.</p>

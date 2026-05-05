@@ -722,7 +722,7 @@ Based on this review, the Parties may mutually agree to: (i) maintain the flat s
 
 C.3 DISCRETIONARY BONUS. Practice may award discretionary bonuses for exceptional performance. Such bonuses do not create an entitlement to future bonuses.
 
-[ANNOTATION: Model C is the simplest structure and works best for new graduates or associates transitioning from another practice who need income stability during adjustment. The 12-month review is the critical mechanism -- it forces both parties to revisit the arrangement with real data. Many practices use Model C as a "starter" compensation plan with the explicit intention of transitioning to Model A once the associate is established and both parties have data on production levels.]
+[ANNOTATION: Model C is the simplest structure and works best for new graduates or associates transitioning from another practice who need income stability during adjustment. The 12-month review is the critical mechanism -- it forces both parties to revisit the arrangement with real data. Many practices use Model C as a "basic" compensation plan with the explicit intention of transitioning to Model A once the associate is established and both parties have data on production levels.]
 
 -----------------------------------------------------------------------
 SECTION 2 -- BONUS STRUCTURES (APPLICABLE TO ALL MODELS)

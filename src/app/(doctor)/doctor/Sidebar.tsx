@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
   MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck, TrendingUp, Activity, Presentation, Receipt, DollarSign, Target, ChevronDown,
-  ShieldCheck, Lock,
+  ShieldCheck, Lock, ShoppingBag,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -53,6 +53,7 @@ const navSections = [
       { name: "Contracts", href: "/doctor/contracts", icon: FileCheck, tier: "pro" as const },
       { name: "Students", href: "/doctor/students", icon: GraduationCap },
       { name: "Seminars", href: "/doctor/seminars", icon: Calendar },
+      { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
     ],
   },
   {
@@ -66,14 +67,14 @@ const navSections = [
   },
 ];
 
-const TIER_LEVELS: Record<string, number> = { free: 0, starter: 0, growth: 1, pro: 2 };
+const TIER_LEVELS: Record<string, number> = { free: 0, basic: 0, starter: 0, growth: 1, pro: 2 };
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [userName, setUserName] = useState<string | null>(null);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
-  const [memberTier, setMemberTier] = useState<string>("starter");
+  const [memberTier, setMemberTier] = useState<string>("basic");
 
   useEffect(() => {
     const supabase = createClient();
@@ -84,8 +85,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         supabase.from("notifications").select("*", { count: "exact", head: true })
           .eq("user_id", user.id).is("read_at", null)
           .then(({ count }) => setUnreadNotifs(count || 0));
-        supabase.from("doctors").select("membership_tier").eq("user_id", user.id).single()
-          .then(({ data }) => setMemberTier(data?.membership_tier || "starter"));
+        supabase.from("doctors").select("membership_tier, is_founding_member").eq("user_id", user.id).single()
+          .then(({ data }: any) => {
+            // Founding members get full Pro access to everything
+            if (data?.is_founding_member) {
+              setMemberTier("pro");
+            } else {
+              setMemberTier(data?.membership_tier || "basic");
+            }
+          });
       }
     });
   }, []);

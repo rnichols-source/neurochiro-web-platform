@@ -224,6 +224,47 @@ export async function getJobsForRadar() {
   }
 }
 
+export async function getUpcomingSeminarsForStudent() {
+  const supabase = createServerSupabase()
+  try {
+    const { data } = await supabase
+      .from('seminars')
+      .select('id, title, dates, city, country, price, instructor_name')
+      .eq('is_approved', true)
+      .eq('is_past', false)
+      .order('dates', { ascending: true })
+      .limit(3)
+    return data || []
+  } catch { return [] }
+}
+
+export async function getRecentJobs() {
+  const supabase = createServerSupabase()
+  try {
+    const { data } = await supabase
+      .from('job_postings')
+      .select('id, title, employment_type, salary_min, salary_max, created_at, doctor_id')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    if (!data || data.length === 0) return [];
+
+    const doctorIds = [...new Set(data.map(j => j.doctor_id).filter(Boolean))];
+    if (doctorIds.length > 0) {
+      const { data: doctors } = await supabase
+        .from('doctors')
+        .select('user_id, clinic_name, city, state')
+        .in('user_id', doctorIds);
+      const clinicMap = new Map((doctors || []).map((d: any) => [d.user_id, d]));
+      return data.map(j => ({ ...j, clinic: (clinicMap.get(j.doctor_id) as any) || {} }));
+    }
+    return data.map(j => ({ ...j, clinic: {} }));
+  } catch {
+    return [];
+  }
+}
+
 export async function transitionToDoctorAction() {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()

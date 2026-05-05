@@ -17,10 +17,10 @@ export default function DoctorPricing() {
     <div className="max-w-5xl mx-auto">
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-heading font-black text-neuro-navy uppercase tracking-tight">
-          Start Free. <span className="text-neuro-orange">Upgrade When Ready.</span>
+          Choose Your <span className="text-neuro-orange">Plan.</span>
         </h1>
         <p className="text-gray-500 mt-4 text-lg max-w-xl mx-auto">
-          Get listed in the global directory for free. Upgrade to unlock premium tools that grow your practice.
+          Every plan includes a verified directory listing. Upgrade for advanced practice growth tools.
         </p>
       </div>
 
@@ -40,28 +40,29 @@ export default function DoctorPricing() {
 
       {/* 3 Tier Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* FREE */}
+        {/* BASIC */}
         <div className="bg-white rounded-2xl border border-gray-200 p-8">
           <div className="flex items-center gap-2 mb-4">
-            <Star className="w-5 h-5 text-gray-400" />
-            <h3 className="text-lg font-black text-neuro-navy">Free</h3>
+            <Star className="w-5 h-5 text-neuro-navy" />
+            <h3 className="text-lg font-black text-neuro-navy">Basic</h3>
           </div>
           <div className="flex items-baseline gap-1 mb-1">
-            <span className="text-5xl font-black text-neuro-navy">$0</span>
-            <span className="text-gray-400 font-bold">/forever</span>
+            <span className="text-5xl font-black text-neuro-navy">${billingCycle === "monthly" ? "49" : "42"}</span>
+            <span className="text-gray-400 font-bold">/mo</span>
           </div>
-          <p className="text-sm text-gray-500 mb-8">Get listed in the directory</p>
+          {billingCycle === "annual" && <p className="text-xs text-green-600 font-bold">$490/yr — save $98</p>}
+          <p className="text-sm text-gray-500 mb-8 mt-1">Get listed and start growing</p>
 
           <div className="space-y-3 mb-8">
             {[
               { name: "Directory listing", included: true },
               { name: "Profile page with photo & bio", included: true },
-              { name: "Profile views count", included: true },
+              { name: "Profile view analytics", included: true },
               { name: "Show up in patient searches", included: true },
               { name: "Patient messaging", included: false },
-              { name: "Analytics dashboard", included: false },
-              { name: "KPI Tracker", included: false },
               { name: "Verified badge", included: false },
+              { name: "AI Bio Generator", included: false },
+              { name: "KPI Tracker", included: false },
               { name: "Priority search placement", included: false },
             ].map((f, i) => (
               <div key={i} className={`flex items-center gap-2 text-sm ${f.included ? 'text-gray-700' : 'text-gray-300'}`}>
@@ -72,10 +73,10 @@ export default function DoctorPricing() {
           </div>
 
           <Link
-            href="/register?role=doctor"
-            className="w-full py-4 bg-gray-100 text-neuro-navy font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-gray-200 transition-all"
+            href="/register?role=doctor&billing=basic"
+            className="w-full py-4 bg-neuro-navy text-white font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-neuro-navy/90 transition-all"
           >
-            Get Listed Free
+            Get Started
           </Link>
         </div>
 
@@ -98,7 +99,7 @@ export default function DoctorPricing() {
 
           <div className="space-y-3 mb-8">
             {[
-              { name: "Everything in Free", included: true },
+              { name: "Everything in Basic", included: true },
               { name: "Patient messaging", included: true },
               { name: "Analytics dashboard", included: true },
               { name: "KPI Tracker", included: true },
@@ -106,6 +107,7 @@ export default function DoctorPricing() {
               { name: "Job posting", included: true },
               { name: "Referral program", included: true },
               { name: "Verified badge", included: true },
+              { name: "Content Library", included: true },
               { name: "Care Plan Builder", included: false },
               { name: "P&L Analyzer", included: false },
               { name: "Priority search placement", included: false },
@@ -177,9 +179,9 @@ export default function DoctorPricing() {
         <h3 className="font-bold text-neuro-navy text-center mb-6">Common Questions</h3>
         <div className="space-y-4">
           {[
-            { q: "Is the free plan really free?", a: "Yes. Your directory listing is free forever. No credit card required. No time limit. You can upgrade to Growth or Pro whenever you're ready." },
-            { q: "Can I start free and upgrade later?", a: "Absolutely. Most doctors start with a free listing, get some profile views, and then upgrade when they see the value. You can upgrade from your dashboard anytime." },
-            { q: "Can I cancel anytime?", a: "Yes. Cancel from your dashboard anytime. No lock-in contracts, no cancellation fees. Your free listing stays even if you cancel a paid plan." },
+            { q: "What does Basic include?", a: "Basic at $49/mo gives you a directory listing, profile page, and profile view analytics. Upgrade to Growth to unlock patient messaging, verified badge, KPI tracker, and more." },
+            { q: "Can I upgrade later?", a: "Yes. Start with Basic and upgrade to Growth or Pro anytime from your dashboard. All your data carries over." },
+            { q: "Can I cancel anytime?", a: "Yes. Cancel from your dashboard anytime. No lock-in contracts, no cancellation fees. You keep access through the end of your billing period." },
             { q: "Will patients actually find me?", a: "NeuroChiro is the only directory focused exclusively on nervous system chiropractors. Patients searching for this specific type of care find you here, not competing with generalists on Google." },
             { q: "What's the difference between Growth and Pro?", a: "Growth unlocks patient messaging, analytics, KPI tracking, and the verified badge. Pro adds the Care Plan Builder, Scan Reports, P&L Analyzer, Screenings system, and priority search placement." },
           ].map((item, i) => (

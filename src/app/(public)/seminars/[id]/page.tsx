@@ -72,7 +72,13 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
           </h1>
 
           {seminar.instructor_name && (
-            <p className="text-gray-400">Hosted by <span className="text-white font-bold">{seminar.instructor_name}</span></p>
+            <p className="text-gray-400">Hosted by {seminar.host_doctor ? (
+              <Link href={`/directory/${seminar.host_doctor.slug}`} className="text-white font-bold hover:text-neuro-orange transition-colors underline underline-offset-2">
+                {seminar.instructor_name}
+              </Link>
+            ) : (
+              <span className="text-white font-bold">{seminar.instructor_name}</span>
+            )}</p>
           )}
         </div>
       </section>

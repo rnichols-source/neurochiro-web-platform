@@ -17,7 +17,7 @@ export async function getDoctors(options: {
   try {
     // DATA MINIMIZATION: Only fetch essential columns for the LIST view
     // Removed: email, website_url, instagram_url, facebook_url, address (private-ish)
-    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code';
+    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, phone, photo_url';
     
     let query = supabase
       .from('doctors')
@@ -78,7 +78,7 @@ export async function getDoctors(options: {
     }
 
     // Priority sort: Founding members first, then by tier (Pro > Growth > Starter)
-    const tierPriority: Record<string, number> = { pro: 1, growth: 2, starter: 3 };
+    const tierPriority: Record<string, number> = { pro: 1, growth: 2, basic: 3, starter: 3 };
     if (data) {
       data.sort((a: any, b: any) => {
         const aFounder = a.is_founding_member ? 0 : 1;
@@ -170,6 +170,36 @@ export async function incrementDoctorViews(slug: string) {
   } catch (e) {
     // Masked internally
   }
+}
+
+// ── Get seminars hosted by a doctor ──
+export async function getDoctorSeminars(userId: string) {
+  const supabase = createServerSupabase();
+  try {
+    const { data } = await supabase
+      .from('seminars')
+      .select('id, title, dates, location, city, country, price, is_past')
+      .eq('host_id', userId)
+      .eq('is_approved', true)
+      .order('dates', { ascending: false })
+      .limit(6);
+    return data || [];
+  } catch { return []; }
+}
+
+// ── Get jobs posted by a doctor ──
+export async function getDoctorJobs(doctorId: string) {
+  const supabase = createServerSupabase();
+  try {
+    const { data } = await supabase
+      .from('job_postings')
+      .select('id, title, employment_type, salary_min, salary_max, created_at, status')
+      .eq('doctor_id', doctorId)
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(5);
+    return data || [];
+  } catch { return []; }
 }
 
 export async function getStudentsForMap(options: {

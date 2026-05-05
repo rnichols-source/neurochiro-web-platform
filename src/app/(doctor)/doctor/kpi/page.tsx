@@ -1,5 +1,6 @@
 "use client";
 import UpgradeGate from "@/components/doctor/UpgradeGate";
+import { saveToolData, loadToolData } from "../tool-data-actions";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
@@ -193,15 +194,25 @@ function KpiTrackerContent() {
     loadData();
   }, [loadData]);
 
-  // Load goals from localStorage
+  // Load goals from Supabase (localStorage fallback)
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LS_GOALS_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setGoals({ ...DEFAULT_GOALS, ...parsed });
+    async function loadGoals() {
+      try {
+        const cloud = await loadToolData('kpi_goals');
+        if (cloud) {
+          setGoals({ ...DEFAULT_GOALS, ...cloud });
+        } else {
+          const saved = localStorage.getItem(LS_GOALS_KEY);
+          if (saved) setGoals({ ...DEFAULT_GOALS, ...JSON.parse(saved) });
+        }
+      } catch {
+        try {
+          const saved = localStorage.getItem(LS_GOALS_KEY);
+          if (saved) setGoals({ ...DEFAULT_GOALS, ...JSON.parse(saved) });
+        } catch {}
       }
-    } catch {}
+    }
+    loadGoals();
   }, []);
 
   // Pre-fill form if today is already logged
@@ -218,11 +229,10 @@ function KpiTrackerContent() {
         servicesPerVisit: "",
         energyLevel: todayEntry.energy_level,
       });
-      // Load extras from localStorage
-      try {
-        const extras = localStorage.getItem(LS_EXTRAS_KEY);
-        if (extras) {
-          const parsed = JSON.parse(extras);
+      // Load extras from Supabase (localStorage fallback)
+      loadToolData('kpi_extras').then((cloud) => {
+        const parsed = cloud || (() => { try { return JSON.parse(localStorage.getItem(LS_EXTRAS_KEY) || 'null'); } catch { return null; } })();
+        if (parsed) {
           setForm(prev => ({
             ...prev,
             referrals: parsed.referrals ?? "",
@@ -231,7 +241,7 @@ function KpiTrackerContent() {
             servicesPerVisit: parsed.servicesPerVisit ?? "",
           }));
         }
-      } catch {}
+      }).catch(() => {});
     }
   }, [todayEntry]);
 
@@ -263,16 +273,16 @@ function KpiTrackerContent() {
       return;
     }
 
-    // Save extras to localStorage
-    try {
-      localStorage.setItem(LS_EXTRAS_KEY, JSON.stringify({
-        referrals: form.referrals,
-        reactivations: form.reactivations,
-        caseAcceptance: form.caseAcceptance,
-        servicesPerVisit: form.servicesPerVisit,
-        date: new Date().toISOString().slice(0, 10),
-      }));
-    } catch {}
+    // Save extras to Supabase + localStorage fallback
+    const extras = {
+      referrals: form.referrals,
+      reactivations: form.reactivations,
+      caseAcceptance: form.caseAcceptance,
+      servicesPerVisit: form.servicesPerVisit,
+      date: new Date().toISOString().slice(0, 10),
+    };
+    saveToolData('kpi_extras', extras).catch(() => {});
+    try { localStorage.setItem(LS_EXTRAS_KEY, JSON.stringify(extras)); } catch {}
 
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 3000);
@@ -280,9 +290,8 @@ function KpiTrackerContent() {
   };
 
   const saveGoals = () => {
-    try {
-      localStorage.setItem(LS_GOALS_KEY, JSON.stringify(goals));
-    } catch {}
+    saveToolData('kpi_goals', goals).catch(() => {});
+    try { localStorage.setItem(LS_GOALS_KEY, JSON.stringify(goals)); } catch {}
   };
 
   // -----------------------------------------------------------------------

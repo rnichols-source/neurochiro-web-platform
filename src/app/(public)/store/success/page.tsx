@@ -114,7 +114,7 @@ function SuccessContent() {
                 <UserPlus className="w-5 h-5 text-neuro-orange flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-bold text-sm text-neuro-navy">
-                    Create your free account
+                    Create your account
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5">
                     Sign up to access your purchases anytime. We&apos;ll link

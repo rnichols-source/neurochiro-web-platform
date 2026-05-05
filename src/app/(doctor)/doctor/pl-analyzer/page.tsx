@@ -1,5 +1,6 @@
 "use client";
 import UpgradeGate from "@/components/doctor/UpgradeGate";
+import { saveToolData, loadToolData } from "../tool-data-actions";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
@@ -518,13 +519,18 @@ function PLAnalyzerContent() {
           setCheckingPurchase(false);
           return;
         }
-        const { data } = await (supabase as any)
-          .from("course_purchases")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("course_id", "pl-analyzer")
-          .limit(1);
-        if (data && data.length > 0) setIsPurchased(true);
+        // Founding members get everything
+        const { data: doc } = await supabase.from("doctors").select("is_founding_member").eq("user_id", user.id).single() as any;
+        if (doc?.is_founding_member) { setIsPurchased(true); }
+        else {
+          const { data } = await (supabase as any)
+            .from("course_purchases")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("course_id", "pl-analyzer")
+            .limit(1);
+          if (data && data.length > 0) setIsPurchased(true);
+        }
 
         const { data: snaps } = await (supabase as any)
           .from("pl_snapshots")
@@ -540,24 +546,35 @@ function PLAnalyzerContent() {
     })();
   }, []);
 
-  // ---- Load from localStorage on mount ----
+  // ---- Load from Supabase (localStorage fallback) ----
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(`pl_draft_${month}`);
-      if (saved) {
-        setValues(JSON.parse(saved));
+    const key = `pl_draft_${month}`;
+    loadToolData(key).then((cloud) => {
+      if (cloud) {
+        setValues(cloud);
+      } else {
+        try {
+          const saved = localStorage.getItem(key);
+          if (saved) setValues(JSON.parse(saved));
+        } catch {}
       }
-    } catch {}
+    }).catch(() => {
+      try {
+        const saved = localStorage.getItem(key);
+        if (saved) setValues(JSON.parse(saved));
+      } catch {}
+    });
   }, [month]);
 
-  // ---- Auto-save draft to localStorage (debounced 500ms) ----
+  // ---- Auto-save to Supabase + localStorage (debounced) ----
   useEffect(() => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      try {
-        localStorage.setItem(`pl_draft_${month}`, JSON.stringify(valuesRef.current));
-      } catch {}
-    }, 500);
+      const key = `pl_draft_${month}`;
+      const data = valuesRef.current;
+      saveToolData(key, data).catch(() => {});
+      try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
+    }, 1000);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
@@ -725,14 +742,7 @@ function PLAnalyzerContent() {
     (dir: -1 | 1) => {
       const newMonth = dir === -1 ? prevMonth(month) : nextMonth(month);
       setMonth(newMonth);
-      // Try loading from localStorage
-      try {
-        const saved = localStorage.getItem(`pl_draft_${newMonth}`);
-        if (saved) {
-          setValues(JSON.parse(saved));
-          return;
-        }
-      } catch {}
+      // Data will load via the useEffect on [month]
       // Try loading from snapshot
       const snap = snapshots.find((s) => s.month === newMonth);
       if (snap && snap.expenses) {
@@ -814,7 +824,7 @@ function PLAnalyzerContent() {
               }}
               className="bg-[#e97325] text-white px-6 py-3 rounded-lg font-bold text-base hover:bg-[#d4631e] transition-colors"
             >
-              Unlock P&L Intelligence &mdash; $29
+              Upgrade to Pro
             </button>
           </div>
           <div className="opacity-20 pointer-events-none">{children}</div>

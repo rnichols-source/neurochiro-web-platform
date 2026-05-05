@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Calendar, MapPin, Users, ArrowRight, ExternalLink, Zap } from "lucide-react";
 import { getSeminars } from "./actions";
 import Footer from "@/components/landing/Footer";
+import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
 
 export default function SeminarsPage() {
   const [seminars, setSeminars] = useState<any[]>([]);
@@ -136,11 +137,25 @@ export default function SeminarsPage() {
         )}
       </section>
 
+      {/* Lead Capture */}
+      <section className="bg-neuro-cream py-12 px-6">
+        <div className="max-w-md mx-auto">
+          <LeadCaptureInline
+            source="seminars_page"
+            role="doctor"
+            headline="Get notified about new events"
+            description="We'll email you when new seminars and CE events are posted."
+            buttonText="Subscribe"
+            variant="card"
+          />
+        </div>
+      </section>
+
       {/* Host CTA */}
       <section className="bg-neuro-navy py-16 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl font-heading font-black text-white mb-4">Want to Host a Seminar?</h2>
-          <p className="text-gray-400 mb-8">Share your expertise with the global nervous system chiropractic community. Members list seminars for free.</p>
+          <p className="text-gray-400 mb-8">Share your expertise with the global nervous system chiropractic community. Seminar listings are included with membership.</p>
           <Link href="/host-a-seminar" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
             Get Started <ArrowRight className="w-5 h-5" />
           </Link>

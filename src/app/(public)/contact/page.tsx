@@ -42,8 +42,8 @@ export default function ContactPage() {
             <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
               <Mail className="w-5 h-5 text-neuro-orange mx-auto mb-2" />
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Email</p>
-              <a href="mailto:support@neurochiro.com" className="text-sm font-bold text-neuro-navy hover:text-neuro-orange transition-colors">
-                support@neurochiro.com
+              <a href="mailto:support@neurochirodirectory.com" className="text-sm font-bold text-neuro-navy hover:text-neuro-orange transition-colors">
+                support@neurochirodirectory.com
               </a>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">

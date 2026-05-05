@@ -59,7 +59,7 @@ export async function GET(req: Request) {
           const profile = emailMap.get(doc.user_id);
           if (!profile?.email) return null;
 
-          const isPaid = doc.membership_tier && !['starter', 'free'].includes(doc.membership_tier);
+          const isPaid = doc.membership_tier && !['basic', 'free'].includes(doc.membership_tier);
           const views = doc.profile_views || 0;
           const name = doc.first_name || profile.name?.split(' ')[0] || 'Doctor';
           const profileUrl = doc.slug ? `https://neurochiro.co/directory/${doc.slug}` : 'https://neurochiro.co';

@@ -110,6 +110,11 @@ export default function RootLayout({
             <LazyOverlays />
           </UserPreferencesProvider>
         </RegionProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}`
+          }}
+        />
       </body>
     </html>
   );
