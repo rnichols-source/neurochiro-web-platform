@@ -404,8 +404,8 @@ function Accordion({ title, icon, children, defaultOpen = false }: {
 
 function Disclaimer() {
   return (
-    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
-      <p className="text-xs text-yellow-700">
+    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
+      <p className="text-xs text-yellow-400">
         <strong>Disclaimer:</strong> This is an educational tool, not legal advice. Always consult a licensed attorney before signing any employment contract.
       </p>
     </div>
@@ -566,7 +566,7 @@ function ContractLabContent() {
               <div className="space-y-4">
                 <textarea value={contractText} onChange={(e) => setContractText(e.target.value)}
                   placeholder="Paste your full employment contract text here..."
-                  className="w-full p-4 border-2 border-white/[0.08] rounded-2xl resize-none focus:border-[#D66829]/40 outline-none text-sm min-h-[220px]" />
+                  className="w-full p-4 border-2 border-white/[0.08] rounded-2xl resize-none focus:border-[#D66829]/40 outline-none text-sm min-h-[220px] text-white bg-white/[0.04]" />
                 <p className="text-xs text-white/35">Minimum 100 characters. The AI will analyze every clause.</p>
                 {analysisError && <p className="text-red-500 text-xs font-bold">{analysisError}</p>}
                 <button onClick={handlePasteAnalyze} disabled={isAnalyzing || !contractText.trim()}
@@ -590,7 +590,7 @@ function ContractLabContent() {
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 font-bold">$</span>
                     <input type="number" value={questionnaire.baseSalary} onChange={(e) => setQ("baseSalary", Number(e.target.value) || 0)}
-                      className="w-full pl-8 pr-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none" />
+                      className="w-full pl-8 pr-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white" />
                   </div>
                 </div>
 
@@ -610,7 +610,7 @@ function ContractLabContent() {
                       <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Bonus %</label>
                       <div className="relative">
                         <input type="number" value={questionnaire.bonusPct} onChange={(e) => setQ("bonusPct", Number(e.target.value) || 0)}
-                          className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none" />
+                          className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white" />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/35">%</span>
                       </div>
                     </div>
@@ -619,7 +619,7 @@ function ContractLabContent() {
                       <div className="relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 font-bold">$</span>
                         <input type="number" value={questionnaire.bonusThreshold} onChange={(e) => setQ("bonusThreshold", Number(e.target.value) || 0)}
-                          className="w-full pl-8 pr-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none" />
+                          className="w-full pl-8 pr-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white" />
                       </div>
                     </div>
                   </div>
@@ -636,12 +636,12 @@ function ContractLabContent() {
                     <div>
                       <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Radius (miles)</label>
                       <input type="number" value={questionnaire.nonCompeteRadius} onChange={(e) => setQ("nonCompeteRadius", Number(e.target.value) || 0)}
-                        className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none" />
+                        className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white" />
                     </div>
                     <div>
                       <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Duration (months)</label>
                       <input type="number" value={questionnaire.nonCompeteDuration} onChange={(e) => setQ("nonCompeteDuration", Number(e.target.value) || 0)}
-                        className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none" />
+                        className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white" />
                     </div>
                   </div>
                 )}
@@ -718,10 +718,10 @@ function ContractLabContent() {
             )}
 
             {hasResults && (
-              <div className="bg-green-50 border border-green-200 rounded-2xl flex flex-col items-center justify-center p-8 text-center">
+              <div className="bg-green-500/10 border border-green-500/20 rounded-2xl flex flex-col items-center justify-center p-8 text-center">
                 <CheckCircle className="w-12 h-12 text-green-500 mb-3" />
-                <h3 className="font-bold text-green-900 mb-1">Analysis Complete</h3>
-                <p className="text-sm text-green-700 mb-4">Review your results on the right.</p>
+                <h3 className="font-bold text-green-400 mb-1">Analysis Complete</h3>
+                <p className="text-sm text-green-400 mb-4">Review your results on the right.</p>
                 <button onClick={resetAnalysis} className="text-xs font-bold uppercase tracking-widest text-[#D66829] hover:underline">
                   Analyze Another
                 </button>
@@ -810,7 +810,7 @@ function ContractLabContent() {
             <p className="text-white/40">1-2 Years: <span className="font-bold text-white">$65-85K</span></p>
           </div>
           <div className="flex items-center justify-end">
-            <span className={`text-sm font-bold px-3 py-1.5 rounded-full ${r.salaryBenchmark === "Below Market" ? "bg-red-100 text-red-600" : r.salaryBenchmark === "Above Market" ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"}`}>
+            <span className={`text-sm font-bold px-3 py-1.5 rounded-full ${r.salaryBenchmark === "Below Market" ? "bg-red-500/15 text-red-600" : r.salaryBenchmark === "Above Market" ? "bg-green-500/15 text-green-600" : "bg-yellow-500/15 text-yellow-600"}`}>
               {r.salaryBenchmark}
             </span>
           </div>
@@ -825,14 +825,14 @@ function ContractLabContent() {
           </h3>
           <div className="space-y-3">
             {r.redFlags.map((flag, i) => (
-              <div key={i} className="border-2 border-red-200 bg-red-50/50 rounded-2xl p-5">
+              <div key={i} className="border-2 border-red-500/20 bg-red-500/10 rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertTriangle className="w-4 h-4 text-red-500" />
                   <h4 className="font-bold text-white text-sm">{flag.title}</h4>
-                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${flag.risk === "High" ? "bg-red-100 text-red-600" : flag.risk === "Medium" ? "bg-orange-100 text-orange-600" : "bg-yellow-100 text-yellow-600"}`}>{flag.risk} Risk</span>
+                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${flag.risk === "High" ? "bg-red-500/15 text-red-600" : flag.risk === "Medium" ? "bg-orange-500/15 text-orange-600" : "bg-yellow-500/15 text-yellow-600"}`}>{flag.risk} Risk</span>
                 </div>
                 <p className="text-sm text-white/60 mb-3">{flag.explanation}</p>
-                <div className="space-y-3 border-t border-red-200 pt-3">
+                <div className="space-y-3 border-t border-red-500/20 pt-3">
                   <div className="flex gap-2">
                     <MessageSquare className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
                     <div>
@@ -869,7 +869,7 @@ function ContractLabContent() {
           </h3>
           <div className="space-y-3">
             {r.greenLights.map((gl, i) => (
-              <div key={i} className="border-2 border-green-200 bg-green-50/50 rounded-2xl p-5">
+              <div key={i} className="border-2 border-green-500/20 bg-green-500/10 rounded-2xl p-5">
                 <div className="flex items-start gap-3">
                   <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
                   <div>
@@ -891,13 +891,13 @@ function ContractLabContent() {
           </h3>
           <div className="space-y-3">
             {r.missingClauses.map((mc, i) => (
-              <div key={i} className="border-2 border-yellow-200 bg-yellow-50/50 rounded-2xl p-5">
+              <div key={i} className="border-2 border-yellow-500/20 bg-yellow-500/10 rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <Info className="w-4 h-4 text-yellow-500" />
                   <h4 className="font-bold text-white text-sm">{mc.title}</h4>
                 </div>
                 <p className="text-sm text-white/60 mb-3">{mc.explanation}</p>
-                <div className="space-y-3 border-t border-yellow-200 pt-3">
+                <div className="space-y-3 border-t border-yellow-500/20 pt-3">
                   <div className="flex gap-2">
                     <MessageSquare className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
                     <div>
@@ -943,7 +943,7 @@ function ContractLabContent() {
             ))}
             {r.missingClauses.map((mc, i) => (
               <div key={`mc-${i}`} className="flex items-center gap-2 text-sm">
-                <span className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-[10px] font-bold text-[#1a2744] shrink-0">{r.redFlags.filter((f) => f.risk === "High").length + i + 1}</span>
+                <span className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-[10px] font-bold text-white shrink-0">{r.redFlags.filter((f) => f.risk === "High").length + i + 1}</span>
                 <span className="text-white/90">{mc.title}</span>
                 <span className="text-[10px] bg-yellow-500/30 text-yellow-300 px-2 py-0.5 rounded-full font-bold">Add</span>
               </div>
@@ -987,8 +987,8 @@ function ContractLabContent() {
             const risk = clause.risk || clause.status || "Medium";
             const isLow = risk === "Low" || risk === "safe";
             const isHigh = risk === "High" || risk === "Critical" || risk === "danger";
-            const colors = isLow ? "border-green-200 bg-green-50/50" : isHigh ? "border-red-200 bg-red-50/50" : "border-orange-200 bg-orange-50/50";
-            const badgeColors = isLow ? "bg-green-100 text-green-600" : isHigh ? "bg-red-100 text-red-600" : "bg-orange-100 text-orange-600";
+            const colors = isLow ? "border-green-500/20 bg-green-500/10" : isHigh ? "border-red-500/20 bg-red-500/10" : "border-orange-500/20 bg-orange-500/10";
+            const badgeColors = isLow ? "bg-green-500/15 text-green-600" : isHigh ? "bg-red-500/15 text-red-600" : "bg-orange-500/15 text-orange-600";
             const Icon = isLow ? ShieldCheck : isHigh ? ShieldAlert : AlertTriangle;
             const iconColor = isLow ? "text-green-500" : isHigh ? "text-red-500" : "text-orange-500";
 
@@ -1078,17 +1078,17 @@ function ContractLabContent() {
           <p><strong>State Enforceability:</strong> Not all states enforce non-competes equally. California, Oklahoma, and North Dakota essentially ban them for employees. Other states like Colorado and Illinois have placed significant restrictions on their use. Many states will only enforce &quot;reasonable&quot; non-competes, meaning a court could throw out overly aggressive terms.</p>
           <p><strong>Reasonable vs. Excessive Benchmarks:</strong></p>
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+            <div className="bg-green-500/10 rounded-lg p-3 border border-green-500/20">
               <p className="font-bold text-green-600 text-xs uppercase mb-1">Reasonable</p>
               <p>5-10 mile radius</p>
               <p>6-12 months</p>
             </div>
-            <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+            <div className="bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/20">
               <p className="font-bold text-yellow-600 text-xs uppercase mb-1">Moderate</p>
               <p>10-20 mile radius</p>
               <p>12-18 months</p>
             </div>
-            <div className="bg-red-50 rounded-lg p-3 border border-red-200">
+            <div className="bg-red-500/10 rounded-lg p-3 border border-red-500/20">
               <p className="font-bold text-red-600 text-xs uppercase mb-1">Aggressive</p>
               <p>20+ mile radius</p>
               <p>18+ months</p>
@@ -1269,9 +1269,9 @@ function ContractLabContent() {
                 {COMPARISON_ROWS.map((row, i) => (
                   <tr key={i} className="hover:bg-white/[0.04]">
                     <td className="px-4 py-3 font-bold text-white">{row.term}</td>
-                    <td className="px-4 py-3 text-green-700">{row.good}</td>
-                    <td className="px-4 py-3 text-yellow-700">{row.average}</td>
-                    <td className="px-4 py-3 text-red-700">{row.bad}</td>
+                    <td className="px-4 py-3 text-green-400">{row.good}</td>
+                    <td className="px-4 py-3 text-yellow-400">{row.average}</td>
+                    <td className="px-4 py-3 text-red-400">{row.bad}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1287,11 +1287,11 @@ function ContractLabContent() {
         </h2>
         <div className="space-y-3">
           {RED_FLAG_EXAMPLES.map((ex, i) => (
-            <div key={i} className="bg-red-50/50 border-2 border-red-200 rounded-2xl p-5">
+            <div key={i} className="bg-red-500/10 border-2 border-red-500/20 rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="w-4 h-4 text-red-500" />
                 <h4 className="font-bold text-white text-sm">{ex.title}</h4>
-                <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-600">Danger</span>
+                <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-500/15 text-red-600">Danger</span>
               </div>
               <blockquote className="bg-white/[0.04] border-l-4 border-red-400 p-3 rounded-r-xl font-mono text-xs text-white/60 leading-relaxed mb-3 whitespace-pre-wrap">
                 {ex.clause}
@@ -1364,7 +1364,7 @@ const SAMPLE_CLAUSES = [
   {
     title: "Compensation Clause",
     rating: "Standard",
-    ratingColor: "bg-green-100 text-green-600",
+    ratingColor: "bg-green-500/15 text-green-600",
     language: `COMPENSATION. Employer shall pay Associate a base annual salary of Sixty-Five Thousand Dollars ($65,000), payable in equal bi-weekly installments. In addition, Associate shall receive a production bonus equal to twenty-five percent (25%) of net collections exceeding Fifteen Thousand Dollars ($15,000) per month, calculated and paid quarterly.`,
     annotation: "This is a straightforward base + bonus structure. The base salary is within market range for new graduates, and the bonus threshold of $15K/month in collections is achievable in most practices. The quarterly payout is standard. Make sure 'net collections' is clearly defined elsewhere in the contract.",
   },
@@ -1378,7 +1378,7 @@ const SAMPLE_CLAUSES = [
   {
     title: "Non-Solicitation (Fair)",
     rating: "Standard",
-    ratingColor: "bg-green-100 text-green-600",
+    ratingColor: "bg-green-500/15 text-green-600",
     language: `NON-SOLICITATION. For a period of twelve (12) months following termination, Associate shall not directly solicit patients of the Practice for the purpose of providing chiropractic services. This provision does not restrict patients from independently seeking care from Associate.`,
     annotation: "The key phrase here is 'directly solicit' — this means you cannot reach out to patients, but patients who find you on their own are free to see you. This is a fair balance. Watch out for clauses that say 'solicit or accept' — the word 'accept' would prevent you from seeing patients even if they find you independently.",
   },
@@ -1392,7 +1392,7 @@ const SAMPLE_CLAUSES = [
   {
     title: "CE Allowance",
     rating: "Standard",
-    ratingColor: "bg-green-100 text-green-600",
+    ratingColor: "bg-green-500/15 text-green-600",
     language: `CONTINUING EDUCATION. Employer shall provide Associate with an annual continuing education allowance of Two Thousand Five Hundred Dollars ($2,500) for registration fees, travel, and materials. Associate shall receive up to five (5) paid business days annually for approved CE activities.`,
     annotation: "$2,500 plus 5 paid days is a solid CE benefit. Make sure 'approved' CE activities is not overly restrictive — you should be able to attend any state-approved CE program, not just programs the employer selects. Consider negotiating for the allowance to roll over if unused.",
   },
@@ -1413,14 +1413,14 @@ const SAMPLE_CLAUSES = [
   {
     title: "Malpractice Tail Coverage",
     rating: "Standard",
-    ratingColor: "bg-green-100 text-green-600",
+    ratingColor: "bg-green-500/15 text-green-600",
     language: `MALPRACTICE. Employer shall maintain professional liability insurance for Associate in the amount of $1,000,000/$3,000,000. In the event of termination by either party, Employer shall purchase tail coverage at its sole expense, provided Associate has been employed for a minimum of twelve (12) months.`,
     annotation: "The $1M/$3M coverage limits are standard. Employer-paid tail coverage is a significant benefit — tail coverage can cost $5,000-15,000. The 12-month employment minimum for tail coverage is reasonable. If you leave before 12 months, you may need to purchase your own tail.",
   },
   {
     title: "Dispute Resolution",
     rating: "Watch Out",
-    ratingColor: "bg-orange-100 text-orange-600",
+    ratingColor: "bg-orange-500/15 text-orange-600",
     language: `DISPUTE RESOLUTION. Any dispute arising from this Agreement shall be resolved through binding arbitration administered by the American Arbitration Association, in the county of Employer's principal office. Each party shall bear its own costs and attorney's fees.`,
     annotation: "Arbitration clauses waive your right to sue in court. While arbitration can be faster, it often favors employers because they are repeat participants in the system. 'Binding' means you cannot appeal. 'Each party bears its own costs' means you pay your own attorney even if you win. Consider negotiating for mediation first, then arbitration, with the losing party paying fees.",
   },

@@ -932,9 +932,9 @@ function FinancialPlannerContent() {
               <p className="text-lg font-black text-red-600">-${fmt(Math.round(ficaAnnual / 12))}</p>
             </div>
             {is1099 && (
-              <div className="bg-yellow-50 rounded-xl p-4 text-center border border-yellow-200">
-                <p className="text-[10px] font-bold text-yellow-700 uppercase">Quarterly Est.</p>
-                <p className="text-lg font-black text-yellow-700">${fmt(Math.round(totalTaxAnnual / 4))}</p>
+              <div className="bg-yellow-500/10 rounded-xl p-4 text-center border border-yellow-500/20">
+                <p className="text-[10px] font-bold text-yellow-400 uppercase">Quarterly Est.</p>
+                <p className="text-lg font-black text-yellow-400">${fmt(Math.round(totalTaxAnnual / 4))}</p>
               </div>
             )}
             <div className="bg-[#162231] rounded-xl p-4 text-center">
@@ -943,9 +943,9 @@ function FinancialPlannerContent() {
             </div>
           </div>
           {is1099 && (
-            <div className="mt-4 flex items-start gap-2 bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+            <div className="mt-4 flex items-start gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
               <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-yellow-700">
+              <p className="text-xs text-yellow-400">
                 As a 1099 contractor, you pay self-employment tax (15.3%). Set aside <strong>${fmt(Math.round(totalTaxAnnual / 4))}</strong> quarterly for estimated taxes (due Jan 15, Apr 15, Jun 15, Sep 15).
               </p>
             </div>
@@ -1066,9 +1066,9 @@ function FinancialPlannerContent() {
               </div>
             ))}
           </div>
-          <div className="mt-4 bg-green-50 border border-green-200 rounded-xl p-4 flex justify-between items-center">
-            <span className="text-sm font-bold text-green-800">Total Estimated Annual Tax Savings</span>
-            <span className="text-xl font-black text-green-700">${fmt(totalDeductionSavings)}</span>
+          <div className="mt-4 bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex justify-between items-center">
+            <span className="text-sm font-bold text-green-400">Total Estimated Annual Tax Savings</span>
+            <span className="text-xl font-black text-green-400">${fmt(totalDeductionSavings)}</span>
           </div>
         </div>
       </div>
@@ -1534,9 +1534,9 @@ function FinancialPlannerContent() {
                   Estimated Tax Savings
                 </h3>
               </div>
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                <p className="text-sm text-green-700">Estimated annual savings from deductions</p>
-                <p className="text-3xl font-black text-green-700 mt-1">${fmt(totalDeductionSavings)}/yr</p>
+              <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 text-center">
+                <p className="text-sm text-green-400">Estimated annual savings from deductions</p>
+                <p className="text-3xl font-black text-green-400 mt-1">${fmt(totalDeductionSavings)}/yr</p>
               </div>
             </section>
           </div>

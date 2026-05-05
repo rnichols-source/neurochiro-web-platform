@@ -1229,13 +1229,13 @@ function InterviewPlaybookContent() {
                     </div>
 
                     {/* Red flags */}
-                    <div className="rounded-xl p-4 border-2 border-red-200 bg-red-50">
+                    <div className="rounded-xl p-4 border-2 border-red-500/20 bg-red-500/10">
                       <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-red-600">
                         Red Flags to Avoid
                       </h4>
                       <ul className="space-y-1.5">
                         {q.redFlags.map((rf, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-red-700">
+                          <li key={i} className="flex items-start gap-2 text-sm text-red-400">
                             <X className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-400" />
                             {rf}
                           </li>
@@ -1396,18 +1396,18 @@ function InterviewPlaybookContent() {
                       <p className="text-sm text-white/50 leading-relaxed">{q.whyMatters}</p>
                     </div>
 
-                    <div className="rounded-xl p-4 border-2 border-green-200 bg-green-50">
-                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-1.5 text-green-700">
+                    <div className="rounded-xl p-4 border-2 border-green-500/20 bg-green-500/10">
+                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-1.5 text-green-400">
                         Good Answer Sounds Like
                       </h4>
-                      <p className="text-sm text-green-800 leading-relaxed">{q.goodAnswer}</p>
+                      <p className="text-sm text-green-400 leading-relaxed">{q.goodAnswer}</p>
                     </div>
 
-                    <div className="rounded-xl p-4 border-2 border-red-200 bg-red-50">
+                    <div className="rounded-xl p-4 border-2 border-red-500/20 bg-red-500/10">
                       <h4 className="text-[10px] font-black uppercase tracking-widest mb-1.5 text-red-600">
                         Red Flag Answer
                       </h4>
-                      <p className="text-sm text-red-700 leading-relaxed">{q.redFlagAnswer}</p>
+                      <p className="text-sm text-red-400 leading-relaxed">{q.redFlagAnswer}</p>
                     </div>
 
                     <p className="text-sm font-bold" style={{ color: BRAND_ORANGE }}>
@@ -1754,7 +1754,7 @@ function InterviewPlaybookContent() {
 
             {/* Hidden Costs */}
             {calc.hiddenCosts > 0 && (
-              <div className="bg-white/[0.04] rounded-2xl border-2 border-red-200 p-6 mb-4">
+              <div className="bg-white/[0.04] rounded-2xl border-2 border-red-500/20 p-6 mb-4">
                 <div className="flex items-center gap-2 mb-4">
                   <AlertTriangle className="w-5 h-5 text-red-500" />
                   <h3 className="text-sm font-bold text-red-600">Hidden Costs</h3>
@@ -1763,32 +1763,32 @@ function InterviewPlaybookContent() {
                   {offer.employmentType === "1099" && (
                     <div className="flex justify-between text-sm">
                       <span className="text-red-600">Self-Employment Tax (7.65%)</span>
-                      <span className="font-bold text-red-700">-${Math.round(offer.baseSalary * 0.0765).toLocaleString()}/yr</span>
+                      <span className="font-bold text-red-400">-${Math.round(offer.baseSalary * 0.0765).toLocaleString()}/yr</span>
                     </div>
                   )}
                   {!offer.benefits.includes("Health Insurance") && (
                     <div className="flex justify-between text-sm">
                       <span className="text-red-600">Missing Health Insurance</span>
-                      <span className="font-bold text-red-700">-$6,000/yr</span>
+                      <span className="font-bold text-red-400">-$6,000/yr</span>
                     </div>
                   )}
                   {!offer.benefits.includes("Malpractice") && (
                     <div className="flex justify-between text-sm">
                       <span className="text-red-600">Missing Malpractice Insurance</span>
-                      <span className="font-bold text-red-700">-$1,200/yr</span>
+                      <span className="font-bold text-red-400">-$1,200/yr</span>
                     </div>
                   )}
                   {offer.hasNonCompete && (
                     <div className="flex justify-between text-sm">
                       <span className="text-red-600">Non-Compete Risk Cost (est.)</span>
-                      <span className="font-bold text-red-700">
+                      <span className="font-bold text-red-400">
                         -${Math.round((offer.baseSalary / 12) * offer.nonCompeteDuration * 0.5).toLocaleString()}
                       </span>
                     </div>
                   )}
-                  <div className="flex justify-between items-center py-3 mt-2 bg-red-50 rounded-xl px-4">
-                    <span className="text-sm font-bold text-red-700">True Net Compensation</span>
-                    <span className="text-lg font-black text-red-700">${Math.round(calc.trueNet).toLocaleString()}/yr</span>
+                  <div className="flex justify-between items-center py-3 mt-2 bg-red-500/10 rounded-xl px-4">
+                    <span className="text-sm font-bold text-red-400">True Net Compensation</span>
+                    <span className="text-lg font-black text-red-400">${Math.round(calc.trueNet).toLocaleString()}/yr</span>
                   </div>
                 </div>
               </div>
@@ -1900,28 +1900,28 @@ function InterviewPlaybookContent() {
                     <p className="text-sm text-white/50 leading-relaxed">{s.situation}</p>
                   </div>
 
-                  <div className="rounded-xl p-4 border-2 border-green-200 bg-green-50 relative">
+                  <div className="rounded-xl p-4 border-2 border-green-500/20 bg-green-500/10 relative">
                     <div className="flex items-start justify-between mb-2">
-                      <h4 className="text-[10px] font-black uppercase tracking-widest text-green-700">
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-green-400">
                         What to Say
                       </h4>
                       <button
                         onClick={() => copyText(s.whatToSay, s.id)}
-                        className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-colors hover:bg-green-100"
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-colors hover:bg-green-500/15"
                         style={{ color: copiedId === s.id ? "#22c55e" : "#6b7280" }}
                       >
                         {copiedId === s.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                         {copiedId === s.id ? "Copied" : "Copy"}
                       </button>
                     </div>
-                    <p className="text-sm text-green-800 leading-relaxed italic">&ldquo;{s.whatToSay}&rdquo;</p>
+                    <p className="text-sm text-green-400 leading-relaxed italic">&ldquo;{s.whatToSay}&rdquo;</p>
                   </div>
 
-                  <div className="rounded-xl p-4 border-2 border-red-200 bg-red-50">
+                  <div className="rounded-xl p-4 border-2 border-red-500/20 bg-red-500/10">
                     <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-red-600">
                       What NOT to Say
                     </h4>
-                    <p className="text-sm text-red-700 leading-relaxed italic">&ldquo;{s.whatNotToSay}&rdquo;</p>
+                    <p className="text-sm text-red-400 leading-relaxed italic">&ldquo;{s.whatNotToSay}&rdquo;</p>
                   </div>
 
                   <div className="rounded-xl p-4 border-2" style={{ borderColor: BRAND_ORANGE, backgroundColor: `${BRAND_ORANGE}08` }}>
