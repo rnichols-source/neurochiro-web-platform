@@ -27,15 +27,15 @@ const STAGES = [
 export default function PipelinePreview({ milestones, modulesCompleted }: PipelinePreviewProps) {
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-white/25">Pipeline</p>
-        <Link href="/student/career-pipeline" className="text-[10px] text-[#D66829] hover:underline">
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-white/25 font-semibold">Pipeline</p>
+        <Link href="/student/career-pipeline" className="text-[10px] text-[#D66829] font-semibold hover:underline">
           View all
         </Link>
       </div>
 
       {/* Gauge bar */}
-      <div className="flex h-2 rounded-full overflow-hidden gap-px">
+      <div className="flex h-3 rounded-lg overflow-hidden gap-[2px]">
         {STAGES.map((stage) => {
           const done = stage.check(milestones, modulesCompleted);
           const active = !done && stage.active(milestones, modulesCompleted);
@@ -43,11 +43,11 @@ export default function PipelinePreview({ milestones, modulesCompleted }: Pipeli
             <Link
               key={stage.id}
               href={stage.href}
-              className={`flex-1 rounded-sm transition-colors ${
+              className={`flex-1 rounded-sm transition-all hover:opacity-80 ${
                 done
-                  ? "bg-[#D66829]"
+                  ? "bg-gradient-to-r from-[#D66829] to-[#e8834a]"
                   : active
-                  ? "bg-[#D66829]/30"
+                  ? "bg-[#D66829]/25"
                   : "bg-white/[0.06]"
               }`}
             />
@@ -56,15 +56,15 @@ export default function PipelinePreview({ milestones, modulesCompleted }: Pipeli
       </div>
 
       {/* Labels */}
-      <div className="flex mt-2">
+      <div className="flex mt-2.5">
         {STAGES.map((stage) => {
           const done = stage.check(milestones, modulesCompleted);
           const active = !done && stage.active(milestones, modulesCompleted);
           return (
             <span
               key={stage.id}
-              className={`flex-1 text-[8px] text-center transition-colors ${
-                done ? "text-[#D66829]" : active ? "text-white/40" : "text-white/15"
+              className={`flex-1 text-[9px] text-center font-medium ${
+                done ? "text-[#D66829]" : active ? "text-white/50" : "text-white/15"
               }`}
             >
               {stage.label}

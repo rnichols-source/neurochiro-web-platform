@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Check } from "lucide-react";
 
 interface MilestoneData {
   profileComplete: boolean;
@@ -33,22 +34,22 @@ export default function MilestoneTimeline({ milestones }: MilestoneTimelineProps
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-white/25">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-white/25 font-semibold">
           Milestones &middot; {completedCount}/{MILESTONES.length}
         </p>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {MILESTONES.map((m) => (
             <div
               key={m.key}
-              className={`w-1 h-1 rounded-full ${
-                milestones[m.key as keyof MilestoneData] ? "bg-[#D66829]" : "bg-white/10"
+              className={`w-1.5 h-1.5 rounded-full ${
+                milestones[m.key as keyof MilestoneData] ? "bg-[#D66829]" : "bg-white/[0.08]"
               }`}
             />
           ))}
         </div>
       </div>
 
-      <div className="space-y-0.5">
+      <div className="space-y-1">
         {MILESTONES.map((m, idx) => {
           const done = milestones[m.key as keyof MilestoneData];
           const isNext = !done && (idx === 0 || milestones[MILESTONES[idx - 1].key as keyof MilestoneData]);
@@ -57,28 +58,30 @@ export default function MilestoneTimeline({ milestones }: MilestoneTimelineProps
             <Link
               key={m.key}
               href={m.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group ${
-                isNext ? "bg-white/[0.03]" : "hover:bg-white/[0.02]"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group ${
+                isNext ? "bg-white/[0.04]" : "hover:bg-white/[0.02]"
               }`}
             >
               <div
-                className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
                   done
-                    ? "bg-white/40"
-                    : isNext
                     ? "bg-[#D66829]"
-                    : "bg-white/10"
+                    : isNext
+                    ? "border-2 border-[#D66829]"
+                    : "border border-white/[0.1]"
                 }`}
-              />
+              >
+                {done && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+              </div>
               <span
-                className={`text-[12px] flex-1 ${
-                  done ? "text-white/20 line-through" : isNext ? "text-white/70" : "text-white/15"
+                className={`text-[12px] flex-1 font-medium ${
+                  done ? "text-white/25 line-through" : isNext ? "text-white/70" : "text-white/20"
                 }`}
               >
                 {m.label}
               </span>
               {isNext && (
-                <span className="text-[9px] text-[#D66829] opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
+                <span className="text-[10px] text-[#D66829] font-semibold opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
               )}
             </Link>
           );
