@@ -74,7 +74,7 @@ export default async function JoinReferralPage({ searchParams }: Props) {
           {/* Benefits */}
           <div className="flex flex-wrap justify-center gap-8 mt-12">
             {[
-              { icon: Gift, label: referrer ? "1 Month Free for Both" : "Free Trial Available" },
+              { icon: Gift, label: referrer ? "1 Month Free for Both" : "30-Day Money-Back Guarantee" },
               { icon: Users, label: "140+ Verified Doctors" },
               { icon: ShieldCheck, label: "100% Verified Network" },
             ].map((item, i) => (

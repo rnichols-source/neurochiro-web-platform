@@ -97,7 +97,7 @@ export default function StudentPricing() {
 
           <div className="space-y-3 mb-8">
             {[
-              "Everything in Free",
+              "Everything included",
               "Interview Prep",
               "Contract Lab",
               "Financial Planner",

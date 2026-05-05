@@ -125,7 +125,7 @@ export default function HostSeminarPage() {
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
-          NeuroChiro members host seminars for free. Not a member?{" "}
+          NeuroChiro members host seminars at no extra cost. Not a member?{" "}
           <Link href="/register?role=doctor" className="text-neuro-orange font-bold hover:underline">Join now</Link>.
         </p>
       </div>

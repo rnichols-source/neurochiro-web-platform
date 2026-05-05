@@ -44,7 +44,7 @@ const AGENTS = [
   {
     id: "upgrade-nudger",
     name: "Upgrade Nudger",
-    description: "Sends milestone-based upgrade emails to free doctors (1st view, 25, 50, 100 views, 14 & 30 days)",
+    description: "Sends milestone-based upgrade emails to Basic tier doctors (1st view, 25, 50, 100 views, 14 & 30 days)",
     schedule: "Every day at 11 AM",
     icon: TrendingUp,
     color: "text-emerald-400",
