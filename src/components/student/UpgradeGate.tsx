@@ -104,7 +104,7 @@ function StudentUpgradeModal({ isOpen, onClose, userId, currentTier, highlightFe
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-neuro-orange rounded-full text-[10px] font-black text-white uppercase tracking-widest">Recommended</div>
                 <div className="flex items-center gap-2 mb-3 mt-1">
                   <Crown className="w-5 h-5 text-neuro-orange" />
-                  <h3 className="text-lg font-black text-white">Student Pro</h3>
+                  <h3 className="text-lg font-black text-white">Student Membership</h3>
                 </div>
                 <div className="flex items-baseline gap-1 mb-1">
                   <span className="text-3xl font-black text-white">{billing === "annual" ? "$10" : "$12"}</span>
@@ -121,7 +121,7 @@ function StudentUpgradeModal({ isOpen, onClose, userId, currentTier, highlightFe
                   ))}
                 </div>
                 <button onClick={handleUpgrade} disabled={loading} className="w-full py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange-light transition-all disabled:opacity-50 shadow-lg shadow-neuro-orange/20">
-                  {loading ? "Redirecting..." : "Upgrade to Student Pro"}
+                  {loading ? "Redirecting..." : "Subscribe — $12/mo"}
                 </button>
               </div>
             </div>
