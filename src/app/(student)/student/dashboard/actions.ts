@@ -272,6 +272,17 @@ export async function transitionToDoctorAction() {
   if (!user) return { error: "Unauthorized" }
 
   try {
+    // 0. Verify user is currently a student
+    const { data: currentProfile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (!currentProfile || (currentProfile.role !== 'student' && currentProfile.role !== 'student_paid')) {
+      return { error: "Only student accounts can transition to doctor." }
+    }
+
     // 1. Update Profile Role
     const { error: profileError } = await supabase
       .from('profiles')

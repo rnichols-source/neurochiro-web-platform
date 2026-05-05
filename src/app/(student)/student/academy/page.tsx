@@ -239,8 +239,19 @@ function renderContent(content: string) {
   return elements;
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function inlineBold(text: string): string {
-  return text.replace(
+  // Escape HTML first to prevent XSS, then apply bold formatting
+  const escaped = escapeHtml(text);
+  return escaped.replace(
     /\*\*(.*?)\*\*/g,
     '<strong class="text-white font-bold">$1</strong>'
   );

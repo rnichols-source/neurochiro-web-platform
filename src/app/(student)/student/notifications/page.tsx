@@ -84,10 +84,13 @@ export default function StudentNotificationsPage() {
 
   const markRead = async (id: string) => {
     const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
     await supabase
       .from("notifications")
       .update({ read_at: new Date().toISOString() })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", user.id);
     setNotifications((prev) =>
       prev.map((x) => (x.id === id ? { ...x, read_at: new Date().toISOString() } : x))
     );

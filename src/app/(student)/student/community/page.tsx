@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Users, GraduationCap, MapPin, Loader2, Compass, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase";
+import { getCommunityData } from "./actions";
 
 interface SchoolStats {
   school: string;
@@ -25,87 +25,20 @@ export default function CommunityPage() {
   const [studentRegion, setStudentRegion] = useState<string | null>(null);
 
   useEffect(() => {
-    const supabase = createClient();
-
-    async function fetchData() {
-      try {
-        // Get all students (aggregate only — no individual data)
-        const { data: students } = await supabase
-          .from("students")
-          .select("school, graduation_year, interests, region_code");
-
-        if (!students) {
-          setLoading(false);
-          return;
-        }
-
-        setTotalStudents(students.length);
-
-        // Aggregate by school
-        const schoolMap = new Map<string, { count: number; interests: string[] }>();
-        for (const s of students) {
-          const school = (s as any).school || "Unknown";
-          if (school === "Unknown") continue;
-          const existing = schoolMap.get(school) || { count: 0, interests: [] };
-          existing.count++;
-          if ((s as any).interests) {
-            existing.interests.push(...(s as any).interests);
-          }
-          schoolMap.set(school, existing);
-        }
-
-        const schoolStats: SchoolStats[] = Array.from(schoolMap.entries())
-          .map(([school, data]) => {
-            // Get top 3 interests
-            const interestCount = new Map<string, number>();
-            for (const i of data.interests) {
-              interestCount.set(i, (interestCount.get(i) || 0) + 1);
-            }
-            const topInterests = Array.from(interestCount.entries())
-              .sort((a, b) => b[1] - a[1])
-              .slice(0, 3)
-              .map(([name]) => name);
-
-            return { school, count: data.count, topInterests };
-          })
-          .sort((a, b) => b.count - a.count);
-
-        setSchools(schoolStats);
-
-        // Aggregate by graduation year
-        const yearMap = new Map<number, number>();
-        for (const s of students) {
-          const year = (s as any).graduation_year;
-          if (!year) continue;
-          yearMap.set(year, (yearMap.get(year) || 0) + 1);
-        }
-        const yearStats: YearStats[] = Array.from(yearMap.entries())
-          .map(([year, count]) => ({ year, count }))
-          .sort((a, b) => a.year - b.year);
-        setYears(yearStats);
-
-        // Get current student's region for "near you" count
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: studentData } = await supabase
-            .from("students")
-            .select("region_code")
-            .eq("id", user.id)
-            .single();
-          if (studentData && (studentData as any).region_code) {
-            const region = (studentData as any).region_code;
-            setStudentRegion(region);
-            const nearby = students.filter((s) => (s as any).region_code === region).length;
-            setNearbyCount(nearby);
-          }
-        }
-      } catch (e) {
+    getCommunityData()
+      .then((data) => {
+        setTotalStudents(data.totalStudents);
+        setSchools(data.schools);
+        setYears(data.years);
+        setNearbyCount(data.nearbyCount);
+        setStudentRegion(data.studentRegion);
+      })
+      .catch((e) => {
         console.error("Community data error:", e);
-      }
-      setLoading(false);
-    }
-
-    fetchData();
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {
