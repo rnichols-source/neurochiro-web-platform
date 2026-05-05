@@ -77,6 +77,7 @@ export default function MentorDiscoveryPage() {
       .from("doctors")
       .select("id, user_id, first_name, last_name, clinic_name, city, state, specialties, bio, photo_url, rating, review_count, is_mentoring, is_hiring, region_code")
       .eq("is_mentoring", true)
+      .limit(50)
       .then(({ data }) => {
         if (data) setMentors(data as Mentor[]);
         setLoading(false);

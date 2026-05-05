@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createClient } from "@/lib/supabase";
 import {
   Compass,
   Search,
@@ -107,31 +108,70 @@ export default function TechniqueComparisonGuide() {
   const quizRef = useRef(quiz);
   quizRef.current = quiz;
 
-  // ─── Load quiz from localStorage ───────────────────────────────────────────
+  // ─── Load quiz from Supabase (fallback: localStorage) ──────────────────────
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LS_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<QuizState>;
-        setQuiz((prev) => ({ ...prev, ...parsed }));
+    async function loadQuiz() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data } = await (supabase as any)
+            .from("technique_quiz_state")
+            .select("quiz_data")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (data?.quiz_data) {
+            setQuiz((prev) => ({ ...prev, ...data.quiz_data }));
+            setLoaded(true);
+            return;
+          }
+        }
+      } catch {
+        // fall through to localStorage
       }
-    } catch {
-      // ignore
+      try {
+        const saved = localStorage.getItem(LS_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved) as Partial<QuizState>;
+          setQuiz((prev) => ({ ...prev, ...parsed }));
+        }
+      } catch {
+        // ignore
+      }
+      setLoaded(true);
     }
-    setLoaded(true);
+    loadQuiz();
   }, []);
 
-  // ─── Save quiz to localStorage (debounced) ────────────────────────────────
+  // ─── Save quiz to Supabase (fallback: localStorage, debounced) ────────────
 
   useEffect(() => {
     if (!loaded) return;
     const timer = setTimeout(() => {
-      try {
-        localStorage.setItem(LS_KEY, JSON.stringify(quizRef.current));
-      } catch {
-        // ignore
+      async function save() {
+        try {
+          const supabase = createClient();
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await (supabase as any)
+              .from("technique_quiz_state")
+              .upsert(
+                { user_id: user.id, quiz_data: quizRef.current },
+                { onConflict: "user_id" }
+              );
+            return;
+          }
+        } catch {
+          // fall through to localStorage
+        }
+        try {
+          localStorage.setItem(LS_KEY, JSON.stringify(quizRef.current));
+        } catch {
+          // ignore
+        }
       }
+      save();
     }, 500);
     return () => clearTimeout(timer);
   }, [quiz, loaded]);
@@ -234,8 +274,21 @@ export default function TechniqueComparisonGuide() {
     []
   );
 
-  const resetQuiz = useCallback(() => {
+  const resetQuiz = useCallback(async () => {
     setQuiz(INITIAL_QUIZ);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await (supabase as any)
+          .from("technique_quiz_state")
+          .upsert(
+            { user_id: user.id, quiz_data: INITIAL_QUIZ },
+            { onConflict: "user_id" }
+          );
+        return;
+      }
+    } catch { /* fall through */ }
     localStorage.removeItem(LS_KEY);
   }, []);
 

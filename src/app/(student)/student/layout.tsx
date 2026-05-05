@@ -74,7 +74,7 @@ export default function StudentLayout({
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto relative scroll-smooth bg-[#0F1A24] pb-24 md:pb-0">
+        <main className="flex-1 overflow-y-auto relative scroll-smooth bg-[#0F1A24] pb-28 md:pb-0">
           {children}
         </main>
       </div>

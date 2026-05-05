@@ -919,28 +919,52 @@ function InterviewPlaybookContent() {
     return () => { cancelled = true; };
   }, []);
 
-  // ─── Load localStorage ────────────────────────────────────────────────────
+  // ─── Load from Supabase (fallback: localStorage) ──────────────────────────
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LS_PRACTICE);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.practiceAnswers) setPracticeAnswers(parsed.practiceAnswers);
+    async function loadState() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data } = await (supabase as any)
+            .from("interview_prep_state")
+            .select("state_data")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (data?.state_data) {
+            const s = data.state_data;
+            if (s.practiceAnswers) setPracticeAnswers(s.practiceAnswers);
+            if (s.scorecardRatings) setScorecardRatings(s.scorecardRatings);
+            if (s.offer) setOffer((prev) => ({ ...prev, ...s.offer }));
+            setLoaded(true);
+            return;
+          }
+        }
+      } catch {
+        // fall through to localStorage
       }
-    } catch { /* ignore */ }
-    try {
-      const saved = localStorage.getItem(LS_SCORECARD);
-      if (saved) setScorecardRatings(JSON.parse(saved));
-    } catch { /* ignore */ }
-    try {
-      const saved = localStorage.getItem(LS_OFFER);
-      if (saved) setOffer((prev) => ({ ...prev, ...JSON.parse(saved) }));
-    } catch { /* ignore */ }
-    setLoaded(true);
+      try {
+        const saved = localStorage.getItem(LS_PRACTICE);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.practiceAnswers) setPracticeAnswers(parsed.practiceAnswers);
+        }
+      } catch { /* ignore */ }
+      try {
+        const saved = localStorage.getItem(LS_SCORECARD);
+        if (saved) setScorecardRatings(JSON.parse(saved));
+      } catch { /* ignore */ }
+      try {
+        const saved = localStorage.getItem(LS_OFFER);
+        if (saved) setOffer((prev) => ({ ...prev, ...JSON.parse(saved) }));
+      } catch { /* ignore */ }
+      setLoaded(true);
+    }
+    loadState();
   }, []);
 
-  // ─── Save localStorage (debounced) ────────────────────────────────────────
+  // ─── Save to Supabase (fallback: localStorage, debounced) ─────────────────
 
   const practiceRef = useRef(practiceAnswers);
   practiceRef.current = practiceAnswers;
@@ -952,26 +976,37 @@ function InterviewPlaybookContent() {
   useEffect(() => {
     if (!loaded) return;
     const t = setTimeout(() => {
-      try { localStorage.setItem(LS_PRACTICE, JSON.stringify({ practiceAnswers: practiceRef.current })); } catch { /* */ }
+      async function save() {
+        try {
+          const supabase = createClient();
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await (supabase as any)
+              .from("interview_prep_state")
+              .upsert(
+                {
+                  user_id: user.id,
+                  state_data: {
+                    practiceAnswers: practiceRef.current,
+                    scorecardRatings: scorecardRef.current,
+                    offer: offerRef.current,
+                  },
+                },
+                { onConflict: "user_id" }
+              );
+            return;
+          }
+        } catch {
+          // fall through to localStorage
+        }
+        try { localStorage.setItem(LS_PRACTICE, JSON.stringify({ practiceAnswers: practiceRef.current })); } catch { /* */ }
+        try { localStorage.setItem(LS_SCORECARD, JSON.stringify(scorecardRef.current)); } catch { /* */ }
+        try { localStorage.setItem(LS_OFFER, JSON.stringify(offerRef.current)); } catch { /* */ }
+      }
+      save();
     }, 500);
     return () => clearTimeout(t);
-  }, [practiceAnswers, loaded]);
-
-  useEffect(() => {
-    if (!loaded) return;
-    const t = setTimeout(() => {
-      try { localStorage.setItem(LS_SCORECARD, JSON.stringify(scorecardRef.current)); } catch { /* */ }
-    }, 500);
-    return () => clearTimeout(t);
-  }, [scorecardRatings, loaded]);
-
-  useEffect(() => {
-    if (!loaded) return;
-    const t = setTimeout(() => {
-      try { localStorage.setItem(LS_OFFER, JSON.stringify(offerRef.current)); } catch { /* */ }
-    }, 500);
-    return () => clearTimeout(t);
-  }, [offer, loaded]);
+  }, [practiceAnswers, scorecardRatings, offer, loaded]);
 
   // ─── Timer cleanup ────────────────────────────────────────────────────────
 

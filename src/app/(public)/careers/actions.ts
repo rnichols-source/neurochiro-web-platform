@@ -16,7 +16,7 @@ export async function getPublicJobs(filters: { category?: string; employment_typ
 
   // Exclude expired listings
   query = query.or("expires_at.is.null,expires_at.gt." + new Date().toISOString());
-  query = query.order("created_at", { ascending: false });
+  query = query.order("created_at", { ascending: false }).limit(100);
 
   const { data, error } = await query;
   if (error) {

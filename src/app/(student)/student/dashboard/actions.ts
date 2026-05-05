@@ -63,7 +63,8 @@ export async function getStudentDashboardData() {
 export async function getAcademyProgress() {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { completed: 0, total: 22 }
+  // 6 courses: ns-foundations(4) + neuroplasticity(4) + clinical-identity(4) + business(6) + clinical-confidence(6) + associate-playbook(4) = 28
+  if (!user) return { completed: 0, total: 28 }
 
   const { data } = await supabase
     .from('course_progress')
@@ -78,7 +79,8 @@ export async function getAcademyProgress() {
     })
   }
 
-  return { completed, total: 22 } // 6 courses, 22 total modules
+  // 6 courses: ns-foundations(4) + neuroplasticity(4) + clinical-identity(4) + business(6) + clinical-confidence(6) + associate-playbook(4) = 28
+  return { completed, total: 28 }
 }
 
 export async function getCareerReadinessData() {
@@ -117,7 +119,7 @@ export async function getCareerReadinessData() {
         totalModulesCompleted += mods.length
       })
     }
-    const academyScore = Math.min(Math.round((totalModulesCompleted / 22) * 100), 100)
+    const academyScore = Math.min(Math.round((totalModulesCompleted / 28) * 100), 100)
 
     // Job applications (20%)
     const { count: appCount } = await supabase
@@ -176,7 +178,7 @@ export async function getCareerReadinessData() {
         firstJobApp: appsSubmitted > 0,
         contractReviewed: (contractCount || 0) > 0,
         financialPlanCreated: !!planData,
-        allCoursesComplete: totalModulesCompleted >= 22,
+        allCoursesComplete: totalModulesCompleted >= 28,
       },
       raw: {
         modulesCompleted: totalModulesCompleted,

@@ -39,6 +39,11 @@ export default function ProfilePage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (saving) return;
+    if (!form.name.trim() || !form.school.trim()) {
+      setToast("Name and School are required");
+      setTimeout(() => setToast(null), 2500);
+      return;
+    }
     setSaving(true);
     try {
       const fd = new FormData();
@@ -95,7 +100,7 @@ export default function ProfilePage() {
         <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
           <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Personal Info</h2>
           <label className="block text-[12px] font-medium text-white/60 mb-1.5">Full Name <span className="text-[#D66829]">*</span></label>
-          <input className={inputClass} value={form.name} onChange={(e) => update("name", e.target.value)} />
+          <input className={inputClass} value={form.name} onChange={(e) => update("name", e.target.value)} maxLength={100} required />
         </div>
 
         {/* Education */}
@@ -103,11 +108,11 @@ export default function ProfilePage() {
           <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-2">Education</h2>
           <div>
             <label className="block text-[12px] font-medium text-white/60 mb-1.5">School <span className="text-[#D66829]">*</span></label>
-            <input className={inputClass} value={form.school} onChange={(e) => update("school", e.target.value)} />
+            <input className={inputClass} value={form.school} onChange={(e) => update("school", e.target.value)} maxLength={200} required />
           </div>
           <div>
             <label className="block text-[12px] font-medium text-white/60 mb-1.5">Graduation Year <span className="text-[#D66829]">*</span></label>
-            <input className={inputClass} type="number" min="2020" max="2035" value={form.gradYear} onChange={(e) => update("gradYear", e.target.value)} placeholder="e.g. 2027" />
+            <input className={inputClass} type="number" min="2020" max="2035" value={form.gradYear} onChange={(e) => update("gradYear", e.target.value)} placeholder="e.g. 2027" required />
           </div>
         </div>
 
@@ -116,7 +121,7 @@ export default function ProfilePage() {
           <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Location</h2>
           <label className="block text-[12px] font-medium text-white/60 mb-1.5">City</label>
           <p className="text-[11px] text-white/25 mb-2">Used to match you with nearby jobs and mentors.</p>
-          <input className={inputClass} value={form.city} onChange={(e) => update("city", e.target.value)} />
+          <input className={inputClass} value={form.city} onChange={(e) => update("city", e.target.value)} maxLength={100} />
         </div>
 
         {/* Interests */}
@@ -124,7 +129,7 @@ export default function ProfilePage() {
           <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Interests</h2>
           <label className="block text-[12px] font-medium text-white/60 mb-1.5">Clinical Interests</label>
           <p className="text-[11px] text-white/25 mb-2">Comma-separated. Matches you with jobs and mentors who share these interests.</p>
-          <input className={inputClass} placeholder="Pediatrics, Sports Performance" value={form.interests} onChange={(e) => update("interests", e.target.value)} />
+          <input className={inputClass} placeholder="Pediatrics, Sports Performance" value={form.interests} onChange={(e) => update("interests", e.target.value)} maxLength={500} />
         </div>
 
         {/* Skills */}
@@ -132,7 +137,7 @@ export default function ProfilePage() {
           <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Skills</h2>
           <label className="block text-[12px] font-medium text-white/60 mb-1.5">Skills</label>
           <p className="text-[11px] text-white/25 mb-2">Comma-separated techniques you know. Helps employers see what you bring to their practice.</p>
-          <input className={inputClass} placeholder="Diversified, Activator, Dry Needling" value={form.skills} onChange={(e) => update("skills", e.target.value)} />
+          <input className={inputClass} placeholder="Diversified, Activator, Dry Needling" value={form.skills} onChange={(e) => update("skills", e.target.value)} maxLength={500} />
         </div>
 
         {/* Mentorship */}

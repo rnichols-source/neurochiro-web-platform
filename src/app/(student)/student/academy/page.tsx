@@ -131,6 +131,13 @@ async function loadProgressFromSupabase(): Promise<AllProgress> {
 
 async function saveProgressToSupabase(courseId: string, completed: string[]) {
   try {
+    // Validate courseId exists in SEED_COURSES
+    const course = SEED_COURSES.find((c) => c.id === courseId);
+    if (!course) return;
+    // Validate all completedModules are valid module IDs for this course
+    const validModuleIds = new Set(course.modules.map((m) => m.id));
+    const validCompleted = completed.filter((id) => validModuleIds.has(id));
+
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -139,9 +146,8 @@ async function saveProgressToSupabase(courseId: string, completed: string[]) {
       .upsert({
         user_id: user.id,
         course_id: courseId,
-        completed_modules: completed,
+        completed_modules: validCompleted,
         started_at: new Date().toISOString(),
-        ...(completed.length > 0 ? {} : {}),
       }, { onConflict: "user_id,course_id" });
   } catch {
     /* noop */
