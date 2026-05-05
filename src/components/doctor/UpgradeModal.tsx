@@ -252,7 +252,7 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "free", us
                       </button>
                     ) : (
                       <div className="py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-widest">
-                        Free Forever
+                        Current Plan
                       </div>
                     )}
                   </div>

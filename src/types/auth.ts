@@ -12,7 +12,7 @@ export type UserRole =
   | 'mastermind_member';
 
 // Membership tiers for doctors (from doctors.membership_tier column)
-export type DoctorTier = 'starter' | 'basic' | 'growth' | 'pro';
+export type DoctorTier = 'basic' | 'growth' | 'pro';
 
 export interface UserSession {
   id: string;

@@ -18,7 +18,7 @@ export default function StudentPricing() {
           Launch Your <span className="text-neuro-orange">Career.</span>
         </h1>
         <p className="text-gray-500 mt-4 text-lg max-w-lg mx-auto">
-          Join free. Access the job board, seminars, and academy. Upgrade to Pro for advanced career tools.
+          One plan. Everything included. $12/mo.
         </p>
       </div>
 
