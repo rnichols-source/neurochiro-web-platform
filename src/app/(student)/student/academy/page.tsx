@@ -686,7 +686,7 @@ export default function AcademyPage() {
     const activeMod = activeIdx >= 0 ? course.modules[activeIdx] : course.modules[0];
     const resolvedIdx = activeIdx >= 0 ? activeIdx : 0;
 
-    const isModuleLocked = () => false;
+    const isModuleLocked = (_idx: number) => false;
 
     const isCompleted = (moduleId: string) =>
       cp.completed.includes(moduleId);
