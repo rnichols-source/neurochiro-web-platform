@@ -14,7 +14,7 @@ export default async function PatientMessagesPage({ searchParams }: { searchPara
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       <header>
         <h1 className="text-2xl font-bold text-white">Messages</h1>
         <p className="text-xs text-white/35 mt-1">Connect with your doctors securely.</p>

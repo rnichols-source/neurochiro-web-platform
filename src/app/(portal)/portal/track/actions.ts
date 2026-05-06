@@ -23,7 +23,7 @@ export async function submitDailyLog(data: {
     .select('id')
     .eq('user_id', user.id)
     .eq('log_date', today)
-    .single()
+    .maybeSingle()
 
   if (existing) {
     const { error } = await supabase
@@ -91,7 +91,7 @@ export async function getTodaysLog() {
     .select('*')
     .eq('user_id', user.id)
     .eq('log_date', today)
-    .single()
+    .maybeSingle()
 
   return data || null
 }

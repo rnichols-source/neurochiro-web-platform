@@ -12,7 +12,7 @@ export async function getPatientDashboardData() {
       .from('profiles')
       .select('full_name')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     // Get all logs ordered by date
     const { data: allLogs } = await supabase
@@ -54,7 +54,7 @@ export async function getPatientDashboardData() {
       const log = logs.find(l => l.log_date === dateStr)
       last7Days.push({
         date: dateStr,
-        energy: log?.energy_level || null
+        energy: log?.energy_level ?? null
       })
       trendDate.setDate(trendDate.getDate() - 1)
     }

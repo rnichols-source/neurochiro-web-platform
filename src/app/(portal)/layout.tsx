@@ -90,7 +90,7 @@ function PortalShell({ children }: { children: React.ReactNode }) {
       .from("profiles")
       .select("full_name")
       .eq("id", user.id)
-      .single()
+      .maybeSingle()
       .then(({ data }) => {
         if (data?.full_name) {
           setFullName(data.full_name);
@@ -228,7 +228,7 @@ function PortalShell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-[#0F1A24] pb-28 md:pb-0">
+        <main className="flex-1 overflow-y-auto bg-[#0F1A24] pb-28 md:pb-0 px-4 pt-6 md:px-10 md:pt-8">
           {children}
         </main>
       </div>

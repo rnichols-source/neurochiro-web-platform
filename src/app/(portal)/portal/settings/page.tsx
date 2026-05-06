@@ -25,7 +25,7 @@ export default function SettingsPage() {
       const el = document.getElementById('patient-email');
       if (el) el.textContent = user.email || '';
       const nameEl = document.getElementById('patient-name');
-      const { data } = await supabase.from('profiles').select('full_name, notification_preferences').eq('id', user.id).single();
+      const { data } = await supabase.from('profiles').select('full_name, notification_preferences').eq('id', user.id).maybeSingle();
       if (nameEl && data?.full_name) nameEl.textContent = data.full_name;
       if (data?.notification_preferences) setNotifPrefs(p => ({ ...p, ...(data.notification_preferences as any) }));
     });
