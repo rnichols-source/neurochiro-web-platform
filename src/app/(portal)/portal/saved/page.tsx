@@ -51,7 +51,7 @@ export default function SavedPage() {
         <h1 className="text-2xl font-bold text-white">
           Saved Doctors
         </h1>
-        <p className="text-xs text-white/35 mt-1">Your bookmarked specialists for easy access.</p>
+        <p className="text-xs text-white/35 mt-1">Doctors you&apos;ve bookmarked. Tap any card to view their profile or send a message.</p>
       </header>
 
       {doctors.length > 0 ? (
@@ -121,14 +121,14 @@ export default function SavedPage() {
         <div className="py-20 text-center bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-dashed border-white/[0.08]">
           <Heart className="w-12 h-12 text-white/10 mx-auto mb-4" />
           <h3 className="text-lg font-bold text-white/30">
-            You haven&apos;t saved any doctors yet.
+            No saved doctors yet
           </h3>
-          <p className="text-white/30 text-sm mt-2 mb-6">Browse the directory and bookmark your favorites.</p>
+          <p className="text-white/30 text-sm mt-2 mb-6">When you find a chiropractor you like, tap the heart icon to save them here for easy access.</p>
           <Link
             href="/directory"
             className="inline-block px-8 py-3 bg-[#D66829] text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-[#e8834a] transition-colors shadow-lg shadow-[#D66829]/20"
           >
-            Browse Directory
+            Find a Doctor Near You
           </Link>
         </div>
       )}

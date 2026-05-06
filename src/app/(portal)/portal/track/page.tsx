@@ -42,8 +42,8 @@ function SliderInput({ label, icon: Icon, value, onChange, color, invertScale }:
         className="w-full h-3 bg-white/[0.06] rounded-full appearance-none cursor-pointer accent-[#D66829] [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-[#D66829] [&::-webkit-slider-thumb]:shadow-md touch-pan-x"
       />
       <div className="flex justify-between text-[10px] text-white/35 font-bold mt-1">
-        <span>{invertScale ? 'None' : 'Low'}</span>
-        <span>{invertScale ? 'Severe' : 'High'}</span>
+        <span>{invertScale ? '1 = No pain' : '1 = Very low'}</span>
+        <span>{invertScale ? '10 = Worst pain' : '10 = Excellent'}</span>
       </div>
     </div>
   );
@@ -130,8 +130,8 @@ export default function TrackPage() {
   return (
     <div className="space-y-8 pb-20">
       <header>
-        <h1 className="text-2xl font-bold text-white">Health Tracker</h1>
-        <p className="text-xs text-white/35 mt-1">Log how you feel each day to see trends over time.</p>
+        <h1 className="text-2xl font-bold text-white">Daily Check-In</h1>
+        <p className="text-xs text-white/35 mt-1">Rate how you feel today. Your doctor can see trends over time to help guide your care.</p>
       </header>
 
       {streak > 0 && (
@@ -145,7 +145,7 @@ export default function TrackPage() {
       <section className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-8 shadow-lg shadow-black/20">
         <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2">
           <Activity className="w-5 h-5 text-[#D66829]" />
-          {todayLogged ? "Today's Check-in (Update)" : "Daily Check-in"}
+          {todayLogged ? "Update Today\u2019s Check-In" : "How Are You Feeling Today?"}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -166,9 +166,9 @@ export default function TrackPage() {
           disabled={saving}
           className="px-6 py-3 bg-[#D66829] text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#e8834a] transition-all disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-[#D66829]/20"
         >
-          {saved ? <><CheckCircle2 className="w-4 h-4" /> Saved!</> : saving ? 'Saving...' : todayLogged ? 'Update Check-in' : 'Log Today'}
+          {saved ? <><CheckCircle2 className="w-4 h-4" /> Check-in saved! See you tomorrow.</> : saving ? 'Saving...' : todayLogged ? 'Update Today\u2019s Check-In' : 'Log Today\u2019s Check-In'}
         </button>
-        <p className="text-xs text-white/35 mt-2">Tip: 1 = worst, 10 = best. For pain, 1 = no pain, 10 = severe.</p>
+        <p className="text-xs text-white/35 mt-2">For energy and sleep, higher is better. For pain, lower is better (1 = no pain).</p>
       </section>
 
       {/* 30-Day Trends */}
@@ -226,9 +226,9 @@ export default function TrackPage() {
               {logs.slice(-7).reverse().map((log) => (
                 <div key={log.id} className="flex items-center gap-4 p-3 bg-white/[0.04] rounded-xl text-sm">
                   <span className="text-white/35 text-xs font-mono w-20">{log.log_date}</span>
-                  <span className="font-bold text-yellow-400">E:{log.energy_level}</span>
-                  <span className="font-bold text-red-400">P:{log.pain_level}</span>
-                  <span className="font-bold text-blue-400">S:{log.sleep_quality}</span>
+                  <span className="font-bold text-yellow-400">Energy {log.energy_level}</span>
+                  <span className="font-bold text-red-400">Pain {log.pain_level}</span>
+                  <span className="font-bold text-blue-400">Sleep {log.sleep_quality}</span>
                   {log.notes && <span className="text-white/40 text-xs truncate flex-1">{log.notes}</span>}
                 </div>
               ))}
@@ -238,9 +238,9 @@ export default function TrackPage() {
       ) : (
         <section className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-12 shadow-lg shadow-black/20 text-center">
           <Sun className="w-16 h-16 text-white/10 mx-auto mb-4" />
-          <h2 className="text-xl font-black text-white/30 mb-2">No tracking data yet</h2>
+          <h2 className="text-xl font-black text-white/30 mb-2">Your trends will show up here</h2>
           <p className="text-white/40 text-sm max-w-md mx-auto">
-            Start your daily check-in above to track how your energy, pain, and sleep change over time.
+            After you log a few check-ins, you&apos;ll see charts showing how your energy, pain, and sleep are changing. The more you track, the clearer the picture.
           </p>
         </section>
       )}

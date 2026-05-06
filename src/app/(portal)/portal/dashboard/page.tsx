@@ -70,12 +70,12 @@ export default function PatientDashboard() {
   if (error)
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <p className="text-red-400 font-bold">Something went wrong.</p>
+        <p className="text-red-400 font-bold">We couldn&apos;t load your dashboard. Please check your connection and try again.</p>
         <button
           onClick={() => window.location.reload()}
           className="px-6 py-3 bg-[#162231] text-white rounded-xl text-sm font-bold hover:bg-white/[0.1] transition-colors"
         >
-          Retry
+          Try Again
         </button>
       </div>
     );
@@ -94,7 +94,7 @@ export default function PatientDashboard() {
             <h1 className="text-2xl font-bold text-white">
               {data?.name || "there"}
             </h1>
-            <p className="text-xs text-white/35 mt-1">Your health dashboard at a glance.</p>
+            <p className="text-xs text-white/35 mt-1">Here&apos;s a snapshot of how you&apos;re doing. Start with your daily check-in.</p>
           </div>
           {data?.streak > 0 && (
             <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#D66829]/10 border border-[#D66829]/20 rounded-full">
@@ -115,7 +115,7 @@ export default function PatientDashboard() {
               { label: "Check In", href: "/portal/track", icon: Activity, iconColor: "text-blue-400" },
               { label: "Exercises", href: "/portal/exercises", icon: Dumbbell, iconColor: "text-[#D66829]" },
               { label: "Learn", href: "/portal/learn", icon: BookOpen, iconColor: "text-emerald-400" },
-              { label: "Journey", href: "/portal/journey", icon: Calendar, iconColor: "text-violet-400" },
+              { label: "Progress", href: "/portal/journey", icon: Calendar, iconColor: "text-violet-400" },
               { label: "Nutrition", href: "/portal/supplements", icon: Apple, iconColor: "text-rose-400" },
             ].map((item) => (
               <Link
@@ -152,9 +152,9 @@ export default function PatientDashboard() {
             </div>
             <div className="space-y-3 mt-6">
               {[
-                { step: 1, href: "/portal/track", title: "Log your first check-in", desc: "Track your energy, pain, and sleep in 30 seconds" },
-                { step: 2, href: "/directory", title: "Find a doctor near you", desc: "Search the global directory of verified specialists" },
-                { step: 3, href: "/portal/saved", title: "Save your favorites", desc: "Bookmark doctors to compare and revisit later" },
+                { step: 1, href: "/portal/track", title: "Log your first check-in", desc: "Rate your energy, pain, and sleep today -- it only takes 30 seconds" },
+                { step: 2, href: "/directory", title: "Find a doctor near you", desc: "Browse chiropractors in your area and read their profiles" },
+                { step: 3, href: "/portal/saved", title: "Save your favorites", desc: "Bookmark doctors you like so you can find them easily later" },
               ].map((item) => (
                 <Link
                   key={item.step}
@@ -366,8 +366,8 @@ export default function PatientDashboard() {
                   Your Health, Between Visits
                 </h3>
                 <p className="text-white/40 text-sm leading-relaxed max-w-lg">
-                  Track your progress, get daily exercises, and understand
-                  what&apos;s happening in your body &mdash; all in one place.
+                  See how your health improves over time, get daily stretches
+                  and exercises, and stay on track between visits &mdash; all in one place.
                 </p>
                 <p className="text-white/60 text-xs font-black mt-3 uppercase tracking-widest">
                   $9/month &middot; Cancel anytime
@@ -379,7 +379,7 @@ export default function PatientDashboard() {
                   if (result.url) {
                     window.location.href = result.url;
                   } else {
-                    alert(result.error || "Something went wrong");
+                    alert(result.error || "We couldn't start the checkout. Please try again or contact support.");
                   }
                 }}
                 className="px-8 py-4 bg-[#D66829] text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-[#D66829]/20 hover:bg-[#e8834a] hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
@@ -423,9 +423,9 @@ export default function PatientDashboard() {
       <div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
-            { label: "Find a Doctor", desc: "Search the global directory", href: "/directory", icon: Search },
-            { label: "Saved Doctors", desc: "Your bookmarked specialists", href: "/portal/saved", icon: Heart },
-            { label: "Learn", desc: "Articles and education", href: "/portal/learn", icon: BookOpen },
+            { label: "Find a Doctor", desc: "Browse chiropractors near you", href: "/directory", icon: Search },
+            { label: "Saved Doctors", desc: "Doctors you bookmarked", href: "/portal/saved", icon: Heart },
+            { label: "Learn", desc: "Health articles written for you", href: "/portal/learn", icon: BookOpen },
           ].map((item) => (
             <Link
               key={item.href}

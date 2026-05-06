@@ -63,7 +63,7 @@ function WellnessChart({ data }: { data: CheckinEntry[] }) {
   if (data.length < 2) {
     return (
       <div className="bg-white/[0.04] rounded-xl p-8 text-center text-sm text-white/35">
-        Need at least 2 check-ins to show a chart.
+        Log at least 2 days of check-ins to see your wellness chart here.
       </div>
     );
   }
@@ -289,9 +289,9 @@ export default function JourneyPage() {
     <div className="space-y-6 pb-20">
       <header>
         <h1 className="text-2xl font-bold text-white">
-          My Journey
+          My Progress
         </h1>
-        <p className="text-xs text-white/35 mt-1">Your health story, one day at a time.</p>
+        <p className="text-xs text-white/35 mt-1">See how your health has changed over time. The more you track, the clearer your progress becomes.</p>
       </header>
 
       {/* Streak & Stats Bar */}
@@ -371,10 +371,10 @@ export default function JourneyPage() {
               <div className="bg-[#162231]/90 backdrop-blur-sm rounded-2xl border border-[#D66829]/20 p-6 text-center shadow-lg shadow-black/20 max-w-xs">
                 <Lock className="w-6 h-6 text-[#D66829] mx-auto mb-2" />
                 <p className="font-black text-white text-sm mb-1">
-                  See your full journey
+                  See your full progress history
                 </p>
                 <p className="text-xs text-white/35 mb-3">
-                  Unlock your complete health history and trends.
+                  Premium members can view all past check-ins and long-term trends.
                 </p>
                 <p className="text-sm font-bold text-white mb-3">$9/month</p>
                 <button className="px-5 py-3 bg-[#D66829] text-white rounded-xl font-bold text-xs hover:bg-[#e8834a] transition-all shadow-lg shadow-[#D66829]/20">
@@ -477,15 +477,15 @@ export default function JourneyPage() {
         {visibleHistory.length === 0 && (
           <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-12 text-center shadow-lg shadow-black/20">
             <Calendar className="w-12 h-12 text-white/10 mx-auto mb-3" />
-            <h3 className="font-black text-white/30 mb-2">No check-ins yet</h3>
+            <h3 className="font-black text-white/30 mb-2">Your progress timeline will appear here</h3>
             <p className="text-white/40 text-sm mb-4">
-              Start your daily check-ins to build your health journey.
+              Once you start logging daily check-ins, you&apos;ll see your wellness score, streaks, and how your health is trending over time.
             </p>
             <a
               href="/portal/track"
               className="inline-flex px-5 py-3 bg-[#D66829] text-white rounded-xl font-bold text-sm hover:bg-[#e8834a] transition-all shadow-lg shadow-[#D66829]/20"
             >
-              Start First Check-in
+              Log Your First Check-In
             </a>
           </div>
         )}

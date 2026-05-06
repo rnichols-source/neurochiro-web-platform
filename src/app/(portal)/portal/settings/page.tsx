@@ -49,7 +49,7 @@ export default function SettingsPage() {
     const supabase = createClient();
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) setMessage({ type: "error", text: error.message });
-    else { setMessage({ type: "success", text: "Password updated!" }); setNewPassword(""); setConfirmPassword(""); }
+    else { setMessage({ type: "success", text: "Your password has been updated successfully." }); setNewPassword(""); setConfirmPassword(""); }
   };
 
   const handleSignOut = async () => {
@@ -74,8 +74,8 @@ export default function SettingsPage() {
   return (
     <div className="max-w-xl mx-auto space-y-8 pb-20">
       <header>
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <p className="text-xs text-white/35 mt-1">Manage your account, notifications, and security.</p>
+        <h1 className="text-2xl font-bold text-white">Your Account</h1>
+        <p className="text-xs text-white/35 mt-1">Update your password, notification preferences, and account details.</p>
       </header>
 
       {/* Account Info */}
@@ -142,7 +142,7 @@ export default function SettingsPage() {
           <button onClick={() => setShowDeleteForm(true)} className="text-red-400 font-bold text-sm hover:underline">Delete my account</button>
         ) : (
           <div className="space-y-3">
-            <p className="text-sm text-red-400">This will permanently delete your account and all health data.</p>
+            <p className="text-sm text-red-400">This will permanently delete your account, all your check-ins, saved doctors, and health data. This cannot be undone.</p>
             <p className="text-xs text-red-400/70">Type <strong>DELETE</strong> to confirm:</p>
             <input type="text" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} placeholder="Type DELETE" className="w-full px-4 py-3 bg-white/[0.04] border border-red-500/20 rounded-lg text-sm text-white placeholder-white/20 focus:border-red-500/40 outline-none" />
             <div className="flex gap-3">

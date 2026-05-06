@@ -26,8 +26,8 @@ export default function PortalLearnPage() {
   return (
     <div className="space-y-6 pb-20">
       <header>
-        <h1 className="text-2xl font-bold text-white">Learn</h1>
-        <p className="text-xs text-white/35 mt-1">Understand your nervous system and how chiropractic care helps.</p>
+        <h1 className="text-2xl font-bold text-white">Health Articles</h1>
+        <p className="text-xs text-white/35 mt-1">Short, easy-to-read articles about how your body works and what you can do to feel better.</p>
       </header>
 
       {/* Search */}
@@ -113,7 +113,7 @@ export default function PortalLearnPage() {
       {filtered.length === 0 && (
         <div className="text-center py-12">
           <BookOpen className="w-10 h-10 text-white/10 mx-auto mb-3" />
-          <p className="text-white/30 text-sm">No articles found. Try a different search.</p>
+          <p className="text-white/30 text-sm">No articles matched your search. Try different words or browse all categories.</p>
         </div>
       )}
     </div>

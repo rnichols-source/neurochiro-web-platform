@@ -227,7 +227,7 @@ function ExerciseCard({
               ) : (
                 <CheckCircle2 className="w-4 h-4" />
               )}
-              Mark Complete
+              Done -- Mark Complete
             </button>
           )}
         </div>
@@ -289,10 +289,10 @@ export default function ExercisesPage() {
     <div className="space-y-6 pb-20">
       <header>
         <h1 className="text-2xl font-bold text-white">
-          Exercise Library
+          Exercises
         </h1>
         <p className="text-xs text-white/35 mt-1">
-          Exercises designed for your nervous system health.
+          Stretches and movements to help your body feel better. Start with what feels right for you.
         </p>
       </header>
 
@@ -308,7 +308,7 @@ export default function ExercisesPage() {
               <p className="text-white/40 text-sm">{recommendation.message}</p>
             ) : (
               <p className="text-white/35 text-sm">
-                Check in first to get personalized recommendations.
+                Log today&apos;s check-in first so we can recommend the best exercises for how you&apos;re feeling.
               </p>
             )}
           </div>
@@ -340,7 +340,7 @@ export default function ExercisesPage() {
             href="/portal/track"
             className="mt-4 inline-flex items-center gap-2 px-5 py-3 bg-[#D66829] text-white rounded-xl font-bold text-sm hover:bg-[#e8834a] transition-all shadow-lg shadow-[#D66829]/20"
           >
-            Log Today&apos;s Check-in
+            Log Today&apos;s Check-In First
           </Link>
         ) : null}
       </section>
@@ -394,11 +394,11 @@ export default function ExercisesPage() {
         <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl p-6 text-center border border-white/[0.08] shadow-lg shadow-black/20">
           <Lock className="w-8 h-8 text-[#D66829] mx-auto mb-3" />
           <h3 className="text-white font-black text-lg mb-2">
-            Unlock All {EXERCISES.length} Exercises
+            Get All {EXERCISES.length} Exercises
           </h3>
           <p className="text-white/40 text-sm mb-4">
-            Get personalized routines, track your progress, and access the full
-            exercise library.
+            Premium members get daily routines personalized to how they&apos;re feeling,
+            plus access to every exercise with detailed instructions.
           </p>
           <p className="text-white font-bold mb-4">
             $9/month &middot; Cancel anytime

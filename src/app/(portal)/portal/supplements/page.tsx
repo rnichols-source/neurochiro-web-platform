@@ -204,10 +204,10 @@ export default function SupplementsPage() {
     <div className="space-y-6 pb-20">
       <header>
         <h1 className="text-2xl font-bold text-white">
-          Supplement & Nutrition Guide
+          Nutrition & Supplements
         </h1>
         <p className="text-xs text-white/35 mt-1">
-          Your personalized nutrition toolkit for faster results.
+          Simple nutrition tips and supplement info to support your healing between visits.
         </p>
       </header>
 
@@ -348,8 +348,9 @@ function TrackerTab({
     return (
       <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-8 text-center shadow-lg shadow-black/20">
         <Apple className="w-12 h-12 text-white/10 mx-auto mb-3" />
-        <p className="text-white/30 font-medium">
-          Add supplements from the Library tab to start tracking.
+        <h3 className="text-lg font-bold text-white/30 mb-2">No supplements added yet</h3>
+        <p className="text-white/30 font-medium text-sm">
+          Tap the &quot;Library&quot; tab above to browse supplements, then add the ones your doctor recommends to track them here daily.
         </p>
       </div>
     );

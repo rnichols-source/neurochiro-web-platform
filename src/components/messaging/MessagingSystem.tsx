@@ -779,7 +779,7 @@ export default function MessagingSystem({
               <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">
                 <MessageSquare className="w-6 h-6 text-gray-400" />
               </div>
-              <p className="text-sm font-medium text-gray-500 mb-1">No conversations yet</p>
+              <p className="text-sm font-medium text-gray-500 mb-1">No messages yet. Find a doctor and send them a message to get started.</p>
               <button
                 onClick={() => setIsComposeOpen(true)}
                 className="text-sm font-medium mt-2 px-4 py-1.5 rounded-full transition-colors hover:opacity-90"

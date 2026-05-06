@@ -31,7 +31,7 @@ const navSections = [
     items: [
       { name: "Dashboard", href: "/portal/dashboard", icon: LayoutDashboard },
       { name: "Health Tracker", href: "/portal/track", icon: Activity },
-      { name: "My Journey", href: "/portal/journey", icon: TrendingUp },
+      { name: "My Progress", href: "/portal/journey", icon: TrendingUp },
       { name: "Exercises", href: "/portal/exercises", icon: Dumbbell },
     ],
   },
@@ -39,7 +39,7 @@ const navSections = [
     label: "Learn",
     items: [
       { name: "Articles", href: "/portal/learn", icon: BookOpen },
-      { name: "Nutrition", href: "/portal/supplements", icon: Apple },
+      { name: "Nutrition & Supplements", href: "/portal/supplements", icon: Apple },
       { name: "Seminars", href: "/seminars", icon: Calendar },
     ],
   },
@@ -64,7 +64,7 @@ const allNavItems = navSections.flatMap((s) => s.items);
 
 const mobileNavItems = [
   { name: "Home", href: "/portal/dashboard", icon: LayoutDashboard },
-  { name: "Track", href: "/portal/track", icon: Activity },
+  { name: "Check-In", href: "/portal/track", icon: Activity },
   { name: "Search", href: "/directory", icon: Search },
   { name: "Learn", href: "/portal/learn", icon: BookOpen },
   { name: "Menu", href: "#", icon: Menu, isMenuTrigger: true },
