@@ -138,6 +138,7 @@ export default function TrackPage() {
         <div className="flex items-center gap-2 px-4 py-3 bg-[#D66829]/10 border border-[#D66829]/20 rounded-xl w-fit">
           <Flame className="w-5 h-5 text-[#D66829]" />
           <span className="font-bold text-white">{streak} day streak</span>
+          <span className="text-xs text-white/35 ml-1 hidden sm:inline">&mdash; days in a row you&apos;ve checked in</span>
         </div>
       )}
 
@@ -157,7 +158,7 @@ export default function TrackPage() {
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Any notes about today? (optional)"
+          placeholder="Optional \u2014 write anything you want your future self or your doctor to remember about today"
           className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none resize-none h-20 mb-4"
         />
 
@@ -174,7 +175,8 @@ export default function TrackPage() {
       {/* 30-Day Trends */}
       {logs.length > 0 ? (
         <section className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-8 shadow-lg shadow-black/20">
-          <h2 className="text-xl font-black text-white mb-6">30-Day Trends</h2>
+          <h2 className="text-xl font-black text-white mb-2">30-Day Trends</h2>
+          <p className="text-xs text-white/35 mb-6">Your 7-day averages compared to the prior week. Green means improving, red means declining.</p>
 
           <div className="grid grid-cols-3 gap-4 mb-8">
             {[

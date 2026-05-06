@@ -75,8 +75,13 @@ function DifficultyBadge({ difficulty }: { difficulty: Exercise["difficulty"] })
     Intermediate: "bg-yellow-500/10 text-yellow-400",
     Advanced: "bg-red-500/10 text-red-400",
   };
+  const titles = {
+    Beginner: "Great starting point \u2014 gentle movements, no experience needed",
+    Intermediate: "Some body awareness helpful \u2014 slightly more challenging",
+    Advanced: "For patients comfortable with the basics \u2014 ask your doctor if unsure",
+  };
   return (
-    <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full ${colors[difficulty]}`}>
+    <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full ${colors[difficulty]}`} title={titles[difficulty]}>
       {difficulty}
     </span>
   );
@@ -159,7 +164,7 @@ function ExerciseCard({
         <div className="px-5 pb-4 -mt-1">
           <div className="flex items-center gap-2 text-xs text-white/35">
             <Lock className="w-3 h-3" />
-            <span>Unlock with Premium &mdash; $9/month</span>
+            <span>Premium members get all exercises, detailed instructions, and daily routines &mdash; $9/mo</span>
           </div>
         </div>
       )}
@@ -292,7 +297,10 @@ export default function ExercisesPage() {
           Exercises
         </h1>
         <p className="text-xs text-white/35 mt-1">
-          Stretches and movements to help your body feel better. Start with what feels right for you.
+          Safe stretches and movements you can do at home to support your chiropractic care. Start with what feels right for you.
+        </p>
+        <p className="text-xs text-amber-400/60 mt-2">
+          Stop any exercise that causes pain. If you&apos;re unsure whether an exercise is right for you, ask your chiropractor first.
         </p>
       </header>
 
@@ -396,12 +404,14 @@ export default function ExercisesPage() {
           <h3 className="text-white font-black text-lg mb-2">
             Get All {EXERCISES.length} Exercises
           </h3>
-          <p className="text-white/40 text-sm mb-4">
-            Premium members get daily routines personalized to how they&apos;re feeling,
-            plus access to every exercise with detailed instructions.
-          </p>
+          <ul className="text-white/40 text-sm mb-4 space-y-1 text-left max-w-xs mx-auto">
+            <li>&bull; All {EXERCISES.length} exercises with step-by-step instructions</li>
+            <li>&bull; Daily routines based on how you&apos;re feeling</li>
+            <li>&bull; Full progress history and wellness trends</li>
+            <li>&bull; Milestone badges to track your consistency</li>
+          </ul>
           <p className="text-white font-bold mb-4">
-            $9/month &middot; Cancel anytime
+            $9/month &middot; 7-day free trial &middot; Cancel anytime
           </p>
           <button onClick={async () => { const r = await createPremiumCheckout(); if (r?.url) window.location.href = r.url; }} className="px-6 py-3 bg-[#D66829] text-white rounded-xl font-bold text-sm hover:bg-[#e8834a] transition-all shadow-lg shadow-[#D66829]/20">
             Start Free Trial &mdash; 7 Days Free

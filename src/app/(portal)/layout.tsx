@@ -21,6 +21,7 @@ import {
   MessageSquare,
   Calendar,
   Apple,
+  Sparkles,
 } from "lucide-react";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import NotificationBell from "@/components/layout/NotificationBell";
@@ -77,6 +78,7 @@ function PortalShell({ children }: { children: React.ReactNode }) {
   const [fullName, setFullName] = useState("");
   const [initials, setInitials] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isPremium, setIsPremium] = useState(true); // default true to avoid flash
 
   useEffect(() => {
     if (authLoading) return;
@@ -102,6 +104,10 @@ function PortalShell({ children }: { children: React.ReactNode }) {
           );
         }
       });
+    // Check premium status for sidebar upgrade link
+    import("./portal/premium-actions").then(({ isPremiumMember }) => {
+      isPremiumMember().then((status) => setIsPremium(status)).catch(() => setIsPremium(false));
+    }).catch(() => setIsPremium(false));
   }, [user?.id]);
 
   useEffect(() => {
@@ -183,6 +189,30 @@ function PortalShell({ children }: { children: React.ReactNode }) {
             </div>
           ))}
         </nav>
+
+        {/* Upgrade to Premium */}
+        {!isPremium && (
+          <div className="px-3 py-3">
+            <Link
+              href="/portal/dashboard#premium"
+              onClick={async (e) => {
+                e.preventDefault();
+                setSidebarOpen(false);
+                try {
+                  const { createPremiumCheckout } = await import("./portal/premium-actions");
+                  const r = await createPremiumCheckout();
+                  if (r?.url) window.location.href = r.url;
+                } catch {
+                  window.location.href = "/portal/dashboard";
+                }
+              }}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] bg-[#D66829]/10 border border-[#D66829]/20 text-[#D66829] hover:bg-[#D66829]/20 transition-all"
+            >
+              <Sparkles className="w-[14px] h-[14px]" />
+              Upgrade to Premium
+            </Link>
+          </div>
+        )}
 
         {/* User */}
         <div className="px-3 py-4 border-t border-white/[0.06]">

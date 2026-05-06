@@ -302,6 +302,7 @@ export default function JourneyPage() {
           </div>
           <p className="text-2xl font-black text-white">{streak.current}</p>
           <p className="text-[10px] text-white/35 font-bold uppercase tracking-wide">Day Streak</p>
+          <p className="text-[9px] text-white/25 mt-0.5">Days in a row</p>
         </div>
         <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 text-center">
           <div className="flex items-center justify-center gap-1.5 mb-1">
@@ -322,7 +323,7 @@ export default function JourneyPage() {
       {/* Wellness Score Chart */}
       {history.length > 0 && (
         <section className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-5 shadow-lg shadow-black/20">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-2">
             <h2 className="font-black text-white">Wellness Score</h2>
             <div className="flex gap-1">
               {[30, 60, 90].map((d) => (
@@ -340,6 +341,7 @@ export default function JourneyPage() {
               ))}
             </div>
           </div>
+          <p className="text-xs text-white/35 mb-4">Your wellness score combines your energy, pain, sleep, and stress ratings into one number from 0 to 100. Higher is better. Watch for the line trending upward over time.</p>
           <WellnessChart data={premium ? history : visibleHistory} />
         </section>
       )}
@@ -373,12 +375,25 @@ export default function JourneyPage() {
                 <p className="font-black text-white text-sm mb-1">
                   See your full progress history
                 </p>
-                <p className="text-xs text-white/35 mb-3">
-                  Premium members can view all past check-ins and long-term trends.
+                <p className="text-xs text-white/35 mb-2">
+                  Premium members get:
                 </p>
-                <p className="text-sm font-bold text-white mb-3">$9/month</p>
-                <button className="px-5 py-3 bg-[#D66829] text-white rounded-xl font-bold text-xs hover:bg-[#e8834a] transition-all shadow-lg shadow-[#D66829]/20">
-                  Start Free Trial
+                <ul className="text-xs text-white/35 mb-3 space-y-1 text-left">
+                  <li>&bull; Full check-in history (not just 7 days)</li>
+                  <li>&bull; Long-term wellness score trends</li>
+                  <li>&bull; All exercises with personalized routines</li>
+                  <li>&bull; Milestone badges for your progress</li>
+                </ul>
+                <p className="text-sm font-bold text-white mb-3">$9/month &middot; 7-day free trial</p>
+                <button
+                  onClick={async () => {
+                    const { createPremiumCheckout } = await import("../premium-actions");
+                    const r = await createPremiumCheckout();
+                    if (r?.url) window.location.href = r.url;
+                  }}
+                  className="px-5 py-3 bg-[#D66829] text-white rounded-xl font-bold text-xs hover:bg-[#e8834a] transition-all shadow-lg shadow-[#D66829]/20"
+                >
+                  Unlock for $9/mo &mdash; 7 Days Free
                 </button>
               </div>
             </div>

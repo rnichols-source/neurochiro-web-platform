@@ -97,7 +97,7 @@ export default function PatientDashboard() {
             <p className="text-xs text-white/35 mt-1">Here&apos;s a snapshot of how you&apos;re doing. Start with your daily check-in.</p>
           </div>
           {data?.streak > 0 && (
-            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#D66829]/10 border border-[#D66829]/20 rounded-full">
+            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#D66829]/10 border border-[#D66829]/20 rounded-full" title="Your streak counts how many days in a row you've checked in">
               <Flame className="w-4 h-4 text-[#D66829]" />
               <span className="text-sm font-black text-[#D66829]">
                 {data.streak} day streak
@@ -146,7 +146,7 @@ export default function PatientDashboard() {
                   Welcome to NeuroChiro
                 </h2>
                 <p className="text-white/35 text-sm">
-                  Three steps to get started
+                  Three quick steps to set up your health portal
                 </p>
               </div>
             </div>
@@ -233,7 +233,7 @@ export default function PatientDashboard() {
                 How are you feeling today?
               </h2>
               <p className="text-white/40 text-sm mb-6 max-w-sm mx-auto">
-                Log your energy, pain, and sleep in 30 seconds. Build your streak.
+                Log your energy, pain, and sleep in 30 seconds. Your doctor uses this to track your progress between visits.
               </p>
               <span className="inline-flex items-center gap-2 px-8 py-4 bg-[#D66829] text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-[#D66829]/20 group-hover:gap-3 group-hover:shadow-[#D66829]/40 transition-all">
                 Start Check-in <ArrowRight className="w-4 h-4" />
@@ -269,8 +269,8 @@ export default function PatientDashboard() {
                 </p>
                 <p className="text-sm text-white/35">
                   {data?.streak > 0
-                    ? "Keep it going — consistency is everything."
-                    : "Complete your first check-in to start tracking."}
+                    ? "Your streak counts how many days in a row you\u2019ve checked in. Keep it going \u2014 consistency is everything."
+                    : "Your streak counts how many days in a row you check in. Complete your first check-in to start tracking."}
                 </p>
               </div>
             </div>
@@ -365,12 +365,14 @@ export default function PatientDashboard() {
                 <h3 className="text-white font-bold text-2xl tracking-tight mb-2">
                   Your Health, Between Visits
                 </h3>
-                <p className="text-white/40 text-sm leading-relaxed max-w-lg">
-                  See how your health improves over time, get daily stretches
-                  and exercises, and stay on track between visits &mdash; all in one place.
-                </p>
+                <ul className="text-white/40 text-sm leading-relaxed max-w-lg space-y-1 mt-2 list-none">
+                  <li>&bull; Full progress history &mdash; see how your health changes over weeks and months</li>
+                  <li>&bull; All exercises &mdash; daily stretches and routines tailored to how you feel</li>
+                  <li>&bull; Wellness score trends &mdash; one number that tracks your overall improvement</li>
+                  <li>&bull; Milestone badges &mdash; celebrate your consistency and progress</li>
+                </ul>
                 <p className="text-white/60 text-xs font-black mt-3 uppercase tracking-widest">
-                  $9/month &middot; Cancel anytime
+                  $9/month &middot; 7-day free trial &middot; Cancel anytime
                 </p>
               </div>
               <button

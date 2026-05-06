@@ -209,6 +209,9 @@ export default function SupplementsPage() {
         <p className="text-xs text-white/35 mt-1">
           Simple nutrition tips and supplement info to support your healing between visits.
         </p>
+        <p className="text-xs text-amber-400/60 mt-2">
+          Always consult your doctor before starting any supplement, especially if you take medications or have a medical condition.
+        </p>
       </header>
 
       {/* Tab bar */}
@@ -349,8 +352,11 @@ function TrackerTab({
       <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-8 text-center shadow-lg shadow-black/20">
         <Apple className="w-12 h-12 text-white/10 mx-auto mb-3" />
         <h3 className="text-lg font-bold text-white/30 mb-2">No supplements added yet</h3>
+        <p className="text-white/30 font-medium text-sm mb-2">
+          Your supplement &quot;stack&quot; is your personal daily list of supplements to take. Think of it like a checklist you check off each day.
+        </p>
         <p className="text-white/30 font-medium text-sm">
-          Tap the &quot;Library&quot; tab above to browse supplements, then add the ones your doctor recommends to track them here daily.
+          Tap the &quot;Library&quot; tab above to browse supplements, then add the ones your doctor recommends. They&apos;ll appear here so you can track whether you took them each day.
         </p>
       </div>
     );
