@@ -76,6 +76,84 @@ export async function createJobPosting(formData: any) {
     console.error("Job posted automation failed:", e);
   }
 
+  // Notify matched students about the new job
+  try {
+    // Get the doctor's location for matching
+    const { data: doctor } = await supabase
+      .from('doctors')
+      .select('clinic_name, city, state, region_code, specialties')
+      .eq('user_id', user.id)
+      .single();
+
+    const jobCity = doctor?.city || '';
+    const jobState = doctor?.state || '';
+    const jobRegion = doctor?.region_code || '';
+    const clinicName = doctor?.clinic_name || 'A clinic';
+    const jobTitle = formData.title || 'New Position';
+
+    // Find students to notify — match by region, state, or interests
+    const { data: students } = await supabase
+      .from('students')
+      .select('id, location_city, region_code, interests, graduation_year');
+
+    if (students && students.length > 0) {
+      for (const student of students) {
+        const s = student as any;
+        let isMatch = false;
+        let matchReason = '';
+
+        // Region/location match
+        if (jobRegion && s.region_code === jobRegion) {
+          isMatch = true;
+          matchReason = jobCity ? `in ${jobCity}, ${jobState}` : 'in your region';
+        } else if (jobState && s.location_city) {
+          isMatch = true;
+          matchReason = `in ${jobCity || jobState}`;
+        }
+
+        // Interest/specialty overlap
+        if (s.interests?.length > 0 && doctor?.specialties?.length > 0) {
+          const overlap = (s.interests as string[]).some((interest: string) =>
+            (doctor.specialties as string[]).some((spec: string) =>
+              spec.toLowerCase().includes(interest.toLowerCase()) ||
+              interest.toLowerCase().includes(spec.toLowerCase())
+            )
+          );
+          if (overlap) {
+            isMatch = true;
+            matchReason = matchReason || 'matching your interests';
+          }
+        }
+
+        // If no specific match, notify graduating students
+        if (!isMatch && s.graduation_year) {
+          const currentYear = new Date().getFullYear();
+          if (s.graduation_year <= currentYear + 1) {
+            isMatch = true;
+            matchReason = 'for graduating students';
+          }
+        }
+
+        if (isMatch) {
+          try {
+            await supabase.from('notifications').insert({
+              user_id: s.id,
+              title: `New Position: ${jobTitle}`,
+              body: `${clinicName} just posted a ${jobTitle} position${matchReason ? ` ${matchReason}` : ''}. Check it out.`,
+              type: 'job',
+              link: '/student/jobs',
+              priority: 'info'
+            });
+          } catch {
+            // Don't let notification failure block job creation
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Student notification failed (non-blocking):", e);
+  }
+
   revalidatePath('/doctor/jobs');
   return { success: true, data };
 }
