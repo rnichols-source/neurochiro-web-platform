@@ -112,7 +112,7 @@ export async function createJobPosting(formData: any) {
         }
 
         // Interest/specialty overlap
-        if (s.interests?.length > 0 && doctor?.specialties?.length > 0) {
+        if (s.interests?.length > 0 && (doctor?.specialties as any)?.length > 0) {
           const overlap = (s.interests as string[]).some((interest: string) =>
             (doctor.specialties as string[]).some((spec: string) =>
               spec.toLowerCase().includes(interest.toLowerCase()) ||
