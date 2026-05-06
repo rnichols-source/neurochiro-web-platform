@@ -68,32 +68,35 @@ export default function SettingsPage() {
     router.push("/?deleted=1");
   };
 
-  const toggleClass = (on: boolean) => `relative w-11 h-6 rounded-full transition-colors ${on ? 'bg-neuro-orange' : 'bg-gray-200'}`;
+  const toggleClass = (on: boolean) => `relative w-11 h-6 rounded-full transition-colors ${on ? 'bg-[#D66829]' : 'bg-white/[0.08]'}`;
   const dotClass = (on: boolean) => `absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${on ? 'left-5' : 'left-0.5'}`;
 
   return (
-    <div className="max-w-xl mx-auto py-8 px-6 space-y-8">
-      <h1 className="text-2xl font-heading font-black text-neuro-navy">Settings</h1>
+    <div className="max-w-xl mx-auto space-y-8 pb-20">
+      <header>
+        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <p className="text-xs text-white/35 mt-1">Manage your account, notifications, and security.</p>
+      </header>
 
       {/* Account Info */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Account</h2>
+      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-6 shadow-lg shadow-black/20">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Account</h2>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-400">Name</span>
-            <span className="text-sm font-medium text-neuro-navy" id="patient-name">Loading...</span>
+            <span className="text-[12px] font-medium text-white/60">Name</span>
+            <span className="text-sm font-medium text-white" id="patient-name">Loading...</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-400">Email</span>
-            <span className="text-sm font-medium text-neuro-navy" id="patient-email">Loading...</span>
+            <span className="text-[12px] font-medium text-white/60">Email</span>
+            <span className="text-sm font-medium text-white" id="patient-email">Loading...</span>
           </div>
         </div>
-        <p className="text-xs text-gray-400 mt-3">To update your name or email, contact <a href="mailto:support@neurochirodirectory.com" className="text-neuro-orange hover:underline">support@neurochirodirectory.com</a></p>
+        <p className="text-xs text-white/35 mt-3">To update your name or email, contact <a href="mailto:support@neurochirodirectory.com" className="text-[#D66829] hover:underline">support@neurochirodirectory.com</a></p>
       </div>
 
       {/* Notifications */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Notifications</h2>
+      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-6 shadow-lg shadow-black/20">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Notifications</h2>
         <div className="space-y-4">
           {[
             { key: 'health_reminders', label: 'Daily Check-in Reminders', desc: 'Reminder to log your energy, pain, and sleep' },
@@ -102,8 +105,8 @@ export default function SettingsPage() {
           ].map((item) => (
             <div key={item.key} className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-bold text-neuro-navy">{item.label}</p>
-                <p className="text-xs text-gray-400">{item.desc}</p>
+                <p className="text-sm font-bold text-white">{item.label}</p>
+                <p className="text-xs text-white/35">{item.desc}</p>
               </div>
               <button type="button" onClick={() => setNotifPrefs(p => ({ ...p, [item.key]: !p[item.key as keyof typeof p] }))} className={toggleClass(notifPrefs[item.key as keyof typeof notifPrefs])}>
                 <div className={dotClass(notifPrefs[item.key as keyof typeof notifPrefs])} />
@@ -111,40 +114,40 @@ export default function SettingsPage() {
             </div>
           ))}
         </div>
-        <button onClick={handleSavePrefs} disabled={savingPrefs} className="mt-4 px-5 py-2 bg-neuro-navy text-white rounded-xl font-bold text-sm disabled:opacity-50">
+        <button onClick={handleSavePrefs} disabled={savingPrefs} className="mt-4 px-5 py-3 bg-[#D66829] text-white rounded-lg font-semibold text-sm disabled:opacity-50 hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20">
           {prefsSaved ? 'Saved!' : savingPrefs ? 'Saving...' : 'Save Preferences'}
         </button>
       </div>
 
       {/* Password */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Password</h2>
-        {message && <p className={`text-sm font-bold mb-3 ${message.type === "success" ? "text-green-600" : "text-red-600"}`}>{message.text}</p>}
+      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-6 shadow-lg shadow-black/20">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Password</h2>
+        {message && <p className={`text-sm font-bold mb-3 ${message.type === "success" ? "text-green-400" : "text-red-400"}`}>{message.text}</p>}
         <form onSubmit={handleUpdatePassword} className="space-y-3">
-          <input type="password" placeholder="New password (8+ characters)" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={8} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
-          <input type="password" placeholder="Confirm new password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
-          <button type="submit" className="px-5 py-2 bg-neuro-navy text-white rounded-xl font-bold text-sm">Update Password</button>
+          <input type="password" placeholder="New password (8+ characters)" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={8} className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none" />
+          <input type="password" placeholder="Confirm new password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none" />
+          <button type="submit" className="px-5 py-3 bg-[#D66829] text-white rounded-lg font-semibold text-sm hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20">Update Password</button>
         </form>
       </div>
 
       {/* Sign Out */}
-      <button onClick={handleSignOut} className="w-full py-3 bg-gray-100 text-gray-600 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors">
+      <button onClick={handleSignOut} className="w-full py-3 bg-white/[0.06] text-white/60 rounded-lg font-bold text-sm flex items-center justify-center gap-2 hover:text-white hover:bg-white/[0.1] transition-colors">
         <LogOut className="w-4 h-4" /> Sign Out
       </button>
 
       {/* Danger Zone */}
-      <div className="bg-white rounded-2xl border border-red-100 p-6">
-        <h2 className="text-sm font-bold text-red-500 uppercase tracking-wide mb-2">Danger Zone</h2>
+      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-red-500/20 p-6 shadow-lg shadow-black/20">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-red-400 mb-2">Danger Zone</h2>
         {!showDeleteForm ? (
-          <button onClick={() => setShowDeleteForm(true)} className="text-red-500 font-bold text-sm hover:underline">Delete my account</button>
+          <button onClick={() => setShowDeleteForm(true)} className="text-red-400 font-bold text-sm hover:underline">Delete my account</button>
         ) : (
           <div className="space-y-3">
-            <p className="text-sm text-red-600">This will permanently delete your account and all health data.</p>
-            <p className="text-xs text-red-500">Type <strong>DELETE</strong> to confirm:</p>
-            <input type="text" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} placeholder="Type DELETE" className="w-full px-4 py-2 border border-red-200 rounded-lg text-sm" />
+            <p className="text-sm text-red-400">This will permanently delete your account and all health data.</p>
+            <p className="text-xs text-red-400/70">Type <strong>DELETE</strong> to confirm:</p>
+            <input type="text" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} placeholder="Type DELETE" className="w-full px-4 py-3 bg-white/[0.04] border border-red-500/20 rounded-lg text-sm text-white placeholder-white/20 focus:border-red-500/40 outline-none" />
             <div className="flex gap-3">
-              <button onClick={() => { setShowDeleteForm(false); setDeleteConfirm(""); }} className="px-4 py-2 text-gray-500 text-sm font-bold">Cancel</button>
-              <button onClick={handleDelete} disabled={deleting || deleteConfirm !== "DELETE"} className="px-4 py-2 bg-red-600 text-white text-sm font-bold rounded-lg disabled:opacity-50">
+              <button onClick={() => { setShowDeleteForm(false); setDeleteConfirm(""); }} className="px-4 py-3 text-white/40 text-sm font-bold hover:text-white">Cancel</button>
+              <button onClick={handleDelete} disabled={deleting || deleteConfirm !== "DELETE"} className="px-4 py-3 bg-red-600 text-white text-sm font-bold rounded-lg disabled:opacity-50">
                 {deleting ? "Deleting..." : "Permanently Delete"}
               </button>
             </div>

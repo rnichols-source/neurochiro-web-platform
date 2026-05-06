@@ -40,7 +40,7 @@ export default function SavedPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <div className="w-10 h-10 border-4 border-neuro-orange border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-[#D66829] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -48,9 +48,10 @@ export default function SavedPage() {
   return (
     <div className="space-y-8 pb-20">
       <header>
-        <h1 className="text-3xl font-heading font-black text-neuro-navy uppercase tracking-tight">
+        <h1 className="text-2xl font-bold text-white">
           Saved Doctors
         </h1>
+        <p className="text-xs text-white/35 mt-1">Your bookmarked specialists for easy access.</p>
       </header>
 
       {doctors.length > 0 ? (
@@ -58,7 +59,7 @@ export default function SavedPage() {
           {doctors.map((doc) => (
             <div
               key={doc.id}
-              className="relative bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-shadow"
+              className="relative bg-gradient-to-b from-[#1a2e40] to-[#162231] p-5 rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 hover:border-[#D66829]/20 transition-all"
             >
               <button
                 onClick={() => {
@@ -66,24 +67,24 @@ export default function SavedPage() {
                   toggleSave('doctors', doc.id.toString());
                   setDoctors(prev => prev.filter(d => d.id !== doc.id));
                 }}
-                className="absolute top-3 right-3 p-1.5 text-gray-300 hover:text-red-500 transition-colors"
+                className="absolute top-3 right-3 p-1.5 text-white/20 hover:text-red-400 transition-colors"
                 title="Remove"
               >
                 <X className="w-4 h-4" />
               </button>
               <div className="flex items-start gap-4 mb-3">
-                <div className="w-12 h-12 rounded-xl bg-neuro-navy overflow-hidden flex-shrink-0 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-[#D66829]/10 overflow-hidden flex-shrink-0 flex items-center justify-center">
                   {doc.photo_url ? (
                     <img src={doc.photo_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-white font-black text-lg">{(doc.first_name?.[0] || 'D').toUpperCase()}</span>
+                    <span className="text-[#D66829] font-black text-lg">{(doc.first_name?.[0] || 'D').toUpperCase()}</span>
                   )}
                 </div>
                 <div className="pr-6">
-                  <h3 className="font-bold text-neuro-navy">Dr. {doc.first_name} {doc.last_name}</h3>
-                  {doc.clinic_name && <p className="text-xs text-gray-500">{doc.clinic_name}</p>}
+                  <h3 className="font-bold text-white">Dr. {doc.first_name} {doc.last_name}</h3>
+                  {doc.clinic_name && <p className="text-xs text-white/40">{doc.clinic_name}</p>}
                   {(doc.city || doc.state) && (
-                    <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                    <p className="text-xs text-white/35 flex items-center gap-1 mt-0.5">
                       <MapPin className="w-3 h-3" />
                       {[doc.city, doc.state].filter(Boolean).join(", ")}
                     </p>
@@ -93,7 +94,7 @@ export default function SavedPage() {
               {doc.specialties && doc.specialties.length > 0 && (
                 <div className="flex flex-wrap gap-1 mb-3">
                   {doc.specialties.slice(0, 3).map((s: string, i: number) => (
-                    <span key={i} className="px-2 py-0.5 bg-neuro-orange/5 text-neuro-orange text-[10px] font-bold rounded border border-neuro-orange/10">{s}</span>
+                    <span key={i} className="px-2 py-0.5 bg-[#D66829]/10 text-[#D66829] text-[10px] font-bold rounded border border-[#D66829]/20">{s}</span>
                   ))}
                 </div>
               )}
@@ -101,14 +102,14 @@ export default function SavedPage() {
                 {doc.user_id && (
                   <Link
                     href={`/portal/messages?to=${doc.user_id}`}
-                    className="flex-1 text-center py-2.5 bg-neuro-orange/10 text-neuro-orange text-xs font-bold rounded-xl hover:bg-neuro-orange/20 transition-colors flex items-center justify-center gap-1.5"
+                    className="flex-1 text-center py-3 bg-[#D66829]/10 text-[#D66829] text-xs font-bold rounded-xl hover:bg-[#D66829]/20 transition-colors flex items-center justify-center gap-1.5"
                   >
                     <MessageSquare className="w-3.5 h-3.5" /> Message
                   </Link>
                 )}
                 <Link
                   href={`/directory/${doc.slug}`}
-                  className="flex-1 text-center py-2.5 bg-neuro-navy text-white text-xs font-bold rounded-xl hover:bg-neuro-navy/90 transition-colors"
+                  className="flex-1 text-center py-3 bg-[#D66829] text-white text-xs font-bold rounded-xl hover:bg-[#e8834a] transition-colors shadow-lg shadow-[#D66829]/20"
                 >
                   View Profile
                 </Link>
@@ -117,14 +118,15 @@ export default function SavedPage() {
           ))}
         </div>
       ) : (
-        <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200">
-          <Heart className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-neuro-navy">
+        <div className="py-20 text-center bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-dashed border-white/[0.08]">
+          <Heart className="w-12 h-12 text-white/10 mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-white/30">
             You haven&apos;t saved any doctors yet.
           </h3>
+          <p className="text-white/30 text-sm mt-2 mb-6">Browse the directory and bookmark your favorites.</p>
           <Link
             href="/directory"
-            className="mt-6 inline-block px-8 py-3 bg-neuro-navy text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-neuro-orange transition-colors"
+            className="inline-block px-8 py-3 bg-[#D66829] text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-[#e8834a] transition-colors shadow-lg shadow-[#D66829]/20"
           >
             Browse Directory
           </Link>

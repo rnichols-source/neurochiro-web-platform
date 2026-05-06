@@ -27,11 +27,11 @@ type StreakData = {
 };
 
 function scoreEmoji(score: number): string {
-  if (score >= 80) return "\u{1F929}"; // star-struck
-  if (score >= 60) return "\u{1F60A}"; // smile
-  if (score >= 40) return "\u{1F610}"; // neutral
-  if (score >= 20) return "\u{1F615}"; // confused
-  return "\u{1F62B}"; // tired
+  if (score >= 80) return "\u{1F929}";
+  if (score >= 60) return "\u{1F60A}";
+  if (score >= 40) return "\u{1F610}";
+  if (score >= 20) return "\u{1F615}";
+  return "\u{1F62B}";
 }
 
 function scoreColor(score: number): string {
@@ -50,22 +50,19 @@ function getMilestones(
 ): string[] {
   const badges: string[] = [];
   if (index === 0) badges.push("First Check-in!");
-
-  // Streak milestones based on position from the end
   const daysFromEnd = allEntries.length - index;
   if (daysFromEnd === 7 && streakCurrent >= 7) badges.push("7-Day Streak!");
   if (daysFromEnd === 30 && streakCurrent >= 30) badges.push("30 Days!");
   if (entry.score >= 80) badges.push("Score above 80!");
-
   return badges;
 }
 
-// ── SVG Sparkline Chart ─────────────────────────────────────────────────
+// -- SVG Sparkline Chart --
 
 function WellnessChart({ data }: { data: CheckinEntry[] }) {
   if (data.length < 2) {
     return (
-      <div className="bg-gray-50 rounded-xl p-8 text-center text-sm text-gray-400">
+      <div className="bg-white/[0.04] rounded-xl p-8 text-center text-sm text-white/35">
         Need at least 2 check-ins to show a chart.
       </div>
     );
@@ -88,7 +85,6 @@ function WellnessChart({ data }: { data: CheckinEntry[] }) {
   const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
   const areaPath = `${linePath} L ${points[points.length - 1].x} ${padY + chartH} L ${points[0].x} ${padY + chartH} Z`;
 
-  // Gradient stops based on score ranges
   const avgScore = data.reduce((a, d) => a + d.score, 0) / data.length;
   const gradientColor = scoreColor(avgScore);
 
@@ -106,35 +102,31 @@ function WellnessChart({ data }: { data: CheckinEntry[] }) {
         const y = padY + chartH - (v / 100) * chartH;
         return (
           <g key={v}>
-            <line x1={padX} y1={y} x2={width - padX} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4 4" />
-            <text x={padX - 6} y={y + 3} textAnchor="end" className="text-[10px] fill-gray-400">
+            <line x1={padX} y1={y} x2={width - padX} y2={y} stroke="rgba(255,255,255,0.1)" strokeWidth="1" strokeDasharray="4 4" />
+            <text x={padX - 6} y={y + 3} textAnchor="end" className="text-[10px]" fill="rgba(255,255,255,0.35)">
               {v}
             </text>
           </g>
         );
       })}
 
-      {/* Area fill */}
       <path d={areaPath} fill="url(#areaGrad)" />
-
-      {/* Line */}
       <path d={linePath} fill="none" stroke={gradientColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
 
-      {/* Dots */}
       {points.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r="3" fill={scoreColor(p.score)} stroke="white" strokeWidth="1.5">
+        <circle key={i} cx={p.x} cy={p.y} r="3" fill={scoreColor(p.score)} stroke="#162231" strokeWidth="1.5">
           <title>{`${p.date}: ${p.score}`}</title>
         </circle>
       ))}
 
-      {/* Date labels (first, middle, last) */}
       {[0, Math.floor(points.length / 2), points.length - 1].map((idx) => (
         <text
           key={idx}
           x={points[idx].x}
           y={height - 2}
           textAnchor="middle"
-          className="text-[9px] fill-gray-400"
+          className="text-[9px]"
+          fill="rgba(255,255,255,0.35)"
         >
           {new Date(data[idx].date + "T12:00:00").toLocaleDateString("en", {
             month: "short",
@@ -146,7 +138,7 @@ function WellnessChart({ data }: { data: CheckinEntry[] }) {
   );
 }
 
-// ── Mini bar for breakdown ──────────────────────────────────────────────
+// -- Mini bar for breakdown --
 
 function MiniBreakdown({ entry }: { entry: CheckinEntry }) {
   const items = [
@@ -160,20 +152,20 @@ function MiniBreakdown({ entry }: { entry: CheckinEntry }) {
     <div className="flex gap-1.5 items-end">
       {items.map((item) => (
         <div key={item.label} className="flex flex-col items-center gap-0.5">
-          <div className="w-5 bg-gray-100 rounded-full overflow-hidden" style={{ height: 24 }}>
+          <div className="w-5 bg-white/[0.06] rounded-full overflow-hidden" style={{ height: 24 }}>
             <div
               className={`w-full ${item.color} rounded-full transition-all`}
               style={{ height: `${(item.value / item.max) * 100}%`, marginTop: `${100 - (item.value / item.max) * 100}%` }}
             />
           </div>
-          <span className="text-[8px] text-gray-400 font-bold">{item.label[0]}</span>
+          <span className="text-[8px] text-white/35 font-bold">{item.label[0]}</span>
         </div>
       ))}
     </div>
   );
 }
 
-// ── Editable Note ───────────────────────────────────────────────────────
+// -- Editable Note --
 
 function EditableNote({
   date,
@@ -208,13 +200,13 @@ function EditableNote({
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Add a note..."
-          className="flex-1 text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-neuro-orange"
+          className="flex-1 text-sm px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none"
           autoFocus
         />
         <button
           onClick={save}
           disabled={saving}
-          className="p-2 bg-neuro-navy text-white rounded-lg hover:bg-neuro-navy/90 disabled:opacity-50"
+          className="p-2 bg-[#D66829] text-white rounded-lg hover:bg-[#e8834a] disabled:opacity-50"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
         </button>
@@ -223,7 +215,7 @@ function EditableNote({
             setEditing(false);
             setText(initialNote || "");
           }}
-          className="p-2 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200"
+          className="p-2 bg-white/[0.06] text-white/40 rounded-lg hover:bg-white/[0.1]"
         >
           <X className="w-4 h-4" />
         </button>
@@ -234,11 +226,11 @@ function EditableNote({
   return (
     <button
       onClick={() => setEditing(true)}
-      className="flex items-center gap-1.5 mt-2 text-xs text-gray-400 hover:text-neuro-orange transition-colors"
+      className="flex items-center gap-1.5 mt-2 text-xs text-white/35 hover:text-[#D66829] transition-colors"
     >
       <Pencil className="w-3 h-3" />
       {initialNote ? (
-        <span className="text-gray-600 italic">{initialNote}</span>
+        <span className="text-white/50 italic">{initialNote}</span>
       ) : (
         <span>Add a note</span>
       )}
@@ -246,7 +238,7 @@ function EditableNote({
   );
 }
 
-// ── Main Page ───────────────────────────────────────────────────────────
+// -- Main Page --
 
 export default function JourneyPage() {
   const [loading, setLoading] = useState(true);
@@ -284,12 +276,11 @@ export default function JourneyPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 text-neuro-orange animate-spin" />
+        <Loader2 className="w-5 h-5 text-[#D66829] animate-spin" />
       </div>
     );
   }
 
-  // Split visible vs blurred data for non-premium
   const visibleHistory = premium ? history : history.slice(-FREE_DAYS);
   const blurredHistory = premium ? [] : history.slice(0, -FREE_DAYS);
   const totalCheckins = history.length;
@@ -297,42 +288,42 @@ export default function JourneyPage() {
   return (
     <div className="space-y-6 pb-20">
       <header>
-        <h1 className="text-2xl font-heading font-black text-neuro-navy uppercase tracking-tight">
+        <h1 className="text-2xl font-bold text-white">
           My Journey
         </h1>
-        <p className="text-gray-500 mt-1">Your health story, one day at a time.</p>
+        <p className="text-xs text-white/35 mt-1">Your health story, one day at a time.</p>
       </header>
 
       {/* Streak & Stats Bar */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 text-center">
+        <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 text-center">
           <div className="flex items-center justify-center gap-1.5 mb-1">
-            <Flame className={`w-5 h-5 ${streak.current > 0 ? "text-orange-500" : "text-gray-300"}`} />
+            <Flame className={`w-5 h-5 ${streak.current > 0 ? "text-[#D66829]" : "text-white/20"}`} />
           </div>
-          <p className="text-2xl font-black text-neuro-navy">{streak.current}</p>
-          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Day Streak</p>
+          <p className="text-2xl font-black text-white">{streak.current}</p>
+          <p className="text-[10px] text-white/35 font-bold uppercase tracking-wide">Day Streak</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 text-center">
+        <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 text-center">
           <div className="flex items-center justify-center gap-1.5 mb-1">
-            <Trophy className="w-5 h-5 text-yellow-500" />
+            <Trophy className="w-5 h-5 text-yellow-400" />
           </div>
-          <p className="text-2xl font-black text-neuro-navy">{streak.longest}</p>
-          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Best Streak</p>
+          <p className="text-2xl font-black text-white">{streak.longest}</p>
+          <p className="text-[10px] text-white/35 font-bold uppercase tracking-wide">Best Streak</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 text-center">
+        <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 text-center">
           <div className="flex items-center justify-center gap-1.5 mb-1">
-            <Calendar className="w-5 h-5 text-blue-500" />
+            <Calendar className="w-5 h-5 text-blue-400" />
           </div>
-          <p className="text-2xl font-black text-neuro-navy">{totalCheckins}</p>
-          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Check-ins</p>
+          <p className="text-2xl font-black text-white">{totalCheckins}</p>
+          <p className="text-[10px] text-white/35 font-bold uppercase tracking-wide">Check-ins</p>
         </div>
       </div>
 
       {/* Wellness Score Chart */}
       {history.length > 0 && (
-        <section className="bg-white rounded-2xl border border-gray-100 p-5">
+        <section className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-5 shadow-lg shadow-black/20">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-black text-neuro-navy">Wellness Score</h2>
+            <h2 className="font-black text-white">Wellness Score</h2>
             <div className="flex gap-1">
               {[30, 60, 90].map((d) => (
                 <button
@@ -340,8 +331,8 @@ export default function JourneyPage() {
                   onClick={() => setRangeDays(d)}
                   className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
                     rangeDays === d
-                      ? "bg-neuro-navy text-white"
-                      : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                      ? "bg-[#D66829] text-white"
+                      : "bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white hover:bg-white/[0.1]"
                   }`}
                 >
                   {d}d
@@ -355,7 +346,7 @@ export default function JourneyPage() {
 
       {/* Timeline */}
       <section>
-        <h2 className="font-black text-neuro-navy mb-4">Timeline</h2>
+        <h2 className="font-black text-white mb-4">Timeline</h2>
 
         {/* Blurred preview for non-premium */}
         {!premium && blurredHistory.length > 0 && (
@@ -364,29 +355,29 @@ export default function JourneyPage() {
               {blurredHistory.slice(-3).map((entry) => (
                 <div
                   key={entry.date}
-                  className="bg-white rounded-xl border border-gray-100 p-4"
+                  className="bg-[#162231] rounded-xl border border-white/[0.08] p-4"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{scoreEmoji(entry.score)}</span>
                     <div>
-                      <p className="font-bold text-neuro-navy text-sm">{entry.date}</p>
-                      <p className="text-xs text-gray-400">Score: {entry.score}</p>
+                      <p className="font-bold text-white text-sm">{entry.date}</p>
+                      <p className="text-xs text-white/35">Score: {entry.score}</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-neuro-orange/20 p-6 text-center shadow-lg max-w-xs">
-                <Lock className="w-6 h-6 text-neuro-orange mx-auto mb-2" />
-                <p className="font-black text-neuro-navy text-sm mb-1">
+              <div className="bg-[#162231]/90 backdrop-blur-sm rounded-2xl border border-[#D66829]/20 p-6 text-center shadow-lg shadow-black/20 max-w-xs">
+                <Lock className="w-6 h-6 text-[#D66829] mx-auto mb-2" />
+                <p className="font-black text-white text-sm mb-1">
                   See your full journey
                 </p>
-                <p className="text-xs text-gray-400 mb-3">
+                <p className="text-xs text-white/35 mb-3">
                   Unlock your complete health history and trends.
                 </p>
-                <p className="text-sm font-bold text-neuro-navy mb-3">$9/month</p>
-                <button className="px-5 py-2.5 bg-neuro-orange text-white rounded-xl font-bold text-xs hover:bg-neuro-orange/90 transition-all">
+                <p className="text-sm font-bold text-white mb-3">$9/month</p>
+                <button className="px-5 py-3 bg-[#D66829] text-white rounded-xl font-bold text-xs hover:bg-[#e8834a] transition-all shadow-lg shadow-[#D66829]/20">
                   Start Free Trial
                 </button>
               </div>
@@ -396,9 +387,8 @@ export default function JourneyPage() {
 
         {/* Visible timeline entries */}
         <div className="relative">
-          {/* Vertical line */}
           {visibleHistory.length > 1 && (
-            <div className="absolute left-5 top-6 bottom-6 w-0.5 bg-gray-100" />
+            <div className="absolute left-5 top-6 bottom-6 w-0.5 bg-white/[0.06]" />
           )}
 
           <div className="space-y-4">
@@ -427,14 +417,14 @@ export default function JourneyPage() {
 
                   {/* Content */}
                   <div
-                    className={`flex-1 bg-white rounded-xl border p-4 ${
-                      isToday ? "border-neuro-orange/30 shadow-sm" : "border-gray-100"
+                    className={`flex-1 bg-[#162231] rounded-xl border p-4 ${
+                      isToday ? "border-[#D66829]/30 shadow-lg shadow-black/20" : "border-white/[0.08]"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="font-bold text-neuro-navy text-sm">
+                          <p className="font-bold text-white text-sm">
                             {isToday
                               ? "Today"
                               : dateObj.toLocaleDateString("en", {
@@ -444,12 +434,12 @@ export default function JourneyPage() {
                                 })}
                           </p>
                           {isToday && (
-                            <span className="text-[10px] font-black uppercase tracking-wide text-neuro-orange bg-neuro-orange/10 px-2 py-0.5 rounded-full">
+                            <span className="text-[10px] font-black uppercase tracking-wide text-[#D66829] bg-[#D66829]/10 px-2 py-0.5 rounded-full">
                               Today
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-xs text-white/35 mt-0.5">
                           Wellness: <span className="font-bold" style={{ color: scoreColor(entry.score) }}>{entry.score}</span>/100
                         </p>
                       </div>
@@ -462,7 +452,7 @@ export default function JourneyPage() {
                         {milestones.map((badge) => (
                           <span
                             key={badge}
-                            className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide bg-yellow-50 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded-full"
+                            className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 px-2 py-0.5 rounded-full"
                           >
                             <Star className="w-3 h-3" />
                             {badge}
@@ -485,15 +475,15 @@ export default function JourneyPage() {
         </div>
 
         {visibleHistory.length === 0 && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-            <Calendar className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-            <h3 className="font-black text-gray-400 mb-2">No check-ins yet</h3>
-            <p className="text-gray-500 text-sm mb-4">
+          <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-12 text-center shadow-lg shadow-black/20">
+            <Calendar className="w-12 h-12 text-white/10 mx-auto mb-3" />
+            <h3 className="font-black text-white/30 mb-2">No check-ins yet</h3>
+            <p className="text-white/40 text-sm mb-4">
               Start your daily check-ins to build your health journey.
             </p>
             <a
               href="/portal/track"
-              className="inline-flex px-5 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-all"
+              className="inline-flex px-5 py-3 bg-[#D66829] text-white rounded-xl font-bold text-sm hover:bg-[#e8834a] transition-all shadow-lg shadow-[#D66829]/20"
             >
               Start First Check-in
             </a>

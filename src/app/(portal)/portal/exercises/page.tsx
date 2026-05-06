@@ -33,7 +33,6 @@ function getDailyRecommendation(checkin: CheckinData): {
     return { message: "", exercises: [], icon: Sparkles };
   }
 
-  // High stress (4-5 on 1-5 scale)
   if (checkin.stress >= 4) {
     return {
       message: "Feeling stressed? Start here.",
@@ -42,7 +41,6 @@ function getDailyRecommendation(checkin: CheckinData): {
     };
   }
 
-  // High pain (4-5 on 1-5 scale)
   if (checkin.pain >= 4) {
     return {
       message: "Let\u2019s ease into it gently today.",
@@ -51,7 +49,6 @@ function getDailyRecommendation(checkin: CheckinData): {
     };
   }
 
-  // Low energy (1-2 on 1-5 scale)
   if (checkin.energy <= 2) {
     return {
       message: "Let\u2019s wake your body up.",
@@ -60,7 +57,6 @@ function getDailyRecommendation(checkin: CheckinData): {
     };
   }
 
-  // All good — maintenance
   return {
     message: "Great day \u2014 let\u2019s keep the momentum.",
     icon: Sparkles,
@@ -75,9 +71,9 @@ function getDailyRecommendation(checkin: CheckinData): {
 
 function DifficultyBadge({ difficulty }: { difficulty: Exercise["difficulty"] }) {
   const colors = {
-    Beginner: "bg-green-100 text-green-700",
-    Intermediate: "bg-yellow-100 text-yellow-700",
-    Advanced: "bg-red-100 text-red-700",
+    Beginner: "bg-green-500/10 text-green-400",
+    Intermediate: "bg-yellow-500/10 text-yellow-400",
+    Advanced: "bg-red-500/10 text-red-400",
   };
   return (
     <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full ${colors[difficulty]}`}>
@@ -105,12 +101,12 @@ function ExerciseCard({
 
   return (
     <div
-      className={`bg-white rounded-2xl border transition-all ${
+      className={`bg-[#162231] rounded-2xl border transition-all ${
         isCompleted
-          ? "border-green-200 bg-green-50/30"
+          ? "border-green-500/20 bg-green-500/[0.03]"
           : locked
-          ? "border-gray-100 opacity-75"
-          : "border-gray-100 hover:border-neuro-orange/30 hover:shadow-md"
+          ? "border-white/[0.08] opacity-75"
+          : "border-white/[0.08] hover:border-[#D66829]/20 hover:shadow-lg hover:shadow-black/20"
       }`}
     >
       <button
@@ -121,28 +117,28 @@ function ExerciseCard({
         {/* Completion indicator or lock */}
         <div className="shrink-0 mt-0.5">
           {locked ? (
-            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-              <Lock className="w-4 h-4 text-gray-400" />
+            <div className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center">
+              <Lock className="w-4 h-4 text-white/35" />
             </div>
           ) : isCompleted ? (
-            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
+            <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5 text-green-400" />
             </div>
           ) : (
-            <div className="w-8 h-8 rounded-full bg-neuro-orange/10 flex items-center justify-center">
-              <Dumbbell className="w-4 h-4 text-neuro-orange" />
+            <div className="w-8 h-8 rounded-full bg-[#D66829]/10 flex items-center justify-center">
+              <Dumbbell className="w-4 h-4 text-[#D66829]" />
             </div>
           )}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <h3 className="font-bold text-neuro-navy text-base">{exercise.name}</h3>
+            <h3 className="font-bold text-white text-base">{exercise.name}</h3>
             <DifficultyBadge difficulty={exercise.difficulty} />
           </div>
-          <div className="flex items-center gap-3 text-xs text-gray-400">
+          <div className="flex items-center gap-3 text-xs text-white/35">
             <span>{exercise.duration}</span>
-            <span className="text-gray-200">|</span>
+            <span className="text-white/20">|</span>
             <span>{exercise.bodyAreas.join(", ")}</span>
           </div>
         </div>
@@ -150,9 +146,9 @@ function ExerciseCard({
         {!locked && (
           <div className="shrink-0 mt-1">
             {expanded ? (
-              <ChevronUp className="w-5 h-5 text-gray-300" />
+              <ChevronUp className="w-5 h-5 text-white/20" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-gray-300" />
+              <ChevronDown className="w-5 h-5 text-white/20" />
             )}
           </div>
         )}
@@ -161,7 +157,7 @@ function ExerciseCard({
       {/* Locked overlay message */}
       {locked && (
         <div className="px-5 pb-4 -mt-1">
-          <div className="flex items-center gap-2 text-xs text-gray-400">
+          <div className="flex items-center gap-2 text-xs text-white/35">
             <Lock className="w-3 h-3" />
             <span>Unlock with Premium &mdash; $9/month</span>
           </div>
@@ -170,43 +166,43 @@ function ExerciseCard({
 
       {/* Expanded details */}
       {expanded && !locked && (
-        <div className="px-5 pb-5 border-t border-gray-50 pt-4 space-y-4">
+        <div className="px-5 pb-5 border-t border-white/[0.06] pt-4 space-y-4">
           {/* Instructions */}
           <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">
+            <p className="text-xs font-bold text-white/35 uppercase tracking-wide mb-2">
               Instructions
             </p>
-            <p className="text-base text-gray-700 leading-relaxed">{exercise.instructions}</p>
+            <p className="text-[13px] text-white/60 leading-relaxed">{exercise.instructions}</p>
           </div>
 
           {/* Pro tip */}
-          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-            <p className="text-xs font-black text-blue-600 uppercase tracking-wide mb-1">
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+            <p className="text-xs font-black text-blue-400 uppercase tracking-wide mb-1">
               Pro Tip
             </p>
-            <p className="text-sm text-blue-800 leading-relaxed">{exercise.proTip}</p>
+            <p className="text-sm text-blue-300 leading-relaxed">{exercise.proTip}</p>
           </div>
 
           {/* Nervous system note */}
-          <p className="text-sm text-neuro-orange font-medium leading-relaxed">
+          <p className="text-sm text-[#D66829] font-medium leading-relaxed">
             {exercise.nervousSystemWhy}
           </p>
 
           {/* Sets & Reps + Frequency */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
             <div>
-              <span className="text-gray-400 text-xs font-bold uppercase">Sets/Reps:</span>{" "}
-              <span className="font-bold text-neuro-navy">{exercise.setsReps}</span>
+              <span className="text-white/35 text-xs font-bold uppercase">Sets/Reps:</span>{" "}
+              <span className="font-bold text-white">{exercise.setsReps}</span>
             </div>
             <div>
-              <span className="text-gray-400 text-xs font-bold uppercase">Frequency:</span>{" "}
-              <span className="font-bold text-neuro-navy">{exercise.frequency}</span>
+              <span className="text-white/35 text-xs font-bold uppercase">Frequency:</span>{" "}
+              <span className="font-bold text-white">{exercise.frequency}</span>
             </div>
           </div>
 
           {/* Mark Complete button */}
           {isCompleted ? (
-            <div className="flex items-center gap-2 text-green-600 font-bold text-sm">
+            <div className="flex items-center gap-2 text-green-400 font-bold text-sm">
               <CheckCircle2 className="w-5 h-5" />
               Completed today
             </div>
@@ -224,7 +220,7 @@ function ExerciseCard({
                 setCompleting(false);
               }}
               disabled={completing}
-              className="px-5 py-3 bg-neuro-navy text-white rounded-xl font-bold text-sm hover:bg-neuro-navy/90 transition-all disabled:opacity-50 flex items-center gap-2"
+              className="px-5 py-3 bg-[#D66829] text-white rounded-xl font-bold text-sm hover:bg-[#e8834a] transition-all disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-[#D66829]/20"
             >
               {completing ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -284,7 +280,7 @@ export default function ExercisesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 text-neuro-orange animate-spin" />
+        <Loader2 className="w-5 h-5 text-[#D66829] animate-spin" />
       </div>
     );
   }
@@ -292,26 +288,26 @@ export default function ExercisesPage() {
   return (
     <div className="space-y-6 pb-20">
       <header>
-        <h1 className="text-2xl font-heading font-black text-neuro-navy uppercase tracking-tight">
+        <h1 className="text-2xl font-bold text-white">
           Exercise Library
         </h1>
-        <p className="text-gray-500 mt-1">
+        <p className="text-xs text-white/35 mt-1">
           Exercises designed for your nervous system health.
         </p>
       </header>
 
       {/* Daily Recommended Routine */}
-      <section className="bg-neuro-navy rounded-2xl p-6 text-white">
+      <section className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl p-6 border border-white/[0.08] shadow-lg shadow-black/20">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-xl bg-neuro-orange/20 flex items-center justify-center">
-            <recommendation.icon className="w-5 h-5 text-neuro-orange" />
+          <div className="w-10 h-10 rounded-xl bg-[#D66829]/20 flex items-center justify-center">
+            <recommendation.icon className="w-5 h-5 text-[#D66829]" />
           </div>
           <div>
-            <h2 className="font-black text-lg">Today&apos;s Routine</h2>
+            <h2 className="font-black text-lg text-white">Today&apos;s Routine</h2>
             {checkin ? (
-              <p className="text-gray-300 text-sm">{recommendation.message}</p>
+              <p className="text-white/40 text-sm">{recommendation.message}</p>
             ) : (
-              <p className="text-gray-400 text-sm">
+              <p className="text-white/35 text-sm">
                 Check in first to get personalized recommendations.
               </p>
             )}
@@ -323,16 +319,16 @@ export default function ExercisesPage() {
             {recommendation.exercises.map((ex) => (
               <div
                 key={ex.id}
-                className="bg-white/10 rounded-xl p-4 flex items-center gap-3"
+                className="bg-white/[0.06] rounded-xl p-4 flex items-center gap-3 border border-white/[0.08]"
               >
                 {completedIds.has(ex.id) ? (
                   <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
                 ) : (
-                  <Dumbbell className="w-5 h-5 text-neuro-orange shrink-0" />
+                  <Dumbbell className="w-5 h-5 text-[#D66829] shrink-0" />
                 )}
                 <div className="min-w-0">
-                  <p className="font-bold text-sm truncate">{ex.name}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="font-bold text-sm text-white truncate">{ex.name}</p>
+                  <p className="text-xs text-white/35">
                     {ex.duration} &middot; {ex.difficulty}
                   </p>
                 </div>
@@ -342,7 +338,7 @@ export default function ExercisesPage() {
         ) : !checkin ? (
           <Link
             href="/portal/track"
-            className="mt-4 inline-flex items-center gap-2 px-5 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-all"
+            className="mt-4 inline-flex items-center gap-2 px-5 py-3 bg-[#D66829] text-white rounded-xl font-bold text-sm hover:bg-[#e8834a] transition-all shadow-lg shadow-[#D66829]/20"
           >
             Log Today&apos;s Check-in
           </Link>
@@ -355,8 +351,8 @@ export default function ExercisesPage() {
           onClick={() => setActiveCategory("all")}
           className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-all shrink-0 ${
             activeCategory === "all"
-              ? "bg-neuro-navy text-white"
-              : "bg-white border border-gray-200 text-gray-500 hover:border-neuro-orange/30"
+              ? "bg-[#D66829] text-white"
+              : "bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white hover:bg-white/[0.1]"
           }`}
         >
           All
@@ -367,8 +363,8 @@ export default function ExercisesPage() {
             onClick={() => setActiveCategory(cat.key)}
             className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-all shrink-0 ${
               activeCategory === cat.key
-                ? "bg-neuro-navy text-white"
-                : "bg-white border border-gray-200 text-gray-500 hover:border-neuro-orange/30"
+                ? "bg-[#D66829] text-white"
+                : "bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white hover:bg-white/[0.1]"
             }`}
           >
             {cat.emoji} {cat.label}
@@ -395,19 +391,19 @@ export default function ExercisesPage() {
 
       {/* Premium upsell at bottom if not premium */}
       {!premium && (
-        <div className="bg-neuro-navy rounded-2xl p-6 text-center">
-          <Lock className="w-8 h-8 text-neuro-orange mx-auto mb-3" />
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl p-6 text-center border border-white/[0.08] shadow-lg shadow-black/20">
+          <Lock className="w-8 h-8 text-[#D66829] mx-auto mb-3" />
           <h3 className="text-white font-black text-lg mb-2">
             Unlock All {EXERCISES.length} Exercises
           </h3>
-          <p className="text-gray-400 text-sm mb-4">
+          <p className="text-white/40 text-sm mb-4">
             Get personalized routines, track your progress, and access the full
             exercise library.
           </p>
           <p className="text-white font-bold mb-4">
             $9/month &middot; Cancel anytime
           </p>
-          <button onClick={async () => { const r = await createPremiumCheckout(); if (r?.url) window.location.href = r.url; }} className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-all">
+          <button onClick={async () => { const r = await createPremiumCheckout(); if (r?.url) window.location.href = r.url; }} className="px-6 py-3 bg-[#D66829] text-white rounded-xl font-bold text-sm hover:bg-[#e8834a] transition-all shadow-lg shadow-[#D66829]/20">
             Start Free Trial &mdash; 7 Days Free
           </button>
         </div>

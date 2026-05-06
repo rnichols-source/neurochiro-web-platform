@@ -16,11 +16,11 @@ export default async function PatientMessagesPage({ searchParams }: { searchPara
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-3xl font-heading font-black text-neuro-navy uppercase tracking-tight">Messages</h1>
-        <p className="text-gray-500 mt-1">Connect with your doctors securely.</p>
+        <h1 className="text-2xl font-bold text-white">Messages</h1>
+        <p className="text-xs text-white/35 mt-1">Connect with your doctors securely.</p>
       </header>
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ minHeight: '500px' }}>
+      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden [&_.bg-white]:!bg-[#162231] [&_.border-gray-100]:!border-white/[0.08] [&_.border-gray-200]:!border-white/[0.08] [&_.text-gray-900]:!text-white [&_.text-gray-800]:!text-white/70 [&_.text-gray-700]:!text-white/60 [&_.text-gray-600]:!text-white/50 [&_.text-gray-500]:!text-white/40 [&_.text-gray-400]:!text-white/35 [&_.bg-gray-50]:!bg-white/[0.04] [&_.bg-gray-100]:!bg-white/[0.06] [&_.bg-gray-200]:!bg-white/[0.08]" style={{ minHeight: '500px' }}>
         <MessagingSystem currentUserId={user.id} userRole="patient" initialOtherUserId={to} />
       </div>
     </div>

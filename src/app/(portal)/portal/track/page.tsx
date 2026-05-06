@@ -19,17 +19,17 @@ function SliderInput({ label, icon: Icon, value, onChange, color, invertScale }:
   label: string; icon: any; value: number; onChange: (v: number) => void; color: string; invertScale?: boolean;
 }) {
   const displayColor = invertScale
-    ? (value <= 3 ? 'text-green-500' : value <= 6 ? 'text-orange-500' : 'text-red-500')
-    : (value >= 7 ? 'text-green-500' : value >= 4 ? 'text-orange-500' : 'text-red-500');
+    ? (value <= 3 ? 'text-green-400' : value <= 6 ? 'text-orange-400' : 'text-red-400')
+    : (value >= 7 ? 'text-green-400' : value >= 4 ? 'text-orange-400' : 'text-red-400');
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+    <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", color)}>
             <Icon className="w-5 h-5" />
           </div>
-          <span className="font-bold text-neuro-navy">{label}</span>
+          <span className="font-bold text-white">{label}</span>
         </div>
         <span className={cn("text-3xl font-black", displayColor)}>{value}</span>
       </div>
@@ -39,9 +39,9 @@ function SliderInput({ label, icon: Icon, value, onChange, color, invertScale }:
         max={10}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-3 bg-gray-100 rounded-full appearance-none cursor-pointer accent-neuro-orange [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-neuro-orange [&::-webkit-slider-thumb]:shadow-md touch-pan-x"
+        className="w-full h-3 bg-white/[0.06] rounded-full appearance-none cursor-pointer accent-[#D66829] [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:bg-[#D66829] [&::-webkit-slider-thumb]:shadow-md touch-pan-x"
       />
-      <div className="flex justify-between text-[10px] text-gray-400 font-bold mt-1">
+      <div className="flex justify-between text-[10px] text-white/35 font-bold mt-1">
         <span>{invertScale ? 'None' : 'Low'}</span>
         <span>{invertScale ? 'Severe' : 'High'}</span>
       </div>
@@ -77,13 +77,11 @@ export default function TrackPage() {
 
   const handleSubmit = async () => {
     setSaving(true);
-    // Send local date to avoid timezone mismatch (server is UTC, user may be AU/NZ)
     const now = new Date();
     const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const result = await submitDailyLog({ energyLevel: energy, painLevel: pain, sleepQuality: sleep, notes, localDate });
     setSaving(false);
     if (result.success) {
-      // Verify data persisted by refetching before showing success
       const updatedLogs = await getLast30DaysLogs();
       setLogs(updatedLogs as DailyLog[]);
       setTodayLogged(true);
@@ -104,14 +102,12 @@ export default function TrackPage() {
   const painTrend = avg(recentLogs, 'pain_level') - avg(olderLogs, 'pain_level');
   const sleepTrend = avg(recentLogs, 'sleep_quality') - avg(olderLogs, 'sleep_quality');
 
-  // Calculate streak: consecutive days backwards from today with a log
   const streak = (() => {
     if (logs.length === 0) return 0;
     const logDates = new Set(logs.map((l) => l.log_date));
     let count = 0;
     const d = new Date();
     while (true) {
-      // Use local date string to match against log dates
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       if (logDates.has(key)) {
         count++;
@@ -126,7 +122,7 @@ export default function TrackPage() {
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[60vh]">
-        <div className="w-10 h-10 border-4 border-neuro-orange border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-[#D66829] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -134,51 +130,51 @@ export default function TrackPage() {
   return (
     <div className="space-y-8 pb-20">
       <header>
-        <h1 className="text-2xl font-heading font-black text-neuro-navy uppercase tracking-tight">Health Tracker</h1>
-        <p className="text-gray-500 mt-1">Log how you feel each day to see trends over time.</p>
+        <h1 className="text-2xl font-bold text-white">Health Tracker</h1>
+        <p className="text-xs text-white/35 mt-1">Log how you feel each day to see trends over time.</p>
       </header>
 
       {streak > 0 && (
-        <div className="flex items-center gap-2 px-4 py-3 bg-orange-50 border border-orange-100 rounded-xl w-fit">
-          <Flame className="w-5 h-5 text-neuro-orange" />
-          <span className="font-bold text-neuro-navy">{streak} day streak</span>
+        <div className="flex items-center gap-2 px-4 py-3 bg-[#D66829]/10 border border-[#D66829]/20 rounded-xl w-fit">
+          <Flame className="w-5 h-5 text-[#D66829]" />
+          <span className="font-bold text-white">{streak} day streak</span>
         </div>
       )}
 
       {/* Daily Check-in */}
-      <section className="bg-neuro-cream rounded-2xl border border-gray-100 p-8 shadow-sm">
-        <h2 className="text-xl font-black text-neuro-navy mb-6 flex items-center gap-2">
-          <Activity className="w-5 h-5 text-neuro-orange" />
+      <section className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-8 shadow-lg shadow-black/20">
+        <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2">
+          <Activity className="w-5 h-5 text-[#D66829]" />
           {todayLogged ? "Today's Check-in (Update)" : "Daily Check-in"}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <SliderInput label="Energy Level" icon={Zap} value={energy} onChange={setEnergy} color="bg-yellow-50 text-yellow-500" />
-          <SliderInput label="Pain Level" icon={Activity} value={pain} onChange={setPain} color="bg-red-50 text-red-500" invertScale />
-          <SliderInput label="Sleep Quality" icon={Moon} value={sleep} onChange={setSleep} color="bg-blue-50 text-blue-500" />
+          <SliderInput label="Energy Level" icon={Zap} value={energy} onChange={setEnergy} color="bg-yellow-500/10 text-yellow-400" />
+          <SliderInput label="Pain Level" icon={Activity} value={pain} onChange={setPain} color="bg-red-500/10 text-red-400" invertScale />
+          <SliderInput label="Sleep Quality" icon={Moon} value={sleep} onChange={setSleep} color="bg-blue-500/10 text-blue-400" />
         </div>
 
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Any notes about today? (optional)"
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none h-20 mb-4"
+          className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none resize-none h-20 mb-4"
         />
 
         <button
           onClick={handleSubmit}
           disabled={saving}
-          className="px-6 py-3 bg-neuro-navy text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-neuro-navy/90 transition-all disabled:opacity-50 flex items-center gap-2"
+          className="px-6 py-3 bg-[#D66829] text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#e8834a] transition-all disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-[#D66829]/20"
         >
           {saved ? <><CheckCircle2 className="w-4 h-4" /> Saved!</> : saving ? 'Saving...' : todayLogged ? 'Update Check-in' : 'Log Today'}
         </button>
-        <p className="text-xs text-gray-400 mt-2">Tip: 1 = worst, 10 = best. For pain, 1 = no pain, 10 = severe.</p>
+        <p className="text-xs text-white/35 mt-2">Tip: 1 = worst, 10 = best. For pain, 1 = no pain, 10 = severe.</p>
       </section>
 
       {/* 30-Day Trends */}
       {logs.length > 0 ? (
-        <section className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
-          <h2 className="text-xl font-black text-neuro-navy mb-6">30-Day Trends</h2>
+        <section className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-8 shadow-lg shadow-black/20">
+          <h2 className="text-xl font-black text-white mb-6">30-Day Trends</h2>
 
           <div className="grid grid-cols-3 gap-4 mb-8">
             {[
@@ -189,11 +185,11 @@ export default function TrackPage() {
               const isGood = item.good === 'up' ? item.trend > 0 : item.trend < 0;
               const isBad = item.good === 'up' ? item.trend < 0 : item.trend > 0;
               return (
-                <div key={item.label} className="bg-gray-50 rounded-2xl p-5 text-center">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">{item.label} (7-day avg)</p>
-                  <p className="text-3xl font-black text-neuro-navy">{item.value}</p>
+                <div key={item.label} className="bg-white/[0.04] rounded-2xl p-5 text-center">
+                  <p className="text-xs font-bold text-white/35 uppercase tracking-wide mb-1">{item.label} (7-day avg)</p>
+                  <p className="text-3xl font-black text-white">{item.value}</p>
                   <div className={cn("flex items-center justify-center gap-1 mt-1 text-xs font-bold",
-                    isGood ? "text-green-500" : isBad ? "text-red-500" : "text-gray-400"
+                    isGood ? "text-green-400" : isBad ? "text-red-400" : "text-white/35"
                   )}>
                     {isGood ? <TrendingUp className="w-3 h-3" /> : isBad ? <TrendingDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
                     {Math.abs(item.trend).toFixed(1)} vs prior week
@@ -205,19 +201,19 @@ export default function TrackPage() {
 
           {/* Bar Chart */}
           <div className="space-y-2">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Daily Energy (last 30 days)</p>
+            <p className="text-xs font-bold text-white/35 uppercase tracking-wide">Daily Energy (last 30 days)</p>
             <div className="flex items-end gap-1 h-32">
               {logs.map((log, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
                   <div
-                    className="w-full bg-neuro-orange/80 rounded-t-sm min-h-[2px] transition-all hover:bg-neuro-orange"
+                    className="w-full bg-[#D66829]/80 rounded-t-sm min-h-[2px] transition-all hover:bg-[#D66829]"
                     style={{ height: `${((log.energy_level || 0) / 10) * 100}%` }}
                     title={`${log.log_date}: Energy ${log.energy_level}`}
                   />
                 </div>
               ))}
             </div>
-            <div className="flex justify-between text-xs text-gray-400">
+            <div className="flex justify-between text-xs text-white/35">
               <span>{logs[0]?.log_date}</span>
               <span>{logs[logs.length - 1]?.log_date}</span>
             </div>
@@ -225,25 +221,25 @@ export default function TrackPage() {
 
           {/* Recent Entries */}
           <div className="mt-8">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Recent Entries</p>
+            <p className="text-xs font-bold text-white/35 uppercase tracking-wide mb-3">Recent Entries</p>
             <div className="space-y-2">
               {logs.slice(-7).reverse().map((log) => (
-                <div key={log.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl text-sm">
-                  <span className="text-gray-400 text-xs font-mono w-20">{log.log_date}</span>
-                  <span className="font-bold text-yellow-600">E:{log.energy_level}</span>
-                  <span className="font-bold text-red-500">P:{log.pain_level}</span>
-                  <span className="font-bold text-blue-500">S:{log.sleep_quality}</span>
-                  {log.notes && <span className="text-gray-500 text-xs truncate flex-1">{log.notes}</span>}
+                <div key={log.id} className="flex items-center gap-4 p-3 bg-white/[0.04] rounded-xl text-sm">
+                  <span className="text-white/35 text-xs font-mono w-20">{log.log_date}</span>
+                  <span className="font-bold text-yellow-400">E:{log.energy_level}</span>
+                  <span className="font-bold text-red-400">P:{log.pain_level}</span>
+                  <span className="font-bold text-blue-400">S:{log.sleep_quality}</span>
+                  {log.notes && <span className="text-white/40 text-xs truncate flex-1">{log.notes}</span>}
                 </div>
               ))}
             </div>
           </div>
         </section>
       ) : (
-        <section className="bg-white rounded-2xl border border-gray-100 p-12 shadow-sm text-center">
-          <Sun className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-          <h2 className="text-xl font-black text-gray-400 mb-2">No tracking data yet</h2>
-          <p className="text-gray-500 text-sm max-w-md mx-auto">
+        <section className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-12 shadow-lg shadow-black/20 text-center">
+          <Sun className="w-16 h-16 text-white/10 mx-auto mb-4" />
+          <h2 className="text-xl font-black text-white/30 mb-2">No tracking data yet</h2>
+          <p className="text-white/40 text-sm max-w-md mx-auto">
             Start your daily check-in above to track how your energy, pain, and sleep change over time.
           </p>
         </section>
