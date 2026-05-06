@@ -48,6 +48,7 @@ const allNavItems = [
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
   { name: "Seminars", href: "/admin/seminars", icon: Calendar },
+  { name: "Leads", href: "/admin/leads", icon: Tag },
   { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert },
   { name: "Spotlight", href: "/admin/spotlight", icon: Video },
   { name: "Announcements", href: "/admin/announcements", icon: Megaphone },
