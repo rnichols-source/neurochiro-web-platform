@@ -72,7 +72,7 @@ export default function OutreachPage() {
       const [prospectsRes, statsRes, queueRes, statesRes] = await Promise.all([
         getProspects({ state: stateFilter, status: statusFilter, search: searchQuery, prospect_type: prospectType }),
         getPipelineStats(stateFilter, prospectType),
-        getDailyQueue(10, prospectType),
+        getDailyQueue(50, prospectType),
         getProspectStates(prospectType),
       ]);
       setProspects(prospectsRes.prospects);
