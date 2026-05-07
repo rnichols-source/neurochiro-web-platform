@@ -31,7 +31,7 @@ export async function GET(req: Request) {
     const resend = getResend();
 
     // Import spotlight data
-    const { spotlightEpisodes } = await import('@/app/(public)/spotlight/spotlight-data');
+    const { spotlightEpisodes, getYouTubeThumbnail } = await import('@/app/(public)/spotlight/spotlight-data');
 
     // Find episodes published in the last 7 days
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -73,6 +73,11 @@ export async function GET(req: Request) {
 
     for (let i = 0; i < recipients.length; i += CHUNK_SIZE) {
       const chunk = recipients.slice(i, i + CHUNK_SIZE);
+      // Get YouTube watch URL from embed URL
+      const videoId = episode.videoUrl.match(/\/embed\/([a-zA-Z0-9_-]+)/)?.[1] || '';
+      const watchUrl = videoId ? `https://www.youtube.com/watch?v=${videoId}` : 'https://neurochiro.co/spotlight';
+      const thumbnailUrl = getYouTubeThumbnail(episode.videoUrl);
+
       const emails = chunk.map((r: any) => ({
         from: 'NeuroChiro <support@neurochirodirectory.com>',
         to: r.email,
@@ -81,9 +86,10 @@ export async function GET(req: Request) {
           <p style="font-size: 11px; color: #D66829; font-weight: 900; letter-spacing: 3px; text-transform: uppercase;">New Episode</p>
           <h2 style="font-size: 24px; color: #1E2D3B; margin: 8px 0 16px;">The NeuroChiro Spotlight — ${episode.doctorName}</h2>
           <p style="color: #4B5563;">${episode.clinicName} &middot; ${episode.city}, ${episode.state}</p>
+          ${thumbnailUrl ? `<p style="margin: 20px 0;"><a href="${watchUrl}"><img src="${thumbnailUrl}" alt="Watch Episode" style="width: 100%; max-width: 560px; border-radius: 12px; display: block;" /></a></p>` : ''}
           <p style="margin: 16px 0; font-style: italic; color: #4B5563;">"${episode.quote}"</p>
-          <p>${episode.description.substring(0, 200)}...</p>
-          <p style="margin-top: 20px;"><a href="https://neurochiro.co/spotlight" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">Watch Now</a></p>
+          <p style="color: #4B5563;">${episode.description.substring(0, 200)}...</p>
+          <p style="margin-top: 20px;"><a href="${watchUrl}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">Watch Now</a></p>
         `),
       }));
 
