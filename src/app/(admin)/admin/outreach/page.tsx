@@ -442,10 +442,10 @@ export default function OutreachPage() {
       {/* ═══════════ DM SCRIPTS TAB ═══════════ */}
       {activeTab === "scripts" && (
         <div className="space-y-4">
-          {["first_contact", "follow_up", "response", "objection", "email"].map((category) => {
+          {["first_contact", "follow_up", "response", "objection", "ig_comment", "email"].map((category) => {
             const categoryScripts = scripts.filter((s) => s.category === category);
             if (categoryScripts.length === 0) return null;
-            const categoryLabels: Record<string, string> = { first_contact: "First Contact", follow_up: "Follow-Ups", response: "Responses", objection: "Objection Handling", email: "Email Scripts" };
+            const categoryLabels: Record<string, string> = { first_contact: "First Contact", follow_up: "Follow-Ups", response: "Responses", objection: "Objection Handling", ig_comment: "Instagram Comments", email: "Email Scripts" };
             return (
               <div key={category}>
                 <h3 className="text-sm font-black text-neuro-orange uppercase tracking-widest mb-3">{categoryLabels[category]}</h3>
@@ -556,8 +556,7 @@ function QueueCard({ prospect, scripts, onCopy, onMarkDone, onStatusChange, onVi
       setBuilding(false);
       if (result.success && result.profileUrl) {
         navigator.clipboard.writeText(result.profileUrl);
-        onRefresh();
-        alert(`Profile created!${result.emailSent ? ' Initial email sent automatically!' : ' No email on file — DM them manually.'}\n\nLink copied: ${result.profileUrl}`);
+        alert(`Profile created!${result.emailSent ? ' Initial email sent automatically!' : ' No email on file — DM them manually.'}\n\nLink copied: ${result.profileUrl}\n\nThe prospect stays in your queue until you click "Contacted".`);
       } else {
         alert(`Error: ${result.error || 'Unknown error'}`);
       }
