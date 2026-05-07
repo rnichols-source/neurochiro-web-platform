@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Search, Eye, Users, MapPin } from "lucide-react";
+import { Search, Eye, Users, MapPin, X } from "lucide-react";
 
 interface LiveStats {
   searchesLastHour: number;
@@ -19,6 +19,7 @@ export default function LiveActivityTicker() {
   const [stats, setStats] = useState<LiveStats | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
   const fetchStats = useCallback(() => {
     fetch("/api/activity/live")
@@ -32,47 +33,62 @@ export default function LiveActivityTicker() {
 
   useEffect(() => {
     fetchStats();
-    const interval = setInterval(fetchStats, 30000); // Refresh every 30s
+    const interval = setInterval(fetchStats, 30000);
     return () => clearInterval(interval);
   }, [fetchStats]);
 
-  // Rotate through ticker items
   useEffect(() => {
     if (!stats) return;
+    const items = getTickerItems(stats);
+    if (items.length === 0) return;
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % getTickerItems(stats).length);
+      setActiveIndex((prev) => (prev + 1) % items.length);
     }, 6000);
     return () => clearInterval(interval);
   }, [stats]);
 
-  if (!stats || !isVisible) return null;
+  if (!stats || !isVisible || dismissed) return null;
 
   const items = getTickerItems(stats);
-  if (items.length === 0) return null;
+  if (items.length === 0) {
+    items.push({
+      icon: Users,
+      text: "Patients are searching for nervous system chiropractors right now",
+    });
+  }
 
   const currentItem = items[activeIndex % items.length];
 
   return (
-    <div className="bg-neuro-navy/95 backdrop-blur-sm border-b border-white/5">
-      <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-center gap-2 min-h-[36px]">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] animate-fade-in-up">
+      <div className="bg-neuro-navy/95 backdrop-blur-md border border-white/10 rounded-full px-5 py-2.5 flex items-center gap-3 shadow-2xl">
         {/* Pulse dot */}
         <span className="relative flex h-2 w-2 shrink-0">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
         </span>
 
-        {/* Ticker content with fade transition */}
-        <div className="overflow-hidden relative h-5 flex-1 max-w-md">
+        {/* Ticker content */}
+        <div className="overflow-hidden relative h-5 max-w-[280px] sm:max-w-sm">
           <div
             key={activeIndex}
-            className="flex items-center gap-2 justify-center animate-fade-in-up"
+            className="flex items-center gap-2 animate-fade-in-up"
           >
             <currentItem.icon className="w-3.5 h-3.5 text-neuro-orange shrink-0" />
-            <span className="text-xs text-gray-300 font-medium truncate">
+            <span className="text-xs text-gray-300 font-medium whitespace-nowrap">
               {currentItem.text}
             </span>
           </div>
         </div>
+
+        {/* Dismiss */}
+        <button
+          onClick={() => setDismissed(true)}
+          className="text-gray-500 hover:text-gray-300 transition-colors ml-1"
+          aria-label="Dismiss"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
       </div>
     </div>
   );
@@ -102,7 +118,6 @@ function getTickerItems(stats: LiveStats): TickerItem[] {
     });
   }
 
-  // Add recent search locations
   if (stats.recentSearchLocations.length > 0) {
     const location = stats.recentSearchLocations[0];
     const locationText = location.state

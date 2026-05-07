@@ -226,15 +226,15 @@ export async function updateProfileAction(userId: string, profileData: any) {
       return { error: err.message || "Database connection error" };
     }
   } else if (role === 'student') {
-    // Save student-specific data to the students table
+    // Upsert student-specific data (creates row if trigger didn't fire)
     const { error: studentError } = await supabase
       .from('students')
-      .update({ 
+      .upsert({
+        id: userId,
         school: school,
         graduation_year: gradYear ? parseInt(gradYear, 10) : null,
         location_city: city
-      })
-      .eq('id', userId); // students table uses id as PK
+      }, { onConflict: 'id' });
       
     if (studentError) {
       console.error("Failed to update student profile:", studentError);

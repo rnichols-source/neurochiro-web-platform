@@ -355,7 +355,7 @@ export async function generateDreamPitch(candidateId: string, jobId: string) {
   const supabase = createServerSupabase();
   
   const [candidateRes, jobRes] = await Promise.all([
-    supabase.from('students').select('*').eq('user_id', candidateId).single(),
+    supabase.from('students').select('*').eq('id', candidateId).single(),
     supabase.from('job_postings').select('*').eq('id', jobId).single()
   ]);
 
