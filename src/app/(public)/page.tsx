@@ -112,7 +112,7 @@ export default async function HomePage() {
       {/* Featured Doctors */}
       {featured.length > 0 && (
         <section className="max-w-5xl mx-auto px-6 py-16">
-          <h2 className="text-2xl font-heading font-black text-neuro-navy text-center mb-10">Featured Specialists</h2>
+          <h2 className="text-2xl font-heading font-black text-neuro-navy text-center mb-10">Most Viewed Doctors</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {featured.map((doc) => (
               <Link
