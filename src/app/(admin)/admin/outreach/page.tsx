@@ -229,37 +229,59 @@ export default function OutreachPage() {
       {/* ═══════════ DAILY QUEUE TAB ═══════════ */}
       {activeTab === "queue" && (
         <div className="space-y-6">
+          {/* Instagram filter for queue */}
+          <div className="flex items-center gap-3">
+            <select
+              value={igFilter}
+              onChange={(e) => setIgFilter(e.target.value as "all" | "has_ig" | "no_ig")}
+              className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 focus:outline-none focus:border-neuro-orange"
+            >
+              <option value="all">All Prospects</option>
+              <option value="has_ig">Has Instagram</option>
+              <option value="no_ig">No Instagram</option>
+            </select>
+            {igFilter !== "all" && (
+              <span className="text-xs text-white/40">
+                {igFilter === "has_ig" ? "Showing only prospects you can DM" : "Showing prospects without Instagram — use email"}
+              </span>
+            )}
+          </div>
+          {(() => {
+            const filteredFollowUps = igFilter === "all" ? queue.followUps : igFilter === "has_ig" ? queue.followUps.filter(p => p.instagram_handle) : queue.followUps.filter(p => !p.instagram_handle);
+            const filteredNew = igFilter === "all" ? queue.newProspects : igFilter === "has_ig" ? queue.newProspects.filter(p => p.instagram_handle) : queue.newProspects.filter(p => !p.instagram_handle);
+            const filteredTotal = filteredFollowUps.length + filteredNew.length;
+            return <>
           {loading ? (
             <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-neuro-orange animate-spin" /></div>
-          ) : queueTotal === 0 ? (
+          ) : filteredTotal === 0 ? (
             <div className="text-center py-20">
               <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-4" />
-              <p className="text-lg font-black text-white mb-2">All caught up!</p>
-              <p className="text-gray-500">No DMs to send today. Add more prospects or check back tomorrow.</p>
+              <p className="text-lg font-black text-white mb-2">{igFilter !== "all" ? "No matching prospects" : "All caught up!"}</p>
+              <p className="text-gray-500">{igFilter !== "all" ? "Try changing the Instagram filter." : "No DMs to send today. Add more prospects or check back tomorrow."}</p>
             </div>
           ) : (
             <>
               {/* Follow-ups due */}
-              {queue.followUps.length > 0 && (
+              {filteredFollowUps.length > 0 && (
                 <div>
                   <h3 className="text-sm font-black text-yellow-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <Clock className="w-4 h-4" /> Follow-Ups Due ({queue.followUps.length})
+                    <Clock className="w-4 h-4" /> Follow-Ups Due ({filteredFollowUps.length})
                   </h3>
                   <div className="space-y-2">
-                    {queue.followUps.map((p) => (
+                    {filteredFollowUps.map((p) => (
                       <QueueCard key={p.id} prospect={p} scripts={scripts} onCopy={copyScript} onMarkDone={markContacted} onStatusChange={changeStatus} onViewDetails={setShowDetailModal} onRefresh={fetchData} />
                     ))}
                   </div>
                 </div>
               )}
               {/* New prospects to contact */}
-              {queue.newProspects.length > 0 && (
+              {filteredNew.length > 0 && (
                 <div>
                   <h3 className="text-sm font-black text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <Send className="w-4 h-4" /> New Prospects to Contact ({queue.newProspects.length})
+                    <Send className="w-4 h-4" /> New Prospects to Contact ({filteredNew.length})
                   </h3>
                   <div className="space-y-2">
-                    {queue.newProspects.map((p) => (
+                    {filteredNew.map((p) => (
                       <QueueCard key={p.id} prospect={p} scripts={scripts} onCopy={copyScript} onMarkDone={markContacted} onStatusChange={changeStatus} onViewDetails={setShowDetailModal} onRefresh={fetchData} />
                     ))}
                   </div>
@@ -267,6 +289,8 @@ export default function OutreachPage() {
               )}
             </>
           )}
+          </>;
+          })()}
         </div>
       )}
 
