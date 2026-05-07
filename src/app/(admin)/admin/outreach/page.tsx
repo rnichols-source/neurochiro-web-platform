@@ -50,6 +50,7 @@ export default function OutreachPage() {
   const [loading, setLoading] = useState(true);
   const [stateFilter, setStateFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [igFilter, setIgFilter] = useState<"all" | "has_ig" | "no_ig">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [prospectStates, setProspectStates] = useState<string[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -301,12 +302,35 @@ export default function OutreachPage() {
                 <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
               ))}
             </select>
+            <select
+              value={igFilter}
+              onChange={(e) => setIgFilter(e.target.value as "all" | "has_ig" | "no_ig")}
+              className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 focus:outline-none focus:border-neuro-orange"
+            >
+              <option value="all">All Prospects</option>
+              <option value="has_ig">Has Instagram</option>
+              <option value="no_ig">No Instagram</option>
+            </select>
           </div>
 
           {/* Prospect Table */}
+          {(() => {
+            const filteredByIg = igFilter === "all" ? prospects : igFilter === "has_ig" ? prospects.filter(p => p.instagram_handle) : prospects.filter(p => !p.instagram_handle);
+            const igCount = prospects.filter(p => p.instagram_handle).length;
+            const noIgCount = prospects.length - igCount;
+            return <>
+            {igFilter !== "all" && (
+              <div className="flex items-center gap-3 text-xs text-white/40 mb-2">
+                <span>Showing {filteredByIg.length} of {prospects.length} prospects</span>
+                <span className="text-white/15">|</span>
+                <span className="text-green-400">{igCount} with Instagram</span>
+                <span className="text-white/15">|</span>
+                <span className="text-white/30">{noIgCount} without</span>
+              </div>
+            )}
           {loading ? (
             <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-neuro-orange animate-spin" /></div>
-          ) : prospects.length === 0 ? (
+          ) : filteredByIg.length === 0 ? (
             <div className="text-center py-20">
               <Users className="w-12 h-12 text-gray-600 mx-auto mb-4" />
               <p className="text-lg font-black text-white mb-2">No prospects yet</p>
@@ -328,7 +352,7 @@ export default function OutreachPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {prospects.map((p) => {
+                    {filteredByIg.map((p) => {
                       const config = STATUS_CONFIG[p.status];
                       return (
                         <tr key={p.id} className="hover:bg-white/[0.03] transition-colors">
@@ -386,6 +410,8 @@ export default function OutreachPage() {
               </div>
             </div>
           )}
+          </>;
+          })()}
         </div>
       )}
 
