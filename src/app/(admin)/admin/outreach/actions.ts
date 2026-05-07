@@ -58,7 +58,7 @@ export async function getProspects(options: {
   await requireAdmin();
 
 
-  const { state, status, search, prospect_type, page = 1, limit = 50 } = options;
+  const { state, status, search, prospect_type, page = 1, limit = 500 } = options;
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
