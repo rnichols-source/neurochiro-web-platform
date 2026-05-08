@@ -22,6 +22,8 @@ import ActionItems from "./action-items";
 import LeadPipelineWidget from "./lead-pipeline-widget";
 import CompetitiveIntelWidget from "./competitive-intel-widget";
 import RevenueWidget from "./revenue-widget";
+import WeeklyInsight from "./weekly-insight";
+import ProfileOptimization from "./profile-optimization";
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
@@ -194,6 +196,16 @@ export default function DoctorDashboard() {
             <CompetitiveIntelWidget {...intel} />
           </motion.div>
         )}
+      </div>
+
+      {/* AI Insights Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <motion.div {...delay(0.22)}>
+          <WeeklyInsight />
+        </motion.div>
+        <motion.div {...delay(0.22)}>
+          <ProfileOptimization />
+        </motion.div>
       </div>
 
       {/* Quick Actions */}
