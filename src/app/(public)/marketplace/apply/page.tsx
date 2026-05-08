@@ -1,15 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { createVendorCheckout } from "./actions";
-import { useRegion } from "@/context/RegionContext";
+import { Star, CheckCircle2 } from "lucide-react";
 
-const categories = ["Equipment", "Software", "Marketing", "Education", "Supplements", "Other"];
+const MARKETPLACE_CATEGORIES = [
+  "Tables & Equipment",
+  "Imaging & Scans",
+  "EHR & Software",
+  "Marketing",
+  "Supplements",
+  "Education & Coaching",
+  "Billing & Collections",
+  "Legal & Compliance",
+  "Office Supplies & Design",
+  "Staffing & HR",
+  "Financial Services",
+  "Real Estate",
+];
+
+const TIERS = [
+  {
+    key: "starter" as const,
+    name: "Starter",
+    price: 99,
+    features: ["Directory listing", "Profile page", "Discount code", "Monthly analytics"],
+  },
+  {
+    key: "growth" as const,
+    name: "Growth",
+    price: 249,
+    popular: true,
+    features: ["Everything in Starter", "Featured placement", "Spotlight email", "Lead capture form"],
+  },
+  {
+    key: "partner" as const,
+    name: "Partner",
+    price: 499,
+    features: ["Everything in Growth", "Homepage placement", "Sponsor Spotlight", "Direct intros"],
+  },
+];
 
 export default function VendorApplyPage() {
-  const { region } = useRegion();
+  const searchParams = useSearchParams();
+  const [selectedTier, setSelectedTier] = useState<"starter" | "growth" | "partner">("growth");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const tierParam = searchParams.get("tier");
+    if (tierParam === "starter" || tierParam === "growth" || tierParam === "partner") {
+      setSelectedTier(tierParam);
+    }
+  }, [searchParams]);
+
+  const currentTier = TIERS.find((t) => t.key === selectedTier)!;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,47 +68,158 @@ export default function VendorApplyPage() {
       website: fd.get("website") as string,
       category: fd.get("category") as string,
       description: fd.get("description") as string,
+      tier: selectedTier,
     });
-    if (result.error) { setError(result.error); setLoading(false); return; }
+    if ("error" in result && result.error) {
+      setError(result.error as string);
+      setLoading(false);
+      return;
+    }
     if (result.url) window.location.href = result.url;
   };
 
   return (
-    <div className="min-h-dvh bg-neuro-cream pt-24 pb-20">
-      <div className="max-w-xl mx-auto px-6">
+    <div className="min-h-dvh bg-[#F5F3EF] pt-24 pb-20">
+      <div className="max-w-2xl mx-auto px-6">
         <div className="text-center mb-10 space-y-3">
-          <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-[10px]">Partnership</span>
-          <h1 className="text-4xl font-heading font-black text-neuro-navy">Join the Marketplace.</h1>
-          <p className="text-gray-500">{region.currency.symbol}99/month &mdash; connect your product with high-volume, nervous-system-first clinics.</p>
+          <span className="text-[#D66829] font-black uppercase tracking-[0.4em] text-[10px]">
+            Partnership
+          </span>
+          <h1 className="text-4xl font-heading font-black text-[#1E2D3B]">
+            Join the Marketplace.
+          </h1>
+          <p className="text-gray-500">
+            Select your tier and connect your product with high-volume,
+            nervous-system-first clinics.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 border border-gray-100 shadow-xl space-y-5">
+        {/* Tier Selector */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          {TIERS.map((tier) => (
+            <button
+              key={tier.key}
+              type="button"
+              onClick={() => setSelectedTier(tier.key)}
+              className={`relative rounded-xl border-2 p-5 text-left transition-all ${
+                selectedTier === tier.key
+                  ? "border-[#D66829] bg-white shadow-lg shadow-[#D66829]/10"
+                  : "border-gray-200 bg-white/60 hover:border-gray-300"
+              }`}
+            >
+              {tier.popular && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-3 py-0.5 bg-[#D66829] text-white text-[10px] font-black uppercase tracking-widest rounded-full">
+                  <Star className="w-3 h-3 fill-white" />
+                  Popular
+                </span>
+              )}
+              <div className="flex items-center gap-3 mb-2">
+                <div
+                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                    selectedTier === tier.key
+                      ? "border-[#D66829]"
+                      : "border-gray-300"
+                  }`}
+                >
+                  {selectedTier === tier.key && (
+                    <div className="w-2 h-2 rounded-full bg-[#D66829]" />
+                  )}
+                </div>
+                <span className="font-bold text-[#1E2D3B]">{tier.name}</span>
+              </div>
+              <p className="text-2xl font-black text-[#1E2D3B] mb-2">
+                ${tier.price}
+                <span className="text-sm font-bold text-gray-400">/mo</span>
+              </p>
+              <div className="space-y-1">
+                {tier.features.map((f) => (
+                  <div key={f} className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                    <span className="text-xs text-gray-500">{f}</span>
+                  </div>
+                ))}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-2xl p-8 border border-gray-100 shadow-xl space-y-5"
+        >
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Company Name</label>
-            <input name="companyName" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+              Company Name
+            </label>
+            <input
+              name="companyName"
+              required
+              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-[#D66829]"
+            />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Contact Email</label>
-            <input name="email" type="email" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+              Contact Email
+            </label>
+            <input
+              name="email"
+              type="email"
+              required
+              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-[#D66829]"
+            />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Website</label>
-            <input name="website" type="url" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange" placeholder="https://..." />
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+              Website
+            </label>
+            <input
+              name="website"
+              type="url"
+              required
+              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-[#D66829]"
+              placeholder="https://..."
+            />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Category</label>
-            <select name="category" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+              Category
+            </label>
+            <select
+              name="category"
+              required
+              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-[#D66829]"
+            >
               <option value="">Select a category</option>
-              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+              {MARKETPLACE_CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Description</label>
-            <textarea name="description" rows={3} required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none" placeholder="How does your product serve chiropractors?" />
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+              Description
+            </label>
+            <textarea
+              name="description"
+              rows={3}
+              required
+              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-[#D66829] resize-none"
+              placeholder="How does your product serve chiropractors?"
+            />
           </div>
-          {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
-          <button type="submit" disabled={loading} className="w-full py-4 bg-neuro-orange text-white font-black uppercase tracking-widest rounded-xl hover:bg-neuro-orange-dark transition-all disabled:opacity-50">
-            {loading ? "Redirecting to checkout..." : "Apply & Pay {region.currency.symbol}99/month"}
+          {error && (
+            <p className="text-red-500 text-sm font-medium">{error}</p>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 bg-[#D66829] text-white font-black uppercase tracking-widest rounded-xl hover:bg-[#c25a22] transition-all disabled:opacity-50"
+          >
+            {loading
+              ? "Redirecting to checkout..."
+              : `Apply & Pay $${currentTier.price}/month`}
           </button>
         </form>
       </div>

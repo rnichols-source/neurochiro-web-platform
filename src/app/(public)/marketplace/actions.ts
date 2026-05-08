@@ -2,15 +2,21 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 
-export async function getVendors() {
+export async function getVendors(category?: string) {
   const supabase = createServerSupabase()
-  
-  const { data, error } = await supabase
+
+  let query = (supabase as any)
     .from('vendors')
     .select('*')
     .eq('is_active', true)
-    .order('tier', { ascending: false }) // featured_partner first
+    .order('tier', { ascending: false })
     .order('name', { ascending: true })
+
+  if (category) {
+    query = query.contains('categories', [category])
+  }
+
+  const { data, error } = await query
 
   if (error) {
     console.error("Error fetching vendors:", error)
@@ -22,18 +28,16 @@ export async function getVendors() {
 
 export async function trackVendorClick(vendorId: string, clickType: 'website' | 'discount' | 'profile' | 'demo') {
   const supabase = createServerSupabase()
-  
+
   // Update analytics count
   const column = clickType === 'profile' ? 'profile_views' : `${clickType}_clicks`
-  
-  const { error } = await supabase.rpc('increment_vendor_stats', { 
-    vendor_id: vendorId, 
-    stat_column: column 
+
+  const { error } = await (supabase as any).rpc('increment_vendor_stats', {
+    vendor_id: vendorId,
+    stat_column: column
   })
 
   if (error) {
-    // If RPC doesn't exist, we can do a standard update
-    // But RPC is better for atomic increments
     console.error("Error tracking vendor click:", error)
   }
 
