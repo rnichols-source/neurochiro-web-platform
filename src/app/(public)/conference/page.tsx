@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Users, ShieldCheck, Globe, Sparkles, MapPin, Calendar, Check, Zap } from "lucide-react";
+import { ArrowRight, Users, ShieldCheck, Globe, Sparkles, Check, Zap, Award, BarChart3, Briefcase } from "lucide-react";
 import { STRIPE_PAYMENT_LINKS } from "@/lib/stripe-links";
 
 type Role = "doctor" | "student";
@@ -21,63 +21,56 @@ export default function ConferenceLandingPage() {
   const price = prices[role][billing];
   const paymentLink = STRIPE_PAYMENT_LINKS[role][billing];
 
-  const features = {
-    doctor: [
-      "Your own profile page in the directory",
-      "Found by patients searching Google",
-      "AI-powered bio generator",
-      "Verified badge for your website",
-      "Profile views and analytics dashboard",
-      "Send and receive patient referrals",
-      "Post job listings and seminars",
-      "Message doctors, students, and patients",
-    ],
-    student: [
-      "Learn from top nervous system chiropractors",
-      "Build your professional network early",
-      "Get listed in the directory at graduation",
-      "Access to job listings and clinic matching",
-      "Seminar and event access",
-      "Message doctors and fellow students",
-      "Academy courses and resources",
-      "Profile visibility to hiring clinics",
-    ],
-  };
+  const doctorFeatures = [
+    "Your own profile page in the global directory",
+    "Found by patients searching for nervous system care",
+    "AI-powered practice insights and profile optimization",
+    "Practice Health Score with competitive intelligence",
+    "Patient lead pipeline (CRM) with conversion tracking",
+    "ChiroMatch — residency-style associate matching",
+    "CE credit tracking with verified certificates",
+    "Full ATS for hiring with ChiroScore candidate ratings",
+    "Salary transparency data and market benchmarks",
+    "Referral network with doctor-to-doctor tracking",
+    "Seminar hosting with reviews and analytics",
+    "Milestone badges displayed on your public profile",
+  ];
+
+  const studentFeatures = [
+    "ChiroScore — universal candidate rating (0-100)",
+    "ChiroMatch — get matched with top practices",
+    "Smart job matching with salary transparency",
+    "CE credit tracking and verified certificates",
+    "Academy courses and interview prep",
+    "Contract Lab for reviewing offers",
+    "Financial planner with salary benchmarks",
+    "Technique explorer with certification tracking",
+    "Direct messaging with doctors and mentors",
+    "Profile visibility to hiring clinics nationwide",
+  ];
+
+  const features = { doctor: doctorFeatures, student: studentFeatures };
 
   return (
     <div className="min-h-dvh bg-neuro-cream">
       {/* Hero */}
-      <section className="bg-neuro-navy text-white pt-32 pb-10 px-6">
+      <section className="bg-neuro-navy text-white pt-32 pb-12 px-6">
         <div className="max-w-2xl mx-auto text-center">
-          {/* Event badge */}
           <div className="inline-flex items-center gap-2 bg-neuro-orange/15 border border-neuro-orange/30 rounded-full px-4 py-2 mb-6">
-            <Calendar className="w-4 h-4 text-neuro-orange" />
+            <Sparkles className="w-4 h-4 text-neuro-orange" />
             <span className="text-xs font-bold text-neuro-orange uppercase tracking-wider">
-              New Beginnings 2026 &middot; Asbury Park, NJ
+              The Platform for Nervous System Chiropractors
             </span>
           </div>
 
           <h1 className="text-3xl md:text-4xl font-heading font-black tracking-tight leading-tight mb-4 text-white">
-            Get Found by Patients Looking for{" "}
-            <span className="text-neuro-orange">Nervous System</span> Chiropractors
+            The Most Disruptive Platform in{" "}
+            <span className="text-neuro-orange">Chiropractic</span>
           </h1>
 
-          <p className="text-gray-300 text-base mb-6 max-w-lg mx-auto">
-            The only directory built exclusively for doctors like you.
-            120+ verified chiropractors across 30+ states and 4 countries.
+          <p className="text-gray-300 text-base mb-8 max-w-lg mx-auto">
+            Everything you need to grow your practice, hire top talent, track CE credits, and connect with the nervous system chiropractic community — all in one place.
           </p>
-
-          {/* Event details */}
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-400">
-            <div className="flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-neuro-orange" />
-              <span>Berkeley Oceanfront Hotel</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-neuro-orange" />
-              <span>May 14-17, 2026</span>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -85,9 +78,9 @@ export default function ConferenceLandingPage() {
       <div className="bg-neuro-navy-dark border-t border-white/5">
         <div className="max-w-2xl mx-auto flex justify-center divide-x divide-white/10">
           {[
-            { number: "120+", label: "Doctors" },
-            { number: "30+", label: "States" },
-            { number: "4", label: "Countries" },
+            { number: "140+", label: "Verified Doctors", icon: ShieldCheck },
+            { number: "30+", label: "States", icon: Globe },
+            { number: "4", label: "Countries", icon: Users },
           ].map((stat) => (
             <div key={stat.label} className="flex-1 text-center py-4">
               <div className="text-xl font-black text-neuro-orange">{stat.number}</div>
@@ -97,8 +90,34 @@ export default function ConferenceLandingPage() {
         </div>
       </div>
 
-      {/* Pricing + Signup */}
+      {/* What's Inside */}
       <section className="px-6 py-12">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-xl font-heading font-black text-neuro-navy text-center mb-8">
+            What Doctors Are Saying
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+            <div className="bg-white rounded-xl border border-gray-100 p-5 text-center">
+              <BarChart3 className="w-6 h-6 text-neuro-orange mx-auto mb-2" />
+              <p className="text-sm font-bold text-neuro-navy">Practice Intelligence</p>
+              <p className="text-xs text-gray-400 mt-1">AI insights, competitive ranking, revenue tracking</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 p-5 text-center">
+              <Briefcase className="w-6 h-6 text-neuro-orange mx-auto mb-2" />
+              <p className="text-sm font-bold text-neuro-navy">Hiring System</p>
+              <p className="text-xs text-gray-400 mt-1">ChiroMatch, ATS, ChiroScore, salary data</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 p-5 text-center">
+              <Award className="w-6 h-6 text-neuro-orange mx-auto mb-2" />
+              <p className="text-sm font-bold text-neuro-navy">CE Tracking</p>
+              <p className="text-xs text-gray-400 mt-1">Credits, certificates, seminar reviews</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing + Signup */}
+      <section className="px-6 pb-12">
         <div className="max-w-md mx-auto">
           <h2 className="text-xl font-heading font-black text-neuro-navy text-center mb-2">
             Join NeuroChiro
@@ -163,7 +182,7 @@ export default function ConferenceLandingPage() {
               ))}
             </div>
 
-            {/* Pay button — goes straight to Stripe */}
+            {/* Pay button */}
             <a
               href={paymentLink}
               className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors text-base"
@@ -195,10 +214,10 @@ export default function ConferenceLandingPage() {
               <p className="text-sm font-bold text-neuro-navy">Vendors &amp; Partners</p>
             </div>
             <p className="text-xs text-gray-500">
-              Want to reach 120+ nervous system chiropractors? Grab a card at our booth or email{" "}
-              <a href="mailto:support@neurochirodirectory.com" className="text-neuro-orange font-bold hover:underline">
-                support@neurochirodirectory.com
-              </a>
+              Want to reach 140+ nervous system chiropractors?{" "}
+              <Link href="/marketplace/apply" className="text-neuro-orange font-bold hover:underline">
+                Join the Marketplace
+              </Link>
             </p>
           </div>
         </div>
@@ -213,7 +232,7 @@ export default function ConferenceLandingPage() {
           </span>
         </div>
         <p className="text-xs text-gray-500">
-          neurochiro.co &middot; New Beginnings 2026 &middot; Asbury Park, NJ
+          neurochiro.co &middot; The Global Directory for Nervous System Chiropractors
         </p>
       </div>
     </div>
