@@ -6,6 +6,7 @@ import { Calendar, MapPin, ArrowLeft, Loader2, ExternalLink, Users, Globe } from
 import Link from "next/link";
 import { getSeminarById, incrementSeminarStats } from "../actions";
 import Footer from "@/components/landing/Footer";
+import SeminarReviews from "./seminar-reviews";
 
 export default function SeminarDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
@@ -114,6 +115,9 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                 ))}
               </div>
             )}
+
+            {/* Reviews */}
+            <SeminarReviews seminarId={id} />
           </div>
 
           {/* Sidebar */}
@@ -136,6 +140,14 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                   <div className="flex items-start gap-3">
                     <MapPin className="w-5 h-5 text-neuro-orange mt-0.5 flex-shrink-0" />
                     <p className="font-bold text-neuro-navy text-sm">{location}</p>
+                  </div>
+                )}
+
+                {(seminar as any).ce_hours && (
+                  <div className="pt-3 border-t border-gray-100 flex items-center gap-2">
+                    <span className="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-200">
+                      {(seminar as any).ce_hours} CE Hours
+                    </span>
                   </div>
                 )}
 

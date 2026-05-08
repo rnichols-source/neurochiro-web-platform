@@ -84,19 +84,23 @@ export async function updateSeminarAction(seminarId: string, formData: FormData)
   const dates = formData.get('dates') as string
   const price = formData.get('price') as string
   const max_capacity = formData.get('max_capacity') as string
+  const ce_hours = formData.get('ce_hours') as string
   const registration_link = formData.get('registration_link') as string
 
-  const { data, error } = await supabase
+  const updateData: any = {
+    title,
+    description,
+    location,
+    dates,
+    registration_link,
+    price: Number(price) || 0,
+    max_capacity: Number(max_capacity) || 0,
+  };
+  if (ce_hours) updateData.ce_hours = Number(ce_hours) || null;
+
+  const { data, error } = await (supabase as any)
     .from('seminars')
-    .update({
-      title,
-      description,
-      location,
-      dates,
-      registration_link,
-      price: Number(price) || 0,
-      max_capacity: Number(max_capacity) || 0
-    })
+    .update(updateData)
     .eq('id', seminarId)
     .eq('host_id', user.id)
     .select()
@@ -133,6 +137,8 @@ export async function createSeminarAction(formData: FormData) {
   const registration_link = formData.get('registration_link') as string
   const price = Number(formData.get('price')) || 0
   const max_capacity = Number(formData.get('max_capacity')) || null
+  const ce_hours_input = formData.get('ce_hours') as string
+  const ce_hours = ce_hours_input ? Number(ce_hours_input) : null
   const tier = formData.get('tier') as string || 'basic'
 
   // New Fields
@@ -155,28 +161,31 @@ export async function createSeminarAction(formData: FormData) {
   const country = locParts[1] || ''
 
   // 4. Save to Database
-  const { data, error } = await supabase
+  const insertData: any = {
+    host_id: user.id,
+    title,
+    description,
+    location,
+    city,
+    country,
+    dates,
+    registration_link,
+    price,
+    max_capacity,
+    listing_tier: tier,
+    target_audience: target_audience.length > 0 ? target_audience : ['Doctors', 'Students'],
+    tags,
+    payment_status: 'paid',
+    is_approved: true, // Members auto-approved
+    host_type_at_submission: isVerified ? 'doctor' : 'external',
+    latitude: 0,
+    longitude: 0,
+  };
+  if (ce_hours !== null) insertData.ce_hours = ce_hours;
+
+  const { data, error } = await (supabase as any)
     .from('seminars')
-    .insert({
-      host_id: user.id,
-      title,
-      description,
-      location,
-      city,
-      country,
-      dates,
-      registration_link,
-      price,
-      max_capacity,
-      listing_tier: tier,
-      target_audience: target_audience.length > 0 ? target_audience : ['Doctors', 'Students'],
-      tags,
-      payment_status: 'paid',
-      is_approved: true, // Members auto-approved
-      host_type_at_submission: isVerified ? 'doctor' : 'external',
-      latitude: 0,
-      longitude: 0
-    })
+    .insert(insertData)
     .select()
     .single()
 

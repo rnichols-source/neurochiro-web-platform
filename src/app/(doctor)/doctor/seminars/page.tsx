@@ -97,6 +97,11 @@ export default function SeminarsPage() {
             <input name="max_capacity" type="number" defaultValue={defaults?.max_capacity} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
           </div>
         </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">CE Credit Hours</label>
+          <input name="ce_hours" type="number" step="0.5" min="0" defaultValue={defaults?.ce_hours} placeholder="e.g., 8" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+          <p className="text-xs text-gray-400 mt-1">Number of continuing education hours this seminar provides</p>
+        </div>
         <button
           type="submit"
           disabled={submitting}

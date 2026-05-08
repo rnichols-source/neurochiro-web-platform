@@ -79,6 +79,11 @@ export default function SeminarsPage() {
                         </span>
                       </div>
                     )}
+                    {(seminar as any).ce_hours && (
+                      <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
+                        <span className="text-sm font-bold text-blue-700">{(seminar as any).ce_hours} CE Hours</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Title */}
