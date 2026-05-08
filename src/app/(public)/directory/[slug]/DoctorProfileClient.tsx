@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import PublicBadges from "./public-badges";
 import {
   MapPin,
   ShieldCheck,
@@ -179,6 +180,9 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               ))}
             </div>
           )}
+
+          {/* Badges */}
+          {doctor.user_id && <PublicBadges doctorUserId={doctor.user_id} />}
 
           {/* Contact Buttons */}
           <div className="flex gap-3 mb-6">

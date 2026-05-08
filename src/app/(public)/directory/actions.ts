@@ -77,13 +77,16 @@ export async function getDoctors(options: {
       return { doctors: [], total: 0, error: true };
     }
 
-    // Priority sort: Founding members first, then by tier (Pro > Growth > Starter)
+    // Priority sort: Founding → Boosted → Tier (Pro > Growth > Starter)
     const tierPriority: Record<string, number> = { pro: 1, growth: 2, basic: 3, starter: 3 };
     if (data) {
       data.sort((a: any, b: any) => {
         const aFounder = a.is_founding_member ? 0 : 1;
         const bFounder = b.is_founding_member ? 0 : 1;
         if (aFounder !== bFounder) return aFounder - bFounder;
+        const aBoosted = (a.is_boosted && a.boost_expires_at && new Date(a.boost_expires_at) > new Date()) ? 0 : 1;
+        const bBoosted = (b.is_boosted && b.boost_expires_at && new Date(b.boost_expires_at) > new Date()) ? 0 : 1;
+        if (aBoosted !== bBoosted) return aBoosted - bBoosted;
         return (tierPriority[a.membership_tier] || 3) - (tierPriority[b.membership_tier] || 3);
       });
     }

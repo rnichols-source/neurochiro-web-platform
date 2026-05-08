@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
   MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck, TrendingUp, Activity, Presentation, Receipt, DollarSign, Target, ChevronDown,
-  ShieldCheck, Lock, ShoppingBag, Shuffle, Award,
+  ShieldCheck, Lock, ShoppingBag, Shuffle, Award, Users,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,6 +24,7 @@ const navSections = [
       { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
       { name: "Profile", href: "/doctor/profile", icon: User },
       { name: "Messages", href: "/doctor/messages", icon: MessageSquare, tier: "growth" as const },
+      { name: "Referral Network", href: "/doctor/referral-network", icon: Users },
       { name: "Notifications", href: "/doctor/notifications", icon: Bell },
     ],
   },
