@@ -23,8 +23,6 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     return redirect(`/login?error=auth_failed`)
   }
 
-  if (redirectUrl) return redirect(redirectUrl);
-
   if (!data?.user) {
     return redirect(`/login?error=auth_failed`)
   }
@@ -47,7 +45,8 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     return redirect(`/onboarding?role=${role}`);
   }
 
-  // Students without active subscription go to subscribe page, not dashboard
+  // Students without active subscription ALWAYS go to subscribe page
+  // This check runs before redirectUrl to prevent paywall bypass via ?redirect=
   if (role === 'student') {
     const subStatus = (profile as any)?.subscription_status;
     const tier = (profile as any)?.tier;
@@ -56,6 +55,9 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
       return redirect('/student/subscribe');
     }
   }
+
+  // Honor redirect param only after subscription is verified
+  if (redirectUrl) return redirect(redirectUrl);
 
   // Standardize the dashboard routes
   const dashboardMap: Record<string, string> = {

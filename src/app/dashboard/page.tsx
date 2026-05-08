@@ -33,7 +33,19 @@ export default async function DashboardRedirect() {
   }
   
   if (role.startsWith('doctor') || role === 'doctor') redirect('/doctor/dashboard');
-  if (role.startsWith('student') || role === 'student') redirect('/student/dashboard');
+  if (role.startsWith('student') || role === 'student') {
+    // Check subscription before allowing access to student dashboard
+    const { data: studentProfile } = await supabase
+      .from('profiles')
+      .select('subscription_status, tier')
+      .eq('id', user.id)
+      .single();
+    const isSubscribed = studentProfile?.subscription_status === 'active' ||
+                         studentProfile?.tier === 'pro' ||
+                         studentProfile?.tier === 'student_paid';
+    if (!isSubscribed) redirect('/student/subscribe');
+    redirect('/student/dashboard');
+  }
   if (role === 'patient') redirect('/portal/dashboard');
   if (role === 'vendor') redirect('/vendor/dashboard');
 

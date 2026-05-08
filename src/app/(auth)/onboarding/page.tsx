@@ -14,9 +14,9 @@ const roleConfig: Record<string, { message: string; action: string; actionHref: 
   },
   student: {
     message: "Let's connect you with your first opportunity.",
-    action: "Complete Your Profile",
-    actionHref: "/student/profile",
-    dashboard: "/student/dashboard",
+    action: "Start Membership",
+    actionHref: "/student/subscribe",
+    dashboard: "/student/subscribe",
   },
   patient: {
     message: "Let's find you a nervous system specialist.",

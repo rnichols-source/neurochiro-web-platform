@@ -18,6 +18,27 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/reset-password`)
       }
 
+      // Check if this is a student without an active subscription
+      // Prevents OAuth from bypassing the paywall
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, subscription_status, tier')
+          .eq('id', user.id)
+          .single()
+
+        if (profile?.role === 'student') {
+          const isSubscribed = profile.subscription_status === 'active' ||
+                               profile.tier === 'pro' ||
+                               profile.tier === 'student_paid';
+          if (!isSubscribed) {
+            console.log(`[AUTH_CALLBACK] Unsubscribed student. Redirecting to /student/subscribe`);
+            return NextResponse.redirect(`${origin}/student/subscribe`)
+          }
+        }
+      }
+
       console.log(`[AUTH_CALLBACK] Successfully exchanged code. Redirecting to: ${next}`);
       return NextResponse.redirect(`${origin}${next}`)
     } else {

@@ -335,10 +335,10 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                       <li>Connect with clinics looking for graduates</li>
                     </ul>
                     <p>Your next step: Complete your student profile so we can match you with the right opportunities.</p>`, 
-              ctaText: 'Complete My Profile', 
-              ctaUrl: 'https://neurochiro.co/student/profile',
+              ctaText: 'Start Your Membership',
+              ctaUrl: 'https://neurochiro.co/student/subscribe',
               secondaryCtaText: 'Explore Career Tools',
-              secondaryCtaUrl: 'https://neurochiro.co/student/dashboard'
+              secondaryCtaUrl: 'https://neurochiro.co/student/subscribe'
             });
 
             // Enqueue subsequent emails in the sequence
@@ -504,7 +504,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                      <li><strong>Negotiation Guide:</strong> Exact scripts to increase your starting value.</li>
                    </ul>`,
             ctaText: 'Explore Career Tools',
-            ctaUrl: 'https://neurochiro.co/student/dashboard'
+            ctaUrl: 'https://neurochiro.co/student/subscribe'
           });
         }
         break;
@@ -519,7 +519,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                    <p>The NeuroChiro network is full of high-volume, nervous-system-focused clinics looking for their next associate.</p>
                    <p>Maximize your visibility by uploading your resume and attending upcoming seminars.</p>`,
             ctaText: 'View Job Board',
-            ctaUrl: 'https://neurochiro.co/student/jobs'
+            ctaUrl: 'https://neurochiro.co/student/subscribe'
           });
         }
         break;

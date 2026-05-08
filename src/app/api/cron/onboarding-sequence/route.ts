@@ -86,7 +86,7 @@ export async function GET(req: Request) {
                <li><strong>Start the Academy</strong> — modules your school doesn't teach</li>
                <li><strong>Find seminars</strong> — upcoming events from top docs</li>
              </ul>
-             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/dashboard" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Go to Dashboard</a></p>`;
+             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/subscribe" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Start Your Membership</a></p>`;
       } else if (daysSinceSignup === 7) {
         day = 7;
         // Get their profile views if doctor
@@ -113,7 +113,7 @@ export async function GET(req: Request) {
              <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/billing" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">See Upgrade Options</a></p>`
           : `<p>Hi ${name},</p>
              <p>You've been on NeuroChiro for a week! Have you checked out the job board yet? New positions are posted regularly from clinics looking for students like you.</p>
-             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/jobs" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Browse Jobs</a></p>`;
+             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/subscribe" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Start Your Membership</a></p>`;
       } else if (daysSinceSignup === 14) {
         day = 14;
         subject = isDoctor
@@ -140,7 +140,7 @@ export async function GET(req: Request) {
           : `<p>Hi ${name},</p>
              <p>One month in! You're building your career on NeuroChiro. Keep browsing jobs, connecting with docs, and exploring the academy.</p>
              <p>The students who get ahead are the ones who start early. You're already ahead of most of your classmates just by being here.</p>
-             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/dashboard" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Go to Dashboard</a></p>`;
+             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/subscribe" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Start Your Membership</a></p>`;
       }
 
       if (day === null) continue;

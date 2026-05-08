@@ -92,7 +92,7 @@ export async function GET(req: Request) {
           <p>Here's what's new on NeuroChiro this week:</p>
           ${jobsHtml}
           ${seminarsHtml}
-          <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/jobs" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 14px;">Browse All Opportunities</a></p>
+          <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/dashboard" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 14px;">Browse All Opportunities</a></p>
         `),
       }));
 
