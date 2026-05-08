@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
   MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck, TrendingUp, Activity, Presentation, Receipt, DollarSign, Target, ChevronDown,
-  ShieldCheck, Lock, ShoppingBag,
+  ShieldCheck, Lock, ShoppingBag, Shuffle,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,6 +47,7 @@ const navSections = [
     label: "GROW",
     items: [
       { name: "Jobs & Hiring", href: "/doctor/jobs", icon: Briefcase },
+      { name: "ChiroMatch", href: "/doctor/chiromatch", icon: Shuffle },
       { name: "Workshops", href: "/doctor/workshops", icon: Presentation, tier: "pro" as const },
       { name: "Screenings", href: "/doctor/screenings", icon: Target, tier: "pro" as const },
       { name: "Command Center", href: "/account/command-center", icon: Target },
