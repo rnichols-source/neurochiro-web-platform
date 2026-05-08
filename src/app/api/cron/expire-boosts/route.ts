@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
       .lt('boost_expires_at', new Date().toISOString())
       .select('id');
 
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     const expired = data?.length || 0;
     return NextResponse.json({ message: `Expired ${expired} boosts` });
   } catch {

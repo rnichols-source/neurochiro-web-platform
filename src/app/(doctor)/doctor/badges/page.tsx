@@ -8,11 +8,11 @@ import { BADGE_DEFINITIONS } from "@/lib/badges";
 const ICON_MAP: Record<string, any> = { User, Eye, Users, Calendar, Briefcase, Award, Shuffle, Trophy, Star, Gift };
 
 const COLOR_MAP: Record<string, { bg: string; border: string; icon: string; locked: string }> = {
-  blue: { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'text-blue-500', locked: 'bg-gray-50 border-gray-200' },
-  emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', icon: 'text-emerald-500', locked: 'bg-gray-50 border-gray-200' },
-  violet: { bg: 'bg-violet-50', border: 'border-violet-200', icon: 'text-violet-500', locked: 'bg-gray-50 border-gray-200' },
-  orange: { bg: 'bg-orange-50', border: 'border-orange-200', icon: 'text-orange-500', locked: 'bg-gray-50 border-gray-200' },
-  amber: { bg: 'bg-amber-50', border: 'border-amber-200', icon: 'text-amber-500', locked: 'bg-gray-50 border-gray-200' },
+  blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', icon: 'text-blue-400', locked: 'bg-white/[0.03] border-white/[0.06]' },
+  emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', icon: 'text-emerald-400', locked: 'bg-white/[0.03] border-white/[0.06]' },
+  violet: { bg: 'bg-violet-500/10', border: 'border-violet-500/20', icon: 'text-violet-400', locked: 'bg-white/[0.03] border-white/[0.06]' },
+  orange: { bg: 'bg-orange-500/10', border: 'border-orange-500/20', icon: 'text-orange-400', locked: 'bg-white/[0.03] border-white/[0.06]' },
+  amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/20', icon: 'text-amber-400', locked: 'bg-white/[0.03] border-white/[0.06]' },
 };
 
 export default function BadgesPage() {
@@ -75,8 +75,8 @@ export default function BadgesPage() {
                   <Lock className="w-5 h-5 text-white/20" />
                 )}
               </div>
-              <p className={`text-sm font-bold mb-1 ${isEarned ? 'text-neuro-navy' : 'text-white/40'}`}>{badge.name}</p>
-              <p className={`text-[10px] ${isEarned ? 'text-gray-500' : 'text-white/20'}`}>{badge.description}</p>
+              <p className={`text-sm font-bold mb-1 ${isEarned ? 'text-white' : 'text-white/30'}`}>{badge.name}</p>
+              <p className={`text-[10px] ${isEarned ? 'text-white/50' : 'text-white/15'}`}>{badge.description}</p>
               {isEarned && earnedData && (
                 <p className="text-[9px] text-neuro-orange font-bold mt-2">
                   Earned {new Date(earnedData.earned_at).toLocaleDateString()}

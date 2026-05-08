@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro Tablecloth — 6ft Fitted</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --navy: #1E2D3B;
+    --navy-dark: #15202B;
+    --orange: #D66829;
+    --cream: #F5F3EF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #555;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: 'Montserrat', sans-serif;
+    gap: 48px;
+  }
+
+  .print-note {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 32px;
+    max-width: 700px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .print-note h3 {
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    color: var(--navy);
+  }
+
+  .print-note strong { color: var(--orange); }
+
+  .option-label {
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+    text-align: center;
+  }
+
+  .option-sublabel {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    margin-top: 4px;
+    margin-bottom: 16px;
+  }
+
+  .section-divider {
+    width: 100%;
+    max-width: 1000px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 32px;
+  }
+
+  /* ═══════════════════════════════════
+     TABLECLOTH FRONT PANEL
+     6ft table: 72" wide x 29" drop
+     Scale: 864px x 348px
+     ═══════════════════════════════════ */
+
+  .cloth-wrapper {
+    position: relative;
+  }
+
+  .cloth-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .cloth {
+    width: 900px;
+    height: 612px;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 16px 60px rgba(0,0,0,0.3);
+  }
+
+  /* ════════════════════════════════
+     OPTION A: "The Classic"
+     Navy with centered logo + wordmark
+     ════════════════════════════════ */
+
+  .cloth-a {
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  /* Subtle fabric texture */
+  .cloth-a::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px);
+    pointer-events: none;
+  }
+
+  /* Orange accent — top edge */
+  .cloth-top-accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--orange);
+  }
+
+  .cloth-a .cloth-logo {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    position: relative;
+    z-index: 1;
+  }
+
+  .cloth-a .cloth-wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cloth-a .cloth-wordmark span { color: var(--orange); }
+
+  /* ════════════════════════════════
+     OPTION B: "The Statement" (Recommended)
+     Navy, logo left, text centered,
+     URL right — asymmetric balance
+     ════════════════════════════════ */
+
+  .cloth-b {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+    display: flex;
+    align-items: center;
+    padding: 0 64px;
+  }
+
+  .cloth-b::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px);
+    pointer-events: none;
+  }
+
+  /* Orange top edge */
+  .cloth-b .cloth-top-accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--orange);
+  }
+
+  /* Orange left edge */
+  .cloth-b .cloth-left-accent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    background: var(--orange);
+  }
+
+  .cloth-b-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cloth-b-left .cloth-logo {
+    width: 88px;
+    height: 88px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  .cloth-b-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cloth-b-center .cloth-wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 52px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 4px;
+  }
+
+  .cloth-b-center .cloth-wordmark span { color: var(--orange); }
+
+  .cloth-b-center .cloth-tagline {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.35);
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+
+  .cloth-b-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    padding-left: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cloth-b-right .cloth-url {
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1px;
+  }
+
+  .cloth-b-right .cloth-url span { color: var(--orange); }
+
+  /* ════════════════════════════════
+     OPTION C: "The Monolith"
+     All navy, just the wordmark,
+     massive and centered.
+     Nothing else. Total confidence.
+     ════════════════════════════════ */
+
+  .cloth-c {
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cloth-c::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px);
+    pointer-events: none;
+  }
+
+  /* Orange bottom edge only */
+  .cloth-c .cloth-bottom-accent {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--orange);
+  }
+
+  .cloth-c .cloth-wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cloth-c .cloth-wordmark span { color: var(--orange); }
+
+  /* ════════════════════════════════
+     3D TABLE MOCKUP
+     ════════════════════════════════ */
+
+  .table-mockup {
+    width: 600px;
+    position: relative;
+    margin: 0 auto;
+  }
+
+  .table-top {
+    width: 100%;
+    height: 40px;
+    background: var(--navy);
+    border-radius: 4px 4px 0 0;
+    transform: perspective(600px) rotateX(15deg);
+    transform-origin: bottom center;
+    position: relative;
+    z-index: 2;
+    border-top: 3px solid var(--orange);
+  }
+
+  .table-front {
+    width: 92%;
+    margin: 0 auto;
+    height: 180px;
+    background: var(--navy);
+    border-radius: 0 0 4px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    position: relative;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+
+  .table-front::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 0 0 4px 4px;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.006) 2px, rgba(255,255,255,0.006) 4px);
+    pointer-events: none;
+  }
+
+  .table-front .cloth-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    position: relative;
+    z-index: 1;
+  }
+
+  .table-front .cloth-wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 3px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .table-front .cloth-wordmark span { color: var(--orange); }
+
+  .table-items {
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 24px;
+    z-index: 3;
+  }
+
+  .table-item {
+    width: 36px;
+    height: 20px;
+    border-radius: 3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  .mockup-label {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.3);
+    font-style: italic;
+  }
+
+  @media print {
+    body { background: white; }
+    .print-note { display: none; }
+    .cloth { box-shadow: 0 0 0 1px #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<div class="print-note">
+  <h3>NeuroChiro Fitted Tablecloth — 6ft Table</h3>
+  <p>
+    <strong>Size:</strong> 6ft fitted tablecloth (72" x 30" x 29" drop)<br>
+    These show the <strong>front panel</strong> — what people see when walking by.<br>
+    Order custom printed from <strong>TableCoversNow.com</strong>, <strong>DisplayStar</strong>, or <strong>Vistaprint</strong>.<br>
+    Navy fabric base. If custom print is too expensive, buy a plain navy fitted cloth and add an orange table runner across the front.
+  </p>
+</div>
+
+<!-- ════════ 3D MOCKUP ════════ -->
+<div>
+  <div class="option-label">How It Looks on the Table</div>
+  <div class="option-sublabel">With your banners on either side and items on top</div>
+  <div class="table-mockup">
+    <div class="table-top"></div>
+    <div class="table-front">
+      <img class="cloth-logo" src="../public/logo.png" alt="">
+      <div class="cloth-wordmark">NEURO<span>CHIRO</span></div>
+    </div>
+  </div>
+  <div class="mockup-label">iPad, QR stand, cards, and stickers sit on top</div>
+</div>
+
+<!-- ════════ OPTION A ════════ -->
+<div class="section-divider">
+  <div class="option-label">Option A — "The Classic"</div>
+  <div class="option-sublabel">Logo + wordmark centered. Simple. Works at any event, any year.</div>
+</div>
+
+<div>
+  <div class="cloth-label">Front Panel — 72" x 29"</div>
+  <div class="cloth cloth-a">
+    <div class="cloth-top-accent"></div>
+    <img class="cloth-logo" src="../public/logo.png" alt="NeuroChiro">
+    <div class="cloth-wordmark">NEURO<span>CHIRO</span></div>
+  </div>
+</div>
+
+<!-- ════════ OPTION B ════════ -->
+<div class="section-divider">
+  <div class="option-label">Option B — "The Statement" (Recommended)</div>
+  <div class="option-sublabel">Logo left, wordmark center, URL right. Balanced. Professional. Reads from 20 feet.</div>
+</div>
+
+<div>
+  <div class="cloth-label">Front Panel — 72" x 29"</div>
+  <div class="cloth cloth-b">
+    <div class="cloth-top-accent"></div>
+    <div class="cloth-left-accent"></div>
+    <div class="cloth-b-left">
+      <img class="cloth-logo" src="../public/logo.png" alt="NeuroChiro">
+    </div>
+    <div class="cloth-b-center">
+      <div class="cloth-wordmark">NEURO<span>CHIRO</span></div>
+      <div class="cloth-tagline">The Global Directory for Nervous System Chiropractors</div>
+    </div>
+    <div class="cloth-b-right">
+      <div class="cloth-url">neurochiro<span>.co</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ OPTION C ════════ -->
+<div class="section-divider">
+  <div class="option-label">Option C — "The Monolith"</div>
+  <div class="option-sublabel">Just the name. Nothing else. Total confidence. Lets the banners do the talking.</div>
+</div>
+
+<div>
+  <div class="cloth-label">Front Panel — 72" x 29"</div>
+  <div class="cloth cloth-c">
+    <div class="cloth-bottom-accent"></div>
+    <div class="cloth-wordmark">NEURO<span>CHIRO</span></div>
+  </div>
+</div>
+
+</body>
+</html>

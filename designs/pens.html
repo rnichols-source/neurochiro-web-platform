@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro Custom Pens</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Montserrat:wght@500;600;700&display=swap');
+
+  :root {
+    --navy: #1E2D3B;
+    --navy-dark: #15202B;
+    --orange: #D66829;
+    --cream: #F5F3EF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #555;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: 'Montserrat', sans-serif;
+    gap: 48px;
+  }
+
+  .print-note {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 32px;
+    max-width: 650px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .print-note h3 { font-size: 18px; font-weight: 900; margin-bottom: 8px; color: var(--navy); }
+  .print-note strong { color: var(--orange); }
+
+  .section-divider {
+    width: 100%;
+    max-width: 800px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 32px;
+  }
+
+  .option-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
+    text-align: center;
+  }
+
+  .option-sublabel {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    margin-top: 4px;
+    margin-bottom: 20px;
+  }
+
+  /* ═══════════════════════════════════
+     PEN MOCKUP
+     Barrel print area: ~540px x 48px
+     ═══════════════════════════════════ */
+
+  .pen-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pen {
+    width: 640px;
+    height: 44px;
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+
+  /* Pen tip */
+  .pen::before {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 12px;
+    background: linear-gradient(90deg, #888, #bbb, #888);
+    border-radius: 0 6px 6px 0;
+  }
+
+  /* Clip */
+  .pen::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: -4px;
+    width: 8px;
+    height: 24px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.15);
+  }
+
+  /* Shine effect */
+  .pen-shine {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 40%, rgba(0,0,0,0.08) 100%);
+    border-radius: 22px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .pen-print {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 0 48px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .pen-logo {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .pen-text {
+    font-family: 'Lato', sans-serif;
+    font-weight: 900;
+    letter-spacing: 2px;
+    white-space: nowrap;
+  }
+
+  .pen-divider {
+    width: 1px;
+    height: 20px;
+    flex-shrink: 0;
+    opacity: 0.3;
+  }
+
+  .pen-url {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0.7;
+    letter-spacing: 0.5px;
+  }
+
+  .pen-tagline {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 9px;
+    white-space: nowrap;
+    opacity: 0.5;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ════════════════════════════
+     OPTION A: Navy pen, white + orange print
+     ════════════════════════════ */
+  .pen-a {
+    background: linear-gradient(180deg, #2a3f52 0%, var(--navy) 40%, var(--navy-dark) 100%);
+  }
+
+  .pen-a .pen-text { color: white; font-size: 16px; }
+  .pen-a .pen-text span { color: var(--orange); }
+  .pen-a .pen-logo { filter: brightness(0) invert(1); }
+  .pen-a .pen-divider { background: white; }
+  .pen-a .pen-url { color: var(--orange); }
+
+  /* ════════════════════════════
+     OPTION B: Orange pen, white print
+     ════════════════════════════ */
+  .pen-b {
+    background: linear-gradient(180deg, #e07a3a 0%, var(--orange) 40%, #c45a1a 100%);
+  }
+
+  .pen-b .pen-text { color: white; font-size: 16px; }
+  .pen-b .pen-text span { color: white; opacity: 0.85; }
+  .pen-b .pen-logo { filter: brightness(0) invert(1); }
+  .pen-b .pen-divider { background: white; }
+  .pen-b .pen-url { color: white; }
+
+  /* ════════════════════════════
+     OPTION C: White pen, navy + orange print
+     ════════════════════════════ */
+  .pen-c {
+    background: linear-gradient(180deg, #ffffff 0%, #f5f3ef 40%, #e8e6e1 100%);
+  }
+
+  .pen-c .pen-text { color: var(--navy); font-size: 16px; }
+  .pen-c .pen-text span { color: var(--orange); }
+  .pen-c .pen-divider { background: var(--navy); }
+  .pen-c .pen-url { color: var(--orange); }
+  .pen-c::after { background: rgba(0,0,0,0.06); }
+
+  /* ════════════════════════════
+     OPTION D: Black pen, orange print — the standout
+     ════════════════════════════ */
+  .pen-d {
+    background: linear-gradient(180deg, #333 0%, #1a1a1a 40%, #111 100%);
+  }
+
+  .pen-d .pen-text { color: var(--orange); font-size: 16px; }
+  .pen-d .pen-text span { color: var(--orange); }
+  .pen-d .pen-logo { filter: none; }
+  .pen-d .pen-divider { background: var(--orange); }
+  .pen-d .pen-url { color: rgba(255,255,255,0.5); }
+
+  /* ════════════════════════════
+     OPTION E: Navy pen, full wordmark + tagline
+     ════════════════════════════ */
+  .pen-e {
+    background: linear-gradient(180deg, #2a3f52 0%, var(--navy) 40%, var(--navy-dark) 100%);
+  }
+
+  .pen-e .pen-text { color: white; font-size: 15px; }
+  .pen-e .pen-text span { color: var(--orange); }
+  .pen-e .pen-logo { filter: brightness(0) invert(1); }
+  .pen-e .pen-divider { background: rgba(255,255,255,0.2); }
+  .pen-e .pen-tagline { color: rgba(255,255,255,0.4); }
+
+  /* Color swatch */
+  .swatch-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+</style>
+</head>
+<body>
+
+<div class="print-note">
+  <h3>NeuroChiro Custom Pens</h3>
+  <p>
+    Order from <strong>4imprint.com</strong>, <strong>Vistaprint</strong>, or <strong>PensXpress.com</strong>.<br>
+    100 qty is usually the minimum. Budget: <strong>$0.50-2.00 per pen</strong> depending on quality.<br>
+    Go with a <strong>soft-touch rubberized barrel</strong> — people notice the feel and keep them.
+  </p>
+</div>
+
+<!-- OPTION A -->
+<div class="section-divider">
+  <div class="option-label">Option A — Navy + Orange</div>
+  <div class="option-sublabel">Matches your brand perfectly. Classic.</div>
+</div>
+<div class="pen-wrapper">
+  <div class="pen pen-a">
+    <div class="pen-shine"></div>
+    <div class="pen-print">
+      <img class="pen-logo" src="../public/logo.png" alt="">
+      <div class="pen-text">NEURO<span>CHIRO</span></div>
+      <div class="pen-divider"></div>
+      <div class="pen-url">neurochiro.co</div>
+    </div>
+  </div>
+  <div class="swatch-row">
+    <div class="swatch" style="background: var(--navy);"></div>
+    <div class="swatch" style="background: var(--orange);"></div>
+    <div class="swatch" style="background: white;"></div>
+  </div>
+</div>
+
+<!-- OPTION B -->
+<div class="section-divider">
+  <div class="option-label">Option B — All Orange</div>
+  <div class="option-sublabel">Impossible to lose in a pen cup. People will ask "where'd you get that pen?"</div>
+</div>
+<div class="pen-wrapper">
+  <div class="pen pen-b">
+    <div class="pen-shine"></div>
+    <div class="pen-print">
+      <img class="pen-logo" src="../public/logo.png" alt="">
+      <div class="pen-text">NEURO<span>CHIRO</span></div>
+      <div class="pen-divider"></div>
+      <div class="pen-url">neurochiro.co</div>
+    </div>
+  </div>
+  <div class="swatch-row">
+    <div class="swatch" style="background: var(--orange);"></div>
+    <div class="swatch" style="background: white;"></div>
+  </div>
+</div>
+
+<!-- OPTION C -->
+<div class="section-divider">
+  <div class="option-label">Option C — White + Navy/Orange</div>
+  <div class="option-sublabel">Clean and professional. The logo pops on white.</div>
+</div>
+<div class="pen-wrapper">
+  <div class="pen pen-c">
+    <div class="pen-shine"></div>
+    <div class="pen-print">
+      <img class="pen-logo" src="../public/logo.png" alt="">
+      <div class="pen-text">NEURO<span>CHIRO</span></div>
+      <div class="pen-divider"></div>
+      <div class="pen-url">neurochiro.co</div>
+    </div>
+  </div>
+  <div class="swatch-row">
+    <div class="swatch" style="background: white; border-color: #ccc;"></div>
+    <div class="swatch" style="background: var(--navy);"></div>
+    <div class="swatch" style="background: var(--orange);"></div>
+  </div>
+</div>
+
+<!-- OPTION D -->
+<div class="section-divider">
+  <div class="option-label">Option D — Black + Orange (Recommended)</div>
+  <div class="option-sublabel">Premium feel. The orange glows on black. This is the pen people pocket and keep forever.</div>
+</div>
+<div class="pen-wrapper">
+  <div class="pen pen-d">
+    <div class="pen-shine"></div>
+    <div class="pen-print">
+      <img class="pen-logo" src="../public/logo.png" alt="">
+      <div class="pen-text">NEURO<span>CHIRO</span></div>
+      <div class="pen-divider"></div>
+      <div class="pen-url">neurochiro.co</div>
+    </div>
+  </div>
+  <div class="swatch-row">
+    <div class="swatch" style="background: #111;"></div>
+    <div class="swatch" style="background: var(--orange);"></div>
+  </div>
+</div>
+
+<!-- OPTION E -->
+<div class="section-divider">
+  <div class="option-label">Option E — Navy + Tagline</div>
+  <div class="option-sublabel">Logo, wordmark, and "Nervous System First" tagline. Tells the full story on one pen.</div>
+</div>
+<div class="pen-wrapper">
+  <div class="pen pen-e">
+    <div class="pen-shine"></div>
+    <div class="pen-print">
+      <img class="pen-logo" src="../public/logo.png" alt="">
+      <div class="pen-text">NEURO<span>CHIRO</span></div>
+      <div class="pen-divider"></div>
+      <div class="pen-tagline">Nervous System First</div>
+    </div>
+  </div>
+  <div class="swatch-row">
+    <div class="swatch" style="background: var(--navy);"></div>
+    <div class="swatch" style="background: var(--orange);"></div>
+    <div class="swatch" style="background: white;"></div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro — Booth Display</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+
+  :root {
+    --navy: #1E2D3B;
+    --navy-dark: #15202B;
+    --orange: #D66829;
+    --cream: #F5F3EF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--navy-dark);
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  /* ═══════════════════════════════════
+     SLIDESHOW CONTAINER
+     ═══════════════════════════════════ */
+
+  .slideshow {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+    pointer-events: none;
+  }
+
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ─── Progress bar ─── */
+  .progress-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background: var(--orange);
+    z-index: 100;
+    transition: width 0.1s linear;
+  }
+
+  /* ─── Slide counter ─── */
+  .slide-counter {
+    position: fixed;
+    bottom: 16px;
+    right: 24px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.15);
+    z-index: 100;
+    font-family: 'Lato', sans-serif;
+  }
+
+  /* ═══════════════════════════════════
+     SLIDE 1: Hero / Brand
+     ═══════════════════════════════════ */
+
+  .slide-hero {
+    background: linear-gradient(170deg, var(--navy) 0%, var(--navy-dark) 100%);
+  }
+
+  .slide-hero::before {
+    content: '';
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(214,104,41,0.06) 0%, transparent 70%);
+  }
+
+  .slide-hero .logo {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .slide-hero .wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .slide-hero .wordmark span { color: var(--orange); }
+
+  .slide-hero .tagline {
+    font-size: 18px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-top: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ═══════════════════════════════════
+     SLIDE 2: What We Are
+     ═══════════════════════════════════ */
+
+  .slide-what {
+    background: var(--navy);
+    text-align: center;
+  }
+
+  .slide-what .headline {
+    font-family: 'Lato', sans-serif;
+    font-size: 42px;
+    font-weight: 900;
+    color: white;
+    line-height: 1.3;
+    max-width: 700px;
+  }
+
+  .slide-what .headline em {
+    color: var(--orange);
+    font-style: normal;
+  }
+
+  .slide-what .sub {
+    font-size: 18px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 20px;
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  /* ═══════════════════════════════════
+     SLIDE 3: Stats
+     ═══════════════════════════════════ */
+
+  .slide-stats {
+    background: linear-gradient(170deg, var(--navy-dark) 0%, var(--navy) 100%);
+  }
+
+  .slide-stats .stats-grid {
+    display: flex;
+    gap: 48px;
+  }
+
+  .slide-stats .stat {
+    text-align: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 36px 48px;
+  }
+
+  .slide-stats .stat-number {
+    font-family: 'Lato', sans-serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: var(--orange);
+    line-height: 1;
+  }
+
+  .slide-stats .stat-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-top: 8px;
+  }
+
+  .slide-stats .stats-title {
+    font-family: 'Lato', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.2);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 36px;
+  }
+
+  /* ═══════════════════════════════════
+     SLIDE 4: For Doctors
+     ═══════════════════════════════════ */
+
+  .slide-doctors {
+    background: var(--navy);
+    text-align: center;
+  }
+
+  .slide-role-badge {
+    display: inline-block;
+    padding: 8px 24px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 24px;
+  }
+
+  .badge-orange { background: var(--orange); color: white; }
+  .badge-blue { background: #3B82F6; color: white; }
+  .badge-green { background: #2ECC71; color: white; }
+
+  .slide-role-title {
+    font-family: 'Lato', sans-serif;
+    font-size: 38px;
+    font-weight: 900;
+    color: white;
+    line-height: 1.3;
+    margin-bottom: 32px;
+    max-width: 600px;
+  }
+
+  .slide-role-title em {
+    color: var(--orange);
+    font-style: normal;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    max-width: 600px;
+    width: 100%;
+  }
+
+  .feature-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 14px 18px;
+    text-align: left;
+  }
+
+  .feature-card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(214,104,41,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .feature-card-icon.blue { background: rgba(59,130,246,0.15); }
+  .feature-card-icon.green { background: rgba(46,204,113,0.15); }
+
+  .feature-card-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .slide-price {
+    margin-top: 28px;
+    font-family: 'Lato', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--orange);
+  }
+
+  .slide-price span {
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.3);
+  }
+
+  /* ═══════════════════════════════════
+     SLIDE 5: For Students (same structure)
+     ═══════════════════════════════════ */
+
+  .slide-students {
+    background: var(--navy-dark);
+    text-align: center;
+  }
+
+  .slide-students .slide-role-title em { color: #3B82F6; }
+
+  /* ═══════════════════════════════════
+     SLIDE 6: For Patients
+     ═══════════════════════════════════ */
+
+  .slide-patients {
+    background: var(--navy);
+    text-align: center;
+  }
+
+  .slide-patients .slide-role-title em { color: #2ECC71; }
+
+  /* ═══════════════════════════════════
+     SLIDE 7: QR / CTA
+     ═══════════════════════════════════ */
+
+  .slide-cta {
+    background: linear-gradient(170deg, var(--navy) 0%, var(--navy-dark) 100%);
+    text-align: center;
+  }
+
+  .slide-cta .cta-headline {
+    font-family: 'Lato', sans-serif;
+    font-size: 48px;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .slide-cta .cta-headline span { color: var(--orange); }
+
+  .slide-cta .cta-sub {
+    font-size: 16px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 36px;
+  }
+
+  .slide-cta .qr-container {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    display: inline-block;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .slide-cta .qr-container img {
+    width: 180px;
+    height: 180px;
+    border-radius: 8px;
+  }
+
+  .slide-cta .qr-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-top: 12px;
+  }
+
+  .slide-cta .url {
+    font-family: 'Lato', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.5);
+    margin-top: 20px;
+    letter-spacing: 2px;
+  }
+
+  .slide-cta .url span { color: var(--orange); }
+
+  /* ═══════════════════════════════════
+     SLIDE 8: Spotlight / Social Proof
+     ═══════════════════════════════════ */
+
+  .slide-spotlight {
+    background: var(--navy);
+    text-align: center;
+  }
+
+  .slide-spotlight .spotlight-badge {
+    display: inline-block;
+    background: rgba(214,104,41,0.15);
+    border: 1px solid rgba(214,104,41,0.3);
+    color: var(--orange);
+    padding: 8px 20px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+  }
+
+  .slide-spotlight .spotlight-title {
+    font-family: 'Lato', sans-serif;
+    font-size: 38px;
+    font-weight: 900;
+    color: white;
+    line-height: 1.3;
+    max-width: 600px;
+    margin-bottom: 16px;
+  }
+
+  .slide-spotlight .spotlight-title em {
+    color: var(--orange);
+    font-style: normal;
+  }
+
+  .slide-spotlight .spotlight-sub {
+    font-size: 16px;
+    color: rgba(255,255,255,0.4);
+    max-width: 450px;
+    line-height: 1.6;
+  }
+
+  .slide-spotlight .roles-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .slide-spotlight .role-pill {
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="slideshow">
+
+  <!-- SLIDE 1: Hero -->
+  <div class="slide slide-hero active" data-duration="6000">
+    <img class="logo" src="../public/logo-white.png" alt="">
+    <div class="wordmark">NEURO<span>CHIRO</span></div>
+    <div class="tagline">Nervous System First</div>
+  </div>
+
+  <!-- SLIDE 2: What We Are -->
+  <div class="slide slide-what" data-duration="8000">
+    <div class="headline">The Only Directory Built for <em>Nervous System</em> Chiropractors</div>
+    <div class="sub">Connecting doctors, students, and patients in the largest neuro-chiro community worldwide.</div>
+  </div>
+
+  <!-- SLIDE 3: Stats -->
+  <div class="slide slide-stats" data-duration="7000">
+    <div class="stats-title">The Network Is Growing</div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-number">120+</div>
+        <div class="stat-label">Verified Doctors</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">30+</div>
+        <div class="stat-label">States</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">4</div>
+        <div class="stat-label">Countries</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: For Doctors -->
+  <div class="slide slide-doctors" data-duration="9000">
+    <div class="slide-role-badge badge-orange">For Doctors</div>
+    <div class="slide-role-title">Get Found by Patients Looking for <em>You</em></div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-card-icon">&#128269;</div>
+        <div class="feature-card-text">SEO-optimized profile page</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">&#9889;</div>
+        <div class="feature-card-text">AI-powered bio generator</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">&#128200;</div>
+        <div class="feature-card-text">Analytics and lead tracking</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">&#128188;</div>
+        <div class="feature-card-text">Post jobs and recruit students</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">&#127891;</div>
+        <div class="feature-card-text">Host and list seminars</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">&#9989;</div>
+        <div class="feature-card-text">Verified badge for your site</div>
+      </div>
+    </div>
+    <div class="slide-price">$49<span>/mo &middot; Everything included</span></div>
+  </div>
+
+  <!-- SLIDE 5: For Students -->
+  <div class="slide slide-students" data-duration="9000">
+    <div class="slide-role-badge badge-blue">For Students</div>
+    <div class="slide-role-title">Launch Your Career <em>Before</em> You Graduate</div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-card-icon blue">&#128188;</div>
+        <div class="feature-card-text">Job board and applications</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon blue">&#127891;</div>
+        <div class="feature-card-text">3 full academy courses</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon blue">&#128172;</div>
+        <div class="feature-card-text">Message doctors directly</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon blue">&#128196;</div>
+        <div class="feature-card-text">AI contract analysis lab</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon blue">&#128176;</div>
+        <div class="feature-card-text">Financial planning tools</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon blue">&#9733;</div>
+        <div class="feature-card-text">Listed in directory at graduation</div>
+      </div>
+    </div>
+    <div class="slide-price" style="color: #3B82F6;">$12<span>/mo &middot; Everything included</span></div>
+  </div>
+
+  <!-- SLIDE 6: For Patients -->
+  <div class="slide slide-patients" data-duration="8000">
+    <div class="slide-role-badge badge-green">For Patients</div>
+    <div class="slide-role-title">Put Your <em>Nervous System</em> First</div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-card-icon green">&#128269;</div>
+        <div class="feature-card-text">Find a verified chiropractor</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon green">&#128202;</div>
+        <div class="feature-card-text">Daily health check-in tracker</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon green">&#128170;</div>
+        <div class="feature-card-text">Exercise library with video</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon green">&#128218;</div>
+        <div class="feature-card-text">Educational articles and tips</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon green">&#10084;</div>
+        <div class="feature-card-text">Save favorite doctors</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon green">&#128197;</div>
+        <div class="feature-card-text">Request appointments</div>
+      </div>
+    </div>
+    <div class="slide-price" style="color: #2ECC71;">Free <span>for all patients &middot; Always</span></div>
+  </div>
+
+  <!-- SLIDE 7: Spotlight -->
+  <div class="slide slide-spotlight" data-duration="8000">
+    <div class="spotlight-badge">Featured Content</div>
+    <div class="spotlight-title">The <em>NeuroChiro Spotlight</em></div>
+    <div class="spotlight-sub">Watch in-depth interviews with leading nervous system chiropractors. New episodes every week.</div>
+    <div class="roles-row">
+      <div class="role-pill badge-orange">Doctors</div>
+      <div class="role-pill badge-blue">Students</div>
+      <div class="role-pill badge-green">Patients</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: QR / CTA -->
+  <div class="slide slide-cta" data-duration="10000">
+    <div class="cta-headline">Join <span>NeuroChiro</span> Today</div>
+    <div class="cta-sub">Scan the QR code or visit the link below</div>
+    <div class="qr-container">
+      <img src="../public/qr-conference.png" alt="Scan to join">
+    </div>
+    <div class="qr-label">Scan to Join</div>
+    <div class="url">neurochiro<span>.co</span></div>
+  </div>
+
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="slide-counter" id="slideCounter"></div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const progressBar = document.getElementById('progressBar');
+  const slideCounter = document.getElementById('slideCounter');
+  let current = 0;
+  let timer = null;
+  let progressTimer = null;
+  let progressStart = 0;
+
+  function showSlide(index) {
+    slides.forEach(s => s.classList.remove('active'));
+    slides[index].classList.add('active');
+    slideCounter.textContent = `${index + 1} / ${slides.length}`;
+
+    const duration = parseInt(slides[index].dataset.duration) || 8000;
+    progressStart = Date.now();
+
+    // Animate progress bar
+    if (progressTimer) cancelAnimationFrame(progressTimer);
+    function updateProgress() {
+      const elapsed = Date.now() - progressStart;
+      const pct = Math.min((elapsed / duration) * 100, 100);
+      progressBar.style.width = pct + '%';
+      if (pct < 100) {
+        progressTimer = requestAnimationFrame(updateProgress);
+      }
+    }
+    updateProgress();
+
+    // Schedule next slide
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      current = (current + 1) % slides.length;
+      showSlide(current);
+    }, duration);
+  }
+
+  // Start
+  showSlide(0);
+</script>
+
+</body>
+</html>

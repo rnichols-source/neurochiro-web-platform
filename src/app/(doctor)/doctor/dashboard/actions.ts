@@ -384,21 +384,22 @@ export async function getPracticeHealthScore(): Promise<PracticeHealthResult | n
   try {
     const admin = createAdminClient() as any
 
-    const [doctorRes, leadsRes, confirmedRes, seminarsRes, ceRes, referralsRes, matchRes, jobsRes, reviewsRes, notifsRes] = await Promise.all([
-      createAdminClient().from('doctors').select('photo_url, bio, clinic_name, specialties, city, state, website_url, instagram_url, facebook_url, video_url, profile_views, patient_leads').eq('user_id', user.id).single(),
-      admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id),
-      admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id).not('confirmed_at', 'is', null),
+    // Get doctor record first (need doc.id for leads queries)
+    const { data: doc } = await createAdminClient().from('doctors').select('id, photo_url, bio, clinic_name, specialties, city, state, website_url, instagram_url, facebook_url, video_url, profile_views, patient_leads').eq('user_id', user.id).single();
+    if (!doc) return null;
+
+    const docId = doc.id;
+    const [leadsRes, confirmedRes, seminarsRes, ceRes, referralsRes, matchRes, jobsRes, reviewsRes, notifsRes] = await Promise.all([
+      admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', docId),
+      admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', docId).not('confirmed_at', 'is', null),
       createAdminClient().from('seminars').select('id', { count: 'exact', head: true }).eq('host_id', user.id).eq('is_approved', true),
       admin.from('ce_certificates').select('ce_hours').eq('user_id', user.id),
-      admin.from('leads').select('id', { count: 'exact', head: true }).eq('source', 'referral').eq('doctor_id', user.id),
+      admin.from('leads').select('id', { count: 'exact', head: true }).eq('source', 'referral').eq('doctor_id', docId),
       admin.from('match_positions').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id),
-      createAdminClient().from('job_postings').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id),
+      createAdminClient().from('job_postings').select('id', { count: 'exact', head: true }).eq('doctor_id', docId),
       admin.from('seminar_reviews').select('id', { count: 'exact', head: true }),
       createAdminClient().from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('read', false),
     ])
-
-    const doc = doctorRes.data
-    if (!doc) return null
 
     const ceHours = (ceRes.data || []).reduce((s: number, c: any) => s + (c.ce_hours || 0), 0)
 
@@ -496,9 +497,11 @@ export async function getSmartActionItems() {
       items.push({ id: 'unread', priority: 'high', title: `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`, description: 'Review your recent notifications', href: '/doctor/notifications', icon: 'Bell' })
     }
 
-    // Stale leads (new leads older than 48 hours)
+    // Stale leads (new leads older than 48 hours) — use doctor table ID
+    const { data: docForLeads } = await createAdminClient().from('doctors').select('id').eq('user_id', user.id).single()
+    const docIdForLeads = docForLeads?.id || user.id
     const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
-    const { count: staleLeads } = await admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id).eq('stage', 'new').lt('created_at', twoDaysAgo)
+    const { count: staleLeads } = await admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', docIdForLeads).eq('stage', 'new').lt('created_at', twoDaysAgo)
     if (staleLeads && staleLeads > 0) {
       items.push({ id: 'stale_leads', priority: 'high', title: `${staleLeads} lead${staleLeads > 1 ? 's' : ''} waiting 48+ hours`, description: 'Contact them before they go elsewhere', href: '/doctor/leads', icon: 'Users' })
     }

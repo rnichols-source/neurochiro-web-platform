@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro Global Marketing Plan 2026-2028</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --navy: #1E2D3B;
+    --orange: #D66829;
+    --cream: #F5F3EF;
+    --dark: #0F1A24;
+    --gold: #C9A84C;
+    --light-gray: #E8E6E1;
+    --mid-gray: #8A8A8A;
+    --green: #2ECC71;
+    --red: #E74C3C;
+    --blue: #3498DB;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    background: linear-gradient(135deg, var(--dark) 0%, var(--navy) 50%, #2a3f52 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 70%, rgba(214,104,41,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(214,104,41,0.05) 0%, transparent 50%);
+    animation: pulse 8s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(1.1); opacity: 1; }
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(214,104,41,0.15);
+    border: 1px solid rgba(214,104,41,0.3);
+    color: var(--orange);
+    padding: 8px 20px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-logo {
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 900;
+    color: white;
+    letter-spacing: -2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-logo span { color: var(--orange); }
+
+  .hero-subtitle {
+    font-size: clamp(18px, 3vw, 28px);
+    font-weight: 300;
+    color: rgba(255,255,255,0.7);
+    margin-top: 16px;
+    max-width: 700px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    margin-top: 64px;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .hero-stat {
+    text-align: center;
+  }
+
+  .hero-stat-number {
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--orange);
+    display: block;
+    line-height: 1;
+  }
+
+  .hero-stat-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 8px;
+  }
+
+  .hero-target {
+    margin-top: 64px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-target-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .hero-target-number {
+    font-size: clamp(64px, 10vw, 120px);
+    font-weight: 900;
+    color: white;
+    line-height: 1;
+    margin-top: 8px;
+  }
+
+  .hero-target-sub {
+    font-size: 18px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 400;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.3);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* ─── NAV ─── */
+  .sticky-nav {
+    position: sticky;
+    top: 0;
+    background: var(--navy);
+    z-index: 100;
+    padding: 0 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .sticky-nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+
+  .sticky-nav a {
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 16px 0;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .sticky-nav a:hover {
+    color: var(--orange);
+    border-bottom-color: var(--orange);
+  }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 24px;
+  }
+
+  .section-dark {
+    background: var(--navy);
+    color: white;
+    max-width: 100%;
+  }
+
+  .section-dark .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 24px;
+  }
+
+  .section-accent {
+    background: var(--dark);
+    color: white;
+    max-width: 100%;
+  }
+
+  .section-accent .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 24px;
+  }
+
+  .section-orange {
+    background: var(--orange);
+    color: white;
+    max-width: 100%;
+  }
+
+  .section-orange .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 24px;
+    text-align: center;
+  }
+
+  .phase-badge {
+    display: inline-block;
+    background: var(--orange);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .section-dark .phase-badge {
+    background: rgba(214,104,41,0.2);
+    color: var(--orange);
+    border: 1px solid rgba(214,104,41,0.3);
+  }
+
+  .section-accent .phase-badge {
+    background: rgba(214,104,41,0.2);
+    color: var(--orange);
+    border: 1px solid rgba(214,104,41,0.3);
+  }
+
+  .section-title {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+
+  .section-subtitle {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--mid-gray);
+    margin-bottom: 60px;
+    max-width: 600px;
+  }
+
+  .section-dark .section-subtitle { color: rgba(255,255,255,0.5); }
+  .section-accent .section-subtitle { color: rgba(255,255,255,0.5); }
+
+  /* ─── CARDS ─── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    margin-top: 40px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 36px;
+    border: 1px solid var(--light-gray);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  }
+
+  .section-dark .card {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .section-accent .card {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .card-icon.orange { background: rgba(214,104,41,0.1); }
+  .card-icon.blue { background: rgba(52,152,219,0.1); }
+  .card-icon.green { background: rgba(46,204,113,0.1); }
+  .card-icon.gold { background: rgba(201,168,76,0.1); }
+  .card-icon.red { background: rgba(231,76,60,0.1); }
+  .card-icon.navy { background: rgba(30,45,59,0.1); }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+
+  .card-text {
+    font-size: 15px;
+    color: var(--mid-gray);
+    line-height: 1.7;
+  }
+
+  .section-dark .card-text { color: rgba(255,255,255,0.6); }
+  .section-accent .card-text { color: rgba(255,255,255,0.6); }
+
+  .card-list {
+    list-style: none;
+    margin-top: 16px;
+  }
+
+  .card-list li {
+    padding: 8px 0;
+    font-size: 14px;
+    color: var(--mid-gray);
+    border-bottom: 1px solid var(--light-gray);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .section-dark .card-list li {
+    color: rgba(255,255,255,0.6);
+    border-bottom-color: rgba(255,255,255,0.08);
+  }
+
+  .section-accent .card-list li {
+    color: rgba(255,255,255,0.6);
+    border-bottom-color: rgba(255,255,255,0.08);
+  }
+
+  .card-list li:last-child { border-bottom: none; }
+
+  .check { color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+  /* ─── TIMELINE ─── */
+  .timeline {
+    position: relative;
+    margin-top: 60px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--orange), var(--gold), var(--green));
+  }
+
+  .timeline-item {
+    padding-left: 72px;
+    padding-bottom: 48px;
+    position: relative;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: 15px;
+    top: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--orange);
+    border: 4px solid var(--cream);
+  }
+
+  .section-dark .timeline-dot { border-color: var(--navy); }
+
+  .timeline-day {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .timeline-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .timeline-text {
+    font-size: 14px;
+    color: var(--mid-gray);
+    line-height: 1.7;
+  }
+
+  .section-dark .timeline-text { color: rgba(255,255,255,0.5); }
+
+  /* ─── TABLE ─── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 40px;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .data-table thead {
+    background: var(--navy);
+    color: white;
+  }
+
+  .section-dark .data-table thead {
+    background: rgba(255,255,255,0.1);
+  }
+
+  .data-table th {
+    padding: 16px 24px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .data-table td {
+    padding: 16px 24px;
+    font-size: 15px;
+    border-bottom: 1px solid var(--light-gray);
+  }
+
+  .section-dark .data-table td {
+    border-bottom-color: rgba(255,255,255,0.08);
+  }
+
+  .data-table tbody tr:hover {
+    background: rgba(214,104,41,0.04);
+  }
+
+  .section-dark .data-table tbody tr:hover {
+    background: rgba(214,104,41,0.08);
+  }
+
+  .data-table .highlight {
+    color: var(--orange);
+    font-weight: 800;
+  }
+
+  /* ─── METRIC BLOCKS ─── */
+  .metric-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin: 40px 0;
+  }
+
+  .metric {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    border: 1px solid var(--light-gray);
+  }
+
+  .section-dark .metric {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .metric-number {
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--orange);
+    line-height: 1;
+  }
+
+  .metric-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mid-gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 8px;
+  }
+
+  .section-dark .metric-label { color: rgba(255,255,255,0.5); }
+
+  /* ─── FLYWHEEL ─── */
+  .flywheel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 48px 0;
+  }
+
+  .flywheel-step {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    min-width: 160px;
+    flex: 1;
+  }
+
+  .flywheel-step-number {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--orange);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .flywheel-step-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+  }
+
+  .flywheel-arrow {
+    font-size: 24px;
+    color: var(--orange);
+    flex-shrink: 0;
+  }
+
+  /* ─── GLOBAL MAP ─── */
+  .global-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-top: 40px;
+  }
+
+  .region-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 28px;
+  }
+
+  .region-flag {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .region-name {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .region-details {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.8;
+  }
+
+  .region-target {
+    display: inline-block;
+    margin-top: 12px;
+    background: rgba(214,104,41,0.15);
+    color: var(--orange);
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* ─── BUDGET ─── */
+  .budget-bar {
+    display: flex;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 40px;
+    margin: 24px 0;
+  }
+
+  .budget-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+    padding: 0 8px;
+  }
+
+  /* ─── QUOTE BLOCK ─── */
+  .quote-block {
+    text-align: center;
+    padding: 80px 24px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .quote-text {
+    font-size: clamp(24px, 4vw, 40px);
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: -0.5px;
+  }
+
+  .quote-text em {
+    color: var(--orange);
+    font-style: normal;
+  }
+
+  /* ─── TWO COL ─── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+    margin-top: 40px;
+  }
+
+  @media (max-width: 768px) {
+    .two-col { grid-template-columns: 1fr; }
+    .hero-stats { gap: 32px; }
+    .flywheel-arrow { display: none; }
+  }
+
+  .col-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+
+  .col-text {
+    font-size: 15px;
+    color: var(--mid-gray);
+    line-height: 1.8;
+  }
+
+  .section-dark .col-text { color: rgba(255,255,255,0.6); }
+
+  /* ─── NUMBERED LIST ─── */
+  .numbered-list {
+    list-style: none;
+    counter-reset: steps;
+    margin-top: 24px;
+  }
+
+  .numbered-list li {
+    counter-increment: steps;
+    padding: 16px 0 16px 56px;
+    position: relative;
+    font-size: 15px;
+    border-bottom: 1px solid var(--light-gray);
+  }
+
+  .section-dark .numbered-list li { border-bottom-color: rgba(255,255,255,0.08); }
+
+  .numbered-list li::before {
+    content: counter(steps);
+    position: absolute;
+    left: 0;
+    top: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(214,104,41,0.1);
+    color: var(--orange);
+    font-weight: 800;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .numbered-list li strong {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .numbered-list li span {
+    color: var(--mid-gray);
+    font-size: 14px;
+  }
+
+  .section-dark .numbered-list li span { color: rgba(255,255,255,0.5); }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    background: var(--dark);
+    color: rgba(255,255,255,0.4);
+    text-align: center;
+    padding: 48px 24px;
+    font-size: 14px;
+  }
+
+  .footer strong { color: var(--orange); }
+
+  /* ─── PRINT ─── */
+  @media print {
+    .sticky-nav { display: none; }
+    .hero { min-height: auto; padding: 60px 24px; page-break-after: always; }
+    .section, .section-dark .section-inner, .section-accent .section-inner { padding: 40px 24px; }
+    .card:hover { transform: none; box-shadow: none; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ HERO ═══════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-badge">Confidential Strategy Document</div>
+  <div class="hero-logo">NEURO<span>CHIRO</span></div>
+  <div class="hero-subtitle">Global Marketing Plan &amp; Growth Strategy 2026 - 2028</div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="hero-stat-number">120</span>
+      <div class="hero-stat-label">Paid Doctors</div>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-number">30+</span>
+      <div class="hero-stat-label">US States</div>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-number">4</span>
+      <div class="hero-stat-label">Countries</div>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-number">1</span>
+      <div class="hero-stat-label">Movement</div>
+    </div>
+  </div>
+
+  <div class="hero-target">
+    <div class="hero-target-label">18-Month Target</div>
+    <div class="hero-target-number">10,000</div>
+    <div class="hero-target-sub">doctors worldwide</div>
+  </div>
+
+  <div class="scroll-indicator">Scroll to explore the plan</div>
+</div>
+
+<!-- ═══════════════════════════════════════ NAV ═══════════════════════════════════════ -->
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <a href="#mission">Mission</a>
+    <a href="#phase1">Phase 1: Foundation</a>
+    <a href="#phase2">Phase 2: Growth</a>
+    <a href="#phase3">Phase 3: Scale</a>
+    <a href="#phase4">Phase 4: Global</a>
+    <a href="#phase5">Phase 5: Moat</a>
+    <a href="#team">Team</a>
+    <a href="#budget">Budget</a>
+    <a href="#targets">Targets</a>
+    <a href="#week1">Week 1 Sprint</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════ MISSION ═══════════════════════════════════════ -->
+<div class="section-orange" id="mission">
+  <div class="section-inner">
+    <div class="quote-block" style="padding: 0;">
+      <div class="quote-text">
+        We're not building a directory.<br>
+        We're building the <em>home base</em> for a global movement.
+      </div>
+      <p style="margin-top: 24px; font-size: 18px; opacity: 0.85;">
+        NeuroChiro is the only directory built exclusively for nervous system chiropractors.
+        That specificity is our superpower. Every generic directory (Yelp, Healthgrades, ZocDoc) lists every type of doctor.
+        We curate. We verify. We spotlight. We build belonging.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ UNFAIR ADVANTAGES ═══════════════════════════════════════ -->
+<div class="section" id="advantages">
+  <span class="phase-badge">Why We Win</span>
+  <h2 class="section-title">Our Unfair Advantages</h2>
+  <p class="section-subtitle">Most platforms launch with zero users and zero revenue. We launch with both.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon orange">&#9733;</div>
+      <h3 class="card-title">120 Paid Founding Members</h3>
+      <p class="card-text">Every doctor in our directory is a paying customer. Not a free trial. Not a lead. A believer who put money down before the platform even existed. That's proof of demand most startups spend years trying to find.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon blue">&#9775;</div>
+      <h3 class="card-title">Category of One</h3>
+      <p class="card-text">There is no other directory built specifically for nervous system chiropractors. We own the niche. When a neurological chiropractor wants to be found online, there's one answer: NeuroChiro.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon green">&#9729;</div>
+      <h3 class="card-title">SEO Long-Tail Dominance</h3>
+      <p class="card-text">"Chiropractor near me" is impossibly competitive. "Nervous system chiropractor [city]" has almost zero competition. We can own page one of Google for thousands of specific, high-intent searches.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon gold">&#9881;</div>
+      <h3 class="card-title">Full-Stack Platform</h3>
+      <p class="card-text">Doctor portal, student portal, patient portal, AI bio generation, Spotlight series, automated onboarding. We didn't build a listing page &mdash; we built an ecosystem. That's our moat.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ PHASE 1 ═══════════════════════════════════════ -->
+<div class="section-dark" id="phase1">
+  <div class="section-inner">
+    <span class="phase-badge">Phase 1 &mdash; Months 1-3</span>
+    <h2 class="section-title" style="color: white;">Activate the Founding 120</h2>
+    <p class="section-subtitle">Your 120 paid doctors are not just customers. They're your launch team, your case studies, your referral engine, and your content pipeline. Activate every single one.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon orange">&#128293;</div>
+        <h3 class="card-title">Founding Member Campaign</h3>
+        <p class="card-text">Send a personal video (Loom or Instagram DM) to every founding member. Show them their new profile. Give them an exclusive "Founding Member" badge that will never be available again. Ask each one to refer ONE colleague.</p>
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> Personal Loom to every doctor</li>
+          <li><span class="check">&#10003;</span> Exclusive "Founding Member" badge</li>
+          <li><span class="check">&#10003;</span> Shareable profile links for social</li>
+          <li><span class="check">&#10003;</span> "Refer 1 colleague" ask</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-icon blue">&#128269;</div>
+        <h3 class="card-title">SEO Foundation</h3>
+        <p class="card-text">Every doctor profile becomes an SEO-optimized landing page. Build city pages for every market you're in. Start a content engine targeting long-tail keywords with near-zero competition.</p>
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> Schema markup on every profile (LocalBusiness + Physician)</li>
+          <li><span class="check">&#10003;</span> Title tags: "Dr. [Name] - [Specialty] in [City] | NeuroChiro"</li>
+          <li><span class="check">&#10003;</span> City landing pages (Miami, Austin, Riverside, etc.)</li>
+          <li><span class="check">&#10003;</span> Pillar: "What is Nervous System Chiropractic?"</li>
+          <li><span class="check">&#10003;</span> Google Search Console + Bing Webmaster</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-icon green">&#128200;</div>
+        <h3 class="card-title">Profile Completion Push</h3>
+        <p class="card-text">Many of your 120 have incomplete profiles from migration. A complete profile gets 5x more patient clicks. Make completion effortless.</p>
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> "Your profile is X% complete" email campaign</li>
+          <li><span class="check">&#10003;</span> Free 15-min profile optimization calls</li>
+          <li><span class="check">&#10003;</span> AI bio generator promotion</li>
+          <li><span class="check">&#10003;</span> Professional headshot guidelines</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-icon gold">&#128176;</div>
+        <h3 class="card-title">Premium Tier Launch</h3>
+        <p class="card-text">Introduce Growth ($49/mo) and Pro ($99/mo) tiers with premium features. Position as: "You already invested. Here's how to get even more patients finding you."</p>
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> Growth: Priority search, analytics, AI bio, verified badge</li>
+          <li><span class="check">&#10003;</span> Pro: Featured placement, Spotlight episodes, lead tracking</li>
+          <li><span class="check">&#10003;</span> Founding member discount: locked in forever</li>
+          <li><span class="check">&#10003;</span> Annual billing option (2 months free)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="metric-row" style="margin-top: 60px;">
+      <div class="metric">
+        <div class="metric-number">120 &#8594; 500</div>
+        <div class="metric-label">Doctor Growth Target</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">$15K</div>
+        <div class="metric-label">MRR Target</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">100%</div>
+        <div class="metric-label">Profile Completion</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">10</div>
+        <div class="metric-label">City Pages Live</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ PHASE 2 ═══════════════════════════════════════ -->
+<div class="section" id="phase2">
+  <span class="phase-badge">Phase 2 &mdash; Months 3-6</span>
+  <h2 class="section-title">Doctor-Led Virality</h2>
+  <p class="section-subtitle">Every doctor you feature becomes a recruiter. Every Spotlight episode is a growth engine.</p>
+
+  <div class="two-col">
+    <div>
+      <h3 class="col-title">The Spotlight Flywheel</h3>
+      <p class="col-text">Your Spotlight series is not just content &mdash; it's your most powerful acquisition channel. Here's why: when you feature a doctor, they ALWAYS share it. It's free PR for them. Their chiropractor friends see it and want in. Those friends sign up. You feature one of them. The cycle accelerates.</p>
+      <ol class="numbered-list">
+        <li><strong>Feature a founding member</strong><span>10-15 min video interview, professional production</span></li>
+        <li><strong>They share with their network</strong><span>Instagram, Facebook, email newsletter, office waiting room</span></li>
+        <li><strong>Their colleagues see it</strong><span>"I want to be featured on that directory"</span></li>
+        <li><strong>Colleagues sign up for NeuroChiro</strong><span>New paid member, new profile, new content opportunity</span></li>
+        <li><strong>Feature the new member</strong><span>Cycle repeats, network effects compound</span></li>
+      </ol>
+    </div>
+    <div>
+      <h3 class="col-title">Execution Cadence</h3>
+      <div class="card" style="margin-top: 16px;">
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> <strong>2 Spotlight episodes per week</strong></li>
+          <li><span class="check">&#10003;</span> Prioritize doctors with 5K+ Instagram followers</li>
+          <li><span class="check">&#10003;</span> Cut each episode into 8-10 short clips</li>
+          <li><span class="check">&#10003;</span> Post clips as Reels, TikToks, YouTube Shorts</li>
+          <li><span class="check">&#10003;</span> "Nominate a Doctor" form on the site</li>
+          <li><span class="check">&#10003;</span> Email blast to full directory on each drop</li>
+          <li><span class="check">&#10003;</span> "As Seen On NeuroChiro" badge for featured docs</li>
+        </ul>
+      </div>
+
+      <h3 class="col-title" style="margin-top: 32px;">Referral Program</h3>
+      <div class="card" style="margin-top: 16px;">
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> <strong>Doctor-to-Doctor:</strong> Referrer gets 1 free month upgrade</li>
+          <li><span class="check">&#10003;</span> Leaderboard: top referrers get featured placement</li>
+          <li><span class="check">&#10003;</span> <strong>Patient-to-Doctor:</strong> "Share with a Friend" on every profile</li>
+          <li><span class="check">&#10003;</span> Monthly giveaway for patients who refer</li>
+          <li><span class="check">&#10003;</span> Track everything via referral_code schema</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-size: 28px; font-weight: 900; margin-top: 80px; margin-bottom: 8px;">Social Media Domination</h3>
+  <p class="section-subtitle" style="margin-bottom: 32px;">The chiropractic community lives on Instagram. Meet them there, then expand.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon orange">&#128247;</div>
+      <h3 class="card-title">Instagram (Primary)</h3>
+      <p class="card-text">5-7 posts/week. Reels-first. Spotlight clips, patient education, doctor features. DM every nervous system chiropractor you find: "We built a directory specifically for docs like you."</p>
+      <p style="margin-top: 12px; font-size: 13px; color: var(--orange); font-weight: 700;">#neurochiro #nervoussystem #chiropractor #subluxation</p>
+    </div>
+    <div class="card">
+      <div class="card-icon red">&#127916;</div>
+      <h3 class="card-title">TikTok (Patient Acquisition)</h3>
+      <p class="card-text">"What your chiropractor is actually doing to your nervous system." Patient education content drives patients TO the directory. This is demand generation.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon blue">&#9654;</div>
+      <h3 class="card-title">YouTube (Long-term SEO)</h3>
+      <p class="card-text">Full Spotlight episodes + "Find a Nervous System Chiropractor in [City]" series. YouTube is the #2 search engine. These videos rank on Google for years.</p>
+    </div>
+  </div>
+
+  <h3 style="font-size: 28px; font-weight: 900; margin-top: 80px; margin-bottom: 8px;">Chiropractic School Pipeline</h3>
+  <p class="section-subtitle" style="margin-bottom: 32px;">18 colleges. 12,000 students. Your future paying members.</p>
+
+  <div class="card" style="max-width: 800px;">
+    <ul class="card-list">
+      <li><span class="check">&#10003;</span> <strong>Student portal is already built</strong> &mdash; free access, learning content, community</li>
+      <li><span class="check">&#10003;</span> Partner with Life University, Palmer, Sherman, Parker, Logan first</li>
+      <li><span class="check">&#10003;</span> Student ambassadors: free first year as a doctor if they recruit 10 classmates</li>
+      <li><span class="check">&#10003;</span> Virtual "Career in Neuro Chiro" events with Spotlight doctors as speakers</li>
+      <li><span class="check">&#10003;</span> Graduation pipeline: students become paying members on day one of practice</li>
+    </ul>
+  </div>
+
+  <h3 style="font-size: 28px; font-weight: 900; margin-top: 80px; margin-bottom: 8px;">Email Marketing Engine</h3>
+
+  <div class="card-grid" style="margin-top: 24px;">
+    <div class="card">
+      <h3 class="card-title">New Doctor Welcome</h3>
+      <p class="card-text"><strong>7-day sequence.</strong> Day 1: Welcome + complete profile. Day 3: Best profile examples. Day 5: AI bio feature. Day 7: Tier upgrade pitch.</p>
+    </div>
+    <div class="card">
+      <h3 class="card-title">Weekly Engagement</h3>
+      <p class="card-text"><strong>Every Friday.</strong> Profile views report. New patient leads. Latest Spotlight. "Invite a colleague" CTA. Keep every doctor engaged.</p>
+    </div>
+    <div class="card">
+      <h3 class="card-title">Patient Newsletter</h3>
+      <p class="card-text"><strong>Monthly.</strong> "New doctors in your area." Health education. Drives repeat visits to directory. Patients become your SEO flywheel.</p>
+    </div>
+  </div>
+
+  <div class="metric-row" style="margin-top: 60px;">
+    <div class="metric">
+      <div class="metric-number">500 &#8594; 2K</div>
+      <div class="metric-label">Doctor Growth</div>
+    </div>
+    <div class="metric">
+      <div class="metric-number">$50K</div>
+      <div class="metric-label">MRR Target</div>
+    </div>
+    <div class="metric">
+      <div class="metric-number">50+</div>
+      <div class="metric-label">Spotlight Episodes</div>
+    </div>
+    <div class="metric">
+      <div class="metric-number">5</div>
+      <div class="metric-label">School Partnerships</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ PHASE 3 ═══════════════════════════════════════ -->
+<div class="section-accent" id="phase3">
+  <div class="section-inner">
+    <span class="phase-badge">Phase 3 &mdash; Months 6-12</span>
+    <h2 class="section-title" style="color: white;">Scale: Paid + Events + PR</h2>
+    <p class="section-subtitle">Organic growth is proven. Now pour fuel on it with paid acquisition, conferences, partnerships, and press.</p>
+
+    <div class="two-col">
+      <div>
+        <h3 class="col-title" style="color: white;">Paid Acquisition</h3>
+        <div class="card" style="margin-top: 16px;">
+          <h4 style="font-weight: 800; margin-bottom: 12px;">Google Ads</h4>
+          <ul class="card-list">
+            <li><span class="check">&#10003;</span> Target: "nervous system chiropractor [city]", "find chiropractor near me"</li>
+            <li><span class="check">&#10003;</span> Send to city-specific landing pages</li>
+            <li><span class="check">&#10003;</span> Start: $2K/mo, scale winners</li>
+            <li><span class="check">&#10003;</span> Expected CAC: $50-150 per paying doctor</li>
+          </ul>
+          <h4 style="font-weight: 800; margin: 20px 0 12px;">Meta Ads (Instagram/Facebook)</h4>
+          <ul class="card-list">
+            <li><span class="check">&#10003;</span> Target: Chiropractors by job title</li>
+            <li><span class="check">&#10003;</span> Creative: Spotlight clips, doctor testimonials</li>
+            <li><span class="check">&#10003;</span> Retarget website visitors</li>
+            <li><span class="check">&#10003;</span> Start: $1-2K/mo</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="col-title" style="color: white;">Conference Strategy</h3>
+        <div class="card" style="margin-top: 16px;">
+          <h4 style="font-weight: 800; margin-bottom: 12px;">Target Events</h4>
+          <ul class="card-list">
+            <li><span class="check">&#10003;</span> <strong>IRAPS</strong> &mdash; biggest nervous system chiro event</li>
+            <li><span class="check">&#10003;</span> <strong>Parker Seminars</strong> &mdash; massive chiro conference</li>
+            <li><span class="check">&#10003;</span> <strong>Life Vision Weekend</strong> &mdash; vitalistic community</li>
+            <li><span class="check">&#10003;</span> <strong>State association meetings</strong> &mdash; local density</li>
+          </ul>
+          <h4 style="font-weight: 800; margin: 20px 0 12px;">What We Do There</h4>
+          <ul class="card-list">
+            <li><span class="check">&#10003;</span> Booth with live profile creation + free headshots</li>
+            <li><span class="check">&#10003;</span> Speaking: "Build Your Online Presence"</li>
+            <li><span class="check">&#10003;</span> Bring founding members as ambassadors</li>
+            <li><span class="check">&#10003;</span> Target: 200-500 signups per event</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-size: 28px; font-weight: 900; margin-top: 80px; margin-bottom: 8px; color: white;">Strategic Partnerships</h3>
+
+    <table class="data-table" style="margin-top: 24px;">
+      <thead>
+        <tr>
+          <th>Partner Type</th>
+          <th>Examples</th>
+          <th>What We Get</th>
+          <th>What They Get</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>EHR Software</strong></td>
+          <td>ChiroTouch, Jane App</td>
+          <td>Co-marketing, integration</td>
+          <td>Added value for their users</td>
+        </tr>
+        <tr>
+          <td><strong>Supplements</strong></td>
+          <td>Standard Process, Metagenics</td>
+          <td>Spotlight sponsorships</td>
+          <td>Access to doctor audience</td>
+        </tr>
+        <tr>
+          <td><strong>Coaching Programs</strong></td>
+          <td>TCP, TLC, MaxLiving</td>
+          <td>Referrals from networks</td>
+          <td>Visibility tool for members</td>
+        </tr>
+        <tr>
+          <td><strong>Insurance Platforms</strong></td>
+          <td>Regional networks</td>
+          <td>Patient referral pipeline</td>
+          <td>Verified provider directory</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-size: 28px; font-weight: 900; margin-top: 80px; margin-bottom: 8px; color: white;">PR &amp; Media Milestones</h3>
+
+    <div class="card-grid" style="margin-top: 24px;">
+      <div class="card">
+        <h3 class="card-title" style="color: var(--orange);">1,000 Doctors</h3>
+        <p class="card-text">Local press + chiro trade publications. Chiropractic Economics, The Chiropractic Journal, Dynamic Chiropractic. "The first directory built for nervous system chiropractors."</p>
+      </div>
+      <div class="card">
+        <h3 class="card-title" style="color: var(--orange);">5,000 Doctors</h3>
+        <p class="card-text">Health tech press. MedCity News, Becker's Health IT, Fierce Healthcare. "NeuroChiro is the ZocDoc for the chiropractic movement."</p>
+      </div>
+      <div class="card">
+        <h3 class="card-title" style="color: var(--orange);">10,000 Doctors</h3>
+        <p class="card-text">Major business press. Forbes Health, Entrepreneur, Inc. "How a niche directory became the global home for nervous system chiropractic."</p>
+      </div>
+    </div>
+
+    <div class="metric-row" style="margin-top: 60px;">
+      <div class="metric">
+        <div class="metric-number">2K &#8594; 5K</div>
+        <div class="metric-label">Doctor Growth</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">$125K</div>
+        <div class="metric-label">MRR Target</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">6+</div>
+        <div class="metric-label">Conferences</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">4</div>
+        <div class="metric-label">Strategic Partners</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ PHASE 4: GLOBAL ═══════════════════════════════════════ -->
+<div class="section-dark" id="phase4">
+  <div class="section-inner">
+    <span class="phase-badge">Phase 4 &mdash; Months 9-18</span>
+    <h2 class="section-title" style="color: white;">Go Global</h2>
+    <p class="section-subtitle">You already have doctors in Canada, New Zealand, and the UK. Now systematically expand into every market where nervous system chiropractic exists.</p>
+
+    <div class="global-grid">
+      <div class="region-card">
+        <div class="region-flag">&#127482;&#127480;</div>
+        <h3 class="region-name">United States</h3>
+        <p class="region-details">
+          Current: 112 doctors across 30+ states<br>
+          Strongholds: Florida (13), Texas (8), California (7)<br>
+          Strategy: Deepen in existing states, expand to missing ones
+        </p>
+        <span class="region-target">Target: 5,000 doctors</span>
+      </div>
+      <div class="region-card">
+        <div class="region-flag">&#127464;&#127462;</div>
+        <h3 class="region-name">Canada</h3>
+        <p class="region-details">
+          Current: 4 doctors<br>
+          Key markets: Ontario, BC, Alberta<br>
+          Strategy: Partner with Canadian Memorial Chiropractic College
+        </p>
+        <span class="region-target">Target: 1,000 doctors</span>
+      </div>
+      <div class="region-card">
+        <div class="region-flag">&#127462;&#127482;</div>
+        <h3 class="region-name">Australia &amp; New Zealand</h3>
+        <p class="region-details">
+          Current: 1 doctor (NZ)<br>
+          Key markets: Melbourne, Sydney, Auckland<br>
+          Strategy: Partner with NZCA, Macquarie University chiro program
+        </p>
+        <span class="region-target">Target: 1,500 doctors</span>
+      </div>
+      <div class="region-card">
+        <div class="region-flag">&#127468;&#127463;</div>
+        <h3 class="region-name">United Kingdom &amp; Europe</h3>
+        <p class="region-details">
+          Current: 1 doctor (UK)<br>
+          Key markets: London, Manchester, Dublin, Amsterdam<br>
+          Strategy: Partner with AECC University College, BCA
+        </p>
+        <span class="region-target">Target: 1,500 doctors</span>
+      </div>
+      <div class="region-card">
+        <div class="region-flag">&#127487;&#127462;</div>
+        <h3 class="region-name">South Africa</h3>
+        <p class="region-details">
+          Growing chiro community<br>
+          Key markets: Johannesburg, Cape Town, Durban<br>
+          Strategy: Partner with DUT chiropractic program
+        </p>
+        <span class="region-target">Target: 500 doctors</span>
+      </div>
+      <div class="region-card">
+        <div class="region-flag">&#127470;&#127475;</div>
+        <h3 class="region-name">Asia Pacific</h3>
+        <p class="region-details">
+          Emerging markets: Japan, South Korea, Singapore, Hong Kong<br>
+          Strategy: Long-term play via international chiro associations
+        </p>
+        <span class="region-target">Target: 500 doctors</span>
+      </div>
+    </div>
+
+    <h3 style="font-size: 28px; font-weight: 900; margin-top: 80px; margin-bottom: 16px; color: white;">Global Expansion Playbook</h3>
+    <div class="two-col">
+      <div>
+        <ol class="numbered-list">
+          <li><strong>Find the Local Champion</strong><span>Identify 1-2 well-connected nervous system chiropractors in the market. Feature them on Spotlight. They become your ambassador.</span></li>
+          <li><strong>Localize the Platform</strong><span>Currency, measurement units, state/province names, local SEO. The platform already supports international addresses.</span></li>
+          <li><strong>Partner with Local Schools</strong><span>Every country with chiropractors has chiro programs. Partner with them for the student pipeline.</span></li>
+        </ol>
+      </div>
+      <div>
+        <ol class="numbered-list" style="counter-reset: steps 3;">
+          <li><strong>Local Conference Presence</strong><span>ACA (Australia), BCA (UK), CCA (Canada). Booth or sponsorship. Same playbook as US conferences.</span></li>
+          <li><strong>Content Localization</strong><span>"Find a Nervous System Chiropractor in Melbourne." City pages for every target market. Local language where needed.</span></li>
+          <li><strong>Community Building</strong><span>Country-specific Spotlight playlists. Regional leaderboards. Local WhatsApp/Telegram groups for doctors.</span></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ FLYWHEEL ═══════════════════════════════════════ -->
+<div class="section-orange">
+  <div class="section-inner">
+    <h2 style="font-size: 32px; font-weight: 900; margin-bottom: 8px;">The NeuroChiro Flywheel</h2>
+    <p style="opacity: 0.85; margin-bottom: 40px;">Every element feeds the next. Once spinning, it's nearly impossible to stop.</p>
+    <div class="flywheel">
+      <div class="flywheel-step">
+        <div class="flywheel-step-number">1</div>
+        <div class="flywheel-step-text">Doctors join &amp; complete profiles</div>
+      </div>
+      <div class="flywheel-arrow">&#8594;</div>
+      <div class="flywheel-step">
+        <div class="flywheel-step-number">2</div>
+        <div class="flywheel-step-text">SEO ranks profiles in Google</div>
+      </div>
+      <div class="flywheel-arrow">&#8594;</div>
+      <div class="flywheel-step">
+        <div class="flywheel-step-number">3</div>
+        <div class="flywheel-step-text">Patients find &amp; visit profiles</div>
+      </div>
+      <div class="flywheel-arrow">&#8594;</div>
+      <div class="flywheel-step">
+        <div class="flywheel-step-number">4</div>
+        <div class="flywheel-step-text">Doctors see value, refer peers</div>
+      </div>
+      <div class="flywheel-arrow">&#8594;</div>
+      <div class="flywheel-step">
+        <div class="flywheel-step-number">5</div>
+        <div class="flywheel-step-text">More doctors join</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ PHASE 5: MOAT ═══════════════════════════════════════ -->
+<div class="section" id="phase5">
+  <span class="phase-badge">Phase 5 &mdash; Months 12-18</span>
+  <h2 class="section-title">Build the Moat</h2>
+  <p class="section-subtitle">Make NeuroChiro so deeply integrated into how doctors practice and patients find care that switching is unthinkable.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon green">&#11088;</div>
+      <h3 class="card-title">Patient Reviews</h3>
+      <p class="card-text">Verified patient reviews on every profile. This is the single biggest trust driver. Doctors with 5+ reviews get a "Patient Favorite" badge. Reviews create stickiness &mdash; doctors won't leave a platform where their reputation lives.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon blue">&#128197;</div>
+      <h3 class="card-title">Booking Integration</h3>
+      <p class="card-text">"Book Now" button on every profile. Integrate with Calendly, Jane App, or build native booking. When patients book through NeuroChiro, it becomes indispensable. Revenue opportunity: booking fees or premium tier feature.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon gold">&#127942;</div>
+      <h3 class="card-title">NeuroChiro Verified Certification</h3>
+      <p class="card-text">A professional certification that means something. Doctors apply, submit credentials, get verified. They display the badge in their offices, on their websites, on social. Every badge is a free billboard for NeuroChiro. ($199-499/year)</p>
+    </div>
+    <div class="card">
+      <div class="card-icon navy">&#128202;</div>
+      <h3 class="card-title">Data &amp; Insights Product</h3>
+      <p class="card-text">"NeuroChiro Insights" &mdash; quarterly market reports. Patient search trends by region. Most searched conditions. Sell to conferences, coaching programs, supplement companies. This positions you as THE authority.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon orange">&#128218;</div>
+      <h3 class="card-title">Continuing Education Platform</h3>
+      <p class="card-text">Offer CE credits through the platform. Partner with educators and technique experts. Doctors need CE hours &mdash; if they get them through NeuroChiro, they'll never leave. Massive recurring revenue potential.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon red">&#128225;</div>
+      <h3 class="card-title">Patient Communication Suite</h3>
+      <p class="card-text">HIPAA-compliant messaging between patients and doctors. Appointment reminders. Follow-up automations. Turns NeuroChiro from a directory into the operating system for a chiropractic practice.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ TEAM ═══════════════════════════════════════ -->
+<div class="section-dark" id="team">
+  <div class="section-inner">
+    <span class="phase-badge">The Team</span>
+    <h2 class="section-title" style="color: white;">Who You Need &amp; When</h2>
+    <p class="section-subtitle">Start lean. Hire for what you need now, not what you might need later.</p>
+
+    <h3 style="color: var(--orange); font-size: 18px; font-weight: 800; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 2px;">Hire Now (Phase 1)</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Focus</th>
+          <th>Where to Find</th>
+          <th>Budget</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Content Marketing Manager</strong></td>
+          <td>SEO blog posts, email sequences, city pages, social captions</td>
+          <td>Contra, Twitter/X, content marketing communities</td>
+          <td class="highlight">$2-4K/mo</td>
+        </tr>
+        <tr>
+          <td><strong>Social Media Manager</strong></td>
+          <td>Daily posting, DM outreach, community engagement, Reels</td>
+          <td>Instagram chiro community, chiro school grads</td>
+          <td class="highlight">$1.5-3K/mo</td>
+        </tr>
+        <tr>
+          <td><strong>Doctor Success Rep</strong></td>
+          <td>Onboarding calls, profile optimization, upsells, support</td>
+          <td>Chiro school grads, ZipRecruiter</td>
+          <td class="highlight">$3-5K/mo</td>
+        </tr>
+        <tr>
+          <td><strong>Video Editor</strong></td>
+          <td>Spotlight episodes, Reels/TikToks, testimonial clips</td>
+          <td>Fiverr/Upwork for clips, full editor later</td>
+          <td class="highlight">$1-2K/mo</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="color: var(--orange); font-size: 18px; font-weight: 800; margin: 48px 0 24px; text-transform: uppercase; letter-spacing: 2px;">Hire at Scale (Phase 3+)</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Focus</th>
+          <th>When</th>
+          <th>Budget</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Paid Ads Manager</strong></td>
+          <td>Google Ads + Meta Ads, CAC optimization</td>
+          <td>Month 6 (after organic is proven)</td>
+          <td class="highlight">$4-6K/mo</td>
+        </tr>
+        <tr>
+          <td><strong>Partnerships Manager</strong></td>
+          <td>EHR integrations, conference relationships, school partnerships</td>
+          <td>Month 6</td>
+          <td class="highlight">$5-7K/mo</td>
+        </tr>
+        <tr>
+          <td><strong>International Lead</strong></td>
+          <td>Global expansion, ambassador programs, localization</td>
+          <td>Month 9</td>
+          <td class="highlight">$5-8K/mo</td>
+        </tr>
+        <tr>
+          <td><strong>Head of Sales</strong></td>
+          <td>Enterprise deals, coaching program partnerships, conference sales</td>
+          <td>Month 12</td>
+          <td class="highlight">$6-10K/mo + commission</td>
+        </tr>
+        <tr>
+          <td><strong>PR Agency</strong></td>
+          <td>Trade press, mainstream media at milestones</td>
+          <td>At 1,000 doctors</td>
+          <td class="highlight">$3-5K/mo retainer</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ BUDGET ═══════════════════════════════════════ -->
+<div class="section" id="budget">
+  <span class="phase-badge">Budget</span>
+  <h2 class="section-title">Investment by Phase</h2>
+  <p class="section-subtitle">Start lean, reinvest revenue, scale what works.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3 class="card-title">Phase 1: Foundation</h3>
+      <p style="font-size: 32px; font-weight: 900; color: var(--orange); margin: 16px 0;">$8-14K/mo</p>
+      <div class="budget-bar">
+        <div class="budget-segment" style="background: var(--orange); width: 35%;">Team</div>
+        <div class="budget-segment" style="background: var(--navy); width: 25%;">Content</div>
+        <div class="budget-segment" style="background: var(--blue); width: 20%;">Tools</div>
+        <div class="budget-segment" style="background: var(--green); width: 20%;">Email</div>
+      </div>
+      <ul class="card-list">
+        <li><span class="check">&#10003;</span> Contract team: $7.5-14K</li>
+        <li><span class="check">&#10003;</span> Tools (email, analytics, SEO): $200-500</li>
+        <li><span class="check">&#10003;</span> Content production: $500-1K</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="card-title">Phase 2: Growth</h3>
+      <p style="font-size: 32px; font-weight: 900; color: var(--orange); margin: 16px 0;">$12-20K/mo</p>
+      <div class="budget-bar">
+        <div class="budget-segment" style="background: var(--orange); width: 40%;">Team</div>
+        <div class="budget-segment" style="background: var(--navy); width: 25%;">Content</div>
+        <div class="budget-segment" style="background: var(--gold); width: 20%;">Events</div>
+        <div class="budget-segment" style="background: var(--blue); width: 15%;">Tools</div>
+      </div>
+      <ul class="card-list">
+        <li><span class="check">&#10003;</span> Expanded team: $10-16K</li>
+        <li><span class="check">&#10003;</span> Content + video production: $1-2K</li>
+        <li><span class="check">&#10003;</span> School partnerships: $500-1K</li>
+        <li><span class="check">&#10003;</span> Tools + platforms: $500-1K</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="card-title">Phase 3: Scale</h3>
+      <p style="font-size: 32px; font-weight: 900; color: var(--orange); margin: 16px 0;">$30-50K/mo</p>
+      <div class="budget-bar">
+        <div class="budget-segment" style="background: var(--orange); width: 30%;">Team</div>
+        <div class="budget-segment" style="background: var(--red); width: 25%;">Paid Ads</div>
+        <div class="budget-segment" style="background: var(--gold); width: 25%;">Events</div>
+        <div class="budget-segment" style="background: var(--navy); width: 20%;">PR</div>
+      </div>
+      <ul class="card-list">
+        <li><span class="check">&#10003;</span> Full team: $20-30K</li>
+        <li><span class="check">&#10003;</span> Paid ads: $3-5K</li>
+        <li><span class="check">&#10003;</span> Conferences: $3-8K</li>
+        <li><span class="check">&#10003;</span> PR agency: $3-5K</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ TARGETS ═══════════════════════════════════════ -->
+<div class="section-dark" id="targets">
+  <div class="section-inner">
+    <span class="phase-badge">Growth Targets</span>
+    <h2 class="section-title" style="color: white;">The Roadmap to 10,000</h2>
+    <p class="section-subtitle">All 120 current doctors are paid members. New growth targets revenue from day one.</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Milestone</th>
+          <th>Doctors</th>
+          <th>Countries</th>
+          <th>MRR</th>
+          <th>Timeline</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Launch</td>
+          <td class="highlight">120</td>
+          <td>4</td>
+          <td>Current revenue</td>
+          <td>Now</td>
+        </tr>
+        <tr>
+          <td>Phase 1 Complete</td>
+          <td class="highlight">500</td>
+          <td>5</td>
+          <td class="highlight">$15K</td>
+          <td>Month 3</td>
+        </tr>
+        <tr>
+          <td>Phase 2 Complete</td>
+          <td class="highlight">2,000</td>
+          <td>8</td>
+          <td class="highlight">$50K</td>
+          <td>Month 6</td>
+        </tr>
+        <tr>
+          <td>Phase 3 Complete</td>
+          <td class="highlight">5,000</td>
+          <td>12</td>
+          <td class="highlight">$125K</td>
+          <td>Month 12</td>
+        </tr>
+        <tr style="font-size: 17px;">
+          <td><strong>Phase 4-5 Complete</strong></td>
+          <td class="highlight" style="font-size: 24px;"><strong>10,000</strong></td>
+          <td><strong>20+</strong></td>
+          <td class="highlight" style="font-size: 24px;"><strong>$250K+</strong></td>
+          <td><strong>Month 18</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="color: rgba(255,255,255,0.4); font-size: 14px; margin-top: 16px;">Revenue assumptions: All doctors are paid. Blended average $25-50/mo depending on tier mix, increasing as premium features drive upgrades.</p>
+
+    <div class="metric-row" style="margin-top: 60px;">
+      <div class="metric">
+        <div class="metric-number">83x</div>
+        <div class="metric-label">Doctor Growth (120 &#8594; 10K)</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">20+</div>
+        <div class="metric-label">Countries</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">$3M+</div>
+        <div class="metric-label">ARR at Scale</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">#1</div>
+        <div class="metric-label">Global Neuro Chiro Directory</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ WEEK 1 SPRINT ═══════════════════════════════════════ -->
+<div class="section" id="week1">
+  <span class="phase-badge">Immediate Action</span>
+  <h2 class="section-title">Week 1 Sprint</h2>
+  <p class="section-subtitle">Everything starts with this week. Here's exactly what to do, day by day.</p>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-day">Monday</div>
+      <h3 class="timeline-title">Record the Founding Member Video</h3>
+      <p class="timeline-text">Record a personal Loom for your 120 founding members: "The new platform is live. Here's your profile. Here's what's new. Here's your exclusive Founding Member badge." Send via email blast.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-day">Tuesday</div>
+      <h3 class="timeline-title">Launch on Instagram</h3>
+      <p class="timeline-text">Post the relaunch announcement. Tag 10 of your most active founding members. Ask them to reshare. DM every chiropractor who engages with the post. Story sequence showing the platform.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-day">Wednesday</div>
+      <h3 class="timeline-title">Hire the Content Writer</h3>
+      <p class="timeline-text">Post on Contra and Twitter/X. First assignment: "What is Nervous System Chiropractic?" pillar page + city pages for Miami, Austin, and Riverside. Deadline: end of week 2.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-day">Thursday</div>
+      <h3 class="timeline-title">Spotlight Outreach</h3>
+      <p class="timeline-text">DM 3 chiro influencers (10K+ followers). Offer a free Spotlight feature. They'll share it with their entire audience. Book the first recording for next week.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-day">Friday</div>
+      <h3 class="timeline-title">Technical SEO Setup</h3>
+      <p class="timeline-text">Set up Google Search Console. Submit sitemap. Verify schema markup on doctor profiles. Install Google Analytics 4. Set up Bing Webmaster Tools. Check page speed scores.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-day">Weekend</div>
+      <h3 class="timeline-title">Content Production</h3>
+      <p class="timeline-text">Map out your next 8 Spotlight guests &mdash; start with founding members who have the biggest followings. Record 2 episodes. Plan next month's content calendar.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background: var(--gold);"></div>
+      <div class="timeline-day">Sunday</div>
+      <h3 class="timeline-title">First Weekly Email</h3>
+      <p class="timeline-text">Write and schedule your first weekly email to the directory: 1 Spotlight clip, profile view stats for the week, "Invite a colleague" CTA. This becomes your weekly habit.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ CLOSING ═══════════════════════════════════════ -->
+<div class="section-accent">
+  <div class="section-inner">
+    <div class="quote-block" style="padding: 0; max-width: 100%;">
+      <div class="quote-text" style="color: white;">
+        120 paid doctors believed in this <em>before they ever saw it</em>.<br><br>
+        Imagine what happens when the <em>world</em> sees it.
+      </div>
+      <p style="margin-top: 40px; font-size: 16px; color: rgba(255,255,255,0.5); max-width: 600px; margin-left: auto; margin-right: auto;">
+        Every great movement starts with a small group of true believers.
+        You have 120. The next 9,880 are out there waiting to be found.
+        This plan is how we find them.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ FOOTER ═══════════════════════════════════════ -->
+<div class="footer">
+  <p><strong>NEUROCHIRO</strong> &mdash; Global Marketing Plan</p>
+  <p style="margin-top: 8px;">Confidential &mdash; April 2026</p>
+  <p style="margin-top: 4px;">neurochiro.co</p>
+</div>
+
+</body>
+</html>

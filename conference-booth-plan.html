@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro Conference Booth Plan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --navy: #1E2D3B;
+    --orange: #D66829;
+    --cream: #F5F3EF;
+    --dark: #0F1A24;
+    --gold: #C9A84C;
+    --light-gray: #E8E6E1;
+    --mid-gray: #8A8A8A;
+    --green: #2ECC71;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    background: linear-gradient(135deg, var(--dark) 0%, var(--navy) 50%, #2a3f52 100%);
+    padding: 80px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 70%, rgba(214,104,41,0.08) 0%, transparent 50%);
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(214,104,41,0.15);
+    border: 1px solid rgba(214,104,41,0.3);
+    color: var(--orange);
+    padding: 8px 20px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 900;
+    color: white;
+    letter-spacing: -1px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero h1 span { color: var(--orange); }
+
+  .hero p {
+    color: rgba(255,255,255,0.6);
+    font-size: 18px;
+    margin-top: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-deadline {
+    display: inline-block;
+    margin-top: 32px;
+    background: var(--orange);
+    color: white;
+    padding: 12px 32px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 800;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── NAV ─── */
+  .sticky-nav {
+    position: sticky;
+    top: 0;
+    background: var(--navy);
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .sticky-nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 24px;
+    padding: 0 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+
+  .sticky-nav a {
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 14px 0;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .sticky-nav a:hover { color: var(--orange); border-bottom-color: var(--orange); }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 24px;
+  }
+
+  .section-dark {
+    background: var(--navy);
+    color: white;
+  }
+
+  .section-dark .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 24px;
+  }
+
+  .section-accent {
+    background: var(--dark);
+    color: white;
+  }
+
+  .section-accent .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 24px;
+  }
+
+  .section-orange {
+    background: var(--orange);
+    color: white;
+    text-align: center;
+    padding: 60px 24px;
+  }
+
+  .badge {
+    display: inline-block;
+    background: var(--orange);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .section-dark .badge {
+    background: rgba(214,104,41,0.2);
+    color: var(--orange);
+    border: 1px solid rgba(214,104,41,0.3);
+  }
+
+  .section-accent .badge {
+    background: rgba(214,104,41,0.2);
+    color: var(--orange);
+    border: 1px solid rgba(214,104,41,0.3);
+  }
+
+  h2 {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 17px;
+    color: var(--mid-gray);
+    margin-bottom: 48px;
+    max-width: 650px;
+  }
+
+  .section-dark .subtitle, .section-accent .subtitle { color: rgba(255,255,255,0.5); }
+
+  /* ─── BOOTH VISUAL ─── */
+  .booth-visual {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid var(--light-gray);
+    padding: 48px;
+    margin: 48px auto;
+    max-width: 900px;
+  }
+
+  .booth-diagram {
+    width: 100%;
+    aspect-ratio: 16/10;
+    background: linear-gradient(180deg, #f0ede8 0%, #e8e5df 100%);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--light-gray);
+  }
+
+  /* Floor */
+  .booth-floor {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20%;
+    background: linear-gradient(180deg, #d5d0c8 0%, #c8c3bb 100%);
+  }
+
+  /* Back wall / Backdrop */
+  .booth-backdrop {
+    position: absolute;
+    top: 5%;
+    left: 10%;
+    right: 10%;
+    height: 55%;
+    background: linear-gradient(135deg, var(--navy) 0%, #2a3f52 100%);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+
+  .booth-backdrop-logo {
+    font-size: clamp(20px, 4vw, 40px);
+    font-weight: 900;
+    color: white;
+    letter-spacing: -1px;
+  }
+
+  .booth-backdrop-logo span { color: var(--orange); }
+
+  .booth-backdrop-tagline {
+    font-size: clamp(8px, 1.5vw, 14px);
+    color: rgba(255,255,255,0.7);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .booth-backdrop-url {
+    margin-top: 12px;
+    background: var(--orange);
+    color: white;
+    padding: 4px 16px;
+    border-radius: 6px;
+    font-size: clamp(7px, 1.2vw, 12px);
+    font-weight: 800;
+  }
+
+  /* Table */
+  .booth-table {
+    position: absolute;
+    bottom: 18%;
+    left: 15%;
+    right: 15%;
+    height: 22%;
+    background: linear-gradient(180deg, var(--navy) 0%, #162230 100%);
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 3%;
+    padding-top: 3%;
+  }
+
+  /* Table items */
+  .booth-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .booth-item-icon {
+    width: clamp(20px, 4vw, 44px);
+    height: clamp(14px, 3vw, 32px);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(6px, 1.2vw, 14px);
+  }
+
+  .booth-item-label {
+    font-size: clamp(5px, 0.9vw, 9px);
+    color: rgba(255,255,255,0.7);
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .booth-ipad { background: #333; border: 1px solid #555; }
+  .booth-cards { background: var(--orange); }
+  .booth-brochure { background: white; color: var(--navy); }
+  .booth-qr { background: white; color: var(--navy); }
+  .booth-swag { background: var(--gold); color: var(--navy); }
+
+  /* TV */
+  .booth-tv {
+    position: absolute;
+    top: 8%;
+    right: 13%;
+    width: 18%;
+    height: 28%;
+    background: #111;
+    border: 2px solid #333;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .booth-tv-content {
+    width: 85%;
+    height: 75%;
+    background: linear-gradient(135deg, var(--orange) 0%, #e07a3a 100%);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(5px, 1vw, 10px);
+    font-weight: 800;
+    color: white;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .booth-tv-stand {
+    width: 3%;
+    height: 36%;
+    background: #444;
+    position: absolute;
+    bottom: 18%;
+    right: 21.5%;
+  }
+
+  /* Tablecloth drape indicator */
+  .booth-tablecloth {
+    position: absolute;
+    bottom: 18%;
+    left: 15%;
+    right: 15%;
+    height: 4%;
+    background: var(--navy);
+    border-radius: 0 0 4px 4px;
+    border-top: 2px solid var(--orange);
+  }
+
+  /* People silhouettes */
+  .booth-person {
+    position: absolute;
+    bottom: 4%;
+    width: 8%;
+    text-align: center;
+  }
+
+  .booth-person-body {
+    width: 60%;
+    margin: 0 auto;
+    aspect-ratio: 1/2;
+    background: rgba(0,0,0,0.15);
+    border-radius: 40% 40% 0 0;
+  }
+
+  .booth-person-head {
+    width: 35%;
+    margin: 0 auto 2px;
+    aspect-ratio: 1;
+    background: rgba(0,0,0,0.15);
+    border-radius: 50%;
+  }
+
+  .booth-person-label {
+    font-size: clamp(5px, 0.8vw, 8px);
+    color: var(--mid-gray);
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  /* Annotations */
+  .booth-annotation {
+    position: absolute;
+    font-size: clamp(6px, 1vw, 11px);
+    font-weight: 700;
+    color: var(--orange);
+    background: rgba(255,255,255,0.95);
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid rgba(214,104,41,0.2);
+  }
+
+  .booth-visual-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    color: var(--navy);
+  }
+
+  .booth-visual-sub {
+    text-align: center;
+    font-size: 14px;
+    color: var(--mid-gray);
+    margin-bottom: 32px;
+  }
+
+  /* ─── OVERHEAD VIEW ─── */
+  .overhead-diagram {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    aspect-ratio: 1;
+    background: #f0ede8;
+    border-radius: 16px;
+    position: relative;
+    border: 2px solid var(--light-gray);
+  }
+
+  .overhead-booth {
+    position: absolute;
+    top: 8%;
+    left: 15%;
+    right: 15%;
+    bottom: 35%;
+    border: 3px solid var(--navy);
+    border-radius: 4px;
+    background: rgba(30,45,59,0.05);
+  }
+
+  .overhead-backdrop-wall {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 12%;
+    background: var(--navy);
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .overhead-backdrop-wall span {
+    font-size: clamp(7px, 1.5vw, 12px);
+    font-weight: 900;
+    color: white;
+    letter-spacing: 1px;
+  }
+
+  .overhead-table {
+    position: absolute;
+    bottom: 12%;
+    left: 20%;
+    right: 20%;
+    height: 18%;
+    background: var(--navy);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .overhead-table-label {
+    font-size: clamp(6px, 1vw, 10px);
+    color: rgba(255,255,255,0.7);
+    font-weight: 700;
+  }
+
+  .overhead-tv {
+    position: absolute;
+    top: 18%;
+    right: 8%;
+    width: 15%;
+    height: 22%;
+    background: #333;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .overhead-tv span {
+    font-size: clamp(5px, 0.8vw, 8px);
+    color: white;
+    font-weight: 700;
+  }
+
+  .overhead-you {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12%;
+    aspect-ratio: 1;
+    background: var(--orange);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(5px, 1vw, 9px);
+    font-weight: 900;
+    color: white;
+    box-shadow: 0 0 0 4px rgba(214,104,41,0.2);
+  }
+
+  .overhead-flow-arrow {
+    position: absolute;
+    font-size: clamp(8px, 1.5vw, 16px);
+    color: var(--orange);
+  }
+
+  .overhead-zone {
+    position: absolute;
+    font-size: clamp(6px, 1vw, 10px);
+    font-weight: 700;
+    color: var(--mid-gray);
+    text-align: center;
+  }
+
+  .overhead-visitors {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8%;
+  }
+
+  .overhead-visitor {
+    width: clamp(12px, 3vw, 28px);
+    height: clamp(12px, 3vw, 28px);
+    background: rgba(0,0,0,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(5px, 0.8vw, 8px);
+    color: var(--mid-gray);
+    font-weight: 700;
+  }
+
+  .flow-label {
+    position: absolute;
+    bottom: 16%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(6px, 1vw, 10px);
+    color: var(--orange);
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ─── CARDS ─── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 32px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 32px;
+    border: 1px solid var(--light-gray);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.06);
+  }
+
+  .section-dark .card, .section-accent .card {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+
+  .card-text {
+    font-size: 14px;
+    color: var(--mid-gray);
+    line-height: 1.7;
+  }
+
+  .section-dark .card-text, .section-accent .card-text { color: rgba(255,255,255,0.6); }
+
+  .card-list {
+    list-style: none;
+    margin-top: 14px;
+  }
+
+  .card-list li {
+    padding: 7px 0;
+    font-size: 14px;
+    color: var(--mid-gray);
+    border-bottom: 1px solid var(--light-gray);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .section-dark .card-list li {
+    color: rgba(255,255,255,0.6);
+    border-bottom-color: rgba(255,255,255,0.08);
+  }
+
+  .card-list li:last-child { border-bottom: none; }
+  .check { color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+  /* ─── SHOPPING LIST ─── */
+  .shop-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 32px;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .shop-table thead { background: var(--navy); color: white; }
+
+  .section-dark .shop-table thead { background: rgba(255,255,255,0.1); }
+
+  .shop-table th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .shop-table td {
+    padding: 14px 20px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--light-gray);
+  }
+
+  .section-dark .shop-table td { border-bottom-color: rgba(255,255,255,0.08); }
+
+  .shop-table tbody tr:hover { background: rgba(214,104,41,0.04); }
+
+  .section-dark .shop-table tbody tr:hover { background: rgba(214,104,41,0.08); }
+
+  .price { color: var(--orange); font-weight: 800; }
+
+  .priority-high {
+    display: inline-block;
+    background: rgba(231,76,60,0.1);
+    color: #E74C3C;
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .priority-med {
+    display: inline-block;
+    background: rgba(214,104,41,0.1);
+    color: var(--orange);
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .priority-nice {
+    display: inline-block;
+    background: rgba(46,204,113,0.1);
+    color: var(--green);
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  /* ─── TIMELINE ─── */
+  .timeline {
+    position: relative;
+    margin-top: 40px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--orange), var(--gold), var(--green));
+  }
+
+  .timeline-item {
+    padding-left: 64px;
+    padding-bottom: 36px;
+    position: relative;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: 15px;
+    top: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--orange);
+    border: 4px solid var(--cream);
+  }
+
+  .section-dark .timeline-dot { border-color: var(--navy); }
+
+  .timeline-day {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+
+  .timeline-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .timeline-text {
+    font-size: 14px;
+    color: var(--mid-gray);
+    line-height: 1.7;
+  }
+
+  .section-dark .timeline-text { color: rgba(255,255,255,0.5); }
+
+  /* ─── TWO COL ─── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 32px;
+  }
+
+  @media (max-width: 768px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  /* ─── METRIC ─── */
+  .metric-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin: 40px 0;
+  }
+
+  .metric {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    text-align: center;
+    border: 1px solid var(--light-gray);
+  }
+
+  .section-dark .metric {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .metric-number {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--orange);
+    line-height: 1;
+  }
+
+  .metric-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mid-gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 6px;
+  }
+
+  .section-dark .metric-label { color: rgba(255,255,255,0.5); }
+
+  /* ─── SCRIPT CARD ─── */
+  .script-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid var(--light-gray);
+    padding: 32px;
+    margin-top: 20px;
+  }
+
+  .section-dark .script-card {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .script-label {
+    display: inline-block;
+    background: rgba(214,104,41,0.1);
+    color: var(--orange);
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .script-text {
+    font-size: 15px;
+    color: var(--navy);
+    line-height: 1.8;
+    font-style: italic;
+  }
+
+  .section-dark .script-text { color: rgba(255,255,255,0.8); }
+
+  /* ─── QR MOCKUP ─── */
+  .qr-mockup {
+    width: 200px;
+    height: 260px;
+    background: white;
+    border-radius: 16px;
+    border: 2px solid var(--light-gray);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 24px auto;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+
+  .qr-box {
+    width: 100px;
+    height: 100px;
+    background: var(--navy);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .qr-inner {
+    width: 80px;
+    height: 80px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 2px;
+  }
+
+  .qr-cell {
+    background: white;
+    border-radius: 1px;
+  }
+
+  .qr-cell.filled { background: var(--orange); }
+
+  .qr-title {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--navy);
+    text-align: center;
+  }
+
+  .qr-title span { color: var(--orange); }
+
+  .qr-sub {
+    font-size: 10px;
+    color: var(--mid-gray);
+    margin-top: 4px;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  /* ─── TOTAL COST ─── */
+  .total-box {
+    background: linear-gradient(135deg, var(--navy), #2a3f52);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    margin-top: 40px;
+  }
+
+  .total-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .total-amount {
+    font-size: 56px;
+    font-weight: 900;
+    color: var(--orange);
+    margin: 8px 0;
+  }
+
+  .total-note {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    background: var(--dark);
+    color: rgba(255,255,255,0.4);
+    text-align: center;
+    padding: 40px 24px;
+    font-size: 13px;
+  }
+
+  .footer strong { color: var(--orange); }
+
+  @media print {
+    .sticky-nav { display: none; }
+    .hero { padding: 40px 24px; }
+    .card:hover { transform: none; box-shadow: none; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════ HERO ═══════ -->
+<div class="hero">
+  <div class="hero-badge">Conference Booth Playbook</div>
+  <h1>NEURO<span>CHIRO</span></h1>
+  <h1 style="font-size: clamp(24px, 4vw, 42px); margin-top: 8px;">Conference &amp; Event Strategy</h1>
+  <p>Everything you need to set up, run, and crush every conference booth. Travel-friendly. High-impact. Signup machine.</p>
+  <div class="hero-deadline">First Event: 3 Weeks Out</div>
+</div>
+
+<!-- ═══════ NAV ═══════ -->
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <a href="#visual">Booth Visual</a>
+    <a href="#flow">Traffic Flow</a>
+    <a href="#shopping">Shopping List</a>
+    <a href="#tv">TV Strategy</a>
+    <a href="#scripts">Scripts</a>
+    <a href="#signup">Signup Machine</a>
+    <a href="#timeline">3-Week Countdown</a>
+    <a href="#day-of">Day-Of Playbook</a>
+    <a href="#post">Post-Event</a>
+  </div>
+</nav>
+
+<!-- ═══════ BOOTH VISUAL ═══════ -->
+<div class="section" id="visual">
+  <span class="badge">The Setup</span>
+  <h2>Your Booth &mdash; Front View</h2>
+  <p class="subtitle">Clean, professional, inviting. Navy and orange branding. The TV draws them in. The table keeps them engaged. The QR code captures them.</p>
+
+  <div class="booth-visual">
+    <div class="booth-visual-title">Standard 6ft or 8ft Booth</div>
+    <div class="booth-visual-sub">This is what attendees see when they walk up</div>
+
+    <div class="booth-diagram">
+      <!-- Floor -->
+      <div class="booth-floor"></div>
+
+      <!-- Backdrop Banner -->
+      <div class="booth-backdrop">
+        <div class="booth-backdrop-logo">NEURO<span>CHIRO</span></div>
+        <div class="booth-backdrop-tagline">The #1 Directory for Nervous System Chiropractors</div>
+        <div class="booth-backdrop-url">neurochiro.co</div>
+      </div>
+
+      <!-- TV on stand -->
+      <div class="booth-tv-stand"></div>
+      <div class="booth-tv">
+        <div class="booth-tv-content">LIVE<br>DEMO</div>
+      </div>
+
+      <!-- Table with items -->
+      <div class="booth-table">
+        <div class="booth-item">
+          <div class="booth-item-icon booth-ipad">&#9654;</div>
+          <div class="booth-item-label">iPad</div>
+        </div>
+        <div class="booth-item">
+          <div class="booth-item-icon booth-qr">QR</div>
+          <div class="booth-item-label">QR Stand</div>
+        </div>
+        <div class="booth-item">
+          <div class="booth-item-icon booth-cards">NC</div>
+          <div class="booth-item-label">Cards</div>
+        </div>
+        <div class="booth-item">
+          <div class="booth-item-icon booth-brochure">&#9776;</div>
+          <div class="booth-item-label">Brochures</div>
+        </div>
+        <div class="booth-item">
+          <div class="booth-item-icon booth-swag">&#9733;</div>
+          <div class="booth-item-label">Swag</div>
+        </div>
+      </div>
+
+      <!-- Tablecloth -->
+      <div class="booth-tablecloth"></div>
+
+      <!-- People -->
+      <div class="booth-person" style="left: 25%;">
+        <div class="booth-person-head"></div>
+        <div class="booth-person-body"></div>
+        <div class="booth-person-label">Visitor</div>
+      </div>
+      <div class="booth-person" style="left: 45%;">
+        <div class="booth-person-head"></div>
+        <div class="booth-person-body" style="background: rgba(214,104,41,0.25);"></div>
+        <div class="booth-person-label" style="color: var(--orange);">YOU</div>
+      </div>
+      <div class="booth-person" style="left: 65%;">
+        <div class="booth-person-head"></div>
+        <div class="booth-person-body"></div>
+        <div class="booth-person-label">Visitor</div>
+      </div>
+
+      <!-- Annotations -->
+      <div class="booth-annotation" style="top: 3%; left: 2%;">8ft Retractable Banner</div>
+      <div class="booth-annotation" style="top: 3%; right: 2%;">32" TV on Portable Stand</div>
+      <div class="booth-annotation" style="bottom: 42%; left: 2%;">Navy Tablecloth + Orange Accent</div>
+    </div>
+  </div>
+
+  <!-- Overhead View -->
+  <div class="booth-visual" style="margin-top: 32px;">
+    <div class="booth-visual-title">Overhead View &mdash; Traffic Flow</div>
+    <div class="booth-visual-sub">How people move through your booth. You stand in front of the table, not behind it.</div>
+
+    <div class="overhead-diagram">
+      <!-- Booth outline -->
+      <div class="overhead-booth">
+        <div class="overhead-backdrop-wall"><span>NEUROCHIRO BANNER</span></div>
+      </div>
+
+      <!-- Table -->
+      <div class="overhead-table" style="top: 30%; bottom: auto; left: 25%; right: 25%; height: 14%;">
+        <div class="overhead-table-label">TABLE</div>
+      </div>
+
+      <!-- TV -->
+      <div class="overhead-tv" style="top: 16%; right: 18%; width: 12%; height: 16%;">
+        <span>TV</span>
+      </div>
+
+      <!-- You -->
+      <div class="overhead-you" style="top: 58%; left: 50%;">YOU</div>
+
+      <!-- Zones -->
+      <div class="overhead-zone" style="top: 50%; left: 8%; transform: translateY(-50%);">
+        iPad<br>Signup<br>Station
+      </div>
+      <div class="overhead-zone" style="top: 50%; right: 8%; transform: translateY(-50%);">
+        QR Code<br>+ Swag<br>Pickup
+      </div>
+
+      <!-- Flow arrows -->
+      <div class="overhead-flow-arrow" style="bottom: 28%; left: 30%;">&#8599;</div>
+      <div class="overhead-flow-arrow" style="bottom: 28%; right: 30%;">&#8598;</div>
+
+      <!-- Visitors -->
+      <div class="overhead-visitors" style="bottom: 10%;">
+        <div class="overhead-visitor">D</div>
+        <div class="overhead-visitor">S</div>
+        <div class="overhead-visitor">V</div>
+        <div class="overhead-visitor">D</div>
+        <div class="overhead-visitor">S</div>
+      </div>
+
+      <div class="flow-label">&#8593; Aisle Traffic &#8593;</div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 24px;">
+    <p style="font-size: 15px; font-weight: 700; color: var(--navy);">Key Rule: Stand IN FRONT of the table, not behind it.</p>
+    <p style="font-size: 13px; color: var(--mid-gray); margin-top: 4px;">Standing behind a table creates a barrier. Stand in the aisle, greet people, pull them in.</p>
+  </div>
+</div>
+
+<!-- ═══════ TRAFFIC FLOW ═══════ -->
+<div class="section-dark" id="flow">
+  <div class="section-inner">
+    <span class="badge">The Flow</span>
+    <h2 style="color: white;">The 60-Second Booth Experience</h2>
+    <p class="subtitle">Every visitor should go through this flow. It's designed to capture a signup in under 60 seconds.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div style="font-size: 36px; font-weight: 900; color: var(--orange); margin-bottom: 12px;">1</div>
+        <h3 class="card-title">The Hook (5 sec)</h3>
+        <p class="card-text">You're standing in front of the table. The TV behind you is showing the directory in action &mdash; scrolling through doctor profiles, the map, the search. It's eye candy.</p>
+        <p class="card-text" style="margin-top: 8px;"><strong>You say:</strong> "Hey, are you a chiropractor?" or "Are you a student?"</p>
+      </div>
+      <div class="card">
+        <div style="font-size: 36px; font-weight: 900; color: var(--orange); margin-bottom: 12px;">2</div>
+        <h3 class="card-title">The Pitch (15 sec)</h3>
+        <p class="card-text">Pivot based on who they are:</p>
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> <strong>Doctor:</strong> "We built the only directory specifically for nervous system chiropractors. 120 docs, patients finding them through Google."</li>
+          <li><span class="check">&#10003;</span> <strong>Student:</strong> "Free student portal. Learn from the best docs in the game. When you graduate, you're already listed."</li>
+          <li><span class="check">&#10003;</span> <strong>Vendor:</strong> "We have 120+ chiropractors on our platform. Want to get in front of them?"</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div style="font-size: 36px; font-weight: 900; color: var(--orange); margin-bottom: 12px;">3</div>
+        <h3 class="card-title">The Demo (20 sec)</h3>
+        <p class="card-text">Turn to the TV or iPad. Show them a real doctor profile. Show the map. Show the search. "Look &mdash; there's Dr. [Name] in [City]. Patients are finding them right now."</p>
+      </div>
+      <div class="card">
+        <div style="font-size: 36px; font-weight: 900; color: var(--orange); margin-bottom: 12px;">4</div>
+        <h3 class="card-title">The Capture (20 sec)</h3>
+        <p class="card-text">"Let me get you set up right now. Takes 30 seconds." Hand them the iPad or point to the QR code. They scan, register, done. Hand them a sticker or card as a thank-you.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ TV STRATEGY ═══════ -->
+<div class="section" id="tv">
+  <span class="badge">The Screen</span>
+  <h2>TV Display Strategy</h2>
+  <p class="subtitle">The TV is your silent salesman. It catches eyes from 20 feet away while you're talking to someone else.</p>
+
+  <div class="two-col">
+    <div>
+      <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Option A: Ship a TV (Recommended)</h3>
+      <div class="card">
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> <strong>Buy a 32" TV</strong> &mdash; Amazon, $130-180. Light enough to ship.</li>
+          <li><span class="check">&#10003;</span> <strong>Portable floor stand</strong> &mdash; $40-60. Collapses for shipping.</li>
+          <li><span class="check">&#10003;</span> <strong>Ship to hotel</strong> &mdash; Order on Amazon, ship to your hotel address. Most hotels accept packages for guests.</li>
+          <li><span class="check">&#10003;</span> <strong>Alternative:</strong> Ship to the convention center c/o your booth number</li>
+          <li><span class="check">&#10003;</span> <strong>After the event:</strong> Ship it home, bring it to the next event, or sell locally on Facebook Marketplace</li>
+        </ul>
+      </div>
+
+      <h3 style="font-size: 20px; font-weight: 800; margin: 32px 0 16px;">Option B: No TV (Lighter Setup)</h3>
+      <div class="card">
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> Use an <strong>iPad on a tall stand</strong> as your demo screen</li>
+          <li><span class="check">&#10003;</span> Print a <strong>large poster</strong> (24x36) showing screenshot of the directory</li>
+          <li><span class="check">&#10003;</span> Less visual impact but zero shipping hassle</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">What's on the Screen</h3>
+      <div class="card">
+        <p class="card-text" style="font-weight: 700; color: var(--navy); margin-bottom: 12px;">Loop these on repeat (Google Slides auto-advance or screen recording):</p>
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> <strong>Slide 1 (8 sec):</strong> NeuroChiro logo + "The #1 Directory for Nervous System Chiropractors"</li>
+          <li><span class="check">&#10003;</span> <strong>Slide 2 (8 sec):</strong> Live directory map zoomed to show doctor pins across the US</li>
+          <li><span class="check">&#10003;</span> <strong>Slide 3 (8 sec):</strong> Example doctor profile &mdash; photo, bio, specialties, verified badge</li>
+          <li><span class="check">&#10003;</span> <strong>Slide 4 (8 sec):</strong> "120+ Doctors. 30+ States. 4 Countries. Join Them."</li>
+          <li><span class="check">&#10003;</span> <strong>Slide 5 (8 sec):</strong> "Students: Free Access. Learn from the Best." (student portal)</li>
+          <li><span class="check">&#10003;</span> <strong>Slide 6 (8 sec):</strong> "Vendors: Get in Front of 120+ Chiropractors" </li>
+          <li><span class="check">&#10003;</span> <strong>Slide 7 (8 sec):</strong> Giant QR code + "Scan to Join" + neurochiro.co</li>
+        </ul>
+        <p class="card-text" style="margin-top: 16px;"><strong>Pro tip:</strong> Use a Fire TV Stick ($30) plugged into the TV. Set up a Google Slides presentation in kiosk mode. No laptop needed.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SHOPPING LIST ═══════ -->
+<div class="section-dark" id="shopping">
+  <div class="section-inner">
+    <span class="badge">Order Now</span>
+    <h2 style="color: white;">Complete Shopping List</h2>
+    <p class="subtitle">Everything you need to order today. Sorted by priority. All travel-friendly or shippable.</p>
+
+    <h3 style="color: var(--orange); font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Must Have &mdash; Order This Week</h3>
+
+    <table class="shop-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Details</th>
+          <th>Where</th>
+          <th>Cost</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Retractable Banner Stand</strong></td>
+          <td>33" x 80" pull-up banner. Your backdrop. Navy background, NeuroChiro logo, tagline, URL. Rolls up into carrying case. Fits in luggage or ships flat.</td>
+          <td>Vistaprint / Amazon</td>
+          <td class="price">$70-120</td>
+          <td><span class="priority-high">Must Have</span></td>
+        </tr>
+        <tr>
+          <td><strong>Navy Tablecloth</strong></td>
+          <td>6ft or 8ft fitted tablecloth in navy blue. Wrinkle-resistant polyester. Foldable, lightweight. Get the fitted kind (not flat) for a clean look.</td>
+          <td>Amazon</td>
+          <td class="price">$15-25</td>
+          <td><span class="priority-high">Must Have</span></td>
+        </tr>
+        <tr>
+          <td><strong>Table Runner (Orange)</strong></td>
+          <td>Orange accent runner across the front of the navy tablecloth. On-brand pop of color. Can also get this custom printed with the logo.</td>
+          <td>Amazon / Vistaprint</td>
+          <td class="price">$12-30</td>
+          <td><span class="priority-high">Must Have</span></td>
+        </tr>
+        <tr>
+          <td><strong>Business Cards</strong></td>
+          <td>500 qty. Premium matte or soft-touch. Navy + orange. Front: logo + tagline + QR code. Back: "Doctors / Students / Vendors &mdash; Join at neurochiro.co"</td>
+          <td>Vistaprint / MOO</td>
+          <td class="price">$25-50</td>
+          <td><span class="priority-high">Must Have</span></td>
+        </tr>
+        <tr>
+          <td><strong>QR Code Stand</strong></td>
+          <td>Acrylic tabletop sign holder (5x7 or 8x10). Print a large QR code that goes to neurochiro.co/register. Big enough to scan from 3 feet away.</td>
+          <td>Amazon</td>
+          <td class="price">$8-15</td>
+          <td><span class="priority-high">Must Have</span></td>
+        </tr>
+        <tr>
+          <td><strong>iPad + Stand</strong></td>
+          <td>Your iPad (or borrow one) on a tabletop stand. Open to neurochiro.co/register. This is your live signup station. Lock in Guided Access mode so people can't navigate away.</td>
+          <td>Already own / Amazon stand $15-25</td>
+          <td class="price">$0-25</td>
+          <td><span class="priority-high">Must Have</span></td>
+        </tr>
+        <tr>
+          <td><strong>Stickers</strong></td>
+          <td>2" die-cut stickers. NeuroChiro logo. People LOVE stickers. They put them on laptops, water bottles. Walking billboards. Order 200-500.</td>
+          <td>StickerMule / Stickergiant</td>
+          <td class="price">$30-60</td>
+          <td><span class="priority-high">Must Have</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="color: var(--orange); font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin: 40px 0 8px;">High Impact &mdash; Order Within 1 Week</h3>
+
+    <table class="shop-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Details</th>
+          <th>Where</th>
+          <th>Cost</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>32" TV</strong></td>
+          <td>TCL/Insignia 32" with HDMI. Ship to hotel or venue. Lightweight (~8 lbs). Plays your slideshow loop on repeat.</td>
+          <td>Amazon</td>
+          <td class="price">$130-180</td>
+          <td><span class="priority-med">High Impact</span></td>
+        </tr>
+        <tr>
+          <td><strong>Portable TV Floor Stand</strong></td>
+          <td>Collapsible tripod stand for 32". Adjustable height. Packs into a bag. ~5 lbs.</td>
+          <td>Amazon</td>
+          <td class="price">$40-60</td>
+          <td><span class="priority-med">High Impact</span></td>
+        </tr>
+        <tr>
+          <td><strong>Fire TV Stick</strong></td>
+          <td>Plug into TV HDMI. Run Google Slides in full-screen kiosk mode. No laptop needed at the booth.</td>
+          <td>Amazon</td>
+          <td class="price">$30-40</td>
+          <td><span class="priority-med">High Impact</span></td>
+        </tr>
+        <tr>
+          <td><strong>Tri-Fold Brochures</strong></td>
+          <td>100 qty. One side for doctors, one for students, one for vendors. Include QR codes for each portal. Professional print.</td>
+          <td>Vistaprint / Canva Print</td>
+          <td class="price">$40-70</td>
+          <td><span class="priority-med">High Impact</span></td>
+        </tr>
+        <tr>
+          <td><strong>Second Retractable Banner</strong></td>
+          <td>Place on opposite side of booth. Different message: "Students: Free Access" or "120+ Doctors Nationwide." Creates a frame effect.</td>
+          <td>Vistaprint / Amazon</td>
+          <td class="price">$70-120</td>
+          <td><span class="priority-med">High Impact</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="color: var(--orange); font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin: 40px 0 8px;">Nice to Have &mdash; If Budget Allows</h3>
+
+    <table class="shop-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Details</th>
+          <th>Where</th>
+          <th>Cost</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Branded Polo / T-Shirt</strong></td>
+          <td>Navy polo or tee with NeuroChiro logo embroidered or printed. You look official. People take you seriously.</td>
+          <td>CustomInk / Printful</td>
+          <td class="price">$25-45</td>
+          <td><span class="priority-nice">Nice to Have</span></td>
+        </tr>
+        <tr>
+          <td><strong>Candy Bowl</strong></td>
+          <td>Classic conference move. Mints or individually wrapped candy. Draws people to the table. They stop, you talk.</td>
+          <td>Costco / Amazon</td>
+          <td class="price">$10-15</td>
+          <td><span class="priority-nice">Nice to Have</span></td>
+        </tr>
+        <tr>
+          <td><strong>Clipboard + Signup Sheet</strong></td>
+          <td>Backup analog signup for people who don't want to type on an iPad. Name, email, role (doctor/student/vendor). Enter manually later.</td>
+          <td>Any office store</td>
+          <td class="price">$5</td>
+          <td><span class="priority-nice">Nice to Have</span></td>
+        </tr>
+        <tr>
+          <td><strong>Portable Phone Charger Station</strong></td>
+          <td>Multi-cable charging station on the table. People come to charge, you get face time. Old conference hack that still works.</td>
+          <td>Amazon</td>
+          <td class="price">$20-30</td>
+          <td><span class="priority-nice">Nice to Have</span></td>
+        </tr>
+        <tr>
+          <td><strong>LED Strip Light</strong></td>
+          <td>Orange LED strip under the table edge. Subtle glow effect that makes your booth pop in a convention hall. Battery powered, peel and stick.</td>
+          <td>Amazon</td>
+          <td class="price">$12-18</td>
+          <td><span class="priority-nice">Nice to Have</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="total-box">
+      <div class="total-label">Total Budget Range</div>
+      <div class="total-amount">$350 - $750</div>
+      <div class="total-note">Must-haves only: $160-325 | With TV setup: $350-550 | Full setup: $550-750</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ QR + SIGNUP ═══════ -->
+<div class="section" id="signup">
+  <span class="badge">The Capture</span>
+  <h2>Signup Machine</h2>
+  <p class="subtitle">Two signup paths: QR code (self-serve) and iPad (assisted). Both go to the same place. Maximize captures.</p>
+
+  <div class="two-col">
+    <div>
+      <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">QR Code Stand</h3>
+      <div class="qr-mockup">
+        <div class="qr-box">
+          <div class="qr-inner">
+            <div class="qr-cell filled"></div><div class="qr-cell"></div><div class="qr-cell filled"></div><div class="qr-cell"></div><div class="qr-cell filled"></div>
+            <div class="qr-cell"></div><div class="qr-cell filled"></div><div class="qr-cell filled"></div><div class="qr-cell filled"></div><div class="qr-cell"></div>
+            <div class="qr-cell filled"></div><div class="qr-cell filled"></div><div class="qr-cell"></div><div class="qr-cell filled"></div><div class="qr-cell filled"></div>
+            <div class="qr-cell"></div><div class="qr-cell filled"></div><div class="qr-cell filled"></div><div class="qr-cell"></div><div class="qr-cell"></div>
+            <div class="qr-cell filled"></div><div class="qr-cell"></div><div class="qr-cell filled"></div><div class="qr-cell"></div><div class="qr-cell filled"></div>
+          </div>
+        </div>
+        <div class="qr-title">NEURO<span>CHIRO</span></div>
+        <div class="qr-sub">Scan to Join &mdash; Free for Students</div>
+      </div>
+      <p style="text-align: center; font-size: 14px; color: var(--mid-gray);">Print this at 5x7 or 8x10. Place in acrylic stand holder on the table. Visible from 3+ feet away.</p>
+    </div>
+    <div>
+      <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">iPad Signup Station</h3>
+      <div class="card">
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> Open Safari to <strong>neurochiro.co/register</strong></li>
+          <li><span class="check">&#10003;</span> Enable <strong>Guided Access</strong> (Settings > Accessibility) so they can't navigate away</li>
+          <li><span class="check">&#10003;</span> Place on a <strong>tabletop stand</strong> angled toward visitors</li>
+          <li><span class="check">&#10003;</span> After each signup, the page resets for the next person</li>
+          <li><span class="check">&#10003;</span> <strong>You assist:</strong> "Here, let me get you set up" &mdash; you type their name and email for speed</li>
+        </ul>
+      </div>
+
+      <h3 style="font-size: 20px; font-weight: 800; margin: 32px 0 16px;">Create a Conference Landing Page</h3>
+      <div class="card">
+        <p class="card-text">Build <strong>neurochiro.co/conference</strong> or <strong>neurochiro.co/join</strong> &mdash; a simplified registration page with:</p>
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> Role selector: "I'm a Doctor / Student / Vendor"</li>
+          <li><span class="check">&#10003;</span> Name + Email only (minimal friction)</li>
+          <li><span class="check">&#10003;</span> "Welcome from [Conference Name]!" header</li>
+          <li><span class="check">&#10003;</span> Auto-tags the lead source as the event name</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SCRIPTS ═══════ -->
+<div class="section-dark" id="scripts">
+  <div class="section-inner">
+    <span class="badge">Talk Track</span>
+    <h2 style="color: white;">Conversation Scripts</h2>
+    <p class="subtitle">You'll talk to 3 types of people. Here's exactly what to say to each.</p>
+
+    <h3 style="color: var(--orange); font-size: 18px; font-weight: 800; margin-bottom: 12px;">For Chiropractors</h3>
+    <div class="script-card">
+      <div class="script-label">Opening</div>
+      <p class="script-text">"Hey, are you a chiropractor? Cool &mdash; do you focus on the nervous system at all in your practice?"</p>
+    </div>
+    <div class="script-card">
+      <div class="script-label">The Pitch</div>
+      <p class="script-text">"We built the only directory specifically for nervous system chiropractors. Not a general listing &mdash; this is exclusively for docs like you. Right now we've got 120 doctors across 30 states. Patients are actually finding their chiropractor through us on Google. Let me show you what a profile looks like..."</p>
+    </div>
+    <div class="script-card">
+      <div class="script-label">The Close</div>
+      <p class="script-text">"Let me get you set up right now &mdash; takes 30 seconds. You can fill out your full profile later from the dashboard. What's your name and email?"</p>
+    </div>
+
+    <h3 style="color: var(--orange); font-size: 18px; font-weight: 800; margin: 40px 0 12px;">For Students</h3>
+    <div class="script-card">
+      <div class="script-label">Opening</div>
+      <p class="script-text">"Hey, are you a chiro student? What school? Nice &mdash; what year are you?"</p>
+    </div>
+    <div class="script-card">
+      <div class="script-label">The Pitch</div>
+      <p class="script-text">"So we have a free student portal where you can learn from some of the best nervous system chiropractors in the country. And here's the cool part &mdash; when you graduate, you're already in the directory. Patients can find you from day one. No other platform does that."</p>
+    </div>
+    <div class="script-card">
+      <div class="script-label">The Close</div>
+      <p class="script-text">"Scan this QR code, it's completely free for students. And hey &mdash; if you know other students who should be on here, send them the link."</p>
+    </div>
+
+    <h3 style="color: var(--orange); font-size: 18px; font-weight: 800; margin: 40px 0 12px;">For Vendors</h3>
+    <div class="script-card">
+      <div class="script-label">Opening</div>
+      <p class="script-text">"Hey, what does your company do? Cool &mdash; do you sell to chiropractors?"</p>
+    </div>
+    <div class="script-card">
+      <div class="script-label">The Pitch</div>
+      <p class="script-text">"We've got 120+ nervous system chiropractors on our platform and we're growing fast. We're looking for vendors who want to get in front of our doctors &mdash; whether that's sponsoring our Spotlight series, being featured in our newsletter, or running offers to our members. Who should I talk to on your team about that?"</p>
+    </div>
+    <div class="script-card">
+      <div class="script-label">The Close</div>
+      <p class="script-text">"Let me grab your card. I'll send you a quick email next week with our vendor partnership overview."</p>
+    </div>
+
+    <h3 style="color: var(--orange); font-size: 18px; font-weight: 800; margin: 40px 0 12px;">Objection Handlers</h3>
+    <div class="card-grid" style="margin-top: 12px;">
+      <div class="card">
+        <h3 class="card-title">"I already have a website"</h3>
+        <p class="card-text">"Great &mdash; this isn't a replacement for your site. Think of it like how Zillow works for realtors. Patients search here, find you, then go to your site. It's another channel sending you patients."</p>
+      </div>
+      <div class="card">
+        <h3 class="card-title">"I'm on Healthgrades/Yelp"</h3>
+        <p class="card-text">"Those are generic &mdash; you're listed next to every type of doctor. We're exclusively nervous system chiropractors. When a patient comes here, they already know what they're looking for. That's a higher quality lead."</p>
+      </div>
+      <div class="card">
+        <h3 class="card-title">"How much does it cost?"</h3>
+        <p class="card-text">"Let me get you set up with a profile first &mdash; you can explore everything. When you're ready to upgrade for premium features like priority placement and analytics, we've got plans starting at $49/month. But first, let's just get you listed."</p>
+      </div>
+      <div class="card">
+        <h3 class="card-title">"I'll check it out later"</h3>
+        <p class="card-text">"Totally &mdash; here's a card with the QR code. But honestly, it takes 30 seconds right now and then you're done. Want me to just get your name and email real quick? You can fill out the rest whenever." [hand them the iPad]</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ 3-WEEK COUNTDOWN ═══════ -->
+<div class="section" id="timeline">
+  <span class="badge">Countdown</span>
+  <h2>3-Week Prep Timeline</h2>
+  <p class="subtitle">Work backwards from event day. Here's exactly when to order, design, and prepare everything.</p>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-day">Week 1 (Now)</div>
+      <h3 class="timeline-title">Order Everything</h3>
+      <p class="timeline-text">
+        <strong>Today:</strong> Order tablecloth, table runner, QR stand, iPad stand, stickers from Amazon (2-day shipping).<br>
+        <strong>Today:</strong> Order retractable banner from Vistaprint (design + print takes 5-7 business days).<br>
+        <strong>Today:</strong> Order business cards from Vistaprint or MOO.<br>
+        <strong>Today:</strong> Order 32" TV + floor stand from Amazon &mdash; ship to hotel or venue.<br>
+        <strong>Today:</strong> Order Fire TV Stick.<br>
+        <strong>End of week:</strong> Finalize all designs (banner, cards, brochure). Use Canva for quick turnaround.
+      </p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-day">Week 2</div>
+      <h3 class="timeline-title">Build Content + Practice</h3>
+      <p class="timeline-text">
+        <strong>Mon-Tue:</strong> Create the TV slideshow (Google Slides, 7 slides, auto-advance every 8 seconds).<br>
+        <strong>Wed:</strong> Build the conference landing page (neurochiro.co/join or /conference).<br>
+        <strong>Thu:</strong> Generate + print the QR code. Test it on 3 different phones.<br>
+        <strong>Fri:</strong> Practice your 60-second pitch out loud. Time it. Refine it. Do it 10 times.<br>
+        <strong>Weekend:</strong> Pack everything that's arrived. Make a checklist of what's shipping to the venue.
+      </p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-day">Week 3 (Event Week)</div>
+      <h3 class="timeline-title">Final Prep + Event</h3>
+      <p class="timeline-text">
+        <strong>Mon-Tue:</strong> Confirm hotel/venue received TV shipment. Confirm booth assignment and setup time.<br>
+        <strong>Wed:</strong> Charge iPad, test Fire TV Stick with slideshow, pack carry-on bag with all booth items.<br>
+        <strong>Thu:</strong> Travel day. Review scripts on the plane. Visualize the booth flow.<br>
+        <strong>Day Before Event:</strong> Set up booth. Test everything. Take photos. Adjust layout. Get a good night's sleep.<br>
+        <strong>Event Day:</strong> Arrive 30 min early. Final setup. Deep breath. Go.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ DAY OF ═══════ -->
+<div class="section-accent" id="day-of">
+  <div class="section-inner">
+    <span class="badge">Game Day</span>
+    <h2 style="color: white;">Day-Of Playbook</h2>
+    <p class="subtitle">Hour-by-hour guide for maximum impact.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3 class="card-title" style="color: var(--orange);">Before Doors Open</h3>
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> Arrive 30+ minutes early</li>
+          <li><span class="check">&#10003;</span> Set up banner(s) first &mdash; they take the most space</li>
+          <li><span class="check">&#10003;</span> Tablecloth + runner, then table items</li>
+          <li><span class="check">&#10003;</span> Power on TV, start slideshow loop</li>
+          <li><span class="check">&#10003;</span> iPad on stand, open to registration page, Guided Access on</li>
+          <li><span class="check">&#10003;</span> QR code stand front and center</li>
+          <li><span class="check">&#10003;</span> Take a photo of your setup &mdash; post it on Instagram Stories</li>
+          <li><span class="check">&#10003;</span> Eat something. Hydrate. You'll be on your feet all day.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="card-title" style="color: var(--orange);">During the Event</h3>
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> Stand IN FRONT of the table at all times</li>
+          <li><span class="check">&#10003;</span> Make eye contact with everyone walking by</li>
+          <li><span class="check">&#10003;</span> Open with a question, not a pitch</li>
+          <li><span class="check">&#10003;</span> When someone signs up, celebrate: "You're in! Welcome."</li>
+          <li><span class="check">&#10003;</span> Take photos/video with people at the booth (content gold)</li>
+          <li><span class="check">&#10003;</span> Post Stories every 1-2 hours showing the energy</li>
+          <li><span class="check">&#10003;</span> Collect vendor business cards in a separate pile</li>
+          <li><span class="check">&#10003;</span> During slow periods, walk the floor and network. Hand out cards at other booths.</li>
+          <li><span class="check">&#10003;</span> Track signups &mdash; check your Supabase dashboard hourly</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="card-title" style="color: var(--orange);">End of Day</h3>
+        <ul class="card-list">
+          <li><span class="check">&#10003;</span> Count your signups. Screenshot the numbers.</li>
+          <li><span class="check">&#10003;</span> Post a recap on Instagram: "Just signed up X new doctors at [Event]! The movement is growing."</li>
+          <li><span class="check">&#10003;</span> Organize vendor cards &mdash; note who was most interested</li>
+          <li><span class="check">&#10003;</span> Restock stickers, cards, brochures for day 2</li>
+          <li><span class="check">&#10003;</span> Charge all devices overnight</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ POST EVENT ═══════ -->
+<div class="section" id="post">
+  <span class="badge">After the Event</span>
+  <h2>Post-Event Follow-Up</h2>
+  <p class="subtitle">The event isn't over when the booth comes down. The follow-up is where you convert interest into lasting members.</p>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-day">Day 1 After (Within 24 Hours)</div>
+      <h3 class="timeline-title">Welcome Email Blast</h3>
+      <p class="timeline-text">Send a personalized email to everyone who signed up: "Great meeting you at [Event]! Your NeuroChiro profile is live. Here's what to do next: complete your profile, upload a photo, check out your public page." Include a direct link to their dashboard.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-day">Day 2-3</div>
+      <h3 class="timeline-title">Vendor Outreach</h3>
+      <p class="timeline-text">Email every vendor card you collected. "Great meeting you at [Event]. As discussed, we have 120+ nervous system chiropractors on our platform. Here are a few ways we could partner..." Attach a one-pager or link to a partnerships page.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-day">Day 5-7</div>
+      <h3 class="timeline-title">Profile Completion Follow-Up</h3>
+      <p class="timeline-text">For doctors who signed up but haven't completed their profile: "Your profile is only 40% complete. Patients can't find you yet. Take 5 minutes to add your bio, photo, and specialties." Link directly to the profile edit page.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-day">Day 14</div>
+      <h3 class="timeline-title">Social Proof + Upgrade Pitch</h3>
+      <p class="timeline-text">"Since [Event], 47 new doctors joined NeuroChiro. Your profile has been viewed X times. Want to appear higher in search results? Upgrade to Growth for priority placement."</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background: var(--gold);"></div>
+      <div class="timeline-day">Ongoing</div>
+      <h3 class="timeline-title">Content Repurpose</h3>
+      <p class="timeline-text">Post all your booth photos and videos over the next 2-3 weeks. Tag doctors you met. Create a Reel: "What happened at [Event]." Share signup numbers publicly. This signals momentum and attracts doctors who weren't at the event.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PACKING CHECKLIST ═══════ -->
+<div class="section-orange">
+  <h2 style="font-size: 32px; font-weight: 900; margin-bottom: 32px;">Travel Packing Checklist</h2>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; max-width: 1000px; margin: 0 auto; text-align: left;">
+    <div>
+      <h3 style="font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; opacity: 0.8;">Carry-On / Personal Bag</h3>
+      <ul style="list-style: none; font-size: 14px; line-height: 2.2;">
+        <li>&#9744; iPad + charger</li>
+        <li>&#9744; iPad tabletop stand</li>
+        <li>&#9744; Phone charger + battery pack</li>
+        <li>&#9744; Business cards (500)</li>
+        <li>&#9744; Stickers (200-500)</li>
+        <li>&#9744; QR code print + acrylic stand</li>
+        <li>&#9744; Fire TV Stick</li>
+        <li>&#9744; HDMI cable (backup)</li>
+        <li>&#9744; Pens (for clipboard)</li>
+        <li>&#9744; Breath mints (for you)</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; opacity: 0.8;">Checked Bag / Ship Ahead</h3>
+      <ul style="list-style: none; font-size: 14px; line-height: 2.2;">
+        <li>&#9744; Retractable banner(s) in carrying case</li>
+        <li>&#9744; Navy fitted tablecloth</li>
+        <li>&#9744; Orange table runner</li>
+        <li>&#9744; Brochures (100)</li>
+        <li>&#9744; Clipboard + signup sheets</li>
+        <li>&#9744; LED light strip (optional)</li>
+        <li>&#9744; Branded polo/shirt</li>
+        <li>&#9744; Extension cord + power strip</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; opacity: 0.8;">Ship to Hotel/Venue</h3>
+      <ul style="list-style: none; font-size: 14px; line-height: 2.2;">
+        <li>&#9744; 32" TV (Amazon ship)</li>
+        <li>&#9744; Portable TV floor stand</li>
+        <li>&#9744; Candy/mints bowl</li>
+      </ul>
+      <p style="margin-top: 16px; font-size: 12px; opacity: 0.7;">Ship to: [Hotel Name], Attn: [Your Name], Guest arriving [Date]</p>
+      <p style="margin-top: 8px; font-size: 12px; opacity: 0.7;">Call the hotel to confirm they accept guest packages.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ GOALS ═══════ -->
+<div class="section-dark">
+  <div class="section-inner">
+    <span class="badge">Success Metrics</span>
+    <h2 style="color: white;">What Does "Crushing It" Look Like?</h2>
+    <p class="subtitle">Set these targets before the event. Track them in real-time.</p>
+
+    <div class="metric-row">
+      <div class="metric">
+        <div class="metric-number">50+</div>
+        <div class="metric-label">Doctor Signups</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">30+</div>
+        <div class="metric-label">Student Signups</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">10+</div>
+        <div class="metric-label">Vendor Cards Collected</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">5+</div>
+        <div class="metric-label">Spotlight Candidates</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">200+</div>
+        <div class="metric-label">Conversations Had</div>
+      </div>
+      <div class="metric">
+        <div class="metric-number">10+</div>
+        <div class="metric-label">Instagram Stories Posted</div>
+      </div>
+    </div>
+
+    <p style="text-align: center; color: rgba(255,255,255,0.4); font-size: 14px; margin-top: 24px;">One event at 50 doctor signups = your directory grows by 40% in a single day.</p>
+  </div>
+</div>
+
+<!-- ═══════ FOOTER ═══════ -->
+<div class="footer">
+  <p><strong>NEUROCHIRO</strong> &mdash; Conference Booth Playbook</p>
+  <p style="margin-top: 6px;">Confidential &mdash; April 2026</p>
+  <p style="margin-top: 4px;">neurochiro.co</p>
+</div>
+
+</body>
+</html>

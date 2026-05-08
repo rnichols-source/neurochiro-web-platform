@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro Sticker — Die Cut</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #888;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: -apple-system, sans-serif;
+    gap: 32px;
+  }
+
+  .print-note {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 32px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .print-note h3 { font-size: 18px; font-weight: 900; margin-bottom: 8px; color: #1E2D3B; }
+  .print-note strong { color: #D66829; }
+
+  .sticker-row {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .sticker-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sticker-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .sticker-sublabel {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+  }
+
+  /* Die-cut circle sticker */
+  .sticker-circle {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Die-cut logo shape sticker */
+  .sticker-diecut {
+    width: 280px;
+    height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.25));
+  }
+
+  .sticker-diecut img {
+    width: 260px;
+    height: 260px;
+    object-fit: contain;
+  }
+
+  /* Square with rounded corners */
+  .sticker-square {
+    width: 300px;
+    height: 300px;
+    border-radius: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    position: relative;
+    overflow: hidden;
+  }
+</style>
+</head>
+<body>
+
+<div class="print-note">
+  <h3>NeuroChiro Stickers — 2" Die Cut</h3>
+  <p>
+    Upload to <strong>StickerMule</strong> or <strong>StickerGiant</strong>.<br>
+    Order 200-500 qty. Recommend <strong>matte or glossy vinyl</strong>.
+  </p>
+</div>
+
+<div class="sticker-row">
+
+  <!-- Option A: Just the logo, die-cut to shape -->
+  <div class="sticker-wrapper">
+    <div class="sticker-label">Option A — Logo Die-Cut</div>
+    <div class="sticker-sublabel">Cut to the shape of the logo</div>
+    <div class="sticker-diecut">
+      <img src="../public/logo.png" alt="NeuroChiro">
+    </div>
+  </div>
+
+  <!-- Option B: Logo in navy circle -->
+  <div class="sticker-wrapper">
+    <div class="sticker-label">Option B — Navy Circle</div>
+    <div class="sticker-sublabel">Logo on navy background</div>
+    <div class="sticker-circle" style="background: #1E2D3B;">
+      <img src="../public/logo.png" alt="" style="width: 180px; height: 180px; object-fit: contain; filter: brightness(0) invert(1);">
+    </div>
+  </div>
+
+  <!-- Option C: Logo in white circle -->
+  <div class="sticker-wrapper">
+    <div class="sticker-label">Option C — White Circle (Recommended)</div>
+    <div class="sticker-sublabel">Stands out on any surface</div>
+    <div class="sticker-circle" style="background: white; border: 3px solid #1E2D3B;">
+      <img src="../public/logo.png" alt="" style="width: 170px; height: 170px; object-fit: contain; margin-bottom: 8px;">
+      <div style="font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 900; color: #1E2D3B; letter-spacing: 2px;">NEURO<span style="color: #D66829;">CHIRO</span></div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

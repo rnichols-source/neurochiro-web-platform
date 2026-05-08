@@ -42,10 +42,12 @@ export async function GET(request: NextRequest) {
         groups[key].salaries.push(mid);
       }
 
-      // Also add to national aggregate
-      const natKey = `${roleType}__NATIONAL`;
-      if (!groups[natKey]) groups[natKey] = { salaries: [], roleType, state: 'NATIONAL' };
-      groups[natKey].salaries.push(mid);
+      // Also add to national aggregate (only if mid > 0)
+      if (mid > 0) {
+        const natKey = `${roleType}__NATIONAL`;
+        if (!groups[natKey]) groups[natKey] = { salaries: [], roleType, state: 'NATIONAL' };
+        groups[natKey].salaries.push(mid);
+      }
     }
 
     // Upsert into market_benchmarks

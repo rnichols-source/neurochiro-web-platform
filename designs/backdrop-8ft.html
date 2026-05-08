@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro 8ft Backdrop</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --navy: #1E2D3B;
+    --navy-dark: #15202B;
+    --navy-light: #2C3E50;
+    --orange: #D66829;
+    --cream: #F5F3EF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #444;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: 'Montserrat', sans-serif;
+    gap: 32px;
+  }
+
+  .print-note {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 32px;
+    max-width: 700px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .print-note h3 {
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    color: var(--navy);
+  }
+
+  .print-note strong { color: var(--orange); }
+
+  .option-label {
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+    text-align: center;
+  }
+
+  .option-sublabel {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    margin-top: 4px;
+    margin-bottom: 16px;
+  }
+
+  .section-divider {
+    width: 100%;
+    max-width: 1000px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 32px;
+  }
+
+  /* ═══════════════════════════════════
+     BACKDROP — 96" x 89" (8ft x ~7.5ft)
+     Scale: 1" = 7px → 672px x 623px
+     ═══════════════════════════════════ */
+
+  .backdrop {
+    width: 672px;
+    height: 623px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 16px 60px rgba(0,0,0,0.4);
+    border-radius: 4px;
+  }
+
+  /* ════════════════════════════════
+     OPTION A: "The Wall"
+     Full navy, massive logo center,
+     wordmark below, stats at bottom,
+     orange accents
+     ════════════════════════════════ */
+
+  .backdrop-a {
+    background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 40%, var(--navy) 60%, var(--navy-dark) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  /* Subtle radial glow behind logo */
+  .backdrop-a::before {
+    content: '';
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 50%;
+    background: radial-gradient(ellipse, rgba(214,104,41,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Top orange bar */
+  .backdrop-a .accent-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--orange);
+  }
+
+  /* Bottom orange bar */
+  .backdrop-a .accent-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--orange);
+  }
+
+  .backdrop-a .logo {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .backdrop-a .wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .backdrop-a .wordmark span { color: var(--orange); }
+
+  .backdrop-a .tagline {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.4);
+    margin-top: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+  }
+
+  .backdrop-a .divider {
+    width: 80px;
+    height: 3px;
+    background: var(--orange);
+    margin: 28px 0;
+    border-radius: 2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .backdrop-a .stats-row {
+    display: flex;
+    gap: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .backdrop-a .stat {
+    text-align: center;
+  }
+
+  .backdrop-a .stat-number {
+    font-family: 'Lato', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--orange);
+  }
+
+  .backdrop-a .stat-label {
+    font-size: 8px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+
+  .backdrop-a .url {
+    font-family: 'Lato', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1px;
+    position: absolute;
+    bottom: 28px;
+    z-index: 1;
+  }
+
+  .backdrop-a .url span { color: var(--orange); }
+
+  /* ════════════════════════════════
+     OPTION B: "The Split"
+     Left: massive logo
+     Right: text + stats
+     Orange vertical divider
+     ════════════════════════════════ */
+
+  .backdrop-b {
+    background: var(--navy);
+    display: flex;
+  }
+
+  .backdrop-b .left {
+    width: 45%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .backdrop-b .left::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 60% 50%, rgba(214,104,41,0.05) 0%, transparent 60%);
+  }
+
+  .backdrop-b .left .logo {
+    width: 220px;
+    height: 220px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    position: relative;
+    z-index: 1;
+  }
+
+  .backdrop-b .divider-v {
+    width: 4px;
+    background: var(--orange);
+    margin: 60px 0;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .backdrop-b .right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 48px;
+  }
+
+  .backdrop-b .right .wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 56px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+  }
+
+  .backdrop-b .right .wordmark span { color: var(--orange); }
+
+  .backdrop-b .right .tagline {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1.5px;
+    margin-bottom: 32px;
+    max-width: 280px;
+    line-height: 1.6;
+  }
+
+  .backdrop-b .right .stats-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+
+  .backdrop-b .right .stat {
+    text-align: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+
+  .backdrop-b .right .stat-number {
+    font-family: 'Lato', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--orange);
+  }
+
+  .backdrop-b .right .stat-label {
+    font-size: 7px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 4px;
+  }
+
+  .backdrop-b .right .audience-tags {
+    display: flex;
+    gap: 8px;
+  }
+
+  .backdrop-b .right .tag {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-orange { background: var(--orange); color: white; }
+  .tag-navy { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.1); }
+
+  .backdrop-b .right .url {
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px;
+    margin-top: 24px;
+  }
+
+  .backdrop-b .right .url span { color: var(--orange); }
+
+  /* Top + bottom bars */
+  .backdrop-b .accent-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: var(--orange);
+    z-index: 3;
+  }
+
+  .backdrop-b .accent-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 6px;
+    background: var(--orange);
+    z-index: 3;
+  }
+
+  /* ════════════════════════════════
+     OPTION C: "The Monolith" (Recommended)
+     Massive centered logo, wordmark
+     below, URL at very bottom.
+     Nothing else. Pure presence.
+     Photo-worthy backdrop.
+     ════════════════════════════════ */
+
+  .backdrop-c {
+    background: linear-gradient(170deg, var(--navy) 0%, var(--navy-dark) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* Subtle concentric glow */
+  .backdrop-c::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%);
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(214,104,41,0.04) 0%, rgba(214,104,41,0.02) 40%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Orange left edge */
+  .backdrop-c .accent-left {
+    position: absolute;
+    top: 10%; bottom: 10%; left: 0;
+    width: 5px;
+    background: var(--orange);
+    border-radius: 0 3px 3px 0;
+  }
+
+  /* Orange right edge */
+  .backdrop-c .accent-right {
+    position: absolute;
+    top: 10%; bottom: 10%; right: 0;
+    width: 5px;
+    background: var(--orange);
+    border-radius: 3px 0 0 3px;
+  }
+
+  .backdrop-c .logo {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .backdrop-c .wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 80px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .backdrop-c .wordmark span { color: var(--orange); }
+
+  .backdrop-c .tagline {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-top: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .backdrop-c .url {
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 1px;
+    position: absolute;
+    bottom: 32px;
+    z-index: 1;
+  }
+
+  .backdrop-c .url span { color: var(--orange); opacity: 0.7; }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .print-note { display: none; }
+    .backdrop { box-shadow: none; border: 1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<div class="print-note">
+  <h3>NeuroChiro — 8ft Backdrop Banner</h3>
+  <p>
+    <strong>Size:</strong> 96" x 89" (8ft wide x ~7.5ft tall)<br>
+    This goes behind your table as the main visual wall.<br>
+    Three options below — pick one and I'll generate a print-ready file.
+  </p>
+</div>
+
+<!-- ════════ OPTION A ════════ -->
+<div class="section-divider">
+  <div class="option-label">Option A — "The Wall"</div>
+  <div class="option-sublabel">Centered logo, wordmark, stats. Classic booth backdrop. All the info at a glance.</div>
+</div>
+
+<div class="backdrop backdrop-a">
+  <div class="accent-top"></div>
+  <div class="accent-bottom"></div>
+  <img class="logo" src="../public/logo.png" alt="">
+  <div class="wordmark">NEURO<span>CHIRO</span></div>
+  <div class="tagline">Nervous System First Chiropractic</div>
+  <div class="divider"></div>
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-number">120+</div>
+      <div class="stat-label">Verified Doctors</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">30+</div>
+      <div class="stat-label">States</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">4</div>
+      <div class="stat-label">Countries</div>
+    </div>
+  </div>
+  <div class="url">neurochiro<span>.co</span></div>
+</div>
+
+<!-- ════════ OPTION B ════════ -->
+<div class="section-divider">
+  <div class="option-label">Option B — "The Split"</div>
+  <div class="option-sublabel">Logo left, info right. Orange divider. Professional and balanced. Great for photos.</div>
+</div>
+
+<div class="backdrop backdrop-b">
+  <div class="accent-top"></div>
+  <div class="accent-bottom"></div>
+  <div class="left">
+    <img class="logo" src="../public/logo.png" alt="">
+  </div>
+  <div class="divider-v"></div>
+  <div class="right">
+    <div class="wordmark">NEURO<span>CHIRO</span></div>
+    <div class="tagline">The global directory for nervous system chiropractors</div>
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-number">120+</div>
+        <div class="stat-label">Doctors</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">30+</div>
+        <div class="stat-label">States</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">4</div>
+        <div class="stat-label">Countries</div>
+      </div>
+    </div>
+    <div class="audience-tags">
+      <div class="tag tag-orange">Doctors</div>
+      <div class="tag tag-navy">Students</div>
+      <div class="tag tag-navy">Vendors</div>
+    </div>
+    <div class="url">neurochiro<span>.co</span></div>
+  </div>
+</div>
+
+<!-- ════════ OPTION C ════════ -->
+<div class="section-divider">
+  <div class="option-label">Option C — "The Monolith" (Recommended)</div>
+  <div class="option-sublabel">Just the logo and name. Massive. Clean. The one people take photos in front of. Timeless.</div>
+</div>
+
+<div class="backdrop backdrop-c">
+  <div class="accent-left"></div>
+  <div class="accent-right"></div>
+  <img class="logo" src="../public/logo.png" alt="">
+  <div class="wordmark">NEURO<span>CHIRO</span></div>
+  <div class="tagline">Nervous System First</div>
+  <div class="url">neurochiro<span>.co</span></div>
+</div>
+
+</body>
+</html>

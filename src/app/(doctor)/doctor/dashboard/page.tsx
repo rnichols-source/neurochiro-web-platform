@@ -50,7 +50,7 @@ export default function DoctorDashboard() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       getDoctorDashboardStats(),
       getPracticeHealthScore(),
       getCompetitiveIntelligence(),
@@ -58,14 +58,15 @@ export default function DoctorDashboard() {
       getRevenueIntelligence(),
       getLeadPipelineStages(),
       getDoctorActivityFeed(),
-    ]).then(([statsRes, healthRes, intelRes, actionsRes, revenueRes, pipelineRes, activityRes]) => {
-      if (statsRes) setData(statsRes);
-      if (healthRes) setHealth(healthRes);
-      if (intelRes) setIntel(intelRes);
-      setActionItems(actionsRes || []);
-      if (revenueRes) setRevenue(revenueRes);
-      if (pipelineRes) setPipeline(pipelineRes);
-      setActivity(activityRes || []);
+    ]).then((results) => {
+      const val = (i: number) => results[i].status === 'fulfilled' ? results[i].value : null;
+      if (val(0)) setData(val(0));
+      if (val(1)) setHealth(val(1));
+      if (val(2)) setIntel(val(2));
+      setActionItems((val(3) as any) || []);
+      if (val(4)) setRevenue(val(4));
+      if (val(5)) setPipeline(val(5));
+      setActivity((val(6) as any) || []);
       setLoading(false);
     });
 

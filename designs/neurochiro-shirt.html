@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro Shirt Designs</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --navy: #1E2D3B;
+    --orange: #D66829;
+    --cream: #F5F3EF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #E8E8E8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: 'Montserrat', sans-serif;
+    gap: 60px;
+  }
+
+  .design-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+  .design-sub {
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 20px;
+  }
+
+  /* ─── SHIRT MOCKUP ─── */
+  .shirt-group {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .shirt {
+    width: 320px;
+    position: relative;
+  }
+  .shirt-body {
+    width: 320px;
+    height: 400px;
+    border-radius: 8px 8px 0 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .shirt-body.navy { background: var(--navy); }
+  .shirt-body.black { background: #111; }
+  .shirt-body.white { background: #FAFAFA; border: 1px solid #E0E0E0; }
+  .shirt-body.cream { background: var(--cream); border: 1px solid #E0E0E0; }
+
+  /* Collar */
+  .collar {
+    width: 80px;
+    height: 24px;
+    border-radius: 0 0 40px 40px;
+    margin-top: 0;
+  }
+  .navy .collar { background: #15202B; }
+  .black .collar { background: #000; }
+  .white .collar { background: #EDEDED; }
+  .cream .collar { background: #E8E5DF; }
+
+  /* Sleeves */
+  .sleeve-left, .sleeve-right {
+    position: absolute;
+    width: 70px;
+    height: 100px;
+    top: 20px;
+    border-radius: 0 0 20px 20px;
+  }
+  .sleeve-left { left: -30px; transform: rotate(15deg); }
+  .sleeve-right { right: -30px; transform: rotate(-15deg); }
+  .navy .sleeve-left, .navy .sleeve-right { background: var(--navy); }
+  .black .sleeve-left, .black .sleeve-right { background: #111; }
+  .white .sleeve-left, .white .sleeve-right { background: #FAFAFA; border: 1px solid #E0E0E0; }
+  .cream .sleeve-left, .cream .sleeve-right { background: var(--cream); border: 1px solid #E0E0E0; }
+
+  /* Design placement */
+  .chest-design {
+    position: absolute;
+    top: 80px;
+    left: 40px;
+  }
+  .center-design {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .back-design {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 80%;
+  }
+  .shirt-label {
+    text-align: center;
+    padding: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .section { text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     DESIGN 1: CLASSIC — Small chest logo
+═══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="design-label">Design 1 — Classic</div>
+  <div class="design-sub">Small left chest logo · Clean and minimal</div>
+  <div class="shirt-group">
+    <!-- Navy shirt, front -->
+    <div class="shirt">
+      <div class="shirt-body navy">
+        <div class="collar"></div>
+        <div class="sleeve-left"></div>
+        <div class="sleeve-right"></div>
+        <div class="chest-design">
+          <!-- NeuroChiro logo text -->
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" stroke="#D66829" stroke-width="2" fill="none"/>
+              <path d="M20 8 C20 8, 14 16, 14 22 C14 26, 16 30, 20 32 C24 30, 26 26, 26 22 C26 16, 20 8, 20 8Z" stroke="white" stroke-width="1.5" fill="none"/>
+              <line x1="20" y1="12" x2="20" y2="28" stroke="white" stroke-width="1"/>
+              <line x1="16" y1="18" x2="24" y2="18" stroke="white" stroke-width="0.8"/>
+              <line x1="15" y1="22" x2="25" y2="22" stroke="white" stroke-width="0.8"/>
+            </svg>
+            <div>
+              <div style="font-family: 'Lato'; font-weight: 900; font-size: 13px; color: white; letter-spacing: 3px; text-transform: uppercase;">NeuroChiro</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="shirt-label">Front — Navy</div>
+    </div>
+
+    <!-- Navy shirt, back -->
+    <div class="shirt">
+      <div class="shirt-body navy">
+        <div class="collar"></div>
+        <div class="sleeve-left"></div>
+        <div class="sleeve-right"></div>
+        <div class="back-design">
+          <div style="font-family: 'Lato'; font-weight: 900; font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 4px; text-transform: uppercase;">neurochiro.co</div>
+        </div>
+      </div>
+      <div class="shirt-label">Back — Navy</div>
+    </div>
+
+    <!-- Black shirt, front -->
+    <div class="shirt">
+      <div class="shirt-body black">
+        <div class="collar"></div>
+        <div class="sleeve-left"></div>
+        <div class="sleeve-right"></div>
+        <div class="chest-design">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" stroke="#D66829" stroke-width="2" fill="none"/>
+              <path d="M20 8 C20 8, 14 16, 14 22 C14 26, 16 30, 20 32 C24 30, 26 26, 26 22 C26 16, 20 8, 20 8Z" stroke="white" stroke-width="1.5" fill="none"/>
+              <line x1="20" y1="12" x2="20" y2="28" stroke="white" stroke-width="1"/>
+              <line x1="16" y1="18" x2="24" y2="18" stroke="white" stroke-width="0.8"/>
+              <line x1="15" y1="22" x2="25" y2="22" stroke="white" stroke-width="0.8"/>
+            </svg>
+            <div>
+              <div style="font-family: 'Lato'; font-weight: 900; font-size: 13px; color: white; letter-spacing: 3px; text-transform: uppercase;">NeuroChiro</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="shirt-label">Front — Black</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     DESIGN 2: ICON ONLY — Just the spine/brain mark
+═══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="design-label">Design 2 — Icon Only</div>
+  <div class="design-sub">Just the mark on the chest · Ultra minimal</div>
+  <div class="shirt-group">
+    <div class="shirt">
+      <div class="shirt-body navy">
+        <div class="collar"></div>
+        <div class="sleeve-left"></div>
+        <div class="sleeve-right"></div>
+        <div class="chest-design">
+          <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="18" stroke="#D66829" stroke-width="2.5" fill="none"/>
+            <path d="M20 8 C20 8, 14 16, 14 22 C14 26, 16 30, 20 32 C24 30, 26 26, 26 22 C26 16, 20 8, 20 8Z" stroke="white" stroke-width="1.5" fill="none"/>
+            <line x1="20" y1="12" x2="20" y2="28" stroke="white" stroke-width="1"/>
+            <line x1="16" y1="18" x2="24" y2="18" stroke="white" stroke-width="0.8"/>
+            <line x1="15" y1="22" x2="25" y2="22" stroke="white" stroke-width="0.8"/>
+          </svg>
+        </div>
+      </div>
+      <div class="shirt-label">Front — Navy · Icon Only</div>
+    </div>
+
+    <div class="shirt">
+      <div class="shirt-body black">
+        <div class="collar"></div>
+        <div class="sleeve-left"></div>
+        <div class="sleeve-right"></div>
+        <div class="chest-design">
+          <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="18" stroke="#D66829" stroke-width="2.5" fill="none"/>
+            <path d="M20 8 C20 8, 14 16, 14 22 C14 26, 16 30, 20 32 C24 30, 26 26, 26 22 C26 16, 20 8, 20 8Z" stroke="white" stroke-width="1.5" fill="none"/>
+            <line x1="20" y1="12" x2="20" y2="28" stroke="white" stroke-width="1"/>
+            <line x1="16" y1="18" x2="24" y2="18" stroke="white" stroke-width="0.8"/>
+            <line x1="15" y1="22" x2="25" y2="22" stroke="white" stroke-width="0.8"/>
+          </svg>
+        </div>
+      </div>
+      <div class="shirt-label">Front — Black · Icon Only</div>
+    </div>
+
+    <div class="shirt">
+      <div class="shirt-body white">
+        <div class="collar"></div>
+        <div class="sleeve-left"></div>
+        <div class="sleeve-right"></div>
+        <div class="chest-design">
+          <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="18" stroke="#D66829" stroke-width="2.5" fill="none"/>
+            <path d="M20 8 C20 8, 14 16, 14 22 C14 26, 16 30, 20 32 C24 30, 26 26, 26 22 C26 16, 20 8, 20 8Z" stroke="#1E2D3B" stroke-width="1.5" fill="none"/>
+            <line x1="20" y1="12" x2="20" y2="28" stroke="#1E2D3B" stroke-width="1"/>
+            <line x1="16" y1="18" x2="24" y2="18" stroke="#1E2D3B" stroke-width="0.8"/>
+            <line x1="15" y1="22" x2="25" y2="22" stroke="#1E2D3B" stroke-width="0.8"/>
+          </svg>
+        </div>
+      </div>
+      <div class="shirt-label">Front — White · Icon Only</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     DESIGN 3: STATEMENT BACK — Logo front, tagline back
+═══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="design-label">Design 3 — Statement Back</div>
+  <div class="design-sub">Logo on chest · "Nervous System First" on back</div>
+  <div class="shirt-group">
+    <div class="shirt">
+      <div class="shirt-body navy">
+        <div class="collar"></div>
+        <div class="sleeve-left"></div>
+        <div class="sleeve-right"></div>
+        <div class="chest-design">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" stroke="#D66829" stroke-width="2" fill="none"/>
+              <path d="M20 8 C20 8, 14 16, 14 22 C14 26, 16 30, 20 32 C24 30, 26 26, 26 22 C26 16, 20 8, 20 8Z" stroke="white" stroke-width="1.5" fill="none"/>
+              <line x1="20" y1="12" x2="20" y2="28" stroke="white" stroke-width="1"/>
+              <line x1="16" y1="18" x2="24" y2="18" stroke="white" stroke-width="0.8"/>
+              <line x1="15" y1="22" x2="25" y2="22" stroke="white" stroke-width="0.8"/>
+            </svg>
+            <div style="font-family: 'Lato'; font-weight: 900; font-size: 12px; color: white; letter-spacing: 3px; text-transform: uppercase;">NeuroChiro</div>
+          </div>
+        </div>
+      </div>
+      <div class="shirt-label">Front</div>
+    </div>
+
+    <div class="shirt">
+      <div class="shirt-body navy">
+        <div class="collar"></div>
+        <div class="sleeve-left"></div>
+        <div class="sleeve-right"></div>
+        <div class="back-design">
+          <div style="font-family: 'Montserrat'; font-weight: 900; font-size: 20px; color: white; letter-spacing: 2px; text-transform: uppercase; line-height: 1.4;">
+            Nervous<br>System<br><span style="color: #D66829;">First.</span>
+          </div>
+          <div style="margin-top: 20px; font-family: 'Lato'; font-weight: 400; font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 3px; text-transform: uppercase;">neurochiro.co</div>
+        </div>
+      </div>
+      <div class="shirt-label">Back — "Nervous System First."</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     DESIGN 4: BADGE STYLE — Circular emblem
+═══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="design-label">Design 4 — Badge</div>
+  <div class="design-sub">Circular emblem on chest · Vintage feel</div>
+  <div class="shirt-group">
+    <div class="shirt">
+      <div class="shirt-body navy">
+        <div class="collar"></div>
+        <div class="sleeve-left"></div>
+        <div class="sleeve-right"></div>
+        <div class="chest-design" style="left: 50%; transform: translateX(-50%); top: 100px;">
+          <div style="width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+            <!-- Circular text simulation -->
+            <div style="font-family: 'Montserrat'; font-weight: 800; font-size: 8px; color: rgba(255,255,255,0.4); letter-spacing: 4px; text-transform: uppercase; position: absolute; top: 12px;">NEUROCHIRO</div>
+            <svg width="36" height="36" viewBox="0 0 40 40" fill="none" style="margin-top: 4px;">
+              <circle cx="20" cy="20" r="18" stroke="#D66829" stroke-width="2" fill="none"/>
+              <path d="M20 8 C20 8, 14 16, 14 22 C14 26, 16 30, 20 32 C24 30, 26 26, 26 22 C26 16, 20 8, 20 8Z" stroke="white" stroke-width="1.5" fill="none"/>
+              <line x1="20" y1="12" x2="20" y2="28" stroke="white" stroke-width="1"/>
+              <line x1="16" y1="18" x2="24" y2="18" stroke="white" stroke-width="0.8"/>
+              <line x1="15" y1="22" x2="25" y2="22" stroke="white" stroke-width="0.8"/>
+            </svg>
+            <div style="font-family: 'Montserrat'; font-weight: 600; font-size: 6px; color: rgba(255,255,255,0.3); letter-spacing: 3px; text-transform: uppercase; position: absolute; bottom: 12px;">EST. 2025</div>
+          </div>
+        </div>
+      </div>
+      <div class="shirt-label">Front — Navy · Badge</div>
+    </div>
+
+    <div class="shirt">
+      <div class="shirt-body black">
+        <div class="collar"></div>
+        <div class="sleeve-left"></div>
+        <div class="sleeve-right"></div>
+        <div class="chest-design" style="left: 50%; transform: translateX(-50%); top: 100px;">
+          <div style="width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.15); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+            <div style="font-family: 'Montserrat'; font-weight: 800; font-size: 8px; color: rgba(255,255,255,0.3); letter-spacing: 4px; text-transform: uppercase; position: absolute; top: 12px;">NEUROCHIRO</div>
+            <svg width="36" height="36" viewBox="0 0 40 40" fill="none" style="margin-top: 4px;">
+              <circle cx="20" cy="20" r="18" stroke="#D66829" stroke-width="2" fill="none"/>
+              <path d="M20 8 C20 8, 14 16, 14 22 C14 26, 16 30, 20 32 C24 30, 26 26, 26 22 C26 16, 20 8, 20 8Z" stroke="white" stroke-width="1.5" fill="none"/>
+              <line x1="20" y1="12" x2="20" y2="28" stroke="white" stroke-width="1"/>
+              <line x1="16" y1="18" x2="24" y2="18" stroke="white" stroke-width="0.8"/>
+              <line x1="15" y1="22" x2="25" y2="22" stroke="white" stroke-width="0.8"/>
+            </svg>
+            <div style="font-family: 'Montserrat'; font-weight: 600; font-size: 6px; color: rgba(255,255,255,0.3); letter-spacing: 3px; text-transform: uppercase; position: absolute; bottom: 12px;">EST. 2025</div>
+          </div>
+        </div>
+      </div>
+      <div class="shirt-label">Front — Black · Badge</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PRINT SPECS
+═══════════════════════════════════════════════════════ -->
+<div class="section" style="max-width: 600px; text-align: left; background: white; padding: 30px; border-radius: 12px;">
+  <div class="design-label" style="margin-bottom: 16px;">Print Specifications</div>
+  <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+    <tr><td style="padding: 8px 0; font-weight: 700; color: #1E2D3B;">Brand Colors</td><td>Navy #1E2D3B · Orange #D66829 · White</td></tr>
+    <tr><td style="padding: 8px 0; font-weight: 700; color: #1E2D3B;">Fonts</td><td>Lato (logo text) · Montserrat (tagline)</td></tr>
+    <tr><td style="padding: 8px 0; font-weight: 700; color: #1E2D3B;">Chest Logo Size</td><td>3" wide × 1.5" tall (left chest placement)</td></tr>
+    <tr><td style="padding: 8px 0; font-weight: 700; color: #1E2D3B;">Back Print Size</td><td>10" wide × 12" tall (centered, upper back)</td></tr>
+    <tr><td style="padding: 8px 0; font-weight: 700; color: #1E2D3B;">Recommended Shirt</td><td>Bella+Canvas 3001 or Next Level 6210</td></tr>
+    <tr><td style="padding: 8px 0; font-weight: 700; color: #1E2D3B;">Print Method</td><td>DTG (direct to garment) or screen print</td></tr>
+    <tr><td style="padding: 8px 0; font-weight: 700; color: #1E2D3B;">Shirt Colors</td><td>Navy, Black, White, Cream</td></tr>
+  </table>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro Screening Intensive — 19-Day Social Media Launch Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy: #1E2D3B;
+  --navy-light: #263a4d;
+  --navy-lighter: #2e4760;
+  --orange: #D66829;
+  --orange-light: #e88a50;
+  --cream: #F5F3EF;
+  --cream-dim: #d4d2ce;
+  --white: #ffffff;
+  --card-bg: #243546;
+  --card-border: #344a5e;
+  --slide-bg: #1a2836;
+  --text-body: #c8cdd2;
+  --text-muted: #8a9baa;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--navy);
+  color: var(--text-body);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Lato', sans-serif;
+  color: var(--cream);
+  font-weight: 700;
+}
+
+a { color: var(--orange); text-decoration: none; }
+a:hover { color: var(--orange-light); text-decoration: underline; }
+
+/* ─── TOP NAV / TOC ─── */
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(30,45,59,0.97);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--card-border);
+  padding: 10px 0;
+}
+.top-nav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.top-nav-inner::-webkit-scrollbar { display: none; }
+.nav-brand {
+  font-family: 'Lato', sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--orange);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.nav-link:hover {
+  color: var(--cream);
+  background: var(--navy-light);
+  text-decoration: none;
+}
+.nav-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--card-border);
+  flex-shrink: 0;
+}
+
+/* ─── LAYOUT ─── */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px 20px 80px;
+}
+
+/* ─── HERO ─── */
+.hero {
+  text-align: center;
+  padding: 50px 20px 40px;
+  border-bottom: 3px solid var(--orange);
+  margin-bottom: 40px;
+}
+.hero h1 {
+  font-size: clamp(24px, 5vw, 38px);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin-bottom: 10px;
+  color: var(--white);
+}
+.hero h1 span { color: var(--orange); }
+.hero-meta {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+.hero-meta strong { color: var(--cream); }
+
+/* ─── SUMMARY TABLE ─── */
+.summary-section {
+  margin-bottom: 50px;
+}
+.summary-section h2 {
+  font-size: 22px;
+  color: var(--orange);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--navy-lighter);
+}
+.summary-table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+}
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.summary-table th {
+  background: var(--navy-lighter);
+  color: var(--orange);
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  text-align: left;
+  padding: 10px 12px;
+  white-space: nowrap;
+}
+.summary-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--navy-lighter);
+  color: var(--text-body);
+}
+.summary-table tr:last-child td { border-bottom: none; }
+.summary-table tr:hover td { background: rgba(214,104,41,0.05); }
+
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  text-align: center;
+}
+.stat-card .stat-num {
+  font-family: 'Lato', sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--orange);
+}
+.stat-card .stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ─── DAY CARDS ─── */
+.day-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+.day-header {
+  background: linear-gradient(135deg, var(--navy-lighter), var(--navy-light));
+  padding: 18px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 2px solid var(--orange);
+}
+.day-number {
+  font-family: 'Lato', sans-serif;
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--navy);
+  background: var(--orange);
+  padding: 4px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.day-date {
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--cream);
+}
+.day-theme {
+  font-size: 13px;
+  color: var(--orange-light);
+  font-weight: 500;
+}
+.day-body {
+  padding: 24px;
+}
+
+/* ─── BADGES ─── */
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+.badge-reel { background: #c0392b; color: #fff; }
+.badge-carousel { background: #2980b9; color: #fff; }
+.badge-static { background: #27ae60; color: #fff; }
+.badge-stories { background: #8e44ad; color: #fff; }
+
+/* ─── SECTIONS ─── */
+.section-label {
+  font-family: 'Lato', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--orange);
+  margin-top: 20px;
+  margin-bottom: 6px;
+}
+.section-label:first-child { margin-top: 0; }
+
+.topic-hook {
+  font-family: 'Lato', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cream);
+  margin-bottom: 16px;
+}
+
+/* ─── SCRIPT BOX ─── */
+.script-box {
+  background: var(--slide-bg);
+  border-left: 4px solid var(--orange);
+  border-radius: 0 8px 8px 0;
+  padding: 18px 20px;
+  margin: 8px 0 20px;
+  position: relative;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--cream);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* ─── CAPTION BOX ─── */
+.caption-box {
+  background: var(--slide-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin: 8px 0 20px;
+  position: relative;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-body);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* ─── COPY BUTTON ─── */
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--orange);
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 2;
+}
+.copy-btn:hover { background: var(--orange-light); }
+.copy-btn.copied { background: #27ae60; }
+
+/* ─── SLIDES ─── */
+.slides-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  margin: 10px 0 20px;
+}
+.slide {
+  background: var(--slide-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 16px;
+  position: relative;
+}
+.slide-num {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-family: 'Lato', sans-serif;
+  font-weight: 900;
+  font-size: 20px;
+  color: var(--orange);
+  opacity: 0.4;
+}
+.slide-title {
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--orange);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.slide-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--cream);
+  white-space: pre-wrap;
+}
+
+/* ─── GRAPHIC TEXT ─── */
+.graphic-box {
+  background: var(--slide-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 20px;
+  margin: 10px 0 20px;
+  text-align: center;
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--cream);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.split-graphic {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin: 10px 0 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+}
+.split-side {
+  padding: 20px;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.split-before {
+  background: #2a1a1a;
+  color: #e88a8a;
+}
+.split-after {
+  background: #1a2a1a;
+  color: #8ae88a;
+}
+.split-side-title {
+  font-family: 'Lato', sans-serif;
+  font-weight: 900;
+  font-size: 14px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ─── STORY LIST ─── */
+.story-list {
+  list-style: none;
+  margin: 8px 0 10px;
+}
+.story-list li {
+  position: relative;
+  padding: 8px 0 8px 28px;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(52,74,94,0.4);
+}
+.story-list li:last-child { border-bottom: none; }
+.story-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8e44ad, #c0392b);
+  opacity: 0.6;
+}
+
+/* ─── CTA ─── */
+.cta-box {
+  background: rgba(214,104,41,0.1);
+  border: 1px solid rgba(214,104,41,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.cta-label {
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--orange);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.cta-link {
+  font-weight: 600;
+  color: var(--orange-light);
+}
+
+/* ─── NOTE ─── */
+.note-box {
+  background: rgba(142,68,173,0.1);
+  border: 1px solid rgba(142,68,173,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-size: 12px;
+  color: #b899cc;
+  font-style: italic;
+}
+
+/* ─── DOUBLE POST ─── */
+.double-post-label {
+  font-family: 'Lato', sans-serif;
+  font-weight: 900;
+  font-size: 13px;
+  color: #fff;
+  background: #c0392b;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+.post-divider {
+  border: none;
+  border-top: 2px dashed var(--card-border);
+  margin: 24px 0;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 600px) {
+  .hero { padding: 30px 16px 30px; }
+  .day-header { padding: 14px 16px; }
+  .day-body { padding: 16px; }
+  .slides-container { grid-template-columns: 1fr; }
+  .split-graphic { grid-template-columns: 1fr; }
+  .nav-brand { font-size: 14px; }
+  .summary-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media print {
+  .top-nav { position: relative; }
+  .copy-btn { display: none; }
+  body { background: #fff; color: #222; }
+  .day-card { break-inside: avoid; border-color: #ccc; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── STICKY NAV ─── -->
+<nav class="top-nav">
+  <div class="top-nav-inner">
+    <span class="nav-brand">SCREENING PLAN</span>
+    <div class="nav-divider"></div>
+    <a href="#summary" class="nav-link">Summary</a>
+    <a href="#day1" class="nav-link">D1</a>
+    <a href="#day2" class="nav-link">D2</a>
+    <a href="#day3" class="nav-link">D3</a>
+    <a href="#day4" class="nav-link">D4</a>
+    <a href="#day5" class="nav-link">D5</a>
+    <a href="#day6" class="nav-link">D6</a>
+    <a href="#day7" class="nav-link">D7</a>
+    <a href="#day8" class="nav-link">D8</a>
+    <a href="#day9" class="nav-link">D9</a>
+    <a href="#day10" class="nav-link">D10</a>
+    <a href="#day11" class="nav-link">D11</a>
+    <a href="#day12" class="nav-link">D12</a>
+    <a href="#day13" class="nav-link">D13</a>
+    <a href="#day14" class="nav-link">D14</a>
+    <a href="#day15" class="nav-link">D15</a>
+    <a href="#day16" class="nav-link">D16</a>
+    <a href="#day17" class="nav-link">D17</a>
+    <a href="#day18" class="nav-link">D18</a>
+    <a href="#day19" class="nav-link">D19</a>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- ─── HERO ─── -->
+<div class="hero">
+  <h1><span>NEUROCHIRO</span> SCREENING INTENSIVE</h1>
+  <h1 style="font-size: clamp(18px, 3vw, 26px); margin-top: -4px;">19-Day Social Media Launch Plan</h1>
+  <p class="hero-meta">
+    <strong>Campaign:</strong> May 4 &ndash; May 22, 2026 &nbsp;|&nbsp;
+    <strong>Event:</strong> May 22&ndash;24, 2026 &nbsp;|&nbsp;
+    <strong>Host:</strong> Dr. Raymond Nichols
+  </p>
+</div>
+
+<!-- ═══════════════════════════════ SUMMARY ═══════════════════════════════ -->
+<section class="summary-section" id="summary">
+  <h2>Campaign Summary</h2>
+
+  <div class="summary-stats">
+    <div class="stat-card"><div class="stat-num">21</div><div class="stat-label">Total Feed Posts</div></div>
+    <div class="stat-card"><div class="stat-num">11</div><div class="stat-label">Reels</div></div>
+    <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">Carousels</div></div>
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Static Posts</div></div>
+    <div class="stat-card"><div class="stat-num">1</div><div class="stat-label">Stories-Only Day</div></div>
+    <div class="stat-card"><div class="stat-num">19</div><div class="stat-label">Days</div></div>
+  </div>
+
+  <div class="summary-table-wrap" style="margin-top:20px;">
+    <table class="summary-table">
+      <thead>
+        <tr><th>Day</th><th>Date</th><th>Type</th><th>Theme</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><a href="#day1">1</a></td><td>May 4 (Sun)</td><td><span class="badge badge-reel">Reel</span></td><td>Pain Point &mdash; awkward screenings</td></tr>
+        <tr><td><a href="#day2">2</a></td><td>May 5 (Mon)</td><td><span class="badge badge-carousel">Carousel</span></td><td>ROI Math &mdash; $10K Saturday</td></tr>
+        <tr><td><a href="#day3">3</a></td><td>May 6 (Tue)</td><td><span class="badge badge-reel">Reel</span></td><td>Education &mdash; Build 1: Patient Base</td></tr>
+        <tr><td><a href="#day4">4</a></td><td>May 7 (Wed)</td><td><span class="badge badge-static">Static</span></td><td>Social Proof &mdash; testimonial</td></tr>
+        <tr><td><a href="#day5">5</a></td><td>May 8 (Thu)</td><td><span class="badge badge-reel">Reel</span></td><td>Objection &mdash; "I don't have time"</td></tr>
+        <tr><td><a href="#day6">6</a></td><td>May 9 (Fri)</td><td><span class="badge badge-carousel">Carousel</span></td><td>Education &mdash; Build 2: Network Base</td></tr>
+        <tr><td><a href="#day7">7</a></td><td>May 10 (Sat)</td><td><span class="badge badge-reel">Reel</span></td><td>Lifestyle/Vision &mdash; full schedule</td></tr>
+        <tr><td><a href="#day8">8</a></td><td>May 11 (Sun)</td><td><span class="badge badge-stories">Stories</span></td><td>Behind the Scenes &mdash; Command Center</td></tr>
+        <tr><td><a href="#day9">9</a></td><td>May 12 (Mon)</td><td><span class="badge badge-carousel">Carousel</span></td><td>Objection &mdash; "Never done a screening"</td></tr>
+        <tr><td><a href="#day10">10</a></td><td>May 13 (Tue)</td><td><span class="badge badge-reel">Reel</span></td><td>Urgency &mdash; seats filling</td></tr>
+        <tr><td><a href="#day11">11</a></td><td>May 14 (Wed)</td><td><span class="badge badge-reel">Reel</span></td><td>Education &mdash; Build 3: Vendor Base</td></tr>
+        <tr><td><a href="#day12">12</a></td><td>May 15 (Thu)</td><td><span class="badge badge-static">Static</span></td><td>Social Proof &mdash; Before/After</td></tr>
+        <tr><td><a href="#day13">13</a></td><td>May 16 (Fri)</td><td><span class="badge badge-reel">Reel</span></td><td>Objection &mdash; "Why Zoom?"</td></tr>
+        <tr><td><a href="#day14">14</a></td><td>May 17 (Sat)</td><td><span class="badge badge-carousel">Carousel</span></td><td>Pain Point &mdash; practice stuck</td></tr>
+        <tr><td><a href="#day15">15</a></td><td>May 18 (Sun)</td><td><span class="badge badge-reel">Reel</span></td><td>BTS + 1 Week Out urgency</td></tr>
+        <tr><td><a href="#day16">16</a></td><td>May 19 (Mon)</td><td><span class="badge badge-static">Static</span> <span class="badge badge-reel">Reel</span></td><td>DOUBLE: Student pricing + testimonial</td></tr>
+        <tr><td><a href="#day17">17</a></td><td>May 20 (Tue)</td><td><span class="badge badge-carousel">Carousel</span> <span class="badge badge-reel">Reel</span></td><td>DOUBLE: Tier comparison + 48hr urgency</td></tr>
+        <tr><td><a href="#day18">18</a></td><td>May 21 (Wed)</td><td><span class="badge badge-reel">Reel</span></td><td>LAST CALL &mdash; final day</td></tr>
+        <tr><td><a href="#day19">19</a></td><td>May 22 (Thu)</td><td><span class="badge badge-reel">Reel</span></td><td>EVENT DAY &mdash; tonight it starts</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ DAY 1 ═══════════════════════════════ -->
+<div class="day-card" id="day1">
+  <div class="day-header">
+    <span class="day-number">DAY 1</span>
+    <span class="day-date">Sunday, May 4</span>
+    <span class="day-theme">Pain Point Launch</span>
+    <span class="badge badge-reel">Reel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"Why your screenings feel awkward and get zero patients"</p>
+
+    <div class="section-label">Script (Talking Head, 45s)</div>
+    <div class="script-box" id="script-d1">
+      <button class="copy-btn" onclick="copyText('script-d1')">Copy</button>Let me guess. You set up a table at a health fair, you stood there smiling at people walking by, maybe you did some posture checks, handed out your card, and then... nothing. Nobody called. Nobody booked. And you told yourself screenings don't work. Here's the thing — screenings work. YOUR screening didn't work. Because nobody taught you the system. There's a reason some chiropractors pull 10 to 20 new patients a month from screenings while you're sitting at a folding table hoping someone makes eye contact. It's not talent. It's not charisma. It's a system. And I'm teaching the entire system live over one weekend. May 22nd through 24th. The NeuroChiro Screening Intensive. 40 seats. Link in bio.</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d1">
+      <button class="copy-btn" onclick="copyText('caption-d1')">Copy</button>Let's be honest.
+
+Most chiropractors try screenings ONCE, it feels awkward, they get zero patients, and they never do it again.
+
+But here's what nobody told you:
+
+Screenings are the single highest-ROI patient acquisition strategy in chiropractic. Period.
+
+The problem wasn't screenings. The problem was you didn't have a system.
+
+On May 22-24, I'm teaching the ENTIRE screening system live on Zoom — the same system that produces 10-20 new patients per month when executed correctly.
+
+We're covering:
+→ The 3-Build Philosophy (Patient Base, Network Base, Vendor Base)
+→ Live role-play in breakout rooms so you're not winging it
+→ You'll walk out with your first screening BOOKED within 14 days
+
+Only 40 seats. This is not a webinar. This is a working weekend.
+
+neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>Poll — "Have you ever done a community screening?" (Yes / No / Tried once, never again)</li>
+      <li>Text overlay on black background — "May 22-24. The system changes. 40 seats." with link sticker to neurochiro.co/screening-weekend</li>
+      <li>Selfie video, casual — "Just dropped the first post about Screening Weekend. If you've ever felt awkward at a screening, go watch it."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 2 ═══════════════════════════════ -->
+<div class="day-card" id="day2">
+  <div class="day-header">
+    <span class="day-number">DAY 2</span>
+    <span class="day-date">Monday, May 5</span>
+    <span class="day-theme">ROI / Math</span>
+    <span class="badge badge-carousel">Carousel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"The $10,000 Saturday Morning"</p>
+
+    <div class="section-label">Carousel Slides (7)</div>
+    <div class="slides-container">
+      <div class="slide"><span class="slide-num">1</span><div class="slide-title">Cover</div><div class="slide-text">THE $10,000
+SATURDAY MORNING
+(And why most chiropractors
+leave this money on the table)</div></div>
+      <div class="slide"><span class="slide-num">2</span><div class="slide-text">Here's the math nobody
+is showing you:
+
+One screening event.
+One Saturday morning.
+3 hours of your time.</div></div>
+      <div class="slide"><span class="slide-num">3</span><div class="slide-text">Average screening
+(with a system):
+
+→ 30-50 people screened
+→ 8-15 book consults
+→ 4-6 start care</div></div>
+      <div class="slide"><span class="slide-num">4</span><div class="slide-text">Average patient value
+in most chiro offices:
+
+$2,500 — $3,500
+(conservative)</div></div>
+      <div class="slide"><span class="slide-num">5</span><div class="slide-text">4 patients x $2,500
+= $10,000
+
+From ONE Saturday morning.
+
+Now do that twice a month.</div></div>
+      <div class="slide"><span class="slide-num">6</span><div class="slide-text">"But Dr. Ray, I've done
+screenings and got nothing."
+
+Right. Because you didn't have:
+✓ The right location strategy
+✓ The 60-second conversation
+✓ The follow-up system
+✓ The booking protocol
+
+That's what I'm teaching.</div></div>
+      <div class="slide"><span class="slide-num">7</span><div class="slide-title">CTA Slide</div><div class="slide-text">THE NEUROCHIRO
+SCREENING INTENSIVE
+
+May 22-24, 2026 — Live on Zoom
+
+→ $497 (Doctor) / $247 (Student)
+→ Only 40 seats
+→ Walk out with your first
+   screening booked
+
+neurochiro.co/screening-weekend</div></div>
+    </div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d2">
+      <button class="copy-btn" onclick="copyText('caption-d2')">Copy</button>The math is stupid simple.
+
+4 patients from one screening. $2,500 average patient value. That's $10,000 from a single Saturday morning.
+
+And the best chiropractors doing this? They're running 2-4 screenings a month.
+
+You do the math.
+
+The question isn't whether screenings work. The question is whether you have the SYSTEM to make them work.
+
+Most docs don't. They show up to a health fair with a spine model and hope for the best. That's not a system. That's a prayer.
+
+On May 22-24, I'm breaking down the entire system:
+
+→ Where to screen (and where NOT to)
+→ What to say in the first 60 seconds
+→ How to book them on the spot
+→ How to follow up so they actually show
+→ The 3-Build Philosophy that turns one screening into a pipeline
+
+40 seats. Link in bio.
+
+neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>Screenshot of the carousel cover slide — "New post. Go save this one."</li>
+      <li>Quick math graphic — "4 x $2,500 = ?" with answer reveal on next story</li>
+      <li>Question box — "What's your average patient value? Drop it below."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 3 ═══════════════════════════════ -->
+<div class="day-card" id="day3">
+  <div class="day-header">
+    <span class="day-number">DAY 3</span>
+    <span class="day-date">Tuesday, May 6</span>
+    <span class="day-theme">Education — Build 1: Patient Base</span>
+    <span class="badge badge-reel">Reel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"The #1 mistake chiropractors make at screening events"</p>
+
+    <div class="section-label">Script (Talking Head, 50s)</div>
+    <div class="script-box" id="script-d3">
+      <button class="copy-btn" onclick="copyText('script-d3')">Copy</button>The number one mistake chiropractors make at screenings is trying to sell chiropractic. I know that sounds backwards but hear me out. When you're at a screening, you're not a salesperson. You're a doctor doing what doctors do — screening for problems. That shift changes everything. You're not pitching. You're not convincing. You're finding people who already have a problem and offering to help. That's Build One of our 3-Build Philosophy — Build Patient Base. It's not about collecting as many names as possible. It's about identifying the right people who need you, having a 60-second conversation that creates urgency, and booking them before they leave your table. I teach the entire 60-second framework at the Screening Intensive, May 22nd through 24th. Forty seats, live on Zoom. Link is in the bio.</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d3">
+      <button class="copy-btn" onclick="copyText('caption-d3')">Copy</button>Stop selling chiropractic at screenings.
+
+I know — controversial. But here's what I mean:
+
+The docs who crush it at screenings aren't "selling." They're SCREENING. They're finding problems. They're being doctors.
+
+This is Build 1 of the 3-Build Philosophy:
+
+BUILD YOUR PATIENT BASE
+→ Not by collecting names
+→ By identifying the right people
+→ Having a 60-second conversation that creates real urgency
+→ And booking them before they walk away
+
+The difference between "I handed out 50 cards and nobody called" and "I booked 12 consults in 3 hours" is the SYSTEM behind the conversation.
+
+I'm teaching the full 60-second framework at the Screening Intensive.
+
+May 22-24. Live on Zoom. 40 seats.
+
+This isn't theory. This is practice. You'll role-play it in breakout rooms until it's second nature.
+
+neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #nervousystem #chiropracticstudent</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>Text slide — "Build 1 of 3: Build Patient Base. This is where most docs stop. And that's why they fail."</li>
+      <li>Poll — "At your last screening, did you have a scripted 60-second conversation?" (Yes / No / What's that?)</li>
+      <li>Video story — "I just taught you Build 1. Builds 2 and 3 are where the REAL leverage is. That's what we go deep on at Screening Weekend."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 4 ═══════════════════════════════ -->
+<div class="day-card" id="day4">
+  <div class="day-header">
+    <span class="day-number">DAY 4</span>
+    <span class="day-date">Wednesday, May 7</span>
+    <span class="day-theme">Social Proof</span>
+    <span class="badge badge-static">Static</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"From zero screenings to 14 new patients in 30 days"</p>
+
+    <div class="section-label">Graphic Text</div>
+    <div class="graphic-box">"I had never done a single screening before working with Dr. Ray. Within 30 days of learning the system, I booked my first event, screened 38 people, and started 14 new patients. The ROI on this training paid for itself ten times over."
+
+— Dr. [Name], [City, State]
+NeuroChiro Member</div>
+
+    <div class="note-box">Note: Replace with actual testimonial. If no exact testimonial exists yet, use a composite based on real results and mark for Dr. Ray to approve or replace with a real one.</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d4">
+      <button class="copy-btn" onclick="copyText('caption-d4')">Copy</button>This is what happens when you stop guessing and start using a system.
+
+Zero screenings before the training.
+38 people screened at the first event.
+14 new patients in 30 days.
+
+This isn't an outlier. This is what happens when you:
+✓ Know WHERE to screen
+✓ Know WHAT to say
+✓ Know HOW to follow up
+✓ Actually practice before you go live
+
+That last part is key. At the Screening Intensive, you're not just learning — you're PRACTICING.
+
+Live role-play in Zoom breakout rooms.
+The 60-second conversation framework.
+Objection handling.
+Booking protocol.
+
+You walk out ready. Not "inspired." READY.
+
+May 22-24. 40 seats.
+
+→ $497 (Doctor) / $247 (Student)
+→ Payment plans available
+
+neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>Repost the testimonial graphic to stories with "This could be you in 30 days" text</li>
+      <li>Question box — "What would 14 new patients in one month do for your practice?"</li>
+      <li>Countdown sticker — "SCREENING INTENSIVE — May 22" (start the countdown, keep it in stories from here forward)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 5 ═══════════════════════════════ -->
+<div class="day-card" id="day5">
+  <div class="day-header">
+    <span class="day-number">DAY 5</span>
+    <span class="day-date">Thursday, May 8</span>
+    <span class="day-theme">Objection Handling — "I don't have time"</span>
+    <span class="badge badge-reel">Reel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"You don't have time for screenings? Good — watch this."</p>
+
+    <div class="section-label">Script (Talking Head, 45s)</div>
+    <div class="script-box" id="script-d5">
+      <button class="copy-btn" onclick="copyText('script-d5')">Copy</button>I don't have time for screenings. I hear that from docs all the time. And I get it. You're already working 40, 50 hours a week. The last thing you want is to give up a Saturday morning. But here's what I want you to think about. How much time do you spend RIGHT NOW worrying about where your next patients are coming from? How many hours a week do you waste on marketing that doesn't work? One screening. Three hours on a Saturday. Four to six new patients. That's more patients than most Facebook ad campaigns produce in a month. And it cost you zero ad spend. You don't have a time problem. You have a strategy problem. And that's exactly what we fix at the Screening Intensive. May 22nd through 24th. One weekend. The whole system. Link in bio.</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d5">
+      <button class="copy-btn" onclick="copyText('caption-d5')">Copy</button>"I don't have time for screenings."
+
+Let me reframe that for you:
+
+You don't have time to NOT do screenings.
+
+Here's why:
+
+→ One screening = 3 hours on a Saturday morning
+→ Average result with the system = 4-6 new patients
+→ Average patient value = $2,500+
+→ Total marketing cost = $0
+
+Now compare that to:
+
+→ Facebook ads: $500-2,000/month for maybe 3-5 leads (not patients — LEADS)
+→ Google Ads: Same story, higher cost per click
+→ Lunch and learns: 2 hours of prep for maybe 1-2 patients
+→ Hoping for referrals: Not a strategy
+
+Screenings — done right — are the most time-efficient, highest-ROI patient acquisition strategy in chiropractic.
+
+The Screening Intensive teaches you the entire system in one weekend.
+
+May 22-24 on Zoom.
+
+$497 doctor / $247 student
+Payment plans available.
+40 seats only.
+
+neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>Poll — "What's your biggest marketing spend right now?" (Facebook ads / Google ads / Mailers / Nothing — just hoping)</li>
+      <li>Text slide — "3 hours. $0 ad spend. 4-6 new patients. That's a screening done right."</li>
+      <li>Selfie video — "If you said 'I don't have time,' go watch today's reel. I made it specifically for you."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 6 ═══════════════════════════════ -->
+<div class="day-card" id="day6">
+  <div class="day-header">
+    <span class="day-number">DAY 6</span>
+    <span class="day-date">Friday, May 9</span>
+    <span class="day-theme">Education — Build 2: Network Base</span>
+    <span class="badge badge-carousel">Carousel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"Why the best screening doctors never run out of events"</p>
+
+    <div class="section-label">Carousel Slides (6)</div>
+    <div class="slides-container">
+      <div class="slide"><span class="slide-num">1</span><div class="slide-title">Cover</div><div class="slide-text">WHY THE BEST
+SCREENING DOCTORS
+NEVER RUN OUT
+OF EVENTS
+
+(Build #2 of 3)</div></div>
+      <div class="slide"><span class="slide-num">2</span><div class="slide-text">Most docs do one screening,
+get a few patients, and stop.
+
+Then they're back to square
+one next month wondering
+where patients will come from.</div></div>
+      <div class="slide"><span class="slide-num">3</span><div class="slide-title">Build #2</div><div class="slide-text">BUILD YOUR
+NETWORK BASE
+
+This is the secret most
+chiropractors miss entirely.</div></div>
+      <div class="slide"><span class="slide-num">4</span><div class="slide-text">Every screening event connects
+you with:
+
+→ Event organizers
+→ Business owners
+→ Community leaders
+→ Other health professionals
+→ Gym owners, coaches, PTs
+
+These people become your
+NETWORK BASE.</div></div>
+      <div class="slide"><span class="slide-num">5</span><div class="slide-text">When you build relationships
+with these people:
+
+→ They invite you BACK
+→ They refer you to OTHER events
+→ They send you patients directly
+→ They become your unpaid
+   marketing team
+
+One screening becomes
+a pipeline of screenings.</div></div>
+      <div class="slide"><span class="slide-num">6</span><div class="slide-title">CTA Slide</div><div class="slide-text">THE NEUROCHIRO
+SCREENING INTENSIVE
+
+May 22-24, 2026 — Live on Zoom
+
+I teach you how to build all
+3 bases so you never run out
+of patients OR events.
+
+40 seats → neurochiro.co/screening-weekend</div></div>
+    </div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d6">
+      <button class="copy-btn" onclick="copyText('caption-d6')">Copy</button>This is Build #2 of the 3-Build Philosophy, and it's the one that creates LEVERAGE.
+
+Build 1 = Build your Patient Base (get patients from screenings)
+Build 2 = Build your Network Base (get INVITED to more screenings)
+Build 3 = ... coming soon
+
+Most docs treat screenings like a one-off event. Show up, screen people, go home.
+
+The smart ones treat every screening as a networking opportunity.
+
+That event organizer? They run 12 events a year. Get on their list.
+
+That gym owner who let you set up in their lobby? They know every fitness professional in town.
+
+That HR director at the corporate wellness fair? They manage 500 employees.
+
+One screening, done right, doesn't just give you patients. It gives you a NETWORK that feeds you patients for years.
+
+This is what we build at the Screening Intensive.
+
+May 22-24. Zoom. 40 seats.
+
+neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>Share slide 4 to stories — "Save this list. These are the people you should be connecting with at every event."</li>
+      <li>Quiz sticker — "How many of the 3 Builds can you name?" (encourage DMs)</li>
+      <li>Text slide — "Build 1: Patients. Build 2: Network. Build 3 drops next week."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 7 ═══════════════════════════════ -->
+<div class="day-card" id="day7">
+  <div class="day-header">
+    <span class="day-number">DAY 7</span>
+    <span class="day-date">Saturday, May 10</span>
+    <span class="day-theme">Lifestyle / Vision</span>
+    <span class="badge badge-reel">Reel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"What your practice looks like with 10-20 new patients every month"</p>
+
+    <div class="section-label">Script (Talking Head + B-Roll, 55s)</div>
+    <div class="script-box" id="script-d7">
+      <button class="copy-btn" onclick="copyText('script-d7')">Copy</button>I want you to picture something. It's Monday morning. You walk into your office and your schedule is full. Not because you ran an ad. Not because you begged for referrals. Because last Saturday you spent three hours at a screening and twelve people booked. Four of them are already confirmed for this week. Your CA isn't stressed about the schedule. You're not stressed about the numbers. You know that next Saturday there's another screening already booked. And the Saturday after that. And the one after that. Because you built a system — not just for getting patients, but for getting INVITED to events, month after month. That's what ten to twenty new patients a month looks like. It's not a grind. It's a system. And it starts at the Screening Intensive, May 22nd through 24th. Forty seats. Link in bio.</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d7">
+      <button class="copy-btn" onclick="copyText('caption-d7')">Copy</button>Close your eyes and picture this:
+
+→ Monday morning. Schedule is full.
+→ No ads running. No stress about numbers.
+→ Last Saturday's screening produced 12 consult bookings.
+→ 4 already confirmed for this week.
+→ Next Saturday's screening is already booked.
+→ The one after that? Already booked too.
+
+This is what a screening SYSTEM looks like.
+
+Not one random health fair.
+Not hoping someone calls back.
+
+A SYSTEM that produces 10-20 new patients every single month.
+
+Here's what changes:
+→ You stop worrying about where patients come from
+→ Your CA has a full schedule to manage instead of empty slots to fill
+→ Your revenue becomes predictable
+→ You actually enjoy your weekends because 3 hours of screening PRODUCES instead of drains
+
+This is the vision. And it's built on a system I'm teaching May 22-24.
+
+The NeuroChiro Screening Intensive.
+40 seats. Live on Zoom.
+
+$497 (Doctor) / $247 (Student)
+Payment plans available.
+
+neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>"Saturday morning check-in" selfie — "While most people are sleeping in, the best chiropractors are out screening. What are you doing this morning?"</li>
+      <li>Poll — "Would 10-20 new patients/month change your practice?" (Yes, completely / I'm already there / I need this)</li>
+      <li>DM prompt — "If this is the practice you want, DM me 'SCREENING' and I'll send you the details."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 8 ═══════════════════════════════ -->
+<div class="day-card" id="day8">
+  <div class="day-header">
+    <span class="day-number">DAY 8</span>
+    <span class="day-date">Sunday, May 11</span>
+    <span class="day-theme">Behind the Scenes (Stories Only — Feed Rest Day)</span>
+    <span class="badge badge-stories">Stories</span>
+  </div>
+  <div class="day-body">
+    <div class="section-label">Story Sequence (5-6 Stories)</div>
+    <ul class="story-list">
+      <li><strong>Story 1:</strong> Selfie video — "Happy Sunday. No feed post today, but I wanted to show you something we're building for Screening Weekend."</li>
+      <li><strong>Story 2:</strong> Screenshot or screen recording of the Screening Command Center dashboard — "This is the Screening Command Center. It's only for Accelerator members. It comes pre-loaded with 25-50 screening events already happening in YOUR area. Farmers markets, health fairs, corporate wellness events — all researched and ready for you."</li>
+      <li><strong>Story 3:</strong> Text slide — "Imagine finishing the weekend and instead of 'now what do I do?' you open a dashboard with your first 5 events already picked out."</li>
+      <li><strong>Story 4:</strong> Poll — "Would having 25-50 pre-loaded events in your area help?" (Game changer / I can find my own / Wait, what?)</li>
+      <li><strong>Story 5:</strong> Text slide with link sticker — "The Screening Command Center is included in the Accelerator tier ($997 doctor / $497 student). Only 15 Accelerator spots. → neurochiro.co/screening-weekend"</li>
+      <li><strong>Story 6:</strong> Question box — "What questions do you have about Screening Weekend? Drop them here and I'll answer tomorrow."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 9 ═══════════════════════════════ -->
+<div class="day-card" id="day9">
+  <div class="day-header">
+    <span class="day-number">DAY 9</span>
+    <span class="day-date">Monday, May 12</span>
+    <span class="day-theme">Objection — "I've never done a screening"</span>
+    <span class="badge badge-carousel">Carousel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"Never done a screening? Perfect. You're exactly who this is for."</p>
+
+    <div class="section-label">Carousel Slides (7)</div>
+    <div class="slides-container">
+      <div class="slide"><span class="slide-num">1</span><div class="slide-title">Cover</div><div class="slide-text">"I'VE NEVER DONE
+A SCREENING BEFORE"
+
+Perfect.
+You're exactly who
+this is for.</div></div>
+      <div class="slide"><span class="slide-num">2</span><div class="slide-text">Here's a secret:
+
+Most of the docs who crush it
+at screenings started with
+ZERO experience.
+
+The difference? They learned
+the system BEFORE they
+showed up.</div></div>
+      <div class="slide"><span class="slide-num">3</span><div class="slide-text">At the Screening Intensive,
+you don't just learn.
+
+You PRACTICE.
+
+Live role-play in Zoom
+breakout rooms until the
+60-second conversation
+is second nature.</div></div>
+      <div class="slide"><span class="slide-num">4</span><div class="slide-text">Here's what you'll practice:
+
+→ The opening line
+→ The 60-second screening convo
+→ Handling "I already have
+   a chiropractor"
+→ The booking close
+→ The follow-up sequence</div></div>
+      <div class="slide"><span class="slide-num">5</span><div class="slide-text">By Sunday morning,
+you won't just "know" the
+system.
+
+You'll have DONE it.
+
+Multiple times.
+
+With feedback.</div></div>
+      <div class="slide"><span class="slide-num">6</span><div class="slide-text">And here's the kicker:
+
+You'll walk out with your
+first screening event
+BOOKED within 14 days.
+
+Not "someday."
+Not "when I feel ready."
+BOOKED.</div></div>
+      <div class="slide"><span class="slide-num">7</span><div class="slide-title">CTA Slide</div><div class="slide-text">NEUROCHIRO
+SCREENING INTENSIVE
+
+May 22-24, 2026 — Zoom
+
+$497 Doctor / $247 Student
+Payment plans available
+40 seats only
+
+→ neurochiro.co/screening-weekend</div></div>
+    </div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d9">
+      <button class="copy-btn" onclick="copyText('caption-d9')">Copy</button>"But I've never done a screening before..."
+
+GOOD. That means you don't have bad habits to unlearn.
+
+Here's the truth: the docs who get the MOST out of this weekend are the ones starting from zero.
+
+Why? Because they follow the system exactly as taught. No shortcuts. No "well I usually do it this way." Just the system.
+
+And the system works.
+
+At the Screening Intensive, you're not sitting through a lecture. You're PRACTICING:
+
+→ Live role-play in Zoom breakout rooms
+→ The 60-second screening conversation
+→ Objection handling
+→ Booking protocol
+→ Follow-up sequences
+
+By Sunday morning, you'll have practiced the conversation multiple times with feedback.
+
+And you'll walk out with your first screening event BOOKED within 14 days.
+
+Never done a screening? This weekend fixes that permanently.
+
+May 22-24. 40 seats.
+
+neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>Answer questions from yesterday's Q&A box (screen record or text slides with answers)</li>
+      <li>Poll — "Have you ever done a screening event?" (Yes, many times / Once or twice / Never)</li>
+      <li>DM prompt — "If you've NEVER done a screening and you're nervous about starting, DM me. I'll tell you exactly why that's actually your advantage."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 10 ═══════════════════════════════ -->
+<div class="day-card" id="day10">
+  <div class="day-header">
+    <span class="day-number">DAY 10</span>
+    <span class="day-date">Tuesday, May 13</span>
+    <span class="day-theme">Urgency — Seats Filling</span>
+    <span class="badge badge-reel">Reel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"We just crossed 20 registrations — here's what that means for you"</p>
+
+    <div class="section-label">Script (Talking Head, 40s)</div>
+    <div class="script-box" id="script-d10">
+      <button class="copy-btn" onclick="copyText('script-d10')">Copy</button>Quick update on Screening Weekend. We just crossed twenty registrations, which means we're halfway to capacity. Forty seats total, and we're not expanding it because the breakout rooms don't work with more than forty people. This is a working weekend, not a webinar. You need reps. You need practice. You need feedback. And that only works in small groups. So if you've been sitting on the fence, here's your heads up — we will sell out, and when we do, the next one isn't until fall. I'd rather you be in the room than watching from the sidelines. Link in bio. Lock your seat.</div>
+
+    <div class="note-box">Note: Adjust the registration number to match actual numbers. If actual registrations are lower, adjust to something truthful like "registrations are coming in faster than expected."</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d10">
+      <button class="copy-btn" onclick="copyText('caption-d10')">Copy</button>Halfway there.
+
+20 of 40 seats are gone for the Screening Intensive (May 22-24).
+
+Here's why we cap it at 40:
+
+This isn't a webinar where 500 people watch passively. This is a WORKING weekend.
+
+→ Breakout rooms for role-play
+→ Live feedback on your screening conversation
+→ Accountability partner pairing
+→ First screening booked before you leave
+
+That only works with a small group.
+
+40 seats. That's it.
+
+When they're gone, the next Screening Intensive isn't until fall.
+
+Don't be the doc who watches everyone else post about their screening results this summer while you're still "thinking about it."
+
+Lock your seat:
+→ neurochiro.co/screening-weekend
+
+$497 Doctor / $247 Student
+Payment plans available
+
+The Accelerator tier ($997 / $497 student) includes the Screening Command Center + 90-day group coaching. Only 15 Accelerator spots and they're going first.
+
+neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>Screenshot of registration count (or graphic showing "20/40 SEATS FILLED") — "Halfway. Don't sleep on this."</li>
+      <li>Countdown sticker — "9 DAYS until Screening Intensive"</li>
+      <li>Text slide — "Accelerator spots are going fastest. 15 total. If you want the Command Center + coaching, don't wait. → neurochiro.co/screening-weekend"</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 11 ═══════════════════════════════ -->
+<div class="day-card" id="day11">
+  <div class="day-header">
+    <span class="day-number">DAY 11</span>
+    <span class="day-date">Wednesday, May 14</span>
+    <span class="day-theme">Education — Build 3: Vendor Base</span>
+    <span class="badge badge-reel">Reel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"The third build that turns screenings into a business (not just an event)"</p>
+
+    <div class="section-label">Script (Talking Head, 55s)</div>
+    <div class="script-box" id="script-d11">
+      <button class="copy-btn" onclick="copyText('script-d11')">Copy</button>Alright, I've taught you Build One — Build Patient Base. Build Two — Build Network Base. Now here's Build Three, and this is the one that makes the whole thing sustainable. Build Vendor Base. Here's what I mean. Every screening event costs you something — a table, a banner, maybe some giveaways, your time. But what if local businesses PAID to be part of your screening? What if a supplement company sponsored your table? What if a local gym co-hosted the event and split the marketing? What if a massage therapist set up next to you and you cross-referred all day? That's Build Three. You're not just getting patients and building a network. You're building a vendor base that subsidizes your events and eventually makes your screenings PROFITABLE before a single patient walks in. I go deep on all three builds at the Screening Intensive. May 22nd through 24th. Forty seats. Link in bio.</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d11">
+      <button class="copy-btn" onclick="copyText('caption-d11')">Copy</button>BUILD #3: BUILD YOUR VENDOR BASE
+
+This is the one nobody talks about. And it's the one that makes screenings sustainable long-term.
+
+Build 1: Get patients from screenings ✓
+Build 2: Build a network so you never run out of events ✓
+Build 3: Build a vendor base so your screenings PAY FOR THEMSELVES
+
+Here's what that looks like:
+
+→ Local supplement company sponsors your table setup
+→ A gym co-hosts the event and handles marketing
+→ A massage therapist sets up next to you — you cross-refer all day
+→ A local health food store provides samples in exchange for visibility
+
+Now your screening costs you nothing. Sometimes it MAKES you money before a single patient starts care.
+
+That's the 3-Build Philosophy:
+Patient Base + Network Base + Vendor Base
+
+Most docs only think about Build 1. The ones who build all 3 create a machine that runs itself.
+
+I'm teaching all three — in depth — at the Screening Intensive.
+
+May 22-24. Zoom. 40 seats.
+
+neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>Text slide — "THE 3-BUILD PHILOSOPHY: 1. Patient Base 2. Network Base 3. Vendor Base — This is the full system."</li>
+      <li>Poll — "Have you ever had a local business SPONSOR one of your events?" (Yes / No / Didn't know that was possible)</li>
+      <li>Video story — "If you missed Builds 1 and 2, go back through my feed. All three are there. But the deep work happens May 22-24."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 12 ═══════════════════════════════ -->
+<div class="day-card" id="day12">
+  <div class="day-header">
+    <span class="day-number">DAY 12</span>
+    <span class="day-date">Thursday, May 15</span>
+    <span class="day-theme">Social Proof / Results</span>
+    <span class="badge badge-static">Static</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"Before the system vs. after the system"</p>
+
+    <div class="section-label">Graphic (Split Screen)</div>
+    <div class="split-graphic">
+      <div class="split-side split-before">
+        <div class="split-side-title">Before the System</div>
+✗ Random health fairs
+✗ No script, winging it
+✗ Handed out 50 cards
+✗ Zero callbacks
+✗ "Screenings don't work"
+      </div>
+      <div class="split-side split-after">
+        <div class="split-side-title">After the System</div>
+✓ Strategic locations
+✓ 60-second framework
+✓ 30-50 people screened
+✓ 8-15 booked same day
+✓ 4-6 started care
+      </div>
+    </div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d12">
+      <button class="copy-btn" onclick="copyText('caption-d12')">Copy</button>The difference isn't talent. It's not charisma. It's not "being a good closer."
+
+The difference is a SYSTEM.
+
+BEFORE the system:
+→ You pick random events and hope for the best
+→ You stand at a table and wait for people to approach
+→ You talk about chiropractic for 10 minutes to anyone who'll listen
+→ You hand out a card and say "call if you're interested"
+→ Nobody calls
+→ You decide screenings don't work
+
+AFTER the system:
+→ You strategically choose high-traffic locations
+→ You engage people with a specific opening line
+→ You run a 60-second conversation designed to create urgency
+→ You book them on the spot — not "give them your card"
+→ You follow up with a proven sequence
+→ 4-6 new patients from one Saturday morning
+
+Same doctor. Same screening. Different system.
+
+The Screening Intensive gives you the system.
+
+May 22-24. 40 seats. Zoom.
+
+$497 Doctor / $247 Student
+Accelerator tier: $997 / $497 (includes Command Center + 90-day coaching — only 15 spots)
+
+neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>Repost the graphic to stories — "Which side are you on right now? Be honest."</li>
+      <li>Poll — "Which side describes your screening experience?" (Left side / Right side / Never tried)</li>
+      <li>Text slide — "One week from today, the Screening Intensive starts. Are you in?" with link sticker</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 13 ═══════════════════════════════ -->
+<div class="day-card" id="day13">
+  <div class="day-header">
+    <span class="day-number">DAY 13</span>
+    <span class="day-date">Friday, May 16</span>
+    <span class="day-theme">Objection — "Why Zoom?"</span>
+    <span class="badge badge-reel">Reel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"Why the Screening Intensive is on Zoom (and why that's actually better)"</p>
+
+    <div class="section-label">Script (Talking Head, 50s)</div>
+    <div class="script-box" id="script-d13">
+      <button class="copy-btn" onclick="copyText('script-d13')">Copy</button>Someone asked me — Dr. Ray, why is the Screening Intensive on Zoom? Why not in person? Fair question. Here's the honest answer. First, I want chiropractors from everywhere. Not just people who can fly to one city. This system works whether you're in South Carolina or California or Canada. Second — and this is the big one — the role-play works BETTER on Zoom. I know that sounds crazy, but think about it. Breakout rooms. You and two other docs. Camera on. Practicing the sixty-second conversation. Getting immediate feedback. No distractions. No side conversations. Just reps. In person, people hide in the back of the room. On Zoom, there's nowhere to hide. Everyone practices. Everyone gets feedback. Everyone walks out ready. May 22nd through 24th. Forty seats. Link in bio.</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d13">
+      <button class="copy-btn" onclick="copyText('caption-d13')">Copy</button>"Why Zoom?"
+
+I get this question a lot. Here's the real answer:
+
+1. ACCESS — I want chiropractors from everywhere, not just people who can afford a flight + hotel + 3 days away from their practice.
+
+2. BREAKOUT ROOMS — The role-play is actually MORE effective on Zoom. Small groups of 2-3 docs, camera on, practicing the 60-second conversation. No hiding in the back of a ballroom.
+
+3. NO EXCUSES — You can attend from your office, your home, wherever. The barrier to entry is zero.
+
+4. RECORDINGS — Lifetime access to everything. Review it before your first screening. Review it before your tenth.
+
+The Screening Intensive isn't a sit-and-listen webinar. It's a WORKING weekend with:
+
+→ Breakout room role-play
+→ Live coaching from me
+→ Accountability partner pairing
+→ Your first screening booked before Sunday afternoon
+
+Zoom is a feature, not a bug.
+
+May 22-24. 40 seats.
+
+neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>"Friday thought" text slide — "The best investment you'll make this month costs $497 and doesn't require a plane ticket."</li>
+      <li>Quick video — "One week from tonight, we kick off. Friday night, May 22. Are you going to be in the Zoom room or are you going to be scrolling wishing you were?"</li>
+      <li>Share a DM screenshot (with permission or blurred name) of someone saying they signed up — "Another one locked in. Seats are moving."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 14 ═══════════════════════════════ -->
+<div class="day-card" id="day14">
+  <div class="day-header">
+    <span class="day-number">DAY 14</span>
+    <span class="day-date">Saturday, May 17</span>
+    <span class="day-theme">Pain Point — Deeper Cut</span>
+    <span class="badge badge-carousel">Carousel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"5 reasons your practice is stuck at the same patient count"</p>
+
+    <div class="section-label">Carousel Slides (6)</div>
+    <div class="slides-container">
+      <div class="slide"><span class="slide-num">1</span><div class="slide-title">Cover</div><div class="slide-text">5 REASONS YOUR
+PRACTICE IS STUCK
+AT THE SAME
+PATIENT COUNT
+
+(And one fix for all of them)</div></div>
+      <div class="slide"><span class="slide-num">2</span><div class="slide-text">1. You rely on referrals
+as your only growth strategy.
+
+Referrals are great.
+But they're UNPREDICTABLE.
+You can't scale "hope."</div></div>
+      <div class="slide"><span class="slide-num">3</span><div class="slide-text">2. You're spending money on
+ads but the leads don't convert.
+
+Because strangers on the internet
+don't trust you yet.
+
+Screenings build trust
+in 60 seconds, face to face.</div></div>
+      <div class="slide"><span class="slide-num">4</span><div class="slide-text">3. You have no system for
+getting NEW patients consistently.
+
+Some months are great.
+Some months are terrifying.
+That's not a business.
+That's a rollercoaster.</div></div>
+      <div class="slide"><span class="slide-num">5</span><div class="slide-text">4. You've never built a
+NETWORK that feeds you patients.
+
+Your practice is an island.
+It shouldn't be.</div></div>
+      <div class="slide"><span class="slide-num">6</span><div class="slide-text">5. You're doing everything
+yourself instead of using
+a proven system.
+
+THE FIX FOR ALL 5:
+
+The NeuroChiro Screening Intensive
+May 22-24 — Live on Zoom
+40 seats → neurochiro.co/screening-weekend</div></div>
+    </div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d14">
+      <button class="copy-btn" onclick="copyText('caption-d14')">Copy</button>If your practice has been stuck at the same patient count for months (or years), it's not because you're a bad chiropractor.
+
+It's because you're missing a SYSTEM for consistent patient acquisition.
+
+Here are the 5 reasons I see most often:
+
+1. Referral dependency — Great when they come, panic when they don't
+2. Ad spend with no conversion — Leads aren't patients until they trust you
+3. No consistency — Feast or famine every month
+4. No network — Your practice is an island
+5. No system — You're reinventing the wheel every month
+
+The Screening Intensive fixes all 5 with one system: the 3-Build Philosophy.
+
+→ Build Patient Base (consistent new patients)
+→ Build Network Base (never run out of events)
+→ Build Vendor Base (make it sustainable)
+
+May 22-24. Zoom. 40 seats.
+
+If you want to talk through whether this is right for you, book a free strategy call:
+→ neurochiro.co/screening-weekend/call
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend/call" class="cta-link" target="_blank">neurochiro.co/screening-weekend/call</a> (strategy call)
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>Share slide 1 to stories — "Swipe through this one. It's going to hit home."</li>
+      <li>Poll — "Which of these 5 is YOUR biggest struggle?" (Referral dependency / Ads not converting / Inconsistency / No network / No system)</li>
+      <li>Link sticker story — "Not sure if this is right for you? Book a free strategy call. No pressure. → neurochiro.co/screening-weekend/call"</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 15 ═══════════════════════════════ -->
+<div class="day-card" id="day15">
+  <div class="day-header">
+    <span class="day-number">DAY 15</span>
+    <span class="day-date">Sunday, May 18</span>
+    <span class="day-theme">Behind the Scenes + 1 Week Out Urgency</span>
+    <span class="badge badge-reel">Reel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"One week from today, you'll either have a screening system or you won't"</p>
+
+    <div class="section-label">Script (Talking Head + Screen Share, 50s)</div>
+    <div class="script-box" id="script-d15">
+      <button class="copy-btn" onclick="copyText('script-d15')">Copy</button>One week from today, the Screening Intensive wraps up. And on that Sunday afternoon, forty chiropractors are going to have their first screening booked within fourteen days. They're going to have the sixty-second conversation memorized. They're going to have an accountability partner checking in on them. They're going to have a system. And if you're not in that room, nothing changes for you next Monday. Same patient count. Same stress. Same hoping referrals come in. I'm not saying this to be harsh. I'm saying it because I've watched too many good chiropractors stay stuck because they keep waiting for the 'right time.' The right time is this weekend. May 22nd through 24th. We're under twenty seats left. If you're in, get in. If you have questions, book a call with me — link in bio. But don't wait until Thursday and find out it's full.</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d15">
+      <button class="copy-btn" onclick="copyText('caption-d15')">Copy</button>One week out.
+
+Next Sunday afternoon, 40 chiropractors will walk away from the Screening Intensive with:
+
+✓ The complete 3-Build system
+✓ The 60-second conversation practiced and refined
+✓ An accountability partner
+✓ Their first screening event BOOKED
+✓ Lifetime access to all recordings
+
+And if you're not one of them?
+
+Monday morning looks exactly the same as last Monday. And the Monday before that.
+
+Same patient count. Same stress. Same uncertainty.
+
+I've watched too many good doctors stay stuck because they keep waiting for the "perfect time."
+
+There is no perfect time. There's only this time.
+
+May 22-24. Under 20 seats remain.
+
+→ Ready? neurochiro.co/screening-weekend
+→ Questions? neurochiro.co/screening-weekend/call
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+      &nbsp;|&nbsp;
+      <a href="https://neurochiro.co/screening-weekend/call" class="cta-link" target="_blank">neurochiro.co/screening-weekend/call</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>"ONE WEEK" graphic with countdown sticker</li>
+      <li>Selfie video — "I'm spending today doing final prep for the Screening Intensive. Let me show you a few things we have planned..." (tease the schedule)</li>
+      <li>Screenshot of the event schedule — "Friday evening: Foundations. Saturday: The full system + role-play. Sunday morning: Book your first screening live."</li>
+      <li>Poll — "Are you in for May 22-24?" (Already registered / Registering today / Still thinking / Can't make it)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 16 ═══════════════════════════════ -->
+<div class="day-card" id="day16">
+  <div class="day-header">
+    <span class="day-number">DAY 16</span>
+    <span class="day-date">Monday, May 19</span>
+    <span class="day-theme">Student Pricing + Social Proof</span>
+    <span class="badge badge-static">Static</span>
+    <span class="badge badge-reel">Reel</span>
+  </div>
+  <div class="day-body">
+    <div class="double-post-label">DOUBLE POST DAY</div>
+
+    <!-- POST 1 -->
+    <h4 style="color:var(--orange); margin-bottom:12px;">POST 1 — Morning (Static)</h4>
+    <p class="topic-hook">"Chiropractic students: 50% off everything"</p>
+
+    <div class="section-label">Graphic Text</div>
+    <div class="graphic-box">CHIRO STUDENTS:
+50% OFF EVERYTHING
+
+Screening Intensive: $247 (reg. $497)
+Screening Accelerator: $497 (reg. $997)
+
+May 22-24 — Live on Zoom
+
+Learn the system BEFORE
+you graduate.
+
+neurochiro.co/screening-weekend</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d16a">
+      <button class="copy-btn" onclick="copyText('caption-d16a')">Copy</button>Chiropractic students — listen up.
+
+You're about to graduate and enter a profession where the #1 struggle is: "Where do I get patients?"
+
+Most new docs spend their first 2 years figuring this out the hard way. Burning money on ads. Waiting for referrals. Stressing every month.
+
+What if you graduated with a SYSTEM already in place?
+
+The Screening Intensive is 50% off for students:
+
+→ Intensive: $247 (regular $497)
+→ Accelerator: $497 (regular $997) — includes the Screening Command Center with 25-50 events pre-loaded in your area + 90-day group coaching
+
+This is the training I WISH existed when I was in school.
+
+You don't need to wait until you have a practice to start learning how to fill one.
+
+May 22-24. Zoom. 40 seats (filling fast).
+
+Tag a chiro student who needs to see this.
+
+neurochiro.co/screening-weekend
+
+#chiropracticstudent #chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <hr class="post-divider">
+
+    <!-- POST 2 -->
+    <h4 style="color:var(--orange); margin-bottom:12px;">POST 2 — Evening (Reel)</h4>
+    <p class="topic-hook">"A doc just sent me this message..." (social proof)</p>
+
+    <div class="section-label">Script (Talking Head, 40s)</div>
+    <div class="script-box" id="script-d16b">
+      <button class="copy-btn" onclick="copyText('script-d16b')">Copy</button>A doc just sent me a message and I have to share it. She said — Dr. Ray, I did my first screening last Saturday. I used the sixty-second conversation exactly the way you taught it. I screened forty-two people. Eleven booked. Seven showed up for their consult. Five started care. That's five new patients from one Saturday morning, her first time ever doing it. That's the power of having a system. You're not guessing. You're not hoping. You're executing a proven framework. I'm teaching this exact system at the Screening Intensive, May 22nd through 24th. We're under twenty seats. Link in bio.</div>
+
+    <div class="note-box">Note: Use a real testimonial if available. If this is a composite, mark for Dr. Ray to verify and approve.</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d16b">
+      <button class="copy-btn" onclick="copyText('caption-d16b')">Copy</button>Got this message from a doc who learned the system:
+
+"Dr. Ray — first screening ever. 42 people screened. 11 booked. 7 showed. 5 started care."
+
+FIVE new patients. First time. One Saturday morning.
+
+That's $12,500+ in patient value from 3 hours of work.
+
+And she was NERVOUS. She almost didn't do it. But she had the system, she had the 60-second conversation, and she executed.
+
+That's what the Screening Intensive does. It gives you:
+
+→ The exact conversation framework
+→ Live practice so you're ready
+→ Confidence backed by REPS, not motivation
+→ Your first event booked before the weekend is over
+
+May 22-24. Under 20 seats.
+
+neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas (Both Posts)</div>
+    <ul class="story-list">
+      <li>Share the student pricing graphic — "Students: tag your classmates. 50% off. This doesn't happen often."</li>
+      <li>Reshare the testimonial reel — "This was her FIRST screening. Imagine what happens after 5."</li>
+      <li>Countdown sticker — "3 DAYS until Screening Intensive"</li>
+      <li>DM prompt — "DM me 'STUDENT' if you're a chiro student and want more info about the pricing."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 17 ═══════════════════════════════ -->
+<div class="day-card" id="day17">
+  <div class="day-header">
+    <span class="day-number">DAY 17</span>
+    <span class="day-date">Tuesday, May 20</span>
+    <span class="day-theme">Accelerator Deep Dive + Urgency</span>
+    <span class="badge badge-carousel">Carousel</span>
+    <span class="badge badge-reel">Reel</span>
+  </div>
+  <div class="day-body">
+    <div class="double-post-label">DOUBLE POST DAY</div>
+
+    <!-- POST 1 -->
+    <h4 style="color:var(--orange); margin-bottom:12px;">POST 1 — Morning (Carousel)</h4>
+    <p class="topic-hook">"Intensive vs. Accelerator — which one is right for you?"</p>
+
+    <div class="section-label">Carousel Slides (7)</div>
+    <div class="slides-container">
+      <div class="slide"><span class="slide-num">1</span><div class="slide-title">Cover</div><div class="slide-text">INTENSIVE
+vs.
+ACCELERATOR
+
+Which one is right for you?</div></div>
+      <div class="slide"><span class="slide-num">2</span><div class="slide-title">The Intensive</div><div class="slide-text">THE SCREENING INTENSIVE
+$497 (Doctor) / $247 (Student)
+
+Everything you need to learn
+the screening system:
+
+✓ 3-Build Philosophy (full system)
+✓ 60-second conversation framework
+✓ Live role-play in breakout rooms
+✓ Accountability partner
+✓ First screening booked in 14 days
+✓ Lifetime recording access</div></div>
+      <div class="slide"><span class="slide-num">3</span><div class="slide-title">The Accelerator</div><div class="slide-text">THE SCREENING ACCELERATOR
+$997 (Doctor) / $497 (Student)
+
+Everything in the Intensive PLUS:
+
+✓ Screening Command Center dashboard
+✓ 25-50 events pre-loaded in YOUR area
+✓ 90-day group coaching (bi-weekly)
+✓ Direct access to Dr. Ray for Q&A
+✓ Templates, scripts, follow-up sequences
+✓ Priority support</div></div>
+      <div class="slide"><span class="slide-num">4</span><div class="slide-text">THE INTENSIVE is for you if:
+
+→ You want to learn the system
+→ You're self-motivated
+→ You can find your own events
+→ You want the training at
+   the lowest investment</div></div>
+      <div class="slide"><span class="slide-num">5</span><div class="slide-text">THE ACCELERATOR is for you if:
+
+→ You want the system AND the tools
+→ You want events already found
+   for you (25-50 in your area)
+→ You want 90 days of coaching
+   to make sure you execute
+→ You want the fastest path to ROI</div></div>
+      <div class="slide"><span class="slide-num">6</span><div class="slide-text">IMPORTANT:
+
+Only 15 Accelerator spots available.
+(Small group coaching requires it.)
+
+Accelerator spots are filling
+faster than Intensive spots.
+
+If you want the Command Center
++ coaching, don't wait.</div></div>
+      <div class="slide"><span class="slide-num">7</span><div class="slide-title">CTA Slide</div><div class="slide-text">PAYMENT PLANS AVAILABLE
+(2 payments for either tier)
+
+→ neurochiro.co/screening-weekend
+
+Questions? Book a free call:
+→ neurochiro.co/screening-weekend/call
+
+May 22-24 — 2 days away.</div></div>
+    </div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d17a">
+      <button class="copy-btn" onclick="copyText('caption-d17a')">Copy</button>A lot of you have been asking: "What's the difference between the Intensive and the Accelerator?"
+
+Here's the simple breakdown:
+
+THE INTENSIVE ($497 doc / $247 student):
+You get the complete system. The 3-Build Philosophy, the 60-second conversation, live role-play, accountability partner, lifetime recordings. Everything you need to learn and launch.
+
+THE ACCELERATOR ($997 doc / $497 student):
+Everything above PLUS the Screening Command Center (25-50 events already found in your area), 90-day group coaching, direct Q&A access, and all the templates and scripts.
+
+The Intensive gives you the knowledge.
+The Accelerator gives you the knowledge AND the execution support.
+
+Both work. The question is: do you want to find events yourself or have them handed to you?
+
+Only 15 Accelerator spots. They're going fast.
+
+Payment plans available for both tiers (2 payments).
+
+→ neurochiro.co/screening-weekend
+→ Questions? neurochiro.co/screening-weekend/call
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+      &nbsp;|&nbsp;
+      <a href="https://neurochiro.co/screening-weekend/call" class="cta-link" target="_blank">neurochiro.co/screening-weekend/call</a>
+    </div>
+
+    <hr class="post-divider">
+
+    <!-- POST 2 -->
+    <h4 style="color:var(--orange); margin-bottom:12px;">POST 2 — Afternoon/Evening (Reel)</h4>
+    <p class="topic-hook">"48 hours — here's what's about to happen"</p>
+
+    <div class="section-label">Script (Talking Head, Urgent Energy, 40s)</div>
+    <div class="script-box" id="script-d17b">
+      <button class="copy-btn" onclick="copyText('script-d17b')">Copy</button>In forty-eight hours, the Screening Intensive kicks off. Friday night, May 22nd. Here's where we stand. We are under fifteen seats left. The Accelerator tier is almost full — I think we have four or five spots left in that. Once those are gone, they're gone. I'm not adding seats, I'm not running this again until fall. If you've been watching these posts for the last two weeks thinking 'I should do this,' this is your sign. Stop thinking. Decide. You're either going to build a screening system this summer or you're going to keep doing what you've been doing. Your call. Link in bio. Lock it in.</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d17b">
+      <button class="copy-btn" onclick="copyText('caption-d17b')">Copy</button>48 HOURS.
+
+Friday night, May 22nd, we start.
+
+Here's where we stand:
+→ Under 15 seats remaining
+→ Accelerator spots nearly full (4-5 left)
+→ Payment plans still available
+
+This is not a drill. This is not manufactured urgency. We are almost full.
+
+If you've been watching these posts for the last 2+ weeks, you already know this is for you. You've seen the math. You've seen the results. You've heard the system.
+
+The only question is: are you going to act?
+
+Two paths:
+
+PATH A: Register now, spend this weekend learning the system, have your first screening booked by June 1, and generate $10,000+ in patient value by July.
+
+PATH B: Keep scrolling, keep "thinking about it," and be in the exact same spot 3 months from now.
+
+I want you on Path A.
+
+→ neurochiro.co/screening-weekend
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas (Both Posts)</div>
+    <ul class="story-list">
+      <li>Share the comparison carousel to stories — "Save this. Share it. If you know a doc who needs this, tag them."</li>
+      <li>Selfie video, excited energy — "TWO DAYS. I'm so fired up. The docs who are in this room are going to be different by Sunday night."</li>
+      <li>Screenshot of registration numbers (or graphic) — "Under 15 seats. This is real."</li>
+      <li>Link sticker — "Last chance to book a strategy call before the event → neurochiro.co/screening-weekend/call"</li>
+      <li>Final countdown sticker — "2 DAYS"</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 18 ═══════════════════════════════ -->
+<div class="day-card" id="day18">
+  <div class="day-header">
+    <span class="day-number">DAY 18</span>
+    <span class="day-date">Wednesday, May 21</span>
+    <span class="day-theme">LAST CALL — Final Day</span>
+    <span class="badge badge-reel">Reel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"Last call. Tomorrow night we start. With or without you."</p>
+
+    <div class="section-label">Script (Talking Head, Most Intense Energy, 50s)</div>
+    <div class="script-box" id="script-d18">
+      <button class="copy-btn" onclick="copyText('script-d18')">Copy</button>This is the last time I'm going to say this. Tomorrow night — Friday, May 22nd — the Screening Intensive starts. And when we start, the doors close. We have a handful of seats left. I'm not going to tell you the exact number because it changes every few hours. But I will tell you this — by tomorrow afternoon, we'll likely be full. Here's what I want you to think about. Six months from now, you're either going to be the doc who runs two screenings a month and has a full schedule, or you're going to be the doc who's still scrolling, still wishing, still stuck at the same patient count. This is the weekend that draws the line. I genuinely hope you're in the room. Neurochiro dot co slash screening dash weekend. Last call.</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d18">
+      <button class="copy-btn" onclick="copyText('caption-d18')">Copy</button>LAST CALL.
+
+Tomorrow night, May 22nd, we start the Screening Intensive.
+
+When we start, the doors close.
+
+Final count: a handful of seats remain. By tomorrow afternoon, we'll likely be full.
+
+I've spent the last 19 days showing you:
+
+→ The math: 4 patients x $2,500 = $10,000 from one Saturday morning
+→ The system: 3-Build Philosophy (Patient Base, Network Base, Vendor Base)
+→ The proof: Docs getting 5, 10, 14 new patients from their first screening
+→ The format: Live role-play, breakout rooms, accountability partners
+→ The outcome: First screening booked within 14 days
+
+If you're still reading this, you already know you need this.
+
+The only thing between you and a screening system is a decision.
+
+Make it now:
+→ neurochiro.co/screening-weekend
+
+$497 Doctor / $247 Student
+$997 Accelerator (if spots remain)
+Payment plans available.
+
+See you tomorrow night.
+
+— Dr. Ray
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li>Black screen, white text — "TOMORROW." Link sticker.</li>
+      <li>Selfie video — "I've been talking about this for 19 days. Tomorrow we stop talking and start building. If you're not registered yet, this is literally your last chance."</li>
+      <li>Reshare the very first reel from May 4 to stories — "This is where it started. Tomorrow is where it becomes real."</li>
+      <li>Countdown sticker — "1 DAY"</li>
+      <li>Final story of the night — "Doors close tomorrow at 6 PM EST. That's it. neurochiro.co/screening-weekend"</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DAY 19 ═══════════════════════════════ -->
+<div class="day-card" id="day19">
+  <div class="day-header">
+    <span class="day-number">DAY 19</span>
+    <span class="day-date">Thursday, May 22 — EVENT DAY</span>
+    <span class="day-theme">Event Day Energy — Final Push + Launch</span>
+    <span class="badge badge-reel">Reel</span>
+  </div>
+  <div class="day-body">
+    <p class="topic-hook">"Tonight. It starts tonight."</p>
+
+    <div class="section-label">Script (Talking Head, High Energy, 35s) — Post Early Morning</div>
+    <div class="script-box" id="script-d19">
+      <button class="copy-btn" onclick="copyText('script-d19')">Copy</button>Today is the day. Tonight at seven PM Eastern, the Screening Intensive kicks off. If there are any seats left — and I honestly don't know if there are right now — the link is in my bio. This is the weekend that changes how you get patients. Not next month. Not next year. This weekend. For the forty docs in the room tonight, your practice is about to look very different. I'll see you at seven.</div>
+
+    <div class="section-label">Caption</div>
+    <div class="caption-box" id="caption-d19">
+      <button class="copy-btn" onclick="copyText('caption-d19')">Copy</button>TODAY.
+
+Tonight at 7 PM EST, the NeuroChiro Screening Intensive begins.
+
+If seats remain (I'm not sure they do), the link is below.
+
+For everyone who registered: check your email for the Zoom link, prep materials, and the weekend schedule.
+
+For everyone who didn't: I genuinely hope you make it in. But if not, follow along this weekend. Watch the stories. See the energy. And know that the next one isn't until fall.
+
+Tonight we build.
+
+→ neurochiro.co/screening-weekend (if seats remain)
+
+See you at 7 PM.
+
+— Dr. Ray
+
+#chiropractor #chiropracticmarketing #newpatients #screeningevents #chiropracticgrowth #neurochiro #practicegrowth #chiropracticbusiness #chiropracticstudent #nervousystem</div>
+
+    <div class="cta-box">
+      <span class="cta-label">CTA:</span>
+      <a href="https://neurochiro.co/screening-weekend" class="cta-link" target="_blank">neurochiro.co/screening-weekend</a>
+    </div>
+
+    <div class="section-label">Story Ideas</div>
+    <ul class="story-list">
+      <li><strong>Morning:</strong> "THE DAY IS HERE" graphic</li>
+      <li><strong>Afternoon:</strong> Selfie — "Setting up the Zoom room. Slides are loaded. Breakout rooms are configured. LET'S GO."</li>
+      <li><strong>Pre-event:</strong> "1 HOUR until doors open. Last chance if any seats remain → neurochiro.co/screening-weekend"</li>
+      <li><strong>During event:</strong> Screenshot of the Zoom room full of faces — "FORTY CHIROPRACTORS IN THE ROOM. We're building screening systems RIGHT NOW."</li>
+      <li><strong>Post first session:</strong> "Day 1 DONE. The energy in that room was unreal. Two more days of this. If you missed it, recordings are only available for attendees."</li>
+    </ul>
+  </div>
+</div>
+
+</div><!-- /.container -->
+
+<script>
+function copyText(elementId) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  // Get the text content, excluding the copy button text
+  const btn = el.querySelector('.copy-btn');
+  const btnText = btn ? btn.textContent : '';
+  let text = el.textContent;
+  if (btnText) {
+    text = text.replace(btnText, '').trim();
+  }
+  navigator.clipboard.writeText(text).then(function() {
+    if (btn) {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+  }).catch(function() {
+    // Fallback for older browsers
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    try { document.execCommand('copy'); } catch(e) {}
+    selection.removeAllRanges();
+    if (btn) {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+  });
+}
+</script>
+
+</body>
+</html>

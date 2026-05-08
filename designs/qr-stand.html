@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro QR Code Stand — 5x7 and 8x10</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+
+  :root {
+    --navy: #1E2D3B;
+    --navy-dark: #15202B;
+    --orange: #D66829;
+    --cream: #F5F3EF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #666;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: 'Montserrat', sans-serif;
+    gap: 48px;
+  }
+
+  .print-note {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 32px;
+    max-width: 600px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .print-note h3 { font-size: 18px; font-weight: 900; margin-bottom: 8px; color: var(--navy); }
+  .print-note strong { color: var(--orange); }
+
+  .option-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
+    text-align: center;
+  }
+
+  .option-sublabel {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    margin-top: 4px;
+    margin-bottom: 16px;
+  }
+
+  .section-divider {
+    width: 100%;
+    max-width: 800px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 32px;
+  }
+
+  /* ═══════════════════════════════════
+     QR STAND SIGNS
+     5x7: 360px x 504px
+     8x10: 480px x 600px
+     ═══════════════════════════════════ */
+
+  .sign {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  /* ════════════════════════════
+     5x7 Sign
+     ════════════════════════════ */
+
+  .sign-5x7 {
+    width: 360px;
+    height: 504px;
+    background: white;
+  }
+
+  .sign-5x7 .sign-top {
+    width: 100%;
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px 16px;
+  }
+
+  .sign-5x7 .sign-top .logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  .sign-5x7 .sign-top .wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 2px;
+  }
+
+  .sign-5x7 .sign-top .wordmark span { color: var(--orange); }
+
+  .sign-5x7 .sign-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 16px;
+  }
+
+  .sign-5x7 .sign-headline {
+    font-family: 'Lato', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--navy);
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .sign-5x7 .sign-headline em {
+    color: var(--orange);
+    font-style: normal;
+  }
+
+  .sign-5x7 .qr-box {
+    background: var(--navy);
+    border-radius: 16px;
+    padding: 16px;
+    display: inline-block;
+  }
+
+  .sign-5x7 .qr-box img {
+    width: 160px;
+    height: 160px;
+    border-radius: 8px;
+  }
+
+  .sign-5x7 .scan-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+
+  .sign-5x7 .sign-bottom {
+    width: 100%;
+    background: var(--navy);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .sign-5x7 .role-tag {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 5px 12px;
+    border-radius: 6px;
+  }
+
+  .tag-orange { background: var(--orange); color: white; }
+  .tag-outline { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.15); }
+
+  /* ════════════════════════════
+     8x10 Sign
+     ════════════════════════════ */
+
+  .sign-8x10 {
+    width: 480px;
+    height: 600px;
+    background: var(--navy);
+  }
+
+  .sign-8x10 .accent-top {
+    width: 100%;
+    height: 6px;
+    background: var(--orange);
+  }
+
+  .sign-8x10 .sign-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    gap: 20px;
+  }
+
+  .sign-8x10 .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sign-8x10 .logo-row .logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  .sign-8x10 .logo-row .wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 2px;
+  }
+
+  .sign-8x10 .logo-row .wordmark span { color: var(--orange); }
+
+  .sign-8x10 .sign-headline {
+    font-family: 'Lato', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: white;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .sign-8x10 .sign-headline em {
+    color: var(--orange);
+    font-style: normal;
+  }
+
+  .sign-8x10 .sign-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .sign-8x10 .qr-box {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    display: inline-block;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .sign-8x10 .qr-box img {
+    width: 180px;
+    height: 180px;
+    border-radius: 8px;
+  }
+
+  .sign-8x10 .scan-label {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+  }
+
+  .sign-8x10 .url {
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px;
+  }
+
+  .sign-8x10 .url span { color: var(--orange); opacity: 0.7; }
+
+  .sign-8x10 .accent-bottom {
+    width: 100%;
+    height: 6px;
+    background: var(--orange);
+  }
+
+  .signs-row {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+  }
+
+  .sign-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sign-size-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  @media print {
+    body { background: white; }
+    .print-note { display: none; }
+    .sign { box-shadow: 0 0 0 1px #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<div class="print-note">
+  <h3>NeuroChiro QR Code Stand Signs</h3>
+  <p>
+    Print and place in an <strong>acrylic tabletop sign holder</strong> ($8-15 on Amazon).<br>
+    Two sizes below — 5x7 (compact) and 8x10 (easier to scan from distance).<br>
+    <strong>Recommended:</strong> 8x10 on navy — scannable from 5+ feet away.
+  </p>
+</div>
+
+<div class="signs-row">
+
+  <!-- 5x7 Sign -->
+  <div class="sign-wrapper">
+    <div class="sign-size-label">5" x 7"</div>
+    <div class="sign sign-5x7">
+      <div class="sign-top">
+        <img class="logo" src="../public/logo.png" alt="">
+        <div class="wordmark">NEURO<span>CHIRO</span></div>
+      </div>
+      <div class="sign-body">
+        <div class="sign-headline">Join the <em>Movement</em></div>
+        <div class="qr-box">
+          <img src="../public/qr-conference.png" alt="Scan to join">
+        </div>
+        <div class="scan-label">Scan to Join</div>
+      </div>
+      <div class="sign-bottom">
+        <div class="role-tag tag-orange">Doctors</div>
+        <div class="role-tag tag-outline">Students</div>
+        <div class="role-tag tag-outline">Vendors</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8x10 Sign -->
+  <div class="sign-wrapper">
+    <div class="sign-size-label">8" x 10" (Recommended)</div>
+    <div class="sign sign-8x10">
+      <div class="accent-top"></div>
+      <div class="sign-body">
+        <div class="logo-row">
+          <img class="logo" src="../public/logo.png" alt="">
+          <div class="wordmark">NEURO<span>CHIRO</span></div>
+        </div>
+        <div class="sign-headline">Join <em>120+</em> Nervous System<br>Chiropractors Nationwide</div>
+        <div class="sign-sub">Scan the QR code to get started</div>
+        <div class="qr-box">
+          <img src="../public/qr-conference.png" alt="Scan to join">
+        </div>
+        <div class="scan-label">Scan to Join</div>
+        <div class="url">neurochiro<span>.co</span></div>
+      </div>
+      <div class="accent-bottom"></div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

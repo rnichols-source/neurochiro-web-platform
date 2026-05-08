@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { FileText, Loader2 } from "lucide-react";
-import { createAdminClient } from "@/lib/supabase-admin";
 
 interface Article {
   id: string;

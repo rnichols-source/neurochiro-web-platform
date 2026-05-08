@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro Retractable Banner — 33" x 80"</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --navy: #1E2D3B;
+    --navy-light: #2C3E50;
+    --orange: #D66829;
+    --orange-light: #E8834A;
+    --cream: #F5F3EF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #666;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  .print-note {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 32px;
+    margin-bottom: 32px;
+    max-width: 600px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .print-note h3 {
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    color: var(--navy);
+  }
+
+  .print-note strong { color: var(--orange); }
+
+  /* ═══════════════════════════════════
+     BANNER — 33" x 80"
+     420px x 1020px at screen scale
+     Fills the full canvas
+     ═══════════════════════════════════ */
+
+  .banner {
+    width: 420px;
+    height: 1020px;
+    background: linear-gradient(180deg, #ffffff 0%, var(--cream) 60%, #eeebe5 100%);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.4);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+  }
+
+  /* Subtle radial glow behind logo and QR */
+  .banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse at 50% 8%, rgba(214,104,41,0.05) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 92%, rgba(30,45,59,0.04) 0%, transparent 35%);
+    pointer-events: none;
+  }
+
+  /* ─── TOP SECTION: Navy block with logo ─── */
+  .banner-top {
+    width: 100%;
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 44px 24px 40px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .banner-top::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 24px solid transparent;
+    border-right: 24px solid transparent;
+    border-top: 20px solid var(--navy);
+  }
+
+  .banner-logo-img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  .banner-wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 48px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 3px;
+    margin-top: 12px;
+  }
+
+  .banner-wordmark span { color: var(--orange); }
+
+  /* ─── MIDDLE SECTION: Headline + Stats ─── */
+  .banner-middle {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 28px 20px;
+    position: relative;
+    z-index: 1;
+    gap: 0;
+  }
+
+  .banner-headline {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .banner-headline h2 {
+    font-family: 'Lato', sans-serif;
+    font-size: 25px;
+    font-weight: 900;
+    color: var(--navy);
+    line-height: 1.3;
+    letter-spacing: 0.2px;
+  }
+
+  .banner-headline h2 em {
+    color: var(--orange);
+    font-style: normal;
+  }
+
+  .banner-subheadline {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .banner-subheadline p {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(30,45,59,0.5);
+    line-height: 1.5;
+  }
+
+  /* Stats row */
+  .banner-stats {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 28px;
+  }
+
+  .banner-stat {
+    text-align: center;
+    background: white;
+    border: 1.5px solid rgba(30,45,59,0.1);
+    border-radius: 14px;
+    padding: 16px 8px;
+    flex: 1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+
+  .banner-stat-number {
+    font-family: 'Lato', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--orange);
+    line-height: 1;
+  }
+
+  .banner-stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(30,45,59,0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 6px;
+    line-height: 1.3;
+  }
+
+  /* Divider */
+  .banner-divider {
+    width: 60%;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+    margin-bottom: 24px;
+  }
+
+  /* Audience tags */
+  .banner-audiences {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .banner-audiences-title {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+
+  .banner-audience-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .banner-audience-tag {
+    background: var(--navy);
+    color: white;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .banner-audience-tag.alt {
+    background: var(--orange);
+  }
+
+  /* CTA Button */
+  .banner-cta-button {
+    display: inline-block;
+    background: var(--orange);
+    color: white;
+    padding: 16px 52px;
+    border-radius: 14px;
+    font-family: 'Lato', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    box-shadow: 0 6px 24px rgba(214,104,41,0.3);
+    margin-bottom: 0;
+  }
+
+  /* ─── BOTTOM SECTION: Navy block with QR + URL ─── */
+  .banner-bottom {
+    width: 100%;
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 36px 24px 40px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .banner-bottom::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 24px solid transparent;
+    border-right: 24px solid transparent;
+    border-bottom: 20px solid var(--navy);
+  }
+
+  .banner-qr-box {
+    width: 108px;
+    height: 108px;
+    background: white;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+
+  .banner-qr-grid {
+    width: 84px;
+    height: 84px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    gap: 2px;
+  }
+
+  .qc { background: #eee; border-radius: 1px; }
+  .qf { background: var(--navy); border-radius: 1px; }
+
+  .banner-qr-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    margin-top: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .banner-url-text {
+    font-family: 'Lato', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 1px;
+    margin-top: 16px;
+  }
+
+  .banner-url-text span { color: var(--orange); }
+
+  /* ─── Labels ─── */
+  .banner-label {
+    background: white;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--navy);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 16px;
+  }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .print-note, .banner-label { display: none; }
+    .banner { box-shadow: none; border: 1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<div class="print-note">
+  <h3>NeuroChiro Retractable Banner — Final</h3>
+  <p>
+    <strong>Size:</strong> 33" x 80" (standard retractable pull-up banner)<br>
+    Zoom browser to <strong>200%</strong>, then screenshot (Cmd+Shift+4) for best print quality.<br>
+    Upload to <strong>Vistaprint</strong> or send to your print vendor.<br>
+    Replace the QR placeholder with your real QR code before printing.
+  </p>
+</div>
+
+<div class="banner-label">33" x 80" — Final Design</div>
+
+<div class="banner">
+
+  <!-- ═══ TOP: Navy block with logo ═══ -->
+  <div class="banner-top">
+    <img class="banner-logo-img" src="../public/logo.png" alt="NeuroChiro">
+    <div class="banner-wordmark">NEURO<span>CHIRO</span></div>
+  </div>
+
+  <!-- ═══ MIDDLE: Content on white ═══ -->
+  <div class="banner-middle">
+
+    <div class="banner-headline">
+      <h2>Get Found by Patients<br>Looking for <em>Nervous System</em><br>Chiropractors</h2>
+    </div>
+
+    <div class="banner-subheadline">
+      <p>The only directory built exclusively<br>for doctors like you</p>
+    </div>
+
+    <!-- QR CODE — center of banner = eye level -->
+    <div class="banner-qr-box" style="margin-bottom: 12px;">
+      <img src="../public/qr-conference.png" alt="Scan to join NeuroChiro" style="width: 88px; height: 88px; border-radius: 4px;">
+    </div>
+    <div class="banner-qr-label" style="color: rgba(30,45,59,0.45); margin-bottom: 24px;">Scan to Join</div>
+
+    <div class="banner-stats">
+      <div class="banner-stat">
+        <div class="banner-stat-number">120+</div>
+        <div class="banner-stat-label">Verified<br>Doctors</div>
+      </div>
+      <div class="banner-stat">
+        <div class="banner-stat-number">30+</div>
+        <div class="banner-stat-label">States &amp;<br>Provinces</div>
+      </div>
+      <div class="banner-stat">
+        <div class="banner-stat-number">4</div>
+        <div class="banner-stat-label">Countries<br>&amp; Growing</div>
+      </div>
+    </div>
+
+    <div class="banner-divider"></div>
+
+    <div class="banner-audiences">
+      <div class="banner-audiences-title">For</div>
+      <div class="banner-audience-row">
+        <div class="banner-audience-tag alt">Doctors</div>
+        <div class="banner-audience-tag">Students</div>
+        <div class="banner-audience-tag">Vendors</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ BOTTOM: Navy block with URL only ═══ -->
+  <div class="banner-bottom" style="padding: 24px 24px 28px;">
+    <div class="banner-url-text">neurochiro<span>.co</span></div>
+  </div>
+
+</div>
+
+</body>
+</html>

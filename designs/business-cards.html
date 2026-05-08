@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro Business Cards — 3.5" x 2"</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --navy: #1E2D3B;
+    --navy-dark: #15202B;
+    --orange: #D66829;
+    --orange-light: #E8834A;
+    --cream: #F5F3EF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #555;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: 'Montserrat', sans-serif;
+    gap: 48px;
+  }
+
+  .print-note {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 32px;
+    max-width: 700px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .print-note h3 {
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    color: var(--navy);
+  }
+
+  .print-note strong { color: var(--orange); }
+
+  .card-pair-label {
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  .card-pair-sublabel {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    margin-top: 4px;
+    margin-bottom: 16px;
+  }
+
+  /* ═══════════════════════════
+     CARD — 3.5" x 2"
+     Scale: 420px x 240px
+     ═══════════════════════════ */
+
+  .card-pair {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .card-side-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .card {
+    width: 420px;
+    height: 240px;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+
+  /* ════════════════════════════════════════
+     OPTION A: "The Minimal" — Logo dominant
+     ════════════════════════════════════════ */
+
+  /* Front: Navy with centered logo */
+  .card-a-front {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card-a-front::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -20%;
+    width: 60%;
+    height: 80%;
+    background: radial-gradient(circle, rgba(214,104,41,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Orange accent bar on left edge */
+  .card-a-front::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    bottom: 20%;
+    width: 4px;
+    background: var(--orange);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .card-a-front .card-logo {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-a-front .card-wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 3px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-a-front .card-wordmark span { color: var(--orange); }
+
+  .card-a-front .card-tagline {
+    font-size: 8px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-top: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Back: White with info + QR */
+  .card-a-back {
+    background: white;
+    display: flex;
+    padding: 28px 28px 28px 32px;
+    position: relative;
+  }
+
+  /* Orange accent bar on left edge */
+  .card-a-back::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    bottom: 20%;
+    width: 4px;
+    background: var(--orange);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .card-a-back-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .card-a-back-left .card-back-wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--navy);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+  }
+
+  .card-a-back-left .card-back-wordmark span { color: var(--orange); }
+
+  .card-a-back-left .card-info-line {
+    font-size: 9px;
+    color: rgba(30,45,59,0.5);
+    font-weight: 500;
+    line-height: 2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-a-back-left .card-info-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--orange);
+    flex-shrink: 0;
+  }
+
+  .card-a-back-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-left: 24px;
+    border-left: 1px solid rgba(30,45,59,0.08);
+  }
+
+  .card-a-back-right .card-qr {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    object-fit: contain;
+  }
+
+  .card-a-back-right .card-qr-text {
+    font-size: 7px;
+    font-weight: 700;
+    color: rgba(30,45,59,0.35);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 6px;
+  }
+
+  /* ════════════════════════════════════════
+     OPTION B: "The Bold" — Orange edge,
+     darker feel
+     ════════════════════════════════════════ */
+
+  .card-b-front {
+    background: var(--navy-dark);
+    display: flex;
+    align-items: center;
+    padding: 0;
+  }
+
+  /* Large orange left block */
+  .card-b-front-accent {
+    width: 36%;
+    height: 100%;
+    background: var(--orange);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-b-front-accent .card-logo {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  .card-b-front-right {
+    flex: 1;
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .card-b-front-right .card-wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .card-b-front-right .card-wordmark span { color: var(--orange); }
+
+  .card-b-front-right .card-tagline {
+    font-size: 8.5px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.6;
+    max-width: 200px;
+  }
+
+  .card-b-front-right .card-url {
+    font-family: 'Lato', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--orange);
+    margin-top: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Back */
+  .card-b-back {
+    background: white;
+    display: flex;
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .card-b-back-left {
+    flex: 1;
+    padding: 24px 20px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .card-b-back-left .card-back-title {
+    font-family: 'Lato', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .card-b-back-left .card-back-title span { color: var(--orange); }
+
+  .card-b-back-left .card-role-tags {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 14px;
+  }
+
+  .card-b-back-left .card-role-tag {
+    font-size: 7px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .card-role-tag.navy { background: var(--navy); color: white; }
+  .card-role-tag.orange { background: var(--orange); color: white; }
+  .card-role-tag.outline { background: transparent; color: var(--navy); border: 1px solid rgba(30,45,59,0.15); }
+
+  .card-b-back-left .card-info-line {
+    font-size: 9px;
+    color: rgba(30,45,59,0.5);
+    font-weight: 500;
+    line-height: 2;
+  }
+
+  .card-b-back-right {
+    width: 36%;
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    border-radius: 0;
+  }
+
+  .card-b-back-right .card-qr {
+    width: 76px;
+    height: 76px;
+    border-radius: 8px;
+    background: white;
+    padding: 6px;
+    object-fit: contain;
+  }
+
+  .card-b-back-right .card-qr-text {
+    font-size: 7px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 8px;
+  }
+
+  /* ════════════════════════════════════════
+     OPTION C: "The Statement" — Full navy,
+     die-cut feel, ultra clean
+     ════════════════════════════════════════ */
+
+  .card-c-front {
+    background: linear-gradient(160deg, var(--navy) 0%, var(--navy-dark) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 28px 32px;
+  }
+
+  .card-c-front::before {
+    content: '';
+    position: absolute;
+    top: 24px;
+    right: 28px;
+    width: 48px;
+    height: 48px;
+    background-image: url('../public/logo-white.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.12;
+  }
+
+  .card-c-front .card-wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-c-front .card-wordmark span { color: var(--orange); }
+
+  .card-c-front .card-tagline {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.4);
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Orange bottom edge */
+  .card-c-front .card-bottom-edge {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--orange);
+  }
+
+  /* Back */
+  .card-c-back {
+    background: var(--cream);
+    display: flex;
+    padding: 28px 28px 28px 32px;
+    position: relative;
+  }
+
+  .card-c-back .card-bottom-edge {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--navy);
+  }
+
+  .card-c-back-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .card-c-back-left .card-back-wordmark {
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--navy);
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+  }
+
+  .card-c-back-left .card-back-wordmark span { color: var(--orange); }
+
+  .card-c-back-left .card-info-line {
+    font-size: 9px;
+    color: rgba(30,45,59,0.45);
+    font-weight: 500;
+    line-height: 2.2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-info-icon {
+    font-size: 10px;
+    width: 14px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .card-c-back-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-left: 24px;
+  }
+
+  .card-c-back-right .card-qr {
+    width: 84px;
+    height: 84px;
+    border-radius: 10px;
+    object-fit: contain;
+    border: 2px solid rgba(30,45,59,0.08);
+  }
+
+  .card-c-back-right .card-qr-text {
+    font-size: 7px;
+    font-weight: 700;
+    color: rgba(30,45,59,0.3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 6px;
+  }
+
+  /* ─── Section dividers ─── */
+  .section-divider {
+    width: 100%;
+    max-width: 900px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 32px;
+  }
+
+  @media print {
+    body { background: white; gap: 24px; }
+    .print-note { display: none; }
+    .card { box-shadow: 0 0 0 1px #ccc; }
+    .card-side-label { color: #999; }
+    .card-pair-label { color: #333; }
+    .card-pair-sublabel { color: #999; }
+  }
+</style>
+</head>
+<body>
+
+<div class="print-note">
+  <h3>NeuroChiro Business Card Designs</h3>
+  <p>
+    <strong>Size:</strong> 3.5" x 2" (standard business card)<br>
+    Three options below. Each shows front and back.<br>
+    <strong>Recommended print:</strong> Soft-touch matte lamination on 16pt stock — premium feel people notice.<br>
+    Order 500 from <strong>MOO</strong> (best quality) or <strong>Vistaprint</strong> (best price).
+  </p>
+</div>
+
+<!-- ════════ OPTION A ════════ -->
+<div class="section-divider">
+  <div class="card-pair-label">Option A — "The Minimal"</div>
+  <div class="card-pair-sublabel">Clean. Centered. Let the logo speak. People flip it over out of curiosity.</div>
+</div>
+
+<div class="card-pair">
+  <div>
+    <div class="card-side-label">Front</div>
+    <div class="card card-a-front">
+      <img class="card-logo" src="../public/logo.png" alt="NeuroChiro">
+      <div class="card-wordmark">NEURO<span>CHIRO</span></div>
+      <div class="card-tagline">Nervous System First</div>
+    </div>
+  </div>
+  <div>
+    <div class="card-side-label">Back</div>
+    <div class="card card-a-back">
+      <div class="card-a-back-left">
+        <div class="card-back-wordmark">NEURO<span>CHIRO</span></div>
+        <div class="card-info-line"><span class="card-info-dot"></span> neurochiro.co</div>
+        <div class="card-info-line"><span class="card-info-dot"></span> support@neurochirodirectory.com</div>
+        <div class="card-info-line"><span class="card-info-dot"></span> 120+ Doctors &middot; 30+ States &middot; 4 Countries</div>
+        <div class="card-info-line"><span class="card-info-dot"></span> For Doctors &middot; Students &middot; Vendors</div>
+      </div>
+      <div class="card-a-back-right">
+        <img class="card-qr" src="../public/qr-conference.png" alt="QR">
+        <div class="card-qr-text">Scan to Join</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ OPTION B ════════ -->
+<div class="section-divider">
+  <div class="card-pair-label">Option B — "The Bold"</div>
+  <div class="card-pair-sublabel">Orange accent block. Impossible to lose in a stack. The one people pull out first.</div>
+</div>
+
+<div class="card-pair">
+  <div>
+    <div class="card-side-label">Front</div>
+    <div class="card card-b-front">
+      <div class="card-b-front-accent">
+        <img class="card-logo" src="../public/logo.png" alt="NeuroChiro">
+      </div>
+      <div class="card-b-front-right">
+        <div class="card-wordmark">NEURO<span>CHIRO</span></div>
+        <div class="card-tagline">The global directory for nervous system chiropractors</div>
+        <div class="card-url">neurochiro.co</div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="card-side-label">Back</div>
+    <div class="card card-b-back">
+      <div class="card-b-back-left">
+        <div class="card-back-title">Join <span>NeuroChiro</span></div>
+        <div class="card-role-tags">
+          <div class="card-role-tag orange">Doctors</div>
+          <div class="card-role-tag navy">Students</div>
+          <div class="card-role-tag outline">Vendors</div>
+        </div>
+        <div class="card-info-line">120+ verified doctors</div>
+        <div class="card-info-line">30+ states &middot; 4 countries</div>
+        <div class="card-info-line">neurochiro.co</div>
+        <div class="card-info-line">support@neurochirodirectory.com</div>
+      </div>
+      <div class="card-b-back-right">
+        <img class="card-qr" src="../public/qr-conference.png" alt="QR">
+        <div class="card-qr-text">Scan to Join</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ OPTION C ════════ -->
+<div class="section-divider">
+  <div class="card-pair-label">Option C — "The Statement" (Recommended)</div>
+  <div class="card-pair-sublabel">Understated front. Cream back. Feels expensive. The one people keep.</div>
+</div>
+
+<div class="card-pair">
+  <div>
+    <div class="card-side-label">Front</div>
+    <div class="card card-c-front">
+      <div class="card-wordmark">NEURO<span>CHIRO</span></div>
+      <div class="card-tagline">The global directory for nervous system chiropractors</div>
+      <div class="card-bottom-edge"></div>
+    </div>
+  </div>
+  <div>
+    <div class="card-side-label">Back</div>
+    <div class="card card-c-back">
+      <div class="card-c-back-left">
+        <div class="card-back-wordmark">NEURO<span>CHIRO</span></div>
+        <div class="card-info-line"><span class="card-info-icon">&#127760;</span> neurochiro.co</div>
+        <div class="card-info-line"><span class="card-info-icon">&#9993;</span> support@neurochirodirectory.com</div>
+        <div class="card-info-line"><span class="card-info-icon">&#9734;</span> 120+ Doctors &middot; 4 Countries</div>
+        <div class="card-info-line"><span class="card-info-icon">&#9654;</span> Doctors &middot; Students &middot; Vendors</div>
+      </div>
+      <div class="card-c-back-right">
+        <img class="card-qr" src="../public/qr-conference.png" alt="QR">
+        <div class="card-qr-text">Scan to Join</div>
+      </div>
+      <div class="card-bottom-edge"></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

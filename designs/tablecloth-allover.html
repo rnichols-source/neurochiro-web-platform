@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroChiro Tablecloth — 8ft All-Over Print — 150.5" x 84"</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap');
+
+  :root {
+    --navy: #1E2D3B;
+    --navy-dark: #15202B;
+    --orange: #D66829;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #444;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: 'Lato', sans-serif;
+    gap: 32px;
+  }
+
+  .print-note {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 32px;
+    max-width: 700px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .print-note h3 {
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    color: var(--navy);
+  }
+
+  .print-note strong { color: var(--orange); }
+
+  /* ═══════════════════════════════════════
+     TABLECLOTH — 150.5" x 84"
+     Scale: 1 inch = 6px → 903px x 504px
+
+     Layout (unfolded, top view):
+     ┌─────────────────────────────────┐
+     │          BACK DRAPE             │  ~29" (174px)
+     │          (behind table)         │
+     ├──────┬──────────────────┬───────┤
+     │ LEFT │   TABLE TOP      │ RIGHT │  ~26" (156px) ← table surface
+     │ SIDE │   (items go here)│ SIDE  │
+     ├──────┴──────────────────┴───────┤
+     │         FRONT DRAPE             │  ~29" (174px)
+     │     (what people see)           │
+     └─────────────────────────────────┘
+
+     Total width: 150.5" (903px)
+     - Left side: ~30" (180px)
+     - Table top: ~90.5" (543px) [8ft = 96" minus edges]
+     - Right side: ~30" (180px)
+
+     Total height: 84" (504px)
+     - Back drape: ~29" (174px)
+     - Table top: ~26" (156px)
+     - Front drape: ~29" (174px)
+     ═══════════════════════════════════════ */
+
+  .cloth {
+    width: 903px;
+    height: 504px;
+    background: var(--navy);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 16px 60px rgba(0,0,0,0.4);
+    border-radius: 4px;
+  }
+
+  /* Subtle fabric texture */
+  .cloth::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.006) 3px, rgba(255,255,255,0.006) 6px),
+      repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(255,255,255,0.006) 3px, rgba(255,255,255,0.006) 6px);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ─── FOLD GUIDE LINES (won't print, just for reference) ─── */
+  .fold-guides {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .fold-h {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    border-top: 1px dashed rgba(255,255,255,0.08);
+  }
+
+  .fold-v {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    border-left: 1px dashed rgba(255,255,255,0.08);
+  }
+
+  /* ─── FRONT PANEL — The hero. What people see. ─── */
+  .front-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 174px; /* ~29" */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    z-index: 2;
+  }
+
+  .front-panel .logo {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  .front-panel .wordmark {
+    font-size: 64px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 4px;
+  }
+
+  .front-panel .wordmark span { color: var(--orange); }
+
+  /* ─── TABLE TOP — Mostly covered by items, keep subtle ─── */
+  .table-top-area {
+    position: absolute;
+    top: 174px;
+    left: 180px;
+    right: 180px;
+    height: 156px; /* ~26" */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  .table-top-area .logo-watermark {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    opacity: 0.06;
+  }
+
+  /* ─── BACK PANEL — Behind the table, partially visible ─── */
+  .back-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 174px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  .back-panel .wordmark {
+    font-size: 36px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 3px;
+    opacity: 0.15;
+  }
+
+  .back-panel .wordmark span { color: var(--orange); opacity: 0.4; }
+
+  /* ─── SIDE PANELS — Left and right drapes ─── */
+  .side-panel {
+    position: absolute;
+    top: 174px;
+    height: 156px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  .side-left { left: 0; width: 180px; }
+  .side-right { right: 0; width: 180px; }
+
+  .side-panel .side-url {
+    font-size: 18px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 1px;
+    opacity: 0.12;
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+  }
+
+  .side-panel .side-url span { color: var(--orange); opacity: 0.5; }
+
+  /* ─── LABELS (reference only, won't be in final PNG) ─── */
+  .zone-label {
+    position: absolute;
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.12);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .print-note { display: none; }
+    .fold-guides { display: none; }
+    .zone-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="print-note">
+  <h3>NeuroChiro — 8ft All-Over Print Tablecloth</h3>
+  <p>
+    <strong>Size:</strong> 150.5" x 84" (Vistaprint 8ft all-over print spec)<br>
+    This is the full unfolded cloth. The logo + wordmark are centered on the <strong>front drape</strong> (what people see).<br>
+    The back and sides have subtle branding. Table top has a faint watermark (covered by your items).<br>
+    Upload this image to Vistaprint using <strong>"Upload your design"</strong>.
+  </p>
+</div>
+
+<div class="cloth">
+  <!-- Fold guide lines (for reference) -->
+  <div class="fold-guides">
+    <div class="fold-h" style="top: 174px;"></div>
+    <div class="fold-h" style="top: 330px;"></div>
+    <div class="fold-v" style="left: 180px;"></div>
+    <div class="fold-v" style="left: 723px;"></div>
+  </div>
+
+  <!-- Zone labels (won't print) -->
+  <div class="zone-label" style="top: 80px; left: 50%; transform: translateX(-50%);">Back Panel</div>
+  <div class="zone-label" style="top: 245px; left: 50%; transform: translateX(-50%);">Table Top</div>
+  <div class="zone-label" style="bottom: 80px; left: 50%; transform: translateX(-50%);">Front Panel (Audience Sees This)</div>
+  <div class="zone-label" style="top: 245px; left: 70px;">Left Side</div>
+  <div class="zone-label" style="top: 245px; right: 55px;">Right Side</div>
+
+  <!-- FRONT PANEL — Main branding -->
+  <div class="front-panel">
+    <img class="logo" src="../public/logo.png" alt="NeuroChiro">
+    <div class="wordmark">NEURO<span>CHIRO</span></div>
+  </div>
+
+  <!-- TABLE TOP — Subtle watermark (covered by items) -->
+  <div class="table-top-area">
+    <img class="logo-watermark" src="../public/logo.png" alt="">
+  </div>
+
+  <!-- BACK PANEL — Subtle, partially visible -->
+  <div class="back-panel">
+    <div class="wordmark">NEURO<span>CHIRO</span></div>
+  </div>
+
+  <!-- SIDE PANELS -->
+  <div class="side-panel side-left">
+    <div class="side-url">neurochiro<span>.co</span></div>
+  </div>
+  <div class="side-panel side-right">
+    <div class="side-url">neurochiro<span>.co</span></div>
+  </div>
+</div>
+
+</body>
+</html>

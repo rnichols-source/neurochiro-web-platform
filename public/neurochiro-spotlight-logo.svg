@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 180" width="600" height="180">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Lato:wght@700;900&amp;family=Montserrat:wght@400;600&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Spotlight beam / accent arc behind text -->
+  <ellipse cx="300" cy="170" rx="260" ry="8" fill="#D66829" opacity="0.25"/>
+
+  <!-- NEURO text -->
+  <text x="148" y="82" font-family="Lato, sans-serif" font-weight="900" font-size="62" fill="#F5F3EF" letter-spacing="3">NEURO</text>
+
+  <!-- CHIRO text -->
+  <text x="398" y="82" font-family="Lato, sans-serif" font-weight="900" font-size="62" fill="#D66829" letter-spacing="3">CHIRO</text>
+
+  <!-- Divider line -->
+  <line x1="148" y1="96" x2="590" y2="96" stroke="#D66829" stroke-width="2.5" opacity="0.6"/>
+
+  <!-- SPOTLIGHT text -->
+  <text x="148" y="132" font-family="Montserrat, sans-serif" font-weight="600" font-size="38" fill="#F5F3EF" letter-spacing="14">SPOTLIGHT</text>
+
+  <!-- Brain + Spine icon (simplified) -->
+  <g transform="translate(28, 16) scale(0.14)">
+    <!-- Brain outline -->
+    <path d="M500 120c-60-50-140-70-200-60s-120 50-160 110c-30 50-40 110-20 170s60 110 120 140c20 10 40 15 60 15 30 0 55-12 75-35 25 30 60 50 100 50 25 0 50-8 70-25 50-40 70-110 50-175s-40-140-95-190z" fill="none" stroke="#F5F3EF" stroke-width="55" stroke-linecap="round"/>
+    <!-- Brain center line -->
+    <line x1="380" y1="100" x2="380" y2="380" stroke="#F5F3EF" stroke-width="30" opacity="0.4"/>
+    <!-- Brain folds left -->
+    <path d="M250 180c40 20 80 10 110-10M230 260c50 15 90 5 120-15M260 340c30 10 60 5 90-10" fill="none" stroke="#F5F3EF" stroke-width="25" stroke-linecap="round" opacity="0.5"/>
+    <!-- Brain folds right -->
+    <path d="M510 180c-40 20-80 10-110-10M530 260c-50 15-90 5-120-15M500 340c-30 10-60 5-90-10" fill="none" stroke="#F5F3EF" stroke-width="25" stroke-linecap="round" opacity="0.5"/>
+    <!-- Spine stem -->
+    <g stroke="#D66829" stroke-width="35" stroke-linecap="round" fill="none">
+      <line x1="380" y1="480" x2="380" y2="520"/>
+      <line x1="360" y1="540" x2="400" y2="540"/>
+      <line x1="380" y1="560" x2="380" y2="600"/>
+      <line x1="355" y1="620" x2="405" y2="620"/>
+      <line x1="380" y1="640" x2="380" y2="680"/>
+      <line x1="360" y1="700" x2="400" y2="700"/>
+      <line x1="380" y1="720" x2="380" y2="760"/>
+    </g>
+    <!-- Brain stem connection -->
+    <path d="M420 400c10 30 0 60-20 80" fill="none" stroke="#1E2D3B" stroke-width="40" stroke-linecap="round"/>
+  </g>
+
+  <!-- Subtle glow on spotlight text -->
+  <text x="148" y="132" font-family="Montserrat, sans-serif" font-weight="600" font-size="38" fill="#D66829" letter-spacing="14" opacity="0.15" filter="blur(4px)">SPOTLIGHT</text>
+</svg>
