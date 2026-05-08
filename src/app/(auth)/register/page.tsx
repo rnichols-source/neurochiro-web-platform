@@ -63,9 +63,9 @@ function RegisterForm() {
       return;
     }
 
-    // Claiming flow: redirect immediately
+    // Claiming flow: redirect to billing (must pay before dashboard access)
     if (claimId) {
-      router.push("/doctor/dashboard?claimed=true");
+      router.push("/doctor/billing?claimed=true");
       return;
     }
 
