@@ -47,6 +47,7 @@ import {
   JOB_TEMPLATES,
 } from "./hiring-data";
 import type { PipelineStage } from "./hiring-data";
+import ChiroScoreInline from "./ChiroScoreInline";
 
 // ─── Utility Components ──────────────────────────────────────────────────────
 
@@ -491,7 +492,10 @@ export default function JobsPage() {
                               className="flex-1 text-left"
                               onClick={() => openApplicantDetail(app.id)}
                             >
-                              <p className="font-bold text-neuro-navy">{app.name}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="font-bold text-neuro-navy">{app.name}</p>
+                                {app.candidateId && <ChiroScoreInline candidateId={app.candidateId} />}
+                              </div>
                               {app.school && (
                                 <p className="text-sm text-gray-500">
                                   {app.school}
