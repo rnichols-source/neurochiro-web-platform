@@ -32,7 +32,11 @@ export default function StudentLayout({
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return;
+      if (!user) {
+        // Not authenticated — redirect to login with return URL
+        router.push('/login?redirect=/student/subscribe');
+        return;
+      }
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name, subscription_status, tier')
@@ -56,6 +60,17 @@ export default function StudentLayout({
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [pathname]);
+
+  // Prevent flash of portal content while subscription is being checked
+  // Allow the subscribe and billing pages to render immediately
+  const isExemptPage = pathname === '/student/subscribe' || pathname === '/student/billing';
+  if (!subscriptionChecked && !isExemptPage) {
+    return (
+      <div className="flex items-center justify-center h-dvh bg-[#0F1A24]">
+        <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <AuthProvider>

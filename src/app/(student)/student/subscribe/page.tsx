@@ -1,13 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GraduationCap, Check, Loader2 } from "lucide-react";
 import { createStudentCheckout } from "@/app/(auth)/actions/student-checkout";
+import { createClient } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function StudentSubscribePage() {
+  const router = useRouter();
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Check if already subscribed — redirect to dashboard if so
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) {
+        // Not logged in — redirect to login
+        router.push('/login?redirect=/student/subscribe');
+        return;
+      }
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('subscription_status, tier')
+        .eq('id', user.id)
+        .single();
+      const isSubscribed = (profile as any)?.subscription_status === 'active' ||
+                           (profile as any)?.tier === 'pro' ||
+                           (profile as any)?.tier === 'student_paid';
+      if (isSubscribed) {
+        router.push('/student/dashboard');
+        return;
+      }
+      setCheckingAuth(false);
+    });
+  }, [router]);
 
   const handleSubscribe = async () => {
     setLoading(true);
@@ -39,6 +68,14 @@ export default function StudentSubscribePage() {
     "Student Network",
     "Direct messaging with doctors",
   ];
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">

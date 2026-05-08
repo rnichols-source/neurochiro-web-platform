@@ -711,14 +711,15 @@ export async function POST(req: Request) {
 
         const { data: profile } = await supabase
           .from('profiles')
-          .select('id')
+          .select('id, tier')
           .eq('stripe_customer_id', customer)
           .single();
 
         if (profile) {
+          // Preserve existing tier (e.g. 'student_paid', 'pro', 'growth') — only update subscription_status
           await supabase
             .from('profiles')
-            .update({ subscription_status: 'active', tier: 'active' })
+            .update({ subscription_status: 'active' })
             .eq('id', profile.id);
         }
 

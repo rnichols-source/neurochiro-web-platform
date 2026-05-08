@@ -31,12 +31,12 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, full_name')
+    .select('role, full_name, subscription_status, tier')
     .eq('id', data.user.id)
     .single()
 
   let role = (profile as any)?.role || 'doctor'
-  
+
   // 🛡️ FOUNDER OVERRIDE
   if (isFounderEmail(email)) {
     role = 'founder';
@@ -45,6 +45,16 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   // Check if first-time user (name not set)
   if (!(profile as any)?.full_name && ['doctor', 'student'].includes(role)) {
     return redirect(`/onboarding?role=${role}`);
+  }
+
+  // Students without active subscription go to subscribe page, not dashboard
+  if (role === 'student') {
+    const subStatus = (profile as any)?.subscription_status;
+    const tier = (profile as any)?.tier;
+    const isSubscribed = subStatus === 'active' || tier === 'pro' || tier === 'student_paid';
+    if (!isSubscribed) {
+      return redirect('/student/subscribe');
+    }
   }
 
   // Standardize the dashboard routes
