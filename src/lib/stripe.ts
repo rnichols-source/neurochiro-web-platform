@@ -36,10 +36,26 @@ export const PLANS = {
   },
   vendor: {
     id: "vendor",
-    name: "Vendor Marketplace Partner",
+    name: "Vendor Marketplace — Starter",
     monthly: {
       priceId: process.env.STRIPE_VENDOR_MONTHLY_PRICE_ID ?? "",
       price: 99,
+    },
+  },
+  vendor_growth: {
+    id: "vendor_growth",
+    name: "Vendor Marketplace — Growth",
+    monthly: {
+      priceId: process.env.STRIPE_VENDOR_GROWTH_PRICE_ID ?? "",
+      price: 249,
+    },
+  },
+  vendor_partner: {
+    id: "vendor_partner",
+    name: "Vendor Marketplace — Partner",
+    monthly: {
+      priceId: process.env.STRIPE_VENDOR_PARTNER_PRICE_ID ?? "",
+      price: 499,
     },
   },
   seminar_listing: {

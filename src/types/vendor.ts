@@ -1,14 +1,71 @@
-export type VendorTier = 'basic' | 'professional' | 'featured_partner';
+export type VendorTier = 'starter' | 'growth' | 'partner';
 
-export type VendorCategory = 
-  | 'Neurological Tech' 
-  | 'Practice Management' 
-  | 'EHR Systems' 
-  | 'Marketing' 
-  | 'Equipment' 
-  | 'Supplements' 
-  | 'Financial Services' 
-  | 'Consulting';
+export type VendorCategory =
+  | 'Tables & Equipment'
+  | 'Imaging & Scans'
+  | 'EHR & Software'
+  | 'Marketing'
+  | 'Supplements'
+  | 'Education & Coaching'
+  | 'Billing & Collections'
+  | 'Legal & Compliance'
+  | 'Office Supplies & Design'
+  | 'Staffing & HR'
+  | 'Financial Services'
+  | 'Real Estate';
+
+export const VENDOR_CATEGORIES: VendorCategory[] = [
+  'Tables & Equipment',
+  'Imaging & Scans',
+  'EHR & Software',
+  'Marketing',
+  'Supplements',
+  'Education & Coaching',
+  'Billing & Collections',
+  'Legal & Compliance',
+  'Office Supplies & Design',
+  'Staffing & HR',
+  'Financial Services',
+  'Real Estate',
+];
+
+export const VENDOR_TIERS = {
+  starter: {
+    name: 'Starter',
+    price: 99,
+    features: [
+      'Verified vendor listing',
+      'Company profile page',
+      'Member discount code',
+      'Monthly analytics report',
+    ],
+  },
+  growth: {
+    name: 'Growth',
+    price: 249,
+    features: [
+      'Everything in Starter',
+      'Featured in your category',
+      'Vendor Spotlight email blast',
+      'Publish articles & content',
+      'Lead capture form',
+      'Priority support',
+    ],
+  },
+  partner: {
+    name: 'Partner',
+    price: 499,
+    features: [
+      'Everything in Growth',
+      'Homepage placement',
+      'Sponsor Spotlight section',
+      'Co-branded content',
+      'NeuroChiro Recommended badge',
+      'Dedicated account manager',
+      'Quarterly strategy call',
+    ],
+  },
+} as const;
 
 export interface Vendor {
   id: string;

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getVendorDashboardData } from "./actions";
 import { updateVendorOffer, updateVendorProfile } from "@/app/actions/vendors";
+import { VENDOR_CATEGORIES } from "@/types/vendor";
 
 export default function VendorDashboard() {
   const [data, setData] = useState<any>(null);
@@ -166,12 +167,7 @@ export default function VendorDashboard() {
             <div className="space-y-1">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Category</label>
               <select className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold" value={profileForm.category} onChange={(e) => setProfileForm({ ...profileForm, category: e.target.value })}>
-                <option>Neurological Tech</option>
-                <option>Practice Management</option>
-                <option>EHR Systems</option>
-                <option>Marketing</option>
-                <option>Equipment</option>
-                <option>Supplements</option>
+                {VENDOR_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div className="space-y-1">
