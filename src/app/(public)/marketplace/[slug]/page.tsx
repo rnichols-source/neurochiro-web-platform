@@ -6,6 +6,7 @@ import Footer from "@/components/landing/Footer";
 import CopyDiscountCode from "./copy-discount-code";
 import VendorReviews from "./vendor-reviews";
 import VendorUsedBy from "./vendor-used-by";
+import VendorContent from "./vendor-content";
 
 async function getVendorBySlug(slug: string) {
   const supabase = createAdminClient();
@@ -119,6 +120,9 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
 
             {/* Used By Social Proof */}
             <VendorUsedBy vendorId={vendor.id} />
+
+            {/* Content Hub */}
+            <VendorContent vendorId={vendor.id} />
 
             {/* Reviews */}
             <VendorReviews vendorId={vendor.id} />
