@@ -13,6 +13,19 @@ export async function getAIWeeklyInsight(): Promise<string | null> {
   try {
     const admin = createAdminClient() as any;
 
+    // Check for cached insight (regenerate once per day)
+    const { data: cached } = await admin
+      .from('doctor_tool_data')
+      .select('data, updated_at')
+      .eq('user_id', user.id)
+      .eq('tool_key', 'weekly_insight')
+      .maybeSingle();
+
+    if (cached?.data?.insight && cached.updated_at) {
+      const age = Date.now() - new Date(cached.updated_at).getTime();
+      if (age < 24 * 60 * 60 * 1000) return cached.data.insight; // Less than 24 hours old
+    }
+
     // Gather practice data
     const { data: doc } = await createAdminClient()
       .from('doctors')
@@ -92,8 +105,17 @@ Rules:
     });
 
     const text = message.content[0];
-    if (text.type === 'text') return text.text;
-    return generateFallbackInsight(context);
+    const insightText = text.type === 'text' ? text.text : generateFallbackInsight(context);
+
+    // Cache the insight for 24 hours
+    await admin.from('doctor_tool_data').upsert({
+      user_id: user.id,
+      tool_key: 'weekly_insight',
+      data: { insight: insightText },
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id,tool_key' }).catch(() => {});
+
+    return insightText;
   } catch (e) {
     console.error('AI Insight error:', e);
     return null;
