@@ -125,18 +125,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     return open;
   };
 
-  const [openSections, setOpenSections] = useState<string[]>(getDefaultOpen);
-
-  useEffect(() => {
-    setOpenSections(getDefaultOpen());
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
-
-  const toggleSection = (label: string) => {
-    setOpenSections((prev) =>
-      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
-    );
-  };
+  // All sections always expanded
+  const allSectionLabels = navSections.map(s => s.label);
+  const [openSections] = useState<string[]>(allSectionLabels);
 
   const Content = (
     <div className="flex flex-col h-full bg-neuro-navy">
@@ -168,21 +159,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
           return (
             <div key={section.label} className={si > 0 ? "mt-3" : ""}>
-              <button
-                onClick={() => toggleSection(section.label)}
-                className="w-full flex items-center justify-between px-3 py-2 group"
-              >
+              <div className="px-3 py-2">
                 <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${
-                  hasActive ? "text-neuro-orange" : "text-gray-500 group-hover:text-gray-400"
+                  hasActive ? "text-neuro-orange" : "text-gray-500"
                 }`}>
                   {section.label}
                 </span>
-                <ChevronDown
-                  className={`w-3 h-3 text-gray-600 transition-transform duration-200 ${
-                    isOpen2 ? "" : "-rotate-90"
-                  }`}
-                />
-              </button>
+              </div>
               <AnimatePresence initial={false}>
                 {isOpen2 && (
                   <motion.div
