@@ -100,14 +100,14 @@ export default function DoctorDashboard() {
       <WhatsNew />
 
       {/* Top Banner: Greeting + Practice Health Score */}
-      <motion.div {...delay(0)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 md:p-8">
+      <motion.div {...delay(0)} className="bg-neuro-navy rounded-2xl shadow-lg p-6 md:p-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <p className="text-[10px] uppercase tracking-[0.2em] text-neuro-orange font-semibold mb-1">Practice Command Center</p>
             <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
               Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}, Dr. {doctorName}
             </h1>
-            {clinicName && <p className="text-white/30 text-sm mt-1">{clinicName}</p>}
+            {clinicName && <p className="text-gray-400 text-sm mt-1">{clinicName}</p>}
             {slug && (
               <Link href={`/directory/${slug}`} target="_blank" className="text-xs text-neuro-orange hover:underline mt-2 inline-flex items-center gap-1">
                 View Public Profile <ArrowRight className="w-3 h-3" />
@@ -154,25 +154,25 @@ export default function DoctorDashboard() {
           <LeadPipelineWidget stages={pipeline || { new: 0, contacted: 0, scheduled: 0, converted: 0 }} />
         </motion.div>
 
-        <motion.div {...delay(0.15)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-6">
+        <motion.div {...delay(0.15)} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-white">Recent Activity</h3>
+            <h3 className="text-sm font-bold text-neuro-navy">Recent Activity</h3>
             <Link href="/doctor/notifications" className="text-[10px] font-bold text-neuro-orange hover:underline">View All</Link>
           </div>
           {activity.length === 0 ? (
-            <p className="text-xs text-white/30">No recent activity yet.</p>
+            <p className="text-xs text-gray-400">No recent activity yet.</p>
           ) : (
             <div className="space-y-3">
               {activity.slice(0, 5).map((item: any, i: number) => {
                 const Icon = iconMap[item.type] || Bell;
                 return (
                   <Link key={i} href={item.link || '#'} className="flex items-start gap-3 group">
-                    <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center shrink-0">
-                      <Icon className="w-4 h-4 text-white/30" />
+                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
+                      <Icon className="w-4 h-4 text-gray-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-white/60 group-hover:text-neuro-orange transition-colors truncate">{item.title}</p>
-                      <p className="text-[10px] text-white/20">{formatDistanceToNow(new Date(item.time), { addSuffix: true })}</p>
+                      <p className="text-xs text-gray-600 group-hover:text-neuro-orange transition-colors truncate">{item.title}</p>
+                      <p className="text-[10px] text-gray-400">{formatDistanceToNow(new Date(item.time), { addSuffix: true })}</p>
                     </div>
                   </Link>
                 );
@@ -198,7 +198,7 @@ export default function DoctorDashboard() {
 
       {/* Quick Actions */}
       <motion.div {...delay(0.25)}>
-        <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-semibold mb-3">Quick Actions</p>
+        <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-semibold mb-3">Quick Actions</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { label: "Edit Profile", href: "/doctor/profile", icon: "👤" },
@@ -206,21 +206,21 @@ export default function DoctorDashboard() {
             { label: "Browse Students", href: "/doctor/students", icon: "🎓" },
             { label: "Marketplace", href: "/marketplace", icon: "🛒" },
           ].map((action) => (
-            <Link key={action.href} href={action.href} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-center hover:border-neuro-orange/20 hover:bg-neuro-orange/5 transition-all">
+            <Link key={action.href} href={action.href} className="bg-white border border-gray-100 rounded-xl p-4 text-center hover:border-neuro-orange/30 hover:shadow-md transition-all">
               <span className="text-2xl block mb-2">{action.icon}</span>
-              <p className="text-xs font-bold text-white/50">{action.label}</p>
+              <p className="text-xs font-bold text-neuro-navy">{action.label}</p>
             </Link>
           ))}
         </div>
       </motion.div>
 
       {/* Referral Program */}
-      <motion.div {...delay(0.3)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-6">
+      <motion.div {...delay(0.3)} className="bg-neuro-navy rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-3">
           <Gift className="w-5 h-5 text-neuro-orange" />
           <h3 className="text-sm font-bold text-white">Referral Program</h3>
         </div>
-        <p className="text-xs text-white/30 mb-4">Invite doctors to NeuroChiro and earn free months on your membership.</p>
+        <p className="text-xs text-gray-400 mb-4">Invite doctors to NeuroChiro and earn free months on your membership.</p>
         {referralCode ? (
           <div className="flex items-center gap-2">
             <code className="flex-1 px-4 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm font-mono text-neuro-orange">

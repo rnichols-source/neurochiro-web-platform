@@ -50,10 +50,10 @@ export default function PracticeHealthGauge({ data }: { data: PracticeHealthResu
         {Object.values(breakdown).map((cat) => (
           <div key={cat.label}>
             <div className="flex items-center justify-between mb-0.5">
-              <span className="text-[11px] text-white/40">{cat.label}</span>
-              <span className="text-[10px] text-white/20 tabular-nums">{cat.score}%</span>
+              <span className="text-[11px] text-white/60">{cat.label}</span>
+              <span className="text-[10px] text-white/40 tabular-nums">{cat.score}%</span>
             </div>
-            <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
               <div className={`h-full rounded-full ${getBarColor(cat.score)} transition-all duration-700`} style={{ width: `${Math.max(cat.score, 2)}%` }} />
             </div>
           </div>
