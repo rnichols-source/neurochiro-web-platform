@@ -15,17 +15,17 @@ interface ActionItem {
 }
 
 const PRIORITY_STYLES = {
-  high: "border-red-200 bg-red-50",
-  medium: "border-orange-200 bg-orange-50",
-  low: "border-gray-100 bg-white",
+  high: "border-red-500/20 bg-red-500/5",
+  medium: "border-[#D66829]/20 bg-[#D66829]/5",
+  low: "border-white/[0.06] bg-white/[0.03]",
 };
 
 export default function ActionItems({ items }: { items: ActionItem[] }) {
   if (items.length === 0) {
     return (
-      <div className="bg-green-50 rounded-2xl border border-green-200 p-5 flex items-center gap-3">
-        <CheckCircle2 className="w-5 h-5 text-green-500" />
-        <p className="text-sm text-green-700">You&apos;re all caught up! No actions needed.</p>
+      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-5 flex items-center gap-3">
+        <CheckCircle2 className="w-5 h-5 text-green-400" />
+        <p className="text-sm text-white/50">You&apos;re all caught up! No actions needed.</p>
       </div>
     );
   }
@@ -38,15 +38,15 @@ export default function ActionItems({ items }: { items: ActionItem[] }) {
           <Link
             key={item.id}
             href={item.href}
-            className={`rounded-xl border p-4 transition-all hover:border-neuro-orange/30 group ${PRIORITY_STYLES[item.priority]}`}
+            className={`rounded-xl border p-4 transition-all hover:border-[#D66829]/30 group ${PRIORITY_STYLES[item.priority]}`}
           >
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-neuro-orange/10 flex items-center justify-center shrink-0">
-                <Icon className="w-4 h-4 text-neuro-orange" />
+              <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center shrink-0">
+                <Icon className="w-4 h-4 text-[#D66829]" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">{item.title}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
+                <p className="text-sm font-bold text-white group-hover:text-[#D66829] transition-colors">{item.title}</p>
+                <p className="text-xs text-white/30 mt-0.5">{item.description}</p>
               </div>
             </div>
           </Link>

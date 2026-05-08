@@ -121,27 +121,19 @@ export default function DoctorDashboard() {
       </motion.div>
 
       {/* Key Metrics */}
-      <motion.div {...delay(0.05)} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-b from-blue-50 to-white rounded-2xl border border-blue-100 p-5">
-          <Eye className="w-5 h-5 text-blue-500 mb-2" />
-          <p className="text-2xl font-black text-neuro-navy">{profileViews}</p>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Profile Views</p>
-        </div>
-        <div className="bg-gradient-to-b from-emerald-50 to-white rounded-2xl border border-emerald-100 p-5">
-          <Users className="w-5 h-5 text-emerald-500 mb-2" />
-          <p className="text-2xl font-black text-neuro-navy">{patientLeads}</p>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Patient Leads</p>
-        </div>
-        <div className="bg-gradient-to-b from-violet-50 to-white rounded-2xl border border-violet-100 p-5">
-          <DollarSign className="w-5 h-5 text-violet-500 mb-2" />
-          <p className="text-2xl font-black text-neuro-navy">${(revenue?.estimatedMonthlyRevenue || 0).toLocaleString()}</p>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Est. Revenue</p>
-        </div>
-        <div className="bg-gradient-to-b from-orange-50 to-white rounded-2xl border border-orange-100 p-5">
-          <MapPin className="w-5 h-5 text-neuro-orange mb-2" />
-          <p className="text-2xl font-black text-neuro-navy">{intel ? `#${intel.cityRank}` : '—'}</p>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{intel ? `in ${intel.city}` : 'Directory Rank'}</p>
-        </div>
+      <motion.div {...delay(0.05)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/[0.06]">
+        {[
+          { icon: Eye, value: profileViews, label: "Profile Views", color: "text-blue-400" },
+          { icon: Users, value: patientLeads, label: "Patient Leads", color: "text-emerald-400" },
+          { icon: DollarSign, value: `$${(revenue?.estimatedMonthlyRevenue || 0).toLocaleString()}`, label: "Est. Revenue", color: "text-violet-400" },
+          { icon: MapPin, value: intel ? `#${intel.cityRank}` : '—', label: intel ? `in ${intel.city}` : 'Directory Rank', color: "text-neuro-orange" },
+        ].map((stat, i) => (
+          <div key={i} className="px-3 sm:px-5 py-4 sm:py-6 text-center">
+            <stat.icon className={`w-4 h-4 ${stat.color} mx-auto mb-2`} />
+            <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums">{stat.value}</p>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-white/25 mt-1">{stat.label}</p>
+          </div>
+        ))}
       </motion.div>
 
       {/* Smart Action Items */}
@@ -156,25 +148,25 @@ export default function DoctorDashboard() {
           <LeadPipelineWidget stages={pipeline || { new: 0, contacted: 0, scheduled: 0, converted: 0 }} />
         </motion.div>
 
-        <motion.div {...delay(0.15)} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <motion.div {...delay(0.15)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-neuro-navy">Recent Activity</h3>
+            <h3 className="text-sm font-bold text-white">Recent Activity</h3>
             <Link href="/doctor/notifications" className="text-[10px] font-bold text-neuro-orange hover:underline">View All</Link>
           </div>
           {activity.length === 0 ? (
-            <p className="text-xs text-gray-400">No recent activity yet.</p>
+            <p className="text-xs text-white/30">No recent activity yet.</p>
           ) : (
             <div className="space-y-3">
               {activity.slice(0, 5).map((item: any, i: number) => {
                 const Icon = iconMap[item.type] || Bell;
                 return (
                   <Link key={i} href={item.link || '#'} className="flex items-start gap-3 group">
-                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
-                      <Icon className="w-4 h-4 text-gray-400" />
+                    <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center shrink-0">
+                      <Icon className="w-4 h-4 text-white/30" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-600 group-hover:text-neuro-orange transition-colors truncate">{item.title}</p>
-                      <p className="text-[10px] text-gray-400">{formatDistanceToNow(new Date(item.time), { addSuffix: true })}</p>
+                      <p className="text-xs text-white/60 group-hover:text-neuro-orange transition-colors truncate">{item.title}</p>
+                      <p className="text-[10px] text-white/20">{formatDistanceToNow(new Date(item.time), { addSuffix: true })}</p>
                     </div>
                   </Link>
                 );
@@ -210,7 +202,7 @@ export default function DoctorDashboard() {
 
       {/* Quick Actions */}
       <motion.div {...delay(0.25)}>
-        <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-semibold mb-3">Quick Actions</p>
+        <p className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-semibold mb-3">Quick Actions</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { label: "Edit Profile", href: "/doctor/profile", icon: "👤" },
@@ -218,9 +210,9 @@ export default function DoctorDashboard() {
             { label: "Browse Students", href: "/doctor/students", icon: "🎓" },
             { label: "Marketplace", href: "/marketplace", icon: "🛒" },
           ].map((action) => (
-            <Link key={action.href} href={action.href} className="bg-white border border-gray-100 rounded-xl p-4 text-center hover:border-neuro-orange/30 hover:shadow-md transition-all">
+            <Link key={action.href} href={action.href} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-center hover:border-[#D66829]/30 hover:bg-[#D66829]/5 transition-all">
               <span className="text-2xl block mb-2">{action.icon}</span>
-              <p className="text-xs font-bold text-neuro-navy">{action.label}</p>
+              <p className="text-xs font-bold text-white/50">{action.label}</p>
             </Link>
           ))}
         </div>
