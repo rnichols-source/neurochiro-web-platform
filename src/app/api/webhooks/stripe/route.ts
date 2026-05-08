@@ -50,9 +50,12 @@ export async function POST(req: Request) {
 
         if (userId) {
           // Update profile with Stripe customer ID and activate membership
-          // Determine tier from the price paid
+          // Determine tier from the price paid and role
           const amountPaid = (session.amount_total || 0) / 100;
-          const membershipTier = amountPaid >= 199 ? 'pro' : amountPaid >= 99 ? 'growth' : 'basic';
+          const metaRole = session.metadata?.role || '';
+          const membershipTier = metaRole === 'student'
+            ? 'student_paid'
+            : amountPaid >= 199 ? 'pro' : amountPaid >= 99 ? 'growth' : 'basic';
 
           await supabase
             .from('profiles')
