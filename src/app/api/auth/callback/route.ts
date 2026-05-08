@@ -37,6 +37,21 @@ export async function GET(request: Request) {
             return NextResponse.redirect(`${origin}/student/subscribe`)
           }
         }
+
+        // Check if doctor without active subscription
+        if (profile?.role === 'doctor') {
+          const { data: doc } = await supabase
+            .from('doctors')
+            .select('is_founding_member')
+            .eq('user_id', user.id)
+            .single();
+          const isFounder = (doc as any)?.is_founding_member === true;
+          const isSubscribed = profile.subscription_status === 'active' || isFounder;
+          if (!isSubscribed) {
+            console.log(`[AUTH_CALLBACK] Unsubscribed doctor. Redirecting to /doctor/billing`);
+            return NextResponse.redirect(`${origin}/doctor/billing`)
+          }
+        }
       }
 
       console.log(`[AUTH_CALLBACK] Successfully exchanged code. Redirecting to: ${next}`);

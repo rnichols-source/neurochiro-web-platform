@@ -74,7 +74,7 @@ function RegisterForm() {
       if (role === "student") {
         router.push("/student/subscribe");
       } else {
-        router.push(role === "doctor" ? "/doctor/dashboard" : "/student/dashboard");
+        router.push(role === "doctor" ? "/doctor/billing" : "/student/dashboard");
       }
       return;
     }

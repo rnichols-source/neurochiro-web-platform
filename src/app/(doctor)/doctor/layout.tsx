@@ -27,11 +27,43 @@ export default function DoctorLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [initials, setInitials] = useState("--");
+  const [subscriptionChecked, setSubscriptionChecked] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
+
+      // Check subscription status — redirect to billing if not active
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, subscription_status, tier')
+        .eq('id', user.id)
+        .single();
+
+      // Check if doctor is a founding member (bypasses payment)
+      const { data: doc } = await supabase
+        .from('doctors')
+        .select('is_founding_member, membership_tier')
+        .eq('user_id', user.id)
+        .single();
+
+      const isFounder = (doc as any)?.is_founding_member === true;
+      const isActive = profile?.subscription_status === 'active' || profile?.subscription_status === 'trialing';
+      const isPaid = isActive || isFounder;
+
+      // Allow /doctor/billing and /doctor/settings without payment
+      const allowedPaths = ['/doctor/billing', '/doctor/settings'];
+      const isAllowedPath = allowedPaths.some(p => pathname?.startsWith(p));
+
+      if (!isPaid && !isAllowedPath) {
+        window.location.href = '/doctor/billing';
+        return;
+      }
+
+      setSubscriptionChecked(true);
+
+      // Load notifications count
       const { count } = await supabase
         .from('notifications')
         .select('*', { count: 'exact', head: true })
@@ -39,17 +71,12 @@ export default function DoctorLayout({
         .is('read_at', null);
       setUnreadCount(count || 0);
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user.id)
-        .single();
       if (profile?.full_name) {
         const parts = profile.full_name.split(" ");
         setInitials(parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0][0] || "--");
       }
     });
-  }, []);
+  }, [pathname]);
 
   // Close sidebar on route change
   useEffect(() => {
