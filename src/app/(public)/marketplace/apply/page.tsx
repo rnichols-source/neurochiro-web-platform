@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { createVendorCheckout } from "./actions";
 import { Star, CheckCircle2 } from "lucide-react";
@@ -43,6 +43,14 @@ const TIERS = [
 ];
 
 export default function VendorApplyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-dvh bg-[#F5F3EF] pt-24 flex items-center justify-center"><div className="w-8 h-8 border-4 border-[#D66829] border-t-transparent rounded-full animate-spin" /></div>}>
+      <VendorApplyForm />
+    </Suspense>
+  );
+}
+
+function VendorApplyForm() {
   const searchParams = useSearchParams();
   const [selectedTier, setSelectedTier] = useState<"starter" | "growth" | "partner">("growth");
   const [loading, setLoading] = useState(false);
