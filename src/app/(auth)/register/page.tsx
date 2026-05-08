@@ -71,7 +71,11 @@ function RegisterForm() {
 
     // Session already active: redirect immediately
     if ((result as Record<string, unknown>).sessionActive) {
-      router.push(role === "doctor" ? "/doctor/dashboard" : "/student/dashboard");
+      if (role === "student") {
+        router.push("/student/subscribe");
+      } else {
+        router.push(role === "doctor" ? "/doctor/dashboard" : "/student/dashboard");
+      }
       return;
     }
 

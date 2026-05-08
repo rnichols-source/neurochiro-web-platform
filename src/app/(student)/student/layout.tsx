@@ -6,7 +6,7 @@ import NotificationBell from "@/components/layout/NotificationBell";
 import { AuthProvider } from "@/context/AuthContext";
 import { LayoutDashboard, MessageSquare, Bell, GraduationCap, Menu } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 
@@ -24,8 +24,10 @@ export default function StudentLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [initials, setInitials] = useState("--");
+  const [subscriptionChecked, setSubscriptionChecked] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -33,15 +35,23 @@ export default function StudentLayout({
       if (!user) return;
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name')
+        .select('full_name, subscription_status, tier')
         .eq('id', user.id)
         .single();
       if (profile?.full_name) {
         const parts = profile.full_name.split(" ");
         setInitials(parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0][0] || "--");
       }
+      // Check subscription — redirect to subscribe if not active
+      const isSubscribed = (profile as any)?.subscription_status === 'active' ||
+                           (profile as any)?.tier === 'pro' ||
+                           (profile as any)?.tier === 'student_paid';
+      if (!isSubscribed && pathname !== '/student/subscribe' && pathname !== '/student/billing') {
+        router.push('/student/subscribe');
+      }
+      setSubscriptionChecked(true);
     });
-  }, []);
+  }, [pathname, router]);
 
   useEffect(() => {
     setIsSidebarOpen(false);
