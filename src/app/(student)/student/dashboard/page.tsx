@@ -20,7 +20,9 @@ import {
   getMatchedJobsCount,
   transitionToDoctorAction,
 } from "./actions";
+import { getChiroScore } from "./chiroscore-actions";
 import CareerReadiness from "./career-readiness";
+import ChiroScoreDisplay from "./chiroscore-display";
 import PipelinePreview from "./pipeline-preview";
 import MilestoneTimeline from "./milestone-timeline";
 
@@ -28,6 +30,7 @@ export default function StudentDashboard() {
   const [data, setData] = useState<any>(null);
   const [academyData, setAcademyData] = useState<{ completed: number; total: number }>({ completed: 0, total: 22 });
   const [readiness, setReadiness] = useState<any>(null);
+  const [chiroScore, setChiroScore] = useState<any>(null);
   const [jobCount, setJobCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
@@ -38,11 +41,13 @@ export default function StudentDashboard() {
       getAcademyProgress(),
       getCareerReadinessData(),
       getMatchedJobsCount(),
-    ]).then(([dashResult, academyResult, readinessResult, jobsResult]) => {
+      getChiroScore(),
+    ]).then(([dashResult, academyResult, readinessResult, jobsResult, chiroResult]) => {
       if (dashResult) setData(dashResult);
       if (academyResult) setAcademyData(academyResult);
       if (readinessResult) setReadiness(readinessResult);
       setJobCount(jobsResult);
+      if (chiroResult) setChiroScore(chiroResult);
       setLoading(false);
     });
   }, []);
@@ -109,7 +114,7 @@ export default function StudentDashboard() {
       {/* Stats strip */}
       <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/[0.06]">
         {[
-          { label: "Readiness", value: totalScore, unit: "/100" },
+          { label: "ChiroScore", value: chiroScore?.totalScore || totalScore, unit: "/100" },
           { label: "Open Jobs", value: jobCount, href: "/student/jobs" },
           { label: "Modules", value: academyData.completed, unit: `/${academyData.total}`, href: "/student/academy" },
           daysUntilGrad !== null && daysUntilGrad > 0
@@ -161,7 +166,11 @@ export default function StudentDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         {/* Left: readiness */}
         <div className="lg:col-span-3">
-          {readiness && <CareerReadiness totalScore={totalScore} breakdown={readiness.breakdown} />}
+          {chiroScore ? (
+            <ChiroScoreDisplay data={chiroScore} />
+          ) : readiness ? (
+            <CareerReadiness totalScore={totalScore} breakdown={readiness.breakdown} />
+          ) : null}
         </div>
 
         {/* Right: pipeline + milestones */}
