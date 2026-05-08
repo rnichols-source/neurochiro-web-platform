@@ -76,7 +76,7 @@ export async function POST(req: Request) {
           if (profile?.role === 'doctor') {
             await supabase
               .from('doctors')
-              .update({ verification_status: 'verified', membership_tier: membershipTier })
+              .update({ verification_status: 'verified', membership_tier: membershipTier as 'basic' | 'growth' | 'pro' })
               .eq('user_id', userId);
           }
 
