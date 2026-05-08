@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, X, Calendar, Loader2, Pencil, Trash2 } from "lucide-react";
+import { Plus, X, Calendar, Loader2, Pencil, Trash2, Star, Users, Award, BarChart3 } from "lucide-react";
 import {
   getDoctorSeminars,
   createSeminarAction,
   updateSeminarAction,
   deleteSeminarAction,
   getSeminarRegistrants,
+  getEnhancedSeminarAnalytics,
 } from "./actions";
+import SeminarRecommendations from "./recommendations";
 
 export default function SeminarsPage() {
   const [seminars, setSeminars] = useState<any[]>([]);
@@ -19,11 +21,13 @@ export default function SeminarsPage() {
   const [selectedSeminarId, setSelectedSeminarId] = useState<string | null>(null);
   const [registrants, setRegistrants] = useState<any[]>([]);
   const [loadingRegistrants, setLoadingRegistrants] = useState(false);
+  const [analytics, setAnalytics] = useState<any>(null);
 
   async function loadData() {
     setLoading(true);
-    const data = await getDoctorSeminars();
+    const [data, stats] = await Promise.all([getDoctorSeminars(), getEnhancedSeminarAnalytics()]);
     setSeminars(data);
+    if (stats) setAnalytics(stats);
     setLoading(false);
   }
 
@@ -132,6 +136,40 @@ export default function SeminarsPage() {
         >
           <Plus className="w-4 h-4" /> Create Seminar
         </button>
+      </div>
+
+      {/* Analytics */}
+      {analytics && analytics.totalSeminars > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
+            <p className="text-2xl font-black text-neuro-navy">{analytics.totalSeminars}</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Events</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
+            <p className="text-2xl font-black text-neuro-navy">{analytics.totalAttendees}</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Attendees</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
+            <div className="flex items-center justify-center gap-1">
+              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+              <p className="text-2xl font-black text-neuro-navy">{analytics.avgRating || '—'}</p>
+            </div>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{analytics.reviewCount} Reviews</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
+            <p className="text-2xl font-black text-blue-600">{analytics.totalCEDelivered}</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">CE Delivered</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
+            <p className="text-2xl font-black text-green-600">{Math.round((analytics.totalSeminars * 25) + (analytics.avgRating * 50) + (analytics.totalAttendees * 10))}</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Authority Score</p>
+          </div>
+        </div>
+      )}
+
+      {/* Recommendations */}
+      <div className="mb-6">
+        <SeminarRecommendations />
       </div>
 
       {/* Seminar List */}

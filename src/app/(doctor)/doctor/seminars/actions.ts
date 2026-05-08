@@ -350,3 +350,120 @@ export async function getSeminarRegistrants(seminarId: string) {
     registeredAt: a.created_at,
   }))
 }
+
+// Smart seminar recommendations based on doctor's specialties and location
+export async function getRecommendedSeminars() {
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // Get doctor's specialties and location
+  const { data: doctor } = await supabase
+    .from('doctors')
+    .select('specialties, city, state')
+    .eq('user_id', user.id)
+    .single();
+
+  // Get upcoming approved seminars
+  const sb = supabase as any;
+  const { data: seminars } = await sb
+    .from('seminars')
+    .select('id, title, dates, city, country, description, tags, target_audience, price, ce_hours, host_id')
+    .eq('is_approved', true)
+    .neq('host_id', user.id)
+    .order('dates', { ascending: true })
+    .limit(20);
+
+  if (!seminars || seminars.length === 0) return [];
+
+  // Get CE hours earned by this doctor
+  const { data: certs } = await sb
+    .from('ce_certificates')
+    .select('ce_hours')
+    .eq('user_id', user.id);
+
+  const ceEarned = (certs || []).reduce((sum: number, c: any) => sum + (c.ce_hours || 0), 0);
+
+  // Score each seminar
+  const specialties = doctor?.specialties || [];
+  const scored = seminars.map((sem: any) => {
+    let score = 0;
+
+    // Location match (30%)
+    if (doctor?.state && sem.city) {
+      const semLocation = `${sem.city} ${sem.country || ''}`.toLowerCase();
+      if (doctor.city && semLocation.includes(doctor.city.toLowerCase())) score += 30;
+      else if (semLocation.includes(doctor.state.toLowerCase())) score += 15;
+    }
+
+    // Specialty/tag alignment (40%)
+    const semText = `${sem.title} ${sem.description || ''} ${(sem.tags || []).join(' ')}`.toLowerCase();
+    let matches = 0;
+    for (const sp of specialties) {
+      if (semText.includes(sp.toLowerCase())) matches++;
+    }
+    if (specialties.length > 0) score += Math.min((matches / specialties.length) * 40, 40);
+
+    // CE value (20%) — higher CE hours = more valuable
+    if (sem.ce_hours && sem.ce_hours > 0) score += Math.min(sem.ce_hours * 3, 20);
+
+    // Targets doctors (10%)
+    if (sem.target_audience && sem.target_audience.some((t: string) => t.toLowerCase().includes('doctor'))) score += 10;
+
+    return { ...sem, matchScore: Math.round(score) };
+  });
+
+  return scored.sort((a: any, b: any) => b.matchScore - a.matchScore).slice(0, 5);
+}
+
+// Enhanced analytics with review data
+export async function getEnhancedSeminarAnalytics() {
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const sb = supabase as any;
+
+  // Get all hosted seminars
+  const { data: seminars } = await supabase
+    .from('seminars')
+    .select('id, title')
+    .eq('host_id', user.id);
+
+  if (!seminars || seminars.length === 0) return { totalSeminars: 0, totalAttendees: 0, avgRating: 0, reviewCount: 0, totalCEDelivered: 0 };
+
+  const seminarIds = seminars.map(s => s.id);
+
+  // Get all registrations
+  const { count: attendeeCount } = await supabase
+    .from('seminar_registrations')
+    .select('id', { count: 'exact', head: true })
+    .in('seminar_id', seminarIds);
+
+  // Get reviews
+  const { data: reviews } = await sb
+    .from('seminar_reviews')
+    .select('rating')
+    .in('seminar_id', seminarIds);
+
+  const reviewCount = reviews?.length || 0;
+  const avgRating = reviewCount > 0
+    ? Number((reviews.reduce((s: number, r: any) => s + r.rating, 0) / reviewCount).toFixed(1))
+    : 0;
+
+  // Get total CE hours delivered
+  const { data: certs } = await sb
+    .from('ce_certificates')
+    .select('ce_hours')
+    .in('seminar_id', seminarIds);
+
+  const totalCEDelivered = (certs || []).reduce((sum: number, c: any) => sum + (c.ce_hours || 0), 0);
+
+  return {
+    totalSeminars: seminars.length,
+    totalAttendees: attendeeCount || 0,
+    avgRating,
+    reviewCount,
+    totalCEDelivered,
+  };
+}
