@@ -58,6 +58,23 @@ export async function toggleVendorActive(vendorId: string, isActive: boolean) {
   return { success: true };
 }
 
+export async function updateVendorTier(vendorId: string, tier: string) {
+  const supabase = createServerSupabase();
+  const { error } = await (supabase as any)
+    .from("vendors")
+    .update({ tier })
+    .eq("id", vendorId);
+
+  if (error) {
+    console.error("Error updating vendor tier:", error);
+    return { error: error.message };
+  }
+
+  revalidatePath("/admin/marketplace");
+  revalidatePath("/marketplace");
+  return { success: true };
+}
+
 export async function deleteVendor(vendorId: string) {
   const supabase = createServerSupabase();
 
