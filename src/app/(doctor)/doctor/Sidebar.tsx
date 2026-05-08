@@ -30,6 +30,7 @@ const navSections = [
   {
     label: "PATIENTS",
     items: [
+      { name: "Patient Leads", href: "/doctor/leads", icon: Target, tier: "growth" as const },
       { name: "Care Plan", href: "/doctor/care-plan", icon: Calculator, tier: "pro" as const },
       { name: "Scan Reports", href: "/doctor/scan-report", icon: Activity, tier: "pro" as const },
     ],
@@ -62,6 +63,7 @@ const navSections = [
     label: "ACCOUNT",
     items: [
       { name: "Analytics", href: "/doctor/analytics", icon: BarChart3, tier: "growth" as const },
+      { name: "Achievements", href: "/doctor/badges", icon: Award },
       { name: "Settings", href: "/doctor/settings", icon: Settings },
       { name: "Billing", href: "/doctor/billing", icon: CreditCard },
       { name: "Help & Support", href: "/contact", icon: MessageSquare },

@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { isFounderRole } from '@/lib/founder'
 
 export async function getDoctorDashboardStats() {
@@ -368,5 +369,213 @@ export async function getDoctorActivityFeed() {
   } catch (e) {
     console.error("Activity Feed Error:", e)
     return []
+  }
+}
+
+// ─── PRACTICE HEALTH SCORE ───────────────────────────────────────────────────
+
+import { computePracticeHealth, type PracticeHealthResult } from '@/lib/practice-health'
+
+export async function getPracticeHealthScore(): Promise<PracticeHealthResult | null> {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  try {
+    const admin = createAdminClient() as any
+
+    const [doctorRes, leadsRes, confirmedRes, seminarsRes, ceRes, referralsRes, matchRes, jobsRes, reviewsRes, notifsRes] = await Promise.all([
+      createAdminClient().from('doctors').select('photo_url, bio, clinic_name, specialties, city, state, website_url, instagram_url, facebook_url, video_url, profile_views, patient_leads').eq('user_id', user.id).single(),
+      admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id),
+      admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id).not('confirmed_at', 'is', null),
+      createAdminClient().from('seminars').select('id', { count: 'exact', head: true }).eq('host_id', user.id).eq('is_approved', true),
+      admin.from('ce_certificates').select('ce_hours').eq('user_id', user.id),
+      admin.from('leads').select('id', { count: 'exact', head: true }).eq('source', 'referral').eq('doctor_id', user.id),
+      admin.from('match_positions').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id),
+      createAdminClient().from('job_postings').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id),
+      admin.from('seminar_reviews').select('id', { count: 'exact', head: true }),
+      createAdminClient().from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('read', false),
+    ])
+
+    const doc = doctorRes.data
+    if (!doc) return null
+
+    const ceHours = (ceRes.data || []).reduce((s: number, c: any) => s + (c.ce_hours || 0), 0)
+
+    return computePracticeHealth({
+      profile: {
+        hasPhoto: !!doc.photo_url,
+        hasBio: !!(doc.bio && doc.bio.length >= 50),
+        hasClinicName: !!doc.clinic_name,
+        hasSpecialties: !!(doc.specialties && doc.specialties.length > 0),
+        hasLocation: !!(doc.city && doc.state),
+        hasWebsite: !!doc.website_url,
+        hasSocial: !!(doc.instagram_url || doc.facebook_url),
+        hasVideo: !!doc.video_url,
+      },
+      engagement: {
+        profileViews: doc.profile_views || 0,
+        patientLeads: leadsRes.count || 0,
+        confirmedPatients: confirmedRes.count || 0,
+      },
+      community: {
+        seminarsHosted: seminarsRes.count || 0,
+        ceHoursDelivered: ceHours,
+        referralsSent: referralsRes.count || 0,
+        chiroMatchPositions: matchRes.count || 0,
+      },
+      growth: {
+        viewsTrend: doc.profile_views > 10 ? 15 : 0,
+        leadsThisMonth: leadsRes.count || 0,
+        jobsPosted: jobsRes.count || 0,
+        reviewCount: reviewsRes.count || 0,
+      },
+    })
+  } catch (e) {
+    console.error("Practice Health Error:", e)
+    return null
+  }
+}
+
+// ─── COMPETITIVE INTELLIGENCE ────────────────────────────────────────────────
+
+export async function getCompetitiveIntelligence() {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  try {
+    const { data: doc } = await createAdminClient().from('doctors').select('city, state, profile_views').eq('user_id', user.id).single()
+    if (!doc || !doc.city) return null
+
+    const { data: cityDoctors } = await createAdminClient()
+      .from('doctors')
+      .select('profile_views')
+      .eq('city', doc.city)
+      .eq('state', doc.state)
+      .eq('verification_status', 'verified')
+      .order('profile_views', { ascending: false })
+
+    if (!cityDoctors || cityDoctors.length === 0) return null
+
+    const myViews = doc.profile_views || 0
+    const rank = cityDoctors.filter(d => (d.profile_views || 0) > myViews).length + 1
+    const totalInCity = cityDoctors.length
+    const avgViews = Math.round(cityDoctors.reduce((s, d) => s + (d.profile_views || 0), 0) / totalInCity)
+    const topPercentile = Math.round((1 - (rank - 1) / totalInCity) * 100)
+
+    return {
+      cityRank: rank,
+      totalInCity,
+      topPercentile,
+      areaAverageViews: avgViews,
+      doctorViews: myViews,
+      city: doc.city,
+      state: doc.state,
+      trend: myViews > avgViews ? 'up' as const : myViews < avgViews ? 'down' as const : 'flat' as const,
+    }
+  } catch {
+    return null
+  }
+}
+
+// ─── SMART ACTION ITEMS ──────────────────────────────────────────────────────
+
+export async function getSmartActionItems() {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  try {
+    const admin = createAdminClient() as any
+    const items: { id: string; priority: 'high' | 'medium' | 'low'; title: string; description: string; href: string; icon: string }[] = []
+
+    // Unread messages
+    const { count: unreadCount } = await createAdminClient().from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('read', false)
+    if (unreadCount && unreadCount > 0) {
+      items.push({ id: 'unread', priority: 'high', title: `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`, description: 'Review your recent notifications', href: '/doctor/notifications', icon: 'Bell' })
+    }
+
+    // Stale leads (new leads older than 48 hours)
+    const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+    const { count: staleLeads } = await admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id).eq('stage', 'new').lt('created_at', twoDaysAgo)
+    if (staleLeads && staleLeads > 0) {
+      items.push({ id: 'stale_leads', priority: 'high', title: `${staleLeads} lead${staleLeads > 1 ? 's' : ''} waiting 48+ hours`, description: 'Contact them before they go elsewhere', href: '/doctor/leads', icon: 'Users' })
+    }
+
+    // Missing video
+    const { data: doc } = await createAdminClient().from('doctors').select('video_url, photo_url, bio, specialties').eq('user_id', user.id).single()
+    if (doc && !doc.video_url) {
+      items.push({ id: 'video', priority: 'medium', title: 'Add a profile video', description: 'Doctors with video get 3x more patient leads', href: '/doctor/profile', icon: 'Video' })
+    }
+
+    // Profile gaps
+    if (doc && (!doc.photo_url || !doc.bio || !doc.specialties || doc.specialties.length === 0)) {
+      items.push({ id: 'profile', priority: 'medium', title: 'Complete your profile', description: 'A complete profile ranks higher in search results', href: '/doctor/profile', icon: 'User' })
+    }
+
+    return items.slice(0, 4)
+  } catch {
+    return []
+  }
+}
+
+// ─── REVENUE INTELLIGENCE ────────────────────────────────────────────────────
+
+export async function getRevenueIntelligence() {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  try {
+    const { data: doc } = await createAdminClient().from('doctors').select('id, average_case_value, membership_tier').eq('user_id', user.id).single()
+    if (!doc) return null
+
+    const admin = createAdminClient() as any
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+    const { count: confirmedThisMonth } = await admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', doc.id).not('confirmed_at', 'is', null).gte('confirmed_at', thirtyDaysAgo)
+
+    const avgCaseValue = doc.average_case_value || 1200
+    const estimatedRevenue = (confirmedThisMonth || 0) * avgCaseValue
+    const tierCosts: Record<string, number> = { basic: 49, growth: 69, pro: 129 }
+    const membershipCost = tierCosts[doc.membership_tier] || 49
+    const roi = membershipCost > 0 ? Math.round(estimatedRevenue / membershipCost) : 0
+
+    return {
+      estimatedMonthlyRevenue: estimatedRevenue,
+      membershipCost,
+      roi,
+      confirmedLeadsThisMonth: confirmedThisMonth || 0,
+      averageCaseValue: avgCaseValue,
+    }
+  } catch {
+    return null
+  }
+}
+
+// ─── LEAD PIPELINE STAGES (for dashboard widget) ────────────────────────────
+
+export async function getLeadPipelineStages() {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  try {
+    const admin = createAdminClient() as any
+    const { data: doc } = await createAdminClient().from('doctors').select('id').eq('user_id', user.id).single()
+    if (!doc) return null
+
+    const { data: leads } = await admin.from('leads').select('stage').eq('doctor_id', doc.id)
+    if (!leads) return { new: 0, contacted: 0, scheduled: 0, converted: 0 }
+
+    const stages = { new: 0, contacted: 0, scheduled: 0, converted: 0 }
+    for (const l of leads) {
+      const s = l.stage || 'new'
+      if (s in stages) stages[s as keyof typeof stages]++
+    }
+    return stages
+  } catch {
+    return null
   }
 }
