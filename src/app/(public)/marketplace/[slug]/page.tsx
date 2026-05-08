@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase-admin";
 import Footer from "@/components/landing/Footer";
 import CopyDiscountCode from "./copy-discount-code";
+import VendorReviews from "./vendor-reviews";
+import VendorUsedBy from "./vendor-used-by";
 
 async function getVendorBySlug(slug: string) {
   const supabase = createAdminClient();
@@ -115,11 +117,11 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
               </div>
             )}
 
-            {/* Reviews Placeholder */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-              <h2 className="text-lg font-black text-neuro-navy mb-4">Reviews</h2>
-              <p className="text-gray-400 text-sm">Reviews from verified NeuroChiro doctors coming soon.</p>
-            </div>
+            {/* Used By Social Proof */}
+            <VendorUsedBy vendorId={vendor.id} />
+
+            {/* Reviews */}
+            <VendorReviews vendorId={vendor.id} />
           </div>
 
           {/* Sidebar */}
