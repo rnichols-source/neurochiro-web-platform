@@ -29,7 +29,8 @@ import {
   Briefcase,
   Calendar,
   Video,
-  Bot
+  Bot,
+  Shuffle
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -48,6 +49,7 @@ const allNavItems = [
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
   { name: "Seminars", href: "/admin/seminars", icon: Calendar },
+  { name: "ChiroMatch", href: "/admin/chiromatch", icon: Shuffle },
   { name: "Leads", href: "/admin/leads", icon: Tag },
   { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert },
   { name: "Spotlight", href: "/admin/spotlight", icon: Video },
