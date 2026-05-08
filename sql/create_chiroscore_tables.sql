@@ -49,13 +49,29 @@ CREATE POLICY "Students can view feedback about themselves" ON employer_feedback
 CREATE POLICY "Service role full access to feedback" ON employer_feedback
   FOR ALL USING (auth.role() = 'service_role');
 
--- Extend market_benchmarks for salary transparency engine
-ALTER TABLE market_benchmarks
-  ADD COLUMN IF NOT EXISTS median_salary integer,
-  ADD COLUMN IF NOT EXISTS sample_size integer DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS state_code text,
-  ADD COLUMN IF NOT EXISTS period_start date,
-  ADD COLUMN IF NOT EXISTS period_end date,
-  ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+-- Market Benchmarks for salary transparency engine
+CREATE TABLE IF NOT EXISTS market_benchmarks (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  role_type text NOT NULL,
+  region_code text NOT NULL DEFAULT 'DEFAULT',
+  avg_salary_min integer,
+  avg_salary_max integer,
+  common_benefits text[],
+  median_salary integer,
+  sample_size integer DEFAULT 0,
+  state_code text,
+  period_start date,
+  period_end date,
+  updated_at timestamptz DEFAULT now(),
+  UNIQUE(role_type, region_code)
+);
 
 CREATE INDEX IF NOT EXISTS idx_market_benchmarks_state ON market_benchmarks (state_code, role_type);
+
+ALTER TABLE market_benchmarks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can read market benchmarks" ON market_benchmarks
+  FOR SELECT USING (true);
+
+CREATE POLICY "Service role can manage benchmarks" ON market_benchmarks
+  FOR ALL USING (auth.role() = 'service_role');
