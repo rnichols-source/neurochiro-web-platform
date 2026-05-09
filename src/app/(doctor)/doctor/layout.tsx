@@ -34,24 +34,28 @@ export default function DoctorLayout({
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
 
-      // Check subscription status — redirect to billing if not active
+      // Check subscription status via profile tier
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, subscription_status, tier')
+        .select('full_name, tier')
         .eq('id', user.id)
         .single();
 
-      // Check if doctor is a founding member (bypasses payment)
+      // Check tier — paid tiers are: pro, growth, basic (paid), student_paid
+      // "standard" = free/unpaid
+      const profileTier = profile?.tier || 'standard';
+      const isPaidByProfile = profileTier !== 'standard' && profileTier !== 'free';
+
+      // Also check doctors table for founding member / membership_tier
       const { data: doc } = await supabase
         .from('doctors')
         .select('is_founding_member, membership_tier')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       const isFounder = (doc as any)?.is_founding_member === true;
-      const isActive = profile?.subscription_status === 'active' || profile?.subscription_status === 'trialing';
-      const hasPaidTier = (doc as any)?.membership_tier === 'pro' || (doc as any)?.membership_tier === 'growth';
-      const isPaid = isActive || isFounder || hasPaidTier;
+      const hasPaidMembership = ['pro', 'growth', 'basic'].includes((doc as any)?.membership_tier || '');
+      const isPaid = isPaidByProfile || isFounder || hasPaidMembership;
 
       // Allow /doctor/billing and /doctor/settings without payment
       const allowedPaths = ['/doctor/billing', '/doctor/settings'];
