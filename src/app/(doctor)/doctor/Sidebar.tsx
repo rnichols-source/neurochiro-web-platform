@@ -90,13 +90,20 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         supabase.from("notifications").select("*", { count: "exact", head: true })
           .eq("user_id", user.id).is("read_at", null)
           .then(({ count }) => setUnreadNotifs(count || 0));
+        // Try doctors table first, fall back to profiles.tier
         supabase.from("doctors").select("membership_tier, is_founding_member").eq("user_id", user.id).single()
           .then(({ data }: any) => {
-            // Founding members get full Pro access to everything
             if (data?.is_founding_member) {
               setMemberTier("pro");
+            } else if (data?.membership_tier) {
+              setMemberTier(data.membership_tier);
             } else {
-              setMemberTier(data?.membership_tier || "basic");
+              // Fallback: read tier from profiles table
+              supabase.from("profiles").select("tier").eq("id", user.id).single()
+                .then(({ data: p }) => {
+                  const t = p?.tier || "basic";
+                  setMemberTier(t === "standard" ? "basic" : t);
+                });
             }
           });
       }
