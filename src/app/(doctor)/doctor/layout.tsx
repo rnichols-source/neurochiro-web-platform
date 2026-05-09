@@ -50,7 +50,8 @@ export default function DoctorLayout({
 
       const isFounder = (doc as any)?.is_founding_member === true;
       const isActive = profile?.subscription_status === 'active' || profile?.subscription_status === 'trialing';
-      const isPaid = isActive || isFounder;
+      const hasPaidTier = (doc as any)?.membership_tier === 'pro' || (doc as any)?.membership_tier === 'growth';
+      const isPaid = isActive || isFounder || hasPaidTier;
 
       // Allow /doctor/billing and /doctor/settings without payment
       const allowedPaths = ['/doctor/billing', '/doctor/settings'];
