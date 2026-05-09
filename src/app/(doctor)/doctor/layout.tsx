@@ -34,37 +34,15 @@ export default function DoctorLayout({
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
 
-      // Check subscription status via profile tier
+      // TODO: Re-enable payment gate after conference
+      // Payment verification will be handled server-side via API route
+      // to avoid client-side RLS issues with doctors table
+
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name, tier')
         .eq('id', user.id)
         .single();
-
-      // Check tier — paid tiers are: pro, growth, basic (paid), student_paid
-      // "standard" = free/unpaid
-      const profileTier = profile?.tier || 'standard';
-      const isPaidByProfile = profileTier !== 'standard' && profileTier !== 'free';
-
-      // Also check doctors table for founding member / membership_tier
-      const { data: doc } = await supabase
-        .from('doctors')
-        .select('is_founding_member, membership_tier')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      const isFounder = (doc as any)?.is_founding_member === true;
-      const hasPaidMembership = ['pro', 'growth', 'basic'].includes((doc as any)?.membership_tier || '');
-      const isPaid = isPaidByProfile || isFounder || hasPaidMembership;
-
-      // Allow /doctor/billing and /doctor/settings without payment
-      const allowedPaths = ['/doctor/billing', '/doctor/settings'];
-      const isAllowedPath = allowedPaths.some(p => pathname?.startsWith(p));
-
-      if (!isPaid && !isAllowedPath) {
-        window.location.href = '/doctor/billing';
-        return;
-      }
 
       setSubscriptionChecked(true);
 
