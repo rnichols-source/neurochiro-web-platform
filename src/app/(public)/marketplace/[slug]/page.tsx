@@ -7,6 +7,8 @@ import CopyDiscountCode from "./copy-discount-code";
 import VendorReviews from "./vendor-reviews";
 import VendorUsedBy from "./vendor-used-by";
 import VendorContent from "./vendor-content";
+import VendorProducts from "./vendor-products";
+import VendorContact from "./vendor-contact";
 
 async function getVendorBySlug(slug: string) {
   const supabase = createAdminClient();
@@ -118,6 +120,9 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
               </div>
             )}
 
+            {/* Featured Products */}
+            <VendorProducts vendorId={vendor.id} />
+
             {/* Used By Social Proof */}
             <VendorUsedBy vendorId={vendor.id} />
 
@@ -178,6 +183,9 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
                 Verified NeuroChiro vendor
               </p>
             </div>
+
+            {/* Contact Form */}
+            <VendorContact vendorName={vendor.name} vendorId={vendor.id} />
           </div>
         </div>
 
