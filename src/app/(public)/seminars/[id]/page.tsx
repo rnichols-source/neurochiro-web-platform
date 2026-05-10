@@ -51,6 +51,9 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
   const venueName = s.venue_name as string | null;
   const venueAddress = s.venue_address as string | null;
   const heroImage = s.hero_image_url as string | null;
+  const spotlightVideoUrl = s.spotlight_video_url as string | null;
+  const spotlightQuote = s.spotlight_quote as string | null;
+  const spotlightHostName = s.spotlight_host_name as string | null;
 
   return (
     <div className="min-h-dvh bg-neuro-cream">
@@ -130,6 +133,69 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
           )}
         </div>
       </section>
+
+      {/* Spotlight Interview */}
+      {spotlightVideoUrl && (
+        <section className="bg-neuro-navy py-12 px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-2 h-2 bg-neuro-orange rounded-full animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange">NeuroChiro Spotlight</span>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
+              {/* Video */}
+              <div className="lg:col-span-3">
+                <div className="aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl">
+                  {spotlightVideoUrl.includes('youtube.com') || spotlightVideoUrl.includes('youtu.be') ? (
+                    <iframe
+                      src={spotlightVideoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : spotlightVideoUrl.includes('vimeo.com') ? (
+                    <iframe
+                      src={spotlightVideoUrl.replace('vimeo.com/', 'player.vimeo.com/video/')}
+                      className="w-full h-full"
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video src={spotlightVideoUrl} controls className="w-full h-full object-cover" />
+                  )}
+                </div>
+              </div>
+
+              {/* Quote + Context */}
+              <div className="lg:col-span-2">
+                <h2 className="text-2xl font-heading font-black text-white mb-4">
+                  Hear from {spotlightHostName || 'the Host'}
+                </h2>
+                {spotlightQuote && (
+                  <blockquote className="text-gray-300 leading-relaxed italic mb-6 border-l-2 border-neuro-orange pl-4">
+                    &ldquo;{spotlightQuote}&rdquo;
+                  </blockquote>
+                )}
+                <p className="text-gray-500 text-sm mb-6">
+                  Watch the full interview to learn why this event is a must-attend for nervous system chiropractors.
+                </p>
+                {seminar.registration_link && (
+                  <a
+                    href={seminar.registration_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => incrementSeminarStats(id, "clicks").catch(() => {})}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors"
+                  >
+                    Register Now <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Main Content */}
       <section className="max-w-4xl mx-auto px-6 py-10">
