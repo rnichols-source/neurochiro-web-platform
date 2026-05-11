@@ -127,19 +127,25 @@ function RegisterForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Role toggle — hide when claiming (always doctor) */}
           {!claimId && (
-          <div className="flex rounded-lg border border-gray-300 overflow-hidden">
-            <button type="button" onClick={() => setRole("doctor")}
-              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${role === "doctor" ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>
-              Doctor
-            </button>
-            <button type="button" onClick={() => setRole("student")}
-              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${role === "student" ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>
-              Student
-            </button>
-            <button type="button" onClick={() => setRole("patient")}
-              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${role === "patient" ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>
-              Patient
-            </button>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">I am a...</label>
+            <div className="grid grid-cols-3 gap-3">
+              <button type="button" onClick={() => setRole("doctor")}
+                className={`py-3 rounded-xl text-sm font-bold transition-all border-2 ${role === "doctor" ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/20" : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"}`}>
+                🩺 Doctor
+              </button>
+              <button type="button" onClick={() => setRole("student")}
+                className={`py-3 rounded-xl text-sm font-bold transition-all border-2 ${role === "student" ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/20" : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"}`}>
+                🎓 Student
+              </button>
+              <button type="button" onClick={() => setRole("patient")}
+                className={`py-3 rounded-xl text-sm font-bold transition-all border-2 ${role === "patient" ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/20" : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"}`}>
+                👤 Patient
+              </button>
+            </div>
+            {role === "patient" && (
+              <p className="text-xs text-amber-600 mt-2 font-medium">Are you a chiropractor? Select &quot;Doctor&quot; instead to access the full doctor portal.</p>
+            )}
           </div>
           )}
 
