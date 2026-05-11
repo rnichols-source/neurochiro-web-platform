@@ -18,6 +18,7 @@ function RegisterForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [honeypot, setHoneypot] = useState("");
   const [phone, setPhone] = useState("");
   const [licenseNumber, setLicenseNumber] = useState("");
   const [licenseState, setLicenseState] = useState("");
@@ -28,6 +29,10 @@ function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Spam bot detection — honeypot field should be empty
+    if (honeypot) { setError("Registration failed."); return; }
+
     setPending(true);
     setError(null);
 
@@ -161,6 +166,10 @@ function RegisterForm() {
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               placeholder="••••••••"
             />
+          </div>
+          {/* Honeypot — hidden from humans, bots fill it */}
+          <div className="absolute -left-[9999px]" aria-hidden="true">
+            <input type="text" name="website_url" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Phone <span className="text-gray-400">(optional)</span></label>
