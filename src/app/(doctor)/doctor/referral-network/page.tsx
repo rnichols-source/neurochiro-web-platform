@@ -86,12 +86,12 @@ export default function ReferralNetworkPage() {
         ) : (
           <div className="space-y-3">
             {network.map((doc: any, i: number) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-100 p-5 flex items-center justify-between">
+              <div key={i} className="bg-[#162231] rounded-xl border border-white/[0.06] p-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   {doc.photoUrl ? (
                     <img src={doc.photoUrl} alt="" className="w-12 h-12 rounded-xl object-cover" />
                   ) : (
-                    <div className="w-12 h-12 rounded-xl bg-neuro-navy/5 flex items-center justify-center text-white font-bold">
+                    <div className="w-12 h-12 rounded-xl bg-white/[0.06] flex items-center justify-center text-white font-bold">
                       {doc.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
                     </div>
                   )}
