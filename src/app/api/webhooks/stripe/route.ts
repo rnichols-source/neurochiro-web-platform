@@ -62,6 +62,7 @@ export async function POST(req: Request) {
             .update({
               stripe_customer_id: customer,
               tier: membershipTier,
+              subscription_status: 'active',
             } as any)
             .eq('id', userId);
 
@@ -803,10 +804,10 @@ export async function POST(req: Request) {
           .single();
 
         if (profile) {
-          // Preserve existing tier (e.g. 'student_paid', 'pro', 'growth') — only update subscription_status
+          // Preserve existing tier — only confirm subscription is active
           await supabase
             .from('profiles')
-            .update({} as any)
+            .update({ subscription_status: 'active' } as any)
             .eq('id', profile.id);
         }
 
@@ -851,7 +852,7 @@ export async function POST(req: Request) {
         if (profile) {
           await supabase
             .from('profiles')
-            .update({ tier: 'basic' } as any)
+            .update({ tier: 'basic', subscription_status: 'past_due' } as any)
             .eq('id', profile.id);
         }
 
@@ -872,7 +873,7 @@ export async function POST(req: Request) {
         if (profile) {
           await supabase
             .from('profiles')
-            .update({} as any) // subscription_status column doesn't exist
+            .update({ subscription_status: subscription.status } as any)
             .eq('id', profile.id);
         }
 
@@ -906,7 +907,7 @@ export async function POST(req: Request) {
         if (profile && !hasOtherActiveSub) {
           await supabase
             .from('profiles')
-            .update({ tier: 'basic' } as any)
+            .update({ tier: 'basic', subscription_status: 'canceled' } as any)
             .eq('id', profile.id);
         } else if (profile && hasOtherActiveSub) {
           console.log(`[WEBHOOK] Subscription deleted but customer ${customer} still has active subs — not downgrading`);

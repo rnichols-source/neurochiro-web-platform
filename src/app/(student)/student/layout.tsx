@@ -6,7 +6,7 @@ import NotificationBell from "@/components/layout/NotificationBell";
 import { AuthProvider } from "@/context/AuthContext";
 import { LayoutDashboard, MessageSquare, Bell, GraduationCap, Menu } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 
@@ -25,15 +25,18 @@ export default function StudentLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [initials, setInitials] = useState("--");
   const [subscriptionChecked, setSubscriptionChecked] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    const justSubscribed = searchParams.get('subscribed') === 'true';
+
+    const checkSubscription = async (attempt = 1): Promise<void> => {
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        // Not authenticated — redirect to login with return URL
         router.push('/login?redirect=/student/subscribe');
         return;
       }
@@ -46,16 +49,22 @@ export default function StudentLayout({
         const parts = profile.full_name.split(" ");
         setInitials(parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0][0] || "--");
       }
-      // Check subscription — redirect to subscribe if not active
       const isSubscribed = (profile as any)?.subscription_status === 'active' ||
                            (profile as any)?.tier === 'pro' ||
                            (profile as any)?.tier === 'student_paid';
+      if (!isSubscribed && justSubscribed && attempt < 5) {
+        // Webhook may still be processing — retry a few times
+        await new Promise(r => setTimeout(r, 1500));
+        return checkSubscription(attempt + 1);
+      }
       if (!isSubscribed && pathname !== '/student/subscribe' && pathname !== '/student/billing') {
         router.push('/student/subscribe');
       }
       setSubscriptionChecked(true);
-    });
-  }, [pathname, router]);
+    };
+
+    checkSubscription();
+  }, [pathname, router, searchParams]);
 
   useEffect(() => {
     setIsSidebarOpen(false);
