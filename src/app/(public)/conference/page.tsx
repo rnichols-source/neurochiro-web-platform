@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Users, ShieldCheck, Globe, Sparkles, Check, Zap, Award, BarChart3, Briefcase } from "lucide-react";
+import { ArrowRight, Users, ShieldCheck, Globe, Sparkles, Check, Zap, Award, BarChart3, Briefcase, Calendar, MapPin } from "lucide-react";
 import { STRIPE_PAYMENT_LINKS } from "@/lib/stripe-links";
 
 type Role = "doctor" | "student";
@@ -57,20 +57,32 @@ export default function ConferenceLandingPage() {
       <section className="bg-neuro-navy text-white pt-32 pb-12 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-neuro-orange/15 border border-neuro-orange/30 rounded-full px-4 py-2 mb-6">
-            <Sparkles className="w-4 h-4 text-neuro-orange" />
+            <Calendar className="w-4 h-4 text-neuro-orange" />
             <span className="text-xs font-bold text-neuro-orange uppercase tracking-wider">
-              The Platform for Nervous System Chiropractors
+              New Beginnings 2026 &middot; Asbury Park, NJ
             </span>
           </div>
 
           <h1 className="text-3xl md:text-4xl font-heading font-black tracking-tight leading-tight mb-4 text-white">
-            The Most Disruptive Platform in{" "}
-            <span className="text-neuro-orange">Chiropractic</span>
+            Get Found by Patients Looking for{" "}
+            <span className="text-neuro-orange">Nervous System</span> Chiropractors
           </h1>
 
-          <p className="text-gray-300 text-base mb-8 max-w-lg mx-auto">
-            Everything you need to grow your practice, hire top talent, track CE credits, and connect with the nervous system chiropractic community — all in one place.
+          <p className="text-gray-300 text-base mb-6 max-w-lg mx-auto">
+            The only directory built exclusively for doctors like you.
+            140+ verified chiropractors across 30+ states and 4 countries.
           </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-400 mb-4">
+            <div className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-neuro-orange" />
+              <span>Berkeley Oceanfront Hotel</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-neuro-orange" />
+              <span>May 14-17, 2026</span>
+            </div>
+          </div>
         </div>
       </section>
 
