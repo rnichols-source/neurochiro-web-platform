@@ -7,7 +7,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { LayoutDashboard, MessageSquare, Bell, GraduationCap, Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { createClient } from "@/lib/supabase";
 
 const mobileNavItems = [
@@ -19,6 +19,18 @@ const mobileNavItems = [
 ];
 
 export default function StudentLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Suspense fallback={<div className="min-h-dvh bg-[#0F1A24] flex items-center justify-center"><div className="w-8 h-8 border-4 border-neuro-orange border-t-transparent rounded-full animate-spin" /></div>}>
+      <StudentLayoutInner>{children}</StudentLayoutInner>
+    </Suspense>
+  );
+}
+
+function StudentLayoutInner({
   children,
 }: {
   children: React.ReactNode;
