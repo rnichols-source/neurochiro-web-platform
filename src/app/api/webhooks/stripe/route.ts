@@ -82,6 +82,94 @@ export async function POST(req: Request) {
           // Handle metadata-driven record creation
           const metaType = session.metadata?.type;
 
+          // Conference signup — auto-create account + profile + doctor record
+          if (metaType === 'conference_signup') {
+            const signupName = session.metadata?.name || '';
+            const signupEmail = session.metadata?.email || '';
+            const signupPassword = session.metadata?.password || '';
+            const signupRole = session.metadata?.role || 'doctor';
+
+            if (signupEmail && signupPassword) {
+              try {
+                // Create auth user
+                const { data: authUser, error: authErr } = await supabase.auth.admin.createUser({
+                  email: signupEmail,
+                  password: signupPassword,
+                  email_confirm: true,
+                  user_metadata: { full_name: signupName },
+                });
+
+                if (authUser?.user) {
+                  const newUserId = authUser.user.id;
+
+                  // Create profile
+                  await (supabase as any).from('profiles').upsert({
+                    id: newUserId,
+                    email: signupEmail,
+                    full_name: signupName,
+                    role: signupRole,
+                    tier: signupRole === 'student' ? 'student_paid' : 'basic',
+                    stripe_customer_id: customer,
+                  });
+
+                  // If doctor, create doctor record for directory
+                  if (signupRole === 'doctor') {
+                    const nameParts = signupName.split(' ');
+                    const firstName = nameParts[0] || '';
+                    const lastName = nameParts.slice(1).join(' ') || '';
+                    const slug = signupName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+                    await supabase.from('doctors').insert({
+                      user_id: newUserId,
+                      first_name: firstName,
+                      last_name: lastName,
+                      slug: slug + '-' + Date.now().toString(36),
+                      clinic_name: '',
+                      city: '',
+                      state: '',
+                      country: 'US',
+                      address: '',
+                      bio: '',
+                      specialties: [],
+                      verification_status: 'verified',
+                      membership_tier: 'basic',
+                      is_hiring: false,
+                      is_mentoring: false,
+                      region_code: 'US',
+                    } as any);
+                  }
+
+                  // If student, create student record
+                  if (signupRole === 'student') {
+                    await (supabase as any).from('students').upsert({
+                      id: newUserId,
+                      full_name: signupName,
+                      region_code: 'US',
+                    });
+                  }
+
+                  console.log(`[WEBHOOK] Conference signup complete: ${signupName} (${signupEmail}) as ${signupRole}`);
+
+                  // Discord notification
+                  const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+                  if (discordUrl) {
+                    await fetch(discordUrl, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        content: `🎉 **CONFERENCE SIGNUP**\n\n**${signupName}** just signed up as a **${signupRole}** at New Beginnings!\nEmail: ${signupEmail}\nPlan: ${session.metadata?.billing || 'monthly'}`,
+                      }),
+                    }).catch(() => {});
+                  }
+                } else {
+                  console.error('[WEBHOOK] Conference signup auth error:', authErr?.message);
+                }
+              } catch (e: any) {
+                console.error('[WEBHOOK] Conference signup error:', e.message);
+              }
+            }
+          }
+
           if (metaType === 'vendor') {
             const vendorName = session.metadata?.companyName || session.metadata?.company_name || 'Unnamed Vendor';
             const vendorSlug = vendorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
