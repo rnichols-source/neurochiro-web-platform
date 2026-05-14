@@ -25,20 +25,35 @@ const TIERS = [
     key: "starter" as const,
     name: "Starter",
     price: 99,
-    features: ["Directory listing", "Profile page", "Discount code", "Monthly analytics"],
+    features: [
+      "Listed in the marketplace directory",
+      "Profile page with product showcase",
+      "Discount code displayed to 140+ doctors",
+      "Monthly views & click analytics",
+    ],
   },
   {
     key: "growth" as const,
     name: "Growth",
     price: 249,
     popular: true,
-    features: ["Everything in Starter", "Featured placement", "Spotlight email", "Lead capture form"],
+    features: [
+      "Everything in Starter",
+      "Featured at top of your category",
+      "Monthly email blast to matching doctors",
+      "Lead capture — doctors contact you directly",
+    ],
   },
   {
     key: "partner" as const,
     name: "Partner",
     price: 499,
-    features: ["Everything in Growth", "Homepage placement", "Sponsor Spotlight", "Direct intros"],
+    features: [
+      "Everything in Growth",
+      "Featured on the NeuroChiro homepage",
+      "\"NeuroChiro Recommended\" badge",
+      "Personal intros to top practices",
+    ],
   },
 ];
 
