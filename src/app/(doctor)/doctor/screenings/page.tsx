@@ -63,7 +63,7 @@ function CopyButton({ text }: { text: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }}
-      className="flex items-center gap-1 text-xs text-gray-400 hover:text-neuro-orange transition-colors"
+      className="flex items-center gap-1 text-xs text-white/30 hover:text-neuro-orange transition-colors"
     >
       {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
       {copied ? "Copied" : "Copy"}
@@ -122,7 +122,7 @@ function ScreeningsContent() {
   if (!SCREENING_KIT) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-gray-400">Screening kit data is loading...</p>
+        <p className="text-white/30">Screening kit data is loading...</p>
       </div>
     );
   }
@@ -138,33 +138,33 @@ function ScreeningsContent() {
           <Target className="w-3.5 h-3.5" />
           Premium Tool
         </div>
-        <h1 className="text-3xl font-black text-neuro-navy mb-2">{kit.title}</h1>
-        <p className="text-gray-500 max-w-lg mx-auto">{kit.subtitle}</p>
+        <h1 className="text-3xl font-black text-white mb-2">{kit.title}</h1>
+        <p className="text-white/40 max-w-lg mx-auto">{kit.subtitle}</p>
       </div>
 
       {/* Expected Results */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-          <div className="text-xs text-gray-400 font-semibold uppercase mb-1">Screened/Event</div>
-          <div className="text-xl font-black text-neuro-navy">{kit.expectedResults.screenedPerEvent}</div>
+        <div className="bg-[#162231] rounded-xl border border-white/[0.06] p-4 text-center">
+          <div className="text-xs text-white/30 font-semibold uppercase mb-1">Screened/Event</div>
+          <div className="text-xl font-black text-white">{kit.expectedResults.screenedPerEvent}</div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-          <div className="text-xs text-gray-400 font-semibold uppercase mb-1">Sign-Up Rate</div>
+        <div className="bg-[#162231] rounded-xl border border-white/[0.06] p-4 text-center">
+          <div className="text-xs text-white/30 font-semibold uppercase mb-1">Sign-Up Rate</div>
           <div className="text-xl font-black text-green-600">{kit.expectedResults.signUpRate}</div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-          <div className="text-xs text-gray-400 font-semibold uppercase mb-1">Show Rate</div>
-          <div className="text-xl font-black text-neuro-navy">{kit.expectedResults.showRate}</div>
+        <div className="bg-[#162231] rounded-xl border border-white/[0.06] p-4 text-center">
+          <div className="text-xs text-white/30 font-semibold uppercase mb-1">Show Rate</div>
+          <div className="text-xl font-black text-white">{kit.expectedResults.showRate}</div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-          <div className="text-xs text-gray-400 font-semibold uppercase mb-1">Case Accept</div>
+        <div className="bg-[#162231] rounded-xl border border-white/[0.06] p-4 text-center">
+          <div className="text-xs text-white/30 font-semibold uppercase mb-1">Case Accept</div>
           <div className="text-xl font-black text-neuro-orange">{kit.expectedResults.caseAcceptance}</div>
         </div>
       </div>
 
       {/* ROI Example */}
       <div className="bg-neuro-navy rounded-xl p-5 text-white mb-6 text-center">
-        <div className="text-sm text-gray-400 mb-1">Example ROI</div>
+        <div className="text-sm text-white/30 mb-1">Example ROI</div>
         <div className="text-sm font-medium">{kit.expectedResults.exampleCalc}</div>
         <div className="text-xs text-neuro-orange font-bold mt-2">{kit.expectedResults.annualProjection}</div>
       </div>
@@ -174,7 +174,7 @@ function ScreeningsContent() {
         <div className="bg-gradient-to-r from-neuro-navy to-[#2d3f5e] rounded-xl p-6 text-white text-center mb-8">
           <Lock className="w-8 h-8 text-neuro-orange mx-auto mb-3" />
           <h3 className="text-lg font-black mb-2">Unlock the Screening Event Mastery Kit</h3>
-          <p className="text-gray-400 text-sm mb-4 max-w-md mx-auto">
+          <p className="text-white/30 text-sm mb-4 max-w-md mx-auto">
             Get the complete screening system with the 3-Build Philosophy, every script, printable forms, network builder, vendor connect, and follow-up sequences.
           </p>
           <button
@@ -203,7 +203,7 @@ function ScreeningsContent() {
           const isLocked = !isPurchased && key !== "philosophy"; // Philosophy is free preview
 
           return (
-            <div key={key} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+            <div key={key} className="bg-[#162231] rounded-xl border border-white/[0.06] overflow-hidden">
               {/* Section header */}
               <button
                 onClick={() => toggleSection(key)}
@@ -216,18 +216,18 @@ function ScreeningsContent() {
                   <Icon className="w-4.5 h-4.5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold text-neuro-navy text-sm">{section.title}</div>
+                  <div className="font-bold text-white text-sm">{section.title}</div>
                   {hasItems && (
-                    <div className="text-xs text-gray-400 mt-0.5">
+                    <div className="text-xs text-white/30 mt-0.5">
                       {section.items.length} items
                     </div>
                   )}
                 </div>
                 {isLocked && <Lock className="w-4 h-4 text-gray-300 flex-shrink-0" />}
                 {isExpanded ? (
-                  <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <ChevronDown className="w-4 h-4 text-white/30 flex-shrink-0" />
                 ) : (
-                  <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <ChevronRight className="w-4 h-4 text-white/30 flex-shrink-0" />
                 )}
               </button>
 
@@ -235,7 +235,7 @@ function ScreeningsContent() {
               {isExpanded && (
                 <div className="border-t border-gray-100">
                   {isLocked ? (
-                    <div className="p-6 text-center text-gray-400 text-sm">
+                    <div className="p-6 text-center text-white/30 text-sm">
                       <Lock className="w-5 h-5 mx-auto mb-2 text-gray-300" />
                       Purchase to unlock this section
                     </div>
@@ -260,16 +260,16 @@ function ScreeningsContent() {
                               className="w-full flex items-center gap-3 p-3 pl-6 text-left hover:bg-gray-50 transition-colors"
                             >
                               <span className="text-xs font-mono text-gray-300 w-5">{i + 1}.</span>
-                              <span className="flex-1 text-sm font-semibold text-neuro-navy">
+                              <span className="flex-1 text-sm font-semibold text-white">
                                 {item.title}
                               </span>
-                              <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold px-2 py-0.5 bg-gray-50 rounded">
+                              <span className="text-[10px] uppercase tracking-wider text-white/30 font-bold px-2 py-0.5 bg-gray-50 rounded">
                                 {item.type}
                               </span>
                               {itemExpanded ? (
-                                <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+                                <ChevronDown className="w-3.5 h-3.5 text-white/30" />
                               ) : (
-                                <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+                                <ChevronRight className="w-3.5 h-3.5 text-white/30" />
                               )}
                             </button>
                             {itemExpanded && (
@@ -307,14 +307,14 @@ function ScreeningsContent() {
           >
             Unlock for $79
           </button>
-          <p className="text-xs text-gray-400 mt-2">One-time purchase. Lifetime access.</p>
+          <p className="text-xs text-white/30 mt-2">One-time purchase. Lifetime access.</p>
         </div>
       )}
       {/* Vendor Marketplace CTA */}
       <div className="mt-6 p-5 rounded-xl bg-gradient-to-r from-violet-50 to-white border border-violet-100 flex items-center justify-between">
         <div>
-          <p className="text-sm font-bold text-neuro-navy">Need screening supplies or equipment?</p>
-          <p className="text-xs text-gray-400 mt-0.5">Browse trusted vendors in the NeuroChiro marketplace.</p>
+          <p className="text-sm font-bold text-white">Need screening supplies or equipment?</p>
+          <p className="text-xs text-white/30 mt-0.5">Browse trusted vendors in the NeuroChiro marketplace.</p>
         </div>
         <a href="/marketplace" className="px-4 py-2 bg-neuro-navy text-white text-xs font-bold rounded-xl hover:bg-neuro-navy/90 transition-colors whitespace-nowrap">Browse Vendors</a>
       </div>
