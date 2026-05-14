@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   // 1. Find the user
   const { data: profile, error: findError } = await supabase
     .from('profiles')
-    .select('id, full_name, email, role, tier, subscription_status, stripe_customer_id')
+    .select('id, full_name, email, role, tier, stripe_customer_id')
     .eq('email', email)
     .single()
 
@@ -30,10 +30,8 @@ export async function POST(req: Request) {
   // 2. Update their profile
   const updates: Record<string, any> = {}
   if (tier) updates.tier = tier
-  if (subscription_status) updates.subscription_status = subscription_status
 
   if (Object.keys(updates).length === 0) {
-    // No updates requested — just return current state
     return NextResponse.json({ profile, message: 'No updates — returning current state' })
   }
 
@@ -60,7 +58,7 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     success: true,
-    before: { tier: (profile as any).tier, subscription_status: (profile as any).subscription_status },
+    before: { tier: (profile as any).tier },
     after: updates,
   })
 }

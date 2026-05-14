@@ -62,7 +62,6 @@ export async function POST(req: Request) {
             .update({
               stripe_customer_id: customer,
               tier: membershipTier,
-              subscription_status: 'active',
             } as any)
             .eq('id', userId);
 
@@ -803,13 +802,7 @@ export async function POST(req: Request) {
           .eq('stripe_customer_id', customer)
           .single();
 
-        if (profile) {
-          // Preserve existing tier — only confirm subscription is active
-          await supabase
-            .from('profiles')
-            .update({ subscription_status: 'active' } as any)
-            .eq('id', profile.id);
-        }
+        // invoice.payment_succeeded — tier already set, no additional update needed
 
         // Auto-cancel payment plan subscriptions after 3 payments
         const subscriptionId = invoice.subscription;
@@ -852,7 +845,7 @@ export async function POST(req: Request) {
         if (profile) {
           await supabase
             .from('profiles')
-            .update({ tier: 'basic', subscription_status: 'past_due' } as any)
+            .update({ tier: 'basic' } as any)
             .eq('id', profile.id);
         }
 
@@ -873,7 +866,7 @@ export async function POST(req: Request) {
         if (profile) {
           await supabase
             .from('profiles')
-            .update({ subscription_status: subscription.status } as any)
+            .update({} as any) // subscription_status column doesn't exist; tier handles access
             .eq('id', profile.id);
         }
 
@@ -907,7 +900,7 @@ export async function POST(req: Request) {
         if (profile && !hasOtherActiveSub) {
           await supabase
             .from('profiles')
-            .update({ tier: 'basic', subscription_status: 'canceled' } as any)
+            .update({ tier: 'basic' } as any)
             .eq('id', profile.id);
         } else if (profile && hasOtherActiveSub) {
           console.log(`[WEBHOOK] Subscription deleted but customer ${customer} still has active subs — not downgrading`);
