@@ -223,6 +223,15 @@ export default function ConferenceLandingPage() {
             Already a member?{" "}
             <Link href="/login" className="text-neuro-orange font-bold hover:underline">Log in</Link>
           </p>
+
+          {/* Vendor CTA */}
+          <div className="mt-6 bg-white rounded-xl border border-gray-100 p-4 text-center">
+            <p className="text-sm font-bold text-neuro-navy">Are you a vendor?</p>
+            <p className="text-xs text-gray-500 mt-1 mb-3">Get your products in front of 140+ nervous system chiropractors.</p>
+            <Link href="/marketplace/apply" className="text-neuro-orange font-bold text-sm hover:underline">
+              Apply for the Marketplace &rarr;
+            </Link>
+          </div>
         </div>
       </section>
 
