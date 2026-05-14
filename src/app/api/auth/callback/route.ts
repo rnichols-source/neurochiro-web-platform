@@ -24,14 +24,14 @@ export async function GET(request: Request) {
       if (user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role, subscription_status, tier')
+          .select('role, tier, stripe_customer_id')
           .eq('id', user.id)
           .single()
 
         if (profile?.role === 'student') {
-          const isSubscribed = profile.subscription_status === 'active' ||
-                               profile.tier === 'pro' ||
-                               profile.tier === 'student_paid';
+          const tier = profile.tier;
+          const hasStripe = !!(profile as any).stripe_customer_id;
+          const isSubscribed = hasStripe || (tier && tier !== 'basic' && tier !== 'free');
           if (!isSubscribed) {
             console.log(`[AUTH_CALLBACK] Unsubscribed student. Redirecting to /student/subscribe`);
             return NextResponse.redirect(`${origin}/student/subscribe`)
@@ -46,7 +46,7 @@ export async function GET(request: Request) {
             .eq('user_id', user.id)
             .single();
           const isFounder = (doc as any)?.is_founding_member === true;
-          const isSubscribed = profile.subscription_status === 'active' || isFounder;
+          const isSubscribed = !!(profile as any).stripe_customer_id || isFounder;
           if (!isSubscribed) {
             console.log(`[AUTH_CALLBACK] Unsubscribed doctor. Redirecting to /doctor/billing`);
             return NextResponse.redirect(`${origin}/doctor/billing`)

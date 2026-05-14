@@ -37,12 +37,12 @@ export default async function DashboardRedirect() {
     // Check subscription before allowing access to student dashboard
     const { data: studentProfile } = await supabase
       .from('profiles')
-      .select('subscription_status, tier')
+      .select('tier, stripe_customer_id')
       .eq('id', user.id)
       .single();
-    const isSubscribed = studentProfile?.subscription_status === 'active' ||
-                         studentProfile?.tier === 'pro' ||
-                         studentProfile?.tier === 'student_paid';
+    const tier = studentProfile?.tier;
+    const hasStripe = !!(studentProfile as any)?.stripe_customer_id;
+    const isSubscribed = hasStripe || (tier && tier !== 'basic' && tier !== 'free');
     if (!isSubscribed) redirect('/student/subscribe');
     redirect('/student/dashboard');
   }

@@ -54,16 +54,16 @@ function StudentLayoutInner({
       }
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, subscription_status, tier')
+        .select('full_name, tier, stripe_customer_id')
         .eq('id', user.id)
         .single();
       if (profile?.full_name) {
         const parts = profile.full_name.split(" ");
         setInitials(parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0][0] || "--");
       }
-      const isSubscribed = (profile as any)?.subscription_status === 'active' ||
-                           (profile as any)?.tier === 'pro' ||
-                           (profile as any)?.tier === 'student_paid';
+      const tier = (profile as any)?.tier;
+      const hasStripe = !!(profile as any)?.stripe_customer_id;
+      const isSubscribed = hasStripe || (tier && tier !== 'basic' && tier !== 'free');
       if (!isSubscribed && justSubscribed && attempt < 5) {
         // Webhook may still be processing — retry a few times
         await new Promise(r => setTimeout(r, 1500));

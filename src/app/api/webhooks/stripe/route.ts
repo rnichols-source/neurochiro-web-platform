@@ -54,7 +54,7 @@ export async function POST(req: Request) {
           const amountPaid = (session.amount_total || 0) / 100;
           const metaRole = session.metadata?.role || '';
           const membershipTier = metaRole === 'student'
-            ? 'student_paid'
+            ? 'standard'
             : amountPaid >= 199 ? 'pro' : amountPaid >= 99 ? 'growth' : 'basic';
 
           await supabase
@@ -108,7 +108,7 @@ export async function POST(req: Request) {
                     email: signupEmail,
                     full_name: signupName,
                     role: signupRole,
-                    tier: signupRole === 'student' ? 'student_paid' : 'basic',
+                    tier: signupRole === 'student' ? 'standard' : 'basic',
                     stripe_customer_id: customer,
                   });
 

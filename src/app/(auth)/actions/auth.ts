@@ -29,7 +29,7 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, full_name, subscription_status, tier')
+    .select('role, full_name, tier, stripe_customer_id')
     .eq('id', data.user.id)
     .single()
 
@@ -48,9 +48,9 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   // Students without active subscription ALWAYS go to subscribe page
   // This check runs before redirectUrl to prevent paywall bypass via ?redirect=
   if (role === 'student') {
-    const subStatus = (profile as any)?.subscription_status;
     const tier = (profile as any)?.tier;
-    const isSubscribed = subStatus === 'active' || tier === 'pro' || tier === 'student_paid';
+    const hasStripe = !!(profile as any)?.stripe_customer_id;
+    const isSubscribed = hasStripe || (tier && tier !== 'basic' && tier !== 'free');
     if (!isSubscribed) {
       return redirect('/student/subscribe');
     }

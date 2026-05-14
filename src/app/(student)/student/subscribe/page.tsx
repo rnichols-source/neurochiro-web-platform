@@ -24,12 +24,12 @@ export default function StudentSubscribePage() {
       }
       const { data: profile } = await supabase
         .from('profiles')
-        .select('subscription_status, tier')
+        .select('tier, stripe_customer_id')
         .eq('id', user.id)
         .single();
-      const isSubscribed = (profile as any)?.subscription_status === 'active' ||
-                           (profile as any)?.tier === 'pro' ||
-                           (profile as any)?.tier === 'student_paid';
+      const tier = (profile as any)?.tier;
+      const hasStripe = !!(profile as any)?.stripe_customer_id;
+      const isSubscribed = hasStripe || (tier && tier !== 'basic' && tier !== 'free');
       if (isSubscribed) {
         router.push('/student/dashboard');
         return;
