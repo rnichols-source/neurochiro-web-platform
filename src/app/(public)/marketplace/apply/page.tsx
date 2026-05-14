@@ -30,6 +30,7 @@ const TIERS = [
       "Profile page with product showcase",
       "Discount code displayed to 140+ doctors",
       "Monthly views & click analytics",
+      "Listed on NeuroChiro Instagram highlights",
     ],
   },
   {
@@ -42,6 +43,8 @@ const TIERS = [
       "Featured at top of your category",
       "Monthly email blast to matching doctors",
       "Lead capture — doctors contact you directly",
+      "Monthly Instagram promotion (post + story)",
+      "Vendor Spotlight interview on your page",
     ],
   },
   {
@@ -52,6 +55,8 @@ const TIERS = [
       "Everything in Growth",
       "Featured on the NeuroChiro homepage",
       "\"NeuroChiro Recommended\" badge",
+      "Weekly Instagram promotion (4x/month)",
+      "Sponsor a NeuroChiro Spotlight episode",
       "Personal intros to top practices",
     ],
   },
