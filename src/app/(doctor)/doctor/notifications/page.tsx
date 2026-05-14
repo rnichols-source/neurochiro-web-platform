@@ -68,8 +68,8 @@ export default function NotificationsPage() {
     <div className="space-y-8 pb-20">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-heading font-black text-neuro-navy uppercase tracking-tight">Notifications</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-3xl font-heading font-black text-white uppercase tracking-tight">Notifications</h1>
+          <p className="text-white/30 mt-1">
             {unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
           </p>
         </div>
@@ -92,8 +92,8 @@ export default function NotificationsPage() {
             className={cn(
               "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
               filter === tab
-                ? "bg-neuro-navy text-white"
-                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                ? "bg-white/10 text-white"
+                : "bg-white/[0.04] text-white/40 hover:bg-white/[0.08]"
             )}
           >
             {tab === "all" ? "All" : `Unread (${unreadCount})`}
@@ -123,7 +123,7 @@ export default function NotificationsPage() {
                   "flex items-start gap-4 p-5 rounded-2xl border transition-all cursor-pointer",
                   isUnread
                     ? "bg-neuro-orange/5 border-neuro-orange/20 hover:border-neuro-orange/40"
-                    : "bg-white border-gray-100 hover:border-gray-200"
+                    : "bg-white/[0.03] border-white/[0.06] hover:border-white/[0.1]"
                 )}
                 onClick={() => {
                   setExpandedId(expandedId === notif.id ? null : notif.id);
@@ -133,24 +133,24 @@ export default function NotificationsPage() {
                 <div
                   className={cn(
                     "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
-                    isUnread ? "bg-neuro-orange/10 text-neuro-orange" : "bg-gray-50 text-gray-400"
+                    isUnread ? "bg-neuro-orange/10 text-neuro-orange" : "bg-white/[0.06] text-white/30"
                   )}
                 >
                   <Icon className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className={cn("text-sm font-black", isUnread ? "text-neuro-navy" : "text-gray-600")}>
+                    <p className={cn("text-sm font-black", isUnread ? "text-white" : "text-white/50")}>
                       {notif.title}
                     </p>
                     {isUnread && <span className="w-2 h-2 bg-neuro-orange rounded-full flex-shrink-0" />}
                   </div>
-                  <p className={cn("text-gray-500 text-sm mt-0.5", expandedId === notif.id ? "" : "line-clamp-2")}>{notif.body}</p>
-                  <p className="text-gray-400 text-xs mt-2">
+                  <p className={cn("text-white/40 text-sm mt-0.5", expandedId === notif.id ? "" : "line-clamp-2")}>{notif.body}</p>
+                  <p className="text-white/20 text-xs mt-2">
                     {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true })}
                   </p>
                 </div>
-                {notif.link && <ChevronRight className="w-5 h-5 text-gray-300 flex-shrink-0 mt-2" />}
+                {notif.link && <ChevronRight className="w-5 h-5 text-white/20 flex-shrink-0 mt-2" />}
               </div>
             );
 
