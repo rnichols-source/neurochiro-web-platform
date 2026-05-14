@@ -39,6 +39,16 @@ export async function createStudentCheckout(billing: 'monthly' | 'annual' = 'mon
         .eq('id', user.id)
     }
 
+    // Check if student already has an active subscription
+    const activeSubs = await stripe.subscriptions.list({
+      customer: customerId,
+      status: 'active',
+      limit: 1,
+    })
+    if (activeSubs.data.length > 0) {
+      return { error: 'You already have an active subscription.' }
+    }
+
     const priceAmount = billing === 'monthly' ? 1200 : 12000 // $12/mo or $120/yr ($10/mo)
 
     const session = await stripe.checkout.sessions.create({

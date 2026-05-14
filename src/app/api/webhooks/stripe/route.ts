@@ -884,17 +884,32 @@ export async function POST(req: Request) {
         const subscription = event.data.object as any;
         const customer = subscription.customer as string;
 
+        // Check if customer still has other active subscriptions before downgrading
+        let hasOtherActiveSub = false;
+        try {
+          const activeSubs = await stripe.subscriptions.list({
+            customer,
+            status: 'active',
+            limit: 1,
+          });
+          hasOtherActiveSub = activeSubs.data.length > 0;
+        } catch (err) {
+          console.error('[WEBHOOK] Error checking remaining subs:', err);
+        }
+
         const { data: profile } = await supabase
           .from('profiles')
           .select('id')
           .eq('stripe_customer_id', customer)
           .single();
 
-        if (profile) {
+        if (profile && !hasOtherActiveSub) {
           await supabase
             .from('profiles')
             .update({ tier: 'basic' } as any)
             .eq('id', profile.id);
+        } else if (profile && hasOtherActiveSub) {
+          console.log(`[WEBHOOK] Subscription deleted but customer ${customer} still has active subs — not downgrading`);
         }
 
         Automations.onSubscriptionCanceled(subscription);
