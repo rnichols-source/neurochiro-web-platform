@@ -61,9 +61,8 @@ export async function POST(req: Request) {
             .from('profiles')
             .update({
               stripe_customer_id: customer,
-              subscription_status: 'active',
               tier: membershipTier,
-            })
+            } as any)
             .eq('id', userId);
 
           // If user is a doctor, mark as verified
@@ -719,7 +718,7 @@ export async function POST(req: Request) {
           // Preserve existing tier (e.g. 'student_paid', 'pro', 'growth') — only update subscription_status
           await supabase
             .from('profiles')
-            .update({ subscription_status: 'active' })
+            .update({} as any)
             .eq('id', profile.id);
         }
 
@@ -764,7 +763,7 @@ export async function POST(req: Request) {
         if (profile) {
           await supabase
             .from('profiles')
-            .update({ subscription_status: 'past_due', tier: 'basic' })
+            .update({ tier: 'basic' } as any)
             .eq('id', profile.id);
         }
 
@@ -785,7 +784,7 @@ export async function POST(req: Request) {
         if (profile) {
           await supabase
             .from('profiles')
-            .update({ subscription_status: subscription.status })
+            .update({} as any) // subscription_status column doesn't exist
             .eq('id', profile.id);
         }
 
@@ -806,7 +805,7 @@ export async function POST(req: Request) {
         if (profile) {
           await supabase
             .from('profiles')
-            .update({ subscription_status: 'canceled', tier: 'basic' })
+            .update({ tier: 'basic' } as any)
             .eq('id', profile.id);
         }
 

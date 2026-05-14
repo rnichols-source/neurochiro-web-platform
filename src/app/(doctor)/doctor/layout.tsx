@@ -34,15 +34,24 @@ export default function DoctorLayout({
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
 
-      // TODO: Re-enable payment gate after conference
-      // Payment verification will be handled server-side via API route
-      // to avoid client-side RLS issues with doctors table
-
+      // Payment gate — check profiles.tier (readable via client RLS)
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name, tier')
         .eq('id', user.id)
         .single();
+
+      const profileTier = profile?.tier || 'standard';
+      const isPaid = profileTier !== 'standard' && profileTier !== 'free';
+
+      // Allow billing and settings without payment
+      const allowedPaths = ['/doctor/billing', '/doctor/settings'];
+      const isAllowedPath = allowedPaths.some(p => pathname?.startsWith(p));
+
+      if (!isPaid && !isAllowedPath) {
+        window.location.href = '/doctor/billing';
+        return;
+      }
 
       setSubscriptionChecked(true);
 
