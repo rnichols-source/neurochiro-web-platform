@@ -37,7 +37,7 @@ export default function WhatsNew() {
     <div className="bg-gradient-to-r from-neuro-orange/10 to-neuro-orange/5 border border-neuro-orange/20 rounded-2xl p-5 relative">
       <button
         onClick={handleDismiss}
-        className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-black/5 text-gray-400 hover:text-gray-600 transition-colors"
+        className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-white/10 text-white/30 hover:text-white/60 transition-colors"
         aria-label="Dismiss"
       >
         <X className="w-4 h-4" />
@@ -48,8 +48,8 @@ export default function WhatsNew() {
         </div>
         <div>
           <p className="text-xs font-black text-neuro-orange uppercase tracking-widest mb-1">What&apos;s New</p>
-          <h3 className="font-bold text-neuro-navy text-sm mb-1">{CURRENT_UPDATE.title}</h3>
-          <p className="text-xs text-gray-500 leading-relaxed mb-3">{CURRENT_UPDATE.description}</p>
+          <h3 className="font-bold text-white text-sm mb-1">{CURRENT_UPDATE.title}</h3>
+          <p className="text-xs text-white/50 leading-relaxed mb-3">{CURRENT_UPDATE.description}</p>
           <Link
             href={CURRENT_UPDATE.ctaLink}
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-neuro-orange text-white text-xs font-bold rounded-lg hover:bg-neuro-orange/90 transition-colors"
