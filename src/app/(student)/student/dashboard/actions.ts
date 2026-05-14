@@ -11,7 +11,7 @@ export async function getStudentDashboardData() {
   try {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role, tier, full_name, subscription_status')
+      .select('role, tier, full_name, stripe_customer_id')
       .eq('id', user.id)
       .single()
 
@@ -39,7 +39,7 @@ export async function getStudentDashboardData() {
         fullName: (profile as any)?.full_name,
         role: (profile as any)?.role,
         status: ((profile as any)?.tier && (profile as any)?.tier !== 'free') ? 'active' : 'inactive',
-        subscription_status: (profile as any)?.subscription_status || null,
+        hasSubscription: !!(profile as any)?.stripe_customer_id,
         school: (student as any)?.school || null,
         gradYear: (student as any)?.graduation_year || null,
         city: (student as any)?.location_city || null,

@@ -340,12 +340,12 @@ export async function isPremiumMember(): Promise<boolean> {
 
     const { data, error } = await (supabase as any)
       .from('profiles')
-      .select('tier, subscription_status')
+      .select('tier, stripe_customer_id')
       .eq('id', user.id)
       .maybeSingle()
 
     if (error || !data) return false
-    return data.tier !== 'free' || data.subscription_status === 'active'
+    return data.tier !== 'free' || !!data.stripe_customer_id
   } catch {
     return false
   }

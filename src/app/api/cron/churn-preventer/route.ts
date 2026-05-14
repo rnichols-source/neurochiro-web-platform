@@ -48,9 +48,9 @@ export async function GET(req: Request) {
     // 1. Find doctors with past_due or inactive subscription who were previously paid
     const { data: atRiskDocs } = await supabase
       .from('profiles')
-      .select('id, email, full_name, subscription_status, updated_at')
+      .select('id, email, full_name, tier, updated_at')
       .eq('role', 'doctor')
-      .in('subscription_status', ['past_due', 'canceled', 'unpaid']);
+      .eq('tier', 'basic');
 
     for (const doc of (atRiskDocs || []) as any[]) {
       if (recentlyEmailed.has(doc.id)) continue;
@@ -73,7 +73,7 @@ export async function GET(req: Request) {
 
       await supabase.from('automation_queue').insert({
         event_type: 'churn_prevention',
-        payload: { userId: doc.id, email: doc.email, reason: doc.subscription_status },
+        payload: { userId: doc.id, email: doc.email, reason: doc.tier },
         status: 'completed',
       });
 
