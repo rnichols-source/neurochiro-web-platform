@@ -57,7 +57,7 @@ export default function StudentLayout({
         await new Promise(r => setTimeout(r, 1500));
         return checkSubscription(attempt + 1);
       }
-      if (!isSubscribed && pathname !== '/student/subscribe' && pathname !== '/student/billing') {
+      if (!isSubscribed && pathname !== '/student/subscribe' && pathname !== '/student/billing' && pathname !== '/student/welcome') {
         router.push('/student/subscribe');
       }
       setSubscriptionChecked(true);
@@ -72,7 +72,7 @@ export default function StudentLayout({
 
   // Prevent flash of portal content while subscription is being checked
   // Allow the subscribe and billing pages to render immediately
-  const isExemptPage = pathname === '/student/subscribe' || pathname === '/student/billing';
+  const isExemptPage = pathname === '/student/subscribe' || pathname === '/student/billing' || pathname === '/student/welcome';
   if (!subscriptionChecked && !isExemptPage) {
     return (
       <div className="flex items-center justify-center h-dvh bg-[#0F1A24]">

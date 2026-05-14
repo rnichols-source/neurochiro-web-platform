@@ -73,7 +73,7 @@ export async function createStudentCheckout(billing: 'monthly' | 'annual' = 'mon
           quantity: 1,
         },
       ],
-      success_url: `${siteUrl}/student/dashboard?subscribed=true`,
+      success_url: `${siteUrl}/student/welcome?subscribed=true`,
       cancel_url: `${siteUrl}/student/subscribe?canceled=true`,
       metadata: {
         userId: user.id,
