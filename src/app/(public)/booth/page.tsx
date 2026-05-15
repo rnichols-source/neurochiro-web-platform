@@ -2,229 +2,399 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { ShieldCheck, Users, Globe, BarChart3, Briefcase, Award, Shuffle, DollarSign, GraduationCap, Zap, Star, MapPin, Heart, TrendingUp } from "lucide-react";
+import {
+  Users, BarChart3, Briefcase, Award, Shuffle, DollarSign,
+  GraduationCap, Zap, Star, MapPin, Heart, Eye, Bell,
+  TrendingUp, Calendar, Search, CheckCircle2, ArrowRight,
+  FileText, MessageSquare, ShieldCheck, Target, Clock,
+} from "lucide-react";
 
 const SLIDES = [
   {
-    icon: BarChart3,
-    title: "AI Practice Intelligence",
-    desc: "Your practice command center — health score, competitive ranking, AI-powered weekly insights, and revenue intelligence.",
-    color: "text-blue-400",
-    screenshot: "/booth/dashboard.png",
-    label: "Doctor Dashboard",
+    title: "Doctor Dashboard",
+    subtitle: "Your Practice Command Center",
+    desc: "AI-powered insights, competitive ranking, revenue intelligence, and smart action items — all in one view.",
+    color: "bg-blue-500",
+    mockup: (
+      <div className="space-y-3">
+        <div className="bg-neuro-navy rounded-xl p-4 text-white">
+          <p className="text-[10px] text-neuro-orange font-bold uppercase tracking-widest mb-1">Practice Command Center</p>
+          <p className="text-lg font-bold">Good morning, Dr. Smith</p>
+          <p className="text-xs text-white/40">AlignLife Chiropractic</p>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {[
+            { icon: Eye, label: "Views", value: "487", color: "text-blue-500" },
+            { icon: Users, label: "Leads", value: "34", color: "text-emerald-500" },
+            { icon: DollarSign, label: "Revenue", value: "$40K", color: "text-violet-500" },
+            { icon: MapPin, label: "Rank", value: "#3", color: "text-neuro-orange" },
+          ].map((s, i) => (
+            <div key={i} className="bg-white rounded-lg border border-gray-100 p-3 text-center">
+              <s.icon className={`w-4 h-4 mx-auto mb-1 ${s.color}`} />
+              <p className="text-lg font-black text-neuro-navy">{s.value}</p>
+              <p className="text-[8px] text-gray-400 uppercase">{s.label}</p>
+            </div>
+          ))}
+        </div>
+        <div className="bg-neuro-orange/5 border border-neuro-orange/20 rounded-lg p-3">
+          <p className="text-[10px] text-neuro-orange font-bold uppercase mb-1">AI Weekly Insight</p>
+          <p className="text-xs text-gray-600">Your profile views increased 23% this week. Doctors who add video see 3x more leads.</p>
+        </div>
+      </div>
+    ),
   },
   {
-    icon: Users,
     title: "Patient Lead Pipeline",
-    desc: "Track every patient lead from first contact to converted. Notes, stage management, and conversion tracking built in.",
-    color: "text-emerald-400",
-    screenshot: "/booth/leads.png",
-    label: "Lead Pipeline",
+    subtitle: "Never Lose a Lead",
+    desc: "Track every patient from first contact to converted — with notes, stages, and conversion analytics.",
+    color: "bg-emerald-500",
+    mockup: (
+      <div className="space-y-3">
+        <div className="grid grid-cols-4 gap-2">
+          {["New", "Contacted", "Scheduled", "Converted"].map((s, i) => (
+            <div key={i} className={`rounded-lg p-2 text-center text-white text-xs font-bold ${
+              ["bg-blue-500", "bg-amber-500", "bg-violet-500", "bg-emerald-500"][i]
+            }`}>{s} ({[3, 4, 2, 8][i]})</div>
+          ))}
+        </div>
+        {["Sarah Mitchell — Directory — Converted", "Brandon Lee — Referral — Scheduled", "Megan Hernandez — Directory — New"].map((l, i) => (
+          <div key={i} className="bg-white rounded-lg border border-gray-100 p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-neuro-orange/10 flex items-center justify-center text-neuro-orange font-bold text-xs">{l[0]}</div>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-neuro-navy">{l.split(" — ")[0]}</p>
+              <p className="text-[10px] text-gray-400">{l.split(" — ").slice(1).join(" · ")}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
   },
   {
-    icon: Shuffle,
     title: "ChiroMatch",
-    desc: "The first residency-style matching system for chiropractic. Students rank practices. Practices rank candidates. Algorithm matches.",
-    color: "text-violet-400",
-    screenshot: "/booth/chiromatch.png",
-    label: "ChiroMatch",
+    subtitle: "The NFL Draft for Chiropractic",
+    desc: "Students rank practices. Practices rank candidates. Our algorithm finds the perfect match on Match Day.",
+    color: "bg-violet-500",
+    mockup: (
+      <div className="space-y-3">
+        <div className="bg-neuro-navy rounded-xl p-4 text-center text-white">
+          <Shuffle className="w-8 h-8 text-neuro-orange mx-auto mb-2" />
+          <p className="font-bold text-lg">Fall 2026</p>
+          <p className="text-xs text-white/40">Match Day: September 22</p>
+        </div>
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="bg-white rounded-lg border border-gray-100 p-2">
+            <p className="text-lg font-black text-neuro-navy">24</p>
+            <p className="text-[8px] text-gray-400 uppercase">Positions</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-100 p-2">
+            <p className="text-lg font-black text-neuro-navy">67</p>
+            <p className="text-[8px] text-gray-400 uppercase">Students</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-100 p-2">
+            <p className="text-lg font-black text-neuro-navy">89%</p>
+            <p className="text-[8px] text-gray-400 uppercase">Match Rate</p>
+          </div>
+        </div>
+        <p className="text-center text-xs text-gray-500">Rank your top 10 → Algorithm matches → Results on Match Day</p>
+      </div>
+    ),
   },
   {
-    icon: DollarSign,
     title: "Salary Transparency",
-    desc: "Real compensation data by state, role, and specialty. Know what the market pays before you make an offer.",
-    color: "text-emerald-400",
-    screenshot: "/booth/salary.png",
-    label: "Salary Explorer",
+    subtitle: "Real Data. No Guessing.",
+    desc: "Compensation data by state, role, and specialty — aggregated from real job postings on the platform.",
+    color: "bg-emerald-500",
+    mockup: (
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-white rounded-lg border border-gray-100 p-3 text-center">
+            <p className="text-2xl font-black text-neuro-navy">$85K</p>
+            <p className="text-[8px] text-gray-400 uppercase">Avg Associate</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-100 p-3 text-center">
+            <p className="text-2xl font-black text-neuro-navy">$105K</p>
+            <p className="text-[8px] text-gray-400 uppercase">75th Percentile</p>
+          </div>
+        </div>
+        {["California — $105K", "Texas — $90K", "Florida — $82K", "Georgia — $80K"].map((s, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <span className="text-xs font-bold text-neuro-navy w-24">{s.split(" — ")[0]}</span>
+            <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-neuro-orange rounded-full" style={{ width: `${[100, 86, 78, 76][i]}%` }} />
+            </div>
+            <span className="text-xs font-bold text-neuro-navy">{s.split(" — ")[1]}</span>
+          </div>
+        ))}
+      </div>
+    ),
   },
   {
-    icon: Award,
     title: "CE Credit Tracking",
-    desc: "QR check-in at events. Verified certificates generated automatically. Track all your CE hours in one dashboard.",
-    color: "text-amber-400",
-    screenshot: "/booth/ce-tracker.png",
-    label: "CE Tracker",
+    subtitle: "QR Check-In → Certificate",
+    desc: "Attend a seminar, scan the QR code, and your CE certificate is generated instantly. All hours tracked in one dashboard.",
+    color: "bg-amber-500",
+    mockup: (
+      <div className="space-y-3">
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-white rounded-lg border border-gray-100 p-3 text-center">
+            <p className="text-2xl font-black text-neuro-navy">30</p>
+            <p className="text-[8px] text-gray-400 uppercase">Total Hours</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-100 p-3 text-center">
+            <p className="text-2xl font-black text-neuro-orange">12</p>
+            <p className="text-[8px] text-gray-400 uppercase">This Year</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-100 p-3 text-center">
+            <p className="text-2xl font-black text-neuro-navy">4</p>
+            <p className="text-[8px] text-gray-400 uppercase">Certificates</p>
+          </div>
+        </div>
+        {["Pediatric Neurology Workshop — 8 CE", "New Beginnings 2026 — 12 CE"].map((c, i) => (
+          <div key={i} className="bg-white rounded-lg border border-gray-100 p-3 flex items-center gap-3">
+            <Award className="w-6 h-6 text-blue-400" />
+            <div className="flex-1">
+              <p className="text-xs font-bold text-neuro-navy">{c.split(" — ")[0]}</p>
+              <p className="text-[10px] text-gray-400">Certificate: NC-CE-{Math.random().toString(36).slice(2, 8).toUpperCase()}</p>
+            </div>
+            <span className="text-sm font-black text-blue-500">{c.split(" — ")[1]}</span>
+          </div>
+        ))}
+      </div>
+    ),
   },
   {
-    icon: Star,
     title: "Seminar Platform",
-    desc: "Full event landing pages with schedule, speakers, venue, reviews, and spotlight interviews. Better than Eventbrite for chiropractic.",
-    color: "text-yellow-400",
-    screenshot: "/booth/seminars.png",
-    label: "Seminar Pages",
+    subtitle: "Better Than Eventbrite",
+    desc: "Full event landing pages with schedule, speakers, venue, reviews, and spotlight interviews. CE tracking built in.",
+    color: "bg-yellow-500",
+    mockup: (
+      <div className="space-y-3">
+        <div className="bg-neuro-navy rounded-xl p-4 text-white">
+          <div className="flex gap-2 mb-2">
+            <span className="px-2 py-0.5 bg-white/10 rounded text-[10px]">📅 May 14-17</span>
+            <span className="px-2 py-0.5 bg-white/10 rounded text-[10px]">📍 Asbury Park</span>
+            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded text-[10px]">12 CE</span>
+          </div>
+          <p className="font-bold">New Beginnings — 35th Anniversary</p>
+          <p className="text-xs text-white/40">Berkeley Oceanfront Hotel</p>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-white rounded-lg border border-gray-100 p-2 text-center text-xs"><Clock className="w-3 h-3 mx-auto mb-1 text-neuro-orange" /> Schedule</div>
+          <div className="bg-white rounded-lg border border-gray-100 p-2 text-center text-xs"><Users className="w-3 h-3 mx-auto mb-1 text-neuro-orange" /> Speakers</div>
+        </div>
+        <div className="flex gap-1">
+          {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 text-yellow-400 fill-yellow-400" />)}
+          <span className="text-xs text-gray-500 ml-1">4.8 (12 reviews)</span>
+        </div>
+      </div>
+    ),
   },
   {
-    icon: GraduationCap,
     title: "ChiroScore",
-    desc: "Universal candidate rating from 0-100. Seven categories. Grades A through F. Doctors see it on every applicant.",
-    color: "text-blue-400",
-    screenshot: "/booth/chiroscore.png",
-    label: "ChiroScore",
+    subtitle: "Universal Candidate Rating",
+    desc: "Every student gets a 0-100 score across 7 categories. Doctors see it on every applicant. Grades A through F.",
+    color: "bg-blue-500",
+    mockup: (
+      <div className="space-y-3">
+        <div className="flex items-center gap-4 justify-center">
+          <div className="text-center">
+            <p className="text-4xl font-black text-neuro-navy">78</p>
+            <p className="text-xs text-gray-400">/100</p>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center">
+            <span className="text-xl font-black text-blue-500">B</span>
+          </div>
+        </div>
+        {[
+          { label: "Profile", pct: 90 }, { label: "Education", pct: 75 },
+          { label: "Academy", pct: 60 }, { label: "Career", pct: 85 },
+        ].map((b, i) => (
+          <div key={i}>
+            <div className="flex justify-between text-[10px] mb-0.5">
+              <span className="text-gray-500">{b.label}</span>
+              <span className="text-gray-400">{b.pct}%</span>
+            </div>
+            <div className="h-1.5 bg-gray-100 rounded-full">
+              <div className={`h-full rounded-full ${b.pct >= 75 ? 'bg-green-400' : 'bg-neuro-orange'}`} style={{ width: `${b.pct}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
   },
   {
-    icon: Briefcase,
-    title: "Hiring System + ATS",
-    desc: "7-stage pipeline. Interview prep. Offer letters. Email templates. Reference checks. The most complete hiring system in chiropractic.",
-    color: "text-orange-400",
-    screenshot: "/booth/hiring.png",
-    label: "Hiring ATS",
+    title: "Hiring System",
+    subtitle: "Full ATS Built In",
+    desc: "7-stage pipeline, interview prep, offer letters, email templates, reference checks — the most complete hiring system in chiropractic.",
+    color: "bg-orange-500",
+    mockup: (
+      <div className="space-y-3">
+        <div className="flex gap-1">
+          {["New", "Review", "Phone", "Interview", "Offer", "Hired"].map((s, i) => (
+            <div key={i} className={`flex-1 py-1 text-center text-[8px] font-bold rounded ${i < 4 ? 'bg-neuro-orange text-white' : 'bg-gray-100 text-gray-400'}`}>{s}</div>
+          ))}
+        </div>
+        {["Dr. Sarah Chen — ChiroScore 82 B", "Dr. Mike Torres — ChiroScore 74 C", "Dr. Ashley Kim — ChiroScore 91 A"].map((a, i) => (
+          <div key={i} className="bg-white rounded-lg border border-gray-100 p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-neuro-navy/5 flex items-center justify-center text-xs font-bold text-neuro-navy">{a[4]}{a.split(" ")[1][0]}</div>
+            <div className="flex-1">
+              <p className="text-xs font-bold text-neuro-navy">{a.split(" — ")[0]}</p>
+              <p className="text-[10px] text-gray-400">{a.split(" — ")[1]}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
   },
   {
-    icon: MapPin,
     title: "Global Directory",
-    desc: "140+ verified nervous system chiropractors. Patients find you. Badges, reviews, and referral tracking on every profile.",
-    color: "text-red-400",
-    screenshot: "/booth/directory.png",
-    label: "Doctor Directory",
+    subtitle: "Get Found by Patients",
+    desc: "140+ verified nervous system chiropractors. Patients search, find your profile, and contact you directly.",
+    color: "bg-red-500",
+    mockup: (
+      <div className="space-y-3">
+        <div className="bg-neuro-navy rounded-xl p-4 text-white text-center">
+          <Search className="w-6 h-6 mx-auto mb-2 text-neuro-orange" />
+          <p className="text-sm font-bold">Find a Nervous System Chiropractor</p>
+          <div className="mt-2 bg-white/10 rounded-lg px-3 py-2 text-xs text-white/40">City, state, or doctor name...</div>
+        </div>
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="bg-white rounded-lg border border-gray-100 p-2">
+            <p className="text-lg font-black text-neuro-orange">140+</p>
+            <p className="text-[8px] text-gray-400">Doctors</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-100 p-2">
+            <p className="text-lg font-black text-neuro-orange">30+</p>
+            <p className="text-[8px] text-gray-400">States</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-100 p-2">
+            <p className="text-lg font-black text-neuro-orange">4</p>
+            <p className="text-[8px] text-gray-400">Countries</p>
+          </div>
+        </div>
+      </div>
+    ),
   },
   {
-    icon: Heart,
     title: "Marketplace",
-    desc: "Trusted products for your practice. Exclusive member discounts. Vendor reviews and product showcases.",
-    color: "text-pink-400",
-    screenshot: "/booth/marketplace.png",
-    label: "Marketplace",
+    subtitle: "Products for Your Practice",
+    desc: "Trusted vendors with exclusive member discounts. Product showcases, reviews, and direct contact — all in one place.",
+    color: "bg-pink-500",
+    mockup: (
+      <div className="space-y-3">
+        {["Aceva — Supplements — NEUROCHIRO10", "INSiGHT CLA — Scanning Tech — NEUROCHIRO", "MojoFeet — Custom Orthotics — NEURO15"].map((v, i) => (
+          <div key={i} className="bg-white rounded-lg border border-gray-100 p-3 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-lg font-bold text-neuro-orange">{v[0]}</div>
+            <div className="flex-1">
+              <p className="text-xs font-bold text-neuro-navy">{v.split(" — ")[0]}</p>
+              <p className="text-[10px] text-gray-400">{v.split(" — ")[1]}</p>
+            </div>
+            <span className="px-2 py-0.5 bg-green-50 text-green-700 text-[8px] font-bold rounded border border-green-200">{v.split(" — ")[2]}</span>
+          </div>
+        ))}
+      </div>
+    ),
   },
 ];
 
 export default function BoothPage() {
   const [activeSlide, setActiveSlide] = useState(0);
-  const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % SLIDES.length);
-    }, 6000);
+    }, 7000);
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    fetch("/api/stats").then(r => r.json()).then(d => setStats(d)).catch(() => {});
-  }, []);
-
   const slide = SLIDES[activeSlide];
-  const Icon = slide.icon;
 
   return (
-    <div className="min-h-dvh bg-[#0A0F15] text-white overflow-hidden flex flex-col">
+    <div className="min-h-dvh bg-neuro-cream flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-12 pt-6 shrink-0">
-        <div className="flex items-center gap-4">
-          <Image src="/logo-white.png" alt="NeuroChiro" width={44} height={44} />
+      <div className="flex items-center justify-between px-10 pt-6 shrink-0">
+        <div className="flex items-center gap-3">
+          <Image src="/logo-dark.png" alt="NeuroChiro" width={40} height={40} className="hidden" />
           <div>
-            <span className="text-2xl font-heading font-black tracking-tight text-white">
-              NEURO<span className="text-[#D66829]">CHIRO</span>
+            <span className="text-2xl font-heading font-black tracking-tight text-neuro-navy">
+              NEURO<span className="text-neuro-orange">CHIRO</span>
             </span>
-            <p className="text-[10px] text-white/30 font-bold uppercase tracking-[0.3em]">The Platform for Nervous System Chiropractors</p>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.3em]">The Platform for Nervous System Chiropractors</p>
           </div>
         </div>
         <div className="flex items-center gap-6">
-          {stats && (
-            <>
-              <div className="text-center">
-                <p className="text-2xl font-black text-white">{stats.doctors || 140}+</p>
-                <p className="text-[9px] text-white/30 uppercase tracking-widest">Doctors</p>
-              </div>
-              <div className="w-px h-8 bg-white/10" />
-              <div className="text-center">
-                <p className="text-2xl font-black text-white">{stats.countries || 4}</p>
-                <p className="text-[9px] text-white/30 uppercase tracking-widest">Countries</p>
-              </div>
-            </>
-          )}
+          <div className="flex items-center gap-2 px-4 py-2 bg-neuro-navy rounded-full">
+            <ShieldCheck className="w-4 h-4 text-neuro-orange" />
+            <span className="text-sm font-bold text-white">140+ Verified Doctors</span>
+          </div>
         </div>
       </div>
 
-      {/* Main Content — Feature + Screenshot */}
-      <div className="flex-1 flex items-center px-12 py-8">
-        <div className="w-full grid grid-cols-2 gap-12 items-center">
+      {/* Main — Split Layout */}
+      <div className="flex-1 flex items-center px-10 py-6">
+        <div className="w-full grid grid-cols-2 gap-10 items-center">
           {/* Left — Feature Info */}
           <div>
-            <div className={`w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 ${slide.color}`}>
-              <Icon className="w-7 h-7" />
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 ${slide.color} text-white text-xs font-bold rounded-full mb-4`}>
+              {slide.subtitle}
             </div>
-            <h2 className="text-4xl md:text-5xl font-heading font-black tracking-tight mb-4 leading-tight">
+            <h2 className="text-4xl md:text-5xl font-heading font-black text-neuro-navy tracking-tight mb-4 leading-tight">
               {slide.title}
             </h2>
-            <p className="text-lg text-white/40 leading-relaxed mb-8">
+            <p className="text-lg text-gray-500 leading-relaxed mb-6">
               {slide.desc}
             </p>
 
-            {/* Progress dots */}
+            {/* Slide indicators */}
             <div className="flex items-center gap-2">
-              {SLIDES.map((_, i) => (
+              {SLIDES.map((s, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveSlide(i)}
-                  className={`h-1.5 rounded-full transition-all ${i === activeSlide ? 'w-10 bg-[#D66829]' : 'w-1.5 bg-white/10'}`}
+                  className={`h-1.5 rounded-full transition-all ${i === activeSlide ? 'w-10 bg-neuro-orange' : 'w-1.5 bg-gray-200'}`}
                 />
               ))}
             </div>
           </div>
 
-          {/* Right — Screenshot Mockup */}
-          <div className="relative">
-            <div className="bg-gradient-to-b from-[#1a2e40] to-[#0F1A24] rounded-2xl border border-white/[0.08] p-1 shadow-2xl shadow-black/50">
-              {/* Browser chrome */}
-              <div className="flex items-center gap-2 px-4 py-2 border-b border-white/[0.06]">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/60" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/60" />
-                </div>
-                <div className="flex-1 mx-4">
-                  <div className="bg-white/[0.06] rounded-lg px-4 py-1 text-[10px] text-white/20 text-center">
-                    neurochiro.co
-                  </div>
-                </div>
+          {/* Right — Mockup */}
+          <div className="bg-white rounded-3xl border border-gray-200 shadow-2xl shadow-gray-200/50 p-6 max-w-md mx-auto w-full">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-400" />
+                <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                <div className="w-3 h-3 rounded-full bg-green-400" />
               </div>
-              {/* Screenshot area */}
-              <div className="aspect-[16/10] bg-[#0F1A24] rounded-b-xl flex items-center justify-center overflow-hidden">
-                <div className="text-center p-8">
-                  <div className={`w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4 ${slide.color}`}>
-                    <Icon className="w-8 h-8" />
-                  </div>
-                  <p className="text-xl font-heading font-black text-white mb-2">{slide.label}</p>
-                  <p className="text-sm text-white/20">Live on neurochiro.co</p>
-                  <div className="mt-6 grid grid-cols-3 gap-3">
-                    <div className="bg-white/[0.04] rounded-lg p-3">
-                      <div className="w-full h-2 bg-white/[0.06] rounded mb-2" />
-                      <div className="w-2/3 h-2 bg-white/[0.04] rounded" />
-                    </div>
-                    <div className="bg-white/[0.04] rounded-lg p-3">
-                      <div className="w-full h-2 bg-[#D66829]/20 rounded mb-2" />
-                      <div className="w-1/2 h-2 bg-white/[0.04] rounded" />
-                    </div>
-                    <div className="bg-white/[0.04] rounded-lg p-3">
-                      <div className="w-full h-2 bg-emerald-500/20 rounded mb-2" />
-                      <div className="w-3/4 h-2 bg-white/[0.04] rounded" />
-                    </div>
-                  </div>
+              <div className="flex-1 mx-4">
+                <div className="bg-gray-50 rounded-lg px-4 py-1.5 text-[10px] text-gray-400 text-center font-medium">
+                  neurochiro.co
                 </div>
               </div>
             </div>
-            {/* Glow effect */}
-            <div className="absolute -inset-4 bg-[#D66829]/5 rounded-3xl blur-2xl -z-10" />
+            {slide.mockup}
           </div>
         </div>
       </div>
 
       {/* Bottom CTA */}
-      <div className="px-12 pb-6 shrink-0">
-        <div className="flex items-center justify-between bg-white/[0.03] border border-white/[0.06] rounded-2xl px-8 py-4">
-          <div>
-            <p className="text-lg font-bold text-white">Scan to Join</p>
-            <p className="text-sm text-white/30">neurochiro.co/conference</p>
+      <div className="px-10 pb-6 shrink-0">
+        <div className="flex items-center justify-between bg-neuro-navy rounded-2xl px-8 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            <div>
+              <p className="text-sm font-bold text-white">Scan to Join</p>
+              <p className="text-xs text-white/40">neurochiro.co/conference</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm text-white/40">Doctors from</p>
-              <p className="text-lg font-black text-[#D66829]">$49/mo</p>
+              <p className="text-xs text-white/40">Doctors from</p>
+              <p className="text-lg font-black text-neuro-orange">$49/mo</p>
             </div>
             <div className="w-px h-10 bg-white/10" />
             <div className="text-right">
-              <p className="text-sm text-white/40">Students from</p>
-              <p className="text-lg font-black text-[#D66829]">$12/mo</p>
+              <p className="text-xs text-white/40">Students from</p>
+              <p className="text-lg font-black text-neuro-orange">$12/mo</p>
             </div>
           </div>
         </div>
