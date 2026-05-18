@@ -86,7 +86,7 @@ export async function GET(req: Request) {
                <li><strong>Start the Academy</strong> — modules your school doesn't teach</li>
                <li><strong>Find seminars</strong> — upcoming events from top docs</li>
              </ul>
-             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/subscribe" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Start Your Membership</a></p>`;
+             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/dashboard" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Go to Dashboard</a></p>`;
       } else if (daysSinceSignup === 7) {
         day = 7;
         // Get their profile views if doctor
@@ -113,7 +113,7 @@ export async function GET(req: Request) {
              <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/billing" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">See Upgrade Options</a></p>`
           : `<p>Hi ${name},</p>
              <p>You've been on NeuroChiro for a week! Have you checked out the job board yet? New positions are posted regularly from clinics looking for students like you.</p>
-             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/subscribe" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Start Your Membership</a></p>`;
+             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/dashboard" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Go to Dashboard</a></p>`;
       } else if (daysSinceSignup === 14) {
         day = 14;
         subject = isDoctor
@@ -125,9 +125,9 @@ export async function GET(req: Request) {
              <p>You also unlock your full analytics dashboard so you can see exactly who's finding you and how.</p>
              <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/billing" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Upgrade to Growth — $69/mo</a></p>`
           : `<p>Hi ${name},</p>
-             <p>Your student membership includes everything — Interview Prep, Contract Lab, Financial Planner, Techniques Library, and more. All for $12/mo.</p>
+             <p>Your free student account gives you access to jobs, seminars, the doctor directory, and community. When you're ready for more, upgrade to Premium ($12/mo) for Interview Prep, Contract Lab, Financial Planner, ChiroMatch, and the full Techniques Library.</p>
              <p>These are the tools that help you land your first job and negotiate your first contract with confidence.</p>
-             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/billing" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Subscribe — $12/mo</a></p>`;
+             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/dashboard" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Go to Dashboard</a></p>`;
       } else if (daysSinceSignup === 30) {
         day = 30;
         subject = `Your first month on NeuroChiro`;
@@ -140,7 +140,7 @@ export async function GET(req: Request) {
           : `<p>Hi ${name},</p>
              <p>One month in! You're building your career on NeuroChiro. Keep browsing jobs, connecting with docs, and exploring the academy.</p>
              <p>The students who get ahead are the ones who start early. You're already ahead of most of your classmates just by being here.</p>
-             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/subscribe" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Start Your Membership</a></p>`;
+             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/dashboard" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Go to Dashboard</a></p>`;
       }
 
       if (day === null) continue;
