@@ -5,10 +5,10 @@ import { useEffect, useState, useMemo } from "react";
 import {
   Calendar, MapPin, ArrowLeft, Loader2, ExternalLink, Users, Clock,
   Award, HelpCircle, Image as ImageIcon, ChevronDown, Share2, Copy,
-  Check, Plane, Hotel, Sun, Mic2, CheckCircle2, ArrowRight, ChevronRight,
+  Check, Plane, Hotel, Sun, Mic2, CheckCircle2, ArrowRight, ChevronRight, Eye, Mail, Send,
 } from "lucide-react";
 import Link from "next/link";
-import { getSeminarById, getSeminars, incrementSeminarStats } from "../actions";
+import { getSeminarById, getSeminars, incrementSeminarStats, captureEventInterest } from "../actions";
 import Footer from "@/components/landing/Footer";
 import SeminarReviews from "./seminar-reviews";
 
@@ -44,6 +44,11 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
   const [relatedSeminars, setRelatedSeminars] = useState<any[]>([]);
+  const [captureEmail, setCaptureEmail] = useState("");
+  const [captureName, setCaptureName] = useState("");
+  const [captureLoading, setCaptureLoading] = useState(false);
+  const [captureSuccess, setCaptureSuccess] = useState(false);
+  const [captureError, setCaptureError] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -279,6 +284,15 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
               <div className="text-2xl font-black text-neuro-orange">{seminar.city || '---'}</div>
               <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Location</div>
             </div>
+            {(s.page_views || 0) > 10 && (
+              <div className="flex-1 text-center py-4">
+                <div className="text-2xl font-black text-neuro-orange flex items-center justify-center gap-1.5">
+                  <Eye className="w-5 h-5" />
+                  {s.page_views > 999 ? `${(s.page_views / 1000).toFixed(1)}k` : s.page_views}
+                </div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Chiropractors Looking</div>
+              </div>
+            )}
             {seminar.price != null && (
               <div className="flex-1 text-center py-4">
                 <div className="text-2xl font-black text-neuro-orange">${seminar.price}</div>
@@ -750,6 +764,71 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
           </div>
         </section>
       )}
+
+      {/* Email Capture */}
+      <section className="max-w-4xl mx-auto px-6 py-12">
+        <div className="bg-gradient-to-br from-neuro-navy to-[#162231] rounded-2xl p-8 md:p-10 border border-white/5">
+          <div className="max-w-lg mx-auto text-center">
+            <div className="w-12 h-12 bg-neuro-orange/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <Mail className="w-6 h-6 text-neuro-orange" />
+            </div>
+            <h2 className="text-xl font-heading font-black text-white mb-2">Not Ready to Register Yet?</h2>
+            <p className="text-gray-400 text-sm mb-6">
+              Get event updates, speaker announcements, and early access to exclusive content. No spam — just the good stuff.
+            </p>
+
+            {captureSuccess ? (
+              <div className="flex items-center justify-center gap-2 py-4">
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <p className="text-green-400 font-bold">You&apos;re on the list! We&apos;ll keep you posted.</p>
+              </div>
+            ) : (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!captureEmail) return;
+                  setCaptureLoading(true);
+                  setCaptureError("");
+                  const result = await captureEventInterest(id, captureEmail, captureName || undefined);
+                  if (result.error) { setCaptureError(result.error); setCaptureLoading(false); return; }
+                  setCaptureSuccess(true);
+                  setCaptureLoading(false);
+                }}
+                className="space-y-3"
+              >
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="text"
+                    value={captureName}
+                    onChange={(e) => setCaptureName(e.target.value)}
+                    placeholder="Your name"
+                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-neuro-orange"
+                  />
+                  <input
+                    type="email"
+                    required
+                    value={captureEmail}
+                    onChange={(e) => setCaptureEmail(e.target.value)}
+                    placeholder="Email address"
+                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-neuro-orange"
+                  />
+                </div>
+                {captureError && <p className="text-red-400 text-xs font-bold">{captureError}</p>}
+                <button
+                  type="submit"
+                  disabled={captureLoading}
+                  className="w-full sm:w-auto px-8 py-3.5 bg-neuro-orange text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors disabled:opacity-50 mx-auto"
+                >
+                  {captureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  {captureLoading ? "Joining..." : "Get Event Updates"}
+                </button>
+              </form>
+            )}
+
+            <p className="text-[10px] text-gray-600 mt-4">We respect your inbox. Unsubscribe anytime.</p>
+          </div>
+        </div>
+      </section>
 
       {/* Related Seminars */}
       {relatedSeminars.length > 0 && (

@@ -187,3 +187,25 @@ export async function registerForSeminar(seminarId: string) {
 
   return { success: true }
 }
+
+export async function captureEventInterest(seminarId: string, email: string, name?: string) {
+  const supabase = createServerSupabase()
+
+  // Store in leads table
+  const { error } = await supabase
+    .from('leads')
+    .insert({
+      email,
+      full_name: name || null,
+      source: 'seminar_interest',
+      metadata: { seminar_id: seminarId },
+    })
+
+  if (error) {
+    if (error.code === '23505') return { error: 'You\'re already on the list!' }
+    console.error("Lead capture error:", error)
+    return { error: 'Something went wrong. Please try again.' }
+  }
+
+  return { success: true }
+}
