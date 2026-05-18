@@ -48,20 +48,59 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
 
   useEffect(() => {
     async function load() {
-      const data = await getSeminarById(id);
-      setSeminar(data);
+      try {
+        const data = await getSeminarById(id);
+        setSeminar(data);
+      } catch (e) {
+        console.error("Failed to load seminar:", e);
+      }
       setLoading(false);
-      if (id) incrementSeminarStats(id, "page_views").catch(() => {});
 
-      // Load related seminars
-      const all = await getSeminars({});
-      setRelatedSeminars((all || []).filter((s: any) => s.id !== id).slice(0, 3));
+      // Track views (non-blocking)
+      try { if (id) await incrementSeminarStats(id, "page_views"); } catch {}
+
+      // Load related seminars (non-blocking)
+      try {
+        const all = await getSeminars({});
+        setRelatedSeminars((all || []).filter((s: any) => s.id !== id).slice(0, 3));
+      } catch {}
     }
     load();
   }, [id]);
 
-  const eventDate = useMemo(() => seminar?.dates ? parseEventDate(seminar.dates) : null, [seminar?.dates]);
-  const countdown = useCountdown(eventDate || new Date());
+  const eventDate = useMemo(() => {
+    try { return seminar?.dates ? parseEventDate(seminar.dates) : null; } catch { return null; }
+  }, [seminar?.dates]);
+  const countdown = useCountdown(eventDate || new Date(Date.now() + 86400000));
+
+  // Google Calendar link (must be before early returns — hooks can't be conditional)
+  const calendarUrl = useMemo(() => {
+    if (!eventDate || !seminar) return null;
+    try {
+      const va = (seminar as any).venue_address || '';
+      const loc = [seminar.location, seminar.city, seminar.country].filter(Boolean).join(", ");
+      const start = eventDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      const end = new Date(eventDate.getTime() + 2 * 86400000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(seminar.title || '')}&dates=${start}/${end}&location=${encodeURIComponent(va || loc)}&details=${encodeURIComponent((seminar.description || '').slice(0, 200))}`;
+    } catch { return null; }
+  }, [eventDate, seminar]);
+
+  // Sponsors extracted from schedule (must be before early returns)
+  const sponsors = useMemo(() => {
+    if (!seminar) return [];
+    const sched = (seminar as any).schedule as { day: string; items: { time: string; title: string }[] }[] | null;
+    if (!sched) return [];
+    const found: { name: string; context: string }[] = [];
+    sched.forEach((day: any) => {
+      (day.items || []).forEach((item: any) => {
+        const sponsorMatch = item.title?.match(/[Ss]ponsored by (.+)/);
+        if (sponsorMatch) {
+          found.push({ name: sponsorMatch[1], context: item.title });
+        }
+      });
+    });
+    return found;
+  }, [seminar]);
 
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(window.location.href);
@@ -108,30 +147,8 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
   const spotlightQuote = s.spotlight_quote as string | null;
   const spotlightHostName = s.spotlight_host_name as string | null;
 
-  // Google Calendar link
-  const calendarUrl = eventDate ? (() => {
-    const start = eventDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const end = new Date(eventDate.getTime() + 2 * 86400000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(seminar.title)}&dates=${start}/${end}&location=${encodeURIComponent(venueAddress || location)}&details=${encodeURIComponent(seminar.description?.slice(0, 200) || '')}`;
-  })() : null;
-
   // Google Maps embed
   const mapQuery = venueAddress ? encodeURIComponent(venueAddress) : venueName ? encodeURIComponent(venueName) : null;
-
-  // Sponsors extracted from schedule
-  const sponsors = useMemo(() => {
-    if (!schedule) return [];
-    const found: { name: string; context: string }[] = [];
-    schedule.forEach(day => {
-      day.items.forEach(item => {
-        const sponsorMatch = item.title.match(/[Ss]ponsored by (.+)/);
-        if (sponsorMatch) {
-          found.push({ name: sponsorMatch[1], context: item.title });
-        }
-      });
-    });
-    return found;
-  }, [schedule]);
 
   // What's included
   const inclusions = [
