@@ -1,17 +1,87 @@
 "use client";
 
 import { useState } from "react";
-import { Check, X, ArrowRight, Zap, Crown, Star, ShieldCheck } from "lucide-react";
+import { Check, X, ArrowRight, Zap, Crown, ShieldCheck, Camera, BarChart3, Users, MessageSquare, Briefcase, Award, Star } from "lucide-react";
 import Link from "next/link";
-import SocialProof from "@/components/landing/SocialProof";
 
 export default function DoctorPricing() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
 
   const growthPrice = billingCycle === "monthly" ? "69" : "59";
   const proPrice = billingCycle === "monthly" ? "129" : "109";
-  const growthAnnualTotal = "$708/yr";
-  const proAnnualTotal = "$1,308/yr";
+
+  const tiers = [
+    {
+      name: "Free",
+      price: "0",
+      period: "forever",
+      description: "Get listed and start getting found by patients.",
+      cta: "Get Started Free",
+      ctaLink: "/get-started",
+      highlight: false,
+      features: [
+        { text: "Listed in global directory", included: true },
+        { text: "Public profile page", included: true },
+        { text: "Profile view count", included: true },
+        { text: "Verified badge", included: true },
+        { text: "Post 1 job listing", included: true },
+        { text: "Browse seminars & marketplace", included: true },
+        { text: "Instagram highlights", included: true },
+        { text: "Patient lead pipeline", included: false },
+        { text: "AI practice insights", included: false },
+        { text: "Competitive ranking", included: false },
+        { text: "Practice management tools", included: false },
+      ],
+    },
+    {
+      name: "Growth",
+      price: growthPrice,
+      period: billingCycle === "monthly" ? "/mo" : "/mo (billed annually)",
+      description: "Everything to grow your practice and fill your schedule.",
+      cta: "Start Growth",
+      ctaLink: "/register?role=doctor&billing=growth",
+      highlight: true,
+      badge: "Most Popular",
+      features: [
+        { text: "Everything in Free", included: true },
+        { text: "See WHO viewed your profile", included: true },
+        { text: "Patient lead pipeline (CRM)", included: true },
+        { text: "AI practice insights & weekly report", included: true },
+        { text: "Competitive ranking in your city", included: true },
+        { text: "Revenue intelligence & ROI tracking", included: true },
+        { text: "Full analytics dashboard", included: true },
+        { text: "Unlimited job postings", included: true },
+        { text: "ChiroMatch participation", included: true },
+        { text: "CE credit tracker + certificates", included: true },
+        { text: "Doctor-to-doctor messaging", included: true },
+        { text: "Monthly Instagram feature (post + story)", included: true },
+        { text: "Practice management tools", included: false },
+      ],
+    },
+    {
+      name: "Pro",
+      price: proPrice,
+      period: billingCycle === "monthly" ? "/mo" : "/mo (billed annually)",
+      description: "Every tool unlocked. The complete practice operating system.",
+      cta: "Go Pro",
+      ctaLink: "/register?role=doctor&billing=pro",
+      highlight: false,
+      features: [
+        { text: "Everything in Growth", included: true },
+        { text: "NeuroChiro Spotlight interview", included: true },
+        { text: "Profile Boost (rank higher in search)", included: true },
+        { text: "Care Plan Builder", included: true },
+        { text: "Scan Report Generator", included: true },
+        { text: "KPI Tracker", included: true },
+        { text: "P&L Analyzer", included: true },
+        { text: "Content Library", included: true },
+        { text: "Contract Templates", included: true },
+        { text: "Workshops System", included: true },
+        { text: "Screenings System", included: true },
+        { text: "Weekly Instagram promotion (4x/month)", included: true },
+      ],
+    },
+  ];
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -19,178 +89,84 @@ export default function DoctorPricing() {
         <h1 className="text-4xl md:text-5xl font-heading font-black text-neuro-navy uppercase tracking-tight">
           Choose Your <span className="text-neuro-orange">Plan.</span>
         </h1>
-        <p className="text-gray-500 mt-4 text-lg max-w-xl mx-auto">
-          Every plan includes a verified directory listing. Upgrade for advanced practice growth tools.
+        <p className="text-gray-500 mt-3 max-w-lg mx-auto">
+          Start free. Upgrade when you&apos;re ready. No contracts, cancel anytime.
         </p>
-      </div>
 
-      {/* Billing toggle */}
-      <div className="flex items-center justify-center gap-4 mb-10">
-        <span className={`text-sm font-bold ${billingCycle === 'monthly' ? 'text-neuro-navy' : 'text-gray-400'}`}>Monthly</span>
-        <button
-          onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
-          className="relative w-14 h-7 bg-neuro-navy rounded-full transition-colors"
-        >
-          <div className={`absolute top-0.5 w-6 h-6 bg-neuro-orange rounded-full transition-all ${billingCycle === 'annual' ? 'left-7' : 'left-0.5'}`} />
-        </button>
-        <span className={`text-sm font-bold ${billingCycle === 'annual' ? 'text-neuro-navy' : 'text-gray-400'}`}>
-          Annual <span className="text-green-500 text-xs font-black">(Save 15%)</span>
-        </span>
-      </div>
-
-      {/* 3 Tier Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* BASIC */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Star className="w-5 h-5 text-neuro-navy" />
-            <h3 className="text-lg font-black text-neuro-navy">Basic</h3>
-          </div>
-          <div className="flex items-baseline gap-1 mb-1">
-            <span className="text-5xl font-black text-neuro-navy">${billingCycle === "monthly" ? "49" : "42"}</span>
-            <span className="text-gray-400 font-bold">/mo</span>
-          </div>
-          {billingCycle === "annual" && <p className="text-xs text-green-600 font-bold">$490/yr — save $98</p>}
-          <p className="text-sm text-gray-500 mb-8 mt-1">Get listed and start growing</p>
-
-          <div className="space-y-3 mb-8">
-            {[
-              { name: "Directory listing", included: true },
-              { name: "Profile page with photo & bio", included: true },
-              { name: "Profile view analytics", included: true },
-              { name: "Show up in patient searches", included: true },
-              { name: "Patient messaging", included: false },
-              { name: "Verified badge", included: false },
-              { name: "AI Bio Generator", included: false },
-              { name: "KPI Tracker", included: false },
-              { name: "Priority search placement", included: false },
-            ].map((f, i) => (
-              <div key={i} className={`flex items-center gap-2 text-sm ${f.included ? 'text-gray-700' : 'text-gray-300'}`}>
-                {f.included ? <Check className="w-4 h-4 text-green-500 flex-shrink-0" /> : <X className="w-4 h-4 text-gray-200 flex-shrink-0" />}
-                {f.name}
-              </div>
-            ))}
-          </div>
-
-          <Link
-            href="/register?role=doctor&billing=basic"
-            className="w-full py-4 bg-neuro-navy text-white font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-neuro-navy/90 transition-all"
+        {/* Billing toggle */}
+        <div className="flex items-center justify-center gap-4 mt-6">
+          <span className={`text-sm font-bold ${billingCycle === "monthly" ? "text-neuro-navy" : "text-gray-400"}`}>Monthly</span>
+          <button
+            onClick={() => setBillingCycle(billingCycle === "monthly" ? "annual" : "monthly")}
+            className="relative w-14 h-7 bg-neuro-navy rounded-full"
           >
-            Get Started
-          </Link>
-        </div>
-
-        {/* GROWTH — POPULAR */}
-        <div className="bg-white rounded-2xl border-2 border-neuro-orange p-8 relative shadow-xl shadow-neuro-orange/10">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-neuro-orange rounded-full text-[10px] font-black text-white uppercase tracking-widest">
-            Most Popular
-          </div>
-          <div className="flex items-center gap-2 mb-4 mt-1">
-            <Zap className="w-5 h-5 text-neuro-orange" />
-            <h3 className="text-lg font-black text-neuro-navy">Growth</h3>
-          </div>
-          <div className="flex items-baseline gap-1 mb-1">
-            <span className="text-lg text-gray-400">$</span>
-            <span className="text-5xl font-black text-neuro-navy">{growthPrice}</span>
-            <span className="text-gray-400 font-bold">/mo</span>
-          </div>
-          {billingCycle === "annual" && <p className="text-xs text-green-500 font-bold mb-2">Billed at {growthAnnualTotal}</p>}
-          <p className="text-sm text-gray-500 mb-8">Everything to grow your practice</p>
-
-          <div className="space-y-3 mb-8">
-            {[
-              { name: "Everything in Basic", included: true },
-              { name: "Patient messaging", included: true },
-              { name: "Analytics dashboard", included: true },
-              { name: "KPI Tracker", included: true },
-              { name: "AI Bio Generator", included: true },
-              { name: "Job posting", included: true },
-              { name: "Referral program", included: true },
-              { name: "Verified badge", included: true },
-              { name: "Content Library", included: true },
-              { name: "Care Plan Builder", included: false },
-              { name: "P&L Analyzer", included: false },
-              { name: "Priority search placement", included: false },
-            ].map((f, i) => (
-              <div key={i} className={`flex items-center gap-2 text-sm ${f.included ? 'text-gray-700' : 'text-gray-300'}`}>
-                {f.included ? <Check className="w-4 h-4 text-green-500 flex-shrink-0" /> : <X className="w-4 h-4 text-gray-200 flex-shrink-0" />}
-                {f.name}
-              </div>
-            ))}
-          </div>
-
-          <Link
-            href="/register?role=doctor&billing=growth"
-            className="w-full py-4 bg-neuro-orange text-white font-black uppercase tracking-wider text-sm rounded-xl text-center flex items-center justify-center gap-2 hover:bg-neuro-orange-light transition-all shadow-lg shadow-neuro-orange/20"
-          >
-            <Zap className="w-4 h-4" /> Start with Growth
-          </Link>
-        </div>
-
-        {/* PRO */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Crown className="w-5 h-5 text-yellow-500" />
-            <h3 className="text-lg font-black text-neuro-navy">Pro</h3>
-          </div>
-          <div className="flex items-baseline gap-1 mb-1">
-            <span className="text-lg text-gray-400">$</span>
-            <span className="text-5xl font-black text-neuro-navy">{proPrice}</span>
-            <span className="text-gray-400 font-bold">/mo</span>
-          </div>
-          {billingCycle === "annual" && <p className="text-xs text-green-500 font-bold mb-2">Billed at {proAnnualTotal}</p>}
-          <p className="text-sm text-gray-500 mb-8">Full suite — every tool unlocked</p>
-
-          <div className="space-y-3 mb-8">
-            {[
-              { name: "Everything in Growth", included: true },
-              { name: "Care Plan Builder", included: true },
-              { name: "Scan Reports", included: true },
-              { name: "P&L Analyzer", included: true },
-              { name: "Contracts", included: true },
-              { name: "Screenings system", included: true },
-              { name: "Workshops", included: true },
-              { name: "Content Library", included: true },
-              { name: "Priority search placement", included: true },
-            ].map((f, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm text-gray-700">
-                <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                {f.name}
-              </div>
-            ))}
-          </div>
-
-          <Link
-            href="/register?role=doctor&billing=pro"
-            className="w-full py-4 bg-neuro-navy text-white font-bold rounded-xl text-sm text-center flex items-center justify-center gap-2 hover:bg-neuro-navy-light transition-all"
-          >
-            <Crown className="w-4 h-4" /> Start with Pro
-          </Link>
+            <div className={`absolute top-0.5 w-6 h-6 bg-neuro-orange rounded-full transition-all ${billingCycle === "annual" ? "left-7" : "left-0.5"}`} />
+          </button>
+          <span className={`text-sm font-bold ${billingCycle === "annual" ? "text-neuro-navy" : "text-gray-400"}`}>
+            Annual <span className="text-green-500 text-xs">(Save 15%)</span>
+          </span>
         </div>
       </div>
 
-      {/* Social Proof */}
-      <div className="mt-12">
-        <SocialProof variant="inline" />
-      </div>
+      {/* Pricing Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        {tiers.map((tier) => (
+          <div
+            key={tier.name}
+            className={`relative bg-white rounded-2xl border-2 p-8 flex flex-col ${
+              tier.highlight ? "border-neuro-orange shadow-2xl shadow-neuro-orange/10 scale-[1.02]" : "border-gray-100"
+            }`}
+          >
+            {tier.badge && (
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-neuro-orange text-white text-[10px] font-black uppercase tracking-widest rounded-full flex items-center gap-1">
+                <Star className="w-3 h-3 fill-white" /> {tier.badge}
+              </span>
+            )}
 
-      {/* FAQ */}
-      <div className="mt-12">
-        <h3 className="font-bold text-neuro-navy text-center mb-6">Common Questions</h3>
-        <div className="space-y-4">
-          {[
-            { q: "What does Basic include?", a: "Basic at $49/mo gives you a directory listing, profile page, and profile view analytics. Upgrade to Growth to unlock patient messaging, verified badge, KPI tracker, and more." },
-            { q: "Can I upgrade later?", a: "Yes. Start with Basic and upgrade to Growth or Pro anytime from your dashboard. All your data carries over." },
-            { q: "Can I cancel anytime?", a: "Yes. Cancel from your dashboard anytime. No lock-in contracts, no cancellation fees. You keep access through the end of your billing period." },
-            { q: "Will patients actually find me?", a: "NeuroChiro is the only directory focused exclusively on nervous system chiropractors. Patients searching for this specific type of care find you here, not competing with generalists on Google." },
-            { q: "What's the difference between Growth and Pro?", a: "Growth unlocks patient messaging, analytics, KPI tracking, and the verified badge. Pro adds the Care Plan Builder, Scan Reports, P&L Analyzer, Screenings system, and priority search placement." },
-          ].map((item, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-100 p-5">
-              <p className="font-bold text-neuro-navy text-sm">{item.q}</p>
-              <p className="text-gray-500 text-sm mt-2">{item.a}</p>
+            <div className="mb-6">
+              <h2 className="text-xl font-heading font-black text-neuro-navy">{tier.name}</h2>
+              <p className="text-gray-400 text-sm mt-1">{tier.description}</p>
             </div>
-          ))}
-        </div>
+
+            <div className="mb-6">
+              <span className="text-4xl font-black text-neuro-navy">${tier.price}</span>
+              <span className="text-gray-400 text-sm font-bold">{tier.period}</span>
+            </div>
+
+            <div className="space-y-3 flex-1 mb-8">
+              {tier.features.map((f, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  {f.included ? (
+                    <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                  ) : (
+                    <X className="w-4 h-4 text-gray-300 shrink-0 mt-0.5" />
+                  )}
+                  <span className={`text-sm ${f.included ? "text-gray-700" : "text-gray-400"}`}>{f.text}</span>
+                </div>
+              ))}
+            </div>
+
+            <Link
+              href={tier.ctaLink}
+              className={`w-full py-4 font-bold rounded-xl text-center text-sm transition-all block ${
+                tier.highlight
+                  ? "bg-neuro-orange text-white hover:bg-neuro-orange/90 shadow-lg shadow-neuro-orange/20"
+                  : tier.name === "Free"
+                  ? "bg-neuro-navy text-white hover:bg-neuro-navy-light"
+                  : "bg-neuro-navy text-white hover:bg-neuro-navy-light"
+              }`}
+            >
+              {tier.cta}
+            </Link>
+          </div>
+        ))}
+      </div>
+
+      {/* Founding member note */}
+      <div className="text-center mb-12">
+        <p className="text-xs text-gray-400">
+          Founding members are locked at their original price with full Pro access forever.
+        </p>
       </div>
     </div>
   );

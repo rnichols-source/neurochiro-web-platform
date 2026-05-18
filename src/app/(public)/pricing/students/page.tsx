@@ -1,118 +1,121 @@
 "use client";
 
-import { useState } from "react";
-import { Check, ArrowRight, GraduationCap } from "lucide-react";
+import { Check, X, Star } from "lucide-react";
 import Link from "next/link";
-import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
 
 export default function StudentPricing() {
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
-
-  const price = billingCycle === "monthly" ? "12" : "10";
-  const annualTotal = "$120/yr";
+  const tiers = [
+    {
+      name: "Free",
+      price: "0",
+      period: "forever",
+      description: "Start exploring and building your career.",
+      cta: "Get Started Free",
+      ctaLink: "/get-started",
+      highlight: false,
+      features: [
+        { text: "Student profile", included: true },
+        { text: "Browse job listings", included: true },
+        { text: "Browse seminars", included: true },
+        { text: "Basic ChiroScore", included: true },
+        { text: "Browse doctor directory", included: true },
+        { text: "ChiroMatch participation", included: false },
+        { text: "Academy courses", included: false },
+        { text: "Contract Lab", included: false },
+        { text: "Financial Planner", included: false },
+        { text: "Messaging", included: false },
+      ],
+    },
+    {
+      name: "Premium",
+      price: "12",
+      period: "/mo",
+      description: "Everything you need to launch your career.",
+      cta: "Go Premium",
+      ctaLink: "/register?role=student",
+      highlight: true,
+      badge: "Best Value",
+      features: [
+        { text: "Everything in Free", included: true },
+        { text: "Full ChiroMatch — get matched with top practices", included: true },
+        { text: "Academy courses (6 courses, 28 modules)", included: true },
+        { text: "Contract Lab — AI contract review", included: true },
+        { text: "Financial Planner — salary modeling", included: true },
+        { text: "Interview Prep — 100+ real questions", included: true },
+        { text: "Full ChiroScore (7 categories)", included: true },
+        { text: "Techniques Library (18 techniques)", included: true },
+        { text: "CE credit tracker + certificates", included: true },
+        { text: "Direct messaging with doctors", included: true },
+      ],
+    },
+  ];
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-3xl mx-auto">
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-heading font-black text-neuro-navy uppercase tracking-tight">
-          Launch Your <span className="text-neuro-orange">Career.</span>
+          Student <span className="text-neuro-orange">Plans.</span>
         </h1>
-        <p className="text-gray-500 mt-4 text-lg max-w-lg mx-auto">
-          One plan. Everything included. $12/mo.
+        <p className="text-gray-500 mt-3 max-w-lg mx-auto">
+          Start free. Upgrade to Premium when you&apos;re ready to launch your career.
         </p>
       </div>
 
-      {/* Billing toggle */}
-      <div className="flex items-center justify-center gap-4 mb-10">
-        <span className={`text-sm font-bold ${billingCycle === 'monthly' ? 'text-neuro-navy' : 'text-gray-400'}`}>Monthly</span>
-        <button
-          onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
-          className="relative w-14 h-7 bg-neuro-navy rounded-full transition-colors"
-        >
-          <div className={`absolute top-0.5 w-6 h-6 bg-neuro-orange rounded-full transition-all ${billingCycle === 'annual' ? 'left-7' : 'left-0.5'}`} />
-        </button>
-        <span className={`text-sm font-bold ${billingCycle === 'annual' ? 'text-neuro-navy' : 'text-gray-400'}`}>
-          Annual <span className="text-green-500 text-xs font-black">(Save 17%)</span>
-        </span>
-      </div>
-
-      {/* Single pricing card */}
-      <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-2xl border-2 border-neuro-orange p-8 shadow-xl shadow-neuro-orange/10">
-          <div className="text-center mb-6">
-            <div className="w-14 h-14 bg-neuro-orange/10 rounded-full flex items-center justify-center mx-auto mb-3">
-              <GraduationCap className="w-7 h-7 text-neuro-orange" />
-            </div>
-            <h3 className="text-xl font-black text-neuro-navy">Student Membership</h3>
-            <div className="flex items-baseline justify-center gap-1 mt-2">
-              <span className="text-lg text-gray-400">$</span>
-              <span className="text-5xl font-black text-neuro-navy">{price}</span>
-              <span className="text-gray-400 font-bold">/mo</span>
-            </div>
-            {billingCycle === "annual" && <p className="text-xs text-green-500 font-bold mt-1">Billed at {annualTotal}</p>}
-          </div>
-
-          <div className="space-y-3 mb-8">
-            {[
-              "Profile + job applications",
-              "Full job board access",
-              "Seminar calendar & registration",
-              "Academy courses",
-              "Direct messaging with doctors",
-              "Interview Prep — 20 real questions with scripts",
-              "Contract Lab — analyze any associate agreement",
-              "Financial Planner — model salary, loans, budget",
-              "Techniques Library — compare 18 techniques",
-              "Command Center",
-              "Priority in talent drops",
-              "Transition to Doctor account at graduation",
-            ].map((f, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm text-gray-700">
-                <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                {f}
-              </div>
-            ))}
-          </div>
-
-          <Link
-            href="/register?role=student"
-            className="w-full py-4 bg-neuro-orange text-white font-black uppercase tracking-wider text-sm rounded-xl text-center flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-all shadow-lg shadow-neuro-orange/20"
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        {tiers.map((tier) => (
+          <div
+            key={tier.name}
+            className={`relative bg-white rounded-2xl border-2 p-8 flex flex-col ${
+              tier.highlight ? "border-neuro-orange shadow-2xl shadow-neuro-orange/10" : "border-gray-100"
+            }`}
           >
-            Join Now — ${price}/mo <ArrowRight className="w-4 h-4" />
-          </Link>
+            {tier.badge && (
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-neuro-orange text-white text-[10px] font-black uppercase tracking-widest rounded-full flex items-center gap-1">
+                <Star className="w-3 h-3 fill-white" /> {tier.badge}
+              </span>
+            )}
 
-          <p className="text-center text-xs text-gray-400 mt-3">Cancel anytime. No lock-in contracts.</p>
-        </div>
-      </div>
-
-      {/* FAQ */}
-      <div className="mt-12">
-        <h3 className="font-bold text-neuro-navy text-center mb-6">Common Questions</h3>
-        <div className="space-y-4">
-          {[
-            { q: "What do I get for $12/month?", a: "Everything. Job board, seminars, academy, messaging, interview prep, contract lab, financial planner, technique explorer, and command center. All included in one plan." },
-            { q: "What happens when I graduate?", a: "You can transition your account to a Doctor account and get listed in the directory. Your student data is preserved." },
-            { q: "Can I cancel anytime?", a: "Yes. Cancel anytime from your dashboard. No lock-in contracts." },
-            { q: "Is there a free trial?", a: "We offer a 30-day money-back guarantee. If it's not for you, we'll refund you — no questions asked." },
-          ].map((item, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-100 p-5">
-              <p className="font-bold text-neuro-navy text-sm">{item.q}</p>
-              <p className="text-gray-500 text-sm mt-2">{item.a}</p>
+            <div className="mb-6">
+              <h2 className="text-xl font-heading font-black text-neuro-navy">{tier.name}</h2>
+              <p className="text-gray-400 text-sm mt-1">{tier.description}</p>
             </div>
-          ))}
-        </div>
+
+            <div className="mb-6">
+              <span className="text-4xl font-black text-neuro-navy">${tier.price}</span>
+              <span className="text-gray-400 text-sm font-bold">{tier.period}</span>
+            </div>
+
+            <div className="space-y-3 flex-1 mb-8">
+              {tier.features.map((f, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  {f.included ? (
+                    <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                  ) : (
+                    <X className="w-4 h-4 text-gray-300 shrink-0 mt-0.5" />
+                  )}
+                  <span className={`text-sm ${f.included ? "text-gray-700" : "text-gray-400"}`}>{f.text}</span>
+                </div>
+              ))}
+            </div>
+
+            <Link
+              href={tier.ctaLink}
+              className={`w-full py-4 font-bold rounded-xl text-center text-sm transition-all block ${
+                tier.highlight
+                  ? "bg-neuro-orange text-white hover:bg-neuro-orange/90 shadow-lg shadow-neuro-orange/20"
+                  : "bg-neuro-navy text-white hover:bg-neuro-navy-light"
+              }`}
+            >
+              {tier.cta}
+            </Link>
+          </div>
+        ))}
       </div>
 
-      {/* Lead Capture */}
-      <div className="max-w-md mx-auto mt-12">
-        <LeadCaptureInline
-          source="pricing_students"
-          role="student"
-          headline="Not ready to sign up?"
-          description="Get career tips and job alerts sent to your inbox."
-          buttonText="Subscribe"
-          variant="card"
-        />
+      <div className="text-center">
+        <p className="text-xs text-gray-400">
+          No contracts. Cancel anytime. 30-day money-back guarantee.
+        </p>
       </div>
     </div>
   );
