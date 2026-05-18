@@ -117,6 +117,11 @@ const sendPremiumEmail = async (options: {
         <div class="footer">
           &copy; 2026 NeuroChiro Network. All Rights Reserved.
         </div>
+        <div style="text-align: center; padding: 0 30px 20px; font-size: 11px; color: #D1D5DB;">
+          <a href="https://neurochiro.co/settings" style="color: #D1D5DB; text-decoration: underline;">Manage email preferences</a> &middot;
+          NeuroChiro &middot; neurochiro.co<br>
+          Pelham Falls, SC &middot; support@neurochirodirectory.com
+        </div>
       </div>
     </body>
     </html>
@@ -336,9 +341,9 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                     </ul>
                     <p>Your next step: Complete your student profile so we can match you with the right opportunities.</p>`, 
               ctaText: 'Start Your Membership',
-              ctaUrl: 'https://neurochiro.co/student/subscribe',
+              ctaUrl: 'https://neurochiro.co/student/dashboard',
               secondaryCtaText: 'Explore Career Tools',
-              secondaryCtaUrl: 'https://neurochiro.co/student/subscribe'
+              secondaryCtaUrl: 'https://neurochiro.co/student/dashboard'
             });
 
             // Enqueue subsequent emails in the sequence
@@ -440,7 +445,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         }
         break;
 
-        case 'student_career_accelerator':
+        case 'broadcast_email':
         if (payload.isTest) {
           // Send only to the test email
           if (payload.testEmail) {
@@ -504,7 +509,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                      <li><strong>Negotiation Guide:</strong> Exact scripts to increase your starting value.</li>
                    </ul>`,
             ctaText: 'Explore Career Tools',
-            ctaUrl: 'https://neurochiro.co/student/subscribe'
+            ctaUrl: 'https://neurochiro.co/student/dashboard'
           });
         }
         break;
@@ -519,7 +524,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                    <p>The NeuroChiro network is full of high-volume, nervous-system-focused clinics looking for their next associate.</p>
                    <p>Maximize your visibility by uploading your resume and attending upcoming seminars.</p>`,
             ctaText: 'View Job Board',
-            ctaUrl: 'https://neurochiro.co/student/subscribe'
+            ctaUrl: 'https://neurochiro.co/student/dashboard'
           });
         }
         break;
@@ -568,8 +573,8 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                 body: `<h1>Dr. ${payload.name || payload.full_name || ''}, your clinic is missing from the map.</h1>
                        <p>You started setting up your NeuroChiro directory profile, but haven't finalized your membership yet.</p>
                        <p>Patients and students are actively searching your area. Complete your setup now to secure your spot.</p>`,
-                ctaText: 'Complete Registration',
-                ctaUrl: 'https://neurochiro.co/register?role=doctor'
+                ctaText: 'Complete Your Profile',
+                ctaUrl: 'https://neurochiro.co/doctor/profile'
               });
            }
         }

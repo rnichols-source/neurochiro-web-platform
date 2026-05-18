@@ -3,7 +3,7 @@
  * Includes unsubscribe link (legally required for CAN-SPAM compliance).
  */
 export function wrapEmail(body: string, options?: { unsubscribeUrl?: string }) {
-  const unsubscribeUrl = options?.unsubscribeUrl || 'https://neurochiro.co/doctor/settings';
+  const unsubscribeUrl = options?.unsubscribeUrl || 'https://neurochiro.co/settings';
 
   return `<!DOCTYPE html>
 <html>
@@ -42,7 +42,8 @@ export function wrapEmail(body: string, options?: { unsubscribeUrl?: string }) {
     </div>
     <div class="unsubscribe">
       <a href="${unsubscribeUrl}">Manage email preferences</a> &middot;
-      NeuroChiro &middot; neurochiro.co
+      NeuroChiro &middot; neurochiro.co<br>
+      Pelham Falls, SC &middot; support@neurochirodirectory.com
     </div>
   </div>
 </body>

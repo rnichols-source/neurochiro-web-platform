@@ -45,12 +45,14 @@ export async function GET(req: Request) {
       (recentChurn || []).map((c: any) => c.payload?.userId)
     );
 
-    // 1. Find doctors with past_due or inactive subscription who were previously paid
+    // 1. Find doctors who WERE paid but downgraded (have stripe_customer_id but tier is free/basic)
+    // IMPORTANT: Never email free-tier doctors who never paid — they chose free intentionally
     const { data: atRiskDocs } = await supabase
       .from('profiles')
-      .select('id, email, full_name, tier, updated_at')
+      .select('id, email, full_name, tier, updated_at, stripe_customer_id')
       .eq('role', 'doctor')
-      .eq('tier', 'basic');
+      .in('tier', ['basic', 'free', 'standard'])
+      .not('stripe_customer_id', 'is', null);
 
     for (const doc of (atRiskDocs || []) as any[]) {
       if (recentlyEmailed.has(doc.id)) continue;
