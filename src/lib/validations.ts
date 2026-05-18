@@ -2,7 +2,8 @@ import { z } from "zod";
 
 export const stripeCheckoutSchema = z.object({
   priceId: z.string().startsWith("price_"),
-  userId: z.string().uuid().or(z.string().startsWith("mock_")), 
+  userId: z.string().uuid().or(z.string().startsWith("mock_")),
+  tier: z.string().optional(),
 });
 
 export const sessionSchema = z.object({

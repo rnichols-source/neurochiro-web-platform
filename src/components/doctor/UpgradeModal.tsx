@@ -14,33 +14,6 @@ interface UpgradeModalProps {
 
 const tiers = [
   {
-    id: "basic",
-    name: "Basic",
-    monthlyPrice: "$49",
-    annualPrice: "$42",
-    annualTotal: "$490/yr",
-    description: "Directory listing + messaging",
-    icon: Star,
-    color: "text-gray-400",
-    bg: "bg-white/5",
-    border: "border-white/10",
-    features: [
-      { name: "Directory listing", included: true },
-      { name: "Profile page", included: true },
-      { name: "Profile views count", included: true },
-      { name: "Patient messaging", included: false },
-      { name: "Analytics dashboard", included: false },
-      { name: "KPI Tracker", included: false },
-      { name: "AI Bio Generator", included: false },
-      { name: "Job posting", included: false },
-      { name: "Care Plan Builder", included: false },
-      { name: "Scan Reports", included: false },
-      { name: "P&L Analyzer", included: false },
-      { name: "Verified badge", included: false },
-      { name: "Priority search", included: false },
-    ],
-  },
-  {
     id: "growth",
     name: "Growth",
     monthlyPrice: "$69",
@@ -120,7 +93,7 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "basic", u
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId, userId }),
+        body: JSON.stringify({ priceId, userId, tier: tierId }),
       });
       const data = await res.json();
       if (data.url) {

@@ -25,7 +25,7 @@ function StudentUpgradeModal({ isOpen, onClose, userId, currentTier, highlightFe
     setLoading(true);
     try {
       // Route to student pricing page for Stripe payment
-      window.location.href = "/pricing/students";
+      window.location.href = "/student/subscribe";
     } catch (err) { console.error(err); }
     setLoading(false);
   };

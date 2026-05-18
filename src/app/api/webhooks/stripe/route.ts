@@ -50,12 +50,19 @@ export async function POST(req: Request) {
 
         if (userId) {
           // Update profile with Stripe customer ID and activate membership
-          // Determine tier from the price paid and role
+          // Use tier from metadata (passed from checkout) — fallback to amount-based logic
           const amountPaid = (session.amount_total || 0) / 100;
           const metaRole = session.metadata?.role || '';
-          const membershipTier = metaRole === 'student'
-            ? 'student_paid'
-            : amountPaid >= 199 ? 'pro' : amountPaid >= 99 ? 'growth' : 'growth';
+          const metaTier = session.metadata?.tier || '';
+          let membershipTier: string;
+          if (metaRole === 'student') {
+            membershipTier = 'student_paid';
+          } else if (metaTier === 'pro' || metaTier === 'growth') {
+            membershipTier = metaTier;
+          } else {
+            // Fallback: use price IDs or amount
+            membershipTier = amountPaid >= 100 ? 'pro' : 'growth';
+          }
 
           await supabase
             .from('profiles')
@@ -859,15 +866,40 @@ export async function POST(req: Request) {
 
         const { data: profile } = await supabase
           .from('profiles')
-          .select('id')
+          .select('id, role')
           .eq('stripe_customer_id', customer)
           .single();
 
         if (profile) {
-          await supabase
-            .from('profiles')
-            .update({} as any) // subscription_status column doesn't exist; tier handles access
-            .eq('id', profile.id);
+          // Determine tier from the subscription's price
+          const priceId = subscription.items?.data?.[0]?.price?.id || '';
+          const amount = (subscription.items?.data?.[0]?.price?.unit_amount || 0) / 100;
+          const metaTier = subscription.metadata?.tier || '';
+
+          let newTier: string | null = null;
+          if (profile.role === 'student') {
+            newTier = subscription.status === 'active' ? 'student_paid' : 'free';
+          } else if (metaTier === 'pro' || metaTier === 'growth') {
+            newTier = subscription.status === 'active' ? metaTier : 'free';
+          } else if (amount >= 100) {
+            newTier = subscription.status === 'active' ? 'pro' : 'free';
+          } else if (amount > 0) {
+            newTier = subscription.status === 'active' ? 'growth' : 'free';
+          }
+
+          if (newTier) {
+            await supabase
+              .from('profiles')
+              .update({ tier: newTier } as any)
+              .eq('id', profile.id);
+
+            if (profile.role === 'doctor') {
+              await supabase
+                .from('doctors')
+                .update({ membership_tier: newTier as any })
+                .eq('user_id', profile.id);
+            }
+          }
         }
 
         Automations.onSubscriptionUpdated(subscription);

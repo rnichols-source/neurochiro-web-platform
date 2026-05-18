@@ -72,9 +72,8 @@ const navSections = [
   },
 ];
 
-// free=0 (new signups), basic/starter/growth=1 (paid), pro=2 (premium)
-// basic maps to 1 so existing paid doctors who haven't been migrated still get growth access
-const TIER_LEVELS: Record<string, number> = { free: 0, standard: 0, basic: 1, starter: 1, growth: 1, pro: 2 };
+// free/basic/starter/standard = 0 (free tier), growth = 1 (paid), pro = 2 (premium)
+const TIER_LEVELS: Record<string, number> = { free: 0, standard: 0, basic: 0, starter: 0, growth: 1, pro: 2 };
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();

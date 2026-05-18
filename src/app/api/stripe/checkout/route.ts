@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid Request Payload", details: result.error.format() }, { status: 400 });
     }
 
-    const { priceId, userId } = result.data;
+    const { priceId, userId, tier } = result.data;
 
     // 2. Create Session
     const session = await stripe.checkout.sessions.create({
@@ -30,6 +30,7 @@ export async function POST(req: Request) {
       metadata: {
         userId,
         planId: priceId,
+        tier: tier || '',
       },
     });
 
