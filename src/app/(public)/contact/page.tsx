@@ -20,7 +20,8 @@ export default function ContactPage() {
           first_name: form.name,
           source: "contact_form",
           role: "contact",
-          location: form.subject + ": " + form.message,
+          location: null,
+          metadata: { subject: form.subject, message: form.message },
         }),
       });
     } catch {}

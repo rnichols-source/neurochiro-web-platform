@@ -41,11 +41,13 @@ export async function GET(req: Request) {
     // - status = 'new' (never nurtured) OR 'contacted' (in sequence)
     // - have an email
     // - not converted or closed
+    // - exclude non-nurture sources (password resets, billing, contact form inquiries, seminar interest)
     const { data: leads } = await supabase
       .from('leads')
       .select('*')
       .in('status', ['new', 'contacted'])
       .not('email', 'is', null)
+      .not('source', 'in', '("password_reset_code","contact_form","screening_lead_magnet","seminar_interest","billing")')
       .order('created_at', { ascending: true })
       .limit(30);
 
@@ -58,8 +60,8 @@ export async function GET(req: Request) {
     let closed = 0;
 
     for (const lead of leads) {
-      const meta = lead.metadata || {};
-      const step = meta.nurture_step || 0;
+      const meta = (typeof lead.metadata === 'object' && lead.metadata !== null) ? lead.metadata : {};
+      const step = typeof meta.nurture_step === 'number' ? meta.nurture_step : 0;
       const lastNurtured = meta.last_nurtured_at ? new Date(meta.last_nurtured_at) : null;
       const created = new Date(lead.created_at);
       const daysSinceCreated = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
@@ -88,7 +90,9 @@ export async function GET(req: Request) {
 
       const role = lead.role || 'patient';
       const name = lead.first_name || lead.email?.split('@')[0] || 'there';
-      const location = lead.location || 'your area';
+      // Sanitize location — never use raw message content. Only use short, clean location strings.
+      const rawLoc = lead.location || '';
+      const location = (rawLoc.length > 50 || rawLoc.includes(':') || rawLoc.includes('\n')) ? 'your area' : (rawLoc || 'your area');
       const email = getEmailContent(nextStep, role, name, location);
 
       if (!email) { skipped++; continue; }
