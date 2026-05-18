@@ -1,276 +1,167 @@
 import Link from "next/link";
 import {
-  ArrowRight,
-  Globe,
-  TrendingUp,
-  Users,
-  ShieldCheck,
-  BarChart3,
-  Zap,
-  MessageSquare,
-  GraduationCap,
-  Calendar,
-  CheckCircle2,
-  Quote,
+  ArrowRight, Check, X, ShieldCheck, BarChart3, Users, Briefcase,
+  Award, DollarSign, Shuffle, Star, MapPin, Calendar, TrendingUp,
+  MessageSquare, Zap, Eye, Heart,
 } from "lucide-react";
 import Footer from "@/components/landing/Footer";
 
-export const metadata = {
-  title: "Why NeuroChiro? | For Doctors",
-  description:
-    "Join the global network of nervous system chiropractors. Get listed, grow your practice, and connect with patients who are specifically looking for your expertise.",
-};
-
-const benefits = [
-  {
-    icon: Globe,
-    title: "Global Directory Listing",
-    desc: "Your verified profile is visible to patients worldwide who are searching specifically for nervous system chiropractic care. No more competing with generalists on Google.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Grow Your Patient Base",
-    desc: "Patients who find you through NeuroChiro are already searching for nervous system care. They understand your approach before they walk through the door.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Verified Badge",
-    desc: "Stand out with a verified clinician badge. Every profile is reviewed by our team before it goes live in the directory.",
-  },
-  {
-    icon: Users,
-    title: "Doctor-to-Doctor Referrals",
-    desc: "Send and receive patient referrals from other nervous system specialists. When a patient relocates, their care continues seamlessly.",
-  },
-  {
-    icon: BarChart3,
-    title: "ROI Analytics Dashboard",
-    desc: "Track your profile views, appointment requests, and referrals. See exactly how NeuroChiro is growing your practice.",
-  },
-  {
-    icon: GraduationCap,
-    title: "Recruit Students",
-    desc: "Post job listings and connect with chiropractic students who want to specialize in nervous system care. Find your next associate.",
-  },
-  {
-    icon: Calendar,
-    title: "Host Seminars",
-    desc: "List your seminars and workshops on the platform. Reach an audience of doctors and students who are hungry to learn.",
-  },
-  {
-    icon: MessageSquare,
-    title: "Direct Messaging",
-    desc: "Communicate securely with other doctors, students, and patients through the built-in messaging system.",
-  },
+const comparison = [
+  { feature: "Directory listing", neurochiro: true, others: true },
+  { feature: "Nervous system focused audience", neurochiro: true, others: false },
+  { feature: "AI practice insights & weekly reports", neurochiro: true, others: false },
+  { feature: "Patient lead pipeline (CRM)", neurochiro: true, others: false },
+  { feature: "Salary transparency data", neurochiro: true, others: false },
+  { feature: "CE credit tracking + certificates", neurochiro: true, others: false },
+  { feature: "Residency-style matching (ChiroMatch)", neurochiro: true, others: false },
+  { feature: "Full ATS hiring system", neurochiro: true, others: false },
+  { feature: "Seminar platform with reviews", neurochiro: true, others: false },
+  { feature: "Vendor marketplace", neurochiro: true, others: false },
+  { feature: "Instagram promotion", neurochiro: true, others: false },
+  { feature: "Spotlight interviews", neurochiro: true, others: false },
+  { feature: "Doctor-to-doctor referral network", neurochiro: true, others: false },
+  { feature: "Practice management tools", neurochiro: true, others: false },
+  { feature: "Competitive ranking in your city", neurochiro: true, others: false },
 ];
 
-const doctorTestimonials = [
-  {
-    quote: "Patients who find me through NeuroChiro already understand what nervous system chiropractic is. I don't have to convince them — they came looking for me.",
-    name: "Network Doctor",
-    location: "United States",
-  },
-  {
-    quote: "I was tired of being lumped in with every general chiropractor on Google. NeuroChiro puts me in front of the right patients.",
-    name: "Network Doctor",
-    location: "Australia",
-  },
-  {
-    quote: "The referral network is what sold me. When a patient moves, I can send them to another nervous system specialist in the network.",
-    name: "Network Doctor",
-    location: "Canada",
-  },
+const features = [
+  { icon: Eye, title: "Get Found by Patients", desc: "Patients searching for nervous system care find YOU — not generalists competing for the same keywords." },
+  { icon: BarChart3, title: "AI Practice Intelligence", desc: "Weekly AI insights, competitive ranking, revenue intelligence, and smart action items — your practice consultant that never sleeps." },
+  { icon: Users, title: "Patient Lead Pipeline", desc: "Track every lead from first contact to converted patient. Notes, stages, conversion rates — a CRM built for chiropractors." },
+  { icon: Shuffle, title: "ChiroMatch", desc: "The first residency-style matching system for chiropractic. Students rank practices. Practices rank candidates. Algorithm matches." },
+  { icon: DollarSign, title: "Salary Transparency", desc: "Real compensation data by state, role, and specialty. Know what the market pays before you make an offer." },
+  { icon: Award, title: "CE Credit Tracking", desc: "QR check-in at seminars. Verified certificates generated instantly. All hours tracked in one dashboard." },
+  { icon: Briefcase, title: "Full Hiring System", desc: "7-stage ATS pipeline, ChiroScore candidate ratings, interview prep, offer letters, email templates." },
+  { icon: Star, title: "Seminar Reviews", desc: "Verified attendee reviews on every seminar. The Yelp for chiropractic education." },
+  { icon: Calendar, title: "Instagram Promotion", desc: "Growth members get monthly Instagram features. Pro members get weekly promotion + Spotlight interviews." },
+  { icon: Heart, title: "Vendor Marketplace", desc: "Trusted products with exclusive member discounts. Reviews, product showcases, and direct contact." },
 ];
 
 export default function WhyNeuroChiroPage() {
   return (
     <div className="min-h-dvh bg-neuro-cream">
       {/* Hero */}
-      <section className="bg-neuro-navy text-white pt-40 pb-20 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-20 left-20 w-60 h-60 bg-neuro-orange rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-20 w-80 h-80 bg-blue-500 rounded-full blur-3xl" />
-        </div>
-        <div className="max-w-3xl mx-auto text-center relative z-10">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-4">
-            For Doctors
-          </p>
-          <h1 className="text-4xl md:text-5xl font-heading font-black tracking-tight leading-tight mb-6 text-white">
-            Stop Competing with <br />
-            <span className="text-neuro-orange">Generalists.</span>
-          </h1>
-          <p className="text-gray-400 text-lg mb-6 max-w-xl mx-auto">
-            You specialize in the nervous system. Your patients should be able to find you.
-            NeuroChiro is the only directory built specifically for practitioners like you.
-          </p>
-          <div className="flex flex-wrap justify-center gap-6 mb-10 text-sm">
-            <span className="text-gray-400"><span className="text-white font-bold">120+</span> Verified Doctors</span>
-            <span className="text-gray-400"><span className="text-white font-bold">6</span> Countries</span>
-            <span className="text-gray-400"><span className="text-white font-bold">Free</span> to join</span>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/register?role=doctor"
-              className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors inline-flex items-center justify-center gap-2"
-            >
-              Get Listed <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/directory"
-              className="px-8 py-4 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-colors border border-white/20"
-            >
-              Browse Directory
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* The Problem */}
-      <section className="py-20 px-6 bg-white">
+      <section className="bg-neuro-navy text-white pt-32 pb-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-heading font-black text-neuro-navy mb-6">
-            The Problem You Know Too Well
-          </h2>
-          <div className="space-y-4 text-gray-600 text-lg leading-relaxed">
-            <p>
-              You&apos;ve spent years mastering nervous system chiropractic. But when patients search for you online, they find generic chiropractic directories that don&apos;t distinguish what makes you different.
-            </p>
-            <p>
-              Your ideal patients &mdash; the ones who specifically want nervous system care &mdash; can&apos;t find you. They end up at a generalist down the street, or worse, they give up looking entirely.
-            </p>
-            <p className="font-bold text-neuro-navy">
-              NeuroChiro changes that.
-            </p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-4">Why NeuroChiro</p>
+          <h1 className="text-4xl md:text-5xl font-heading font-black text-white mb-6 leading-tight">
+            Other Directories List You.<br />
+            <span className="text-neuro-orange">NeuroChiro Grows Your Practice.</span>
+          </h1>
+          <p className="text-gray-400 text-lg max-w-xl mx-auto mb-8">
+            NeuroChiro isn&apos;t a directory. It&apos;s the operating system for nervous system chiropractors — AI insights, hiring tools, CE tracking, salary data, and a marketplace all in one platform.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="/get-started" className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors inline-flex items-center gap-2">
+              Get Listed Free <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link href="/pricing" className="px-8 py-4 bg-white/10 text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-colors">
+              View Plans
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Benefits Grid */}
-      <section className="py-20 px-6 bg-neuro-cream">
+      {/* Stats */}
+      <div className="bg-neuro-navy-dark border-t border-white/5">
+        <div className="max-w-3xl mx-auto flex justify-center divide-x divide-white/10">
+          {[
+            { number: "140+", label: "Verified Doctors" },
+            { number: "30+", label: "States" },
+            { number: "4", label: "Countries" },
+            { number: "Free", label: "To Join" },
+          ].map((stat) => (
+            <div key={stat.label} className="flex-1 text-center py-5">
+              <div className="text-2xl font-black text-neuro-orange">{stat.number}</div>
+              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Comparison Table */}
+      <section className="max-w-3xl mx-auto px-6 py-16">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-heading font-black text-neuro-navy mb-3">NeuroChiro vs Everyone Else</h2>
+          <p className="text-gray-500">See what you get that no other platform offers.</p>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden">
+          {/* Header */}
+          <div className="grid grid-cols-3 gap-0 border-b border-gray-100">
+            <div className="p-4 font-bold text-neuro-navy text-sm">Feature</div>
+            <div className="p-4 text-center font-bold text-neuro-orange text-sm bg-neuro-orange/5">NeuroChiro</div>
+            <div className="p-4 text-center font-bold text-gray-400 text-sm">Other Directories</div>
+          </div>
+          {/* Rows */}
+          {comparison.map((row, i) => (
+            <div key={i} className="grid grid-cols-3 gap-0 border-b border-gray-50 last:border-0">
+              <div className="p-3 text-sm text-gray-600">{row.feature}</div>
+              <div className="p-3 text-center bg-neuro-orange/5">
+                <Check className="w-5 h-5 text-green-500 mx-auto" />
+              </div>
+              <div className="p-3 text-center">
+                {row.others ? (
+                  <Check className="w-5 h-5 text-green-500 mx-auto" />
+                ) : (
+                  <X className="w-5 h-5 text-gray-300 mx-auto" />
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="bg-neuro-navy py-16 px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-3">
-              Everything You Need
-            </p>
-            <h2 className="text-3xl font-heading font-black text-neuro-navy">
-              One Membership. Full Access.
-            </h2>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-heading font-black text-white mb-3">Everything You Need. One Platform.</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {benefits.map((b, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-2xl p-8 border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all"
-              >
-                <div className="flex items-start gap-5">
-                  <div className="w-12 h-12 rounded-xl bg-neuro-orange/10 flex items-center justify-center flex-shrink-0">
-                    <b.icon className="w-6 h-6 text-neuro-orange" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-neuro-navy text-lg mb-2">{b.title}</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed">{b.desc}</p>
-                  </div>
-                </div>
+            {features.map((f, i) => (
+              <div key={i} className="bg-white/5 rounded-2xl border border-white/10 p-6">
+                <f.icon className="w-6 h-6 text-neuro-orange mb-3" />
+                <h3 className="font-bold text-white mb-1">{f.title}</h3>
+                <p className="text-sm text-gray-400">{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* What You'll See */}
-      <section className="py-20 px-6 bg-white">
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-3">Your Dashboard</p>
-          <h2 className="text-2xl font-heading font-black text-neuro-navy mb-4">See Exactly How Your Practice Grows</h2>
-          <p className="text-gray-500 max-w-xl mx-auto mb-10">After you join, your dashboard shows you real-time data on how patients are finding you.</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { label: "Profile Views", value: "47", desc: "patients viewed your profile this month" },
-              { label: "Phone Taps", value: "12", desc: "patients tapped to call your office" },
-              { label: "Appointment Requests", value: "8", desc: "patients requested an appointment" },
-              { label: "Website Clicks", value: "23", desc: "patients visited your website" },
-            ].map((stat, i) => (
-              <div key={i} className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                <p className="text-3xl font-black text-neuro-navy">{stat.value}</p>
-                <p className="text-xs font-bold text-neuro-orange mt-1">{stat.label}</p>
-                <p className="text-[11px] text-gray-400 mt-1">{stat.desc}</p>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-gray-400 mt-4">Example data shown. Your actual numbers depend on your location and profile completeness.</p>
+      {/* Promotion */}
+      <section className="max-w-3xl mx-auto px-6 py-16">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-heading font-black text-neuro-navy mb-3">We Promote You</h2>
+          <p className="text-gray-500">Every member gets visibility. Paid members get even more.</p>
         </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 px-6 bg-neuro-navy">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-3">
-              From Our Network
-            </p>
-            <h2 className="text-3xl font-heading font-black text-white">
-              Hear from Doctors Like You
-            </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
+            <p className="text-sm font-bold text-neuro-orange mb-1">Free</p>
+            <p className="text-lg font-black text-neuro-navy mb-2">Instagram Highlights</p>
+            <p className="text-xs text-gray-500">Your practice featured in our Instagram highlights for followers to discover.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {doctorTestimonials.map((t, i) => (
-              <div
-                key={i}
-                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8"
-              >
-                <Quote className="w-6 h-6 text-neuro-orange/40 mb-4" />
-                <p className="text-white/80 text-sm leading-relaxed mb-6">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-                <div>
-                  <p className="font-bold text-white">{t.name}</p>
-                  <p className="text-gray-400 text-sm">{t.location}</p>
-                </div>
-              </div>
-            ))}
+          <div className="bg-white rounded-2xl border-2 border-neuro-orange p-6 text-center">
+            <p className="text-sm font-bold text-neuro-orange mb-1">Growth</p>
+            <p className="text-lg font-black text-neuro-navy mb-2">Monthly Instagram Feature</p>
+            <p className="text-xs text-gray-500">1 dedicated post + story per month featuring your practice to our entire audience.</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
+            <p className="text-sm font-bold text-neuro-orange mb-1">Pro</p>
+            <p className="text-lg font-black text-neuro-navy mb-2">Spotlight Interview</p>
+            <p className="text-xs text-gray-500">We interview you on camera. Featured on our channels + weekly Instagram promotion.</p>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-20 px-6 bg-white">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl font-heading font-black text-neuro-navy mb-12">
-            Get Started in 3 Minutes
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { step: "1", title: "Create Your Account", desc: "Sign up and choose your membership plan." },
-              { step: "2", title: "Complete Your Profile", desc: "Add your bio, specialties, photos, and clinic details. Our AI can help write your bio." },
-              { step: "3", title: "Go Live", desc: "Your verified listing goes live in the global directory. Patients start finding you." },
-            ].map((item) => (
-              <div key={item.step}>
-                <div className="w-12 h-12 rounded-xl bg-neuro-orange/10 text-neuro-orange font-black text-lg flex items-center justify-center mx-auto mb-4">
-                  {item.step}
-                </div>
-                <h3 className="font-bold text-neuro-navy mb-2">{item.title}</h3>
-                <p className="text-gray-500 text-sm">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="py-20 px-6 bg-neuro-cream">
+      {/* CTA */}
+      <section className="bg-neuro-navy py-16 px-6">
         <div className="max-w-2xl mx-auto text-center">
-          <Zap className="w-10 h-10 text-neuro-orange mx-auto mb-4" />
-          <h2 className="text-3xl font-heading font-black text-neuro-navy mb-4">
-            Ready to Grow Your Practice?
-          </h2>
-          <p className="text-gray-500 mb-8">
-            Join the growing network of nervous system specialists. Your patients are already looking for you.
-          </p>
-          <Link
-            href="/register?role=doctor"
-            className="inline-flex items-center gap-2 px-10 py-5 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors shadow-xl shadow-neuro-orange/20"
-          >
-            Get Listed <ArrowRight className="w-5 h-5" />
+          <h2 className="text-3xl font-heading font-black text-white mb-4">Ready to Get Found?</h2>
+          <p className="text-gray-400 mb-8">Join 140+ nervous system chiropractors. Free to start. No credit card required.</p>
+          <Link href="/get-started" className="px-10 py-5 bg-neuro-orange text-white font-bold rounded-xl text-lg inline-flex items-center gap-2 hover:bg-neuro-orange/90 transition-colors shadow-lg shadow-neuro-orange/20">
+            Get Listed Free <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>
