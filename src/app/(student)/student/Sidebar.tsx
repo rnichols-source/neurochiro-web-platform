@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
   MessageSquare, FileText, LogOut, X, Settings, CreditCard, DollarSign, Compass, ClipboardList, HelpCircle,
-  Map, Users, Heart, Search, ShoppingBag, Shuffle, Award,
+  Map, Users, Heart, Search, ShoppingBag, Shuffle, Award, Lock,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
@@ -28,9 +28,9 @@ const navSections = [
   {
     label: "Learn",
     items: [
-      { name: "Academy", href: "/student/academy", icon: GraduationCap },
-      { name: "Techniques", href: "/student/techniques", icon: Compass },
-      { name: "Interview Playbook", href: "/student/interview-prep", icon: ClipboardList },
+      { name: "Academy", href: "/student/academy", icon: GraduationCap, tier: "premium" as const },
+      { name: "Techniques", href: "/student/techniques", icon: Compass, tier: "premium" as const },
+      { name: "Interview Playbook", href: "/student/interview-prep", icon: ClipboardList, tier: "premium" as const },
     ],
   },
   {
@@ -38,12 +38,12 @@ const navSections = [
     items: [
       { name: "Find Doctors", href: "/directory", icon: Search },
       { name: "Jobs", href: "/student/jobs", icon: Briefcase },
-      { name: "ChiroMatch", href: "/student/chiromatch", icon: Shuffle },
+      { name: "ChiroMatch", href: "/student/chiromatch", icon: Shuffle, tier: "premium" as const },
       { name: "Mentors", href: "/student/mentors", icon: Heart },
-      { name: "Contract Lab", href: "/student/contract-lab", icon: FileText },
-      { name: "Financial Planner", href: "/student/financial-planner", icon: DollarSign },
+      { name: "Contract Lab", href: "/student/contract-lab", icon: FileText, tier: "premium" as const },
+      { name: "Financial Planner", href: "/student/financial-planner", icon: DollarSign, tier: "premium" as const },
       { name: "Seminars", href: "/student/seminars", icon: Calendar },
-      { name: "CE Tracker", href: "/student/ce-tracker", icon: Award },
+      { name: "CE Tracker", href: "/student/ce-tracker", icon: Award, tier: "premium" as const },
       { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
     ],
   },
@@ -67,14 +67,21 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [userName, setUserName] = useState<string | null>(null);
+  const [studentTier, setStudentTier] = useState("free");
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
-        supabase.from("profiles").select("full_name").eq("id", user.id).single()
+        supabase.from("profiles").select("full_name, tier, stripe_customer_id").eq("id", user.id).single()
           .then(({ data }) => {
             setUserName(data?.full_name || null);
+            const t = (data as any)?.tier || 'free';
+            const hasStripe = !!(data as any)?.stripe_customer_id;
+            // Any paid tier or has stripe = premium
+            if (hasStripe || (t !== 'free' && t !== 'standard' && t !== 'basic')) {
+              setStudentTier('premium');
+            }
           });
       }
     });
@@ -123,19 +130,25 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <div className="space-y-px">
               {section.items.map((item: any) => {
                 const active = pathname === item.href || pathname?.startsWith(item.href + "/");
+                const isLocked = item.tier === 'premium' && studentTier !== 'premium';
                 return (
                   <Link
                     key={item.name}
-                    href={item.href}
+                    href={isLocked ? "/student/subscribe" : item.href}
                     onClick={onClose}
-                    className={`flex items-center gap-3 px-3 py-[7px] rounded-lg text-[13px] transition-all duration-200 ${
+                    className={`flex items-center justify-between px-3 py-[7px] rounded-lg text-[13px] transition-all duration-200 ${
                       active
                         ? "bg-white/[0.06] text-white"
+                        : isLocked
+                        ? "text-white/15 hover:text-white/25"
                         : "text-white/30 hover:text-white/60 hover:bg-white/[0.02]"
                     }`}
                   >
-                    <item.icon className={`w-[14px] h-[14px] ${active ? "text-[#D66829]" : "text-white/20"}`} />
-                    {item.name}
+                    <span className="flex items-center gap-3">
+                      <item.icon className={`w-[14px] h-[14px] ${active ? "text-[#D66829]" : isLocked ? "text-white/10" : "text-white/20"}`} />
+                      {item.name}
+                    </span>
+                    {isLocked && <Lock className="w-3 h-3 text-white/10" />}
                   </Link>
                 );
               })}
