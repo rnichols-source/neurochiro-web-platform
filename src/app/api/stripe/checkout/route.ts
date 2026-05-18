@@ -25,8 +25,8 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co'}/billing?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co'}/billing?canceled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co'}/doctor/dashboard?upgraded=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co'}/doctor/billing?canceled=true`,
       metadata: {
         userId,
         planId: priceId,

@@ -12,13 +12,13 @@ export async function createConferenceCheckout(data: {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co';
 
   const prices = {
-    doctor: { monthly: 4900, annual: 49000 },
+    doctor: { monthly: 6900, annual: 70800 },
     student: { monthly: 1200, annual: 12000 },
   };
 
   const priceLabels = {
-    doctor: { monthly: 'Doctor Monthly ($49/mo)', annual: 'Doctor Annual ($490/yr)' },
-    student: { monthly: 'Student Monthly ($12/mo)', annual: 'Student Annual ($120/yr)' },
+    doctor: { monthly: 'Doctor Growth ($69/mo)', annual: 'Doctor Growth Annual ($708/yr)' },
+    student: { monthly: 'Student Premium ($12/mo)', annual: 'Student Premium Annual ($120/yr)' },
   };
 
   const amount = prices[data.role][data.billing];

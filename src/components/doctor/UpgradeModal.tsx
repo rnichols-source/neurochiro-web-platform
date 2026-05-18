@@ -151,7 +151,7 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "basic", u
             </div>
 
             {/* Tiers */}
-            <div className="p-8 pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-8 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               {tiers.map((tier) => {
                 const isCurrent = tier.id === currentTier;
                 const isUpgrade = !isCurrent && tier.id !== "basic";

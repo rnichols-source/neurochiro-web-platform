@@ -932,8 +932,13 @@ export async function POST(req: Request) {
         if (profile && !hasOtherActiveSub) {
           await supabase
             .from('profiles')
-            .update({ tier: 'basic' } as any)
+            .update({ tier: 'free' } as any)
             .eq('id', profile.id);
+          // Also update doctors table
+          await supabase
+            .from('doctors')
+            .update({ membership_tier: 'free' as any })
+            .eq('user_id', profile.id);
         } else if (profile && hasOtherActiveSub) {
           console.log(`[WEBHOOK] Subscription deleted but customer ${customer} still has active subs — not downgrading`);
         }
