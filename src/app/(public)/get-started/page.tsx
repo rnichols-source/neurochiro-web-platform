@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle2, Loader2, ShieldCheck, Users, BarChart3, Briefcase, Award, Zap } from "lucide-react";
 import { createFreeAccount } from "./actions";
+import { createClient } from "@/lib/supabase";
 
 type Role = "doctor" | "student";
 
@@ -28,8 +29,23 @@ export default function GetStartedPage() {
     const result = await createFreeAccount({ name, email, password, role });
     if (result.error) { setError(result.error); setLoading(false); return; }
 
-    setSuccess(true);
-    setLoading(false);
+    // Auto-login with the credentials they just created
+    const supabase = createClient();
+    const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (loginErr) {
+      // Fallback — show success with login link
+      setSuccess(true);
+      setLoading(false);
+      return;
+    }
+
+    // Redirect straight to onboarding (doctors) or dashboard (students)
+    if (role === "doctor") {
+      window.location.href = "/doctor/onboarding";
+    } else {
+      window.location.href = "/student/dashboard";
+    }
   };
 
   if (success) {
