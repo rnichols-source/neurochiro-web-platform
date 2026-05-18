@@ -218,8 +218,17 @@ export default function ConferenceLandingPage() {
             <p className="text-green-600 text-xs mt-1">Not satisfied? Full refund within 30 days.</p>
           </div>
 
+          {/* Free option */}
+          <div className="bg-neuro-navy rounded-xl p-4 text-center">
+            <p className="text-white font-bold text-sm mb-1">Not ready to pay?</p>
+            <p className="text-gray-400 text-xs mb-3">Get a free listing and upgrade later.</p>
+            <Link href="/get-started" className="text-neuro-orange font-bold text-sm hover:underline">
+              Join Free →
+            </Link>
+          </div>
+
           {/* Already a member */}
-          <p className="text-center text-xs text-gray-400">
+          <p className="text-center text-xs text-gray-400 mt-4">
             Already a member?{" "}
             <Link href="/login" className="text-neuro-orange font-bold hover:underline">Log in</Link>
           </p>

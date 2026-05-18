@@ -383,18 +383,13 @@ export default function BoothPage() {
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
             <div>
               <p className="text-sm font-bold text-white">Scan to Join</p>
-              <p className="text-xs text-white/40">neurochiro.co/conference</p>
+              <p className="text-xs text-white/40">neurochiro.co/get-started</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-xs text-white/40">Doctors from</p>
-              <p className="text-lg font-black text-neuro-orange">$49/mo</p>
-            </div>
-            <div className="w-px h-10 bg-white/10" />
-            <div className="text-right">
-              <p className="text-xs text-white/40">Students from</p>
-              <p className="text-lg font-black text-neuro-orange">$12/mo</p>
+            <div className="px-5 py-2 bg-neuro-orange rounded-xl">
+              <p className="text-lg font-black text-white">Free to Join</p>
+              <p className="text-[10px] text-white/60">Upgrade anytime</p>
             </div>
           </div>
         </div>
