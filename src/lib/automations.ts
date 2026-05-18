@@ -340,7 +340,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                       <li>Connect with clinics looking for graduates</li>
                     </ul>
                     <p>Your next step: Complete your student profile so we can match you with the right opportunities.</p>`, 
-              ctaText: 'Start Your Membership',
+              ctaText: 'Go to Dashboard',
               ctaUrl: 'https://neurochiro.co/student/dashboard',
               secondaryCtaText: 'Explore Career Tools',
               secondaryCtaUrl: 'https://neurochiro.co/student/dashboard'
@@ -589,7 +589,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                 subject: 'Ready to expand your clinical influence? 🚀',
                 title: 'Growth Tier Unlock',
                 body: `<h1>Dr. ${payload.name || payload.full_name || ''}, level up your practice.</h1>
-                       <p>Your Basic tier gets you on the map, but the Growth tier unlocks powerful student recruiting tools, seminar hosting capabilities, and advanced analytics to track your referral sources.</p>
+                       <p>Your Free tier gets you on the map, but the Growth tier unlocks powerful student recruiting tools, seminar hosting capabilities, and advanced analytics to track your referral sources.</p>
                        <p>Upgrade today and see what the full network can do for your clinic.</p>`,
                 ctaText: 'View Upgrade Options',
                 ctaUrl: 'https://neurochiro.co/doctor/settings'
@@ -879,7 +879,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           if (customerId) {
             const { data: profile } = await supabaseAdmin.from('profiles').select('id, email, full_name').eq('stripe_customer_id', customerId).single();
             if (profile) {
-              await supabaseAdmin.from('profiles').update({ tier: 'basic' }).eq('id', profile.id);
+              await supabaseAdmin.from('profiles').update({ tier: 'free' }).eq('id', profile.id);
               if (emailEnabled && profile.email) {
                 await sendPremiumEmail({
                   to: profile.email,
@@ -901,7 +901,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           if (customerId) {
             const { data: profile } = await supabaseAdmin.from('profiles').select('id, role').eq('stripe_customer_id', customerId).single();
             if (profile) {
-              await supabaseAdmin.from('profiles').update({ tier: 'basic' }).eq('id', profile.id);
+              await supabaseAdmin.from('profiles').update({ tier: 'free' }).eq('id', profile.id);
               // [FOREVER FIX] Do not hide from directory on subscription cancelation.
               // We want listings to stay visible to preserve the platform's value.
               // They will be downgraded to 'basic' tier instead (handled in profiles update above).

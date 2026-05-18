@@ -49,7 +49,7 @@ export async function getDoctorProfile() {
       full_name: "", 
       email: "", 
       role: "doctor", 
-      tier: "basic", 
+      tier: "free", 
       notification_preferences: {},
       profile_views: 0,
       patient_leads: 0

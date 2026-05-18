@@ -153,7 +153,7 @@ export async function sendFoundingMemberEmail() {
 
     <h2 style="font-size: 20px; color: #D66829; margin-top: 30px;">WHAT'S CHANGING</h2>
     <p>We're opening NeuroChiro to more chiropractors across the country. More doctors in the directory means more patients using the platform to search — and more patients finding <strong>YOU</strong>.</p>
-    <p>New doctors will join at $49/mo for Basic, $69/mo for Growth, or $129/mo for Pro.</p>
+    <p>New doctors will join at free. Growth is $69/mo, Pro is $129/mo.</p>
 
     <h2 style="font-size: 20px; color: #D66829; margin-top: 30px;">WHAT THIS MEANS FOR YOU</h2>
     <p>You were here first. So here's what you get that nobody else ever will:</p>
@@ -164,9 +164,9 @@ export async function sendFoundingMemberEmail() {
 
     <p><strong style="color: #D66829;">YOUR PRICE IS LOCKED</strong> — Whatever you're paying now is your price for life. New members will pay more. Your rate will never increase.</p>
 
-    <p><strong style="color: #D66829;">PRIORITY SEARCH PLACEMENT</strong> — When patients search for a chiropractor, you show up above Basic listings. Always.</p>
+    <p><strong style="color: #D66829;">PRIORITY SEARCH PLACEMENT</strong> — When patients search for a chiropractor, you show up above Free listings. Always.</p>
 
-    <p><strong style="color: #D66829;">VERIFIED PROVIDER BADGE</strong> — The trust signal patients look for. Basic listings don't get this. You do.</p>
+    <p><strong style="color: #D66829;">VERIFIED PROVIDER BADGE</strong> — The trust signal patients look for. Free listings don't get this. You do.</p>
 
     <p><strong style="color: #D66829;">EARLY ACCESS</strong> — Any new feature we build, you get it first.</p>
 

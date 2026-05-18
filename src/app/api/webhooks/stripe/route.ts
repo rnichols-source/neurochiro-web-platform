@@ -139,7 +139,7 @@ export async function POST(req: Request) {
                       bio: '',
                       specialties: [],
                       verification_status: 'verified',
-                      membership_tier: 'basic',
+                      membership_tier: 'free',
                       is_hiring: false,
                       is_mentoring: false,
                       region_code: 'US',
@@ -189,7 +189,7 @@ export async function POST(req: Request) {
               website_url: session.metadata?.website || '',
               categories: session.metadata?.category ? [session.metadata.category] : [],
               is_active: false,
-              tier: 'basic',
+              tier: 'free',
             });
 
             // Confirmation email
@@ -258,7 +258,7 @@ export async function POST(req: Request) {
               max_capacity: parseInt(session.metadata?.capacity || '0') || null,
               payment_status: 'paid',
               is_approved: false,
-              listing_tier: 'basic',
+              listing_tier: 'free',
               host_type_at_submission: 'external',
             });
 
@@ -852,7 +852,7 @@ export async function POST(req: Request) {
         if (profile) {
           await supabase
             .from('profiles')
-            .update({ tier: 'basic' } as any)
+            .update({ tier: 'free' } as any)
             .eq('id', profile.id);
         }
 

@@ -547,7 +547,7 @@ export async function preBuildProfile(prospectId: string) {
     bio: '',
     specialties: [],
     verification_status: 'verified',
-    membership_tier: 'basic',
+    membership_tier: 'free',
     region_code: 'US',
     phone: p.phone || null,
     email: p.email || null,

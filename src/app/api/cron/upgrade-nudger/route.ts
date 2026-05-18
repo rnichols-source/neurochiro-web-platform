@@ -15,7 +15,7 @@ const getResend = () => new Resend(process.env.RESEND_API_KEY || '');
 
 /**
  * UPGRADE NUDGER — Runs daily at 11 AM EST
- * Monitors Basic tier doctor activity and sends targeted upgrade emails
+ * Monitors Free tier doctor activity and sends targeted upgrade emails
  * based on real milestones. Each nudge type fires ONCE per doctor.
  *
  * Triggers:
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
       .in('membership_tier', ['basic', 'free']);
 
     if (!doctors || doctors.length === 0) {
-      return NextResponse.json({ success: true, message: 'No Basic tier doctors to nudge', sent: 0 });
+      return NextResponse.json({ success: true, message: 'No Free tier doctors to nudge', sent: 0 });
     }
 
     // Get emails
@@ -139,7 +139,7 @@ export async function GET(req: Request) {
             <p style="margin-top: 24px;">
               <a href="https://neurochiro.co/doctor/billing" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">See Upgrade Options</a>
             </p>
-            <p style="margin-top: 16px; font-size: 13px; color: #9CA3AF;">Your Basic listing stays active. Upgrade whenever you're ready.</p>`),
+            <p style="margin-top: 16px; font-size: 13px; color: #9CA3AF;">Your Free listing stays active. Upgrade whenever you're ready.</p>`),
         });
 
         // Log so we don't send again

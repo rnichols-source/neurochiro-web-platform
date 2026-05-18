@@ -105,7 +105,7 @@ export async function GET(req: Request) {
           bio: '',
           specialties: [],
           verification_status: 'verified',
-          membership_tier: 'basic',
+          membership_tier: 'free',
           region_code: 'US',
           is_founding_member: false,
           phone: p.phone || null,
