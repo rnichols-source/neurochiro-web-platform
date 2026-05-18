@@ -5,7 +5,7 @@ import { useEffect, useState, useMemo } from "react";
 import {
   Calendar, MapPin, ArrowLeft, Loader2, ExternalLink, Users, Clock,
   Award, HelpCircle, Image as ImageIcon, ChevronDown, Share2, Copy,
-  Check, Plane, Hotel, Sun, Mic2, CheckCircle2, ArrowRight,
+  Check, Plane, Hotel, Sun, Mic2, CheckCircle2, ArrowRight, ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { getSeminarById, getSeminars, incrementSeminarStats } from "../actions";
@@ -42,7 +42,6 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
   const [seminar, setSeminar] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [expandedSpeaker, setExpandedSpeaker] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
   const [relatedSeminars, setRelatedSeminars] = useState<any[]>([]);
 
@@ -454,12 +453,12 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {speakers.map((speaker, si) => {
-                    const isExpanded = expandedSpeaker === si;
+                    const speakerSlug = speaker.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
                     return (
-                      <button
+                      <Link
                         key={si}
-                        onClick={() => setExpandedSpeaker(isExpanded ? null : si)}
-                        className="flex items-start gap-4 bg-gray-50 hover:bg-gray-100 rounded-xl p-4 text-left transition-colors w-full"
+                        href={`/seminars/${id}/speakers/${speakerSlug}`}
+                        className="flex items-start gap-4 bg-gray-50 hover:bg-gray-100 rounded-xl p-4 text-left transition-all w-full group hover:shadow-md"
                       >
                         {speaker.photo_url ? (
                           <img src={speaker.photo_url} alt={speaker.name} className="w-14 h-14 rounded-xl object-cover shrink-0" />
@@ -469,20 +468,18 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                           </div>
                         )}
                         <div className="min-w-0 flex-1">
-                          <p className="font-bold text-neuro-navy text-sm">{speaker.name}</p>
+                          <p className="font-bold text-neuro-navy text-sm group-hover:text-neuro-orange transition-colors">{speaker.name}</p>
                           <p className="text-xs text-neuro-orange font-bold mt-0.5">{speaker.title}</p>
                           {speaker.bio && (
-                            <p className={`text-xs text-gray-500 mt-1.5 leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}>
+                            <p className="text-xs text-gray-500 mt-1.5 leading-relaxed line-clamp-2">
                               {speaker.bio}
                             </p>
                           )}
-                          {speaker.bio && (
-                            <span className="text-[10px] font-bold text-neuro-orange mt-1 inline-block">
-                              {isExpanded ? 'Show less' : 'Read more'}
-                            </span>
-                          )}
+                          <span className="text-[10px] font-bold text-neuro-orange mt-1.5 inline-flex items-center gap-0.5">
+                            View Profile <ChevronRight className="w-3 h-3" />
+                          </span>
                         </div>
-                      </button>
+                      </Link>
                     );
                   })}
                 </div>
