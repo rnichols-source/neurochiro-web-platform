@@ -45,16 +45,8 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     return redirect(`/onboarding?role=${role}`);
   }
 
-  // Students without active subscription ALWAYS go to subscribe page
-  // This check runs before redirectUrl to prevent paywall bypass via ?redirect=
-  if (role === 'student') {
-    const tier = (profile as any)?.tier;
-    const hasStripe = !!(profile as any)?.stripe_customer_id;
-    const isSubscribed = hasStripe || (tier && tier !== 'basic' && tier !== 'free');
-    if (!isSubscribed) {
-      return redirect('/student/subscribe');
-    }
-  }
+  // Free tier — students can access portal without payment
+  // Features gated inside via UpgradeGate components
 
   // Honor redirect param only after subscription is verified
   if (redirectUrl) return redirect(redirectUrl);

@@ -28,30 +28,9 @@ export async function GET(request: Request) {
           .eq('id', user.id)
           .single()
 
-        if (profile?.role === 'student') {
-          const tier = profile.tier;
-          const hasStripe = !!(profile as any).stripe_customer_id;
-          const isSubscribed = hasStripe || (tier && tier !== 'basic' && tier !== 'free');
-          if (!isSubscribed) {
-            console.log(`[AUTH_CALLBACK] Unsubscribed student. Redirecting to /student/subscribe`);
-            return NextResponse.redirect(`${origin}/student/subscribe`)
-          }
-        }
-
-        // Check if doctor without active subscription
-        if (profile?.role === 'doctor') {
-          const { data: doc } = await supabase
-            .from('doctors')
-            .select('is_founding_member')
-            .eq('user_id', user.id)
-            .single();
-          const isFounder = (doc as any)?.is_founding_member === true;
-          const isSubscribed = !!(profile as any).stripe_customer_id || isFounder;
-          if (!isSubscribed) {
-            console.log(`[AUTH_CALLBACK] Unsubscribed doctor. Redirecting to /doctor/billing`);
-            return NextResponse.redirect(`${origin}/doctor/billing`)
-          }
-        }
+        // Free tier — no subscription redirects needed
+        // All doctors and students can access their portals
+        // Features are gated inside via sidebar locks and UpgradeGate components
       }
 
       console.log(`[AUTH_CALLBACK] Successfully exchanged code. Redirecting to: ${next}`);

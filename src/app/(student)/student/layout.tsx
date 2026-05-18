@@ -61,17 +61,8 @@ function StudentLayoutInner({
         const parts = profile.full_name.split(" ");
         setInitials(parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0][0] || "--");
       }
-      const tier = (profile as any)?.tier;
-      const hasStripe = !!(profile as any)?.stripe_customer_id;
-      const isSubscribed = hasStripe || (tier && tier !== 'basic' && tier !== 'free');
-      if (!isSubscribed && justSubscribed && attempt < 5) {
-        // Webhook may still be processing — retry a few times
-        await new Promise(r => setTimeout(r, 1500));
-        return checkSubscription(attempt + 1);
-      }
-      if (!isSubscribed && pathname !== '/student/subscribe' && pathname !== '/student/billing' && pathname !== '/student/welcome') {
-        router.push('/student/subscribe');
-      }
+      // Free tier — all students can access the portal
+      // Features are gated inside via sidebar locks and UpgradeGate components
       setSubscriptionChecked(true);
     };
 

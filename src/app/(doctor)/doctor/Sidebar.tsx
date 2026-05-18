@@ -24,7 +24,7 @@ const navSections = [
       { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
       { name: "Profile", href: "/doctor/profile", icon: User },
       { name: "Messages", href: "/doctor/messages", icon: MessageSquare, tier: "growth" as const },
-      { name: "Referral Network", href: "/doctor/referral-network", icon: Users },
+      { name: "Referral Network", href: "/doctor/referral-network", icon: Users, tier: "growth" as const },
       { name: "Notifications", href: "/doctor/notifications", icon: Bell },
     ],
   },
@@ -39,9 +39,9 @@ const navSections = [
   {
     label: "TOOLS",
     items: [
-      { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp, tier: "growth" as const },
+      { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp, tier: "pro" as const },
       { name: "P&L Analyzer", href: "/doctor/pl-analyzer", icon: DollarSign, tier: "pro" as const },
-      { name: "Content Library", href: "/doctor/content-library", icon: Library, tier: "growth" as const },
+      { name: "Content Library", href: "/doctor/content-library", icon: Library, tier: "pro" as const },
       { name: "Billing Guide", href: "/doctor/billing-guide", icon: Receipt },
     ],
   },
@@ -49,14 +49,14 @@ const navSections = [
     label: "GROW",
     items: [
       { name: "Jobs & Hiring", href: "/doctor/jobs", icon: Briefcase },
-      { name: "ChiroMatch", href: "/doctor/chiromatch", icon: Shuffle },
+      { name: "ChiroMatch", href: "/doctor/chiromatch", icon: Shuffle, tier: "growth" as const },
       { name: "Workshops", href: "/doctor/workshops", icon: Presentation, tier: "pro" as const },
       { name: "Screenings", href: "/doctor/screenings", icon: Target, tier: "pro" as const },
-      { name: "Command Center", href: "/account/command-center", icon: Target },
+      { name: "Command Center", href: "/account/command-center", icon: Target, tier: "pro" as const },
       { name: "Contracts", href: "/doctor/contracts", icon: FileCheck, tier: "pro" as const },
-      { name: "Students", href: "/doctor/students", icon: GraduationCap },
+      { name: "Students", href: "/doctor/students", icon: GraduationCap, tier: "growth" as const },
       { name: "Seminars", href: "/doctor/seminars", icon: Calendar },
-      { name: "CE Tracker", href: "/doctor/ce-tracker", icon: Award },
+      { name: "CE Tracker", href: "/doctor/ce-tracker", icon: Award, tier: "growth" as const },
       { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
     ],
   },
@@ -72,7 +72,9 @@ const navSections = [
   },
 ];
 
-const TIER_LEVELS: Record<string, number> = { free: 0, basic: 0, starter: 0, growth: 1, pro: 2 };
+// free=0 (new signups), basic/starter/growth=1 (paid), pro=2 (premium)
+// basic maps to 1 so existing paid doctors who haven't been migrated still get growth access
+const TIER_LEVELS: Record<string, number> = { free: 0, standard: 0, basic: 1, starter: 1, growth: 1, pro: 2 };
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();

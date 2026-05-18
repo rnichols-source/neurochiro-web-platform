@@ -68,18 +68,18 @@ function RegisterForm() {
       return;
     }
 
-    // Claiming flow: redirect to billing (must pay before dashboard access)
+    // Claiming flow: redirect to dashboard (free tier, no payment needed)
     if (claimId) {
-      router.push("/doctor/billing?claimed=true");
+      router.push("/doctor/dashboard?claimed=true");
       return;
     }
 
     // Session already active: redirect immediately
     if ((result as Record<string, unknown>).sessionActive) {
       if (role === "student") {
-        router.push("/student/subscribe");
+        router.push("/student/dashboard");
       } else {
-        router.push(role === "doctor" ? "/doctor/billing" : "/student/dashboard");
+        router.push(role === "doctor" ? "/doctor/dashboard" : "/student/dashboard");
       }
       return;
     }
