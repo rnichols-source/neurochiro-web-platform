@@ -121,38 +121,38 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             <ArrowLeft className="w-3 h-3" /> Back to Directory
           </Link>
 
-          <div className="flex items-start gap-6 mt-4">
-            {/* Large Photo */}
-            <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white/10 overflow-hidden flex-shrink-0 shadow-2xl border-2 border-white/10 relative">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 mt-4">
+            {/* Photo */}
+            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 rounded-2xl bg-white/10 overflow-hidden flex-shrink-0 shadow-2xl border-2 border-white/10 relative">
               {doctor.photo_url ? (
                 <Image src={doctor.photo_url} alt={name} fill className="object-cover" priority />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-white font-black text-4xl">{(doctor.first_name?.[0] || 'N').toUpperCase()}</span>
+                  <span className="text-white font-black text-3xl">{(doctor.first_name?.[0] || 'N').toUpperCase()}</span>
                 </div>
               )}
             </div>
 
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <h1 className="text-3xl md:text-4xl font-heading font-black text-white">{name}</h1>
-                <ShieldCheck className="w-5 h-5 text-blue-400" />
+            <div className="flex-1 text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-black text-white">{name}</h1>
+              <div className="flex items-center gap-2 mt-1 justify-center sm:justify-start flex-wrap">
+                <ShieldCheck className="w-4 h-4 text-blue-400" />
                 {doctor.is_founding_member && (
-                  <span className="flex items-center gap-1 px-2.5 py-1 bg-neuro-orange/20 text-neuro-orange text-[10px] font-black rounded-full border border-neuro-orange/30 uppercase tracking-wider">
+                  <span className="flex items-center gap-1 px-2 py-0.5 bg-neuro-orange/20 text-neuro-orange text-[9px] font-black rounded-full border border-neuro-orange/30 uppercase tracking-wider">
                     <Star className="w-3 h-3 fill-neuro-orange" /> Founding Member
                   </span>
                 )}
               </div>
-              <p className="text-gray-300 text-lg font-medium">{doctor.clinic_name || 'Private Practice'}</p>
+              <p className="text-gray-300 text-base sm:text-lg font-medium mt-1">{doctor.clinic_name || 'Private Practice'}</p>
               {location && (
-                <div className="flex items-center gap-1.5 mt-2 text-gray-400">
-                  <MapPin className="w-4 h-4 text-neuro-orange" />
+                <div className="flex items-center gap-1.5 mt-1 text-gray-400 justify-center sm:justify-start">
+                  <MapPin className="w-3.5 h-3.5 text-neuro-orange" />
                   <span className="text-sm">{location}</span>
                 </div>
               )}
 
               {/* Social links */}
-              <div className="flex items-center gap-2 mt-4">
+              <div className="flex items-center gap-2 mt-3 justify-center sm:justify-start">
                 {instagramUrl && (
                   <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
                     <Instagram className="w-4 h-4 text-white" />
@@ -176,8 +176,8 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 </button>
               </div>
 
-              {/* Quick CTA */}
-              <div className="flex items-center gap-3 mt-5">
+              {/* Quick CTA — hidden on mobile (sticky bar handles it) */}
+              <div className="hidden sm:flex items-center gap-3 mt-5">
                 {doctor.phone && (
                   <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')}
                     className="px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-neuro-orange/90 transition-colors">
@@ -195,30 +195,30 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
 
       {/* Stats Bar */}
       {(d.profile_views > 0 || specialties.length > 0) && (
-        <div className="bg-neuro-navy border-t border-white/5">
-          <div className="max-w-4xl mx-auto flex justify-center divide-x divide-white/10">
+        <div className="bg-neuro-navy border-t border-white/5 overflow-x-auto">
+          <div className="max-w-4xl mx-auto flex justify-center divide-x divide-white/10 min-w-0">
             {d.profile_views > 0 && (
-              <div className="flex-1 text-center py-4">
-                <div className="text-2xl font-black text-neuro-orange">{d.profile_views > 999 ? `${(d.profile_views / 1000).toFixed(1)}k` : d.profile_views}</div>
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Profile Views</div>
+              <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
+                <div className="text-xl sm:text-2xl font-black text-neuro-orange">{d.profile_views > 999 ? `${(d.profile_views / 1000).toFixed(1)}k` : d.profile_views}</div>
+                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Views</div>
               </div>
             )}
             {specialties.length > 0 && (
-              <div className="flex-1 text-center py-4">
-                <div className="text-2xl font-black text-neuro-orange">{specialties.length}</div>
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Specialties</div>
+              <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
+                <div className="text-xl sm:text-2xl font-black text-neuro-orange">{specialties.length}</div>
+                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Specialties</div>
               </div>
             )}
             {d.patient_leads > 0 && (
-              <div className="flex-1 text-center py-4">
-                <div className="text-2xl font-black text-neuro-orange">{d.patient_leads}</div>
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Patient Inquiries</div>
+              <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
+                <div className="text-xl sm:text-2xl font-black text-neuro-orange">{d.patient_leads}</div>
+                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Inquiries</div>
               </div>
             )}
             {location && (
-              <div className="flex-1 text-center py-4">
-                <div className="text-2xl font-black text-neuro-orange">{doctor.city}</div>
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{doctor.state}</div>
+              <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
+                <div className="text-lg sm:text-2xl font-black text-neuro-orange truncate">{doctor.city}</div>
+                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">{doctor.state}</div>
               </div>
             )}
           </div>
