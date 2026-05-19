@@ -85,7 +85,7 @@ function StudentUpgradeModal({ isOpen, onClose, userId, currentTier, highlightFe
                   ))}
                 </div>
                 <button onClick={handleUpgrade} disabled={loading} className="w-full py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange-light transition-all disabled:opacity-50 shadow-lg shadow-neuro-orange/20">
-                  {loading ? "Redirecting..." : "Subscribe — $12/mo"}
+                  {loading ? "Redirecting..." : "Upgrade to Premium — $12/mo"}
                 </button>
               </div>
             </div>

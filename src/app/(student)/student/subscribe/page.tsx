@@ -84,7 +84,7 @@ export default function StudentSubscribePage() {
           <div className="w-14 h-14 bg-[#D66829]/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <GraduationCap className="w-7 h-7 text-[#D66829]" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Start Your Membership</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">Upgrade to Premium</h1>
           <p className="text-white/40 text-sm">
             One plan. Everything included. Cancel anytime.
           </p>

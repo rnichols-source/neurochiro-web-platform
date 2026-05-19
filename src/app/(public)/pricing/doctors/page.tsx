@@ -39,7 +39,7 @@ export default function DoctorPricing() {
       period: billingCycle === "monthly" ? "/mo" : "/mo (billed annually)",
       description: "Everything to grow your practice and fill your schedule.",
       cta: "Start Growth",
-      ctaLink: "/register?role=doctor&billing=growth",
+      ctaLink: "/get-started",
       highlight: true,
       badge: "Most Popular",
       features: [
@@ -64,7 +64,7 @@ export default function DoctorPricing() {
       period: billingCycle === "monthly" ? "/mo" : "/mo (billed annually)",
       description: "Every tool unlocked. The complete practice operating system.",
       cta: "Go Pro",
-      ctaLink: "/register?role=doctor&billing=pro",
+      ctaLink: "/get-started",
       highlight: false,
       features: [
         { text: "Everything in Growth", included: true },

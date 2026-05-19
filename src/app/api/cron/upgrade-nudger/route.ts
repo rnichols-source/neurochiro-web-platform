@@ -24,8 +24,8 @@ const getResend = () => new Resend(process.env.RESEND_API_KEY || '');
  * - 50 total profile views
  * - 100 total profile views
  * - Profile saved by a patient (if trackable)
- * - 14 days as Basic member
- * - 30 days as Basic member
+ * - 14 days as Free member
+ * - 30 days as Free member
  */
 export async function GET(req: Request) {
   const authHeader = req.headers.get('authorization');

@@ -32,7 +32,7 @@ export default function StudentPricing() {
       period: "/mo",
       description: "Everything you need to launch your career.",
       cta: "Go Premium",
-      ctaLink: "/register?role=student",
+      ctaLink: "/get-started",
       highlight: true,
       badge: "Best Value",
       features: [

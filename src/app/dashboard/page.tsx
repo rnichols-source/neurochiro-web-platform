@@ -43,7 +43,7 @@ export default async function DashboardRedirect() {
     const tier = studentProfile?.tier;
     const hasStripe = !!(studentProfile as any)?.stripe_customer_id;
     const isSubscribed = hasStripe || (tier && tier !== 'basic' && tier !== 'free');
-    if (!isSubscribed) redirect('/student/subscribe');
+    // Free students get dashboard access — no subscription required
     redirect('/student/dashboard');
   }
   if (role === 'patient') redirect('/portal/dashboard');

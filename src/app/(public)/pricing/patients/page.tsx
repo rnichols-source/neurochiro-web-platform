@@ -59,7 +59,7 @@ export default function PatientPricing() {
           </div>
 
           <Link 
-            href="/register?role=patient"
+            href="/get-started"
             className="w-full py-6 bg-neuro-orange text-white hover:bg-neuro-orange-dark rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-neuro-orange/30 transition-all flex items-center justify-center gap-3 transform hover:-translate-y-1"
           >
             {tier.cta} <ArrowRight className="w-5 h-5" />

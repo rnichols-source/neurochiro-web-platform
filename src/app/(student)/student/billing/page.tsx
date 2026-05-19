@@ -53,7 +53,7 @@ export default function StudentBilling() {
             href="/pricing/students"
             className="inline-block px-6 py-3 bg-[#D66829] text-white font-bold rounded-lg text-sm hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors"
           >
-            Subscribe — $12/mo
+            Upgrade to Premium — $12/mo
           </Link>
         </div>
       </div>

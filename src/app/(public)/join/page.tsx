@@ -58,13 +58,13 @@ export default async function JoinReferralPage({ searchParams }: Props) {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/register?role=doctor${code ? `&ref=${code}` : ''}`}
+              href={`/get-started${code ? `&ref=${code}` : ''}`}
               className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors inline-flex items-center justify-center gap-2"
             >
               Join as a Doctor <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
-              href={`/register?role=student${code ? `&ref=${code}` : ''}`}
+              href={`/get-started${code ? `&ref=${code}` : ''}`}
               className="px-8 py-4 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-colors border border-white/20"
             >
               Join as a Student
