@@ -755,9 +755,9 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
       {seminar.registration_link && (
         <section className="bg-neuro-navy py-14 px-6">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl font-heading font-black text-white mb-4">Ready to Be Brave?</h2>
+            <h2 className="text-3xl font-heading font-black text-white mb-4">Ready to Join?</h2>
             <p className="text-gray-400 mb-8">
-              {speakers?.length || 0} world-class speakers. {schedule?.filter(d => d.items.length > 2).length || 2} days of transformation. One oceanfront venue.
+              {speakers && speakers.length > 0 ? `${speakers.length} speakers. ` : ''}{schedule ? `${schedule.filter(d => d.items.length > 1).length} days.` : ''} {venueName || seminar.city || 'An unforgettable experience'}.
             </p>
             <a
               href={seminar.registration_link}
