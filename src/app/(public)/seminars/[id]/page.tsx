@@ -154,18 +154,15 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
   // Google Maps embed
   const mapQuery = venueAddress ? encodeURIComponent(venueAddress) : venueName ? encodeURIComponent(venueName) : null;
 
-  // What's included
-  const inclusions = [
-    "All speaker sessions (Friday & Saturday)",
-    "Poolside Q&A panel",
-    "After-hours book signing",
-    "Beach networking events",
-    "Lunch both days (sponsored)",
-    "Access to all after-hours events",
+  // What's included (from seminar data or defaults)
+  const inclusions = (s.inclusions as string[] | null) || [
+    "All speaker sessions",
+    "Networking with attendees",
+    "Access to all event programming",
   ];
 
-  // Who should attend
-  const audiences = [
+  // Who should attend (from seminar data or defaults)
+  const audiences = (s.audiences as { label: string; desc: string }[] | null) || [
     { label: "Practice owners", desc: "Ready to scale and build systems" },
     { label: "Associate doctors", desc: "Looking to level up and lead" },
     { label: "Chiropractors in transition", desc: "Pivoting your career or practice model" },
