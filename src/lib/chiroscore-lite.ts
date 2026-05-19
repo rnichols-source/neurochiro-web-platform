@@ -92,11 +92,12 @@ export function computeChiroScoreLite(input: ChiroScoreLiteInput): ChiroScoreLit
 
   const totalScore = educationScore + careerScore + clinicalScore + experienceScore + ambitionScore;
 
-  // Grade
-  const grade = totalScore >= 90 ? "A" : totalScore >= 80 ? "A-"
-    : totalScore >= 70 ? "B+" : totalScore >= 60 ? "B"
-    : totalScore >= 50 ? "B-" : totalScore >= 40 ? "C+"
-    : totalScore >= 30 ? "C" : totalScore >= 20 ? "D" : "F";
+  // Grade (standard academic scale)
+  const grade = totalScore >= 93 ? "A" : totalScore >= 90 ? "A-"
+    : totalScore >= 87 ? "B+" : totalScore >= 83 ? "B"
+    : totalScore >= 80 ? "B-" : totalScore >= 77 ? "C+"
+    : totalScore >= 73 ? "C" : totalScore >= 70 ? "C-"
+    : totalScore >= 67 ? "D+" : totalScore >= 60 ? "D" : "F";
 
   // Recommendation
   let topRecommendation = "";
