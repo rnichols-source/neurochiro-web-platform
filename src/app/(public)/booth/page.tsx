@@ -1,301 +1,419 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import {
   Users, BarChart3, Briefcase, Award, Shuffle, DollarSign,
-  GraduationCap, Zap, Star, MapPin, Heart, Eye, Bell,
-  TrendingUp, Calendar, Search, CheckCircle2, ArrowRight,
-  FileText, MessageSquare, ShieldCheck, Target, Clock,
+  GraduationCap, Zap, Star, MapPin, Eye, Search,
+  CheckCircle2, ArrowRight, MessageSquare, ShieldCheck, Clock,
+  Heart, TrendingUp, Target, FileText, Activity, Mic2,
+  Calendar, Globe, Lock, Stethoscope,
 } from "lucide-react";
 import LiveSignupFeed from "@/components/booth/LiveSignupFeed";
 
-const SLIDES = [
-  {
-    title: "Doctor Dashboard",
-    subtitle: "Your Practice Command Center",
-    desc: "AI-powered insights, competitive ranking, revenue intelligence, and smart action items — all in one view.",
-    color: "bg-blue-500",
-    mockup: (
-      <div className="space-y-3">
-        <div className="bg-neuro-navy rounded-xl p-4 text-white">
-          <p className="text-[10px] text-neuro-orange font-bold uppercase tracking-widest mb-1">Practice Command Center</p>
-          <p className="text-lg font-bold">Good morning, Dr. Smith</p>
-          <p className="text-xs text-white/40">AlignLife Chiropractic</p>
+/* ─── Full-Screen Slide Components ─── */
+
+function SlideHero() {
+  return (
+    <div className="h-full bg-neuro-navy flex flex-col items-center justify-center text-center px-16 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-20 left-40 w-96 h-96 bg-neuro-orange rounded-full blur-[150px]" />
+        <div className="absolute bottom-20 right-40 w-72 h-72 bg-blue-500 rounded-full blur-[120px]" />
+      </div>
+      <div className="relative z-10">
+        <p className="text-neuro-orange text-sm font-black uppercase tracking-[0.4em] mb-6">The Platform for</p>
+        <h1 className="text-7xl font-heading font-black text-white tracking-tight mb-4 leading-none">
+          Nervous System<br />Chiropractors
+        </h1>
+        <p className="text-2xl text-gray-400 mt-6 mb-12">The only directory, hiring system, and practice growth platform built for doctors like you.</p>
+        <div className="flex items-center justify-center gap-12">
+          {[
+            { value: "140+", label: "Verified Doctors" },
+            { value: "30+", label: "States" },
+            { value: "4", label: "Countries" },
+            { value: "Free", label: "To Join" },
+          ].map((s) => (
+            <div key={s.label} className="text-center">
+              <p className="text-4xl font-black text-neuro-orange">{s.value}</p>
+              <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mt-1">{s.label}</p>
+            </div>
+          ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SlideDoctorDashboard() {
+  return (
+    <div className="h-full bg-[#0F1A24] flex items-center px-16 gap-12">
+      {/* Left info */}
+      <div className="w-[380px] shrink-0">
+        <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.3em] mb-3">Doctor Portal</p>
+        <h2 className="text-5xl font-heading font-black text-white leading-tight mb-4">Your Practice<br />Command Center</h2>
+        <p className="text-gray-400 text-lg leading-relaxed">AI-powered insights, competitive ranking, lead pipeline, and smart action items — everything you need to grow your practice in one dashboard.</p>
+      </div>
+      {/* Right mockup — dark portal style */}
+      <div className="flex-1 bg-gradient-to-br from-[#1a2e40] to-[#162231] rounded-2xl border border-white/10 p-6 shadow-2xl">
+        <div className="flex items-center gap-2 mb-5">
+          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+          <span className="text-xs text-white/40">Live Dashboard</span>
+        </div>
+        {/* Stats row */}
+        <div className="grid grid-cols-4 gap-3 mb-5">
+          {[
+            { icon: Eye, label: "Profile Views", value: "487", sub: "+23% this week", color: "text-blue-400" },
+            { icon: Users, label: "Active Leads", value: "34", sub: "8 new this week", color: "text-emerald-400" },
+            { icon: TrendingUp, label: "Practice Health", value: "87", sub: "Top 15% in state", color: "text-violet-400" },
+            { icon: MapPin, label: "City Rank", value: "#3", sub: "of 12 in Charleston", color: "text-neuro-orange" },
+          ].map((s, i) => (
+            <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
+              <p className="text-2xl font-black text-white">{s.value}</p>
+              <p className="text-[10px] text-white/30 font-bold uppercase mt-1">{s.label}</p>
+              <p className="text-[10px] text-green-400 mt-1">{s.sub}</p>
+            </div>
+          ))}
+        </div>
+        {/* AI Insight */}
+        <div className="bg-neuro-orange/10 border border-neuro-orange/20 rounded-xl p-4 mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Zap className="w-4 h-4 text-neuro-orange" />
+            <span className="text-xs font-bold text-neuro-orange uppercase tracking-wider">AI Weekly Insight</span>
+          </div>
+          <p className="text-sm text-white/80">Your profile views increased 23% this week. Doctors in your area who add a video bio get 3x more patient inquiries. Consider recording a 60-second intro.</p>
+        </div>
+        {/* Lead pipeline preview */}
         <div className="grid grid-cols-4 gap-2">
           {[
-            { icon: Eye, label: "Views", value: "487", color: "text-blue-500" },
-            { icon: Users, label: "Leads", value: "34", color: "text-emerald-500" },
-            { icon: DollarSign, label: "Revenue", value: "$40K", color: "text-violet-500" },
-            { icon: MapPin, label: "Rank", value: "#3", color: "text-neuro-orange" },
+            { stage: "New", count: 3, color: "bg-blue-500" },
+            { stage: "Contacted", count: 4, color: "bg-amber-500" },
+            { stage: "Scheduled", count: 2, color: "bg-violet-500" },
+            { stage: "Converted", count: 8, color: "bg-emerald-500" },
           ].map((s, i) => (
-            <div key={i} className="bg-white rounded-lg border border-gray-100 p-3 text-center">
-              <s.icon className={`w-4 h-4 mx-auto mb-1 ${s.color}`} />
-              <p className="text-lg font-black text-neuro-navy">{s.value}</p>
-              <p className="text-[8px] text-gray-400 uppercase">{s.label}</p>
+            <div key={i} className={`${s.color} rounded-lg py-2 text-center`}>
+              <p className="text-lg font-black text-white">{s.count}</p>
+              <p className="text-[9px] text-white/70 font-bold uppercase">{s.stage}</p>
             </div>
           ))}
         </div>
-        <div className="bg-neuro-orange/5 border border-neuro-orange/20 rounded-lg p-3">
-          <p className="text-[10px] text-neuro-orange font-bold uppercase mb-1">AI Weekly Insight</p>
-          <p className="text-xs text-gray-600">Your profile views increased 23% this week. Doctors who add video see 3x more leads.</p>
-        </div>
       </div>
-    ),
-  },
-  {
-    title: "Patient Lead Pipeline",
-    subtitle: "Never Lose a Lead",
-    desc: "Track every patient from first contact to converted — with notes, stages, and conversion analytics.",
-    color: "bg-emerald-500",
-    mockup: (
-      <div className="space-y-3">
-        <div className="grid grid-cols-4 gap-2">
-          {["New", "Contacted", "Scheduled", "Converted"].map((s, i) => (
-            <div key={i} className={`rounded-lg p-2 text-center text-white text-xs font-bold ${
-              ["bg-blue-500", "bg-amber-500", "bg-violet-500", "bg-emerald-500"][i]
-            }`}>{s} ({[3, 4, 2, 8][i]})</div>
-          ))}
-        </div>
-        {["Sarah Mitchell — Directory — Converted", "Brandon Lee — Referral — Scheduled", "Megan Hernandez — Directory — New"].map((l, i) => (
-          <div key={i} className="bg-white rounded-lg border border-gray-100 p-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-neuro-orange/10 flex items-center justify-center text-neuro-orange font-bold text-xs">{l[0]}</div>
-            <div className="flex-1">
-              <p className="text-sm font-bold text-neuro-navy">{l.split(" — ")[0]}</p>
-              <p className="text-[10px] text-gray-400">{l.split(" — ").slice(1).join(" · ")}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    ),
-  },
-  {
-    title: "ChiroMatch",
-    subtitle: "The NFL Draft for Chiropractic",
-    desc: "Students rank practices. Practices rank candidates. Our algorithm finds the perfect match on Match Day.",
-    color: "bg-violet-500",
-    mockup: (
-      <div className="space-y-3">
-        <div className="bg-neuro-navy rounded-xl p-4 text-center text-white">
-          <Shuffle className="w-8 h-8 text-neuro-orange mx-auto mb-2" />
-          <p className="font-bold text-lg">Fall 2026</p>
-          <p className="text-xs text-white/40">Match Day: September 22</p>
-        </div>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-white rounded-lg border border-gray-100 p-2">
-            <p className="text-lg font-black text-neuro-navy">24</p>
-            <p className="text-[8px] text-gray-400 uppercase">Positions</p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-100 p-2">
-            <p className="text-lg font-black text-neuro-navy">67</p>
-            <p className="text-[8px] text-gray-400 uppercase">Students</p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-100 p-2">
-            <p className="text-lg font-black text-neuro-navy">89%</p>
-            <p className="text-[8px] text-gray-400 uppercase">Match Rate</p>
-          </div>
-        </div>
-        <p className="text-center text-xs text-gray-500">Rank your top 10 → Algorithm matches → Results on Match Day</p>
-      </div>
-    ),
-  },
-  {
-    title: "Salary Transparency",
-    subtitle: "Real Data. No Guessing.",
-    desc: "Compensation data by state, role, and specialty — aggregated from real job postings on the platform.",
-    color: "bg-emerald-500",
-    mockup: (
-      <div className="space-y-3">
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-white rounded-lg border border-gray-100 p-3 text-center">
-            <p className="text-2xl font-black text-neuro-navy">$85K</p>
-            <p className="text-[8px] text-gray-400 uppercase">Avg Associate</p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-100 p-3 text-center">
-            <p className="text-2xl font-black text-neuro-navy">$105K</p>
-            <p className="text-[8px] text-gray-400 uppercase">75th Percentile</p>
-          </div>
-        </div>
-        {["California — $105K", "Texas — $90K", "Florida — $82K", "Georgia — $80K"].map((s, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <span className="text-xs font-bold text-neuro-navy w-24">{s.split(" — ")[0]}</span>
-            <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-neuro-orange rounded-full" style={{ width: `${[100, 86, 78, 76][i]}%` }} />
-            </div>
-            <span className="text-xs font-bold text-neuro-navy">{s.split(" — ")[1]}</span>
-          </div>
-        ))}
-      </div>
-    ),
-  },
-  {
-    title: "CE Credit Tracking",
-    subtitle: "QR Check-In → Certificate",
-    desc: "Attend a seminar, scan the QR code, and your CE certificate is generated instantly. All hours tracked in one dashboard.",
-    color: "bg-amber-500",
-    mockup: (
-      <div className="space-y-3">
-        <div className="grid grid-cols-3 gap-2">
-          <div className="bg-white rounded-lg border border-gray-100 p-3 text-center">
-            <p className="text-2xl font-black text-neuro-navy">30</p>
-            <p className="text-[8px] text-gray-400 uppercase">Total Hours</p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-100 p-3 text-center">
-            <p className="text-2xl font-black text-neuro-orange">12</p>
-            <p className="text-[8px] text-gray-400 uppercase">This Year</p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-100 p-3 text-center">
-            <p className="text-2xl font-black text-neuro-navy">4</p>
-            <p className="text-[8px] text-gray-400 uppercase">Certificates</p>
-          </div>
-        </div>
-        {["Pediatric Neurology Workshop — 8 CE", "New Beginnings 2026 — 12 CE"].map((c, i) => (
-          <div key={i} className="bg-white rounded-lg border border-gray-100 p-3 flex items-center gap-3">
-            <Award className="w-6 h-6 text-blue-400" />
-            <div className="flex-1">
-              <p className="text-xs font-bold text-neuro-navy">{c.split(" — ")[0]}</p>
-              <p className="text-[10px] text-gray-400">Certificate: NC-CE-{Math.random().toString(36).slice(2, 8).toUpperCase()}</p>
-            </div>
-            <span className="text-sm font-black text-blue-500">{c.split(" — ")[1]}</span>
-          </div>
-        ))}
-      </div>
-    ),
-  },
-  {
-    title: "Seminar Platform",
-    subtitle: "Better Than Eventbrite",
-    desc: "Full event landing pages with schedule, speakers, venue, reviews, and spotlight interviews. CE tracking built in.",
-    color: "bg-yellow-500",
-    mockup: (
-      <div className="space-y-3">
-        <div className="bg-neuro-navy rounded-xl p-4 text-white">
-          <div className="flex gap-2 mb-2">
-            <span className="px-2 py-0.5 bg-white/10 rounded text-[10px]">📅 May 14-17</span>
-            <span className="px-2 py-0.5 bg-white/10 rounded text-[10px]">📍 Asbury Park</span>
-            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded text-[10px]">12 CE</span>
-          </div>
-          <p className="font-bold">New Beginnings — 35th Anniversary</p>
-          <p className="text-xs text-white/40">Berkeley Oceanfront Hotel</p>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-white rounded-lg border border-gray-100 p-2 text-center text-xs"><Clock className="w-3 h-3 mx-auto mb-1 text-neuro-orange" /> Schedule</div>
-          <div className="bg-white rounded-lg border border-gray-100 p-2 text-center text-xs"><Users className="w-3 h-3 mx-auto mb-1 text-neuro-orange" /> Speakers</div>
-        </div>
-        <div className="flex gap-1">
-          {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 text-yellow-400 fill-yellow-400" />)}
-          <span className="text-xs text-gray-500 ml-1">4.8 (12 reviews)</span>
-        </div>
-      </div>
-    ),
-  },
-  {
-    title: "ChiroScore",
-    subtitle: "Universal Candidate Rating",
-    desc: "Every student gets a 0-100 score across 7 categories. Doctors see it on every applicant. Grades A through F.",
-    color: "bg-blue-500",
-    mockup: (
-      <div className="space-y-3">
-        <div className="flex items-center gap-4 justify-center">
+    </div>
+  );
+}
+
+function SlideDirectory() {
+  return (
+    <div className="h-full bg-neuro-cream flex items-center px-16 gap-12">
+      <div className="w-[380px] shrink-0">
+        <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.3em] mb-3">Global Directory</p>
+        <h2 className="text-5xl font-heading font-black text-neuro-navy leading-tight mb-4">Get Found by<br />Patients</h2>
+        <p className="text-gray-500 text-lg leading-relaxed">Patients search for nervous system chiropractors by city, state, or specialty. Your profile is your storefront — photos, bio, specialties, reviews, and contact info.</p>
+        <div className="flex items-center gap-6 mt-8">
           <div className="text-center">
-            <p className="text-4xl font-black text-neuro-navy">78</p>
-            <p className="text-xs text-gray-400">/100</p>
+            <p className="text-3xl font-black text-neuro-orange">140+</p>
+            <p className="text-xs text-gray-400 font-bold">Doctors</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center">
-            <span className="text-xl font-black text-blue-500">B</span>
+          <div className="text-center">
+            <p className="text-3xl font-black text-neuro-orange">30+</p>
+            <p className="text-xs text-gray-400 font-bold">States</p>
+          </div>
+          <div className="text-center">
+            <p className="text-3xl font-black text-neuro-orange">4</p>
+            <p className="text-xs text-gray-400 font-bold">Countries</p>
           </div>
         </div>
-        {[
-          { label: "Profile", pct: 90 }, { label: "Education", pct: 75 },
-          { label: "Academy", pct: 60 }, { label: "Career", pct: 85 },
-        ].map((b, i) => (
-          <div key={i}>
-            <div className="flex justify-between text-[10px] mb-0.5">
-              <span className="text-gray-500">{b.label}</span>
-              <span className="text-gray-400">{b.pct}%</span>
-            </div>
-            <div className="h-1.5 bg-gray-100 rounded-full">
-              <div className={`h-full rounded-full ${b.pct >= 75 ? 'bg-green-400' : 'bg-neuro-orange'}`} style={{ width: `${b.pct}%` }} />
-            </div>
-          </div>
-        ))}
       </div>
-    ),
-  },
-  {
-    title: "Hiring System",
-    subtitle: "Full ATS Built In",
-    desc: "7-stage pipeline, interview prep, offer letters, email templates, reference checks — the most complete hiring system in chiropractic.",
-    color: "bg-orange-500",
-    mockup: (
-      <div className="space-y-3">
-        <div className="flex gap-1">
-          {["New", "Review", "Phone", "Interview", "Offer", "Hired"].map((s, i) => (
-            <div key={i} className={`flex-1 py-1 text-center text-[8px] font-bold rounded ${i < 4 ? 'bg-neuro-orange text-white' : 'bg-gray-100 text-gray-400'}`}>{s}</div>
+      <div className="flex-1">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-xl p-6">
+          <div className="bg-gray-50 rounded-xl px-5 py-3 flex items-center gap-3 mb-5">
+            <Search className="w-5 h-5 text-gray-300" />
+            <span className="text-gray-400 text-sm">Search by city, state, or doctor name...</span>
+          </div>
+          <div className="space-y-3">
+            {[
+              { name: "Dr. Sarah Mitchell", loc: "Austin, TX", spec: "Torque Release, Pediatrics", views: "1,243", badge: true },
+              { name: "Dr. James Park", loc: "Boulder, CO", spec: "NetworkSpinal, Family Care", views: "892", badge: true },
+              { name: "Dr. Aisha Rahman", loc: "Atlanta, GA", spec: "NUCCA, Upper Cervical", views: "756", badge: false },
+              { name: "Dr. Carlos Rivera", loc: "Miami, FL", spec: "Gonstead, Sports Chiro", views: "634", badge: true },
+            ].map((d, i) => (
+              <div key={i} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                <div className="w-14 h-14 rounded-xl bg-neuro-navy/10 flex items-center justify-center text-neuro-navy font-bold text-sm">
+                  {d.name.split(' ').slice(1).map(n => n[0]).join('')}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-neuro-navy">{d.name}</p>
+                    {d.badge && <ShieldCheck className="w-4 h-4 text-blue-500" />}
+                  </div>
+                  <p className="text-xs text-gray-400">{d.loc} · {d.spec}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-neuro-navy">{d.views}</p>
+                  <p className="text-[9px] text-gray-400">views</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SlideChiroMatch() {
+  return (
+    <div className="h-full bg-neuro-navy flex items-center px-16 gap-12">
+      <div className="w-[380px] shrink-0">
+        <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.3em] mb-3">ChiroMatch</p>
+        <h2 className="text-5xl font-heading font-black text-white leading-tight mb-4">The NFL Draft<br />for Chiropractic</h2>
+        <p className="text-gray-400 text-lg leading-relaxed">The first residency-style matching system for chiropractic. Students rank practices. Practices rank candidates. Our Gale-Shapley algorithm finds the optimal match.</p>
+      </div>
+      <div className="flex-1 flex flex-col gap-4">
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center">
+            <Shuffle className="w-8 h-8 text-neuro-orange mx-auto mb-3" />
+            <p className="text-3xl font-black text-white">24</p>
+            <p className="text-xs text-gray-500 font-bold uppercase mt-1">Open Positions</p>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center">
+            <GraduationCap className="w-8 h-8 text-blue-400 mx-auto mb-3" />
+            <p className="text-3xl font-black text-white">67</p>
+            <p className="text-xs text-gray-500 font-bold uppercase mt-1">Students Ranked</p>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center">
+            <CheckCircle2 className="w-8 h-8 text-green-400 mx-auto mb-3" />
+            <p className="text-3xl font-black text-white">89%</p>
+            <p className="text-xs text-gray-500 font-bold uppercase mt-1">Match Rate</p>
+          </div>
+        </div>
+        <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+          <p className="text-xs text-neuro-orange font-bold uppercase tracking-wider mb-4">How It Works</p>
+          <div className="flex items-center justify-between">
+            {["Students Submit Rankings", "Practices Submit Rankings", "Algorithm Runs", "Match Day Results"].map((s, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-neuro-orange/10 flex items-center justify-center text-neuro-orange font-black text-sm">{i + 1}</div>
+                <p className="text-sm text-white/70 font-bold">{s}</p>
+                {i < 3 && <ArrowRight className="w-4 h-4 text-white/20 ml-3" />}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SlideSalary() {
+  return (
+    <div className="h-full bg-neuro-cream flex items-center px-16 gap-12">
+      <div className="w-[380px] shrink-0">
+        <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.3em] mb-3">Salary Engine</p>
+        <h2 className="text-5xl font-heading font-black text-neuro-navy leading-tight mb-4">Real Data.<br />No Guessing.</h2>
+        <p className="text-gray-500 text-lg leading-relaxed">Compensation data aggregated from real job postings. Know what the market pays by state, role, and experience level before you make an offer or accept one.</p>
+      </div>
+      <div className="flex-1 bg-white rounded-2xl border border-gray-200 shadow-xl p-8">
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="bg-neuro-navy rounded-xl p-5 text-center">
+            <p className="text-3xl font-black text-white">$85K</p>
+            <p className="text-xs text-gray-400 font-bold uppercase mt-1">Avg Associate</p>
+          </div>
+          <div className="bg-neuro-orange rounded-xl p-5 text-center">
+            <p className="text-3xl font-black text-white">$105K</p>
+            <p className="text-xs text-white/70 font-bold uppercase mt-1">75th Percentile</p>
+          </div>
+          <div className="bg-neuro-navy rounded-xl p-5 text-center">
+            <p className="text-3xl font-black text-white">$142K</p>
+            <p className="text-xs text-gray-400 font-bold uppercase mt-1">Top 10%</p>
+          </div>
+        </div>
+        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-4">By State</p>
+        <div className="space-y-3">
+          {[
+            { state: "California", salary: "$105K", pct: 100 },
+            { state: "New York", salary: "$98K", pct: 93 },
+            { state: "Texas", salary: "$90K", pct: 86 },
+            { state: "Florida", salary: "$82K", pct: 78 },
+            { state: "Colorado", salary: "$88K", pct: 84 },
+            { state: "Georgia", salary: "$80K", pct: 76 },
+          ].map((s) => (
+            <div key={s.state} className="flex items-center gap-4">
+              <span className="text-sm font-bold text-neuro-navy w-28">{s.state}</span>
+              <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-neuro-orange to-orange-400 rounded-full" style={{ width: `${s.pct}%` }} />
+              </div>
+              <span className="text-sm font-black text-neuro-navy w-16 text-right">{s.salary}</span>
+            </div>
           ))}
         </div>
-        {["Dr. Sarah Chen — ChiroScore 82 B", "Dr. Mike Torres — ChiroScore 74 C", "Dr. Ashley Kim — ChiroScore 91 A"].map((a, i) => (
-          <div key={i} className="bg-white rounded-lg border border-gray-100 p-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-neuro-navy/5 flex items-center justify-center text-xs font-bold text-neuro-navy">{a[4]}{a.split(" ")[1][0]}</div>
-            <div className="flex-1">
-              <p className="text-xs font-bold text-neuro-navy">{a.split(" — ")[0]}</p>
-              <p className="text-[10px] text-gray-400">{a.split(" — ")[1]}</p>
-            </div>
+      </div>
+    </div>
+  );
+}
+
+function SlideStudentTools() {
+  return (
+    <div className="h-full bg-[#0F1A24] flex items-center px-16 gap-12">
+      <div className="w-[380px] shrink-0">
+        <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.3em] mb-3">Student Portal</p>
+        <h2 className="text-5xl font-heading font-black text-white leading-tight mb-4">Your Career<br />Starts Here</h2>
+        <p className="text-gray-400 text-lg leading-relaxed">ChiroScore, interview prep, contract analysis, financial planning, technique explorer, CE tracking — tools your school doesn't teach you.</p>
+      </div>
+      <div className="flex-1 grid grid-cols-2 gap-4">
+        {[
+          { icon: Target, title: "ChiroScore", desc: "Your 0-100 candidate rating across 7 categories. Employers see this on every application.", color: "text-blue-400" },
+          { icon: FileText, title: "Contract Lab", desc: "Paste any associate agreement. AI breaks down the terms, spots red flags, and compares to market standards.", color: "text-violet-400" },
+          { icon: DollarSign, title: "Financial Planner", desc: "Model your salary, student loans, cost of living, and runway. Know your numbers before you negotiate.", color: "text-emerald-400" },
+          { icon: Mic2, title: "Interview Prep", desc: "20 real interview questions with frameworks, example answers, and scoring rubrics. Practice before game day.", color: "text-amber-400" },
+          { icon: Award, title: "CE Tracker", desc: "QR check-in at seminars. Certificates generated instantly. All hours tracked in one dashboard.", color: "text-pink-400" },
+          { icon: Shuffle, title: "ChiroMatch", desc: "Rank your top practice choices. Get matched through our algorithm on Match Day. Like the NFL Draft.", color: "text-neuro-orange" },
+        ].map((t, i) => (
+          <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-5">
+            <t.icon className={`w-6 h-6 ${t.color} mb-3`} />
+            <p className="font-bold text-white text-sm mb-1">{t.title}</p>
+            <p className="text-xs text-gray-500 leading-relaxed">{t.desc}</p>
           </div>
         ))}
       </div>
-    ),
-  },
-  {
-    title: "Global Directory",
-    subtitle: "Get Found by Patients",
-    desc: "140+ verified nervous system chiropractors. Patients search, find your profile, and contact you directly.",
-    color: "bg-red-500",
-    mockup: (
-      <div className="space-y-3">
-        <div className="bg-neuro-navy rounded-xl p-4 text-white text-center">
-          <Search className="w-6 h-6 mx-auto mb-2 text-neuro-orange" />
-          <p className="text-sm font-bold">Find a Nervous System Chiropractor</p>
-          <div className="mt-2 bg-white/10 rounded-lg px-3 py-2 text-xs text-white/40">City, state, or doctor name...</div>
-        </div>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-white rounded-lg border border-gray-100 p-2">
-            <p className="text-lg font-black text-neuro-orange">140+</p>
-            <p className="text-[8px] text-gray-400">Doctors</p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-100 p-2">
-            <p className="text-lg font-black text-neuro-orange">30+</p>
-            <p className="text-[8px] text-gray-400">States</p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-100 p-2">
-            <p className="text-lg font-black text-neuro-orange">4</p>
-            <p className="text-[8px] text-gray-400">Countries</p>
-          </div>
-        </div>
+    </div>
+  );
+}
+
+function SlideSeminars() {
+  return (
+    <div className="h-full bg-neuro-cream flex items-center px-16 gap-12">
+      <div className="w-[380px] shrink-0">
+        <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.3em] mb-3">Seminars</p>
+        <h2 className="text-5xl font-heading font-black text-neuro-navy leading-tight mb-4">Better Than<br />Eventbrite</h2>
+        <p className="text-gray-500 text-lg leading-relaxed">Full event pages with schedule, 22 speaker landing pages, venue photos, Google Maps, countdown timer, FAQ, reviews, and CE tracking built in.</p>
       </div>
-    ),
-  },
-  {
-    title: "Marketplace",
-    subtitle: "Products for Your Practice",
-    desc: "Trusted vendors with exclusive member discounts. Product showcases, reviews, and direct contact — all in one place.",
-    color: "bg-pink-500",
-    mockup: (
-      <div className="space-y-3">
-        {["Aceva — Supplements — NEUROCHIRO10", "INSiGHT CLA — Scanning Tech — NEUROCHIRO", "MojoFeet — Custom Orthotics — NEURO15"].map((v, i) => (
-          <div key={i} className="bg-white rounded-lg border border-gray-100 p-3 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-lg font-bold text-neuro-orange">{v[0]}</div>
-            <div className="flex-1">
-              <p className="text-xs font-bold text-neuro-navy">{v.split(" — ")[0]}</p>
-              <p className="text-[10px] text-gray-400">{v.split(" — ")[1]}</p>
+      <div className="flex-1 bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden">
+        {/* Event header */}
+        <div className="bg-neuro-navy p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="px-3 py-1 bg-white/10 rounded-lg text-xs text-white font-bold flex items-center gap-1.5"><Calendar className="w-3 h-3 text-neuro-orange" /> Nov 5-8, 2026</span>
+            <span className="px-3 py-1 bg-white/10 rounded-lg text-xs text-white font-bold flex items-center gap-1.5"><MapPin className="w-3 h-3 text-neuro-orange" /> Fort Lauderdale, FL</span>
+          </div>
+          <p className="text-2xl font-black text-white">The Brave Practice Event</p>
+          <p className="text-sm text-gray-400 mt-1">Hosted by Dr. Kim Thor-Adams, Dr. Aura Tovar & Dr. Jenna Davis</p>
+        </div>
+        {/* Stats */}
+        <div className="grid grid-cols-4 divide-x divide-gray-100 border-b border-gray-100">
+          {[
+            { value: "22", label: "Speakers" },
+            { value: "2", label: "Days" },
+            { value: "$379", label: "Ticket" },
+            { value: "4.9", label: "Rating" },
+          ].map((s) => (
+            <div key={s.label} className="text-center py-4">
+              <p className="text-xl font-black text-neuro-orange">{s.value}</p>
+              <p className="text-[9px] text-gray-400 font-bold uppercase">{s.label}</p>
             </div>
-            <span className="px-2 py-0.5 bg-green-50 text-green-700 text-[8px] font-bold rounded border border-green-200">{v.split(" — ")[2]}</span>
+          ))}
+        </div>
+        {/* Speaker preview */}
+        <div className="p-5">
+          <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-3">Featured Speakers</p>
+          <div className="flex gap-3">
+            {["Dr. Billy DeMoss", "Roberto Monaco", "Dr. Travis Corcoran", "Dr. Lauryn Brunclik", "Dr. Peter Kevorkian"].map((s) => (
+              <div key={s} className="text-center">
+                <div className="w-12 h-12 rounded-xl bg-neuro-navy/10 flex items-center justify-center text-neuro-navy font-bold text-xs mx-auto mb-1">
+                  {s.replace('Dr. ', '').split(' ').map(n => n[0]).join('')}
+                </div>
+                <p className="text-[9px] text-gray-500 font-bold">{s.split(' ').slice(-1)[0]}</p>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
-    ),
-  },
+    </div>
+  );
+}
+
+function SlideDoctorFeatures() {
+  return (
+    <div className="h-full bg-neuro-navy flex items-center px-16 gap-12">
+      <div className="w-[380px] shrink-0">
+        <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.3em] mb-3">For Doctors</p>
+        <h2 className="text-5xl font-heading font-black text-white leading-tight mb-4">Everything<br />You Need</h2>
+        <p className="text-gray-400 text-lg leading-relaxed">Free to join. Upgrade to Growth ($69/mo) or Pro ($129/mo) to unlock the full suite of practice tools.</p>
+      </div>
+      <div className="flex-1">
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { icon: Eye, title: "Directory Listing", desc: "Get found by patients", tier: "Free" },
+            { icon: ShieldCheck, title: "Verified Badge", desc: "Build trust instantly", tier: "Free" },
+            { icon: BarChart3, title: "Profile Analytics", desc: "See who's viewing you", tier: "Free" },
+            { icon: MessageSquare, title: "Patient Messaging", desc: "Direct communication", tier: "Growth" },
+            { icon: Users, title: "Lead Pipeline", desc: "Track every patient", tier: "Growth" },
+            { icon: Activity, title: "KPI Tracker", desc: "Practice metrics", tier: "Growth" },
+            { icon: Shuffle, title: "ChiroMatch", desc: "Find associates", tier: "Growth" },
+            { icon: Award, title: "CE Tracking", desc: "QR check-in + certs", tier: "Growth" },
+            { icon: Stethoscope, title: "Care Plans", desc: "AI-powered plans", tier: "Pro" },
+            { icon: FileText, title: "Scan Reports", desc: "Patient reports", tier: "Pro" },
+            { icon: DollarSign, title: "P&L Analyzer", desc: "Financial clarity", tier: "Pro" },
+            { icon: Target, title: "Command Center", desc: "Full practice OS", tier: "Pro" },
+          ].map((f, i) => (
+            <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-start gap-3">
+              <f.icon className="w-5 h-5 text-neuro-orange shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="font-bold text-white text-sm">{f.title}</p>
+                </div>
+                <p className="text-[10px] text-gray-500">{f.desc}</p>
+              </div>
+              <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0 ${
+                f.tier === "Free" ? "bg-green-500/20 text-green-400" :
+                f.tier === "Growth" ? "bg-neuro-orange/20 text-neuro-orange" :
+                "bg-violet-500/20 text-violet-400"
+              }`}>{f.tier}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SlideJoinFree() {
+  return (
+    <div className="h-full bg-gradient-to-br from-neuro-navy to-[#0F1A24] flex items-center justify-center px-16">
+      <div className="text-center max-w-4xl">
+        <p className="text-neuro-orange text-sm font-black uppercase tracking-[0.4em] mb-6">Join NeuroChiro Today</p>
+        <h2 className="text-7xl font-heading font-black text-white mb-12">Free. For Everyone.</h2>
+        <div className="grid grid-cols-3 gap-8 mb-12">
+          {[
+            { icon: Stethoscope, role: "Doctors", desc: "Get your practice listed in the global directory. Verified badge. Profile analytics. Upgrade to Growth or Pro anytime.", url: "neurochiro.co/get-started" },
+            { icon: GraduationCap, role: "Students", desc: "Find jobs, attend seminars, build your ChiroScore, explore techniques, and prep for interviews. Upgrade to Premium anytime.", url: "neurochiro.co/get-started" },
+            { icon: Heart, role: "Patients", desc: "Find nervous system chiropractors near you. Track your health. Read reviews. Message doctors directly. Always free.", url: "neurochiro.co/get-started" },
+          ].map((r) => (
+            <div key={r.role} className="bg-white/5 border border-white/10 rounded-2xl p-8 text-center">
+              <r.icon className="w-10 h-10 text-neuro-orange mx-auto mb-4" />
+              <p className="text-2xl font-black text-white mb-3">{r.role}</p>
+              <p className="text-sm text-gray-400 leading-relaxed mb-6">{r.desc}</p>
+              <div className="bg-neuro-orange rounded-xl py-3 px-6 inline-block">
+                <p className="text-white font-bold text-lg">Free to Join</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="text-3xl font-heading font-black text-neuro-orange">neurochiro.co/get-started</p>
+        <p className="text-gray-500 mt-2">Scan the QR code or visit the link</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Slide Registry ─── */
+const SLIDES = [
+  { id: "hero", component: SlideHero },
+  { id: "dashboard", component: SlideDoctorDashboard },
+  { id: "directory", component: SlideDirectory },
+  { id: "chiromatch", component: SlideChiroMatch },
+  { id: "salary", component: SlideSalary },
+  { id: "students", component: SlideStudentTools },
+  { id: "seminars", component: SlideSeminars },
+  { id: "features", component: SlideDoctorFeatures },
+  { id: "join", component: SlideJoinFree },
 ];
 
 export default function BoothPage() {
@@ -304,94 +422,48 @@ export default function BoothPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % SLIDES.length);
-    }, 7000);
+    }, 8000);
     return () => clearInterval(interval);
   }, []);
 
-  const slide = SLIDES[activeSlide];
+  const SlideComponent = SLIDES[activeSlide].component;
 
   return (
-    <div className="min-h-dvh bg-neuro-cream flex flex-col overflow-hidden">
+    <div className="h-dvh w-full overflow-hidden relative">
       <LiveSignupFeed />
-      {/* Header */}
-      <div className="flex items-center justify-between px-10 pt-6 shrink-0">
-        <div className="flex items-center gap-3">
-          <Image src="/logo-dark.png" alt="NeuroChiro" width={40} height={40} className="hidden" />
+
+      {/* Full-screen slide */}
+      <SlideComponent />
+
+      {/* Bottom bar */}
+      <div className="absolute bottom-0 left-0 right-0 z-40">
+        <div className="flex items-center justify-between px-8 py-3 bg-black/60 backdrop-blur">
+          {/* Logo */}
           <div>
-            <span className="text-2xl font-heading font-black tracking-tight text-neuro-navy">
+            <span className="text-lg font-heading font-black text-white tracking-tight">
               NEURO<span className="text-neuro-orange">CHIRO</span>
             </span>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.3em]">The Platform for Nervous System Chiropractors</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 px-4 py-2 bg-neuro-navy rounded-full">
-            <ShieldCheck className="w-4 h-4 text-neuro-orange" />
-            <span className="text-sm font-bold text-white">140+ Verified Doctors</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main — Split Layout */}
-      <div className="flex-1 flex items-center px-10 py-6">
-        <div className="w-full grid grid-cols-2 gap-10 items-center">
-          {/* Left — Feature Info */}
-          <div>
-            <div className={`inline-flex items-center gap-2 px-3 py-1.5 ${slide.color} text-white text-xs font-bold rounded-full mb-4`}>
-              {slide.subtitle}
-            </div>
-            <h2 className="text-4xl md:text-5xl font-heading font-black text-neuro-navy tracking-tight mb-4 leading-tight">
-              {slide.title}
-            </h2>
-            <p className="text-lg text-gray-500 leading-relaxed mb-6">
-              {slide.desc}
-            </p>
-
-            {/* Slide indicators */}
-            <div className="flex items-center gap-2">
-              {SLIDES.map((s, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveSlide(i)}
-                  className={`h-1.5 rounded-full transition-all ${i === activeSlide ? 'w-10 bg-neuro-orange' : 'w-1.5 bg-gray-200'}`}
-                />
-              ))}
-            </div>
           </div>
 
-          {/* Right — Mockup */}
-          <div className="bg-white rounded-3xl border border-gray-200 shadow-2xl shadow-gray-200/50 p-6 max-w-md mx-auto w-full">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-400" />
-                <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                <div className="w-3 h-3 rounded-full bg-green-400" />
-              </div>
-              <div className="flex-1 mx-4">
-                <div className="bg-gray-50 rounded-lg px-4 py-1.5 text-[10px] text-gray-400 text-center font-medium">
-                  neurochiro.co
-                </div>
-              </div>
-            </div>
-            {slide.mockup}
+          {/* Slide indicators */}
+          <div className="flex items-center gap-2">
+            {SLIDES.map((s, i) => (
+              <button
+                key={s.id}
+                onClick={() => setActiveSlide(i)}
+                className={`h-1.5 rounded-full transition-all ${i === activeSlide ? 'w-8 bg-neuro-orange' : 'w-2 bg-white/20'}`}
+              />
+            ))}
           </div>
-        </div>
-      </div>
 
-      {/* Bottom CTA */}
-      <div className="px-10 pb-6 shrink-0">
-        <div className="flex items-center justify-between bg-neuro-navy rounded-2xl px-8 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <div>
-              <p className="text-sm font-bold text-white">Scan to Join</p>
-              <p className="text-xs text-white/40">neurochiro.co/get-started</p>
-            </div>
-          </div>
+          {/* CTA */}
           <div className="flex items-center gap-4">
-            <div className="px-5 py-2 bg-neuro-orange rounded-xl">
-              <p className="text-lg font-black text-white">Free to Join</p>
-              <p className="text-[10px] text-white/60">Upgrade anytime</p>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-xs text-white/60 font-bold">neurochiro.co/get-started</span>
+            </div>
+            <div className="px-4 py-2 bg-neuro-orange rounded-lg">
+              <p className="text-sm font-black text-white">Free to Join</p>
             </div>
           </div>
         </div>
