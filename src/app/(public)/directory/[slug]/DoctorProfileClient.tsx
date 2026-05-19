@@ -194,7 +194,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       </section>
 
       {/* Stats Bar */}
-      {(d.profile_views > 0 || d.rating > 0 || d.review_count > 0 || specialties.length > 0) && (
+      {(d.profile_views > 0 || specialties.length > 0) && (
         <div className="bg-neuro-navy border-t border-white/5">
           <div className="max-w-4xl mx-auto flex justify-center divide-x divide-white/10">
             {d.profile_views > 0 && (
@@ -203,24 +203,22 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Profile Views</div>
               </div>
             )}
-            {d.rating > 0 && (
-              <div className="flex-1 text-center py-4">
-                <div className="text-2xl font-black text-neuro-orange flex items-center justify-center gap-1">
-                  <Star className="w-5 h-5 fill-neuro-orange" /> {d.rating.toFixed(1)}
-                </div>
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Rating</div>
-              </div>
-            )}
-            {d.review_count > 0 && (
-              <div className="flex-1 text-center py-4">
-                <div className="text-2xl font-black text-neuro-orange">{d.review_count}</div>
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Reviews</div>
-              </div>
-            )}
             {specialties.length > 0 && (
               <div className="flex-1 text-center py-4">
                 <div className="text-2xl font-black text-neuro-orange">{specialties.length}</div>
                 <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Specialties</div>
+              </div>
+            )}
+            {d.patient_leads > 0 && (
+              <div className="flex-1 text-center py-4">
+                <div className="text-2xl font-black text-neuro-orange">{d.patient_leads}</div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Patient Inquiries</div>
+              </div>
+            )}
+            {location && (
+              <div className="flex-1 text-center py-4">
+                <div className="text-2xl font-black text-neuro-orange">{doctor.city}</div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{doctor.state}</div>
               </div>
             )}
           </div>
