@@ -561,7 +561,12 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                   <div className="bg-white/5 rounded-xl p-4 border border-white/10">
                     <Plane className="w-5 h-5 text-neuro-orange mb-2" />
                     <p className="font-bold text-white text-sm">Fly Into</p>
-                    <p className="text-xs text-gray-400 mt-1">Fort Lauderdale-Hollywood International Airport (FLL) — 15 min from venue</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {seminar.city === 'Fort Lauderdale' ? 'Fort Lauderdale-Hollywood International Airport (FLL) — 15 min from venue' :
+                       seminar.city === 'Atlanta' || (seminar.city || '').includes('Atlanta') ? 'Hartsfield-Jackson Atlanta International Airport (ATL) — 22 miles from venue. MARTA rail available.' :
+                       seminar.city === 'Denver' || (seminar.city || '').includes('Denver') ? 'Denver International Airport (DEN)' :
+                       `Nearest major airport to ${seminar.city || 'the venue'}`}
+                    </p>
                   </div>
                   <div className="bg-white/5 rounded-xl p-4 border border-white/10">
                     <Hotel className="w-5 h-5 text-neuro-orange mb-2" />
@@ -571,7 +576,12 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                   <div className="bg-white/5 rounded-xl p-4 border border-white/10">
                     <Sun className="w-5 h-5 text-neuro-orange mb-2" />
                     <p className="font-bold text-white text-sm">Weather</p>
-                    <p className="text-xs text-gray-400 mt-1">November in Fort Lauderdale — 75-82°F. Pack summer clothes and sunscreen!</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {seminar.city === 'Fort Lauderdale' ? 'November in Fort Lauderdale — 75-82°F. Pack summer clothes and sunscreen!' :
+                       (seminar.city === 'Atlanta' || (seminar.city || '').includes('Atlanta')) ? 'July in Atlanta — 85-95°F. Hot and humid. Pack light, stay hydrated!' :
+                       (seminar.city === 'Denver' || (seminar.city || '').includes('Denver')) ? 'Denver weather varies — check the forecast before you pack!' :
+                       `Check the local forecast for ${seminar.city || 'the area'} before you travel.`}
+                    </p>
                   </div>
                 </div>
               </div>
