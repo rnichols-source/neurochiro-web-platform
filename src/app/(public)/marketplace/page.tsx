@@ -86,11 +86,12 @@ function VendorCard({ vendor, index }: { vendor: any; index: number }) {
   const colorClass = INITIALS_COLORS[index % INITIALS_COLORS.length];
   const isPartner = vendor.tier === "partner";
   const isGrowth = vendor.tier === "growth" || vendor.tier === "featured";
+  const isFounding = !!vendor.is_founding_vendor;
 
   return (
     <div
       className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col ${
-        isPartner ? "border-amber-200" : isGrowth ? "border-[#D66829]/30" : "border-gray-100"
+        isPartner ? "border-amber-200" : isGrowth ? "border-[#D66829]/30" : isFounding ? "border-yellow-300" : "border-gray-100"
       }`}
     >
       <div className="p-6 flex flex-col flex-1">
@@ -121,7 +122,14 @@ function VendorCard({ vendor, index }: { vendor: any; index: number }) {
               )}
             </div>
           </div>
-          {getTierBadge(vendor.tier)}
+          <div className="flex flex-col items-end gap-1">
+            {getTierBadge(vendor.tier)}
+            {isFounding && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-50 text-yellow-700 text-[9px] font-black rounded-full border border-yellow-200 uppercase tracking-wider">
+                Founding
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Description */}

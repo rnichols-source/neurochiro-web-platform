@@ -50,6 +50,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
   const v = vendor as any;
   const isPartner = v.tier === 'partner' || v.tier === 'featured_partner';
   const isGrowth = v.tier === 'growth';
+  const isFounding = !!(v.is_founding_vendor);
 
   // Extended fields (JSONB or future columns)
   const bannerUrl = v.banner_url as string | null;
@@ -115,6 +116,11 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
                 {isGrowth && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-500/20 text-blue-400 text-[10px] font-black rounded-full uppercase tracking-wider">
                     <Zap className="w-3 h-3" /> Featured
+                  </span>
+                )}
+                {isFounding && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-yellow-500/20 text-yellow-300 text-[10px] font-black rounded-full uppercase tracking-wider">
+                    <Award className="w-3 h-3" /> Founding Vendor
                   </span>
                 )}
               </div>
@@ -412,6 +418,14 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
                 <CheckCircle2 className="w-3 h-3" />
                 Verified NeuroChiro vendor
               </p>
+              {isFounding && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-center">
+                  <p className="text-xs font-black text-yellow-700 flex items-center justify-center gap-1">
+                    <Award className="w-3.5 h-3.5" /> Founding Vendor
+                  </p>
+                  <p className="text-[10px] text-yellow-600 mt-0.5">One of our original 20 launch partners</p>
+                </div>
+              )}
             </div>
 
             {/* Contact Form */}
