@@ -123,9 +123,8 @@ export async function getDoctors(options: {
 export async function getDoctorBySlug(slug: string) {
   const supabase = createServerSupabase()
   
-  // DATA MINIMIZATION: Fetch columns needed for full profile
-  // Removed google_place_id as it does not exist in the schema
-  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, address, latitude, longitude, bio, specialties, region_code, email, phone, website_url, instagram_url, facebook_url, user_id, photo_url, video_url';
+  // Full profile select — includes all extended fields for ultimate profile page
+  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, address, zip_code, latitude, longitude, bio, specialties, region_code, email, phone, website_url, instagram_url, facebook_url, user_id, photo_url, video_url, seo_keywords, profile_views, rating, review_count, banner_url, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images';
   
   try {
     let { data, error } = await supabase

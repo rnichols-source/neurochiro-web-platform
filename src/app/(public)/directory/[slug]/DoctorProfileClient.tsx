@@ -194,7 +194,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       </section>
 
       {/* Stats Bar */}
-      {(d.profile_views > 0 || d.rating > 0 || d.review_count > 0) && (
+      {(d.profile_views > 0 || d.rating > 0 || d.review_count > 0 || specialties.length > 0) && (
         <div className="bg-neuro-navy border-t border-white/5">
           <div className="max-w-4xl mx-auto flex justify-center divide-x divide-white/10">
             {d.profile_views > 0 && (
