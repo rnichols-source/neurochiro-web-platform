@@ -8,6 +8,7 @@ import {
   TrendingUp, Calendar, Search, CheckCircle2, ArrowRight,
   FileText, MessageSquare, ShieldCheck, Target, Clock,
 } from "lucide-react";
+import LiveSignupFeed from "@/components/booth/LiveSignupFeed";
 
 const SLIDES = [
   {
@@ -311,6 +312,7 @@ export default function BoothPage() {
 
   return (
     <div className="min-h-dvh bg-neuro-cream flex flex-col overflow-hidden">
+      <LiveSignupFeed />
       {/* Header */}
       <div className="flex items-center justify-between px-10 pt-6 shrink-0">
         <div className="flex items-center gap-3">

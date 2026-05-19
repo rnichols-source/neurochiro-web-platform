@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle2, Loader2, ShieldCheck, Users, BarChart3, Briefcase, Award, Zap } from "lucide-react";
@@ -9,8 +10,14 @@ import { createClient } from "@/lib/supabase";
 
 type Role = "doctor" | "student";
 
-export default function GetStartedPage() {
-  const [role, setRole] = useState<Role>("doctor");
+function GetStartedInner() {
+  const searchParams = useSearchParams();
+  const paramRole = searchParams.get("role") as Role | null;
+  const paramChiroscore = searchParams.get("chiroscore");
+  const paramCity = searchParams.get("city");
+  const paramState = searchParams.get("state");
+
+  const [role, setRole] = useState<Role>(paramRole === "student" ? "student" : "doctor");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -71,6 +78,30 @@ export default function GetStartedPage() {
   return (
     <div className="min-h-dvh bg-neuro-cream pt-24 pb-20">
       <div className="max-w-md mx-auto px-6">
+        {/* Contextual Banners */}
+        {paramChiroscore && (
+          <div className="bg-neuro-navy rounded-2xl p-4 mb-4 flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-neuro-orange/10 flex items-center justify-center shrink-0">
+              <span className="text-lg font-black text-neuro-orange">{paramChiroscore}</span>
+            </div>
+            <div>
+              <p className="text-white font-bold text-sm">Your ChiroScore: {paramChiroscore}/100</p>
+              <p className="text-gray-400 text-xs">Sign up to see your full breakdown and career tools.</p>
+            </div>
+          </div>
+        )}
+        {paramCity && paramState && (
+          <div className="bg-neuro-navy rounded-2xl p-4 mb-4 flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-6 h-6 text-green-400" />
+            </div>
+            <div>
+              <p className="text-white font-bold text-sm">Claim your spot in {paramCity}, {paramState}</p>
+              <p className="text-gray-400 text-xs">Be found by patients searching your area.</p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-heading font-black text-neuro-navy mb-2">Get Listed Free</h1>
@@ -172,5 +203,13 @@ export default function GetStartedPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GetStartedPage() {
+  return (
+    <Suspense fallback={<div className="min-h-dvh bg-neuro-cream flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-neuro-orange" /></div>}>
+      <GetStartedInner />
+    </Suspense>
   );
 }

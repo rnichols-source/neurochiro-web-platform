@@ -1,0 +1,314 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronRight, Award, ArrowRight, Zap, GraduationCap, Briefcase, Stethoscope, Target } from "lucide-react";
+import Link from "next/link";
+import { computeChiroScoreLite, type ChiroScoreLiteInput, type ChiroScoreLiteResult } from "@/lib/chiroscore-lite";
+
+const SCHOOLS = [
+  "Palmer College", "Life University", "Sherman College", "Parker University",
+  "Logan University", "Cleveland University", "Northwestern Health Sciences",
+  "National University of Health Sciences", "Life Chiropractic College West",
+  "New York Chiropractic College", "Palmer West", "Southern California University",
+  "University of Western States", "Texas Chiropractic College", "Canadian Memorial",
+  "D'Youville University", "Keiser University", "University of Bridgeport",
+];
+
+const TECHNIQUES = [
+  "Diversified", "Gonstead", "Thompson Drop", "Network Spinal",
+  "Torque Release", "NUCCA", "Atlas Orthogonal", "Activator Methods",
+  "Cox Flexion-Distraction", "Toggle Recoil / HIO", "Chiropractic Biophysics",
+  "Active Release", "Graston / IASTM", "Bio-Geometric Integration",
+  "Blair Upper Cervical", "Palmer Package", "ArthroStim", "Impulse Adjusting",
+];
+
+const GRAD_YEARS = ["Graduated", "2026", "2027", "2028", "2029+"];
+const EXTERNSHIPS = ["0", "1", "2", "3+"];
+const GOALS = [
+  { id: "associate", label: "Associate Doctor", icon: Stethoscope },
+  { id: "own_practice", label: "Own My Practice", icon: Briefcase },
+  { id: "research", label: "Research / Academic", icon: GraduationCap },
+  { id: "undecided", label: "Still Deciding", icon: Target },
+];
+
+/* ─── Radar Chart SVG ─── */
+function RadarChart({ categories }: { categories: { label: string; score: number }[] }) {
+  const size = 200;
+  const cx = size / 2, cy = size / 2, r = 80;
+  const n = categories.length;
+  const angleStep = (2 * Math.PI) / n;
+
+  const getPoint = (i: number, scale: number) => ({
+    x: cx + r * scale * Math.sin(i * angleStep),
+    y: cy - r * scale * Math.cos(i * angleStep),
+  });
+
+  const gridLevels = [0.33, 0.66, 1];
+  const dataPoints = categories.map((c, i) => getPoint(i, c.score / 100));
+  const dataPath = dataPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
+
+  return (
+    <svg viewBox={`0 0 ${size} ${size}`} className="w-48 h-48 mx-auto">
+      {/* Grid */}
+      {gridLevels.map((level) => (
+        <polygon
+          key={level}
+          points={Array.from({ length: n }, (_, i) => {
+            const p = getPoint(i, level);
+            return `${p.x},${p.y}`;
+          }).join(' ')}
+          fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1"
+        />
+      ))}
+      {/* Axes */}
+      {categories.map((_, i) => {
+        const p = getPoint(i, 1);
+        return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />;
+      })}
+      {/* Data */}
+      <polygon points={dataPoints.map(p => `${p.x},${p.y}`).join(' ')} fill="rgba(214,104,41,0.25)" stroke="#D66829" strokeWidth="2" />
+      {dataPoints.map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r="4" fill="#D66829" />
+      ))}
+      {/* Labels */}
+      {categories.map((c, i) => {
+        const p = getPoint(i, 1.25);
+        return (
+          <text key={i} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle"
+            fill="rgba(255,255,255,0.6)" fontSize="8" fontWeight="700">
+            {c.label}
+          </text>
+        );
+      })}
+    </svg>
+  );
+}
+
+export default function ChiroScoreLivePage() {
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState<Partial<ChiroScoreLiteInput>>({
+    techniques: [],
+  });
+  const [result, setResult] = useState<ChiroScoreLiteResult | null>(null);
+  const [animatedScore, setAnimatedScore] = useState(0);
+
+  const totalSteps = 5;
+  const progress = step < totalSteps ? ((step + 1) / totalSteps) * 100 : 100;
+
+  const canProceed = (() => {
+    switch (step) {
+      case 0: return !!answers.school;
+      case 1: return !!answers.graduationYear;
+      case 2: return (answers.techniques?.length || 0) > 0;
+      case 3: return !!answers.externships;
+      case 4: return !!answers.careerGoal;
+      default: return false;
+    }
+  })();
+
+  const handleNext = () => {
+    if (step < 4) {
+      setStep(step + 1);
+    } else {
+      // Calculate score
+      const r = computeChiroScoreLite(answers as ChiroScoreLiteInput);
+      setResult(r);
+      setStep(5);
+    }
+  };
+
+  // Animated score countup
+  useEffect(() => {
+    if (result && step === 5) {
+      let current = 0;
+      const target = result.totalScore;
+      const interval = setInterval(() => {
+        current += 1;
+        setAnimatedScore(current);
+        if (current >= target) clearInterval(interval);
+      }, 20);
+      return () => clearInterval(interval);
+    }
+  }, [result, step]);
+
+  const toggleTechnique = (t: string) => {
+    const current = answers.techniques || [];
+    setAnswers({
+      ...answers,
+      techniques: current.includes(t) ? current.filter(x => x !== t) : [...current, t],
+    });
+  };
+
+  return (
+    <div className="min-h-dvh bg-neuro-navy flex flex-col">
+      {/* Header */}
+      <div className="px-6 pt-8 pb-4">
+        <div className="flex items-center gap-2 justify-center mb-4">
+          <Zap className="w-5 h-5 text-neuro-orange" />
+          <span className="text-xs font-black uppercase tracking-[0.3em] text-neuro-orange">ChiroScore</span>
+        </div>
+        {step < 5 && (
+          <>
+            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-2">
+              <motion.div className="h-full bg-neuro-orange rounded-full" animate={{ width: `${progress}%` }} transition={{ duration: 0.3 }} />
+            </div>
+            <p className="text-center text-xs text-gray-500">{step + 1} of {totalSteps}</p>
+          </>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 px-6 pb-8 flex flex-col">
+        <AnimatePresence mode="wait">
+          {step === 0 && (
+            <motion.div key="school" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-1">
+              <h2 className="text-2xl font-heading font-black text-white mb-6 text-center">What school are you at?</h2>
+              <div className="grid grid-cols-2 gap-2 max-w-md mx-auto">
+                {SCHOOLS.map(s => (
+                  <button key={s} onClick={() => setAnswers({ ...answers, school: s })}
+                    className={`py-3 px-3 rounded-xl text-xs font-bold transition-all border-2 ${
+                      answers.school === s ? 'bg-neuro-orange/10 border-neuro-orange text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
+                    }`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {step === 1 && (
+            <motion.div key="year" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-1 flex flex-col items-center justify-center">
+              <h2 className="text-2xl font-heading font-black text-white mb-8 text-center">When do you graduate?</h2>
+              <div className="flex flex-col gap-3 w-full max-w-xs">
+                {GRAD_YEARS.map(y => (
+                  <button key={y} onClick={() => setAnswers({ ...answers, graduationYear: y.toLowerCase() })}
+                    className={`py-4 rounded-xl text-sm font-bold transition-all border-2 ${
+                      answers.graduationYear === y.toLowerCase() ? 'bg-neuro-orange/10 border-neuro-orange text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
+                    }`}>
+                    {y}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {step === 2 && (
+            <motion.div key="tech" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-1">
+              <h2 className="text-2xl font-heading font-black text-white mb-2 text-center">What techniques do you know?</h2>
+              <p className="text-gray-500 text-xs text-center mb-6">Select all that apply</p>
+              <div className="grid grid-cols-2 gap-2 max-w-md mx-auto">
+                {TECHNIQUES.map(t => (
+                  <button key={t} onClick={() => toggleTechnique(t)}
+                    className={`py-3 px-3 rounded-xl text-xs font-bold transition-all border-2 ${
+                      answers.techniques?.includes(t) ? 'bg-neuro-orange/10 border-neuro-orange text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
+                    }`}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {step === 3 && (
+            <motion.div key="ext" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-1 flex flex-col items-center justify-center">
+              <h2 className="text-2xl font-heading font-black text-white mb-8 text-center">How many externships have you done?</h2>
+              <div className="flex gap-3">
+                {EXTERNSHIPS.map(e => (
+                  <button key={e} onClick={() => setAnswers({ ...answers, externships: e })}
+                    className={`w-16 h-16 rounded-2xl text-lg font-black transition-all border-2 ${
+                      answers.externships === e ? 'bg-neuro-orange/10 border-neuro-orange text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
+                    }`}>
+                    {e}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {step === 4 && (
+            <motion.div key="goal" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-1 flex flex-col items-center justify-center">
+              <h2 className="text-2xl font-heading font-black text-white mb-8 text-center">What&apos;s your career goal?</h2>
+              <div className="flex flex-col gap-3 w-full max-w-xs">
+                {GOALS.map(g => (
+                  <button key={g.id} onClick={() => setAnswers({ ...answers, careerGoal: g.id })}
+                    className={`flex items-center gap-3 py-4 px-5 rounded-xl text-sm font-bold transition-all border-2 ${
+                      answers.careerGoal === g.id ? 'bg-neuro-orange/10 border-neuro-orange text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
+                    }`}>
+                    <g.icon className="w-5 h-5 shrink-0" />
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Results */}
+          {step === 5 && result && (
+            <motion.div key="results" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex flex-col items-center">
+              <h2 className="text-lg font-heading font-black text-white mb-6">Your ChiroScore</h2>
+
+              {/* Score Circle */}
+              <div className="relative w-36 h-36 mb-6">
+                <svg viewBox="0 0 120 120" className="w-full h-full">
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="#D66829" strokeWidth="8"
+                    strokeDasharray={`${(animatedScore / 100) * 327} 327`}
+                    strokeLinecap="round" transform="rotate(-90 60 60)" />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-4xl font-black text-white">{animatedScore}</span>
+                  <span className="text-xs font-bold text-neuro-orange">{result.grade}</span>
+                </div>
+              </div>
+
+              {/* Radar Chart */}
+              <RadarChart categories={result.categories} />
+
+              {/* Category Bars */}
+              <div className="w-full max-w-xs space-y-3 mt-6 mb-6">
+                {result.categories.map((c, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-gray-400 font-bold">{c.label}</span>
+                      <span className="text-white font-bold">{c.score}%</span>
+                    </div>
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                      <motion.div className="h-full bg-neuro-orange rounded-full" initial={{ width: 0 }} animate={{ width: `${c.score}%` }}
+                        transition={{ delay: 0.5 + i * 0.1, duration: 0.5 }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Recommendation */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 w-full max-w-xs mb-6">
+                <p className="text-xs text-neuro-orange font-bold mb-1">Top Recommendation</p>
+                <p className="text-sm text-gray-300">{result.topRecommendation}</p>
+              </div>
+
+              {/* Gate CTA */}
+              <Link
+                href={`/get-started?role=student&chiroscore=${result.totalScore}`}
+                className="w-full max-w-xs py-4 bg-neuro-orange text-white font-bold rounded-xl text-center flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors shadow-lg shadow-neuro-orange/20"
+              >
+                Create Free Account to See Full Breakdown <ArrowRight className="w-4 h-4" />
+              </Link>
+              <p className="text-[10px] text-gray-600 mt-3 text-center">Free forever. No credit card required.</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Next Button */}
+        {step < 5 && (
+          <div className="mt-auto pt-6">
+            <button onClick={handleNext} disabled={!canProceed}
+              className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+              {step === 4 ? 'See My Score' : 'Next'} <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
