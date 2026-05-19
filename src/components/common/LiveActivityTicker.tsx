@@ -60,7 +60,7 @@ export default function LiveActivityTicker() {
   const currentItem = items[activeIndex % items.length];
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] animate-fade-in-up">
+    <div className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-[90] animate-fade-in-up">
       <div className="bg-neuro-navy/95 backdrop-blur-md border border-white/10 rounded-full px-5 py-2.5 flex items-center gap-3 shadow-2xl">
         {/* Pulse dot */}
         <span className="relative flex h-2 w-2 shrink-0">

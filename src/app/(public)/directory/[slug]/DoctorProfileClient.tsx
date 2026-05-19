@@ -103,7 +103,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   return (
     <div className="min-h-dvh bg-neuro-cream pb-40">
       {/* Hero with Banner */}
-      <section className={`text-white pt-28 pb-16 px-6 relative overflow-hidden ${bannerUrl ? '' : 'bg-neuro-navy'}`}>
+      <section className={`text-white pt-20 sm:pt-28 pb-10 sm:pb-16 px-6 relative overflow-hidden ${bannerUrl ? '' : 'bg-neuro-navy'}`}>
         {bannerUrl && (
           <div className="absolute inset-0">
             <img src={bannerUrl} alt="" className="w-full h-full object-cover" />
