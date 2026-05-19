@@ -101,7 +101,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   };
 
   return (
-    <div className="min-h-dvh bg-neuro-cream pb-32">
+    <div className="min-h-dvh bg-neuro-cream pb-40">
       {/* Hero with Banner */}
       <section className={`text-white pt-28 pb-16 px-6 relative overflow-hidden ${bannerUrl ? '' : 'bg-neuro-navy'}`}>
         {bannerUrl && (
@@ -710,7 +710,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       )}
 
       {/* Sticky mobile bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-200 py-3 px-4 z-40 lg:hidden">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-200 py-3 px-4 z-[100] lg:hidden">
         <div className="flex gap-3 max-w-3xl mx-auto">
           <a href="#appointment" className="flex-1 py-3.5 bg-neuro-orange text-white rounded-xl font-bold text-sm text-center">
             Book Consultation
