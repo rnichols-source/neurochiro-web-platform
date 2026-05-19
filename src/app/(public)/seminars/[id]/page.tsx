@@ -150,6 +150,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
   const spotlightVideoUrl = s.spotlight_video_url as string | null;
   const spotlightQuote = s.spotlight_quote as string | null;
   const spotlightHostName = s.spotlight_host_name as string | null;
+  const hotelBookingUrl = s.hotel_booking_url as string | null;
 
   // Google Maps embed
   const mapQuery = venueAddress ? encodeURIComponent(venueAddress) : venueName ? encodeURIComponent(venueName) : null;
@@ -568,7 +569,15 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                   <div className="bg-white/5 rounded-xl p-4 border border-white/10">
                     <Hotel className="w-5 h-5 text-neuro-orange mb-2" />
                     <p className="font-bold text-white text-sm">Stay At</p>
-                    <p className="text-xs text-gray-400 mt-1">{venueName}. Book directly with the hotel — ask about group rates.</p>
+                    <p className="text-xs text-gray-400 mt-1">{venueName}.</p>
+                    {hotelBookingUrl ? (
+                      <a href={hotelBookingUrl} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 mt-2 px-3 py-1.5 bg-neuro-orange text-white text-xs font-bold rounded-lg hover:bg-neuro-orange/90 transition-colors">
+                        Book Group Rate <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <p className="text-xs text-gray-500 mt-1">Book directly — ask about group rates.</p>
+                    )}
                   </div>
                   <div className="bg-white/5 rounded-xl p-4 border border-white/10">
                     <Sun className="w-5 h-5 text-neuro-orange mb-2" />
@@ -726,6 +735,17 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                   className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors"
                 >
                   Register Now <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
+
+              {hotelBookingUrl && (
+                <a
+                  href={hotelBookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 bg-neuro-navy text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-neuro-navy/90 transition-colors"
+                >
+                  <Hotel className="w-4 h-4" /> Book Your Room
                 </a>
               )}
 
