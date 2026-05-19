@@ -298,10 +298,10 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               </div>
             )}
 
-            {/* Conditions Treated */}
+            {/* Patients We Help */}
             {conditionsTreated && conditionsTreated.length > 0 && (
               <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-                <h2 className="text-lg font-black text-neuro-navy mb-4">Conditions Treated</h2>
+                <h2 className="text-lg font-black text-neuro-navy mb-4">Patients We Help</h2>
                 <div className="flex flex-wrap gap-2">
                   {conditionsTreated.map((c: string, i: number) => (
                     <span key={i} className="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100">
