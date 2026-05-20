@@ -46,10 +46,9 @@ export default function AustraliaLandingPage() {
             <span className="text-xs font-black uppercase tracking-widest text-white/60">Now in Australia</span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-heading font-black tracking-tight leading-[1.1] mb-6">
-            The Home Base for{" "}
-            <span className="text-neuro-orange">Nervous System</span>{" "}
-            Chiropractors
+          <h1 className="text-4xl md:text-6xl font-heading font-black tracking-tight leading-[1.1] mb-6 text-white">
+            The Home Base for<br />
+            <span className="text-neuro-orange">Nervous System</span> Chiropractors
           </h1>
 
           <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
