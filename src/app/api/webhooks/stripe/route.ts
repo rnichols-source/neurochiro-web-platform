@@ -24,7 +24,8 @@ export async function POST(req: Request) {
     );
   } catch (error: unknown) {
     const err = error as Error;
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
+    console.error(`Stripe webhook signature error: ${err.message}`);
+    return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 400 });
   }
 
   // 1. IDEMPOTENCY CHECK

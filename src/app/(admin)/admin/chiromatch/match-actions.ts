@@ -3,8 +3,10 @@
 import { createAdminClient } from "@/lib/supabase-admin";
 import { runGaleShapley } from "@/lib/chiromatch-algorithm";
 import { revalidatePath } from "next/cache";
+import { checkAdminAuth } from "@/lib/admin-auth";
 
 export async function executeMatching(cycleId: string) {
+  await checkAdminAuth();
   const sb = createAdminClient() as any;
 
   // 1. Verify cycle status

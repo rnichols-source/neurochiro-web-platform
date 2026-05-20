@@ -244,6 +244,17 @@ export async function uploadAvatar(formData: FormData) {
             return { error: "No valid image file detected." }
         }
 
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            return { error: "Only JPEG, PNG, and WebP images are allowed." }
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            return { error: "Image must be under 5MB." }
+        }
+
         // Use admin client for storage to bypass RLS policies
         const { createAdminClient } = await import('@/lib/supabase-admin')
         const adminSupabase = createAdminClient()

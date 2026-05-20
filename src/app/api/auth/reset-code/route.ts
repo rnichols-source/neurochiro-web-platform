@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { Resend } from 'resend';
+import { rateLimit, getIP } from '@/lib/rate-limit';
+
+const limiter = rateLimit('reset-code', { maxRequests: 3, windowMs: 15 * 60_000 });
 
 export async function POST(request: NextRequest) {
+  const ip = getIP(request);
+  const { allowed } = limiter.check(ip);
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too many requests. Try again later.' }, { status: 429 });
+  }
+
   const { email } = await request.json();
   if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 });
 
@@ -21,8 +30,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   }
 
-  // Generate 6-digit code
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  // Generate 8-digit code (100M possibilities vs 1M for 6-digit)
+  const code = Math.floor(10000000 + Math.random() * 90000000).toString();
   const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
   // Delete old codes

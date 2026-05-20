@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { Resend } from 'resend';
+import { rateLimit, getIP } from '@/lib/rate-limit';
+
+const limiter = rateLimit('appointment', { maxRequests: 3, windowMs: 60_000 });
 
 export async function POST(request: NextRequest) {
+  const { allowed } = limiter.check(getIP(request));
+  if (!allowed) return NextResponse.json({ error: 'Too many requests. Try again later.' }, { status: 429 });
   try {
     const body = await request.json();
     const { patientName, patientEmail, patientPhone, preferredDate, message, doctorId } = body;

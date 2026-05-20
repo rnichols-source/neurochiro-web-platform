@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { rateLimit, getIP } from '@/lib/rate-limit';
+
+const limiter = rateLimit('verify-code', { maxRequests: 5, windowMs: 15 * 60_000 });
 
 export async function POST(request: NextRequest) {
+  const ip = getIP(request);
+  const { allowed } = limiter.check(ip);
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too many attempts. Try again later.' }, { status: 429 });
+  }
+
   const { email, code, newPassword } = await request.json();
 
   if (!email || !code || !newPassword) {

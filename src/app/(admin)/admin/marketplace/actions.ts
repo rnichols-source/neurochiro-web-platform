@@ -2,8 +2,10 @@
 
 import { createServerSupabase } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
+import { checkAdminAuth } from "@/lib/admin-auth";
 
 export async function getVendors() {
+  await checkAdminAuth();
   const supabase = createServerSupabase();
   const { data, error } = await (supabase as any)
     .from("vendors")
@@ -19,6 +21,7 @@ export async function getVendors() {
 }
 
 export async function toggleVendorActive(vendorId: string, isActive: boolean) {
+  await checkAdminAuth();
   const supabase = createServerSupabase();
 
   const { error } = await (supabase as any)
@@ -59,6 +62,7 @@ export async function toggleVendorActive(vendorId: string, isActive: boolean) {
 }
 
 export async function updateVendorTier(vendorId: string, tier: string) {
+  await checkAdminAuth();
   const supabase = createServerSupabase();
   const { error } = await (supabase as any)
     .from("vendors")
@@ -76,6 +80,7 @@ export async function updateVendorTier(vendorId: string, tier: string) {
 }
 
 export async function deleteVendor(vendorId: string) {
+  await checkAdminAuth();
   const supabase = createServerSupabase();
 
   const { error } = await (supabase as any)

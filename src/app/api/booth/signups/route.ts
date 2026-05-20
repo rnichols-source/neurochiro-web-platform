@@ -1,12 +1,17 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { rateLimit, getIP } from '@/lib/rate-limit';
+
+const limiter = rateLimit('booth-signups', { maxRequests: 20, windowMs: 60_000 });
 
 /**
  * GET /api/booth/signups
  * Returns recent signups for the live booth feed.
  * Privacy: Only first name + last initial shown.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { allowed } = limiter.check(getIP(request));
+  if (!allowed) return NextResponse.json({ error: 'Rate limited' }, { status: 429 });
   try {
     const supabase = createAdminClient();
 

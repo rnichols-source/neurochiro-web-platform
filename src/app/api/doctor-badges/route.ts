@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { rateLimit, getIP } from '@/lib/rate-limit';
 
 export const revalidate = 300;
 
+const limiter = rateLimit('doctor-badges', { maxRequests: 30, windowMs: 60_000 });
+
 export async function GET(request: NextRequest) {
+  const { allowed } = limiter.check(getIP(request));
+  if (!allowed) return NextResponse.json({ badges: [] });
+
   const userId = request.nextUrl.searchParams.get('userId');
   if (!userId) return NextResponse.json({ badges: [] });
 

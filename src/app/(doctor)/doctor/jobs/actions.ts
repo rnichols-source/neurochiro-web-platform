@@ -3,6 +3,17 @@
 import { createServerSupabase } from '@/lib/supabase-server';
 import { revalidatePath } from 'next/cache';
 
+/** Verify the current user owns the job that an application belongs to */
+async function verifyApplicationOwnership(supabase: any, userId: string, applicationId: string) {
+  const { data } = await supabase
+    .from('applications')
+    .select('job_id, job:job_postings!inner(doctor_id)')
+    .eq('id', applicationId)
+    .single();
+  if (!data || (data as any).job?.doctor_id !== userId) {
+    throw new Error("Forbidden: You don't own this application's job");
+  }
+}
 
 /**
  * 1. JOB POSTINGS ACTIONS
@@ -218,6 +229,7 @@ export async function updateApplicationStage(applicationId: string, stage: strin
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
+  await verifyApplicationOwnership(supabase, user.id, applicationId);
 
   const { data, error } = await supabase
     .from('applications')
@@ -441,6 +453,7 @@ export async function updateApplicantRating(applicationId: string, rating: numbe
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
+  await verifyApplicationOwnership(supabase, user.id, applicationId);
 
   try {
     const { error } = await (supabase as any)
@@ -465,6 +478,7 @@ export async function updateApplicantNotes(applicationId: string, notes: string)
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
+  await verifyApplicationOwnership(supabase, user.id, applicationId);
 
   try {
     const { error } = await (supabase as any)
@@ -489,6 +503,7 @@ export async function getApplicationWithHistory(applicationId: string) {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
+  await verifyApplicationOwnership(supabase, user.id, applicationId);
 
   try {
     const { data: rawData, error } = await (supabase as any)

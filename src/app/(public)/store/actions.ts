@@ -1,14 +1,24 @@
 "use server";
 
 import { stripe } from "@/lib/stripe";
+import { STORE_PRODUCTS } from "./store-data";
 
 export async function createStoreCheckout(
   productId: string,
-  productName: string,
-  priceInCents: number,
-  billing: "one_time" | "monthly",
+  _productName: string,
+  _priceInCents: number,
+  _billing: "one_time" | "monthly",
 ) {
   try {
+    // Server-side price lookup — never trust client-provided price
+    const product = STORE_PRODUCTS.find((p) => p.id === productId);
+    if (!product) {
+      return { error: "Product not found" };
+    }
+    const priceInCents = product.retailPrice;
+    const productName = product.name;
+    const billing = product.billing;
+
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://neurochiro.co";
 
     const session = await stripe.checkout.sessions.create({

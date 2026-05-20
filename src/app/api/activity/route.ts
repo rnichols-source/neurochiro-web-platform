@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { rateLimit, getIP } from '@/lib/rate-limit';
+
+const limiter = rateLimit('activity', { maxRequests: 30, windowMs: 60_000 });
 
 export async function POST(request: NextRequest) {
+  const { allowed } = limiter.check(getIP(request));
+  if (!allowed) return NextResponse.json({ error: 'Rate limited' }, { status: 429 });
   try {
     const { eventType, pagePath, searchQuery, doctorId, city, state } = await request.json();
 

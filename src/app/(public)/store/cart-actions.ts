@@ -1,11 +1,12 @@
 "use server";
 
 import { stripe } from "@/lib/stripe";
+import { STORE_PRODUCTS } from "./store-data";
 
 interface CartLineItem {
   productId: string;
   name: string;
-  retailPrice: number; // cents
+  retailPrice: number; // cents — ignored, looked up server-side
   billing: "one_time" | "monthly";
 }
 
@@ -15,19 +16,27 @@ export async function createCartCheckout(items: CartLineItem[]) {
       return { error: "Cart is empty" };
     }
 
+    // Server-side price lookup — never trust client prices
+    const verifiedItems = items.map((item) => {
+      const product = STORE_PRODUCTS.find((p) => p.id === item.productId);
+      if (!product) throw new Error(`Product not found: ${item.productId}`);
+      return {
+        productId: product.id,
+        name: product.name,
+        retailPrice: product.retailPrice,
+        billing: product.billing,
+      };
+    });
+
     const baseUrl =
       process.env.NEXT_PUBLIC_SITE_URL || "https://neurochiro.co";
 
-    // Separate one-time and monthly items
-    const oneTimeItems = items.filter((i) => i.billing === "one_time");
-    const recurringItems = items.filter((i) => i.billing === "monthly");
+    const oneTimeItems = verifiedItems.filter((i) => i.billing === "one_time");
+    const recurringItems = verifiedItems.filter((i) => i.billing === "monthly");
 
-    // If there are monthly items, we can't mix with one-time in one session.
-    // Process only one-time items per cart checkout. Monthly items use
-    // individual Buy Now (which creates a subscription session).
     const checkoutItems = recurringItems.length > 0 && oneTimeItems.length > 0
-      ? oneTimeItems // Only checkout one-time items; monthly must be bought individually
-      : items;
+      ? oneTimeItems
+      : verifiedItems;
 
     const hasRecurring = checkoutItems.some((i) => i.billing === "monthly");
     const mode = hasRecurring ? ("subscription" as const) : ("payment" as const);

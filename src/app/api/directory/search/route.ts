@@ -10,8 +10,8 @@ const SEARCHABLE_LOCATION_COLUMNS = ['city', 'state', 'address'];
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   // Sanitize inputs: remove characters that could break PostgREST filter syntax
-  const query = (searchParams.get('q') || '').replace(/[%_(),.*\\]/g, '').trim();
-  const location = (searchParams.get('location') || '').replace(/[%_(),.*\\]/g, '').trim();
+  const query = (searchParams.get('q') || '').replace(/[%_(),.*\\'";\[\]{}]/g, '').trim().slice(0, 100);
+  const location = (searchParams.get('location') || '').replace(/[%_(),.*\\'";\[\]{}]/g, '').trim().slice(0, 100);
   const region = searchParams.get('region') || ''; // This is Country Code (US/AU)
   const limit = parseInt(searchParams.get('limit') || '200');
   

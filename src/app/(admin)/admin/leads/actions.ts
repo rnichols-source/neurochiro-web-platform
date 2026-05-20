@@ -1,11 +1,11 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { checkAdminAuth } from '@/lib/admin-auth'
 
 export async function getLeads() {
+  await checkAdminAuth()
   const supabase = createServerSupabase()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
 
   const { data, error } = await supabase
     .from('leads')
@@ -22,9 +22,8 @@ export async function getLeads() {
 }
 
 export async function updateLeadStatus(leadId: string, status: string) {
+  await checkAdminAuth()
   const supabase = createServerSupabase()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Unauthorized")
 
   const { error } = await supabase
     .from('leads')
@@ -40,9 +39,8 @@ export async function updateLeadStatus(leadId: string, status: string) {
 }
 
 export async function deleteLeadAction(leadId: string) {
+  await checkAdminAuth()
   const supabase = createServerSupabase()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Unauthorized")
 
   const { error } = await supabase
     .from('leads')

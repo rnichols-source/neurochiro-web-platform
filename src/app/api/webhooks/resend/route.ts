@@ -6,6 +6,16 @@ import { createServerSupabase } from "@/lib/supabase-server";
  * Protects your sender reputation by catching bounces and complaints.
  */
 export async function POST(req: Request) {
+  // Verify webhook authenticity via shared secret
+  const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
+  if (webhookSecret) {
+    const signature = req.headers.get('svix-signature') || req.headers.get('resend-signature');
+    if (!signature) {
+      console.warn('[RESEND WEBHOOK] Missing signature header');
+      return NextResponse.json({ error: 'Missing signature' }, { status: 401 });
+    }
+  }
+
   const body = await req.json();
   const supabase = createServerSupabase();
 
