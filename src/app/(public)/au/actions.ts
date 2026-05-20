@@ -5,6 +5,13 @@ import { createAdminClient } from '@/lib/supabase-admin'
 export async function captureAULead(email: string, name: string, role: string) {
   if (!email) return { error: 'Email is required' }
 
+  // Block fake/test domains
+  const domain = email.split('@')[1]?.toLowerCase()
+  const blocked = ['demo.com', 'test.com', 'example.com', 'fake.com', 'mailinator.com', 'tempmail.com', 'throwaway.email', 'guerrillamail.com']
+  if (domain && blocked.includes(domain)) {
+    return { success: true } // Silent reject
+  }
+
   const supabase = createAdminClient()
 
   const { error } = await supabase
