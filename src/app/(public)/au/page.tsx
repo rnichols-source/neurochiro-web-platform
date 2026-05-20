@@ -126,7 +126,7 @@ export default function AustraliaLandingPage() {
                 <span className="text-3xl font-black text-neuro-navy">Free</span>
                 <span className="text-gray-400 text-sm">to list</span>
               </div>
-              <p className="text-xs text-gray-400">Growth ~$109 AUD/mo &middot; Pro ~$199 AUD/mo for premium tools</p>
+              <p className="text-xs text-gray-400">Upgrade anytime for premium tools and analytics.</p>
             </div>
 
             <Link
@@ -159,17 +159,17 @@ export default function AustraliaLandingPage() {
 
             <div className="border-t border-gray-100 pt-6 mb-6">
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl font-black text-neuro-navy">~$19</span>
-                <span className="text-gray-400 text-sm">AUD/mo</span>
+                <span className="text-3xl font-black text-neuro-navy">Free</span>
+                <span className="text-gray-400 text-sm">to join</span>
               </div>
-              <p className="text-xs text-gray-400">One plan. Everything included. Cancel anytime.</p>
+              <p className="text-xs text-gray-400">Upgrade anytime for full access to premium tools.</p>
             </div>
 
             <Link
               href="/register?role=student&region=AU"
               className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl text-center hover:bg-neuro-orange/90 transition-colors inline-flex items-center justify-center gap-2"
             >
-              Start Your Membership <ArrowRight className="w-4 h-4" />
+              Join Free <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
@@ -217,7 +217,7 @@ export default function AustraliaLandingPage() {
             Ready to join?
           </h2>
           <p className="text-gray-400 mb-8">
-            Free for doctors. $19 AUD/mo for students. Takes 60 seconds.
+            Free for doctors and students. Takes 60 seconds.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
