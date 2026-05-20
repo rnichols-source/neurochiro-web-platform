@@ -150,7 +150,12 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
   const spotlightVideoUrl = s.spotlight_video_url as string | null;
   const spotlightQuote = s.spotlight_quote as string | null;
   const spotlightHostName = s.spotlight_host_name as string | null;
-  const hotelBookingUrl = s.hotel_booking_url as string | null;
+  // Extract hotel booking URL and promo code from FAQ entries or direct columns
+  const hotelFaq = (faq || []).find((f: any) => f.hotel_url);
+  const hotelBookingUrl = hotelFaq?.hotel_url || s.hotel_booking_url || null;
+  const promoFaq = (faq || []).find((f: any) => f.promo_code);
+  const promoCode = promoFaq?.promo_code || s.promo_code || null;
+  const promoDescription = promoFaq?.promo_description || s.promo_description || null;
 
   // Google Maps embed
   const mapQuery = venueAddress ? encodeURIComponent(venueAddress) : venueName ? encodeURIComponent(venueName) : null;
@@ -629,7 +634,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                   <h2 className="text-lg font-black text-neuro-navy">FAQ</h2>
                 </div>
                 <div className="space-y-2">
-                  {faq.map((item, fi) => (
+                  {faq.filter((f: any) => !f.hotel_url && !f.promo_code).map((item, fi) => (
                     <div key={fi} className="border border-gray-100 rounded-xl overflow-hidden">
                       <button
                         onClick={() => setOpenFaq(openFaq === fi ? null : fi)}
@@ -747,6 +752,14 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                 >
                   <Hotel className="w-4 h-4" /> Book Your Room
                 </a>
+              )}
+
+              {promoCode && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                  <p className="text-[10px] font-black text-green-600 uppercase tracking-widest mb-1">Promo Code</p>
+                  <p className="text-lg font-black text-green-700 tracking-wide">{promoCode}</p>
+                  {promoDescription && <p className="text-xs text-green-600 mt-1">{promoDescription}</p>}
+                </div>
               )}
 
               {/* Quick actions */}
