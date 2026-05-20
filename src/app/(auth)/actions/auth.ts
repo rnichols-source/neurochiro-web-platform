@@ -151,6 +151,53 @@ export async function createAccountAction(formData: FormData, role: string, tier
   if (data?.user) {
     Automations.onSignup(data.user.id, email, name, role, phone);
 
+    // Day 0 welcome email for doctors — nudge to complete profile
+    if (role === 'doctor' && email) {
+      try {
+        const { Resend } = await import('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY || '');
+        const firstName = name?.split(' ')[0] || 'Doctor';
+        await resend.emails.send({
+          from: 'NeuroChiro <support@neurochirodirectory.com>',
+          to: [email],
+          subject: `Welcome to NeuroChiro — let's get your profile live`,
+          html: `
+            <div style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;">
+              <div style="background:#1a2744;padding:28px;text-align:center;">
+                <h1 style="color:white;font-size:22px;margin:0;">NeuroChiro</h1>
+                <p style="color:#e97325;font-size:14px;font-weight:bold;margin:8px 0 0;">Welcome to the Network</p>
+              </div>
+              <div style="padding:28px;background:white;">
+                <p style="font-size:15px;color:#333;line-height:1.6;">Hey Dr. ${firstName},</p>
+                <p style="font-size:15px;color:#333;line-height:1.6;">Welcome to NeuroChiro — the global directory for nervous system chiropractors. Your listing is live, but it needs a few things before patients can find you.</p>
+                <div style="background:#fff7ed;border-left:4px solid #e97325;border-radius:8px;padding:16px;margin:20px 0;">
+                  <p style="margin:0 0 8px;font-weight:bold;color:#1a2744;font-size:14px;">To complete your profile:</p>
+                  <ul style="margin:0;padding:0 0 0 16px;color:#666;font-size:14px;line-height:1.8;">
+                    <li>Add your city and state</li>
+                    <li>Upload a profile photo</li>
+                    <li>Write a short bio</li>
+                    <li>Add your clinic name</li>
+                    <li>Select your specialties</li>
+                  </ul>
+                </div>
+                <p style="font-size:15px;color:#333;line-height:1.6;">Takes about 5 minutes. The more complete your profile, the higher you rank when patients search.</p>
+                <div style="text-align:center;margin:24px 0;">
+                  <a href="https://neurochiro.co/doctor/profile" style="display:inline-block;background:#e97325;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">Complete My Profile</a>
+                </div>
+                <p style="color:#999;font-size:13px;">Questions? Just reply to this email.</p>
+                <p style="margin-top:20px;color:#333;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
+              </div>
+              <div style="background:#f0f0f0;padding:14px;text-align:center;font-size:12px;color:#999;">
+                NeuroChiro Network &middot; neurochiro.co
+              </div>
+            </div>
+          `,
+        });
+      } catch (emailErr) {
+        console.error('Welcome email failed:', emailErr);
+      }
+    }
+
     // Discord notification for new signups
     try {
       const discordUrl = process.env.DISCORD_WEBHOOK_URL;
