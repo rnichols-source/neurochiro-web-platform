@@ -15,6 +15,7 @@ function RegisterForm() {
   const billing = searchParams.get("billing");
   const region = searchParams.get("region");
 
+  const roleFromUrl = urlRole === "student" || urlRole === "patient" || urlRole === "doctor";
   const [role, setRole] = useState<Role>(claimId ? "doctor" : urlRole === "student" ? "student" : urlRole === "patient" ? "patient" : "doctor");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -112,10 +113,12 @@ function RegisterForm() {
     <div className="min-h-dvh flex items-center justify-center bg-gray-50 px-4 py-12">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
         <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">
-          {claimId ? "Claim Your Profile" : "Create your account"}
+          {claimId ? "Claim Your Profile" : roleFromUrl ? `Join as a ${role === 'doctor' ? 'Doctor' : role === 'student' ? 'Student' : 'Patient'}` : "Create your account"}
         </h1>
         {claimId ? (
           <p className="text-center text-gray-500 text-sm mb-6">Create an account to manage your NeuroChiro listing. Takes 30 seconds.</p>
+        ) : roleFromUrl ? (
+          <p className="text-center text-gray-500 text-sm mb-6">Three fields. Takes 15 seconds.</p>
         ) : (
           <p className="text-center text-gray-500 text-sm mb-6">Create your account to get started.</p>
         )}
@@ -127,8 +130,8 @@ function RegisterForm() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Role toggle — hide when claiming (always doctor) */}
-          {!claimId && (
+          {/* Role toggle — hide when claiming or when role is set from URL */}
+          {!claimId && !roleFromUrl && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">I am a...</label>
             <div className="grid grid-cols-3 gap-3">
@@ -179,35 +182,40 @@ function RegisterForm() {
           <div className="absolute -left-[9999px]" aria-hidden="true">
             <input type="text" name="website_url" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone <span className="text-gray-400">(optional)</span></label>
-            <input
-              type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              placeholder="Phone number (optional)"
-            />
-          </div>
 
-          {/* License info for doctors — skip for claim flow to reduce friction */}
-          {role === "doctor" && !claimId && (
-            <div className="grid grid-cols-2 gap-3">
+          {/* Phone + license — only show on full registration form, not streamlined flow */}
+          {!roleFromUrl && (
+            <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">License # <span className="text-gray-400">(required)</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone <span className="text-gray-400">(optional)</span></label>
                 <input
-                  type="text" required value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)}
+                  type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="DC-12345"
+                  placeholder="Phone number (optional)"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">License State</label>
-                <input
-                  type="text" required value={licenseState} onChange={(e) => setLicenseState(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="e.g. TX, CA, NSW"
-                />
-              </div>
-            </div>
+
+              {role === "doctor" && !claimId && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">License # <span className="text-gray-400">(required)</span></label>
+                    <input
+                      type="text" required value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      placeholder="DC-12345"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">License State</label>
+                    <input
+                      type="text" required value={licenseState} onChange={(e) => setLicenseState(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      placeholder="e.g. TX, CA, NSW"
+                    />
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           <button type="submit" disabled={pending}
