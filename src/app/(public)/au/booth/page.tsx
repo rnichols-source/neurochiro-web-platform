@@ -184,9 +184,10 @@ export default function BoothGuidePage() {
             <div className="space-y-3">
               {[
                 "Banners up with QR codes clearly visible",
-                "Tablet or laptop open to neurochiro.co/directory for live demos",
-                "Second device playing Dr. Ray's 60-second video on loop",
-                "QR code stickers / cards to hand out",
+                "Tablet or laptop open to neurochiro.co/au/chiroscore — let students check their score",
+                "Second tablet open to neurochiro.co/au/market-check — let doctors check their city",
+                "Device playing Dr. Ray's 60-second video on loop",
+                "QR code stickers / cards to hand out (point to neurochiro.co/au)",
                 "This page pulled up on your phone for reference",
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
@@ -205,6 +206,14 @@ export default function BoothGuidePage() {
             <div className="flex items-center justify-between">
               <span className="text-white/40">QR Landing Page</span>
               <span className="text-white">neurochiro.co/au</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-white/40">ChiroScore (students)</span>
+              <span className="text-white">neurochiro.co/au/chiroscore</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-white/40">Market Check (doctors)</span>
+              <span className="text-white">neurochiro.co/au/market-check</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-white/40">Directory</span>
