@@ -35,6 +35,19 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
 
   let role = (profile as any)?.role || 'doctor'
 
+  // 🛡️ ROLE AUTO-CORRECT: if user has a doctors record, they're a doctor
+  if (role === 'patient' || !role) {
+    const { data: doctorRecord } = await supabase
+      .from('doctors')
+      .select('id')
+      .eq('user_id', data.user.id)
+      .maybeSingle()
+    if (doctorRecord) {
+      role = 'doctor'
+      await supabase.from('profiles').update({ role: 'doctor' } as any).eq('id', data.user.id)
+    }
+  }
+
   // 🛡️ FOUNDER OVERRIDE
   if (isFounderEmail(email)) {
     role = 'founder';
