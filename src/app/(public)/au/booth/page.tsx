@@ -226,7 +226,7 @@ export default function BoothGuidePage() {
           <div className="bg-[#D66829]/10 border border-[#D66829]/20 rounded-2xl p-6 text-center">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#D66829] mb-2">Need Help?</p>
             <p className="text-white/60 text-sm">Text or WhatsApp Dr. Ray directly if anything comes up.</p>
-            <p className="text-white font-bold text-lg mt-2">+1 (864) 555-0199</p>
+            <p className="text-white font-bold text-lg mt-2">+1 (864) 593-9279</p>
           </div>
         </section>
 
