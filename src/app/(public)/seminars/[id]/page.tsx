@@ -151,9 +151,9 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
   const spotlightQuote = s.spotlight_quote as string | null;
   const spotlightHostName = s.spotlight_host_name as string | null;
   // Extract hotel booking URL and promo code from FAQ entries or direct columns
-  const hotelFaq = (faq || []).find((f: any) => f.hotel_url);
+  const hotelFaq = (faq || []).find((f: any) => f.hotel_url) as any;
   const hotelBookingUrl = hotelFaq?.hotel_url || s.hotel_booking_url || null;
-  const promoFaq = (faq || []).find((f: any) => f.promo_code);
+  const promoFaq = (faq || []).find((f: any) => f.promo_code) as any;
   const promoCode = promoFaq?.promo_code || s.promo_code || null;
   const promoDescription = promoFaq?.promo_description || s.promo_description || null;
 
