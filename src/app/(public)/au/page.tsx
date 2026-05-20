@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, MapPin, GraduationCap, Stethoscope, Users, Globe2, Zap, CheckCircle2 } from "lucide-react";
 import Footer from "@/components/landing/Footer";
+import EmailCapture from "./EmailCapture";
 
 export const metadata = {
   title: "NeuroChiro Australia | The Home for Nervous System Chiropractors",
@@ -206,6 +207,13 @@ export default function AustraliaLandingPage() {
           </blockquote>
           <p className="text-neuro-orange font-bold">Dr. Raymond Nichols</p>
           <p className="text-gray-400 text-sm">Founder, NeuroChiro</p>
+        </div>
+      </section>
+
+      {/* Email Capture */}
+      <section className="py-16 px-6">
+        <div className="max-w-lg mx-auto">
+          <EmailCapture />
         </div>
       </section>
 
