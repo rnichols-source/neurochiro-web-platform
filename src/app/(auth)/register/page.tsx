@@ -13,6 +13,7 @@ function RegisterForm() {
   const claimId = searchParams.get("claim_id");
   const urlRole = searchParams.get("role");
   const billing = searchParams.get("billing");
+  const region = searchParams.get("region");
 
   const [role, setRole] = useState<Role>(claimId ? "doctor" : urlRole === "student" ? "student" : urlRole === "patient" ? "patient" : "doctor");
   const [name, setName] = useState("");
@@ -44,6 +45,7 @@ function RegisterForm() {
     if (licenseNumber) formData.append("licenseNumber", licenseNumber);
     if (licenseState) formData.append("licenseState", licenseState);
     if (billing) formData.append("billing", billing);
+    if (region) formData.append("region", region);
 
     const result = await createAccountAction(formData, role, "basic", "monthly");
 

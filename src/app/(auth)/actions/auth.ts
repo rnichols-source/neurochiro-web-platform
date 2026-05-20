@@ -108,6 +108,7 @@ export async function createAccountAction(formData: FormData, role: string, tier
   const phone = formData.get('phone') as string
   const licenseNumber = formData.get('licenseNumber') as string || ''
   const licenseState = formData.get('licenseState') as string || ''
+  const region = formData.get('region') as string || ''
   const supabase = createServerSupabase()
 
   const { data, error } = await supabase.auth.signUp({
@@ -122,6 +123,7 @@ export async function createAccountAction(formData: FormData, role: string, tier
         phone: phone,
         license_number: licenseNumber,
         license_state: licenseState,
+        ...(region && { region_code: region }),
       }
     }
   })
