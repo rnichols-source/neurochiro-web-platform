@@ -251,7 +251,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
             )}
             {seminar.price != null && (
               <span className="text-2xl font-black text-white">
-                {seminar.price > 0 ? `${currencySymbol}{currencySymbol}{seminar.price}` : 'Free'}
+                {seminar.price > 0 ? `${currencySymbol}${seminar.price}` : 'Free'}
                 {seminar.price > 0 && <span className="text-sm font-normal text-gray-400 ml-1">per person</span>}
               </span>
             )}
@@ -907,7 +907,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
         <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white/95 backdrop-blur border-t border-gray-200 px-4 py-3 flex items-center justify-between gap-3">
           <div>
             {seminar.price != null && (
-              <p className="text-lg font-black text-neuro-navy">{seminar.price > 0 ? `${currencySymbol}{currencySymbol}{seminar.price}` : 'Free'}</p>
+              <p className="text-lg font-black text-neuro-navy">{seminar.price > 0 ? `${currencySymbol}${seminar.price}` : 'Free'}</p>
             )}
             <p className="text-[10px] text-gray-400 font-bold uppercase">per person</p>
           </div>
