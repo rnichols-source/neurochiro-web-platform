@@ -23,7 +23,7 @@ const navSections = [
     items: [
       { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
       { name: "Profile", href: "/doctor/profile", icon: User },
-      { name: "Messages", href: "/doctor/messages", icon: MessageSquare, tier: "growth" as const },
+      { name: "Messages", href: "/doctor/messages", icon: MessageSquare },
       { name: "Referral Network", href: "/doctor/referral-network", icon: Users, tier: "growth" as const },
       { name: "Notifications", href: "/doctor/notifications", icon: Bell },
     ],
