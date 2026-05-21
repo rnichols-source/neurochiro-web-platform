@@ -68,7 +68,7 @@ function ResetPasswordForm() {
     <div className="min-h-dvh bg-neuro-cream flex items-center justify-center p-6">
       <div className="max-w-md w-full">
         <h1 className="text-2xl font-heading font-black text-neuro-navy mb-2 text-center">Set Your Password</h1>
-        <p className="text-gray-500 text-center mb-8">Enter the 6-digit code from your email and choose a new password.</p>
+        <p className="text-gray-500 text-center mb-8">Enter the 8-digit code from your email and choose a new password.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -83,15 +83,15 @@ function ResetPasswordForm() {
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">6-Digit Code</label>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">8-Digit Code</label>
             <input
               type="text"
               required
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="123456"
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
+              placeholder="12345678"
               inputMode="numeric"
-              maxLength={6}
+              maxLength={8}
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-center text-2xl font-mono tracking-widest"
             />
           </div>

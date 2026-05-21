@@ -418,7 +418,7 @@ export async function sendMigrationEmails(doctorIds: string[]) {
                     <div style="width: 28px; height: 28px; background: #D66829; color: white; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 800; font-size: 14px;">4</div>
                   </td>
                   <td style="padding: 8px 0; color: #555; font-size: 15px;">
-                    Check your inbox for an email with a <strong>6-digit code</strong> from NeuroChiro
+                    Check your inbox for an email with a <strong>8-digit code</strong> from NeuroChiro
                   </td>
                 </tr>
                 <tr>
