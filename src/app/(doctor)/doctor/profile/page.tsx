@@ -242,7 +242,6 @@ export default function ProfilePage() {
             <input name="address" defaultValue={profile?.address || ''} placeholder="Street Address" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange md:col-span-2" />
             <input name="city" defaultValue={profile?.city || ''} placeholder="City" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
             <input name="state" defaultValue={profile?.state || ''} placeholder="State / Province" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
-            <input name="zip_code" defaultValue={profile?.zip_code || ''} placeholder="ZIP / Postal Code" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
             <input name="country" defaultValue={profile?.country || ''} placeholder="Country" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
           </div>
         </div>
@@ -310,10 +309,7 @@ export default function ProfilePage() {
               <label className="block text-xs font-bold text-gray-500 mb-1">Years in Practice</label>
               <input name="years_in_practice" type="number" defaultValue={profile?.years_in_practice || ''} placeholder="e.g. 12" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
             </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1">Google Place ID (for reviews)</label>
-              <input name="google_place_id" defaultValue={profile?.google_place_id || ''} placeholder="e.g. ChIJ..." className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
-            </div>
+            <div />
           </div>
           <div className="mt-4">
             <label className="block text-xs font-bold text-gray-500 mb-1">Certifications (one per line)</label>

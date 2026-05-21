@@ -18,7 +18,7 @@ export async function getDoctorProfile() {
         .maybeSingle(),
       supabase
         .from('doctors')
-        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, membership_tier, address, zip_code, google_place_id, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, years_in_practice, insurance_networks, team_members, certifications')
+        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, years_in_practice, insurance_networks, team_members, certifications')
         .eq('user_id', user.id)
         .maybeSingle()
     ])
@@ -79,8 +79,6 @@ export async function updateDoctorProfile(formData: FormData) {
 
     // Extended profile fields
     const address = formData.get('address') as string
-    const zipCode = formData.get('zip_code') as string
-    const googlePlaceId = formData.get('google_place_id') as string
     const hoursText = formData.get('hours') as string
     const highlightsRaw = formData.get('highlights') as string
     const highlights = highlightsRaw ? highlightsRaw.split('\n').map(s => s.trim()).filter(Boolean) : []
@@ -148,8 +146,6 @@ export async function updateDoctorProfile(formData: FormData) {
         instagram_url: instagramUrl || null,
         facebook_url: facebookUrl || null,
         address: address || null,
-        zip_code: zipCode || null,
-        google_place_id: googlePlaceId || null,
         hours: hoursText || null,
         highlights: highlights.length ? highlights : null,
         conditions_treated: conditionsTreated.length ? conditionsTreated : null,
