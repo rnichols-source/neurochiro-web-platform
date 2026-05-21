@@ -4,8 +4,17 @@ import { useState, useEffect } from "react";
 import { Award, Loader2, Calendar, MapPin, Download, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { getCEHistory } from "./actions";
+import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 export default function CETrackerPage() {
+  return (
+    <UpgradeGate feature="CE Tracker" requiredTier="growth" description="Track your continuing education credits — logged, verified, and exportable for license renewal.">
+      <CETrackerContent />
+    </UpgradeGate>
+  );
+}
+
+function CETrackerContent() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 

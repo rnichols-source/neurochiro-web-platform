@@ -4,8 +4,17 @@ import { useState, useEffect } from "react";
 import { Users, Loader2, ArrowUpRight, ArrowDownLeft, Send, MapPin } from "lucide-react";
 import Link from "next/link";
 import { getReferralNetwork } from "./actions";
+import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 export default function ReferralNetworkPage() {
+  return (
+    <UpgradeGate feature="Referral Network" requiredTier="growth" description="Build and track your doctor-to-doctor referral network. See who's sending you patients and strengthen those relationships.">
+      <ReferralNetworkContent />
+    </UpgradeGate>
+  );
+}
+
+function ReferralNetworkContent() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 

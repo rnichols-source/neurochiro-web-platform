@@ -4,8 +4,17 @@ import { useState, useEffect } from "react";
 import { Search, X, MapPin, GraduationCap, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { searchStudents } from "./actions";
+import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 export default function StudentsPage() {
+  return (
+    <UpgradeGate feature="Student Network" requiredTier="growth" description="Browse and connect with chiropractic students looking for mentorship, externships, and associate positions.">
+      <StudentsContent />
+    </UpgradeGate>
+  );
+}
+
+function StudentsContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

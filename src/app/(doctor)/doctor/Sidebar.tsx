@@ -39,9 +39,9 @@ const navSections = [
   {
     label: "TOOLS",
     items: [
-      { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp, tier: "pro" as const },
+      { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp, tier: "growth" as const },
       { name: "P&L Analyzer", href: "/doctor/pl-analyzer", icon: DollarSign, tier: "pro" as const },
-      { name: "Content Library", href: "/doctor/content-library", icon: Library, tier: "pro" as const },
+      { name: "Content Library", href: "/doctor/content-library", icon: Library, tier: "growth" as const },
       { name: "Billing Guide", href: "/doctor/billing-guide", icon: Receipt },
     ],
   },
