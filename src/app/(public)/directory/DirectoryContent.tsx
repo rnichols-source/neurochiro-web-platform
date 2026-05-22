@@ -279,41 +279,72 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
             <div className="bg-white rounded-2xl p-2 flex flex-col md:flex-row gap-2 shadow-2xl border border-gray-100">
               <div className="flex-1 relative">
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input 
-                  type="text" 
-                  placeholder="Doctor name, clinic, or specialty..." 
-                  className="w-full pl-14 pr-4 py-5 bg-transparent border-none focus:outline-none text-neuro-navy font-medium text-lg"
+                <input
+                  type="text"
+                  placeholder="Doctor name, clinic, condition, or specialty..."
+                  className="w-full pl-14 pr-10 py-5 bg-transparent border-none focus:outline-none text-neuro-navy font-medium text-lg"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-300 hover:text-gray-500 transition-colors">
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
               <div className="w-px h-10 bg-gray-100 self-center hidden md:block"></div>
               <div className="flex-1 relative group">
                 <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-neuro-orange" />
-                <input 
-                  type="text" 
-                  placeholder={`City, ${region.terminology.state}, or ${region.terminology.postalCode}...`} 
+                <input
+                  type="text"
+                  placeholder="City, state, or zip — e.g. Hartford, CT"
                   className="w-full pl-14 pr-16 py-5 bg-transparent border-none focus:outline-none text-neuro-navy font-medium text-lg"
                   value={locationQuery}
                   onChange={(e) => setLocationQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 />
-                <button onClick={handleUseLocation} disabled={isLocating} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-neuro-orange transition-all">
-                  <motion.div animate={isLocating ? { rotate: 360 } : { rotate: 0 }} transition={isLocating ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}>
-                    <Target className={cn("w-5 h-5", isLocating && "animate-pulse")} />
-                  </motion.div>
-                </button>
+                {locationQuery ? (
+                  <button onClick={() => setLocationQuery("")} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-300 hover:text-gray-500 transition-colors">
+                    <X className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button onClick={handleUseLocation} disabled={isLocating} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-neuro-orange transition-all" title="Use my location">
+                    <motion.div animate={isLocating ? { rotate: 360 } : { rotate: 0 }} transition={isLocating ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}>
+                      <Target className={cn("w-5 h-5", isLocating && "animate-pulse")} />
+                    </motion.div>
+                  </button>
+                )}
               </div>
-              <motion.button 
+              <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={handleSearch} 
-                className="bg-neuro-navy text-white px-10 py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-neuro-navy-light transition-all shadow-lg"
+                onClick={handleSearch}
+                disabled={loading}
+                className="bg-neuro-navy text-white px-10 py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-neuro-navy-light transition-all shadow-lg disabled:opacity-70"
               >
-                Search
+                {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : 'Search'}
               </motion.button>
             </div>
+
+            {/* Active search pills */}
+            {(searchQuery || locationQuery) && (
+              <div className="flex items-center gap-2 justify-center flex-wrap">
+                {searchQuery && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 text-white/80 text-xs font-bold rounded-full border border-white/20">
+                    <Search className="w-3 h-3" /> {searchQuery}
+                    <button onClick={() => setSearchQuery("")} className="ml-1 hover:text-white"><X className="w-3 h-3" /></button>
+                  </span>
+                )}
+                {locationQuery && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neuro-orange/20 text-neuro-orange text-xs font-bold rounded-full border border-neuro-orange/30">
+                    <MapPin className="w-3 h-3" /> {locationQuery}
+                    <button onClick={() => setLocationQuery("")} className="ml-1 hover:text-white"><X className="w-3 h-3" /></button>
+                  </span>
+                )}
+                <button onClick={handleClearSearch} className="text-white/40 hover:text-white text-[10px] font-bold uppercase tracking-widest ml-2">Clear All</button>
+              </div>
+            )}
           </div>
 
           {/* Specialty Filters */}
@@ -367,18 +398,16 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
           )}>
             <div className="flex items-center justify-between mb-2">
                <div>
-                 <h2 className="text-xl font-heading font-black text-neuro-navy">Verified Clinics ({totalCount}+ in network)</h2>
-                 <div className="flex items-center gap-2 mt-1">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Showing {filteredDoctors.length} specialists</p>
-                    {(searchQuery || locationQuery || (matchCriteria && matchCriteria.length > 0)) && (
-                      <>
-                        <span className="text-gray-300">|</span>
-                        <button onClick={handleClearSearch} className="text-[10px] font-black text-neuro-orange uppercase tracking-widest hover:underline flex items-center gap-1">
-                          <X className="w-2.5 h-2.5" /> Clear All
-                        </button>
-                      </>
-                    )}
-                 </div>
+                 <h2 className="text-xl font-heading font-black text-neuro-navy">
+                   {searchQuery || locationQuery ? `Results` : `Verified Clinics`}
+                   <span className="text-neuro-orange ml-2">({filteredDoctors.length})</span>
+                 </h2>
+                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+                   {searchQuery || locationQuery
+                     ? `${filteredDoctors.length} ${filteredDoctors.length === 1 ? 'doctor' : 'doctors'} found${locationQuery ? ` near ${locationQuery}` : ''}${searchQuery ? ` for "${searchQuery}"` : ''}`
+                     : `${totalCount}+ specialists in the network`
+                   }
+                 </p>
                </div>
             </div>
 
