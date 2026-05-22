@@ -216,7 +216,7 @@ export async function GET(request: NextRequest) {
         if (locFallback?.length) { fallbackData = locFallback; fallbackHint = `Showing all doctors near ${locationTerm}`; }
       }
 
-      // Step 2: Try just the state
+      // Step 2: Try just the state (from split or expanded query)
       if (!fallbackData.length) {
         const searchedState = splitFromQuery?.state || splitFromLocation?.state || expandQuery(rawLocation || rawQuery);
         if (searchedState) {
@@ -227,6 +227,20 @@ export async function GET(request: NextRequest) {
             .ilike('state', `%${searchedState}%`)
             .limit(20);
           if (stateFallback?.length) { fallbackData = stateFallback; fallbackHint = `Showing doctors in ${searchedState}`; }
+        }
+      }
+
+      // Step 2b: Try city name as a broad search (catches "Fort Lauderdale" → finds Florida doctors nearby)
+      if (!fallbackData.length) {
+        const cityTerm = splitFromQuery?.city || expandQuery(rawQuery || rawLocation);
+        if (cityTerm) {
+          const { data: cityFallback } = await supabase
+            .from('doctors')
+            .select(SELECT_FIELDS)
+            .in('verification_status', ['verified', 'pending'])
+            .or(`city.ilike.%${cityTerm}%,state.ilike.%${cityTerm}%,address.ilike.%${cityTerm}%`)
+            .limit(20);
+          if (cityFallback?.length) { fallbackData = cityFallback; fallbackHint = `Showing doctors near ${cityTerm}`; }
         }
       }
 
