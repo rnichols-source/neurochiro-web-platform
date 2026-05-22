@@ -195,20 +195,53 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await dbQuery.limit(limit);
 
     if (error || !data || data.length === 0) {
-      // Smart fallback
+      // Smart cascading fallback: try progressively broader searches
       let fallbackData: any[] = [];
-      const searchedState = splitFromQuery?.state || splitFromLocation?.state || expandQuery(rawLocation || rawQuery);
+      let fallbackHint = '';
 
-      if (searchedState) {
-        const { data: stateFallback } = await supabase
+      // Step 1: If both query + location were used, try just location (drop the specialty/name filter)
+      const locationTerm = rawLocation || (splitFromQuery ? `${splitFromQuery.city} ${splitFromQuery.state}` : '');
+      if (rawQuery && locationTerm) {
+        const locExpanded = expandQuery(locationTerm);
+        const locSplit = splitCityState(locationTerm);
+        let locQuery = supabase.from('doctors').select(SELECT_FIELDS).in('verification_status', ['verified', 'pending']);
+        if (locSplit) {
+          const cityExp = expandQuery(locSplit.city);
+          locQuery = locQuery.or(`city.ilike.%${cityExp}%,address.ilike.%${cityExp}%`);
+          locQuery = locQuery.ilike('state', `%${locSplit.state}%`);
+        } else {
+          locQuery = locQuery.or(`city.ilike.%${locExpanded}%,state.ilike.%${locExpanded}%,address.ilike.%${locExpanded}%`);
+        }
+        const { data: locFallback } = await locQuery.limit(20);
+        if (locFallback?.length) { fallbackData = locFallback; fallbackHint = `Showing all doctors near ${locationTerm}`; }
+      }
+
+      // Step 2: Try just the state
+      if (!fallbackData.length) {
+        const searchedState = splitFromQuery?.state || splitFromLocation?.state || expandQuery(rawLocation || rawQuery);
+        if (searchedState) {
+          const { data: stateFallback } = await supabase
+            .from('doctors')
+            .select(SELECT_FIELDS)
+            .in('verification_status', ['verified', 'pending'])
+            .ilike('state', `%${searchedState}%`)
+            .limit(20);
+          if (stateFallback?.length) { fallbackData = stateFallback; fallbackHint = `Showing doctors in ${searchedState}`; }
+        }
+      }
+
+      // Step 3: If query was a specialty, try just that specialty nationwide
+      if (!fallbackData.length && rawQuery) {
+        const { data: specFallback } = await supabase
           .from('doctors')
           .select(SELECT_FIELDS)
           .in('verification_status', ['verified', 'pending'])
-          .ilike('state', `%${searchedState}%`)
+          .or(`bio.ilike.%${rawQuery}%,clinic_name.ilike.%${rawQuery}%`)
           .limit(20);
-        if (stateFallback?.length) fallbackData = stateFallback;
+        if (specFallback?.length) { fallbackData = specFallback; fallbackHint = `Showing "${rawQuery}" doctors nationwide`; }
       }
 
+      // Step 4: Last resort — top verified doctors in region
       if (!fallbackData.length) {
         let fallbackQuery = supabase
           .from('doctors')
@@ -218,6 +251,7 @@ export async function GET(request: NextRequest) {
         if (region && region !== 'ALL') fallbackQuery = fallbackQuery.eq('region_code', region);
         const { data: regionFallback } = await fallbackQuery;
         fallbackData = regionFallback || [];
+        fallbackHint = 'Showing featured doctors';
       }
 
       // Add distance to fallback results
@@ -230,6 +264,7 @@ export async function GET(request: NextRequest) {
         isFallback: true,
         error: !!error,
         searchedFor: rawQuery || rawLocation || '',
+        fallbackHint: fallbackHint,
       });
     }
 
