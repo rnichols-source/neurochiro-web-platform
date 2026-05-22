@@ -377,12 +377,12 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
       <SmartMatchWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} onComplete={(criteria) => setMatchCriteria(criteria)} />
 
       {/* Search Header */}
-      <header className="bg-neuro-navy text-white pt-20 pb-32 px-8 relative overflow-hidden">
+      <header className="bg-neuro-navy text-white pt-20 pb-24 md:pb-32 px-4 md:px-8 relative overflow-hidden">
         <div className="max-w-7xl mx-auto relative z-10 text-center">
-          <h1 className="text-5xl md:text-6xl font-heading font-black mb-6 text-white drop-shadow-xl">
+          <h1 className="text-3xl md:text-6xl font-heading font-black mb-2 md:mb-6 text-white drop-shadow-xl">
             Find a <span className="text-neuro-orange">NeuroChiro</span> Doctor.
           </h1>
-          <p className="text-white/80 text-xl max-w-2xl mx-auto mb-12 font-medium">
+          <p className="text-white/80 text-sm md:text-xl max-w-2xl mx-auto mb-6 md:mb-12 font-medium hidden md:block">
             The global network of elite chiropractic clinics focused on the nervous system.
           </p>
           
@@ -392,8 +392,8 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Doctor name, clinic, condition, or specialty..."
-                  className="w-full pl-14 pr-10 py-5 bg-transparent border-none focus:outline-none text-neuro-navy font-medium text-lg"
+                  placeholder="Doctor, clinic, or specialty..."
+                  className="w-full pl-14 pr-10 py-3.5 md:py-5 bg-transparent border-none focus:outline-none text-neuro-navy font-medium text-base md:text-lg"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setAcFocusField('search')}
@@ -410,8 +410,8 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                 <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-neuro-orange" />
                 <input
                   type="text"
-                  placeholder="City, state, or zip — e.g. Hartford, CT"
-                  className="w-full pl-14 pr-16 py-5 bg-transparent border-none focus:outline-none text-neuro-navy font-medium text-lg"
+                  placeholder="City, state, or zip..."
+                  className="w-full pl-14 pr-16 py-3.5 md:py-5 bg-transparent border-none focus:outline-none text-neuro-navy font-medium text-base md:text-lg"
                   value={locationQuery}
                   onChange={(e) => setLocationQuery(e.target.value)}
                   onFocus={() => setAcFocusField('location')}
@@ -434,7 +434,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSearch}
                 disabled={loading}
-                className="bg-neuro-navy text-white px-10 py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-neuro-navy-light transition-all shadow-lg disabled:opacity-70"
+                className="bg-neuro-navy text-white px-8 md:px-10 py-3.5 md:py-5 rounded-[2rem] font-black uppercase tracking-widest text-xs md:text-sm hover:bg-neuro-navy-light transition-all shadow-lg disabled:opacity-70"
               >
                 {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : 'Search'}
               </motion.button>
@@ -463,7 +463,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
           {/* Autocomplete Dropdown */}
           {showAutocomplete && (
             <div className="max-w-4xl mx-auto -mt-4">
-              <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 space-y-3">
+              <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-3 md:p-4 space-y-3 max-h-[60vh] overflow-y-auto">
                 {autocomplete.cities.length > 0 && (
                   <div>
                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Locations</p>
@@ -514,7 +514,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
 
           {/* Filters Bar */}
           <div className="max-w-4xl mx-auto mt-4">
-            <div className="flex gap-2 justify-center flex-wrap items-center">
+            <div className="flex gap-2 justify-start md:justify-center flex-nowrap md:flex-wrap items-center overflow-x-auto scrollbar-hide pb-1">
               {/* Filter Toggle */}
               <button onClick={() => setShowFilters(!showFilters)}
                 className={cn("flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all border",
@@ -604,7 +604,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
       </header>
 
       {/* Main Content: Map + Grid */}
-      <main className="max-w-7xl mx-auto px-8 -mt-16 relative z-20 pb-20">
+      <main className="max-w-7xl mx-auto px-4 md:px-8 -mt-16 relative z-20 pb-24">
         <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8">
           
           {/* Map Section */}
@@ -612,7 +612,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
             "lg:col-span-7",
             mobileView === 'list' ? 'hidden lg:block' : 'block'
           )}>
-            <div className="bg-slate-200 rounded-2xl p-2 shadow-xl border border-gray-100 h-[500px] lg:h-[700px] lg:sticky lg:top-8 overflow-hidden relative group">
+            <div className="bg-slate-200 rounded-2xl p-2 shadow-xl border border-gray-100 h-[350px] md:h-[500px] lg:h-[700px] lg:sticky lg:top-8 overflow-hidden relative group">
                {showMap ? <GlobalNetworkMap key={region.code} externalSearchQuery={searchQuery} onSearchChange={setSearchQuery} externalLocationQuery={locationQuery} initialDoctors={initialData.doctors} listDoctors={filteredDoctors} /> : <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center"><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Preparing Map...</p></div>}
             </div>
           </div>
