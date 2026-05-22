@@ -2,8 +2,8 @@
 
 import dynamic from "next/dynamic";
 import NextImage from "next/image";
-import { Search, MapPin, Filter, Star, ShieldCheck, ArrowRight, Zap, Globe, Heart, Sparkles, X, Target, Calendar, RefreshCw, AlertTriangle, RotateCcw, List, Map as MapIcon } from "lucide-react";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { Search, MapPin, Filter, Star, ShieldCheck, ArrowRight, Zap, Globe, Heart, Sparkles, X, Target, Calendar, RefreshCw, AlertTriangle, RotateCcw, List, Map as MapIcon, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRegion } from "@/context/RegionContext";
 import { useSearchParams } from "next/navigation";
 import { getDoctors } from "./actions";
@@ -51,6 +51,29 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   const [mobileView, setMobileView] = useState<'map' | 'list'>('list');
   const [activeSpecialty, setActiveSpecialty] = useState<string | null>(null);
 
+  // Filters
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterNewPatients, setFilterNewPatients] = useState(false);
+  const [filterTelehealth, setFilterTelehealth] = useState(false);
+  const [filterWalkins, setFilterWalkins] = useState(false);
+  const [filterRadius, setFilterRadius] = useState(0); // 0 = no limit
+  const [sortBy, setSortBy] = useState('tier');
+  const activeFilterCount = [filterNewPatients, filterTelehealth, filterWalkins, filterRadius > 0].filter(Boolean).length + (activeSpecialty ? 1 : 0);
+
+  // Geolocation
+  const [userLat, setUserLat] = useState(0);
+  const [userLng, setUserLng] = useState(0);
+  const hasUserCoords = userLat !== 0 && userLng !== 0;
+
+  // Autocomplete
+  const [autocomplete, setAutocomplete] = useState<{cities: any[], doctors: any[], specialties: string[]}>({ cities: [], doctors: [], specialties: [] });
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [acFocusField, setAcFocusField] = useState<'search' | 'location' | null>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Infinite scroll
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
   const resetFilters = () => {
     setSearchQuery("");
     setLocationQuery("");
@@ -92,12 +115,30 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
     setLoading(true);
     const nextPage = isLoadMore ? page + 1 : 1;
     const limit = 200;
-    
+
     try {
-      // Use the new Failsafe API Route
       const searchQ = (query !== undefined ? query : searchQuery).trim();
       const locationQ = (loc !== undefined ? loc : locationQuery).trim();
-      const response = await fetch(`/api/directory/search?q=${encodeURIComponent(searchQ)}&location=${encodeURIComponent(locationQ)}&region=${region.code}&limit=${limit}&page=${nextPage}`);
+
+      const params = new URLSearchParams({
+        q: searchQ,
+        location: locationQ,
+        region: region.code,
+        limit: String(limit),
+        page: String(nextPage),
+        sort: sortBy,
+      });
+      if (hasUserCoords) {
+        params.set('lat', String(userLat));
+        params.set('lng', String(userLng));
+      }
+      if (filterRadius > 0) params.set('radius', String(filterRadius));
+      if (filterNewPatients) params.set('new_patients', 'true');
+      if (filterTelehealth) params.set('telehealth', 'true');
+      if (filterWalkins) params.set('walkins', 'true');
+      if (activeSpecialty) params.set('specialties', activeSpecialty);
+
+      const response = await fetch(`/api/directory/search?${params.toString()}`);
       const result = await response.json();
       
       if (result.error && !result.doctors?.length) {
@@ -170,6 +211,76 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
       }
     );
   };
+
+  // Autocomplete
+  useEffect(() => {
+    const q = acFocusField === 'location' ? locationQuery : searchQuery;
+    if (!q || q.length < 2 || !acFocusField) {
+      setAutocomplete({ cities: [], doctors: [], specialties: [] });
+      setShowAutocomplete(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const type = acFocusField === 'location' ? 'location' : 'all';
+        const res = await fetch(`/api/directory/autocomplete?q=${encodeURIComponent(q)}&type=${type}`);
+        const data = await res.json();
+        setAutocomplete(data);
+        setShowAutocomplete(data.cities.length > 0 || data.doctors.length > 0 || data.specialties.length > 0);
+      } catch { setShowAutocomplete(false); }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, locationQuery, acFocusField]);
+
+  // Close autocomplete on click outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setShowAutocomplete(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Auto-detect location on first visit
+  useEffect(() => {
+    if (searchParams.get('q') || searchParams.get('search') || searchParams.get('location') || lastLocation) return;
+    if (typeof window === 'undefined' || !navigator.geolocation) return;
+    const asked = localStorage.getItem('nc_geo_asked');
+    if (asked) return;
+    localStorage.setItem('nc_geo_asked', '1');
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        setUserLat(pos.coords.latitude);
+        setUserLng(pos.coords.longitude);
+        setSortBy('distance');
+        try {
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=en`);
+          const data = await res.json();
+          const city = data.city || data.locality || '';
+          if (city) { setLocationQuery(city); setLastLocation(city); }
+        } catch {}
+      },
+      () => {},
+      { timeout: 5000 }
+    );
+  }, []);
+
+  // Infinite scroll
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasMore || loading) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting && hasMore && !loading) fetchDoctors(undefined, undefined, true); },
+      { threshold: 0.1 }
+    );
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loading, page]);
+
+  // Re-fetch when filters change
+  useEffect(() => {
+    setPage(1);
+    fetchDoctors(searchQuery, locationQuery, false);
+  }, [filterNewPatients, filterTelehealth, filterWalkins, filterRadius, sortBy, activeSpecialty]);
 
   useEffect(() => {
     const search = searchParams.get("search");
@@ -275,7 +386,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
             The global network of elite chiropractic clinics focused on the nervous system.
           </p>
           
-          <div className="max-w-4xl mx-auto space-y-8 sticky top-[72px] z-30 bg-neuro-navy pt-4 pb-2 md:relative md:top-0 md:bg-transparent md:pt-0 md:pb-0">
+          <div ref={searchRef} className="max-w-4xl mx-auto space-y-8 sticky top-[72px] z-30 bg-neuro-navy pt-4 pb-2 md:relative md:top-0 md:bg-transparent md:pt-0 md:pb-0">
             <div className="bg-white rounded-2xl p-2 flex flex-col md:flex-row gap-2 shadow-2xl border border-gray-100">
               <div className="flex-1 relative">
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -285,7 +396,8 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                   className="w-full pl-14 pr-10 py-5 bg-transparent border-none focus:outline-none text-neuro-navy font-medium text-lg"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  onFocus={() => setAcFocusField('search')}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { setShowAutocomplete(false); handleSearch(); } }}
                 />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-300 hover:text-gray-500 transition-colors">
@@ -302,7 +414,8 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                   className="w-full pl-14 pr-16 py-5 bg-transparent border-none focus:outline-none text-neuro-navy font-medium text-lg"
                   value={locationQuery}
                   onChange={(e) => setLocationQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  onFocus={() => setAcFocusField('location')}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { setShowAutocomplete(false); handleSearch(); } }}
                 />
                 {locationQuery ? (
                   <button onClick={() => setLocationQuery("")} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-300 hover:text-gray-500 transition-colors">
@@ -347,32 +460,145 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
             )}
           </div>
 
-          {/* Specialty Filters */}
-          <div className="max-w-4xl mx-auto mt-6 overflow-x-auto scrollbar-hide">
-            <div className="flex gap-2 pb-2 justify-center flex-wrap">
-              {SPECIALTY_FILTERS.map((specialty) => (
-                <button
-                  key={specialty}
+          {/* Autocomplete Dropdown */}
+          {showAutocomplete && (
+            <div className="max-w-4xl mx-auto -mt-4">
+              <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 space-y-3">
+                {autocomplete.cities.length > 0 && (
+                  <div>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Locations</p>
+                    {autocomplete.cities.map((c, i) => (
+                      <button key={i} onClick={() => { setLocationQuery(c.city ? `${c.city}, ${c.state}` : c.state); setShowAutocomplete(false); handleSearch(); }}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded-lg flex items-center gap-2 transition-colors">
+                        <MapPin className="w-4 h-4 text-neuro-orange flex-shrink-0" />
+                        <span className="text-sm font-medium text-neuro-navy">{c.city ? `${c.city}, ${c.state}` : c.state}</span>
+                        <span className="text-xs text-gray-400 ml-auto">{c.count} {c.count === 1 ? 'doctor' : 'doctors'}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {autocomplete.doctors.length > 0 && (
+                  <div>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Doctors</p>
+                    {autocomplete.doctors.map((d, i) => (
+                      <Link key={i} href={`/directory/${d.slug}`} onClick={() => setShowAutocomplete(false)}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded-lg flex items-center gap-3 transition-colors">
+                        <div className="w-8 h-8 rounded-lg bg-neuro-navy overflow-hidden flex-shrink-0 flex items-center justify-center">
+                          {d.photo_url ? <img src={d.photo_url} alt="" className="w-full h-full object-cover" /> :
+                            <span className="text-white text-xs font-bold">{d.name?.[4] || '?'}</span>}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-neuro-navy">{d.name}</p>
+                          <p className="text-xs text-gray-400">{d.clinic} · {d.location}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+                {autocomplete.specialties.length > 0 && (
+                  <div>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Specialties</p>
+                    <div className="flex flex-wrap gap-2">
+                      {autocomplete.specialties.map((s, i) => (
+                        <button key={i} onClick={() => { setActiveSpecialty(s); setSearchQuery(s); setShowAutocomplete(false); }}
+                          className="px-3 py-1.5 bg-neuro-orange/10 text-neuro-orange text-xs font-bold rounded-lg border border-neuro-orange/20 hover:bg-neuro-orange/20 transition-colors">
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Filters Bar */}
+          <div className="max-w-4xl mx-auto mt-4">
+            <div className="flex gap-2 justify-center flex-wrap items-center">
+              {/* Filter Toggle */}
+              <button onClick={() => setShowFilters(!showFilters)}
+                className={cn("flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all border",
+                  showFilters || activeFilterCount > 0
+                    ? "bg-neuro-orange text-white border-neuro-orange"
+                    : "bg-white/10 text-white/70 border-white/20 hover:bg-white/20")}>
+                <SlidersHorizontal className="w-3.5 h-3.5" /> Filters
+                {activeFilterCount > 0 && <span className="w-5 h-5 bg-white text-neuro-orange rounded-full flex items-center justify-center text-[10px] font-black">{activeFilterCount}</span>}
+              </button>
+
+              {/* Quick Specialty Filters */}
+              {SPECIALTY_FILTERS.slice(0, 8).map((specialty) => (
+                <button key={specialty}
                   onClick={() => {
-                    if (activeSpecialty === specialty) {
-                      setActiveSpecialty(null);
-                      setSearchQuery("");
-                    } else {
-                      setActiveSpecialty(specialty);
-                      setSearchQuery(specialty);
-                    }
+                    if (activeSpecialty === specialty) { setActiveSpecialty(null); setSearchQuery(""); }
+                    else { setActiveSpecialty(specialty); setSearchQuery(specialty); }
                   }}
-                  className={cn(
-                    "px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border",
+                  className={cn("px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border",
                     activeSpecialty === specialty
                       ? "bg-neuro-orange text-white border-neuro-orange"
-                      : "bg-white/10 text-white/70 border-white/20 hover:bg-white/20 hover:text-white"
-                  )}
-                >
+                      : "bg-white/10 text-white/70 border-white/20 hover:bg-white/20 hover:text-white")}>
                   {specialty}
                 </button>
               ))}
             </div>
+
+            {/* Expanded Filter Panel */}
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-5 mt-3 border border-white/10">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {/* Toggles */}
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={filterNewPatients} onChange={(e) => setFilterNewPatients(e.target.checked)} className="w-4 h-4 accent-neuro-orange rounded" />
+                        <span className="text-white text-xs font-bold">Accepting New Patients</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={filterTelehealth} onChange={(e) => setFilterTelehealth(e.target.checked)} className="w-4 h-4 accent-neuro-orange rounded" />
+                        <span className="text-white text-xs font-bold">Telehealth Available</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={filterWalkins} onChange={(e) => setFilterWalkins(e.target.checked)} className="w-4 h-4 accent-neuro-orange rounded" />
+                        <span className="text-white text-xs font-bold">Walk-Ins Welcome</span>
+                      </label>
+
+                      {/* Radius */}
+                      <div>
+                        <span className="text-white text-xs font-bold block mb-1">Distance: {filterRadius > 0 ? `${filterRadius} mi` : 'Any'}</span>
+                        <select value={filterRadius} onChange={(e) => setFilterRadius(parseInt(e.target.value))}
+                          className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-xs font-bold focus:outline-none">
+                          <option value="0" className="text-black">Any distance</option>
+                          <option value="5" className="text-black">Within 5 miles</option>
+                          <option value="10" className="text-black">Within 10 miles</option>
+                          <option value="25" className="text-black">Within 25 miles</option>
+                          <option value="50" className="text-black">Within 50 miles</option>
+                          <option value="100" className="text-black">Within 100 miles</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Sort */}
+                    <div className="flex items-center gap-4 mt-4 pt-4 border-t border-white/10">
+                      <span className="text-white/50 text-xs font-bold">Sort by:</span>
+                      {[
+                        { value: 'tier', label: 'Featured' },
+                        { value: 'distance', label: 'Nearest' },
+                        { value: 'name', label: 'Name A-Z' },
+                      ].map(opt => (
+                        <button key={opt.value} onClick={() => setSortBy(opt.value)}
+                          className={cn("px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
+                            sortBy === opt.value ? "bg-neuro-orange text-white" : "text-white/60 hover:text-white")}>
+                          {opt.label}
+                        </button>
+                      ))}
+                      {activeFilterCount > 0 && (
+                        <button onClick={() => { setFilterNewPatients(false); setFilterTelehealth(false); setFilterWalkins(false); setFilterRadius(0); setActiveSpecialty(null); setSortBy('tier'); }}
+                          className="text-xs text-white/40 hover:text-white font-bold ml-auto">Clear All Filters</button>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </header>
@@ -438,6 +664,8 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                 {filteredDoctors.map((doc, i) => (
                   <DoctorCard key={`${doc.id}-${i}`} doc={doc} index={i} />
                 ))}
+                {/* Infinite scroll trigger */}
+                {hasMore && <div ref={loadMoreRef} className="py-4 flex justify-center">{loading && <RefreshCw className="w-5 h-5 text-neuro-orange animate-spin" />}</div>}
               </>
             ) : (
               <div className="space-y-6">
