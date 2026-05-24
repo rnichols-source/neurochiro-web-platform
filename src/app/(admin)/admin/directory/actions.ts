@@ -570,3 +570,4 @@ export async function deleteDoctorManually(doctorId: string) {
     return { success: false, error: `Critical Exception: ${err.message || "Unknown error"}` };
   }
 }
+

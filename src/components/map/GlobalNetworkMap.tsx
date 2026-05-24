@@ -4,12 +4,11 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRegion } from "@/context/RegionContext";
-import Supercluster from "supercluster";
-import { 
-  Search, 
-  MapPin, 
-  GraduationCap, 
-  CalendarDays, 
+import {
+  Search,
+  MapPin,
+  GraduationCap,
+  CalendarDays,
   Filter,
   X,
   ArrowRight,
@@ -19,6 +18,7 @@ import {
 import { getDoctors, getStudentsForMap } from "@/app/(public)/directory/actions";
 import { getSeminarsForMap } from "@/app/(public)/seminars/actions";
 import { Doctor } from "@/types/directory";
+
 interface GlobalNetworkMapProps {
   defaultLayer?: "all" | "student" | "seminar";
   externalSearchQuery?: string;
@@ -28,7 +28,7 @@ interface GlobalNetworkMapProps {
   listDoctors?: Doctor[];
 }
 
-export default function GlobalNetworkMap({ 
+export default function GlobalNetworkMap({
   defaultLayer = "all",
   externalSearchQuery = "",
   onSearchChange,
@@ -45,11 +45,8 @@ export default function GlobalNetworkMap({
   const searchQuery = externalSearchQuery || internalSearchQuery;
 
   const handleSearchChange = (val: string) => {
-    if (onSearchChange) {
-      onSearchChange(val);
-    } else {
-      setInternalSearchQuery(val);
-    }
+    if (onSearchChange) onSearchChange(val);
+    else setInternalSearchQuery(val);
   };
 
   const [doctors, setDoctors] = useState<Doctor[]>(initialDoctors);
@@ -61,127 +58,31 @@ export default function GlobalNetworkMap({
   // Handle location centering
   useEffect(() => {
     if (!externalLocationQuery || !iframeRef.current?.contentWindow) return;
-
-    // Simple geocoding fallback (MapBox/Google would be better, but we can try bigdatacloud or similar)
     const geocode = async () => {
-        try {
-            // Using a free geocoding service for the demo/prototype
-            const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?localityName=${encodeURIComponent(externalLocationQuery)}&localityLanguage=en`);
-            // Actually BigDataCloud reverse geocode doesn't do forward geocode well.
-            // Let's use OpenStreetMap Nominatim
-            const osmResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(externalLocationQuery)}&limit=1`);
-            const data = await osmResponse.json();
-
-            if (data && data.length > 0) {
-                const { lat, lon } = data[0];
-                iframeRef.current?.contentWindow?.postMessage({
-                    type: 'set-view',
-                    center: [Number(lon), Number(lat)],
-                    zoom: 12
-                }, '*');
-            }
-        } catch (e) {
-            console.error("Geocoding error:", e);
+      try {
+        const osmResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(externalLocationQuery)}&limit=1`);
+        const data = await osmResponse.json();
+        if (data && data.length > 0) {
+          iframeRef.current?.contentWindow?.postMessage({
+            type: 'set-view',
+            center: [Number(data[0].lon), Number(data[0].lat)],
+            zoom: 12
+          }, '*');
         }
+      } catch (e) {
+        console.error("Geocoding error:", e);
+      }
     };
-
-    const timeout = setTimeout(geocode, 1000); // Debounce
+    const timeout = setTimeout(geocode, 1000);
     return () => clearTimeout(timeout);
   }, [externalLocationQuery]);
 
   const currentBounds = useRef<[number, number, number, number] | null>(null);
   const currentZoom = useRef<number>(4);
 
-  // Initialize Supercluster
-  const index = useMemo(() => {
-    const cluster = new Supercluster({
-      radius: 60,
-      maxZoom: 16
-    });
-
-    let points: any[] = [];
-
-    if (activeLayer === 'seminar') {
-      points = seminars
-        .filter(sem => sem.latitude !== 0 && sem.longitude !== 0)
-        .map(sem => ({
-          type: 'Feature' as const,
-          properties: { 
-            cluster: false, 
-            seminarId: sem.id,
-            name: sem.title,
-            city: sem.city,
-            instructor: sem.instructor_name,
-            dates: sem.dates,
-            type: 'seminar'
-          },
-          geometry: {
-            type: 'Point' as const,
-            coordinates: [Number(sem.longitude), Number(sem.latitude)]
-          }
-        }));
-    } else if (activeLayer === 'student') {
-      points = students
-        .filter(st => st.latitude && st.longitude)
-        .map(st => ({
-          type: 'Feature' as const,
-          properties: {
-            cluster: false,
-            studentId: st.id,
-            name: st.full_name,
-            school: st.school,
-            graduationYear: st.graduation_year,
-            city: st.location_city,
-            type: 'student'
-          },
-          geometry: {
-            type: 'Point' as const,
-            coordinates: [st.longitude, st.latitude]
-          }
-        }));
-    } else {
-      // 🤝 FINAL DATA HANDSHAKE: Use real coordinates from initialDoctors
-      const sourceDoctors = initialDoctors;
-      
-      points = sourceDoctors
-        .map(doc => {
-          // 🛡️ Standardize coordinates: Strictly use latitude/longitude from Doctor interface
-          const lat = parseFloat(doc.latitude as any);
-          const lng = parseFloat(doc.longitude as any);
-
-          if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
-            return null;
-          }
-
-          return {
-            type: 'Feature' as const,
-            properties: { 
-              cluster: false, 
-              doctorId: doc.id,
-              name: doc.last_name?.startsWith('Dr.') ? doc.last_name : `Dr. ${doc.first_name || ''} ${doc.last_name || ''}`.trim().replace(/\s+/g, ' '),
-              clinic: doc.clinic_name,
-              slug: doc.slug,
-              type: 'doctor'
-            },
-            geometry: {
-              type: 'Point' as const,
-              coordinates: [lng, lat]
-            }
-          };
-        })
-        .filter((p): p is NonNullable<typeof p> => p !== null);
-    }
-
-    cluster.load(points as Supercluster.PointFeature<Supercluster.AnyProps>[]);
-    return cluster;
-  }, [doctors, seminars, students, activeLayer, searchQuery, initialDoctors, region.mapDefaults.center]);
-
   const updateMapData = useCallback(async (bounds: [number, number, number, number], zoom: number) => {
     currentBounds.current = bounds;
     currentZoom.current = zoom;
-    
-    // 🛡️ SYNC FIX: If we are in the directory view (which uses initialDoctors), 
-    // don't re-fetch data from the map bounds to prevent list/map mismatch.
     if (initialDoctors.length > 0 && activeLayer === 'all') return;
 
     setLoading(true);
@@ -205,7 +106,6 @@ export default function GlobalNetworkMap({
 
   const [mapReady, setMapReady] = useState(false);
 
-  // 🛡️ RACE CONDITION FIX: Continually ping map until it reports ready
   useEffect(() => {
     if (mapReady) return;
     const interval = setInterval(() => {
@@ -214,54 +114,38 @@ export default function GlobalNetworkMap({
     return () => clearInterval(interval);
   }, [mapReady]);
 
-  // 🛡️ SYNC COUNTER: Reflect exact list count
   const verifiedCountTotal = initialDoctors.length || 122;
   const filteredCount = listDoctors.length > 0 ? listDoctors.length : verifiedCountTotal;
 
-  // Initial map centering and data fetch
+  // Center on results
   useEffect(() => {
     if (mapReady && iframeRef.current?.contentWindow) {
-      // 🎯 CENTER ON RESULTS: If we have filtered list doctors, center on those
       let center = region.mapDefaults.center;
       let zoom = region.mapDefaults.zoom;
-
       const focusDoctors = listDoctors.length > 0 ? listDoctors : initialDoctors;
-
       if (focusDoctors.length > 0) {
         const firstDoc = focusDoctors.find(d => parseFloat(d.latitude as any) && parseFloat(d.longitude as any));
         if (firstDoc) {
           center = [parseFloat(firstDoc.longitude as any), parseFloat(firstDoc.latitude as any)];
-          zoom = focusDoctors.length < 5 ? 10 : 6; // Zoom in more if fewer results
+          zoom = focusDoctors.length < 5 ? 10 : 6;
         }
       }
-
-      iframeRef.current.contentWindow.postMessage({
-        type: 'set-view',
-        center: center,
-        zoom: zoom
-      }, '*');
-
-      // If we haven't received bounds yet, do an initial wide fetch
+      iframeRef.current.contentWindow.postMessage({ type: 'set-view', center, zoom }, '*');
       if (!currentBounds.current) {
         updateMapData(undefined as any, region.mapDefaults.zoom);
       }
     }
   }, [mapReady, region.code, listDoctors, initialDoctors]);
 
-  // Build marker data from initialDoctors
+  // Build marker data
   const buildMarkerData = useCallback(() => {
     return (initialDoctors || []).map(doc => {
       const lat = Number(doc.latitude);
       const lng = Number(doc.longitude);
-
       if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
-
       return {
         type: 'Feature' as const,
-        geometry: {
-          type: 'Point' as const,
-          coordinates: [lng, lat]
-        },
+        geometry: { type: 'Point' as const, coordinates: [lng, lat] },
         properties: {
           cluster: false,
           doctorId: doc.id,
@@ -279,82 +163,55 @@ export default function GlobalNetworkMap({
     }).filter((f): f is NonNullable<typeof f> => f !== null);
   }, [initialDoctors, listDoctors, externalSearchQuery, externalLocationQuery]);
 
-  // Re-sync markers when data, layer, or map state changes
-  // Uses retry to handle iframe not being ready on first attempt
+  // Sync markers to iframe
   useEffect(() => {
     if (!iframeRef.current?.contentWindow) return;
-
     const sendMarkers = () => {
       const dataToSend = buildMarkerData();
       if (dataToSend.length === 0) return;
-
       iframeRef.current?.contentWindow?.postMessage({
         type: 'force-raw-markers',
         data: dataToSend,
         layer: activeLayer
       }, '*');
     };
-
-    // Send immediately, then retry a few times to handle iframe race condition
-    if (mapReady) {
-      sendMarkers();
-    }
+    if (mapReady) sendMarkers();
     const t1 = setTimeout(sendMarkers, 1500);
     const t2 = setTimeout(sendMarkers, 3500);
-    const t3 = setTimeout(sendMarkers, 6000);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [initialDoctors, listDoctors, mapReady, activeLayer, buildMarkerData]);
 
   // Handle iframe messages
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
-      // 🛡️ HANDSHAKE: Catch initialization from iframe
       if (e.data.type === 'MAP_INITIALIZED' || e.data.type === 'map-ready') {
         setMapReady(true);
       } else if (e.data.type === 'map-move') {
-        // 🤝 HANDSHAKE: Update refs and trigger refresh
         currentBounds.current = e.data.bounds;
         currentZoom.current = e.data.zoom;
         updateMapData(e.data.bounds, e.data.zoom);
       } else if (e.data.type === 'marker-click') {
         setSelectedPin(e.data.data);
-      } else if (e.data.type === 'map-error') {
-        console.error("Map Iframe Error:", e.data.error);
       }
     };
-
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [updateMapData]);
 
-  // 🛡️ Sync State: Ensure doctors state reflects initialDoctors when they arrive
   useEffect(() => {
-    if (initialDoctors && initialDoctors.length > 0) {
-      setDoctors(initialDoctors);
-    }
+    if (initialDoctors && initialDoctors.length > 0) setDoctors(initialDoctors);
   }, [initialDoctors]);
 
-  const activeCount = activeLayer === 'seminar' ? seminars.length : 
-                      activeLayer === 'student' ? students.length : 
-                      filteredCount;
-
-  const activeLabel = activeLayer === 'seminar' ? "Active Seminars" : 
-                      activeLayer === 'student' ? "Clinical Students" : 
-                      "Verified Clinics";
-
   return (
-    <div className="relative w-full h-full bg-[#0B1118] overflow-hidden rounded-2xl">
+    <div className="relative w-full h-full overflow-hidden rounded-xl">
       {loading && (
-        <div className="absolute inset-0 z-50 bg-neuro-navy/40 backdrop-blur-sm flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-10 h-10 text-neuro-orange animate-spin" />
-            <p className="text-white font-black uppercase tracking-widest text-xs">Syncing Global Nodes...</p>
-          </div>
+        <div className="absolute inset-0 z-50 bg-white/40 backdrop-blur-sm flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-neuro-orange animate-spin" />
         </div>
       )}
 
-      {/* 1. STANDALONE MAP ENGINE */}
-      <iframe 
+      {/* Map iframe */}
+      <iframe
         ref={iframeRef}
         id="network-map-iframe"
         src={`/network-map.html${initialDoctors.length > 0 ? '?autoload=doctors' : ''}`}
@@ -363,145 +220,74 @@ export default function GlobalNetworkMap({
         title="Global Network Map"
       />
 
-      {/* 2. FLOATING COMMAND PALETTE */}
-      <div className="absolute top-8 left-8 right-8 md:right-auto md:w-96 z-10 space-y-4">
-        <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-2 rounded-2xl shadow-2xl flex items-center gap-2">
-          <Search className="w-5 h-5 text-gray-400 ml-2" />
-          <input 
-            type="text" 
-            placeholder="Search within map..." 
-            className="bg-transparent border-none focus:outline-none text-white w-full placeholder:text-gray-400 text-sm"
-            value={searchQuery}
-            onChange={(e) => handleSearchChange(e.target.value)}
-          />
-          <button className="p-2 bg-white/10 rounded-xl hover:bg-white/20 transition-colors">
-            <Filter className="w-4 h-4 text-white" />
-          </button>
-        </div>
-
-        {/* 🛡️ COUNTER: Reflect exact list count */}
-        <motion.div 
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="inline-flex items-center gap-2 bg-neuro-orange px-4 py-2 rounded-xl shadow-lg border border-white/20"
-        >
-          <span className="text-[10px] font-black text-white uppercase tracking-widest">
-            {listDoctors.length > 0 ? `${listDoctors.length} results / ` : ''}
-            {verifiedCountTotal} {activeLabel}
-          </span>
-          <div className="w-1 h-1 rounded-full bg-white/50"></div>
-          <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest">Global Network</span>
-        </motion.div>
-      </div>
-
-      {/* 3. LAYER TOGGLES */}
-      <div className="absolute bottom-12 right-8 z-10 flex flex-col gap-3">
+      {/* Layer toggles — desktop only */}
+      <div className="absolute bottom-6 right-6 z-10 hidden lg:flex flex-col gap-2">
         {[
-          { id: "all", label: "Global Network", icon: MapPin, color: "text-neuro-orange hover:bg-neuro-orange hover:text-white" },
-          { id: "student", label: "Student Layer", icon: GraduationCap, color: "text-blue-500 hover:bg-blue-500 hover:text-white" },
-          { id: "seminar", label: "Seminars", icon: CalendarDays, color: "text-purple-500 hover:bg-purple-500 hover:text-white" }
+          { id: "all", label: "Doctors", icon: MapPin, bg: "bg-neuro-orange" },
+          { id: "student", label: "Students", icon: GraduationCap, bg: "bg-blue-500" },
+          { id: "seminar", label: "Seminars", icon: CalendarDays, bg: "bg-purple-500" }
         ].map(layer => (
-          <motion.button 
+          <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             key={layer.id}
-            onClick={() => setActiveLayer(layer.id as "all" | "student" | "seminar")}
-            className="flex items-center justify-end gap-3 group"
+            onClick={() => setActiveLayer(layer.id as any)}
+            className="flex items-center justify-end gap-2 group"
           >
-            <span className="text-xs font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md bg-black/50 px-2 py-1 rounded-md backdrop-blur-sm">
+            <span className="text-[10px] font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 px-2 py-1 rounded-md shadow-sm">
               {layer.label}
             </span>
-            <div className={`w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-xl transition-all ${activeLayer === layer.id ? layer.color.split(' ')[1] + ' text-white border-transparent' : layer.color}`}>
-              <layer.icon className="w-5 h-5" />
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all border-2 border-white ${activeLayer === layer.id ? layer.bg + ' text-white' : 'bg-white text-gray-400'}`}>
+              <layer.icon className="w-4 h-4" />
             </div>
           </motion.button>
         ))}
       </div>
 
-      {/* 4. SLIDE-OUT PANEL */}
+      {/* Selected pin slide-out — desktop only */}
       <AnimatePresence>
         {selectedPin && (
-          <motion.div 
+          <motion.div
             initial={{ x: "100%", opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="absolute top-0 right-0 w-full md:w-[400px] h-full bg-[#131B24]/95 backdrop-blur-2xl border-l border-white/10 z-20 shadow-2xl flex flex-col"
+            className="absolute top-0 right-0 w-[360px] h-full bg-white/95 backdrop-blur-xl border-l border-gray-200 z-20 shadow-2xl flex flex-col hidden lg:flex"
           >
             <div className="p-6 flex-1 overflow-y-auto">
-              <div className="flex justify-end mb-6">
-                <button onClick={() => setSelectedPin(null)} className="p-2 bg-white/5 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors">
-                  <X className="w-5 h-5" />
+              <div className="flex justify-end mb-4">
+                <button onClick={() => setSelectedPin(null)} className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500 transition-colors">
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="w-full h-48 bg-white/5 rounded-3xl mb-6 relative overflow-hidden border border-white/5">
-                <div className="absolute inset-0 bg-gradient-to-t from-[#131B24] to-transparent z-10"></div>
+              <div className="w-16 h-16 bg-neuro-orange rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-lg mb-4">
+                {(selectedPin.name || "NC").replace(/^Dr\.\s*/i, '').split(' ').filter(Boolean).map((n: string) => n[0]).join('').substring(0, 2)}
               </div>
 
-              <div className="relative z-20 -mt-16 mb-4 flex items-end gap-4">
-                <div className="w-20 h-20 bg-neuro-orange rounded-2xl border-4 border-[#131B24] flex items-center justify-center text-white text-2xl font-black shadow-xl">
-                  {(selectedPin.name || "N C").replace(/^Dr\.\s*/i, '').split(' ').filter(Boolean).map((n: string) => n[0]).join('').substring(0, 2) || "NC"}
-                </div>
-                <div className="flex items-center gap-1 text-[10px] font-black text-neuro-orange uppercase tracking-widest bg-neuro-orange/10 px-2 py-1 rounded-lg border border-neuro-orange/20 mb-2">
-                  <ShieldCheck className="w-3 h-3" /> Verified
-                </div>
+              <div className="flex items-center gap-1 text-[10px] font-bold text-neuro-orange uppercase tracking-widest mb-2">
+                <ShieldCheck className="w-3 h-3" /> Verified
               </div>
 
-              <h2 className="text-2xl font-heading font-black text-white">{selectedPin.name}</h2>
-              <p className="text-gray-400 font-medium">
-                {selectedPin.type === 'seminar' ? selectedPin.city : 
-                 selectedPin.type === 'student' ? selectedPin.school : 
-                 selectedPin.clinic}
+              <h2 className="text-xl font-black text-neuro-navy">{selectedPin.name}</h2>
+              <p className="text-gray-500 font-medium text-sm">{selectedPin.clinic}</p>
+
+              <div className="flex items-center gap-2 text-sm text-gray-400 mt-2 mb-6">
+                <MapPin className="w-4 h-4" />
+                {[selectedPin.city, selectedPin.state].filter(Boolean).join(', ') || 'Location available on profile'}
+              </div>
+
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Expert in nervous-system-first chiropractic care. View the full profile to see techniques, reviews, and clinic hours.
               </p>
-              
-              <div className="flex items-center gap-2 text-sm text-gray-500 mt-2 mb-8">
-                {selectedPin.type === 'seminar' ? (
-                  <>
-                    <CalendarDays className="w-4 h-4 text-neuro-orange" />
-                    {selectedPin.dates}
-                  </>
-                ) : selectedPin.type === 'student' ? (
-                  <>
-                    <GraduationCap className="w-4 h-4 text-blue-500" />
-                    Class of {selectedPin.graduationYear}
-                  </>
-                ) : (
-                  <>
-                    <MapPin className="w-4 h-4" />
-                    Global Node Active
-                  </>
-                )}
-              </div>
-
-              <div className="space-y-6 text-gray-300 text-sm leading-relaxed">
-                {selectedPin.type === 'seminar' ? (
-                  <p>Instructor: <span className="text-white font-bold">{selectedPin.instructor || 'NeuroChiro Faculty'}</span></p>
-                ) : selectedPin.type === 'student' ? (
-                  "Verified student member of the NeuroChiro network, preparing for clinical excellence in nervous-system-first care."
-                ) : (
-                  "Expert in nervous-system-first chiropractic care. View the full clinical profile to see techniques, patient reviews, and clinic hours."
-                )}
-              </div>
             </div>
 
-            <div className="p-6 border-t border-white/10 bg-[#131B24]">
-              <button 
-                onClick={() => {
-                  if (selectedPin.type === 'seminar') {
-                    router.push(`/seminars/${selectedPin.seminarId}`);
-                  } else if (selectedPin.type === 'student') {
-                    // Placeholder for student profile route, or just close for now
-                    // router.push(`/student/${selectedPin.studentId}`);
-                  } else {
-                    router.push(`/directory/${selectedPin.slug || selectedPin.doctorId}`);
-                  }
-                }}
-                className="w-full py-4 bg-neuro-orange hover:bg-neuro-orange-light text-white font-black uppercase tracking-widest text-sm rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-neuro-orange/20"
+            <div className="p-6 border-t border-gray-100">
+              <button
+                onClick={() => router.push(`/directory/${selectedPin.slug || selectedPin.doctorId}`)}
+                className="w-full py-4 bg-neuro-orange hover:bg-neuro-orange/90 text-white font-black uppercase tracking-widest text-xs rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg"
               >
-                {selectedPin.type === 'seminar' ? 'View Event Details' : 
-                 selectedPin.type === 'student' ? 'View Student Profile' : 
-                 'View Full Profile'} <ArrowRight className="w-4 h-4" />
+                View Full Profile <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </motion.div>

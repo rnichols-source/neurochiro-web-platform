@@ -4,112 +4,371 @@
     <meta charset="utf-8">
     <title>NeuroChiro Network Map</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
     <style>
-        body { margin: 0; padding: 0; background: #0B1118; overflow: hidden; }
-        #map { position: absolute; top: 0; bottom: 0; width: 100%; height: 100%; background: #0B1118; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; height: 100%; }
 
-        @keyframes pulse-animation {
-            0% { stroke-width: 2; stroke-opacity: 1; }
-            50% { stroke-width: 15; stroke-opacity: 0; }
-            100% { stroke-width: 2; stroke-opacity: 1; }
+        /* Apple Maps style popups */
+        .maplibregl-popup { max-width: 280px !important; }
+        .maplibregl-popup-content {
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .maplibregl-popup-close-button {
+            font-size: 20px;
+            color: #999;
+            right: 8px;
+            top: 8px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.05);
+        }
+        .maplibregl-popup-close-button:hover { background: rgba(0,0,0,0.1); }
+        .maplibregl-popup-tip { border-top-color: rgba(255,255,255,0.98) !important; }
+
+        .popup-card { padding: 16px; }
+        .popup-card .doctor-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1E2D3B;
+            margin-bottom: 2px;
+            letter-spacing: -0.3px;
+        }
+        .popup-card .clinic-name {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .popup-card .location {
+            font-size: 12px;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        .popup-card .location svg { flex-shrink: 0; }
+        .popup-card .view-btn {
+            display: block;
+            width: 100%;
+            padding: 10px 16px;
+            background: #D66829;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            letter-spacing: 0.3px;
+            transition: background 0.2s;
+        }
+        .popup-card .view-btn:hover { background: #c05a22; }
+
+        /* Hide default controls, we'll position our own */
+        .maplibregl-ctrl-bottom-left,
+        .maplibregl-ctrl-bottom-right { display: none !important; }
+
+        /* Zoom controls */
+        .maplibregl-ctrl-group {
+            background: rgba(255,255,255,0.95) !important;
+            backdrop-filter: blur(12px) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1) !important;
+            border: 1px solid rgba(0,0,0,0.06) !important;
+            overflow: hidden !important;
+        }
+        .maplibregl-ctrl-group button {
+            width: 40px !important;
+            height: 40px !important;
+        }
+        .maplibregl-ctrl-group button + button {
+            border-top: 1px solid rgba(0,0,0,0.08) !important;
         }
 
-        .active-specialist-marker {
-            animation: pulse-animation 2s infinite;
+        /* Pulse animation for markers */
+        @keyframes marker-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(214, 104, 41, 0.5); }
+            70% { box-shadow: 0 0 0 12px rgba(214, 104, 41, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(214, 104, 41, 0); }
+        }
+        .marker-dot {
+            width: 14px;
+            height: 14px;
+            background: #D66829;
+            border: 2.5px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .marker-dot:hover {
+            transform: scale(1.4);
+        }
+        .marker-dot.active {
+            animation: marker-pulse 2s infinite;
+            background: #D66829;
+        }
+        .marker-dot.dimmed {
+            background: #bbb;
+            border-color: #eee;
+            opacity: 0.5;
+            width: 10px;
+            height: 10px;
         }
 
-        .leaflet-control-attribution { display: none !important; }
+        /* Cluster markers */
+        .cluster-marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #D66829;
+            color: white;
+            font-weight: 800;
+            font-size: 13px;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(214, 104, 41, 0.35);
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .cluster-marker:hover {
+            transform: scale(1.15);
+        }
     </style>
 </head>
 <body>
 <div id="map"></div>
 <script>
-    var map;
-    var markerLayer;
+(function() {
+    var markers = [];
+    var activePopup = null;
 
-    map = L.map('map', {
-        zoomControl: false,
-        attributionControl: false,
-        preferCanvas: false
-    }).setView([20, 0], 2);
+    var map = new maplibregl.Map({
+        container: 'map',
+        style: {
+            version: 8,
+            sources: {
+                'carto-light': {
+                    type: 'raster',
+                    tiles: [
+                        'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                        'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                        'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png'
+                    ],
+                    tileSize: 256,
+                    attribution: ''
+                }
+            },
+            layers: [{
+                id: 'carto-light-layer',
+                type: 'raster',
+                source: 'carto-light',
+                minzoom: 0,
+                maxzoom: 20
+            }],
+            glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf'
+        },
+        center: [-98, 38],
+        zoom: 4,
+        pitch: 0,
+        bearing: 0,
+        maxPitch: 60,
+        dragRotate: true,
+        touchPitch: true,
+        attributionControl: false
+    });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd',
-        maxZoom: 20
-    }).addTo(map);
+    // Add zoom controls top-right
+    map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
 
-    window.markerLayer = L.featureGroup().addTo(map);
+    // Add geolocation
+    map.addControl(new maplibregl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: false,
+        showUserHeading: false
+    }), 'top-right');
 
-    function reportReady() {
-        window.parent.postMessage({ type: 'map-ready' }, '*');
+    function clearMarkers() {
+        markers.forEach(function(m) { m.remove(); });
+        markers = [];
+        if (activePopup) { activePopup.remove(); activePopup = null; }
+    }
+
+    function createPopupHtml(props) {
+        var name = props.name || 'Specialist';
+        var clinic = props.clinic || '';
+        var city = props.city || '';
+        var state = props.state || '';
+        var location = [city, state].filter(Boolean).join(', ');
+        var slug = props.slug;
+
+        var html = '<div class="popup-card">';
+        html += '<div class="doctor-name">' + name + '</div>';
+        if (clinic) html += '<div class="clinic-name">' + clinic + '</div>';
+        if (location) {
+            html += '<div class="location"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D66829" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + location + '</div>';
+        }
+        if (slug) {
+            html += '<a class="view-btn" href="/directory/' + slug + '" target="_top">View Profile</a>';
+        }
+        html += '</div>';
+        return html;
+    }
+
+    function getClusterSize(count) {
+        if (count < 10) return 36;
+        if (count < 50) return 44;
+        if (count < 100) return 52;
+        return 60;
     }
 
     function renderMarkers(features) {
-        window.markerLayer.clearLayers();
-        var activeMarkers = [];
-        var hasAnyFiltered = features.some(function(f) { return f.properties && f.properties.isFiltered; });
+        clearMarkers();
 
-        features.forEach(function(feat) {
-            if (!feat.geometry || !feat.geometry.coordinates) return;
-            var lng = feat.geometry.coordinates[0];
-            var lat = feat.geometry.coordinates[1];
-            var isActive = hasAnyFiltered ? feat.properties.isFiltered : true;
+        var hasFiltered = features.some(function(f) { return f.properties && f.properties.isFiltered === true; });
+        var hasAnyFiltered = features.some(function(f) { return f.properties && f.properties.isFiltered !== undefined; });
 
-            if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-                var marker = L.circleMarker([lat, lng], {
-                    radius: isActive ? 8 : 4,
-                    fillColor: isActive ? "#ff5722" : "#666",
-                    color: isActive ? "#fff" : "#999",
-                    weight: isActive ? 2 : 1,
-                    opacity: 1,
-                    fillOpacity: isActive ? 0.9 : 0.4,
-                    className: isActive ? 'active-specialist-marker' : ''
-                }).addTo(window.markerLayer);
+        // Simple client-side clustering
+        var zoom = map.getZoom();
+        var clusterRadius = 50;
+        var clustered = [];
+        var used = new Set();
 
-                var slug = feat.properties.slug;
-                var name = feat.properties.name || "Specialist";
-                var clinic = feat.properties.clinic || "";
-                var city = feat.properties.city || "";
-                var state = feat.properties.state || "";
-                var locationStr = [city, state].filter(Boolean).join(", ");
+        if (zoom < 10 && features.length > 30) {
+            // Cluster
+            features.forEach(function(f, i) {
+                if (used.has(i)) return;
+                var coords = f.geometry.coordinates;
+                var cluster = [f];
+                used.add(i);
 
-                var popupHtml = '<div style="min-width:180px;">';
-                if (slug) {
-                    popupHtml += '<a href="/directory/' + slug + '" target="_top" style="color:#e97325;font-weight:bold;text-decoration:none;font-size:14px;display:block;">' + name + '</a>';
+                features.forEach(function(f2, j) {
+                    if (used.has(j)) return;
+                    var c2 = f2.geometry.coordinates;
+                    var dx = coords[0] - c2[0];
+                    var dy = coords[1] - c2[1];
+                    var threshold = clusterRadius / Math.pow(2, zoom) * 0.5;
+                    if (Math.sqrt(dx*dx + dy*dy) < threshold) {
+                        cluster.push(f2);
+                        used.add(j);
+                    }
+                });
+
+                if (cluster.length > 1) {
+                    var avgLng = cluster.reduce(function(s, c) { return s + c.geometry.coordinates[0]; }, 0) / cluster.length;
+                    var avgLat = cluster.reduce(function(s, c) { return s + c.geometry.coordinates[1]; }, 0) / cluster.length;
+                    clustered.push({ type: 'cluster', count: cluster.length, lng: avgLng, lat: avgLat, features: cluster });
                 } else {
-                    popupHtml += '<span style="font-weight:bold;font-size:14px;display:block;">' + name + '</span>';
+                    clustered.push({ type: 'point', feature: f });
                 }
-                if (clinic) popupHtml += '<span style="font-size:11px;color:#666;display:block;margin-top:2px;">' + clinic + '</span>';
-                if (locationStr) popupHtml += '<span style="font-size:11px;color:#999;display:block;">' + locationStr + '</span>';
-                if (slug) popupHtml += '<a href="/directory/' + slug + '" target="_top" style="display:inline-block;margin-top:6px;padding:5px 12px;background:#e97325;color:white;border-radius:6px;font-size:11px;font-weight:bold;text-decoration:none;">View Profile &rarr;</a>';
-                popupHtml += '</div>';
+            });
+        } else {
+            features.forEach(function(f) {
+                clustered.push({ type: 'point', feature: f });
+            });
+        }
 
-                marker.bindPopup(popupHtml);
-                marker.on('click', function() { marker.openPopup(); });
+        clustered.forEach(function(item) {
+            if (item.type === 'cluster') {
+                var size = getClusterSize(item.count);
+                var el = document.createElement('div');
+                el.className = 'cluster-marker';
+                el.style.width = size + 'px';
+                el.style.height = size + 'px';
+                el.textContent = item.count;
 
-                if (isActive) activeMarkers.push(marker);
+                el.addEventListener('click', function() {
+                    map.flyTo({ center: [item.lng, item.lat], zoom: map.getZoom() + 3, duration: 800, essential: true });
+                });
+
+                var marker = new maplibregl.Marker({ element: el })
+                    .setLngLat([item.lng, item.lat])
+                    .addTo(map);
+                markers.push(marker);
+            } else {
+                var f = item.feature;
+                var coords = f.geometry.coordinates;
+                var props = f.properties;
+                var isActive = !hasAnyFiltered || props.isFiltered;
+
+                var el = document.createElement('div');
+                el.className = 'marker-dot' + (isActive ? ' active' : ' dimmed');
+
+                var popup = new maplibregl.Popup({
+                    offset: 12,
+                    closeButton: true,
+                    closeOnClick: true,
+                    maxWidth: '280px',
+                    focusAfterOpen: false
+                }).setHTML(createPopupHtml(props));
+
+                var marker = new maplibregl.Marker({ element: el, anchor: 'center' })
+                    .setLngLat(coords)
+                    .setPopup(popup)
+                    .addTo(map);
+
+                el.addEventListener('click', function() {
+                    if (activePopup) activePopup.remove();
+                    marker.togglePopup();
+                    activePopup = popup;
+                    window.parent.postMessage({ type: 'marker-click', data: props }, '*');
+                });
+
+                markers.push(marker);
             }
         });
-
-        try {
-            if (activeMarkers.length > 0) {
-                var activeGroup = L.featureGroup(activeMarkers);
-                map.fitBounds(activeGroup.getBounds(), { padding: [50, 50], maxZoom: 6 });
-            }
-        } catch (err) {
-            console.error('[MAP] fitBounds error:', err);
-        }
     }
 
-    // Self-load doctors from the API so we don't depend on postMessage
+    function fitToMarkers(features) {
+        var active = features.filter(function(f) {
+            return f.properties && (f.properties.isFiltered === undefined || f.properties.isFiltered === true);
+        });
+        if (active.length === 0) active = features;
+        if (active.length === 0) return;
+
+        if (active.length === 1) {
+            map.flyTo({
+                center: active[0].geometry.coordinates,
+                zoom: 13,
+                duration: 1200,
+                essential: true
+            });
+            return;
+        }
+
+        var bounds = new maplibregl.LngLatBounds();
+        active.forEach(function(f) {
+            bounds.extend(f.geometry.coordinates);
+        });
+
+        map.fitBounds(bounds, {
+            padding: { top: 80, bottom: 80, left: 60, right: 60 },
+            maxZoom: 14,
+            duration: 1200
+        });
+    }
+
+    // Self-load doctors from API
     function loadDoctors() {
-        fetch('/api/directory/search?q=&limit=200')
+        fetch('/api/directory/search?q=&limit=500')
             .then(function(res) { return res.json(); })
             .then(function(data) {
                 var doctors = data.doctors || [];
-                console.log('[MAP] Loaded', doctors.length, 'doctors from API');
                 var features = doctors
                     .filter(function(d) { return d.latitude && d.longitude && d.latitude !== 0 && d.longitude !== 0; })
                     .map(function(d) {
@@ -117,48 +376,70 @@
                             type: 'Feature',
                             geometry: { type: 'Point', coordinates: [d.longitude, d.latitude] },
                             properties: {
-                                cluster: false,
                                 doctorId: d.id,
                                 name: 'Dr. ' + (d.first_name || '') + ' ' + (d.last_name || ''),
                                 slug: d.slug,
+                                clinic: d.clinic_name,
+                                city: d.city,
+                                state: d.state,
                                 type: 'doctor',
                                 isFiltered: true
                             }
                         };
                     });
                 renderMarkers(features);
+                fitToMarkers(features);
             })
             .catch(function(err) {
-                console.error('[MAP] Failed to load doctors:', err);
+                console.error('[MAP] Load failed:', err);
             });
     }
 
-    map.whenReady(function() {
+    function reportReady() {
+        window.parent.postMessage({ type: 'map-ready' }, '*');
+    }
+
+    map.on('load', function() {
         reportReady();
-        // Only auto-load doctors if the parent page requests it via URL param
         var params = new URLSearchParams(window.location.search);
         if (params.get('autoload') === 'doctors') {
             loadDoctors();
         }
     });
 
-    // Also still listen for postMessage for filtered results
+    // Re-render markers on zoom change for clustering
+    map.on('zoomend', function() {
+        // Only re-cluster if we have stored features
+        if (window._lastFeatures && window._lastFeatures.length > 0) {
+            renderMarkers(window._lastFeatures);
+        }
+    });
+
+    // Listen for postMessage from parent
     window.addEventListener('message', function(e) {
         if (e.data.type === 'is-ready') {
             reportReady();
         } else if (e.data.type === 'force-raw-markers') {
             var features = e.data.data || [];
             if (features.length > 0) {
+                window._lastFeatures = features;
                 renderMarkers(features);
+                fitToMarkers(features);
             }
         } else if (e.data.type === 'set-view') {
             var center = e.data.center;
             var zoom = e.data.zoom;
             if (center && center[0] !== undefined) {
-                map.setView([center[1], center[0]], zoom);
+                map.flyTo({
+                    center: [center[0], center[1]],
+                    zoom: zoom,
+                    duration: 1200,
+                    essential: true
+                });
             }
         }
     });
+})();
 </script>
 </body>
 </html>
