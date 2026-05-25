@@ -9,57 +9,42 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; }
-        #map { position: absolute; top: 0; bottom: 0; width: 100%; height: 100%; cursor: grab; }
-        #map:active { cursor: grabbing; }
-        #map canvas { outline: none; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; height: 100%; }
 
         /* Apple Maps style popups */
         .maplibregl-popup { max-width: 280px !important; z-index: 10; }
         .maplibregl-popup-content {
-            background: rgba(255,255,255,0.98);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 0;
+            background: rgba(255,255,255,0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px; padding: 0;
             box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
-            border: 1px solid rgba(0,0,0,0.06);
-            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.06); overflow: hidden;
         }
         .maplibregl-popup-close-button {
-            font-size: 20px; color: #999; right: 8px; top: 8px;
-            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; background: rgba(0,0,0,0.05);
+            font-size: 20px; color: #999; right: 8px; top: 8px; width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(0,0,0,0.05);
         }
         .maplibregl-popup-close-button:hover { background: rgba(0,0,0,0.1); }
         .maplibregl-popup-tip { border-top-color: rgba(255,255,255,0.98) !important; }
-
         .popup-card { padding: 16px; }
-        .popup-card .doctor-name { font-size: 16px; font-weight: 700; color: #1E2D3B; margin-bottom: 2px; letter-spacing: -0.3px; }
+        .popup-card .doctor-name { font-size: 16px; font-weight: 700; color: #1E2D3B; margin-bottom: 2px; }
         .popup-card .clinic-name { font-size: 13px; color: #666; margin-bottom: 4px; }
         .popup-card .location { font-size: 12px; color: #999; display: flex; align-items: center; gap: 4px; margin-bottom: 12px; }
-        .popup-card .location svg { flex-shrink: 0; }
         .popup-card .view-btn {
             display: block; width: 100%; padding: 10px 16px; background: #D66829; color: white;
             border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;
-            text-align: center; text-decoration: none; letter-spacing: 0.3px; transition: background 0.2s;
+            text-align: center; text-decoration: none; transition: background 0.2s;
         }
         .popup-card .view-btn:hover { background: #c05a22; }
 
-        /* Hide default bottom controls */
         .maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right { display: none !important; }
-
-        /* Apple Maps style controls */
         .maplibregl-ctrl-group {
-            background: rgba(255,255,255,0.92) !important;
-            backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important;
+            background: rgba(255,255,255,0.92) !important; backdrop-filter: blur(20px) !important;
             border-radius: 12px !important;
             box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.06) !important;
             border: none !important; overflow: hidden !important;
         }
         .maplibregl-ctrl-group button { width: 44px !important; height: 44px !important; }
         .maplibregl-ctrl-group button + button { border-top: 1px solid rgba(0,0,0,0.06) !important; }
-
-        .maplibregl-user-location-dot { box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3) !important; }
     </style>
 </head>
 <body>
@@ -68,8 +53,8 @@
 (function() {
     var activePopup = null;
     var selectedDoctorId = null;
-    var storedFeatures = [];
-    var sourceLoaded = false;
+    var pendingFeatures = null;
+    var layersReady = false;
 
     var map = new maplibregl.Map({
         container: 'map',
@@ -102,40 +87,30 @@
         attributionControl: false
     });
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right');
+    map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
     map.addControl(new maplibregl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: false, showUserHeading: false
+        trackUserLocation: false
     }), 'top-right');
 
+    // ── Popup helper ──
     function createPopupHtml(props) {
         var name = props.name || 'Specialist';
         var clinic = props.clinic || '';
-        var city = props.city || '';
-        var state = props.state || '';
-        var location = [city, state].filter(Boolean).join(', ');
-        var slug = props.slug;
-
+        var loc = [props.city || '', props.state || ''].filter(Boolean).join(', ');
+        var slug = props.slug || '';
         var html = '<div class="popup-card">';
         html += '<div class="doctor-name">' + name + '</div>';
         if (clinic) html += '<div class="clinic-name">' + clinic + '</div>';
-        if (location) {
-            html += '<div class="location"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D66829" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + location + '</div>';
-        }
-        if (slug) {
-            html += '<a class="view-btn" href="/directory/' + slug + '" target="_top">View Profile</a>';
-        }
+        if (loc) html += '<div class="location"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D66829" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + loc + '</div>';
+        if (slug) html += '<a class="view-btn" href="/directory/' + slug + '" target="_top">View Profile</a>';
         html += '</div>';
         return html;
     }
 
-    // ── Native GL layers — no DOM markers, no floating ──
-
+    // ── Setup GL layers (called once on map load) ──
     function setupLayers() {
-        if (sourceLoaded) return;
-        sourceLoaded = true;
-
-        // GeoJSON source with built-in clustering
+        // GeoJSON source with native clustering
         map.addSource('doctors', {
             type: 'geojson',
             data: { type: 'FeatureCollection', features: [] },
@@ -144,7 +119,7 @@
             clusterRadius: 50
         });
 
-        // Cluster circles
+        // Layer 1: Cluster circles
         map.addLayer({
             id: 'clusters',
             type: 'circle',
@@ -152,59 +127,51 @@
             filter: ['has', 'point_count'],
             paint: {
                 'circle-color': '#D66829',
-                'circle-radius': ['step', ['get', 'point_count'], 18, 10, 22, 50, 28, 100, 34],
+                'circle-radius': [
+                    'step', ['get', 'point_count'],
+                    18,   // default
+                    10, 22,   // 10+ → 22px
+                    50, 28,   // 50+ → 28px
+                    100, 34   // 100+ → 34px
+                ],
                 'circle-stroke-width': 3,
-                'circle-stroke-color': '#ffffff',
-                'circle-opacity': 1
+                'circle-stroke-color': '#ffffff'
             }
         });
 
-        // Cluster count labels
+        // Layer 2: Cluster count text
         map.addLayer({
             id: 'cluster-count',
             type: 'symbol',
             source: 'doctors',
             filter: ['has', 'point_count'],
             layout: {
-                'text-field': '{point_count_abbreviated}',
-                'text-font': ['Open Sans Bold'],
+                'text-field': ['get', 'point_count_abbreviated'],
+                'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
                 'text-size': 13,
                 'text-allow-overlap': true
             },
-            paint: {
-                'text-color': '#ffffff'
-            }
+            paint: { 'text-color': '#ffffff' }
         });
 
-        // Individual doctor dots — active (matched filter)
+        // Layer 3: Individual doctor dots (matched / default)
         map.addLayer({
             id: 'doctor-dots',
             type: 'circle',
             source: 'doctors',
-            filter: ['all', ['!', ['has', 'point_count']], ['any', ['!', ['has', 'isFiltered']], ['==', ['get', 'isFiltered'], true]]],
+            filter: ['!', ['has', 'point_count']],
             paint: {
                 'circle-color': '#D66829',
                 'circle-radius': 7,
                 'circle-stroke-width': 2.5,
-                'circle-stroke-color': '#ffffff',
-                'circle-opacity': 1
+                'circle-stroke-color': '#ffffff'
             }
         });
 
-        // Individual doctor dots — dimmed (not matching filter)
-        map.addLayer({
-            id: 'doctor-dots-dimmed',
-            type: 'circle',
-            source: 'doctors',
-            filter: ['all', ['!', ['has', 'point_count']], ['has', 'isFiltered'], ['==', ['get', 'isFiltered'], false]],
-            paint: {
-                'circle-color': '#cccccc',
-                'circle-radius': 5,
-                'circle-stroke-width': 2,
-                'circle-stroke-color': '#eeeeee',
-                'circle-opacity': 0.4
-            }
-        });
+        layersReady = true;
+        console.log('[MAP] Layers ready');
+
+        // ── Interactions ──
 
         // Click cluster → zoom in
         map.on('click', 'clusters', function(e) {
@@ -218,30 +185,18 @@
         });
 
         // Click doctor dot → popup + notify parent
-        map.on('click', 'doctor-dots', handleDoctorClick);
-        map.on('click', 'doctor-dots-dimmed', handleDoctorClick);
-
-        function handleDoctorClick(e) {
+        map.on('click', 'doctor-dots', function(e) {
             if (!e.features || !e.features.length) return;
-            e.preventDefault();
             var feature = e.features[0];
             var coords = feature.geometry.coordinates.slice();
             var props = feature.properties;
 
-            // Parse stringified properties from GeoJSON
-            var doctorId = props.doctorId;
-            var name = props.name || 'Specialist';
-            var slug = props.slug || '';
-            var clinic = props.clinic || '';
-            var city = props.city || '';
-            var state = props.state || '';
-
-            selectedDoctorId = doctorId;
+            selectedDoctorId = props.doctorId;
 
             if (activePopup) activePopup.remove();
             activePopup = new maplibregl.Popup({ offset: 14, closeButton: true, closeOnClick: true, maxWidth: '280px', focusAfterOpen: false })
                 .setLngLat(coords)
-                .setHTML(createPopupHtml({ name: name, slug: slug, clinic: clinic, city: city, state: state }))
+                .setHTML(createPopupHtml(props))
                 .addTo(map);
             activePopup.on('close', function() { activePopup = null; });
 
@@ -249,108 +204,120 @@
 
             window.parent.postMessage({
                 type: 'marker-click',
-                data: { doctorId: doctorId, name: name, slug: slug, clinic: clinic, city: city, state: state, photo_url: props.photo_url || '' }
+                data: {
+                    doctorId: props.doctorId,
+                    name: props.name,
+                    slug: props.slug,
+                    clinic: props.clinic,
+                    city: props.city,
+                    state: props.state,
+                    photo_url: props.photo_url || ''
+                }
             }, '*');
-        }
+        });
 
-        // Click on empty map → deselect
+        // Click empty space → deselect
         map.on('click', function(e) {
-            var clusters = map.queryRenderedFeatures(e.point, { layers: ['clusters', 'doctor-dots', 'doctor-dots-dimmed'] });
-            if (clusters.length === 0 && selectedDoctorId) {
+            var hits = map.queryRenderedFeatures(e.point, { layers: ['clusters', 'doctor-dots'] });
+            if (hits.length === 0 && selectedDoctorId) {
                 selectedDoctorId = null;
                 if (activePopup) { activePopup.remove(); activePopup = null; }
                 window.parent.postMessage({ type: 'marker-deselect' }, '*');
             }
         });
 
-        // Cursor changes
-        map.on('mouseenter', 'clusters', function() { map.getCanvas().style.cursor = 'pointer'; });
-        map.on('mouseleave', 'clusters', function() { map.getCanvas().style.cursor = ''; });
-        map.on('mouseenter', 'doctor-dots', function() { map.getCanvas().style.cursor = 'pointer'; });
-        map.on('mouseleave', 'doctor-dots', function() { map.getCanvas().style.cursor = ''; });
-        map.on('mouseenter', 'doctor-dots-dimmed', function() { map.getCanvas().style.cursor = 'pointer'; });
-        map.on('mouseleave', 'doctor-dots-dimmed', function() { map.getCanvas().style.cursor = ''; });
-    }
-
-    function updateMarkers(features) {
-        storedFeatures = features;
-        if (!sourceLoaded) return;
-        var source = map.getSource('doctors');
-        if (source) {
-            source.setData({ type: 'FeatureCollection', features: features });
-        }
-    }
-
-    function fitToMarkers(features) {
-        var active = features.filter(function(f) {
-            return f.properties && (f.properties.isFiltered === undefined || f.properties.isFiltered === true);
+        // Cursor
+        ['clusters', 'doctor-dots'].forEach(function(layer) {
+            map.on('mouseenter', layer, function() { map.getCanvas().style.cursor = 'pointer'; });
+            map.on('mouseleave', layer, function() { map.getCanvas().style.cursor = ''; });
         });
-        if (active.length === 0) active = features;
-        if (active.length === 0) return;
+    }
 
-        if (active.length === 1) {
-            map.flyTo({ center: active[0].geometry.coordinates, zoom: 13, duration: 1200, essential: true });
+    // ── Data management ──
+    function setFeatures(features) {
+        console.log('[MAP] setFeatures called with', features.length, 'features');
+        pendingFeatures = features;
+        if (!layersReady) {
+            console.log('[MAP] Layers not ready, features queued');
             return;
         }
+        try {
+            var source = map.getSource('doctors');
+            if (source) {
+                source.setData({ type: 'FeatureCollection', features: features });
+                console.log('[MAP] Source data updated');
+            } else {
+                console.error('[MAP] Source "doctors" not found');
+            }
+        } catch (err) {
+            console.error('[MAP] setData error:', err);
+        }
+    }
 
+    function fitToFeatures(features) {
+        if (!features || features.length === 0) return;
+        if (features.length === 1) {
+            map.flyTo({ center: features[0].geometry.coordinates, zoom: 13, duration: 1200, essential: true });
+            return;
+        }
         var bounds = new maplibregl.LngLatBounds();
-        active.forEach(function(f) { bounds.extend(f.geometry.coordinates); });
+        features.forEach(function(f) { bounds.extend(f.geometry.coordinates); });
         map.fitBounds(bounds, { padding: { top: 80, bottom: 80, left: 60, right: 60 }, maxZoom: 14, duration: 1200 });
     }
 
     function flyToDoctor(doctorId) {
-        var features = storedFeatures;
-        for (var i = 0; i < features.length; i++) {
-            if (features[i].properties && String(features[i].properties.doctorId) === String(doctorId)) {
-                var coords = features[i].geometry.coordinates;
-                selectedDoctorId = doctorId;
+        if (!pendingFeatures) return;
+        var id = String(doctorId);
+        for (var i = 0; i < pendingFeatures.length; i++) {
+            var f = pendingFeatures[i];
+            if (f.properties && String(f.properties.doctorId) === id) {
+                selectedDoctorId = id;
+                var coords = f.geometry.coordinates;
                 map.flyTo({ center: coords, zoom: Math.max(map.getZoom(), 13), duration: 800, essential: true });
 
-                // Show popup
                 if (activePopup) activePopup.remove();
-                var props = features[i].properties;
                 activePopup = new maplibregl.Popup({ offset: 14, closeButton: true, closeOnClick: true, maxWidth: '280px', focusAfterOpen: false })
-                    .setLngLat(coords)
-                    .setHTML(createPopupHtml(props))
-                    .addTo(map);
+                    .setLngLat(coords).setHTML(createPopupHtml(f.properties)).addTo(map);
                 activePopup.on('close', function() { activePopup = null; });
 
-                window.parent.postMessage({ type: 'marker-click', data: props }, '*');
+                window.parent.postMessage({ type: 'marker-click', data: f.properties }, '*');
                 return;
             }
         }
     }
 
+    // ── Self-load doctors from API ──
     function loadDoctors() {
+        console.log('[MAP] loadDoctors called');
         fetch('/api/directory/search?q=&limit=500')
             .then(function(res) { return res.json(); })
             .then(function(data) {
                 var doctors = data.doctors || [];
-                var features = doctors
-                    .filter(function(d) {
-                        var lat = Number(d.latitude);
-                        var lng = Number(d.longitude);
-                        return lat && lng && lat !== 0 && lng !== 0 && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
-                    })
-                    .map(function(d) {
-                        return {
-                            type: 'Feature',
-                            geometry: { type: 'Point', coordinates: [Number(d.longitude), Number(d.latitude)] },
-                            properties: {
-                                doctorId: d.id,
-                                name: 'Dr. ' + (d.first_name || '') + ' ' + (d.last_name || ''),
-                                slug: d.slug,
-                                clinic: d.clinic_name,
-                                city: d.city,
-                                state: d.state,
-                                photo_url: d.photo_url || '',
-                                membership_tier: d.membership_tier || '',
-                                isFiltered: true
-                            }
-                        };
+                console.log('[MAP] API returned', doctors.length, 'doctors');
+                var features = [];
+                doctors.forEach(function(d) {
+                    var lat = Number(d.latitude);
+                    var lng = Number(d.longitude);
+                    if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
+                    if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return;
+                    features.push({
+                        type: 'Feature',
+                        geometry: { type: 'Point', coordinates: [lng, lat] },
+                        properties: {
+                            doctorId: String(d.id),
+                            name: 'Dr. ' + (d.first_name || '') + ' ' + (d.last_name || ''),
+                            slug: d.slug || '',
+                            clinic: d.clinic_name || '',
+                            city: d.city || '',
+                            state: d.state || '',
+                            photo_url: d.photo_url || '',
+                            matched: 1
+                        }
                     });
-                updateMarkers(features);
-                fitToMarkers(features);
+                });
+                console.log('[MAP] Built', features.length, 'valid features');
+                setFeatures(features);
+                fitToFeatures(features);
             })
             .catch(function(err) { console.error('[MAP] Load failed:', err); });
     }
@@ -359,14 +326,17 @@
         window.parent.postMessage({ type: 'map-ready' }, '*');
     }
 
+    // ── Map load ──
     map.on('load', function() {
+        console.log('[MAP] Map loaded');
         setupLayers();
         reportReady();
 
-        // If we received features before map loaded, push them now
-        if (storedFeatures.length > 0) {
-            updateMarkers(storedFeatures);
-            fitToMarkers(storedFeatures);
+        // Push any features that arrived before map was ready
+        if (pendingFeatures && pendingFeatures.length > 0) {
+            console.log('[MAP] Flushing', pendingFeatures.length, 'pending features');
+            setFeatures(pendingFeatures);
+            fitToFeatures(pendingFeatures);
         }
 
         var params = new URLSearchParams(window.location.search);
@@ -375,27 +345,39 @@
         }
     });
 
-    // Listen for postMessage from parent
+    // ── PostMessage from parent ──
     window.addEventListener('message', function(e) {
-        if (e.data.type === 'is-ready') {
-            reportReady();
-        } else if (e.data.type === 'force-raw-markers') {
-            var features = e.data.data || [];
-            if (features.length > 0) {
-                updateMarkers(features);
-                fitToMarkers(features);
-            }
-        } else if (e.data.type === 'set-view') {
-            var center = e.data.center;
-            var zoom = e.data.zoom;
-            if (center && center[0] !== undefined) {
-                map.flyTo({ center: [center[0], center[1]], zoom: zoom, duration: 1200, essential: true });
-            }
-        } else if (e.data.type === 'select-marker') {
-            flyToDoctor(e.data.doctorId);
-        } else if (e.data.type === 'deselect-marker') {
-            selectedDoctorId = null;
-            if (activePopup) { activePopup.remove(); activePopup = null; }
+        var d = e.data;
+        if (!d || !d.type) return;
+
+        switch (d.type) {
+            case 'is-ready':
+                reportReady();
+                break;
+
+            case 'force-raw-markers':
+                var features = d.data || [];
+                console.log('[MAP] Received force-raw-markers with', features.length, 'features');
+                if (features.length > 0) {
+                    setFeatures(features);
+                    fitToFeatures(features);
+                }
+                break;
+
+            case 'set-view':
+                if (d.center && d.center[0] !== undefined) {
+                    map.flyTo({ center: [d.center[0], d.center[1]], zoom: d.zoom, duration: 1200, essential: true });
+                }
+                break;
+
+            case 'select-marker':
+                flyToDoctor(d.doctorId);
+                break;
+
+            case 'deselect-marker':
+                selectedDoctorId = null;
+                if (activePopup) { activePopup.remove(); activePopup = null; }
+                break;
         }
     });
 })();

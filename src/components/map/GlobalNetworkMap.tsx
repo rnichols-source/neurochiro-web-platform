@@ -156,24 +156,22 @@ export default function GlobalNetworkMap({
       const lng = Number(doc.longitude);
       if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
       if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+      const matched = (externalSearchQuery || externalLocationQuery) && listDoctors.length > 0
+        ? listDoctors.some(ld => ld.id === doc.id)
+        : true;
       return {
         type: 'Feature' as const,
         geometry: { type: 'Point' as const, coordinates: [lng, lat] },
         properties: {
-          cluster: false,
-          doctorId: doc.id,
+          doctorId: String(doc.id),
           name: `Dr. ${doc.first_name || ''} ${doc.last_name || ''}`.trim(),
-          slug: doc.slug,
-          clinic: doc.clinic_name,
-          city: doc.city,
-          state: doc.state,
+          slug: doc.slug || '',
+          clinic: doc.clinic_name || '',
+          city: doc.city || '',
+          state: doc.state || '',
           photo_url: doc.photo_url || '',
           membership_tier: doc.membership_tier || '',
-          distance_miles: (doc as any).distance_miles || null,
-          type: 'doctor' as const,
-          isFiltered: (externalSearchQuery || externalLocationQuery) && listDoctors.length > 0
-            ? listDoctors.some(ld => ld.id === doc.id)
-            : true
+          matched: matched ? 1 : 0
         }
       };
     }).filter((f): f is NonNullable<typeof f> => f !== null);
