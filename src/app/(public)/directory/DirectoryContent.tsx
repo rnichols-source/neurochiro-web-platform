@@ -394,6 +394,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                 doc={doc}
                 index={i}
                 onHover={handleCardHover}
+                dark={isMobile}
               />
             </div>
           ))}
@@ -443,45 +444,48 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
         </div>
 
         {/* Bottom Sheet — dark glass, Apple Maps style */}
-        <BottomSheet onSnapChange={setSheetSnap}>
-          {/* Search bar — glass input inside sheet */}
-          <div ref={searchRef} className="mb-3">
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                <input type="text" placeholder="Search doctors, clinics..." className="w-full pl-9 pr-3 py-2.5 bg-white/10 border border-white/5 focus:outline-none focus:border-white/20 text-white font-medium text-[15px] rounded-xl placeholder:text-white/35"
-                  value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setAcFocusField('search')} />
-              </div>
-              <div className="relative" style={{ width: '120px' }}>
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neuro-orange/80" />
-                <input type="text" placeholder="Location..." className="w-full pl-9 pr-9 py-2.5 bg-white/10 border border-white/5 focus:outline-none focus:border-white/20 text-white font-medium text-[15px] rounded-xl placeholder:text-white/35"
-                  value={locationQuery} onChange={(e) => setLocationQuery(e.target.value)} onFocus={() => setAcFocusField('location')} />
-                <button onClick={handleUseLocation} disabled={isLocating} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg text-white/40 active:text-white/70">
-                  <Target className={cn("w-3.5 h-3.5", isLocating && "animate-spin")} />
-                </button>
-              </div>
-            </div>
-
-            {/* Autocomplete dropdown */}
-            {showAutocomplete && (
-              <div className="bg-[#2c2c2e] rounded-xl border border-white/10 p-2 mt-2 max-h-[30vh] overflow-y-auto">
-                {autocomplete.cities.map((c: any, i: number) => (
-                  <button key={i} onClick={() => { setLocationQuery(c.city ? `${c.city}, ${c.state}` : c.state); setShowAutocomplete(false); }}
-                    className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-lg flex items-center gap-2 text-sm text-white/80">
-                    <MapPin className="w-4 h-4 text-neuro-orange flex-shrink-0" /> {c.city ? `${c.city}, ${c.state}` : c.state}
-                    <span className="text-xs text-white/30 ml-auto">{c.count}</span>
+        <BottomSheet
+          onSnapChange={setSheetSnap}
+          header={
+            <div ref={searchRef}>
+              {/* Search bar — fixed in drag handle, always visible even at peek */}
+              <div className="flex gap-2 mb-2">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                  <input type="text" placeholder="Search doctors, clinics..." className="w-full pl-9 pr-3 py-2.5 bg-white/10 border border-white/5 focus:outline-none focus:border-white/20 text-white font-medium text-[15px] rounded-xl placeholder:text-white/35"
+                    value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setAcFocusField('search')} />
+                </div>
+                <div className="relative" style={{ width: '120px' }}>
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neuro-orange/80" />
+                  <input type="text" placeholder="Location..." className="w-full pl-9 pr-9 py-2.5 bg-white/10 border border-white/5 focus:outline-none focus:border-white/20 text-white font-medium text-[15px] rounded-xl placeholder:text-white/35"
+                    value={locationQuery} onChange={(e) => setLocationQuery(e.target.value)} onFocus={() => setAcFocusField('location')} />
+                  <button onClick={handleUseLocation} disabled={isLocating} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg text-white/40 active:text-white/70">
+                    <Target className={cn("w-3.5 h-3.5", isLocating && "animate-spin")} />
                   </button>
-                ))}
-                {autocomplete.doctors.map((d: any, i: number) => (
-                  <Link key={i} href={`/directory/${d.slug}`} onClick={() => setShowAutocomplete(false)} className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-lg flex items-center gap-2 text-sm">
-                    <div className="w-6 h-6 rounded bg-neuro-orange/20 flex items-center justify-center"><span className="text-neuro-orange text-[10px] font-bold">{d.name?.[4] || '?'}</span></div>
-                    <span className="font-bold text-white/90">{d.name}</span>
-                  </Link>
-                ))}
+                </div>
               </div>
-            )}
-          </div>
 
+              {/* Autocomplete dropdown */}
+              {showAutocomplete && (
+                <div className="bg-[#2c2c2e] rounded-xl border border-white/10 p-2 mb-2 max-h-[30vh] overflow-y-auto">
+                  {autocomplete.cities.map((c: any, i: number) => (
+                    <button key={i} onClick={() => { setLocationQuery(c.city ? `${c.city}, ${c.state}` : c.state); setShowAutocomplete(false); }}
+                      className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-lg flex items-center gap-2 text-sm text-white/80">
+                      <MapPin className="w-4 h-4 text-neuro-orange flex-shrink-0" /> {c.city ? `${c.city}, ${c.state}` : c.state}
+                      <span className="text-xs text-white/30 ml-auto">{c.count}</span>
+                    </button>
+                  ))}
+                  {autocomplete.doctors.map((d: any, i: number) => (
+                    <Link key={i} href={`/directory/${d.slug}`} onClick={() => setShowAutocomplete(false)} className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-lg flex items-center gap-2 text-sm">
+                      <div className="w-6 h-6 rounded bg-neuro-orange/20 flex items-center justify-center"><span className="text-neuro-orange text-[10px] font-bold">{d.name?.[4] || '?'}</span></div>
+                      <span className="font-bold text-white/90">{d.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          }
+        >
           {/* Specialty pills */}
           <div className="overflow-x-auto scrollbar-hide -mx-1 mb-3">
             <div className="flex gap-1.5 px-1">
@@ -495,7 +499,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
             </div>
           </div>
 
-          {/* Divider + result count */}
+          {/* Result count */}
           <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/10">
             <p className="text-[13px] font-bold text-white/90">{filteredDoctors.length} {filteredDoctors.length === 1 ? 'Doctor' : 'Doctors'}</p>
             {(searchQuery || locationQuery) && (

@@ -61,6 +61,16 @@
         style: {
             version: 8,
             sources: {
+                'carto-dark': {
+                    type: 'raster',
+                    tiles: [
+                        'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+                        'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+                        'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
+                    ],
+                    tileSize: 256,
+                    attribution: ''
+                },
                 'carto-light': {
                     type: 'raster',
                     tiles: [
@@ -73,9 +83,9 @@
                 }
             },
             layers: [{
-                id: 'carto-light-layer',
+                id: 'carto-base-layer',
                 type: 'raster',
-                source: 'carto-light',
+                source: window.innerWidth < 1024 ? 'carto-dark' : 'carto-light',
                 minzoom: 0,
                 maxzoom: 20
             }],
@@ -120,15 +130,25 @@
             data: { type: 'FeatureCollection', features: [] }
         });
 
-        // Doctor dots — WebGL rendered, no floating
+        // Doctor dots — scale with zoom to prevent overlap at low zoom
         map.addLayer({
             id: 'doctor-dots',
             type: 'circle',
             source: 'doctors',
             paint: {
                 'circle-color': '#D66829',
-                'circle-radius': 8,
-                'circle-stroke-width': 2.5,
+                'circle-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    3, 4,     // zoom 3 → 4px
+                    6, 6,     // zoom 6 → 6px
+                    10, 8,    // zoom 10 → 8px
+                    14, 10    // zoom 14 → 10px
+                ],
+                'circle-stroke-width': [
+                    'interpolate', ['linear'], ['zoom'],
+                    3, 1.5,
+                    10, 2.5
+                ],
                 'circle-stroke-color': '#ffffff',
                 'circle-opacity': 1,
                 'circle-stroke-opacity': 1

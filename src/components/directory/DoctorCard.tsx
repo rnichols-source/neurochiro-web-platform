@@ -7,14 +7,16 @@ import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { formatDistance } from "@/lib/geo";
+import { cn } from "@/lib/utils";
 
 interface DoctorCardProps {
   doc: any;
   index: number;
   onHover?: (docId: string | null) => void;
+  dark?: boolean;
 }
 
-export default function DoctorCard({ doc, index, onHover }: DoctorCardProps) {
+export default function DoctorCard({ doc, index, onHover, dark = false }: DoctorCardProps) {
   const { isSaved, toggleSave } = useUserPreferences();
   const docId = doc.id.toString();
   const saved = isSaved('doctors', docId);
@@ -39,7 +41,12 @@ export default function DoctorCard({ doc, index, onHover }: DoctorCardProps) {
       transition={{ delay: index * 0.03 }}
       onMouseEnter={() => onHover?.(docId)}
       onMouseLeave={() => onHover?.(null)}
-      className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-lg hover:border-gray-200 transition-all group relative"
+      className={cn(
+        "rounded-2xl p-5 transition-all group relative",
+        dark
+          ? "bg-white/8 border border-white/10 hover:bg-white/12"
+          : "bg-white border border-gray-100 hover:shadow-lg hover:border-gray-200"
+      )}
       id={`doctor-card-${docId}`}
     >
       {/* Distance Badge */}
@@ -94,7 +101,7 @@ export default function DoctorCard({ doc, index, onHover }: DoctorCardProps) {
         </div>
         <div className="flex-1 min-w-0 pr-8">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <h3 className="font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors truncate">{name}</h3>
+            <h3 className={cn("font-bold transition-colors truncate", dark ? "text-white group-hover:text-neuro-orange" : "text-neuro-navy group-hover:text-neuro-orange")}>{name}</h3>
             {doc.verification_status === 'verified' && <ShieldCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />}
             {doc.is_founding_member && (
               <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-neuro-orange/10 text-neuro-orange text-[9px] font-black rounded-md border border-neuro-orange/20 flex-shrink-0 uppercase tracking-wider">
@@ -107,7 +114,7 @@ export default function DoctorCard({ doc, index, onHover }: DoctorCardProps) {
               </span>
             )}
           </div>
-          <p className="text-xs text-gray-500 truncate">{doc.clinic_name || 'Private Practice'}</p>
+          <p className={cn("text-xs truncate", dark ? "text-white/50" : "text-gray-500")}>{doc.clinic_name || 'Private Practice'}</p>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             {location && (
               <div className="flex items-center gap-1">
