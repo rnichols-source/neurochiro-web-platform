@@ -428,6 +428,13 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
       <div className="fixed inset-0 z-[101] bg-black">
         <SmartMatchWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} onComplete={(criteria) => setMatchCriteria(criteria)} />
 
+        {/* Home button — top left, glass pill */}
+        <Link href="/" className="absolute top-[env(safe-area-inset-top)] left-4 mt-3 z-[102] px-3 py-2 rounded-full flex items-center gap-2"
+          style={{ background: 'rgba(28,28,30,0.75)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+          <NextImage src="/logo-white.png" alt="NeuroChiro" width={20} height={20} className="opacity-90" />
+          <span className="text-white/80 text-[11px] font-bold tracking-wide">NEUROCHIRO</span>
+        </Link>
+
         {/* Full-screen map — edge to edge, no chrome */}
         <div className="absolute inset-0">
           <GlobalNetworkMap
