@@ -20,7 +20,7 @@ export async function getDoctorDashboardStats() {
     // Use admin client to bypass any RLS issues
     const [profileRes, doctorRes, seminarsRes, jobsRes, leadsRes] = await Promise.all([
       admin.from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
-      admin.from('doctors').select('clinic_name, slug, city, state, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count, membership_tier, is_founding_member, verification_status, created_at').eq('user_id', user.id).single(),
+      (admin as any).from('doctors').select('clinic_name, slug, city, state, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count, membership_tier, verification_status, created_at').eq('user_id', user.id).single(),
       admin.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
       admin.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', docId),
       admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', docId)
@@ -131,7 +131,7 @@ export async function getDoctorDashboardStats() {
       doctor: {
         city: doctor?.city || "your city",
         membership_tier: (doctor as any)?.membership_tier || 'free',
-        is_founding_member: (doctor as any)?.is_founding_member || false,
+        is_founding_member: isFounder,
         created_at: (doctor as any)?.created_at || null,
       },
       stats: [
