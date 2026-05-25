@@ -47,6 +47,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const supabase = createClient();
 
+  const [photoError, setPhotoError] = useState(false);
   const saved = isSaved('doctors', doctor.id?.toString());
   const name = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
   const spotlightEpisode = getEpisodeByDoctorSlug(slug);
@@ -135,8 +136,8 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 mt-4">
             {/* Photo */}
             <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 rounded-2xl bg-white/10 overflow-hidden flex-shrink-0 shadow-2xl border-2 border-white/10 relative">
-              {doctor.photo_url ? (
-                <Image src={doctor.photo_url} alt={name} fill className="object-cover" priority />
+              {doctor.photo_url && !photoError ? (
+                <img src={doctor.photo_url} alt={name} className="w-full h-full object-cover" onError={() => setPhotoError(true)} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <span className="text-white font-black text-3xl">{(doctor.first_name?.[0] || 'N').toUpperCase()}</span>

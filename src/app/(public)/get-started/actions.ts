@@ -16,7 +16,7 @@ export async function createFreeAccount(data: {
       email: data.email,
       password: data.password,
       email_confirm: true,
-      user_metadata: { full_name: data.name },
+      user_metadata: { full_name: data.name, role: data.role },
     });
 
     if (authErr) {
