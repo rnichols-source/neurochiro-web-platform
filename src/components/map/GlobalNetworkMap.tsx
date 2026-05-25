@@ -19,27 +19,6 @@ import { getDoctors, getStudentsForMap } from "@/app/(public)/directory/actions"
 import { getSeminarsForMap } from "@/app/(public)/seminars/actions";
 import { Doctor } from "@/types/directory";
 
-// Quick check if coordinates are plausibly on land (filters ocean pins)
-function isLikelyLand(lat: number, lng: number): boolean {
-  // Continental US
-  if (lat >= 24 && lat <= 50 && lng >= -125 && lng <= -66) {
-    // Filter deep Atlantic (east of rough coastline)
-    if (lng > -65) return false;
-    // Filter deep Gulf of Mexico
-    if (lat < 27 && lat > 24 && lng > -90 && lng < -83) return false;
-    return true;
-  }
-  // Hawaii, Alaska, Canada, Europe, Australia, Asia, Africa, Americas
-  if (lat >= 18 && lat <= 23 && lng >= -161 && lng <= -154) return true;
-  if (lat >= 51 && lat <= 72 && lng >= -180 && lng <= -130) return true;
-  if (lat >= 42 && lat <= 84 && lng >= -141 && lng <= -52) return true;
-  if (lat >= 36 && lat <= 72 && lng >= -11 && lng <= 40) return true;
-  if (lat >= -44 && lat <= -10 && lng >= 112 && lng <= 154) return true;
-  if (lat >= 7 && lat <= 55 && lng >= 60 && lng <= 150) return true;
-  if (lat >= -56 && lat <= 37 && lng >= -82 && lng <= 52) return true;
-  return false;
-}
-
 interface GlobalNetworkMapProps {
   defaultLayer?: "all" | "student" | "seminar";
   externalSearchQuery?: string;
@@ -176,10 +155,7 @@ export default function GlobalNetworkMap({
       const lat = Number(doc.latitude);
       const lng = Number(doc.longitude);
       if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
-      // Skip coordinates that are clearly in the ocean or invalid
-      if (Math.abs(lat) > 85 || Math.abs(lng) > 180) return null;
-      // Basic land validation: skip if lat/lng don't match any known land mass
-      if (!isLikelyLand(lat, lng)) return null;
+      if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
       return {
         type: 'Feature' as const,
         geometry: { type: 'Point' as const, coordinates: [lng, lat] },

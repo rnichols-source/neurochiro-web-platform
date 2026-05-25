@@ -9,7 +9,9 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; }
-        #map { position: absolute; top: 0; bottom: 0; width: 100%; height: 100%; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; height: 100%; cursor: grab; }
+        #map:active { cursor: grabbing; }
+        #map canvas { outline: none; }
 
         /* Apple Maps style popups */
         .maplibregl-popup { max-width: 280px !important; z-index: 10; }
@@ -24,178 +26,50 @@
             overflow: hidden;
         }
         .maplibregl-popup-close-button {
-            font-size: 20px;
-            color: #999;
-            right: 8px;
-            top: 8px;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.05);
+            font-size: 20px; color: #999; right: 8px; top: 8px;
+            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; background: rgba(0,0,0,0.05);
         }
         .maplibregl-popup-close-button:hover { background: rgba(0,0,0,0.1); }
         .maplibregl-popup-tip { border-top-color: rgba(255,255,255,0.98) !important; }
 
         .popup-card { padding: 16px; }
-        .popup-card .doctor-name {
-            font-size: 16px;
-            font-weight: 700;
-            color: #1E2D3B;
-            margin-bottom: 2px;
-            letter-spacing: -0.3px;
-        }
-        .popup-card .clinic-name {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 4px;
-        }
-        .popup-card .location {
-            font-size: 12px;
-            color: #999;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            margin-bottom: 12px;
-        }
+        .popup-card .doctor-name { font-size: 16px; font-weight: 700; color: #1E2D3B; margin-bottom: 2px; letter-spacing: -0.3px; }
+        .popup-card .clinic-name { font-size: 13px; color: #666; margin-bottom: 4px; }
+        .popup-card .location { font-size: 12px; color: #999; display: flex; align-items: center; gap: 4px; margin-bottom: 12px; }
         .popup-card .location svg { flex-shrink: 0; }
         .popup-card .view-btn {
-            display: block;
-            width: 100%;
-            padding: 10px 16px;
-            background: #D66829;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            letter-spacing: 0.3px;
-            transition: background 0.2s;
+            display: block; width: 100%; padding: 10px 16px; background: #D66829; color: white;
+            border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;
+            text-align: center; text-decoration: none; letter-spacing: 0.3px; transition: background 0.2s;
         }
         .popup-card .view-btn:hover { background: #c05a22; }
 
         /* Hide default bottom controls */
-        .maplibregl-ctrl-bottom-left,
-        .maplibregl-ctrl-bottom-right { display: none !important; }
+        .maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right { display: none !important; }
 
         /* Apple Maps style controls */
         .maplibregl-ctrl-group {
             background: rgba(255,255,255,0.92) !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
+            backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important;
             border-radius: 12px !important;
             box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.06) !important;
-            border: none !important;
-            overflow: hidden !important;
+            border: none !important; overflow: hidden !important;
         }
-        .maplibregl-ctrl-group button {
-            width: 44px !important;
-            height: 44px !important;
-        }
-        .maplibregl-ctrl-group button + button {
-            border-top: 1px solid rgba(0,0,0,0.06) !important;
-        }
+        .maplibregl-ctrl-group button { width: 44px !important; height: 44px !important; }
+        .maplibregl-ctrl-group button + button { border-top: 1px solid rgba(0,0,0,0.06) !important; }
 
-        /* Marker styles */
-        @keyframes marker-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(214, 104, 41, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(214, 104, 41, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(214, 104, 41, 0); }
-        }
-        @keyframes marker-bounce {
-            0%, 100% { transform: translateY(0) scale(1); }
-            40% { transform: translateY(-8px) scale(1.1); }
-            60% { transform: translateY(-4px) scale(1.05); }
-        }
-
-        .marker-dot {
-            width: 14px;
-            height: 14px;
-            background: #D66829;
-            border: 2.5px solid white;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative;
-        }
-        .marker-dot:hover {
-            transform: scale(1.5);
-            box-shadow: 0 4px 12px rgba(214, 104, 41, 0.4);
-        }
-        .marker-dot.active {
-            animation: marker-pulse 2s infinite;
-            background: #D66829;
-        }
-        .marker-dot.dimmed {
-            background: #ccc;
-            border-color: #eee;
-            opacity: 0.4;
-            width: 10px;
-            height: 10px;
-        }
-        .marker-dot.dimmed:hover {
-            opacity: 0.7;
-            transform: scale(1.3);
-        }
-
-        /* Selected / highlighted marker */
-        .marker-dot.selected {
-            width: 20px;
-            height: 20px;
-            background: #D66829;
-            border: 3px solid white;
-            box-shadow: 0 0 0 3px #D66829, 0 4px 16px rgba(214, 104, 41, 0.5);
-            animation: marker-bounce 0.5s ease-out;
-            z-index: 100 !important;
-        }
-        .marker-dot.highlighted {
-            width: 18px;
-            height: 18px;
-            background: #D66829;
-            border: 3px solid white;
-            box-shadow: 0 0 0 2px #D66829, 0 4px 12px rgba(214, 104, 41, 0.4);
-            z-index: 90 !important;
-        }
-
-        /* Cluster markers */
-        .cluster-marker {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: #D66829;
-            color: white;
-            font-weight: 800;
-            font-size: 13px;
-            border: 3px solid white;
-            box-shadow: 0 3px 12px rgba(214, 104, 41, 0.3);
-            cursor: pointer;
-            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .cluster-marker:hover {
-            transform: scale(1.15);
-        }
-
-        /* User location dot */
-        .maplibregl-user-location-dot {
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3) !important;
-        }
+        .maplibregl-user-location-dot { box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3) !important; }
     </style>
 </head>
 <body>
 <div id="map"></div>
 <script>
 (function() {
-    var markers = [];
     var activePopup = null;
     var selectedDoctorId = null;
-    var highlightedDoctorId = null;
+    var storedFeatures = [];
+    var sourceLoaded = false;
 
     var map = new maplibregl.Map({
         container: 'map',
@@ -224,29 +98,15 @@
         },
         center: [-98, 38],
         zoom: 4,
-        pitch: 0,
-        bearing: 0,
         maxPitch: 60,
-        dragRotate: true,
-        touchPitch: true,
         attributionControl: false
     });
 
-    // Apple Maps style — zoom + compass, top-right
     map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right');
-
-    // Geolocation
     map.addControl(new maplibregl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: false,
-        showUserHeading: false
+        trackUserLocation: false, showUserHeading: false
     }), 'top-right');
-
-    function clearMarkers() {
-        markers.forEach(function(m) { m.remove(); });
-        markers = [];
-        if (activePopup) { activePopup.remove(); activePopup = null; }
-    }
 
     function createPopupHtml(props) {
         var name = props.name || 'Specialist';
@@ -255,22 +115,12 @@
         var state = props.state || '';
         var location = [city, state].filter(Boolean).join(', ');
         var slug = props.slug;
-        var photo = props.photo_url || '';
-        var tier = props.membership_tier || '';
-        var distance = props.distance_miles;
 
         var html = '<div class="popup-card">';
         html += '<div class="doctor-name">' + name + '</div>';
         if (clinic) html += '<div class="clinic-name">' + clinic + '</div>';
         if (location) {
-            html += '<div class="location">';
-            html += '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D66829" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
-            html += location;
-            if (distance != null && distance > 0) {
-                var d = distance < 1 ? distance.toFixed(1) : Math.round(distance);
-                html += ' · ' + d + ' mi';
-            }
-            html += '</div>';
+            html += '<div class="location"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D66829" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + location + '</div>';
         }
         if (slug) {
             html += '<a class="view-btn" href="/directory/' + slug + '" target="_top">View Profile</a>';
@@ -279,183 +129,155 @@
         return html;
     }
 
-    function getClusterSize(count) {
-        if (count < 10) return 36;
-        if (count < 50) return 44;
-        if (count < 100) return 52;
-        return 60;
-    }
+    // ── Native GL layers — no DOM markers, no floating ──
 
-    function getMarkerElement(props, isActive, isDimmed) {
-        var el = document.createElement('div');
-        el.className = 'marker-dot';
-        if (isDimmed) el.className += ' dimmed';
-        else if (isActive) el.className += ' active';
-        if (props.doctorId) el.setAttribute('data-doctor-id', props.doctorId);
-        return el;
-    }
+    function setupLayers() {
+        if (sourceLoaded) return;
+        sourceLoaded = true;
 
-    function renderMarkers(features) {
-        clearMarkers();
+        // GeoJSON source with built-in clustering
+        map.addSource('doctors', {
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features: [] },
+            cluster: true,
+            clusterMaxZoom: 12,
+            clusterRadius: 50
+        });
 
-        var hasFiltered = features.some(function(f) { return f.properties && f.properties.isFiltered === true; });
-        var hasAnyFiltered = features.some(function(f) { return f.properties && f.properties.isFiltered !== undefined; });
+        // Cluster circles
+        map.addLayer({
+            id: 'clusters',
+            type: 'circle',
+            source: 'doctors',
+            filter: ['has', 'point_count'],
+            paint: {
+                'circle-color': '#D66829',
+                'circle-radius': ['step', ['get', 'point_count'], 18, 10, 22, 50, 28, 100, 34],
+                'circle-stroke-width': 3,
+                'circle-stroke-color': '#ffffff',
+                'circle-opacity': 1
+            }
+        });
 
-        // Client-side clustering
-        var zoom = map.getZoom();
-        var clusterRadius = 50;
-        var clustered = [];
-        var used = new Set();
+        // Cluster count labels
+        map.addLayer({
+            id: 'cluster-count',
+            type: 'symbol',
+            source: 'doctors',
+            filter: ['has', 'point_count'],
+            layout: {
+                'text-field': '{point_count_abbreviated}',
+                'text-font': ['Open Sans Bold'],
+                'text-size': 13,
+                'text-allow-overlap': true
+            },
+            paint: {
+                'text-color': '#ffffff'
+            }
+        });
 
-        if (zoom < 10 && features.length > 30) {
-            features.forEach(function(f, i) {
-                if (used.has(i)) return;
-                var coords = f.geometry.coordinates;
-                var cluster = [f];
-                used.add(i);
+        // Individual doctor dots — active (matched filter)
+        map.addLayer({
+            id: 'doctor-dots',
+            type: 'circle',
+            source: 'doctors',
+            filter: ['all', ['!', ['has', 'point_count']], ['any', ['!', ['has', 'isFiltered']], ['==', ['get', 'isFiltered'], true]]],
+            paint: {
+                'circle-color': '#D66829',
+                'circle-radius': 7,
+                'circle-stroke-width': 2.5,
+                'circle-stroke-color': '#ffffff',
+                'circle-opacity': 1
+            }
+        });
 
-                features.forEach(function(f2, j) {
-                    if (used.has(j)) return;
-                    var c2 = f2.geometry.coordinates;
-                    var dx = coords[0] - c2[0];
-                    var dy = coords[1] - c2[1];
-                    var threshold = clusterRadius / Math.pow(2, zoom) * 0.5;
-                    if (Math.sqrt(dx*dx + dy*dy) < threshold) {
-                        cluster.push(f2);
-                        used.add(j);
-                    }
-                });
+        // Individual doctor dots — dimmed (not matching filter)
+        map.addLayer({
+            id: 'doctor-dots-dimmed',
+            type: 'circle',
+            source: 'doctors',
+            filter: ['all', ['!', ['has', 'point_count']], ['has', 'isFiltered'], ['==', ['get', 'isFiltered'], false]],
+            paint: {
+                'circle-color': '#cccccc',
+                'circle-radius': 5,
+                'circle-stroke-width': 2,
+                'circle-stroke-color': '#eeeeee',
+                'circle-opacity': 0.4
+            }
+        });
 
-                if (cluster.length > 1) {
-                    var avgLng = cluster.reduce(function(s, c) { return s + c.geometry.coordinates[0]; }, 0) / cluster.length;
-                    var avgLat = cluster.reduce(function(s, c) { return s + c.geometry.coordinates[1]; }, 0) / cluster.length;
-                    clustered.push({ type: 'cluster', count: cluster.length, lng: avgLng, lat: avgLat, features: cluster });
-                } else {
-                    clustered.push({ type: 'point', feature: f });
-                }
+        // Click cluster → zoom in
+        map.on('click', 'clusters', function(e) {
+            var features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+            if (!features.length) return;
+            var clusterId = features[0].properties.cluster_id;
+            map.getSource('doctors').getClusterExpansionZoom(clusterId, function(err, zoom) {
+                if (err) return;
+                map.flyTo({ center: features[0].geometry.coordinates, zoom: zoom, duration: 600 });
             });
-        } else {
-            features.forEach(function(f) {
-                clustered.push({ type: 'point', feature: f });
-            });
+        });
+
+        // Click doctor dot → popup + notify parent
+        map.on('click', 'doctor-dots', handleDoctorClick);
+        map.on('click', 'doctor-dots-dimmed', handleDoctorClick);
+
+        function handleDoctorClick(e) {
+            if (!e.features || !e.features.length) return;
+            e.preventDefault();
+            var feature = e.features[0];
+            var coords = feature.geometry.coordinates.slice();
+            var props = feature.properties;
+
+            // Parse stringified properties from GeoJSON
+            var doctorId = props.doctorId;
+            var name = props.name || 'Specialist';
+            var slug = props.slug || '';
+            var clinic = props.clinic || '';
+            var city = props.city || '';
+            var state = props.state || '';
+
+            selectedDoctorId = doctorId;
+
+            if (activePopup) activePopup.remove();
+            activePopup = new maplibregl.Popup({ offset: 14, closeButton: true, closeOnClick: true, maxWidth: '280px', focusAfterOpen: false })
+                .setLngLat(coords)
+                .setHTML(createPopupHtml({ name: name, slug: slug, clinic: clinic, city: city, state: state }))
+                .addTo(map);
+            activePopup.on('close', function() { activePopup = null; });
+
+            map.flyTo({ center: coords, zoom: Math.max(map.getZoom(), 12), duration: 600 });
+
+            window.parent.postMessage({
+                type: 'marker-click',
+                data: { doctorId: doctorId, name: name, slug: slug, clinic: clinic, city: city, state: state, photo_url: props.photo_url || '' }
+            }, '*');
         }
 
-        clustered.forEach(function(item) {
-            if (item.type === 'cluster') {
-                var size = getClusterSize(item.count);
-                var el = document.createElement('div');
-                el.className = 'cluster-marker';
-                el.style.width = size + 'px';
-                el.style.height = size + 'px';
-                el.textContent = item.count;
-
-                el.addEventListener('click', function() {
-                    map.flyTo({ center: [item.lng, item.lat], zoom: map.getZoom() + 3, duration: 800, essential: true });
-                });
-
-                var marker = new maplibregl.Marker({ element: el })
-                    .setLngLat([item.lng, item.lat])
-                    .addTo(map);
-                markers.push(marker);
-            } else {
-                var f = item.feature;
-                var coords = f.geometry.coordinates;
-                var props = f.properties;
-                var isActive = !hasAnyFiltered || props.isFiltered;
-                var isDimmed = hasAnyFiltered && !props.isFiltered;
-
-                var el = getMarkerElement(props, isActive, isDimmed);
-
-                // Apply selected/highlighted state
-                if (props.doctorId === selectedDoctorId) {
-                    el.classList.remove('active', 'dimmed');
-                    el.classList.add('selected');
-                } else if (props.doctorId === highlightedDoctorId) {
-                    el.classList.remove('dimmed');
-                    el.classList.add('highlighted');
-                }
-
-                var marker = new maplibregl.Marker({ element: el, anchor: 'center' })
-                    .setLngLat(coords)
-                    .addTo(map);
-
-                el.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    selectMarker(props.doctorId);
-
-                    // Show popup on desktop, send message for mobile preview card
-                    if (window.innerWidth >= 1024) {
-                        if (activePopup) activePopup.remove();
-                        var popup = new maplibregl.Popup({
-                            offset: 16,
-                            closeButton: true,
-                            closeOnClick: true,
-                            maxWidth: '280px',
-                            focusAfterOpen: false
-                        }).setHTML(createPopupHtml(props)).setLngLat(coords).addTo(map);
-                        activePopup = popup;
-                        popup.on('close', function() { activePopup = null; });
-                    }
-
-                    // Fly to pin
-                    map.flyTo({
-                        center: coords,
-                        zoom: Math.max(map.getZoom(), 12),
-                        duration: 600,
-                        essential: true
-                    });
-
-                    window.parent.postMessage({ type: 'marker-click', data: props }, '*');
-                });
-
-                markers.push(marker);
+        // Click on empty map → deselect
+        map.on('click', function(e) {
+            var clusters = map.queryRenderedFeatures(e.point, { layers: ['clusters', 'doctor-dots', 'doctor-dots-dimmed'] });
+            if (clusters.length === 0 && selectedDoctorId) {
+                selectedDoctorId = null;
+                if (activePopup) { activePopup.remove(); activePopup = null; }
+                window.parent.postMessage({ type: 'marker-deselect' }, '*');
             }
         });
+
+        // Cursor changes
+        map.on('mouseenter', 'clusters', function() { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', 'clusters', function() { map.getCanvas().style.cursor = ''; });
+        map.on('mouseenter', 'doctor-dots', function() { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', 'doctor-dots', function() { map.getCanvas().style.cursor = ''; });
+        map.on('mouseenter', 'doctor-dots-dimmed', function() { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', 'doctor-dots-dimmed', function() { map.getCanvas().style.cursor = ''; });
     }
 
-    function selectMarker(doctorId) {
-        selectedDoctorId = doctorId;
-        // Update all marker elements
-        markers.forEach(function(m) {
-            var el = m.getElement();
-            if (!el || el.classList.contains('cluster-marker')) return;
-            var id = el.getAttribute('data-doctor-id');
-            el.classList.remove('selected', 'highlighted');
-            if (id === doctorId) {
-                el.classList.add('selected');
-            }
-        });
-    }
-
-    function highlightMarker(doctorId) {
-        highlightedDoctorId = doctorId;
-        markers.forEach(function(m) {
-            var el = m.getElement();
-            if (!el || el.classList.contains('cluster-marker')) return;
-            var id = el.getAttribute('data-doctor-id');
-            el.classList.remove('highlighted');
-            if (id === doctorId && id !== selectedDoctorId) {
-                el.classList.add('highlighted');
-            }
-        });
-    }
-
-    function flyToDoctor(doctorId) {
-        for (var i = 0; i < markers.length; i++) {
-            var el = markers[i].getElement();
-            if (!el) continue;
-            var id = el.getAttribute('data-doctor-id');
-            if (id === doctorId) {
-                var lngLat = markers[i].getLngLat();
-                selectMarker(doctorId);
-                map.flyTo({
-                    center: [lngLat.lng, lngLat.lat],
-                    zoom: Math.max(map.getZoom(), 13),
-                    duration: 800,
-                    essential: true
-                });
-                return;
-            }
+    function updateMarkers(features) {
+        storedFeatures = features;
+        if (!sourceLoaded) return;
+        var source = map.getSource('doctors');
+        if (source) {
+            source.setData({ type: 'FeatureCollection', features: features });
         }
     }
 
@@ -467,46 +289,36 @@
         if (active.length === 0) return;
 
         if (active.length === 1) {
-            map.flyTo({
-                center: active[0].geometry.coordinates,
-                zoom: 13,
-                duration: 1200,
-                essential: true
-            });
+            map.flyTo({ center: active[0].geometry.coordinates, zoom: 13, duration: 1200, essential: true });
             return;
         }
 
         var bounds = new maplibregl.LngLatBounds();
-        active.forEach(function(f) {
-            bounds.extend(f.geometry.coordinates);
-        });
-
-        map.fitBounds(bounds, {
-            padding: { top: 100, bottom: 200, left: 60, right: 60 },
-            maxZoom: 14,
-            duration: 1200
-        });
+        active.forEach(function(f) { bounds.extend(f.geometry.coordinates); });
+        map.fitBounds(bounds, { padding: { top: 80, bottom: 80, left: 60, right: 60 }, maxZoom: 14, duration: 1200 });
     }
 
-    // Quick land check — filters ocean pins from bad geocoding
-    function isOnLand(lat, lng) {
-        // Continental US
-        if (lat >= 24 && lat <= 50 && lng >= -125 && lng <= -66) {
-            if (lng > -65) return false;
-            if (lat < 27 && lat > 24 && lng > -90 && lng < -83) return false;
-            return true;
+    function flyToDoctor(doctorId) {
+        var features = storedFeatures;
+        for (var i = 0; i < features.length; i++) {
+            if (features[i].properties && String(features[i].properties.doctorId) === String(doctorId)) {
+                var coords = features[i].geometry.coordinates;
+                selectedDoctorId = doctorId;
+                map.flyTo({ center: coords, zoom: Math.max(map.getZoom(), 13), duration: 800, essential: true });
+
+                // Show popup
+                if (activePopup) activePopup.remove();
+                var props = features[i].properties;
+                activePopup = new maplibregl.Popup({ offset: 14, closeButton: true, closeOnClick: true, maxWidth: '280px', focusAfterOpen: false })
+                    .setLngLat(coords)
+                    .setHTML(createPopupHtml(props))
+                    .addTo(map);
+                activePopup.on('close', function() { activePopup = null; });
+
+                window.parent.postMessage({ type: 'marker-click', data: props }, '*');
+                return;
+            }
         }
-        // Hawaii
-        if (lat >= 18 && lat <= 23 && lng >= -161 && lng <= -154) return true;
-        // Alaska
-        if (lat >= 51 && lat <= 72 && lng >= -180 && lng <= -130) return true;
-        // Canada, Europe, Australia, Asia, Africa, Americas
-        if (lat >= 42 && lat <= 84 && lng >= -141 && lng <= -52) return true;
-        if (lat >= 36 && lat <= 72 && lng >= -11 && lng <= 40) return true;
-        if (lat >= -44 && lat <= -10 && lng >= 112 && lng <= 154) return true;
-        if (lat >= 7 && lat <= 55 && lng >= 60 && lng <= 150) return true;
-        if (lat >= -56 && lat <= 37 && lng >= -82 && lng <= 52) return true;
-        return false;
     }
 
     function loadDoctors() {
@@ -515,11 +327,15 @@
             .then(function(data) {
                 var doctors = data.doctors || [];
                 var features = doctors
-                    .filter(function(d) { return d.latitude && d.longitude && d.latitude !== 0 && d.longitude !== 0 && isOnLand(d.latitude, d.longitude); })
+                    .filter(function(d) {
+                        var lat = Number(d.latitude);
+                        var lng = Number(d.longitude);
+                        return lat && lng && lat !== 0 && lng !== 0 && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+                    })
                     .map(function(d) {
                         return {
                             type: 'Feature',
-                            geometry: { type: 'Point', coordinates: [d.longitude, d.latitude] },
+                            geometry: { type: 'Point', coordinates: [Number(d.longitude), Number(d.latitude)] },
                             properties: {
                                 doctorId: d.id,
                                 name: 'Dr. ' + (d.first_name || '') + ' ' + (d.last_name || ''),
@@ -529,18 +345,14 @@
                                 state: d.state,
                                 photo_url: d.photo_url || '',
                                 membership_tier: d.membership_tier || '',
-                                distance_miles: d.distance_miles || null,
-                                type: 'doctor',
                                 isFiltered: true
                             }
                         };
                     });
-                renderMarkers(features);
+                updateMarkers(features);
                 fitToMarkers(features);
             })
-            .catch(function(err) {
-                console.error('[MAP] Load failed:', err);
-            });
+            .catch(function(err) { console.error('[MAP] Load failed:', err); });
     }
 
     function reportReady() {
@@ -548,29 +360,18 @@
     }
 
     map.on('load', function() {
+        setupLayers();
         reportReady();
+
+        // If we received features before map loaded, push them now
+        if (storedFeatures.length > 0) {
+            updateMarkers(storedFeatures);
+            fitToMarkers(storedFeatures);
+        }
+
         var params = new URLSearchParams(window.location.search);
         if (params.get('autoload') === 'doctors') {
             loadDoctors();
-        }
-    });
-
-    // Re-cluster on zoom
-    map.on('zoomend', function() {
-        if (window._lastFeatures && window._lastFeatures.length > 0) {
-            renderMarkers(window._lastFeatures);
-        }
-    });
-
-    // Deselect on map click (not on marker)
-    map.on('click', function() {
-        if (selectedDoctorId) {
-            selectedDoctorId = null;
-            markers.forEach(function(m) {
-                var el = m.getElement();
-                if (el) el.classList.remove('selected');
-            });
-            window.parent.postMessage({ type: 'marker-deselect' }, '*');
         }
     });
 
@@ -581,32 +382,20 @@
         } else if (e.data.type === 'force-raw-markers') {
             var features = e.data.data || [];
             if (features.length > 0) {
-                window._lastFeatures = features;
-                renderMarkers(features);
+                updateMarkers(features);
                 fitToMarkers(features);
             }
         } else if (e.data.type === 'set-view') {
             var center = e.data.center;
             var zoom = e.data.zoom;
             if (center && center[0] !== undefined) {
-                map.flyTo({
-                    center: [center[0], center[1]],
-                    zoom: zoom,
-                    duration: 1200,
-                    essential: true
-                });
+                map.flyTo({ center: [center[0], center[1]], zoom: zoom, duration: 1200, essential: true });
             }
-        } else if (e.data.type === 'highlight-marker') {
-            highlightMarker(e.data.doctorId || null);
         } else if (e.data.type === 'select-marker') {
             flyToDoctor(e.data.doctorId);
         } else if (e.data.type === 'deselect-marker') {
             selectedDoctorId = null;
-            highlightedDoctorId = null;
-            markers.forEach(function(m) {
-                var el = m.getElement();
-                if (el) el.classList.remove('selected', 'highlighted');
-            });
+            if (activePopup) { activePopup.remove(); activePopup = null; }
         }
     });
 })();
