@@ -87,7 +87,11 @@
         attributionControl: false
     });
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+    // Only show zoom controls on desktop — mobile uses pinch to zoom like Apple Maps
+    var isMobile = window.innerWidth < 1024;
+    if (!isMobile) {
+        map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+    }
     map.addControl(new maplibregl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
         trackUserLocation: false

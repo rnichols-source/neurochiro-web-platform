@@ -422,13 +422,12 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   );
 
   // ── MOBILE: Apple Maps full-screen experience ──
-  // No navbar, no floating search — search lives INSIDE the bottom sheet
   if (isMobile) {
     return (
-      <div className="fixed inset-0 z-[101]">
+      <div className="fixed inset-0 z-[101] bg-black">
         <SmartMatchWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} onComplete={(criteria) => setMatchCriteria(criteria)} />
 
-        {/* Full-screen map — edge to edge */}
+        {/* Full-screen map — edge to edge, no chrome */}
         <div className="absolute inset-0">
           <GlobalNetworkMap
             key={region.code}
@@ -443,74 +442,68 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
           />
         </div>
 
-        {/* Bottom Sheet — search bar is INSIDE (Apple Maps style) */}
-        <BottomSheet
-          header={
-            <div ref={searchRef}>
-              {/* Search bar — inside the sheet like Apple Maps */}
-              <div className="flex gap-2 mb-2">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input type="text" placeholder="Search doctors..." className="w-full pl-9 pr-3 py-2.5 bg-gray-100 border-none focus:outline-none text-neuro-navy font-medium text-[15px] rounded-xl placeholder:text-gray-400"
-                    value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setAcFocusField('search')} />
-                </div>
-                <div className="relative" style={{ width: '120px' }}>
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neuro-orange" />
-                  <input type="text" placeholder="Location..." className="w-full pl-9 pr-9 py-2.5 bg-gray-100 border-none focus:outline-none text-neuro-navy font-medium text-[15px] rounded-xl placeholder:text-gray-400"
-                    value={locationQuery} onChange={(e) => setLocationQuery(e.target.value)} onFocus={() => setAcFocusField('location')} />
-                  <button onClick={handleUseLocation} disabled={isLocating} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-200 rounded-lg text-gray-400">
-                    <Target className={cn("w-3.5 h-3.5", isLocating && "animate-spin")} />
-                  </button>
-                </div>
+        {/* Bottom Sheet — dark glass, Apple Maps style */}
+        <BottomSheet onSnapChange={setSheetSnap}>
+          {/* Search bar — glass input inside sheet */}
+          <div ref={searchRef} className="mb-3">
+            <div className="flex gap-2">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                <input type="text" placeholder="Search doctors, clinics..." className="w-full pl-9 pr-3 py-2.5 bg-white/10 border border-white/5 focus:outline-none focus:border-white/20 text-white font-medium text-[15px] rounded-xl placeholder:text-white/35"
+                  value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setAcFocusField('search')} />
               </div>
-
-              {/* Autocomplete dropdown */}
-              {showAutocomplete && (
-                <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-2 mb-2 max-h-[30vh] overflow-y-auto">
-                  {autocomplete.cities.map((c: any, i: number) => (
-                    <button key={i} onClick={() => { setLocationQuery(c.city ? `${c.city}, ${c.state}` : c.state); setShowAutocomplete(false); }}
-                      className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded-lg flex items-center gap-2 text-sm">
-                      <MapPin className="w-4 h-4 text-neuro-orange flex-shrink-0" /> {c.city ? `${c.city}, ${c.state}` : c.state}
-                      <span className="text-xs text-gray-400 ml-auto">{c.count}</span>
-                    </button>
-                  ))}
-                  {autocomplete.doctors.map((d: any, i: number) => (
-                    <Link key={i} href={`/directory/${d.slug}`} onClick={() => setShowAutocomplete(false)} className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded-lg flex items-center gap-2 text-sm">
-                      <div className="w-6 h-6 rounded bg-neuro-navy flex items-center justify-center"><span className="text-white text-[10px] font-bold">{d.name?.[4] || '?'}</span></div>
-                      <span className="font-bold text-neuro-navy">{d.name}</span>
-                    </Link>
-                  ))}
-                </div>
-              )}
-
-              {/* Specialty pills */}
-              <div className="overflow-x-auto scrollbar-hide -mx-1">
-                <div className="flex gap-1.5 px-1 pb-1">
-                  {SPECIALTY_FILTERS.map((specialty) => (
-                    <button key={specialty} onClick={() => { if (activeSpecialty === specialty) { setActiveSpecialty(null); setSearchQuery(""); } else { setActiveSpecialty(specialty); setSearchQuery(specialty); } }}
-                      className={cn("px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border",
-                        activeSpecialty === specialty ? "bg-neuro-orange text-white border-neuro-orange" : "bg-gray-100 text-gray-600 border-transparent")}>
-                      {specialty}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Result count */}
-              <div className="flex items-center justify-between mt-2">
-                <p className="text-[13px] font-bold text-neuro-navy">{filteredDoctors.length} {filteredDoctors.length === 1 ? 'Doctor' : 'Doctors'}</p>
-                {(searchQuery || locationQuery) && <button onClick={handleClearSearch} className="text-[11px] font-bold text-neuro-orange flex items-center gap-1"><X className="w-3 h-3" /> Clear</button>}
+              <div className="relative" style={{ width: '120px' }}>
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neuro-orange/80" />
+                <input type="text" placeholder="Location..." className="w-full pl-9 pr-9 py-2.5 bg-white/10 border border-white/5 focus:outline-none focus:border-white/20 text-white font-medium text-[15px] rounded-xl placeholder:text-white/35"
+                  value={locationQuery} onChange={(e) => setLocationQuery(e.target.value)} onFocus={() => setAcFocusField('location')} />
+                <button onClick={handleUseLocation} disabled={isLocating} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg text-white/40 active:text-white/70">
+                  <Target className={cn("w-3.5 h-3.5", isLocating && "animate-spin")} />
+                </button>
               </div>
             </div>
-          }
-          selectedDoctor={selectedDoctor}
-          onDismissPreview={() => {
-            setSelectedDoctor(null);
-            const iframe = document.getElementById('network-map-iframe') as HTMLIFrameElement;
-            iframe?.contentWindow?.postMessage({ type: 'deselect-marker' }, window.location.origin);
-          }}
-          onSnapChange={setSheetSnap}
-        >
+
+            {/* Autocomplete dropdown */}
+            {showAutocomplete && (
+              <div className="bg-[#2c2c2e] rounded-xl border border-white/10 p-2 mt-2 max-h-[30vh] overflow-y-auto">
+                {autocomplete.cities.map((c: any, i: number) => (
+                  <button key={i} onClick={() => { setLocationQuery(c.city ? `${c.city}, ${c.state}` : c.state); setShowAutocomplete(false); }}
+                    className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-lg flex items-center gap-2 text-sm text-white/80">
+                    <MapPin className="w-4 h-4 text-neuro-orange flex-shrink-0" /> {c.city ? `${c.city}, ${c.state}` : c.state}
+                    <span className="text-xs text-white/30 ml-auto">{c.count}</span>
+                  </button>
+                ))}
+                {autocomplete.doctors.map((d: any, i: number) => (
+                  <Link key={i} href={`/directory/${d.slug}`} onClick={() => setShowAutocomplete(false)} className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-lg flex items-center gap-2 text-sm">
+                    <div className="w-6 h-6 rounded bg-neuro-orange/20 flex items-center justify-center"><span className="text-neuro-orange text-[10px] font-bold">{d.name?.[4] || '?'}</span></div>
+                    <span className="font-bold text-white/90">{d.name}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Specialty pills */}
+          <div className="overflow-x-auto scrollbar-hide -mx-1 mb-3">
+            <div className="flex gap-1.5 px-1">
+              {SPECIALTY_FILTERS.map((specialty) => (
+                <button key={specialty} onClick={() => { if (activeSpecialty === specialty) { setActiveSpecialty(null); setSearchQuery(""); } else { setActiveSpecialty(specialty); setSearchQuery(specialty); } }}
+                  className={cn("px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition-all",
+                    activeSpecialty === specialty ? "bg-neuro-orange text-white" : "bg-white/10 text-white/60")}>
+                  {specialty}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Divider + result count */}
+          <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/10">
+            <p className="text-[13px] font-bold text-white/90">{filteredDoctors.length} {filteredDoctors.length === 1 ? 'Doctor' : 'Doctors'}</p>
+            {(searchQuery || locationQuery) && (
+              <button onClick={handleClearSearch} className="text-[11px] font-bold text-neuro-orange flex items-center gap-1"><X className="w-3 h-3" /> Clear</button>
+            )}
+          </div>
+
+          {/* Doctor list */}
           <div className="space-y-3 pb-8">{doctorListJSX}</div>
         </BottomSheet>
       </div>
