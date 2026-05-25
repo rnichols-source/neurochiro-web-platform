@@ -1,9 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useCallback } from "react";
-import { motion, useMotionValue, useTransform, animate, PanInfo, AnimatePresence } from "framer-motion";
-import { MapPin, ChevronUp, X } from "lucide-react";
-import Link from "next/link";
+import { motion, useMotionValue, useTransform, animate, PanInfo } from "framer-motion";
 
 interface BottomSheetProps {
   children: React.ReactNode;
@@ -14,14 +12,14 @@ interface BottomSheetProps {
 }
 
 // Snap points as percentage from bottom of viewport
-const SNAP_PEEK = 0.14;   // 14% — handle + count + preview peek
-const SNAP_HALF = 0.50;   // 50% — half screen, scrollable list
-const SNAP_FULL = 0.92;   // 92% — full screen (leave room for status bar)
+const SNAP_PEEK = 0.18;   // 18% — handle + search bar peek
+const SNAP_HALF = 0.48;   // 48% — half screen, search + list visible
+const SNAP_FULL = 0.94;   // 94% — full screen
 
 export default function BottomSheet({ children, header, selectedDoctor, onDismissPreview, onSnapChange }: BottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const [windowHeight, setWindowHeight] = useState(0);
-  const [currentSnap, setCurrentSnap] = useState<'peek' | 'half' | 'full'>('peek');
+  const [currentSnap, setCurrentSnap] = useState<'peek' | 'half' | 'full'>('half');
 
   useEffect(() => {
     const update = () => setWindowHeight(window.innerHeight);
@@ -30,7 +28,7 @@ export default function BottomSheet({ children, header, selectedDoctor, onDismis
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  const sheetHeight = useMotionValue(windowHeight * SNAP_PEEK);
+  const sheetHeight = useMotionValue(windowHeight * SNAP_HALF);
   const borderRadius = useTransform(sheetHeight, [windowHeight * SNAP_HALF, windowHeight * SNAP_FULL], [20, 0]);
   const handleOpacity = useTransform(sheetHeight, [windowHeight * SNAP_HALF, windowHeight * SNAP_FULL], [1, 0.3]);
   const backdropOpacity = useTransform(sheetHeight, [windowHeight * SNAP_HALF, windowHeight * SNAP_FULL], [0, 0.15]);
@@ -87,59 +85,6 @@ export default function BottomSheet({ children, header, selectedDoctor, onDismis
         style={{ opacity: backdropOpacity }}
       />
 
-      {/* Floating preview card when pin is selected and sheet is at peek */}
-      <AnimatePresence>
-        {selectedDoctor && currentSnap === 'peek' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 500, damping: 35 }}
-            className="fixed left-4 right-4 z-[201] lg:hidden"
-            style={{ bottom: windowHeight * SNAP_PEEK + 12 }}
-          >
-            <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-100/50 p-4 flex items-center gap-3">
-              {/* Avatar */}
-              <div className="w-12 h-12 rounded-xl bg-neuro-navy flex-shrink-0 flex items-center justify-center overflow-hidden">
-                {selectedDoctor.photo_url ? (
-                  <img src={selectedDoctor.photo_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-white font-black text-lg">
-                    {(selectedDoctor.name || 'NC').replace(/^Dr\.\s*/i, '').charAt(0)}
-                  </span>
-                )}
-              </div>
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-neuro-navy text-sm truncate">{selectedDoctor.name || 'Doctor'}</p>
-                <p className="text-xs text-gray-500 truncate">{selectedDoctor.clinic || 'Private Practice'}</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <MapPin className="w-3 h-3 text-neuro-orange flex-shrink-0" />
-                  <span className="text-[11px] text-gray-400 truncate">
-                    {[selectedDoctor.city, selectedDoctor.state].filter(Boolean).join(', ') || 'View profile'}
-                  </span>
-                </div>
-              </div>
-              {/* Actions */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <Link
-                  href={`/directory/${selectedDoctor.slug || selectedDoctor.doctorId}`}
-                  className="px-4 py-2 bg-neuro-orange text-white text-xs font-bold rounded-xl"
-                >
-                  View
-                </Link>
-                <button
-                  onClick={onDismissPreview}
-                  className="p-1.5 text-gray-300 hover:text-gray-500"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Bottom Sheet */}
       <motion.div
         ref={sheetRef}
@@ -181,12 +126,6 @@ export default function BottomSheet({ children, header, selectedDoctor, onDismis
             </div>
           )}
 
-          {/* Pull-up hint at peek state */}
-          {currentSnap === 'peek' && !selectedDoctor && (
-            <div className="flex justify-center pb-1">
-              <ChevronUp className="w-4 h-4 text-gray-300 animate-bounce" />
-            </div>
-          )}
         </motion.div>
 
         {/* Scrollable list */}

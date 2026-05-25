@@ -63,10 +63,15 @@ export default function Navbar() {
   // Always use white text on dark navy navbar
   const useWhiteText = true;
 
+  // Hide navbar on mobile for directory page (full-screen Apple Maps experience)
+  const isDirectoryPage = pathname === '/directory';
+
   return (
     <>
-      <header 
+      <header
         className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
+          isDirectoryPage ? 'lg:block hidden' : ''
+        } ${
           isScrolled
             ? "bg-neuro-navy/95 backdrop-blur-md border-b border-white/10 py-4 shadow-xl"
             : "bg-neuro-navy py-5"
