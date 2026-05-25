@@ -17,7 +17,7 @@ export async function getDoctors(options: {
   try {
     // DATA MINIMIZATION: Only fetch essential columns for the LIST view
     // Removed: email, website_url, instagram_url, facebook_url, address (private-ish)
-    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, phone, photo_url, created_at';
+    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, phone, photo_url';
     
     let query = supabase
       .from('doctors')
@@ -124,7 +124,7 @@ export async function getDoctorBySlug(slug: string) {
   const supabase = createServerSupabase()
   
   // Full profile select — includes all extended fields for ultimate profile page
-  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, address, latitude, longitude, bio, specialties, region_code, email, phone, website_url, instagram_url, facebook_url, user_id, photo_url, video_url, seo_keywords, profile_views, patient_leads, banner_url, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, years_in_practice, insurance_networks, team_members, certifications, created_at';
+  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, address, latitude, longitude, bio, specialties, region_code, email, phone, website_url, instagram_url, facebook_url, user_id, photo_url, video_url, seo_keywords, profile_views, patient_leads, banner_url, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, years_in_practice, insurance_networks, team_members, certifications';
   
   try {
     let { data, error } = await supabase

@@ -21,10 +21,10 @@ export function isProfileGated(doctor: {
   const tier = doctor.membership_tier || 'free';
   if (tier === 'growth' || tier === 'pro') return false;
 
-  // Free/basic/starter doctors created BEFORE the cutoff are grandfathered
-  if (doctor.created_at && new Date(doctor.created_at) < new Date(GATING_CUTOFF_DATE)) {
-    return false;
-  }
+  // Free/basic/starter doctors created BEFORE the cutoff are grandfathered.
+  // If created_at is not available, assume grandfathered (existing doctor).
+  if (!doctor.created_at) return false;
+  if (new Date(doctor.created_at) < new Date(GATING_CUTOFF_DATE)) return false;
 
   // New free doctors after the cutoff: gated
   return true;
