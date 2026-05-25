@@ -65,7 +65,7 @@ export default function GlobalNetworkMap({
   useEffect(() => {
     if (!iframeRef.current?.contentWindow) return;
     iframeRef.current.contentWindow.postMessage({
-      type: highlightedDoctorId ? 'highlight-marker' : 'highlight-marker',
+      type: 'highlight-marker',
       doctorId: highlightedDoctorId || null
     }, window.location.origin);
   }, [highlightedDoctorId]);
