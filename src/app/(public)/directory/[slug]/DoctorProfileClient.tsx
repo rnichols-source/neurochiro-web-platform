@@ -728,40 +728,48 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           <h2 className="text-lg font-black text-neuro-navy mb-2 flex items-center gap-2">
             <Calendar className="w-5 h-5 text-neuro-orange" /> Request a Consultation
           </h2>
-          <p className="text-gray-400 text-sm mb-5">Send a request to {doctor.clinic_name || name}. They&apos;ll get back to you directly.</p>
-          {appointmentSubmitted ? (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-              <CheckCircle2 className="w-6 h-6 text-green-500 mx-auto mb-1" />
-              <p className="font-bold text-green-700 text-sm">Request Sent!</p>
-              <p className="text-green-600 text-xs mt-1">They&apos;ll contact you within 1-2 business days.</p>
+          {gated ? (
+            <div className="text-center py-6">
+              <ContactGateCTA variant="sidebar" />
             </div>
           ) : (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <input type="text" placeholder="Your name *" value={appointmentForm.name} onChange={e => setAppointmentForm(f => ({...f, name: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
-                <input type="email" placeholder="Email *" value={appointmentForm.email} onChange={e => setAppointmentForm(f => ({...f, email: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <input type="tel" placeholder="Phone (optional)" value={appointmentForm.phone} onChange={e => setAppointmentForm(f => ({...f, phone: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
-                <input type="date" value={appointmentForm.preferredDate} onChange={e => setAppointmentForm(f => ({...f, preferredDate: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
-              </div>
-              <textarea placeholder="What are you looking for? (optional)" value={appointmentForm.message} onChange={e => setAppointmentForm(f => ({...f, message: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange h-20 resize-none" />
-              <button disabled={submittingAppointment || !appointmentForm.name || !appointmentForm.email}
-                onClick={async () => {
-                  setSubmittingAppointment(true);
-                  try {
-                    const res = await fetch('/api/appointment', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ patientName: appointmentForm.name, patientEmail: appointmentForm.email, patientPhone: appointmentForm.phone, preferredDate: appointmentForm.preferredDate, message: appointmentForm.message, doctorId: doctor.id }) });
-                    if (!res.ok) throw new Error();
-                    setAppointmentSubmitted(true);
-                  } catch { alert('Something went wrong. Please try again or call the office directly.'); }
-                  setSubmittingAppointment(false);
-                }}
-                className="w-full py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 disabled:opacity-50 flex items-center justify-center gap-2">
-                {submittingAppointment ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : <><Send className="w-4 h-4" /> Send Request</>}
-              </button>
-              <p className="text-xs text-gray-400 text-center">Your info is sent directly to the doctor. We never share it with anyone else.</p>
-            </div>
+            <>
+              <p className="text-gray-400 text-sm mb-5">Send a request to {doctor.clinic_name || name}. They&apos;ll get back to you directly.</p>
+              {appointmentSubmitted ? (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                  <CheckCircle2 className="w-6 h-6 text-green-500 mx-auto mb-1" />
+                  <p className="font-bold text-green-700 text-sm">Request Sent!</p>
+                  <p className="text-green-600 text-xs mt-1">They&apos;ll contact you within 1-2 business days.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <input type="text" placeholder="Your name *" value={appointmentForm.name} onChange={e => setAppointmentForm(f => ({...f, name: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
+                    <input type="email" placeholder="Email *" value={appointmentForm.email} onChange={e => setAppointmentForm(f => ({...f, email: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input type="tel" placeholder="Phone (optional)" value={appointmentForm.phone} onChange={e => setAppointmentForm(f => ({...f, phone: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
+                    <input type="date" value={appointmentForm.preferredDate} onChange={e => setAppointmentForm(f => ({...f, preferredDate: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
+                  </div>
+                  <textarea placeholder="What are you looking for? (optional)" value={appointmentForm.message} onChange={e => setAppointmentForm(f => ({...f, message: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange h-20 resize-none" />
+                  <button disabled={submittingAppointment || !appointmentForm.name || !appointmentForm.email}
+                    onClick={async () => {
+                      setSubmittingAppointment(true);
+                      try {
+                        const res = await fetch('/api/appointment', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ patientName: appointmentForm.name, patientEmail: appointmentForm.email, patientPhone: appointmentForm.phone, preferredDate: appointmentForm.preferredDate, message: appointmentForm.message, doctorId: doctor.id }) });
+                        if (!res.ok) throw new Error();
+                        setAppointmentSubmitted(true);
+                      } catch { alert('Something went wrong. Please try again or call the office directly.'); }
+                      setSubmittingAppointment(false);
+                    }}
+                    className="w-full py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 disabled:opacity-50 flex items-center justify-center gap-2">
+                    {submittingAppointment ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : <><Send className="w-4 h-4" /> Send Request</>}
+                  </button>
+                  <p className="text-xs text-gray-400 text-center">Your info is sent directly to the doctor. We never share it with anyone else.</p>
+                </div>
+              )}
+            </>
           )}
         </div>
 
