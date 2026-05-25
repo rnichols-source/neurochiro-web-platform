@@ -1,10 +1,11 @@
 "use client";
 
-import { Loader2, Eye, Users, DollarSign, MapPin, Briefcase, Calendar, Bell, Mail, ArrowRight, Copy, CheckCircle2, Gift, Zap, X } from "lucide-react";
+import { Loader2, Eye, Users, DollarSign, MapPin, Briefcase, Calendar, Bell, Mail, ArrowRight, Copy, CheckCircle2, Gift, Zap, X, Lock, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { isProfileGated } from "@/lib/profile-gating";
 import {
   getDoctorDashboardStats,
   getDoctorActivityFeed,
@@ -135,6 +136,34 @@ export default function DoctorDashboard() {
           <div className="flex items-center gap-2">
             <Link href="/doctor/profile" className="px-4 py-2 bg-neuro-orange text-white rounded-xl text-xs font-bold hover:bg-neuro-orange/90 whitespace-nowrap">Edit Profile</Link>
             <button onClick={() => setShowClaimedBanner(false)} className="p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg"><X className="w-4 h-4" /></button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Upgrade Nudge Banner — shows for gated free profiles */}
+      {data?.doctor && isProfileGated(data.doctor) && profileViews > 0 && (
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-r from-neuro-navy to-neuro-navy/90 rounded-2xl p-6 border border-neuro-orange/20 shadow-lg">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-neuro-orange/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="w-6 h-6 text-neuro-orange" />
+              </div>
+              <div>
+                <p className="font-black text-white text-base">
+                  {profileViews} {profileViews === 1 ? 'patient' : 'patients'} found your profile
+                </p>
+                <p className="text-gray-400 text-sm mt-1">
+                  But they can't see your phone number, website, or booking link yet. Upgrade to Growth so patients can actually reach you.
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Lock className="w-3 h-3 text-neuro-orange" />
+                  <span className="text-neuro-orange text-xs font-semibold">Phone, website, email & socials are hidden on your public profile</span>
+                </div>
+              </div>
+            </div>
+            <Link href="/pricing" className="px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap flex-shrink-0">
+              Unlock for $69/mo
+            </Link>
           </div>
         </motion.div>
       )}
