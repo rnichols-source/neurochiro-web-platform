@@ -26,8 +26,15 @@ export default function BottomSheet({ children, header, onSnapChange }: BottomSh
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  const sheetHeight = useMotionValue(windowHeight * SNAP_HALF);
+  const sheetHeight = useMotionValue(0);
   const borderRadius = useTransform(sheetHeight, [windowHeight * SNAP_HALF, windowHeight * SNAP_FULL], [14, 0]);
+
+  // Set initial height once windowHeight is known
+  useEffect(() => {
+    if (windowHeight > 0) {
+      sheetHeight.set(windowHeight * SNAP_HALF);
+    }
+  }, [windowHeight]);
 
   const snapTo = useCallback((point: 'peek' | 'half' | 'full') => {
     const targets = { peek: SNAP_PEEK, half: SNAP_HALF, full: SNAP_FULL };
