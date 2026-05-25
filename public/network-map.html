@@ -110,79 +110,31 @@
 
     // ── Setup GL layers (called once on map load) ──
     function setupLayers() {
-        // GeoJSON source with native clustering
+        // Simple GeoJSON source — no clustering (157 docs is fine without it)
         map.addSource('doctors', {
             type: 'geojson',
-            data: { type: 'FeatureCollection', features: [] },
-            cluster: true,
-            clusterMaxZoom: 12,
-            clusterRadius: 50
+            data: { type: 'FeatureCollection', features: [] }
         });
 
-        // Layer 1: Cluster circles
-        map.addLayer({
-            id: 'clusters',
-            type: 'circle',
-            source: 'doctors',
-            filter: ['has', 'point_count'],
-            paint: {
-                'circle-color': '#D66829',
-                'circle-radius': [
-                    'step', ['get', 'point_count'],
-                    18,   // default
-                    10, 22,   // 10+ → 22px
-                    50, 28,   // 50+ → 28px
-                    100, 34   // 100+ → 34px
-                ],
-                'circle-stroke-width': 3,
-                'circle-stroke-color': '#ffffff'
-            }
-        });
-
-        // Layer 2: Cluster count text
-        map.addLayer({
-            id: 'cluster-count',
-            type: 'symbol',
-            source: 'doctors',
-            filter: ['has', 'point_count'],
-            layout: {
-                'text-field': ['get', 'point_count_abbreviated'],
-                'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-                'text-size': 13,
-                'text-allow-overlap': true
-            },
-            paint: { 'text-color': '#ffffff' }
-        });
-
-        // Layer 3: Individual doctor dots (matched / default)
+        // Doctor dots — WebGL rendered, no floating
         map.addLayer({
             id: 'doctor-dots',
             type: 'circle',
             source: 'doctors',
-            filter: ['!', ['has', 'point_count']],
             paint: {
                 'circle-color': '#D66829',
-                'circle-radius': 7,
+                'circle-radius': 8,
                 'circle-stroke-width': 2.5,
-                'circle-stroke-color': '#ffffff'
+                'circle-stroke-color': '#ffffff',
+                'circle-opacity': 1,
+                'circle-stroke-opacity': 1
             }
         });
 
         layersReady = true;
-        console.log('[MAP] Layers ready');
+        console.log('[MAP] Layers ready, source added');
 
         // ── Interactions ──
-
-        // Click cluster → zoom in
-        map.on('click', 'clusters', function(e) {
-            var features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
-            if (!features.length) return;
-            var clusterId = features[0].properties.cluster_id;
-            map.getSource('doctors').getClusterExpansionZoom(clusterId, function(err, zoom) {
-                if (err) return;
-                map.flyTo({ center: features[0].geometry.coordinates, zoom: zoom, duration: 600 });
-            });
-        });
 
         // Click doctor dot → popup + notify parent
         map.on('click', 'doctor-dots', function(e) {
@@ -218,7 +170,7 @@
 
         // Click empty space → deselect
         map.on('click', function(e) {
-            var hits = map.queryRenderedFeatures(e.point, { layers: ['clusters', 'doctor-dots'] });
+            var hits = map.queryRenderedFeatures(e.point, { layers: ['doctor-dots'] });
             if (hits.length === 0 && selectedDoctorId) {
                 selectedDoctorId = null;
                 if (activePopup) { activePopup.remove(); activePopup = null; }
@@ -227,7 +179,7 @@
         });
 
         // Cursor
-        ['clusters', 'doctor-dots'].forEach(function(layer) {
+        ['doctor-dots'].forEach(function(layer) {
             map.on('mouseenter', layer, function() { map.getCanvas().style.cursor = 'pointer'; });
             map.on('mouseleave', layer, function() { map.getCanvas().style.cursor = ''; });
         });
