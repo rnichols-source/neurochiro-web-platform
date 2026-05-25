@@ -27,10 +27,9 @@ export default function DoctorCard({ doc, index, onHover }: DoctorCardProps) {
   const hasBooking = !!doc.booking_url;
   const acceptingNew = doc.accepting_new_patients === true;
 
-  const directionsUrl = doc.address
-    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${doc.address}, ${doc.city}, ${doc.state}`)}`
-    : doc.city
-    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${doc.city}, ${doc.state}`)}`
+  const dirParts = [doc.address, doc.city, doc.state].filter(Boolean);
+  const directionsUrl = dirParts.length > 0
+    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dirParts.join(', '))}`
     : null;
 
   return (
@@ -96,7 +95,7 @@ export default function DoctorCard({ doc, index, onHover }: DoctorCardProps) {
         <div className="flex-1 min-w-0 pr-8">
           <div className="flex items-center gap-1.5 flex-wrap">
             <h3 className="font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors truncate">{name}</h3>
-            <ShieldCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />
+            {doc.verification_status === 'verified' && <ShieldCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />}
             {doc.is_founding_member && (
               <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-neuro-orange/10 text-neuro-orange text-[9px] font-black rounded-md border border-neuro-orange/20 flex-shrink-0 uppercase tracking-wider">
                 <Star className="w-2.5 h-2.5 fill-neuro-orange" /> Founder

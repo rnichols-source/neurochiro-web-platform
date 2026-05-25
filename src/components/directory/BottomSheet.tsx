@@ -48,13 +48,6 @@ export default function BottomSheet({ children, header, selectedDoctor, onDismis
     onSnapChange?.(point);
   }, [windowHeight, sheetHeight, onSnapChange]);
 
-  // Auto-expand to half when a pin is selected
-  useEffect(() => {
-    if (selectedDoctor && currentSnap === 'peek') {
-      // Don't auto-expand, let preview card show above sheet
-    }
-  }, [selectedDoctor]);
-
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
     const velocity = info.velocity.y;
     const current = sheetHeight.get();
