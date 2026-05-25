@@ -68,12 +68,12 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
     <>
       <div className="relative min-h-[60vh]">
         {/* Blurred content underneath */}
-        <div className="blur-sm opacity-40 pointer-events-none select-none" aria-hidden="true">
+        <div className="blur-sm opacity-40 pointer-events-none select-none max-h-[70vh] overflow-hidden" aria-hidden="true">
           {children}
         </div>
 
         {/* Upgrade overlay */}
-        <div className="absolute inset-0 flex items-center justify-center z-10">
+        <div className="absolute inset-0 flex items-start justify-center z-10 pt-12 md:pt-20">
           <div className="bg-white rounded-3xl border border-gray-100 shadow-2xl p-10 max-w-md text-center mx-4">
             <div className="w-16 h-16 bg-neuro-orange/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
               <Lock className="w-7 h-7 text-neuro-orange" />

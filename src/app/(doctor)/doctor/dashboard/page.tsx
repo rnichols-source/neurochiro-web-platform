@@ -1,8 +1,9 @@
 "use client";
 
-import { Loader2, Eye, Users, DollarSign, MapPin, Briefcase, Calendar, Bell, Mail, ArrowRight, Copy, CheckCircle2, Gift } from "lucide-react";
+import { Loader2, Eye, Users, DollarSign, MapPin, Briefcase, Calendar, Bell, Mail, ArrowRight, Copy, CheckCircle2, Gift, Zap, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   getDoctorDashboardStats,
@@ -34,6 +35,7 @@ const fadeUp = {
 function delay(d: number) { return { ...fadeUp, transition: { ...fadeUp.transition, delay: d } }; }
 
 export default function DoctorDashboard() {
+  const searchParams = useSearchParams();
   const [data, setData] = useState<any>(null);
   const [health, setHealth] = useState<any>(null);
   const [intel, setIntel] = useState<any>(null);
@@ -43,6 +45,8 @@ export default function DoctorDashboard() {
   const [activity, setActivity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [views, setViews] = useState(0);
+  const [showUpgradeBanner, setShowUpgradeBanner] = useState(searchParams.get("upgraded") === "true");
+  const [showClaimedBanner, setShowClaimedBanner] = useState(searchParams.get("claimed") === "true");
 
   // Referral state
   const [referralCode, setReferralCode] = useState("");
@@ -100,6 +104,41 @@ export default function DoctorDashboard() {
 
   return (
     <div className="p-4 md:p-8 lg:p-10 max-w-6xl mx-auto space-y-6">
+      {/* Upgrade Success Banner */}
+      {showUpgradeBanner && (
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="bg-green-500/10 border border-green-500/30 rounded-2xl p-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+              <Zap className="w-5 h-5 text-green-500" />
+            </div>
+            <div>
+              <p className="font-black text-green-700 text-sm">Upgrade complete — all features are now unlocked!</p>
+              <p className="text-green-600/70 text-xs mt-0.5">Your new tools are ready to use in the sidebar.</p>
+            </div>
+          </div>
+          <button onClick={() => setShowUpgradeBanner(false)} className="p-1.5 text-green-500 hover:bg-green-500/10 rounded-lg"><X className="w-4 h-4" /></button>
+        </motion.div>
+      )}
+
+      {/* Profile Claimed Banner */}
+      {showClaimedBanner && (
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="bg-neuro-orange/10 border border-neuro-orange/30 rounded-2xl p-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-neuro-orange/20 rounded-xl flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5 text-neuro-orange" />
+            </div>
+            <div>
+              <p className="font-black text-neuro-navy text-sm">Profile claimed! Add your photo and details to stand out.</p>
+              <p className="text-gray-500 text-xs mt-0.5">Upgrade anytime to unlock patient leads, analytics, and more.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link href="/doctor/profile" className="px-4 py-2 bg-neuro-orange text-white rounded-xl text-xs font-bold hover:bg-neuro-orange/90 whitespace-nowrap">Edit Profile</Link>
+            <button onClick={() => setShowClaimedBanner(false)} className="p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg"><X className="w-4 h-4" /></button>
+          </div>
+        </motion.div>
+      )}
+
       <WhatsNew />
 
       {/* Top Banner: Greeting + Practice Health Score */}

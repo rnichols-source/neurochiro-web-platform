@@ -26,6 +26,9 @@ interface GlobalNetworkMapProps {
   externalLocationQuery?: string;
   initialDoctors?: Doctor[];
   listDoctors?: Doctor[];
+  highlightedDoctorId?: string | null;
+  onMarkerClick?: (doctor: Record<string, any>) => void;
+  onMarkerDeselect?: () => void;
 }
 
 export default function GlobalNetworkMap({
@@ -34,7 +37,10 @@ export default function GlobalNetworkMap({
   onSearchChange,
   externalLocationQuery = "",
   initialDoctors = [],
-  listDoctors = []
+  listDoctors = [],
+  highlightedDoctorId = null,
+  onMarkerClick,
+  onMarkerDeselect,
 }: GlobalNetworkMapProps) {
   const router = useRouter();
   const { region } = useRegion();
@@ -54,6 +60,15 @@ export default function GlobalNetworkMap({
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Send highlight command to iframe
+  useEffect(() => {
+    if (!iframeRef.current?.contentWindow) return;
+    iframeRef.current.contentWindow.postMessage({
+      type: highlightedDoctorId ? 'highlight-marker' : 'highlight-marker',
+      doctorId: highlightedDoctorId || null
+    }, '*');
+  }, [highlightedDoctorId]);
 
   // Handle location centering
   useEffect(() => {
@@ -114,9 +129,6 @@ export default function GlobalNetworkMap({
     return () => clearInterval(interval);
   }, [mapReady]);
 
-  const verifiedCountTotal = initialDoctors.length || 122;
-  const filteredCount = listDoctors.length > 0 ? listDoctors.length : verifiedCountTotal;
-
   // Center on results
   useEffect(() => {
     if (mapReady && iframeRef.current?.contentWindow) {
@@ -137,7 +149,7 @@ export default function GlobalNetworkMap({
     }
   }, [mapReady, region.code, listDoctors, initialDoctors]);
 
-  // Build marker data
+  // Build marker data — include extra props for preview card
   const buildMarkerData = useCallback(() => {
     return (initialDoctors || []).map(doc => {
       const lat = Number(doc.latitude);
@@ -154,6 +166,9 @@ export default function GlobalNetworkMap({
           clinic: doc.clinic_name,
           city: doc.city,
           state: doc.state,
+          photo_url: doc.photo_url || '',
+          membership_tier: doc.membership_tier || '',
+          distance_miles: (doc as any).distance_miles || null,
           type: 'doctor' as const,
           isFiltered: (externalSearchQuery || externalLocationQuery) && listDoctors.length > 0
             ? listDoctors.some(ld => ld.id === doc.id)
@@ -192,15 +207,29 @@ export default function GlobalNetworkMap({
         updateMapData(e.data.bounds, e.data.zoom);
       } else if (e.data.type === 'marker-click') {
         setSelectedPin(e.data.data);
+        onMarkerClick?.(e.data.data);
+      } else if (e.data.type === 'marker-deselect') {
+        setSelectedPin(null);
+        onMarkerDeselect?.();
       }
     };
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [updateMapData]);
+  }, [updateMapData, onMarkerClick, onMarkerDeselect]);
 
   useEffect(() => {
     if (initialDoctors && initialDoctors.length > 0) setDoctors(initialDoctors);
   }, [initialDoctors]);
+
+  // Public method: fly to a doctor on the map
+  const flyToDoctor = useCallback((doctorId: string) => {
+    iframeRef.current?.contentWindow?.postMessage({
+      type: 'select-marker',
+      doctorId
+    }, '*');
+  }, []);
+
+  // Expose flyToDoctor via ref — but we'll use postMessage from parent instead
 
   return (
     <div className="relative w-full h-full overflow-hidden rounded-xl">
@@ -252,17 +281,22 @@ export default function GlobalNetworkMap({
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="absolute top-0 right-0 w-[360px] h-full bg-white/95 backdrop-blur-xl border-l border-gray-200 z-20 shadow-2xl flex flex-col hidden lg:flex"
+            className="absolute top-0 right-0 w-[360px] h-full bg-white/95 backdrop-blur-xl border-l border-gray-200 z-20 shadow-2xl hidden lg:flex flex-col"
           >
             <div className="p-6 flex-1 overflow-y-auto">
               <div className="flex justify-end mb-4">
-                <button onClick={() => setSelectedPin(null)} className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500 transition-colors">
+                <button onClick={() => { setSelectedPin(null); onMarkerDeselect?.(); }} className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500 transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="w-16 h-16 bg-neuro-orange rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-lg mb-4">
-                {(selectedPin.name || "NC").replace(/^Dr\.\s*/i, '').split(' ').filter(Boolean).map((n: string) => n[0]).join('').substring(0, 2)}
+              {/* Avatar */}
+              <div className="w-16 h-16 bg-neuro-navy rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-lg mb-4 overflow-hidden">
+                {selectedPin.photo_url ? (
+                  <img src={selectedPin.photo_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  (selectedPin.name || "NC").replace(/^Dr\.\s*/i, '').split(' ').filter(Boolean).map((n: string) => n[0]).join('').substring(0, 2)
+                )}
               </div>
 
               <div className="flex items-center gap-1 text-[10px] font-bold text-neuro-orange uppercase tracking-widest mb-2">

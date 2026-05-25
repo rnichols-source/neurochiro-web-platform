@@ -157,6 +157,9 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
   const promoCode = promoFaq?.promo_code || s.promo_code || null;
   const promoDescription = promoFaq?.promo_description || s.promo_description || null;
 
+  // Currency symbol based on country
+  const currencySymbol = ((seminar.country || '').toLowerCase().includes('united kingdom') || (seminar.country || '').toLowerCase().includes('uk')) ? '£' : ((seminar.country || '').toLowerCase().includes('australia') || (seminar.country || '').toLowerCase().includes('canada')) ? '$' : ((seminar.country || '').toLowerCase().includes('euro')) ? '€' : '$';
+
   // Google Maps embed
   const mapQuery = venueAddress ? encodeURIComponent(venueAddress) : venueName ? encodeURIComponent(venueName) : null;
 
@@ -248,7 +251,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
             )}
             {seminar.price != null && (
               <span className="text-2xl font-black text-white">
-                {seminar.price > 0 ? `$${seminar.price}` : 'Free'}
+                {seminar.price > 0 ? `${currencySymbol}${seminar.price}` : 'Free'}
                 {seminar.price > 0 && <span className="text-sm font-normal text-gray-400 ml-1">per person</span>}
               </span>
             )}
@@ -298,7 +301,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
             )}
             {seminar.price != null && (
               <div className="flex-1 text-center py-4">
-                <div className="text-2xl font-black text-neuro-orange">${seminar.price}</div>
+                <div className="text-2xl font-black text-neuro-orange">{currencySymbol}{seminar.price}</div>
                 <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Per Person</div>
               </div>
             )}
@@ -716,7 +719,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                 {seminar.price != null && (
                   <div className="pt-3 border-t border-gray-100">
                     {seminar.price > 0 ? (
-                      <p className="text-2xl font-black text-neuro-navy">${seminar.price} <span className="text-sm font-normal text-gray-400">per person</span></p>
+                      <p className="text-2xl font-black text-neuro-navy">{currencySymbol}{seminar.price} <span className="text-sm font-normal text-gray-400">per person</span></p>
                     ) : (
                       <p className="text-2xl font-black text-green-600">Free</p>
                     )}
@@ -799,7 +802,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
               onClick={handleRegisterClick}
               className="px-10 py-5 bg-neuro-orange text-white font-bold rounded-xl text-lg inline-flex items-center gap-2 hover:bg-neuro-orange/90 transition-colors shadow-lg shadow-neuro-orange/20"
             >
-              Register Now — ${seminar.price} <ExternalLink className="w-5 h-5" />
+              Register Now — {currencySymbol}{seminar.price} <ExternalLink className="w-5 h-5" />
             </a>
           </div>
         </section>
@@ -884,7 +887,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
                   <span>{rs.city}, {rs.country}</span>
                 </div>
                 {rs.price != null && (
-                  <p className="text-sm font-black text-neuro-navy mt-3">{rs.price > 0 ? `$${rs.price}` : 'Free'}</p>
+                  <p className="text-sm font-black text-neuro-navy mt-3">{rs.price > 0 ? `${currencySymbol}${rs.price}` : 'Free'}</p>
                 )}
               </Link>
             ))}
@@ -904,7 +907,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
         <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white/95 backdrop-blur border-t border-gray-200 px-4 py-3 flex items-center justify-between gap-3">
           <div>
             {seminar.price != null && (
-              <p className="text-lg font-black text-neuro-navy">{seminar.price > 0 ? `$${seminar.price}` : 'Free'}</p>
+              <p className="text-lg font-black text-neuro-navy">{seminar.price > 0 ? `${currencySymbol}${seminar.price}` : 'Free'}</p>
             )}
             <p className="text-[10px] text-gray-400 font-bold uppercase">per person</p>
           </div>

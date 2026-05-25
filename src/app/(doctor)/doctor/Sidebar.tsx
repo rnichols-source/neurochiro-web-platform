@@ -23,7 +23,7 @@ const navSections = [
     items: [
       { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
       { name: "Profile", href: "/doctor/profile", icon: User },
-      { name: "Messages", href: "/doctor/messages", icon: MessageSquare, tier: "growth" as const },
+      { name: "Messages", href: "/doctor/messages", icon: MessageSquare },
       { name: "Referral Network", href: "/doctor/referral-network", icon: Users, tier: "growth" as const },
       { name: "Notifications", href: "/doctor/notifications", icon: Bell },
     ],
@@ -39,9 +39,9 @@ const navSections = [
   {
     label: "TOOLS",
     items: [
-      { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp, tier: "pro" as const },
+      { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp, tier: "growth" as const },
       { name: "P&L Analyzer", href: "/doctor/pl-analyzer", icon: DollarSign, tier: "pro" as const },
-      { name: "Content Library", href: "/doctor/content-library", icon: Library, tier: "pro" as const },
+      { name: "Content Library", href: "/doctor/content-library", icon: Library, tier: "growth" as const },
       { name: "Billing Guide", href: "/doctor/billing-guide", icon: Receipt },
     ],
   },

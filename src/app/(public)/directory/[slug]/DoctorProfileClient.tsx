@@ -66,6 +66,17 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const acceptedPayment = d.accepted_payment as string[] | null;
   const faq = d.faq as { question: string; answer: string }[] | null;
   const galleryImages = d.gallery_images as string[] | null;
+  const bookingUrl = d.booking_url as string | null;
+  const firstVisitInfo = d.first_visit_info as string | null;
+  const parkingInfo = d.parking_info as string | null;
+  const amenitiesList = d.amenities as string[] | null;
+  const offersTelehealth = d.offers_telehealth as boolean;
+  const acceptsWalkins = d.accepts_walkins as boolean;
+  const acceptingNewPatients = d.accepting_new_patients as boolean;
+  const yearsInPractice = d.years_in_practice as number | null;
+  const insuranceNetworks = d.insurance_networks as string[] | null;
+  const teamMembersList = d.team_members as { name: string; role: string; photo_url?: string }[] | null;
+  const certificationsList = d.certifications as string[] | null;
   const mapQuery = doctor.address ? encodeURIComponent(`${doctor.address}, ${doctor.city}, ${doctor.state}`) : doctor.city ? encodeURIComponent(`${doctor.city}, ${doctor.state}`) : null;
 
   const trackEvent = (eventType: string) => {
@@ -184,9 +195,16 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                     <Phone className="w-4 h-4" /> Call Now
                   </a>
                 )}
-                <a href="#appointment" className="px-6 py-3 bg-white/10 text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-white/20 transition-colors border border-white/20">
-                  <Calendar className="w-4 h-4" /> Book Consultation
-                </a>
+                {bookingUrl ? (
+                  <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('booking_click')}
+                    className="px-6 py-3 bg-green-500 text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-green-600 transition-colors">
+                    <Calendar className="w-4 h-4" /> Book Online
+                  </a>
+                ) : (
+                  <a href="#appointment" className="px-6 py-3 bg-white/10 text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-white/20 transition-colors border border-white/20">
+                    <Calendar className="w-4 h-4" /> Book Consultation
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -197,6 +215,12 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       {(d.profile_views > 0 || specialties.length > 0) && (
         <div className="bg-neuro-navy border-t border-white/5 overflow-x-auto">
           <div className="max-w-4xl mx-auto flex justify-center divide-x divide-white/10 min-w-0">
+            {yearsInPractice && (
+              <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
+                <div className="text-xl sm:text-2xl font-black text-neuro-orange">{yearsInPractice}+</div>
+                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Years Practice</div>
+              </div>
+            )}
             {d.profile_views > 0 && (
               <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
                 <div className="text-xl sm:text-2xl font-black text-neuro-orange">{d.profile_views > 999 ? `${(d.profile_views / 1000).toFixed(1)}k` : d.profile_views}</div>
@@ -225,6 +249,17 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         </div>
       )}
 
+      {/* Quick Badges */}
+      {(acceptingNewPatients || offersTelehealth || acceptsWalkins) && (
+        <div className="bg-neuro-navy border-t border-white/5">
+          <div className="max-w-4xl mx-auto flex justify-center gap-3 py-3 px-6 flex-wrap">
+            {acceptingNewPatients && <span className="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded-full border border-green-500/30">Accepting New Patients</span>}
+            {offersTelehealth && <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-full border border-blue-500/30">Telehealth Available</span>}
+            {acceptsWalkins && <span className="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-full border border-purple-500/30">Walk-Ins Welcome</span>}
+          </div>
+        </div>
+      )}
+
       {/* Claim Banner */}
       {!doctor.user_id && (
         <div className="max-w-4xl mx-auto px-6 mt-6">
@@ -234,7 +269,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 <p className="font-black text-neuro-navy text-sm">Is this you?</p>
                 <p className="text-xs text-gray-500 mt-1">Claim your NeuroChiro profile to add your photo, bio, and start connecting with patients.</p>
               </div>
-              <a href={`/get-started?claim_id=${doctor.id}&role=doctor`}
+              <a href={`/register?claim_id=${doctor.id}&role=doctor`}
                 className="px-5 py-2.5 bg-neuro-orange text-white rounded-xl text-sm font-bold hover:bg-neuro-orange/90 transition-all whitespace-nowrap">
                 Claim This Profile
               </a>
@@ -260,6 +295,21 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                     <span key={i} className="px-4 py-2 bg-neuro-orange/5 text-neuro-orange text-sm font-bold rounded-xl border border-neuro-orange/10">
                       {s}
                     </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Certifications */}
+            {certificationsList && certificationsList.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Award className="w-5 h-5 text-neuro-orange" />
+                  <h2 className="text-lg font-black text-neuro-navy">Certifications</h2>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {certificationsList.map((c: string, i: number) => (
+                    <span key={i} className="px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg border border-amber-100">{c}</span>
                   ))}
                 </div>
               </div>
@@ -338,6 +388,48 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 <div className="aspect-video">
                   <iframe src={doctor.video_url.replace('watch?v=', 'embed/').replace('vimeo.com/', 'player.vimeo.com/video/')}
                     className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                </div>
+              </div>
+            )}
+
+            {/* First Visit Info */}
+            {firstVisitInfo && (
+              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+                <h2 className="text-lg font-black text-neuro-navy mb-4">What to Expect on Your First Visit</h2>
+                <p className="text-gray-600 leading-relaxed whitespace-pre-line">{firstVisitInfo}</p>
+              </div>
+            )}
+
+            {/* Amenities */}
+            {amenitiesList && amenitiesList.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+                <h2 className="text-lg font-black text-neuro-navy mb-4">Amenities</h2>
+                <div className="flex flex-wrap gap-2">
+                  {amenitiesList.map((a: string, i: number) => (
+                    <span key={i} className="px-3 py-1.5 bg-gray-50 text-gray-700 text-sm rounded-lg border border-gray-100">{a}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Team Members */}
+            {teamMembersList && teamMembersList.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <Users className="w-5 h-5 text-neuro-orange" />
+                  <h2 className="text-lg font-black text-neuro-navy">Our Team</h2>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {teamMembersList.map((m, i) => (
+                    <div key={i} className="text-center">
+                      <div className="w-20 h-20 rounded-xl bg-gray-100 overflow-hidden mx-auto mb-2">
+                        {m.photo_url ? <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" /> :
+                          <div className="w-full h-full flex items-center justify-center text-gray-300 text-2xl font-bold">{m.name?.[0]}</div>}
+                      </div>
+                      <p className="text-sm font-bold text-neuro-navy">{m.name}</p>
+                      <p className="text-xs text-gray-500">{m.role}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -580,6 +672,26 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 </div>
               )}
 
+              {/* Insurance Networks */}
+              {insuranceNetworks && insuranceNetworks.length > 0 && (
+                <div className="pt-3 border-t border-gray-100">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Insurance Accepted</p>
+                  <div className="flex flex-wrap gap-1">
+                    {insuranceNetworks.map((ins: string, i: number) => (
+                      <span key={i} className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-lg border border-blue-100">{ins}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Parking & Access */}
+              {parkingInfo && (
+                <div className="pt-3 border-t border-gray-100">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Parking & Access</p>
+                  <p className="text-sm text-gray-600">{parkingInfo}</p>
+                </div>
+              )}
+
               {/* Refer (doctor only) */}
               {session && userRole === 'doctor' && doctor.user_id !== session.user.id && (
                 <button onClick={() => setShowReferralModal(true)}
@@ -712,9 +824,15 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       {/* Sticky mobile bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-200 py-3 px-4 z-[100] lg:hidden">
         <div className="flex gap-3 max-w-3xl mx-auto">
-          <a href="#appointment" className="flex-1 py-3.5 bg-neuro-orange text-white rounded-xl font-bold text-sm text-center">
-            Book Consultation
-          </a>
+          {bookingUrl ? (
+            <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('booking_click')} className="flex-1 py-3.5 bg-green-500 text-white rounded-xl font-bold text-sm text-center">
+              Book Online
+            </a>
+          ) : (
+            <a href="#appointment" className="flex-1 py-3.5 bg-neuro-orange text-white rounded-xl font-bold text-sm text-center">
+              Book Consultation
+            </a>
+          )}
           {doctor.phone && (
             <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')} className="flex-1 py-3.5 bg-neuro-navy text-white rounded-xl font-bold text-sm text-center flex items-center justify-center gap-2">
               <Phone className="w-4 h-4" /> Call

@@ -5,8 +5,17 @@ import { Shuffle, Plus, Loader2, Calendar, Users, MapPin, DollarSign, XCircle, A
 import Link from "next/link";
 import { getActiveCycle, getMyMatchPositions } from "./actions";
 import type { MatchCycle, MatchPosition } from "@/types/chiromatch";
+import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 export default function DoctorChiroMatchPage() {
+  return (
+    <UpgradeGate feature="ChiroMatch" requiredTier="growth" description="Residency-style matching to find your ideal associate or next opportunity. Post positions and rank candidates automatically.">
+      <DoctorChiroMatchContent />
+    </UpgradeGate>
+  );
+}
+
+function DoctorChiroMatchContent() {
   const [cycle, setCycle] = useState<MatchCycle | null>(null);
   const [positions, setPositions] = useState<MatchPosition[]>([]);
   const [loading, setLoading] = useState(true);

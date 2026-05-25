@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { Automations } from "@/lib/automations";
-import { createServerSupabase } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 import { Resend } from "resend";
 
 export async function POST(req: Request) {
   const body = await req.text();
   const signature = req.headers.get("Stripe-Signature") as string;
-  const supabase = createServerSupabase();
+  const supabase = createAdminClient();
 
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
