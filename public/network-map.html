@@ -488,13 +488,34 @@
         });
     }
 
+    // Quick land check — filters ocean pins from bad geocoding
+    function isOnLand(lat, lng) {
+        // Continental US
+        if (lat >= 24 && lat <= 50 && lng >= -125 && lng <= -66) {
+            if (lng > -65) return false;
+            if (lat < 27 && lat > 24 && lng > -90 && lng < -83) return false;
+            return true;
+        }
+        // Hawaii
+        if (lat >= 18 && lat <= 23 && lng >= -161 && lng <= -154) return true;
+        // Alaska
+        if (lat >= 51 && lat <= 72 && lng >= -180 && lng <= -130) return true;
+        // Canada, Europe, Australia, Asia, Africa, Americas
+        if (lat >= 42 && lat <= 84 && lng >= -141 && lng <= -52) return true;
+        if (lat >= 36 && lat <= 72 && lng >= -11 && lng <= 40) return true;
+        if (lat >= -44 && lat <= -10 && lng >= 112 && lng <= 154) return true;
+        if (lat >= 7 && lat <= 55 && lng >= 60 && lng <= 150) return true;
+        if (lat >= -56 && lat <= 37 && lng >= -82 && lng <= 52) return true;
+        return false;
+    }
+
     function loadDoctors() {
         fetch('/api/directory/search?q=&limit=500')
             .then(function(res) { return res.json(); })
             .then(function(data) {
                 var doctors = data.doctors || [];
                 var features = doctors
-                    .filter(function(d) { return d.latitude && d.longitude && d.latitude !== 0 && d.longitude !== 0; })
+                    .filter(function(d) { return d.latitude && d.longitude && d.latitude !== 0 && d.longitude !== 0 && isOnLand(d.latitude, d.longitude); })
                     .map(function(d) {
                         return {
                             type: 'Feature',
