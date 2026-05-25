@@ -116,7 +116,7 @@ function RegisterForm() {
           {claimId ? "Claim Your Profile" : roleFromUrl ? `Join as a ${role === 'doctor' ? 'Doctor' : role === 'student' ? 'Student' : 'Patient'}` : "Create your account"}
         </h1>
         {claimId ? (
-          <p className="text-center text-gray-500 text-sm mb-6">Create an account to manage your NeuroChiro listing. Takes 30 seconds.</p>
+          <p className="text-center text-gray-500 text-sm mb-6">Three fields. Takes 15 seconds. Your profile links automatically.</p>
         ) : roleFromUrl ? (
           <p className="text-center text-gray-500 text-sm mb-6">Three fields. Takes 15 seconds.</p>
         ) : (
@@ -183,8 +183,8 @@ function RegisterForm() {
             <input type="text" name="website_url" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
           </div>
 
-          {/* Phone + license — only show on full registration form, not streamlined flow */}
-          {!roleFromUrl && (
+          {/* Phone + license — only show on full registration form, not streamlined/claim flow */}
+          {!roleFromUrl && !claimId && (
             <>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone <span className="text-gray-400">(optional)</span></label>
