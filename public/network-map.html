@@ -297,10 +297,7 @@
             fitToFeatures(pendingFeatures);
         }
 
-        var params = new URLSearchParams(window.location.search);
-        if (params.get('autoload') === 'doctors') {
-            loadDoctors();
-        }
+        // Data is sent by parent via postMessage — no self-loading
     });
 
     // ── PostMessage from parent ──
@@ -319,6 +316,15 @@
                 if (features.length > 0) {
                     setFeatures(features);
                     fitToFeatures(features);
+                }
+                break;
+
+            case 'update-markers':
+                var updatedFeatures = d.data || [];
+                console.log('[MAP] Received update-markers with', updatedFeatures.length, 'features');
+                if (updatedFeatures.length > 0) {
+                    setFeatures(updatedFeatures);
+                    // No fitToFeatures — keep current view
                 }
                 break;
 

@@ -129,25 +129,20 @@ export default function GlobalNetworkMap({
     return () => clearInterval(interval);
   }, [mapReady]);
 
-  // Center on results
+  // Set initial view when map is ready (only once per region change)
+  const initialViewSent = useRef(false);
   useEffect(() => {
-    if (mapReady && iframeRef.current?.contentWindow) {
-      let center = region.mapDefaults.center;
-      let zoom = region.mapDefaults.zoom;
-      const focusDoctors = listDoctors.length > 0 ? listDoctors : initialDoctors;
-      if (focusDoctors.length > 0) {
-        const firstDoc = focusDoctors.find(d => parseFloat(d.latitude as any) && parseFloat(d.longitude as any));
-        if (firstDoc) {
-          center = [parseFloat(firstDoc.longitude as any), parseFloat(firstDoc.latitude as any)];
-          zoom = focusDoctors.length < 5 ? 10 : 6;
-        }
-      }
-      iframeRef.current.contentWindow.postMessage({ type: 'set-view', center, zoom }, window.location.origin);
-      if (!currentBounds.current) {
-        updateMapData(undefined as any, region.mapDefaults.zoom);
-      }
+    if (!mapReady || !iframeRef.current?.contentWindow) return;
+    // Only send initial view once — markers handle fit-to-bounds
+    if (!initialViewSent.current) {
+      initialViewSent.current = true;
+      iframeRef.current.contentWindow.postMessage({
+        type: 'set-view',
+        center: region.mapDefaults.center,
+        zoom: region.mapDefaults.zoom
+      }, window.location.origin);
     }
-  }, [mapReady, region.code, listDoctors, initialDoctors]);
+  }, [mapReady, region.code]);
 
   // Build marker data — include extra props for preview card
   const buildMarkerData = useCallback(() => {
@@ -177,23 +172,19 @@ export default function GlobalNetworkMap({
     }).filter((f): f is NonNullable<typeof f> => f !== null);
   }, [initialDoctors, listDoctors, externalSearchQuery, externalLocationQuery]);
 
-  // Sync markers to iframe
+  // Sync markers to iframe — send once when ready, update without re-fitting on filter changes
+  const hasSentInitialMarkers = useRef(false);
   useEffect(() => {
-    if (!iframeRef.current?.contentWindow) return;
-    const sendMarkers = () => {
-      const dataToSend = buildMarkerData();
-      if (dataToSend.length === 0) return;
-      iframeRef.current?.contentWindow?.postMessage({
-        type: 'force-raw-markers',
-        data: dataToSend,
-        layer: activeLayer
-      }, window.location.origin);
-    };
-    if (mapReady) sendMarkers();
-    const t1 = setTimeout(sendMarkers, 1500);
-    const t2 = setTimeout(sendMarkers, 3500);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [initialDoctors, listDoctors, mapReady, activeLayer, buildMarkerData]);
+    if (!mapReady || !iframeRef.current?.contentWindow) return;
+    const dataToSend = buildMarkerData();
+    if (dataToSend.length === 0) return;
+    const isInitial = !hasSentInitialMarkers.current;
+    hasSentInitialMarkers.current = true;
+    iframeRef.current.contentWindow.postMessage({
+      type: isInitial ? 'force-raw-markers' : 'update-markers',
+      data: dataToSend,
+    }, window.location.origin);
+  }, [initialDoctors, listDoctors, mapReady, buildMarkerData]);
 
   // Handle iframe messages
   useEffect(() => {
@@ -242,7 +233,7 @@ export default function GlobalNetworkMap({
       <iframe
         ref={iframeRef}
         id="network-map-iframe"
-        src={`/network-map.html${initialDoctors.length > 0 ? '?autoload=doctors' : ''}`}
+        src="/network-map.html"
         loading="lazy"
         className="absolute inset-0 w-full h-full border-none"
         title="Global Network Map"
