@@ -67,7 +67,7 @@ export default function GlobalNetworkMap({
     iframeRef.current.contentWindow.postMessage({
       type: highlightedDoctorId ? 'highlight-marker' : 'highlight-marker',
       doctorId: highlightedDoctorId || null
-    }, '*');
+    }, window.location.origin);
   }, [highlightedDoctorId]);
 
   // Handle location centering
@@ -82,7 +82,7 @@ export default function GlobalNetworkMap({
             type: 'set-view',
             center: [Number(data[0].lon), Number(data[0].lat)],
             zoom: 12
-          }, '*');
+          }, window.location.origin);
         }
       } catch (e) {
         console.error("Geocoding error:", e);
@@ -124,7 +124,7 @@ export default function GlobalNetworkMap({
   useEffect(() => {
     if (mapReady) return;
     const interval = setInterval(() => {
-      iframeRef.current?.contentWindow?.postMessage({ type: 'is-ready' }, '*');
+      iframeRef.current?.contentWindow?.postMessage({ type: 'is-ready' }, window.location.origin);
     }, 1000);
     return () => clearInterval(interval);
   }, [mapReady]);
@@ -142,7 +142,7 @@ export default function GlobalNetworkMap({
           zoom = focusDoctors.length < 5 ? 10 : 6;
         }
       }
-      iframeRef.current.contentWindow.postMessage({ type: 'set-view', center, zoom }, '*');
+      iframeRef.current.contentWindow.postMessage({ type: 'set-view', center, zoom }, window.location.origin);
       if (!currentBounds.current) {
         updateMapData(undefined as any, region.mapDefaults.zoom);
       }
@@ -187,7 +187,7 @@ export default function GlobalNetworkMap({
         type: 'force-raw-markers',
         data: dataToSend,
         layer: activeLayer
-      }, '*');
+      }, window.location.origin);
     };
     if (mapReady) sendMarkers();
     const t1 = setTimeout(sendMarkers, 1500);
@@ -225,7 +225,7 @@ export default function GlobalNetworkMap({
     iframeRef.current?.contentWindow?.postMessage({
       type: 'select-marker',
       doctorId
-    }, '*');
+    }, window.location.origin);
   }, []);
 
   // Expose flyToDoctor via ref — but we'll use postMessage from parent instead

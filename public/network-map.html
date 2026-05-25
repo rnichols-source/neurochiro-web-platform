@@ -165,7 +165,7 @@
                     state: props.state,
                     photo_url: props.photo_url || ''
                 }
-            }, '*');
+            }, window.location.origin);
         });
 
         // Click empty space → deselect
@@ -174,7 +174,7 @@
             if (hits.length === 0 && selectedDoctorId) {
                 selectedDoctorId = null;
                 if (activePopup) { activePopup.remove(); activePopup = null; }
-                window.parent.postMessage({ type: 'marker-deselect' }, '*');
+                window.parent.postMessage({ type: 'marker-deselect' }, window.location.origin);
             }
         });
 
@@ -192,6 +192,9 @@
         if (!layersReady) {
             console.log('[MAP] Layers not ready, features queued');
             return;
+        }
+        if (features.length === 0) {
+            window.parent.postMessage({ type: 'map-empty' }, window.location.origin);
         }
         try {
             var source = map.getSource('doctors');
@@ -232,7 +235,7 @@
                     .setLngLat(coords).setHTML(createPopupHtml(f.properties)).addTo(map);
                 activePopup.on('close', function() { activePopup = null; });
 
-                window.parent.postMessage({ type: 'marker-click', data: f.properties }, '*');
+                window.parent.postMessage({ type: 'marker-click', data: f.properties }, window.location.origin);
                 return;
             }
         }
@@ -271,11 +274,14 @@
                 setFeatures(features);
                 fitToFeatures(features);
             })
-            .catch(function(err) { console.error('[MAP] Load failed:', err); });
+            .catch(function(err) {
+                console.error('[MAP] Load failed:', err);
+                window.parent.postMessage({ type: 'map-error', error: 'Failed to load doctors' }, window.location.origin);
+            });
     }
 
     function reportReady() {
-        window.parent.postMessage({ type: 'map-ready' }, '*');
+        window.parent.postMessage({ type: 'map-ready' }, window.location.origin);
     }
 
     // ── Map load ──

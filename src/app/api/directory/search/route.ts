@@ -287,7 +287,7 @@ export async function GET(request: NextRequest) {
 
     // Exact radius filter (bounding box was approximate)
     if (hasUserCoords && radius > 0) {
-      enriched = enriched.filter((d: any) => d.distance_miles == null || d.distance_miles <= radius);
+      enriched = enriched.filter((d: any) => d.distance_miles == null || d.distance_miles <= radius + 0.1);
     }
 
     // Sort

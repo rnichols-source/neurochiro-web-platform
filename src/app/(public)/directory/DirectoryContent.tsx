@@ -180,25 +180,25 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
     }
   };
 
+  const handleSearch = useCallback(() => {
+    setPage(1);
+    fetchDoctors(searchQuery, locationQuery, false);
+    if (locationQuery) setLastLocation(locationQuery);
+  }, [searchQuery, locationQuery]);
+
   // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
       handleSearch();
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchQuery, locationQuery]);
+  }, [searchQuery, locationQuery, handleSearch]);
 
   // Re-fetch if region changes
   useEffect(() => {
     setPage(1);
     fetchDoctors(searchQuery, locationQuery, false);
   }, [region.code]);
-
-  const handleSearch = () => {
-    setPage(1);
-    fetchDoctors(searchQuery, locationQuery, false);
-    if (locationQuery) setLastLocation(locationQuery);
-  };
 
   const handleUseLocation = () => {
     if (!navigator.geolocation) {
@@ -367,7 +367,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
     // On mobile, send select-marker to fly to pin
     const iframe = document.getElementById('network-map-iframe') as HTMLIFrameElement;
     if (iframe?.contentWindow) {
-      iframe.contentWindow.postMessage({ type: 'select-marker', doctorId: docId }, '*');
+      iframe.contentWindow.postMessage({ type: 'select-marker', doctorId: docId }, window.location.origin);
     }
   }, []);
 
@@ -553,7 +553,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
           onDismissPreview={() => {
             setSelectedDoctor(null);
             const iframe = document.getElementById('network-map-iframe') as HTMLIFrameElement;
-            iframe?.contentWindow?.postMessage({ type: 'deselect-marker' }, '*');
+            iframe?.contentWindow?.postMessage({ type: 'deselect-marker' }, window.location.origin);
           }}
           onSnapChange={setSheetSnap}
         >

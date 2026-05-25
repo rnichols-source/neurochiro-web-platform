@@ -72,8 +72,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (type === 'all' || type === 'name') {
-      // Get matching doctor names
+    if (type !== 'location') {
+      // Get matching doctor names (skip when searching by location only)
       const { data: nameData } = await supabase
         .from('doctors')
         .select('first_name, last_name, slug, clinic_name, city, state, photo_url')
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
       }));
     }
 
-    if (type === 'all') {
+    if (type !== 'location') {
       // Get matching specialties
       const COMMON_SPECIALTIES = [
         'Pediatric', 'Prenatal', 'Sports', 'Neurologically-Focused', 'Upper Cervical',
