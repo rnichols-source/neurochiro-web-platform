@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { formatDistance } from "@/lib/geo";
 import { cn } from "@/lib/utils";
+import { isProfileGated } from "@/lib/profile-gating";
 
 interface DoctorCardProps {
   doc: any;
@@ -22,6 +23,7 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
   const saved = isSaved('doctors', docId);
   const [showToast, setShowToast] = useState<string | null>(null);
   const [cardPhotoError, setCardPhotoError] = useState(false);
+  const gated = isProfileGated(doc);
 
   const location = [doc.city, doc.state].filter(Boolean).join(", ");
   const specialties = (doc.specialties || []).slice(0, 3);
@@ -87,7 +89,7 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
       {/* Doctor Info */}
       <div className={`flex items-start gap-4 mb-4 ${distanceMiles != null ? 'mt-6' : ''}`}>
         <div className="relative w-14 h-14 rounded-xl bg-neuro-navy overflow-hidden shadow flex-shrink-0 flex items-center justify-center">
-          {doc.photo_url && !cardPhotoError ? (
+          {doc.photo_url && !cardPhotoError && !gated ? (
             <img
               src={doc.photo_url}
               alt={name}
@@ -156,7 +158,7 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
             View Profile <ArrowRight className="w-3.5 h-3.5" />
           </div>
         </Link>
-        {hasBooking && (
+        {!gated && hasBooking && (
           <a
             href={doc.booking_url}
             target="_blank"
@@ -167,7 +169,7 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
             <Calendar className="w-3.5 h-3.5" />
           </a>
         )}
-        {doc.phone && (
+        {!gated && doc.phone && (
           <a
             href={`tel:${doc.phone}`}
             className="py-3 px-3 bg-neuro-orange text-white rounded-xl hover:bg-neuro-orange/90 transition-colors flex items-center justify-center gap-1 text-xs font-bold"

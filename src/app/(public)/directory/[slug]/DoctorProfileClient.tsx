@@ -13,6 +13,8 @@ import { createClient } from "@/lib/supabase";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { sendReferral } from "@/app/actions/referrals";
 import { submitPatientStory, getApprovedStories } from "@/app/actions/patient-stories";
+import { isProfileGated } from "@/lib/profile-gating";
+import ContactGateCTA from "@/components/directory/ContactGateCTA";
 import GoogleReviews from "@/components/directory/GoogleReviews";
 import Image from "next/image";
 import { getEpisodeByDoctorSlug } from "../../spotlight/spotlight-data";
@@ -48,6 +50,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const supabase = createClient();
 
   const [photoError, setPhotoError] = useState(false);
+  const gated = isProfileGated(doctor);
   const saved = isSaved('doctors', doctor.id?.toString());
   const name = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
   const spotlightEpisode = getEpisodeByDoctorSlug(slug);
@@ -165,17 +168,17 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
 
               {/* Social links */}
               <div className="flex items-center gap-2 mt-3 justify-center sm:justify-start">
-                {instagramUrl && (
+                {!gated && instagramUrl && (
                   <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
                     <Instagram className="w-4 h-4 text-white" />
                   </a>
                 )}
-                {facebookUrl && (
+                {!gated && facebookUrl && (
                   <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
                     <Facebook className="w-4 h-4 text-white" />
                   </a>
                 )}
-                {formatUrl(doctor.website_url) && (
+                {!gated && formatUrl(doctor.website_url) && (
                   <a href={formatUrl(doctor.website_url)!} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
                     <Globe className="w-4 h-4 text-white" />
                   </a>
@@ -190,21 +193,27 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
 
               {/* Quick CTA — hidden on mobile (sticky bar handles it) */}
               <div className="hidden sm:flex items-center gap-3 mt-5">
-                {doctor.phone && (
-                  <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')}
-                    className="px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-neuro-orange/90 transition-colors">
-                    <Phone className="w-4 h-4" /> Call Now
-                  </a>
-                )}
-                {bookingUrl ? (
-                  <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('booking_click')}
-                    className="px-6 py-3 bg-green-500 text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-green-600 transition-colors">
-                    <Calendar className="w-4 h-4" /> Book Online
-                  </a>
+                {gated ? (
+                  <ContactGateCTA variant="hero" />
                 ) : (
-                  <a href="#appointment" className="px-6 py-3 bg-white/10 text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-white/20 transition-colors border border-white/20">
-                    <Calendar className="w-4 h-4" /> Book Consultation
-                  </a>
+                  <>
+                    {doctor.phone && (
+                      <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')}
+                        className="px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-neuro-orange/90 transition-colors">
+                        <Phone className="w-4 h-4" /> Call Now
+                      </a>
+                    )}
+                    {bookingUrl ? (
+                      <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('booking_click')}
+                        className="px-6 py-3 bg-green-500 text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-green-600 transition-colors">
+                        <Calendar className="w-4 h-4" /> Book Online
+                      </a>
+                    ) : (
+                      <a href="#appointment" className="px-6 py-3 bg-white/10 text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-white/20 transition-colors border border-white/20">
+                        <Calendar className="w-4 h-4" /> Book Consultation
+                      </a>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -594,23 +603,29 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
 
               {/* Contact Buttons */}
               <div className="space-y-2">
-                {doctor.phone && (
-                  <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')}
-                    className="w-full py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors">
-                    <Phone className="w-4 h-4" /> Call {doctor.phone}
-                  </a>
-                )}
-                {formatUrl(doctor.website_url) && (
-                  <a href={formatUrl(doctor.website_url)!} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('website_click')}
-                    className="w-full py-3 bg-neuro-navy text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-neuro-navy/90 transition-colors">
-                    <Globe className="w-4 h-4" /> Visit Website
-                  </a>
-                )}
-                {doctor.email && (
-                  <a href={`mailto:${doctor.email}`} onClick={() => trackEvent('contact_click')}
-                    className="w-full py-3 bg-gray-100 text-neuro-navy font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors">
-                    <Mail className="w-4 h-4" /> Email
-                  </a>
+                {gated ? (
+                  <ContactGateCTA variant="sidebar" />
+                ) : (
+                  <>
+                    {doctor.phone && (
+                      <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')}
+                        className="w-full py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors">
+                        <Phone className="w-4 h-4" /> Call {doctor.phone}
+                      </a>
+                    )}
+                    {formatUrl(doctor.website_url) && (
+                      <a href={formatUrl(doctor.website_url)!} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('website_click')}
+                        className="w-full py-3 bg-neuro-navy text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-neuro-navy/90 transition-colors">
+                        <Globe className="w-4 h-4" /> Visit Website
+                      </a>
+                    )}
+                    {doctor.email && (
+                      <a href={`mailto:${doctor.email}`} onClick={() => trackEvent('contact_click')}
+                        className="w-full py-3 bg-gray-100 text-neuro-navy font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors">
+                        <Mail className="w-4 h-4" /> Email
+                      </a>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -825,19 +840,25 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       {/* Sticky mobile bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-200 py-3 px-4 z-[100] lg:hidden">
         <div className="flex gap-3 max-w-3xl mx-auto">
-          {bookingUrl ? (
-            <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('booking_click')} className="flex-1 py-3.5 bg-green-500 text-white rounded-xl font-bold text-sm text-center">
-              Book Online
-            </a>
+          {gated ? (
+            <ContactGateCTA variant="mobile" />
           ) : (
-            <a href="#appointment" className="flex-1 py-3.5 bg-neuro-orange text-white rounded-xl font-bold text-sm text-center">
-              Book Consultation
-            </a>
-          )}
-          {doctor.phone && (
-            <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')} className="flex-1 py-3.5 bg-neuro-navy text-white rounded-xl font-bold text-sm text-center flex items-center justify-center gap-2">
-              <Phone className="w-4 h-4" /> Call
-            </a>
+            <>
+              {bookingUrl ? (
+                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('booking_click')} className="flex-1 py-3.5 bg-green-500 text-white rounded-xl font-bold text-sm text-center">
+                  Book Online
+                </a>
+              ) : (
+                <a href="#appointment" className="flex-1 py-3.5 bg-neuro-orange text-white rounded-xl font-bold text-sm text-center">
+                  Book Consultation
+                </a>
+              )}
+              {doctor.phone && (
+                <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')} className="flex-1 py-3.5 bg-neuro-navy text-white rounded-xl font-bold text-sm text-center flex items-center justify-center gap-2">
+                  <Phone className="w-4 h-4" /> Call
+                </a>
+              )}
+            </>
           )}
         </div>
       </div>
