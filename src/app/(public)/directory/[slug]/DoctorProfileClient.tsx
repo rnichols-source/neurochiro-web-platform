@@ -231,7 +231,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Years Practice</div>
               </div>
             )}
-            {d.profile_views > 0 && (
+            {d.profile_views > 0 && !gated && (
               <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
                 <div className="text-xl sm:text-2xl font-black text-neuro-orange">{d.profile_views > 999 ? `${(d.profile_views / 1000).toFixed(1)}k` : d.profile_views}</div>
                 <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Views</div>
