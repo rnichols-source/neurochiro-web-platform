@@ -12,7 +12,6 @@ const NEW_DOCTORS = [
     city: 'Grapevine',
     state: 'Texas',
     country: 'United States',
-    zip_code: '76051',
     phone: '',
     email: '',
     website_url: 'https://liberatedchiropractic.com',
@@ -36,7 +35,6 @@ const NEW_DOCTORS = [
     city: 'Georgetown',
     state: 'Texas',
     country: 'United States',
-    zip_code: '78626',
     phone: '',
     email: '',
     website_url: 'https://riseupchirotx.com',
@@ -60,7 +58,6 @@ const NEW_DOCTORS = [
     city: 'Cypress',
     state: 'Texas',
     country: 'United States',
-    zip_code: '77095',
     phone: '(281) 225-0127',
     email: '',
     website_url: 'https://wavelengthchiropractic.com',
@@ -85,7 +82,6 @@ const NEW_DOCTORS = [
     city: 'Beaumont',
     state: 'Texas',
     country: 'United States',
-    zip_code: '77713',
     phone: '(409) 333-1039',
     email: '',
     website_url: 'https://rootschirobmt.com',
@@ -141,7 +137,7 @@ export async function POST(req: Request) {
 
     const { data: inserted, error } = await supabase
       .from('doctors')
-      .insert(doc)
+      .insert(doc as any)
       .select('id, slug')
       .single();
 
