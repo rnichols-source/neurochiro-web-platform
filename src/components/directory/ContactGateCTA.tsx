@@ -46,10 +46,11 @@ export default function ContactGateCTA({ variant, doctorId, doctorName }: Contac
   if (variant === 'mobile') {
     return showForm ? (
       <form onSubmit={handleSubmit} className="flex-1 space-y-2">
-        <input type="email" required placeholder="Your email" value={email} onChange={(e) => setEmail(e.target.value)}
+        <p className="text-gray-500 text-xs">We&apos;ll notify {doctorName || 'the doctor'} and share your email so they can reach out to you.</p>
+        <input type="email" required placeholder="Enter your email..." value={email} onChange={(e) => setEmail(e.target.value)}
           className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange" />
         <button type="submit" disabled={loading} className="w-full py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm">
-          {loading ? "Sending..." : "Request Contact Info"}
+          {loading ? "Sending..." : "Send Request"}
         </button>
       </form>
     ) : (
@@ -61,12 +62,15 @@ export default function ContactGateCTA({ variant, doctorId, doctorName }: Contac
 
   if (variant === 'hero') {
     return showForm ? (
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input type="email" required placeholder="Your email" value={email} onChange={(e) => setEmail(e.target.value)}
-          className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-neuro-orange placeholder:text-white/40" />
-        <button type="submit" disabled={loading} className="px-5 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm whitespace-nowrap">
-          {loading ? "..." : "Send Request"}
-        </button>
+      <form onSubmit={handleSubmit} className="space-y-2">
+        <p className="text-white/60 text-xs">We&apos;ll let {doctorName || 'the doctor'} know you&apos;re looking for them and share your email so they can reach out.</p>
+        <div className="flex gap-2">
+          <input type="email" required placeholder="Enter your email..." value={email} onChange={(e) => setEmail(e.target.value)}
+            className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:border-neuro-orange placeholder:text-white/40" />
+          <button type="submit" disabled={loading} className="px-5 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm whitespace-nowrap">
+            {loading ? "..." : "Send Request"}
+          </button>
+        </div>
       </form>
     ) : (
       <button onClick={() => setShowForm(true)} className="px-6 py-3 bg-white/10 text-white/70 rounded-xl text-sm flex items-center gap-2 border border-white/20 hover:bg-white/15 transition-colors">
@@ -81,12 +85,13 @@ export default function ContactGateCTA({ variant, doctorId, doctorName }: Contac
     <div className="w-full py-4 px-4 bg-gray-50 rounded-xl text-center space-y-2 border border-gray-100">
       {showForm ? (
         <form onSubmit={handleSubmit} className="space-y-2">
+          <p className="text-xs text-gray-500 text-left">We&apos;ll notify {doctorName || 'this doctor'} and share your email so they can reach out.</p>
           <input type="text" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)}
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-neuro-orange" />
-          <input type="email" required placeholder="Your email" value={email} onChange={(e) => setEmail(e.target.value)}
+          <input type="email" required placeholder="Enter your email..." value={email} onChange={(e) => setEmail(e.target.value)}
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-neuro-orange" />
           <button type="submit" disabled={loading} className="w-full py-2.5 bg-neuro-orange text-white font-bold rounded-lg text-xs">
-            {loading ? "Sending..." : "Request Contact Info"}
+            {loading ? "Sending..." : "Send Request"}
           </button>
         </form>
       ) : (
