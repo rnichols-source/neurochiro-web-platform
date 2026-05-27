@@ -1,121 +1,83 @@
 "use client";
 
-import { useState } from "react";
-import { Check, X, ArrowRight, Zap, Crown, ShieldCheck, Camera, BarChart3, Users, MessageSquare, Briefcase, Award, Star } from "lucide-react";
+import { Check, X, Zap, Star } from "lucide-react";
 import Link from "next/link";
 
 export default function DoctorPricing() {
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
-
-  const growthPrice = billingCycle === "monthly" ? "69" : "59";
-  const proPrice = billingCycle === "monthly" ? "129" : "109";
-
   const tiers = [
     {
       name: "Free",
       price: "0",
       period: "forever",
-      description: "Get listed and start getting found by patients.",
+      description: "Get listed. Start getting found.",
       cta: "Get Started Free",
       ctaLink: "/get-started",
       highlight: false,
       features: [
         { text: "Listed in global directory", included: true },
         { text: "Public profile page", included: true },
-        { text: "Profile view count", included: true },
-        { text: "Verified badge", included: true },
-        { text: "Post 1 job listing", included: true },
+        { text: "Map pin with your location", included: true },
+        { text: "Up to 2 specialties shown", included: true },
         { text: "Browse seminars & marketplace", included: true },
-        { text: "Phone & contact info on profile", included: false },
-        { text: "Website & booking link visible", included: false },
-        { text: "Social media links on profile", included: false },
+        { text: "Phone & contact info visible", included: false },
+        { text: "Website & booking link", included: false },
+        { text: "Social media links", included: false },
         { text: "Photo on directory cards", included: false },
-        { text: "Patient lead pipeline", included: false },
-        { text: "AI practice insights", included: false },
-        { text: "Competitive ranking", included: false },
-      ],
-    },
-    {
-      name: "Growth",
-      price: growthPrice,
-      period: billingCycle === "monthly" ? "/mo" : "/mo (billed annually)",
-      description: "Everything to grow your practice and fill your schedule.",
-      cta: "Start Growth",
-      ctaLink: "/get-started",
-      highlight: true,
-      badge: "Most Popular",
-      features: [
-        { text: "Everything in Free", included: true },
-        { text: "Full contact info visible to patients", included: true },
-        { text: "Photo displayed on directory cards", included: true },
-        { text: "See WHO viewed your profile", included: true },
-        { text: "Patient lead pipeline (CRM)", included: true },
-        { text: "AI practice insights & weekly report", included: true },
-        { text: "Competitive ranking in your city", included: true },
-        { text: "Revenue intelligence & ROI tracking", included: true },
-        { text: "Full analytics dashboard", included: true },
-        { text: "Unlimited job postings", included: true },
-        { text: "ChiroMatch participation", included: true },
-        { text: "CE credit tracker + certificates", included: true },
-        { text: "Doctor-to-doctor messaging", included: true },
-        { text: "Monthly Instagram story feature", included: true },
-        { text: "Content reposts on @neurochiro", included: true },
+        { text: "Verified badge", included: false },
+        { text: "Analytics dashboard", included: false },
+        { text: "Patient leads & messaging", included: false },
+        { text: "Priority search ranking", included: false },
+        { text: "Practice tools (AI, KPI, Care Plans)", included: false },
       ],
     },
     {
       name: "Pro",
-      price: proPrice,
-      period: billingCycle === "monthly" ? "/mo" : "/mo (billed annually)",
-      description: "The authority tier. Every tool + personal access to Dr. Ray.",
-      cta: "Go Pro",
+      price: "49",
+      period: "/mo",
+      description: "Everything unlocked. Patients can reach you.",
+      cta: "Upgrade to Pro",
       ctaLink: "/get-started",
-      highlight: false,
+      highlight: true,
+      badge: "Everything Included",
       features: [
-        { text: "Everything in Growth", included: true },
-        { text: "1-on-1 onboarding call with Dr. Ray", included: true },
-        { text: "NeuroChiro Spotlight interview", included: true },
-        { text: "Blog feature + SEO backlink", included: true },
-        { text: "Weekly Instagram promotion (4x/month)", included: true },
-        { text: '"As Seen on NeuroChiro" embed badge', included: true },
-        { text: "Profile Boost (rank higher in search)", included: true },
-        { text: "Featured Doctor gold badge", included: true },
+        { text: "Full directory listing", included: true },
+        { text: "Contact info visible to patients", included: true },
+        { text: "Phone, website, booking link", included: true },
+        { text: "Instagram & social links", included: true },
+        { text: "Photo on directory cards", included: true },
+        { text: "Verified badge", included: true },
+        { text: "Priority search ranking", included: true },
+        { text: "Analytics dashboard", included: true },
+        { text: "Patient leads & messaging", included: true },
+        { text: "KPI Tracker", included: true },
+        { text: "AI Bio Generator", included: true },
         { text: "Care Plan Builder", included: true },
         { text: "Scan Report Generator", included: true },
-        { text: "KPI Tracker", included: true },
-        { text: "P&L Analyzer", included: true },
+        { text: "ChiroMatch hiring", included: true },
+        { text: "CE Tracker + certificates", included: true },
         { text: "Content Library", included: true },
-        { text: "Contract Templates", included: true },
+        { text: "P&L Analyzer", included: true },
+        { text: "Referral Network", included: true },
       ],
     },
   ];
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-heading font-black text-neuro-navy uppercase tracking-tight">
-          Choose Your <span className="text-neuro-orange">Plan.</span>
+          Simple <span className="text-neuro-orange">Pricing.</span>
         </h1>
         <p className="text-gray-500 mt-3 max-w-lg mx-auto">
-          Start free. Upgrade when you&apos;re ready. No contracts, cancel anytime.
+          Free to get listed. $49/mo to unlock everything. No contracts, cancel anytime.
         </p>
-
-        {/* Billing toggle */}
-        <div className="flex items-center justify-center gap-4 mt-6">
-          <span className={`text-sm font-bold ${billingCycle === "monthly" ? "text-neuro-navy" : "text-gray-400"}`}>Monthly</span>
-          <button
-            onClick={() => setBillingCycle(billingCycle === "monthly" ? "annual" : "monthly")}
-            className="relative w-14 h-7 bg-neuro-navy rounded-full"
-          >
-            <div className={`absolute top-0.5 w-6 h-6 bg-neuro-orange rounded-full transition-all ${billingCycle === "annual" ? "left-7" : "left-0.5"}`} />
-          </button>
-          <span className={`text-sm font-bold ${billingCycle === "annual" ? "text-neuro-navy" : "text-gray-400"}`}>
-            Annual <span className="text-green-500 text-xs">(Save 15%)</span>
-          </span>
-        </div>
+        <p className="text-neuro-orange text-sm font-bold mt-2">
+          One new patient pays for a full year of NeuroChiro.
+        </p>
       </div>
 
       {/* Pricing Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 max-w-3xl mx-auto">
         {tiers.map((tier) => (
           <div
             key={tier.name}
@@ -135,7 +97,7 @@ export default function DoctorPricing() {
             </div>
 
             <div className="mb-6">
-              <span className="text-4xl font-black text-neuro-navy">${tier.price}</span>
+              <span className="text-5xl font-black text-neuro-navy">${tier.price}</span>
               <span className="text-gray-400 text-sm font-bold">{tier.period}</span>
             </div>
 
@@ -157,11 +119,10 @@ export default function DoctorPricing() {
               className={`w-full py-4 font-bold rounded-xl text-center text-sm transition-all block ${
                 tier.highlight
                   ? "bg-neuro-orange text-white hover:bg-neuro-orange/90 shadow-lg shadow-neuro-orange/20"
-                  : tier.name === "Free"
-                  ? "bg-neuro-navy text-white hover:bg-neuro-navy-light"
                   : "bg-neuro-navy text-white hover:bg-neuro-navy-light"
               }`}
             >
+              {tier.highlight && <Zap className="w-4 h-4 inline mr-2" />}
               {tier.cta}
             </Link>
           </div>
