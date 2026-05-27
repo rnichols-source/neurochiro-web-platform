@@ -54,7 +54,7 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
   if (isFounder) return <>{children}</>;
 
   const currentLevel = TIER_LEVELS[tier || "basic"] || 0;
-  const requiredLevel = TIER_LEVELS[requiredTier] || 1;
+  const requiredLevel = TIER_LEVELS[requiredTier || "pro"] || 1;
   const isLocked = currentLevel < requiredLevel;
 
   // If they have access, just render the children
