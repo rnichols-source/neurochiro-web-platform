@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     }
 
     // Insert patient request
-    await supabase.from('patient_requests').insert({
+    await (supabase as any).from('patient_requests').insert({
       doctor_id: doctorId,
       patient_email: patientEmail,
       patient_name: patientName || null,
