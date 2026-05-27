@@ -77,8 +77,8 @@ export async function getDoctors(options: {
       return { doctors: [], total: 0, error: true };
     }
 
-    // Priority sort: Founding → Boosted → Tier (Pro > Growth > Starter)
-    const tierPriority: Record<string, number> = { pro: 1, growth: 2, basic: 3, starter: 3 };
+    // Priority sort: Founding → Boosted → Tier (Pro > Free)
+    const tierPriority: Record<string, number> = { pro: 1, growth: 1, free: 2, basic: 2, starter: 2 };
     if (data) {
       data.sort((a: any, b: any) => {
         const aFounder = a.is_founding_member ? 0 : 1;

@@ -7,7 +7,7 @@ export async function GET(
 ) {
   const { slug } = await params;
 
-  // Verify the doctor exists and has Growth+ tier
+  // Verify the doctor exists and has Pro tier
   const supabase = createAdminClient();
   const { data: doctor } = await supabase
     .from('doctors')

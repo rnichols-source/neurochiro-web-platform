@@ -143,7 +143,7 @@ export default function WhyNeuroChiroPage() {
             <p className="text-xs text-gray-500">Your practice featured in our Instagram highlights for followers to discover.</p>
           </div>
           <div className="bg-white rounded-2xl border-2 border-neuro-orange p-6 text-center">
-            <p className="text-sm font-bold text-neuro-orange mb-1">Growth</p>
+            <p className="text-sm font-bold text-neuro-orange mb-1">Pro</p>
             <p className="text-lg font-black text-neuro-navy mb-2">Monthly Instagram Feature</p>
             <p className="text-xs text-gray-500">1 dedicated post + story per month featuring your practice to our entire audience.</p>
           </div>

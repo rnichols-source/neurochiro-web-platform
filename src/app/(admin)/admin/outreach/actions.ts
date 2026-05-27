@@ -683,7 +683,7 @@ export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
       name: 'Objection: What Does It Cost?',
       category: 'objection',
       description: 'When they ask about pricing',
-      template: `Great question.\n\nYour basic listing is free — name, clinic, city. Patients can find you.\n\nPro is $49/mo — that's where you get your photo, bio, specialties, verified badge, patient messaging, and analytics.\n\nPro is $49/mo — everything in Growth plus care plans, job posting, and the full practice toolkit.\n\nMost docs start with Growth and it honestly pays for itself fast. One new patient from the directory and you're ahead.\n\nWant me to walk you through it?`,
+      template: `Great question.\n\nYour free listing gets you on the map — name, clinic, city. Patients can find you.\n\nPro is $49/mo — that unlocks your photo, bio, specialties, verified badge, patient messaging, analytics, and every practice tool.\n\nMost docs say it pays for itself with the first new patient from the directory.\n\nWant me to walk you through it?`,
     },
     {
       id: 'objection_time',

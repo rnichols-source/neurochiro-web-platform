@@ -565,7 +565,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         if (supabaseAdmin && emailEnabled && payload.email && payload.userId) {
            // Check if they already paid/completed
            const { data: profile } = await supabaseAdmin.from('profiles').select('tier').eq('id', payload.userId).single();
-           if (!profile || profile.tier === 'basic' || profile.tier === null) {
+           if (!profile || profile.tier !== 'pro' && profile.tier !== 'student_paid') {
               await sendPremiumEmail({
                 to: payload.email,
                 subject: 'Did you forget something? 🌍',

@@ -12,7 +12,7 @@ interface VerifiedBadgeProps {
 
 export default function VerifiedBadge({ doctorSlug, doctorName, tier }: VerifiedBadgeProps) {
   const [copied, setCopy] = useState(false);
-  const isStarter = tier === 'basic';
+  const isStarter = tier !== 'pro';
   
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co';
   
@@ -68,7 +68,7 @@ export default function VerifiedBadge({ doctorSlug, doctorName, tier }: Verified
                     <h3 className="text-2xl font-heading font-black text-gray-400 uppercase tracking-tight">Authority Kit Locked</h3>
                   </div>
                   <p className="text-gray-500 text-sm leading-relaxed max-w-xl">
-                    The Instant Authority Kit is available for <span className="font-bold text-neuro-navy">Growth</span> and <span className="font-bold text-neuro-navy">Pro</span> members. Upgrade to unlock your verified badge and boost your website's clinical authority.
+                    The Instant Authority Kit is available for <span className="font-bold text-neuro-navy">Pro</span> members. Upgrade to unlock your verified badge and boost your website&apos;s clinical authority.
                   </p>
                </div>
                

@@ -164,7 +164,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
               <div className="p-6 bg-white rounded-2xl border border-neuro-orange/20 shadow-sm relative">
                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-neuro-orange text-white text-xs font-black px-2 py-1 rounded-full uppercase tracking-widest">Recommended</div>
                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Recovery Plan</p>
-                 <p className="text-2xl font-black text-neuro-orange">Growth Tier</p>
+                 <p className="text-2xl font-black text-neuro-orange">Pro — $49/mo</p>
               </div>
            </div>
         </section>
