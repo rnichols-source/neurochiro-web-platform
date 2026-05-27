@@ -288,6 +288,24 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         </div>
       )}
 
+      {/* Owner Upgrade Banner — only shows when doctor views their own gated profile */}
+      {gated && session?.user?.id && doctor.user_id === session.user.id && (
+        <div className="max-w-4xl mx-auto px-6 mt-6">
+          <div className="bg-gradient-to-r from-neuro-orange/10 to-neuro-orange/5 border border-neuro-orange/20 rounded-2xl p-5">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <p className="font-black text-neuro-navy text-sm">This is how patients see your profile</p>
+                <p className="text-xs text-gray-500 mt-1">Your phone, website, booking link, and photo are hidden. Upgrade to Pro so patients can reach you.</p>
+              </div>
+              <Link href="/doctor/billing"
+                className="px-5 py-2.5 bg-neuro-orange text-white rounded-xl text-sm font-bold hover:bg-neuro-orange/90 transition-all whitespace-nowrap shadow-lg shadow-neuro-orange/20">
+                Upgrade to Pro — $49/mo
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <section className="max-w-4xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
