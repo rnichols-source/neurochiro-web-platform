@@ -581,18 +581,19 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         break;
 
       case 'doctor_growth_upsell':
+      case 'doctor_pro_upsell':
         if (supabaseAdmin && emailEnabled && payload.email && payload.userId) {
            const { data: profile } = await supabaseAdmin.from('profiles').select('tier').eq('id', payload.userId).single();
-           if (profile && profile.tier === 'basic') {
+           if (profile && (profile.tier === 'free' || profile.tier === 'basic' || profile.tier === 'standard')) {
               await sendPremiumEmail({
                 to: payload.email,
                 subject: 'Ready to expand your clinical influence? 🚀',
-                title: 'Growth Tier Unlock',
+                title: 'Upgrade to Pro',
                 body: `<h1>Dr. ${payload.name || payload.full_name || ''}, level up your practice.</h1>
-                       <p>Your Free tier gets you on the map, but the Growth tier unlocks powerful student recruiting tools, seminar hosting capabilities, and advanced analytics to track your referral sources.</p>
-                       <p>Upgrade today and see what the full network can do for your clinic.</p>`,
-                ctaText: 'View Upgrade Options',
-                ctaUrl: 'https://neurochiro.co/doctor/settings'
+                       <p>Your free listing gets you on the map, but Pro ($49/mo) unlocks your full contact info, patient messaging, analytics, and the complete practice toolkit.</p>
+                       <p>One new patient pays for a full year. Upgrade today.</p>`,
+                ctaText: 'Upgrade to Pro — $49/mo',
+                ctaUrl: 'https://neurochiro.co/doctor/billing'
               });
            }
         }

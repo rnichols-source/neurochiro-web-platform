@@ -81,7 +81,7 @@ export async function POST(req: Request) {
           if (profile?.role === 'doctor') {
             await supabase
               .from('doctors')
-              .update({ verification_status: 'verified', membership_tier: membershipTier as 'basic' | 'growth' | 'pro' })
+              .update({ verification_status: 'verified', membership_tier: membershipTier as any })
               .eq('user_id', userId);
           }
 
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
                     email: signupEmail,
                     full_name: signupName,
                     role: signupRole,
-                    tier: signupRole === 'student' ? 'student_paid' : 'growth',
+                    tier: signupRole === 'student' ? 'student_paid' : 'pro',
                     stripe_customer_id: customer,
                   });
 
