@@ -44,7 +44,7 @@ try {
 
 export default function ContentLibraryPage() {
   return (
-    <UpgradeGate feature="Content Library" requiredTier="growth" description="Access ready-to-use patient education content, social media templates, and practice resources.">
+    <UpgradeGate feature="Content Library" requiredTier="pro" description="Access ready-to-use patient education content, social media templates, and practice resources.">
       <ContentLibraryContent />
     </UpgradeGate>
   );

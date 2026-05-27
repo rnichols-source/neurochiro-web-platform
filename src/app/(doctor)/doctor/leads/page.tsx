@@ -14,7 +14,7 @@ const STAGES = [
 
 export default function LeadsPage() {
   return (
-    <UpgradeGate feature="Patient Lead Pipeline" requiredTier="growth" description="Track and manage your patient leads through every stage of the conversion funnel.">
+    <UpgradeGate feature="Patient Lead Pipeline" requiredTier="pro" description="Track and manage your patient leads through every stage of the conversion funnel.">
       <LeadsPipelineContent />
     </UpgradeGate>
   );

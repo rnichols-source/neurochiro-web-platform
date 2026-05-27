@@ -8,7 +8,7 @@ import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 export default function ReferralNetworkPage() {
   return (
-    <UpgradeGate feature="Referral Network" requiredTier="growth" description="Build and track your doctor-to-doctor referral network. See who's sending you patients and strengthen those relationships.">
+    <UpgradeGate feature="Referral Network" requiredTier="pro" description="Build and track your doctor-to-doctor referral network. See who's sending you patients and strengthen those relationships.">
       <ReferralNetworkContent />
     </UpgradeGate>
   );

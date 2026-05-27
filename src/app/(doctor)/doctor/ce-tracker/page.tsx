@@ -8,7 +8,7 @@ import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 export default function CETrackerPage() {
   return (
-    <UpgradeGate feature="CE Tracker" requiredTier="growth" description="Track your continuing education credits — logged, verified, and exportable for license renewal.">
+    <UpgradeGate feature="CE Tracker" requiredTier="pro" description="Track your continuing education credits — logged, verified, and exportable for license renewal.">
       <CETrackerContent />
     </UpgradeGate>
   );

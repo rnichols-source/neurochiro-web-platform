@@ -133,7 +133,7 @@ function getStatusColor(value: number, target: number, invert: boolean): string 
 
 export default function KpiTrackerPage() {
   return (
-    <UpgradeGate feature="KPI Tracker" requiredTier="growth" description="Track your daily practice metrics, monitor trends, and keep your finger on the pulse of your business.">
+    <UpgradeGate feature="KPI Tracker" requiredTier="pro" description="Track your daily practice metrics, monitor trends, and keep your finger on the pulse of your business.">
       <KpiTrackerContent />
     </UpgradeGate>
   );

@@ -9,7 +9,7 @@ import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 export default function DoctorChiroMatchPage() {
   return (
-    <UpgradeGate feature="ChiroMatch" requiredTier="growth" description="Residency-style matching to find your ideal associate or next opportunity. Post positions and rank candidates automatically.">
+    <UpgradeGate feature="ChiroMatch" requiredTier="pro" description="Residency-style matching to find your ideal associate or next opportunity. Post positions and rank candidates automatically.">
       <DoctorChiroMatchContent />
     </UpgradeGate>
   );

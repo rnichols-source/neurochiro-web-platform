@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase";
 
 export default function DoctorAnalytics() {
   return (
-    <UpgradeGate feature="Analytics Dashboard" requiredTier="growth" description="See where your profile views come from, track trends over time, and understand how patients find you.">
+    <UpgradeGate feature="Analytics Dashboard" requiredTier="pro" description="See where your profile views come from, track trends over time, and understand how patients find you.">
       <DoctorAnalyticsContent />
     </UpgradeGate>
   );

@@ -8,7 +8,7 @@ import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 export default function StudentsPage() {
   return (
-    <UpgradeGate feature="Student Network" requiredTier="growth" description="Browse and connect with chiropractic students looking for mentorship, externships, and associate positions.">
+    <UpgradeGate feature="Student Network" requiredTier="pro" description="Browse and connect with chiropractic students looking for mentorship, externships, and associate positions.">
       <StudentsContent />
     </UpgradeGate>
   );
