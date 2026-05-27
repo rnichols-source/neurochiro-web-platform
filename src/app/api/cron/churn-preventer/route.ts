@@ -57,6 +57,10 @@ export async function GET(req: Request) {
     for (const doc of (atRiskDocs || []) as any[]) {
       if (recentlyEmailed.has(doc.id)) continue;
 
+      // Skip hidden/unsubscribed doctors
+      const { data: doctorRecord } = await supabase.from('doctors').select('verification_status').eq('user_id', doc.id).single();
+      if (doctorRecord?.verification_status === 'hidden') continue;
+
       const name = doc.full_name?.split(' ')[0] || 'Doctor';
 
       await resend.emails.send({

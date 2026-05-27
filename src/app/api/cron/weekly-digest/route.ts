@@ -33,8 +33,9 @@ export async function GET(req: Request) {
     // Get all doctors with accounts
     const { data: doctors } = await supabase
       .from('doctors')
-      .select('user_id, first_name, last_name, slug, membership_tier, profile_views, city, state')
-      .not('user_id', 'is', null);
+      .select('user_id, first_name, last_name, slug, membership_tier, profile_views, city, state, verification_status')
+      .not('user_id', 'is', null)
+      .neq('verification_status', 'hidden');
 
     if (!doctors || doctors.length === 0) {
       return NextResponse.json({ success: true, message: 'No doctors to send to', count: 0 });

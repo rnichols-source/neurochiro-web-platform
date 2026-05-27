@@ -43,7 +43,8 @@ export async function GET(req: Request) {
       .from('doctors')
       .select('user_id, first_name, last_name, profile_views, city, state, slug, membership_tier, created_at, trial_ends_at')
       .not('user_id', 'is', null)
-      .in('membership_tier', ['basic', 'free', 'starter', 'standard']);
+      .in('membership_tier', ['basic', 'free', 'starter', 'standard'])
+      .neq('verification_status', 'hidden');
 
     if (!doctors || doctors.length === 0) {
       return NextResponse.json({ success: true, message: 'No Free tier doctors to nudge', sent: 0 });
