@@ -131,7 +131,7 @@ export async function getDoctorBySlug(slug: string) {
       .from('doctors')
       .select(selectFields)
       .eq('slug', slug)
-      .eq('verification_status', 'verified')
+      .in('verification_status', ['verified', 'pending'])
       .maybeSingle()
 
     if (!data) {
@@ -143,7 +143,7 @@ export async function getDoctorBySlug(slug: string) {
               .from('doctors')
               .select(selectFields)
               .eq('id', slug)
-              .eq('verification_status', 'verified')
+              .in('verification_status', ['verified', 'pending'])
               .maybeSingle()
           
           if (byId) {
