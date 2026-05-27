@@ -59,7 +59,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
     setIsRefreshing(false);
   };
 
-  const isLocked = tier !== 'pro' && !data.isFounder;
+  const isLocked = tier !== 'pro' && !(data as any).isFounder;
   const isLimited = false; // Single pro tier — no limited state
   
   const stats = data.stats;
@@ -461,7 +461,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
             </Link>
           </section>
 
-          {tier !== 'pro' && !data.isFounder ? (
+          {tier !== 'pro' && !(data as any).isFounder ? (
             <section className="bg-gradient-to-br from-neuro-orange to-neuro-orange-dark rounded-[2rem] p-8 text-white relative overflow-hidden group shadow-xl border-t-4 border-white/20">
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-4">
