@@ -186,7 +186,7 @@ export async function getDoctorROIData(period: string = '30d') {
 
     const tier = doctorRes.data?.membership_tier || 'basic';
     const isStarter = tier === 'basic';
-    const membershipCost = tier === 'pro' ? 199 : tier === 'growth' ? 99 : 49;
+    const membershipCost = tier === 'pro' ? 49 : 0;
     const averageCaseValue = Number((doctorRes.data as any)?.average_case_value) || 2500;
     
     // Aggregating analytics from the new analytics_events table

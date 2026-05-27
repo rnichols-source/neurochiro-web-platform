@@ -21,7 +21,7 @@ export async function completeOnboarding() {
   const tier = profile?.tier || 'free';
   const isPaid = tier === 'pro' || tier === 'growth' || tier === 'student_paid';
 
-  // Set trial for free doctors: 3 days of Pro access
+  // Set trial for free doctors: 7 days of Pro access
   const trialEndsAt = !isPaid ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() : null;
 
   await admin.from('doctors').update({
