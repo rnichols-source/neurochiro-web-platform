@@ -28,19 +28,31 @@ export default function DoctorLayout({
   const [unreadCount, setUnreadCount] = useState(0);
   const [initials, setInitials] = useState("--");
   const [subscriptionChecked, setSubscriptionChecked] = useState(false);
+  const [tierInfo, setTierInfo] = useState<{ tier: string; trialEndsAt: string | null; isFounder: boolean } | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
 
-      // Free tier — all doctors can access the portal
-      // Features are gated inside via sidebar tier locks and UpgradeGate components
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name, tier')
         .eq('id', user.id)
         .single();
+
+      // Get doctor tier + trial info
+      const { data: doctor } = await supabase
+        .from('doctors')
+        .select('membership_tier, trial_ends_at, is_founding_member')
+        .eq('user_id', user.id)
+        .single() as any;
+
+      setTierInfo({
+        tier: doctor?.membership_tier || profile?.tier || 'free',
+        trialEndsAt: doctor?.trial_ends_at || null,
+        isFounder: doctor?.is_founding_member || false,
+      });
 
       setSubscriptionChecked(true);
 
@@ -97,6 +109,28 @@ export default function DoctorLayout({
         </div>
 
         <main className="flex-1 overflow-y-auto relative scroll-smooth bg-[#0F1A24] pb-24 md:pb-0">
+          {/* Upgrade banner for free tier */}
+          {tierInfo && !tierInfo.isFounder && tierInfo.tier !== 'pro' && tierInfo.tier !== 'growth' && (
+            <div className="bg-gradient-to-r from-neuro-orange/20 to-neuro-orange/10 border-b border-neuro-orange/20 px-6 py-3 flex items-center justify-between">
+              <p className="text-sm text-white/90 font-medium">
+                {tierInfo.trialEndsAt && new Date(tierInfo.trialEndsAt) > new Date() ? (
+                  <>
+                    <span className="font-black text-neuro-orange">Pro Trial:</span>{' '}
+                    {Math.ceil((new Date(tierInfo.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left —{' '}
+                    <span className="text-white/70">Keep full access for $49/mo</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-white/70">Patients can&apos;t reach you yet.</span>{' '}
+                    Upgrade to Pro — $49/mo
+                  </>
+                )}
+              </p>
+              <Link href="/doctor/billing" className="px-4 py-1.5 bg-neuro-orange text-white text-xs font-black rounded-lg hover:bg-neuro-orange/90 transition-colors whitespace-nowrap">
+                Upgrade
+              </Link>
+            </div>
+          )}
           <div className="p-6 md:p-10 max-w-6xl mx-auto w-full">
             {children}
           </div>
