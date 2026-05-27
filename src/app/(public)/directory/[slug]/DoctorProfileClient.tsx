@@ -194,7 +194,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               {/* Quick CTA — hidden on mobile (sticky bar handles it) */}
               <div className="hidden sm:flex items-center gap-3 mt-5">
                 {gated ? (
-                  <ContactGateCTA variant="hero" />
+                  <ContactGateCTA variant="hero" doctorId={doctor.id} doctorName={name} />
                 ) : (
                   <>
                     {doctor.phone && (
@@ -604,7 +604,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               {/* Contact Buttons */}
               <div className="space-y-2">
                 {gated ? (
-                  <ContactGateCTA variant="sidebar" />
+                  <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} />
                 ) : (
                   <>
                     {doctor.phone && (
@@ -730,7 +730,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           </h2>
           {gated ? (
             <div className="text-center py-6">
-              <ContactGateCTA variant="sidebar" />
+              <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} />
             </div>
           ) : (
             <>
@@ -849,7 +849,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-200 py-3 px-4 z-[100] lg:hidden">
         <div className="flex gap-3 max-w-3xl mx-auto">
           {gated ? (
-            <ContactGateCTA variant="mobile" />
+            <ContactGateCTA variant="mobile" doctorId={doctor.id} doctorName={name} />
           ) : (
             <>
               {bookingUrl ? (
