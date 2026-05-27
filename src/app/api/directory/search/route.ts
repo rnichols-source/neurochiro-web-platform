@@ -331,7 +331,7 @@ function enrichWithDistance(doctors: any[], userLat: number, userLng: number, ha
 }
 
 function sortResults(doctors: any[], sort: string): any[] {
-  const tierPriority: Record<string, number> = { pro: 1, growth: 2, basic: 3, starter: 3, free: 4 };
+  const tierPriority: Record<string, number> = { pro: 1, growth: 1, basic: 2, starter: 2, free: 2 };
 
   return [...doctors].sort((a, b) => {
     if (sort === 'distance') {

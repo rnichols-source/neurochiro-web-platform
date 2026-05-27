@@ -19,7 +19,7 @@ export async function completeOnboarding() {
   const admin = createAdminClient();
   const { data: profile } = await (supabase as any).from('profiles').select('tier').eq('id', user.id).single();
   const tier = profile?.tier || 'free';
-  const isPaid = tier === 'growth' || tier === 'pro' || tier === 'student_paid';
+  const isPaid = tier === 'pro' || tier === 'growth' || tier === 'student_paid';
 
   await admin.from('doctors').update({
     verification_status: isPaid ? 'verified' : 'pending',

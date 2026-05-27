@@ -8,17 +8,17 @@ import UpgradeModal from "./UpgradeModal";
 interface UpgradeGateProps {
   children: React.ReactNode;
   feature: string;
-  requiredTier: "growth" | "pro";
+  requiredTier?: "pro";
   description?: string;
 }
 
-// Which tiers unlock which level
 const TIER_LEVELS: Record<string, number> = {
   free: 0,
   basic: 0,
   starter: 0,
+  standard: 0,
   growth: 1,
-  pro: 2,
+  pro: 1,
 };
 
 export default function UpgradeGate({ children, feature, requiredTier, description }: UpgradeGateProps) {
@@ -61,8 +61,8 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
   if (!isLocked) return <>{children}</>;
 
   // If locked, show the content with an overlay
-  const tierLabel = requiredTier === "growth" ? "Growth" : "Pro";
-  const tierPrice = requiredTier === "growth" ? "$69" : "$129";
+  const tierLabel = "Pro";
+  const tierPrice = "$49";
 
   return (
     <>

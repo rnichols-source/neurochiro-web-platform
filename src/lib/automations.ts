@@ -838,10 +838,10 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           
           // 🛡️ CENTRALIZED PRICE ID TO TIER MAPPING (Last 3 chars of Stripe Price ID)
           const priceToTier: Record<string, string> = {
-            'A0q': 'basic',      // Doctor Starter Monthly
-            'A0s': 'basic',      // Doctor Starter Annual
-            'A0p': 'growth',       // Doctor Growth Monthly
-            'A0r': 'pro',          // Doctor Pro Monthly
+            'A0q': 'pro',         // Doctor Monthly
+            'A0s': 'pro',         // Doctor Annual
+            'A0p': 'pro',         // Doctor (legacy Growth Monthly)
+            'A0r': 'pro',         // Doctor (legacy Pro Monthly)
             'A0v': 'foundation',   // Student Foundation Monthly
             'A0A': 'foundation',   // Student Foundation Annual
             'A0w': 'professional', // Student Professional Monthly

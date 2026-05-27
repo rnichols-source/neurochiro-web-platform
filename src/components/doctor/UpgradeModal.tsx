@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Check, Star, Zap, Crown } from "lucide-react";
+import { X, Check, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
@@ -12,88 +12,37 @@ interface UpgradeModalProps {
   highlightFeature?: string;
 }
 
-const tiers = [
-  {
-    id: "growth",
-    name: "Growth",
-    monthlyPrice: "$69",
-    annualPrice: "$59",
-    annualTotal: "$708/yr",
-    description: "Everything to grow your practice",
-    icon: Zap,
-    color: "text-neuro-orange",
-    bg: "bg-neuro-orange/5",
-    border: "border-neuro-orange/30",
-    popular: true,
-    features: [
-      { name: "Directory listing", included: true },
-      { name: "Profile page", included: true },
-      { name: "Profile views count", included: true },
-      { name: "Patient messaging", included: true },
-      { name: "Analytics dashboard", included: true },
-      { name: "KPI Tracker", included: true },
-      { name: "AI Bio Generator", included: true },
-      { name: "Job posting", included: true },
-      { name: "Care Plan Builder", included: false },
-      { name: "Scan Reports", included: false },
-      { name: "P&L Analyzer", included: false },
-      { name: "Verified badge", included: true },
-      { name: "Priority search", included: false },
-    ],
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    monthlyPrice: "$129",
-    annualPrice: "$109",
-    annualTotal: "$1,308/yr",
-    description: "Full suite — every tool unlocked",
-    icon: Crown,
-    color: "text-yellow-400",
-    bg: "bg-yellow-400/5",
-    border: "border-yellow-400/30",
-    features: [
-      { name: "Directory listing", included: true },
-      { name: "Profile page", included: true },
-      { name: "Profile views count", included: true },
-      { name: "Patient messaging", included: true },
-      { name: "Analytics dashboard", included: true },
-      { name: "KPI Tracker", included: true },
-      { name: "AI Bio Generator", included: true },
-      { name: "Job posting", included: true },
-      { name: "Care Plan Builder", included: true },
-      { name: "Scan Reports", included: true },
-      { name: "P&L Analyzer", included: true },
-      { name: "Verified badge", included: true },
-      { name: "Priority search", included: true },
-    ],
-  },
+const PRO_FEATURES = [
+  "Full directory listing",
+  "Contact info visible to patients",
+  "Phone, website, booking link",
+  "Social media links",
+  "Verified badge",
+  "Priority search ranking",
+  "Analytics dashboard",
+  "Patient leads & messaging",
+  "KPI Tracker",
+  "AI Bio Generator",
+  "ChiroMatch hiring",
+  "Care Plan Builder",
+  "Scan Reports",
+  "Content Library",
+  "CE Tracker",
 ];
 
-const PRICE_IDS: Record<string, Record<string, string>> = {
-  growth: {
-    monthly: "price_1TS56YQ4WJOENoxriuU4hW5Z",
-    annual: "price_1TS57ZQ4WJOENoxrgnvf6O2h",
-  },
-  pro: {
-    monthly: "price_1TS58UQ4WJOENoxrnxgbtIbQ",
-    annual: "price_1TS59FQ4WJOENoxrJewp6dwT",
-  },
-};
+const STRIPE_PRICE_ID = "price_1TS56YQ4WJOENoxriuU4hW5Z";
 
-export default function UpgradeModal({ isOpen, onClose, currentTier = "basic", userId, highlightFeature }: UpgradeModalProps) {
-  const [loading, setLoading] = useState<string | null>(null);
-  const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
+export default function UpgradeModal({ isOpen, onClose, currentTier = "free", userId, highlightFeature }: UpgradeModalProps) {
+  const [loading, setLoading] = useState(false);
 
-  const handleUpgrade = async (tierId: string) => {
-    const priceId = PRICE_IDS[tierId]?.[billing];
-    if (!userId || !priceId) return;
-    setLoading(tierId);
+  const handleUpgrade = async () => {
+    if (!userId) return;
+    setLoading(true);
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId, userId, tier: tierId }),
+        body: JSON.stringify({ priceId: STRIPE_PRICE_ID, userId, tier: "pro" }),
       });
       const data = await res.json();
       if (data.url) {
@@ -102,7 +51,7 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "basic", u
     } catch (err) {
       console.error("Checkout error:", err);
     }
-    setLoading(null);
+    setLoading(false);
   };
 
   return (
@@ -120,117 +69,52 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "basic", u
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="relative w-full max-w-4xl bg-[#0F172A] rounded-3xl border border-white/10 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+            className="relative w-full max-w-md bg-[#0F172A] rounded-3xl border border-white/10 shadow-2xl overflow-hidden"
           >
             {/* Header */}
             <div className="p-8 pb-4 flex items-start justify-between">
               <div>
                 <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.2em] mb-2">Upgrade Your Practice</p>
-                <h2 className="text-2xl font-black text-white">Choose Your Plan</h2>
-                <p className="text-gray-500 text-sm mt-1">Founding member pricing is no longer available. These are the current rates.</p>
+                <h2 className="text-2xl font-black text-white">Go Pro</h2>
+                <p className="text-gray-500 text-sm mt-1">Everything unlocked. One simple price.</p>
               </div>
               <button onClick={onClose} className="p-2 text-gray-500 hover:text-white hover:bg-white/5 rounded-xl">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Billing Toggle */}
-            <div className="px-8 flex items-center justify-center gap-3 mb-2">
-              <button
-                onClick={() => setBilling("monthly")}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${billing === "monthly" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-300"}`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setBilling("annual")}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${billing === "annual" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-300"}`}
-              >
-                Annual <span className="text-[10px] font-black text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">Save 15%</span>
-              </button>
+            {/* Price */}
+            <div className="px-8 pb-4">
+              <div className="flex items-baseline gap-1">
+                <span className="text-5xl font-black text-white">$49</span>
+                <span className="text-gray-500 font-bold">/mo</span>
+              </div>
+              <p className="text-gray-500 text-xs mt-1">One new patient pays for a full year.</p>
             </div>
 
-            {/* Tiers */}
-            <div className="p-8 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {tiers.map((tier) => {
-                const isCurrent = tier.id === currentTier;
-                const isUpgrade = !isCurrent && tier.id !== "basic";
-                return (
-                  <div
-                    key={tier.id}
-                    className={`rounded-2xl border p-6 relative ${
-                      tier.popular ? `${tier.border} ${tier.bg}` : "border-white/10 bg-white/[0.02]"
-                    } ${isCurrent ? "ring-2 ring-neuro-orange" : ""}`}
-                  >
-                    {tier.popular && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-neuro-orange rounded-full text-[10px] font-black text-white uppercase tracking-widest">
-                        Most Popular
-                      </div>
-                    )}
-                    {isCurrent && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-white/10 rounded-full text-[10px] font-black text-white uppercase tracking-widest">
-                        Current Plan
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-2 mb-3 mt-1">
-                      <tier.icon className={`w-5 h-5 ${tier.color}`} />
-                      <h3 className="text-lg font-black text-white">{tier.name}</h3>
-                    </div>
-
-                    <div className="flex items-baseline gap-1 mb-1">
-                      <span className="text-3xl font-black text-white">{billing === "annual" ? (tier as any).annualPrice : (tier as any).monthlyPrice}</span>
-                      <span className="text-sm text-gray-500">/mo</span>
-                    </div>
-                    {billing === "annual" && (tier as any).annualTotal && (
-                      <p className="text-xs text-green-400 font-bold mb-2">Billed at {(tier as any).annualTotal}</p>
-                    )}
-                    <p className="text-xs text-gray-500 mb-5">{tier.description}</p>
-
-                    {/* Features */}
-                    <div className="space-y-2.5 mb-6">
-                      {tier.features.map((feature) => (
-                        <div
-                          key={feature.name}
-                          className={`flex items-center gap-2 text-xs ${
-                            feature.included ? "text-gray-300" : "text-gray-600"
-                          } ${highlightFeature === feature.name && !feature.included ? "text-red-400 font-bold" : ""}`}
-                        >
-                          {feature.included ? (
-                            <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
-                          ) : (
-                            <X className="w-3.5 h-3.5 text-gray-700 flex-shrink-0" />
-                          )}
-                          {feature.name}
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* CTA */}
-                    {isCurrent ? (
-                      <div className="py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">
-                        Your Plan
-                      </div>
-                    ) : isUpgrade ? (
-                      <button
-                        onClick={() => handleUpgrade(tier.id)}
-                        disabled={loading === tier.id}
-                        className={`w-full py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-50 ${
-                          tier.popular
-                            ? "bg-neuro-orange text-white hover:bg-neuro-orange-light shadow-lg shadow-neuro-orange/20"
-                            : "bg-white/10 text-white hover:bg-white/20"
-                        }`}
-                      >
-                        {loading === tier.id ? "Redirecting..." : `Upgrade to ${tier.name}`}
-                      </button>
-                    ) : (
-                      <div className="py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-widest">
-                        Current Plan
-                      </div>
-                    )}
+            {/* Features */}
+            <div className="px-8 pb-6">
+              <div className="grid grid-cols-1 gap-2">
+                {PRO_FEATURES.map((feature) => (
+                  <div key={feature} className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-neuro-orange flex-shrink-0" />
+                    <span className={`text-sm ${feature === highlightFeature ? 'text-white font-bold' : 'text-gray-400'}`}>
+                      {feature}
+                    </span>
                   </div>
-                );
-              })}
+                ))}
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="p-8 pt-2">
+              <button
+                onClick={handleUpgrade}
+                disabled={loading}
+                className="w-full py-4 bg-neuro-orange text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-neuro-orange/20 hover:bg-neuro-orange/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {loading ? "Redirecting..." : <><Zap className="w-4 h-4" /> Upgrade to Pro — $49/mo</>}
+              </button>
             </div>
           </motion.div>
         </div>

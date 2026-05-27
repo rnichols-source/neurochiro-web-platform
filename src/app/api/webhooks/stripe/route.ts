@@ -58,11 +58,9 @@ export async function POST(req: Request) {
           let membershipTier: string;
           if (metaRole === 'student') {
             membershipTier = 'student_paid';
-          } else if (metaTier === 'pro' || metaTier === 'growth') {
-            membershipTier = metaTier;
           } else {
-            // Fallback: use price IDs or amount
-            membershipTier = amountPaid >= 100 ? 'pro' : 'growth';
+            // All paid doctors are Pro — single tier
+            membershipTier = 'pro';
           }
 
           await supabase
@@ -880,12 +878,9 @@ export async function POST(req: Request) {
           let newTier: string | null = null;
           if (profile.role === 'student') {
             newTier = subscription.status === 'active' ? 'student_paid' : 'free';
-          } else if (metaTier === 'pro' || metaTier === 'growth') {
-            newTier = subscription.status === 'active' ? metaTier : 'free';
-          } else if (amount >= 100) {
+          } else {
+            // All paid doctors → pro, cancelled → free
             newTier = subscription.status === 'active' ? 'pro' : 'free';
-          } else if (amount > 0) {
-            newTier = subscription.status === 'active' ? 'growth' : 'free';
           }
 
           if (newTier) {
