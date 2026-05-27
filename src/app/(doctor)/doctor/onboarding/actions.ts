@@ -21,8 +21,12 @@ export async function completeOnboarding() {
   const tier = profile?.tier || 'free';
   const isPaid = tier === 'pro' || tier === 'growth' || tier === 'student_paid';
 
+  // Set trial for free doctors: 3 days of Pro access
+  const trialEndsAt = !isPaid ? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() : null;
+
   await admin.from('doctors').update({
     verification_status: isPaid ? 'verified' : 'pending',
+    ...(trialEndsAt ? { trial_ends_at: trialEndsAt } : {}),
   } as any).eq('user_id', user.id);
 
   // Notify admin when a free doctor needs approval

@@ -41,9 +41,9 @@ export async function GET(req: Request) {
     // Get all free-tier doctors with accounts
     const { data: doctors } = await supabase
       .from('doctors')
-      .select('user_id, first_name, last_name, profile_views, city, state, slug, membership_tier, created_at')
+      .select('user_id, first_name, last_name, profile_views, city, state, slug, membership_tier, created_at, trial_ends_at')
       .not('user_id', 'is', null)
-      .in('membership_tier', ['basic', 'free']);
+      .in('membership_tier', ['basic', 'free', 'starter', 'standard']);
 
     if (!doctors || doctors.length === 0) {
       return NextResponse.json({ success: true, message: 'No Free tier doctors to nudge', sent: 0 });
@@ -84,17 +84,25 @@ export async function GET(req: Request) {
       let subject = '';
       let body = '';
 
-      if (views >= 100 && !sentNudges.has(`${doc.user_id}-views_100`)) {
+      // HIGHEST PRIORITY: Trial just expired
+      const trialEnded = doc.trial_ends_at && new Date(doc.trial_ends_at) < new Date() && new Date(doc.trial_ends_at) > new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+      if (trialEnded && !sentNudges.has(`${doc.user_id}-trial_expired`)) {
+        trigger = 'trial_expired';
+        subject = `Your Pro trial ended, Dr. ${name} — ${views} patients found you`;
+        body = `<p>Your 3-day Pro trial has ended. During your trial, <strong>${views} patients</strong> viewed your profile on NeuroChiro.</p>
+          <p>Your contact info is now hidden from patients. To keep your phone, website, and booking link visible — upgrade to Pro for just $49/mo.</p>
+          <p style="color:#e97325;font-weight:bold;">One new patient pays for a full year.</p>`;
+      } else if (views >= 100 && !sentNudges.has(`${doc.user_id}-views_100`)) {
         trigger = 'views_100';
         subject = `100 patients found your profile, Dr. ${name}`;
         body = `<p>Your NeuroChiro profile has been viewed <strong>100 times</strong>.</p>
           <p>That's 100 patients who searched for a nervous system chiropractor and found <strong>you</strong>.</p>
-          <p>Right now, they can see your listing but they can't message you or see your full analytics. Upgrade to Growth and turn those views into actual patients walking through your door.</p>`;
+          <p>Right now, they can see your listing but they can't message you or see your full analytics. Upgrade to Pro ($49/mo) and turn those views into actual patients walking through your door.</p>`;
       } else if (views >= 50 && !sentNudges.has(`${doc.user_id}-views_50`)) {
         trigger = 'views_50';
         subject = `50 profile views — patients are finding you, Dr. ${name}`;
         body = `<p>Your profile has been viewed <strong>50 times</strong> on NeuroChiro.</p>
-          <p>Patients in ${doc.city || 'your area'} are actively searching for chiropractors like you. With Growth, you can see exactly who's viewing your profile, respond to patient messages, and show up with a verified badge.</p>`;
+          <p>Patients in ${doc.city || 'your area'} are actively searching for chiropractors like you. With Pro, you can see exactly who's viewing your profile, respond to patient messages, and show up with a verified badge.</p>`;
       } else if (views >= 25 && !sentNudges.has(`${doc.user_id}-views_25`)) {
         trigger = 'views_25';
         subject = `25 people viewed your profile this month`;
@@ -117,7 +125,7 @@ export async function GET(req: Request) {
         subject = `Two weeks in — are you getting the most out of NeuroChiro?`;
         body = `<p>Hi Dr. ${name},</p>
           <p>You've been on NeuroChiro for two weeks. Your profile is live and patients can find you.</p>
-          <p>But there's more you could be doing. Growth members get patient messaging, analytics, the KPI tracker, and a verified badge that tells patients you're the real deal.</p>
+          <p>But there's more you could be doing. Pro members get patient messaging, analytics, the KPI tracker, and a verified badge that tells patients you're the real deal.</p>
           <p>Most doctors upgrade within the first month. Here's what they unlock:</p>
           <ul style="color: #4B5563;">
             <li>Direct patient messaging</li>
