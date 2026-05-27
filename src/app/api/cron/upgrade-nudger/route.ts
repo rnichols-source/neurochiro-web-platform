@@ -89,7 +89,7 @@ export async function GET(req: Request) {
       if (trialEnded && !sentNudges.has(`${doc.user_id}-trial_expired`)) {
         trigger = 'trial_expired';
         subject = `Your Pro trial ended, Dr. ${name} — ${views} patients found you`;
-        body = `<p>Your 3-day Pro trial has ended. During your trial, <strong>${views} patients</strong> viewed your profile on NeuroChiro.</p>
+        body = `<p>Your 7-day Pro trial has ended. During your trial, <strong>${views} patients</strong> viewed your profile on NeuroChiro.</p>
           <p>Your contact info is now hidden from patients. To keep your phone, website, and booking link visible — upgrade to Pro for just $49/mo.</p>
           <p style="color:#e97325;font-weight:bold;">One new patient pays for a full year.</p>`;
       } else if (views >= 100 && !sentNudges.has(`${doc.user_id}-views_100`)) {
