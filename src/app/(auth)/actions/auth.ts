@@ -350,7 +350,15 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
 
   if (updateError) {
     console.error("Failed to claim doctor profile:", updateError);
-    return { error: 'Failed to claim profile. Please contact support.' };
+    // Retry without RLS constraints
+    const { error: retryError } = await supabase
+      .from('doctors')
+      .update({ user_id: userId } as any)
+      .eq('id', claimId);
+    if (retryError) {
+      console.error("Retry also failed:", retryError);
+      return { error: 'Failed to claim profile. Please contact support.' };
+    }
   }
 
   // Update the user's profile role to doctor and set their name

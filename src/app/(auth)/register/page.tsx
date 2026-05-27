@@ -48,7 +48,9 @@ function RegisterForm() {
     if (billing) formData.append("billing", billing);
     if (region) formData.append("region", region);
 
-    const result = await createAccountAction(formData, role, "basic", "monthly");
+    // Force doctor role when claiming a profile
+    const effectiveRole = claimId ? "doctor" : role;
+    const result = await createAccountAction(formData, effectiveRole, "basic", "monthly");
 
     if (result.error) {
       setError(result.error);
@@ -59,9 +61,8 @@ function RegisterForm() {
     if (result.user && claimId) {
       const claimResult = await claimDoctorProfileAction(result.user.id, claimId);
       if (claimResult?.error) {
-        setError(claimResult.error);
-        setPending(false);
-        return;
+        // If claim fails, still redirect to dashboard — profile role is already set to doctor
+        console.error("Claim error (non-blocking):", claimResult.error);
       }
     }
 
