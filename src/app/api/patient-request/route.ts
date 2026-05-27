@@ -33,15 +33,15 @@ export async function POST(req: Request) {
 
     // Send notification to doctor (if they have a user account)
     if (doctor.user_id) {
-      const { insertNotification } = await import('@/lib/notifications');
-      await insertNotification(
-        doctor.user_id,
-        'A patient is trying to reach you!',
-        `Someone${patientName ? ` (${patientName})` : ''} wants your contact info. Upgrade to Pro to connect.`,
-        'lead',
-        '/doctor/billing',
-        'important'
-      );
+      const { sendNotification } = await import('@/lib/notifications');
+      await sendNotification({
+        userId: doctor.user_id,
+        title: 'A patient is trying to reach you!',
+        body: `Someone${patientName ? ` (${patientName})` : ''} wants your contact info. Upgrade to Pro to connect.`,
+        type: 'system',
+        priority: 'important',
+        link: '/doctor/billing',
+      });
     }
 
     // Send email to doctor if we have their email
