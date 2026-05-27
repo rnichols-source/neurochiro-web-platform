@@ -117,7 +117,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
                         <Lock className="w-5 h-5 text-neuro-orange" />
                      </div>
                   </div>
-                  <p className="text-xs text-gray-400 mt-6 italic">Upgrade to Growth to unblur your practice analytics and start converting these leads.</p>
+                  <p className="text-xs text-gray-400 mt-6 italic">Upgrade to Pro to unblur your practice analytics and start converting these leads.</p>
                </div>
             </div>
           </div>

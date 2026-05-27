@@ -254,7 +254,7 @@ function getDoctorEmail(step: number, name: string): { subject: string; body: st
             <li><strong>Seminar hosting</strong> — list your CE events and reach chiropractors globally</li>
             <li><strong>Practice tools</strong> — KPI tracker, care plan builder, P&L analyzer</li>
           </ul>
-          <p>Free to join. Paid plans from $69/mo for doctors who want the full suite.</p>
+          <p>Free to join. Paid plans from $49/mo for doctors who want the full suite.</p>
           <p style="margin: 24px 0;">
             <a href="https://neurochiro.co/why-neurochiro" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">See What's Included</a>
           </p>

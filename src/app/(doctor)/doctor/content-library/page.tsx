@@ -175,7 +175,7 @@ function ContentLibraryContent() {
             }}
             className="px-5 py-2.5 bg-neuro-orange text-white rounded-lg font-bold text-xs hover:bg-neuro-orange/90 transition-colors whitespace-nowrap"
           >
-            Upgrade to Growth
+            Upgrade to Pro
           </button>
         </div>
       )}

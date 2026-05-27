@@ -17,7 +17,7 @@ export async function createConferenceCheckout(data: {
   };
 
   const priceLabels = {
-    doctor: { monthly: 'Doctor Growth ($69/mo)', annual: 'Doctor Growth Annual ($708/yr)' },
+    doctor: { monthly: 'Doctor Pro ($49/mo)', annual: 'Doctor Pro Annual ($490/yr)' },
     student: { monthly: 'Student Premium ($12/mo)', annual: 'Student Premium Annual ($120/yr)' },
   };
 

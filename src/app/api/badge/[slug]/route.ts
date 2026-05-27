@@ -19,7 +19,7 @@ export async function GET(
     return new NextResponse('Doctor not found', { status: 404 });
   }
 
-  const isEligible = doctor.membership_tier === 'growth' || doctor.membership_tier === 'pro';
+  const isEligible = doctor.membership_tier === 'pro';
   const doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`;
   const tierLabel = doctor.membership_tier === 'pro' ? 'PRO' : 'VERIFIED';
 

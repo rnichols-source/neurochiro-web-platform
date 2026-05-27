@@ -109,7 +109,7 @@ export async function GET(req: Request) {
                <p style="font-size: 36px; font-weight: 900; color: #1E2D3B; margin: 0;">${views}</p>
                <p style="font-size: 12px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 2px; margin: 4px 0 0 0;">Profile Views</p>
              </div>
-             <p>Patients are finding you. Upgrade to Growth to unlock messaging, analytics, and the verified badge — so patients can contact you directly.</p>
+             <p>Patients are finding you. Upgrade to Pro to unlock messaging, analytics, and the verified badge — so patients can contact you directly.</p>
              <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/billing" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">See Upgrade Options</a></p>`
           : `<p>Hi ${name},</p>
              <p>You've been on NeuroChiro for a week! Have you checked out the job board yet? New positions are posted regularly from clinics looking for students like you.</p>
@@ -121,9 +121,9 @@ export async function GET(req: Request) {
           : `Unlock your full career toolkit`;
         body = isDoctor
           ? `<p>Hi Dr. ${name},</p>
-             <p>Doctors in your area are receiving patient messages through NeuroChiro. With the Growth plan, patients can message you directly from your profile.</p>
+             <p>Doctors in your area are receiving patient messages through NeuroChiro. With the Pro plan, patients can message you directly from your profile.</p>
              <p>You also unlock your full analytics dashboard so you can see exactly who's finding you and how.</p>
-             <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/billing" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Upgrade to Growth — $69/mo</a></p>`
+             <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/billing" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Upgrade to Pro — $49/mo</a></p>`
           : `<p>Hi ${name},</p>
              <p>Your free student account gives you access to jobs, seminars, the doctor directory, and community. When you're ready for more, upgrade to Premium ($12/mo) for Interview Prep, Contract Lab, Financial Planner, ChiroMatch, and the full Techniques Library.</p>
              <p>These are the tools that help you land your first job and negotiate your first contract with confidence.</p>

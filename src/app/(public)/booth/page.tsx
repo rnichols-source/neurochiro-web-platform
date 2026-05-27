@@ -335,7 +335,7 @@ function SlideDoctorFeatures() {
       <div className="w-[380px] shrink-0">
         <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.3em] mb-3">For Doctors</p>
         <h2 className="text-5xl font-heading font-black text-white leading-tight mb-4">Everything<br />You Need</h2>
-        <p className="text-gray-400 text-lg leading-relaxed">Free to join. Upgrade to Growth ($69/mo) or Pro ($129/mo) to unlock the full suite of practice tools.</p>
+        <p className="text-gray-400 text-lg leading-relaxed">Free to join. Upgrade to Pro ($49/mo) to unlock the full suite of practice tools.</p>
       </div>
       <div className="flex-1">
         <div className="grid grid-cols-3 gap-3">
@@ -343,11 +343,11 @@ function SlideDoctorFeatures() {
             { icon: Eye, title: "Directory Listing", desc: "Get found by patients", tier: "Free" },
             { icon: ShieldCheck, title: "Verified Badge", desc: "Build trust instantly", tier: "Free" },
             { icon: BarChart3, title: "Profile Analytics", desc: "See who's viewing you", tier: "Free" },
-            { icon: MessageSquare, title: "Patient Messaging", desc: "Direct communication", tier: "Growth" },
-            { icon: Users, title: "Lead Pipeline", desc: "Track every patient", tier: "Growth" },
-            { icon: Activity, title: "KPI Tracker", desc: "Practice metrics", tier: "Growth" },
-            { icon: Shuffle, title: "ChiroMatch", desc: "Find associates", tier: "Growth" },
-            { icon: Award, title: "CE Tracking", desc: "QR check-in + certs", tier: "Growth" },
+            { icon: MessageSquare, title: "Patient Messaging", desc: "Direct communication", tier: "Pro" },
+            { icon: Users, title: "Lead Pipeline", desc: "Track every patient", tier: "Pro" },
+            { icon: Activity, title: "KPI Tracker", desc: "Practice metrics", tier: "Pro" },
+            { icon: Shuffle, title: "ChiroMatch", desc: "Find associates", tier: "Pro" },
+            { icon: Award, title: "CE Tracking", desc: "QR check-in + certs", tier: "Pro" },
             { icon: Stethoscope, title: "Care Plans", desc: "AI-powered plans", tier: "Pro" },
             { icon: FileText, title: "Scan Reports", desc: "Patient reports", tier: "Pro" },
             { icon: DollarSign, title: "P&L Analyzer", desc: "Financial clarity", tier: "Pro" },
@@ -363,7 +363,7 @@ function SlideDoctorFeatures() {
               </div>
               <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0 ${
                 f.tier === "Free" ? "bg-green-500/20 text-green-400" :
-                f.tier === "Growth" ? "bg-neuro-orange/20 text-neuro-orange" :
+                f.tier === "Pro" ? "bg-neuro-orange/20 text-neuro-orange" :
                 "bg-violet-500/20 text-violet-400"
               }`}>{f.tier}</span>
             </div>
@@ -382,7 +382,7 @@ function SlideJoinFree() {
         <h2 className="text-7xl font-heading font-black text-white mb-12">Free. For Everyone.</h2>
         <div className="grid grid-cols-3 gap-8 mb-12">
           {[
-            { icon: Stethoscope, role: "Doctors", desc: "Get your practice listed in the global directory. Verified badge. Profile analytics. Upgrade to Growth or Pro anytime.", url: "neurochiro.co/get-started" },
+            { icon: Stethoscope, role: "Doctors", desc: "Get your practice listed in the global directory. Verified badge. Profile analytics. Upgrade to Pro or Pro anytime.", url: "neurochiro.co/get-started" },
             { icon: GraduationCap, role: "Students", desc: "Find jobs, attend seminars, build your ChiroScore, explore techniques, and prep for interviews. Upgrade to Premium anytime.", url: "neurochiro.co/get-started" },
             { icon: Heart, role: "Patients", desc: "Find nervous system chiropractors near you. Track your health. Read reviews. Message doctors directly. Always free.", url: "neurochiro.co/get-started" },
           ].map((r) => (

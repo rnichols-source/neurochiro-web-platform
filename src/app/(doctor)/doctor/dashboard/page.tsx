@@ -153,7 +153,7 @@ export default function DoctorDashboard() {
                   {profileViews} {profileViews === 1 ? 'patient' : 'patients'} found your profile
                 </p>
                 <p className="text-gray-400 text-sm mt-1">
-                  But they can't see your phone number, website, or booking link yet. Upgrade to Growth so patients can actually reach you.
+                  But they can't see your phone number, website, or booking link yet. Upgrade to Pro so patients can actually reach you.
                 </p>
                 <div className="flex items-center gap-2 mt-2">
                   <Lock className="w-3 h-3 text-neuro-orange" />
@@ -162,7 +162,7 @@ export default function DoctorDashboard() {
               </div>
             </div>
             <Link href="/pricing" className="px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap flex-shrink-0">
-              Unlock for $69/mo
+              Unlock for $49/mo
             </Link>
           </div>
         </motion.div>

@@ -75,7 +75,7 @@ export default function DoctorBilling() {
   }
 
   const { subscription, invoices, tier } = billingData;
-  const planLabel = tier === "basic" || tier === "starter" ? "Free" : tier === "growth" ? "Growth" : "Pro";
+  const planLabel = tier === "pro" || tier === "growth" ? "Pro" : "Free";
   const isActive = subscription?.status === "active";
 
   return (

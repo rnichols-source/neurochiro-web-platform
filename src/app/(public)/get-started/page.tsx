@@ -198,7 +198,7 @@ function GetStartedInner() {
         {/* Upgrade later */}
         <div className="mt-6 bg-neuro-navy rounded-2xl p-5 text-center">
           <p className="text-white font-bold text-sm mb-1">Want more features?</p>
-          <p className="text-gray-400 text-xs mb-3">Upgrade to Growth ($69/mo) or Pro ($129/mo) anytime from your dashboard.</p>
+          <p className="text-gray-400 text-xs mb-3">Upgrade to Pro ($49/mo) anytime from your dashboard.</p>
           <Link href="/pricing" className="text-neuro-orange text-xs font-bold hover:underline">Compare Plans →</Link>
         </div>
       </div>

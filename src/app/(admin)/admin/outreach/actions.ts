@@ -634,7 +634,7 @@ export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
       name: 'Pre-Built Profile (Primary)',
       category: 'first_contact',
       description: 'YOUR #1 SCRIPT — Send after clicking "Pre-Build Profile"',
-      template: `Hey {name} 👋\n\nI came across your page and I can tell you're doing real nervous system work — not just the cookie cutter stuff.\n\nI actually went ahead and built you a free listing on NeuroChiro. It's the directory specifically for docs like you who practice nervous-system-first chiropractic.\n\nHere it is: {profile_link}\n\nPatients in {city} are already searching through it.\n\nYou can claim it anytime — takes about 2 min. And if you want the full profile with your photo, bio, and verified badge, that's $69/mo.\n\nEither way, just wanted you to know it's there 🤙`,
+      template: `Hey {name} 👋\n\nI came across your page and I can tell you're doing real nervous system work — not just the cookie cutter stuff.\n\nI actually went ahead and built you a free listing on NeuroChiro. It's the directory specifically for docs like you who practice nervous-system-first chiropractic.\n\nHere it is: {profile_link}\n\nPatients in {city} are already searching through it.\n\nYou can claim it anytime — takes about 2 min. And if you want the full profile with your photo, bio, and verified badge, that's $49/mo.\n\nEither way, just wanted you to know it's there 🤙`,
     },
     {
       id: 'pre_built_short',
@@ -669,21 +669,21 @@ export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
       name: 'They\'re Interested',
       category: 'response',
       description: 'They responded positively — guide them to claim',
-      template: `That's awesome — glad it caught your eye!\n\nHere's all you need to do:\n\n1. Go to {profile_link}\n2. Click "Claim This Profile"\n3. Create a quick account\n4. Add your photo and bio\n\nThat's it. Takes about 2 minutes.\n\nYour free listing is live right away. If you want the verified badge, full profile, and patient messaging — that's our Growth plan at $69/mo. Most docs say it pays for itself with the first new patient.\n\nLet me know if you need help with anything 🤙`,
+      template: `That's awesome — glad it caught your eye!\n\nHere's all you need to do:\n\n1. Go to {profile_link}\n2. Click "Claim This Profile"\n3. Create a quick account\n4. Add your photo and bio\n\nThat's it. Takes about 2 minutes.\n\nYour free listing is live right away. If you want the verified badge, full profile, and patient messaging — that's our Pro plan at $49/mo. Most docs say it pays for itself with the first new patient.\n\nLet me know if you need help with anything 🤙`,
     },
     {
       id: 'signed_up',
       name: 'Welcome — They Claimed It',
       category: 'response',
       description: 'Send after they sign up',
-      template: `Welcome to the network {name}! 🎉\n\nYou're in. Patients in {city} can find you right now.\n\nQuick tip — docs who add their photo and bio get about 3x more clicks. If you want to level up with the verified badge and patient messaging, check out our Growth plan ($69/mo) in your dashboard.\n\nBut honestly, just having you in the directory is a win.\n\nReach out anytime if you need anything. I'm here.`,
+      template: `Welcome to the network {name}! 🎉\n\nYou're in. Patients in {city} can find you right now.\n\nQuick tip — docs who add their photo and bio get about 3x more clicks. If you want to level up with the verified badge and patient messaging, check out our Pro plan ($49/mo) in your dashboard.\n\nBut honestly, just having you in the directory is a win.\n\nReach out anytime if you need anything. I'm here.`,
     },
     {
       id: 'objection_cost',
       name: 'Objection: What Does It Cost?',
       category: 'objection',
       description: 'When they ask about pricing',
-      template: `Great question.\n\nYour basic listing is free — name, clinic, city. Patients can find you.\n\nGrowth is $69/mo — that's where you get your photo, bio, specialties, verified badge, patient messaging, and analytics.\n\nPro is $129/mo — everything in Growth plus care plans, job posting, and the full practice toolkit.\n\nMost docs start with Growth and it honestly pays for itself fast. One new patient from the directory and you're ahead.\n\nWant me to walk you through it?`,
+      template: `Great question.\n\nYour basic listing is free — name, clinic, city. Patients can find you.\n\nPro is $49/mo — that's where you get your photo, bio, specialties, verified badge, patient messaging, and analytics.\n\nPro is $49/mo — everything in Growth plus care plans, job posting, and the full practice toolkit.\n\nMost docs start with Growth and it honestly pays for itself fast. One new patient from the directory and you're ahead.\n\nWant me to walk you through it?`,
     },
     {
       id: 'objection_time',
@@ -732,7 +732,7 @@ export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
       name: 'Email: First Contact',
       category: 'email',
       description: 'Professional email when no Instagram available',
-      template: `Subject: Built you a free listing on NeuroChiro\n\nHey {name},\n\nMy name is Dr. Raymond Nichols. I'm a chiropractor and the founder of NeuroChiro — the directory built specifically for nervous system chiropractors.\n\nI came across your practice and I can tell you're doing real work. So I went ahead and created a free listing for you. It's already live:\n\n{profile_link}\n\nPatients in {city} are actively searching through the directory to find docs like you.\n\nYour basic listing — name, clinic, location — is free. If you want to stand out with your photo, bio, verified badge, and patient messaging, our Growth plan is $69/mo.\n\nMost doctors say it pays for itself with the first new patient.\n\nClaim your listing anytime — takes about 2 minutes.\n\nDr. Raymond Nichols\nFounder, NeuroChiro\nneurochiro.co`,
+      template: `Subject: Built you a free listing on NeuroChiro\n\nHey {name},\n\nMy name is Dr. Raymond Nichols. I'm a chiropractor and the founder of NeuroChiro — the directory built specifically for nervous system chiropractors.\n\nI came across your practice and I can tell you're doing real work. So I went ahead and created a free listing for you. It's already live:\n\n{profile_link}\n\nPatients in {city} are actively searching through the directory to find docs like you.\n\nYour basic listing — name, clinic, location — is free. If you want to stand out with your photo, bio, verified badge, and patient messaging, our Pro plan is $49/mo.\n\nMost doctors say it pays for itself with the first new patient.\n\nClaim your listing anytime — takes about 2 minutes.\n\nDr. Raymond Nichols\nFounder, NeuroChiro\nneurochiro.co`,
     },
     {
       id: 'email_follow_up',

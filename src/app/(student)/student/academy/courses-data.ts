@@ -849,7 +849,7 @@ Revenue mix is usually 50/50 to 70/30 insurance/cash, blending out to $55-90 per
 
 If you go cash or hybrid, memberships are your best tool. Typical structure:
 
-$69-$129/month. Includes 4 adjustments per month plus a quarterly progress scan. Additional visits at a discounted rate ($35-$50). Family discounts of 15-25%.
+$69-$49/month. Includes 4 adjustments per month plus a quarterly progress scan. Additional visits at a discounted rate ($35-$50). Family discounts of 15-25%.
 
 Why it works: patients commit monthly, so you've got recurring revenue. It feels like a deal compared to per-visit pricing. Automatic billing means you stop having the money conversation every visit. And retention is way higher than per-visit cash patients — once someone's on autopay, inertia works in your favor.
 
