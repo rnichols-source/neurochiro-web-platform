@@ -94,7 +94,7 @@ export default function DoctorDashboard() {
     );
   }
 
-  const doctorName = data?.profile?.full_name?.split(" ")[0] || "Doctor";
+  const doctorName = (data?.profile?.name || data?.profile?.full_name || "Doctor").split(" ")[0];
   const clinicName = data?.doctor?.clinic_name || "";
   const slug = data?.doctor?.slug;
   const stats = data?.stats || [];
