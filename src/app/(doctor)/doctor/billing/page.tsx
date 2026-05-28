@@ -67,7 +67,7 @@ export default function DoctorBilling() {
             href="/pricing/doctors"
             className="inline-block px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm hover:bg-neuro-orange-light transition-colors"
           >
-            View Plans
+            Upgrade to Pro
           </Link>
         </div>
       </div>
