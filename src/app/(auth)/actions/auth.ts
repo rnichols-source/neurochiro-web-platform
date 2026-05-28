@@ -375,8 +375,8 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
   try {
     await supabase.from('notifications').insert({
       user_id: userId,
-      title: 'Profile Claimed Successfully!',
-      body: 'Welcome to NeuroChiro! Your profile is live. Add your photo and bio to start attracting patients.',
+      title: 'Profile Claimed — 7-Day Pro Trial Active!',
+      body: 'Welcome to NeuroChiro! Your contact info is visible to patients for the next 7 days. Add your photo and bio from your dashboard. After the trial, upgrade to Pro ($49/mo) to keep everything unlocked.',
       type: 'system',
       link: '/doctor/profile',
       priority: 'important',

@@ -115,9 +115,9 @@ export default function DoctorLayout({
               <p className="text-sm text-white/90 font-medium">
                 {tierInfo.trialEndsAt && new Date(tierInfo.trialEndsAt) > new Date() ? (
                   <>
-                    <span className="font-black text-neuro-orange">Pro Trial:</span>{' '}
-                    {Math.ceil((new Date(tierInfo.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left —{' '}
-                    <span className="text-white/70">Keep full access for $49/mo</span>
+                    <span className="font-black text-neuro-orange">Pro Trial Active:</span>{' '}
+                    {Math.ceil((new Date(tierInfo.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left — your contact info is visible to patients.{' '}
+                    <span className="text-white/70">Upgrade to keep it after the trial.</span>
                   </>
                 ) : (
                   <>
