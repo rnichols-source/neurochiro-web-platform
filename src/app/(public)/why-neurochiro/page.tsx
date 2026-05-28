@@ -5,6 +5,7 @@ import {
   MessageSquare, Zap, Eye, Heart,
 } from "lucide-react";
 import Footer from "@/components/landing/Footer";
+import NetworkStats from "@/components/common/NetworkStats";
 
 const comparison = [
   { feature: "Directory listing", neurochiro: true, others: true },
@@ -159,7 +160,7 @@ export default function WhyNeuroChiroPage() {
       <section className="bg-neuro-navy py-16 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl font-heading font-black text-white mb-4">Ready to Get Found?</h2>
-          <p className="text-gray-400 mb-8">Join 140+ nervous system chiropractors. Free to start. No credit card required.</p>
+          <p className="text-gray-400 mb-8"><NetworkStats format="full-sentence" />. Free to start. No credit card required.</p>
           <Link href="/get-started" className="px-10 py-5 bg-neuro-orange text-white font-bold rounded-xl text-lg inline-flex items-center gap-2 hover:bg-neuro-orange/90 transition-colors shadow-lg shadow-neuro-orange/20">
             Get Listed Free <ArrowRight className="w-5 h-5" />
           </Link>

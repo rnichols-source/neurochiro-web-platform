@@ -15,6 +15,7 @@ import VendorContent from "./vendor-content";
 import VendorProducts from "./vendor-products";
 import VendorContact from "./vendor-contact";
 import VendorPageClient from "./vendor-page-client";
+import NetworkStats from "@/components/common/NetworkStats";
 
 async function getVendorBySlug(slug: string) {
   const supabase = createAdminClient();
@@ -440,7 +441,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
             <p className="text-gray-400 mb-6 max-w-lg mx-auto">
               {vendor.discount_code
                 ? `Use code ${vendor.discount_code} for your exclusive NeuroChiro member discount.`
-                : `Join 140+ nervous system chiropractors who trust NeuroChiro marketplace vendors.`}
+                : <><NetworkStats format="full-sentence" /> who trust NeuroChiro marketplace vendors.</>}
             </p>
             <a href={vendor.website_url} target="_blank" rel="noopener noreferrer"
               className="px-10 py-4 bg-neuro-orange text-white font-bold rounded-xl text-lg inline-flex items-center gap-2 hover:bg-neuro-orange/90 transition-colors shadow-lg shadow-neuro-orange/20">

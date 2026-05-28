@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { applyAsFoundingVendor } from "./actions";
 import Footer from "@/components/landing/Footer";
+import NetworkStats from "@/components/common/NetworkStats";
 
 const CATEGORIES = [
   "Supplements & Nutrition",
@@ -102,7 +103,7 @@ export default function FoundingVendorPage() {
             Become a Founding Vendor
           </h1>
           <p className="text-xl text-gray-300 mb-4 max-w-xl mx-auto">
-            3 months free. Permanent Founding Vendor badge. Direct access to 140+ nervous system chiropractors.
+            3 months free. Permanent Founding Vendor badge. Direct access to <NetworkStats format="doctors" /> nervous system chiropractors.
           </p>
           <p className="text-gray-500">
             We&apos;re handpicking 20 vendors to launch the NeuroChiro Marketplace. No credit card required.

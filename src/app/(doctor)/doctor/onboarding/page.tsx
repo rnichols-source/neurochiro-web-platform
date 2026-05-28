@@ -222,17 +222,37 @@ export default function DoctorOnboardingPage() {
           </div>
         )}
 
-        {/* Step 4: Share */}
+        {/* Step 4: Share & Celebrate */}
         {step === 4 && (
-          <div className="text-center space-y-6">
-            <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto" />
-            <h1 className="text-2xl font-heading font-black text-white">You&apos;re Live!</h1>
-            <p className="text-white/40">Your profile is now visible to patients searching for nervous system chiropractors.</p>
+          <div className="text-center space-y-8">
+            {/* Celebration */}
+            <div>
+              <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 className="w-10 h-10 text-green-400" />
+              </div>
+              <h1 className="text-3xl font-heading font-black text-white">You&apos;re Live!</h1>
+              <p className="text-white/50 mt-2">Your profile is now visible to patients searching for nervous system chiropractors.</p>
+            </div>
 
+            {/* Profile Preview Card */}
             {slug && (
-              <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-4">
-                <p className="text-[10px] text-white/30 uppercase tracking-widest mb-2">Your Profile URL</p>
-                <div className="flex items-center gap-2">
+              <div className="bg-white/[0.06] border border-white/[0.1] rounded-2xl p-6 text-left">
+                <div className="flex items-center gap-4 mb-4">
+                  {photoPreview ? (
+                    <img src={photoPreview} alt="" className="w-14 h-14 rounded-xl object-cover" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-xl bg-neuro-orange/20 flex items-center justify-center text-neuro-orange font-black text-xl">
+                      {(clinicName?.[0] || 'N').toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-white font-bold text-lg">{clinicName || 'Your Practice'}</p>
+                    <p className="text-white/40 text-sm">{selectedSpecialties.slice(0, 2).join(' · ') || 'Nervous System Specialist'}</p>
+                  </div>
+                </div>
+
+                {/* Profile URL */}
+                <div className="bg-white/[0.04] rounded-xl p-3 flex items-center gap-2">
                   <code className="flex-1 text-sm text-neuro-orange font-mono truncate">{profileUrl}</code>
                   <button
                     onClick={() => { navigator.clipboard.writeText(`https://${profileUrl}`); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
@@ -244,6 +264,35 @@ export default function DoctorOnboardingPage() {
               </div>
             )}
 
+            {/* Trial badge */}
+            <div className="bg-neuro-orange/10 border border-neuro-orange/20 rounded-xl p-4">
+              <p className="text-neuro-orange font-bold text-sm">Your 7-day Pro trial is active</p>
+              <p className="text-white/40 text-xs mt-1">Full access to analytics, patient leads, and all Pro tools. No credit card required.</p>
+            </div>
+
+            {/* Share buttons */}
+            <div className="grid grid-cols-2 gap-3">
+              <a
+                href={`https://www.instagram.com/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-3 bg-white/[0.06] border border-white/[0.1] text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-white/[0.1] transition-colors"
+              >
+                Share on Instagram
+              </a>
+              <button
+                onClick={() => {
+                  const text = `I just joined the NeuroChiro network! Find me at https://${profileUrl}`;
+                  if (navigator.share) { navigator.share({ text, url: `https://${profileUrl}` }).catch(() => {}); }
+                  else { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); }
+                }}
+                className="py-3 bg-white/[0.06] border border-white/[0.1] text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-white/[0.1] transition-colors"
+              >
+                <Share2 className="w-4 h-4" /> Share Link
+              </button>
+            </div>
+
+            {/* Go to Dashboard */}
             <button
               onClick={handleComplete}
               disabled={loading}

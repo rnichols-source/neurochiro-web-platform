@@ -9,6 +9,7 @@ import {
   Calendar, Globe, Lock, Stethoscope,
 } from "lucide-react";
 import LiveSignupFeed from "@/components/booth/LiveSignupFeed";
+import NetworkStats from "@/components/common/NetworkStats";
 
 /* ─── Full-Screen Slide Components ─── */
 
@@ -110,7 +111,7 @@ function SlideDirectory() {
         <p className="text-gray-500 text-lg leading-relaxed">Patients search for nervous system chiropractors by city, state, or specialty. Your profile is your storefront — photos, bio, specialties, reviews, and contact info.</p>
         <div className="flex items-center gap-6 mt-8">
           <div className="text-center">
-            <p className="text-3xl font-black text-neuro-orange">140+</p>
+            <p className="text-3xl font-black text-neuro-orange"><NetworkStats format="doctors" /></p>
             <p className="text-xs text-gray-400 font-bold">Doctors</p>
           </div>
           <div className="text-center">

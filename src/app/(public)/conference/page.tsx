@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Calendar, MapPin, Check, Zap, Globe, Loader2 } from "lucide-react";
 import { createConferenceCheckout } from "./actions";
+import NetworkStats from "@/components/common/NetworkStats";
 
 type Role = "doctor" | "student";
 type Billing = "monthly" | "annual";
@@ -79,8 +80,8 @@ export default function ConferenceLandingPage() {
           </h1>
 
           <p className="text-gray-300 text-base mb-6 max-w-lg mx-auto">
-            The only directory built exclusively for doctors like you.
-            140+ verified chiropractors across 30+ states and 4 countries.
+            The only directory built exclusively for doctors like you.{" "}
+            <NetworkStats format="doctors" /> verified chiropractors across 30+ states and 4 countries.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-400">
@@ -236,7 +237,7 @@ export default function ConferenceLandingPage() {
           {/* Vendor CTA */}
           <div className="mt-6 bg-white rounded-xl border border-gray-100 p-4 text-center">
             <p className="text-sm font-bold text-neuro-navy">Are you a vendor?</p>
-            <p className="text-xs text-gray-500 mt-1 mb-3">Get your products in front of 140+ nervous system chiropractors.</p>
+            <p className="text-xs text-gray-500 mt-1 mb-3">Get your products in front of <NetworkStats format="doctors" /> nervous system chiropractors.</p>
             <Link href="/marketplace/apply" className="text-neuro-orange font-bold text-sm hover:underline">
               Apply for the Marketplace &rarr;
             </Link>

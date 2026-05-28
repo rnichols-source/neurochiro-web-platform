@@ -7,6 +7,7 @@ import Image from "next/image";
 import { CheckCircle2, Loader2, ShieldCheck, Users, BarChart3, Briefcase, Award, Zap } from "lucide-react";
 import { createFreeAccount } from "./actions";
 import { createClient } from "@/lib/supabase";
+import NetworkStats from "@/components/common/NetworkStats";
 
 type Role = "doctor" | "student";
 
@@ -105,7 +106,7 @@ function GetStartedInner() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-heading font-black text-neuro-navy mb-2">Get Listed Free</h1>
-          <p className="text-gray-500">Join 140+ nervous system chiropractors. Your profile is live in 60 seconds.</p>
+          <p className="text-gray-500"><NetworkStats format="full-sentence" />. Your profile is live in 60 seconds.</p>
         </div>
 
         {/* What you get */}

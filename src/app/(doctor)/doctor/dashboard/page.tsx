@@ -140,6 +140,37 @@ export default function DoctorDashboard() {
         </motion.div>
       )}
 
+      {/* Welcome Checklist — shows until profile is 100% complete */}
+      {data?.marketPerformance?.completeness < 100 && data?.marketPerformance?.missingItems?.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-black text-neuro-navy text-base">Complete Your Profile</h3>
+              <p className="text-gray-400 text-xs mt-0.5">Complete profiles get 5x more patient inquiries.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-black text-neuro-orange">{data.marketPerformance.completeness}%</span>
+              <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full bg-neuro-orange rounded-full transition-all" style={{ width: `${data.marketPerformance.completeness}%` }} />
+              </div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {data.marketPerformance.missingItems.map((label: string, i: number) => (
+              <Link
+                key={i}
+                href="/doctor/profile"
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+              >
+                <div className="w-6 h-6 rounded-full border-2 border-gray-200 group-hover:border-neuro-orange transition-colors flex-shrink-0" />
+                <span className="text-sm text-gray-600 group-hover:text-neuro-navy transition-colors">{label}</span>
+                <ArrowRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-neuro-orange ml-auto transition-colors" />
+              </Link>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Upgrade Nudge Banner — shows for gated free profiles */}
       {data?.doctor && isProfileGated(data.doctor) && profileViews > 0 && (
         <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-r from-neuro-navy to-neuro-navy/90 rounded-2xl p-6 border border-neuro-orange/20 shadow-lg">

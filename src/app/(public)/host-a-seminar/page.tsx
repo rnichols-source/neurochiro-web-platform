@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { createSeminarListingCheckout, createMemberSeminar } from "./actions";
 import { CheckCircle2, Calendar, Users, Award, Mail, TrendingUp, Star, Zap } from "lucide-react";
+import NetworkStats from "@/components/common/NetworkStats";
 
 type ListingType = "single" | "annual";
 
@@ -76,7 +77,7 @@ export default function HostSeminarPage() {
         {/* Hero */}
         <div className="text-center mb-12 space-y-3">
           <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-[10px]">Educator Network</span>
-          <h1 className="text-3xl md:text-4xl font-heading font-black text-neuro-navy">Get Your Seminar in Front of 140+ Nervous System Chiropractors</h1>
+          <h1 className="text-3xl md:text-4xl font-heading font-black text-neuro-navy">Get Your Seminar in Front of <NetworkStats format="doctors" /> Nervous System Chiropractors</h1>
           <p className="text-gray-500 max-w-xl mx-auto">NeuroChiro promotes your event to the exact audience you want — verified, specialty-specific doctors actively looking for seminars.</p>
         </div>
 
