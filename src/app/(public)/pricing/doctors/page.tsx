@@ -129,6 +129,47 @@ export default function DoctorPricing() {
         ))}
       </div>
 
+      {/* Why NeuroChiro vs Google */}
+      <div className="max-w-3xl mx-auto mb-12">
+        <h2 className="text-2xl font-heading font-black text-neuro-navy text-center mb-6">
+          Why NeuroChiro <span className="text-neuro-orange">vs. Google?</span>
+        </h2>
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left py-3 px-5 font-bold text-gray-400 text-xs uppercase tracking-wider"></th>
+                <th className="py-3 px-4 font-bold text-gray-400 text-xs uppercase tracking-wider text-center">Google</th>
+                <th className="py-3 px-4 font-bold text-neuro-orange text-xs uppercase tracking-wider text-center">NeuroChiro Pro</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {[
+                ["General search listing", true, true],
+                ["Nervous-system-specific directory", false, true],
+                ["Patients pre-filtered for your specialty", false, true],
+                ["Verified nervous system practitioner badge", false, true],
+                ["Practice analytics & KPI tracking", false, true],
+                ["Care Plan Builder", false, true],
+                ["AI Bio Generator", false, true],
+                ["ChiroMatch hiring system", false, true],
+                ["CE credit tracker", false, true],
+                ["Doctor referral network", false, true],
+              ].map(([feature, google, nc], i) => (
+                <tr key={i}>
+                  <td className="py-2.5 px-5 text-gray-700 font-medium">{feature as string}</td>
+                  <td className="py-2.5 px-4 text-center">{google ? <Check className="w-4 h-4 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-gray-300 mx-auto" />}</td>
+                  <td className="py-2.5 px-4 text-center">{nc ? <Check className="w-4 h-4 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-gray-300 mx-auto" />}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-center text-xs text-gray-400 mt-4">
+          Google shows everyone. NeuroChiro shows patients who are already looking for nervous system chiropractors — zero wasted traffic.
+        </p>
+      </div>
+
       {/* Founding member note */}
       <div className="text-center mb-12">
         <p className="text-xs text-gray-400">
