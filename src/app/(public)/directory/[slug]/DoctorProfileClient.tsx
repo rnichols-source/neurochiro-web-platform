@@ -275,7 +275,8 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         <div className="max-w-4xl mx-auto px-6 mt-6">
           <div className="bg-gradient-to-r from-neuro-navy to-[#1a3048] rounded-2xl p-6 text-white">
             <p className="font-black text-lg mb-1">Welcome, {name}!</p>
-            <p className="text-white/70 text-sm leading-relaxed mb-4">We built this free listing for you based on your public practice info. Claim it to manage your profile — takes 15 seconds. You&apos;ll get a <span className="text-neuro-orange font-bold">free 7-day Pro trial</span> so patients can see your full contact info right away. After that, it&apos;s $49/mo to keep everything visible.</p>
+            <p className="text-white/70 text-sm leading-relaxed mb-3">We built this free listing for you based on your public practice info. Claim it to manage your profile — takes 15 seconds. You&apos;ll get a <span className="text-neuro-orange font-bold">free 7-day Pro trial</span> so patients can see your full contact info right away.</p>
+            <p className="text-white/50 text-xs leading-relaxed mb-4">After the trial, Pro is $49/mo — includes your contact info visible to patients, verified badge, priority search ranking, analytics dashboard, patient leads, KPI tracker, care plan builder, and every practice tool. No contracts, cancel anytime.</p>
             <a href={`/register?claim_id=${doctor.id}&role=doctor`}
               className="inline-block px-6 py-3 bg-neuro-orange text-white rounded-xl text-sm font-bold hover:bg-neuro-orange/90 transition-all shadow-lg shadow-neuro-orange/20">
               Claim My Profile
