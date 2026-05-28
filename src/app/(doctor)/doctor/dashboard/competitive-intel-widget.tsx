@@ -7,6 +7,7 @@ interface Props {
   totalInCity: number;
   topPercentile: number;
   areaAverageViews: number;
+  cityDemand?: number;
   doctorViews: number;
   city: string;
   state: string;
@@ -34,17 +35,23 @@ export default function CompetitiveIntelWidget(props: Props) {
         </div>
       </div>
 
-      <div className="bg-white/[0.04] rounded-xl p-3">
+      <div className="bg-white/[0.04] rounded-xl p-3 space-y-1">
         <div className="flex items-center justify-between text-xs">
           <span className="text-white/40">Your views</span>
           <span className="font-bold text-white flex items-center gap-1">
             {props.doctorViews} <TrendIcon className={`w-3 h-3 ${trendColor}`} />
           </span>
         </div>
-        <div className="flex items-center justify-between text-xs mt-1">
+        <div className="flex items-center justify-between text-xs">
           <span className="text-white/40">Area average</span>
           <span className="text-white/50">{props.areaAverageViews}</span>
         </div>
+        {props.cityDemand !== undefined && props.cityDemand > 0 && (
+          <div className="flex items-center justify-between text-xs pt-1 border-t border-white/[0.06]">
+            <span className="text-white/40">City demand</span>
+            <span className="text-neuro-orange font-bold">{props.cityDemand.toLocaleString()} searches</span>
+          </div>
+        )}
       </div>
     </div>
   );

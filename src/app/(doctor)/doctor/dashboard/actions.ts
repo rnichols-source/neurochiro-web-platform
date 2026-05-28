@@ -465,7 +465,8 @@ export async function getCompetitiveIntelligence() {
     const myViews = doc.profile_views || 0
     const rank = cityDoctors.filter(d => (d.profile_views || 0) > myViews).length + 1
     const totalInCity = cityDoctors.length
-    const avgViews = Math.round(cityDoctors.reduce((s, d) => s + (d.profile_views || 0), 0) / totalInCity)
+    const totalCityViews = cityDoctors.reduce((s, d) => s + (d.profile_views || 0), 0)
+    const avgViews = Math.round(totalCityViews / totalInCity)
     const topPercentile = Math.round((1 - (rank - 1) / totalInCity) * 100)
 
     return {
@@ -473,6 +474,7 @@ export async function getCompetitiveIntelligence() {
       totalInCity,
       topPercentile,
       areaAverageViews: avgViews,
+      cityDemand: totalCityViews,
       doctorViews: myViews,
       city: doc.city,
       state: doc.state,

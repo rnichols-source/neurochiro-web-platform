@@ -46,6 +46,19 @@ export async function GET(req: Request) {
       .in('membership_tier', ['basic', 'free', 'starter', 'standard'])
       .neq('verification_status', 'hidden');
 
+    // Pre-compute city demand (total views per city) for email personalization
+    const { data: allDoctors } = await supabase
+      .from('doctors')
+      .select('city, state, profile_views')
+      .eq('verification_status', 'verified');
+    const cityDemandMap = new Map<string, number>();
+    for (const d of allDoctors || []) {
+      if (d.city && d.state) {
+        const key = `${d.city.toLowerCase()}-${d.state.toLowerCase()}`;
+        cityDemandMap.set(key, (cityDemandMap.get(key) || 0) + (d.profile_views || 0));
+      }
+    }
+
     if (!doctors || doctors.length === 0) {
       return NextResponse.json({ success: true, message: 'No Free tier doctors to nudge', sent: 0 });
     }
@@ -79,6 +92,9 @@ export async function GET(req: Request) {
       const views = doc.profile_views || 0;
       const daysSinceJoin = Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24));
       const profileUrl = doc.slug ? `https://neurochiro.co/directory/${doc.slug}` : 'https://neurochiro.co/doctor/dashboard';
+      const cityKey = doc.city && doc.state ? `${doc.city.toLowerCase()}-${doc.state.toLowerCase()}` : '';
+      const cityDemand = cityKey ? (cityDemandMap.get(cityKey) || 0) : 0;
+      const cityDemandLine = cityDemand > 0 ? `<p style="margin-top:12px;padding:12px 16px;background:#FFF7ED;border-radius:10px;font-size:14px;color:#9A3412;"><strong>${cityDemand.toLocaleString()} patients</strong> have searched for nervous system chiropractors in ${doc.city} recently.</p>` : '';
 
       // Determine which nudge to send (only one per run, priority order)
       let trigger: string | null = null;
@@ -92,28 +108,31 @@ export async function GET(req: Request) {
         subject = `Your Pro trial ended, Dr. ${name} — ${views} patients found you`;
         body = `<p>Your 7-day Pro trial has ended. During your trial, <strong>${views} patients</strong> viewed your profile on NeuroChiro.</p>
           <p>Your contact info is now hidden from patients. To keep your phone, website, and booking link visible — upgrade to Pro for just $49/mo.</p>
+          ${cityDemandLine}
           <p style="color:#e97325;font-weight:bold;">One new patient pays for a full year.</p>`;
       } else if (views >= 100 && !sentNudges.has(`${doc.user_id}-views_100`)) {
         trigger = 'views_100';
         subject = `100 patients found your profile, Dr. ${name}`;
         body = `<p>Your NeuroChiro profile has been viewed <strong>100 times</strong>.</p>
           <p>That's 100 patients who searched for a nervous system chiropractor and found <strong>you</strong>.</p>
+          ${cityDemandLine}
           <p>Right now, they can see your listing but they can't message you or see your full analytics. Upgrade to Pro ($49/mo) and turn those views into actual patients walking through your door.</p>`;
       } else if (views >= 50 && !sentNudges.has(`${doc.user_id}-views_50`)) {
         trigger = 'views_50';
         subject = `50 profile views — patients are finding you, Dr. ${name}`;
         body = `<p>Your profile has been viewed <strong>50 times</strong> on NeuroChiro.</p>
-          <p>Patients in ${doc.city || 'your area'} are actively searching for chiropractors like you. With Pro, you can see exactly who's viewing your profile, respond to patient messages, and show up with a verified badge.</p>`;
+          <p>Patients in ${doc.city || 'your area'} are actively searching for chiropractors like you. With Pro, you can see exactly who's viewing your profile, respond to patient messages, and show up with a verified badge.</p>${cityDemandLine}`;
       } else if (views >= 25 && !sentNudges.has(`${doc.user_id}-views_25`)) {
         trigger = 'views_25';
         subject = `25 people viewed your profile this month`;
         body = `<p>Your NeuroChiro listing is getting attention — <strong>25 profile views</strong> and counting.</p>
-          <p>These are real patients looking for nervous system chiropractors in ${doc.city || 'your area'}. Upgrade to unlock patient messaging so they can reach you directly.</p>`;
+          <p>These are real patients looking for nervous system chiropractors in ${doc.city || 'your area'}. Upgrade to unlock patient messaging so they can reach you directly.</p>${cityDemandLine}`;
       } else if (views >= 1 && !sentNudges.has(`${doc.user_id}-first_view`)) {
         trigger = 'first_view';
         subject = `Someone just found your profile, Dr. ${name}`;
         body = `<p>Your NeuroChiro profile got its first view!</p>
           <p>A patient in ${doc.city || 'your area'} searched for a nervous system chiropractor and found you. This is just the beginning — as the directory grows, so does your visibility.</p>
+          ${cityDemandLine}
           <p>Make sure your profile is complete (photo + bio) to maximize clicks.</p>`;
       } else if (daysSinceJoin >= 30 && !sentNudges.has(`${doc.user_id}-day_30`)) {
         trigger = 'day_30';
