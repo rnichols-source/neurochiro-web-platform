@@ -26,7 +26,7 @@ function formatUrl(url: string | null | undefined): string | null {
   return `https://${trimmed}`;
 }
 
-export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs = [] }: { doctor: any, slug: string, seminars?: any[], jobs?: any[] }) {
+export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs = [], cityDoctorCount = 0, nearbyDoctors = [], citySearchVolume = 0 }: { doctor: any, slug: string, seminars?: any[], jobs?: any[], cityDoctorCount?: number, nearbyDoctors?: any[], citySearchVolume?: number }) {
   const { toggleSave, isSaved } = useUserPreferences();
   const [copied, setCopied] = useState(false);
   const [session, setSession] = useState<any>(null);
@@ -241,6 +241,12 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
                 <div className="text-xl sm:text-2xl font-black text-neuro-orange">{specialties.length}</div>
                 <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Specialties</div>
+              </div>
+            )}
+            {cityDoctorCount > 0 && doctor.city && (
+              <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
+                <div className="text-xl sm:text-2xl font-black text-neuro-orange">1 of {cityDoctorCount}</div>
+                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">in {doctor.city}</div>
               </div>
             )}
             {d.patient_leads > 0 && (
@@ -788,6 +794,57 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             </>
           )}
         </div>
+
+        {/* City Demand — Social Proof */}
+        {citySearchVolume > 0 && doctor.city && (
+          <div className="mt-8 bg-gradient-to-r from-neuro-orange/5 to-neuro-orange/[0.02] border border-neuro-orange/10 rounded-2xl p-6 text-center">
+            <div className="text-3xl font-black text-neuro-orange">{citySearchVolume.toLocaleString()}</div>
+            <p className="text-sm text-gray-500 mt-1">patients found nervous system chiropractors in {doctor.city} recently</p>
+          </div>
+        )}
+
+        {/* Nearby Doctors */}
+        {nearbyDoctors.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-lg font-black text-neuro-navy mb-4">Other Nervous System Chiropractors Near You</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {nearbyDoctors.map((doc: any) => (
+                <Link key={doc.id} href={`/directory/${doc.slug || doc.id}`}
+                  className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-neuro-orange/30 hover:shadow-md transition-all group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-neuro-navy/5 overflow-hidden flex-shrink-0">
+                      {doc.photo_url ? (
+                        <img src={doc.photo_url} alt={`${doc.first_name} ${doc.last_name}`} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-neuro-orange font-black text-lg">
+                          {(doc.first_name?.[0] || 'N').toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors truncate">
+                        Dr. {doc.first_name} {doc.last_name}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">{doc.clinic_name}</p>
+                      <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                        <MapPin className="w-3 h-3" /> {doc.city}{doc.state ? `, ${doc.state}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                  {doc.specialties?.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {doc.specialties.slice(0, 2).map((s: string, i: number) => (
+                        <span key={i} className="px-2 py-0.5 bg-neuro-orange/5 text-neuro-orange text-[10px] font-bold rounded-lg">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Report + Disclaimer */}
         <div className="mt-6 text-center space-y-4 pb-6">

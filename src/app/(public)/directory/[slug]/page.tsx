@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${name} | Nervous System Specialist at ${doctor.clinic_name}`;
   const description = `Visit ${name} in ${location}. Specializing in ${specialtyList || 'Nervous System Chiropractic'}. Verified member of the NeuroChiro network of elite clinical practitioners.`;
 
-  const ogImage = doctor.photo_url || "https://neurochiro.co/og-default.png";
+  const ogImage = `https://neurochiro.co/api/og/profile?slug=${doctor.slug || doctor.id}&format=landscape`;
 
   return {
     title,
