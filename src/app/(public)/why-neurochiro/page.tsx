@@ -56,7 +56,7 @@ export default function WhyNeuroChiroPage() {
               Get Listed Free <ArrowRight className="w-5 h-5" />
             </Link>
             <Link href="/pricing" className="px-8 py-4 bg-white/10 text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-colors">
-              View Plans
+              See Pricing
             </Link>
           </div>
         </div>

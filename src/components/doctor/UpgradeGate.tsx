@@ -113,7 +113,7 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
               onClick={() => setShowModal(true)}
               className="mt-3 text-xs font-bold text-neuro-orange hover:underline flex items-center justify-center gap-1 mx-auto"
             >
-              See all plans <ArrowRight className="w-3 h-3" />
+              Learn more about Pro <ArrowRight className="w-3 h-3" />
             </button>
           </div>
         </div>
