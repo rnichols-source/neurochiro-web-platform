@@ -97,9 +97,19 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const certificationsList = d.certifications as string[] | null;
   const mapQuery = doctor.address ? encodeURIComponent(`${doctor.address}, ${doctor.city}, ${doctor.state}`) : doctor.city ? encodeURIComponent(`${doctor.city}, ${doctor.state}`) : null;
 
-  // Bio split for pull quote
-  const firstSentence = doctor.bio?.split(/(?<=[.!?])\s/)?.[0] || "";
-  const restOfBio = doctor.bio?.slice(firstSentence.length).trim() || "";
+  // Bio split for pull quote — find the first real sentence (60+ chars)
+  const bioParts = doctor.bio?.split(/(?<=[.!?])\s+/) || [];
+  let pullQuote = "";
+  let pullEnd = 0;
+  for (let i = 0; i < bioParts.length; i++) {
+    pullQuote += (i > 0 ? " " : "") + bioParts[i];
+    if (pullQuote.length >= 60 && /[.!?]$/.test(pullQuote.trim())) {
+      pullEnd = pullQuote.length;
+      break;
+    }
+  }
+  const firstSentence = pullEnd > 0 ? pullQuote.trim() : "";
+  const restOfBio = firstSentence ? doctor.bio?.slice(doctor.bio.indexOf(firstSentence) + firstSentence.length).trim() || "" : doctor.bio || "";
 
   const trackEvent = (eventType: string) => {
     fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ doctorId: doctor.id, eventType }) }).catch(() => {});
