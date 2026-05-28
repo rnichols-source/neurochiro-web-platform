@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import PublicBadges from "./public-badges";
 import {
   MapPin, ShieldCheck, CheckCircle2, Mail, ExternalLink, MessageSquare,
   Loader2, Phone, Heart, Share2, Calendar, Send, Globe, Users, Star,
   Copy, Instagram, Facebook, Award, Clock, Stethoscope, GraduationCap,
-  ChevronDown, ArrowLeft,
+  ChevronDown, ArrowLeft, Play, TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
@@ -26,7 +26,21 @@ function formatUrl(url: string | null | undefined): string | null {
   return `https://${trimmed}`;
 }
 
-export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs = [], cityDoctorCount = 0, nearbyDoctors = [], citySearchVolume = 0 }: { doctor: any, slug: string, seminars?: any[], jobs?: any[], cityDoctorCount?: number, nearbyDoctors?: any[], citySearchVolume?: number }) {
+/* ═══════════════════════════════════════════════════════════════
+   SECTION WRAPPER — alternating full-width backgrounds
+   ═══════════════════════════════════════════════════════════════ */
+function Section({ bg = "white", children, id, style: extra }: { bg?: "white" | "cream" | "navy" | "darknavy"; children: React.ReactNode; id?: string; style?: React.CSSProperties }) {
+  const bgMap = { white: "#ffffff", cream: "#F5F3EF", navy: "#1E2D3B", darknavy: "#162230" };
+  return (
+    <section id={id} style={{ background: bgMap[bg], width: "100%", ...extra }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs = [], cityDoctorCount = 0, nearbyDoctors = [], citySearchVolume = 0 }: { doctor: any; slug: string; seminars?: any[]; jobs?: any[]; cityDoctorCount?: number; nearbyDoctors?: any[]; citySearchVolume?: number }) {
   const { toggleSave, isSaved } = useUserPreferences();
   const [copied, setCopied] = useState(false);
   const [session, setSession] = useState<any>(null);
@@ -48,8 +62,8 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const [referralNotes, setReferralNotes] = useState('');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const supabase = createClient();
-
   const [photoError, setPhotoError] = useState(false);
+
   const gated = isProfileGated(doctor);
   const saved = isSaved('doctors', doctor.id?.toString());
   const name = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
@@ -83,12 +97,12 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const certificationsList = d.certifications as string[] | null;
   const mapQuery = doctor.address ? encodeURIComponent(`${doctor.address}, ${doctor.city}, ${doctor.state}`) : doctor.city ? encodeURIComponent(`${doctor.city}, ${doctor.state}`) : null;
 
+  // Bio split for pull quote
+  const firstSentence = doctor.bio?.split(/(?<=[.!?])\s/)?.[0] || "";
+  const restOfBio = doctor.bio?.slice(firstSentence.length).trim() || "";
+
   const trackEvent = (eventType: string) => {
-    fetch('/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ doctorId: doctor.id, eventType }),
-    }).catch(() => {});
+    fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ doctorId: doctor.id, eventType }) }).catch(() => {});
   };
 
   useEffect(() => {
@@ -116,664 +130,636 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   };
 
   return (
-    <div className="min-h-dvh bg-neuro-cream pb-40">
-      {/* Hero with Banner */}
-      <section className={`text-white pt-20 sm:pt-28 pb-10 sm:pb-16 px-6 relative overflow-hidden ${bannerUrl ? '' : 'bg-neuro-navy'}`}>
-        {bannerUrl && (
-          <div className="absolute inset-0">
-            <img src={bannerUrl} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-neuro-navy/80" />
-          </div>
+    <div style={{ minHeight: "100dvh", background: "#F5F3EF" }}>
+
+      {/* ═══════════════════════════════════════════
+          1. CINEMATIC HERO
+      ═══════════════════════════════════════════ */}
+      <section style={{ position: "relative", overflow: "hidden", paddingTop: 80, paddingBottom: 80 }}>
+        {/* Background */}
+        {bannerUrl ? (
+          <>
+            <img src={bannerUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+            <div style={{ position: "absolute", inset: 0, background: "rgba(30,45,59,0.85)" }} />
+          </>
+        ) : (
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(165deg, #0f1922 0%, #1E2D3B 40%, #1a2744 70%, #0d1520 100%)" }} />
         )}
-        {!bannerUrl && (
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute top-10 left-20 w-60 h-60 bg-neuro-orange rounded-full blur-3xl" />
-            <div className="absolute bottom-10 right-20 w-40 h-40 bg-blue-500 rounded-full blur-3xl" />
-          </div>
-        )}
-        <div className="max-w-4xl mx-auto relative z-10">
-          <Link href="/directory" className="text-xs text-gray-400 hover:text-white transition-colors mb-6 inline-flex items-center gap-1">
-            <ArrowLeft className="w-3 h-3" /> Back to Directory
+        {/* Ambient glows */}
+        <div style={{ position: "absolute", top: -200, right: -150, width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(214,104,41,0.1) 0%, transparent 70%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: -200, left: -150, width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%)", pointerEvents: "none" }} />
+
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 10 }}>
+          {/* Back link */}
+          <Link href="/directory" style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 40, textDecoration: "none" }}>
+            <ArrowLeft style={{ width: 14, height: 14 }} /> Back to Directory
           </Link>
 
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 mt-4">
+          {/* Centered content */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
             {/* Photo */}
-            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 rounded-2xl bg-white/10 overflow-hidden flex-shrink-0 shadow-2xl border-2 border-white/10 relative">
+            <div style={{ width: 140, height: 140, borderRadius: "50%", border: "4px solid rgba(214,104,41,0.4)", overflow: "hidden", background: "#1E2D3B", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", boxShadow: "0 25px 60px rgba(0,0,0,0.4)", marginBottom: 24 }}>
               {doctor.photo_url && !photoError ? (
-                <img src={doctor.photo_url} alt={name} className="w-full h-full object-cover" onError={() => setPhotoError(true)} />
+                <img src={doctor.photo_url} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={() => setPhotoError(true)} />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-white font-black text-3xl">{(doctor.first_name?.[0] || 'N').toUpperCase()}</span>
-                </div>
+                <span style={{ fontSize: 48, fontWeight: 900, color: "#D66829" }}>{(doctor.first_name?.[0] || 'N').toUpperCase()}</span>
               )}
             </div>
 
-            <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-black text-white">{name}</h1>
-              <div className="flex items-center gap-2 mt-1 justify-center sm:justify-start flex-wrap">
-                <ShieldCheck className="w-4 h-4 text-blue-400" />
-                {doctor.is_founding_member && (
-                  <span className="flex items-center gap-1 px-2 py-0.5 bg-neuro-orange/20 text-neuro-orange text-[9px] font-black rounded-full border border-neuro-orange/30 uppercase tracking-wider">
-                    <Star className="w-3 h-3 fill-neuro-orange" /> Founding Member
-                  </span>
-                )}
-              </div>
-              <p className="text-gray-300 text-base sm:text-lg font-medium mt-1">{doctor.clinic_name || 'Private Practice'}</p>
-              {location && (
-                <div className="flex items-center gap-1.5 mt-1 text-gray-400 justify-center sm:justify-start">
-                  <MapPin className="w-3.5 h-3.5 text-neuro-orange" />
-                  <span className="text-sm">{location}</span>
-                </div>
+            {/* Name */}
+            <h1 style={{ fontSize: 42, fontWeight: 900, color: "white", fontFamily: "Lato, sans-serif", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: 8 }}>{name}</h1>
+
+            {/* Clinic */}
+            <p style={{ fontSize: 14, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 6 }}>{doctor.clinic_name || 'Private Practice'}</p>
+
+            {/* Location */}
+            {location && (
+              <p style={{ fontSize: 15, color: "rgba(255,255,255,0.55)", fontWeight: 500, display: "flex", alignItems: "center", gap: 5, marginBottom: 16 }}>
+                <MapPin style={{ width: 14, height: 14, color: "#D66829" }} /> {location}
+              </p>
+            )}
+
+            {/* Badges row */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginBottom: 24 }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 14px", borderRadius: 20, background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.25)", fontSize: 11, fontWeight: 800, color: "#60a5fa" }}>
+                <ShieldCheck style={{ width: 13, height: 13 }} /> Verified
+              </span>
+              {doctor.is_founding_member && (
+                <span style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 14px", borderRadius: 20, background: "rgba(214,104,41,0.12)", border: "1px solid rgba(214,104,41,0.25)", fontSize: 11, fontWeight: 800, color: "#D66829" }}>
+                  <Star style={{ width: 12, height: 12 }} /> Founding Member
+                </span>
               )}
+              {acceptingNewPatients && (
+                <span style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 14px", borderRadius: 20, background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.25)", fontSize: 11, fontWeight: 800, color: "#4ade80" }}>
+                  <Heart style={{ width: 12, height: 12 }} /> Accepting Patients
+                </span>
+              )}
+              {offersTelehealth && (
+                <span style={{ padding: "5px 14px", borderRadius: 20, background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)", fontSize: 11, fontWeight: 800, color: "#60a5fa" }}>Telehealth</span>
+              )}
+              {acceptsWalkins && (
+                <span style={{ padding: "5px 14px", borderRadius: 20, background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)", fontSize: 11, fontWeight: 800, color: "#c084fc" }}>Walk-Ins</span>
+              )}
+            </div>
 
-              {/* Social links */}
-              <div className="flex items-center gap-2 mt-3 justify-center sm:justify-start">
-                {!gated && instagramUrl && (
-                  <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
-                    <Instagram className="w-4 h-4 text-white" />
-                  </a>
-                )}
-                {!gated && facebookUrl && (
-                  <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
-                    <Facebook className="w-4 h-4 text-white" />
-                  </a>
-                )}
-                {!gated && formatUrl(doctor.website_url) && (
-                  <a href={formatUrl(doctor.website_url)!} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
-                    <Globe className="w-4 h-4 text-white" />
-                  </a>
-                )}
-                <button onClick={handleShare} className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
-                  {copied ? <CheckCircle2 className="w-4 h-4 text-green-400" /> : <Share2 className="w-4 h-4 text-white" />}
-                </button>
-                <button onClick={() => toggleSave('doctors', doctor.id?.toString())} className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
-                  <Heart className={`w-4 h-4 ${saved ? 'text-red-400 fill-red-400' : 'text-white'}`} />
-                </button>
-              </div>
+            {/* Social links */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 28, justifyContent: "center" }}>
+              {!gated && instagramUrl && (
+                <a href={instagramUrl} target="_blank" rel="noopener noreferrer" style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.6)" }}>
+                  <Instagram style={{ width: 16, height: 16 }} />
+                </a>
+              )}
+              {!gated && facebookUrl && (
+                <a href={facebookUrl} target="_blank" rel="noopener noreferrer" style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.6)" }}>
+                  <Facebook style={{ width: 16, height: 16 }} />
+                </a>
+              )}
+              {!gated && formatUrl(doctor.website_url) && (
+                <a href={formatUrl(doctor.website_url)!} target="_blank" rel="noopener noreferrer" style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.6)" }}>
+                  <Globe style={{ width: 16, height: 16 }} />
+                </a>
+              )}
+              <button onClick={handleShare} style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.6)", cursor: "pointer" }}>
+                {copied ? <CheckCircle2 style={{ width: 16, height: 16, color: "#4ade80" }} /> : <Share2 style={{ width: 16, height: 16 }} />}
+              </button>
+              <button onClick={() => toggleSave('doctors', doctor.id?.toString())} style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: saved ? "#f87171" : "rgba(255,255,255,0.6)" }}>
+                <Heart style={{ width: 16, height: 16, fill: saved ? "#f87171" : "none" }} />
+              </button>
+            </div>
 
-              {/* Quick CTA — hidden on mobile (sticky bar handles it) */}
-              <div className="hidden sm:flex items-center gap-3 mt-5">
-                {gated ? (
-                  <ContactGateCTA variant="hero" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
-                ) : (
-                  <>
-                    {doctor.phone && (
-                      <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')}
-                        className="px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-neuro-orange/90 transition-colors">
-                        <Phone className="w-4 h-4" /> Call Now
-                      </a>
-                    )}
-                    {bookingUrl ? (
-                      <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('booking_click')}
-                        className="px-6 py-3 bg-green-500 text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-green-600 transition-colors">
-                        <Calendar className="w-4 h-4" /> Book Online
-                      </a>
-                    ) : (
-                      <a href="#appointment" className="px-6 py-3 bg-white/10 text-white font-bold rounded-xl text-sm flex items-center gap-2 hover:bg-white/20 transition-colors border border-white/20">
-                        <Calendar className="w-4 h-4" /> Book Consultation
-                      </a>
-                    )}
-                  </>
-                )}
-              </div>
+            {/* CTA Buttons */}
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+              {gated ? (
+                <ContactGateCTA variant="hero" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
+              ) : (
+                <>
+                  {doctor.phone && (
+                    <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')} style={{ padding: "14px 28px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", boxShadow: "0 8px 30px rgba(214,104,41,0.3)" }}>
+                      <Phone style={{ width: 16, height: 16 }} /> Call Now
+                    </a>
+                  )}
+                  {bookingUrl ? (
+                    <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('booking_click')} style={{ padding: "14px 28px", background: "#22c55e", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+                      <Calendar style={{ width: 16, height: 16 }} /> Book Online
+                    </a>
+                  ) : (
+                    <a href="#appointment" style={{ padding: "14px 28px", background: "rgba(255,255,255,0.1)", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", border: "1px solid rgba(255,255,255,0.15)" }}>
+                      <Calendar style={{ width: 16, height: 16 }} /> Book Consultation
+                    </a>
+                  )}
+                  {doctor.email && (
+                    <a href={`mailto:${doctor.email}`} onClick={() => trackEvent('contact_click')} style={{ padding: "14px 28px", background: "rgba(255,255,255,0.08)", color: "white", borderRadius: 14, fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", border: "1px solid rgba(255,255,255,0.12)" }}>
+                      <Mail style={{ width: 16, height: 16 }} /> Email
+                    </a>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Bar */}
-      {(d.profile_views > 0 || specialties.length > 0) && (
-        <div className="bg-neuro-navy border-t border-white/5 overflow-x-auto">
-          <div className="max-w-4xl mx-auto flex justify-center divide-x divide-white/10 min-w-0">
-            {yearsInPractice && (
-              <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
-                <div className="text-xl sm:text-2xl font-black text-neuro-orange">{yearsInPractice}+</div>
-                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Years Practice</div>
-              </div>
-            )}
-            {d.profile_views > 0 && !gated && (
-              <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
-                <div className="text-xl sm:text-2xl font-black text-neuro-orange">{d.profile_views > 999 ? `${(d.profile_views / 1000).toFixed(1)}k` : d.profile_views}</div>
-                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Views</div>
-              </div>
-            )}
-            {specialties.length > 0 && (
-              <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
-                <div className="text-xl sm:text-2xl font-black text-neuro-orange">{specialties.length}</div>
-                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Specialties</div>
-              </div>
-            )}
-            {cityDoctorCount > 0 && doctor.city && (
-              <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
-                <div className="text-xl sm:text-2xl font-black text-neuro-orange">1 of {cityDoctorCount}</div>
-                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">in {doctor.city}</div>
-              </div>
-            )}
-            {d.patient_leads > 0 && (
-              <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
-                <div className="text-xl sm:text-2xl font-black text-neuro-orange">{d.patient_leads}</div>
-                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Inquiries</div>
-              </div>
-            )}
-            {location && (
-              <div className="flex-1 text-center py-3 sm:py-4 px-2 min-w-0">
-                <div className="text-lg sm:text-2xl font-black text-neuro-orange truncate">{doctor.city}</div>
-                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">{doctor.state}</div>
-              </div>
-            )}
-          </div>
+      {/* ═══════════════════════════════════════════
+          2. TRUST BAR
+      ═══════════════════════════════════════════ */}
+      <section style={{ background: "#162230", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", overflow: "auto" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "center", minWidth: "fit-content" }}>
+          {[
+            ...(yearsInPractice ? [{ value: `${yearsInPractice}+`, label: "Years Practice" }] : []),
+            ...(cityDoctorCount > 0 && doctor.city ? [{ value: `1 of ${cityDoctorCount}`, label: `in ${doctor.city}` }] : []),
+            ...(certificationsList?.length ? [{ value: certificationsList[0], label: "Certified" }] : []),
+            ...(specialties.length > 0 ? [{ value: String(specialties.length), label: "Specialties" }] : []),
+            ...(d.profile_views > 0 && !gated ? [{ value: d.profile_views > 999 ? `${(d.profile_views / 1000).toFixed(1)}k` : String(d.profile_views), label: "Profile Views" }] : []),
+            ...(d.patient_leads > 0 ? [{ value: String(d.patient_leads), label: "Inquiries" }] : []),
+          ].map((item, i) => (
+            <div key={i} style={{ flex: "0 0 auto", textAlign: "center", padding: "16px 28px", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
+              <div style={{ fontSize: 22, fontWeight: 900, color: "#D66829", lineHeight: 1.2, whiteSpace: "nowrap" }}>{item.value}</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.12em", whiteSpace: "nowrap" }}>{item.label}</div>
+            </div>
+          ))}
         </div>
-      )}
+      </section>
 
-      {/* Quick Badges */}
-      {(acceptingNewPatients || offersTelehealth || acceptsWalkins) && (
-        <div className="bg-neuro-navy border-t border-white/5">
-          <div className="max-w-4xl mx-auto flex justify-center gap-3 py-3 px-6 flex-wrap">
-            {acceptingNewPatients && <span className="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded-full border border-green-500/30">Accepting New Patients</span>}
-            {offersTelehealth && <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-full border border-blue-500/30">Telehealth Available</span>}
-            {acceptsWalkins && <span className="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-full border border-purple-500/30">Walk-Ins Welcome</span>}
-          </div>
-        </div>
-      )}
-
-      {/* Claim Banner */}
+      {/* ═══════════════════════════════════════════
+          3. CLAIM / UPGRADE BANNERS
+      ═══════════════════════════════════════════ */}
       {!doctor.user_id && (
-        <div className="max-w-4xl mx-auto px-6 mt-6">
-          <div className="bg-gradient-to-r from-neuro-navy to-[#1a3048] rounded-2xl p-6 text-white">
-            <p className="font-black text-lg mb-1">Welcome, {name}!</p>
-            <p className="text-white/70 text-sm leading-relaxed mb-3">We built this free listing for you based on your public practice info. Claim it to manage your profile — takes 15 seconds. Your free plan is yours forever — you&apos;ll be listed on the directory, show up on the map, and can edit your photo, bio, and specialties.</p>
-            <p className="text-white/70 text-sm leading-relaxed mb-3">You&apos;ll also get a <span className="text-neuro-orange font-bold">free 7-day Pro trial</span> to try everything — contact info visible to patients, analytics, practice tools, and more.</p>
-            <p className="text-white/50 text-xs leading-relaxed mb-4">After the trial, Pro is $49/mo. Stay on the free plan as long as you want — no pressure, no credit card required to claim.</p>
-            <a href={`/register?claim_id=${doctor.id}&role=doctor`}
-              className="inline-block px-6 py-3 bg-neuro-orange text-white rounded-xl text-sm font-bold hover:bg-neuro-orange/90 transition-all shadow-lg shadow-neuro-orange/20">
+        <Section bg="cream" style={{ paddingTop: 32, paddingBottom: 0 }}>
+          <div style={{ background: "linear-gradient(135deg, #1E2D3B 0%, #1a3048 100%)", borderRadius: 20, padding: "32px 36px", color: "white" }}>
+            <p style={{ fontWeight: 900, fontSize: 20, marginBottom: 8 }}>Welcome, {name}!</p>
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>We built this free listing for you based on your public practice info. Claim it to manage your profile — takes 15 seconds. Your free plan is yours forever.</p>
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>You&apos;ll also get a <span style={{ color: "#D66829", fontWeight: 800 }}>free 7-day Pro trial</span> to try everything — contact info visible to patients, analytics, practice tools, and more.</p>
+            <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, lineHeight: 1.6, marginBottom: 20 }}>After the trial, Pro is $49/mo. Stay on the free plan as long as you want — no pressure, no credit card required to claim.</p>
+            <a href={`/register?claim_id=${doctor.id}&role=doctor`} style={{ display: "inline-block", padding: "14px 28px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, textDecoration: "none", boxShadow: "0 4px 20px rgba(214,104,41,0.3)" }}>
               Claim My Profile
             </a>
           </div>
-        </div>
+        </Section>
       )}
 
-      {/* Owner Upgrade Banner — only shows when doctor views their own gated profile */}
       {gated && session?.user?.id && doctor.user_id === session.user.id && (
-        <div className="max-w-4xl mx-auto px-6 mt-6">
-          <div className="bg-gradient-to-r from-neuro-orange/10 to-neuro-orange/5 border border-neuro-orange/20 rounded-2xl p-5">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <p className="font-black text-neuro-navy text-sm">This is how patients see your profile</p>
-                <p className="text-xs text-gray-500 mt-1">Your phone, website, and booking link are hidden from patients. Upgrade to Pro so they can reach you.</p>
-              </div>
-              <Link href="/doctor/billing"
-                className="px-5 py-2.5 bg-neuro-orange text-white rounded-xl text-sm font-bold hover:bg-neuro-orange/90 transition-all whitespace-nowrap shadow-lg shadow-neuro-orange/20">
-                Upgrade to Pro — $49/mo
-              </Link>
+        <Section bg="cream" style={{ paddingTop: 32, paddingBottom: 0 }}>
+          <div style={{ background: "linear-gradient(135deg, rgba(214,104,41,0.08) 0%, rgba(214,104,41,0.03) 100%)", border: "1px solid rgba(214,104,41,0.15)", borderRadius: 20, padding: "24px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+            <div>
+              <p style={{ fontWeight: 900, fontSize: 14, color: "#1E2D3B" }}>This is how patients see your profile</p>
+              <p style={{ fontSize: 12, color: "#718096", marginTop: 4 }}>Your phone, website, and booking link are hidden. Upgrade to Pro so patients can reach you.</p>
             </div>
+            <Link href="/doctor/billing" style={{ padding: "12px 24px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>Upgrade to Pro — $49/mo</Link>
           </div>
-        </div>
+        </Section>
       )}
 
-      {/* Main Content */}
-      <section className="max-w-4xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Specialties */}
-            {specialties.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Stethoscope className="w-5 h-5 text-neuro-orange" />
-                  <h2 className="text-lg font-black text-neuro-navy">Specialties</h2>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {specialties.map((s: string, i: number) => (
-                    <span key={i} className="px-4 py-2 bg-neuro-orange/5 text-neuro-orange text-sm font-bold rounded-xl border border-neuro-orange/10">
-                      {s}
-                    </span>
-                  ))}
-                </div>
+      {/* ═══════════════════════════════════════════
+          4. WHY CHOOSE ME / HIGHLIGHTS
+      ═══════════════════════════════════════════ */}
+      {highlights && highlights.length > 0 && (
+        <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 36 }}>Why Choose {doctor.first_name}</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+            {highlights.map((h: string, i: number) => (
+              <div key={i} style={{ background: "white", borderRadius: 16, padding: "24px 28px", display: "flex", alignItems: "flex-start", gap: 14, border: "1px solid rgba(30,45,59,0.06)" }}>
+                <CheckCircle2 style={{ width: 20, height: 20, color: "#22c55e", flexShrink: 0, marginTop: 2 }} />
+                <span style={{ fontSize: 15, color: "#374151", lineHeight: 1.5 }}>{h}</span>
               </div>
-            )}
-
-            {/* Certifications */}
-            {certificationsList && certificationsList.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Award className="w-5 h-5 text-neuro-orange" />
-                  <h2 className="text-lg font-black text-neuro-navy">Certifications</h2>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {certificationsList.map((c: string, i: number) => (
-                    <span key={i} className="px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg border border-amber-100">{c}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Badges */}
-            {doctor.user_id && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                <PublicBadges doctorUserId={doctor.user_id} />
-              </div>
-            )}
-
-            {/* Bio */}
-            {doctor.bio && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-                <h2 className="text-lg font-black text-neuro-navy mb-4">About {name}</h2>
-                <p className="text-gray-600 leading-relaxed whitespace-pre-line">{doctor.bio}</p>
-              </div>
-            )}
-
-            {/* Why Choose Me / Highlights */}
-            {highlights && highlights.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-                <div className="flex items-center gap-2 mb-5">
-                  <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  <h2 className="text-lg font-black text-neuro-navy">Why Choose {doctor.first_name}?</h2>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {highlights.map((h: string, i: number) => (
-                    <div key={i} className="flex items-start gap-3 bg-green-50/50 rounded-xl p-4 border border-green-100">
-                      <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                      <span className="text-sm text-gray-700">{h}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Patients We Help */}
-            {conditionsTreated && conditionsTreated.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-                <h2 className="text-lg font-black text-neuro-navy mb-4">Patients We Help</h2>
-                <div className="flex flex-wrap gap-2">
-                  {conditionsTreated.map((c: string, i: number) => (
-                    <span key={i} className="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100">
-                      {c}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Spotlight / Video */}
-            {spotlightEpisode && (
-              <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                <div className="flex items-center gap-2 px-6 pt-5 pb-3">
-                  <span className="text-lg">🎬</span>
-                  <h2 className="text-lg font-black text-neuro-navy">Featured on NeuroChiro Spotlight</h2>
-                  <span className="bg-neuro-orange/10 text-neuro-orange text-xs font-black px-2.5 py-0.5 rounded-full">EP {String(spotlightEpisode.episodeNumber).padStart(2, "0")}</span>
-                </div>
-                <div className="px-6 pb-3">
-                  <p className="text-gray-500 text-sm italic">&ldquo;{spotlightEpisode.quote}&rdquo;</p>
-                </div>
-                <div className="aspect-video">
-                  <iframe src={spotlightEpisode.videoUrl} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                </div>
-                <div className="px-6 py-4">
-                  <p className="text-gray-500 text-sm mb-3">{spotlightEpisode.description}</p>
-                  <Link href="/spotlight" className="text-neuro-orange font-bold text-sm hover:underline">Watch all Spotlight episodes &rarr;</Link>
-                </div>
-              </div>
-            )}
-
-            {doctor.video_url && !spotlightEpisode && (
-              <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                <div className="aspect-video">
-                  <iframe src={doctor.video_url.replace('watch?v=', 'embed/').replace('vimeo.com/', 'player.vimeo.com/video/')}
-                    className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                </div>
-              </div>
-            )}
-
-            {/* First Visit Info */}
-            {firstVisitInfo && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-                <h2 className="text-lg font-black text-neuro-navy mb-4">What to Expect on Your First Visit</h2>
-                <p className="text-gray-600 leading-relaxed whitespace-pre-line">{firstVisitInfo}</p>
-              </div>
-            )}
-
-            {/* Amenities */}
-            {amenitiesList && amenitiesList.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-                <h2 className="text-lg font-black text-neuro-navy mb-4">Amenities</h2>
-                <div className="flex flex-wrap gap-2">
-                  {amenitiesList.map((a: string, i: number) => (
-                    <span key={i} className="px-3 py-1.5 bg-gray-50 text-gray-700 text-sm rounded-lg border border-gray-100">{a}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Team Members */}
-            {teamMembersList && teamMembersList.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-                <div className="flex items-center gap-2 mb-4">
-                  <Users className="w-5 h-5 text-neuro-orange" />
-                  <h2 className="text-lg font-black text-neuro-navy">Our Team</h2>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {teamMembersList.map((m, i) => (
-                    <div key={i} className="text-center">
-                      <div className="w-20 h-20 rounded-xl bg-gray-100 overflow-hidden mx-auto mb-2">
-                        {m.photo_url ? <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" /> :
-                          <div className="w-full h-full flex items-center justify-center text-gray-300 text-2xl font-bold">{m.name?.[0]}</div>}
-                      </div>
-                      <p className="text-sm font-bold text-neuro-navy">{m.name}</p>
-                      <p className="text-xs text-gray-500">{m.role}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Photo Gallery */}
-            {galleryImages && galleryImages.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-                <h2 className="text-lg font-black text-neuro-navy mb-4">Photos</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {galleryImages.map((img: string, i: number) => (
-                    <img key={i} src={img} alt="" className="w-full aspect-video object-cover rounded-xl" />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Map */}
-            {mapQuery && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-                <div className="flex items-center gap-2 mb-4">
-                  <MapPin className="w-5 h-5 text-neuro-orange" />
-                  <h2 className="text-lg font-black text-neuro-navy">Location</h2>
-                </div>
-                {doctor.address && <p className="text-sm text-gray-500 mb-4">{doctor.address}, {doctor.city}, {doctor.state} {doctor.zip_code}</p>}
-                <div className="aspect-video rounded-xl overflow-hidden border border-gray-200">
-                  <iframe src={`https://www.google.com/maps?q=${mapQuery}&output=embed`}
-                    className="w-full h-full" loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" />
-                </div>
-              </div>
-            )}
-
-            {/* Seminars */}
-            {seminars.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-                <h2 className="text-lg font-black text-neuro-navy mb-4">Seminars & Events</h2>
-                <div className="space-y-3">
-                  {seminars.map((sem: any) => (
-                    <Link key={sem.id} href={`/seminars/${sem.id}`} className="block bg-gray-50 hover:bg-orange-50 rounded-xl p-4 transition-colors group">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-sm font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">{sem.title}</h3>
-                          <div className="flex items-center gap-3 mt-1.5">
-                            {sem.dates && <span className="text-xs text-gray-500 flex items-center gap-1"><Calendar className="w-3 h-3" /> {sem.dates}</span>}
-                            {(sem.city || sem.location) && <span className="text-xs text-gray-500 flex items-center gap-1"><MapPin className="w-3 h-3" /> {sem.city || sem.location}</span>}
-                          </div>
-                        </div>
-                        {sem.price ? <span className="text-xs font-bold text-neuro-orange">${sem.price}</span> : <span className="text-xs font-bold text-green-600">Free</span>}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Jobs */}
-            {jobs.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-                <h2 className="text-lg font-black text-neuro-navy mb-4">Open Positions</h2>
-                <div className="space-y-3">
-                  {jobs.map((job: any) => (
-                    <Link key={job.id} href={`/careers/${job.id}`} className="block bg-gray-50 hover:bg-orange-50 rounded-xl p-4 transition-colors group">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-sm font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors">{job.title}</h3>
-                          <div className="flex items-center gap-3 mt-1.5">
-                            {job.employment_type && <span className="text-xs text-gray-500">{job.employment_type}</span>}
-                            {(job.salary_min || job.salary_max) && (
-                              <span className="text-xs text-gray-500">
-                                {job.salary_min && job.salary_max ? `$${(job.salary_min/1000).toFixed(0)}k–$${(job.salary_max/1000).toFixed(0)}k` : job.salary_min ? `From $${(job.salary_min/1000).toFixed(0)}k` : `Up to $${(job.salary_max/1000).toFixed(0)}k`}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Hiring</span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Google Reviews */}
-            {doctor.google_place_id && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-                <h2 className="text-lg font-black text-neuro-navy mb-4">Reviews</h2>
-                <GoogleReviews placeId={doctor.google_place_id} doctorName={name} />
-              </div>
-            )}
-
-            {/* Patient Stories */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-              <h2 className="text-lg font-black text-neuro-navy mb-4">Patient Stories</h2>
-              {stories.length > 0 ? (
-                <div className="space-y-4 mb-6">
-                  {stories.map((story) => (
-                    <div key={story.id} className="bg-gray-50 rounded-xl p-5">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm font-bold text-neuro-navy">{story.patient_first_name}</span>
-                        <span className="text-xs text-gray-400">{story.condition_before} &rarr; {story.outcome_after}</span>
-                      </div>
-                      <p className="text-gray-600 text-sm italic">&ldquo;{story.story_text}&rdquo;</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-400 text-sm mb-6">No stories yet. Be the first to share your experience.</p>
-              )}
-              {storySubmitted ? (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                  <CheckCircle2 className="w-6 h-6 text-green-500 mx-auto mb-1" />
-                  <p className="font-bold text-green-700 text-sm">Thank you! Your story will appear after review.</p>
-                </div>
-              ) : showStoryForm ? (
-                <div className="bg-gray-50 rounded-xl p-5 space-y-3">
-                  <input type="text" placeholder="Your first name" value={storyForm.patientFirstName} onChange={e => setStoryForm(f => ({...f, patientFirstName: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
-                  <div className="grid grid-cols-2 gap-3">
-                    <input type="text" placeholder="Condition before" value={storyForm.conditionBefore} onChange={e => setStoryForm(f => ({...f, conditionBefore: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
-                    <input type="text" placeholder="Outcome after" value={storyForm.outcomeAfter} onChange={e => setStoryForm(f => ({...f, outcomeAfter: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
-                  </div>
-                  <textarea placeholder="Tell your story..." value={storyForm.storyText} onChange={e => setStoryForm(f => ({...f, storyText: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange h-24 resize-none" />
-                  <div className="flex gap-3">
-                    <button onClick={() => setShowStoryForm(false)} className="px-4 py-2 text-gray-500 text-sm font-bold">Cancel</button>
-                    <button disabled={submittingStory || !storyForm.patientFirstName || !storyForm.storyText}
-                      onClick={async () => { setSubmittingStory(true); const result = await submitPatientStory(doctor.id, storyForm); setSubmittingStory(false); if (result.success) { setStorySubmitted(true); setShowStoryForm(false); } }}
-                      className="px-4 py-2 bg-neuro-orange text-white rounded-xl text-sm font-bold hover:bg-neuro-orange/90 disabled:opacity-50">
-                      {submittingStory ? 'Submitting...' : 'Submit'}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button onClick={() => setShowStoryForm(true)} className="text-sm font-bold text-neuro-orange hover:underline">Share your experience</button>
-              )}
-            </div>
-
-            {/* FAQ */}
-            {faq && faq.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-                <h2 className="text-lg font-black text-neuro-navy mb-4">Frequently Asked Questions</h2>
-                <div className="space-y-2">
-                  {faq.map((item, i) => (
-                    <div key={i} className="border border-gray-100 rounded-xl overflow-hidden">
-                      <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                        className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
-                        <span className="font-bold text-neuro-navy text-sm">{item.question}</span>
-                        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${openFaq === i ? 'rotate-180' : ''}`} />
-                      </button>
-                      {openFaq === i && (
-                        <div className="px-4 pb-4"><p className="text-sm text-gray-600 leading-relaxed">{item.answer}</p></div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            ))}
           </div>
+        </Section>
+      )}
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 sticky top-24 space-y-5">
-              <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Quick Info</h3>
-
-              {/* Contact Buttons */}
-              <div className="space-y-2">
-                {gated ? (
-                  <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
+      {/* ═══════════════════════════════════════════
+          5. BIO — Pull Quote
+      ═══════════════════════════════════════════ */}
+      {doctor.bio && (
+        <Section bg="white" style={{ paddingTop: 80, paddingBottom: 80 }}>
+          <div style={{ maxWidth: 800, margin: "0 auto" }}>
+            {firstSentence && (
+              <p style={{ fontSize: 26, fontWeight: 500, fontStyle: "italic", color: "#1E2D3B", lineHeight: 1.55, borderLeft: "4px solid #D66829", paddingLeft: 28, marginBottom: 28 }}>
+                &ldquo;{firstSentence}&rdquo;
+              </p>
+            )}
+            {restOfBio && (
+              <p style={{ fontSize: 16, lineHeight: 1.8, color: "#4a5568" }}>{restOfBio}</p>
+            )}
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 32, paddingTop: 24, borderTop: "1px solid rgba(30,45,59,0.08)" }}>
+              <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", background: "#1E2D3B", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
+                {doctor.photo_url && !photoError ? (
+                  <img src={doctor.photo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
-                  <>
-                    {doctor.phone && (
-                      <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')}
-                        className="w-full py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors">
-                        <Phone className="w-4 h-4" /> Call {doctor.phone}
-                      </a>
-                    )}
-                    {formatUrl(doctor.website_url) && (
-                      <a href={formatUrl(doctor.website_url)!} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('website_click')}
-                        className="w-full py-3 bg-neuro-navy text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-neuro-navy/90 transition-colors">
-                        <Globe className="w-4 h-4" /> Visit Website
-                      </a>
-                    )}
-                    {doctor.email && (
-                      <a href={`mailto:${doctor.email}`} onClick={() => trackEvent('contact_click')}
-                        className="w-full py-3 bg-gray-100 text-neuro-navy font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors">
-                        <Mail className="w-4 h-4" /> Email
-                      </a>
-                    )}
-                  </>
+                  <span style={{ color: "#D66829", fontWeight: 900, fontSize: 16 }}>{(doctor.first_name?.[0] || "N").toUpperCase()}</span>
                 )}
               </div>
-
-              {/* Location */}
-              {location && (
-                <div className="flex items-start gap-3 pt-3 border-t border-gray-100">
-                  <MapPin className="w-5 h-5 text-neuro-orange mt-0.5 shrink-0" />
-                  <div>
-                    <p className="font-bold text-neuro-navy text-sm">{doctor.clinic_name}</p>
-                    <p className="text-xs text-gray-500">{doctor.address ? `${doctor.address}, ` : ''}{location}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Education */}
-              {education && education.length > 0 && (
-                <div className="pt-3 border-t border-gray-100">
-                  <div className="flex items-center gap-2 mb-2">
-                    <GraduationCap className="w-4 h-4 text-neuro-orange" />
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Education</span>
-                  </div>
-                  {education.map((e: string, i: number) => (
-                    <p key={i} className="text-sm text-gray-600">{e}</p>
-                  ))}
-                </div>
-              )}
-
-              {/* Hours */}
-              {hours && (
-                <div className="pt-3 border-t border-gray-100">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="w-4 h-4 text-neuro-orange" />
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Hours</span>
-                  </div>
-                  <p className="text-sm text-gray-600 whitespace-pre-line">{hours}</p>
-                </div>
-              )}
-
-              {/* Languages */}
-              {languages && languages.length > 0 && (
-                <div className="pt-3 border-t border-gray-100">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Languages</p>
-                  <div className="flex flex-wrap gap-1">
-                    {languages.map((l: string, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-gray-50 text-gray-600 text-xs rounded-lg">{l}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Payment */}
-              {acceptedPayment && acceptedPayment.length > 0 && (
-                <div className="pt-3 border-t border-gray-100">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Accepted Payment</p>
-                  <div className="flex flex-wrap gap-1">
-                    {acceptedPayment.map((p: string, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-lg border border-green-100">{p}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Insurance Networks */}
-              {insuranceNetworks && insuranceNetworks.length > 0 && (
-                <div className="pt-3 border-t border-gray-100">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Insurance Accepted</p>
-                  <div className="flex flex-wrap gap-1">
-                    {insuranceNetworks.map((ins: string, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-lg border border-blue-100">{ins}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Parking & Access */}
-              {parkingInfo && (
-                <div className="pt-3 border-t border-gray-100">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Parking & Access</p>
-                  <p className="text-sm text-gray-600">{parkingInfo}</p>
-                </div>
-              )}
-
-              {/* Refer (doctor only) */}
-              {session && userRole === 'doctor' && doctor.user_id !== session.user.id && (
-                <button onClick={() => setShowReferralModal(true)}
-                  className="w-full py-3 bg-blue-50 text-blue-600 font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-blue-100 transition-colors">
-                  <Users className="w-4 h-4" /> Refer a Patient
-                </button>
-              )}
-
-              <p className="text-xs text-gray-400 text-center flex items-center justify-center gap-1">
-                <ShieldCheck className="w-3 h-3" /> Verified NeuroChiro member
-              </p>
+              <div>
+                <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B" }}>{name}</p>
+                <p style={{ fontSize: 12, color: "#718096" }}>{doctor.clinic_name}{doctor.city ? ` · ${doctor.city}` : ""}</p>
+              </div>
             </div>
           </div>
-        </div>
+        </Section>
+      )}
 
-        {/* Request Appointment */}
-        <div id="appointment" className="mt-8 bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-          <h2 className="text-lg font-black text-neuro-navy mb-2 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-neuro-orange" /> Request a Consultation
-          </h2>
+      {/* ═══════════════════════════════════════════
+          6. SPECIALTIES + CONDITIONS
+      ═══════════════════════════════════════════ */}
+      {(specialties.length > 0 || (conditionsTreated && conditionsTreated.length > 0)) && (
+        <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 32 }}>Patients We Help</h2>
+          {specialties.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", marginBottom: conditionsTreated?.length ? 24 : 0 }}>
+              {specialties.map((s: string, i: number) => (
+                <span key={i} style={{ padding: "10px 22px", background: "rgba(214,104,41,0.08)", border: "1px solid rgba(214,104,41,0.15)", borderRadius: 50, fontSize: 14, fontWeight: 700, color: "#D66829" }}>{s}</span>
+              ))}
+            </div>
+          )}
+          {conditionsTreated && conditionsTreated.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
+              {conditionsTreated.map((c: string, i: number) => (
+                <span key={i} style={{ padding: "7px 16px", background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.12)", borderRadius: 50, fontSize: 13, fontWeight: 600, color: "#3b82f6" }}>{c}</span>
+              ))}
+            </div>
+          )}
+        </Section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          7. CERTIFICATIONS + EDUCATION + BADGES
+      ═══════════════════════════════════════════ */}
+      {(certificationsList?.length || education?.length || doctor.user_id) && (
+        <Section bg="white" style={{ paddingTop: 72, paddingBottom: 72 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 40 }}>
+            {certificationsList && certificationsList.length > 0 && (
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                  <Award style={{ width: 18, height: 18, color: "#D66829" }} />
+                  <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>Certifications</h3>
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {certificationsList.map((c: string, i: number) => (
+                    <span key={i} style={{ padding: "6px 14px", background: "#fffbeb", color: "#b45309", fontSize: 12, fontWeight: 700, borderRadius: 8, border: "1px solid #fde68a" }}>{c}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {education && education.length > 0 && (
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                  <GraduationCap style={{ width: 18, height: 18, color: "#D66829" }} />
+                  <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>Education</h3>
+                </div>
+                {education.map((e: string, i: number) => (
+                  <p key={i} style={{ fontSize: 14, color: "#4a5568", marginBottom: 4 }}>{e}</p>
+                ))}
+              </div>
+            )}
+          </div>
+          {doctor.user_id && (
+            <div style={{ marginTop: 32 }}>
+              <PublicBadges doctorUserId={doctor.user_id} />
+            </div>
+          )}
+        </Section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          8. VIDEO / SPOTLIGHT — Cinematic
+      ═══════════════════════════════════════════ */}
+      {(spotlightEpisode || doctor.video_url) && (
+        <section style={{ background: "linear-gradient(180deg, #1E2D3B 0%, #162230 100%)", padding: "80px 24px" }}>
+          <div style={{ maxWidth: 960, margin: "0 auto" }}>
+            {spotlightEpisode ? (
+              <>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center", marginBottom: 12 }}>
+                  <span style={{ fontSize: 18 }}>🎬</span>
+                  <h2 style={{ fontSize: 18, fontWeight: 900, color: "white" }}>Featured on NeuroChiro Spotlight</h2>
+                  <span style={{ background: "rgba(214,104,41,0.15)", color: "#D66829", fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 20 }}>EP {String(spotlightEpisode.episodeNumber).padStart(2, "0")}</span>
+                </div>
+                <p style={{ textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: 15, fontStyle: "italic", marginBottom: 28, maxWidth: 600, margin: "0 auto 28px" }}>&ldquo;{spotlightEpisode.quote}&rdquo;</p>
+                <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.3)", aspectRatio: "16 / 9" }}>
+                  <iframe src={spotlightEpisode.videoUrl} style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                </div>
+                <div style={{ textAlign: "center", marginTop: 20 }}>
+                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, marginBottom: 8 }}>{spotlightEpisode.description}</p>
+                  <Link href="/spotlight" style={{ color: "#D66829", fontWeight: 800, fontSize: 14, textDecoration: "none" }}>Watch all Spotlight episodes →</Link>
+                </div>
+              </>
+            ) : doctor.video_url && (
+              <>
+                <h2 style={{ textAlign: "center", fontSize: 13, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  <Play style={{ width: 14, height: 14 }} /> Meet {doctor.first_name}
+                </h2>
+                <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.3)", aspectRatio: "16 / 9" }}>
+                  <iframe src={doctor.video_url.replace('watch?v=', 'embed/').replace('vimeo.com/', 'player.vimeo.com/video/')} style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          9. GALLERY
+      ═══════════════════════════════════════════ */}
+      {galleryImages && galleryImages.length > 0 && (
+        <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 32 }}>Photos</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
+            {galleryImages.map((img: string, i: number) => (
+              <img key={i} src={img} alt="" style={{ width: "100%", aspectRatio: "4 / 3", objectFit: "cover", borderRadius: 16 }} />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          10. TEAM MEMBERS
+      ═══════════════════════════════════════════ */}
+      {teamMembersList && teamMembersList.length > 0 && (
+        <Section bg="white" style={{ paddingTop: 72, paddingBottom: 72 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", marginBottom: 32 }}>
+            <Users style={{ width: 18, height: 18, color: "#D66829" }} />
+            <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B" }}>Our Team</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 20 }}>
+            {teamMembersList.map((m, i) => (
+              <div key={i} style={{ textAlign: "center" }}>
+                <div style={{ width: 80, height: 80, borderRadius: 16, background: "#f3f4f6", overflow: "hidden", margin: "0 auto 10px" }}>
+                  {m.photo_url ? <img src={m.photo_url} alt={m.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
+                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#d1d5db", fontSize: 24, fontWeight: 700 }}>{m.name?.[0]}</div>}
+                </div>
+                <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B" }}>{m.name}</p>
+                <p style={{ fontSize: 12, color: "#718096" }}>{m.role}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          11. SOCIAL PROOF — Reviews + City Demand + Stories
+      ═══════════════════════════════════════════ */}
+      <section style={{ background: "linear-gradient(180deg, #1E2D3B 0%, #162230 100%)", padding: "80px 24px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 48 }}>Social Proof</h2>
+
+          {/* City demand */}
+          {citySearchVolume > 0 && doctor.city && (
+            <div style={{ textAlign: "center", marginBottom: 48, padding: "28px 32px", background: "rgba(214,104,41,0.08)", borderRadius: 20, border: "1px solid rgba(214,104,41,0.12)" }}>
+              <div style={{ fontSize: 40, fontWeight: 900, color: "#D66829" }}>{citySearchVolume.toLocaleString()}</div>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>patients found nervous system chiropractors in {doctor.city} recently</p>
+            </div>
+          )}
+
+          {/* Google Reviews */}
+          {doctor.google_place_id && (
+            <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 20, padding: "32px", border: "1px solid rgba(255,255,255,0.06)", marginBottom: 32 }}>
+              <GoogleReviews placeId={doctor.google_place_id} doctorName={name} />
+            </div>
+          )}
+
+          {/* Patient Stories */}
+          <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 20, padding: "32px", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <h3 style={{ fontSize: 16, fontWeight: 900, color: "white", marginBottom: 20 }}>Patient Stories</h3>
+            {stories.length > 0 ? (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 20 }}>
+                {stories.map((story) => (
+                  <div key={story.id} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 16, padding: 24, border: "1px solid rgba(255,255,255,0.06)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                      <span style={{ fontSize: 14, fontWeight: 800, color: "white" }}>{story.patient_first_name}</span>
+                      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>{story.condition_before} → {story.outcome_after}</span>
+                    </div>
+                    <p style={{ fontSize: 14, color: "rgba(255,255,255,0.6)", fontStyle: "italic", lineHeight: 1.6 }}>&ldquo;{story.story_text}&rdquo;</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.3)", marginBottom: 16 }}>No stories yet. Be the first to share your experience.</p>
+            )}
+
+            {storySubmitted ? (
+              <div style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: 16, padding: 20, textAlign: "center" }}>
+                <CheckCircle2 style={{ width: 24, height: 24, color: "#4ade80", margin: "0 auto 8px" }} />
+                <p style={{ fontWeight: 800, color: "#4ade80", fontSize: 14 }}>Thank you! Your story will appear after review.</p>
+              </div>
+            ) : showStoryForm ? (
+              <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 16, padding: 24, display: "flex", flexDirection: "column", gap: 12 }}>
+                <input type="text" placeholder="Your first name" value={storyForm.patientFirstName} onChange={e => setStoryForm(f => ({...f, patientFirstName: e.target.value}))} style={{ width: "100%", padding: "12px 16px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <input type="text" placeholder="Condition before" value={storyForm.conditionBefore} onChange={e => setStoryForm(f => ({...f, conditionBefore: e.target.value}))} style={{ padding: "12px 16px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} />
+                  <input type="text" placeholder="Outcome after" value={storyForm.outcomeAfter} onChange={e => setStoryForm(f => ({...f, outcomeAfter: e.target.value}))} style={{ padding: "12px 16px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} />
+                </div>
+                <textarea placeholder="Tell your story..." value={storyForm.storyText} onChange={e => setStoryForm(f => ({...f, storyText: e.target.value}))} style={{ width: "100%", padding: "12px 16px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, height: 80, resize: "none", outline: "none" }} />
+                <div style={{ display: "flex", gap: 12 }}>
+                  <button onClick={() => setShowStoryForm(false)} style={{ padding: "10px 20px", color: "rgba(255,255,255,0.5)", fontSize: 14, fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
+                  <button disabled={submittingStory || !storyForm.patientFirstName || !storyForm.storyText}
+                    onClick={async () => { setSubmittingStory(true); const result = await submitPatientStory(doctor.id, storyForm); setSubmittingStory(false); if (result && 'success' in result) { setStorySubmitted(true); setShowStoryForm(false); } }}
+                    style={{ padding: "10px 20px", background: "#D66829", color: "white", borderRadius: 10, fontSize: 14, fontWeight: 800, border: "none", cursor: "pointer", opacity: submittingStory || !storyForm.patientFirstName || !storyForm.storyText ? 0.5 : 1 }}>
+                    {submittingStory ? 'Submitting...' : 'Submit'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => setShowStoryForm(true)} style={{ color: "#D66829", fontWeight: 800, fontSize: 14, background: "none", border: "none", cursor: "pointer" }}>Share your experience</button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════
+          12. LOCATION + HOURS + PRACTICAL INFO
+      ═══════════════════════════════════════════ */}
+      {(mapQuery || hours || parkingInfo || languages?.length || acceptedPayment?.length || insuranceNetworks?.length || firstVisitInfo || amenitiesList?.length) && (
+        <Section bg="white" style={{ paddingTop: 80, paddingBottom: 80 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 40 }}>Visit the Practice</h2>
+          <div style={{ display: "grid", gridTemplateColumns: mapQuery ? "1fr 1fr" : "1fr", gap: 40 }}>
+            {/* Map */}
+            {mapQuery && (
+              <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(30,45,59,0.08)", aspectRatio: "4 / 3" }}>
+                <iframe src={`https://www.google.com/maps?q=${mapQuery}&output=embed`} style={{ width: "100%", height: "100%", border: "none" }} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" />
+              </div>
+            )}
+            {/* Info stack */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+              {doctor.address && (
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                  <MapPin style={{ width: 18, height: 18, color: "#D66829", flexShrink: 0, marginTop: 2 }} />
+                  <div>
+                    <p style={{ fontWeight: 800, fontSize: 14, color: "#1E2D3B", marginBottom: 2 }}>{doctor.clinic_name}</p>
+                    <p style={{ fontSize: 13, color: "#718096" }}>{doctor.address}, {location}</p>
+                  </div>
+                </div>
+              )}
+              {hours && (
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <Clock style={{ width: 16, height: 16, color: "#D66829" }} />
+                    <span style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em" }}>Hours</span>
+                  </div>
+                  <p style={{ fontSize: 14, color: "#4a5568", whiteSpace: "pre-line", lineHeight: 1.7 }}>{hours}</p>
+                </div>
+              )}
+              {firstVisitInfo && (
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>First Visit</p>
+                  <p style={{ fontSize: 14, color: "#4a5568", lineHeight: 1.7, whiteSpace: "pre-line" }}>{firstVisitInfo}</p>
+                </div>
+              )}
+              {parkingInfo && (
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Parking & Access</p>
+                  <p style={{ fontSize: 14, color: "#4a5568" }}>{parkingInfo}</p>
+                </div>
+              )}
+              {languages && languages.length > 0 && (
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Languages</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {languages.map((l: string, i: number) => (
+                      <span key={i} style={{ padding: "5px 12px", background: "#f3f4f6", borderRadius: 8, fontSize: 13, color: "#4a5568" }}>{l}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {acceptedPayment && acceptedPayment.length > 0 && (
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Accepted Payment</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {acceptedPayment.map((p: string, i: number) => (
+                      <span key={i} style={{ padding: "5px 12px", background: "#f0fdf4", color: "#15803d", fontSize: 12, fontWeight: 700, borderRadius: 8, border: "1px solid #bbf7d0" }}>{p}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {insuranceNetworks && insuranceNetworks.length > 0 && (
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Insurance Accepted</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {insuranceNetworks.map((ins: string, i: number) => (
+                      <span key={i} style={{ padding: "5px 12px", background: "#eff6ff", color: "#1d4ed8", fontSize: 12, borderRadius: 8, border: "1px solid #bfdbfe" }}>{ins}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {amenitiesList && amenitiesList.length > 0 && (
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Amenities</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {amenitiesList.map((a: string, i: number) => (
+                      <span key={i} style={{ padding: "5px 12px", background: "#f3f4f6", borderRadius: 8, fontSize: 13, color: "#4a5568" }}>{a}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </Section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          13. SEMINARS + JOBS
+      ═══════════════════════════════════════════ */}
+      {(seminars.length > 0 || jobs.length > 0) && (
+        <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
+          <div style={{ display: "grid", gridTemplateColumns: seminars.length > 0 && jobs.length > 0 ? "1fr 1fr" : "1fr", gap: 32 }}>
+            {seminars.length > 0 && (
+              <div>
+                <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", marginBottom: 16 }}>Seminars & Events</h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {seminars.map((sem: any) => (
+                    <Link key={sem.id} href={`/seminars/${sem.id}`} style={{ background: "white", borderRadius: 16, padding: "16px 20px", textDecoration: "none", border: "1px solid rgba(30,45,59,0.06)", display: "block" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div>
+                          <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B", marginBottom: 6 }}>{sem.title}</p>
+                          <div style={{ display: "flex", gap: 12 }}>
+                            {sem.dates && <span style={{ fontSize: 12, color: "#718096", display: "flex", alignItems: "center", gap: 4 }}><Calendar style={{ width: 12, height: 12 }} /> {sem.dates}</span>}
+                            {(sem.city || sem.location) && <span style={{ fontSize: 12, color: "#718096", display: "flex", alignItems: "center", gap: 4 }}><MapPin style={{ width: 12, height: 12 }} /> {sem.city || sem.location}</span>}
+                          </div>
+                        </div>
+                        {sem.price ? <span style={{ fontSize: 12, fontWeight: 800, color: "#D66829" }}>${sem.price}</span> : <span style={{ fontSize: 12, fontWeight: 800, color: "#16a34a" }}>Free</span>}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {jobs.length > 0 && (
+              <div>
+                <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", marginBottom: 16 }}>Open Positions</h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {jobs.map((job: any) => (
+                    <Link key={job.id} href={`/careers/${job.id}`} style={{ background: "white", borderRadius: 16, padding: "16px 20px", textDecoration: "none", border: "1px solid rgba(30,45,59,0.06)", display: "block" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div>
+                          <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B", marginBottom: 4 }}>{job.title}</p>
+                          <div style={{ display: "flex", gap: 12 }}>
+                            {job.employment_type && <span style={{ fontSize: 12, color: "#718096" }}>{job.employment_type}</span>}
+                            {(job.salary_min || job.salary_max) && <span style={{ fontSize: 12, color: "#718096" }}>{job.salary_min && job.salary_max ? `$${(job.salary_min/1000).toFixed(0)}k–$${(job.salary_max/1000).toFixed(0)}k` : job.salary_min ? `From $${(job.salary_min/1000).toFixed(0)}k` : `Up to $${(job.salary_max/1000).toFixed(0)}k`}</span>}
+                          </div>
+                        </div>
+                        <span style={{ fontSize: 10, fontWeight: 800, color: "#16a34a", background: "#f0fdf4", padding: "3px 10px", borderRadius: 20 }}>Hiring</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </Section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          14. FAQ
+      ═══════════════════════════════════════════ */}
+      {faq && faq.length > 0 && (
+        <Section bg="white" style={{ paddingTop: 72, paddingBottom: 72 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", textAlign: "center", marginBottom: 32 }}>Frequently Asked Questions</h2>
+          <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", flexDirection: "column", gap: 8 }}>
+            {faq.map((item, i) => (
+              <div key={i} style={{ border: "1px solid rgba(30,45,59,0.08)", borderRadius: 16, overflow: "hidden" }}>
+                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ width: "100%", padding: "18px 24px", textAlign: "left", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer" }}>
+                  <span style={{ fontWeight: 800, color: "#1E2D3B", fontSize: 15 }}>{item.question}</span>
+                  <ChevronDown style={{ width: 18, height: 18, color: "#9ca3af", transition: "transform 0.2s", transform: openFaq === i ? "rotate(180deg)" : "none" }} />
+                </button>
+                {openFaq === i && (
+                  <div style={{ padding: "0 24px 18px" }}><p style={{ fontSize: 14, color: "#4a5568", lineHeight: 1.7 }}>{item.answer}</p></div>
+                )}
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          15. APPOINTMENT REQUEST
+      ═══════════════════════════════════════════ */}
+      <Section bg="cream" id="appointment" style={{ paddingTop: 80, paddingBottom: 80 }}>
+        <div style={{ maxWidth: 700, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", marginBottom: 8 }}>
+            <Calendar style={{ width: 20, height: 20, color: "#D66829" }} />
+            <h2 style={{ fontSize: 22, fontWeight: 900, color: "#1E2D3B" }}>Request a Consultation</h2>
+          </div>
           {gated ? (
-            <div className="text-center py-6">
+            <div style={{ textAlign: "center", paddingTop: 24 }}>
               <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
             </div>
           ) : (
             <>
-              <p className="text-gray-400 text-sm mb-5">Send a request to {doctor.clinic_name || name}. They&apos;ll get back to you directly.</p>
+              <p style={{ textAlign: "center", color: "#718096", fontSize: 14, marginBottom: 28 }}>Send a request to {doctor.clinic_name || name}. They&apos;ll get back to you directly.</p>
               {appointmentSubmitted ? (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                  <CheckCircle2 className="w-6 h-6 text-green-500 mx-auto mb-1" />
-                  <p className="font-bold text-green-700 text-sm">Request Sent!</p>
-                  <p className="text-green-600 text-xs mt-1">They&apos;ll contact you within 1-2 business days.</p>
+                <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 20, padding: 28, textAlign: "center" }}>
+                  <CheckCircle2 style={{ width: 28, height: 28, color: "#22c55e", margin: "0 auto 8px" }} />
+                  <p style={{ fontWeight: 800, color: "#15803d", fontSize: 15 }}>Request Sent!</p>
+                  <p style={{ color: "#16a34a", fontSize: 13, marginTop: 4 }}>They&apos;ll contact you within 1-2 business days.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <input type="text" placeholder="Your name *" value={appointmentForm.name} onChange={e => setAppointmentForm(f => ({...f, name: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
-                    <input type="email" placeholder="Email *" value={appointmentForm.email} onChange={e => setAppointmentForm(f => ({...f, email: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    <input type="text" placeholder="Your name *" value={appointmentForm.name} onChange={e => setAppointmentForm(f => ({...f, name: e.target.value}))} style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, outline: "none" }} />
+                    <input type="email" placeholder="Email *" value={appointmentForm.email} onChange={e => setAppointmentForm(f => ({...f, email: e.target.value}))} style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, outline: "none" }} />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <input type="tel" placeholder="Phone (optional)" value={appointmentForm.phone} onChange={e => setAppointmentForm(f => ({...f, phone: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
-                    <input type="date" value={appointmentForm.preferredDate} onChange={e => setAppointmentForm(f => ({...f, preferredDate: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    <input type="tel" placeholder="Phone (optional)" value={appointmentForm.phone} onChange={e => setAppointmentForm(f => ({...f, phone: e.target.value}))} style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, outline: "none" }} />
+                    <input type="date" value={appointmentForm.preferredDate} onChange={e => setAppointmentForm(f => ({...f, preferredDate: e.target.value}))} style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, outline: "none" }} />
                   </div>
-                  <textarea placeholder="What are you looking for? (optional)" value={appointmentForm.message} onChange={e => setAppointmentForm(f => ({...f, message: e.target.value}))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange h-20 resize-none" />
+                  <textarea placeholder="What are you looking for? (optional)" value={appointmentForm.message} onChange={e => setAppointmentForm(f => ({...f, message: e.target.value}))} style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, height: 80, resize: "none", outline: "none" }} />
                   <button disabled={submittingAppointment || !appointmentForm.name || !appointmentForm.email}
                     onClick={async () => {
                       setSubmittingAppointment(true);
@@ -785,75 +771,73 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                       } catch { alert('Something went wrong. Please try again or call the office directly.'); }
                       setSubmittingAppointment(false);
                     }}
-                    className="w-full py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 disabled:opacity-50 flex items-center justify-center gap-2">
-                    {submittingAppointment ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : <><Send className="w-4 h-4" /> Send Request</>}
+                    style={{ padding: "16px 32px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 15, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: submittingAppointment || !appointmentForm.name || !appointmentForm.email ? 0.5 : 1, boxShadow: "0 4px 20px rgba(214,104,41,0.25)" }}>
+                    {submittingAppointment ? <><Loader2 style={{ width: 18, height: 18 }} className="animate-spin" /> Sending...</> : <><Send style={{ width: 16, height: 16 }} /> Send Request</>}
                   </button>
-                  <p className="text-xs text-gray-400 text-center">Your info is sent directly to the doctor. We never share it with anyone else.</p>
+                  <p style={{ fontSize: 12, color: "#9ca3af", textAlign: "center" }}>Your info is sent directly to the doctor. We never share it with anyone else.</p>
                 </div>
               )}
             </>
           )}
         </div>
+      </Section>
 
-        {/* City Demand — Social Proof */}
-        {citySearchVolume > 0 && doctor.city && (
-          <div className="mt-8 bg-gradient-to-r from-neuro-orange/5 to-neuro-orange/[0.02] border border-neuro-orange/10 rounded-2xl p-6 text-center">
-            <div className="text-3xl font-black text-neuro-orange">{citySearchVolume.toLocaleString()}</div>
-            <p className="text-sm text-gray-500 mt-1">patients found nervous system chiropractors in {doctor.city} recently</p>
-          </div>
-        )}
-
-        {/* Nearby Doctors */}
-        {nearbyDoctors.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-lg font-black text-neuro-navy mb-4">Other Nervous System Chiropractors Near You</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {nearbyDoctors.map((doc: any) => (
-                <Link key={doc.id} href={`/directory/${doc.slug || doc.id}`}
-                  className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-neuro-orange/30 hover:shadow-md transition-all group">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-neuro-navy/5 overflow-hidden flex-shrink-0">
-                      {doc.photo_url ? (
-                        <img src={doc.photo_url} alt={`${doc.first_name} ${doc.last_name}`} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-neuro-orange font-black text-lg">
-                          {(doc.first_name?.[0] || 'N').toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-neuro-navy group-hover:text-neuro-orange transition-colors truncate">
-                        Dr. {doc.first_name} {doc.last_name}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">{doc.clinic_name}</p>
-                      <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
-                        <MapPin className="w-3 h-3" /> {doc.city}{doc.state ? `, ${doc.state}` : ''}
-                      </p>
-                    </div>
+      {/* ═══════════════════════════════════════════
+          16. NEARBY DOCTORS
+      ═══════════════════════════════════════════ */}
+      {nearbyDoctors.length > 0 && (
+        <Section bg="white" style={{ paddingTop: 72, paddingBottom: 72 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 36 }}>Other Nervous System Chiropractors Near You</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
+            {nearbyDoctors.map((doc: any) => (
+              <Link key={doc.id} href={`/directory/${doc.slug || doc.id}`} style={{ background: "#F5F3EF", borderRadius: 20, padding: 24, textDecoration: "none", border: "1px solid rgba(30,45,59,0.04)", display: "block" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+                  <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#1E2D3B", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {doc.photo_url ? <img src={doc.photo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
+                      <span style={{ color: "#D66829", fontWeight: 900, fontSize: 18 }}>{(doc.first_name?.[0] || "N").toUpperCase()}</span>}
                   </div>
-                  {doc.specialties?.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-3">
-                      {doc.specialties.slice(0, 2).map((s: string, i: number) => (
-                        <span key={i} className="px-2 py-0.5 bg-neuro-orange/5 text-neuro-orange text-[10px] font-bold rounded-lg">
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </Link>
-              ))}
-            </div>
+                  <div>
+                    <p style={{ fontSize: 15, fontWeight: 800, color: "#1E2D3B" }}>Dr. {doc.first_name} {doc.last_name}</p>
+                    <p style={{ fontSize: 12, color: "#718096", display: "flex", alignItems: "center", gap: 4 }}><MapPin style={{ width: 12, height: 12 }} /> {doc.city}{doc.state ? `, ${doc.state}` : ''}</p>
+                  </div>
+                </div>
+                {doc.specialties?.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {doc.specialties.slice(0, 2).map((s: string, i: number) => (
+                      <span key={i} style={{ padding: "4px 10px", background: "rgba(214,104,41,0.06)", borderRadius: 20, fontSize: 11, fontWeight: 700, color: "#D66829" }}>{s}</span>
+                    ))}
+                  </div>
+                )}
+              </Link>
+            ))}
           </div>
-        )}
+        </Section>
+      )}
 
-        {/* Report + Disclaimer */}
-        <div className="mt-6 text-center space-y-4 pb-6">
+      {/* ═══════════════════════════════════════════
+          17. REFERRAL (doctor-to-doctor)
+      ═══════════════════════════════════════════ */}
+      {session && userRole === 'doctor' && doctor.user_id !== session.user.id && (
+        <Section bg="cream" style={{ paddingTop: 40, paddingBottom: 40 }}>
+          <div style={{ textAlign: "center" }}>
+            <button onClick={() => setShowReferralModal(true)} style={{ padding: "14px 32px", background: "#eff6ff", color: "#2563eb", borderRadius: 14, fontWeight: 800, fontSize: 14, border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <Users style={{ width: 16, height: 16 }} /> Refer a Patient to {name}
+            </button>
+          </div>
+        </Section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          18. REPORT + DISCLAIMER
+      ═══════════════════════════════════════════ */}
+      <Section bg="cream" style={{ paddingTop: 32, paddingBottom: 48 }}>
+        <div style={{ textAlign: "center" }}>
           {reportSubmitted ? (
-            <p className="text-sm text-green-600 font-bold">Thank you. Our team will review this.</p>
+            <p style={{ fontSize: 14, fontWeight: 800, color: "#16a34a" }}>Thank you. Our team will review this.</p>
           ) : showReportForm ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 text-left">
-              <h4 className="font-bold text-neuro-navy mb-1 text-sm">Report a Concern</h4>
-              <p className="text-gray-400 text-xs mb-3">All reports are reviewed by our team.</p>
+            <div style={{ background: "white", borderRadius: 20, border: "1px solid rgba(30,45,59,0.08)", padding: 28, textAlign: "left", maxWidth: 500, margin: "0 auto" }}>
+              <h4 style={{ fontWeight: 800, color: "#1E2D3B", marginBottom: 4, fontSize: 14 }}>Report a Concern</h4>
+              <p style={{ color: "#9ca3af", fontSize: 12, marginBottom: 16 }}>All reports are reviewed by our team.</p>
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 const form = e.target as HTMLFormElement;
@@ -861,52 +845,54 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 await fetch('/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ email: data.get('email'), first_name: data.get('name'), source: 'report_concern', role: 'report', doctor_id: doctor.id, metadata: { concern: data.get('concern') } }) });
                 setReportSubmitted(true);
-              }} className="space-y-2">
-                <input type="text" name="name" required placeholder="Your name" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-neuro-orange" />
-                <input type="email" name="email" required placeholder="Your email" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-neuro-orange" />
-                <textarea name="concern" required placeholder="Describe your concern..." rows={3} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-neuro-orange resize-none" />
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => setShowReportForm(false)} className="px-3 py-2 text-gray-500 text-xs font-bold">Cancel</button>
-                  <button type="submit" className="px-3 py-2 bg-red-500 text-white text-xs font-bold rounded-lg">Submit Report</button>
+              }} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <input type="text" name="name" required placeholder="Your name" style={{ padding: "10px 14px", border: "1px solid #e5e7eb", borderRadius: 10, fontSize: 14 }} />
+                <input type="email" name="email" required placeholder="Your email" style={{ padding: "10px 14px", border: "1px solid #e5e7eb", borderRadius: 10, fontSize: 14 }} />
+                <textarea name="concern" required placeholder="Describe your concern..." rows={3} style={{ padding: "10px 14px", border: "1px solid #e5e7eb", borderRadius: 10, fontSize: 14, resize: "none" }} />
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button type="button" onClick={() => setShowReportForm(false)} style={{ padding: "8px 16px", color: "#718096", fontSize: 13, fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
+                  <button type="submit" style={{ padding: "8px 16px", background: "#ef4444", color: "white", fontSize: 13, fontWeight: 800, borderRadius: 8, border: "none", cursor: "pointer" }}>Submit Report</button>
                 </div>
               </form>
             </div>
           ) : (
-            <button onClick={() => setShowReportForm(true)} className="text-xs text-gray-400 hover:text-red-500 transition-colors underline">Report a concern</button>
+            <button onClick={() => setShowReportForm(true)} style={{ fontSize: 12, color: "#9ca3af", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Report a concern</button>
           )}
-          <p className="text-[11px] text-gray-400 leading-relaxed max-w-lg mx-auto">
+          <p style={{ fontSize: 11, color: "#9ca3af", lineHeight: 1.6, maxWidth: 500, margin: "16px auto 0" }}>
             NeuroChiro is a directory service. The &ldquo;Verified&rdquo; badge indicates identity review, not a guarantee of clinical outcomes.{" "}
-            <a href="/terms" className="underline">Terms</a> &middot; <a href="/privacy" className="underline">Privacy</a>
+            <a href="/terms" style={{ textDecoration: "underline", color: "#9ca3af" }}>Terms</a> · <a href="/privacy" style={{ textDecoration: "underline", color: "#9ca3af" }}>Privacy</a>
           </p>
         </div>
-      </section>
+      </Section>
 
-      {/* Referral Modal */}
+      {/* ═══════════════════════════════════════════
+          19. REFERRAL MODAL
+      ═══════════════════════════════════════════ */}
       {showReferralModal && (
         <>
-          <div onClick={() => setShowReferralModal(false)} className="fixed inset-0 z-[500] bg-black/60" />
-          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[501] w-full max-w-md p-6">
-            <div className="bg-white rounded-2xl p-6 shadow-2xl">
+          <div onClick={() => setShowReferralModal(false)} style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }} />
+          <div style={{ position: "fixed", left: "50%", top: "50%", transform: "translate(-50%, -50%)", zIndex: 501, width: "100%", maxWidth: 440, padding: 24 }}>
+            <div style={{ background: "white", borderRadius: 24, padding: 32, boxShadow: "0 25px 60px rgba(0,0,0,0.2)" }}>
               {referralSent ? (
-                <div className="text-center py-6">
-                  <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                  <h3 className="text-lg font-black text-neuro-navy">Referral Sent!</h3>
+                <div style={{ textAlign: "center", padding: "24px 0" }}>
+                  <CheckCircle2 style={{ width: 48, height: 48, color: "#22c55e", margin: "0 auto 12px" }} />
+                  <h3 style={{ fontSize: 20, fontWeight: 900, color: "#1E2D3B" }}>Referral Sent!</h3>
                 </div>
               ) : (
                 <>
-                  <h3 className="text-lg font-black text-neuro-navy mb-4">Refer a Patient to {name}</h3>
-                  <div className="space-y-3">
-                    <input type="text" value={referralPatientName} onChange={e => setReferralPatientName(e.target.value)} placeholder="Patient name (optional)" className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange" />
-                    <textarea value={referralNotes} onChange={e => setReferralNotes(e.target.value)} placeholder="Notes (optional)" className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-neuro-orange h-20 resize-none" />
-                    <div className="flex gap-3">
-                      <button onClick={() => setShowReferralModal(false)} className="flex-1 py-3 border border-gray-200 rounded-xl font-bold text-gray-500 text-sm">Cancel</button>
+                  <h3 style={{ fontSize: 20, fontWeight: 900, color: "#1E2D3B", marginBottom: 20 }}>Refer a Patient to {name}</h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <input type="text" value={referralPatientName} onChange={e => setReferralPatientName(e.target.value)} placeholder="Patient name (optional)" style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14 }} />
+                    <textarea value={referralNotes} onChange={e => setReferralNotes(e.target.value)} placeholder="Notes (optional)" style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, height: 80, resize: "none" }} />
+                    <div style={{ display: "flex", gap: 12 }}>
+                      <button onClick={() => setShowReferralModal(false)} style={{ flex: 1, padding: "14px", border: "1px solid #e5e7eb", borderRadius: 14, fontWeight: 800, color: "#718096", fontSize: 14, background: "none", cursor: "pointer" }}>Cancel</button>
                       <button onClick={async () => {
                         setReferring(true);
                         try { await sendReferral(doctor.id, referralPatientName || undefined, referralNotes || undefined); setReferralSent(true);
                           setTimeout(() => { setShowReferralModal(false); setReferralSent(false); setReferralPatientName(''); setReferralNotes(''); }, 2000);
                         } catch (err: any) { alert(err.message || 'Failed'); }
                         setReferring(false);
-                      }} disabled={referring} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm disabled:opacity-50">
+                      }} disabled={referring} style={{ flex: 1, padding: "14px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, border: "none", cursor: "pointer", opacity: referring ? 0.5 : 1 }}>
                         {referring ? 'Sending...' : 'Send Referral'}
                       </button>
                     </div>
@@ -918,31 +904,32 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         </>
       )}
 
-      {/* Sticky mobile bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-200 py-3 px-4 z-[100] lg:hidden">
-        <div className="flex gap-3 max-w-3xl mx-auto">
+      {/* ═══════════════════════════════════════════
+          20. STICKY MOBILE CTA
+      ═══════════════════════════════════════════ */}
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "rgba(255,255,255,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid #e5e7eb", padding: "12px 16px", paddingBottom: "calc(12px + env(safe-area-inset-bottom))", zIndex: 100 }} className="lg:hidden">
+        <div style={{ display: "flex", gap: 10, maxWidth: 600, margin: "0 auto" }}>
           {gated ? (
             <ContactGateCTA variant="mobile" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
           ) : (
             <>
               {bookingUrl ? (
-                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('booking_click')} className="flex-1 py-3.5 bg-green-500 text-white rounded-xl font-bold text-sm text-center">
-                  Book Online
-                </a>
+                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('booking_click')} style={{ flex: 1, padding: "14px 0", background: "#22c55e", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, textAlign: "center", textDecoration: "none" }}>Book Online</a>
               ) : (
-                <a href="#appointment" className="flex-1 py-3.5 bg-neuro-orange text-white rounded-xl font-bold text-sm text-center">
-                  Book Consultation
-                </a>
+                <a href="#appointment" style={{ flex: 1, padding: "14px 0", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, textAlign: "center", textDecoration: "none" }}>Book Consultation</a>
               )}
               {doctor.phone && (
-                <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')} className="flex-1 py-3.5 bg-neuro-navy text-white rounded-xl font-bold text-sm text-center flex items-center justify-center gap-2">
-                  <Phone className="w-4 h-4" /> Call
+                <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')} style={{ flex: 1, padding: "14px 0", background: "#1E2D3B", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, textAlign: "center", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                  <Phone style={{ width: 16, height: 16 }} /> Call
                 </a>
               )}
             </>
           )}
         </div>
       </div>
+
+      {/* Bottom spacer for mobile sticky CTA */}
+      <div style={{ height: 80 }} className="lg:hidden" />
     </div>
   );
 }
