@@ -1,4 +1,4 @@
-import { getDoctorBySlug, incrementDoctorViews, getDoctorSeminars, getDoctorJobs } from "../actions";
+import { getDoctorBySlug, incrementDoctorViews, getDoctorSeminars, getDoctorJobs, getCityDoctorCount, getNearbyDoctors, getCitySearchVolume } from "../actions";
 import { notFound } from "next/navigation";
 import DoctorProfileClient from "./DoctorProfileClient";
 import { Metadata } from "next";
@@ -68,10 +68,13 @@ export default async function DoctorProfilePage({ params }: Props) {
   // 🛡️ Track View (Background)
   await incrementDoctorViews(resolvedParams.slug);
 
-  // Fetch doctor's seminars and jobs in parallel
-  const [seminars, jobs] = await Promise.all([
+  // Fetch doctor's seminars, jobs, city data, and nearby doctors in parallel
+  const [seminars, jobs, cityDoctorCount, nearbyDoctors, citySearchVolume] = await Promise.all([
     doctor.user_id ? getDoctorSeminars(doctor.user_id) : Promise.resolve([]),
     getDoctorJobs(doctor.id),
+    getCityDoctorCount(doctor.city || '', doctor.state || ''),
+    getNearbyDoctors(doctor.id, doctor.state || ''),
+    getCitySearchVolume(doctor.city || '', doctor.state || ''),
   ]);
 
   // 2. JSON-LD STRUCTURED DATA (Physician & LocalBusiness)
@@ -102,7 +105,7 @@ export default async function DoctorProfilePage({ params }: Props) {
   return (
     <>
       <SchemaMarkup data={jsonLd} />
-      <DoctorProfileClient doctor={doctor} slug={resolvedParams.slug} seminars={seminars} jobs={jobs} />
+      <DoctorProfileClient doctor={doctor} slug={resolvedParams.slug} seminars={seminars} jobs={jobs} cityDoctorCount={cityDoctorCount} nearbyDoctors={nearbyDoctors} citySearchVolume={citySearchVolume} />
     </>
   );
 }

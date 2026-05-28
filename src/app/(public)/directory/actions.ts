@@ -233,3 +233,50 @@ export async function getStudentsForMap(options: {
     return [];
   }
 }
+
+// ── Get count of doctors in same city ──
+export async function getCityDoctorCount(city: string, state: string): Promise<number> {
+  if (!city) return 0;
+  const supabase = createServerSupabase();
+  try {
+    const { count } = await supabase
+      .from('doctors')
+      .select('id', { count: 'exact', head: true })
+      .in('verification_status', ['verified', 'pending'])
+      .ilike('city', city)
+      .ilike('state', state);
+    return count || 0;
+  } catch { return 0; }
+}
+
+// ── Get nearby doctors (same state, different doctor) ──
+export async function getNearbyDoctors(doctorId: string, state: string, limit = 4): Promise<any[]> {
+  if (!state) return [];
+  const supabase = createServerSupabase();
+  try {
+    const { data } = await supabase
+      .from('doctors')
+      .select('id, first_name, last_name, clinic_name, city, state, slug, photo_url, specialties, membership_tier, is_founding_member')
+      .in('verification_status', ['verified', 'pending'])
+      .ilike('state', state)
+      .neq('id', doctorId)
+      .order('membership_tier', { ascending: true })
+      .limit(limit);
+    return data || [];
+  } catch { return []; }
+}
+
+// ── Get total profile views for all doctors in a city ──
+export async function getCitySearchVolume(city: string, state: string): Promise<number> {
+  if (!city) return 0;
+  const supabase = createServerSupabase();
+  try {
+    const { data } = await supabase
+      .from('doctors')
+      .select('profile_views')
+      .in('verification_status', ['verified', 'pending'])
+      .ilike('city', city)
+      .ilike('state', state);
+    return (data || []).reduce((sum, d) => sum + (d.profile_views || 0), 0);
+  } catch { return 0; }
+}
