@@ -89,7 +89,7 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
       {/* Doctor Info */}
       <div className={`flex items-start gap-4 mb-4 ${distanceMiles != null ? 'mt-6' : ''}`}>
         <div className="relative w-14 h-14 rounded-xl bg-neuro-navy overflow-hidden shadow flex-shrink-0 flex items-center justify-center">
-          {doc.photo_url && !cardPhotoError && !gated ? (
+          {doc.photo_url && !cardPhotoError ? (
             <img
               src={doc.photo_url}
               alt={name}

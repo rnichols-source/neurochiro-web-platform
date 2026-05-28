@@ -194,7 +194,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               {/* Quick CTA — hidden on mobile (sticky bar handles it) */}
               <div className="hidden sm:flex items-center gap-3 mt-5">
                 {gated ? (
-                  <ContactGateCTA variant="hero" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} />
+                  <ContactGateCTA variant="hero" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
                 ) : (
                   <>
                     {doctor.phone && (
@@ -291,7 +291,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <p className="font-black text-neuro-navy text-sm">This is how patients see your profile</p>
-                <p className="text-xs text-gray-500 mt-1">Your phone, website, booking link, and photo are hidden. Upgrade to Pro so patients can reach you.</p>
+                <p className="text-xs text-gray-500 mt-1">Your phone, website, and booking link are hidden from patients. Upgrade to Pro so they can reach you.</p>
               </div>
               <Link href="/doctor/billing"
                 className="px-5 py-2.5 bg-neuro-orange text-white rounded-xl text-sm font-bold hover:bg-neuro-orange/90 transition-all whitespace-nowrap shadow-lg shadow-neuro-orange/20">
@@ -618,7 +618,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               {/* Contact Buttons */}
               <div className="space-y-2">
                 {gated ? (
-                  <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} />
+                  <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
                 ) : (
                   <>
                     {doctor.phone && (
@@ -744,7 +744,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           </h2>
           {gated ? (
             <div className="text-center py-6">
-              <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} />
+              <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
             </div>
           ) : (
             <>
@@ -863,7 +863,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-200 py-3 px-4 z-[100] lg:hidden">
         <div className="flex gap-3 max-w-3xl mx-auto">
           {gated ? (
-            <ContactGateCTA variant="mobile" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} />
+            <ContactGateCTA variant="mobile" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
           ) : (
             <>
               {bookingUrl ? (

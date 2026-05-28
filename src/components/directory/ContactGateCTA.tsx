@@ -1,6 +1,6 @@
 "use client";
 
-import { Lock, Mail, Check } from "lucide-react";
+import { Mail, Check, Globe, Phone, ExternalLink } from "lucide-react";
 import { useState } from "react";
 
 interface ContactGateCTAProps {
@@ -8,9 +8,32 @@ interface ContactGateCTAProps {
   doctorId: string;
   doctorName?: string;
   isClaimed?: boolean;
+  phone?: string | null;
+  website?: string | null;
 }
 
-export default function ContactGateCTA({ variant, doctorId, doctorName, isClaimed = true }: ContactGateCTAProps) {
+function maskPhone(phone: string): string {
+  // "(903) 465-1881" → "(●●●) ●●●-1881"
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length >= 10) {
+    return `(●●●) ●●●-${digits.slice(-4)}`;
+  }
+  return '●●●-●●●-●●●●';
+}
+
+function maskUrl(url: string): string {
+  // "https://drknight.net/durant/" → "●●●●●●●●.net"
+  try {
+    const hostname = new URL(url.startsWith('http') ? url : `https://${url}`).hostname.replace('www.', '');
+    const parts = hostname.split('.');
+    const ext = parts.pop();
+    return `●●●●●●●●.${ext}`;
+  } catch {
+    return '●●●●●●●●.com';
+  }
+}
+
+export default function ContactGateCTA({ variant, doctorId, doctorName, isClaimed = true, phone, website }: ContactGateCTAProps) {
   const [showForm, setShowForm] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -29,7 +52,6 @@ export default function ContactGateCTA({ variant, doctorId, doctorName, isClaime
       });
       setSubmitted(true);
     } catch {
-      // Still show success to patient
       setSubmitted(true);
     }
     setLoading(false);
@@ -43,6 +65,24 @@ export default function ContactGateCTA({ variant, doctorId, doctorName, isClaime
       </div>
     );
   }
+
+  // Masked contact preview
+  const maskedContactJSX = (phone || website) && isClaimed ? (
+    <div className="space-y-1.5 mb-3">
+      {phone && (
+        <div className="flex items-center gap-2 text-gray-400 text-sm">
+          <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="blur-[3px] select-none">{maskPhone(phone)}</span>
+        </div>
+      )}
+      {website && (
+        <div className="flex items-center gap-2 text-gray-400 text-sm">
+          <Globe className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="blur-[3px] select-none">{maskUrl(website)}</span>
+        </div>
+      )}
+    </div>
+  ) : null;
 
   if (variant === 'mobile') {
     return showForm ? (
@@ -97,13 +137,10 @@ export default function ContactGateCTA({ variant, doctorId, doctorName, isClaime
         </form>
       ) : (
         <>
-          <div className="flex items-center justify-center gap-2 text-gray-400">
-            <Mail className="w-4 h-4" />
-            <span className="text-xs font-bold uppercase tracking-wider">{isClaimed ? 'Contact Info Locked' : 'Contact Info Pending'}</span>
-          </div>
+          {maskedContactJSX}
           <p className="text-xs text-gray-500">
             {isClaimed
-              ? `Want to reach ${doctorName || 'this doctor'}? We'll let them know.`
+              ? `Upgrade to Pro to see ${doctorName || 'this doctor'}'s full contact info.`
               : `${doctorName || 'This doctor'} hasn't claimed their profile yet. Leave your email and we'll connect you when they do.`}
           </p>
           <button onClick={() => setShowForm(true)} className="mt-1 px-5 py-2.5 bg-neuro-orange text-white font-bold rounded-lg text-xs hover:bg-neuro-orange/90 transition-colors">
