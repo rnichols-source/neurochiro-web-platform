@@ -544,8 +544,8 @@ export async function getRevenueIntelligence() {
 
     const avgCaseValue = doc.average_case_value || 1200
     const estimatedRevenue = (confirmedThisMonth || 0) * avgCaseValue
-    const tierCosts: Record<string, number> = { basic: 49, growth: 69, pro: 129 }
-    const membershipCost = tierCosts[doc.membership_tier] || 49
+    const tierCosts: Record<string, number> = { pro: 49, growth: 49, basic: 0, free: 0 }
+    const membershipCost = tierCosts[doc.membership_tier] || 0
     const roi = membershipCost > 0 ? Math.round(estimatedRevenue / membershipCost) : 0
 
     return {
