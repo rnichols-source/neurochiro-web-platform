@@ -56,24 +56,31 @@ export async function POST(req: Request) {
         try {
           const { Resend } = await import('resend');
           const resend = new Resend(process.env.RESEND_API_KEY);
+          const location = [doctor.city, doctor.state].filter(Boolean).join(', ');
           await resend.emails.send({
             from: 'NeuroChiro <support@neurochirodirectory.com>',
             to: [profile.email],
-            subject: 'A patient is looking for you on NeuroChiro',
+            subject: `A patient ${patientName ? `(${patientName}) ` : ''}just tried to reach you on NeuroChiro`,
             html: `
               <div style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;">
                 <div style="background:#1a2744;padding:28px;text-align:center;">
                   <h1 style="color:white;font-size:22px;margin:0;">NeuroChiro</h1>
-                  <p style="color:#e97325;font-size:16px;font-weight:bold;margin:8px 0 0;">Patient Request</p>
+                  <p style="color:#e97325;font-size:16px;font-weight:bold;margin:8px 0 0;">Missed Patient Connection</p>
                 </div>
                 <div style="padding:28px;background:white;">
-                  <p style="font-size:15px;color:#1a2744;">Hey Dr. ${doctor.first_name || profile.full_name || 'Doctor'},</p>
-                  <p style="color:#666;line-height:1.6;">A patient${patientName ? ` named <strong>${patientName}</strong>` : ''} found your profile on NeuroChiro and wants to connect with you.</p>
-                  <p style="color:#666;line-height:1.6;">Your contact info is currently locked. Upgrade to Pro ($49/mo) to make your phone, website, and booking link visible to patients.</p>
+                  <p style="font-size:15px;color:#1a2744;">Dr. ${doctor.first_name || profile.full_name || 'Doctor'},</p>
+                  <p style="color:#666;line-height:1.6;">A patient just searched for a nervous system chiropractor${location ? ` in <strong>${location}</strong>` : ''}, found your profile, and tried to contact you.</p>
+                  ${patientName ? `<div style="background:#f8f9fa;border-left:4px solid #e97325;border-radius:8px;padding:16px;margin:20px 0;">
+                    <p style="margin:0;font-weight:bold;color:#1a2744;">Patient: ${patientName}</p>
+                    <p style="margin:4px 0 0;color:#666;font-size:14px;">Email: ${patientEmail}</p>
+                  </div>` : `<div style="background:#f8f9fa;border-left:4px solid #e97325;border-radius:8px;padding:16px;margin:20px 0;">
+                    <p style="margin:0;color:#666;">A patient left their email but your contact info isn't visible yet.</p>
+                  </div>`}
+                  <p style="color:#666;line-height:1.6;">They couldn't see your phone number or website because your profile isn't on the Pro plan yet. Upgrade now and this patient — and every future patient — can reach you directly.</p>
                   <div style="text-align:center;margin:24px 0;">
                     <a href="https://neurochiro.co/doctor/billing" style="display:inline-block;background:#e97325;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">Upgrade to Pro — $49/mo</a>
                   </div>
-                  <p style="color:#999;font-size:13px;">One new patient pays for a full year of NeuroChiro.</p>
+                  <p style="color:#999;font-size:13px;text-align:center;">One new patient pays for a full year of NeuroChiro.</p>
                 </div>
               </div>
             `,
