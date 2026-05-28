@@ -28,6 +28,8 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
   const [showModal, setShowModal] = useState(false);
 
   const [isFounder, setIsFounder] = useState(false);
+  const [inTrial, setInTrial] = useState(false);
+  const [trialDaysLeft, setTrialDaysLeft] = useState(0);
 
   useEffect(() => {
     const supabase = createClient();
@@ -35,15 +37,21 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
       if (!user) { setLoading(false); return; }
       setUserId(user.id);
 
-      // Check doctor's membership tier + founding member status
       const { data: doctor } = await supabase
         .from("doctors")
-        .select("membership_tier, is_founding_member")
+        .select("membership_tier, is_founding_member, trial_ends_at")
         .eq("user_id", user.id)
         .single() as any;
 
-      setTier(doctor?.membership_tier || "basic");
+      setTier(doctor?.membership_tier || "free");
       setIsFounder(doctor?.is_founding_member || false);
+
+      // Check active trial
+      if (doctor?.trial_ends_at && new Date(doctor.trial_ends_at) > new Date()) {
+        setInTrial(true);
+        setTrialDaysLeft(Math.ceil((new Date(doctor.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+      }
+
       setLoading(false);
     });
   }, []);
@@ -52,6 +60,17 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
 
   // Founding members get access to EVERYTHING
   if (isFounder) return <>{children}</>;
+
+  // Active trial gets full access with a banner
+  if (inTrial) return (
+    <>
+      <div className="bg-neuro-orange/10 border border-neuro-orange/20 rounded-xl px-4 py-2 mb-4 flex items-center justify-between">
+        <p className="text-sm text-neuro-orange font-bold">Pro Trial: {trialDaysLeft} {trialDaysLeft === 1 ? 'day' : 'days'} left</p>
+        <a href="/doctor/billing" className="text-xs font-bold text-neuro-orange hover:underline">Keep access →</a>
+      </div>
+      {children}
+    </>
+  );
 
   const currentLevel = TIER_LEVELS[tier || "basic"] || 0;
   const requiredLevel = TIER_LEVELS[requiredTier || "pro"] || 1;
