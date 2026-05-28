@@ -7,9 +7,10 @@ interface ContactGateCTAProps {
   variant: 'sidebar' | 'hero' | 'mobile';
   doctorId: string;
   doctorName?: string;
+  isClaimed?: boolean;
 }
 
-export default function ContactGateCTA({ variant, doctorId, doctorName }: ContactGateCTAProps) {
+export default function ContactGateCTA({ variant, doctorId, doctorName, isClaimed = true }: ContactGateCTAProps) {
   const [showForm, setShowForm] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -75,7 +76,7 @@ export default function ContactGateCTA({ variant, doctorId, doctorName }: Contac
     ) : (
       <button onClick={() => setShowForm(true)} className="px-6 py-3 bg-white/10 text-white/70 rounded-xl text-sm flex items-center gap-2 border border-white/20 hover:bg-white/15 transition-colors">
         <Mail className="w-4 h-4" />
-        <span>Request this doctor&apos;s contact info</span>
+        <span>{isClaimed ? 'Request this doctor\u0027s contact info' : 'Contact info available after claiming'}</span>
       </button>
     );
   }
@@ -97,12 +98,16 @@ export default function ContactGateCTA({ variant, doctorId, doctorName }: Contac
       ) : (
         <>
           <div className="flex items-center justify-center gap-2 text-gray-400">
-            <Lock className="w-4 h-4" />
-            <span className="text-xs font-bold uppercase tracking-wider">Contact Info Locked</span>
+            <Mail className="w-4 h-4" />
+            <span className="text-xs font-bold uppercase tracking-wider">{isClaimed ? 'Contact Info Locked' : 'Contact Info Pending'}</span>
           </div>
-          <p className="text-xs text-gray-500">Want to reach {doctorName || 'this doctor'}? We&apos;ll let them know.</p>
+          <p className="text-xs text-gray-500">
+            {isClaimed
+              ? `Want to reach ${doctorName || 'this doctor'}? We'll let them know.`
+              : `${doctorName || 'This doctor'} hasn't claimed their profile yet. Leave your email and we'll connect you when they do.`}
+          </p>
           <button onClick={() => setShowForm(true)} className="mt-1 px-5 py-2.5 bg-neuro-orange text-white font-bold rounded-lg text-xs hover:bg-neuro-orange/90 transition-colors">
-            Request Contact Info
+            {isClaimed ? 'Request Contact Info' : 'Get Notified'}
           </button>
         </>
       )}

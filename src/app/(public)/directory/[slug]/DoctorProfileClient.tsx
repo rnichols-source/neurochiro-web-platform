@@ -194,7 +194,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               {/* Quick CTA — hidden on mobile (sticky bar handles it) */}
               <div className="hidden sm:flex items-center gap-3 mt-5">
                 {gated ? (
-                  <ContactGateCTA variant="hero" doctorId={doctor.id} doctorName={name} />
+                  <ContactGateCTA variant="hero" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} />
                 ) : (
                   <>
                     {doctor.phone && (
@@ -273,17 +273,13 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       {/* Claim Banner */}
       {!doctor.user_id && (
         <div className="max-w-4xl mx-auto px-6 mt-6">
-          <div className="bg-neuro-orange/5 border border-neuro-orange/20 rounded-2xl p-5">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <p className="font-black text-neuro-navy text-sm">Is this you?</p>
-                <p className="text-xs text-gray-500 mt-1">Claim your NeuroChiro profile to manage your listing. Upgrade to Pro ($49/mo) to unlock your photo, contact info, and start connecting with patients.</p>
-              </div>
-              <a href={`/register?claim_id=${doctor.id}&role=doctor`}
-                className="px-5 py-2.5 bg-neuro-orange text-white rounded-xl text-sm font-bold hover:bg-neuro-orange/90 transition-all whitespace-nowrap">
-                Claim This Profile
-              </a>
-            </div>
+          <div className="bg-gradient-to-r from-neuro-navy to-[#1a3048] rounded-2xl p-6 text-white">
+            <p className="font-black text-lg mb-1">Welcome, {name}!</p>
+            <p className="text-white/70 text-sm leading-relaxed mb-4">We built this free listing for you based on your public practice info. Claim it to manage your profile — takes 15 seconds. Your free plan includes your name, specialties, and location. Upgrade anytime to show your photo and contact info to patients.</p>
+            <a href={`/register?claim_id=${doctor.id}&role=doctor`}
+              className="inline-block px-6 py-3 bg-neuro-orange text-white rounded-xl text-sm font-bold hover:bg-neuro-orange/90 transition-all shadow-lg shadow-neuro-orange/20">
+              Claim My Profile
+            </a>
           </div>
         </div>
       )}
@@ -622,7 +618,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               {/* Contact Buttons */}
               <div className="space-y-2">
                 {gated ? (
-                  <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} />
+                  <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} />
                 ) : (
                   <>
                     {doctor.phone && (
@@ -748,7 +744,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           </h2>
           {gated ? (
             <div className="text-center py-6">
-              <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} />
+              <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} />
             </div>
           ) : (
             <>
@@ -867,7 +863,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-200 py-3 px-4 z-[100] lg:hidden">
         <div className="flex gap-3 max-w-3xl mx-auto">
           {gated ? (
-            <ContactGateCTA variant="mobile" doctorId={doctor.id} doctorName={name} />
+            <ContactGateCTA variant="mobile" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} />
           ) : (
             <>
               {bookingUrl ? (
