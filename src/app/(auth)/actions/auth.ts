@@ -342,10 +342,10 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
     return { error: 'This profile has already been claimed.' };
   }
 
-  // Link the doctor record to the new user
+  // Link the doctor record to the new user (pending approval)
   const { error: updateError } = await supabase
     .from('doctors')
-    .update({ user_id: userId })
+    .update({ user_id: userId, is_approved: false } as any)
     .eq('id', claimId);
 
   if (updateError) {
@@ -353,7 +353,7 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
     // Retry without RLS constraints
     const { error: retryError } = await supabase
       .from('doctors')
-      .update({ user_id: userId } as any)
+      .update({ user_id: userId, is_approved: false } as any)
       .eq('id', claimId);
     if (retryError) {
       console.error("Retry also failed:", retryError);

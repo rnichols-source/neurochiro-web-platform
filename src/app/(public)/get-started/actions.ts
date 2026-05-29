@@ -60,6 +60,7 @@ export async function createFreeAccount(data: {
         verification_status: 'pending',
         membership_tier: 'free',
         region_code: 'US',
+        is_approved: false,
       } as any);
     }
 

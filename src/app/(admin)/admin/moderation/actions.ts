@@ -123,13 +123,14 @@ export async function moderateDoctor(doctorId: string, action: 'approve' | 'reje
       flag: 'pending' 
     };
 
-    const updateData: any = { 
+    const updateData: any = {
       verification_status: statusMap[action]
     };
 
     // Audit requirement: Update verification_date (verified_at) if approved
     if (action === 'approve') {
       updateData.verified_at = new Date().toISOString();
+      updateData.is_approved = true;
     }
 
     const { data: doctor, error: fetchError } = await supabase
@@ -157,12 +158,46 @@ export async function moderateDoctor(doctorId: string, action: 'approve' | 'reje
       if (approvedDoctor?.user_id) {
         await supabase.from('notifications').insert({
           user_id: approvedDoctor.user_id,
-          title: 'Profile Approved!',
-          body: 'Your doctor profile has been verified and is now live in the directory. Patients can find you!',
+          title: 'Account Approved!',
+          body: 'Your account has been approved! You now have full access to your dashboard, profile editor, and all tools.',
           type: 'system',
           priority: 'important',
           link: '/doctor/dashboard'
         });
+
+        // Send approval email
+        try {
+          const { data: profile } = await supabase.from('profiles').select('email').eq('id', approvedDoctor.user_id).single();
+          if (profile?.email) {
+            const { Resend } = await import('resend');
+            const resend = new Resend(process.env.RESEND_API_KEY || '');
+            const firstName = approvedDoctor.first_name || 'Doctor';
+            await resend.emails.send({
+              from: 'NeuroChiro <support@neurochirodirectory.com>',
+              to: [profile.email],
+              subject: `You're approved, Dr. ${firstName}! Your dashboard is ready.`,
+              html: `
+                <div style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;">
+                  <div style="background:#1a2744;padding:28px;text-align:center;">
+                    <h1 style="color:white;font-size:22px;margin:0;">NeuroChiro</h1>
+                    <p style="color:#22c55e;font-size:14px;font-weight:bold;margin:8px 0 0;">Account Approved!</p>
+                  </div>
+                  <div style="padding:28px;background:white;">
+                    <p style="font-size:15px;color:#333;line-height:1.6;">Hey Dr. ${firstName},</p>
+                    <p style="font-size:15px;color:#333;line-height:1.6;">Great news — your NeuroChiro account has been approved! You now have full access to your dashboard.</p>
+                    <div style="text-align:center;margin:24px 0;">
+                      <a href="https://neurochiro.co/doctor/dashboard" style="display:inline-block;background:#e97325;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">Go to Dashboard</a>
+                    </div>
+                    <p style="color:#999;font-size:13px;">Questions? Just reply to this email.</p>
+                    <p style="margin-top:20px;color:#333;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
+                  </div>
+                </div>
+              `,
+            });
+          }
+        } catch (emailErr) {
+          console.error('Approval email failed:', emailErr);
+        }
       }
     }
 

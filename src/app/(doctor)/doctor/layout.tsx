@@ -4,7 +4,7 @@ import Sidebar from "./Sidebar";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import NotificationBell from "@/components/layout/NotificationBell";
 import { AuthProvider } from "@/context/AuthContext";
-import { LayoutDashboard, MessageSquare, Bell, User, Menu } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Bell, User, Menu, Clock, CheckCircle2, Mail } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -29,6 +29,7 @@ export default function DoctorLayout({
   const [initials, setInitials] = useState("--");
   const [subscriptionChecked, setSubscriptionChecked] = useState(false);
   const [tierInfo, setTierInfo] = useState<{ tier: string; trialEndsAt: string | null; isFounder: boolean } | null>(null);
+  const [approvalPending, setApprovalPending] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -44,9 +45,14 @@ export default function DoctorLayout({
       // Get doctor tier + trial info
       const { data: doctor } = await supabase
         .from('doctors')
-        .select('membership_tier, trial_ends_at, is_founding_member')
+        .select('membership_tier, trial_ends_at, is_founding_member, is_approved')
         .eq('user_id', user.id)
         .single() as any;
+
+      // Approval gate — block dashboard if not approved
+      if (doctor && doctor.is_approved === false) {
+        setApprovalPending(true);
+      }
 
       setTierInfo({
         tier: doctor?.membership_tier || profile?.tier || 'free',
@@ -75,6 +81,48 @@ export default function DoctorLayout({
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [pathname]);
+
+  // Approval pending — show waiting screen instead of dashboard
+  if (approvalPending) {
+    return (
+      <div className="min-h-dvh bg-[#0F1A24] flex items-center justify-center px-6">
+        <div className="max-w-md w-full text-center">
+          <div className="w-20 h-20 rounded-full bg-neuro-orange/20 flex items-center justify-center mx-auto mb-6">
+            <Clock className="w-10 h-10 text-neuro-orange" />
+          </div>
+          <h1 className="text-2xl font-heading font-black text-white mb-3">Your Account is Being Reviewed</h1>
+          <p className="text-white/50 mb-6 leading-relaxed">
+            Thank you for signing up! Our team is reviewing your account to ensure the quality of our network.
+            You&apos;ll receive an email once your account is approved — usually within 24 hours.
+          </p>
+          <div className="bg-white/[0.06] border border-white/[0.1] rounded-2xl p-5 text-left space-y-3 mb-6">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
+              <span className="text-sm text-white/70">Account created</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
+              <span className="text-sm text-white/70">Profile information saved</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Clock className="w-5 h-5 text-neuro-orange flex-shrink-0 animate-pulse" />
+              <span className="text-sm text-white font-bold">Pending admin approval</span>
+            </div>
+          </div>
+          <div className="flex items-center justify-center gap-2 text-white/30 text-sm">
+            <Mail className="w-4 h-4" />
+            <span>We&apos;ll email you when approved</span>
+          </div>
+          <button
+            onClick={() => { const supabase = createClient(); supabase.auth.signOut().then(() => window.location.href = '/'); }}
+            className="mt-8 text-sm text-white/30 hover:text-white/50 transition-colors"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AuthProvider>
