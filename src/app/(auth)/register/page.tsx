@@ -24,6 +24,7 @@ function RegisterForm() {
   const [phone, setPhone] = useState("");
   const [licenseNumber, setLicenseNumber] = useState("");
   const [licenseState, setLicenseState] = useState("");
+  const [chiropracticApproach, setChiropracticApproach] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
@@ -47,6 +48,7 @@ function RegisterForm() {
     if (licenseState) formData.append("licenseState", licenseState);
     if (billing) formData.append("billing", billing);
     if (region) formData.append("region", region);
+    if (chiropracticApproach) formData.append("chiropracticApproach", chiropracticApproach);
 
     // Force doctor role when claiming a profile
     const effectiveRole = claimId ? "doctor" : role;
@@ -217,6 +219,36 @@ function RegisterForm() {
                 </div>
               )}
             </>
+          )}
+
+          {/* Chiropractic approach — doctors only */}
+          {(role === "doctor" || claimId) && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">How would you describe your approach?</label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { value: "nervous_system", label: "Nervous System Focused" },
+                  { value: "structural", label: "Structural / Manual" },
+                  { value: "upper_cervical", label: "Upper Cervical" },
+                  { value: "functional_neuro", label: "Functional Neurology" },
+                  { value: "wellness", label: "Wellness / Vitalistic" },
+                  { value: "other", label: "Other" },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setChiropracticApproach(opt.value)}
+                    className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all border-2 ${
+                      chiropracticApproach === opt.value
+                        ? "bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/20"
+                        : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
 
           <button type="submit" disabled={pending}

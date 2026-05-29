@@ -122,6 +122,7 @@ export async function createAccountAction(formData: FormData, role: string, tier
   const licenseNumber = formData.get('licenseNumber') as string || ''
   const licenseState = formData.get('licenseState') as string || ''
   const region = formData.get('region') as string || ''
+  const chiropracticApproach = formData.get('chiropracticApproach') as string || ''
   const supabase = createServerSupabase()
 
   const { data, error } = await supabase.auth.signUp({
@@ -137,6 +138,7 @@ export async function createAccountAction(formData: FormData, role: string, tier
         license_number: licenseNumber,
         license_state: licenseState,
         ...(region && { region_code: region }),
+        ...(chiropracticApproach && { chiropractic_approach: chiropracticApproach }),
       }
     }
   })
@@ -203,11 +205,20 @@ export async function createAccountAction(formData: FormData, role: string, tier
       const discordUrl = process.env.DISCORD_WEBHOOK_URL;
       if (discordUrl) {
         const roleLabel = role === 'doctor' ? 'DOCTOR' : role === 'student' ? 'STUDENT' : 'PATIENT';
+        const approachLabels: Record<string, string> = {
+          nervous_system: '🧠 Nervous System Focused',
+          structural: '🦴 Structural / Manual',
+          upper_cervical: '🔝 Upper Cervical',
+          functional_neuro: '⚡ Functional Neurology',
+          wellness: '🌿 Wellness / Vitalistic',
+          other: '❓ Other',
+        };
+        const approachLine = chiropracticApproach ? `\n**Approach:** ${approachLabels[chiropracticApproach] || chiropracticApproach}` : '';
         await fetch(discordUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `🆕 **NEW ${roleLabel} SIGNUP**\n\n**Name:** ${name}\n**Email:** ${email}${phone ? `\n**Phone:** ${phone}` : ''}${licenseNumber ? `\n**License:** ${licenseNumber} (${licenseState})` : ''}`,
+            content: `🆕 **NEW ${roleLabel} SIGNUP — PENDING APPROVAL**\n\n**Name:** ${name}\n**Email:** ${email}${phone ? `\n**Phone:** ${phone}` : ''}${licenseNumber ? `\n**License:** ${licenseNumber} (${licenseState})` : ''}${approachLine}\n\n⏳ Approve at: https://neurochiro.co/admin/moderation`,
           }),
         }).catch(() => {});
       }
