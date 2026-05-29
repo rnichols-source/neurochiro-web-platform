@@ -583,7 +583,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             {/* Map */}
             {mapQuery && (
               <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(30,45,59,0.08)", aspectRatio: "4 / 3" }}>
-                <iframe src={`https://www.google.com/maps?q=${mapQuery}&output=embed`} style={{ width: "100%", height: "100%", border: "none" }} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" />
+                <iframe src={`https://maps.google.com/maps?q=${mapQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`} style={{ width: "100%", height: "100%", border: "none" }} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" />
               </div>
             )}
             {/* Info stack */}
