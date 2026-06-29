@@ -66,7 +66,8 @@ export async function GET(req: Request) {
       const profile = emailMap.get(doc.user_id);
       if (!profile?.email) continue;
 
-      const name = doc.first_name || profile.name?.split(' ')[0] || 'Doctor';
+      const rawName = doc.first_name || profile.name?.split(' ')[0] || 'Doctor';
+      const name = rawName.replace(/^Dr\.?$/i, '') || 'Doctor';
       const profileUrl = doc.slug ? `https://neurochiro.co/directory/${doc.slug}` : 'https://neurochiro.co/doctor/profile';
 
       // Determine what's missing

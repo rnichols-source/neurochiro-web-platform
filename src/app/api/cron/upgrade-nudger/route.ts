@@ -88,7 +88,8 @@ export async function GET(req: Request) {
       const profile = profileMap.get(doc.user_id);
       if (!profile?.email) continue;
 
-      const name = doc.first_name || profile.full_name?.split(' ')[0] || 'Doctor';
+      const rawName = doc.first_name || profile.full_name?.split(' ')[0] || 'Doctor';
+      const name = rawName.replace(/^Dr\.?$/i, '') || 'Doctor';
       const views = doc.profile_views || 0;
       const daysSinceJoin = Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24));
       const profileUrl = doc.slug ? `https://neurochiro.co/directory/${doc.slug}` : 'https://neurochiro.co/doctor/dashboard';

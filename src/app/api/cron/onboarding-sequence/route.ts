@@ -61,8 +61,15 @@ export async function GET(req: Request) {
 
     for (const profile of recentProfiles) {
       const daysSinceSignup = Math.floor((now.getTime() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24));
-      const name = profile.full_name?.split(' ')[0] || (profile.role === 'doctor' ? 'Doctor' : 'Student');
+      const rawName = profile.full_name?.split(' ')[0] || (profile.role === 'doctor' ? 'Doctor' : 'Student');
+      const name = rawName.replace(/^Dr\.?$/i, '') || (profile.role === 'doctor' ? 'Doctor' : 'Student');
       const isDoctor = profile.role === 'doctor';
+
+      // Skip hidden/unsubscribed doctors
+      if (isDoctor) {
+        const { data: doctorRecord } = await supabase.from('doctors').select('verification_status').eq('user_id', profile.id).single();
+        if (doctorRecord?.verification_status === 'hidden') continue;
+      }
 
       // Determine which email to send based on days since signup
       let day: number | null = null;

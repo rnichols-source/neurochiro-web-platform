@@ -61,7 +61,8 @@ export async function GET(req: Request) {
       const { data: doctorRecord } = await supabase.from('doctors').select('verification_status').eq('user_id', doc.id).single();
       if (doctorRecord?.verification_status === 'hidden') continue;
 
-      const name = doc.full_name?.split(' ')[0] || 'Doctor';
+      const rawName1 = doc.full_name?.split(' ')[0] || 'Doctor';
+      const name = rawName1.replace(/^Dr\.?$/i, '') || 'Doctor';
 
       await resend.emails.send({
         from: 'NeuroChiro <support@neurochirodirectory.com>',
@@ -100,7 +101,12 @@ export async function GET(req: Request) {
     for (const doc of (allDoctors || []) as any[]) {
       if (recentlyEmailed.has(doc.id) || emailedThisRun.has(doc.id)) continue;
 
-      const name = doc.full_name?.split(' ')[0] || 'Doctor';
+      // Skip hidden/unsubscribed doctors
+      const { data: doctorRecord2 } = await supabase.from('doctors').select('verification_status').eq('user_id', doc.id).single();
+      if (doctorRecord2?.verification_status === 'hidden') continue;
+
+      const rawName = doc.full_name?.split(' ')[0] || 'Doctor';
+      const name = rawName.replace(/^Dr\.?$/i, '') || 'Doctor';
 
       try {
         await resend.emails.send({
