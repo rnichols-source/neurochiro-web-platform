@@ -8,7 +8,7 @@ import UpgradeModal from "./UpgradeModal";
 interface UpgradeGateProps {
   children: React.ReactNode;
   feature: string;
-  requiredTier?: "pro";
+  requiredTier?: "pro" | "neuros";
   description?: string;
 }
 
@@ -19,6 +19,7 @@ const TIER_LEVELS: Record<string, number> = {
   standard: 0,
   growth: 1,
   pro: 1,
+  neuros: 2,
 };
 
 export default function UpgradeGate({ children, feature, requiredTier, description }: UpgradeGateProps) {
@@ -39,11 +40,16 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
 
       const { data: doctor } = await supabase
         .from("doctors")
-        .select("membership_tier, is_founding_member, trial_ends_at")
+        .select("membership_tier, is_founding_member, trial_ends_at, neuros_tier")
         .eq("user_id", user.id)
         .single() as any;
 
-      setTier(doctor?.membership_tier || "free");
+      // If user has NeurOS, set tier to neuros (highest level)
+      if (doctor?.neuros_tier === 'neuros' || doctor?.neuros_tier === 'neuros_founding') {
+        setTier("neuros");
+      } else {
+        setTier(doctor?.membership_tier || "free");
+      }
       setIsFounder(doctor?.is_founding_member || false);
 
       // Check active trial

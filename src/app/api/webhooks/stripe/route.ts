@@ -88,6 +88,39 @@ export async function POST(req: Request) {
           // Handle metadata-driven record creation
           const metaType = session.metadata?.type;
 
+          // NeurOS signup — activate NeurOS tier + create practice config
+          if (metaType === 'neuros_signup') {
+            await supabase
+              .from('doctors')
+              .update({ neuros_tier: 'neuros', membership_tier: 'pro', verification_status: 'verified' })
+              .eq('user_id', userId);
+
+            await supabase
+              .from('profiles')
+              .update({ tier: 'pro', stripe_customer_id: customer } as any)
+              .eq('id', userId);
+
+            // Create practice config row if it doesn't exist
+            await supabase
+              .from('neuros_practice_config')
+              .upsert({
+                user_id: userId,
+                setup_fee_paid: true,
+              } as any, { onConflict: 'user_id' });
+
+            // Discord notification
+            if (process.env.DISCORD_WEBHOOK_URL) {
+              const { data: doctorInfo } = await supabase.from('doctors').select('first_name, last_name, clinic_name').eq('user_id', userId).single();
+              fetch(process.env.DISCORD_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  content: `🧠 **NeurOS Signup!** Dr. ${doctorInfo?.first_name} ${doctorInfo?.last_name} (${doctorInfo?.clinic_name}) just joined NeurOS at $${session.metadata?.cycle === 'annual' ? '2,997/yr' : '297/mo + $497 setup'}`,
+                }),
+              }).catch(() => {});
+            }
+          }
+
           // Conference signup — auto-create account + profile + doctor record
           if (metaType === 'conference_signup') {
             const signupName = session.metadata?.name || '';

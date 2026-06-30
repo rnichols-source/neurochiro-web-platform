@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
   MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck, TrendingUp, Activity, Presentation, Receipt, DollarSign, Target, ChevronDown,
-  ShieldCheck, Lock, ShoppingBag, Shuffle, Award, Users,
+  ShieldCheck, Lock, ShoppingBag, Shuffle, Award, Users, Cpu, Wrench,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,6 +18,14 @@ interface SidebarProps {
 }
 
 const navSections = [
+  {
+    label: "NEUROS",
+    items: [
+      { name: "NeurOS Home", href: "/doctor/neuros", icon: Cpu, tier: "neuros" as const },
+      { name: "Care Plan Closer", href: "/doctor/neuros/care-plan", icon: Calculator, tier: "neuros" as const },
+      { name: "Practice Setup", href: "/doctor/neuros/onboarding", icon: Wrench, tier: "neuros" as const },
+    ],
+  },
   {
     label: "PRACTICE",
     items: [
@@ -72,8 +80,8 @@ const navSections = [
   },
 ];
 
-// free/basic/starter/standard = 0 (free tier), growth = 1 (paid), pro = 2 (premium)
-const TIER_LEVELS: Record<string, number> = { free: 0, standard: 0, basic: 0, starter: 0, growth: 1, pro: 1 };
+// free/basic/starter/standard = 0 (free tier), growth/pro = 1 (paid), neuros = 2 (practice OS)
+const TIER_LEVELS: Record<string, number> = { free: 0, standard: 0, basic: 0, starter: 0, growth: 1, pro: 1, neuros: 2 };
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
@@ -92,9 +100,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           .eq("user_id", user.id).is("read_at", null)
           .then(({ count }) => setUnreadNotifs(count || 0));
         // Try doctors table first, fall back to profiles.tier
-        supabase.from("doctors").select("membership_tier, is_founding_member").eq("user_id", user.id).single()
+        supabase.from("doctors").select("membership_tier, is_founding_member, neuros_tier").eq("user_id", user.id).single()
           .then(({ data }: any) => {
-            if (data?.is_founding_member) {
+            if (data?.neuros_tier === 'neuros' || data?.neuros_tier === 'neuros_founding') {
+              setMemberTier("neuros");
+            } else if (data?.is_founding_member) {
               setMemberTier("pro");
             } else if (data?.membership_tier) {
               setMemberTier(data.membership_tier);

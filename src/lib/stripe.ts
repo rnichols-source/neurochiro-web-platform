@@ -235,6 +235,29 @@ export const PLANS = {
       price: 29,
     },
   },
+  // =============================================
+  // NeurOS Practice Operating System
+  // =============================================
+  neuros: {
+    id: "neuros",
+    name: "NeurOS Practice Operating System",
+    monthly: {
+      priceId: process.env.STRIPE_NEUROS_MONTHLY_PRICE_ID ?? "",
+      price: 297,
+    },
+    annual: {
+      priceId: process.env.STRIPE_NEUROS_ANNUAL_PRICE_ID ?? "",
+      price: 2997,
+    },
+  },
+  neuros_setup: {
+    id: "neuros_setup",
+    name: "NeurOS Setup Fee",
+    oneTime: {
+      priceId: process.env.STRIPE_NEUROS_SETUP_PRICE_ID ?? "",
+      price: 497,
+    },
+  },
 } as const;
 
 export function getPriceId(plan: 'doctor' | 'student', cycle: 'monthly' | 'annual'): string {
