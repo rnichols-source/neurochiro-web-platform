@@ -124,7 +124,8 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
 
   // Load practice config on mount
   useEffect(() => {
-    loadPracticeConfig().then(config => {
+    loadPracticeConfig().then((rawConfig: any) => {
+      const config = rawConfig as any;
       if (config) {
         setPracticeConfig(config);
         // Pre-populate supplements from practice catalog
