@@ -115,7 +115,7 @@ export async function POST(req: Request) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  content: `🧠 **NeurOS Signup!** Dr. ${doctorInfo?.first_name} ${doctorInfo?.last_name} (${doctorInfo?.clinic_name}) just joined NeurOS at $${session.metadata?.cycle === 'annual' ? '2,997/yr' : '297/mo + $497 setup'}`,
+                  content: `🧠 **NeurOS Signup!** Dr. ${doctorInfo?.first_name} ${doctorInfo?.last_name} (${doctorInfo?.clinic_name}) just joined NeurOS at $${session.metadata?.cycle === 'annual' ? '2,997/yr' : '297/mo + $997 setup'}`,
                 }),
               }).catch(() => {});
             }

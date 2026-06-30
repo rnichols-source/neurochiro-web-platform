@@ -255,7 +255,7 @@ export const PLANS = {
     name: "NeurOS Setup Fee",
     oneTime: {
       priceId: process.env.STRIPE_NEUROS_SETUP_PRICE_ID ?? "",
-      price: 497,
+      price: 997,
     },
   },
 } as const;

@@ -16,8 +16,8 @@ const TOOLS = [
 
 const VALUE_STACK = [
   { name: "8 Practice Tools (unlimited use)", value: "$682/mo" },
-  { name: "Care Plan Template Library (10 templates)", value: "$497" },
-  { name: "The Scripts Vault (ROF, objection handling, recall)", value: "$497" },
+  { name: "Care Plan Template Library (10 templates)", value: "$997" },
+  { name: "The Scripts Vault (ROF, objection handling, recall)", value: "$997" },
   { name: "Exercise Prescription Library (200+ exercises)", value: "$297" },
   { name: "White-Label Branding (your logo on everything)", value: "$97/mo" },
   { name: "NeuroChiro Pro Directory Listing (included FREE)", value: "$49/mo" },
@@ -118,7 +118,7 @@ export default function NeurOSSalesPage() {
 
         <button onClick={() => handleCheckout("monthly")}
           style={{ width: "100%", padding: "18px 32px", background: "#3b82f6", color: "#fff", border: "none", borderRadius: 14, fontSize: 16, fontWeight: 900, cursor: "pointer", textTransform: "uppercase", letterSpacing: 1 }}>
-          Get NeurOS - $297/mo + $497 Setup
+          Get NeurOS - $297/mo + $997 Setup
         </button>
 
         <button onClick={() => handleCheckout("annual")}

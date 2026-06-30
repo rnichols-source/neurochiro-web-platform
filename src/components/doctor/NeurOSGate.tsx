@@ -103,7 +103,7 @@ export default function NeurOSGate({ children, feature }: NeurOSGateProps) {
             <div className="border border-gray-100 rounded-xl p-4 mb-4">
               <div className="text-center">
                 <div className="text-3xl font-black text-[#1E2D3B]">$297<span className="text-sm font-normal text-gray-400">/mo</span></div>
-                <div className="text-xs text-gray-400 mt-1">+ $497 one-time setup fee</div>
+                <div className="text-xs text-gray-400 mt-1">+ $997 one-time setup fee</div>
               </div>
             </div>
 
@@ -121,7 +121,7 @@ export default function NeurOSGate({ children, feature }: NeurOSGateProps) {
               disabled={checkingOut}
               className="w-full mt-2 py-3 bg-white text-blue-600 border-2 border-blue-100 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-blue-50 transition-all disabled:opacity-50"
             >
-              Annual: $2,997/yr (setup fee waived, save $567)
+              Annual: $2,997/yr (setup fee waived, save $1,564)
             </button>
 
             {/* Guarantee */}

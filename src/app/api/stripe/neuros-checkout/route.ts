@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ url: session.url });
     }
 
-    // Monthly: $497 setup fee (one-time) + $297/mo subscription
+    // Monthly: $997 setup fee (one-time) + $297/mo subscription
     // Stripe supports mixed mode with subscription + one-time in subscription mode
     const lineItems: any[] = [
       {
