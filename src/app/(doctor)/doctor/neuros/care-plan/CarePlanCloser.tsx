@@ -146,7 +146,8 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
   // Load existing care plan if editing
   useEffect(() => {
     if (!editId) return;
-    loadCareplan(editId).then(plan => {
+    loadCareplan(editId).then((rawPlan: any) => {
+      const plan = rawPlan as any;
       if (!plan) return;
       setState({
         id: plan.id,
@@ -157,12 +158,12 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
         case_type: plan.case_type as any,
         insurance_payer: plan.insurance_payer || "",
         care_track: plan.care_track as any,
-        scoring: (plan.scoring_data as any)?.categories || INITIAL_SCORING,
-        complaints: (plan.scoring_data as any)?.complaints || [],
-        goals: (plan.scoring_data as any)?.goals || [],
-        phases: (plan.phases as any) || [],
-        supplements: (plan.supplements as any) || [],
-        lifestyle_recs: (plan.lifestyle_recs as any) || [],
+        scoring: plan.scoring_data?.categories || INITIAL_SCORING,
+        complaints: plan.scoring_data?.complaints || [],
+        goals: plan.scoring_data?.goals || [],
+        phases: plan.phases || [],
+        supplements: plan.supplements || [],
+        lifestyle_recs: plan.lifestyle_recs || [],
         notes: plan.notes || "",
         status: plan.status as any,
       });
