@@ -41,12 +41,12 @@ export default function NeurOSDashboard() {
         .eq("user_id", user.id);
 
       if (plans) {
-        const thisMonth = plans.filter(p => p.created_at >= monthStart);
+        const thisMonth = plans.filter((p: any) => p.created_at >= monthStart);
         setStats({
           total: plans.length,
           thisMonth: thisMonth.length,
-          totalValue: plans.reduce((sum, p) => sum + (p.total_value || 0), 0),
-          accepted: plans.filter(p => p.status === "accepted").length,
+          totalValue: plans.reduce((sum: number, p: any) => sum + (p.total_value || 0), 0),
+          accepted: plans.filter((p: any) => p.status === "accepted").length,
         });
       }
 
