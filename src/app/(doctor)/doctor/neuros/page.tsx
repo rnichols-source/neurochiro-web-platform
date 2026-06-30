@@ -18,8 +18,8 @@ export default function NeurOSDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    const supabase = createClient() as any;
+    supabase.auth.getUser().then(async ({ data: { user } }: any) => {
       if (!user) { setLoading(false); return; }
 
       // Check onboarding status

@@ -2,10 +2,21 @@
 
 import { createServerSupabase } from "@/lib/supabase-server";
 
-export async function saveCareplan(data: any) {
+// Cast supabase to any for NeurOS tables not yet in generated types
+function getSupabase() {
+  return createServerSupabase() as any;
+}
+
+async function getUser() {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}
+
+export async function saveCareplan(data: any) {
+  const user = await getUser();
   if (!user) return { success: false, error: "Not authenticated" };
+  const supabase = getSupabase();
 
   const payload = {
     user_id: user.id,
@@ -47,9 +58,9 @@ export async function saveCareplan(data: any) {
 }
 
 export async function loadCareplans(filters?: { status?: string; search?: string }) {
-  const supabase = createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return [];
+  const supabase = getSupabase();
 
   let query = supabase
     .from("neuros_care_plans")
@@ -70,9 +81,9 @@ export async function loadCareplans(filters?: { status?: string; search?: string
 }
 
 export async function loadCareplan(id: string) {
-  const supabase = createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return null;
+  const supabase = getSupabase();
 
   const { data } = await supabase
     .from("neuros_care_plans")
@@ -85,9 +96,9 @@ export async function loadCareplan(id: string) {
 }
 
 export async function deleteCareplan(id: string) {
-  const supabase = createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return { success: false };
+  const supabase = getSupabase();
 
   const { error } = await supabase
     .from("neuros_care_plans")
@@ -99,9 +110,9 @@ export async function deleteCareplan(id: string) {
 }
 
 export async function loadPracticeConfig() {
-  const supabase = createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return null;
+  const supabase = getSupabase();
 
   const { data } = await supabase
     .from("neuros_practice_config")
@@ -113,7 +124,7 @@ export async function loadPracticeConfig() {
 }
 
 export async function lookupFeeSchedule(payerCode: string, cptCodes: string[]) {
-  const supabase = createServerSupabase();
+  const supabase = getSupabase();
 
   const { data } = await supabase
     .from("neuros_fee_schedules")
@@ -122,9 +133,8 @@ export async function lookupFeeSchedule(payerCode: string, cptCodes: string[]) {
     .in("cpt_code", cptCodes);
 
   if (!data || data.length === 0) {
-    // Fallback to default static data
     const { DEFAULT_FEE_SCHEDULES } = await import("./fee-schedule-data");
-    return cptCodes.map(code => {
+    return cptCodes.map((code: string) => {
       const entry = DEFAULT_FEE_SCHEDULES.find(f => f.payer_code === payerCode && f.cpt_code === code);
       return { cpt_code: code, allowed_amount: entry?.allowed_amount || 0 };
     });

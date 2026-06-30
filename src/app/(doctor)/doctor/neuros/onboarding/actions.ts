@@ -2,10 +2,21 @@
 
 import { createServerSupabase } from "@/lib/supabase-server";
 
-export async function loadPracticeConfig() {
+// Cast to any for NeurOS tables not yet in generated types
+function getSupabase() {
+  return createServerSupabase() as any;
+}
+
+async function getUser() {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}
+
+export async function loadPracticeConfig() {
+  const user = await getUser();
   if (!user) return null;
+  const supabase = getSupabase();
 
   const { data } = await supabase
     .from("neuros_practice_config")
@@ -17,9 +28,9 @@ export async function loadPracticeConfig() {
 }
 
 export async function savePracticeConfig(config: any) {
-  const supabase = createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return { success: false, error: "Not authenticated" };
+  const supabase = getSupabase();
 
   const { error } = await supabase
     .from("neuros_practice_config")
@@ -27,19 +38,19 @@ export async function savePracticeConfig(config: any) {
       user_id: user.id,
       ...config,
       updated_at: new Date().toISOString(),
-    } as any, { onConflict: "user_id" });
+    }, { onConflict: "user_id" });
 
   return { success: !error, error: error?.message };
 }
 
 export async function markOnboardingComplete() {
-  const supabase = createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return { success: false };
+  const supabase = getSupabase();
 
   const { error } = await supabase
     .from("neuros_practice_config")
-    .update({ onboarding_completed: true, updated_at: new Date().toISOString() } as any)
+    .update({ onboarding_completed: true, updated_at: new Date().toISOString() })
     .eq("user_id", user.id);
 
   return { success: !error };
