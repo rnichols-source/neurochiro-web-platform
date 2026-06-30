@@ -101,12 +101,12 @@ export async function POST(req: Request) {
               .eq('id', userId);
 
             // Create practice config row if it doesn't exist
-            await supabase
+            await (supabase as any)
               .from('neuros_practice_config')
               .upsert({
                 user_id: userId,
                 setup_fee_paid: true,
-              } as any, { onConflict: 'user_id' });
+              }, { onConflict: 'user_id' });
 
             // Discord notification
             if (process.env.DISCORD_WEBHOOK_URL) {
