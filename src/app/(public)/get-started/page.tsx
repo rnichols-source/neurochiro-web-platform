@@ -3,11 +3,9 @@
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
-import { CheckCircle2, Loader2, ShieldCheck, Users, BarChart3, Briefcase, Award, Zap } from "lucide-react";
+import { CheckCircle2, Loader2, Check, Shield, Users, BarChart3, MessageSquare, Briefcase, Calendar, Star, Zap } from "lucide-react";
 import { createFreeAccount } from "./actions";
 import { createClient } from "@/lib/supabase";
-import NetworkStats from "@/components/common/NetworkStats";
 
 type Role = "doctor" | "student";
 
@@ -37,18 +35,15 @@ function GetStartedInner() {
     const result = await createFreeAccount({ name, email, password, role });
     if (result.error) { setError(result.error); setLoading(false); return; }
 
-    // Auto-login with the credentials they just created
     const supabase = createClient();
     const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password });
 
     if (loginErr) {
-      // Fallback — show success with login link
       setSuccess(true);
       setLoading(false);
       return;
     }
 
-    // Redirect straight to onboarding (doctors) or dashboard (students)
     if (role === "doctor") {
       window.location.href = "/doctor/onboarding";
     } else {
@@ -62,19 +57,66 @@ function GetStartedInner() {
         <div className="max-w-md w-full text-center">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-xl p-10">
             <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-heading font-black text-neuro-navy mb-2">You&apos;re In!</h1>
-            <p className="text-gray-500 mb-6">Your account is ready. Log in to {role === "doctor" ? "set up your profile and start getting found by patients" : "explore jobs and start building your career"}.</p>
+            <h1 className="text-2xl font-heading font-black text-neuro-navy mb-2">Your 7-Day Trial Has Started!</h1>
+            <p className="text-gray-500 mb-4">
+              {role === "doctor"
+                ? "You have full access to everything in NeuroChiro Pro for the next 7 days. Set up your profile and start getting found by patients."
+                : "You have full access to Student Premium for 7 days. Explore jobs, the Academy, and start building your career."}
+            </p>
+
+            {role === "doctor" && (
+              <div className="bg-neuro-cream rounded-xl p-4 mb-6 text-left">
+                <p className="text-xs font-bold text-neuro-orange uppercase tracking-widest mb-3">What You Get During Your Trial</p>
+                <div className="space-y-2">
+                  {[
+                    "Directory listing (patients find you immediately)",
+                    "Full profile with analytics",
+                    "Patient messaging",
+                    "Job postings + ChiroMatch",
+                    "Seminar hosting",
+                    "Spotlight interview eligibility",
+                    "Everything in NeuroChiro Pro",
+                  ].map((f, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <Check className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+                      <span className="text-xs text-gray-600">{f}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <Link
               href="/login"
               className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors"
             >
-              Log In Now
+              Log In & Set Up Your Profile
             </Link>
           </div>
         </div>
       </div>
     );
   }
+
+  const doctorFeatures = [
+    { icon: Users, label: "Listed in global directory" },
+    { icon: Shield, label: "Verified badge" },
+    { icon: BarChart3, label: "Patient analytics" },
+    { icon: MessageSquare, label: "Patient messaging" },
+    { icon: Briefcase, label: "Job postings" },
+    { icon: Calendar, label: "Seminar hosting" },
+    { icon: Star, label: "Spotlight eligibility" },
+    { icon: Zap, label: "Weekly growth report" },
+  ];
+
+  const studentFeatures = [
+    { icon: Briefcase, label: "Browse & apply to jobs" },
+    { icon: Star, label: "Full Academy access" },
+    { icon: Users, label: "ChiroMatch matching" },
+    { icon: Shield, label: "Interview Prep" },
+    { icon: BarChart3, label: "Financial Planner" },
+    { icon: Zap, label: "Techniques Library" },
+  ];
 
   return (
     <div className="min-h-dvh bg-neuro-cream pt-24 pb-20">
@@ -105,69 +147,57 @@ function GetStartedInner() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-heading font-black text-neuro-navy mb-2">Get Listed Free</h1>
-          <p className="text-gray-500"><NetworkStats format="full-sentence" />. Your profile is live in 60 seconds.</p>
+          <h1 className="text-3xl font-heading font-black text-neuro-navy mb-2">
+            {role === "doctor" ? "Start Your 7-Day Pro Trial" : "Start Your Student Trial"}
+          </h1>
+          <p className="text-gray-500">
+            {role === "doctor"
+              ? "Full access to everything. No credit card required."
+              : "Explore jobs, Academy, and career tools. No credit card required."}
+          </p>
         </div>
 
-        {/* What you get */}
+        {/* What you get during trial */}
         <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Free includes</p>
+          <p className="text-xs font-bold text-neuro-orange uppercase tracking-widest mb-3">
+            {role === "doctor" ? "Your 7-Day Trial Includes" : "Student Trial Includes"}
+          </p>
           <div className="grid grid-cols-2 gap-2">
-            {[
-              { icon: ShieldCheck, label: "Directory listing" },
-              { icon: Users, label: "Public profile" },
-              { icon: BarChart3, label: "View count" },
-              { icon: Briefcase, label: "Post 1 job" },
-              { icon: Award, label: "Verified badge" },
-              { icon: Zap, label: "Instagram highlights" },
-            ].map((f, i) => (
+            {(role === "doctor" ? doctorFeatures : studentFeatures).map((f, i) => (
               <div key={i} className="flex items-center gap-2 text-sm">
                 <f.icon className="w-4 h-4 text-neuro-orange shrink-0" />
                 <span className="text-gray-600">{f.label}</span>
               </div>
             ))}
           </div>
+          <p className="text-xs text-gray-400 mt-3">
+            {role === "doctor" ? "After 7 days: $49/mo or $490/yr. Cancel anytime." : "After 7 days: $12/mo or $120/yr. Cancel anytime."}
+          </p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border-2 border-neuro-orange p-8 shadow-lg space-y-4">
           {/* Role selector */}
           <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setRole("doctor")}
-              className={`py-3 rounded-xl text-sm font-bold transition-all border-2 ${
-                role === "doctor" ? "bg-neuro-orange text-white border-neuro-orange" : "bg-white text-gray-500 border-gray-200"
-              }`}
-            >
+            <button type="button" onClick={() => setRole("doctor")}
+              className={`py-3 rounded-xl text-sm font-bold transition-all border-2 ${role === "doctor" ? "bg-neuro-orange text-white border-neuro-orange" : "bg-white text-gray-500 border-gray-200"}`}>
               🩺 Doctor
             </button>
-            <button
-              type="button"
-              onClick={() => setRole("student")}
-              className={`py-3 rounded-xl text-sm font-bold transition-all border-2 ${
-                role === "student" ? "bg-neuro-orange text-white border-neuro-orange" : "bg-white text-gray-500 border-gray-200"
-              }`}
-            >
+            <button type="button" onClick={() => setRole("student")}
+              className={`py-3 rounded-xl text-sm font-bold transition-all border-2 ${role === "student" ? "bg-neuro-orange text-white border-neuro-orange" : "bg-white text-gray-500 border-gray-200"}`}>
               🎓 Student
             </button>
           </div>
 
-          <input
-            type="text" required value={name} onChange={(e) => setName(e.target.value)}
+          <input type="text" required value={name} onChange={(e) => setName(e.target.value)}
             placeholder="Full name"
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange"
-          />
-          <input
-            type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange" />
+          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
             placeholder="Email address"
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange"
-          />
-          <input
-            type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange" />
+          <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
             placeholder="Create password (6+ characters)"
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange"
-          />
+            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange" />
 
           {/* Honeypot */}
           <div className="absolute -left-[9999px]" aria-hidden="true">
@@ -176,17 +206,14 @@ function GetStartedInner() {
 
           {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors disabled:opacity-50"
-          >
+          <button type="submit" disabled={loading}
+            className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors disabled:opacity-50">
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
-            {loading ? "Creating account..." : "Get Started — Free"}
+            {loading ? "Creating account..." : "Start My Free Trial"}
           </button>
 
           <p className="text-center text-xs text-gray-400">
-            No credit card required. Upgrade anytime.
+            No credit card required. Full {role === "doctor" ? "Pro" : "Premium"} access for 7 days.
           </p>
         </form>
 
@@ -195,13 +222,6 @@ function GetStartedInner() {
           Already a member?{" "}
           <Link href="/login" className="text-neuro-orange font-bold hover:underline">Log in</Link>
         </p>
-
-        {/* Upgrade later */}
-        <div className="mt-6 bg-neuro-navy rounded-2xl p-5 text-center">
-          <p className="text-white font-bold text-sm mb-1">Want more features?</p>
-          <p className="text-gray-400 text-xs mb-3">Upgrade to Pro ($49/mo) anytime from your dashboard.</p>
-          <Link href="/pricing" className="text-neuro-orange text-xs font-bold hover:underline">Compare Plans →</Link>
-        </div>
       </div>
     </div>
   );
