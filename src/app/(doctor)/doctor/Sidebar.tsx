@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
-  MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, Library, FileCheck, TrendingUp, Activity, Presentation, Receipt, DollarSign, Target, ChevronDown,
-  ShieldCheck, Lock, ShoppingBag, Shuffle, Award, Users, Cpu, Wrench,
+  MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, TrendingUp, Activity, Receipt, DollarSign, Target, ChevronDown,
+  Lock, ShoppingBag, Shuffle, Award, Users,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,15 +17,10 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
-const navSections = [
-  {
-    label: "NEUROS",
-    items: [
-      { name: "NeurOS Home", href: "/doctor/neuros", icon: Cpu, tier: "neuros" as const },
-      { name: "Care Plan Closer", href: "/doctor/neuros/care-plan", icon: Calculator, tier: "neuros" as const },
-      { name: "Practice Setup", href: "/doctor/neuros/onboarding", icon: Wrench, tier: "neuros" as const },
-    ],
-  },
+// Cutoff date: doctors created before this get practice tools in sidebar
+const LEGACY_CUTOFF = "2026-07-15T00:00:00Z";
+
+const coreNavSections = [
   {
     label: "PRACTICE",
     items: [
@@ -40,17 +35,6 @@ const navSections = [
     label: "PATIENTS",
     items: [
       { name: "Patient Leads", href: "/doctor/leads", icon: Target, tier: "pro" as const },
-      { name: "Care Plan", href: "/doctor/care-plan", icon: Calculator, tier: "pro" as const },
-      { name: "Scan Reports", href: "/doctor/scan-report", icon: Activity, tier: "pro" as const },
-    ],
-  },
-  {
-    label: "TOOLS",
-    items: [
-      { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp, tier: "pro" as const },
-      { name: "P&L Analyzer", href: "/doctor/pl-analyzer", icon: DollarSign, tier: "pro" as const },
-      { name: "Content Library", href: "/doctor/content-library", icon: Library, tier: "pro" as const },
-      { name: "Billing Guide", href: "/doctor/billing-guide", icon: Receipt },
     ],
   },
   {
@@ -58,13 +42,8 @@ const navSections = [
     items: [
       { name: "Jobs & Hiring", href: "/doctor/jobs", icon: Briefcase },
       { name: "ChiroMatch", href: "/doctor/chiromatch", icon: Shuffle, tier: "pro" as const },
-      { name: "Workshops", href: "/doctor/workshops", icon: Presentation, tier: "pro" as const },
-      { name: "Screenings", href: "/doctor/screenings", icon: Target, tier: "pro" as const },
-      { name: "Command Center", href: "/account/command-center", icon: Target, tier: "pro" as const },
-      { name: "Contracts", href: "/doctor/contracts", icon: FileCheck, tier: "pro" as const },
       { name: "Students", href: "/doctor/students", icon: GraduationCap, tier: "pro" as const },
       { name: "Seminars", href: "/doctor/seminars", icon: Calendar },
-      { name: "CE Tracker", href: "/doctor/ce-tracker", icon: Award, tier: "pro" as const },
       { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
     ],
   },
@@ -72,13 +51,26 @@ const navSections = [
     label: "ACCOUNT",
     items: [
       { name: "Analytics", href: "/doctor/analytics", icon: BarChart3, tier: "pro" as const },
-      { name: "Achievements", href: "/doctor/badges", icon: Award },
       { name: "Settings", href: "/doctor/settings", icon: Settings },
       { name: "Billing", href: "/doctor/billing", icon: CreditCard },
       { name: "Help & Support", href: "/contact", icon: MessageSquare },
     ],
   },
 ];
+
+// Practice tools only shown to legacy Pro doctors (created before cutoff)
+const practiceToolsSection = {
+  label: "PRACTICE TOOLS",
+  sublabel: "Included with your membership",
+  items: [
+    { name: "Care Plan", href: "/doctor/care-plan", icon: Calculator, tier: "pro" as const },
+    { name: "Scan Reports", href: "/doctor/scan-report", icon: Activity, tier: "pro" as const },
+    { name: "KPI Tracker", href: "/doctor/kpi", icon: TrendingUp, tier: "pro" as const },
+    { name: "P&L Analyzer", href: "/doctor/pl-analyzer", icon: DollarSign, tier: "pro" as const },
+    { name: "CE Tracker", href: "/doctor/ce-tracker", icon: Award, tier: "pro" as const },
+    { name: "Billing Guide", href: "/doctor/billing-guide", icon: Receipt },
+  ],
+};
 
 // free/basic/starter/standard = 0 (free tier), growth/pro = 1 (paid), neuros = 2 (practice OS)
 const TIER_LEVELS: Record<string, number> = { free: 0, standard: 0, basic: 0, starter: 0, growth: 1, pro: 1, neuros: 2 };
@@ -89,6 +81,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [userName, setUserName] = useState<string | null>(null);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [memberTier, setMemberTier] = useState<string>("basic");
+  const [showPracticeTools, setShowPracticeTools] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -99,8 +92,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         supabase.from("notifications").select("*", { count: "exact", head: true })
           .eq("user_id", user.id).is("read_at", null)
           .then(({ count }) => setUnreadNotifs(count || 0));
-        // Try doctors table first, fall back to profiles.tier
-        supabase.from("doctors").select("membership_tier, is_founding_member, neuros_tier").eq("user_id", user.id).single()
+        supabase.from("doctors").select("membership_tier, is_founding_member, neuros_tier, created_at").eq("user_id", user.id).single()
           .then(({ data }: any) => {
             if (data?.neuros_tier === 'neuros' || data?.neuros_tier === 'neuros_founding') {
               setMemberTier("neuros");
@@ -109,17 +101,26 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             } else if (data?.membership_tier) {
               setMemberTier(data.membership_tier);
             } else {
-              // Fallback: read tier from profiles table
               supabase.from("profiles").select("tier").eq("id", user.id).single()
                 .then(({ data: p }) => {
                   const t = p?.tier || "basic";
                   setMemberTier(t === "standard" ? "basic" : t);
                 });
             }
+
+            // Show practice tools for legacy Pro doctors or founding members
+            const isLegacy = data?.created_at && new Date(data.created_at) < new Date(LEGACY_CUTOFF);
+            const isPro = data?.membership_tier === "pro" || data?.is_founding_member;
+            setShowPracticeTools((isLegacy && isPro) || data?.is_founding_member);
           });
       }
     });
   }, []);
+
+  // Build nav sections dynamically
+  const navSections = showPracticeTools
+    ? [...coreNavSections.slice(0, 2), practiceToolsSection, ...coreNavSections.slice(2)]
+    : coreNavSections;
 
   const handleLogout = async () => {
     if (!confirm("Are you sure you want to log out?")) return;
@@ -144,8 +145,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   };
 
   // All sections always expanded
-  const allSectionLabels = navSections.map(s => s.label);
-  const [openSections] = useState<string[]>(allSectionLabels);
+  const openSections = navSections.map(s => s.label);
 
   const Content = (
     <div className="flex flex-col h-full bg-neuro-navy">
@@ -183,6 +183,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 }`}>
                   {section.label}
                 </span>
+                {(section as any).sublabel && (
+                  <span className="text-[8px] text-gray-600 block mt-0.5">{(section as any).sublabel}</span>
+                )}
               </div>
               <AnimatePresence initial={false}>
                 {isOpen2 && (
