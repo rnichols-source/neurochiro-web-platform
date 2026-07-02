@@ -1,121 +1,67 @@
 "use client";
 
-import { Check, X, Star } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default function StudentPricing() {
-  const tiers = [
-    {
-      name: "Free",
-      price: "0",
-      period: "forever",
-      description: "Start exploring and building your career.",
-      cta: "Get Started Free",
-      ctaLink: "/get-started",
-      highlight: false,
-      features: [
-        { text: "Student profile", included: true },
-        { text: "Browse job listings", included: true },
-        { text: "Browse seminars", included: true },
-        { text: "Basic ChiroScore", included: true },
-        { text: "Browse doctor directory", included: true },
-        { text: "ChiroMatch participation", included: false },
-        { text: "Academy courses", included: false },
-        { text: "Contract Lab", included: false },
-        { text: "Financial Planner", included: false },
-        { text: "Messaging", included: false },
-      ],
-    },
-    {
-      name: "Premium",
-      price: "12",
-      period: "/mo",
-      description: "Everything you need to launch your career.",
-      cta: "Go Premium",
-      ctaLink: "/get-started",
-      highlight: true,
-      badge: "Best Value",
-      features: [
-        { text: "Everything in Free", included: true },
-        { text: "Full ChiroMatch — get matched with top practices", included: true },
-        { text: "Academy courses (6 courses, 28 modules)", included: true },
-        { text: "Contract Lab — AI contract review", included: true },
-        { text: "Financial Planner — salary modeling", included: true },
-        { text: "Interview Prep — 100+ real questions", included: true },
-        { text: "Full ChiroScore (7 categories)", included: true },
-        { text: "Techniques Library (18 techniques)", included: true },
-        { text: "CE credit tracker + certificates", included: true },
-        { text: "Direct messaging with doctors", included: true },
-      ],
-    },
+  const features = [
+    "Browse and apply to job listings",
+    "ChiroMatch (residency-style matching with top practices)",
+    "Academy courses (6 courses, 28 modules)",
+    "Interview Prep (100+ real questions with frameworks)",
+    "Contract Lab (AI-powered contract review)",
+    "Financial Planner (salary modeling, loans, budgeting)",
+    "Full ChiroScore (7 categories, career readiness rating)",
+    "Techniques Library (18 techniques with video)",
+    "CE credit tracker + certificates",
+    "Direct messaging with doctors and mentors",
+    "Student profile visible to hiring practices",
   ];
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="text-center mb-12">
+    <div className="max-w-xl mx-auto">
+      <div className="text-center mb-10">
         <h1 className="text-4xl md:text-5xl font-heading font-black text-neuro-navy uppercase tracking-tight">
-          Student <span className="text-neuro-orange">Plans.</span>
+          Launch Your <span className="text-neuro-orange">Career.</span>
         </h1>
         <p className="text-gray-500 mt-3 max-w-lg mx-auto">
-          Start free. Upgrade to Premium when you&apos;re ready to launch your career.
+          Everything you need to land your first associate position. One plan. Everything included.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-        {tiers.map((tier) => (
-          <div
-            key={tier.name}
-            className={`relative bg-white rounded-2xl border-2 p-8 flex flex-col ${
-              tier.highlight ? "border-neuro-orange shadow-2xl shadow-neuro-orange/10" : "border-gray-100"
-            }`}
-          >
-            {tier.badge && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-neuro-orange text-white text-[10px] font-black uppercase tracking-widest rounded-full flex items-center gap-1">
-                <Star className="w-3 h-3 fill-white" /> {tier.badge}
-              </span>
-            )}
+      {/* Single pricing card */}
+      <div className="bg-white rounded-3xl border-2 border-neuro-orange shadow-2xl shadow-neuro-orange/10 p-10 relative overflow-hidden">
+        <span className="absolute -top-0 left-1/2 -translate-x-1/2 px-5 py-1.5 bg-neuro-orange text-white text-[10px] font-black uppercase tracking-widest rounded-b-xl">
+          Student Premium
+        </span>
 
-            <div className="mb-6">
-              <h2 className="text-xl font-heading font-black text-neuro-navy">{tier.name}</h2>
-              <p className="text-gray-400 text-sm mt-1">{tier.description}</p>
+        <div className="text-center mt-4 mb-8">
+          <div className="text-6xl font-black text-neuro-navy">$12<span className="text-lg font-bold text-gray-400">/mo</span></div>
+          <p className="text-sm text-neuro-orange font-bold mt-1">$120/yr billed annually. Save $24.</p>
+        </div>
+
+        <div className="space-y-3 mb-8">
+          {features.map((f, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                <Check className="w-3 h-3 text-green-600" />
+              </div>
+              <span className="text-sm text-gray-700 leading-relaxed">{f}</span>
             </div>
+          ))}
+        </div>
 
-            <div className="mb-6">
-              <span className="text-4xl font-black text-neuro-navy">${tier.price}</span>
-              <span className="text-gray-400 text-sm font-bold">{tier.period}</span>
-            </div>
-
-            <div className="space-y-3 flex-1 mb-8">
-              {tier.features.map((f, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  {f.included ? (
-                    <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                  ) : (
-                    <X className="w-4 h-4 text-gray-300 shrink-0 mt-0.5" />
-                  )}
-                  <span className={`text-sm ${f.included ? "text-gray-700" : "text-gray-400"}`}>{f.text}</span>
-                </div>
-              ))}
-            </div>
-
-            <Link
-              href={tier.ctaLink}
-              className={`w-full py-4 font-bold rounded-xl text-center text-sm transition-all block ${
-                tier.highlight
-                  ? "bg-neuro-orange text-white hover:bg-neuro-orange/90 shadow-lg shadow-neuro-orange/20"
-                  : "bg-neuro-navy text-white hover:bg-neuro-navy-light"
-              }`}
-            >
-              {tier.cta}
-            </Link>
-          </div>
-        ))}
+        <Link
+          href="/get-started?role=student"
+          className="w-full py-4 bg-neuro-orange text-white font-black rounded-xl text-center text-sm uppercase tracking-wider hover:bg-neuro-orange/90 shadow-lg shadow-neuro-orange/20 transition-all flex items-center justify-center gap-2 block"
+        >
+          Start Your 7-Day Trial <ArrowRight className="w-4 h-4" />
+        </Link>
+        <p className="text-center text-xs text-gray-400 mt-3">No credit card required. Cancel anytime.</p>
       </div>
 
-      <div className="text-center">
-        <p className="text-xs text-gray-400">
-          No contracts. Cancel anytime. 30-day money-back guarantee.
-        </p>
+      <div className="text-center mt-8">
+        <p className="text-sm text-gray-500 font-bold">Graduate with a job offer, not just a degree.</p>
       </div>
     </div>
   );
