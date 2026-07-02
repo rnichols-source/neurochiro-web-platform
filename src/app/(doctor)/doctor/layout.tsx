@@ -159,23 +159,24 @@ export default function DoctorLayout({
         <main className="flex-1 overflow-y-auto relative scroll-smooth bg-[#0F1A24] pb-24 md:pb-0">
           {/* Upgrade banner for free tier */}
           {tierInfo && !tierInfo.isFounder && tierInfo.tier !== 'pro' && tierInfo.tier !== 'growth' && (
-            <div className="bg-gradient-to-r from-neuro-orange/20 to-neuro-orange/10 border-b border-neuro-orange/20 px-6 py-3 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-red-600/20 to-neuro-orange/20 border-b border-red-500/30 px-6 py-3 flex items-center justify-between">
               <p className="text-sm text-white/90 font-medium">
                 {tierInfo.trialEndsAt && new Date(tierInfo.trialEndsAt) > new Date() ? (
                   <>
                     <span className="font-black text-neuro-orange">Pro Trial Active:</span>{' '}
-                    {Math.ceil((new Date(tierInfo.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left — your contact info is visible to patients.{' '}
-                    <span className="text-white/70">Upgrade to keep it after the trial.</span>
+                    {Math.ceil((new Date(tierInfo.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left.{' '}
+                    <span className="text-white/70">Activate Pro to stay in the directory after your trial.</span>
                   </>
                 ) : (
                   <>
-                    <span className="text-white/70">Patients can&apos;t reach you yet.</span>{' '}
-                    Upgrade to Pro — $49/mo
+                    <span className="font-black text-red-400">Action Required:</span>{' '}
+                    Your profile will be removed from the directory on August 1.{' '}
+                    <span className="text-white/70">Activate Pro ($49/mo) to stay listed and visible to patients.</span>
                   </>
                 )}
               </p>
               <Link href="/doctor/billing" className="px-4 py-1.5 bg-neuro-orange text-white text-xs font-black rounded-lg hover:bg-neuro-orange/90 transition-colors whitespace-nowrap">
-                Upgrade
+                Activate Pro
               </Link>
             </div>
           )}
