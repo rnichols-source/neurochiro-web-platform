@@ -42,6 +42,7 @@
     "directory-app",
     "scripts",
     "tests",
-    "e2e"
+    "e2e",
+    "Projects"
   ]
 }
