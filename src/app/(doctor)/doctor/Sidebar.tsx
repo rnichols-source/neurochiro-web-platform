@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
   MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, TrendingUp, Activity, Receipt, DollarSign, Target, ChevronDown,
-  Lock, ShoppingBag, Shuffle, Award, Users,
+  Lock, ShoppingBag, Shuffle, Award, Users, ShieldCheck,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
