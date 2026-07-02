@@ -53,22 +53,51 @@ export default function DoctorBilling() {
     );
   }
 
+  const handleActivatePro = async (cycle: "monthly" | "annual") => {
+    setIsPortalLoading(true);
+    try {
+      const res = await fetch("/api/stripe/upgrade-to-pro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cycle }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else alert("Unable to start checkout. Please try again or contact support.");
+    } catch {
+      alert("An error occurred. Please try again.");
+    } finally {
+      setIsPortalLoading(false);
+    }
+  };
+
   if (!billingData || billingData.noCustomer) {
     return (
       <div className="space-y-8">
         <h1 className="text-2xl font-black text-neuro-navy">Billing</h1>
         <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
-          <CreditCard className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-          <p className="text-lg font-bold text-neuro-navy mb-2">No active subscription</p>
-          <p className="text-sm text-gray-500 mb-6">
-            You are on the <span className="font-bold capitalize">{billingData?.tier || "basic"}</span> tier.
-          </p>
-          <Link
-            href="/pricing/doctors"
-            className="inline-block px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm hover:bg-neuro-orange-light transition-colors"
-          >
-            Upgrade to Pro
-          </Link>
+          <CreditCard className="w-10 h-10 text-neuro-orange mx-auto mb-4" />
+          <p className="text-lg font-bold text-neuro-navy mb-2">Activate NeuroChiro Pro</p>
+          <p className="text-sm text-gray-500 mb-2">Get found by patients. Full profile, analytics, messaging, Spotlight eligibility.</p>
+          <p className="text-3xl font-black text-neuro-navy mt-4 mb-1">$49<span className="text-sm font-bold text-gray-400">/mo</span></p>
+          <p className="text-xs text-gray-400 mb-6">or $490/yr (save $98). Cancel anytime.</p>
+          <div className="flex flex-col gap-3 max-w-xs mx-auto">
+            <button
+              onClick={() => handleActivatePro("monthly")}
+              disabled={isPortalLoading}
+              className="w-full px-6 py-4 bg-neuro-orange text-white font-black rounded-xl text-sm hover:bg-neuro-orange/90 transition-colors disabled:opacity-50 uppercase tracking-wider"
+            >
+              {isPortalLoading ? "Redirecting..." : "Activate Pro — $49/mo"}
+            </button>
+            <button
+              onClick={() => handleActivatePro("annual")}
+              disabled={isPortalLoading}
+              className="w-full px-6 py-3 bg-neuro-navy text-white font-bold rounded-xl text-sm hover:bg-neuro-navy/90 transition-colors disabled:opacity-50"
+            >
+              Annual — $490/yr (Save $98)
+            </button>
+          </div>
+          <p className="text-xs text-gray-400 mt-4">Your profile will be removed from the directory on August 1 without an active Pro membership.</p>
         </div>
       </div>
     );
