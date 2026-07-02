@@ -254,7 +254,7 @@ function getDoctorEmail(step: number, name: string): { subject: string; body: st
             <li><strong>Seminar hosting</strong> — list your CE events and reach chiropractors globally</li>
             <li><strong>Practice tools</strong> — KPI tracker, care plan builder, P&L analyzer</li>
           </ul>
-          <p>Free to join. Pro is $49/mo to unlock everything.</p>
+          <p>Start with a 7-day free trial. Pro is $49/mo after that.</p>
           <p style="margin: 24px 0;">
             <a href="https://neurochiro.co/why-neurochiro" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">See What's Included</a>
           </p>
@@ -331,7 +331,7 @@ function getStudentEmail(step: number, name: string): { subject: string; body: s
             <li><strong>Financial Planner</strong> — model your salary, student loans, and first-year budget</li>
             <li><strong>Technique Explorer</strong> — compare 18 techniques to find your fit</li>
           </ul>
-          <p>Free to join. Premium features from $12/mo.</p>
+          <p>Start with a free trial. Premium is $12/mo.</p>
           <p style="margin: 24px 0;">
             <a href="https://neurochiro.co/careers" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Browse Open Positions</a>
           </p>

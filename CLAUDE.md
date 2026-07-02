@@ -43,10 +43,10 @@ npx next build       # Production build
 - `notifications` table — in-app notifications
 - `automation_queue` table — async jobs (geocoding, etc.)
 
-## Pricing
-- Doctor Basic: $49/mo ($490/yr)
-- Doctor Growth: $69/mo ($708/yr)
-- Doctor Pro: $129/mo ($1,308/yr)
+## Pricing (Updated July 2026)
+- Doctor Pro: $49/mo ($490/yr) — ONE tier, everything included, 7-day trial
+- NO free tier for claimed profiles. NO Growth tier. NO $69/$129.
+- Unclaimed profiles visible with masked contact info, "Claim" CTA leads to $49/mo signup
 - Student: $12/mo ($120/yr) — one tier, everything included
 - Patient: Free
 - Vendors: Tiered (basic, professional, featured partner)
