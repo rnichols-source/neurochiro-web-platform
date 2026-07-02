@@ -153,6 +153,39 @@ export async function createAccountAction(formData: FormData, role: string, tier
   if (data?.user) {
     Automations.onSignup(data.user.id, email, name, role, phone);
 
+    // Create doctors row with is_approved = false (approval gate)
+    if (role === 'doctor') {
+      const { createAdminClient } = await import('@/lib/supabase-admin');
+      const adminDb = createAdminClient();
+      const nameParts = name?.split(' ') || [''];
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      const slug = (name || 'doctor').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
+
+      // Only create if no doctors row exists yet
+      const { data: existingDoc } = await adminDb.from('doctors').select('id').eq('user_id', data.user.id).maybeSingle();
+      if (!existingDoc) {
+        await adminDb.from('doctors').insert({
+          user_id: data.user.id,
+          first_name: firstName,
+          last_name: lastName,
+          slug,
+          email,
+          clinic_name: '',
+          city: '',
+          state: '',
+          country: 'US',
+          address: '',
+          bio: '',
+          specialties: [],
+          verification_status: 'pending',
+          membership_tier: 'free',
+          region_code: 'US',
+          is_approved: false,
+        } as any);
+      }
+    }
+
     // Day 0 welcome email for doctors — nudge to complete profile
     if (role === 'doctor' && email) {
       try {
