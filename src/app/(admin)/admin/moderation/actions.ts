@@ -127,9 +127,7 @@ export async function moderateDoctor(doctorId: string, action: 'approve' | 'reje
       verification_status: statusMap[action]
     };
 
-    // Audit requirement: Update verification_date (verified_at) if approved
     if (action === 'approve') {
-      updateData.verified_at = new Date().toISOString();
       updateData.is_approved = true;
     }
 
