@@ -61,6 +61,7 @@ export async function createFreeAccount(data: {
         membership_tier: 'free',
         region_code: 'US',
         is_approved: false,
+        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       } as any);
     }
 
