@@ -80,6 +80,10 @@
     {
       "path": "/api/cron/free-to-paid",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/monthly-growth-report",
+      "schedule": "0 12 1 * *"
     }
   ]
 }
