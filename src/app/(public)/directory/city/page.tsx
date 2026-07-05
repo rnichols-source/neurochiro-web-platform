@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MapPin, ArrowRight } from "lucide-react";
-import { createServerSupabase } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 
 export const metadata = {
   title: "Find Nervous System Chiropractors by City | NeuroChiro",
@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 async function getCitiesWithDoctors() {
-  const supabase = createServerSupabase();
+  const supabase = createAdminClient();
   const { data } = await supabase
     .from("doctors")
     .select("city, state")

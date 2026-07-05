@@ -1,9 +1,9 @@
 "use server";
 
-import { createServerSupabase } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 
 export async function getDoctorsByLocation(city: string, state: string) {
-  const supabase = createServerSupabase();
+  const supabase = createAdminClient();
 
   const decodedCity = decodeURIComponent(city).replace(/-/g, " ");
   const decodedState = decodeURIComponent(state).replace(/-/g, " ");
@@ -20,7 +20,7 @@ export async function getDoctorsByLocation(city: string, state: string) {
 }
 
 export async function getDoctorsByState(state: string) {
-  const supabase = createServerSupabase();
+  const supabase = createAdminClient();
 
   const decodedState = decodeURIComponent(state).replace(/-/g, " ");
 
@@ -35,7 +35,7 @@ export async function getDoctorsByState(state: string) {
 }
 
 export async function getCityStats(city: string, state: string) {
-  const supabase = createServerSupabase();
+  const supabase = createAdminClient();
 
   const decodedCity = decodeURIComponent(city).replace(/-/g, " ");
   const decodedState = decodeURIComponent(state).replace(/-/g, " ");
