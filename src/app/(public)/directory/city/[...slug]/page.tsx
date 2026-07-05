@@ -29,21 +29,31 @@ function titleCase(str: string): string {
 }
 
 function parseSlug(slug: string[]): { city: string | null; state: string } {
-  if (slug.length === 1) {
-    // Just state: /directory/city/texas
-    const raw = slug[0].toLowerCase();
-    return { city: null, state: STATE_NAMES[raw] || titleCase(raw) };
-  }
-  // City + State: /directory/city/austin-texas
   const combined = slug.join("-").toLowerCase();
-  // Try to find a state at the end
-  for (const [key, name] of Object.entries(STATE_NAMES)) {
-    if (combined.endsWith(`-${key}`) || combined.endsWith(`-${name.toLowerCase().replace(/ /g, "-")}`)) {
-      const stateStr = name;
-      const cityStr = combined.replace(new RegExp(`-?${key}$|-?${name.toLowerCase().replace(/ /g, "-")}$`), "");
-      return { city: titleCase(cityStr), state: stateStr };
+
+  // First: check if the entire slug is a known state name (e.g., "texas", "new-york")
+  if (STATE_NAMES[combined]) {
+    return { city: null, state: STATE_NAMES[combined] };
+  }
+
+  // Second: try to find a state name at the END of the slug
+  // Sort by length descending so "north-carolina" matches before "carolina"
+  const stateEntries = Object.entries(STATE_NAMES).sort((a, b) => b[0].length - a[0].length);
+  for (const [key, name] of stateEntries) {
+    const stateSlug = key.replace(/ /g, "-");
+    if (combined.endsWith(`-${stateSlug}`)) {
+      const cityPart = combined.slice(0, -(stateSlug.length + 1));
+      if (cityPart) {
+        return { city: titleCase(cityPart), state: name };
+      }
     }
   }
+
+  // Third: if single segment with no state match, treat as state
+  if (slug.length === 1) {
+    return { city: null, state: titleCase(slug[0]) };
+  }
+
   // Fallback: last segment is state, rest is city
   const state = titleCase(slug[slug.length - 1]);
   const city = slug.slice(0, -1).map(s => titleCase(s)).join(" ");
