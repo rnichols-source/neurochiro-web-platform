@@ -280,8 +280,8 @@ function DonutChart({
             onClick={() => onSegmentClick(seg.label)}
             className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full border transition-all ${
               selectedSegment === seg.label
-                ? "border-[#1a2744] bg-slate-50 font-bold"
-                : "border-slate-200"
+                ? "border-[#1a2744] bg-white/[0.04] font-bold"
+                : "border-white/[0.1]"
             }`}
           >
             <span
@@ -797,19 +797,19 @@ function PLAnalyzerContent() {
     if (checkingPurchase) {
       return (
         <div className="flex items-center justify-center py-20">
-          <div className="text-slate-400 text-sm">Checking access...</div>
+          <div className="text-gray-400 text-sm">Checking access...</div>
         </div>
       );
     }
     if (!isPurchased) {
       return (
         <div className="relative">
-          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-xl">
+          <div className="absolute inset-0 bg-white/[0.06]/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-xl">
             <Lock className="w-10 h-10 text-slate-300 mb-4" />
-            <h3 className="text-lg font-bold text-[#1a2744] mb-2">
+            <h3 className="text-lg font-bold text-white mb-2">
               Unlock P&L Intelligence
             </h3>
-            <p className="text-slate-500 text-sm mb-4 text-center max-w-xs">
+            <p className="text-gray-400 text-sm mb-4 text-center max-w-xs">
               Get health scoring, gap analysis, coaching notes, trend tracking, and print-ready reports.
             </p>
             <button
@@ -843,26 +843,26 @@ function PLAnalyzerContent() {
       <div>
         {/* Summary bar */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <div className="text-[11px] text-slate-500 font-semibold uppercase mb-1">
+          <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-4">
+            <div className="text-[11px] text-gray-400 font-semibold uppercase mb-1">
               Total Income
             </div>
             <div className="text-xl font-extrabold text-green-600">{fmtMoney(totalIncome)}</div>
           </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <div className="text-[11px] text-slate-500 font-semibold uppercase mb-1">
+          <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-4">
+            <div className="text-[11px] text-gray-400 font-semibold uppercase mb-1">
               Gross Profit
             </div>
             <div className="text-xl font-extrabold text-blue-600">{fmtMoney(grossProfit)}</div>
           </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <div className="text-[11px] text-slate-500 font-semibold uppercase mb-1">
+          <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-4">
+            <div className="text-[11px] text-gray-400 font-semibold uppercase mb-1">
               Total Expenses
             </div>
             <div className="text-xl font-extrabold text-red-500">{fmtMoney(totalExpenses)}</div>
           </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <div className="text-[11px] text-slate-500 font-semibold uppercase mb-1">
+          <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-4">
+            <div className="text-[11px] text-gray-400 font-semibold uppercase mb-1">
               Net Income
             </div>
             <div
@@ -882,14 +882,14 @@ function PLAnalyzerContent() {
         <div className="flex items-center justify-center gap-4 mb-6">
           <button
             onClick={() => changeMonth(-1)}
-            className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50"
+            className="p-2 rounded-lg border border-white/[0.1] hover:bg-white/[0.04]"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-base font-bold text-[#1a2744]">{getMonthLabel(month)}</span>
+          <span className="text-base font-bold text-white">{getMonthLabel(month)}</span>
           <button
             onClick={() => changeMonth(1)}
-            className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50"
+            className="p-2 rounded-lg border border-white/[0.1] hover:bg-white/[0.04]"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -897,7 +897,7 @@ function PLAnalyzerContent() {
 
         {/* Scaling examples */}
         <div className="mb-6 no-print">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-2">
             Load Example
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
@@ -905,10 +905,10 @@ function PLAnalyzerContent() {
               <button
                 key={ex.id}
                 onClick={() => applyScalingExample(ex)}
-                className="text-left p-3 rounded-lg border border-slate-200 hover:border-[#e97325] hover:bg-orange-50 transition-all"
+                className="text-left p-3 rounded-lg border border-white/[0.1] hover:border-[#e97325] hover:bg-orange-50 transition-all"
               >
-                <div className="text-xs font-bold text-[#1a2744]">{ex.title}</div>
-                <div className="text-[11px] text-slate-500">{ex.subtitle}</div>
+                <div className="text-xs font-bold text-white">{ex.title}</div>
+                <div className="text-[11px] text-gray-400">{ex.subtitle}</div>
               </button>
             ))}
           </div>
@@ -948,25 +948,25 @@ function PLAnalyzerContent() {
                 return (
                   <div
                     key={cat.id}
-                    className="border border-slate-200 rounded-lg mb-1 overflow-hidden"
+                    className="border border-white/[0.1] rounded-lg mb-1 overflow-hidden"
                   >
                     <button
                       onClick={() => toggleCategory(cat.id)}
-                      className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors"
+                      className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/[0.04] transition-colors"
                     >
                       <div className="flex items-center gap-2">
                         {isExpanded ? (
-                          <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                          <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
                         ) : (
-                          <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                          <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
                         )}
-                        <span className="text-[11px] text-slate-400 font-mono">{cat.code}</span>
-                        <span className="text-sm font-bold text-[#1a2744]">{cat.label}</span>
+                        <span className="text-[11px] text-gray-400 font-mono">{cat.code}</span>
+                        <span className="text-sm font-bold text-white">{cat.label}</span>
                       </div>
                       <div className="flex items-center gap-4">
                         {catTotal !== 0 && (
                           <>
-                            <span className="text-sm font-semibold tabular-nums text-[#1a2744]">
+                            <span className="text-sm font-semibold tabular-nums text-white">
                               {fmtMoney(catTotal)}
                             </span>
                             {section.type !== "income" && (
@@ -983,7 +983,7 @@ function PLAnalyzerContent() {
                     </button>
 
                     {isExpanded && (
-                      <div className="border-t border-slate-100 bg-slate-50/50">
+                      <div className="border-t border-white/[0.06] bg-white/[0.04]">
                         {cat.items.map((item) => {
                           const val = values[item.id] || 0;
                           const pct = itemPct(item.id);
@@ -993,19 +993,19 @@ function PLAnalyzerContent() {
                             : "#64748b";
 
                           return (
-                            <div key={item.id} className="px-4 py-2 border-t border-slate-100">
+                            <div key={item.id} className="px-4 py-2 border-t border-white/[0.06]">
                               <div className="flex items-center gap-3">
-                                <span className="text-[11px] text-slate-400 font-mono w-8">
+                                <span className="text-[11px] text-gray-400 font-mono w-8">
                                   {item.code}
                                 </span>
-                                <span className="text-sm text-[#1a2744] flex-1">
+                                <span className="text-sm text-white flex-1">
                                   {item.label}
                                 </span>
                                 <button
                                   onClick={() =>
                                     setTooltipItem(tooltipItem === item.id ? null : item.id)
                                   }
-                                  className="text-slate-400 hover:text-[#e97325] transition-colors"
+                                  className="text-gray-400 hover:text-[#e97325] transition-colors"
                                 >
                                   <Info className="w-3.5 h-3.5" />
                                 </button>
@@ -1021,7 +1021,7 @@ function PLAnalyzerContent() {
                                       : ""
                                   }
                                   onChange={(e) => handleValue(item.id, e.target.value)}
-                                  className="w-28 text-right border border-slate-200 rounded-md px-2 py-1.5 text-sm tabular-nums bg-white focus:outline-none focus:ring-2 focus:ring-[#e97325] focus:border-transparent"
+                                  className="w-28 text-right border border-white/[0.1] rounded-md px-2 py-1.5 text-sm tabular-nums bg-white/[0.06] focus:outline-none focus:ring-2 focus:ring-[#e97325] focus:border-transparent"
                                 />
                                 {showPct && (
                                   <span
@@ -1034,7 +1034,7 @@ function PLAnalyzerContent() {
                                 {!showPct && <span className="w-12" />}
                               </div>
                               {showPct && (
-                                <div className="ml-11 mt-0.5 text-[10px] text-slate-400">
+                                <div className="ml-11 mt-0.5 text-[10px] text-gray-400">
                                   Benchmark: {item.minPct}% - {item.maxPct}%
                                 </div>
                               )}
@@ -1109,7 +1109,7 @@ function PLAnalyzerContent() {
       <PurchaseGate>
         <div>
           {!hasAnyInput && (
-            <div className="text-center py-12 text-slate-400">
+            <div className="text-center py-12 text-gray-400">
               <BarChart3 className="w-10 h-10 mx-auto mb-3 text-slate-300" />
               <p className="font-semibold">Enter your numbers in Tab 1 first</p>
               <p className="text-sm mt-1">Analysis will appear here once you have data.</p>
@@ -1119,35 +1119,35 @@ function PLAnalyzerContent() {
           {hasAnyInput && (
             <>
               {/* Health Score */}
-              <div className="bg-white border border-slate-200 rounded-xl p-6 mb-6">
-                <h3 className="text-base font-bold text-[#1a2744] mb-4 text-center">
+              <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-6 mb-6">
+                <h3 className="text-base font-bold text-white mb-4 text-center">
                   Practice Health Score
                 </h3>
                 <HealthGauge score={healthScore} size={220} />
                 <div className="grid grid-cols-4 gap-2 mt-4 text-center text-[11px]">
                   <div>
-                    <div className="font-bold text-[#1a2744]">Profit</div>
-                    <div className="text-slate-500">40 pts max</div>
+                    <div className="font-bold text-white">Profit</div>
+                    <div className="text-gray-400">40 pts max</div>
                   </div>
                   <div>
-                    <div className="font-bold text-[#1a2744]">Expenses</div>
-                    <div className="text-slate-500">30 pts max</div>
+                    <div className="font-bold text-white">Expenses</div>
+                    <div className="text-gray-400">30 pts max</div>
                   </div>
                   <div>
-                    <div className="font-bold text-[#1a2744]">Revenue Mix</div>
-                    <div className="text-slate-500">15 pts max</div>
+                    <div className="font-bold text-white">Revenue Mix</div>
+                    <div className="text-gray-400">15 pts max</div>
                   </div>
                   <div>
-                    <div className="font-bold text-[#1a2744]">COGS</div>
-                    <div className="text-slate-500">15 pts max</div>
+                    <div className="font-bold text-white">COGS</div>
+                    <div className="text-gray-400">15 pts max</div>
                   </div>
                 </div>
               </div>
 
               {/* Donut chart */}
               {donutSegments.length > 0 && (
-                <div className="bg-white border border-slate-200 rounded-xl p-6 mb-6">
-                  <h3 className="text-base font-bold text-[#1a2744] mb-4 text-center">
+                <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-6 mb-6">
+                  <h3 className="text-base font-bold text-white mb-4 text-center">
                     Expense Breakdown
                   </h3>
                   <DonutChart
@@ -1163,13 +1163,13 @@ function PLAnalyzerContent() {
               )}
 
               {/* Gap analysis grid */}
-              <div className="bg-white border border-slate-200 rounded-xl p-6 mb-6">
-                <h3 className="text-base font-bold text-[#1a2744] mb-4">Gap Analysis</h3>
+              <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-6 mb-6">
+                <h3 className="text-base font-bold text-white mb-4">Gap Analysis</h3>
                 <div className="grid gap-2">
                   {gapItems.map((g) => (
                     <div
                       key={g.category.id}
-                      className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50"
+                      className="flex items-center justify-between p-3 rounded-lg border border-white/[0.06] hover:bg-white/[0.04]"
                     >
                       <div className="flex items-center gap-3">
                         <span
@@ -1182,10 +1182,10 @@ function PLAnalyzerContent() {
                           }`}
                         />
                         <div>
-                          <div className="text-sm font-semibold text-[#1a2744]">
+                          <div className="text-sm font-semibold text-white">
                             {g.category.label}
                           </div>
-                          <div className="text-[11px] text-slate-400">
+                          <div className="text-[11px] text-gray-400">
                             {fmtMoney(g.catTotal)} | Benchmark: {g.category.minPct}%-{g.category.maxPct}%
                           </div>
                         </div>
@@ -1210,7 +1210,7 @@ function PLAnalyzerContent() {
 
               {/* Top 3 Problems */}
               {topProblems.length > 0 && (
-                <div className="bg-white border border-red-100 rounded-xl p-6 mb-6">
+                <div className="bg-white/[0.06] border border-red-500/20 rounded-xl p-6 mb-6">
                   <h3 className="text-base font-bold text-red-600 mb-4 flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4" /> Top Problems
                   </h3>
@@ -1218,17 +1218,17 @@ function PLAnalyzerContent() {
                     {topProblems.map((p, i) => (
                       <div key={p.item.id} className="p-4 bg-red-50 rounded-lg">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="font-bold text-sm text-[#1a2744]">
+                          <span className="font-bold text-sm text-white">
                             #{i + 1} {p.item.label}
                           </span>
                           <span className="text-red-500 font-bold text-sm">
                             {fmtPct(p.actualPct)} (max {fmtPct(p.item.maxPct)})
                           </span>
                         </div>
-                        <div className="text-xs text-slate-600 mb-2">
+                        <div className="text-xs text-gray-300 mb-2">
                           Gap: {fmtMoney(p.gapDollar)}/mo over midpoint
                         </div>
-                        <div className="text-xs text-slate-700 leading-relaxed">
+                        <div className="text-xs text-gray-200 leading-relaxed">
                           {p.item.coachingOver
                             ? p.item.coachingOver.replace("[X]", fmtPct(p.actualPct))
                             : "Review this line item for potential savings."}
@@ -1241,7 +1241,7 @@ function PLAnalyzerContent() {
 
               {/* Quick Wins */}
               {quickWins.length > 0 && (
-                <div className="bg-white border border-green-100 rounded-xl p-6">
+                <div className="bg-white/[0.06] border border-green-500/20 rounded-xl p-6">
                   <h3 className="text-base font-bold text-green-600 mb-4 flex items-center gap-2">
                     <Target className="w-4 h-4" /> Quick Wins
                   </h3>
@@ -1252,10 +1252,10 @@ function PLAnalyzerContent() {
                         className="flex items-center justify-between p-3 bg-green-50 rounded-lg"
                       >
                         <div>
-                          <div className="text-sm font-semibold text-[#1a2744]">
+                          <div className="text-sm font-semibold text-white">
                             {w.item.label}
                           </div>
-                          <div className="text-[11px] text-slate-500">
+                          <div className="text-[11px] text-gray-400">
                             Reduce from {fmtPct(w.actualPct)} to {fmtPct(w.item.midPct)}
                           </div>
                         </div>
@@ -1323,7 +1323,7 @@ function PLAnalyzerContent() {
       <PurchaseGate>
         <div>
           {snapshots.length < 2 ? (
-            <div className="text-center py-16 text-slate-400">
+            <div className="text-center py-16 text-gray-400">
               <TrendingUp className="w-10 h-10 mx-auto mb-3 text-slate-300" />
               <p className="font-semibold">Save 2+ months to unlock trends</p>
               <p className="text-sm mt-1">
@@ -1333,19 +1333,19 @@ function PLAnalyzerContent() {
           ) : (
             <>
               {/* Profit margin line */}
-              <div className="bg-white border border-slate-200 rounded-xl p-6 mb-6">
-                <h3 className="text-base font-bold text-[#1a2744] mb-1">
+              <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-6 mb-6">
+                <h3 className="text-base font-bold text-white mb-1">
                   Profit Margin Trend
                 </h3>
-                <p className="text-xs text-slate-400 mb-4">
+                <p className="text-xs text-gray-400 mb-4">
                   Green dashed line = 40% target
                 </p>
                 <TrendLine data={profitData} target={40} />
               </div>
 
               {/* Revenue vs Expenses */}
-              <div className="bg-white border border-slate-200 rounded-xl p-6 mb-6">
-                <h3 className="text-base font-bold text-[#1a2744] mb-1">
+              <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-6 mb-6">
+                <h3 className="text-base font-bold text-white mb-1">
                   Revenue vs Expenses
                 </h3>
                 <div className="flex gap-4 text-xs mb-4">
@@ -1361,8 +1361,8 @@ function PLAnalyzerContent() {
 
               {/* Category sparklines */}
               {categoryTrends.length > 0 && (
-                <div className="bg-white border border-slate-200 rounded-xl p-6">
-                  <h3 className="text-base font-bold text-[#1a2744] mb-4">
+                <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-6">
+                  <h3 className="text-base font-bold text-white mb-4">
                     Category Trends
                   </h3>
                   <div className="space-y-3">
@@ -1371,9 +1371,9 @@ function PLAnalyzerContent() {
                       return (
                         <div
                           key={ct.category.id}
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50"
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/[0.04]"
                         >
-                          <span className="text-sm font-semibold text-[#1a2744] w-40 truncate">
+                          <span className="text-sm font-semibold text-white w-40 truncate">
                             {ct.category.label}
                           </span>
                           <div className="flex-1 h-6 flex items-center">
@@ -1441,7 +1441,7 @@ function PLAnalyzerContent() {
       <PurchaseGate>
         <div>
           {!hasAnyInput ? (
-            <div className="text-center py-16 text-slate-400">
+            <div className="text-center py-16 text-gray-400">
               <FileText className="w-10 h-10 mx-auto mb-3 text-slate-300" />
               <p className="font-semibold">Enter your numbers first</p>
               <p className="text-sm mt-1">Your report will be generated once data is entered.</p>
@@ -1456,23 +1456,23 @@ function PLAnalyzerContent() {
               </div>
 
               {/* Executive summary */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-6">
-                <h3 className="text-base font-bold text-[#1a2744] mb-3">Executive Summary</h3>
+              <div className="bg-white/[0.04] border border-white/[0.1] rounded-xl p-6 mb-6">
+                <h3 className="text-base font-bold text-white mb-3">Executive Summary</h3>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                   <div>
-                    <div className="text-[11px] text-slate-500 uppercase">Health Score</div>
-                    <div className="text-lg font-extrabold text-[#1a2744]">
+                    <div className="text-[11px] text-gray-400 uppercase">Health Score</div>
+                    <div className="text-lg font-extrabold text-white">
                       {healthScore}/100 ({scoreLabel})
                     </div>
                   </div>
                   <div>
-                    <div className="text-[11px] text-slate-500 uppercase">Total Income</div>
+                    <div className="text-[11px] text-gray-400 uppercase">Total Income</div>
                     <div className="text-lg font-extrabold text-green-600">
                       {fmtMoney(totalIncome)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[11px] text-slate-500 uppercase">Net Income</div>
+                    <div className="text-[11px] text-gray-400 uppercase">Net Income</div>
                     <div
                       className={`text-lg font-extrabold ${netIncome >= 0 ? "text-green-600" : "text-red-500"}`}
                     >
@@ -1480,7 +1480,7 @@ function PLAnalyzerContent() {
                     </div>
                   </div>
                   <div>
-                    <div className="text-[11px] text-slate-500 uppercase">Profit Margin</div>
+                    <div className="text-[11px] text-gray-400 uppercase">Profit Margin</div>
                     <div
                       className={`text-lg font-extrabold ${profitMargin >= 35 ? "text-green-600" : profitMargin >= 25 ? "text-yellow-500" : "text-red-500"}`}
                     >
@@ -1489,20 +1489,20 @@ function PLAnalyzerContent() {
                   </div>
                 </div>
                 {profitCoachingNote && (
-                  <p className="text-sm text-slate-600 leading-relaxed">
+                  <p className="text-sm text-gray-300 leading-relaxed">
                     {profitCoachingNote.note}
                   </p>
                 )}
               </div>
 
               {/* Full P&L */}
-              <div className="bg-white border border-slate-200 rounded-xl p-6 mb-6">
-                <h3 className="text-base font-bold text-[#1a2744] mb-4">
+              <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-6 mb-6">
+                <h3 className="text-base font-bold text-white mb-4">
                   Full P&amp;L Statement
                 </h3>
                 {PL_SECTIONS.map((section) => (
                   <div key={section.id} className="mb-4">
-                    <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 pb-1 border-b border-slate-100">
+                    <div className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2 pb-1 border-b border-white/[0.06]">
                       {section.label}
                     </div>
                     {section.categories.map((cat) => {
@@ -1521,15 +1521,15 @@ function PLAnalyzerContent() {
                                 key={item.id}
                                 className="flex justify-between py-1 text-sm"
                               >
-                                <span className="text-slate-600">
-                                  <span className="text-slate-400 text-[11px] font-mono mr-2">
+                                <span className="text-gray-300">
+                                  <span className="text-gray-400 text-[11px] font-mono mr-2">
                                     {item.code}
                                   </span>
                                   {item.label}
                                 </span>
-                                <span className="tabular-nums text-[#1a2744] font-semibold">
+                                <span className="tabular-nums text-white font-semibold">
                                   {fmtMoney(val)}{" "}
-                                  <span className="text-slate-400 text-xs ml-1">
+                                  <span className="text-gray-400 text-xs ml-1">
                                     {section.type !== "income" ? fmtPct(pct) : ""}
                                   </span>
                                 </span>
@@ -1537,11 +1537,11 @@ function PLAnalyzerContent() {
                             );
                           })}
                           {catTotal !== 0 && (
-                            <div className="flex justify-between py-1 text-sm font-bold border-t border-slate-100 mt-1">
-                              <span className="text-[#1a2744]">
+                            <div className="flex justify-between py-1 text-sm font-bold border-t border-white/[0.06] mt-1">
+                              <span className="text-white">
                                 Total {cat.label}
                               </span>
-                              <span className="tabular-nums text-[#1a2744]">
+                              <span className="tabular-nums text-white">
                                 {fmtMoney(catTotal)}
                               </span>
                             </div>
@@ -1585,20 +1585,20 @@ function PLAnalyzerContent() {
 
               {/* Benchmark comparison */}
               {gapItems.filter((g) => g.gap > 0).length > 0 && (
-                <div className="bg-white border border-slate-200 rounded-xl p-6 mb-6">
-                  <h3 className="text-base font-bold text-[#1a2744] mb-4">
+                <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-6 mb-6">
+                  <h3 className="text-base font-bold text-white mb-4">
                     Benchmark Comparison (Out of Range)
                   </h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-slate-200">
-                          <th className="text-left py-2 font-semibold text-slate-500">Category</th>
-                          <th className="text-right py-2 font-semibold text-slate-500">Actual</th>
-                          <th className="text-right py-2 font-semibold text-slate-500">
+                        <tr className="border-b border-white/[0.1]">
+                          <th className="text-left py-2 font-semibold text-gray-400">Category</th>
+                          <th className="text-right py-2 font-semibold text-gray-400">Actual</th>
+                          <th className="text-right py-2 font-semibold text-gray-400">
                             Benchmark
                           </th>
-                          <th className="text-right py-2 font-semibold text-slate-500">Gap</th>
+                          <th className="text-right py-2 font-semibold text-gray-400">Gap</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1606,13 +1606,13 @@ function PLAnalyzerContent() {
                           .filter((g) => g.gap > 0)
                           .map((g) => (
                             <tr key={g.category.id} className="border-b border-slate-50">
-                              <td className="py-2 text-[#1a2744] font-semibold">
+                              <td className="py-2 text-white font-semibold">
                                 {g.category.label}
                               </td>
                               <td className="py-2 text-right text-red-500 font-semibold">
                                 {fmtPct(g.catPct)}
                               </td>
-                              <td className="py-2 text-right text-slate-500">
+                              <td className="py-2 text-right text-gray-400">
                                 {g.category.minPct}%-{g.category.maxPct}%
                               </td>
                               <td className="py-2 text-right text-red-500 font-bold">
@@ -1628,13 +1628,13 @@ function PLAnalyzerContent() {
 
               {/* Recommendations */}
               {(topProblems.length > 0 || quickWins.length > 0) && (
-                <div className="bg-white border border-slate-200 rounded-xl p-6 mb-6">
-                  <h3 className="text-base font-bold text-[#1a2744] mb-4">Recommendations</h3>
+                <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-6 mb-6">
+                  <h3 className="text-base font-bold text-white mb-4">Recommendations</h3>
                   {topProblems.length > 0 && (
                     <div className="mb-4">
                       <h4 className="text-sm font-bold text-red-600 mb-2">Top Issues</h4>
                       {topProblems.map((p, i) => (
-                        <div key={p.item.id} className="text-sm text-slate-700 mb-2">
+                        <div key={p.item.id} className="text-sm text-gray-200 mb-2">
                           <span className="font-bold">
                             {i + 1}. {p.item.label}
                           </span>{" "}
@@ -1648,7 +1648,7 @@ function PLAnalyzerContent() {
                     <div>
                       <h4 className="text-sm font-bold text-green-600 mb-2">Quick Wins</h4>
                       {quickWins.map((w) => (
-                        <div key={w.item.id} className="text-sm text-slate-700 mb-2">
+                        <div key={w.item.id} className="text-sm text-gray-200 mb-2">
                           <span className="font-bold">{w.item.label}:</span> Save{" "}
                           {fmtMoney(w.savings)}/mo by reducing to {fmtPct(w.item.midPct)}
                         </div>
@@ -1659,7 +1659,7 @@ function PLAnalyzerContent() {
               )}
 
               {/* Footer */}
-              <div className="text-center text-xs text-slate-400 py-4 border-t border-slate-200">
+              <div className="text-center text-xs text-gray-400 py-4 border-t border-white/[0.1]">
                 <p>AlignLife Practice</p>
                 <p>Generated by NeuroChiro P&amp;L Analyzer | {new Date().toLocaleDateString()}</p>
               </div>
@@ -1684,7 +1684,7 @@ function PLAnalyzerContent() {
                     setValues({});
                     setActiveTab(1);
                   }}
-                  className="flex items-center gap-2 border border-slate-200 text-[#1a2744] px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-slate-50 transition-colors"
+                  className="flex items-center gap-2 border border-white/[0.1] text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-white/[0.04] transition-colors"
                 >
                   New Month
                 </button>
@@ -1722,9 +1722,9 @@ function PLAnalyzerContent() {
         <div className="text-center mb-6 no-print">
           <div className="inline-flex items-center gap-3">
             <DollarSign className="w-8 h-8 text-[#e97325]" />
-            <h1 className="text-2xl font-extrabold text-[#1a2744]">P&amp;L Analyzer</h1>
+            <h1 className="text-2xl font-extrabold text-white">P&amp;L Analyzer</h1>
           </div>
-          <p className="text-sm text-slate-500 mt-1 max-w-md mx-auto">
+          <p className="text-sm text-gray-400 mt-1 max-w-md mx-auto">
             Enter your numbers from QuickBooks and see exactly where your money is going.
           </p>
         </div>
@@ -1741,13 +1741,13 @@ function PLAnalyzerContent() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all ${
                   isActive
-                    ? "bg-white text-[#1a2744] shadow-sm"
-                    : "text-slate-500 hover:text-[#1a2744]"
+                    ? "bg-white/[0.06] text-white shadow-sm"
+                    : "text-gray-400 hover:text-white"
                 }`}
               >
                 <Icon className="w-4 h-4" />
                 <span className="hidden sm:inline">{tab.label}</span>
-                {isGated && <Lock className="w-3 h-3 text-slate-400" />}
+                {isGated && <Lock className="w-3 h-3 text-gray-400" />}
               </button>
             );
           })}
