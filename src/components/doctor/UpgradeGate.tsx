@@ -12,6 +12,7 @@ interface UpgradeGateProps {
   description?: string;
 }
 
+// Single tier model: free = 0, any paid (growth/pro) = 1, neuros = 2
 const TIER_LEVELS: Record<string, number> = {
   free: 0,
   basic: 0,

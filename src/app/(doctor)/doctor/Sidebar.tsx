@@ -72,7 +72,7 @@ const practiceToolsSection = {
   ],
 };
 
-// free/basic/starter/standard = 0 (free tier), growth/pro = 1 (paid), neuros = 2 (practice OS)
+// Single tier model: free = 0, any paid (growth/pro) = 1, neuros = 2
 const TIER_LEVELS: Record<string, number> = { free: 0, standard: 0, basic: 0, starter: 0, growth: 1, pro: 1, neuros: 2 };
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {

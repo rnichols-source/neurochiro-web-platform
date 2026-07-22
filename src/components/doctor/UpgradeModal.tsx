@@ -30,26 +30,29 @@ const PRO_FEATURES = [
   "CE Tracker",
 ];
 
-const STRIPE_PRICE_ID = "price_1TS56YQ4WJOENoxriuU4hW5Z";
-
 export default function UpgradeModal({ isOpen, onClose, currentTier = "free", userId, highlightFeature }: UpgradeModalProps) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleUpgrade = async () => {
     if (!userId) return;
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId: STRIPE_PRICE_ID, userId, tier: "pro" }),
+        body: JSON.stringify({ billing: "monthly", tier: "pro" }),
       });
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
+      } else {
+        setError(data.error || "Something went wrong. Please try again.");
       }
     } catch (err) {
       console.error("Checkout error:", err);
+      setError("Something went wrong. Please try again.");
     }
     setLoading(false);
   };
@@ -115,6 +118,9 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "free", us
               >
                 {loading ? "Redirecting..." : <><Zap className="w-4 h-4" /> Upgrade to Pro — $49/mo</>}
               </button>
+              {error && (
+                <p className="text-red-400 text-xs text-center mt-3">{error}</p>
+              )}
             </div>
           </motion.div>
         </div>

@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { stripeCheckoutSchema } from "@/lib/validations";
 import { createServerSupabase } from "@/lib/supabase-server";
+import { z } from "zod";
+
+const checkoutSchema = z.object({
+  billing: z.enum(["monthly", "annual"]).default("monthly"),
+  tier: z.string().default("pro"),
+});
+
+const PLANS: Record<string, { monthly: number; annual: number; name: string }> = {
+  pro: { monthly: 4900, annual: 49000, name: "NeuroChiro Pro" },
+};
 
 export async function POST(req: Request) {
   try {
@@ -13,25 +22,35 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-
-    // 1. Validate Input (Security Check)
-    const result = stripeCheckoutSchema.safeParse(body);
+    const result = checkoutSchema.safeParse(body);
     if (!result.success) {
-      console.warn(`[SECURITY AUDIT] Invalid checkout attempt: ${result.error.message}`);
-      return NextResponse.json({ error: "Invalid Request Payload", details: result.error.format() }, { status: 400 });
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
 
-    const { priceId, tier } = result.data;
-    // Always use the authenticated user's ID — never trust client-provided userId
-    const userId = user.id;
+    const { billing, tier } = result.data;
+    const plan = PLANS[tier];
+    if (!plan) {
+      return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+    }
 
-    // 2. Create Session
+    const userId = user.id;
+    const isAnnual = billing === "annual";
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
+      subscription_data: {
+        trial_period_days: 7,
+        metadata: { userId, tier },
+      },
       line_items: [
         {
-          price: priceId,
+          price_data: {
+            currency: "usd",
+            product_data: { name: plan.name },
+            unit_amount: isAnnual ? plan.annual : plan.monthly,
+            recurring: { interval: isAnnual ? "year" : "month" },
+          },
           quantity: 1,
         },
       ],
@@ -39,8 +58,7 @@ export async function POST(req: Request) {
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co'}/doctor/billing?canceled=true`,
       metadata: {
         userId,
-        planId: priceId,
-        tier: tier || '',
+        tier,
       },
     });
 
