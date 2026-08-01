@@ -10,7 +10,6 @@ export async function completeOnboarding() {
 
   // Mark onboarding complete
   await (supabase as any).from('profiles').update({
-    is_first_login: false,
     onboarding_completed_at: new Date().toISOString(),
   }).eq('id', user.id);
 
