@@ -49,8 +49,10 @@ export default function DoctorLayout({
         .eq('user_id', user.id)
         .single() as any;
 
-      // Approval gate — block dashboard if not approved
-      if (doctor && doctor.is_approved === false) {
+      // Approval gate — block dashboard if not approved (skip for free/trial users)
+      const hasTrial = doctor?.trial_ends_at && new Date(doctor.trial_ends_at) > new Date();
+      const isFree = doctor?.membership_tier === 'free';
+      if (doctor && doctor.is_approved === false && !hasTrial && !isFree) {
         setApprovalPending(true);
       }
 

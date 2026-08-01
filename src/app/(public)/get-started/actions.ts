@@ -35,7 +35,6 @@ export async function createFreeAccount(data: {
       full_name: data.name,
       role: data.role,
       tier: 'free',
-      is_first_login: true,
     });
 
     // If doctor, create doctor record
