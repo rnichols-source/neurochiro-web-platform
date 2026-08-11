@@ -49,7 +49,7 @@ export async function createStudentCheckout(billing: 'monthly' | 'annual' = 'mon
       return { error: 'You already have an active subscription.' }
     }
 
-    const priceAmount = billing === 'monthly' ? 1200 : 12000 // $12/mo or $120/yr ($10/mo)
+    const priceAmount = billing === 'monthly' ? 3300 : 33000 // $33/mo or $330/yr ($28/mo)
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -62,10 +62,10 @@ export async function createStudentCheckout(billing: 'monthly' | 'annual' = 'mon
             product_data: {
               name: 'NeuroChiro Student Membership',
               description: billing === 'monthly'
-                ? 'Full access to all student tools — $12/month'
-                : 'Full access to all student tools — $10/month (billed annually)',
+                ? 'Full access to all student tools — $33/month'
+                : 'Full access to all student tools — $28/month (billed annually)',
             },
-            unit_amount: billing === 'monthly' ? 1200 : 1000,
+            unit_amount: billing === 'monthly' ? 3300 : 2750,
             recurring: {
               interval: billing === 'monthly' ? 'month' : 'year',
             },

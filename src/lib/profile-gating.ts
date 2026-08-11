@@ -13,7 +13,6 @@ export function isProfileGated(doctor: {
   membership_tier?: string;
   is_founding_member?: boolean;
   created_at?: string;
-  trial_ends_at?: string | null;
 }): boolean {
   // Founding members bypass all gates
   if (doctor.is_founding_member) return false;
@@ -21,9 +20,6 @@ export function isProfileGated(doctor: {
   // Pro tier is never gated
   const tier = doctor.membership_tier || 'free';
   if (tier === 'pro' || tier === 'growth') return false;
-
-  // Active trial bypasses gates
-  if (doctor.trial_ends_at && new Date(doctor.trial_ends_at) > new Date()) return false;
 
   // Free/basic/starter doctors created BEFORE the cutoff are grandfathered.
   if (!doctor.created_at) return false;

@@ -182,7 +182,7 @@ export async function createAccountAction(formData: FormData, role: string, tier
           membership_tier: 'free',
           region_code: 'US',
           is_approved: false,
-          trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          onboarding_call_status: 'not_booked',
         } as any);
       }
     }
@@ -420,8 +420,8 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
   try {
     await supabase.from('notifications').insert({
       user_id: userId,
-      title: 'Profile Claimed — 7-Day Pro Trial Active!',
-      body: 'Welcome to NeuroChiro! Your contact info is visible to patients for the next 7 days. Add your photo and bio from your dashboard. After the trial, upgrade to Pro ($49/mo) to keep everything unlocked.',
+      title: 'Profile Claimed — Welcome to NeuroChiro!',
+      body: 'Welcome to NeuroChiro! Book your onboarding call with Dr. Ray to activate your account and get the most out of your membership ($99/mo).',
       type: 'system',
       link: '/doctor/profile',
       priority: 'important',

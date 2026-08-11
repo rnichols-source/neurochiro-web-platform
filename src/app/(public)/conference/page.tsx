@@ -84,7 +84,7 @@ export default function ConferenceLandingPage() {
             <p className="text-gray-500 mb-6">
               {role === "student"
                 ? "Your student account is ready. Explore jobs, courses, and career tools."
-                : "Your 7-day Pro trial is active. Set up your profile and start getting found by patients."}
+                : "Your account is created. Log in to book your onboarding call with Dr. Ray and get started."}
             </p>
             <Link
               href="/login"

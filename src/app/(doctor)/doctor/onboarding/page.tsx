@@ -264,10 +264,10 @@ export default function DoctorOnboardingPage() {
               </div>
             )}
 
-            {/* Trial badge */}
+            {/* Activation notice */}
             <div className="bg-neuro-orange/10 border border-neuro-orange/20 rounded-xl p-4">
-              <p className="text-neuro-orange font-bold text-sm">Your 7-day Pro trial is active</p>
-              <p className="text-white/40 text-xs mt-1">Full access to analytics, patient leads, and all Pro tools. No credit card required.</p>
+              <p className="text-neuro-orange font-bold text-sm">Your account will be activated after your onboarding call with Dr. Ray.</p>
+              <p className="text-white/40 text-xs mt-1">Book your call from the dashboard to get started with all Pro tools.</p>
             </div>
 
             {/* Share buttons */}

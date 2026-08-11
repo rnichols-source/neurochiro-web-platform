@@ -142,7 +142,7 @@ export default function ChiroMatchPublicPage() {
           <p className="text-gray-500 mb-8">Join NeuroChiro to participate in the next ChiroMatch cycle. All paid members are eligible.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/get-started" className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
-              Student Sign Up — $12/mo
+              Student Sign Up — $33/mo
             </Link>
             <Link href="/pricing" className="px-8 py-4 bg-neuro-navy text-white font-bold rounded-xl hover:bg-neuro-navy-light transition-colors">
               Doctor Plans

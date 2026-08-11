@@ -186,7 +186,7 @@ export async function getDoctorROIData(period: string = '30d') {
 
     const tier = doctorRes.data?.membership_tier || 'free';
     const isStarter = tier !== 'pro';
-    const membershipCost = tier === 'pro' ? 49 : 0;
+    const membershipCost = tier === 'pro' ? 99 : 0;
     const averageCaseValue = Number((doctorRes.data as any)?.average_case_value) || 2500;
     
     // Aggregating analytics from the new analytics_events table
@@ -546,7 +546,7 @@ export async function getRevenueIntelligence() {
 
     const avgCaseValue = doc.average_case_value || 1200
     const estimatedRevenue = (confirmedThisMonth || 0) * avgCaseValue
-    const tierCosts: Record<string, number> = { pro: 49, growth: 49, basic: 0, free: 0 }
+    const tierCosts: Record<string, number> = { pro: 99, growth: 99, basic: 0, free: 0 }
     const membershipCost = tierCosts[doc.membership_tier] || 0
     const roi = membershipCost > 0 ? Math.round(estimatedRevenue / membershipCost) : 0
 

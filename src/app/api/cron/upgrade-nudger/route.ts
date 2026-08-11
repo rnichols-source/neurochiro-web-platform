@@ -41,7 +41,7 @@ export async function GET(req: Request) {
     // Get all free-tier doctors with accounts
     const { data: doctors } = await supabase
       .from('doctors')
-      .select('user_id, first_name, last_name, profile_views, city, state, slug, membership_tier, created_at, trial_ends_at')
+      .select('user_id, first_name, last_name, profile_views, city, state, slug, membership_tier, created_at')
       .not('user_id', 'is', null)
       .in('membership_tier', ['basic', 'free', 'starter', 'standard'])
       .neq('verification_status', 'hidden');
@@ -102,16 +102,7 @@ export async function GET(req: Request) {
       let subject = '';
       let body = '';
 
-      // HIGHEST PRIORITY: Trial just expired
-      const trialEnded = doc.trial_ends_at && new Date(doc.trial_ends_at) < new Date() && new Date(doc.trial_ends_at) > new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-      if (trialEnded && !sentNudges.has(`${doc.user_id}-trial_expired`)) {
-        trigger = 'trial_expired';
-        subject = `Your Pro trial ended, Dr. ${name} — ${views} patients found you`;
-        body = `<p>Your profile is no longer on the Pro plan. During your time on NeuroChiro, <strong>${views} patients</strong> viewed your profile.</p>
-          <p>Your contact info is now hidden from patients. To keep your phone, website, and booking link visible — upgrade to Pro for $99/mo.</p>
-          ${cityDemandLine}
-          <p style="color:#e97325;font-weight:bold;">One new patient pays for a full year.</p>`;
-      } else if (views >= 100 && !sentNudges.has(`${doc.user_id}-views_100`)) {
+      if (views >= 100 && !sentNudges.has(`${doc.user_id}-views_100`)) {
         trigger = 'views_100';
         subject = `100 patients found your profile, Dr. ${name}`;
         body = `<p>Your NeuroChiro profile has been viewed <strong>100 times</strong>.</p>

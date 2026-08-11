@@ -71,10 +71,10 @@ function StudentUpgradeModal({ isOpen, onClose, userId, currentTier, highlightFe
                   <h3 className="text-lg font-black text-white">Student Membership</h3>
                 </div>
                 <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-3xl font-black text-white">{billing === "annual" ? "$10" : "$12"}</span>
+                  <span className="text-3xl font-black text-white">{billing === "annual" ? "$28" : "$33"}</span>
                   <span className="text-sm text-gray-500">/mo</span>
                 </div>
-                {billing === "annual" && <p className="text-xs text-green-400 font-bold mb-2">Billed at $120/yr</p>}
+                {billing === "annual" && <p className="text-xs text-green-400 font-bold mb-2">Billed at $330/yr</p>}
                 <p className="text-xs text-gray-500 mb-5">One plan — everything included</p>
                 <div className="space-y-2.5 mb-6">
                   {features.map((f) => (
@@ -85,7 +85,7 @@ function StudentUpgradeModal({ isOpen, onClose, userId, currentTier, highlightFe
                   ))}
                 </div>
                 <button onClick={handleUpgrade} disabled={loading} className="w-full py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange-light transition-all disabled:opacity-50 shadow-lg shadow-neuro-orange/20">
-                  {loading ? "Redirecting..." : "Upgrade to Premium — $12/mo"}
+                  {loading ? "Redirecting..." : "Upgrade to Premium — $33/mo"}
                 </button>
               </div>
             </div>
@@ -131,10 +131,10 @@ export default function StudentUpgradeGate({ children, feature, description }: S
             </div>
             <h3 className="text-xl font-heading font-black text-neuro-navy mb-2">{feature}</h3>
             <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-              {description || `This tool requires an active student membership ($12/mo). Subscribe to unlock all career tools.`}
+              {description || `This tool requires an active student membership ($33/mo). Subscribe to unlock all career tools.`}
             </p>
             <button onClick={() => setShowModal(true)} className="w-full py-4 bg-neuro-orange text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-neuro-orange/20 hover:bg-neuro-orange-light transition-all flex items-center justify-center gap-2">
-              <Zap className="w-4 h-4" /> Unlock for $12/mo
+              <Zap className="w-4 h-4" /> Unlock for $33/mo
             </button>
             <button onClick={() => setShowModal(true)} className="mt-3 text-xs font-bold text-neuro-orange hover:underline flex items-center justify-center gap-1 mx-auto">
               See plans <ArrowRight className="w-3 h-3" />

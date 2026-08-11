@@ -77,7 +77,7 @@ export default function EventPage() {
             <p style={{ color: "#6b7280", fontSize: 14, marginBottom: 24 }}>
               {role === "student"
                 ? "Your student account is ready. Explore jobs, courses, and career tools."
-                : "Your 7-day Pro trial is active. Set up your profile and start getting found."}
+                : "Your account is created. Log in to book your onboarding call with Dr. Ray and get started."}
             </p>
             <Link
               href="/login"

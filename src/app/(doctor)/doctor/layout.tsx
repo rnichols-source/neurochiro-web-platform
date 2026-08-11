@@ -28,7 +28,7 @@ export default function DoctorLayout({
   const [unreadCount, setUnreadCount] = useState(0);
   const [initials, setInitials] = useState("--");
   const [subscriptionChecked, setSubscriptionChecked] = useState(false);
-  const [tierInfo, setTierInfo] = useState<{ tier: string; trialEndsAt: string | null; isFounder: boolean } | null>(null);
+  const [tierInfo, setTierInfo] = useState<{ tier: string; isFounder: boolean } | null>(null);
   const [onboardingCallStatus, setOnboardingCallStatus] = useState<string | null>(null);
   const [doctorName, setDoctorName] = useState("");
 
@@ -63,7 +63,6 @@ export default function DoctorLayout({
 
       setTierInfo({
         tier: doctor?.membership_tier || profile?.tier || 'free',
-        trialEndsAt: doctor?.trial_ends_at || null,
         isFounder,
       });
 
