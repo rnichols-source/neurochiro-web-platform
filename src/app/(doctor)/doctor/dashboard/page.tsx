@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Eye, Users, DollarSign, MapPin, Briefcase, Calendar, Bell, Mail, ArrowRight, Copy, CheckCircle2, Gift, Zap, X, Lock, TrendingUp } from "lucide-react";
+import { Loader2, Eye, Users, DollarSign, MapPin, Briefcase, Calendar, Bell, Mail, ArrowRight, Copy, CheckCircle2, Gift, Zap, X, Lock, TrendingUp, Video, Image as ImageIcon, Star, BarChart3, Search } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -236,8 +236,37 @@ export default function DoctorDashboard() {
         ))}
       </motion.div>
 
+      {/* What You Get This Month */}
+      <motion.div {...delay(0.1)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-neuro-orange font-semibold mb-1">Your Membership</p>
+            <h3 className="text-sm font-bold text-white">What You Get This Month</h3>
+          </div>
+          <span className="text-[10px] font-bold text-white/20 uppercase tracking-wider">Pro — $99/mo</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[
+            { icon: Search, label: "Directory listing", detail: "Active — patients can find you via SEO", done: true },
+            { icon: Users, label: "Patient leads", detail: `${patientLeads} lead${patientLeads !== 1 ? 's' : ''} this month`, done: patientLeads > 0 },
+            { icon: Video, label: "Weekly live promotion", detail: "IG + YouTube — you get shouted out", done: false, link: "/doctor/lives" },
+            { icon: Star, label: "Spotlight interview", detail: "In rotation — we'll reach out to schedule", done: false },
+            { icon: ImageIcon, label: "Branded content kit", detail: "Graphics + reels with your name and city", done: false },
+            { icon: BarChart3, label: "Monthly growth report", detail: "Views, patient actions, city ranking", done: false },
+          ].map((item, i) => (
+            <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.03]">
+              <item.icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${item.done ? 'text-green-400' : 'text-white/25'}`} />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white/80">{item.label}</p>
+                <p className="text-[11px] text-white/30 mt-0.5">{item.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
       {/* Smart Action Items */}
-      <motion.div {...delay(0.1)}>
+      <motion.div {...delay(0.15)}>
         <p className="text-[10px] uppercase tracking-[0.2em] text-neuro-orange font-semibold mb-3">Action Items</p>
         <ActionItems items={actionItems} />
       </motion.div>
