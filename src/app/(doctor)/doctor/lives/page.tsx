@@ -1,6 +1,6 @@
 "use client";
 
-import { Video, Calendar, Clock, Play, ExternalLink } from "lucide-react";
+import { Video, Clock, Play, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 // Static schedule — Dr. Ray updates this when he picks a day/time
@@ -21,7 +21,7 @@ function getNextLiveDate() {
   const now = new Date();
   const currentDay = now.getDay();
   let daysUntil = targetDay - currentDay;
-  if (daysUntil <= 0) daysUntil += 7;
+  if (daysUntil < 0) daysUntil += 7;
   const nextDate = new Date(now);
   nextDate.setDate(now.getDate() + daysUntil);
   return nextDate;

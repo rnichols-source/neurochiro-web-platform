@@ -247,21 +247,24 @@ export default function DoctorDashboard() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
-            { icon: Search, label: "Directory listing", detail: "Active — patients can find you via SEO", done: true },
-            { icon: Users, label: "Patient leads", detail: `${patientLeads} lead${patientLeads !== 1 ? 's' : ''} this month`, done: patientLeads > 0 },
+            { icon: Search, label: "Directory listing", detail: "Active — patients can find you via SEO", done: true, link: undefined as string | undefined },
+            { icon: Users, label: "Patient leads", detail: `${patientLeads} lead${patientLeads !== 1 ? 's' : ''} this month`, done: patientLeads > 0, link: "/doctor/leads" },
             { icon: Video, label: "Weekly live promotion", detail: "IG + YouTube — you get shouted out", done: false, link: "/doctor/lives" },
-            { icon: Star, label: "Spotlight interview", detail: "In rotation — we'll reach out to schedule", done: false },
-            { icon: ImageIcon, label: "Branded content kit", detail: "Graphics + reels with your name and city", done: false },
-            { icon: BarChart3, label: "Monthly growth report", detail: "Views, patient actions, city ranking", done: false },
-          ].map((item, i) => (
-            <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.03]">
-              <item.icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${item.done ? 'text-green-400' : 'text-white/25'}`} />
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-white/80">{item.label}</p>
-                <p className="text-[11px] text-white/30 mt-0.5">{item.detail}</p>
+            { icon: Star, label: "Spotlight interview", detail: "In rotation — we'll reach out to schedule", done: false, link: undefined },
+            { icon: ImageIcon, label: "Branded content kit", detail: "Graphics + reels with your name and city", done: false, link: undefined },
+            { icon: BarChart3, label: "Monthly growth report", detail: "Views, patient actions, city ranking", done: false, link: "/doctor/analytics" },
+          ].map((item, i) => {
+            const content = (
+              <div className={`flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] ${item.link ? 'hover:bg-white/[0.06] transition-colors cursor-pointer' : ''}`}>
+                <item.icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${item.done ? 'text-green-400' : 'text-white/25'}`} />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-white/80">{item.label}</p>
+                  <p className="text-[11px] text-white/30 mt-0.5">{item.detail}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+            return item.link ? <Link key={i} href={item.link}>{content}</Link> : <div key={i}>{content}</div>;
+          })}
         </div>
       </motion.div>
 
