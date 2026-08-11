@@ -182,7 +182,7 @@ export default function DoctorDashboard() {
             {[
               { label: "Complete your profile", done: (data?.marketPerformance?.completeness || 0) >= 100, href: "/doctor/profile" },
               { label: "Check your analytics", done: profileViews > 0, href: "/doctor/analytics" },
-              { label: "Share your profile link", done: false, href: `/directory/${slug}` },
+              { label: "Share your profile link", done: !slug, href: `/directory/${slug || ''}` },
               { label: "Watch a weekly live recap", done: false, href: "/doctor/lives" },
               { label: "Explore the Care Plan Closer", done: false, href: "/doctor/care-plan-closer" },
             ].filter(item => !item.done).slice(0, 3).map((item, i) => (
