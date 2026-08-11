@@ -60,7 +60,7 @@ export async function createFreeAccount(data: {
         membership_tier: 'free',
         region_code: 'US',
         is_approved: false,
-        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        onboarding_call_status: 'not_booked',
       } as any);
     }
 
@@ -70,6 +70,7 @@ export async function createFreeAccount(data: {
         id: userId,
         full_name: data.name,
         region_code: 'US',
+        onboarding_call_status: 'not_booked',
       });
     }
 
@@ -81,7 +82,7 @@ export async function createFreeAccount(data: {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `🆓 **FREE SIGNUP**\n\n**${data.name}** joined as a **${data.role}**\nEmail: ${data.email}`,
+            content: `🔔 **NEW SIGNUP — ONBOARDING CALL NEEDED**\n\n**${data.name}** signed up as a **${data.role}**\nEmail: ${data.email}\n\nThey need to book their onboarding call before activation.`,
           }),
         }).catch(() => {});
       }

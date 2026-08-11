@@ -13,37 +13,11 @@ export async function completeOnboarding() {
     onboarding_completed_at: new Date().toISOString(),
   }).eq('id', user.id);
 
-  // Check if doctor is on a paid tier — only auto-verify paid members
-  // Free tier doctors stay 'pending' until admin approves
+  // Profile onboarding complete — verification happens after onboarding call with Dr. Ray
   const admin = createAdminClient();
-  const { data: profile } = await (supabase as any).from('profiles').select('tier').eq('id', user.id).single();
-  const tier = profile?.tier || 'free';
-  const isPaid = tier === 'pro' || tier === 'growth' || tier === 'student_paid';
-
-  // Set trial for free doctors: 7 days of Pro access
-  const trialEndsAt = !isPaid ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() : null;
-
   await admin.from('doctors').update({
-    verification_status: isPaid ? 'verified' : 'pending',
-    ...(trialEndsAt ? { trial_ends_at: trialEndsAt } : {}),
+    verification_status: 'pending',
   } as any).eq('user_id', user.id);
-
-  // Notify admin when a free doctor needs approval
-  if (!isPaid) {
-    const { data: doctor } = await admin.from('doctors').select('first_name, last_name, clinic_name, city, state, slug').eq('user_id', user.id).single();
-    const discordUrl = process.env.DISCORD_WEBHOOK_URL;
-    if (discordUrl && doctor) {
-      const name = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
-      const loc = [doctor.city, doctor.state].filter(Boolean).join(', ');
-      fetch(discordUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: `⏳ **FREE DOCTOR NEEDS APPROVAL**\n\n**${name}** | ${doctor.clinic_name || 'No clinic'}\n📍 ${loc || 'No location'}\n🔗 https://neurochiro.co/directory/${doctor.slug}\n\nApprove at: https://neurochiro.co/admin/directory`,
-        }),
-      }).catch(() => {});
-    }
-  }
 
   return { success: true };
 }

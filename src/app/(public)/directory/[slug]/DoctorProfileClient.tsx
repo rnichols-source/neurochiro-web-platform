@@ -298,8 +298,8 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           <div style={{ background: "linear-gradient(135deg, #1E2D3B 0%, #1a3048 100%)", borderRadius: 20, padding: "32px 36px", color: "white" }}>
             <p style={{ fontWeight: 900, fontSize: 20, marginBottom: 8 }}>Welcome, {name}!</p>
             <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>We built this free listing for you based on your public practice info. Claim it to manage your profile — takes 15 seconds. Your free plan is yours forever.</p>
-            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>You&apos;ll also get a <span style={{ color: "#D66829", fontWeight: 800 }}>free 7-day Pro trial</span> to try everything — contact info visible to patients, analytics, practice tools, and more.</p>
-            <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, lineHeight: 1.6, marginBottom: 20 }}>After the trial, Pro is $49/mo. Stay on the free plan as long as you want — no pressure, no credit card required to claim.</p>
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>Upgrade to <span style={{ color: "#D66829", fontWeight: 800 }}>Pro</span> to unlock everything — contact info visible to patients, analytics, practice tools, and more.</p>
+            <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, lineHeight: 1.6, marginBottom: 20 }}>Pro is $99/mo. Stay on the free plan as long as you want — no pressure, no credit card required to claim.</p>
             <a href={`/register?claim_id=${doctor.id}&role=doctor`} style={{ display: "inline-block", padding: "14px 28px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, textDecoration: "none", boxShadow: "0 4px 20px rgba(214,104,41,0.3)" }}>
               Claim My Profile
             </a>
@@ -314,7 +314,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               <p style={{ fontWeight: 900, fontSize: 14, color: "#1E2D3B" }}>This is how patients see your profile</p>
               <p style={{ fontSize: 12, color: "#718096", marginTop: 4 }}>Your phone, website, and booking link are hidden. Upgrade to Pro so patients can reach you.</p>
             </div>
-            <Link href="/doctor/billing" style={{ padding: "12px 24px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>Upgrade to Pro — $49/mo</Link>
+            <Link href="/doctor/billing" style={{ padding: "12px 24px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>Upgrade to Pro — $99/mo</Link>
           </div>
         </Section>
       )}

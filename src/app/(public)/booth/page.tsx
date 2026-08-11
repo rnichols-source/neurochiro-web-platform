@@ -31,7 +31,7 @@ function SlideHero() {
             { value: "140+", label: "Verified Doctors" },
             { value: "30+", label: "States" },
             { value: "4", label: "Countries" },
-            { value: "Free", label: "To Join" },
+            { value: "$99", label: "Per Month" },
           ].map((s) => (
             <div key={s.label} className="text-center">
               <p className="text-4xl font-black text-neuro-orange">{s.value}</p>
@@ -336,7 +336,7 @@ function SlideDoctorFeatures() {
       <div className="w-[380px] shrink-0">
         <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.3em] mb-3">For Doctors</p>
         <h2 className="text-5xl font-heading font-black text-white leading-tight mb-4">Everything<br />You Need</h2>
-        <p className="text-gray-400 text-lg leading-relaxed">Free to join. Upgrade to Pro ($49/mo) to unlock the full suite of practice tools.</p>
+        <p className="text-gray-400 text-lg leading-relaxed">Upgrade to Pro ($99/mo) to unlock the full suite of practice tools.</p>
       </div>
       <div className="flex-1">
         <div className="grid grid-cols-3 gap-3">
@@ -380,11 +380,11 @@ function SlideJoinFree() {
     <div className="h-full bg-gradient-to-br from-neuro-navy to-[#0F1A24] flex items-center justify-center px-16">
       <div className="text-center max-w-4xl">
         <p className="text-neuro-orange text-sm font-black uppercase tracking-[0.4em] mb-6">Join NeuroChiro Today</p>
-        <h2 className="text-7xl font-heading font-black text-white mb-12">Free. For Everyone.</h2>
+        <h2 className="text-7xl font-heading font-black text-white mb-12">Join the Network.</h2>
         <div className="grid grid-cols-3 gap-8 mb-12">
           {[
-            { icon: Stethoscope, role: "Doctors", desc: "Get your practice listed in the global directory. Verified badge. Profile analytics. Upgrade to Pro or Pro anytime.", url: "neurochiro.co/get-started" },
-            { icon: GraduationCap, role: "Students", desc: "Find jobs, attend seminars, build your ChiroScore, explore techniques, and prep for interviews. Upgrade to Premium anytime.", url: "neurochiro.co/get-started" },
+            { icon: Stethoscope, role: "Doctors", desc: "Get your practice listed in the global directory. Verified badge. Profile analytics. Full practice toolkit. $99/mo.", url: "neurochiro.co/get-started" },
+            { icon: GraduationCap, role: "Students", desc: "Find jobs, attend seminars, build your ChiroScore, explore techniques, and prep for interviews. $33/mo.", url: "neurochiro.co/get-started" },
             { icon: Heart, role: "Patients", desc: "Find nervous system chiropractors near you. Track your health. Read reviews. Message doctors directly. Always free.", url: "neurochiro.co/get-started" },
           ].map((r) => (
             <div key={r.role} className="bg-white/5 border border-white/10 rounded-2xl p-8 text-center">
@@ -392,7 +392,7 @@ function SlideJoinFree() {
               <p className="text-2xl font-black text-white mb-3">{r.role}</p>
               <p className="text-sm text-gray-400 leading-relaxed mb-6">{r.desc}</p>
               <div className="bg-neuro-orange rounded-xl py-3 px-6 inline-block">
-                <p className="text-white font-bold text-lg">Free to Join</p>
+                <p className="text-white font-bold text-lg">Join Now</p>
               </div>
             </div>
           ))}
@@ -464,7 +464,7 @@ export default function BoothPage() {
               <span className="text-xs text-white/60 font-bold">neurochiro.co/get-started</span>
             </div>
             <div className="px-4 py-2 bg-neuro-orange rounded-lg">
-              <p className="text-sm font-black text-white">Free to Join</p>
+              <p className="text-sm font-black text-white">Join Now</p>
             </div>
           </div>
         </div>

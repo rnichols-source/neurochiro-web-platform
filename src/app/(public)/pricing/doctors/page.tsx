@@ -7,9 +7,9 @@ import Link from "next/link";
 export default function DoctorPricing() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
 
-  const price = billingCycle === "monthly" ? "49" : "41";
+  const price = billingCycle === "monthly" ? "99" : "83";
   const period = billingCycle === "monthly" ? "/mo" : "/mo (billed annually)";
-  const annualTotal = "$490/yr";
+  const annualTotal = "$990/yr";
 
   const features = [
     { text: "Listed in the global nervous system chiropractic directory", icon: Users },
@@ -47,7 +47,7 @@ export default function DoctorPricing() {
           <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all shadow-sm ${billingCycle === "annual" ? "left-8" : "left-1"}`} />
         </button>
         <span className={`text-sm font-bold ${billingCycle === "annual" ? "text-neuro-navy" : "text-gray-400"}`}>
-          Annual <span className="text-neuro-orange text-xs">(save $98)</span>
+          Annual <span className="text-neuro-orange text-xs">(save $198)</span>
         </span>
       </div>
 
@@ -61,7 +61,7 @@ export default function DoctorPricing() {
         <div className="text-center mt-4 mb-8">
           <div className="text-6xl font-black text-neuro-navy">${price}<span className="text-lg font-bold text-gray-400">{period}</span></div>
           {billingCycle === "annual" && (
-            <p className="text-sm text-neuro-orange font-bold mt-1">{annualTotal} billed annually. Save $98.</p>
+            <p className="text-sm text-neuro-orange font-bold mt-1">{annualTotal} billed annually. Save $198.</p>
           )}
         </div>
 
@@ -82,9 +82,9 @@ export default function DoctorPricing() {
           href="/get-started"
           className="w-full py-4 bg-neuro-orange text-white font-black rounded-xl text-center text-sm uppercase tracking-wider hover:bg-neuro-orange/90 shadow-lg shadow-neuro-orange/20 transition-all flex items-center justify-center gap-2 block"
         >
-          Start Your 7-Day Free Trial <ArrowRight className="w-4 h-4" />
+          Get Started <ArrowRight className="w-4 h-4" />
         </Link>
-        <p className="text-center text-xs text-gray-400 mt-3">No credit card required. Cancel anytime.</p>
+        <p className="text-center text-xs text-gray-400 mt-3">Cancel anytime.</p>
       </div>
 
       {/* Social proof */}
@@ -98,7 +98,7 @@ export default function DoctorPricing() {
         <p className="text-white text-lg font-bold leading-relaxed">
           "One new patient from the directory pays for <span className="text-neuro-orange">an entire year</span> of NeuroChiro Pro."
         </p>
-        <p className="text-white/50 text-sm mt-2">The average new patient is worth $2,000-5,000. NeuroChiro Pro is $49/mo.</p>
+        <p className="text-white/50 text-sm mt-2">The average new patient is worth $2,000-5,000. NeuroChiro Pro is $99/mo.</p>
       </div>
 
       {/* FAQ */}
@@ -106,7 +106,7 @@ export default function DoctorPricing() {
         <h2 className="text-2xl font-heading font-black text-neuro-navy text-center mb-6">Common Questions</h2>
         <div className="space-y-4">
           {[
-            { q: "What happens after the 7-day trial?", a: "You'll be prompted to subscribe at $49/mo (or $490/yr). If you don't subscribe, your profile goes to an unclaimed state with masked contact info. No charge during the trial." },
+            { q: "How does billing work?", a: "You'll be billed $99/mo (or $990/yr if you choose annual). If you cancel, your profile goes to an unclaimed state with masked contact info. Cancel anytime from your dashboard." },
             { q: "Can I cancel anytime?", a: "Yes. No contracts, no cancellation fees. Cancel from your dashboard or email support. Your profile will be set to unclaimed." },
             { q: "What's the difference between NeuroChiro and NeurOS?", a: "NeuroChiro is the directory. It gets you found by patients. NeurOS is a separate practice operating system (care plans, P&L, KPIs) at neuros.co. They're different products." },
             { q: "I'm already listed. Do I need to pay?", a: "If you have a claimed profile, you're already on a plan. Check your dashboard for your current status. Founding members keep their locked price forever." },

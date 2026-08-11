@@ -113,16 +113,16 @@ export async function GET(req: Request) {
           <li>Your profile page will no longer be accessible</li>
           <li>You will not be featured in any promotions, Spotlights, or city pages</li>
         </ul>
-        <p><strong>What you keep if you activate Pro ($49/mo):</strong></p>
+        <p><strong>What you keep if you activate Pro ($99/mo):</strong></p>
         <ul>
           <li>Full profile live in the directory</li>
           <li>Patients can find you, call you, book with you, message you</li>
           <li>Full analytics dashboard</li>
           <li>Spotlight eligibility (185K followers)</li>
-          <li>Locked at $49/mo forever (price goes to $79 at 200 doctors)</li>
+          <li>Locked at $99/mo forever (price goes to $79 at 200 doctors)</li>
         </ul>
         <p>This is the last email I'll send about this. The link below takes 60 seconds:</p>
-        <p style="margin-top: 20px;"><a href="${BILLING_LINK}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">Activate Pro — $49/mo</a></p>
+        <p style="margin-top: 20px;"><a href="${BILLING_LINK}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">Activate Pro — $99/mo</a></p>
         <p style="margin-top: 16px; font-size: 13px; color: #9CA3AF;">If you have questions, reply to this email. I read every one.</p>
         <p style="margin-top: 20px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
       `;
@@ -143,7 +143,7 @@ export async function GET(req: Request) {
             <li>Priority placement in search results</li>
             <li>Weekly Practice Growth Report</li>
           </ul>
-          <p>One new patient from the directory pays for an entire year of Pro. The average new patient is worth $2,000-5,000. Pro is $49/mo.</p>
+          <p>One new patient from the directory pays for an entire year of Pro. The average new patient is worth $2,000-5,000. Pro is $99/mo.</p>
           <p style="margin-top: 20px;"><a href="${BILLING_LINK}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">Activate Before August 1</a></p>
           <p style="margin-top: 12px; font-size: 13px; color: #9CA3AF;">After August 1, your profile will be completely removed from the directory. Patients will no longer be able to find you on NeuroChiro.</p>
           <p style="margin-top: 20px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
@@ -164,9 +164,9 @@ export async function GET(req: Request) {
           <li>Monthly Practice Growth Reports with your analytics</li>
         </ul>
         <p>Every Pro member gets rotated through these promotions. Your profile has <strong>${views} views</strong> so far, and we're about to multiply that.</p>
-        <p><strong>Here's what's changing:</strong> starting August 1, 2026, all directory profiles will require a Pro membership ($49/mo). Profiles without Pro will be <strong>completely removed from the directory.</strong> Patients will not be able to find you, see your listing, or contact you.</p>
-        <p>As an early member, you can lock in <strong>$49/mo forever.</strong> This price goes to $79/mo when we hit 200 doctors. We're at 117 right now.</p>
-        <p style="margin-top: 20px;"><a href="${BILLING_LINK}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">Activate Pro — $49/mo</a></p>
+        <p><strong>Here's what's changing:</strong> starting August 1, 2026, all directory profiles will require a Pro membership ($99/mo). Profiles without Pro will be <strong>completely removed from the directory.</strong> Patients will not be able to find you, see your listing, or contact you.</p>
+        <p>As an early member, you can lock in <strong>$99/mo forever.</strong> This price goes to $79/mo when we hit 200 doctors. We're at 117 right now.</p>
+        <p style="margin-top: 20px;"><a href="${BILLING_LINK}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">Activate Pro — $99/mo</a></p>
         <p style="margin-top: 12px; font-size: 13px; color: #9CA3AF;">You have 30 days.</p>
         <p style="margin-top: 20px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
       `;

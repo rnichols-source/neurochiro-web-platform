@@ -590,9 +590,9 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                 subject: 'Ready to expand your clinical influence? 🚀',
                 title: 'Upgrade to Pro',
                 body: `<h1>Dr. ${payload.name || payload.full_name || ''}, level up your practice.</h1>
-                       <p>Your free listing gets you on the map, but Pro ($49/mo) unlocks your full contact info, patient messaging, analytics, and the complete practice toolkit.</p>
+                       <p>Your free listing gets you on the map, but Pro ($99/mo) unlocks your full contact info, patient messaging, analytics, and the complete practice toolkit.</p>
                        <p>One new patient pays for a full year. Upgrade today.</p>`,
-                ctaText: 'Upgrade to Pro — $49/mo',
+                ctaText: 'Upgrade to Pro — $99/mo',
                 ctaUrl: 'https://neurochiro.co/doctor/billing'
               });
            }

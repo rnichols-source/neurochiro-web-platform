@@ -57,40 +57,18 @@ function GetStartedInner() {
         <div className="max-w-md w-full text-center">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-xl p-10">
             <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-heading font-black text-neuro-navy mb-2">Your 7-Day Trial Has Started!</h1>
+            <h1 className="text-2xl font-heading font-black text-neuro-navy mb-2">You're In!</h1>
             <p className="text-gray-500 mb-4">
               {role === "doctor"
-                ? "You have full access to everything in NeuroChiro Pro for the next 7 days. Set up your profile and start getting found by patients."
-                : "You have full access to Student Premium for 7 days. Explore jobs, the Academy, and start building your career."}
+                ? "Your account is created. Log in to book your onboarding call with Dr. Ray and get started."
+                : "Your account is created. Log in to book your onboarding call and explore your career tools."}
             </p>
-
-            {role === "doctor" && (
-              <div className="bg-neuro-cream rounded-xl p-4 mb-6 text-left">
-                <p className="text-xs font-bold text-neuro-orange uppercase tracking-widest mb-3">What You Get During Your Trial</p>
-                <div className="space-y-2">
-                  {[
-                    "Directory listing (patients find you immediately)",
-                    "Full profile with analytics",
-                    "Patient messaging",
-                    "Job postings + ChiroMatch",
-                    "Seminar hosting",
-                    "Spotlight interview eligibility",
-                    "Everything in NeuroChiro Pro",
-                  ].map((f, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <Check className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
-                      <span className="text-xs text-gray-600">{f}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             <Link
               href="/login"
               className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors"
             >
-              Log In & Set Up Your Profile
+              Log In Now
             </Link>
           </div>
         </div>
@@ -99,23 +77,23 @@ function GetStartedInner() {
   }
 
   const doctorFeatures = [
-    { icon: Users, label: "Listed in global directory" },
-    { icon: Shield, label: "Verified badge" },
-    { icon: BarChart3, label: "Patient analytics" },
-    { icon: MessageSquare, label: "Patient messaging" },
-    { icon: Briefcase, label: "Job postings" },
-    { icon: Calendar, label: "Seminar hosting" },
-    { icon: Star, label: "Spotlight eligibility" },
-    { icon: Zap, label: "Weekly growth report" },
+    { icon: Users, label: "Onboarding call with Dr. Ray" },
+    { icon: Shield, label: "Directory listing + SEO" },
+    { icon: MessageSquare, label: "Patient leads forwarded to you" },
+    { icon: Star, label: "Monthly branded content kit" },
+    { icon: Zap, label: "Weekly live promotion (IG + YT)" },
+    { icon: BarChart3, label: "Spotlight interview + video clips" },
+    { icon: Briefcase, label: "Full practice tools" },
+    { icon: Calendar, label: "Monthly growth report" },
   ];
 
   const studentFeatures = [
-    { icon: Briefcase, label: "Browse & apply to jobs" },
-    { icon: Star, label: "Full Academy access" },
-    { icon: Users, label: "ChiroMatch matching" },
-    { icon: Shield, label: "Interview Prep" },
-    { icon: BarChart3, label: "Financial Planner" },
-    { icon: Zap, label: "Techniques Library" },
+    { icon: Users, label: "Onboarding call with Dr. Ray" },
+    { icon: Star, label: "Monthly group call" },
+    { icon: Briefcase, label: "ChiroMatch + job board" },
+    { icon: Shield, label: "Academy + interview prep" },
+    { icon: BarChart3, label: "Financial planner" },
+    { icon: Zap, label: "Contract Lab" },
   ];
 
   return (
@@ -148,19 +126,19 @@ function GetStartedInner() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-heading font-black text-neuro-navy mb-2">
-            {role === "doctor" ? "Start Your 7-Day Pro Trial" : "Start Your Student Trial"}
+            {role === "doctor" ? "Join NeuroChiro Pro" : "Join NeuroChiro Student"}
           </h1>
           <p className="text-gray-500">
             {role === "doctor"
-              ? "Full access to everything. No credit card required."
-              : "Explore jobs, Academy, and career tools. No credit card required."}
+              ? "Full practice growth. Personal onboarding. Weekly promotion."
+              : "Career tools, mentorship, and a monthly call with Dr. Ray."}
           </p>
         </div>
 
-        {/* What you get during trial */}
+        {/* What you get */}
         <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
           <p className="text-xs font-bold text-neuro-orange uppercase tracking-widest mb-3">
-            {role === "doctor" ? "Your 7-Day Trial Includes" : "Student Trial Includes"}
+            {role === "doctor" ? "What You Get Every Month" : "What You Get Every Month"}
           </p>
           <div className="grid grid-cols-2 gap-2">
             {(role === "doctor" ? doctorFeatures : studentFeatures).map((f, i) => (
@@ -171,7 +149,7 @@ function GetStartedInner() {
             ))}
           </div>
           <p className="text-xs text-gray-400 mt-3">
-            {role === "doctor" ? "After 7 days: $49/mo or $490/yr. Cancel anytime." : "After 7 days: $12/mo or $120/yr. Cancel anytime."}
+            {role === "doctor" ? "$99/mo or $990/yr. Cancel anytime." : "$33/mo. Cancel anytime."}
           </p>
         </div>
 
@@ -209,11 +187,11 @@ function GetStartedInner() {
           <button type="submit" disabled={loading}
             className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors disabled:opacity-50">
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
-            {loading ? "Creating account..." : "Start My Free Trial"}
+            {loading ? "Creating account..." : role === "doctor" ? "Join — $99/mo" : "Join — $33/mo"}
           </button>
 
           <p className="text-center text-xs text-gray-400">
-            No credit card required. Full {role === "doctor" ? "Pro" : "Premium"} access for 7 days.
+            {role === "doctor" ? "Personal onboarding call with Dr. Ray included." : "Includes monthly group call with Dr. Ray."}
           </p>
         </form>
 

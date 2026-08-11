@@ -241,9 +241,9 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
           <h2 className="text-xl font-heading font-black text-white mb-3">Are You a Nervous System Chiropractor in {location}?</h2>
           <p className="text-white/50 text-sm mb-6">Join the directory and get found by patients searching for your specialty.</p>
           <Link href="/get-started" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
-            Start Your 7-Day Trial <ArrowRight className="w-4 h-4" />
+            Get Started <ArrowRight className="w-4 h-4" />
           </Link>
-          <p className="text-white/30 text-xs mt-3">$49/mo after trial. Cancel anytime.</p>
+          <p className="text-white/30 text-xs mt-3">$99/mo. Cancel anytime.</p>
         </div>
       </div>
     </div>

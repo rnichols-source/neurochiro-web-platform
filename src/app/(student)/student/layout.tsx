@@ -4,7 +4,7 @@ import Sidebar from "./Sidebar";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import NotificationBell from "@/components/layout/NotificationBell";
 import { AuthProvider } from "@/context/AuthContext";
-import { LayoutDashboard, MessageSquare, Bell, GraduationCap, Menu } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Bell, GraduationCap, Menu, Calendar, CheckCircle2, Clock, Briefcase, Star, Users, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
@@ -41,6 +41,10 @@ function StudentLayoutInner({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [initials, setInitials] = useState("--");
   const [subscriptionChecked, setSubscriptionChecked] = useState(false);
+  const [onboardingCallStatus, setOnboardingCallStatus] = useState<string | null>(null);
+  const [studentName, setStudentName] = useState("");
+
+  const CALENDLY_URL = "https://calendly.com/neurochiro/onboarding";
 
   useEffect(() => {
     const supabase = createClient();
@@ -57,12 +61,24 @@ function StudentLayoutInner({
         .select('full_name, tier, stripe_customer_id')
         .eq('id', user.id)
         .single();
+
+      // Check onboarding call status
+      const { data: student } = await (supabase as any)
+        .from('students')
+        .select('onboarding_call_status')
+        .eq('id', user.id)
+        .single();
+
+      const callStatus = student?.onboarding_call_status || 'not_booked';
+      if (callStatus !== 'completed') {
+        setOnboardingCallStatus(callStatus);
+      }
+
       if (profile?.full_name) {
         const parts = profile.full_name.split(" ");
         setInitials(parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0][0] || "--");
+        setStudentName(parts[0] || '');
       }
-      // Free tier — all students can access the portal
-      // Features are gated inside via sidebar locks and UpgradeGate components
       setSubscriptionChecked(true);
     };
 
@@ -74,12 +90,100 @@ function StudentLayoutInner({
   }, [pathname]);
 
   // Prevent flash of portal content while subscription is being checked
-  // Allow the subscribe and billing pages to render immediately
   const isExemptPage = pathname === '/student/subscribe' || pathname === '/student/billing' || pathname === '/student/welcome';
   if (!subscriptionChecked && !isExemptPage) {
     return (
       <div className="flex items-center justify-center h-dvh bg-[#0F1A24]">
         <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Onboarding call gate for students
+  if (onboardingCallStatus && onboardingCallStatus !== 'completed') {
+    const studentPromise = [
+      { icon: Users, text: "Monthly group call with Dr. Ray" },
+      { icon: Briefcase, text: "ChiroMatch job matching + smart job board" },
+      { icon: BookOpen, text: "Academy courses + interview prep" },
+      { icon: Star, text: "Contract Lab + financial planner" },
+    ];
+
+    return (
+      <div className="min-h-dvh bg-[#0F1A24] flex items-center justify-center px-6 py-12">
+        <div className="max-w-lg w-full">
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 rounded-full bg-neuro-orange/20 flex items-center justify-center mx-auto mb-6">
+              <Calendar className="w-10 h-10 text-neuro-orange" />
+            </div>
+            <h1 className="text-2xl font-heading font-black text-white mb-2">
+              {onboardingCallStatus === 'booked' ? 'Your Call is Booked!' : `Welcome${studentName ? `, ${studentName}` : ''}!`}
+            </h1>
+            <p className="text-white/50 leading-relaxed">
+              {onboardingCallStatus === 'booked'
+                ? "Dr. Ray is looking forward to meeting you. Your account will be activated after the call."
+                : "Book a quick onboarding call with Dr. Ray to activate your account and get started on your career."}
+            </p>
+          </div>
+
+          {onboardingCallStatus !== 'booked' && (
+            <a
+              href={CALENDLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-4 bg-neuro-orange text-white font-black rounded-xl text-center text-sm uppercase tracking-wider shadow-lg shadow-neuro-orange/20 hover:bg-neuro-orange/90 transition-all flex items-center justify-center gap-2 mb-8"
+            >
+              <Calendar className="w-5 h-5" />
+              Book Your Onboarding Call
+            </a>
+          )}
+
+          {onboardingCallStatus === 'booked' && (
+            <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-5 text-center mb-8">
+              <CheckCircle2 className="w-8 h-8 text-green-400 mx-auto mb-2" />
+              <p className="text-green-400 font-bold text-sm">Call booked! Check your email for the calendar invite.</p>
+            </div>
+          )}
+
+          <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-6 mb-6">
+            <p className="text-neuro-orange text-[10px] font-black uppercase tracking-[0.2em] mb-4">What You Get Every Month — $33/mo</p>
+            <div className="space-y-3">
+              {studentPromise.map((item, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <item.icon className="w-4 h-4 text-neuro-orange flex-shrink-0" />
+                  <span className="text-sm text-white/70">{item.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-5 text-left space-y-3 mb-6">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
+              <span className="text-sm text-white/70">Account created</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {onboardingCallStatus === 'booked' ? (
+                <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
+              ) : (
+                <Clock className="w-5 h-5 text-neuro-orange flex-shrink-0 animate-pulse" />
+              )}
+              <span className={`text-sm ${onboardingCallStatus === 'booked' ? 'text-white/70' : 'text-white font-bold'}`}>
+                {onboardingCallStatus === 'booked' ? 'Onboarding call booked' : 'Book onboarding call with Dr. Ray'}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Clock className="w-5 h-5 text-white/20 flex-shrink-0" />
+              <span className="text-sm text-white/30">Account activated</span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => { const supabase = createClient(); supabase.auth.signOut().then(() => window.location.href = '/'); }}
+            className="w-full text-sm text-white/30 hover:text-white/50 transition-colors text-center"
+          >
+            Sign Out
+          </button>
+        </div>
       </div>
     );
   }

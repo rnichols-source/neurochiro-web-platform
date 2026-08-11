@@ -79,22 +79,22 @@ export default function DoctorBilling() {
           <CreditCard className="w-10 h-10 text-neuro-orange mx-auto mb-4" />
           <p className="text-lg font-bold text-neuro-navy mb-2">Activate NeuroChiro Pro</p>
           <p className="text-sm text-gray-500 mb-2">Get found by patients. Full profile, analytics, messaging, Spotlight eligibility.</p>
-          <p className="text-3xl font-black text-neuro-navy mt-4 mb-1">$49<span className="text-sm font-bold text-gray-400">/mo</span></p>
-          <p className="text-xs text-gray-400 mb-6">or $490/yr (save $98). Cancel anytime.</p>
+          <p className="text-3xl font-black text-neuro-navy mt-4 mb-1">$99<span className="text-sm font-bold text-gray-400">/mo</span></p>
+          <p className="text-xs text-gray-400 mb-6">or $990/yr (save $198). Cancel anytime.</p>
           <div className="flex flex-col gap-3 max-w-xs mx-auto">
             <button
               onClick={() => handleActivatePro("monthly")}
               disabled={isPortalLoading}
               className="w-full px-6 py-4 bg-neuro-orange text-white font-black rounded-xl text-sm hover:bg-neuro-orange/90 transition-colors disabled:opacity-50 uppercase tracking-wider"
             >
-              {isPortalLoading ? "Redirecting..." : "Activate Pro — $49/mo"}
+              {isPortalLoading ? "Redirecting..." : "Activate Pro — $99/mo"}
             </button>
             <button
               onClick={() => handleActivatePro("annual")}
               disabled={isPortalLoading}
               className="w-full px-6 py-3 bg-neuro-navy text-white font-bold rounded-xl text-sm hover:bg-neuro-navy/90 transition-colors disabled:opacity-50"
             >
-              Annual — $490/yr (Save $98)
+              Annual — $990/yr (Save $198)
             </button>
           </div>
           <p className="text-xs text-gray-400 mt-4">Your profile will be removed from the directory on August 1 without an active Pro membership.</p>

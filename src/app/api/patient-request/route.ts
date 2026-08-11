@@ -78,7 +78,7 @@ export async function POST(req: Request) {
                   </div>`}
                   <p style="color:#666;line-height:1.6;">They couldn't see your phone number or website because your profile isn't on the Pro plan yet. Upgrade now and this patient — and every future patient — can reach you directly.</p>
                   <div style="text-align:center;margin:24px 0;">
-                    <a href="https://neurochiro.co/doctor/billing" style="display:inline-block;background:#e97325;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">Upgrade to Pro — $49/mo</a>
+                    <a href="https://neurochiro.co/doctor/billing" style="display:inline-block;background:#e97325;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">Upgrade to Pro — $99/mo</a>
                   </div>
                   <p style="color:#999;font-size:13px;text-align:center;">One new patient pays for a full year of NeuroChiro.</p>
                 </div>

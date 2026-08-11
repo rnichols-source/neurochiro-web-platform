@@ -9,23 +9,26 @@ import { createClient } from "@/lib/supabase";
 type Role = "doctor" | "student";
 
 const studentPerks = [
+  "Personal onboarding call with Dr. Ray",
+  "Monthly group call with Dr. Ray",
   "ChiroScore rating (0-100)",
   "ChiroMatch job matching",
-  "Smart job board with salary data",
   "Academy courses + interview prep",
   "Contract Lab for reviewing offers",
-  "Financial planner",
+  "Financial planner with salary data",
   "Direct messaging with doctors",
 ];
 
 const doctorPerks = [
-  "Profile in the global directory",
-  "Found by patients searching your area",
-  "Analytics dashboard",
-  "Patient leads + messaging",
-  "ChiroMatch associate matching",
-  "Job postings + hiring tools",
-  "CE Tracker",
+  "Personal onboarding call with Dr. Ray",
+  "Directory listing with SEO driving patients to you",
+  "Patient leads forwarded directly to you",
+  "Monthly branded content kit for your social",
+  "Instagram Collab posts (185K followers)",
+  "Weekly live promotion (IG + YouTube)",
+  "Spotlight interview + video clips for your social",
+  "Monthly growth report with stats + city ranking",
+  "Full practice tools (analytics, jobs, ChiroMatch)",
 ];
 
 export default function EventPage() {
@@ -159,20 +162,20 @@ export default function EventPage() {
               boxShadow: "0 4px 14px rgba(214,104,41,0.4)",
             }}>
             {loading && <Loader2 style={{ width: 18, height: 18, animation: "spin 1s linear infinite" }} />}
-            {loading ? "Creating account..." : role === "student" ? "Join Free" : "Start 7-Day Free Trial"}
+            {loading ? "Creating account..." : role === "student" ? "Join — $33/mo" : "Join — $99/mo"}
           </button>
 
           <p style={{ textAlign: "center", fontSize: 11, color: "#9ca3af", marginTop: 12 }}>
             {role === "student"
-              ? "Free to join. $12/mo for premium tools after trial."
-              : "No credit card required. $49/mo after 7-day trial."}
+              ? "$33/mo. Includes monthly group call with Dr. Ray."
+              : "$99/mo or $990/yr. Personal onboarding call included."}
           </p>
         </form>
 
         {/* Perks */}
         <div style={{ marginTop: 24, padding: "0 4px" }}>
           <p style={{ color: "#D66829", fontSize: 10, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 12 }}>
-            {role === "student" ? "What You Get" : "Your 7-Day Trial Includes"}
+            {role === "student" ? "What You Get" : "What You Get Every Month"}
           </p>
           <div style={{ display: "grid", gap: 8 }}>
             {perks.map((perk, i) => (

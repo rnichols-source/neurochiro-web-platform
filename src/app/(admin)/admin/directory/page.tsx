@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getAllDoctors, updateDoctorManually, deleteDoctorManually, bulkDeleteDoctors, migrateDoctorsFromCSV, sendMigrationEmails, registerAllUnlinkedDoctors } from "./actions";
-import { Trash2, Upload, CheckSquare, Square, AlertTriangle, CheckCircle2, Loader2, X, Mail, UserPlus } from "lucide-react";
+import { getAllDoctors, updateDoctorManually, deleteDoctorManually, bulkDeleteDoctors, migrateDoctorsFromCSV, sendMigrationEmails, registerAllUnlinkedDoctors, activateAfterOnboardingCall } from "./actions";
+import { Trash2, Upload, CheckSquare, Square, AlertTriangle, CheckCircle2, Loader2, X, Mail, UserPlus, Phone } from "lucide-react";
 
 export default function DirectoryManager() {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -392,6 +392,18 @@ export default function DirectoryManager() {
                     </td>
                     <td className="px-4 py-3 text-gray-400 capitalize">{doc.membership_tier}</td>
                     <td className="px-4 py-3 text-right space-x-2">
+                      {doc.onboarding_call_status !== 'completed' && !doc.is_approved && (
+                        <button
+                          onClick={async () => {
+                            if (!confirm(`Activate Dr. ${doc.first_name} ${doc.last_name}? This marks their onboarding call as complete.`)) return;
+                            await activateAfterOnboardingCall(doc.id);
+                            fetchDoctors(searchQuery);
+                          }}
+                          className="px-3 py-1 bg-green-500/10 text-green-400 rounded text-xs hover:bg-green-500/20"
+                        >
+                          <Phone className="w-3 h-3 inline mr-1" />Activate
+                        </button>
+                      )}
                       <button onClick={() => setSelectedDoctor({ ...doc })} className="px-3 py-1 bg-white/10 rounded text-xs hover:bg-white/20">Edit</button>
                       <button onClick={() => handleDelete(doc.id)} className="px-3 py-1 bg-red-500/10 text-red-400 rounded text-xs hover:bg-red-500/20">Delete</button>
                     </td>

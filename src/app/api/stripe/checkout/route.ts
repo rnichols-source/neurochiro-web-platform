@@ -9,7 +9,7 @@ const checkoutSchema = z.object({
 });
 
 const PLANS: Record<string, { monthly: number; annual: number; name: string }> = {
-  pro: { monthly: 4900, annual: 49000, name: "NeuroChiro Pro" },
+  pro: { monthly: 9900, annual: 99000, name: "NeuroChiro Pro" },
 };
 
 export async function POST(req: Request) {
@@ -40,7 +40,6 @@ export async function POST(req: Request) {
       mode: "subscription",
       payment_method_types: ["card"],
       subscription_data: {
-        trial_period_days: 7,
         metadata: { userId, tier },
       },
       line_items: [

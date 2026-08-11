@@ -248,9 +248,9 @@ export default async function HomePage() {
       <section className="bg-neuro-navy py-16 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl font-heading font-black text-white mb-4">Are you a nervous system chiropractor?</h2>
-          <p className="text-gray-400 mb-8">Join 115+ verified doctors across 30+ states. Get found by patients searching for your specialty. $49/mo after a 7-day free trial.</p>
+          <p className="text-gray-400 mb-8">Join 115+ verified doctors across 30+ states. Get found by patients searching for your specialty. $99/mo.</p>
           <Link href="/get-started" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
-            Start Your Free Trial <ArrowRight className="w-5 h-5" />
+            Get Started <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>

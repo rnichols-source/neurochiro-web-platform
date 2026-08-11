@@ -107,8 +107,8 @@ export async function GET(req: Request) {
       if (trialEnded && !sentNudges.has(`${doc.user_id}-trial_expired`)) {
         trigger = 'trial_expired';
         subject = `Your Pro trial ended, Dr. ${name} — ${views} patients found you`;
-        body = `<p>Your 7-day Pro trial has ended. During your trial, <strong>${views} patients</strong> viewed your profile on NeuroChiro.</p>
-          <p>Your contact info is now hidden from patients. To keep your phone, website, and booking link visible — upgrade to Pro for just $49/mo.</p>
+        body = `<p>Your profile is no longer on the Pro plan. During your time on NeuroChiro, <strong>${views} patients</strong> viewed your profile.</p>
+          <p>Your contact info is now hidden from patients. To keep your phone, website, and booking link visible — upgrade to Pro for $99/mo.</p>
           ${cityDemandLine}
           <p style="color:#e97325;font-weight:bold;">One new patient pays for a full year.</p>`;
       } else if (views >= 100 && !sentNudges.has(`${doc.user_id}-views_100`)) {
@@ -117,7 +117,7 @@ export async function GET(req: Request) {
         body = `<p>Your NeuroChiro profile has been viewed <strong>100 times</strong>.</p>
           <p>That's 100 patients who searched for a nervous system chiropractor and found <strong>you</strong>.</p>
           ${cityDemandLine}
-          <p>Right now, they can see your listing but they can't message you or see your full analytics. Upgrade to Pro ($49/mo) and turn those views into actual patients walking through your door.</p>`;
+          <p>Right now, they can see your listing but they can't message you or see your full analytics. Upgrade to Pro ($99/mo) and turn those views into actual patients walking through your door.</p>`;
       } else if (views >= 50 && !sentNudges.has(`${doc.user_id}-views_50`)) {
         trigger = 'views_50';
         subject = `50 profile views — patients are finding you, Dr. ${name}`;

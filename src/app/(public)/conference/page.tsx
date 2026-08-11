@@ -21,16 +21,21 @@ export default function ConferenceLandingPage() {
   const [success, setSuccess] = useState(false);
 
   const doctorFeatures = [
-    "Your own profile page in the global directory",
-    "Found by patients searching for nervous system care",
-    "Analytics dashboard + patient leads",
-    "ChiroMatch — residency-style associate matching",
-    "Job postings + full hiring system",
-    "CE credit tracking",
-    "Salary transparency data and market benchmarks",
+    "Personal onboarding call with Dr. Ray",
+    "Directory listing with SEO driving patients to you",
+    "Patient leads forwarded directly to you",
+    "Monthly branded content kit for your social",
+    "Instagram Collab posts (185K followers)",
+    "Featured on weekly live stream (IG + YouTube)",
+    "Spotlight interview + short-form video clips",
+    "City spotlight weeks + SEO articles featuring you",
+    "Monthly growth report with stats + city ranking",
+    "Full practice tools (analytics, jobs, ChiroMatch)",
   ];
 
   const studentFeatures = [
+    "Personal onboarding call with Dr. Ray",
+    "Monthly group call with Dr. Ray",
     "ChiroScore — universal candidate rating (0-100)",
     "ChiroMatch — get matched with top practices",
     "Smart job matching with salary transparency",
@@ -198,7 +203,7 @@ export default function ConferenceLandingPage() {
 
             {/* Features */}
             <div className="space-y-2 mb-6">
-              {features[role].slice(0, 5).map((feature, i) => (
+              {features[role].slice(0, 6).map((feature, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
                   <span className="text-xs text-gray-600">{feature}</span>
@@ -215,27 +220,15 @@ export default function ConferenceLandingPage() {
               className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors text-base disabled:opacity-50"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
-              {loading ? "Creating account..." : role === "student" ? "Join Free" : "Start 7-Day Free Trial"}
+              {loading ? "Creating account..." : role === "student" ? "Join — $33/mo" : "Join — $99/mo"}
             </button>
 
             <p className="text-center text-xs text-gray-400 mt-3">
               {role === "student"
-                ? "Free to join. No credit card required."
-                : "No credit card required. Full Pro access for 7 days."}
+                ? "$33/mo. Includes monthly group call with Dr. Ray."
+                : "$99/mo or $990/yr. Personal onboarding call included."}
             </p>
           </form>
-
-          {/* Pricing note */}
-          <div className="bg-neuro-navy rounded-xl p-4 text-center mb-4">
-            <p className="text-white font-bold text-sm mb-1">
-              {role === "student" ? "Student Premium: $12/mo" : "Doctor Pro: $49/mo"}
-            </p>
-            <p className="text-gray-400 text-xs">
-              {role === "student"
-                ? "Upgrade anytime for full access to premium career tools."
-                : "Continue after your trial to keep your profile, leads, and tools."}
-            </p>
-          </div>
 
           {/* Already a member */}
           <p className="text-center text-xs text-gray-400 mt-4">

@@ -130,9 +130,9 @@ export async function GET(req: Request) {
           ? `<p>Hi Dr. ${name},</p>
              <p>Doctors in your area are receiving patient messages through NeuroChiro. With the Pro plan, patients can message you directly from your profile.</p>
              <p>You also unlock your full analytics dashboard so you can see exactly who's finding you and how.</p>
-             <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/billing" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Upgrade to Pro — $49/mo</a></p>`
+             <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/billing" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Upgrade to Pro — $99/mo</a></p>`
           : `<p>Hi ${name},</p>
-             <p>Your free student account gives you access to jobs, seminars, the doctor directory, and community. When you're ready for more, upgrade to Premium ($12/mo) for Interview Prep, Contract Lab, Financial Planner, ChiroMatch, and the full Techniques Library.</p>
+             <p>Your free student account gives you access to jobs, seminars, the doctor directory, and community. When you're ready for more, upgrade to Premium ($33/mo) for Interview Prep, Contract Lab, Financial Planner, ChiroMatch, and the full Techniques Library.</p>
              <p>These are the tools that help you land your first job and negotiate your first contract with confidence.</p>
              <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/dashboard" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Go to Dashboard</a></p>`;
       } else if (daysSinceSignup === 30) {

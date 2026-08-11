@@ -88,7 +88,7 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
 
   // If locked, show the content with an overlay
   const tierLabel = "Pro";
-  const tierPrice = "$49";
+  const tierPrice = "$99";
 
   return (
     <>

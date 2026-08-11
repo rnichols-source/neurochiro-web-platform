@@ -193,7 +193,7 @@ export default function DoctorDashboard() {
               </div>
             </div>
             <Link href="/pricing" className="px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap flex-shrink-0">
-              Unlock for $49/mo
+              Unlock for $99/mo
             </Link>
           </div>
         </motion.div>

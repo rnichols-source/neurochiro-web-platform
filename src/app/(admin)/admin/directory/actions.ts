@@ -571,3 +571,53 @@ export async function deleteDoctorManually(doctorId: string) {
   }
 }
 
+export async function activateAfterOnboardingCall(doctorId: string) {
+  await checkAdminAuth();
+  const supabase = createAdminClient();
+
+  // Get the doctor's user_id to also update student record if needed
+  const { data: doctor } = await supabase.from('doctors').select('user_id, first_name, last_name').eq('id', doctorId).single();
+  if (!doctor) return { success: false, error: 'Doctor not found' };
+
+  // Activate the doctor
+  await supabase.from('doctors').update({
+    onboarding_call_status: 'completed',
+    is_approved: true,
+    verification_status: 'verified',
+  } as any).eq('id', doctorId);
+
+  // Also update profile if needed
+  if (doctor.user_id) {
+    await supabase.from('profiles').update({ is_approved: true } as any).eq('id', doctor.user_id);
+  }
+
+  // Discord notification
+  const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+  if (discordUrl) {
+    fetch(discordUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: `✅ **ACTIVATED** Dr. ${doctor.first_name} ${doctor.last_name} — onboarding call completed`,
+      }),
+    }).catch(() => {});
+  }
+
+  revalidatePath('/admin/directory');
+  return { success: true };
+}
+
+export async function activateStudentAfterOnboardingCall(studentId: string) {
+  await checkAdminAuth();
+  const supabase = createAdminClient();
+
+  await (supabase as any).from('students').update({
+    onboarding_call_status: 'completed',
+  }).eq('id', studentId);
+
+  await supabase.from('profiles').update({ is_approved: true } as any).eq('id', studentId);
+
+  revalidatePath('/admin/directory');
+  return { success: true };
+}
+
