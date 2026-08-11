@@ -171,6 +171,35 @@ export default function DoctorDashboard() {
         </motion.div>
       )}
 
+      {/* Feature Adoption Checklist — helps Pro members discover tools */}
+      {data?.doctor && !isProfileGated(data.doctor) && (
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-6">
+          <div className="mb-4">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-neuro-orange font-semibold mb-1">Get the Most Out of Pro</p>
+            <p className="text-white/30 text-xs">Complete these to maximize your membership value.</p>
+          </div>
+          <div className="space-y-2">
+            {[
+              { label: "Complete your profile", done: (data?.marketPerformance?.completeness || 0) >= 100, href: "/doctor/profile" },
+              { label: "Check your analytics", done: profileViews > 0, href: "/doctor/analytics" },
+              { label: "Share your profile link", done: false, href: `/directory/${slug}` },
+              { label: "Watch a weekly live recap", done: false, href: "/doctor/lives" },
+              { label: "Explore the Care Plan Closer", done: false, href: "/doctor/care-plan-closer" },
+            ].filter(item => !item.done).slice(0, 3).map((item, i) => (
+              <Link
+                key={i}
+                href={item.href}
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/[0.04] transition-colors group"
+              >
+                <div className="w-5 h-5 rounded-full border-2 border-white/15 group-hover:border-neuro-orange transition-colors flex-shrink-0" />
+                <span className="text-sm text-white/50 group-hover:text-white transition-colors">{item.label}</span>
+                <ArrowRight className="w-3.5 h-3.5 text-white/15 group-hover:text-neuro-orange ml-auto transition-colors" />
+              </Link>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Upgrade Nudge Banner — shows for gated free profiles */}
       {data?.doctor && isProfileGated(data.doctor) && profileViews > 0 && (
         <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-r from-neuro-navy to-neuro-navy/90 rounded-2xl p-6 border border-neuro-orange/20 shadow-lg">

@@ -45,7 +45,14 @@ const coreNavSections = [
       { name: "ChiroMatch", href: "/doctor/chiromatch", icon: Shuffle, tier: "pro" as const },
       { name: "Students", href: "/doctor/students", icon: GraduationCap, tier: "pro" as const },
       { name: "Seminars", href: "/doctor/seminars", icon: Calendar },
+      { name: "Community", href: "/doctor/community", icon: Users },
       { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
+    ],
+  },
+  {
+    label: "ADD-ONS",
+    items: [
+      { name: "Care Plan Closer", href: "/doctor/care-plan-closer", icon: Calculator },
     ],
   },
   {
