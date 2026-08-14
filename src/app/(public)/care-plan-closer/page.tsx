@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Loader2, Calendar, Clock, Users, Zap, DollarSign, TrendingUp, ArrowRight } from "lucide-react";
+import { CheckCircle2, Loader2, Calendar, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 const DEMO_DATE = "August 28, 2026";
@@ -45,16 +45,6 @@ export default function CarePlanCloserDemoPage() {
           role: "doctor",
         }),
       });
-
-      // Discord notification
-      try {
-        await fetch("/api/leads", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: "notify@internal", source: "skip" }),
-        }).catch(() => {});
-      } catch {}
-
       setRegistered(true);
     } catch {
       setError("Something went wrong. Please try again.");
@@ -64,21 +54,21 @@ export default function CarePlanCloserDemoPage() {
 
   if (registered) {
     return (
-      <div style={{ minHeight: "100dvh", background: "#0F1A24", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-        <div style={{ maxWidth: 480, width: "100%", textAlign: "center" }}>
-          <div style={{ background: "#1a2e40", borderRadius: 24, padding: 48, border: "1px solid rgba(255,255,255,0.08)" }}>
-            <CheckCircle2 style={{ width: 64, height: 64, color: "#22c55e", margin: "0 auto 20px" }} />
-            <h1 style={{ fontSize: 24, fontWeight: 900, color: "#fff", marginBottom: 8 }}>You're Registered!</h1>
-            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
+      <div className="min-h-dvh bg-[#0F1A24] flex items-center justify-center px-6">
+        <div className="max-w-lg w-full text-center">
+          <div className="bg-[#1a2e40] rounded-2xl p-12 border border-white/[0.08]">
+            <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-5" />
+            <h1 className="text-2xl font-black text-white mb-3">You're Registered!</h1>
+            <p className="text-white/50 text-sm mb-8 leading-relaxed">
               Mark your calendar: {DEMO_DATE} at {DEMO_TIME}. We'll send you the Zoom link before the demo.
             </p>
-            <div style={{ background: "rgba(214,104,41,0.1)", border: "1px solid rgba(214,104,41,0.2)", borderRadius: 16, padding: 20, marginBottom: 24 }}>
-              <p style={{ color: "#D66829", fontWeight: 800, fontSize: 13 }}>What to expect:</p>
-              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginTop: 8, lineHeight: 1.6 }}>
+            <div className="bg-neuro-orange/10 border border-neuro-orange/20 rounded-xl p-5 mb-8">
+              <p className="text-neuro-orange font-black text-sm">What to expect:</p>
+              <p className="text-white/40 text-sm mt-2 leading-relaxed">
                 60 minutes. Live demo. Real results. And an exclusive beta offer for the first 10 doctors only.
               </p>
             </div>
-            <Link href="/" style={{ color: "#D66829", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
+            <Link href="/" className="text-neuro-orange font-bold text-sm hover:underline">
               Back to NeuroChiro
             </Link>
           </div>
@@ -88,126 +78,121 @@ export default function CarePlanCloserDemoPage() {
   }
 
   return (
-    <div style={{ minHeight: "100dvh", background: "#0F1A24" }}>
+    <div className="min-h-dvh bg-[#0F1A24]">
       {/* Hero */}
-      <div style={{ textAlign: "center", padding: "64px 24px 32px", maxWidth: 640, margin: "0 auto" }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(214,104,41,0.15)", border: "1px solid rgba(214,104,41,0.3)", borderRadius: 100, padding: "8px 16px", marginBottom: 24 }}>
-          <Calendar style={{ width: 14, height: 14, color: "#D66829" }} />
-          <span style={{ fontSize: 11, fontWeight: 900, color: "#D66829", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+      <div className="text-center px-6 pt-16 pb-8 max-w-3xl mx-auto">
+        <div className="inline-flex items-center gap-2 bg-neuro-orange/15 border border-neuro-orange/30 rounded-full px-4 py-2 mb-6">
+          <Calendar className="w-3.5 h-3.5 text-neuro-orange" />
+          <span className="text-[11px] font-black text-neuro-orange uppercase tracking-[0.15em]">
             Free Live Demo — {DEMO_DATE}
           </span>
         </div>
 
-        <h1 style={{ fontSize: 36, fontWeight: 900, color: "#fff", lineHeight: 1.15, marginBottom: 16 }}>
+        <h1 className="text-4xl md:text-5xl font-black text-white leading-[1.1] mb-6">
           Close More Care Plans.<br />
-          <span style={{ color: "#D66829" }}>Stop Losing Cases.</span>
+          <span className="text-neuro-orange">Stop Losing Cases.</span>
         </h1>
 
-        <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 16, lineHeight: 1.7, maxWidth: 500, margin: "0 auto 8px" }}>
+        <p className="text-white/45 text-lg leading-relaxed max-w-xl mx-auto mb-2">
           Watch Dr. Ray build a care plan live, present it the way he does with real patients, and show you exactly how this tool changed his case acceptance.
         </p>
 
-        <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 13, marginBottom: 32 }}>
-          {daysUntil === 0 ? "Today" : `${daysUntil} day${daysUntil !== 1 ? 's' : ''} away`} — {DEMO_TIME} on Zoom — Free
+        <p className="text-white/25 text-sm">
+          {daysUntil === 0 ? "Today" : `${daysUntil} day${daysUntil !== 1 ? "s" : ""} away`} — {DEMO_TIME} on Zoom — Free
         </p>
       </div>
 
-      {/* Registration Form */}
-      <div style={{ maxWidth: 440, margin: "0 auto", padding: "0 24px 32px" }}>
-        <form onSubmit={handleSubmit} style={{ background: "#1a2e40", borderRadius: 24, padding: 32, border: "2px solid #D66829", boxShadow: "0 20px 60px rgba(214,104,41,0.15)" }}>
-          <input
-            type="text" required value={name} onChange={(e) => setName(e.target.value)}
-            placeholder="Your name"
-            style={{ width: "100%", padding: "14px 16px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, fontSize: 14, color: "#fff", marginBottom: 12, outline: "none", boxSizing: "border-box" }}
-          />
-          <input
-            type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email address"
-            style={{ width: "100%", padding: "14px 16px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, fontSize: 14, color: "#fff", marginBottom: 16, outline: "none", boxSizing: "border-box" }}
-          />
+      {/* Two-Column: Form + What You'll See */}
+      <div className="max-w-4xl mx-auto px-6 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
-          {/* Honeypot */}
-          <div style={{ position: "absolute", left: -9999 }} aria-hidden="true">
-            <input type="text" name="company_url" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
-          </div>
+          {/* Registration Form */}
+          <form onSubmit={handleSubmit} className="bg-[#1a2e40] rounded-2xl p-8 border-2 border-neuro-orange" style={{ boxShadow: "0 20px 60px rgba(214,104,41,0.15)" }}>
+            <h2 className="text-lg font-black text-white mb-6">Save Your Spot</h2>
 
-          {error && <p style={{ color: "#ef4444", fontSize: 13, marginBottom: 12 }}>{error}</p>}
+            <input
+              type="text" required value={name} onChange={(e) => setName(e.target.value)}
+              placeholder="Your name"
+              className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white mb-3 outline-none focus:border-neuro-orange placeholder:text-white/25"
+            />
+            <input
+              type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email address"
+              className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white mb-5 outline-none focus:border-neuro-orange placeholder:text-white/25"
+            />
 
-          <button
-            type="submit" disabled={loading}
-            style={{
-              width: "100%", padding: "16px 0", background: "#D66829", color: "#fff", fontWeight: 900,
-              borderRadius: 12, border: "none", fontSize: 15, cursor: "pointer", display: "flex",
-              alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.6 : 1,
-              boxShadow: "0 4px 20px rgba(214,104,41,0.4)",
-            }}
-          >
-            {loading && <Loader2 style={{ width: 18, height: 18, animation: "spin 1s linear infinite" }} />}
-            {loading ? "Registering..." : "Save My Spot — Free"}
-          </button>
-
-          <p style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.25)", marginTop: 12 }}>
-            Free. No credit card. Zoom link sent to your email.
-          </p>
-        </form>
-      </div>
-
-      {/* What You'll See */}
-      <div style={{ maxWidth: 540, margin: "0 auto", padding: "0 24px 32px" }}>
-        <p style={{ color: "#D66829", fontSize: 10, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 16 }}>
-          What You'll See in the Demo
-        </p>
-        <div style={{ display: "grid", gap: 12 }}>
-          {WHAT_YOULL_SEE.map((item, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-              <CheckCircle2 style={{ width: 16, height: 16, color: "#22c55e", flexShrink: 0, marginTop: 2 }} />
-              <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, lineHeight: 1.5 }}>{item}</span>
+            {/* Honeypot */}
+            <div className="absolute -left-[9999px]" aria-hidden="true">
+              <input type="text" name="company_url" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Stats/Social Proof */}
-      <div style={{ maxWidth: 540, margin: "0 auto", padding: "0 24px 32px" }}>
-        <div style={{ background: "#1a2e40", borderRadius: 16, border: "1px solid rgba(255,255,255,0.08)", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", textAlign: "center" }}>
-          {[
-            { value: "10", label: "Beta Spots" },
-            { value: "60", label: "Minutes" },
-            { value: "$0", label: "To Attend" },
-          ].map((stat, i) => (
-            <div key={i} style={{ padding: "20px 12px", borderRight: i < 2 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
-              <p style={{ fontSize: 24, fontWeight: 900, color: "#D66829" }}>{stat.value}</p>
-              <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.15em", marginTop: 4 }}>{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+            {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
 
-      {/* Who This Is For */}
-      <div style={{ maxWidth: 540, margin: "0 auto", padding: "0 24px 48px" }}>
-        <div style={{ background: "rgba(214,104,41,0.08)", border: "1px solid rgba(214,104,41,0.15)", borderRadius: 16, padding: 24, textAlign: "center" }}>
-          <p style={{ color: "#fff", fontWeight: 800, fontSize: 15, marginBottom: 8 }}>This is for chiropractors who:</p>
-          <div style={{ display: "grid", gap: 8, textAlign: "left", maxWidth: 360, margin: "0 auto" }}>
-            {[
-              "Know they're losing cases they should be closing",
-              "Wing their report of findings every time",
-              "Struggle with the money conversation",
-              "Want a system, not another technique",
-            ].map((item, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <ArrowRight style={{ width: 12, height: 12, color: "#D66829", flexShrink: 0 }} />
-                <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{item}</span>
+            <button
+              type="submit" disabled={loading}
+              className="w-full py-4 bg-neuro-orange text-white font-black rounded-xl text-base flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-all disabled:opacity-50 shadow-lg shadow-neuro-orange/20"
+            >
+              {loading && <Loader2 className="w-5 h-5 animate-spin" />}
+              {loading ? "Registering..." : "Save My Spot — Free"}
+            </button>
+
+            <p className="text-center text-[11px] text-white/25 mt-3">
+              Free. No credit card. Zoom link sent to your email.
+            </p>
+          </form>
+
+          {/* What You'll See + Stats */}
+          <div className="space-y-6">
+            <div className="bg-[#1a2e40] rounded-2xl border border-white/[0.08] p-8">
+              <p className="text-neuro-orange text-[10px] font-black uppercase tracking-[0.2em] mb-5">
+                What You'll See in the Demo
+              </p>
+              <div className="space-y-4">
+                {WHAT_YOULL_SEE.map((item, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-white/60 text-sm leading-relaxed">{item}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            <div className="bg-[#1a2e40] rounded-2xl border border-white/[0.08] grid grid-cols-3 text-center">
+              {[
+                { value: "10", label: "Beta Spots" },
+                { value: "60", label: "Minutes" },
+                { value: "$0", label: "To Attend" },
+              ].map((stat, i) => (
+                <div key={i} className={`py-5 ${i < 2 ? "border-r border-white/[0.06]" : ""}`}>
+                  <p className="text-2xl font-black text-neuro-orange">{stat.value}</p>
+                  <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.15em] mt-1">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-neuro-orange/[0.08] border border-neuro-orange/15 rounded-xl p-6">
+              <p className="text-white font-black text-sm mb-3">This is for chiropractors who:</p>
+              <div className="space-y-2">
+                {[
+                  "Know they're losing cases they should be closing",
+                  "Wing their report of findings every time",
+                  "Struggle with the money conversation",
+                  "Want a system, not another technique",
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <ArrowRight className="w-3 h-3 text-neuro-orange flex-shrink-0" />
+                    <span className="text-white/50 text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div style={{ textAlign: "center", padding: "24px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-        <p style={{ color: "rgba(255,255,255,0.15)", fontSize: 12 }}>
-          NeuroChiro — neurochiro.co
-        </p>
+      <div className="text-center py-6 border-t border-white/[0.05]">
+        <p className="text-white/15 text-xs">NeuroChiro — neurochiro.co</p>
       </div>
     </div>
   );
