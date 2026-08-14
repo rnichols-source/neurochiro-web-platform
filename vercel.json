@@ -84,6 +84,10 @@
     {
       "path": "/api/cron/monthly-growth-report",
       "schedule": "0 12 1 * *"
+    },
+    {
+      "path": "/api/cron/demo-reminders",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
