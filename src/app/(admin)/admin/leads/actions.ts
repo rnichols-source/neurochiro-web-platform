@@ -38,6 +38,24 @@ export async function updateLeadStatus(leadId: string, status: string) {
   return { success: true }
 }
 
+export async function getDemoRegistrants() {
+  await checkAdminAuth()
+  const supabase = createServerSupabase()
+
+  const { data, error } = await supabase
+    .from('leads')
+    .select('*')
+    .eq('source', 'care_plan_closer_demo')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error("Error fetching demo registrants:", error)
+    return []
+  }
+
+  return data || []
+}
+
 export async function deleteLeadAction(leadId: string) {
   await checkAdminAuth()
   const supabase = createServerSupabase()

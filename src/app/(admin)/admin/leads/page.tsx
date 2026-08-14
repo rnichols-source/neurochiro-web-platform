@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getLeads, updateLeadStatus, deleteLeadAction } from "./actions";
+import { getLeads, updateLeadStatus, deleteLeadAction, getDemoRegistrants } from "./actions";
 import {
   Mail,
   Phone,
@@ -53,15 +53,18 @@ function formatDate(d: string) {
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<any[]>([]);
+  const [demoRegistrants, setDemoRegistrants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterSource, setFilterSource] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showDemoList, setShowDemoList] = useState(false);
 
   useEffect(() => {
-    getLeads().then((data) => {
-      setLeads(data);
+    Promise.all([getLeads(), getDemoRegistrants()]).then(([leadsData, demoData]) => {
+      setLeads(leadsData);
+      setDemoRegistrants(demoData);
       setLoading(false);
     });
   }, []);
@@ -117,6 +120,34 @@ export default function LeadsPage() {
           Everyone who submitted a form on the site. Contact them, track status, never lose a lead.
         </p>
       </div>
+
+      {/* Demo Registrants Banner */}
+      {demoRegistrants.length > 0 && (
+        <div className="bg-neuro-orange/10 border border-neuro-orange/20 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-neuro-orange font-black text-sm">Care Plan Closer Demo — Aug 28</p>
+              <p className="text-white/40 text-xs mt-0.5">{demoRegistrants.length} registered</p>
+            </div>
+            <button onClick={() => setShowDemoList(!showDemoList)} className="px-3 py-1.5 bg-neuro-orange/20 text-neuro-orange rounded-lg text-xs font-bold hover:bg-neuro-orange/30">
+              {showDemoList ? "Hide" : "View List"}
+            </button>
+          </div>
+          {showDemoList && (
+            <div className="mt-3 border-t border-neuro-orange/10 pt-3 space-y-2">
+              {demoRegistrants.map((r: any, i: number) => (
+                <div key={i} className="flex items-center justify-between text-sm">
+                  <div>
+                    <span className="text-white/70 font-medium">{r.first_name || "No name"}</span>
+                    <span className="text-white/30 ml-2">{r.email}</span>
+                  </div>
+                  <span className="text-white/20 text-xs">{r.created_at ? formatDate(r.created_at) : ""}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

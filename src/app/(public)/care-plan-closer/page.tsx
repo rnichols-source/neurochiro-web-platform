@@ -35,16 +35,12 @@ export default function CarePlanCloserDemoPage() {
     setError("");
 
     try {
-      await fetch("/api/leads", {
+      const res = await fetch("/api/demo-registration", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          first_name: name,
-          source: "care_plan_closer_demo",
-          role: "doctor",
-        }),
+        body: JSON.stringify({ email, first_name: name }),
       });
+      if (!res.ok) throw new Error("Registration failed");
       setRegistered(true);
     } catch {
       setError("Something went wrong. Please try again.");
