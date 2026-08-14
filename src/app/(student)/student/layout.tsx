@@ -100,7 +100,9 @@ function StudentLayoutInner({
   }
 
   // Onboarding call gate for students
-  if (onboardingCallStatus && onboardingCallStatus !== 'completed') {
+  // Exempt welcome page so students can complete initial setup first
+  const isWelcomePage = pathname === '/student/welcome';
+  if (onboardingCallStatus && onboardingCallStatus !== 'completed' && !isWelcomePage) {
     const studentPromise = [
       { icon: Users, text: "Monthly group call with Dr. Ray" },
       { icon: Briefcase, text: "ChiroMatch job matching + smart job board" },

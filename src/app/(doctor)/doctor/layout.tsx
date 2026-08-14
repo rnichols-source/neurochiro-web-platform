@@ -89,7 +89,9 @@ export default function DoctorLayout({
   }, [pathname]);
 
   // Onboarding call gate — must complete call with Dr. Ray before accessing dashboard
-  if (onboardingCallStatus && onboardingCallStatus !== 'completed') {
+  // Exempt the profile onboarding page so new doctors can set up photo/bio/specialties first
+  const isOnboardingPage = pathname === '/doctor/onboarding';
+  if (onboardingCallStatus && onboardingCallStatus !== 'completed' && !isOnboardingPage) {
     const monthlyPromise = [
       { icon: Phone, text: "Patient leads forwarded directly to you" },
       { icon: ImageIcon, text: "Monthly branded content kit for your social" },
