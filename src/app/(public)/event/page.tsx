@@ -78,7 +78,7 @@ export default function EventPage() {
       <div style={{ textAlign: "center", padding: "48px 24px 24px" }}>
         <img src="/logo-white.png" alt="NeuroChiro" style={{ width: 48, height: 48, margin: "0 auto 16px", objectFit: "contain" }} />
         <p style={{ color: "#D66829", fontSize: 11, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 8 }}>
-          Mile High  &middot;  Mile High
+          Mile High 4
         </p>
         <h1 style={{ color: "#fff", fontSize: 28, fontWeight: 900, lineHeight: 1.2, marginBottom: 8 }}>
           Join the Network
