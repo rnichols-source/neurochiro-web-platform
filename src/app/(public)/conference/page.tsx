@@ -15,6 +15,7 @@ export default function ConferenceLandingPage() {
   const [role, setRole] = useState<Role>("student");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,7 +32,7 @@ export default function ConferenceLandingPage() {
     setLoading(true);
     setError("");
 
-    const result = await createFreeAccount({ name, email, password, role });
+    const result = await createFreeAccount({ name, email, password, role, phone });
     if (result.error) { setError(result.error); setLoading(false); return; }
 
     const supabase = createClient();
@@ -164,6 +165,12 @@ export default function ConferenceLandingPage() {
                 type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                 inputMode="email" autoComplete="email"
                 placeholder="Email address"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange"
+              />
+              <input
+                type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)}
+                inputMode="tel" autoComplete="tel"
+                placeholder="Phone number"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange"
               />
               <input

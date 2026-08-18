@@ -13,6 +13,7 @@ export default function EventPage() {
   const [role, setRole] = useState<Role>("student");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +27,7 @@ export default function EventPage() {
     setLoading(true);
     setError("");
 
-    const result = await createFreeAccount({ name, email, password, role });
+    const result = await createFreeAccount({ name, email, password, role, phone });
     if (result.error) { setError(result.error); setLoading(false); return; }
 
     const supabase = createClient();
@@ -121,6 +122,10 @@ export default function EventPage() {
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
             inputMode="email" autoComplete="email"
             placeholder="Email address"
+            style={{ width: "100%", padding: "14px 16px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, marginBottom: 10, outline: "none", boxSizing: "border-box" }} />
+          <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)}
+            inputMode="tel" autoComplete="tel"
+            placeholder="Phone number"
             style={{ width: "100%", padding: "14px 16px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, marginBottom: 10, outline: "none", boxSizing: "border-box" }} />
           <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"

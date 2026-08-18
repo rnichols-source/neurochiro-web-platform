@@ -7,6 +7,7 @@ export async function createFreeAccount(data: {
   email: string;
   password: string;
   role: 'doctor' | 'student';
+  phone?: string;
 }) {
   try {
     const supabase = createAdminClient();
@@ -16,7 +17,7 @@ export async function createFreeAccount(data: {
       email: data.email,
       password: data.password,
       email_confirm: true,
-      user_metadata: { full_name: data.name, role: data.role },
+      user_metadata: { full_name: data.name, role: data.role, phone: data.phone || '' },
     });
 
     if (authErr) {
@@ -55,6 +56,7 @@ export async function createFreeAccount(data: {
         country: 'US',
         address: '',
         bio: '',
+        phone: data.phone || '',
         specialties: [],
         verification_status: 'pending',
         membership_tier: 'free',
@@ -82,7 +84,7 @@ export async function createFreeAccount(data: {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `🔔 **NEW SIGNUP — ONBOARDING CALL NEEDED**\n\n**${data.name}** signed up as a **${data.role}**\nEmail: ${data.email}\n\nThey need to book their onboarding call before activation.`,
+            content: `🔔 **NEW SIGNUP — ONBOARDING CALL NEEDED**\n\n**${data.name}** signed up as a **${data.role}**\nEmail: ${data.email}\nPhone: ${data.phone || 'Not provided'}\n\nThey need to book their onboarding call before activation.`,
           }),
         }).catch(() => {});
       }

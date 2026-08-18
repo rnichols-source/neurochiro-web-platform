@@ -13,6 +13,7 @@ export default function MH4Page() {
   const [role, setRole] = useState<Role>("doctor");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,7 +31,7 @@ export default function MH4Page() {
     setLoading(true);
     setError("");
 
-    const result = await createFreeAccount({ name, email, password, role });
+    const result = await createFreeAccount({ name, email, password, role, phone });
     if (result.error) { setError(result.error); setLoading(false); return; }
 
     // Also save to leads with MH4 source for tracking
@@ -141,6 +142,12 @@ export default function MH4Page() {
               type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
               inputMode="email" autoComplete="email"
               placeholder="Email address"
+              className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white mb-3 outline-none focus:border-neuro-orange placeholder:text-white/25"
+            />
+            <input
+              type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)}
+              inputMode="tel" autoComplete="tel"
+              placeholder="Phone number"
               className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white mb-3 outline-none focus:border-neuro-orange placeholder:text-white/25"
             />
             <input
