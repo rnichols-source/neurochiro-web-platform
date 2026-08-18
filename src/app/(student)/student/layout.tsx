@@ -44,7 +44,7 @@ function StudentLayoutInner({
   const [onboardingCallStatus, setOnboardingCallStatus] = useState<string | null>(null);
   const [studentName, setStudentName] = useState("");
 
-  const CALENDLY_URL = "https://calendly.com/neurochiro/onboarding";
+  const CALENDLY_URL = "https://calendly.com/drray-neurochirodirectory/neurochiro-onboarding-call";
 
   useEffect(() => {
     const supabase = createClient();

@@ -34,7 +34,7 @@ export default function DoctorLayout({
   const [doctorName, setDoctorName] = useState("");
 
   // Placeholder — replace with your Calendly link
-  const CALENDLY_URL = "https://calendly.com/neurochiro/onboarding";
+  const CALENDLY_URL = "https://calendly.com/drray-neurochirodirectory/neurochiro-onboarding-call";
 
   useEffect(() => {
     const supabase = createClient();
