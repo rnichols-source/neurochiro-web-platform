@@ -111,7 +111,7 @@ export default function MH4Page() {
         <div className="inline-flex items-center gap-2 bg-green-500/15 border border-green-500/30 rounded-full px-4 py-2 mb-6">
           <Gift className="w-3.5 h-3.5 text-green-400" />
           <span className="text-[11px] font-black text-green-400 uppercase tracking-[0.15em]">
-            Mau High Virtual Swag Bag
+            Mile High Virtual Swag Bag
           </span>
         </div>
 
@@ -121,7 +121,7 @@ export default function MH4Page() {
         </h1>
 
         <p className="text-white/45 text-lg leading-relaxed max-w-xl mx-auto mb-2">
-          As a Mau High attendee, create your NeuroChiro account free and book a personal onboarding call with Dr. Ray.
+          As a Mile High attendee, create your NeuroChiro account free and book a personal onboarding call with Dr. Ray.
           {role === "doctor" ? " He'll walk you through the directory, weekly promotion, patient leads, and every tool included in Pro." : " He'll walk you through the career tools, job matching, Academy, and everything included in your membership."}
         </p>
 
