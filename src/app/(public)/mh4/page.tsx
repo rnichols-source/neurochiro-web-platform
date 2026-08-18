@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Loader2, GraduationCap, Stethoscope, Zap, ArrowRight, Gift } from "lucide-react";
+import { CheckCircle2, Loader2, GraduationCap, Stethoscope, Gift } from "lucide-react";
 import Link from "next/link";
 import { createFreeAccount } from "../get-started/actions";
 import { createClient } from "@/lib/supabase";
@@ -84,13 +84,13 @@ export default function MH4Page() {
         <div className="max-w-lg w-full text-center">
           <div className="bg-[#1a2e40] rounded-2xl p-12 border border-white/[0.08]">
             <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-5" />
-            <h1 className="text-2xl font-black text-white mb-3">You're In! First Month Free.</h1>
+            <h1 className="text-2xl font-black text-white mb-3">You're In!</h1>
             <p className="text-white/50 text-sm mb-4 leading-relaxed">
-              Your account is created and your first month is on us. Log in to {role === "doctor" ? "complete your profile and book your onboarding call with Dr. Ray" : "book your onboarding call with Dr. Ray and explore your career tools"}.
+              Your account is created. Log in to {role === "doctor" ? "complete your profile and book your onboarding call with Dr. Ray. After the call, activate Pro to unlock everything." : "book your onboarding call with Dr. Ray and explore your career tools."}
             </p>
             <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 mb-6">
-              <p className="text-green-400 font-bold text-sm">Discount code MH4 applied</p>
-              <p className="text-white/30 text-xs mt-1">Your first month ({price}) is free. Billing starts month 2.</p>
+              <p className="text-green-400 font-bold text-sm">MH4 access granted</p>
+              <p className="text-white/30 text-xs mt-1">Start with a free account. Activate {role === "doctor" ? "Pro ($99/mo)" : "your membership ($33/mo)"} after your onboarding call.</p>
             </div>
             <Link
               href="/login"
@@ -116,19 +116,19 @@ export default function MH4Page() {
         </div>
 
         <h1 className="text-4xl md:text-5xl font-black text-white leading-[1.1] mb-6">
-          Your First Month<br />
-          <span className="text-neuro-orange">Is On Us.</span>
+          Get Started<br />
+          <span className="text-neuro-orange">Free.</span>
         </h1>
 
         <p className="text-white/45 text-lg leading-relaxed max-w-xl mx-auto mb-2">
-          As a Mau High attendee, your first month of NeuroChiro is completely free.
-          {role === "doctor" ? " Directory listing, weekly promotion, patient leads, and the full practice growth toolkit." : " Career tools, job matching, Academy access, and monthly group calls with Dr. Ray."}
+          As a Mau High attendee, create your NeuroChiro account free and book a personal onboarding call with Dr. Ray.
+          {role === "doctor" ? " He'll walk you through the directory, weekly promotion, patient leads, and every tool included in Pro." : " He'll walk you through the career tools, job matching, Academy, and everything included in your membership."}
         </p>
 
         <div className="inline-flex items-center gap-2 bg-neuro-orange/15 border border-neuro-orange/30 rounded-full px-4 py-2 mt-4">
-          <span className="text-neuro-orange text-sm font-black">Code: MH4</span>
+          <span className="text-neuro-orange text-sm font-black">Exclusive MH4 Access</span>
           <span className="text-white/30 text-sm">|</span>
-          <span className="text-white/40 text-sm">{price} value, free</span>
+          <span className="text-white/40 text-sm">Free account + personal onboarding</span>
         </div>
       </div>
 
@@ -180,11 +180,11 @@ export default function MH4Page() {
               className="w-full py-4 bg-neuro-orange text-white font-black rounded-xl text-base flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-all disabled:opacity-50 shadow-lg shadow-neuro-orange/20"
             >
               {loading && <Loader2 className="w-5 h-5 animate-spin" />}
-              {loading ? "Creating account..." : `Claim Free Month — ${price} Value`}
+              {loading ? "Creating account..." : "Create Free Account"}
             </button>
 
             <p className="text-center text-[11px] text-white/25 mt-3">
-              Code MH4 auto-applied. Your first month is free. Billing starts month 2.
+              Free account. Book your onboarding call. Activate {role === "doctor" ? "Pro ($99/mo)" : "membership ($33/mo)"} when you're ready.
             </p>
           </form>
 
@@ -205,11 +205,11 @@ export default function MH4Page() {
             </div>
 
             <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-5 text-center">
-              <p className="text-green-400 font-black text-base mb-1">First month free with code MH4</p>
+              <p className="text-green-400 font-black text-base mb-1">Exclusive access for MH4 attendees</p>
               <p className="text-white/30 text-xs">
                 {role === "doctor"
-                  ? "Then $99/mo or $990/yr. Cancel anytime."
-                  : "Then $33/mo. Cancel anytime."}
+                  ? "Free account + personal onboarding. Pro is $99/mo or $990/yr when you're ready."
+                  : "Free account + personal onboarding. Membership is $33/mo when you're ready."}
               </p>
             </div>
 
