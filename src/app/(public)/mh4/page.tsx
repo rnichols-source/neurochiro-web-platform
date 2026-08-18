@@ -5,29 +5,9 @@ import { CheckCircle2, Loader2, GraduationCap, Stethoscope, Gift } from "lucide-
 import Link from "next/link";
 import { createFreeAccount } from "../get-started/actions";
 import { createClient } from "@/lib/supabase";
+import { DOCTOR_PRO_FEATURES_COMPACT, STUDENT_FEATURES_COMPACT } from "@/lib/membership-value";
 
 type Role = "doctor" | "student";
-
-const doctorPerks = [
-  "Personal onboarding call with Dr. Ray",
-  "Directory listing with SEO driving patients to you",
-  "Patient leads forwarded directly to you",
-  "Monthly branded content kit for your social",
-  "Instagram Collab posts (185K followers)",
-  "Weekly live promotion (IG + YouTube)",
-  "Spotlight interview + video clips for your social",
-  "Monthly growth report with stats + city ranking",
-];
-
-const studentPerks = [
-  "Personal onboarding call with Dr. Ray",
-  "Monthly group call with Dr. Ray",
-  "ChiroMatch job matching",
-  "Academy courses + interview prep",
-  "Contract Lab for reviewing offers",
-  "Financial planner with salary data",
-  "Direct messaging with doctors",
-];
 
 export default function MH4Page() {
   const [role, setRole] = useState<Role>("doctor");
@@ -39,7 +19,7 @@ export default function MH4Page() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const perks = role === "doctor" ? doctorPerks : studentPerks;
+  const perks = role === "doctor" ? DOCTOR_PRO_FEATURES_COMPACT.slice(0, 8) : STUDENT_FEATURES_COMPACT;
   const price = role === "doctor" ? "$99" : "$33";
 
   const handleSubmit = async (e: React.FormEvent) => {

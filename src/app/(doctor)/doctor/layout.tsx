@@ -5,6 +5,7 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import NotificationBell from "@/components/layout/NotificationBell";
 import { AuthProvider } from "@/context/AuthContext";
 import { LayoutDashboard, MessageSquare, Bell, User, Menu, Clock, CheckCircle2, Mail, Calendar, Phone, Zap, Star, BarChart3, Video, Image as ImageIcon } from "lucide-react";
+import { DOCTOR_PRO_FEATURES_MINIMAL } from "@/lib/membership-value";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -92,14 +93,11 @@ export default function DoctorLayout({
   // Exempt the profile onboarding page so new doctors can set up photo/bio/specialties first
   const isOnboardingPage = pathname === '/doctor/onboarding';
   if (onboardingCallStatus && onboardingCallStatus !== 'completed' && !isOnboardingPage) {
-    const monthlyPromise = [
-      { icon: Phone, text: "Patient leads forwarded directly to you" },
-      { icon: ImageIcon, text: "Monthly branded content kit for your social" },
-      { icon: Video, text: "Featured on weekly live stream (IG + YouTube)" },
-      { icon: Star, text: "Spotlight interview + short-form video clips" },
-      { icon: BarChart3, text: "Monthly growth report with stats + city ranking" },
-      { icon: Zap, text: "Full suite of practice tools" },
-    ];
+    const minimalIcons = [Phone, ImageIcon, Video, Star, Zap, BarChart3, Zap];
+    const monthlyPromise = DOCTOR_PRO_FEATURES_MINIMAL.map((text, i) => ({
+      icon: minimalIcons[i] || Zap,
+      text,
+    }));
 
     return (
       <div className="min-h-dvh bg-[#0F1A24] flex items-center justify-center px-6 py-12">

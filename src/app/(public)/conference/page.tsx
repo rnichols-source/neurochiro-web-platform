@@ -7,6 +7,7 @@ import { Check, Zap, Loader2, GraduationCap, Stethoscope, CheckCircle2 } from "l
 import { createFreeAccount } from "../get-started/actions";
 import { createClient } from "@/lib/supabase";
 import NetworkStats from "@/components/common/NetworkStats";
+import { DOCTOR_PRO_FEATURES_COMPACT, STUDENT_FEATURES_FULL } from "@/lib/membership-value";
 
 type Role = "doctor" | "student";
 
@@ -20,32 +21,7 @@ export default function ConferenceLandingPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const doctorFeatures = [
-    "Personal onboarding call with Dr. Ray",
-    "Directory listing with SEO driving patients to you",
-    "Patient leads forwarded directly to you",
-    "Monthly branded content kit for your social",
-    "Instagram Collab posts (185K followers)",
-    "Featured on weekly live stream (IG + YouTube)",
-    "Spotlight interview + short-form video clips",
-    "City spotlight weeks + SEO articles featuring you",
-    "Monthly growth report with stats + city ranking",
-    "Full practice tools (analytics, jobs, ChiroMatch)",
-  ];
-
-  const studentFeatures = [
-    "Personal onboarding call with Dr. Ray",
-    "Monthly group call with Dr. Ray",
-    "ChiroScore — universal candidate rating (0-100)",
-    "ChiroMatch — get matched with top practices",
-    "Smart job matching with salary transparency",
-    "Academy courses and interview prep",
-    "Contract Lab for reviewing offers",
-    "Financial planner with salary benchmarks",
-    "Direct messaging with doctors and mentors",
-  ];
-
-  const features = { doctor: doctorFeatures, student: studentFeatures };
+  const features = { doctor: DOCTOR_PRO_FEATURES_COMPACT, student: STUDENT_FEATURES_FULL };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

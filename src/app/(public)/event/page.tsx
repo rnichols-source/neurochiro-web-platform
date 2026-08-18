@@ -5,31 +5,9 @@ import Link from "next/link";
 import { CheckCircle2, Loader2, Check, GraduationCap, Stethoscope } from "lucide-react";
 import { createFreeAccount } from "../get-started/actions";
 import { createClient } from "@/lib/supabase";
+import { DOCTOR_PRO_FEATURES_COMPACT, STUDENT_FEATURES_COMPACT } from "@/lib/membership-value";
 
 type Role = "doctor" | "student";
-
-const studentPerks = [
-  "Personal onboarding call with Dr. Ray",
-  "Monthly group call with Dr. Ray",
-  "ChiroScore rating (0-100)",
-  "ChiroMatch job matching",
-  "Academy courses + interview prep",
-  "Contract Lab for reviewing offers",
-  "Financial planner with salary data",
-  "Direct messaging with doctors",
-];
-
-const doctorPerks = [
-  "Personal onboarding call with Dr. Ray",
-  "Directory listing with SEO driving patients to you",
-  "Patient leads forwarded directly to you",
-  "Monthly branded content kit for your social",
-  "Instagram Collab posts (185K followers)",
-  "Weekly live promotion (IG + YouTube)",
-  "Spotlight interview + video clips for your social",
-  "Monthly growth report with stats + city ranking",
-  "Full practice tools (analytics, jobs, ChiroMatch)",
-];
 
 export default function EventPage() {
   const [role, setRole] = useState<Role>("student");
@@ -91,7 +69,7 @@ export default function EventPage() {
     );
   }
 
-  const perks = role === "student" ? studentPerks : doctorPerks;
+  const perks = role === "student" ? STUDENT_FEATURES_COMPACT : DOCTOR_PRO_FEATURES_COMPACT;
 
   return (
     <div style={{ minHeight: "100dvh", background: "#1E2D3B", padding: "0 0 60px" }}>

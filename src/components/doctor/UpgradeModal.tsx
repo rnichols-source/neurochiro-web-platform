@@ -3,6 +3,7 @@
 import { X, Check, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { DOCTOR_PRO_FEATURES_FULL } from "@/lib/membership-value";
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -11,24 +12,6 @@ interface UpgradeModalProps {
   userId?: string;
   highlightFeature?: string;
 }
-
-const PRO_FEATURES = [
-  "Full directory listing",
-  "Contact info visible to patients",
-  "Phone, website, booking link",
-  "Social media links",
-  "Verified badge",
-  "Priority search ranking",
-  "Analytics dashboard",
-  "Patient leads & messaging",
-  "KPI Tracker",
-  "AI Bio Generator",
-  "ChiroMatch hiring",
-  "Care Plan Builder",
-  "Scan Reports",
-  "Content Library",
-  "CE Tracker",
-];
 
 export default function UpgradeModal({ isOpen, onClose, currentTier = "free", userId, highlightFeature }: UpgradeModalProps) {
   const [loading, setLoading] = useState(false);
@@ -98,7 +81,7 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "free", us
             {/* Features */}
             <div className="px-8 pb-6">
               <div className="grid grid-cols-1 gap-2">
-                {PRO_FEATURES.map((feature) => (
+                {DOCTOR_PRO_FEATURES_FULL.map((feature) => (
                   <div key={feature} className="flex items-center gap-2.5">
                     <Check className="w-4 h-4 text-neuro-orange flex-shrink-0" />
                     <span className={`text-sm ${feature === highlightFeature ? 'text-white font-bold' : 'text-gray-400'}`}>

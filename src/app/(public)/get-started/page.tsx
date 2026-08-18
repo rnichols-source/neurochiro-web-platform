@@ -77,23 +77,23 @@ function GetStartedInner() {
   }
 
   const doctorFeatures = [
-    { icon: Users, label: "Onboarding call with Dr. Ray" },
-    { icon: Shield, label: "Directory listing + SEO" },
-    { icon: MessageSquare, label: "Patient leads forwarded to you" },
-    { icon: Star, label: "Monthly branded content kit" },
-    { icon: Zap, label: "Weekly live promotion (IG + YT)" },
-    { icon: BarChart3, label: "Spotlight interview + video clips" },
-    { icon: Briefcase, label: "Full practice tools" },
-    { icon: Calendar, label: "Monthly growth report" },
+    { icon: Users, label: "Personal onboarding call with Dr. Ray" },
+    { icon: Shield, label: "Directory listing with SEO driving patients to you" },
+    { icon: MessageSquare, label: "Patient leads forwarded directly to you" },
+    { icon: Star, label: "Monthly branded content kit for your social" },
+    { icon: Zap, label: "Featured on weekly live stream (IG + YouTube)" },
+    { icon: BarChart3, label: "Spotlight interview + short-form video clips" },
+    { icon: Briefcase, label: "Full practice tools (analytics, jobs, ChiroMatch)" },
+    { icon: Calendar, label: "Monthly growth report with stats + city ranking" },
   ];
 
   const studentFeatures = [
-    { icon: Users, label: "Onboarding call with Dr. Ray" },
-    { icon: Star, label: "Monthly group call" },
-    { icon: Briefcase, label: "ChiroMatch + job board" },
-    { icon: Shield, label: "Academy + interview prep" },
-    { icon: BarChart3, label: "Financial planner" },
-    { icon: Zap, label: "Contract Lab" },
+    { icon: Users, label: "Personal onboarding call with Dr. Ray" },
+    { icon: Star, label: "Monthly group call with Dr. Ray" },
+    { icon: Briefcase, label: "ChiroMatch job matching" },
+    { icon: Shield, label: "Academy courses + interview prep" },
+    { icon: BarChart3, label: "Financial planner with salary data" },
+    { icon: Zap, label: "Contract Lab for reviewing offers" },
   ];
 
   return (
