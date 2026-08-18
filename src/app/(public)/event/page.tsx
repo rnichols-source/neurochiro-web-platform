@@ -77,7 +77,7 @@ export default function EventPage() {
       <div style={{ textAlign: "center", padding: "48px 24px 24px" }}>
         <img src="/logo-white.png" alt="NeuroChiro" style={{ width: 48, height: 48, margin: "0 auto 16px", objectFit: "contain" }} />
         <p style={{ color: "#D66829", fontSize: 11, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 8 }}>
-          SIFCO Triune  &middot;  Sherman College
+          Mile High  &middot;  Mile High
         </p>
         <h1 style={{ color: "#fff", fontSize: 28, fontWeight: 900, lineHeight: 1.2, marginBottom: 8 }}>
           Join the Network
@@ -119,9 +119,11 @@ export default function EventPage() {
             placeholder="Full name"
             style={{ width: "100%", padding: "14px 16px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, marginBottom: 10, outline: "none", boxSizing: "border-box" }} />
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+            inputMode="email" autoComplete="email"
             placeholder="Email address"
             style={{ width: "100%", padding: "14px 16px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, marginBottom: 10, outline: "none", boxSizing: "border-box" }} />
           <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
             placeholder="Create password (6+ characters)"
             style={{ width: "100%", padding: "14px 16px", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, marginBottom: 16, outline: "none", boxSizing: "border-box" }} />
 

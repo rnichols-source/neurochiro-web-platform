@@ -139,6 +139,7 @@ export default function MH4Page() {
             />
             <input
               type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+              inputMode="email" autoComplete="email"
               placeholder="Email address"
               className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/[0.1] rounded-xl text-sm text-white mb-3 outline-none focus:border-neuro-orange placeholder:text-white/25"
             />

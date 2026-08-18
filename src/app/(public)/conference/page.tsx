@@ -162,11 +162,13 @@ export default function ConferenceLandingPage() {
               />
               <input
                 type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                inputMode="email" autoComplete="email"
                 placeholder="Email address"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange"
               />
               <input
                 type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
                 placeholder="Create password (6+ characters)"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange"
               />
