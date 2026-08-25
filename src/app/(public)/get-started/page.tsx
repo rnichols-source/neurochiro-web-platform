@@ -81,11 +81,11 @@ function GetStartedInner() {
     { icon: Users, label: "Personal onboarding call with Dr. Ray" },
     { icon: Shield, label: "Directory listing with SEO driving patients to you" },
     { icon: MessageSquare, label: "Patient leads forwarded directly to you" },
-    { icon: Star, label: "Monthly branded content kit for your social" },
-    { icon: Zap, label: "Featured on weekly live stream (IG + YouTube)" },
-    { icon: BarChart3, label: "Spotlight interview + short-form video clips" },
-    { icon: Briefcase, label: "Full practice tools (analytics, jobs, ChiroMatch)" },
+    { icon: Zap, label: "Featured on The Weekly Adjustment (live show)" },
+    { icon: Star, label: "Spotlight interview on YouTube + video clips" },
+    { icon: BarChart3, label: "Content rotation to 185K followers" },
     { icon: Calendar, label: "Monthly growth report with stats + city ranking" },
+    { icon: Briefcase, label: "Full practice tools (analytics, jobs, ChiroMatch)" },
   ];
 
   const studentFeatures = [

@@ -12,17 +12,15 @@ export default function DoctorPricing() {
   const annualTotal = "$990/yr";
 
   const features = [
-    { text: "Listed in the global nervous system chiropractic directory", icon: Users },
-    { text: "Full profile with photo, bio, specialties, and booking link", icon: Star },
+    { text: "Personal onboarding call with Dr. Ray", icon: Users },
+    { text: "Directory listing with SEO driving patients to you", icon: Star },
+    { text: "Patient leads forwarded directly to you", icon: MessageSquare },
+    { text: "Featured on The Weekly Adjustment (live every Thursday 8 PM)", icon: Zap },
+    { text: "Spotlight interview on YouTube + short-form video clips for your social", icon: Star },
+    { text: "Content rotation — your clips and graphics posted to 185K followers", icon: BarChart3 },
+    { text: "Monthly growth report with views, leads, and city ranking", icon: BarChart3 },
+    { text: "Full practice tools (analytics, messaging, jobs, ChiroMatch, seminars)", icon: Briefcase },
     { text: "Verified nervous system chiropractor badge", icon: Shield },
-    { text: "Patient analytics (profile views, phone taps, website clicks, sources)", icon: BarChart3 },
-    { text: "Patient messaging (respond to leads directly)", icon: MessageSquare },
-    { text: "Job postings + ChiroMatch hiring system", icon: Briefcase },
-    { text: "Seminar hosting + CE seminar calendar", icon: Calendar },
-    { text: "Referral network (doctor-to-doctor referrals)", icon: Users },
-    { text: "Spotlight interview eligibility (185K+ Instagram followers)", icon: Star },
-    { text: "Weekly Practice Growth Report", icon: BarChart3 },
-    { text: "Instagram features + city spotlights", icon: Zap },
   ];
 
   return (
