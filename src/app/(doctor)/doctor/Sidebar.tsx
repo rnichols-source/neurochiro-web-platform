@@ -40,7 +40,7 @@ const coreNavSections = [
   {
     label: "GROW",
     items: [
-      { name: "Lives", href: "/doctor/lives", icon: Video },
+      { name: "The Weekly Adjustment", href: "/doctor/lives", icon: Video },
       { name: "Jobs & Hiring", href: "/doctor/jobs", icon: Briefcase },
       { name: "ChiroMatch", href: "/doctor/chiromatch", icon: Shuffle, tier: "pro" as const },
       { name: "Students", href: "/doctor/students", icon: GraduationCap, tier: "pro" as const },

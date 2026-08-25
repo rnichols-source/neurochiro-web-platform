@@ -6,21 +6,22 @@
 
 // === DOCTOR PRO ($99/mo) ===
 
+/** The 4 core deliverables — the pitch. Use for booth, first impression, one-liners. */
+export const DOCTOR_PRO_CORE = [
+  "Directory listing with SEO — patients find you when they search",
+  "The Weekly Adjustment — featured on our live show every Thursday",
+  "Spotlight interview on YouTube — chopped into reels for your social",
+  "Monthly growth report — views, leads, and city ranking",
+];
+
 /** Full list — use on pricing page, onboarding gate, detailed views */
 export const DOCTOR_PRO_FEATURES_FULL = [
   "Personal onboarding call with Dr. Ray",
   "Directory listing with SEO driving patients to you",
   "Patient leads forwarded directly to you",
-  "Monthly branded content kit (graphics + reels with your name and city)",
-  "Instagram Collab posts to 185K followers",
-  "Featured on weekly live stream (IG + YouTube)",
+  "Featured on The Weekly Adjustment (live every Thursday 8 PM)",
   "Spotlight interview on YouTube + short-form video clips for your social",
-  "City spotlight weeks (concentrated regional promotion)",
-  "SEO city articles featuring you by name on neurochiro.co",
-  "Patient search alerts tagging you when patients search your city",
-  "Find Your Chiropractor quiz routing patients to your profile",
-  "Patient win story amplification across all channels",
-  "Member referral shoutouts (refer a doctor, both get featured)",
+  "Content rotation — your clips and graphics posted to 185K followers",
   "Monthly growth report with views, leads, and city ranking",
   "Full practice tools (analytics, messaging, jobs, ChiroMatch, seminars)",
   "Verified nervous system chiropractor badge",
@@ -31,11 +32,9 @@ export const DOCTOR_PRO_FEATURES_COMPACT = [
   "Personal onboarding call with Dr. Ray",
   "Directory listing with SEO driving patients to you",
   "Patient leads forwarded directly to you",
-  "Monthly branded content kit for your social",
-  "Instagram Collab posts (185K followers)",
-  "Featured on weekly live stream (IG + YouTube)",
-  "Spotlight interview on YouTube + short-form video clips",
-  "City spotlight weeks + SEO articles featuring you",
+  "Featured on The Weekly Adjustment (live show)",
+  "Spotlight interview on YouTube + video clips",
+  "Content rotation to 185K followers",
   "Monthly growth report with stats + city ranking",
   "Full practice tools (analytics, jobs, ChiroMatch)",
 ];
@@ -43,10 +42,9 @@ export const DOCTOR_PRO_FEATURES_COMPACT = [
 /** Minimal list — use on gate screens, modals, tight spaces */
 export const DOCTOR_PRO_FEATURES_MINIMAL = [
   "Patient leads forwarded directly to you",
-  "Monthly branded content kit for your social",
-  "Featured on weekly live stream (IG + YouTube)",
-  "Spotlight interview on YouTube + short-form video clips",
-  "Instagram Collab posts to 185K followers",
+  "Featured on The Weekly Adjustment (live every Thursday)",
+  "Spotlight interview on YouTube + video clips for your social",
+  "Content rotation to 185K followers",
   "Monthly growth report with stats + city ranking",
   "Full suite of practice tools",
 ];

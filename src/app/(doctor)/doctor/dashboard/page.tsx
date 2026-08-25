@@ -278,7 +278,7 @@ export default function DoctorDashboard() {
           {[
             { icon: Search, label: "Directory listing", detail: "Active — patients can find you via SEO", done: true, link: undefined as string | undefined },
             { icon: Users, label: "Patient leads", detail: `${patientLeads} lead${patientLeads !== 1 ? 's' : ''} this month`, done: patientLeads > 0, link: "/doctor/leads" },
-            { icon: Video, label: "Weekly live promotion", detail: "IG + YouTube — you get shouted out", done: false, link: "/doctor/lives" },
+            { icon: Video, label: "The Weekly Adjustment", detail: "Live show every Thursday 8 PM — you get featured", done: false, link: "/doctor/lives" },
             { icon: Star, label: "Spotlight interview", detail: "In rotation — we'll reach out to schedule", done: false, link: undefined },
             { icon: ImageIcon, label: "Branded content kit", detail: "Graphics + reels with your name and city", done: false, link: undefined },
             { icon: BarChart3, label: "Monthly growth report", detail: "Views, patient actions, city ranking", done: false, link: "/doctor/analytics" },

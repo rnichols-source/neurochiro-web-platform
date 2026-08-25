@@ -82,13 +82,13 @@ function SlideSpotlight() {
         <div className="absolute top-40 right-60 w-[500px] h-[500px] bg-neuro-orange rounded-full blur-[200px]" />
       </div>
       <div className="relative z-10 max-w-4xl">
-        <p className="text-neuro-orange text-sm font-black uppercase tracking-[0.4em] mb-6">Every Member Gets</p>
+        <p className="text-neuro-orange text-sm font-black uppercase tracking-[0.4em] mb-6">The Weekly Adjustment</p>
         <h2 className="text-7xl font-heading font-black text-white mb-12">Promoted. Every Week.</h2>
         <div className="grid grid-cols-3 gap-6 mb-16">
           {[
-            { icon: Video, title: "Weekly Lives", desc: "Dr. Ray goes live on IG + YouTube, shouting out member practices by name" },
-            { icon: Star, title: "Spotlight Interview", desc: "Featured on YouTube. Chopped into reels for your social. Professional production." },
-            { icon: ImageIcon, title: "Content Kit", desc: "Monthly branded graphics and reels with your name, photo, and city. Ready to post." },
+            { icon: Video, title: "The Weekly Adjustment", desc: "Live every Thursday 8 PM. Dr. Ray + a featured doctor answer real patient questions." },
+            { icon: Star, title: "Spotlight Interview", desc: "30-min interview on YouTube. Chopped into reels for your social. Posted in rotation." },
+            { icon: ImageIcon, title: "Content Rotation", desc: "Your clips, graphics, and story features posted to 185K followers at least once a month." },
           ].map((item, i) => (
             <div key={i} className="bg-white/[0.06] border border-white/[0.08] rounded-2xl p-8 text-center">
               <item.icon className="w-10 h-10 text-neuro-orange mx-auto mb-4" />
