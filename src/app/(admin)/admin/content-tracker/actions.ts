@@ -10,6 +10,7 @@ export async function getContentTrackerData() {
   const { data, error } = await supabase
     .from('doctors')
     .select('id, user_id, first_name, last_name, email, city, state, membership_tier, is_founding_member, is_approved, onboarding_call_status, spotlight_status, spotlight_date, spotlight_youtube_url, live_feature_status, live_feature_date, content_created, last_featured_date, times_featured')
+    .not('user_id', 'is', null)
     .order('last_name', { ascending: true });
 
   if (error) {
