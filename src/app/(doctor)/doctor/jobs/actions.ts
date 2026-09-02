@@ -23,10 +23,10 @@ export async function getJobPostings() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  // Try with application count join first, fall back to simple query
+  // Get job postings with counts from BOTH application tables
   const { data, error } = await supabase
     .from('job_postings')
-    .select(`*, applications:applications(count)`)
+    .select(`*, applications:applications(count), job_applications:job_applications(count)`)
     .eq('doctor_id', user.id)
     .order('created_at', { ascending: false });
 
@@ -45,7 +45,15 @@ export async function getJobPostings() {
     return (result.data || []) as any[];
   }
 
-  return (data || []) as any[];
+  // Merge counts from both tables
+  return (data || []).map((job: any) => {
+    const studentCount = job.applications?.[0]?.count ?? 0;
+    const publicCount = job.job_applications?.[0]?.count ?? 0;
+    return {
+      ...job,
+      applications: [{ count: studentCount + publicCount }],
+    };
+  }) as any[];
 }
 
 export async function createJobPosting(formData: any) {
