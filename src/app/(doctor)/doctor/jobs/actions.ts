@@ -272,7 +272,7 @@ export async function getApplications(jobId?: string) {
     message: app.message || '',
     school: null,
     gradYear: null,
-    stage: app.status || 'new',
+    stage: app.stage === 'new' || !app.stage ? 'New' : app.stage.charAt(0).toUpperCase() + app.stage.slice(1),
     rating: 0,
     doctorNotes: '',
     stageHistory: [],
