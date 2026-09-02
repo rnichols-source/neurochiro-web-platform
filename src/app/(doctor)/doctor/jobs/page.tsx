@@ -502,6 +502,12 @@ export default function JobsPage() {
                                   {app.gradYear ? ` - Class of ${app.gradYear}` : ""}
                                 </p>
                               )}
+                              {app.email && !app.school && (
+                                <p className="text-sm text-gray-500">{app.email}{app.phone ? ` · ${app.phone}` : ''}</p>
+                              )}
+                              {app.message && (
+                                <p className="text-xs text-gray-400 mt-1 italic">"{app.message}"</p>
+                              )}
                               <p className="text-xs text-gray-400 mt-0.5">
                                 Applied{" "}
                                 {new Date(app.appliedAt).toLocaleDateString()}

@@ -177,7 +177,8 @@ export async function getApplications(jobId?: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  let query = supabase
+  // 1. Get registered student applications (from applications table)
+  let studentQuery = supabase
     .from('applications')
     .select(`
       *,
@@ -193,26 +194,39 @@ export async function getApplications(jobId?: string) {
     `);
 
   if (jobId) {
-    query = query.eq('job_id', jobId);
+    studentQuery = studentQuery.eq('job_id', jobId);
   } else {
-    query = query.eq('job_postings.doctor_id', user.id);
+    studentQuery = studentQuery.eq('job_postings.doctor_id', user.id);
   }
 
-  const { data, error } = await query.order('created_at', { ascending: false });
+  const { data: studentApps } = await studentQuery.order('created_at', { ascending: false });
 
-  if (error) {
-    console.error("Error fetching applications:", error);
-    return [];
+  // 2. Get public/guest applications (from job_applications table)
+  let publicQuery = (supabase as any)
+    .from('job_applications')
+    .select(`
+      *,
+      job:job_postings!inner(title, doctor_id)
+    `);
+
+  if (jobId) {
+    publicQuery = publicQuery.eq('job_id', jobId);
+  } else {
+    publicQuery = publicQuery.eq('job_postings.doctor_id', user.id);
   }
 
-  // Transform to match UI expectations
-  return (data || []).map((app: any) => ({
+  const { data: publicApps } = await publicQuery.order('created_at', { ascending: false });
+
+  // 3. Transform student applications
+  const studentResults = (studentApps || []).map((app: any) => ({
     id: app.id,
     jobId: app.job_id,
     jobTitle: app.job.title,
     candidateId: app.candidate_id,
     name: app.candidate.full_name || 'Anonymous Candidate',
     email: app.candidate.email || '',
+    phone: '',
+    message: '',
     school: app.candidate.school,
     gradYear: app.candidate.graduation_year,
     stage: app.stage,
@@ -221,8 +235,36 @@ export async function getApplications(jobId?: string) {
     stageHistory: app.stage_history ?? [],
     skills: app.candidate.skills || [],
     resumeUrl: app.candidate.resume_url,
-    appliedAt: app.created_at
+    appliedAt: app.created_at,
+    source: 'student' as const,
   }));
+
+  // 4. Transform public applications
+  const publicResults = (publicApps || []).map((app: any) => ({
+    id: app.id,
+    jobId: app.job_id,
+    jobTitle: app.job?.title || 'Job Listing',
+    candidateId: app.applicant_id || null,
+    name: app.applicant_name || 'Anonymous Applicant',
+    email: app.applicant_email || '',
+    phone: app.applicant_phone || '',
+    message: app.message || '',
+    school: null,
+    gradYear: null,
+    stage: app.status || 'new',
+    rating: 0,
+    doctorNotes: '',
+    stageHistory: [],
+    skills: [],
+    resumeUrl: null,
+    appliedAt: app.created_at,
+    source: 'public' as const,
+  }));
+
+  // 5. Merge and sort by date (newest first)
+  return [...studentResults, ...publicResults].sort((a, b) =>
+    new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime()
+  );
 }
 
 export async function updateApplicationStage(applicationId: string, stage: string) {
