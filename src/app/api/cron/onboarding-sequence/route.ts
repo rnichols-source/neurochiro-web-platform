@@ -83,7 +83,7 @@ export async function GET(req: Request) {
           : `Welcome to the network, ${name}`;
         body = isDoctor
           ? `<p>Hi Dr. ${name},</p>
-             <p>Your profile is live in the NeuroChiro directory. Patients searching for a nervous system chiropractor in your area can now find you.</p>
+             <p>Your profile is live in the NeuroChiro network. Patients searching for a nervous system chiropractor in your area can now find you.</p>
              <p>Quick tip: <strong>profiles with a photo and bio get 3x more clicks.</strong> If you haven't added yours yet, it takes about 2 minutes.</p>
              <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/profile" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Complete Your Profile</a></p>`
           : `<p>Hi ${name},</p>
@@ -141,7 +141,7 @@ export async function GET(req: Request) {
         body = isDoctor
           ? `<p>Hi Dr. ${name},</p>
              <p>You've been on NeuroChiro for a month. Thank you for being part of the network.</p>
-             <p>The directory grows every week — more doctors means more patients using the platform, which means more visibility for you.</p>
+             <p>The network grows every week — more doctors means more patients using the platform, which means more visibility for you.</p>
              <p>If you haven't already, now is a great time to complete your profile and consider upgrading to unlock the full suite of practice tools.</p>
              <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/dashboard" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Go to Dashboard</a></p>`
           : `<p>Hi ${name},</p>

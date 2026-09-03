@@ -13,11 +13,11 @@ export default function DoctorPricing() {
 
   const features = [
     { text: "Personal onboarding call with Dr. Ray", icon: Users },
-    { text: "Directory listing with SEO driving patients to you", icon: Star },
+    { text: "Network profile with SEO driving patients to you", icon: Star },
     { text: "Patient leads forwarded directly to you", icon: MessageSquare },
     { text: "Featured on The Weekly Adjustment (live every Thursday 8 PM)", icon: Zap },
     { text: "Spotlight interview on YouTube + short-form video clips for your social", icon: Star },
-    { text: "Content rotation — your clips and graphics posted to 185K followers", icon: BarChart3 },
+    { text: "Content rotation — your clips and graphics promoted to our audience", icon: BarChart3 },
     { text: "Monthly growth report with views, leads, and city ranking", icon: BarChart3 },
     { text: "Full practice tools (analytics, messaging, jobs, ChiroMatch, seminars)", icon: Briefcase },
     { text: "Verified nervous system chiropractor badge", icon: Shield },
@@ -28,10 +28,10 @@ export default function DoctorPricing() {
       {/* Header */}
       <div className="text-center mb-10">
         <h1 className="text-4xl md:text-5xl font-heading font-black text-neuro-navy uppercase tracking-tight">
-          Get Found by <span className="text-neuro-orange">Patients.</span>
+          We Promote Your <span className="text-neuro-orange">Practice.</span>
         </h1>
         <p className="text-gray-500 mt-3 max-w-lg mx-auto">
-          The only directory for nervous system chiropractors. One plan. Everything included.
+          The only network for nervous system chiropractors. One plan. Everything included.
         </p>
       </div>
 
@@ -94,7 +94,7 @@ export default function DoctorPricing() {
       {/* One-liner value prop */}
       <div className="mt-12 bg-neuro-navy rounded-2xl p-8 text-center">
         <p className="text-white text-lg font-bold leading-relaxed">
-          "One new patient from the directory pays for <span className="text-neuro-orange">an entire year</span> of NeuroChiro Pro."
+          "One new patient from the network pays for <span className="text-neuro-orange">an entire year</span> of NeuroChiro Pro."
         </p>
         <p className="text-white/50 text-sm mt-2">The average new patient is worth $2,000-5,000. NeuroChiro Pro is $99/mo.</p>
       </div>
@@ -106,9 +106,9 @@ export default function DoctorPricing() {
           {[
             { q: "How does billing work?", a: "You'll be billed $99/mo (or $990/yr if you choose annual). If you cancel, your profile goes to an unclaimed state with masked contact info. Cancel anytime from your dashboard." },
             { q: "Can I cancel anytime?", a: "Yes. No contracts, no cancellation fees. Cancel from your dashboard or email support. Your profile will be set to unclaimed." },
-            { q: "What's the difference between NeuroChiro and NeurOS?", a: "NeuroChiro is the directory. It gets you found by patients. NeurOS is a separate practice operating system (care plans, P&L, KPIs) at neuros.co. They're different products." },
+            { q: "What's the difference between NeuroChiro and NeurOS?", a: "NeuroChiro is the network. It gets you found by patients. NeurOS is a separate practice operating system (care plans, P&L, KPIs) at neuros.co. They're different products." },
             { q: "I'm already listed. Do I need to pay?", a: "If you have a claimed profile, you're already on a plan. Check your dashboard for your current status. Founding members keep their locked price forever." },
-            { q: "How do patients find me?", a: "Through the NeuroChiro directory (search by city), our Instagram (185K followers), SEO city pages, Google Ads, and the Spotlight interview series. We actively drive patient traffic to doctor profiles." },
+            { q: "How do patients find me?", a: "Through the NeuroChiro network (search by city), our audience on Instagram, SEO city pages, Google Ads, and the Spotlight interview series. We actively drive patient traffic to doctor profiles." },
           ].map((faq, i) => (
             <div key={i} className="bg-white rounded-xl border border-gray-100 p-5">
               <h3 className="font-bold text-neuro-navy text-sm">{faq.q}</h3>

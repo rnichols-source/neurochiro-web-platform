@@ -16,12 +16,12 @@ function SlideDirectory() {
         <div className="absolute bottom-20 right-40 w-72 h-72 bg-blue-500 rounded-full blur-[120px]" />
       </div>
       <div className="relative z-10">
-        <p className="text-neuro-orange text-sm font-black uppercase tracking-[0.4em] mb-6">The Only Directory for</p>
+        <p className="text-neuro-orange text-sm font-black uppercase tracking-[0.4em] mb-6">The Only Network for</p>
         <h1 className="text-8xl font-heading font-black text-white tracking-tight mb-4 leading-none">
           Nervous System<br />Chiropractors
         </h1>
         <p className="text-2xl text-gray-400 mt-6 mb-16 max-w-2xl mx-auto">
-          Get found by patients. Get promoted every week. Get the tools to grow your practice.
+          We promote your practice. Every week. With the tools to grow.
         </p>
         <div className="flex items-center justify-center gap-16">
           {[
@@ -35,7 +35,7 @@ function SlideDirectory() {
             </div>
           ))}
         </div>
-        <p className="text-gray-600 text-lg mt-16">Are you listed?</p>
+        <p className="text-gray-600 text-lg mt-16">Are you in the network?</p>
       </div>
     </div>
   );
@@ -56,7 +56,7 @@ function SlideValueProp() {
         <div className="bg-neuro-orange/10 border border-neuro-orange/20 rounded-2xl p-6">
           <p className="text-neuro-orange font-black text-sm mb-2">The math:</p>
           <p className="text-white/60 text-sm leading-relaxed">
-            One new patient from the directory pays for an entire year of Pro. The average new patient is worth $2,000-5,000.
+            One new patient from the network pays for an entire year of Pro. The average new patient is worth $2,000-5,000.
           </p>
         </div>
       </div>
@@ -88,7 +88,7 @@ function SlideSpotlight() {
           {[
             { icon: Video, title: "The Weekly Adjustment", desc: "Live every Thursday 8 PM. Dr. Ray + a featured doctor answer real patient questions." },
             { icon: Star, title: "Spotlight Interview", desc: "30-min interview on YouTube. Chopped into reels for your social. Posted in rotation." },
-            { icon: ImageIcon, title: "Content Rotation", desc: "Your clips, graphics, and story features posted to 185K followers at least once a month." },
+            { icon: ImageIcon, title: "Content Rotation", desc: "Your clips, graphics, and story features promoted to our audience at least once a month." },
           ].map((item, i) => (
             <div key={i} className="bg-white/[0.06] border border-white/[0.08] rounded-2xl p-8 text-center">
               <item.icon className="w-10 h-10 text-neuro-orange mx-auto mb-4" />
@@ -132,7 +132,7 @@ function SlideSignup() {
           <div className="text-left">
             <div className="space-y-4">
               {[
-                { icon: Stethoscope, role: "Doctors", price: `$${PRICING.doctor.monthly}/mo`, desc: "Directory, promotion, patient leads, full toolkit" },
+                { icon: Stethoscope, role: "Doctors", price: `$${PRICING.doctor.monthly}/mo`, desc: "Network profile, promotion, patient leads, full toolkit" },
                 { icon: GraduationCap, role: "Students", price: `$${PRICING.student.monthly}/mo`, desc: "Jobs, Academy, ChiroMatch, monthly group call" },
                 { icon: Heart, role: "Patients", price: "Free", desc: "Find a nervous system chiropractor near you" },
               ].map((r) => (

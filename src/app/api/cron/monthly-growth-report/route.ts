@@ -168,7 +168,7 @@ export async function GET(req: Request) {
         <!-- Spotlight CTA -->
         <p style="font-size: 14px; color: #4B5563;">
           Want to boost your visibility? <strong style="color: #1E2D3B;">Book a NeuroChiro Spotlight interview.</strong>
-          We'll feature you to our 185K Instagram followers and promote your profile across all channels.
+          We'll feature you to our audience and promote your profile across all channels.
         </p>
         <p style="margin-top: 16px;">
           <a href="https://calendly.com/drray-neurochirodirectory/neurochiro-spotlight-interview" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 14px;">Book Your Spotlight Interview</a>

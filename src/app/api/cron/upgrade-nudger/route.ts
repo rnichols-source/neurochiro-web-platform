@@ -108,7 +108,7 @@ export async function GET(req: Request) {
         body = `<p>Your NeuroChiro profile has been viewed <strong>100 times</strong>.</p>
           <p>That's 100 patients who searched for a nervous system chiropractor and found <strong>you</strong>.</p>
           ${cityDemandLine}
-          <p>Right now, they can see your listing but they can't message you or see your full analytics. Upgrade to Pro ($99/mo) and turn those views into actual patients walking through your door.</p>`;
+          <p>Right now, they can see your profile but they can't message you or see your full analytics. Upgrade to Pro ($99/mo) and turn those views into actual patients walking through your door.</p>`;
       } else if (views >= 50 && !sentNudges.has(`${doc.user_id}-views_50`)) {
         trigger = 'views_50';
         subject = `50 profile views — patients are finding you, Dr. ${name}`;
@@ -117,13 +117,13 @@ export async function GET(req: Request) {
       } else if (views >= 25 && !sentNudges.has(`${doc.user_id}-views_25`)) {
         trigger = 'views_25';
         subject = `25 people viewed your profile this month`;
-        body = `<p>Your NeuroChiro listing is getting attention — <strong>25 profile views</strong> and counting.</p>
+        body = `<p>Your NeuroChiro profile is getting attention — <strong>25 profile views</strong> and counting.</p>
           <p>These are real patients looking for nervous system chiropractors in ${doc.city || 'your area'}. Upgrade to unlock patient messaging so they can reach you directly.</p>${cityDemandLine}`;
       } else if (views >= 1 && !sentNudges.has(`${doc.user_id}-first_view`)) {
         trigger = 'first_view';
         subject = `Someone just found your profile, Dr. ${name}`;
         body = `<p>Your NeuroChiro profile got its first view!</p>
-          <p>A patient in ${doc.city || 'your area'} searched for a nervous system chiropractor and found you. This is just the beginning — as the directory grows, so does your visibility.</p>
+          <p>A patient in ${doc.city || 'your area'} searched for a nervous system chiropractor and found you. This is just the beginning — as the network grows, so does your visibility.</p>
           ${cityDemandLine}
           <p>Make sure your profile is complete (photo + bio) to maximize clicks.</p>`;
       } else if (daysSinceJoin >= 30 && !sentNudges.has(`${doc.user_id}-day_30`)) {
@@ -131,7 +131,7 @@ export async function GET(req: Request) {
         subject = `One month on NeuroChiro — here's what you could unlock`;
         body = `<p>You've been on NeuroChiro for 30 days, Dr. ${name}.</p>
           <p>In that time, your profile has been viewed ${views} times. Imagine what you could do with the full toolkit: patient messaging, analytics dashboard, KPI tracker, verified badge, and priority search placement.</p>
-          <p>Doctors who upgrade see an average of 3x more patient engagement. Your listing is already working — give it the tools to work harder.</p>`;
+          <p>Doctors who upgrade see an average of 3x more patient engagement. Your profile is already working — give it the tools to work harder.</p>`;
       } else if (daysSinceJoin >= 14 && !sentNudges.has(`${doc.user_id}-day_14`)) {
         trigger = 'day_14';
         subject = `Two weeks in — are you getting the most out of NeuroChiro?`;
@@ -159,7 +159,7 @@ export async function GET(req: Request) {
             <p style="margin-top: 24px;">
               <a href="https://neurochiro.co/doctor/billing" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">See Upgrade Options</a>
             </p>
-            <p style="margin-top: 16px; font-size: 13px; color: #9CA3AF;">Your Free listing stays active. Upgrade whenever you're ready.</p>`),
+            <p style="margin-top: 16px; font-size: 13px; color: #9CA3AF;">Your free profile stays active. Upgrade whenever you're ready.</p>`),
         });
 
         // Log so we don't send again

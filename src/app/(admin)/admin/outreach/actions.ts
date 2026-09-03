@@ -385,7 +385,7 @@ export async function findProspectEmail(prospectId: string) {
             <div class="header"><img src="https://neurochiro.co/logo-white.png" alt="NeuroChiro" width="120" style="display:block;margin:0 auto;"></div>
             <div class="content">
               <p>Hi ${name},</p>
-              <p>My name is Dr. Raymond Nichols, and I'm the founder of NeuroChiro — the global directory built specifically for nervous system chiropractors.</p>
+              <p>My name is Dr. Raymond Nichols, and I'm the founder of NeuroChiro — the global network built specifically for nervous system chiropractors.</p>
               <p>I created a profile for ${clinicName} on our platform, and it's already live:</p>
               <p style="margin: 20px 0;"><a href="https://${profileLink}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">View Your Profile</a></p>
               <p>Patients in ${p.city || 'your area'} are actively using NeuroChiro to find chiropractors like you. All you need to do is claim your profile, add your photo and bio, and you're set. Takes about 2 minutes.</p>
@@ -589,7 +589,7 @@ export async function preBuildProfile(prospectId: string) {
           <div class="header"><img src="https://neurochiro.co/logo-white.png" alt="NeuroChiro" width="120" style="display:block;margin:0 auto;"></div>
           <div class="content">
             <p>Hi ${name},</p>
-            <p>I hope this email finds you well. My name is Dr. Raymond Nichols, and I'm the founder of NeuroChiro — the global directory built specifically for nervous system chiropractors.</p>
+            <p>I hope this email finds you well. My name is Dr. Raymond Nichols, and I'm the founder of NeuroChiro — the global network built specifically for nervous system chiropractors.</p>
             <p>I took the time to create a profile for ${clinicName} on our platform, and it's already live:</p>
             <p style="margin: 20px 0;"><a href="${profileUrl}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">View Your Profile</a></p>
             <p>Patients in ${p.city || 'your area'} are actively using NeuroChiro to find chiropractors like you. All you need to do is claim your profile, add your photo and bio, and you're set. It takes about 2 minutes.</p>
@@ -634,28 +634,28 @@ export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
       name: 'Pre-Built Profile (Primary)',
       category: 'first_contact',
       description: 'YOUR #1 SCRIPT — Send after clicking "Pre-Build Profile"',
-      template: `Hey {name} 👋\n\nI came across your page and I can tell you're doing real nervous system work — not just the cookie cutter stuff.\n\nI actually went ahead and built you a free listing on NeuroChiro. It's the directory specifically for docs like you who practice nervous-system-first chiropractic.\n\nHere it is: {profile_link}\n\nPatients in {city} are already searching through it.\n\nYou can claim it anytime — takes about 2 min. And if you want the full profile with your photo, bio, and verified badge, that's $99/mo.\n\nEither way, just wanted you to know it's there 🤙`,
+      template: `Hey {name} 👋\n\nI came across your page and I can tell you're doing real nervous system work — not just the cookie cutter stuff.\n\nI actually went ahead and built you a free profile on NeuroChiro. It's the network specifically for docs like you who practice nervous-system-first chiropractic.\n\nHere it is: {profile_link}\n\nPatients in {city} are already searching through it.\n\nYou can claim it anytime — takes about 2 min. And if you want the full profile with your photo, bio, and verified badge, that's $99/mo.\n\nEither way, just wanted you to know it's there 🤙`,
     },
     {
       id: 'pre_built_short',
       name: 'Pre-Built Short Version',
       category: 'first_contact',
       description: 'Shorter — for docs who get a lot of DMs',
-      template: `Hey {name} —\n\nBuilt you a free listing on NeuroChiro (directory for nervous system chiros).\n\nIt's live here: {profile_link}\n\nPatients in {city} can find you through it. Claim it whenever you're ready.\n\nNo catch. Just building the network 🤝`,
+      template: `Hey {name} —\n\nBuilt you a free profile on NeuroChiro (the network for nervous system chiros).\n\nIt's live here: {profile_link}\n\nPatients in {city} can find you through it. Claim it whenever you're ready.\n\nNo catch. Just growing the network 🤝`,
     },
     {
       id: 'pre_built_value',
       name: 'Pre-Built Value Lead',
       category: 'first_contact',
       description: 'Lead with the question — makes them think',
-      template: `Hey {name} — real quick.\n\nWhen someone in {city} searches for a nervous system chiropractor... are they finding you?\n\nI built you a free listing on NeuroChiro so they can:\n{profile_link}\n\nIt's already live. You can add your photo and bio if you want to stand out.\n\nJust thought you should know 💪`,
+      template: `Hey {name} — real quick.\n\nWhen someone in {city} searches for a nervous system chiropractor... are they finding you?\n\nI built you a free profile on NeuroChiro so they can:\n{profile_link}\n\nIt's already live. You can add your photo and bio if you want to stand out.\n\nJust thought you should know 💪`,
     },
     {
       id: 'follow_up_1',
       name: 'Follow-Up #1 (5 days later)',
       category: 'follow_up',
       description: 'Friendly nudge — short and low pressure',
-      template: `Hey {name} — just circling back.\n\nYour listing on NeuroChiro is still live:\n{profile_link}\n\nNo pressure at all. Just didn't want it to get lost in your DMs.\n\nLet me know if you have any questions 🙏`,
+      template: `Hey {name} — just circling back.\n\nYour profile on NeuroChiro is still live:\n{profile_link}\n\nNo pressure at all. Just didn't want it to get lost in your DMs.\n\nLet me know if you have any questions 🙏`,
     },
     {
       id: 'follow_up_2',
@@ -676,14 +676,14 @@ export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
       name: 'Welcome — They Claimed It',
       category: 'response',
       description: 'Send after they sign up',
-      template: `Welcome to the network {name}! 🎉\n\nYou're in. Patients in {city} can find you right now.\n\nQuick tip — docs who add their photo and bio get about 3x more clicks. If you want to level up with the verified badge and patient messaging, check out our Pro plan ($99/mo) in your dashboard.\n\nBut honestly, just having you in the directory is a win.\n\nReach out anytime if you need anything. I'm here.`,
+      template: `Welcome to the network {name}! 🎉\n\nYou're in. Patients in {city} can find you right now.\n\nQuick tip — docs who add their photo and bio get about 3x more clicks. If you want to level up with the verified badge and patient messaging, check out our Pro plan ($99/mo) in your dashboard.\n\nBut honestly, just having you in the network is a win.\n\nReach out anytime if you need anything. I'm here.`,
     },
     {
       id: 'objection_cost',
       name: 'Objection: What Does It Cost?',
       category: 'objection',
       description: 'When they ask about pricing',
-      template: `Great question.\n\nYour free listing gets you on the map — name, clinic, city. Patients can find you.\n\nPro is $99/mo — that unlocks your photo, bio, specialties, verified badge, patient messaging, analytics, and every practice tool.\n\nMost docs say it pays for itself with the first new patient from the directory.\n\nWant me to walk you through it?`,
+      template: `Great question.\n\nYour free profile gets you on the map — name, clinic, city. Patients can find you.\n\nPro is $99/mo — that unlocks your photo, bio, specialties, verified badge, patient messaging, analytics, and every practice tool.\n\nMost docs say it pays for itself with the first new patient from the network.\n\nWant me to walk you through it?`,
     },
     {
       id: 'objection_time',
@@ -697,7 +697,7 @@ export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
       name: 'Objection: Why Should I?',
       category: 'objection',
       description: 'When they want to know why this is different',
-      template: `Fair question. Here's the honest answer:\n\nNeuroChiro is the ONLY directory built specifically for nervous system chiropractors.\n\nWhen a patient searches here, they get YOU — not a random list mixed with PTs, massage chains, and "chiropractors" who just crack backs.\n\nIt's built by someone in the profession, for the profession. I'm a chiropractor myself.\n\nYour profile is already live:\n{profile_link}\n\nTake a look. If it resonates, claim it. If not, no hard feelings 🤝`,
+      template: `Fair question. Here's the honest answer:\n\nNeuroChiro is the ONLY network built specifically for nervous system chiropractors.\n\nWhen a patient searches here, they get YOU — not a random list mixed with PTs, massage chains, and "chiropractors" who just crack backs.\n\nIt's built by someone in the profession, for the profession. I'm a chiropractor myself.\n\nYour profile is already live:\n{profile_link}\n\nTake a look. If it resonates, claim it. If not, no hard feelings 🤝`,
     },
     {
       id: 'ig_comment',
@@ -732,21 +732,21 @@ export async function getDMScripts(prospect_type: ProspectType = 'doctor') {
       name: 'Email: First Contact',
       category: 'email',
       description: 'Professional email when no Instagram available',
-      template: `Subject: Built you a free listing on NeuroChiro\n\nHey {name},\n\nMy name is Dr. Raymond Nichols. I'm a chiropractor and the founder of NeuroChiro — the directory built specifically for nervous system chiropractors.\n\nI came across your practice and I can tell you're doing real work. So I went ahead and created a free listing for you. It's already live:\n\n{profile_link}\n\nPatients in {city} are actively searching through the directory to find docs like you.\n\nYour basic listing — name, clinic, location — is free. If you want to stand out with your photo, bio, verified badge, and patient messaging, our Pro plan is $99/mo.\n\nMost doctors say it pays for itself with the first new patient.\n\nClaim your listing anytime — takes about 2 minutes.\n\nDr. Raymond Nichols\nFounder, NeuroChiro\nneurochiro.co`,
+      template: `Subject: Built you a free listing on NeuroChiro\n\nHey {name},\n\nMy name is Dr. Raymond Nichols. I'm a chiropractor and the founder of NeuroChiro — the directory built specifically for nervous system chiropractors.\n\nI came across your practice and I can tell you're doing real work. So I went ahead and created a free profile for you. It's already live:\n\n{profile_link}\n\nPatients in {city} are actively searching through the directory to find docs like you.\n\nYour basic profile — name, clinic, location — is free. If you want to stand out with your photo, bio, verified badge, and patient messaging, our Pro plan is $99/mo.\n\nMost doctors say it pays for itself with the first new patient.\n\nClaim your profile anytime — takes about 2 minutes.\n\nDr. Raymond Nichols\nFounder, NeuroChiro\nneurochiro.co`,
     },
     {
       id: 'email_follow_up',
       name: 'Email: Follow-Up',
       category: 'email',
       description: 'Follow-up after 5-7 days',
-      template: `Subject: Quick follow-up on your NeuroChiro listing\n\nHey {name},\n\nJust making sure this didn't get buried.\n\nI created a free listing for your practice on NeuroChiro — it's live here:\n\n{profile_link}\n\nPatients in {city} can find you through it right now.\n\nIf you want to add your photo and bio, it takes about 2 minutes. No pressure either way.\n\nJust didn't want you to miss it.\n\nDr. Raymond Nichols\nFounder, NeuroChiro`,
+      template: `Subject: Quick follow-up on your NeuroChiro listing\n\nHey {name},\n\nJust making sure this didn't get buried.\n\nI created a free profile for your practice on NeuroChiro — it's live here:\n\n{profile_link}\n\nPatients in {city} can find you through it right now.\n\nIf you want to add your photo and bio, it takes about 2 minutes. No pressure either way.\n\nJust didn't want you to miss it.\n\nDr. Raymond Nichols\nFounder, NeuroChiro`,
     },
     {
       id: 'email_final',
       name: 'Email: Final',
       category: 'email',
       description: 'Last email — respectful close',
-      template: `Subject: Last note from me\n\nHey {name},\n\nI know you're busy running your practice so I'll keep this short.\n\nYour listing on NeuroChiro is still live:\n{profile_link}\n\nIt's there whenever you're ready. If the timing isn't right, no worries at all.\n\nWishing you and your practice the best.\n\nDr. Raymond Nichols\nFounder, NeuroChiro`,
+      template: `Subject: Last note from me\n\nHey {name},\n\nI know you're busy running your practice so I'll keep this short.\n\nYour profile on NeuroChiro is still live:\n{profile_link}\n\nIt's there whenever you're ready. If the timing isn't right, no worries at all.\n\nWishing you and your practice the best.\n\nDr. Raymond Nichols\nFounder, NeuroChiro`,
     },
     {
       id: 'email_warm_intro',
@@ -772,15 +772,15 @@ function getVendorScripts() {
       id: 'vendor_intro',
       name: 'Vendor: Introduction',
       category: 'first_contact',
-      description: 'Initial outreach to vendors — pitch the vendor directory',
-      template: `Subject: Partnership opportunity — NeuroChiro Vendor Directory\n\nHi {name},\n\nMy name is Dr. Raymond Nichols, founder of NeuroChiro — the global platform for nervous system chiropractors.\n\nWe're building a vendor directory to connect our network of chiropractors with the best tools, technology, and services in the industry. I think {clinic_name} would be a great fit.\n\nHere's what a vendor listing includes:\n- Company profile visible to our entire doctor network\n- Category placement so doctors find you when searching for solutions\n- Option to feature exclusive discounts or demo links for our members\n\nWould you be interested in learning more? I'd love to set up a quick call or send over the details.\n\nBest,\nDr. Raymond Nichols\nFounder, NeuroChiro\nneurochiro.co`,
+      description: 'Initial outreach to vendors — pitch the vendor marketplace',
+      template: `Subject: Partnership opportunity — NeuroChiro Vendor Directory\n\nHi {name},\n\nMy name is Dr. Raymond Nichols, founder of NeuroChiro — the global platform for nervous system chiropractors.\n\nWe're building a vendor marketplace to connect our network of chiropractors with the best tools, technology, and services in the industry. I think {clinic_name} would be a great fit.\n\nHere's what a vendor listing includes:\n- Company profile visible to our entire doctor network\n- Category placement so doctors find you when searching for solutions\n- Option to feature exclusive discounts or demo links for our members\n\nWould you be interested in learning more? I'd love to set up a quick call or send over the details.\n\nBest,\nDr. Raymond Nichols\nFounder, NeuroChiro\nneurochiro.co`,
     },
     {
       id: 'vendor_short_dm',
       name: 'Vendor: Short DM',
       category: 'first_contact',
       description: 'Quick DM version for social media outreach',
-      template: `Hey {name} — I run NeuroChiro, the global directory for nervous system chiropractors. We're building a vendor marketplace and I think {clinic_name} would be a great fit. Interested in a listing? It gets your product in front of our entire doctor network.`,
+      template: `Hey {name} — I run NeuroChiro, the global network for nervous system chiropractors. We're building a vendor marketplace and I think {clinic_name} would be a great fit. Interested in a profile? It gets your product in front of our entire doctor network.`,
     },
     {
       id: 'vendor_value_lead',
@@ -794,28 +794,28 @@ function getVendorScripts() {
       name: 'Vendor: Follow-Up #1',
       category: 'follow_up',
       description: 'First follow-up after 5 days',
-      template: `Subject: Quick follow-up — NeuroChiro vendor directory\n\nHi {name},\n\nJust circling back on my note about featuring {clinic_name} in the NeuroChiro vendor directory.\n\nOur doctors are actively searching for trusted vendors in your category. A listing takes minutes to set up and puts you directly in front of our network.\n\nHappy to answer any questions or walk you through it.\n\nDr. Raymond Nichols\nFounder, NeuroChiro`,
+      template: `Subject: Quick follow-up — NeuroChiro vendor marketplace\n\nHi {name},\n\nJust circling back on my note about featuring {clinic_name} in the NeuroChiro vendor marketplace.\n\nOur doctors are actively searching for trusted vendors in your category. A profile takes minutes to set up and puts you directly in front of our network.\n\nHappy to answer any questions or walk you through it.\n\nDr. Raymond Nichols\nFounder, NeuroChiro`,
     },
     {
       id: 'vendor_follow_up_2',
       name: 'Vendor: Follow-Up #2',
       category: 'follow_up',
       description: 'Final follow-up — keep it short',
-      template: `Subject: Last note — vendor directory\n\nHi {name},\n\nLast follow-up from me. The NeuroChiro vendor directory is growing and I think {clinic_name} would be a strong addition.\n\nIf the timing is right, I'd love to get you set up. If not, no worries at all.\n\nDr. Raymond Nichols\nFounder, NeuroChiro`,
+      template: `Subject: Last note — vendor marketplace\n\nHi {name},\n\nLast follow-up from me. The NeuroChiro vendor marketplace is growing and I think {clinic_name} would be a strong addition.\n\nIf the timing is right, I'd love to get you set up. If not, no worries at all.\n\nDr. Raymond Nichols\nFounder, NeuroChiro`,
     },
     {
       id: 'vendor_interested',
       name: 'Vendor: They\'re Interested',
       category: 'response',
       description: 'They responded — guide them to sign up',
-      template: `Great to hear! Here's how to get started:\n\n1. Go to neurochiro.co/vendor-application\n2. Fill out your company details (takes about 5 minutes)\n3. Add your logo, product description, and any discount codes you'd like to offer our members\n\nOnce submitted, I'll review and approve it personally. Your listing will be live in the directory within 24 hours.\n\nLet me know if you have any questions!`,
+      template: `Great to hear! Here's how to get started:\n\n1. Go to neurochiro.co/vendor-application\n2. Fill out your company details (takes about 5 minutes)\n3. Add your logo, product description, and any discount codes you'd like to offer our members\n\nOnce submitted, I'll review and approve it personally. Your profile will be live in the marketplace within 24 hours.\n\nLet me know if you have any questions!`,
     },
     {
       id: 'vendor_objection_cost',
       name: 'Vendor: Objection — Cost',
       category: 'objection',
       description: 'When they ask about pricing',
-      template: `Great question. We have a basic listing tier that gets you in the directory with your company profile. Premium tiers with featured placement, analytics, and enhanced visibility are available too. Happy to walk you through the options — what works best for your budget?`,
+      template: `Great question. We have a basic tier that gets you in the marketplace with your company profile. Premium tiers with featured placement, analytics, and enhanced visibility are available too. Happy to walk you through the options — what works best for your budget?`,
     },
   ];
 }
@@ -835,7 +835,7 @@ function getSeminarHostScripts() {
       name: 'Seminar Host: Short DM',
       category: 'first_contact',
       description: 'Quick DM for social media',
-      template: `Hey {name} — I run NeuroChiro, the global directory for nervous system chiropractors. We have a seminar marketplace where our docs find CE events. Would you be interested in listing your seminars? It's a direct line to chiropractors looking for exactly what you teach.`,
+      template: `Hey {name} — I run NeuroChiro, the global network for nervous system chiropractors. We have a seminar marketplace where our docs find CE events. Would you be interested in listing your seminars? It's a direct line to chiropractors looking for exactly what you teach.`,
     },
     {
       id: 'seminar_follow_up_1',
@@ -856,7 +856,7 @@ function getSeminarHostScripts() {
       name: 'Seminar Host: They\'re Interested',
       category: 'response',
       description: 'Guide them to list their seminar',
-      template: `Awesome! Here's how to list your seminar:\n\n1. Go to neurochiro.co/host-a-seminar\n2. Fill in the details — title, dates, location, price, description\n3. Submit for review (I approve these personally)\n\nYour seminar will show up in our directory with map placement so chiropractors in the area can find it easily. If you're a member, your listings are auto-approved.\n\nLet me know if you need help getting set up!`,
+      template: `Awesome! Here's how to list your seminar:\n\n1. Go to neurochiro.co/host-a-seminar\n2. Fill in the details — title, dates, location, price, description\n3. Submit for review (I approve these personally)\n\nYour seminar will show up in our marketplace with map placement so chiropractors in the area can find it easily. If you're a member, your listings are auto-approved.\n\nLet me know if you need help getting set up!`,
     },
   ];
 }

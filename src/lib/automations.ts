@@ -317,7 +317,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
               to: payload.email, 
               subject: 'Welcome to the NeuroChiro Network 🌍', 
               title: 'Doctor Account Created', 
-              body: `<h1>Welcome Dr. ${payload.name || payload.full_name || ''},</h1><p>Your directory profile has been created. To start receiving referrals and join the global map, complete your clinic profile and finalize your membership.</p>`, 
+              body: `<h1>Welcome Dr. ${payload.name || payload.full_name || ''},</h1><p>Your network profile has been created. To start receiving referrals and join the global map, complete your clinic profile and finalize your membership.</p>`, 
               ctaText: 'Setup My Profile', 
               ctaUrl: 'https://neurochiro.co/onboarding' 
             });
@@ -381,7 +381,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                     <p>Understanding your nervous system is the first step to true healing. You now have access to a global network of elite, nervous-system-first chiropractors.</p>
                     <p>Inside your patient portal, you can:</p>
                     <ul>
-                      <li>Search the global directory for verified specialists near you.</li>
+                      <li>Search the global network for verified specialists near you.</li>
                       <li>Access educational resources about nervous system regulation.</li>
                       <li>Track your health journey and clinical progress.</li>
                     </ul>
@@ -418,7 +418,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             subject: 'Action Required: Complete Your Vendor Profile ⚠️',
             title: 'Profile Incomplete',
             body: `<h1>Don't miss out on exposure, ${payload.name || 'Partner'}.</h1>
-                   <p>Your vendor profile is currently incomplete. Active listings receive significantly more clicks and direct inquiries from our network of chiropractors.</p>
+                   <p>Your vendor profile is currently incomplete. Active profiles receive significantly more clicks and direct inquiries from our network of chiropractors.</p>
                    <p>Take 5 minutes to add your company details, logo, and a special offer for NeuroChiro members.</p>`,
             ctaText: 'Complete Profile Now',
             ctaUrl: 'https://neurochiro.co/vendor/dashboard'
@@ -439,7 +439,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                       <li><strong>Clear ROI:</strong> Explain exactly how your product saves time, increases revenue, or improves patient outcomes.</li>
                       <li><strong>Rich Media:</strong> Ensure your logo is high-resolution and your description is compelling.</li>
                    </ul>`,
-            ctaText: 'Optimize Listing',
+            ctaText: 'Optimize Profile',
             ctaUrl: 'https://neurochiro.co/vendor/dashboard'
           });
         }
@@ -553,9 +553,9 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             subject: 'Find your clinical partner today 📍',
             title: 'Directory Match',
             body: `<h1>${payload.name || payload.full_name || 'Hi'}, are you ready to take the next step?</h1>
-                   <p>Our global directory is filled with rigorously vetted, nervous-system-first practitioners.</p>
+                   <p>Our global network is filled with rigorously vetted, nervous-system-first practitioners.</p>
                    <p>You can search by city, condition, or clinical specialty. Don't wait to start your healing journey.</p>`,
-            ctaText: 'Search the Directory',
+            ctaText: 'Find a Doctor',
             ctaUrl: 'https://neurochiro.co/directory'
           });
         }
@@ -571,7 +571,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                 subject: 'Did you forget something? 🌍',
                 title: 'Incomplete Registration',
                 body: `<h1>Dr. ${payload.name || payload.full_name || ''}, your clinic is missing from the map.</h1>
-                       <p>You started setting up your NeuroChiro directory profile, but haven't finalized your membership yet.</p>
+                       <p>You started setting up your NeuroChiro profile, but haven't finalized your membership yet.</p>
                        <p>Patients and students are actively searching your area. Complete your setup now to secure your spot.</p>`,
                 ctaText: 'Complete Your Profile',
                 ctaUrl: 'https://neurochiro.co/doctor/profile'
@@ -590,7 +590,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                 subject: 'Ready to expand your clinical influence? 🚀',
                 title: 'Upgrade to Pro',
                 body: `<h1>Dr. ${payload.name || payload.full_name || ''}, level up your practice.</h1>
-                       <p>Your free listing gets you on the map, but Pro ($99/mo) unlocks your full contact info, patient messaging, analytics, and the complete practice toolkit.</p>
+                       <p>Your profile gets you on the map, but Pro ($99/mo) unlocks your full contact info, patient messaging, analytics, and the complete practice toolkit.</p>
                        <p>One new patient pays for a full year. Upgrade today.</p>`,
                 ctaText: 'Upgrade to Pro — $99/mo',
                 ctaUrl: 'https://neurochiro.co/doctor/billing'
@@ -732,16 +732,16 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
       case 'payment_warning':
         // 🛡️ PHASE 2: In-App Notification
         if (payload.userId) {
-          await insertNotification(payload.userId, 'Payment Overdue ⚠️', 'Your directory listing is at risk. Update your billing immediately.', 'system', '/doctor/settings', 'urgent');
+          await insertNotification(payload.userId, 'Payment Overdue ⚠️', 'Your network profile is at risk. Update your billing immediately.', 'system', '/doctor/settings', 'urgent');
         }
 
         if (emailEnabled && payload.email) {
           await sendPremiumEmail({
             to: payload.email,
-            subject: 'Action Required: Your directory listing is at risk',
+            subject: 'Action Required: Your network profile is at risk',
             title: 'Payment Warning',
             body: `<p>Hi ${payload.name || 'Doctor'}, your payment is now 3 days past due. To prevent your clinic from being hidden on the global map, please update your billing information immediately.</p>`,
-            ctaText: 'Secure My Listing',
+            ctaText: 'Secure My Profile',
             ctaUrl: 'https://neurochiro.co/doctor/settings'
           });
         }
@@ -803,8 +803,8 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                if (emailEnabled && profile.email) {
                   await sendPremiumEmail({
                     to: profile.email,
-                    subject: 'Your Directory Listing is Live! 🌍',
-                    title: 'Directory Activated',
+                    subject: 'Your Network Profile is Live! 🌍',
+                    title: 'Profile Activated',
                     body: `<p>Congratulations Dr. ${profile.full_name || 'Doctor'}, your profile is now live on the global NeuroChiro map. You can now start receiving patient referrals.</p>`,
                     ctaText: 'View Dashboard',
                     ctaUrl: 'https://neurochiro.co/doctor/dashboard'

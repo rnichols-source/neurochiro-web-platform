@@ -12,7 +12,7 @@ import { spotlightEpisodes } from "./spotlight/spotlight-data";
 
 export const metadata = {
   title: "NeuroChiro | Find a Nervous System Chiropractor",
-  description: "The global directory for nervous system chiropractors. Find verified specialists, track your health, and connect with the chiropractic community.",
+  description: "The global network for nervous system chiropractors. Find verified specialists, track your health, and connect with the chiropractic community.",
 };
 
 export const revalidate = 300; // Cache for 5 minutes
@@ -64,7 +64,7 @@ export default async function HomePage() {
             <span className="text-neuro-orange">Chiropractor</span>
           </h1>
           <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto">
-            The global directory for doctors who put your nervous system first.
+            The global network for doctors who put your nervous system first.
           </p>
 
           {/* Search Bar */}

@@ -222,7 +222,7 @@ export default function DoctorLayout({
             <div className="bg-gradient-to-r from-neuro-orange/20 to-neuro-orange/10 border-b border-neuro-orange/30 px-6 py-3 flex items-center justify-between">
               <p className="text-sm text-white/90 font-medium">
                 <span className="font-black text-neuro-orange">Activate Pro</span>{' '}
-                <span className="text-white/70">to unlock your full directory listing, patient leads, and weekly promotion. $99/mo.</span>
+                <span className="text-white/70">to unlock your full network profile, patient leads, and weekly promotion. $99/mo.</span>
               </p>
               <Link href="/doctor/billing" className="px-4 py-1.5 bg-neuro-orange text-white text-xs font-black rounded-lg hover:bg-neuro-orange/90 transition-colors whitespace-nowrap">
                 Activate Pro

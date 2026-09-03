@@ -92,7 +92,7 @@ export default function ConferenceLandingPage() {
           </h1>
 
           <p className="text-gray-300 text-base mb-4 max-w-lg mx-auto">
-            The only directory and career platform built exclusively for our profession.{" "}
+            The only network and career platform built exclusively for our profession.{" "}
             <NetworkStats format="doctors" /> verified chiropractors across 30+ states and 4 countries.
           </p>
 

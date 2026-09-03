@@ -103,7 +103,7 @@ export default function MH4Page() {
 
         <p className="text-white/45 text-lg leading-relaxed max-w-xl mx-auto mb-2">
           As a Mile High attendee, create your NeuroChiro account free and book a personal onboarding call with Dr. Ray.
-          {role === "doctor" ? " He'll walk you through the directory, weekly promotion, patient leads, and every tool included in Pro." : " He'll walk you through the career tools, job matching, Academy, and everything included in your membership."}
+          {role === "doctor" ? " He'll walk you through the network, weekly promotion, patient leads, and every tool included in Pro." : " He'll walk you through the career tools, job matching, Academy, and everything included in your membership."}
         </p>
 
         <div className="inline-flex items-center gap-2 bg-neuro-orange/15 border border-neuro-orange/30 rounded-full px-4 py-2 mt-4">

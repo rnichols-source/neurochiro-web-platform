@@ -105,20 +105,20 @@ export async function GET(req: Request) {
       subject = '5 days left. Your profile will be removed.';
       buildBody = (doc, views) => `
         <p>Dr. ${doc.first_name},</p>
-        <p>Final heads up. On August 1, your NeuroChiro profile will be <strong>removed from the directory entirely.</strong></p>
+        <p>Final heads up. On August 1, your NeuroChiro profile will be <strong>removed from the network entirely.</strong></p>
         <p><strong>What that means:</strong></p>
         <ul>
-          <li>Your listing will no longer appear in search results</li>
+          <li>Your profile will no longer appear in search results</li>
           <li>Patients will not be able to find you on NeuroChiro</li>
           <li>Your profile page will no longer be accessible</li>
           <li>You will not be featured in any promotions, Spotlights, or city pages</li>
         </ul>
         <p><strong>What you keep if you activate Pro ($99/mo):</strong></p>
         <ul>
-          <li>Full profile live in the directory</li>
+          <li>Full profile live in the network</li>
           <li>Patients can find you, call you, book with you, message you</li>
           <li>Full analytics dashboard</li>
-          <li>Spotlight eligibility (185K followers)</li>
+          <li>Spotlight eligibility (promoted to our audience)</li>
           <li>Locked at $99/mo forever (price goes to $79 at 200 doctors)</li>
         </ul>
         <p>This is the last email I'll send about this. The link below takes 60 seconds:</p>
@@ -133,19 +133,19 @@ export async function GET(req: Request) {
         return `
           <p>Hey Dr. ${doc.first_name},</p>
           <p>Quick update on your NeuroChiro profile.</p>
-          <p>Since you joined, <strong>${views} patients have viewed your listing.</strong> But right now, they can't reach you easily because your profile doesn't have full Pro features (messaging, phone display, booking link).</p>
+          <p>Since you joined, <strong>${views} patients have viewed your profile.</strong> But right now, they can't reach you easily because your profile doesn't have full Pro features (messaging, phone display, booking link).</p>
           <p><strong>Here's what Pro doctors get that you're missing:</strong></p>
           <ul>
             <li>Your phone number and booking link visible to every patient who finds you</li>
             <li>Patient messaging (they can contact you directly from your profile)</li>
             <li>Analytics showing exactly who's viewing your profile and how they found you</li>
-            <li>Spotlight interview eligibility (promoted to 185K followers)</li>
+            <li>Spotlight interview eligibility (promoted to our audience)</li>
             <li>Priority placement in search results</li>
             <li>Weekly Practice Growth Report</li>
           </ul>
-          <p>One new patient from the directory pays for an entire year of Pro. The average new patient is worth $2,000-5,000. Pro is $99/mo.</p>
+          <p>One new patient from the network pays for an entire year of Pro. The average new patient is worth $2,000-5,000. Pro is $99/mo.</p>
           <p style="margin-top: 20px;"><a href="${BILLING_LINK}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">Activate Before August 1</a></p>
-          <p style="margin-top: 12px; font-size: 13px; color: #9CA3AF;">After August 1, your profile will be completely removed from the directory. Patients will no longer be able to find you on NeuroChiro.</p>
+          <p style="margin-top: 12px; font-size: 13px; color: #9CA3AF;">After August 1, your profile will be completely removed from the network. Patients will no longer be able to find you on NeuroChiro.</p>
           <p style="margin-top: 20px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
         `;
       };
@@ -158,13 +158,13 @@ export async function GET(req: Request) {
         <p>Over the next 90 days, we're investing heavily in driving real patient traffic to every doctor on the platform:</p>
         <ul>
           <li>SEO city landing pages (so patients Googling "nervous system chiropractor near me" find YOU)</li>
-          <li>Weekly doctor features to our 185K Instagram followers</li>
+          <li>Weekly doctor features to our audience on Instagram</li>
           <li>Spotlight interview series on YouTube</li>
           <li>Google Ads in top cities</li>
           <li>Monthly Practice Growth Reports with your analytics</li>
         </ul>
         <p>Every Pro member gets rotated through these promotions. Your profile has <strong>${views} views</strong> so far, and we're about to multiply that.</p>
-        <p><strong>Here's what's changing:</strong> starting August 1, 2026, all directory profiles will require a Pro membership ($99/mo). Profiles without Pro will be <strong>completely removed from the directory.</strong> Patients will not be able to find you, see your listing, or contact you.</p>
+        <p><strong>Here's what's changing:</strong> starting August 1, 2026, all network profiles will require a Pro membership ($99/mo). Profiles without Pro will be <strong>completely removed from the network.</strong> Patients will not be able to find you, see your profile, or contact you.</p>
         <p>As an early member, you can lock in <strong>$99/mo forever.</strong> This price goes to $79/mo when we hit 200 doctors. We're at 117 right now.</p>
         <p style="margin-top: 20px;"><a href="${BILLING_LINK}" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">Activate Pro — $99/mo</a></p>
         <p style="margin-top: 12px; font-size: 13px; color: #9CA3AF;">You have 30 days.</p>
