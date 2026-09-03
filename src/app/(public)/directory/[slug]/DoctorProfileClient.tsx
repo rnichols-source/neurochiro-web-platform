@@ -297,7 +297,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         <Section bg="cream" style={{ paddingTop: 32, paddingBottom: 0 }}>
           <div style={{ background: "linear-gradient(135deg, #1E2D3B 0%, #1a3048 100%)", borderRadius: 20, padding: "32px 36px", color: "white" }}>
             <p style={{ fontWeight: 900, fontSize: 20, marginBottom: 8 }}>Welcome, {name}!</p>
-            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>We built this free listing for you based on your public practice info. Claim it to manage your profile — takes 15 seconds. Your free plan is yours forever.</p>
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>We built this free profile for you based on your public practice info. Claim it to manage your profile — takes 15 seconds. Your free plan is yours forever.</p>
             <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>Upgrade to <span style={{ color: "#D66829", fontWeight: 800 }}>Pro</span> to unlock everything — contact info visible to patients, analytics, practice tools, and more.</p>
             <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, lineHeight: 1.6, marginBottom: 20 }}>Claim your profile and book an onboarding call to get started. Pro is $99/mo.</p>
             <a href={`/register?claim_id=${doctor.id}&role=doctor`} style={{ display: "inline-block", padding: "14px 28px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, textDecoration: "none", boxShadow: "0 4px 20px rgba(214,104,41,0.3)" }}>

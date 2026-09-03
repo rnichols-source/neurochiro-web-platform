@@ -123,7 +123,7 @@ export default function Navbar() {
                     <div className="p-2 bg-neuro-orange/10 rounded-lg text-neuro-orange"><Stethoscope className="w-4 h-4" /></div>
                     <div>
                       <p className="text-sm font-bold text-neuro-navy">I&apos;m a Doctor</p>
-                      <p className="text-xs text-gray-500">Get Listed</p>
+                      <p className="text-xs text-gray-500">Join Network</p>
                     </div>
                   </Link>
                   <Link href="/get-started" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">

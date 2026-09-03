@@ -237,7 +237,7 @@ function getDoctorEmail(step: number, name: string): { subject: string; body: st
           </ul>
           <p>It takes about 2 minutes to set up. Completely free — no credit card required.</p>
           <p style="margin: 24px 0;">
-            <a href="https://neurochiro.co/get-started" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Get Listed Free</a>
+            <a href="https://neurochiro.co/get-started" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Get Started</a>
           </p>
           <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
         `,
@@ -274,7 +274,7 @@ function getDoctorEmail(step: number, name: string): { subject: string; body: st
             <li>Start showing up in patient searches</li>
           </ol>
           <p style="margin: 24px 0;">
-            <a href="https://neurochiro.co/get-started" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Get Listed Now</a>
+            <a href="https://neurochiro.co/get-started" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Join the Network</a>
           </p>
           <p style="margin-top: 30px;"><strong>Dr. Raymond Nichols</strong><br>Founder, NeuroChiro</p>
         `,

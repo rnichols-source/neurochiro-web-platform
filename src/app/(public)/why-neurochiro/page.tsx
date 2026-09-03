@@ -54,7 +54,7 @@ export default function WhyNeuroChiroPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/get-started" className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors inline-flex items-center gap-2">
-              Get Listed Free <ArrowRight className="w-5 h-5" />
+              Get Started <ArrowRight className="w-5 h-5" />
             </Link>
             <Link href="/pricing" className="px-8 py-4 bg-white/10 text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-colors">
               See Pricing
@@ -162,7 +162,7 @@ export default function WhyNeuroChiroPage() {
           <h2 className="text-3xl font-heading font-black text-white mb-4">Ready to Get Found?</h2>
           <p className="text-gray-400 mb-8"><NetworkStats format="full-sentence" />. Free to start. No credit card required.</p>
           <Link href="/get-started" className="px-10 py-5 bg-neuro-orange text-white font-bold rounded-xl text-lg inline-flex items-center gap-2 hover:bg-neuro-orange/90 transition-colors shadow-lg shadow-neuro-orange/20">
-            Get Listed Free <ArrowRight className="w-5 h-5" />
+            Join the Network <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>

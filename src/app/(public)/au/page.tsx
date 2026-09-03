@@ -133,7 +133,7 @@ export default function AustraliaLandingPage() {
               href="/register?role=doctor&region=AU"
               className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl text-center hover:bg-neuro-orange/90 transition-colors inline-flex items-center justify-center gap-2"
             >
-              Get Listed <ArrowRight className="w-4 h-4" />
+              Join the Network <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 

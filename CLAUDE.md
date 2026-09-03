@@ -1,7 +1,7 @@
 # NeuroChiro Web Platform
 
 ## Project Overview
-NeuroChiro (neurochiro.co) is the global directory and platform for nervous system chiropractors. Five user roles: Doctors, Students, Patients, Vendors, and Admin. Doctors pay $99/mo ($990/yr). Students pay $33/mo. Patients are free. All new doctors and students must complete a personal onboarding call with Dr. Ray before their account is activated. No free tier. No trial.
+NeuroChiro (neurochiro.co) is the global network and platform for nervous system chiropractors. Five user roles: Doctors, Students, Patients, Vendors, and Admin. Doctors pay $99/mo ($990/yr). Students pay $33/mo. Patients are free. All new doctors and students must complete a personal onboarding call with Dr. Ray before their account is activated. No free tier. No trial.
 
 ## Tech Stack
 - **Framework:** Next.js 14+ (App Router)

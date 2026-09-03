@@ -36,7 +36,7 @@ export default function CommunityPage() {
           <h3 className="text-sm font-bold text-white">The Network</h3>
         </div>
         <p className="text-white/40 text-sm leading-relaxed">
-          You're part of the only directory and growth platform built exclusively for nervous system chiropractors. Every member gets personally onboarded, promoted weekly, and supported by Dr. Ray.
+          You're part of the only network built exclusively for nervous system chiropractors. Every member gets personally onboarded, promoted weekly, and supported by Dr. Ray.
         </p>
       </div>
 

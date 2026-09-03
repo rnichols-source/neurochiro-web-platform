@@ -205,7 +205,7 @@ export async function createAccountAction(formData: FormData, role: string, tier
               </div>
               <div style="padding:28px;background:white;">
                 <p style="font-size:15px;color:#333;line-height:1.6;">Hey Dr. ${firstName},</p>
-                <p style="font-size:15px;color:#333;line-height:1.6;">Welcome to NeuroChiro — the global directory for nervous system chiropractors. Your listing is live, but it needs a few things before patients can find you.</p>
+                <p style="font-size:15px;color:#333;line-height:1.6;">Welcome to NeuroChiro — the global network for nervous system chiropractors. Your listing is live, but it needs a few things before patients can find you.</p>
                 <div style="background:#fff7ed;border-left:4px solid #e97325;border-radius:8px;padding:16px;margin:20px 0;">
                   <p style="margin:0 0 8px;font-weight:bold;color:#1a2744;font-size:14px;">To complete your profile:</p>
                   <ul style="margin:0;padding:0 0 0 16px;color:#666;font-size:14px;line-height:1.8;">

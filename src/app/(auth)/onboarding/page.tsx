@@ -7,7 +7,7 @@ import Link from "next/link";
 
 const roleConfig: Record<string, { message: string; action: string; actionHref: string; dashboard: string }> = {
   doctor: {
-    message: "Let's get your practice listed in the global directory.",
+    message: "Let's get your practice set up in the network.",
     action: "Complete Your Profile",
     actionHref: "/doctor/profile",
     dashboard: "/doctor/dashboard",
