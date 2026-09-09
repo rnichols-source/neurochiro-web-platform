@@ -84,6 +84,22 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 4,
     publishedAt: "2026-05-04T12:00:00Z",
   },
+  {
+    id: "ep-005",
+    doctorName: "Dr. Haley Turpin",
+    doctorSlug: "dr.-haley-turpin",
+    clinicName: "Blue Oak Family Chiropractic",
+    city: "Broomfield",
+    state: "CO",
+    videoUrl: "https://www.youtube.com/embed/-GW1c3mayFA",
+    thumbnail: "https://img.youtube.com/vi/-GW1c3mayFA/hqdefault.jpg",
+    quote:
+      "For the first time in my life, someone with so much confidence said the body was designed to heal. And not just from sports injuries. I was like, why have I never heard this before?",
+    description:
+      "Dr. Haley Turpin is the owner of Blue Oak Family Chiropractic in Broomfield, Colorado, located between Denver and Boulder. She shares how losing her mom to suicide led her to discover chiropractic and the body's innate ability to heal. Dr. Haley tells the story of an 8-year-old patient who came in for bedwetting and ended up eating a cookie at a birthday party with no stomach issues for the first time. With over 5 years in practice and one year owning her own clinic, she leads with curiosity and believes the adjustment starts when you walk out the door.",
+    episodeNumber: 5,
+    publishedAt: "2026-09-09T12:00:00Z",
+  },
 ];
 
 export function getLatestEpisode(): SpotlightEpisode {
