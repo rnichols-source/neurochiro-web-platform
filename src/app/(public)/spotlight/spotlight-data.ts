@@ -100,6 +100,22 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 5,
     publishedAt: "2026-09-09T12:00:00Z",
   },
+  {
+    id: "ep-006",
+    doctorName: "Dr. Ryan Maxwell",
+    doctorSlug: "ryan-maxwell",
+    clinicName: "Silver Lining Chiropractic",
+    city: "Park Ridge",
+    state: "IL",
+    videoUrl: "https://www.youtube.com/embed/naF6AlnXNvI",
+    thumbnail: "https://img.youtube.com/vi/naF6AlnXNvI/hqdefault.jpg",
+    quote:
+      "Somebody needs to stop this. Our kids are growing up sicker than ever. Somebody needs to get ahead of it rather than behind it.",
+    description:
+      "Dr. Ryan Maxwell is the owner of Silver Lining Chiropractic in Park Ridge, Illinois, just outside Chicago. A former college baseball player at Monmouth, he discovered chiropractic after an ankle injury that PT couldn't fully resolve. He opened his practice in November 2020 and has built a 3-doctor team with nearly 400 five-star Google reviews and Best Chiropractor of Park Ridge four years running. With 60% of his patients being pediatric and prenatal, Dr. Ryan shares why birth is one of the most stressful events on a baby's nervous system, how INSiGHT scans change the conversation with families, and why he's on a mission to make kids healthier than ever.",
+    episodeNumber: 6,
+    publishedAt: "2026-09-15T12:00:00Z",
+  },
 ];
 
 export function getLatestEpisode(): SpotlightEpisode {
