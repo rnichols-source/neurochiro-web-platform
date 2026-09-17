@@ -7,6 +7,10 @@ import { Resend } from "resend";
 // at Day 3, Day 7, and Day 14 after account creation
 
 export async function GET(req: NextRequest) {
+  // DISABLED: Merged with profile-nudger to reduce email volume.
+  // profile-nudger handles incomplete profile notifications (one per missing item, 7-day cooldown).
+  return NextResponse.json({ status: 'disabled', reason: 'Merged with profile-nudger' });
+
   // Verify cron secret
   const authHeader = req.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;

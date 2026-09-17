@@ -20,6 +20,10 @@ const getResend = () => new Resend(process.env.RESEND_API_KEY || '');
  * Paid doctors get the full breakdown.
  */
 export async function GET(req: Request) {
+  // DISABLED: Weekly digest killed in favor of monthly growth report only.
+  // Members reported too-frequent view count emails as noise.
+  return NextResponse.json({ status: 'disabled', reason: 'Replaced by monthly growth report' });
+
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {

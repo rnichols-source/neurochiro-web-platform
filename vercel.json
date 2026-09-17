@@ -10,14 +10,6 @@
       "schedule": "0 8 * * 2"
     },
     {
-      "path": "/api/cron/profile-reminders",
-      "schedule": "0 14 * * *"
-    },
-    {
-      "path": "/api/cron/weekly-digest",
-      "schedule": "0 12 * * 1"
-    },
-    {
       "path": "/api/cron/follow-up-bot",
       "schedule": "0 11 * * *"
     },
