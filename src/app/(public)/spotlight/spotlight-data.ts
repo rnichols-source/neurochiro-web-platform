@@ -116,6 +116,22 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 6,
     publishedAt: "2026-09-15T12:00:00Z",
   },
+  {
+    id: "ep-007",
+    doctorName: "Dr. Brittany Perez",
+    doctorSlug: "brittany-perez",
+    clinicName: "AlignLife Wellington",
+    city: "Wellington",
+    state: "FL",
+    videoUrl: "https://www.youtube.com/embed/4xwERaHW3WQ",
+    thumbnail: "https://img.youtube.com/vi/4xwERaHW3WQ/hqdefault.jpg",
+    quote:
+      "You can't medicate your way out of something you behaved your way into.",
+    description:
+      "Dr. Brittany Perez is the owner of AlignLife Wellington in Wellington, Florida. Her journey into chiropractic started through CrossFit, where she discovered that the nervous system was the biggest piece of health and recovery. Now with four years in practice, she shares powerful patient stories, including a woman with a full spinal fusion who found a way to tell her family she loves coming to the office, and an older patient who walked in with a cane and started swinging it on the way out. Dr. Brittany talks about why chiropractors are educators above all things, why healing is a \"done with you\" process, and how she built her office to feel like a community, not a doctor's office.",
+    episodeNumber: 7,
+    publishedAt: "2026-09-17T12:00:00Z",
+  },
 ];
 
 export function getLatestEpisode(): SpotlightEpisode {
