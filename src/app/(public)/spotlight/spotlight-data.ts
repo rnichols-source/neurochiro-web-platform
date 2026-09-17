@@ -132,6 +132,22 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 7,
     publishedAt: "2026-09-17T12:00:00Z",
   },
+  {
+    id: "ep-008",
+    doctorName: "Dr. Frank Kaden",
+    doctorSlug: "dr-frank-kaden",
+    clinicName: "Frank E. Kaden, D.C. Chiropractic",
+    city: "Redondo Beach",
+    state: "CA",
+    videoUrl: "https://www.youtube.com/embed/DdUSc6iR68w",
+    thumbnail: "https://img.youtube.com/vi/DdUSc6iR68w/hqdefault.jpg",
+    quote:
+      "I have never cured anybody of anything. But I have given their bodies the opportunity to cure themselves.",
+    description:
+      "Dr. Frank Kaden has been in practice for 28 years in Redondo Beach, California. A competitive swimmer for 20 years, he discovered chiropractic when a teammate training for the 1988 Olympics healed her shoulder without surgery. Now a certified instructor in Zone Technique, one of only 20 in the world, he shares incredible patient stories: a man who forgot his oxygen generator after one visit, a patient who avoided a kidney transplant, and people with frozen shoulders regaining full range of motion in minutes. He also shares his own healing journey, recovering from 5% to 85% vision in his left eye through Zone Technique. After 28 years, Dr. Kaden says chiropractic is not a job, it is a calling.",
+    episodeNumber: 8,
+    publishedAt: "2026-09-17T12:00:00Z",
+  },
 ];
 
 export function getLatestEpisode(): SpotlightEpisode {
