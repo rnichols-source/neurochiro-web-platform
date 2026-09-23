@@ -26,7 +26,12 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
   const gated = isProfileGated(doc);
 
   const location = [doc.city, doc.state].filter(Boolean).join(", ");
-  const specialties = (doc.specialties || []).slice(0, 3);
+  // Normalize specialties: split concatenated entries on newlines, known category boundaries, and trim
+  const rawSpecialties = (doc.specialties || []) as string[];
+  const specialties = rawSpecialties
+    .flatMap((s: string) => s.split(/\n|(?<=[a-z])(?=[A-Z][a-z].*(?:Care|Support|Wellness|Chiropractic|Restoration))/).map(t => t.trim()))
+    .filter((s: string) => s.length > 0 && s.length <= 45)
+    .slice(0, 3);
   const name = `Dr. ${doc.first_name || ''} ${doc.last_name || ''}`.replace(/^Dr\.\s+Dr\./i, 'Dr.').trim();
   const distanceMiles = doc.distance_miles as number | null;
   const hasBooking = !!doc.booking_url;
@@ -163,19 +168,21 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
             href={doc.booking_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="py-3 px-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-1 text-xs font-bold"
-            aria-label="Book online"
+            className="py-3 px-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]"
+            aria-label={`Book online with ${name}`}
           >
             <Calendar className="w-3.5 h-3.5" />
+            <span>Book</span>
           </a>
         )}
         {!gated && doc.phone && (
           <a
             href={`tel:${doc.phone}`}
-            className="py-3 px-3 bg-neuro-orange text-white rounded-xl hover:bg-neuro-orange/90 transition-colors flex items-center justify-center gap-1 text-xs font-bold"
-            aria-label="Call doctor"
+            className="py-3 px-3 bg-neuro-orange text-white rounded-xl hover:bg-neuro-orange/90 transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]"
+            aria-label={`Call ${name}`}
           >
             <Phone className="w-3.5 h-3.5" />
+            <span>Call</span>
           </a>
         )}
         {directionsUrl && (
@@ -183,10 +190,11 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
             href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="py-3 px-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center text-xs font-bold"
-            aria-label="Get directions"
+            className={cn("py-3 px-3 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]", dark ? "bg-white/10 text-white/70 hover:bg-white/15" : "bg-gray-100 text-gray-600 hover:bg-gray-200")}
+            aria-label={`Get directions to ${name}`}
           >
             <Navigation className="w-3.5 h-3.5" />
+            <span>Map</span>
           </a>
         )}
       </div>
