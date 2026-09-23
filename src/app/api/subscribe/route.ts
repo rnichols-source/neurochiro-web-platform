@@ -29,7 +29,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Invalid request.' }, { status: 400 });
   }
 
-  const { email, zip, consent, _hp, _ts } = body;
+  const { email, zip, consent, source: rawSource, _hp, _ts } = body;
+  const VALID_SOURCES = ['website', 'directory_empty', 'profile_footer', 'site_footer', 'og_share'];
+  const source = VALID_SOURCES.includes(rawSource) ? rawSource : 'website';
 
   // Honeypot check
   if (_hp) {
@@ -141,7 +143,7 @@ export async function POST(req: NextRequest) {
       status: 'pending',
       token_hash: tokenHash,
       token_expires_at: expiresAt,
-      source: 'website',
+      source,
       ip,
       user_agent: userAgent,
     } as any);

@@ -17,9 +17,11 @@ export default function SubscribeListPage() {
 function SubscribeListContent() {
   const searchParams = useSearchParams();
   const urlError = searchParams.get("error");
+  const urlSource = searchParams.get("source") || "website";
+  const urlZip = searchParams.get("zip") || "";
 
   const [email, setEmail] = useState("");
-  const [zip, setZip] = useState("");
+  const [zip, setZip] = useState(urlZip);
   const [consent, setConsent] = useState(false);
   const [honeypot, setHoneypot] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -61,6 +63,7 @@ function SubscribeListContent() {
           email: email.trim(),
           zip: zip.trim(),
           consent: true,
+          source: urlSource,
           _hp: honeypot,
           _ts: tsRef.current,
         }),

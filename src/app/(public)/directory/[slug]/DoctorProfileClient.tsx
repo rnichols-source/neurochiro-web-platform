@@ -938,6 +938,16 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         </div>
       </div>
 
+      {/* Patient list CTA */}
+      <div style={{ background: "#f5f3ef", padding: "32px 24px", textAlign: "center" }}>
+        <p style={{ fontSize: 14, color: "#718096", marginBottom: 8 }}>
+          Can't find a nervous system chiropractor near you?
+        </p>
+        <a href="/list?source=profile_footer" style={{ color: "#D66829", fontWeight: 800, fontSize: 14, textDecoration: "none" }}>
+          Join the patient list and get notified when one joins your area →
+        </a>
+      </div>
+
       {/* Bottom spacer for mobile sticky CTA */}
       <div style={{ height: 80 }} className="lg:hidden" />
     </div>

@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import NextImage from "next/image";
-import { Search, MapPin, Filter, Star, ShieldCheck, ArrowRight, Zap, Globe, Heart, Sparkles, X, Target, Calendar, RefreshCw, AlertTriangle, RotateCcw, List, Map as MapIcon, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { Search, MapPin, Filter, Star, ShieldCheck, ArrowRight, Zap, Globe, Heart, Sparkles, X, Target, Calendar, RefreshCw, AlertTriangle, RotateCcw, List, Map as MapIcon, SlidersHorizontal, ChevronDown, Mail } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRegion } from "@/context/RegionContext";
 import { useSearchParams } from "next/navigation";
@@ -401,22 +401,25 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
           {hasMore && <div ref={loadMoreRef} className="py-4 flex justify-center">{loading && <RefreshCw className="w-5 h-5 text-neuro-orange animate-spin" />}</div>}
         </>
       ) : (
-        <div className="bg-white rounded-2xl border-2 border-dashed border-gray-100 p-8 text-center">
-          <Globe className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-black text-neuro-navy mb-2">No Doctors Found</h3>
-          <p className="text-gray-500 text-sm mb-6">Try a nearby city or clear your search.</p>
-          <button onClick={resetFilters} className="px-6 py-3 bg-neuro-navy text-white rounded-xl font-bold text-xs uppercase tracking-widest"><RotateCcw className="w-3 h-3 inline mr-2" /> Reset Filters</button>
-          {!notifySuccess ? (
-            <form onSubmit={handleNotifyMe} className="max-w-sm mx-auto pt-6 mt-6 border-t border-gray-100">
-              <p className="text-sm font-bold text-neuro-navy mb-3">Get notified when we add a doctor near you</p>
-              <div className="flex gap-2">
-                <input type="email" name="email" required placeholder="you@email.com" className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange" />
-                <button type="submit" disabled={notifying} className="px-5 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm">{notifying ? '...' : 'Notify Me'}</button>
-              </div>
-            </form>
-          ) : (
-            <div className="pt-6 mt-6 border-t border-gray-100"><p className="text-sm font-bold text-green-600">We&apos;ll let you know when a doctor joins near you!</p></div>
-          )}
+        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center max-w-lg mx-auto shadow-sm">
+          <div className="w-16 h-16 rounded-full bg-neuro-orange/10 flex items-center justify-center mx-auto mb-5">
+            <Globe className="w-8 h-8 text-neuro-orange" />
+          </div>
+          <h3 className="text-xl font-black text-neuro-navy mb-2">No Doctors in This Area Yet</h3>
+          <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+            We're growing the network every week. Join the patient list and you'll be the first to know when a nervous system chiropractor joins near you.
+          </p>
+          <Link
+            href="/list?source=directory_empty"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors text-sm"
+          >
+            <Mail className="w-4 h-4" /> Get on the List
+          </Link>
+          <div className="mt-6 pt-6 border-t border-gray-100">
+            <button onClick={resetFilters} className="text-neuro-navy text-xs font-bold uppercase tracking-widest hover:text-neuro-orange transition-colors">
+              <RotateCcw className="w-3 h-3 inline mr-1" /> Reset Filters
+            </button>
+          </div>
         </div>
       )}
     </>
