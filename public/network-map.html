@@ -61,26 +61,23 @@
         style: {
             version: 8,
             sources: {
-                'basemap': {
+                'carto': {
                     type: 'raster',
                     tiles: [
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+                        'https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/{z}/{x}/{y}@2x.png',
+                        'https://cartodb-basemaps-b.global.ssl.fastly.net/dark_all/{z}/{x}/{y}@2x.png',
+                        'https://cartodb-basemaps-c.global.ssl.fastly.net/dark_all/{z}/{x}/{y}@2x.png'
                     ],
                     tileSize: 256,
-                    attribution: '&copy; <a href="https://openstreetmap.org/">OpenStreetMap</a> contributors'
+                    attribution: '&copy; <a href="https://openstreetmap.org/">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
                 }
             },
             layers: [{
                 id: 'base-layer',
                 type: 'raster',
-                source: 'basemap',
+                source: 'carto',
                 minzoom: 0,
-                maxzoom: 19,
-                paint: {
-                    'raster-saturation': -1,
-                    'raster-brightness-max': 0.3,
-                    'raster-contrast': 0.3
-                }
+                maxzoom: 20
             }],
                 minzoom: 0,
                 maxzoom: 20
