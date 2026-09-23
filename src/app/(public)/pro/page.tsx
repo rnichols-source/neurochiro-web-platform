@@ -25,7 +25,11 @@ function ProPageContent() {
   const annualLink = STRIPE_ANNUAL ? `${STRIPE_ANNUAL}${STRIPE_ANNUAL.includes("?") ? "&" : "?"}client_reference_id=pro_${source}` : "#";
   const fitCallLink = FIT_CALL_LINK || "#";
 
-  const css = `@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap');`;
+  const css = `
+    @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap');
+    .pro-page h1, .pro-page h2, .pro-page h3 { color: #F1EDE7 !important; }
+    .pro-page p, .pro-page li, .pro-page span { color: inherit; }
+  `;
 
   const faqs = [
     { q: "Is $99 a month worth it if I'm already busy?", a: "If your schedule is full and you never want another new patient, probably not. Most doctors joining aren't short on patients in general, they're short on the right ones: people who understand nervous system care before they walk in. That's who searches this directory." },
