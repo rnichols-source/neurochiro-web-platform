@@ -17,53 +17,52 @@ export const WELCOME_STEPS: WelcomeStep[] = [
   {
     step: 0,
     dayOffset: 0,
-    subject: "Welcome to NeuroChiro — here's what to expect",
+    subject: "You're in. Here's what happens next.",
     bodyHtml: `
-      <p style="font-size:15px;color:#333;line-height:1.6;">Welcome to the NeuroChiro patient list.</p>
-      <p style="font-size:15px;color:#333;line-height:1.6;">You signed up because you're looking for a nervous system chiropractor in your area, or you want to learn more about how your nervous system affects your health. Either way, you're in the right place.</p>
-      <p style="font-size:15px;color:#333;line-height:1.6;">Here's what you'll get from us:</p>
-      <ul style="font-size:15px;color:#333;line-height:2;">
-        <li>Weekly education on how the nervous system controls your body's ability to heal</li>
-        <li>An alert when a NeuroChiro doctor joins near your ZIP code</li>
-        <li>No spam, no selling, no fluff</li>
-      </ul>
-      <p style="font-size:15px;color:#333;line-height:1.6;">In the meantime, you can browse the doctors already on NeuroChiro:</p>
-      <div style="text-align:center;margin:24px 0;">
-        <a href="https://neurochiro.co/directory" style="display:inline-block;background:#D66829;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">Browse the Directory</a>
-      </div>
-      <p style="font-size:15px;color:#333;line-height:1.6;">Talk soon,</p>
-      <p style="font-size:15px;color:#333;"><strong>Dr. Ray</strong><br>Founder, NeuroChiro</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Hi there,</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">You're in. Welcome to NeuroChiro.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">I'm Dr. Ray, a chiropractor in Greer, South Carolina, and I started NeuroChiro because of a problem I kept running into: people would ask me to recommend a chiropractor in their city, and I'd have no idea who to send them to.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Not every chiropractor practices the same way. The doctors in the NeuroChiro directory focus on the nervous system, which is the system running everything else in your body. That's a different approach than getting cracked and sent on your way.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Here's what to expect from me:</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">One email a week. Real education about how your nervous system affects your sleep, your energy, your digestion, your stress, and your pain. No hype, no fear tactics, no selling you a supplement.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">And the moment a NeuroChiro doctor joins in your area, you'll be the first to know.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">One quick thing: hit reply and tell me what brought you here. Pain that won't quit? Trying to keep your kids healthy? Just curious? I read every reply, and it tells me what to write about.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Talk soon,</p>
+      <p style="font-size:15px;color:#333;"><strong>Dr. Ray</strong><br>NeuroChiro | <a href="https://neurochiro.co" style="color:#D66829;">neurochiro.co</a></p>
     `,
   },
   {
     step: 1,
     dayOffset: 3,
-    subject: "Why your nervous system matters more than you think",
+    subject: "It was never really about your back",
     bodyHtml: `
-      <p style="font-size:15px;color:#333;line-height:1.6;">Your brain and spinal cord make up your central nervous system. Every function in your body, from digestion to sleep to immunity, is controlled by it.</p>
-      <p style="font-size:15px;color:#333;line-height:1.6;">When there's interference in that system (chiropractors call it a subluxation), your body can't communicate properly. That's when symptoms show up: headaches, fatigue, digestive issues, brain fog, poor sleep, and more.</p>
-      <p style="font-size:15px;color:#333;line-height:1.6;">A nervous system chiropractor doesn't just address pain. They find and correct the interference so your body can do what it's designed to do: heal itself.</p>
-      <p style="font-size:15px;color:#333;line-height:1.6;">That's the difference between symptom management and actually getting better.</p>
-      <div style="text-align:center;margin:24px 0;">
-        <a href="https://neurochiro.co/why-neurochiro" style="display:inline-block;background:#D66829;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">Learn More</a>
-      </div>
-      <p style="font-size:15px;color:#333;line-height:1.6;">Dr. Ray</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Hi there,</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Most people think a chiropractor is for back pain. That's like saying a mechanic is for flat tires.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Here's the part nobody explains at the front desk.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Your brain and spinal cord run every single thing in your body you never think about. Your heart rate. Your digestion. Your immune response. How deeply you sleep. How fast you recover from stress. Every one of those signals travels through your spine.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">When your spine doesn't move the way it's supposed to, those signals get noisy. Your body picks a side: stuck in stress mode, or able to rest and repair. Most people are living in the first one and have been for years. It shows up as the stuff you've stopped mentioning to your doctor because it's just how you are now. Tired at 2pm. Wired at 11pm. Shoulders up by your ears. Getting sick more than you used to.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Pain is the smoke alarm. It's the last thing to show up and the first thing to leave. It is not the fire.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">That's why nervous system-focused chiropractors check how your spine is functioning, not just where it hurts. The goal isn't to make the pain quiet. It's to get the signal clean so your body can do what it already knows how to do.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Next week I'll get into what's actually happening when that stress response gets stuck in the on position, and a few things you can do about it tonight.</p>
+      <p style="font-size:15px;color:#333;"><strong>Dr. Ray</strong><br>NeuroChiro | <a href="https://neurochiro.co" style="color:#D66829;">neurochiro.co</a></p>
     `,
   },
   {
     step: 2,
     dayOffset: 7,
-    subject: "Real stories from real patients",
+    subject: "How the directory works (and one thing to try this week)",
     bodyHtml: `
-      <p style="font-size:15px;color:#333;line-height:1.6;">Every week, we interview chiropractors on the NeuroChiro Spotlight. The stories they share are powerful.</p>
-      <p style="font-size:15px;color:#333;line-height:1.6;">A woman with chronic migraines who hasn't had one in a year. A man who walked in carrying an oxygen generator and walked out without it. An 8-year-old who ate a cookie at a birthday party with no stomach issues for the first time.</p>
-      <p style="font-size:15px;color:#333;line-height:1.6;">These aren't miracles. This is what happens when the nervous system is functioning properly.</p>
-      <p style="font-size:15px;color:#333;line-height:1.6;">Watch the interviews and see for yourself:</p>
-      <div style="text-align:center;margin:24px 0;">
-        <a href="https://neurochiro.co/spotlight" style="display:inline-block;background:#D66829;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">Watch the Spotlight</a>
-      </div>
-      <p style="font-size:15px;color:#333;line-height:1.6;">And if you haven't found a doctor near you yet, we're working on it. When one joins your area, you'll be the first to know.</p>
-      <p style="font-size:15px;color:#333;line-height:1.6;">Dr. Ray</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Hi there,</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Two quick things.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">First, a heads-up on how the directory works. Every doctor listed on NeuroChiro is a licensed chiropractor who practices with a nervous system focus. This isn't a scraped list of everybody with a license in your state. Each one applies, and I review them before they're listed.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">If there's already one near you, you can find them here: <a href="https://neurochiro.co" style="color:#D66829;font-weight:bold;">neurochiro.co</a></p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">If there isn't, that's exactly why you're on this list. I use where you all are to decide which cities to recruit doctors in next. When one joins near you, you'll hear from me.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Second, one thing to try this week.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Before you get out of bed tomorrow, take six slow breaths. In through your nose for four counts, out through your mouth for six. The long exhale is the part that matters. It's one of the few direct switches you have into the rest-and-repair side of your nervous system.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">It won't fix anything structural. But it'll show you how fast your body responds when you give it the right signal, and it costs you ninety seconds.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">From here you'll hear from me once a week. Education, doctor spotlights, and answers to the questions people keep sending in.</p>
+      <p style="font-size:15px;color:#333;line-height:1.7;">Glad you're here.</p>
+      <p style="font-size:15px;color:#333;"><strong>Dr. Ray</strong><br>NeuroChiro | <a href="https://neurochiro.co" style="color:#D66829;">neurochiro.co</a></p>
     `,
   },
 ];
