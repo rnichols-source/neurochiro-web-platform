@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Mail, MapPin, CheckCircle2, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Footer from "@/components/landing/Footer";
 
 export default function SubscribeListPage() {
+  return (
+    <Suspense>
+      <SubscribeListContent />
+    </Suspense>
+  );
+}
+
+function SubscribeListContent() {
   const searchParams = useSearchParams();
   const urlError = searchParams.get("error");
 
