@@ -58,6 +58,7 @@ const allNavItems = [
   { name: "Outreach", href: "/admin/outreach", icon: Mail },
   { name: "Content Tracker", href: "/admin/content-tracker", icon: Activity },
   { name: "Agents", href: "/admin/agents", icon: Bot },
+  { name: "Patient List", href: "/admin/list", icon: Mail },
   { name: "Revenue", href: "/admin/revenue", icon: CreditCard },
   { name: "Logs", href: "/admin/logs", icon: History },
 ];
