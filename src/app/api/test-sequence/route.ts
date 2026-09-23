@@ -4,19 +4,24 @@ import { createAdminClient } from '@/lib/supabase-admin';
 /**
  * TEST TOOL — Fast-forward subscriber timestamps for testing the welcome sequence.
  *
- * Usage:
- *   POST /api/test-sequence
- *   Body: { "email": "test@example.com", "action": "enroll" | "fast_forward" | "reset", "days": 3 }
- *
- * Actions:
- *   enroll       — Create a test subscriber and confirm them immediately
- *   fast_forward — Move confirmed_at backwards by N days so the cron thinks time has passed
- *   reset        — Delete all sequence_state rows for this subscriber so emails can re-send
- *
- * Protected: requires CRON_SECRET auth header (same as cron routes).
- * Do NOT deploy to production without auth. This is a test tool.
+ * Guards:
+ *   1. ALLOW_TEST_ENDPOINTS env var must be explicitly "true" (off by default in prod)
+ *   2. Email must be in the hardcoded allowlist
+ *   3. CRON_SECRET auth header required
  */
+
+const EMAIL_ALLOWLIST = new Set([
+  'rnichols@alignlife.com',
+  'nichr114@gmail.com',
+]);
+
 export async function POST(req: NextRequest) {
+  // Guard 1: env flag must be explicitly enabled
+  if (process.env.ALLOW_TEST_ENDPOINTS !== 'true') {
+    return NextResponse.json({ error: 'Test endpoints are disabled' }, { status: 403 });
+  }
+
+  // Guard 2: auth
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
@@ -28,6 +33,11 @@ export async function POST(req: NextRequest) {
 
   if (!email || !action) {
     return NextResponse.json({ error: 'email and action are required' }, { status: 400 });
+  }
+
+  // Guard 3: email allowlist
+  if (!EMAIL_ALLOWLIST.has(email.toLowerCase())) {
+    return NextResponse.json({ error: 'Email not in test allowlist' }, { status: 403 });
   }
 
   const supabase = createAdminClient();
