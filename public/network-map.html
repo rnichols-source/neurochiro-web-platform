@@ -61,31 +61,27 @@
         style: {
             version: 8,
             sources: {
-                'carto-dark': {
+                'stadia-dark': {
                     type: 'raster',
                     tiles: [
-                        'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-                        'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-                        'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
+                        'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}@2x.png'
                     ],
                     tileSize: 256,
-                    attribution: ''
+                    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://openstreetmap.org/">OpenStreetMap</a>'
                 },
-                'carto-light': {
+                'stadia-light': {
                     type: 'raster',
                     tiles: [
-                        'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-                        'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-                        'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png'
+                        'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}@2x.png'
                     ],
                     tileSize: 256,
-                    attribution: ''
+                    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://openstreetmap.org/">OpenStreetMap</a>'
                 }
             },
             layers: [{
-                id: 'carto-base-layer',
+                id: 'base-layer',
                 type: 'raster',
-                source: window.innerWidth < 1024 ? 'carto-dark' : 'carto-light',
+                source: window.innerWidth < 1024 ? 'stadia-dark' : 'stadia-light',
                 minzoom: 0,
                 maxzoom: 20
             }],
