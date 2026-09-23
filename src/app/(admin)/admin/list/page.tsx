@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSubscriberStats, exportSubscribersCSV } from "./actions";
+import Link from "next/link";
+import { getSubscriberStats, exportSubscribersCSV, getDoctorsForNotification, notifySubscribersNewDoctor } from "./actions";
 import {
   Users,
   CheckCircle,
@@ -63,14 +64,22 @@ export default function AdminListPage() {
             Subscribers from neurochiro.co/list
           </p>
         </div>
-        <button
-          onClick={handleExport}
-          disabled={exporting}
-          className="px-4 py-2 bg-white/10 text-white text-sm font-bold rounded-xl hover:bg-white/15 transition-colors flex items-center gap-2 disabled:opacity-50"
-        >
-          {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-          Export CSV
-        </button>
+        <div className="flex gap-3">
+          <Link
+            href="/admin/list/broadcast"
+            className="px-4 py-2 bg-neuro-orange text-white text-sm font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors flex items-center gap-2"
+          >
+            <Mail className="w-4 h-4" /> Compose Broadcast
+          </Link>
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            className="px-4 py-2 bg-white/10 text-white text-sm font-bold rounded-xl hover:bg-white/15 transition-colors flex items-center gap-2 disabled:opacity-50"
+          >
+            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Stat Cards */}
@@ -234,6 +243,88 @@ export default function AdminListPage() {
           </table>
         </div>
       </div>
+
+      {/* Doctor-Joined Trigger */}
+      <DoctorJoinedTrigger />
+    </div>
+  );
+}
+
+function DoctorJoinedTrigger() {
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [selectedId, setSelectedId] = useState("");
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  const loadDoctors = async () => {
+    const data = await getDoctorsForNotification();
+    setDoctors(data);
+    setLoaded(true);
+  };
+
+  const handleNotify = async () => {
+    if (!selectedId) return;
+    const doc = doctors.find(d => d.id === selectedId);
+    if (!confirm(`Send "A doctor joined near you" email to all confirmed subscribers in ${doc?.state}?`)) return;
+    setSending(true);
+    setResult(null);
+    const res = await notifySubscribersNewDoctor(selectedId);
+    setSending(false);
+    if (res.ok) {
+      setResult(`Notified ${res.notified} subscribers in ${doc?.state}.`);
+    } else {
+      setResult(`Error: ${res.error}`);
+    }
+  };
+
+  return (
+    <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-6 mt-8">
+      <h2 className="text-sm font-bold text-white flex items-center gap-2 mb-4">
+        <MapPin className="w-4 h-4 text-neuro-orange" />
+        Doctor Joined Trigger
+      </h2>
+      <p className="text-gray-500 text-xs mb-4">
+        Notify subscribers when a new doctor joins near them. Sends to all confirmed subscribers in the same state.
+      </p>
+      {!loaded ? (
+        <button
+          onClick={loadDoctors}
+          className="px-4 py-2 bg-white/10 text-white text-sm font-bold rounded-xl hover:bg-white/15 transition-colors"
+        >
+          Load Recent Doctors
+        </button>
+      ) : (
+        <div className="flex gap-3 items-end">
+          <div className="flex-1">
+            <select
+              value={selectedId}
+              onChange={(e) => setSelectedId(e.target.value)}
+              className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-neuro-orange"
+            >
+              <option value="">Select doctor...</option>
+              {doctors.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name} — {d.city}, {d.state}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            onClick={handleNotify}
+            disabled={!selectedId || sending}
+            className="px-5 py-2.5 bg-neuro-orange text-white text-sm font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors flex items-center gap-2 disabled:opacity-40"
+          >
+            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+            Notify Subscribers
+          </button>
+        </div>
+      )}
+      {result && (
+        <p className={`text-sm font-bold mt-3 ${result.startsWith("Error") ? "text-red-400" : "text-green-400"}`}>
+          {result}
+        </p>
+      )}
     </div>
   );
 }

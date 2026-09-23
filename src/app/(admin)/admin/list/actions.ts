@@ -120,6 +120,129 @@ export async function getSubscriberStats(): Promise<SubscriberStats> {
   };
 }
 
+export async function notifySubscribersNewDoctor(
+  doctorId: string,
+  dryRun: boolean = false
+): Promise<{ ok: boolean; notified: number; closeMatch: number; error?: string; details?: any[] }> {
+  await checkAdminAuth();
+  const supabase = createAdminClient();
+
+  // Get the doctor
+  const { data: doctor } = await (supabase as any)
+    .from('doctors')
+    .select('first_name, last_name, clinic_name, city, state, slug')
+    .eq('id', doctorId)
+    .single();
+
+  if (!doctor) {
+    return { ok: false, notified: 0, closeMatch: 0, error: 'Doctor not found' };
+  }
+
+  // Find confirmed subscribers in the same state
+  const { data: subscribers } = await (supabase as any)
+    .from('subscribers')
+    .select('id, email, zip, state')
+    .eq('status', 'confirmed')
+    .is('unsubscribed_at', null)
+    .eq('state', doctor.state);
+
+  if (!subscribers || subscribers.length === 0) {
+    return { ok: true, notified: 0, closeMatch: 0 };
+  }
+
+  // Determine close matches (same 3-digit ZIP prefix as doctor's city)
+  // We don't have the doctor's ZIP, so we flag by state for now
+  const details = subscribers.map((s: any) => ({
+    email: s.email,
+    zip: s.zip,
+    closeMatch: false, // would need doctor ZIP to determine 3-digit prefix match
+  }));
+
+  if (dryRun) {
+    return {
+      ok: true,
+      notified: 0,
+      closeMatch: details.filter((d: any) => d.closeMatch).length,
+      details,
+    };
+  }
+
+  // Send notification emails
+  const { getMarketingResend, getMarketingFrom, getMailingAddress } = await import('@/lib/marketing-email');
+  const resend = getMarketingResend();
+  const from = getMarketingFrom();
+  const address = getMailingAddress();
+
+  const doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`;
+  const profileUrl = `https://neurochiro.co/directory/${doctor.slug}`;
+
+  let notified = 0;
+
+  for (const sub of subscribers) {
+    try {
+      await resend.emails.send({
+        from,
+        to: [sub.email],
+        subject: `A NeuroChiro doctor just joined near you`,
+        html: `
+          <div style="font-family:system-ui,-apple-system,sans-serif;max-width:600px;margin:0 auto;">
+            <div style="background:#1E2D3B;padding:28px;text-align:center;">
+              <h1 style="color:white;font-size:22px;margin:0;">NEURO<span style="color:#D66829;">CHIRO</span></h1>
+            </div>
+            <div style="padding:28px;background:white;">
+              <p style="font-size:15px;color:#333;line-height:1.7;">Hi there,</p>
+              <p style="font-size:15px;color:#333;line-height:1.7;">You signed up to be notified when a nervous system chiropractor joined near you. Good news:</p>
+              <div style="background:#f8f6f2;border-radius:12px;padding:20px;margin:20px 0;text-align:center;">
+                <p style="font-size:18px;font-weight:900;color:#1E2D3B;margin:0 0 4px;">${doctorName}</p>
+                <p style="font-size:14px;color:#718096;margin:0;">${doctor.clinic_name} &middot; ${doctor.city}, ${doctor.state}</p>
+              </div>
+              <p style="font-size:15px;color:#333;line-height:1.7;">Check out their profile and see if they're the right fit for you:</p>
+              <div style="text-align:center;margin:24px 0;">
+                <a href="${profileUrl}" style="display:inline-block;background:#D66829;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">View Their Profile</a>
+              </div>
+              <p style="font-size:15px;color:#333;line-height:1.7;">Dr. Ray<br><a href="https://neurochiro.co" style="color:#D66829;">neurochiro.co</a></p>
+            </div>
+            <div style="background:#f5f3ef;padding:20px;text-align:center;font-size:11px;color:#999;line-height:1.6;">
+              <p style="margin:0 0 8px;">This email contains educational content only. It is not medical advice and does not create a doctor-patient relationship.</p>
+              <p style="margin:0 0 8px;">${address}</p>
+              <p style="margin:0;"><a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:#D66829;">Unsubscribe</a></p>
+            </div>
+          </div>
+        `,
+        headers: {
+          'List-Unsubscribe': '<{{{RESEND_UNSUBSCRIBE_URL}}}>',
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
+      });
+      notified++;
+    } catch (err) {
+      console.error(`[DOCTOR-JOINED] Failed to notify ${sub.email}:`, err);
+    }
+    await new Promise(r => setTimeout(r, 100));
+  }
+
+  return { ok: true, notified, closeMatch: 0 };
+}
+
+export async function getDoctorsForNotification(): Promise<{ id: string; name: string; city: string; state: string }[]> {
+  await checkAdminAuth();
+  const supabase = createAdminClient();
+
+  const { data } = await (supabase as any)
+    .from('doctors')
+    .select('id, first_name, last_name, city, state')
+    .eq('verification_status', 'verified')
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  return (data || []).map((d: any) => ({
+    id: d.id,
+    name: `Dr. ${d.first_name} ${d.last_name}`,
+    city: d.city,
+    state: d.state,
+  }));
+}
+
 export async function exportSubscribersCSV(): Promise<string> {
   await checkAdminAuth();
   const supabase = createAdminClient();
