@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getSubscriberStats, exportSubscribersCSV, getDoctorsForNotification, notifySubscribersNewDoctor } from "./actions";
+import { getSubscriberStats, exportSubscribersCSV, getDoctorsForNotification, notifySubscribersNewDoctor, previewDoctorNotification, type NotifyRadius } from "./actions";
 import {
   Users,
   CheckCircle,
@@ -253,6 +253,9 @@ export default function AdminListPage() {
 function DoctorJoinedTrigger() {
   const [doctors, setDoctors] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState("");
+  const [radius, setRadius] = useState<NotifyRadius>("zip_prefix");
+  const [preview, setPreview] = useState<any>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -263,20 +266,32 @@ function DoctorJoinedTrigger() {
     setLoaded(true);
   };
 
-  const handleNotify = async () => {
+  const handlePreview = async () => {
     if (!selectedId) return;
-    const doc = doctors.find(d => d.id === selectedId);
-    if (!confirm(`Send "A doctor joined near you" email to all confirmed subscribers in ${doc?.state}?`)) return;
+    setPreviewLoading(true);
+    setPreview(null);
+    setResult(null);
+    const data = await previewDoctorNotification(selectedId, radius);
+    setPreview(data);
+    setPreviewLoading(false);
+  };
+
+  const handleSend = async () => {
+    if (!selectedId || !preview) return;
     setSending(true);
     setResult(null);
-    const res = await notifySubscribersNewDoctor(selectedId);
+    const res = await notifySubscribersNewDoctor(selectedId, radius);
     setSending(false);
+    setPreview(null);
     if (res.ok) {
-      setResult(`Notified ${res.notified} subscribers in ${doc?.state}.`);
+      setResult(`Sent to ${res.notified} new subscriber${res.notified === 1 ? '' : 's'}. ${res.skipped} already notified (skipped).`);
+      loadDoctors(); // refresh last notified dates
     } else {
       setResult(`Error: ${res.error}`);
     }
   };
+
+  const selectedDoc = doctors.find(d => d.id === selectedId);
 
   return (
     <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-6 mt-8">
@@ -285,7 +300,7 @@ function DoctorJoinedTrigger() {
         Doctor Joined Trigger
       </h2>
       <p className="text-gray-500 text-xs mb-4">
-        Notify subscribers when a new doctor joins near them. Sends to all confirmed subscribers in the same state.
+        Notify subscribers when a new doctor joins near them. Default: ZIP prefix match (tightest radius).
       </p>
       {!loaded ? (
         <button
@@ -295,30 +310,123 @@ function DoctorJoinedTrigger() {
           Load Recent Doctors
         </button>
       ) : (
-        <div className="flex gap-3 items-end">
-          <div className="flex-1">
-            <select
-              value={selectedId}
-              onChange={(e) => setSelectedId(e.target.value)}
-              className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-neuro-orange"
-            >
-              <option value="">Select doctor...</option>
-              {doctors.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name} — {d.city}, {d.state}
-                </option>
-              ))}
-            </select>
+        <>
+          {/* Doctor list with last notified dates */}
+          <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
+            {doctors.map((d) => (
+              <label
+                key={d.id}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-colors ${
+                  selectedId === d.id ? "bg-neuro-orange/10 border border-neuro-orange/30" : "bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04]"
+                }`}
+                onClick={() => { setSelectedId(d.id); setPreview(null); setResult(null); }}
+              >
+                <div>
+                  <span className="text-sm text-white font-bold">{d.name}</span>
+                  <span className="text-xs text-gray-500 ml-2">{d.city}, {d.state}</span>
+                  {d.zipPrefix && <span className="text-xs text-gray-600 ml-1">(ZIP: {d.zipPrefix}xx)</span>}
+                </div>
+                <div className="text-right">
+                  {d.lastNotifiedAt ? (
+                    <span className="text-[10px] text-green-400 font-bold">
+                      Last sent {new Date(d.lastNotifiedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-gray-600">Never sent</span>
+                  )}
+                </div>
+              </label>
+            ))}
           </div>
-          <button
-            onClick={handleNotify}
-            disabled={!selectedId || sending}
-            className="px-5 py-2.5 bg-neuro-orange text-white text-sm font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors flex items-center gap-2 disabled:opacity-40"
-          >
-            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-            Notify Subscribers
-          </button>
-        </div>
+
+          {/* Radius selector */}
+          {selectedId && (
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={() => { setRadius("zip_prefix"); setPreview(null); }}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
+                  radius === "zip_prefix" ? "bg-neuro-orange text-white" : "bg-white/[0.06] text-gray-400 hover:bg-white/10"
+                }`}
+              >
+                ZIP Prefix {selectedDoc?.zipPrefix ? `(${selectedDoc.zipPrefix}xx ± 1)` : "(nearby)"}
+              </button>
+              <button
+                onClick={() => { setRadius("state"); setPreview(null); }}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
+                  radius === "state" ? "bg-neuro-orange text-white" : "bg-white/[0.06] text-gray-400 hover:bg-white/10"
+                }`}
+              >
+                State-wide ({selectedDoc?.state})
+              </button>
+            </div>
+          )}
+
+          {/* Preview button */}
+          {selectedId && !preview && (
+            <button
+              onClick={handlePreview}
+              disabled={previewLoading}
+              className="px-5 py-2.5 bg-white/10 text-white text-sm font-bold rounded-xl hover:bg-white/15 transition-colors flex items-center gap-2 disabled:opacity-40"
+            >
+              {previewLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Users className="w-4 h-4" />}
+              Preview Recipients
+            </button>
+          )}
+
+          {/* Preview results + confirm */}
+          {preview && (
+            <div className="bg-white/[0.04] border border-white/[0.08] rounded-xl p-5 mt-4">
+              <h3 className="text-sm font-bold text-white mb-3">Notification Preview</h3>
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Doctor</span>
+                  <span className="text-white font-bold">{preview.doctorName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Location</span>
+                  <span className="text-white">{preview.doctorCity}, {preview.doctorState}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Radius</span>
+                  <span className="text-white font-bold">
+                    {preview.radius === "zip_prefix"
+                      ? `ZIP prefix ${preview.doctorZipPrefix || "?"}xx ± 1`
+                      : `State-wide (${preview.doctorState})`}
+                  </span>
+                </div>
+                <div className="flex justify-between border-t border-white/[0.06] pt-2">
+                  <span className="text-gray-400">New recipients</span>
+                  <span className="text-green-400 font-black">{preview.newRecipients}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Already notified (will skip)</span>
+                  <span className="text-gray-500">{preview.alreadyNotified}</span>
+                </div>
+              </div>
+
+              {preview.newRecipients === 0 ? (
+                <p className="text-amber-400 text-sm font-bold">No new subscribers to notify. All have already been notified for this doctor.</p>
+              ) : (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setPreview(null)}
+                    className="px-4 py-2.5 bg-white/10 text-white text-sm font-bold rounded-xl hover:bg-white/15 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSend}
+                    disabled={sending}
+                    className="flex-1 px-5 py-2.5 bg-neuro-orange text-white text-sm font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-40"
+                  >
+                    {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                    Send to {preview.newRecipients} new subscriber{preview.newRecipients === 1 ? '' : 's'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
       {result && (
         <p className={`text-sm font-bold mt-3 ${result.startsWith("Error") ? "text-red-400" : "text-green-400"}`}>

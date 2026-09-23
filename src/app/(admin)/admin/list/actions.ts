@@ -120,54 +120,174 @@ export async function getSubscriberStats(): Promise<SubscriberStats> {
   };
 }
 
-export async function notifySubscribersNewDoctor(
+/**
+ * Extract a 5-digit ZIP from an address string. Returns null if not found.
+ */
+function extractZipFromAddress(address: string | null): string | null {
+  if (!address) return null;
+  const match = address.match(/\b(\d{5})(?:-\d{4})?\b/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Get adjacent 3-digit ZIP prefixes. Simple heuristic: prefix ± 1.
+ */
+function getAdjacentPrefixes(prefix: string): string[] {
+  const num = parseInt(prefix, 10);
+  if (isNaN(num)) return [prefix];
+  const prefixes = [prefix];
+  if (num > 0) prefixes.push(String(num - 1).padStart(3, '0'));
+  if (num < 999) prefixes.push(String(num + 1).padStart(3, '0'));
+  return prefixes;
+}
+
+export type NotifyRadius = 'zip_prefix' | 'state';
+
+export interface NotifyPreview {
+  ok: boolean;
+  doctorName: string;
+  doctorCity: string;
+  doctorState: string;
+  doctorZipPrefix: string | null;
+  radius: NotifyRadius;
+  newRecipients: number;
+  alreadyNotified: number;
+  total: number;
+  error?: string;
+}
+
+/**
+ * Preview who would be notified for a doctor, without sending.
+ */
+export async function previewDoctorNotification(
   doctorId: string,
-  dryRun: boolean = false
-): Promise<{ ok: boolean; notified: number; closeMatch: number; error?: string; details?: any[] }> {
+  radius: NotifyRadius = 'zip_prefix',
+): Promise<NotifyPreview> {
   await checkAdminAuth();
   const supabase = createAdminClient();
 
-  // Get the doctor
   const { data: doctor } = await (supabase as any)
     .from('doctors')
-    .select('first_name, last_name, clinic_name, city, state, slug')
+    .select('first_name, last_name, clinic_name, city, state, slug, address')
     .eq('id', doctorId)
     .single();
 
   if (!doctor) {
-    return { ok: false, notified: 0, closeMatch: 0, error: 'Doctor not found' };
+    return { ok: false, doctorName: '', doctorCity: '', doctorState: '', doctorZipPrefix: null, radius, newRecipients: 0, alreadyNotified: 0, total: 0, error: 'Doctor not found' };
   }
 
-  // Find confirmed subscribers in the same state
-  const { data: subscribers } = await (supabase as any)
+  const doctorZip = extractZipFromAddress(doctor.address);
+  const doctorZipPrefix = doctorZip ? doctorZip.slice(0, 3) : null;
+
+  // Get confirmed subscribers
+  let query = (supabase as any)
+    .from('subscribers')
+    .select('id, email, zip, state')
+    .eq('status', 'confirmed')
+    .is('unsubscribed_at', null);
+
+  if (radius === 'zip_prefix' && doctorZipPrefix) {
+    const prefixes = getAdjacentPrefixes(doctorZipPrefix);
+    // Filter subscribers whose ZIP starts with any of the prefixes
+    query = query.eq('state', doctor.state); // still scope to state for safety
+  } else {
+    query = query.eq('state', doctor.state);
+  }
+
+  const { data: subscribers } = await query;
+  if (!subscribers || subscribers.length === 0) {
+    return { ok: true, doctorName: `Dr. ${doctor.first_name} ${doctor.last_name}`, doctorCity: doctor.city, doctorState: doctor.state, doctorZipPrefix, radius, newRecipients: 0, alreadyNotified: 0, total: 0 };
+  }
+
+  // Filter by ZIP prefix if using that radius
+  let filtered = subscribers;
+  if (radius === 'zip_prefix' && doctorZipPrefix) {
+    const prefixes = new Set(getAdjacentPrefixes(doctorZipPrefix));
+    filtered = subscribers.filter((s: any) => s.zip && prefixes.has(s.zip.slice(0, 3)));
+  }
+
+  // Check which have already been notified
+  const subIds = filtered.map((s: any) => s.id);
+  const { data: alreadySent } = await (supabase as any)
+    .from('doctor_notifications')
+    .select('subscriber_id')
+    .eq('doctor_id', doctorId)
+    .in('subscriber_id', subIds.length > 0 ? subIds : ['__none__']);
+
+  const alreadySentSet = new Set((alreadySent || []).map((r: any) => r.subscriber_id));
+  const newRecipients = filtered.filter((s: any) => !alreadySentSet.has(s.id)).length;
+
+  return {
+    ok: true,
+    doctorName: `Dr. ${doctor.first_name} ${doctor.last_name}`,
+    doctorCity: doctor.city,
+    doctorState: doctor.state,
+    doctorZipPrefix,
+    radius,
+    newRecipients,
+    alreadyNotified: alreadySentSet.size,
+    total: filtered.length,
+  };
+}
+
+/**
+ * Send doctor-joined notifications with dedup protection.
+ */
+export async function notifySubscribersNewDoctor(
+  doctorId: string,
+  radius: NotifyRadius = 'zip_prefix',
+): Promise<{ ok: boolean; notified: number; skipped: number; error?: string }> {
+  await checkAdminAuth();
+  const supabase = createAdminClient();
+
+  const { data: doctor } = await (supabase as any)
+    .from('doctors')
+    .select('first_name, last_name, clinic_name, city, state, slug, address')
+    .eq('id', doctorId)
+    .single();
+
+  if (!doctor) {
+    return { ok: false, notified: 0, skipped: 0, error: 'Doctor not found' };
+  }
+
+  const doctorZip = extractZipFromAddress(doctor.address);
+  const doctorZipPrefix = doctorZip ? doctorZip.slice(0, 3) : null;
+
+  // Get confirmed subscribers in scope
+  let query = (supabase as any)
     .from('subscribers')
     .select('id, email, zip, state')
     .eq('status', 'confirmed')
     .is('unsubscribed_at', null)
     .eq('state', doctor.state);
 
+  const { data: subscribers } = await query;
   if (!subscribers || subscribers.length === 0) {
-    return { ok: true, notified: 0, closeMatch: 0 };
+    return { ok: true, notified: 0, skipped: 0 };
   }
 
-  // Determine close matches (same 3-digit ZIP prefix as doctor's city)
-  // We don't have the doctor's ZIP, so we flag by state for now
-  const details = subscribers.map((s: any) => ({
-    email: s.email,
-    zip: s.zip,
-    closeMatch: false, // would need doctor ZIP to determine 3-digit prefix match
-  }));
-
-  if (dryRun) {
-    return {
-      ok: true,
-      notified: 0,
-      closeMatch: details.filter((d: any) => d.closeMatch).length,
-      details,
-    };
+  // Filter by ZIP prefix if needed
+  let filtered = subscribers;
+  if (radius === 'zip_prefix' && doctorZipPrefix) {
+    const prefixes = new Set(getAdjacentPrefixes(doctorZipPrefix));
+    filtered = subscribers.filter((s: any) => s.zip && prefixes.has(s.zip.slice(0, 3)));
   }
 
-  // Send notification emails
+  // Exclude already notified
+  const subIds = filtered.map((s: any) => s.id);
+  const { data: alreadySent } = await (supabase as any)
+    .from('doctor_notifications')
+    .select('subscriber_id')
+    .eq('doctor_id', doctorId)
+    .in('subscriber_id', subIds.length > 0 ? subIds : ['__none__']);
+
+  const alreadySentSet = new Set((alreadySent || []).map((r: any) => r.subscriber_id));
+  const toNotify = filtered.filter((s: any) => !alreadySentSet.has(s.id));
+
+  if (toNotify.length === 0) {
+    return { ok: true, notified: 0, skipped: alreadySentSet.size };
+  }
+
   const { getMarketingResend, getMarketingFrom, getMailingAddress } = await import('@/lib/marketing-email');
   const resend = getMarketingResend();
   const from = getMarketingFrom();
@@ -178,7 +298,17 @@ export async function notifySubscribersNewDoctor(
 
   let notified = 0;
 
-  for (const sub of subscribers) {
+  for (const sub of toNotify) {
+    // Write dedup row first
+    const { error: dedupErr } = await (supabase as any)
+      .from('doctor_notifications')
+      .insert({ doctor_id: doctorId, subscriber_id: sub.id });
+
+    if (dedupErr) {
+      // Unique constraint hit — already notified (race condition protection)
+      continue;
+    }
+
     try {
       await resend.emails.send({
         from,
@@ -217,29 +347,58 @@ export async function notifySubscribersNewDoctor(
       notified++;
     } catch (err) {
       console.error(`[DOCTOR-JOINED] Failed to notify ${sub.email}:`, err);
+      // Roll back dedup row on send failure
+      await (supabase as any).from('doctor_notifications').delete()
+        .eq('doctor_id', doctorId).eq('subscriber_id', sub.id);
     }
     await new Promise(r => setTimeout(r, 100));
   }
 
-  return { ok: true, notified, closeMatch: 0 };
+  return { ok: true, notified, skipped: alreadySentSet.size };
 }
 
-export async function getDoctorsForNotification(): Promise<{ id: string; name: string; city: string; state: string }[]> {
+export async function getDoctorsForNotification(): Promise<{
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+  zipPrefix: string | null;
+  lastNotifiedAt: string | null;
+}[]> {
   await checkAdminAuth();
   const supabase = createAdminClient();
 
   const { data } = await (supabase as any)
     .from('doctors')
-    .select('id, first_name, last_name, city, state')
+    .select('id, first_name, last_name, city, state, address')
     .eq('verification_status', 'verified')
     .order('created_at', { ascending: false })
     .limit(20);
 
-  return (data || []).map((d: any) => ({
+  if (!data || data.length === 0) return [];
+
+  // Get last notification date for each doctor
+  const doctorIds = data.map((d: any) => d.id);
+  const { data: notifications } = await (supabase as any)
+    .from('doctor_notifications')
+    .select('doctor_id, sent_at')
+    .in('doctor_id', doctorIds)
+    .order('sent_at', { ascending: false });
+
+  const lastNotifiedMap = new Map<string, string>();
+  for (const n of (notifications || [])) {
+    if (!lastNotifiedMap.has(n.doctor_id)) {
+      lastNotifiedMap.set(n.doctor_id, n.sent_at);
+    }
+  }
+
+  return data.map((d: any) => ({
     id: d.id,
     name: `Dr. ${d.first_name} ${d.last_name}`,
     city: d.city,
     state: d.state,
+    zipPrefix: extractZipFromAddress(d.address)?.slice(0, 3) || null,
+    lastNotifiedAt: lastNotifiedMap.get(d.id) || null,
   }));
 }
 
