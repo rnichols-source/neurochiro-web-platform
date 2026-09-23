@@ -56,8 +56,10 @@ export async function GET(req: NextRequest) {
   }
 
   // Create contact in Resend Audience
+  // Uses the main Resend key (not marketing send-only key) since Audience API requires full access
   try {
-    const resend = getMarketingResend();
+    const { Resend } = await import('resend');
+    const resend = new Resend(process.env.RESEND_API_KEY || '');
     const audienceId = getAudienceId();
 
     const { data: contact } = await resend.contacts.create({
