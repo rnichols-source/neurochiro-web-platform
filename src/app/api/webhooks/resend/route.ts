@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 
 /**
  * RESEND WEBHOOK HANDLER
- * Protects your sender reputation by catching bounces and complaints.
+ * Handles bounces, complaints, and unsubscribes for both transactional and marketing domains.
  */
 export async function POST(req: Request) {
   // Verify webhook authenticity via shared secret
@@ -18,39 +19,41 @@ export async function POST(req: Request) {
 
   const body = await req.json();
   const supabase = createServerSupabase();
+  const adminDb = createAdminClient();
 
-  // 1. Identify Event Type
-  const eventType = body.type; // 'email.bounced', 'email.complained', 'email.clicked', etc.
+  const eventType = body.type;
   const payload = body.data;
 
   try {
-    // 2. Extract User ID and Event Data
-    // Resend sends tags in the email metadata if we provided them.
-    // Otherwise, we look up by email address.
-    const email = payload.to[0];
+    const email = payload.to?.[0];
+    if (!email) {
+      return NextResponse.json({ received: true });
+    }
 
     switch (eventType) {
       case "email.bounced":
         console.warn(`[REPUTATION ALERT] Email bounced for: ${email}`);
-        await supabase
-          .from('email_preferences')
-          .update({ has_bounced: true, updated_at: new Date().toISOString() })
-          .eq('user_id', (await getUserIdFromEmail(email, supabase)));
+        await handleProfileEmailEvent(email, supabase, { has_bounced: true });
+        await handleSubscriberUnsubscribe(email, adminDb);
         break;
 
       case "email.complained":
         console.warn(`[REPUTATION ALERT] User marked email as SPAM: ${email}`);
-        await supabase
-          .from('email_preferences')
-          .update({ has_complained: true, updated_at: new Date().toISOString() })
-          .eq('user_id', (await getUserIdFromEmail(email, supabase)));
+        await handleProfileEmailEvent(email, supabase, { has_complained: true });
+        await handleSubscriberUnsubscribe(email, adminDb);
+        break;
+
+      case "contact.unsubscribed":
+        // Resend Audience unsubscribe event
+        const unsubEmail = payload.email || email;
+        console.log(`[UNSUBSCRIBE] Contact unsubscribed: ${unsubEmail}`);
+        await handleSubscriberUnsubscribe(unsubEmail, adminDb);
         break;
 
       case "email.sent":
       case "email.delivered":
-        // Optional: Log delivery success in a 'email_logs' table if created
         break;
-        
+
       default:
         console.log(`[RESEND WEBHOOK] Unhandled event: ${eventType}`);
     }
@@ -59,6 +62,35 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("[RESEND WEBHOOK ERROR]", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
+async function handleProfileEmailEvent(email: string, supabase: any, update: Record<string, boolean>) {
+  const userId = await getUserIdFromEmail(email, supabase);
+  if (userId) {
+    await supabase
+      .from('email_preferences')
+      .update({ ...update, updated_at: new Date().toISOString() })
+      .eq('user_id', userId);
+  }
+}
+
+async function handleSubscriberUnsubscribe(email: string, adminDb: any) {
+  const { data } = await adminDb
+    .from('subscribers')
+    .select('id, status')
+    .eq('email', email.toLowerCase())
+    .maybeSingle();
+
+  if (data && data.status !== 'unsubscribed') {
+    await adminDb
+      .from('subscribers')
+      .update({
+        status: 'unsubscribed',
+        unsubscribed_at: new Date().toISOString(),
+      })
+      .eq('id', data.id);
+    console.log(`[SUBSCRIBER] Unsubscribed via webhook: ${email}`);
   }
 }
 
