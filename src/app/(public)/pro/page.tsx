@@ -100,6 +100,26 @@ function ProPageContent() {
           </div>
         </header>
 
+        {/* YOU'RE PROBABLY LISTED SOMEWHERE ALREADY */}
+        <section style={{ padding: "52px 0", borderTop: "1px solid var(--line)" }}>
+          <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
+            <h2 style={{ fontFamily: "Archivo, sans-serif", fontSize: 27, lineHeight: 1.2, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 18px" }}>You're probably listed somewhere already</h2>
+            <p style={{ margin: "0 0 16px" }}>And it's doing nothing for you. Most directories take your money, put your name in a database, and wait for someone to stumble onto it. You've been paying one of them for years and couldn't name a single patient who came from it.</p>
+            <p style={{ margin: "0 0 16px" }}>This one works differently, and the members who are on both will tell you so. I'm posting their clips every week. I'm putting them in front of my audience. When someone asks me for a chiropractor in their city, I'm the one making the introduction. The listing is the smallest part of what you're paying for.</p>
+            <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 10, padding: 24, marginTop: 22 }}>
+              <h3 style={{ fontFamily: "Archivo, sans-serif", fontSize: 18, fontWeight: 700, margin: "0 0 10px" }}>A list versus a machine</h3>
+              <ul style={{ margin: 0, paddingLeft: 20, color: "var(--muted)", fontSize: 16 }}>
+                <li style={{ marginBottom: 8 }}>A list waits for search traffic. This sends traffic at you.</li>
+                <li style={{ marginBottom: 8 }}>A list gives you a page. This gives you a year of scheduled content.</li>
+                <li style={{ marginBottom: 8 }}>A list forgets you after checkout. I know every doctor on here by name.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* MEMBER QUOTES */}
+        <MemberQuotes />
+
         {/* WHAT YOU GET */}
         <section style={{ padding: "52px 0", borderTop: "1px solid var(--line)" }}>
           <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
@@ -210,5 +230,36 @@ function ProPageContent() {
         </footer>
       </div>
     </>
+  );
+}
+
+/**
+ * Member quotes component. Renders nothing when the list is empty.
+ * Add quotes here as they come in.
+ */
+const MEMBER_QUOTES: { text: string; name: string; city: string }[] = [
+  // { text: "Quote here.", name: "Dr. First Last", city: "City, ST" },
+];
+
+function MemberQuotes() {
+  if (MEMBER_QUOTES.length === 0) return null;
+
+  return (
+    <section style={{ padding: "40px 0 52px", borderTop: "1px solid var(--line)" }}>
+      <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
+        <div style={{ display: "grid", gap: 20 }}>
+          {MEMBER_QUOTES.map((q, i) => (
+            <div key={i} style={{ borderLeft: "3px solid var(--orange)", paddingLeft: 20 }}>
+              <p style={{ fontSize: 16, lineHeight: 1.6, margin: "0 0 8px", fontStyle: "italic" }}>
+                &ldquo;{q.text}&rdquo;
+              </p>
+              <p style={{ fontFamily: "Archivo, sans-serif", fontSize: 14, fontWeight: 700, color: "var(--muted)", margin: 0 }}>
+                {q.name} &middot; {q.city}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
