@@ -28,15 +28,9 @@ function ProPageContent() {
   const css = `
     @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap');
     .pro-page {
-      --navy: #1E2D3B; --orange: #D66829; --paper: #F7F5F1; --card: #FFFFFF;
-      --ink: #1E2D3B; --muted: #5C6773; --line: #E3DCD2; --band: #16222D;
-      --band-ink: #F3EFE9; --band-muted: #93A0AC;
-    }
-    @media (prefers-color-scheme: dark) {
-      .pro-page {
-        --paper: #131E27; --card: #1A2833; --ink: #F1EDE7; --muted: #A5B0BB;
-        --line: #2A3B49; --band: #0D161D; --band-ink: #F1EDE7;
-      }
+      --navy: #1E2D3B; --orange: #D66829;
+      --paper: #131E27; --card: #1A2833; --ink: #F1EDE7; --muted: #A5B0BB;
+      --line: #2A3B49; --band: #0D161D; --band-ink: #F1EDE7; --band-muted: #93A0AC;
     }
   `;
 
