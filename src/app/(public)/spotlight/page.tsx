@@ -144,7 +144,7 @@ export default function SpotlightPage() {
               Find a Doctor Near You <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
-              href="/pricing/doctors"
+              href="/pro?source=spotlight_cta"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-colors"
             >
               Are You a Doctor? Get Featured <ArrowRight className="w-5 h-5" />

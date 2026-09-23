@@ -35,7 +35,7 @@ export default function Footer() {
           <ul className="space-y-4">
             <li><Link href="/directory" className="text-gray-400 hover:text-neuro-orange transition-colors">Global Directory</Link></li>
             <li><Link href="/get-started" className="text-gray-400 hover:text-neuro-orange transition-colors">For Students</Link></li>
-            <li><Link href="/get-started" className="text-gray-400 hover:text-neuro-orange transition-colors">For Doctors</Link></li>
+            <li><Link href="/pro?source=site_footer" className="text-gray-400 hover:text-neuro-orange transition-colors">For Doctors</Link></li>
             <li><Link href="/seminars" className="text-gray-400 hover:text-neuro-orange transition-colors">Seminars</Link></li>
             <li><Link href="/why-neurochiro" className="text-gray-400 hover:text-neuro-orange transition-colors">Why NeuroChiro?</Link></li>
             <li><Link href="/list?source=site_footer" className="text-gray-400 hover:text-neuro-orange transition-colors">Patient List</Link></li>
