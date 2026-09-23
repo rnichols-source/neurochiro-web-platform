@@ -82,5 +82,16 @@ export async function GET(req: NextRequest) {
     console.error('[CONFIRM] Resend Audience error:', audienceErr);
   }
 
+  // Fire day 0 welcome email (non-blocking)
+  try {
+    const { sendWelcomeStep, WELCOME_STEPS } = await import('@/lib/welcome-sequence');
+    const step0 = WELCOME_STEPS.find(s => s.step === 0);
+    if (step0) {
+      await sendWelcomeStep(supabase, subscriber.id, subscriber.email, step0);
+    }
+  } catch (welcomeErr) {
+    console.error('[CONFIRM] Welcome step 0 error:', welcomeErr);
+  }
+
   return NextResponse.redirect(`${siteUrl}/list/confirmed`);
 }

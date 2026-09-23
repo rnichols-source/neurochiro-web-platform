@@ -84,6 +84,10 @@
     {
       "path": "/api/cron/milehigh-followup",
       "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/welcome-sequence",
+      "schedule": "0 14 * * *"
     }
   ]
 }
