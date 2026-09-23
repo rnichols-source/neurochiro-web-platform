@@ -61,27 +61,27 @@
         style: {
             version: 8,
             sources: {
-                'stadia-dark': {
+                'basemap': {
                     type: 'raster',
                     tiles: [
-                        'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}@2x.png'
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
                     ],
                     tileSize: 256,
-                    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://openstreetmap.org/">OpenStreetMap</a>'
-                },
-                'stadia-light': {
-                    type: 'raster',
-                    tiles: [
-                        'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}@2x.png'
-                    ],
-                    tileSize: 256,
-                    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://openstreetmap.org/">OpenStreetMap</a>'
+                    attribution: '&copy; <a href="https://openstreetmap.org/">OpenStreetMap</a> contributors'
                 }
             },
             layers: [{
                 id: 'base-layer',
                 type: 'raster',
-                source: window.innerWidth < 1024 ? 'stadia-dark' : 'stadia-light',
+                source: 'basemap',
+                minzoom: 0,
+                maxzoom: 19,
+                paint: {
+                    'raster-saturation': -1,
+                    'raster-brightness-max': 0.3,
+                    'raster-contrast': 0.3
+                }
+            }],
                 minzoom: 0,
                 maxzoom: 20
             }],
