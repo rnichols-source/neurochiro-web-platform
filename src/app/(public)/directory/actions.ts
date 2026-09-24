@@ -250,19 +250,30 @@ export async function getCityDoctorCount(city: string, state: string): Promise<n
 }
 
 // ── Get nearby doctors (same state, different doctor) ──
-export async function getNearbyDoctors(doctorId: string, state: string, limit = 4): Promise<any[]> {
+export async function getNearbyDoctors(doctorId: string, state: string, limit = 4, doctorLat?: number, doctorLng?: number): Promise<any[]> {
   if (!state) return [];
   const supabase = createServerSupabase();
   try {
     const { data } = await supabase
       .from('doctors')
-      .select('id, first_name, last_name, clinic_name, city, state, slug, photo_url, specialties, membership_tier, is_founding_member')
-      .in('verification_status', ['verified', 'pending'])
+      .select('id, first_name, last_name, clinic_name, city, state, slug, photo_url, specialties, latitude, longitude')
+      .eq('verification_status', 'verified')
       .ilike('state', state)
-      .neq('id', doctorId)
-      .order('membership_tier', { ascending: true })
-      .limit(limit);
-    return data || [];
+      .neq('id', doctorId);
+
+    if (!data || data.length === 0) return [];
+
+    // If we have the source doctor's coordinates, calculate distance and cap at 50 miles
+    if (doctorLat && doctorLng) {
+      const { haversineDistance } = await import('@/lib/geo');
+      return data
+        .map(d => ({ ...d, distance_miles: haversineDistance(doctorLat, doctorLng, d.latitude || 0, d.longitude || 0) }))
+        .filter(d => d.distance_miles <= 50 && d.latitude > 0)
+        .sort((a, b) => a.distance_miles - b.distance_miles)
+        .slice(0, limit);
+    }
+
+    return data.slice(0, limit);
   } catch { return []; }
 }
 

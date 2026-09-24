@@ -69,7 +69,10 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const name = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
   const spotlightEpisode = getEpisodeByDoctorSlug(slug);
   const location = [doctor.city, doctor.state].filter(Boolean).join(", ");
-  const specialties = doctor.specialties || [];
+  // Filter specialties: split concatenated entries, drop free-text sentences
+  const specialties = (doctor.specialties || [])
+    .flatMap((s: string) => s.split(/\n/).map((t: string) => t.trim()))
+    .filter((s: string) => s.length > 0 && s.length <= 50);
   const d = doctor as any;
 
   // Extended fields
@@ -77,7 +80,9 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const instagramUrl = d.instagram_url as string | null;
   const facebookUrl = d.facebook_url as string | null;
   const highlights = d.highlights as string[] | null;
-  const conditionsTreated = d.conditions_treated as string[] | null;
+  // Filter treatment tags: controlled vocabulary only, no free-text sentences
+  const rawConditions = d.conditions_treated as string[] | null;
+  const conditionsTreated = rawConditions?.filter((c: string) => c.length <= 50 && !/\b(any|every|all)\s+(condition|problem)/i.test(c)) || null;
   const education = d.education as string[] | null;
   const languages = d.languages as string[] | null;
   const hours = d.hours as string | null;
@@ -94,7 +99,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const yearsInPractice = d.years_in_practice as number | null;
   const insuranceNetworks = d.insurance_networks as string[] | null;
   const teamMembersList = d.team_members as { name: string; role: string; photo_url?: string }[] | null;
-  const certificationsList = d.certifications as string[] | null;
+  const certificationsList = d.certifications ? [...new Set(d.certifications as string[])] : null;
   const mapQuery = doctor.address ? encodeURIComponent(`${doctor.address}, ${doctor.city}, ${doctor.state}`) : doctor.city ? encodeURIComponent(`${doctor.city}, ${doctor.state}`) : null;
 
   // Bio split for pull quote — find the first real sentence (60+ chars)
@@ -276,11 +281,10 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "center", minWidth: "fit-content" }}>
           {[
             ...(yearsInPractice ? [{ value: `${yearsInPractice}+`, label: "Years Practice" }] : []),
-            ...(cityDoctorCount > 0 && doctor.city ? [{ value: `1 of ${cityDoctorCount}`, label: `in ${doctor.city}` }] : []),
             ...(certificationsList?.length ? [{ value: certificationsList[0], label: "Certified" }] : []),
             ...(specialties.length > 0 ? [{ value: String(specialties.length), label: "Specialties" }] : []),
-            ...(d.profile_views > 0 && !gated ? [{ value: d.profile_views > 999 ? `${(d.profile_views / 1000).toFixed(1)}k` : String(d.profile_views), label: "Profile Views" }] : []),
-            ...(d.patient_leads > 0 ? [{ value: String(d.patient_leads), label: "Inquiries" }] : []),
+            // Profile views, "1 of X in city", and inquiry counts removed from patient view (2026-09-23).
+            // These are dashboard metrics, not patient trust signals. "1 of X" reads as a ranking claim.
           ].map((item, i) => (
             <div key={i} style={{ flex: "0 0 auto", textAlign: "center", padding: "16px 28px", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
               <div style={{ fontSize: 22, fontWeight: 900, color: "#D66829", lineHeight: 1.2, whiteSpace: "nowrap" }}>{item.value}</div>
@@ -510,13 +514,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <h2 style={{ fontSize: 13, fontWeight: 800, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 48 }}>Social Proof</h2>
 
-          {/* City demand */}
-          {citySearchVolume > 0 && doctor.city && (
-            <div style={{ textAlign: "center", marginBottom: 48, padding: "28px 32px", background: "rgba(214,104,41,0.08)", borderRadius: 20, border: "1px solid rgba(214,104,41,0.12)" }}>
-              <div style={{ fontSize: 40, fontWeight: 900, color: "#D66829" }}>{citySearchVolume.toLocaleString()}</div>
-              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>patients found nervous system chiropractors in {doctor.city} recently</p>
-            </div>
-          )}
+          {/* City demand stat removed (2026-09-23): was profile_views sum relabeled as "patients found" */}
 
           {/* Google Reviews */}
           {doctor.google_place_id && (
@@ -593,7 +591,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                   <MapPin style={{ width: 18, height: 18, color: "#D66829", flexShrink: 0, marginTop: 2 }} />
                   <div>
                     <p style={{ fontWeight: 800, fontSize: 14, color: "#1E2D3B", marginBottom: 2 }}>{doctor.clinic_name}</p>
-                    <p style={{ fontSize: 13, color: "#718096" }}>{doctor.address}, {location}</p>
+                    <p style={{ fontSize: 13, color: "#718096" }}>{doctor.address}{doctor.address?.toLowerCase().includes(doctor.city?.toLowerCase() || '___') ? '' : `, ${location}`}</p>
                   </div>
                 </div>
               )}
@@ -808,7 +806,10 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                   </div>
                   <div>
                     <p style={{ fontSize: 15, fontWeight: 800, color: "#1E2D3B" }}>Dr. {doc.first_name} {doc.last_name}</p>
-                    <p style={{ fontSize: 12, color: "#718096", display: "flex", alignItems: "center", gap: 4 }}><MapPin style={{ width: 12, height: 12 }} /> {doc.city}{doc.state ? `, ${doc.state}` : ''}</p>
+                    <p style={{ fontSize: 12, color: "#718096", display: "flex", alignItems: "center", gap: 4 }}>
+                      <MapPin style={{ width: 12, height: 12 }} /> {doc.city}{doc.state ? `, ${doc.state}` : ''}
+                      {doc.distance_miles != null && <span style={{ color: "#D66829", fontWeight: 700, marginLeft: 4 }}>{doc.distance_miles < 1 ? '< 1 mi' : `${Math.round(doc.distance_miles)} mi`}</span>}
+                    </p>
                   </div>
                 </div>
                 {doc.specialties?.length > 0 && (

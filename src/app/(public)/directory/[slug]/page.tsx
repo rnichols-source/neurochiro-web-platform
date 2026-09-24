@@ -73,7 +73,7 @@ export default async function DoctorProfilePage({ params }: Props) {
     doctor.user_id ? getDoctorSeminars(doctor.user_id) : Promise.resolve([]),
     getDoctorJobs(doctor.id),
     getCityDoctorCount(doctor.city || '', doctor.state || ''),
-    getNearbyDoctors(doctor.id, doctor.state || ''),
+    getNearbyDoctors(doctor.id, doctor.state || '', 4, doctor.latitude, doctor.longitude),
     getCitySearchVolume(doctor.city || '', doctor.state || ''),
   ]);
 
