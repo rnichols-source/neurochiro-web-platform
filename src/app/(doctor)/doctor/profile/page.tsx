@@ -258,15 +258,87 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Bio */}
+        {/* Profile Completeness */}
+        <div className="bg-gradient-to-r from-neuro-navy to-[#1a3048] rounded-2xl p-6 text-white">
+          <h2 className="text-sm font-bold text-white/50 uppercase tracking-wide mb-3">Profile Completeness</h2>
+          {(() => {
+            const checks = [
+              { done: !!profile?.photo_url, label: 'Profile photo', why: 'Profiles with photos get 3x more patient views' },
+              { done: !!profile?.short_intro, label: 'Short intro', why: 'Tells patients who you are in 2-3 sentences' },
+              { done: !!profile?.chiropractic_school, label: 'Education', why: 'Builds trust — patients want to know where you trained' },
+              { done: (profile?.specialties || []).length > 0, label: 'Specialties', why: 'Helps patients find you when searching' },
+              { done: !!profile?.hours, label: 'Office hours', why: 'Patients check hours before calling' },
+              { done: !!profile?.first_visit_price || !!profile?.payment_model, label: 'Cost & insurance', why: 'The #1 question patients have before booking' },
+              { done: !!profile?.phone, label: 'Phone number', why: 'Many patients prefer to call' },
+              { done: !!profile?.booking_url, label: 'Online booking link', why: 'Patients who can book online are more likely to show up' },
+            ];
+            const done = checks.filter(c => c.done).length;
+            const pct = Math.round((done / checks.length) * 100);
+            const missing = checks.filter(c => !c.done);
+            return (
+              <>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-neuro-orange rounded-full transition-all" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="text-sm font-bold text-neuro-orange">{pct}%</span>
+                </div>
+                {missing.length > 0 && (
+                  <div className="space-y-2">
+                    {missing.slice(0, 3).map((m, i) => (
+                      <div key={i} className="flex items-start gap-2 text-xs">
+                        <span className="text-neuro-orange mt-0.5">●</span>
+                        <div>
+                          <span className="text-white/80 font-bold">{m.label}</span>
+                          <span className="text-white/40 ml-1">— {m.why}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            );
+          })()}
+        </div>
+
+        {/* About You — structured intro */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide">Bio</h2>
-            <button type="button" onClick={handleGenerateBio} disabled={isGeneratingBio} className="flex items-center gap-1 px-3 py-1.5 bg-neuro-orange/10 text-neuro-orange rounded-lg text-xs font-bold hover:bg-neuro-orange/20 disabled:opacity-50">
-              <Sparkles className="w-3 h-3" /> {isGeneratingBio ? 'Generating...' : 'AI Generate'}
-            </button>
+          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-1">About You</h2>
+          <p className="text-xs text-gray-400 mb-4">This is what patients read first. Keep it personal and direct — who you are, what you do, and why you do it.</p>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-neuro-navy mb-1">Short Intro <span className="text-gray-400 font-normal">(2-3 sentences about you and your practice)</span></label>
+              <textarea
+                name="short_intro"
+                value={profile?.short_intro || ''}
+                onChange={(e) => { if (e.target.value.length <= 500) setProfile((p: any) => ({...p, short_intro: e.target.value})); }}
+                placeholder="e.g. I'm a nervous system chiropractor in Austin, TX specializing in families and pediatric care. I opened my practice in 2019 because I believe every family deserves access to care that focuses on how the body actually works."
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none text-sm"
+              />
+              <div className="flex justify-between mt-1">
+                <span className="text-[10px] text-gray-400">No URLs or phone numbers — use the dedicated fields for those</span>
+                <span className={`text-[10px] font-bold ${(profile?.short_intro?.length || 0) > 450 ? 'text-red-500' : 'text-gray-400'}`}>{profile?.short_intro?.length || 0}/500</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-neuro-navy mb-1">Philosophy <span className="text-gray-400 font-normal">(optional — your approach to care)</span></label>
+              <textarea
+                name="philosophy"
+                value={profile?.philosophy || ''}
+                onChange={(e) => { if (e.target.value.length <= 1000) setProfile((p: any) => ({...p, philosophy: e.target.value})); }}
+                placeholder="e.g. I believe the body is designed to heal when the nervous system is functioning properly. My goal isn't to treat symptoms — it's to find and correct the interference so your body can do what it already knows how to do."
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none text-sm"
+              />
+              <div className="flex justify-between mt-1">
+                <span className="text-[10px] text-gray-400">No URLs or phone numbers</span>
+                <span className={`text-[10px] font-bold ${(profile?.philosophy?.length || 0) > 900 ? 'text-red-500' : 'text-gray-400'}`}>{profile?.philosophy?.length || 0}/1000</span>
+              </div>
+            </div>
           </div>
-          <textarea name="bio" defaultValue={profile?.bio || ''} value={profile?.bio || ''} onChange={(e) => setProfile((p: any) => ({...p, bio: e.target.value}))} placeholder="Tell patients about your practice and approach..." rows={5} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none" />
         </div>
 
         {/* Specialties */}
@@ -329,10 +401,71 @@ export default function ProfilePage() {
           <input name="conditions_treated" defaultValue={(profile?.conditions_treated || []).join(', ')} placeholder="Back Pain, Neck Pain, Pediatric, Prenatal, Sports Injuries (comma separated)" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
         </div>
 
-        {/* Education */}
+        {/* Education — structured */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Education</h2>
-          <textarea name="education" defaultValue={(profile?.education || []).join('\n')} placeholder={"D.C. — Palmer College of Chiropractic, 2015\nB.S. Biology — State University, 2011\n(one per line)"} rows={3} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none" />
+          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-1">Education</h2>
+          <p className="text-xs text-gray-400 mb-4">Patients want to know where you trained. This shows on your profile.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-neuro-navy mb-1">Chiropractic School</label>
+              <input name="chiropractic_school" defaultValue={profile?.chiropractic_school || ''} placeholder="e.g. Life University" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-neuro-navy mb-1">Degree</label>
+              <input name="degree" defaultValue={profile?.degree || 'Doctor of Chiropractic (DC)'} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-neuro-navy mb-1">Graduation Year</label>
+              <input name="graduation_year" type="number" min="1950" max="2030" defaultValue={profile?.graduation_year || ''} placeholder="e.g. 2018" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-sm" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <label className="block text-xs font-bold text-neuro-navy mb-1">Post-Doctoral Training <span className="text-gray-400 font-normal">(optional, one per line)</span></label>
+            <textarea name="post_doctoral_training" defaultValue={(profile?.post_doctoral_training || []).join('\n')} placeholder={"e.g. Webster Technique Certification — ICPA\nPediatric Certification — The Pediatric Experience"} rows={3} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none text-sm" />
+          </div>
+        </div>
+
+        {/* Cost & Insurance */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-1">Cost & Insurance</h2>
+          <p className="text-xs text-gray-400 mb-4">The #1 thing patients check before booking. Even "Call for pricing" is better than blank.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-neuro-navy mb-1">First Visit Price <span className="text-gray-400 font-normal">(or "Call for pricing")</span></label>
+              <input name="first_visit_price" defaultValue={profile?.first_visit_price || ''} placeholder="e.g. $150-$250 or Call for pricing" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-neuro-navy mb-1">Payment Model</label>
+              <select name="payment_model" defaultValue={profile?.payment_model || ''} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-sm bg-white">
+                <option value="">Select...</option>
+                <option value="cash">Cash-based (no insurance)</option>
+                <option value="insurance">Insurance accepted</option>
+                <option value="both">Cash & Insurance</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-4 mt-4">
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" name="files_insurance" value="true" defaultChecked={profile?.files_insurance} className="rounded border-gray-300 text-neuro-orange focus:ring-neuro-orange" />
+              Files insurance for patients
+            </label>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" name="payment_plans" value="true" defaultChecked={profile?.payment_plans} className="rounded border-gray-300 text-neuro-orange focus:ring-neuro-orange" />
+              Payment plans available
+            </label>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" name="free_consultation" value="true" defaultChecked={profile?.free_consultation} className="rounded border-gray-300 text-neuro-orange focus:ring-neuro-orange" />
+              Free consultation offered
+            </label>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" name="has_evening_hours" value="true" defaultChecked={profile?.has_evening_hours} className="rounded border-gray-300 text-neuro-orange focus:ring-neuro-orange" />
+              Evening hours
+            </label>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" name="has_weekend_hours" value="true" defaultChecked={profile?.has_weekend_hours} className="rounded border-gray-300 text-neuro-orange focus:ring-neuro-orange" />
+              Weekend hours
+            </label>
+          </div>
         </div>
 
         {/* Hours */}

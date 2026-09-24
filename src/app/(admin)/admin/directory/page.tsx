@@ -56,6 +56,10 @@ export default function DirectoryManager() {
       instagram_url: selectedDoctor.instagram_url,
       verification_status: selectedDoctor.verification_status,
       membership_tier: selectedDoctor.membership_tier,
+      short_intro: selectedDoctor.short_intro || null,
+      philosophy: selectedDoctor.philosophy || null,
+      chiropractic_school: selectedDoctor.chiropractic_school || null,
+      graduation_year: selectedDoctor.graduation_year ? parseInt(selectedDoctor.graduation_year) || null : null,
     };
     const res = await updateDoctorManually(selectedDoctor.id, updates);
     if (res.success) {
@@ -467,6 +471,61 @@ export default function DirectoryManager() {
                     <option value="free">Free</option>
                     <option value="pro">Pro</option>
                   </select>
+                </div>
+              </div>
+              {/* Bio & Structured Fields */}
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Short Intro (replaces bio on profile)</label>
+                <textarea
+                  value={selectedDoctor.short_intro || ""}
+                  onChange={(e) => setSelectedDoctor({ ...selectedDoctor, short_intro: e.target.value })}
+                  rows={3}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-white/30 resize-none"
+                  placeholder="2-3 sentences about the doctor"
+                />
+                <span className="text-[10px] text-gray-600">{(selectedDoctor.short_intro || '').length}/500</span>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Philosophy (optional)</label>
+                <textarea
+                  value={selectedDoctor.philosophy || ""}
+                  onChange={(e) => setSelectedDoctor({ ...selectedDoctor, philosophy: e.target.value })}
+                  rows={3}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-white/30 resize-none"
+                  placeholder="Their approach to care"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Old Bio (legacy — clear this once short_intro is set)</label>
+                <textarea
+                  value={selectedDoctor.bio || ""}
+                  onChange={(e) => setSelectedDoctor({ ...selectedDoctor, bio: e.target.value })}
+                  rows={4}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-white/30 resize-none"
+                />
+                {selectedDoctor.bio && /https?:\/\/|www\.|come in today|specialties:/i.test(selectedDoctor.bio) && (
+                  <p className="text-xs text-red-400 mt-1 font-bold">⚠ This bio appears to be scraped text. Rewrite it using the Short Intro field above, then clear this field.</p>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Chiropractic School</label>
+                  <input
+                    value={selectedDoctor.chiropractic_school || ""}
+                    onChange={(e) => setSelectedDoctor({ ...selectedDoctor, chiropractic_school: e.target.value })}
+                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-white/30"
+                    placeholder="e.g. Life University"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Graduation Year</label>
+                  <input
+                    type="number"
+                    value={selectedDoctor.graduation_year || ""}
+                    onChange={(e) => setSelectedDoctor({ ...selectedDoctor, graduation_year: e.target.value })}
+                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-white/30"
+                    placeholder="e.g. 2015"
+                  />
                 </div>
               </div>
               <div className="flex justify-end gap-3 pt-2">
