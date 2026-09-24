@@ -23,11 +23,11 @@ async function getPlatformStats() {
     const [doctors, seminars, stateData] = await Promise.all([
       supabase.from('doctors').select('id', { count: 'exact', head: true })
         .eq('verification_status', 'verified')
-        .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA'),
+        .or('country.is.null,country.eq.US'),
       supabase.from('seminars').select('id', { count: 'exact', head: true }).eq('is_approved', true).eq('is_past', false),
       supabase.from('doctors').select('state')
         .eq('verification_status', 'verified')
-        .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA')
+        .or('country.is.null,country.eq.US')
         .not('latitude', 'eq', 0)
         .not('latitude', 'is', null),
     ]);

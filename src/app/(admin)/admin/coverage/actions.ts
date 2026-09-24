@@ -141,7 +141,7 @@ export async function getDemandData(): Promise<DemandZip[]> {
     .from('doctors')
     .select('latitude, longitude')
     .in('verification_status', ['verified', 'pending'])
-    .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA')
+    .or('country.is.null,country.eq.US')
     .not('latitude', 'eq', 0)
     .not('longitude', 'eq', 0)
 
@@ -299,7 +299,7 @@ export async function lookupNearby(query: string): Promise<{ doctors: LookupResu
     .from('doctors')
     .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier')
     .in('verification_status', ['verified', 'pending'])
-    .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA')
+    .or('country.is.null,country.eq.US')
 
   if (!doctors) return { doctors: [], label }
 

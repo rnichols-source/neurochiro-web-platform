@@ -58,11 +58,14 @@ function expandQuery(raw: string): string {
  * Split "Greenville, SC" or "Greenville South Carolina" into { city, stateCode }.
  * stateCode is always a 2-letter code resolved via resolveStateCode.
  */
-function splitCityState(input: string): { city: string; stateCode: string } | null {
+function splitCityState(input: string, country: string = 'US'): { city: string; stateCode: string } | null {
   const trimmed = input.trim();
+
+  // Try the search country first, then fall back to US
+  const tryResolve = (s: string) => resolveStateCode(s, country) || (country !== 'US' ? resolveStateCode(s, 'US') : null);
+
   if (!trimmed.includes(' ') && !trimmed.includes(',')) {
-    // Single word — might be a state code or name
-    const code = resolveStateCode(trimmed);
+    const code = tryResolve(trimmed);
     if (code) return { city: '', stateCode: code };
     return null;
   }
@@ -70,7 +73,7 @@ function splitCityState(input: string): { city: string; stateCode: string } | nu
   if (trimmed.includes(',')) {
     const parts = trimmed.split(',').map(p => p.trim()).filter(Boolean);
     if (parts.length >= 2) {
-      const code = resolveStateCode(parts[parts.length - 1]);
+      const code = tryResolve(parts[parts.length - 1]);
       if (code) return { city: parts.slice(0, -1).join(', '), stateCode: code };
     }
   }
@@ -79,7 +82,7 @@ function splitCityState(input: string): { city: string; stateCode: string } | nu
   for (let stateWordCount = 3; stateWordCount >= 1; stateWordCount--) {
     if (words.length <= stateWordCount) continue;
     const possibleState = words.slice(-stateWordCount).join(' ');
-    const code = resolveStateCode(possibleState);
+    const code = tryResolve(possibleState);
     if (code) {
       const city = words.slice(0, -stateWordCount).join(' ');
       return { city, stateCode: code };
@@ -90,36 +93,72 @@ function splitCityState(input: string): { city: string; stateCode: string } | nu
 }
 
 /**
- * Detect and normalize a ZIP code from input. Handles 5-digit, ZIP+4, whitespace.
- * Returns the 5-digit ZIP or null.
+ * Detect and extract a postal code from input. Handles US ZIP, CA FSA, UK outward, NZ postcode.
+ * Returns { code, country } or null.
  */
-function extractZip(input: string): string | null {
-  const cleaned = input.replace(/\s+/g, '').trim();
-  const match = cleaned.match(/^(\d{5})(?:-\d{4})?$/);
-  return match ? match[1] : null;
+function extractPostalCode(input: string, regionHint: string = 'US'): { code: string; country: string } | null {
+  const cleaned = input.replace(/\s+/g, '').trim()
+  if (!cleaned) return null
+
+  // US: 5-digit ZIP, optionally +4
+  const usMatch = cleaned.match(/^(\d{5})(?:-\d{4})?$/)
+  if (usMatch) return { code: usMatch[1], country: 'US' }
+
+  // CA: full postal code A1A1A1 or FSA A1A
+  const caFull = cleaned.toUpperCase().match(/^([A-Z]\d[A-Z])\d[A-Z]\d$/)
+  if (caFull) return { code: caFull[1], country: 'CA' } // use FSA for lookup
+  const caFsa = cleaned.toUpperCase().match(/^([A-Z]\d[A-Z])$/)
+  if (caFsa) return { code: caFsa[1], country: 'CA' }
+
+  // UK: outward code (1-2 letters + digit + optional letter/digit), optionally with inward
+  const withSpace = input.trim().toUpperCase()
+  const ukFull = withSpace.match(/^([A-Z]{1,2}\d[A-Z\d]?)\s?\d[A-Z]{2}$/)
+  if (ukFull) return { code: ukFull[1], country: 'GB' }
+  const ukOutward = withSpace.match(/^([A-Z]{1,2}\d[A-Z\d]?)$/)
+  if (ukOutward) return { code: ukOutward[1], country: 'GB' }
+
+  // NZ: 4-digit (only if region hint is NZ, since 4 digits could be a partial US ZIP)
+  if (/^\d{4}$/.test(cleaned) && regionHint === 'NZ') {
+    return { code: cleaned, country: 'NZ' }
+  }
+
+  return null
 }
 
 /**
- * Look up ZIP code coordinates from the zip_codes table.
+ * Look up postal code coordinates from the zip_codes table.
+ * Country-aware: uses the country column for disambiguation.
  */
-async function lookupZip(supabase: any, zip: string): Promise<{ city: string; state: string; lat: number; lng: number } | null> {
-  const { data } = await supabase
+async function lookupPostalCode(supabase: any, code: string, country: string): Promise<{ city: string; state: string; lat: number; lng: number } | null> {
+  const { data } = await (supabase as any)
     .from('zip_codes')
     .select('city, state, lat, lng')
-    .eq('zip', zip)
-    .maybeSingle();
-  return data || null;
+    .eq('country', country)
+    .eq('zip', code)
+    .maybeSingle()
+  return data || null
 }
 
 const SELECT_FIELDS = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, address, photo_url, phone, accepting_new_patients, offers_telehealth, accepts_walkins, languages, hours, booking_url, created_at';
 
-/** Base query for US doctors: filters verified/pending + excludes international */
-function usDoctorsQuery(sb: any) {
-  return sb
+// Map region codes to ISO country codes for doctor filtering
+const REGION_TO_COUNTRY: Record<string, string> = {
+  'US': 'US', 'CA': 'CA', 'UK': 'GB', 'NZ': 'NZ', 'AU': 'AU',
+}
+
+/** Country-aware doctors query: filters verified/pending + correct country */
+function doctorsQuery(sb: any, countryCode: string) {
+  let q = sb
     .from('doctors')
     .select(SELECT_FIELDS)
     .in('verification_status', ['verified', 'pending'])
-    .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA');
+  // US includes NULL country (legacy data)
+  if (countryCode === 'US') {
+    q = q.or('country.is.null,country.eq.US')
+  } else {
+    q = q.eq('country', countryCode)
+  }
+  return q
 }
 
 export async function GET(request: NextRequest) {
@@ -152,14 +191,14 @@ export async function GET(request: NextRequest) {
 
   const supabase = createAdminClient();
 
-  try {
-    let dbQuery = supabase
-      .from('doctors')
-      .select(SELECT_FIELDS, { count: 'exact' })
-      .in('verification_status', ['verified', 'pending'])
-      .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA');
+  // Resolve region to country code for filtering
+  const searchCountry = REGION_TO_COUNTRY[region] || 'US'
 
-    if (region && region !== 'ALL') {
+  try {
+    let dbQuery = doctorsQuery(supabase, searchCountry);
+
+    // region_code filter only for legacy region-based routing (US sub-regions)
+    if (region && region !== 'ALL' && searchCountry === 'US') {
       dbQuery = dbQuery.eq('region_code', region);
     }
 
@@ -186,22 +225,21 @@ export async function GET(request: NextRequest) {
       dbQuery = dbQuery.overlaps('specialties', specialtiesFilter);
     }
 
-    // ZIP code detection — check before text search
+    // Postal code detection — handles US ZIP, CA FSA, UK outward, NZ postcode
     const locationInput = rawLocation || '';
-    const zipCode = extractZip(locationInput) || extractZip(rawQuery);
+    const postalMatch = extractPostalCode(locationInput, region) || extractPostalCode(rawQuery, region);
     let zipResolved: { city: string; state: string; lat: number; lng: number } | null = null;
-    let locationLabel = ''; // "Showing doctors near Greer, SC" for resolved locations
+    let locationLabel = '';
 
-    if (zipCode) {
-      zipResolved = await lookupZip(supabase, zipCode);
+    if (postalMatch) {
+      zipResolved = await lookupPostalCode(supabase, postalMatch.code, postalMatch.country);
       if (!zipResolved) {
-        // Invalid or unrecognized ZIP — return empty with clear message
         return NextResponse.json({
           doctors: [],
           total: 0,
           isFallback: false,
           error: false,
-          locationLabel: `We couldn't find ZIP code ${zipCode}. Try a city name or check the number.`,
+          locationLabel: `We couldn't find postal code ${postalMatch.code}. Try a city name or check the code.`,
         });
       }
       locationLabel = `Showing doctors near ${zipResolved.city}, ${zipResolved.state}`;
@@ -209,8 +247,8 @@ export async function GET(request: NextRequest) {
 
     // Text search — state is always queried as 2-letter code via resolveStateCode
     const query = expandQuery(rawQuery);
-    const splitFromQuery = (!locationInput || zipCode) ? (!zipCode ? splitCityState(query) : null) : null;
-    const splitFromLocation = zipCode ? null : splitCityState(locationInput);
+    const splitFromQuery = (!locationInput || postalMatch) ? (!postalMatch ? splitCityState(query, searchCountry) : null) : null;
+    const splitFromLocation = postalMatch ? null : splitCityState(locationInput, searchCountry);
 
     // Resolve coordinates: ZIP > user geolocation > city lookup
     let searchLat = userLat;
@@ -236,14 +274,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Single city name without state (e.g. "Atlanta") — try to geocode via zip_codes table
+    // Single city name without state (e.g. "Atlanta", "London") — geocode via zip_codes table
     // so we can do distance-based search instead of text matching
-    const bareLocationTerm = (!resolvedSplit && !zipCode) ? (locationInput || '').trim() : '';
-    if (!hasSearchCoords && bareLocationTerm && !resolveStateCode(bareLocationTerm)) {
-      // Look up in zip_codes table for a city match to get coords
+    const bareLocationTerm = (!resolvedSplit && !postalMatch) ? (locationInput || '').trim() : '';
+    if (!hasSearchCoords && bareLocationTerm && !resolveStateCode(bareLocationTerm, searchCountry)) {
+      // Look up in zip_codes table for a city match, filtered by country
       const { data: cityMatch } = await (supabase as any)
         .from('zip_codes')
         .select('city, state, lat, lng')
+        .eq('country', searchCountry)
         .ilike('city', bareLocationTerm)
         .limit(1);
       if (cityMatch && cityMatch.length > 0) {
@@ -259,7 +298,7 @@ export async function GET(request: NextRequest) {
         if (split.city) q = q.or(`city.ilike.%${split.city}%,address.ilike.%${split.city}%`);
         q = q.eq('state', split.stateCode);
       } else {
-        const stateCode = resolveStateCode(rawLoc);
+        const stateCode = resolveStateCode(rawLoc, searchCountry);
         if (stateCode) {
           q = q.eq('state', stateCode);
         } else {
@@ -289,7 +328,7 @@ export async function GET(request: NextRequest) {
       dbQuery = dbQuery.or(nameConditions.join(','));
       dbQuery = applyLocationFilter(dbQuery, splitFromLocation, locationInput);
     } else if (query) {
-      const stateCode = resolveStateCode(query);
+      const stateCode = resolveStateCode(query, searchCountry);
       if (stateCode) {
         dbQuery = dbQuery.eq('state', stateCode);
       } else {
@@ -325,13 +364,13 @@ export async function GET(request: NextRequest) {
       // Step 1: If both query + location were used, try just location
       const locationTerm = rawLocation || (splitFromQuery ? `${splitFromQuery.city}, ${splitFromQuery.stateCode}` : '');
       if (rawQuery && locationTerm) {
-        const locSplit = splitCityState(locationTerm);
-        let locQuery = usDoctorsQuery(supabase);
+        const locSplit = splitCityState(locationTerm, searchCountry);
+        let locQuery = doctorsQuery(supabase, searchCountry);
         if (locSplit) {
           if (locSplit.city) locQuery = locQuery.or(`city.ilike.%${locSplit.city}%,address.ilike.%${locSplit.city}%`);
           locQuery = locQuery.eq('state', locSplit.stateCode);
         } else {
-          const stateCode = resolveStateCode(locationTerm);
+          const stateCode = resolveStateCode(locationTerm, searchCountry);
           if (stateCode) { locQuery = locQuery.eq('state', stateCode); }
           else { locQuery = locQuery.or(`city.ilike.%${locationTerm}%,address.ilike.%${locationTerm}%`); }
         }
@@ -341,9 +380,9 @@ export async function GET(request: NextRequest) {
 
       // Step 2: Try just the state
       if (!fallbackData.length) {
-        const stateCode = splitFromQuery?.stateCode || splitFromLocation?.stateCode || resolveStateCode(rawLocation || rawQuery);
+        const stateCode = splitFromQuery?.stateCode || splitFromLocation?.stateCode || resolveStateCode(rawLocation || rawQuery, searchCountry);
         if (stateCode) {
-          const { data: stateFallback } = await usDoctorsQuery(supabase)
+          const { data: stateFallback } = await doctorsQuery(supabase, searchCountry)
             .eq('state', stateCode)
             .limit(20);
           if (stateFallback?.length) { fallbackData = stateFallback; fallbackHint = `Showing doctors in ${stateCode}`; }
@@ -354,7 +393,7 @@ export async function GET(request: NextRequest) {
       if (!fallbackData.length) {
         const cityTerm = splitFromQuery?.city || rawQuery || rawLocation;
         if (cityTerm) {
-          const { data: cityFallback } = await usDoctorsQuery(supabase)
+          const { data: cityFallback } = await doctorsQuery(supabase, searchCountry)
             .or(`city.ilike.%${cityTerm}%,address.ilike.%${cityTerm}%`)
             .limit(20);
           if (cityFallback?.length) { fallbackData = cityFallback; fallbackHint = `Showing doctors near ${cityTerm}`; }
@@ -376,7 +415,7 @@ export async function GET(request: NextRequest) {
 
       // Step 3: Only if NO location was specified — try specialty or nationwide
       if (!fallbackData.length && !rawLocation && rawQuery) {
-        const { data: specFallback } = await usDoctorsQuery(supabase)
+        const { data: specFallback } = await doctorsQuery(supabase, searchCountry)
           .or(`bio.ilike.%${rawQuery}%,clinic_name.ilike.%${rawQuery}%`)
           .limit(20);
         if (specFallback?.length) { fallbackData = specFallback; fallbackHint = `Showing "${rawQuery}" doctors nationwide`; }
@@ -384,7 +423,7 @@ export async function GET(request: NextRequest) {
 
       // Step 4: Only if NO location — last resort
       if (!fallbackData.length && !rawLocation) {
-        let fallbackQuery = usDoctorsQuery(supabase)
+        let fallbackQuery = doctorsQuery(supabase, searchCountry)
           .limit(20);
         if (region && region !== 'ALL') fallbackQuery = fallbackQuery.eq('region_code', region);
         const { data: regionFallback } = await fallbackQuery;
@@ -450,7 +489,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     console.error("[SEARCH_API] Critical Error:", err);
 
-    const { data: emergencyData } = await usDoctorsQuery(supabase)
+    const { data: emergencyData } = await doctorsQuery(supabase, searchCountry)
       .limit(20);
 
     return NextResponse.json({

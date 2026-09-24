@@ -52,7 +52,7 @@ export async function getInvisibleDoctors(): Promise<InvisibleDoctor[]> {
     .from('doctors')
     .select('id, first_name, last_name, clinic_name, city, state, address, verification_status, membership_tier, latitude, longitude, country')
     .in('verification_status', ['verified', 'pending'])
-    .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA')
+    .or('country.is.null,country.eq.US')
     .order('verification_status', { ascending: true })
     .order('last_name')
 

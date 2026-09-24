@@ -67,7 +67,20 @@ export async function updateDoctorProfile(formData: FormData) {
     const clinicName = formData.get('clinic_name') as string
     const city = formData.get('city') as string
     const state = formData.get('state') as string
-    const country = formData.get('country') as string || 'United States'
+    const rawCountry = formData.get('country') as string || 'US'
+    // Normalize to ISO 3166-1 alpha-2
+    const COUNTRY_NORMALIZE: Record<string, string> = {
+      'united states': 'US', 'usa': 'US', 'us': 'US',
+      'canada': 'CA', 'ca': 'CA',
+      'united kingdom': 'GB', 'uk': 'GB', 'gb': 'GB',
+      'new zealand': 'NZ', 'nz': 'NZ',
+      'australia': 'AU', 'au': 'AU',
+    }
+    const VALID_COUNTRY_CODES = new Set(['US', 'CA', 'GB', 'NZ', 'AU'])
+    const country = COUNTRY_NORMALIZE[rawCountry.toLowerCase()] || rawCountry.toUpperCase()
+    if (!VALID_COUNTRY_CODES.has(country)) {
+      return { error: `Invalid country code "${rawCountry}". Use US, CA, GB, NZ, or AU.` }
+    }
 
     // Validate clinic name — no emails, phones, or URLs
     if (clinicName) {
@@ -89,7 +102,7 @@ export async function updateDoctorProfile(formData: FormData) {
       if (!cityCheck.valid) return { error: cityCheck.error }
     }
     if (state) {
-      const stateCheck = validateState(state)
+      const stateCheck = validateState(state, country)
       if (!stateCheck.valid) return { error: stateCheck.error }
     }
     const website = formData.get('website') as string

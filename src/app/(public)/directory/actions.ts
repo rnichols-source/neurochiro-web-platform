@@ -24,7 +24,7 @@ export async function getDoctors(options: {
       .from('doctors')
       .select(selectFields, { count: 'exact' })
       .in('verification_status', ['verified', 'pending'])
-      .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA');
+      .or('country.is.null,country.eq.US');
 
     if (regionCode && regionCode !== 'ALL') {
       query = query.eq('region_code', regionCode);
