@@ -2,7 +2,7 @@ import Link from "next/link";
 import { MapPin, Phone, ArrowRight, ShieldCheck, Calendar, Navigation, Clock, CheckCircle, AlertCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { slugToCity, EMPTY_METROS, STATE_NAMES } from "@/lib/city-data";
+import { slugToCity, STATE_NAMES, getCityCoords } from "@/lib/city-data";
 import { getDoctorsNearCity, getNearestDoctors, getNearbyCityPages, type CityDoctor } from "../actions";
 import { formatDistance } from "@/lib/geo";
 import Footer from "@/components/landing/Footer";
@@ -38,32 +38,12 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
   const stateName = STATE_NAMES[state] || state;
   const location = `${city}, ${stateName}`;
 
-  // Find city coordinates from empty metros or geocode
-  const emptyMetro = EMPTY_METROS.find(m => m.slug === slug);
-  let lat = emptyMetro?.lat || 0;
-  let lng = emptyMetro?.lng || 0;
+  // Get city center from static lookup (geocoded city centers, not doctor addresses)
+  const coords = getCityCoords(slug);
+  let lat = coords?.lat || 0;
+  let lng = coords?.lng || 0;
 
-  // If not in empty metros, get coords from the first doctor in this city
-  if (!lat || !lng) {
-    const { createAdminClient } = await import('@/lib/supabase-admin');
-    const supabase = createAdminClient();
-    const { data: cityDoc } = await (supabase as any)
-      .from('doctors')
-      .select('latitude, longitude')
-      .eq('verification_status', 'verified')
-      .eq('country', 'US')
-      .ilike('city', city)
-      .eq('state', state)
-      .gt('latitude', 0)
-      .limit(1)
-      .maybeSingle();
-    if (cityDoc) {
-      lat = cityDoc.latitude;
-      lng = cityDoc.longitude;
-    }
-  }
-
-  // If still no coordinates, try geocoding
+  // Fallback: geocode via Nominatim for cities not in the static lookup
   if (!lat || !lng) {
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(`${city}, ${state}, USA`)}&limit=1`, {
