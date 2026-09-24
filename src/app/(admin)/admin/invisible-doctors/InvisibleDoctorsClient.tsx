@@ -8,6 +8,7 @@ const REASON_LABELS: Record<string, { label: string; color: string; bg: string }
   no_address: { label: "No Address", color: "text-red-400", bg: "bg-red-500/10 border-red-500/20" },
   geocode_failed: { label: "Geocode Failed", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" },
   zero_coords: { label: "Zero Coordinates", color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/20" },
+  address_mismatch: { label: "Address Mismatch", color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20" },
 }
 
 export default function InvisibleDoctorsClient({ doctors }: { doctors: InvisibleDoctor[] }) {
@@ -146,6 +147,9 @@ function DoctorRow({
             <span className="text-red-400/70">No address on file, {location}</span>
           )}
         </div>
+        {doctor.mismatchNote && (
+          <p className="text-xs mt-1 text-purple-400/80">{doctor.mismatchNote}</p>
+        )}
         {message && (
           <p className={`text-xs mt-1 ${message.type === "success" ? "text-emerald-400" : "text-red-400"}`}>
             {message.text}

@@ -69,6 +69,19 @@ export async function updateDoctorProfile(formData: FormData) {
     const state = formData.get('state') as string
     const country = formData.get('country') as string || 'United States'
 
+    // Validate clinic name — no emails, phones, or URLs
+    if (clinicName) {
+      if (/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(clinicName)) {
+        return { error: 'Clinic name cannot contain an email address. Use the email field instead.' }
+      }
+      if (/\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/.test(clinicName)) {
+        return { error: 'Clinic name cannot contain a phone number. Use the phone field instead.' }
+      }
+      if (/https?:\/\/|www\.|\.com\b|\.net\b|\.org\b/i.test(clinicName)) {
+        return { error: 'Clinic name cannot contain a URL. Use the website field instead.' }
+      }
+    }
+
     // Validate city and state to prevent dirty data
     const { validateCity, validateState } = await import('@/lib/validate-location')
     if (city) {

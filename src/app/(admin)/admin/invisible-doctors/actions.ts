@@ -15,20 +15,45 @@ export interface InvisibleDoctor {
   membership_tier: string | null
   latitude: number | null
   longitude: number | null
-  reason: 'no_address' | 'geocode_failed' | 'zero_coords'
+  reason: 'no_address' | 'geocode_failed' | 'zero_coords' | 'address_mismatch'
+  mismatchNote?: string
+}
+
+/** Extract city from address string for mismatch detection */
+function extractCityFromAddress(address: string, state: string): string | null {
+  const cleaned = address
+    .replace(/,?\s*(Suite|Ste|Unit|Bldg|Building|Apt|#)\s*[\w#-]+/gi, '')
+    .replace(/\s+/g, ' ').trim()
+  const STATE_CODES = new Set([
+    'AL','AK','AZ','AR','CA','CO','CT','DE','DC','FL','GA','HI','ID','IL','IN',
+    'IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH',
+    'NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT',
+    'VT','VA','WA','WV','WI','WY'
+  ])
+  const parts = cleaned.split(',').map(p => p.trim()).filter(Boolean)
+  if (parts.length < 2) return null
+  for (let i = parts.length - 1; i >= 1; i--) {
+    const words = parts[i].split(/\s+/)
+    const firstWord = words[0]?.toUpperCase()
+    if (STATE_CODES.has(firstWord) || firstWord === state?.toUpperCase()) {
+      const cityPart = parts[i - 1]?.trim()
+      if (cityPart && !/^\d/.test(cityPart)) return cityPart
+    }
+  }
+  return null
 }
 
 export async function getInvisibleDoctors(): Promise<InvisibleDoctor[]> {
   await checkAdminAuth()
   const supabase = createAdminClient()
 
-  // Fetch all verified/pending US doctors with 0,0 or null coordinates
+  // Fetch all verified/pending US doctors
   const { data, error } = await supabase
     .from('doctors')
     .select('id, first_name, last_name, clinic_name, city, state, address, verification_status, membership_tier, latitude, longitude, country')
     .in('verification_status', ['verified', 'pending'])
     .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA')
-    .order('verification_status', { ascending: true }) // verified first
+    .order('verification_status', { ascending: true })
     .order('last_name')
 
   if (error || !data) return []
@@ -39,6 +64,33 @@ export async function getInvisibleDoctors(): Promise<InvisibleDoctor[]> {
     const lat = d.latitude
     const lng = d.longitude
     const isZero = (lat === 0 && lng === 0) || lat == null || lng == null
+
+    // Check for city/address mismatch (even if coords are valid)
+    if (!isZero && d.address && d.city) {
+      const addrCity = extractCityFromAddress(d.address, d.state || '')
+      if (addrCity) {
+        const recordCity = d.city.trim().toLowerCase()
+        const addrCityLower = addrCity.trim().toLowerCase()
+        if (recordCity !== addrCityLower && !recordCity.includes(addrCityLower) && !addrCityLower.includes(recordCity)) {
+          invisible.push({
+            id: d.id,
+            first_name: d.first_name,
+            last_name: d.last_name,
+            clinic_name: d.clinic_name,
+            city: d.city,
+            state: d.state,
+            address: d.address,
+            verification_status: d.verification_status,
+            membership_tier: d.membership_tier,
+            latitude: lat,
+            longitude: lng,
+            reason: 'address_mismatch',
+            mismatchNote: `Record: ${d.city}, ${d.state}. Address says: ${addrCity}.`,
+          })
+          continue
+        }
+      }
+    }
 
     if (!isZero) continue
 

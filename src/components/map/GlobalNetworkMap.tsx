@@ -70,27 +70,10 @@ export default function GlobalNetworkMap({
     }, window.location.origin);
   }, [highlightedDoctorId]);
 
-  // Handle location centering
-  useEffect(() => {
-    if (!externalLocationQuery || !iframeRef.current?.contentWindow) return;
-    const geocode = async () => {
-      try {
-        const osmResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(externalLocationQuery)}&limit=1`);
-        const data = await osmResponse.json();
-        if (data && data.length > 0) {
-          iframeRef.current?.contentWindow?.postMessage({
-            type: 'set-view',
-            center: [Number(data[0].lon), Number(data[0].lat)],
-            zoom: 12
-          }, window.location.origin);
-        }
-      } catch (e) {
-        console.error("Geocoding error:", e);
-      }
-    };
-    const timeout = setTimeout(geocode, 1000);
-    return () => clearTimeout(timeout);
-  }, [externalLocationQuery]);
+  // Map centering is handled exclusively by force-raw-markers → fitToFeatures.
+  // When doctors change from a new search, the marker sync effect sends
+  // force-raw-markers which auto-zooms the map to fit all result pins.
+  // No separate geocode/set-view — one mechanism, no race.
 
   const currentBounds = useRef<[number, number, number, number] | null>(null);
   const currentZoom = useRef<number>(4);

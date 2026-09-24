@@ -24,6 +24,21 @@ export async function getAllDoctors(search?: string) {
 
 export async function updateDoctorManually(doctorId: string, updates: any) {
   await checkAdminAuth();
+
+  // Validate clinic_name if being updated
+  if (updates.clinic_name) {
+    const cn = updates.clinic_name;
+    if (/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(cn)) {
+      return { success: false, error: 'Clinic name cannot contain an email address.' };
+    }
+    if (/\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/.test(cn)) {
+      return { success: false, error: 'Clinic name cannot contain a phone number.' };
+    }
+    if (/https?:\/\/|www\.|\.com\b|\.net\b|\.org\b/i.test(cn)) {
+      return { success: false, error: 'Clinic name cannot contain a URL.' };
+    }
+  }
+
   // Use Admin Client for manual directory updates
   const supabase = createAdminClient();
   const { data: { user } } = await (supabase.auth as any).getUser(); // Auth might not work with admin client if token is not passed, but we don't strictly need user for update
