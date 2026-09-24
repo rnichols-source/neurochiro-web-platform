@@ -69,6 +69,7 @@ export default function Footer() {
           <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
         </div>
       </div>
+      <p className="max-w-7xl mx-auto text-center text-[10px] text-gray-600 mt-4">Postal code data from <a href="https://www.geonames.org" className="hover:text-gray-400" target="_blank" rel="noopener noreferrer">GeoNames</a> (geonames.org), CC BY 4.0.</p>
     </footer>
   );
 }

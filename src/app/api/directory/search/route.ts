@@ -89,6 +89,28 @@ function splitCityState(input: string): { city: string; stateCode: string } | nu
   return null;
 }
 
+/**
+ * Detect and normalize a ZIP code from input. Handles 5-digit, ZIP+4, whitespace.
+ * Returns the 5-digit ZIP or null.
+ */
+function extractZip(input: string): string | null {
+  const cleaned = input.replace(/\s+/g, '').trim();
+  const match = cleaned.match(/^(\d{5})(?:-\d{4})?$/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Look up ZIP code coordinates from the zip_codes table.
+ */
+async function lookupZip(supabase: any, zip: string): Promise<{ city: string; state: string; lat: number; lng: number } | null> {
+  const { data } = await supabase
+    .from('zip_codes')
+    .select('city, state, lat, lng')
+    .eq('zip', zip)
+    .maybeSingle();
+  return data || null;
+}
+
 const SELECT_FIELDS = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, address, photo_url, phone, accepting_new_patients, offers_telehealth, accepts_walkins, languages, hours, booking_url, created_at';
 
 export async function GET(request: NextRequest) {
@@ -154,16 +176,43 @@ export async function GET(request: NextRequest) {
       dbQuery = dbQuery.overlaps('specialties', specialtiesFilter);
     }
 
+    // ZIP code detection — check before text search
+    const locationInput = rawLocation || '';
+    const zipCode = extractZip(locationInput) || extractZip(rawQuery);
+    let zipResolved: { city: string; state: string; lat: number; lng: number } | null = null;
+    let locationLabel = ''; // "Showing doctors near Greer, SC" for resolved locations
+
+    if (zipCode) {
+      zipResolved = await lookupZip(supabase, zipCode);
+      if (!zipResolved) {
+        // Invalid or unrecognized ZIP — return empty with clear message
+        return NextResponse.json({
+          doctors: [],
+          total: 0,
+          isFallback: false,
+          error: false,
+          locationLabel: `We couldn't find ZIP code ${zipCode}. Try a city name or check the number.`,
+        });
+      }
+      locationLabel = `Showing doctors near ${zipResolved.city}, ${zipResolved.state}`;
+    }
+
     // Text search — state is always queried as 2-letter code via resolveStateCode
     const query = expandQuery(rawQuery);
-    const locationInput = rawLocation || '';
-    const splitFromQuery = !locationInput ? splitCityState(query) : null;
-    const splitFromLocation = splitCityState(locationInput);
+    const splitFromQuery = (!locationInput || zipCode) ? (!zipCode ? splitCityState(query) : null) : null;
+    const splitFromLocation = zipCode ? null : splitCityState(locationInput);
 
-    // Resolve coordinates from static city lookup for distance calculation
+    // Resolve coordinates: ZIP > user geolocation > city lookup
     let searchLat = userLat;
     let searchLng = userLng;
     let hasSearchCoords = hasUserCoords;
+
+    if (zipResolved) {
+      searchLat = Number(zipResolved.lat);
+      searchLng = Number(zipResolved.lng);
+      hasSearchCoords = true;
+    }
+
     const resolvedSplit = splitFromLocation || splitFromQuery;
     if (!hasSearchCoords && resolvedSplit?.city && resolvedSplit?.stateCode) {
       const { cityToSlug } = await import('@/lib/city-data');
@@ -171,6 +220,7 @@ export async function GET(request: NextRequest) {
       const coords = getCityCoords(slug);
       if (coords) {
         searchLat = coords.lat;
+        locationLabel = `Showing doctors near ${resolvedSplit.city}, ${resolvedSplit.stateCode}`;
         searchLng = coords.lng;
         hasSearchCoords = true;
       }
@@ -191,7 +241,14 @@ export async function GET(request: NextRequest) {
       return q;
     }
 
-    if (splitFromQuery) {
+    if (zipResolved) {
+      // ZIP search: use bounding box for the radius query, no text filtering needed
+      const searchRadius = radius > 0 ? radius : 250; // wide initial fetch, radius applied post-query
+      const [minLng, minLat, maxLng, maxLat] = boundingBox(searchLat, searchLng, searchRadius * 1.2);
+      dbQuery = dbQuery
+        .gte('latitude', minLat).lte('latitude', maxLat)
+        .gte('longitude', minLng).lte('longitude', maxLng);
+    } else if (splitFromQuery) {
       if (splitFromQuery.city) dbQuery = dbQuery.or(`city.ilike.%${splitFromQuery.city}%,address.ilike.%${splitFromQuery.city}%`);
       dbQuery = dbQuery.eq('state', splitFromQuery.stateCode);
     } else if (query && locationInput) {
@@ -274,8 +331,21 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Step 3: If query was a specialty, try just that specialty nationwide
-      if (!fallbackData.length && rawQuery) {
+      // GUARD: If location was resolved to coordinates, NEVER fall back to nationwide.
+      // An empty result is honest. A nationwide list pretending to be local is not.
+      if (!fallbackData.length && hasSearchCoords) {
+        // Location was resolved but no doctors found — return empty with location label
+        return NextResponse.json({
+          doctors: [],
+          total: 0,
+          isFallback: false,
+          error: false,
+          locationLabel: locationLabel || `No doctors found near ${rawLocation || rawQuery}`,
+        });
+      }
+
+      // Step 3: Only if NO location was specified — try specialty or nationwide
+      if (!fallbackData.length && !rawLocation && rawQuery) {
         const { data: specFallback } = await supabase
           .from('doctors')
           .select(SELECT_FIELDS)
@@ -285,8 +355,8 @@ export async function GET(request: NextRequest) {
         if (specFallback?.length) { fallbackData = specFallback; fallbackHint = `Showing "${rawQuery}" doctors nationwide`; }
       }
 
-      // Step 4: Last resort — top verified doctors in region
-      if (!fallbackData.length) {
+      // Step 4: Only if NO location — last resort
+      if (!fallbackData.length && !rawLocation) {
         let fallbackQuery = supabase
           .from('doctors')
           .select(SELECT_FIELDS)
@@ -348,6 +418,7 @@ export async function GET(request: NextRequest) {
       total: count || sorted.length,
       isFallback: false,
       error: false,
+      locationLabel: locationLabel || undefined,
     }, {
       headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' }
     });
