@@ -105,7 +105,18 @@ export async function updateDoctorProfile(formData: FormData) {
     const highlightsRaw = formData.get('highlights') as string
     const highlights = highlightsRaw ? highlightsRaw.split('\n').map(s => s.trim()).filter(Boolean) : []
     const conditionsRaw = formData.get('conditions_treated') as string
-    const conditionsTreated = conditionsRaw ? conditionsRaw.split(',').map(s => s.trim()).filter(Boolean) : []
+    const conditionsRawArray = conditionsRaw ? conditionsRaw.split(',').map(s => s.trim()).filter(Boolean) : []
+    // Validate conditions against controlled vocabulary — no free text
+    const { CONDITIONS_VOCABULARY, CONDITIONS_MAX } = await import('@/lib/conditions-vocabulary')
+    const validConditions = new Set(CONDITIONS_VOCABULARY)
+    const invalidConditions = conditionsRawArray.filter(c => !validConditions.has(c))
+    if (invalidConditions.length > 0) {
+      return { error: `Invalid condition: "${invalidConditions[0]}". Please select from the available options.` }
+    }
+    if (conditionsRawArray.length > CONDITIONS_MAX) {
+      return { error: `You can select up to ${CONDITIONS_MAX} conditions. You have ${conditionsRawArray.length}.` }
+    }
+    const conditionsTreated = [...new Set(conditionsRawArray)]
     const educationRaw = formData.get('education') as string
     const education = educationRaw ? educationRaw.split('\n').map(s => s.trim()).filter(Boolean) : []
     const languagesRaw = formData.get('languages') as string

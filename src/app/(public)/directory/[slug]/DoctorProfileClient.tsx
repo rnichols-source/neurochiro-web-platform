@@ -107,6 +107,8 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       )
     : null;
   const mapQuery = doctor.address ? encodeURIComponent(`${doctor.address}, ${doctor.city}, ${doctor.state}`) : doctor.city ? encodeURIComponent(`${doctor.city}, ${doctor.state}`) : null;
+  const hasCostData = d.first_visit_price || d.payment_model || d.insurance_networks?.length > 0 || d.files_insurance || d.payment_plans || d.free_consultation;
+  const hasAvailData = hours || d.accepts_walkins || d.offers_telehealth || d.has_evening_hours || d.has_weekend_hours;
 
   // Bio split for pull quote — find the first real sentence (60+ chars)
   const bioParts = doctor.bio?.split(/(?<=[.!?])\s+/) || [];
@@ -267,22 +269,22 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 <ContactGateCTA variant="hero" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
               ) : (
                 <>
-                  {doctor.phone && (
-                    <a href={`tel:${doctor.phone}`} onClick={() => { trackEvent('phone_tap'); trackConversion('call'); }} style={{ padding: "14px 28px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", boxShadow: "0 8px 30px rgba(214,104,41,0.3)" }}>
-                      <Phone style={{ width: 16, height: 16 }} /> Call Now
-                    </a>
-                  )}
                   {bookingUrl ? (
-                    <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent('booking_click'); trackConversion('book'); }} style={{ padding: "14px 28px", background: "#22c55e", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+                    <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent('booking_click'); trackConversion('book'); }} style={{ padding: "14px 28px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", boxShadow: "0 8px 30px rgba(214,104,41,0.3)" }}>
                       <Calendar style={{ width: 16, height: 16 }} /> Book Online
                     </a>
                   ) : (
-                    <a href="#appointment" style={{ padding: "14px 28px", background: "rgba(255,255,255,0.1)", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", border: "1px solid rgba(255,255,255,0.15)" }}>
+                    <a href="#appointment" style={{ padding: "14px 28px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", boxShadow: "0 8px 30px rgba(214,104,41,0.3)" }}>
                       <Calendar style={{ width: 16, height: 16 }} /> Book Consultation
                     </a>
                   )}
+                  {doctor.phone && (
+                    <a href={`tel:${doctor.phone}`} onClick={() => { trackEvent('phone_tap'); trackConversion('call'); }} style={{ padding: "14px 28px", background: "rgba(255,255,255,0.1)", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", border: "1px solid rgba(255,255,255,0.15)" }}>
+                      <Phone style={{ width: 16, height: 16 }} /> Call
+                    </a>
+                  )}
                   {doctor.email && (
-                    <a href={`mailto:${doctor.email}`} onClick={() => trackEvent('contact_click')} style={{ padding: "14px 28px", background: "rgba(255,255,255,0.08)", color: "white", borderRadius: 14, fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", border: "1px solid rgba(255,255,255,0.12)" }}>
+                    <a href={`mailto:${doctor.email}`} onClick={() => trackEvent('contact_click')} style={{ padding: "14px 28px", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)", borderRadius: 14, fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", border: "1px solid rgba(255,255,255,0.08)" }}>
                       <Mail style={{ width: 16, height: 16 }} /> Email
                     </a>
                   )}
@@ -438,6 +440,14 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       {/* ═══════════════════════════════════════════
           6. COST & AVAILABILITY
       ═══════════════════════════════════════════ */}
+      {!hasCostData && !hasAvailData ? (
+        <Section bg="white" style={{ paddingTop: 48, paddingBottom: 48 }}>
+          <div style={{ padding: "20px 24px", background: "#f8f6f2", borderRadius: 12, textAlign: "center" }}>
+            <p style={{ fontSize: 14, color: "#718096", margin: 0 }}>Contact the office for pricing, insurance, and availability.</p>
+            {doctor.phone && <p style={{ margin: "8px 0 0", fontWeight: 700, color: "#1E2D3B", fontSize: 16 }}><a href={'tel:' + doctor.phone} style={{ color: "#1E2D3B", textDecoration: "none" }}>{doctor.phone}</a></p>}
+          </div>
+        </Section>
+      ) : (
       <Section bg="white" style={{ paddingTop: 48, paddingBottom: 48 }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 32 }}>
           {/* Cost */}
@@ -529,6 +539,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           </div>
         </div>
       </Section>
+      )}
 
       {/* ═══════════════════════════════════════════
           7. CERTIFICATIONS + EDUCATION + BADGES
