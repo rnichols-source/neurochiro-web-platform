@@ -275,27 +275,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       </section>
 
       {/* ═══════════════════════════════════════════
-          2. TRUST BAR
-      ═══════════════════════════════════════════ */}
-      <section style={{ background: "#162230", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", overflow: "auto" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "center", minWidth: "fit-content" }}>
-          {[
-            ...(yearsInPractice ? [{ value: `${yearsInPractice}+`, label: "Years Practice" }] : []),
-            ...(certificationsList?.length ? [{ value: certificationsList[0], label: "Certified" }] : []),
-            ...(specialties.length > 0 ? [{ value: String(specialties.length), label: "Specialties" }] : []),
-            // Profile views, "1 of X in city", and inquiry counts removed from patient view (2026-09-23).
-            // These are dashboard metrics, not patient trust signals. "1 of X" reads as a ranking claim.
-          ].map((item, i) => (
-            <div key={i} style={{ flex: "0 0 auto", textAlign: "center", padding: "16px 28px", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color: "#D66829", lineHeight: 1.2, whiteSpace: "nowrap" }}>{item.value}</div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.12em", whiteSpace: "nowrap" }}>{item.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════
-          3. CLAIM / UPGRADE BANNERS
+          2. CLAIM / UPGRADE BANNERS
       ═══════════════════════════════════════════ */}
       {!doctor.user_id && (
         <Section bg="cream" style={{ paddingTop: 24, paddingBottom: 0 }}>
@@ -330,7 +310,97 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       )}
 
       {/* ═══════════════════════════════════════════
-          COST & AVAILABILITY (Phase 2)
+          3. VIDEO / SPOTLIGHT — Cinematic
+      ═══════════════════════════════════════════ */}
+      {(spotlightEpisode || doctor.video_url) && (
+        <section style={{ background: "linear-gradient(180deg, #1E2D3B 0%, #162230 100%)", padding: "80px 24px" }}>
+          <div style={{ maxWidth: 960, margin: "0 auto" }}>
+            {spotlightEpisode ? (
+              <>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center", marginBottom: 12 }}>
+                  <span style={{ fontSize: 18 }}>🎬</span>
+                  <h2 style={{ fontSize: 18, fontWeight: 900, color: "white" }}>Featured on NeuroChiro Spotlight</h2>
+                  <span style={{ background: "rgba(214,104,41,0.15)", color: "#D66829", fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 20 }}>EP {String(spotlightEpisode.episodeNumber).padStart(2, "0")}</span>
+                </div>
+                <p style={{ textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: 15, fontStyle: "italic", marginBottom: 28, maxWidth: 600, margin: "0 auto 28px" }}>&ldquo;{spotlightEpisode.quote}&rdquo;</p>
+                <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.3)", aspectRatio: "16 / 9" }}>
+                  <iframe src={spotlightEpisode.videoUrl} style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                </div>
+                <div style={{ textAlign: "center", marginTop: 20 }}>
+                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, marginBottom: 8 }}>{spotlightEpisode.description}</p>
+                  <Link href="/spotlight" style={{ color: "#D66829", fontWeight: 800, fontSize: 14, textDecoration: "none" }}>Watch all Spotlight episodes →</Link>
+                </div>
+              </>
+            ) : doctor.video_url && (
+              <>
+                <h2 style={{ textAlign: "center", fontSize: 13, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  <Play style={{ width: 14, height: 14 }} /> Meet {doctor.first_name}
+                </h2>
+                <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.3)", aspectRatio: "16 / 9" }}>
+                  <iframe src={doctor.video_url.replace('watch?v=', 'embed/').replace('vimeo.com/', 'player.vimeo.com/video/')} style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          4. BIO — Pull Quote
+      ═══════════════════════════════════════════ */}
+      {doctor.bio && (
+        <Section bg="white" style={{ paddingTop: 80, paddingBottom: 80 }}>
+          <div style={{ maxWidth: 800, margin: "0 auto" }}>
+            {firstSentence && (
+              <p style={{ fontSize: 26, fontWeight: 500, fontStyle: "italic", color: "#1E2D3B", lineHeight: 1.55, borderLeft: "4px solid #D66829", paddingLeft: 28, marginBottom: 28 }}>
+                &ldquo;{firstSentence}&rdquo;
+              </p>
+            )}
+            {restOfBio && (
+              <p style={{ fontSize: 16, lineHeight: 1.8, color: "#4a5568" }}>{restOfBio}</p>
+            )}
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 32, paddingTop: 24, borderTop: "1px solid rgba(30,45,59,0.08)" }}>
+              <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", background: "#1E2D3B", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
+                {doctor.photo_url && !photoError ? (
+                  <img src={doctor.photo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <span style={{ color: "#D66829", fontWeight: 900, fontSize: 16 }}>{(doctor.first_name?.[0] || "N").toUpperCase()}</span>
+                )}
+              </div>
+              <div>
+                <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B" }}>{name}</p>
+                <p style={{ fontSize: 12, color: "#718096" }}>{doctor.clinic_name}{doctor.city ? ` · ${doctor.city}` : ""}</p>
+              </div>
+            </div>
+          </div>
+        </Section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          5. SPECIALTIES + CONDITIONS (conditions first, then techniques)
+      ═══════════════════════════════════════════ */}
+      {(specialties.length > 0 || (conditionsTreated && conditionsTreated.length > 0)) && (
+        <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 32 }}>Patients We Help</h2>
+          {conditionsTreated && conditionsTreated.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginBottom: specialties.length > 0 ? 24 : 0 }}>
+              {conditionsTreated.map((c: string, i: number) => (
+                <span key={i} style={{ padding: "7px 16px", background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.12)", borderRadius: 50, fontSize: 13, fontWeight: 600, color: "#3b82f6" }}>{c}</span>
+              ))}
+            </div>
+          )}
+          {specialties.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center" }}>
+              {specialties.map((s: string, i: number) => (
+                <span key={i} style={{ padding: "10px 22px", background: "rgba(214,104,41,0.08)", border: "1px solid rgba(214,104,41,0.15)", borderRadius: 50, fontSize: 14, fontWeight: 700, color: "#D66829" }}>{s}</span>
+              ))}
+            </div>
+          )}
+        </Section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          6. COST & AVAILABILITY
       ═══════════════════════════════════════════ */}
       <Section bg="white" style={{ paddingTop: 48, paddingBottom: 48 }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 32 }}>
@@ -425,81 +495,10 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       </Section>
 
       {/* ═══════════════════════════════════════════
-          4. WHY CHOOSE ME / HIGHLIGHTS
-      ═══════════════════════════════════════════ */}
-      {highlights && highlights.length > 0 && (
-        <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 36 }}>Why Choose {doctor.first_name}</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
-            {highlights.map((h: string, i: number) => (
-              <div key={i} style={{ background: "white", borderRadius: 16, padding: "24px 28px", display: "flex", alignItems: "flex-start", gap: 14, border: "1px solid rgba(30,45,59,0.06)" }}>
-                <CheckCircle2 style={{ width: 20, height: 20, color: "#22c55e", flexShrink: 0, marginTop: 2 }} />
-                <span style={{ fontSize: 15, color: "#374151", lineHeight: 1.5 }}>{h}</span>
-              </div>
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* ═══════════════════════════════════════════
-          5. BIO — Pull Quote
-      ═══════════════════════════════════════════ */}
-      {doctor.bio && (
-        <Section bg="white" style={{ paddingTop: 80, paddingBottom: 80 }}>
-          <div style={{ maxWidth: 800, margin: "0 auto" }}>
-            {firstSentence && (
-              <p style={{ fontSize: 26, fontWeight: 500, fontStyle: "italic", color: "#1E2D3B", lineHeight: 1.55, borderLeft: "4px solid #D66829", paddingLeft: 28, marginBottom: 28 }}>
-                &ldquo;{firstSentence}&rdquo;
-              </p>
-            )}
-            {restOfBio && (
-              <p style={{ fontSize: 16, lineHeight: 1.8, color: "#4a5568" }}>{restOfBio}</p>
-            )}
-            <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 32, paddingTop: 24, borderTop: "1px solid rgba(30,45,59,0.08)" }}>
-              <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", background: "#1E2D3B", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
-                {doctor.photo_url && !photoError ? (
-                  <img src={doctor.photo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                ) : (
-                  <span style={{ color: "#D66829", fontWeight: 900, fontSize: 16 }}>{(doctor.first_name?.[0] || "N").toUpperCase()}</span>
-                )}
-              </div>
-              <div>
-                <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B" }}>{name}</p>
-                <p style={{ fontSize: 12, color: "#718096" }}>{doctor.clinic_name}{doctor.city ? ` · ${doctor.city}` : ""}</p>
-              </div>
-            </div>
-          </div>
-        </Section>
-      )}
-
-      {/* ═══════════════════════════════════════════
-          6. SPECIALTIES + CONDITIONS
-      ═══════════════════════════════════════════ */}
-      {(specialties.length > 0 || (conditionsTreated && conditionsTreated.length > 0)) && (
-        <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 32 }}>Patients We Help</h2>
-          {specialties.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", marginBottom: conditionsTreated?.length ? 24 : 0 }}>
-              {specialties.map((s: string, i: number) => (
-                <span key={i} style={{ padding: "10px 22px", background: "rgba(214,104,41,0.08)", border: "1px solid rgba(214,104,41,0.15)", borderRadius: 50, fontSize: 14, fontWeight: 700, color: "#D66829" }}>{s}</span>
-              ))}
-            </div>
-          )}
-          {conditionsTreated && conditionsTreated.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
-              {conditionsTreated.map((c: string, i: number) => (
-                <span key={i} style={{ padding: "7px 16px", background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.12)", borderRadius: 50, fontSize: 13, fontWeight: 600, color: "#3b82f6" }}>{c}</span>
-              ))}
-            </div>
-          )}
-        </Section>
-      )}
-
-      {/* ═══════════════════════════════════════════
           7. CERTIFICATIONS + EDUCATION + BADGES
       ═══════════════════════════════════════════ */}
       {(certificationsList?.length || education?.length || doctor.user_id) && (
-        <Section bg="white" style={{ paddingTop: 72, paddingBottom: 72 }}>
+        <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 40 }}>
             {certificationsList && certificationsList.length > 0 && (
               <div>
@@ -535,149 +534,20 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       )}
 
       {/* ═══════════════════════════════════════════
-          8. VIDEO / SPOTLIGHT — Cinematic
-      ═══════════════════════════════════════════ */}
-      {(spotlightEpisode || doctor.video_url) && (
-        <section style={{ background: "linear-gradient(180deg, #1E2D3B 0%, #162230 100%)", padding: "80px 24px" }}>
-          <div style={{ maxWidth: 960, margin: "0 auto" }}>
-            {spotlightEpisode ? (
-              <>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center", marginBottom: 12 }}>
-                  <span style={{ fontSize: 18 }}>🎬</span>
-                  <h2 style={{ fontSize: 18, fontWeight: 900, color: "white" }}>Featured on NeuroChiro Spotlight</h2>
-                  <span style={{ background: "rgba(214,104,41,0.15)", color: "#D66829", fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 20 }}>EP {String(spotlightEpisode.episodeNumber).padStart(2, "0")}</span>
-                </div>
-                <p style={{ textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: 15, fontStyle: "italic", marginBottom: 28, maxWidth: 600, margin: "0 auto 28px" }}>&ldquo;{spotlightEpisode.quote}&rdquo;</p>
-                <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.3)", aspectRatio: "16 / 9" }}>
-                  <iframe src={spotlightEpisode.videoUrl} style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                </div>
-                <div style={{ textAlign: "center", marginTop: 20 }}>
-                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, marginBottom: 8 }}>{spotlightEpisode.description}</p>
-                  <Link href="/spotlight" style={{ color: "#D66829", fontWeight: 800, fontSize: 14, textDecoration: "none" }}>Watch all Spotlight episodes →</Link>
-                </div>
-              </>
-            ) : doctor.video_url && (
-              <>
-                <h2 style={{ textAlign: "center", fontSize: 13, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                  <Play style={{ width: 14, height: 14 }} /> Meet {doctor.first_name}
-                </h2>
-                <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.3)", aspectRatio: "16 / 9" }}>
-                  <iframe src={doctor.video_url.replace('watch?v=', 'embed/').replace('vimeo.com/', 'player.vimeo.com/video/')} style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                </div>
-              </>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* ═══════════════════════════════════════════
-          9. GALLERY
-      ═══════════════════════════════════════════ */}
-      {galleryImages && galleryImages.length > 0 && (
-        <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 32 }}>Photos</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
-            {galleryImages.map((img: string, i: number) => (
-              <img key={i} src={img} alt="" style={{ width: "100%", aspectRatio: "4 / 3", objectFit: "cover", borderRadius: 16 }} />
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* ═══════════════════════════════════════════
-          10. TEAM MEMBERS
-      ═══════════════════════════════════════════ */}
-      {teamMembersList && teamMembersList.length > 0 && (
-        <Section bg="white" style={{ paddingTop: 72, paddingBottom: 72 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", marginBottom: 32 }}>
-            <Users style={{ width: 18, height: 18, color: "#D66829" }} />
-            <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B" }}>Our Team</h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 20 }}>
-            {teamMembersList.map((m, i) => (
-              <div key={i} style={{ textAlign: "center" }}>
-                <div style={{ width: 80, height: 80, borderRadius: 16, background: "#f3f4f6", overflow: "hidden", margin: "0 auto 10px" }}>
-                  {m.photo_url ? <img src={m.photo_url} alt={m.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
-                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#d1d5db", fontSize: 24, fontWeight: 700 }}>{m.name?.[0]}</div>}
-                </div>
-                <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B" }}>{m.name}</p>
-                <p style={{ fontSize: 12, color: "#718096" }}>{m.role}</p>
-              </div>
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* ═══════════════════════════════════════════
-          11. SOCIAL PROOF — Reviews + City Demand + Stories
-      ═══════════════════════════════════════════ */}
-      <section style={{ background: "linear-gradient(180deg, #1E2D3B 0%, #162230 100%)", padding: "80px 24px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <h2 style={{ fontSize: 13, fontWeight: 800, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 48 }}>Social Proof</h2>
-
-          {/* City demand stat removed (2026-09-23): was profile_views sum relabeled as "patients found" */}
-
-          {/* Google Reviews */}
-          {doctor.google_place_id && (
-            <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 20, padding: "32px", border: "1px solid rgba(255,255,255,0.06)", marginBottom: 32 }}>
-              <GoogleReviews placeId={doctor.google_place_id} doctorName={name} />
-            </div>
-          )}
-
-          {/* Patient Stories */}
-          <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 20, padding: "32px", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <h3 style={{ fontSize: 16, fontWeight: 900, color: "white", marginBottom: 20 }}>Patient Stories</h3>
-            {stories.length > 0 ? (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 20 }}>
-                {stories.map((story) => (
-                  <div key={story.id} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 16, padding: 24, border: "1px solid rgba(255,255,255,0.06)" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                      <span style={{ fontSize: 14, fontWeight: 800, color: "white" }}>{story.patient_first_name}</span>
-                      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>{story.condition_before} → {story.outcome_after}</span>
-                    </div>
-                    <p style={{ fontSize: 14, color: "rgba(255,255,255,0.6)", fontStyle: "italic", lineHeight: 1.6 }}>&ldquo;{story.story_text}&rdquo;</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.3)", marginBottom: 16 }}>No stories yet. Be the first to share your experience.</p>
-            )}
-
-            {storySubmitted ? (
-              <div style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: 16, padding: 20, textAlign: "center" }}>
-                <CheckCircle2 style={{ width: 24, height: 24, color: "#4ade80", margin: "0 auto 8px" }} />
-                <p style={{ fontWeight: 800, color: "#4ade80", fontSize: 14 }}>Thank you! Your story will appear after review.</p>
-              </div>
-            ) : showStoryForm ? (
-              <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 16, padding: 24, display: "flex", flexDirection: "column", gap: 12 }}>
-                <input type="text" placeholder="Your first name" value={storyForm.patientFirstName} onChange={e => setStoryForm(f => ({...f, patientFirstName: e.target.value}))} style={{ width: "100%", padding: "12px 16px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} />
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <input type="text" placeholder="Condition before" value={storyForm.conditionBefore} onChange={e => setStoryForm(f => ({...f, conditionBefore: e.target.value}))} style={{ padding: "12px 16px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} />
-                  <input type="text" placeholder="Outcome after" value={storyForm.outcomeAfter} onChange={e => setStoryForm(f => ({...f, outcomeAfter: e.target.value}))} style={{ padding: "12px 16px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, outline: "none" }} />
-                </div>
-                <textarea placeholder="Tell your story..." value={storyForm.storyText} onChange={e => setStoryForm(f => ({...f, storyText: e.target.value}))} style={{ width: "100%", padding: "12px 16px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "white", fontSize: 14, height: 80, resize: "none", outline: "none" }} />
-                <div style={{ display: "flex", gap: 12 }}>
-                  <button onClick={() => setShowStoryForm(false)} style={{ padding: "10px 20px", color: "rgba(255,255,255,0.5)", fontSize: 14, fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
-                  <button disabled={submittingStory || !storyForm.patientFirstName || !storyForm.storyText}
-                    onClick={async () => { setSubmittingStory(true); const result = await submitPatientStory(doctor.id, storyForm); setSubmittingStory(false); if (result && 'success' in result) { setStorySubmitted(true); setShowStoryForm(false); } }}
-                    style={{ padding: "10px 20px", background: "#D66829", color: "white", borderRadius: 10, fontSize: 14, fontWeight: 800, border: "none", cursor: "pointer", opacity: submittingStory || !storyForm.patientFirstName || !storyForm.storyText ? 0.5 : 1 }}>
-                    {submittingStory ? 'Submitting...' : 'Submit'}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button onClick={() => setShowStoryForm(true)} style={{ color: "#D66829", fontWeight: 800, fontSize: 14, background: "none", border: "none", cursor: "pointer" }}>Share your experience</button>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════
-          12. LOCATION + HOURS + PRACTICAL INFO
+          8. FIRST VISIT + LOCATION + HOURS + PRACTICAL INFO
       ═══════════════════════════════════════════ */}
       {(mapQuery || hours || parkingInfo || languages?.length || acceptedPayment?.length || insuranceNetworks?.length || firstVisitInfo || amenitiesList?.length) && (
         <Section bg="white" style={{ paddingTop: 80, paddingBottom: 80 }}>
           <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 40 }}>Visit the Practice</h2>
+
+          {/* First Visit Info — rendered BEFORE map/hours/parking */}
+          {firstVisitInfo && (
+            <div style={{ maxWidth: 800, margin: "0 auto 40px", padding: "24px 28px", background: "#f8f6f2", borderRadius: 16, border: "1px solid rgba(30,45,59,0.06)" }}>
+              <p style={{ fontSize: 12, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Your First Visit</p>
+              <p style={{ fontSize: 14, color: "#4a5568", lineHeight: 1.7, whiteSpace: "pre-line", margin: 0 }}>{firstVisitInfo}</p>
+            </div>
+          )}
+
           <div style={{ display: "grid", gridTemplateColumns: mapQuery ? "1fr 1fr" : "1fr", gap: 40 }}>
             {/* Map */}
             {mapQuery && (
@@ -703,12 +573,6 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                     <span style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em" }}>Hours</span>
                   </div>
                   <p style={{ fontSize: 14, color: "#4a5568", whiteSpace: "pre-line", lineHeight: 1.7 }}>{hours}</p>
-                </div>
-              )}
-              {firstVisitInfo && (
-                <div>
-                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>First Visit</p>
-                  <p style={{ fontSize: 14, color: "#4a5568", lineHeight: 1.7, whiteSpace: "pre-line" }}>{firstVisitInfo}</p>
                 </div>
               )}
               {parkingInfo && (
@@ -763,62 +627,10 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       )}
 
       {/* ═══════════════════════════════════════════
-          13. SEMINARS + JOBS
-      ═══════════════════════════════════════════ */}
-      {(seminars.length > 0 || jobs.length > 0) && (
-        <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
-          <div style={{ display: "grid", gridTemplateColumns: seminars.length > 0 && jobs.length > 0 ? "1fr 1fr" : "1fr", gap: 32 }}>
-            {seminars.length > 0 && (
-              <div>
-                <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", marginBottom: 16 }}>Seminars & Events</h2>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {seminars.map((sem: any) => (
-                    <Link key={sem.id} href={`/seminars/${sem.id}`} style={{ background: "white", borderRadius: 16, padding: "16px 20px", textDecoration: "none", border: "1px solid rgba(30,45,59,0.06)", display: "block" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                        <div>
-                          <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B", marginBottom: 6 }}>{sem.title}</p>
-                          <div style={{ display: "flex", gap: 12 }}>
-                            {sem.dates && <span style={{ fontSize: 12, color: "#718096", display: "flex", alignItems: "center", gap: 4 }}><Calendar style={{ width: 12, height: 12 }} /> {sem.dates}</span>}
-                            {(sem.city || sem.location) && <span style={{ fontSize: 12, color: "#718096", display: "flex", alignItems: "center", gap: 4 }}><MapPin style={{ width: 12, height: 12 }} /> {sem.city || sem.location}</span>}
-                          </div>
-                        </div>
-                        {sem.price ? <span style={{ fontSize: 12, fontWeight: 800, color: "#D66829" }}>${sem.price}</span> : <span style={{ fontSize: 12, fontWeight: 800, color: "#16a34a" }}>Free</span>}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-            {jobs.length > 0 && (
-              <div>
-                <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", marginBottom: 16 }}>Open Positions</h2>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {jobs.map((job: any) => (
-                    <Link key={job.id} href={`/careers/${job.id}`} style={{ background: "white", borderRadius: 16, padding: "16px 20px", textDecoration: "none", border: "1px solid rgba(30,45,59,0.06)", display: "block" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                        <div>
-                          <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B", marginBottom: 4 }}>{job.title}</p>
-                          <div style={{ display: "flex", gap: 12 }}>
-                            {job.employment_type && <span style={{ fontSize: 12, color: "#718096" }}>{job.employment_type}</span>}
-                            {(job.salary_min || job.salary_max) && <span style={{ fontSize: 12, color: "#718096" }}>{job.salary_min && job.salary_max ? `$${(job.salary_min/1000).toFixed(0)}k–$${(job.salary_max/1000).toFixed(0)}k` : job.salary_min ? `From $${(job.salary_min/1000).toFixed(0)}k` : `Up to $${(job.salary_max/1000).toFixed(0)}k`}</span>}
-                          </div>
-                        </div>
-                        <span style={{ fontSize: 10, fontWeight: 800, color: "#16a34a", background: "#f0fdf4", padding: "3px 10px", borderRadius: 20 }}>Hiring</span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </Section>
-      )}
-
-      {/* ═══════════════════════════════════════════
-          14. FAQ
+          9. FAQ
       ═══════════════════════════════════════════ */}
       {faq && faq.length > 0 && (
-        <Section bg="white" style={{ paddingTop: 72, paddingBottom: 72 }}>
+        <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
           <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", textAlign: "center", marginBottom: 32 }}>Frequently Asked Questions</h2>
           <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", flexDirection: "column", gap: 8 }}>
             {faq.map((item, i) => (
@@ -837,10 +649,10 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       )}
 
       {/* ═══════════════════════════════════════════
-          15. APPOINTMENT REQUEST
+          10. APPOINTMENT REQUEST
       ═══════════════════════════════════════════ */}
-      <Section bg="cream" id="appointment" style={{ paddingTop: 80, paddingBottom: 80 }}>
-        <div style={{ maxWidth: 700, margin: "0 auto" }}>
+      <Section bg="white" id="appointment" style={{ paddingTop: 80, paddingBottom: 80 }}>
+        <div id="appointment-form" style={{ maxWidth: 700, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", marginBottom: 8 }}>
             <Calendar style={{ width: 20, height: 20, color: "#D66829" }} />
             <h2 style={{ fontSize: 22, fontWeight: 900, color: "#1E2D3B" }}>Request a Consultation</h2>
@@ -892,14 +704,14 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       </Section>
 
       {/* ═══════════════════════════════════════════
-          16. NEARBY DOCTORS
+          11. NEARBY DOCTORS
       ═══════════════════════════════════════════ */}
       {nearbyDoctors.length > 0 && (
-        <Section bg="white" style={{ paddingTop: 72, paddingBottom: 72 }}>
+        <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
           <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 36 }}>Other Nervous System Chiropractors Near You</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
             {nearbyDoctors.map((doc: any) => (
-              <Link key={doc.id} href={`/directory/${doc.slug || doc.id}`} style={{ background: "#F5F3EF", borderRadius: 20, padding: 24, textDecoration: "none", border: "1px solid rgba(30,45,59,0.04)", display: "block" }}>
+              <Link key={doc.id} href={`/directory/${doc.slug || doc.id}`} style={{ background: "white", borderRadius: 20, padding: 24, textDecoration: "none", border: "1px solid rgba(30,45,59,0.04)", display: "block" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
                   <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#1E2D3B", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     {doc.photo_url ? <img src={doc.photo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
@@ -927,7 +739,94 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       )}
 
       {/* ═══════════════════════════════════════════
-          17. REFERRAL (doctor-to-doctor)
+          12. TEAM MEMBERS + GALLERY
+      ═══════════════════════════════════════════ */}
+      {teamMembersList && teamMembersList.length > 0 && (
+        <Section bg="white" style={{ paddingTop: 72, paddingBottom: 72 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", marginBottom: 32 }}>
+            <Users style={{ width: 18, height: 18, color: "#D66829" }} />
+            <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B" }}>Our Team</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 20 }}>
+            {teamMembersList.map((m, i) => (
+              <div key={i} style={{ textAlign: "center" }}>
+                <div style={{ width: 80, height: 80, borderRadius: 16, background: "#f3f4f6", overflow: "hidden", margin: "0 auto 10px" }}>
+                  {m.photo_url ? <img src={m.photo_url} alt={m.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
+                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#d1d5db", fontSize: 24, fontWeight: 700 }}>{m.name?.[0]}</div>}
+                </div>
+                <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B" }}>{m.name}</p>
+                <p style={{ fontSize: 12, color: "#718096" }}>{m.role}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {galleryImages && galleryImages.length > 0 && (
+        <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 32 }}>Photos</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
+            {galleryImages.map((img: string, i: number) => (
+              <img key={i} src={img} alt="" style={{ width: "100%", aspectRatio: "4 / 3", objectFit: "cover", borderRadius: 16 }} />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          13. SEMINARS + JOBS
+      ═══════════════════════════════════════════ */}
+      {(seminars.length > 0 || jobs.length > 0) && (
+        <Section bg="white" style={{ paddingTop: 72, paddingBottom: 72 }}>
+          <div style={{ display: "grid", gridTemplateColumns: seminars.length > 0 && jobs.length > 0 ? "1fr 1fr" : "1fr", gap: 32 }}>
+            {seminars.length > 0 && (
+              <div>
+                <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", marginBottom: 16 }}>Seminars & Events</h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {seminars.map((sem: any) => (
+                    <Link key={sem.id} href={`/seminars/${sem.id}`} style={{ background: "white", borderRadius: 16, padding: "16px 20px", textDecoration: "none", border: "1px solid rgba(30,45,59,0.06)", display: "block" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div>
+                          <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B", marginBottom: 6 }}>{sem.title}</p>
+                          <div style={{ display: "flex", gap: 12 }}>
+                            {sem.dates && <span style={{ fontSize: 12, color: "#718096", display: "flex", alignItems: "center", gap: 4 }}><Calendar style={{ width: 12, height: 12 }} /> {sem.dates}</span>}
+                            {(sem.city || sem.location) && <span style={{ fontSize: 12, color: "#718096", display: "flex", alignItems: "center", gap: 4 }}><MapPin style={{ width: 12, height: 12 }} /> {sem.city || sem.location}</span>}
+                          </div>
+                        </div>
+                        {sem.price ? <span style={{ fontSize: 12, fontWeight: 800, color: "#D66829" }}>${sem.price}</span> : <span style={{ fontSize: 12, fontWeight: 800, color: "#16a34a" }}>Free</span>}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {jobs.length > 0 && (
+              <div>
+                <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", marginBottom: 16 }}>Open Positions</h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {jobs.map((job: any) => (
+                    <Link key={job.id} href={`/careers/${job.id}`} style={{ background: "white", borderRadius: 16, padding: "16px 20px", textDecoration: "none", border: "1px solid rgba(30,45,59,0.06)", display: "block" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div>
+                          <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B", marginBottom: 4 }}>{job.title}</p>
+                          <div style={{ display: "flex", gap: 12 }}>
+                            {job.employment_type && <span style={{ fontSize: 12, color: "#718096" }}>{job.employment_type}</span>}
+                            {(job.salary_min || job.salary_max) && <span style={{ fontSize: 12, color: "#718096" }}>{job.salary_min && job.salary_max ? `$${(job.salary_min/1000).toFixed(0)}k–$${(job.salary_max/1000).toFixed(0)}k` : job.salary_min ? `From $${(job.salary_min/1000).toFixed(0)}k` : `Up to $${(job.salary_max/1000).toFixed(0)}k`}</span>}
+                          </div>
+                        </div>
+                        <span style={{ fontSize: 10, fontWeight: 800, color: "#16a34a", background: "#f0fdf4", padding: "3px 10px", borderRadius: 20 }}>Hiring</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </Section>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          14. REFERRAL (doctor-to-doctor)
       ═══════════════════════════════════════════ */}
       {session && userRole === 'doctor' && doctor.user_id !== session.user.id && (
         <Section bg="cream" style={{ paddingTop: 40, paddingBottom: 40 }}>
@@ -940,7 +839,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       )}
 
       {/* ═══════════════════════════════════════════
-          18. REPORT + DISCLAIMER
+          REPORT + DISCLAIMER
       ═══════════════════════════════════════════ */}
       <Section bg="cream" style={{ paddingTop: 32, paddingBottom: 48 }}>
         <div style={{ textAlign: "center" }}>
@@ -978,7 +877,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       </Section>
 
       {/* ═══════════════════════════════════════════
-          19. REFERRAL MODAL
+          REFERRAL MODAL
       ═══════════════════════════════════════════ */}
       {showReferralModal && (
         <>
@@ -1016,30 +915,6 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         </>
       )}
 
-      {/* ═══════════════════════════════════════════
-          20. STICKY MOBILE CTA
-      ═══════════════════════════════════════════ */}
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "rgba(255,255,255,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid #e5e7eb", padding: "12px 16px", paddingBottom: "calc(12px + env(safe-area-inset-bottom))", zIndex: 100 }} className="lg:hidden">
-        <div style={{ display: "flex", gap: 10, maxWidth: 600, margin: "0 auto" }}>
-          {gated ? (
-            <ContactGateCTA variant="mobile" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
-          ) : (
-            <>
-              {bookingUrl ? (
-                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('booking_click')} style={{ flex: 1, padding: "14px 0", background: "#22c55e", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, textAlign: "center", textDecoration: "none" }}>Book Online</a>
-              ) : (
-                <a href="#appointment" style={{ flex: 1, padding: "14px 0", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, textAlign: "center", textDecoration: "none" }}>Book Consultation</a>
-              )}
-              {doctor.phone && (
-                <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')} style={{ flex: 1, padding: "14px 0", background: "#1E2D3B", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, textAlign: "center", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                  <Phone style={{ width: 16, height: 16 }} /> Call
-                </a>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
       {/* Patient list CTA */}
       <div style={{ background: "#f5f3ef", padding: "32px 24px", textAlign: "center" }}>
         <p style={{ fontSize: 14, color: "#718096", marginBottom: 8 }}>
@@ -1050,8 +925,29 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         </a>
       </div>
 
-      {/* Bottom spacer for mobile sticky CTA */}
-      <div style={{ height: 80 }} className="lg:hidden" />
+      {/* ═══════════════════════════════════════════
+          STICKY BOOKING BAR
+      ═══════════════════════════════════════════ */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden" style={{ background: 'rgba(30,45,59,0.95)', backdropFilter: 'blur(20px)', padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+        <div className="flex gap-3 max-w-lg mx-auto">
+          {bookingUrl ? (
+            <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Book online with ${name}`}>
+              <Calendar className="w-4 h-4" /> Book Online
+            </a>
+          ) : (
+            <button onClick={() => document.getElementById('appointment-form')?.scrollIntoView({ behavior: 'smooth' })} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label="Request appointment">
+              <Calendar className="w-4 h-4" /> Request Appointment
+            </button>
+          )}
+          {doctor.phone && (
+            <a href={`tel:${doctor.phone}`} className="py-3 px-5 bg-white/10 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Call ${name}`}>
+              <Phone className="w-4 h-4" /> Call
+            </a>
+          )}
+        </div>
+      </div>
+      {/* Bottom spacer for sticky bar */}
+      <div style={{ height: 76 }} className="lg:hidden" />
     </div>
   );
 }
