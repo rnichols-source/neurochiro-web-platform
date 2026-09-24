@@ -52,8 +52,15 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
   const directionsUrl = dirParts.length > 0
     ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dirParts.join(', '))}`
     : null;
+  const profileUrl = `/directory/${doc.slug || doc.id}`;
 
   return (
+    <Link
+      href={profileUrl}
+      onClick={() => trackConversion(doc.id, 'profile_view')}
+      className="block outline-none focus-visible:ring-2 focus-visible:ring-neuro-orange focus-visible:ring-offset-2 rounded-2xl"
+      aria-label={`View profile for ${name}`}
+    >
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -160,14 +167,14 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
         </div>
       )}
 
-      {/* Actions — Book primary, Call secondary, Map tertiary */}
-      <div className="flex gap-2">
+      {/* Actions — Book primary, Call secondary, Map tertiary. stopPropagation prevents card navigation. */}
+      <div className="flex gap-2" onClick={(e) => e.preventDefault()}>
         {hasBooking ? (
           <a
             href={doc.booking_url}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => trackConversion(doc.id, 'book')}
+            onClick={(e) => { e.stopPropagation(); trackConversion(doc.id, 'book'); }}
             className="flex-1 py-3 bg-neuro-orange text-white rounded-xl hover:bg-neuro-orange/90 transition-colors flex items-center justify-center gap-2 text-xs font-bold min-h-[44px]"
             aria-label={`Book online with ${name}`}
           >
@@ -175,17 +182,15 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
             Book Online
           </a>
         ) : (
-          <Link href={`/directory/${doc.slug || doc.id}`} className="flex-1" onClick={() => trackConversion(doc.id, 'profile_view')}>
-            <div className={cn("w-full py-3 font-bold rounded-xl text-xs text-center transition-colors flex items-center justify-center gap-2 min-h-[44px]",
-              dark ? "bg-white/10 text-white hover:bg-white/15" : "bg-neuro-navy text-white hover:bg-neuro-navy/90")}>
-              View Profile <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </Link>
+          <span className={cn("flex-1 py-3 font-bold rounded-xl text-xs text-center transition-colors flex items-center justify-center gap-2 min-h-[44px]",
+            dark ? "bg-white/10 text-white hover:bg-white/15" : "bg-neuro-navy text-white hover:bg-neuro-navy/90")}>
+            View Profile <ArrowRight className="w-3.5 h-3.5" />
+          </span>
         )}
         {doc.phone && (
           <a
             href={`tel:${doc.phone}`}
-            onClick={() => trackConversion(doc.id, 'call')}
+            onClick={(e) => { e.stopPropagation(); trackConversion(doc.id, 'call'); }}
             className={cn("py-3 px-3 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]", dark ? "bg-white/10 text-white hover:bg-white/15" : "bg-neuro-navy/10 text-neuro-navy hover:bg-neuro-navy/20")}
             aria-label={`Call ${name}`}
           >
@@ -198,7 +203,7 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
             href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => trackConversion(doc.id, 'directions')}
+            onClick={(e) => { e.stopPropagation(); trackConversion(doc.id, 'directions'); }}
             className={cn("py-3 px-3 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]", dark ? "bg-white/8 text-white/50 hover:bg-white/12" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
             aria-label={`Get directions to ${name}`}
           >
@@ -207,13 +212,14 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
           </a>
         )}
         {hasBooking && (
-          <Link href={`/directory/${doc.slug || doc.id}`} onClick={() => trackConversion(doc.id, 'profile_view')}>
-            <div className={cn("py-3 px-3 rounded-xl transition-colors flex items-center justify-center text-xs font-bold min-h-[44px]", dark ? "bg-white/8 text-white/50 hover:bg-white/12" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </Link>
+          <span className={cn("py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]", dark ? "bg-white/8 text-white/50 hover:bg-white/12" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+            aria-label={`View profile for ${name}`}
+          >
+            Profile <ArrowRight className="w-3.5 h-3.5" />
+          </span>
         )}
       </div>
     </motion.div>
+    </Link>
   );
 }

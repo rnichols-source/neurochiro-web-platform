@@ -324,7 +324,10 @@ function DoctorCityCard({ doc, searchCity }: { doc: CityDoctor; searchCity: stri
     .filter((s: string) => s.length > 0 && s.length <= 45)
     .slice(0, 3);
 
+  const profileUrl = `/directory/${doc.slug}`;
+
   return (
+    <Link href={profileUrl} className="block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-neuro-orange focus-visible:ring-offset-2" aria-label={`View profile for ${name}`}>
     <div className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-all">
       <div className="flex gap-5 items-start">
         {/* Photo */}
@@ -382,28 +385,28 @@ function DoctorCityCard({ doc, searchCity }: { doc: CityDoctor; searchCity: stri
         {doc.accepted_payment?.includes('HSA/FSA') && <span>HSA/FSA accepted</span>}
       </div>
 
-      {/* Actions — Book primary */}
-      <div className="flex gap-2 mt-4">
+      {/* Actions — Book primary. onClick preventDefault stops card navigation. */}
+      <div className="flex gap-2 mt-4" onClick={(e) => e.preventDefault()}>
         {doc.booking_url ? (
           <a
             href={doc.booking_url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className="flex-1 py-3 bg-neuro-orange text-white rounded-xl hover:bg-neuro-orange/90 transition-colors flex items-center justify-center gap-2 text-xs font-bold min-h-[44px]"
             aria-label={`Book online with ${name}`}
           >
             <Calendar className="w-3.5 h-3.5" /> Book Online
           </a>
         ) : (
-          <Link href={`/directory/${doc.slug}`} className="flex-1">
-            <div className="w-full py-3 bg-neuro-navy text-white rounded-xl hover:bg-neuro-navy/90 transition-colors flex items-center justify-center gap-2 text-xs font-bold min-h-[44px]">
-              View Profile <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </Link>
+          <span className="flex-1 py-3 bg-neuro-navy text-white rounded-xl hover:bg-neuro-navy/90 transition-colors flex items-center justify-center gap-2 text-xs font-bold min-h-[44px]">
+            View Profile <ArrowRight className="w-3.5 h-3.5" />
+          </span>
         )}
         {doc.phone && (
           <a
             href={`tel:${doc.phone}`}
+            onClick={(e) => e.stopPropagation()}
             className="py-3 px-4 bg-neuro-navy/10 text-neuro-navy rounded-xl hover:bg-neuro-navy/20 transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]"
             aria-label={`Call ${name}`}
           >
@@ -414,19 +417,19 @@ function DoctorCityCard({ doc, searchCity }: { doc: CityDoctor; searchCity: stri
           href={directionsUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
           className="py-3 px-4 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]"
           aria-label={`Get directions to ${name}`}
         >
           <Navigation className="w-3.5 h-3.5" /> Map
         </a>
         {doc.booking_url && (
-          <Link href={`/directory/${doc.slug}`}>
-            <div className="py-3 px-3 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center text-xs font-bold min-h-[44px]">
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </Link>
+          <span className="py-3 px-4 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]" aria-label={`View profile for ${name}`}>
+            Profile <ArrowRight className="w-3.5 h-3.5" />
+          </span>
         )}
       </div>
     </div>
+    </Link>
   );
 }
