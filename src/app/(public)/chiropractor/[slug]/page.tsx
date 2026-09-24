@@ -8,6 +8,9 @@ import { formatDistance } from "@/lib/geo";
 import Footer from "@/components/landing/Footer";
 import FindSomeoneForm from "./FindSomeoneForm";
 
+// Force dynamic rendering — database queries change as doctors join
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const parsed = slugToCity(slug);
