@@ -23,7 +23,8 @@ export async function getDoctors(options: {
     let query = supabase
       .from('doctors')
       .select(selectFields, { count: 'exact' })
-      .in('verification_status', ['verified', 'pending']);
+      .in('verification_status', ['verified', 'pending'])
+      .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA');
 
     if (regionCode && regionCode !== 'ALL') {
       query = query.eq('region_code', regionCode);

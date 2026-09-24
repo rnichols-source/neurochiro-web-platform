@@ -49,7 +49,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   const [dbError, setDbError] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [matchCriteria, setMatchCriteria] = useState<string[] | null>(null);
-  const [mobileView, setMobileView] = useState<'map' | 'list'>('list');
+  const [mobileView, setMobileView] = useState<'map' | 'list'>('list'); // Default to list on mobile
   const [activeSpecialty, setActiveSpecialty] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -468,88 +468,85 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
     </>
   );
 
-  // ── MOBILE: Apple Maps full-screen experience ──
+  // ── MOBILE: List-first with map toggle ──
   if (isMobile) {
     return (
-      <div className="fixed inset-0 z-[101] bg-black">
+      <div className="fixed inset-0 z-[101] bg-black flex flex-col">
         <SmartMatchWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} onComplete={(criteria) => setMatchCriteria(criteria)} />
 
-        {/* Home button — top left, glass pill */}
-        <Link href="/" className="absolute top-[env(safe-area-inset-top)] left-4 mt-3 z-[102] px-3 py-2 rounded-full flex items-center gap-2"
-          style={{ background: 'rgba(28,28,30,0.75)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
-          <NextImage src="/logo-white.png" alt="NeuroChiro" width={20} height={20} className="opacity-90" />
-          <span className="text-white/80 text-[11px] font-bold tracking-wide">NEUROCHIRO</span>
-        </Link>
+        {/* Top bar — logo + search */}
+        <div className="flex-shrink-0 pt-[env(safe-area-inset-top)] px-4 pb-2"
+          style={{ background: 'rgba(28,28,30,0.95)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
 
-        {/* Full-screen map — edge to edge, no chrome */}
-        <div className="absolute inset-0">
-          <GlobalNetworkMap
-            key={region.code}
-            externalSearchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            externalLocationQuery={locationQuery}
-            initialDoctors={initialData.doctors}
-            listDoctors={filteredDoctors}
-            highlightedDoctorId={hoveredDoctorId}
-            onMarkerClick={handleMarkerClick}
-            onMarkerDeselect={handleMarkerDeselect}
-          />
-        </div>
+          {/* Logo row */}
+          <div className="flex items-center justify-between py-2">
+            <Link href="/" className="flex items-center gap-2">
+              <NextImage src="/logo-white.png" alt="NeuroChiro" width={20} height={20} className="opacity-90" />
+              <span className="text-white/80 text-[11px] font-bold tracking-wide">NEUROCHIRO</span>
+            </Link>
 
-        {/* Bottom Sheet — dark glass, Apple Maps style */}
-        <BottomSheet
-          onSnapChange={setSheetSnap}
-          header={
-            <div ref={searchRef}>
-              {/* Search bar — fixed in drag handle, always visible even at peek */}
-              {/* Location first — primary input */}
-              <div className="relative mb-2">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neuro-orange" />
-                <input type="text" placeholder="ZIP code or city..." className="w-full pl-9 pr-20 py-3 bg-white/10 border border-neuro-orange/30 focus:outline-none focus:border-neuro-orange text-white font-bold text-[15px] rounded-xl placeholder:text-white/40"
-                  value={locationQuery} onChange={(e) => setLocationQuery(e.target.value)} onFocus={() => setAcFocusField('location')}
-                  aria-label="Search by ZIP code or city" />
-                {locationQuery ? (
-                  <button onClick={() => setLocationQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 active:text-white/60" aria-label="Clear location">
-                    <X className="w-4 h-4" />
-                  </button>
-                ) : (
-                  <button onClick={handleUseLocation} disabled={isLocating} className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-neuro-orange text-[11px] font-bold rounded-lg active:bg-neuro-orange/10 flex items-center gap-1" aria-label="Use my location">
-                    <Target className={cn("w-3.5 h-3.5", isLocating && "animate-spin")} />
-                    {isLocating ? '' : 'Near me'}
-                  </button>
-                )}
-              </div>
-              {/* Search — secondary */}
-              <div className="relative mb-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
-                <input type="text" placeholder="Doctor, clinic, or specialty..." className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/5 focus:outline-none focus:border-white/15 text-white/80 text-xs rounded-xl placeholder:text-white/25"
-                  value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setAcFocusField('search')}
-                  aria-label="Search by doctor name, clinic, or specialty" />
-              </div>
+            {/* List / Map toggle */}
+            <div className="flex bg-white/10 rounded-lg p-0.5">
+              <button onClick={() => setMobileView('list')}
+                className={cn("px-3 py-1.5 rounded-md text-[11px] font-bold flex items-center gap-1 transition-colors",
+                  mobileView === 'list' ? "bg-neuro-orange text-white" : "text-white/50")}>
+                <List className="w-3 h-3" /> List
+              </button>
+              <button onClick={() => setMobileView('map')}
+                className={cn("px-3 py-1.5 rounded-md text-[11px] font-bold flex items-center gap-1 transition-colors",
+                  mobileView === 'map' ? "bg-neuro-orange text-white" : "text-white/50")}>
+                <MapIcon className="w-3 h-3" /> Map
+              </button>
+            </div>
+          </div>
 
-              {/* Autocomplete dropdown */}
-              {showAutocomplete && (
-                <div className="bg-[#2c2c2e] rounded-xl border border-white/10 p-2 mb-2 max-h-[30vh] overflow-y-auto">
-                  {autocomplete.cities.map((c: any, i: number) => (
-                    <button key={i} onClick={() => { setLocationQuery(c.city ? `${c.city}, ${c.state}` : c.state); setShowAutocomplete(false); }}
-                      className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-lg flex items-center gap-2 text-sm text-white/80">
-                      <MapPin className="w-4 h-4 text-neuro-orange flex-shrink-0" /> {c.city ? `${c.city}, ${c.state}` : c.state}
-                      <span className="text-xs text-white/30 ml-auto">{c.count}</span>
-                    </button>
-                  ))}
-                  {autocomplete.doctors.map((d: any, i: number) => (
-                    <Link key={i} href={`/directory/${d.slug}`} onClick={() => setShowAutocomplete(false)} className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-lg flex items-center gap-2 text-sm">
-                      <div className="w-6 h-6 rounded bg-neuro-orange/20 flex items-center justify-center"><span className="text-neuro-orange text-[10px] font-bold">{d.name?.[4] || '?'}</span></div>
-                      <span className="font-bold text-white/90">{d.name}</span>
-                    </Link>
-                  ))}
-                </div>
+          {/* Search inputs */}
+          <div ref={searchRef}>
+            <div className="relative mb-2">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neuro-orange" />
+              <input type="text" placeholder="ZIP code or city..." className="w-full pl-9 pr-20 py-3 bg-white/10 border border-neuro-orange/30 focus:outline-none focus:border-neuro-orange text-white font-bold text-[15px] rounded-xl placeholder:text-white/40"
+                value={locationQuery} onChange={(e) => setLocationQuery(e.target.value)} onFocus={() => setAcFocusField('location')}
+                aria-label="Search by ZIP code or city" />
+              {locationQuery ? (
+                <button onClick={() => setLocationQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 active:text-white/60" aria-label="Clear location">
+                  <X className="w-4 h-4" />
+                </button>
+              ) : (
+                <button onClick={handleUseLocation} disabled={isLocating} className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-neuro-orange text-[11px] font-bold rounded-lg active:bg-neuro-orange/10 flex items-center gap-1" aria-label="Use my location">
+                  <Target className={cn("w-3.5 h-3.5", isLocating && "animate-spin")} />
+                  {isLocating ? '' : 'Near me'}
+                </button>
               )}
             </div>
-          }
-        >
+            <div className="relative mb-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
+              <input type="text" placeholder="Doctor, clinic, or specialty..." className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/5 focus:outline-none focus:border-white/15 text-white/80 text-xs rounded-xl placeholder:text-white/25"
+                value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setAcFocusField('search')}
+                aria-label="Search by doctor name, clinic, or specialty" />
+            </div>
+
+            {/* Autocomplete dropdown */}
+            {showAutocomplete && (
+              <div className="bg-[#2c2c2e] rounded-xl border border-white/10 p-2 mb-2 max-h-[30vh] overflow-y-auto">
+                {autocomplete.cities.map((c: any, i: number) => (
+                  <button key={i} onClick={() => { setLocationQuery(c.city ? `${c.city}, ${c.state}` : c.state); setShowAutocomplete(false); }}
+                    className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-lg flex items-center gap-2 text-sm text-white/80">
+                    <MapPin className="w-4 h-4 text-neuro-orange flex-shrink-0" /> {c.city ? `${c.city}, ${c.state}` : c.state}
+                    <span className="text-xs text-white/30 ml-auto">{c.count}</span>
+                  </button>
+                ))}
+                {autocomplete.doctors.map((d: any, i: number) => (
+                  <Link key={i} href={`/directory/${d.slug}`} onClick={() => setShowAutocomplete(false)} className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-lg flex items-center gap-2 text-sm">
+                    <div className="w-6 h-6 rounded bg-neuro-orange/20 flex items-center justify-center"><span className="text-neuro-orange text-[10px] font-bold">{d.name?.[4] || '?'}</span></div>
+                    <span className="font-bold text-white/90">{d.name}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Specialty pills */}
-          <div className="overflow-x-auto scrollbar-hide -mx-1 mb-3">
+          <div className="overflow-x-auto scrollbar-hide -mx-1">
             <div className="flex gap-1.5 px-1">
               {SPECIALTY_FILTERS.map((specialty) => (
                 <button key={specialty} onClick={() => { if (activeSpecialty === specialty) { setActiveSpecialty(null); setSearchQuery(""); } else { setActiveSpecialty(specialty); setSearchQuery(specialty); } }}
@@ -560,18 +557,37 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
               ))}
             </div>
           </div>
+        </div>
 
-          {/* Result count */}
-          <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/10">
-            <p className="text-[13px] font-bold text-white/90">{filteredDoctors.length} {filteredDoctors.length === 1 ? 'Doctor' : 'Doctors'}</p>
-            {(searchQuery || locationQuery) && (
-              <button onClick={handleClearSearch} className="text-[11px] font-bold text-neuro-orange flex items-center gap-1"><X className="w-3 h-3" /> Clear</button>
-            )}
+        {/* Result count bar */}
+        <div className="flex-shrink-0 px-4 py-2 border-b border-white/10 flex items-center justify-between"
+          style={{ background: 'rgba(28,28,30,0.95)' }}>
+          <p className="text-[13px] font-bold text-white/90">{filteredDoctors.length} {filteredDoctors.length === 1 ? 'Doctor' : 'Doctors'}</p>
+          {(searchQuery || locationQuery) && (
+            <button onClick={handleClearSearch} className="text-[11px] font-bold text-neuro-orange flex items-center gap-1"><X className="w-3 h-3" /> Clear</button>
+          )}
+        </div>
+
+        {/* Content area — list or map */}
+        {mobileView === 'list' ? (
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {doctorListJSX}
           </div>
-
-          {/* Doctor list */}
-          <div className="space-y-3 pb-8">{doctorListJSX}</div>
-        </BottomSheet>
+        ) : (
+          <div className="flex-1 relative">
+            <GlobalNetworkMap
+              key={region.code}
+              externalSearchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              externalLocationQuery={locationQuery}
+              initialDoctors={doctors}
+              listDoctors={filteredDoctors}
+              highlightedDoctorId={hoveredDoctorId}
+              onMarkerClick={handleMarkerClick}
+              onMarkerDeselect={handleMarkerDeselect}
+            />
+          </div>
+        )}
       </div>
     );
   }
@@ -588,7 +604,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
           externalSearchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           externalLocationQuery={locationQuery}
-          initialDoctors={initialData.doctors}
+          initialDoctors={doctors}
           listDoctors={filteredDoctors}
           highlightedDoctorId={hoveredDoctorId}
           onMarkerClick={handleMarkerClick}

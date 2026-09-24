@@ -1,6 +1,7 @@
 "use server";
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { revalidatePath } from 'next/cache'
 import { stripe } from '@/lib/stripe'
 
@@ -10,10 +11,18 @@ export async function getDoctorSeminars() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
-  const { data, error } = await supabase
+  // Use admin client: doctor dashboard needs payment_status (not granted to authenticated)
+  const admin = createAdminClient()
+  const { data, error } = await admin
     .from('seminars')
     .select(`
-      *,
+      id, host_id, title, description, dates, location, city, country,
+      venue_name, venue_address, start_time, end_time, event_type,
+      instructor_name, instructor_bio, registration_link, price, ce_hours,
+      categories, tags, target_audience, image_url, hero_image_url,
+      gallery_images, schedule, speakers, faq, listing_tier,
+      is_past, is_approved, payment_status, page_views, clicks,
+      created_at, updated_at,
       registrations:seminar_registrations(count)
     `)
     .eq('host_id', user.id)
@@ -83,10 +92,14 @@ export async function updateSeminarAction(seminarId: string, formData: FormData)
   const location = formData.get('location') as string
   const dates = formData.get('dates') as string
   const price = formData.get('price') as string
-  const max_capacity = formData.get('max_capacity') as string
   const ce_hours = formData.get('ce_hours') as string
   const registration_link = formData.get('registration_link') as string
 
+  if (registration_link && !registration_link.startsWith('https://')) {
+    throw new Error("Registration link must use HTTPS")
+  }
+
+  // Whitelist editable fields — is_approved, payment_status, listing_tier NOT editable by host
   const updateData: any = {
     title,
     description,
@@ -94,11 +107,12 @@ export async function updateSeminarAction(seminarId: string, formData: FormData)
     dates,
     registration_link,
     price: Number(price) || 0,
-    max_capacity: Number(max_capacity) || 0,
   };
   if (ce_hours) updateData.ce_hours = Number(ce_hours) || null;
 
-  const { data, error } = await (supabase as any)
+  // Use admin client (no UPDATE policy for authenticated), scoped to host_id from session
+  const adminClient = createAdminClient()
+  const { data, error } = await adminClient
     .from('seminars')
     .update(updateData)
     .eq('id', seminarId)
@@ -146,21 +160,32 @@ export async function createSeminarAction(formData: FormData) {
   const tags_input = formData.get('tags') as string
   const tags = tags_input ? tags_input.split(',').map(t => t.trim()) : []
 
-  // 2. Determine Pricing (Check if they are a Verified Doctor)
-  const { data: doctor } = await supabase
+  // 2. Validate registration_link
+  if (registration_link && !registration_link.startsWith('https://')) {
+    throw new Error("Registration link must use HTTPS")
+  }
+
+  // 3. Check membership status — only paying members get auto-approved
+  //    Read from doctors table via admin client (profiles.tier is untrusted while RLS is off)
+  const adminClient = createAdminClient();
+  const { data: doctor } = await adminClient
     .from('doctors')
-    .select('verification_status')
+    .select('verification_status, membership_tier')
     .eq('user_id', user.id)
     .single()
 
   const isVerified = (doctor as any)?.verification_status === 'verified';
+  // Paid = only 'pro'. All other values (free, null, undefined, unknown) = not paid.
+  // Tier is set server-side by Stripe webhook (hardcoded 'pro' for all paid doctors).
+  const membershipTier = (doctor as any)?.membership_tier;
+  const isPaidMember = membershipTier === 'pro';
 
   // 3. Extract city/country from simple location input
   const locParts = location.split(',').map(s => s.trim())
   const city = locParts[0] || ''
   const country = locParts[1] || ''
 
-  // 4. Save to Database
+  // 4. Save to Database (admin client already created above for membership check)
   const insertData: any = {
     host_id: user.id,
     title,
@@ -171,19 +196,16 @@ export async function createSeminarAction(formData: FormData) {
     dates,
     registration_link,
     price,
-    max_capacity,
     listing_tier: tier,
     target_audience: target_audience.length > 0 ? target_audience : ['Doctors', 'Students'],
     tags,
-    payment_status: 'paid',
-    is_approved: true, // Members auto-approved
+    payment_status: isPaidMember ? 'paid' : 'pending',
+    is_approved: isPaidMember, // Only paid members auto-approved
     host_type_at_submission: isVerified ? 'doctor' : 'external',
-    latitude: 0,
-    longitude: 0,
   };
   if (ce_hours !== null) insertData.ce_hours = ce_hours;
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await adminClient
     .from('seminars')
     .insert(insertData)
     .select()
@@ -312,7 +334,9 @@ export async function deleteSeminarAction(seminarId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Unauthorized")
 
-  const { error } = await supabase
+  // Use admin client (no DELETE policy for authenticated), scoped to host_id from session
+  const adminClient = createAdminClient()
+  const { error } = await adminClient
     .from('seminars')
     .delete()
     .eq('id', seminarId)

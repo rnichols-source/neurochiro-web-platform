@@ -50,7 +50,7 @@ export async function getDoctorsNearCity(
     .from('doctors')
     .select('id, first_name, last_name, slug, clinic_name, city, state, phone, website_url, booking_url, photo_url, bio, specialties, accepting_new_patients, latitude, longitude, hours, accepted_payment, offers_telehealth, accepts_walkins')
     .eq('verification_status', 'verified')
-    .eq('country', 'US')
+    .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA')
     .gte('latitude', lat - latDelta)
     .lte('latitude', lat + latDelta)
     .gte('longitude', lng - lngDelta)
@@ -81,7 +81,7 @@ export async function getNearestDoctors(
     .from('doctors')
     .select('id, first_name, last_name, slug, clinic_name, city, state, phone, website_url, booking_url, photo_url, bio, specialties, accepting_new_patients, latitude, longitude, hours, accepted_payment, offers_telehealth, accepts_walkins')
     .eq('verification_status', 'verified')
-    .eq('country', 'US')
+    .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA')
     .gt('latitude', 0);
 
   if (!data || data.length === 0) return [];
@@ -112,7 +112,7 @@ export async function getNearbyCityPages(
     .from('doctors')
     .select('city, state, latitude, longitude')
     .eq('verification_status', 'verified')
-    .eq('country', 'US')
+    .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA')
     .gt('latitude', 0);
 
   if (!docs) return [];

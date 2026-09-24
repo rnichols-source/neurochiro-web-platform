@@ -113,6 +113,15 @@ async function lookupZip(supabase: any, zip: string): Promise<{ city: string; st
 
 const SELECT_FIELDS = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, address, photo_url, phone, accepting_new_patients, offers_telehealth, accepts_walkins, languages, hours, booking_url, created_at';
 
+/** Base query for US doctors: filters verified/pending + excludes international */
+function usDoctorsQuery(sb: any) {
+  return sb
+    .from('doctors')
+    .select(SELECT_FIELDS)
+    .in('verification_status', ['verified', 'pending'])
+    .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA');
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const rawQuery = sanitize(searchParams.get('q') || '');
@@ -147,7 +156,8 @@ export async function GET(request: NextRequest) {
     let dbQuery = supabase
       .from('doctors')
       .select(SELECT_FIELDS, { count: 'exact' })
-      .in('verification_status', ['verified', 'pending']);
+      .in('verification_status', ['verified', 'pending'])
+      .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA');
 
     if (region && region !== 'ALL') {
       dbQuery = dbQuery.eq('region_code', region);
@@ -226,6 +236,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Single city name without state (e.g. "Atlanta") — try to geocode via zip_codes table
+    // so we can do distance-based search instead of text matching
+    const bareLocationTerm = (!resolvedSplit && !zipCode) ? (locationInput || '').trim() : '';
+    if (!hasSearchCoords && bareLocationTerm && !resolveStateCode(bareLocationTerm)) {
+      // Look up in zip_codes table for a city match to get coords
+      const { data: cityMatch } = await (supabase as any)
+        .from('zip_codes')
+        .select('city, state, lat, lng')
+        .ilike('city', bareLocationTerm)
+        .limit(1);
+      if (cityMatch && cityMatch.length > 0) {
+        searchLat = Number(cityMatch[0].lat);
+        searchLng = Number(cityMatch[0].lng);
+        hasSearchCoords = true;
+        locationLabel = `Showing doctors near ${cityMatch[0].city}, ${cityMatch[0].state}`;
+      }
+    }
+
     function applyLocationFilter(q: typeof dbQuery, split: { city: string; stateCode: string } | null, rawLoc: string) {
       if (split) {
         if (split.city) q = q.or(`city.ilike.%${split.city}%,address.ilike.%${split.city}%`);
@@ -275,6 +303,14 @@ export async function GET(request: NextRequest) {
         ];
         dbQuery = dbQuery.or(allConditions.join(','));
       }
+    } else if (locationInput && hasSearchCoords && bareLocationTerm) {
+      // Bare city name resolved to coordinates — use distance-based search, not text matching
+      // This catches "Atlanta" finding Marietta doctors 15mi away
+      const searchRadius = radius > 0 ? radius : 250;
+      const [minLng, minLat, maxLng, maxLat] = boundingBox(searchLat, searchLng, searchRadius * 1.2);
+      dbQuery = dbQuery
+        .gte('latitude', minLat).lte('latitude', maxLat)
+        .gte('longitude', minLng).lte('longitude', maxLng);
     } else if (locationInput) {
       dbQuery = applyLocationFilter(dbQuery, splitFromLocation, locationInput);
     }
@@ -290,7 +326,7 @@ export async function GET(request: NextRequest) {
       const locationTerm = rawLocation || (splitFromQuery ? `${splitFromQuery.city}, ${splitFromQuery.stateCode}` : '');
       if (rawQuery && locationTerm) {
         const locSplit = splitCityState(locationTerm);
-        let locQuery = supabase.from('doctors').select(SELECT_FIELDS).in('verification_status', ['verified', 'pending']);
+        let locQuery = usDoctorsQuery(supabase);
         if (locSplit) {
           if (locSplit.city) locQuery = locQuery.or(`city.ilike.%${locSplit.city}%,address.ilike.%${locSplit.city}%`);
           locQuery = locQuery.eq('state', locSplit.stateCode);
@@ -307,10 +343,7 @@ export async function GET(request: NextRequest) {
       if (!fallbackData.length) {
         const stateCode = splitFromQuery?.stateCode || splitFromLocation?.stateCode || resolveStateCode(rawLocation || rawQuery);
         if (stateCode) {
-          const { data: stateFallback } = await supabase
-            .from('doctors')
-            .select(SELECT_FIELDS)
-            .in('verification_status', ['verified', 'pending'])
+          const { data: stateFallback } = await usDoctorsQuery(supabase)
             .eq('state', stateCode)
             .limit(20);
           if (stateFallback?.length) { fallbackData = stateFallback; fallbackHint = `Showing doctors in ${stateCode}`; }
@@ -321,10 +354,7 @@ export async function GET(request: NextRequest) {
       if (!fallbackData.length) {
         const cityTerm = splitFromQuery?.city || rawQuery || rawLocation;
         if (cityTerm) {
-          const { data: cityFallback } = await supabase
-            .from('doctors')
-            .select(SELECT_FIELDS)
-            .in('verification_status', ['verified', 'pending'])
+          const { data: cityFallback } = await usDoctorsQuery(supabase)
             .or(`city.ilike.%${cityTerm}%,address.ilike.%${cityTerm}%`)
             .limit(20);
           if (cityFallback?.length) { fallbackData = cityFallback; fallbackHint = `Showing doctors near ${cityTerm}`; }
@@ -346,10 +376,7 @@ export async function GET(request: NextRequest) {
 
       // Step 3: Only if NO location was specified — try specialty or nationwide
       if (!fallbackData.length && !rawLocation && rawQuery) {
-        const { data: specFallback } = await supabase
-          .from('doctors')
-          .select(SELECT_FIELDS)
-          .in('verification_status', ['verified', 'pending'])
+        const { data: specFallback } = await usDoctorsQuery(supabase)
           .or(`bio.ilike.%${rawQuery}%,clinic_name.ilike.%${rawQuery}%`)
           .limit(20);
         if (specFallback?.length) { fallbackData = specFallback; fallbackHint = `Showing "${rawQuery}" doctors nationwide`; }
@@ -357,10 +384,7 @@ export async function GET(request: NextRequest) {
 
       // Step 4: Only if NO location — last resort
       if (!fallbackData.length && !rawLocation) {
-        let fallbackQuery = supabase
-          .from('doctors')
-          .select(SELECT_FIELDS)
-          .eq('verification_status', 'verified')
+        let fallbackQuery = usDoctorsQuery(supabase)
           .limit(20);
         if (region && region !== 'ALL') fallbackQuery = fallbackQuery.eq('region_code', region);
         const { data: regionFallback } = await fallbackQuery;
@@ -426,10 +450,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     console.error("[SEARCH_API] Critical Error:", err);
 
-    const { data: emergencyData } = await supabase
-      .from('doctors')
-      .select(SELECT_FIELDS)
-      .eq('verification_status', 'verified')
+    const { data: emergencyData } = await usDoctorsQuery(supabase)
       .limit(20);
 
     return NextResponse.json({

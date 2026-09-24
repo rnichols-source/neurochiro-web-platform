@@ -1173,10 +1173,9 @@ export interface Database {
         }
         Returns: void
       }
-      increment_seminar_stats: {
+      increment_seminar_page_view: {
         Args: {
-          seminar_id: string
-          stat_column: string
+          p_seminar_id: string
         }
         Returns: void
       }

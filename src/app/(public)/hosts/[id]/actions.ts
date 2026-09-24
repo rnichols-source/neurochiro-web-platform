@@ -43,10 +43,10 @@ async function getHostSeminars(userId: string) {
   const supabase = createServerSupabase()
   const { data } = await supabase
     .from('seminars')
-    .select('*')
+    .select('id, host_id, title, description, dates, location, city, country, venue_name, venue_address, start_time, end_time, event_type, instructor_name, instructor_bio, registration_link, price, ce_hours, categories, tags, target_audience, image_url, hero_image_url, gallery_images, schedule, speakers, faq, listing_tier, is_past, is_approved, page_views, clicks, created_at, updated_at')
     .eq('host_id', userId)
     .eq('is_approved', true)
     .order('created_at', { ascending: false })
-  
+
   return data || []
 }

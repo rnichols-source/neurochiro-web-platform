@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import NextImage from "next/image";
-import { ShieldCheck, ArrowRight, Heart, Phone, MapPin, Navigation, Calendar } from "lucide-react";
+import { ShieldCheck, ArrowRight, Heart, Phone, MapPin, Calendar } from "lucide-react";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -48,10 +48,6 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
   const hasBooking = !!doc.booking_url;
   const acceptingNew = doc.accepting_new_patients === true;
 
-  const dirParts = [doc.address, doc.city, doc.state].filter(Boolean);
-  const directionsUrl = dirParts.length > 0
-    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dirParts.join(', '))}`
-    : null;
   const profileUrl = `/directory/${doc.slug || doc.id}`;
 
   return (
@@ -167,7 +163,7 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
         </div>
       )}
 
-      {/* Actions — Book primary, Call secondary, Map tertiary. stopPropagation prevents card navigation. */}
+      {/* Actions — Book / Call / Profile. Card link handles profile navigation. */}
       <div className="flex gap-2" onClick={(e) => e.preventDefault()}>
         {hasBooking ? (
           <a
@@ -198,21 +194,8 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
             <span>Call</span>
           </a>
         )}
-        {directionsUrl && (
-          <a
-            href={directionsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => { e.stopPropagation(); trackConversion(doc.id, 'directions'); }}
-            className={cn("py-3 px-3 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]", dark ? "bg-white/8 text-white/50 hover:bg-white/12" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
-            aria-label={`Get directions to ${name}`}
-          >
-            <Navigation className="w-3.5 h-3.5" />
-            <span>Map</span>
-          </a>
-        )}
         {hasBooking && (
-          <span className={cn("py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]", dark ? "bg-white/8 text-white/50 hover:bg-white/12" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+          <span className={cn("py-3 px-3 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]", dark ? "bg-white/8 text-white/50 hover:bg-white/12" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
             aria-label={`View profile for ${name}`}
           >
             Profile <ArrowRight className="w-3.5 h-3.5" />

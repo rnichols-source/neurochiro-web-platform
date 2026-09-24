@@ -197,7 +197,38 @@ export async function updateDoctorProfile(formData: FormData) {
       return { error: `Failed to update name: ${profileError.message}` }
     }
 
-    // 2. Update Doctor table
+    // 2. Geocode if address changed
+    let newLat: number | undefined
+    let newLng: number | undefined
+
+    // Get current record to detect address change
+    const { data: currentDoc } = await adminSupabase
+      .from('doctors')
+      .select('address, city, state, latitude, longitude')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    const addressChanged = currentDoc && (
+      currentDoc.address !== (address || null) ||
+      currentDoc.city !== (city || null) ||
+      currentDoc.state !== (state || null)
+    )
+
+    if (addressChanged && address) {
+      try {
+        const { geocodeDoctorAddress } = await import('@/lib/geocode')
+        const result = await geocodeDoctorAddress(address, city, state)
+        if (result) {
+          newLat = result.lat
+          newLng = result.lng
+        }
+        // If geocoding fails, we don't block the save — we'll flag it below
+      } catch (e) {
+        console.warn('Geocoding failed (non-blocking):', e)
+      }
+    }
+
+    // 3. Update Doctor table
 
     const { error: doctorError } = await adminSupabase
       .from('doctors')
@@ -207,6 +238,7 @@ export async function updateDoctorProfile(formData: FormData) {
         state: state,
         country: country,
         website_url: website,
+        ...(newLat !== undefined && newLng !== undefined ? { latitude: newLat, longitude: newLng } : {}),
         bio: bio,
         specialties: specialties,
         video_url: videoUrl,
@@ -264,14 +296,16 @@ export async function updateDoctorProfile(formData: FormData) {
       console.warn("Search Index Refresh (non-critical):", refreshErr)
     }
 
-    // 3. Trigger geocoding if location changed
-    try {
-      await supabase.from('automation_queue').insert({
-        event_type: 'geocode_profile',
-        payload: { userId: user.id, city, state, country }
-      })
-    } catch (e) {
-      console.warn("Automation queue trigger failed (non-critical):", e)
+    // Flag if geocoding failed or coordinates are still bad
+    if (addressChanged && address && newLat === undefined) {
+      try {
+        await adminSupabase.from('automation_queue').insert({
+          event_type: 'geocode_failed',
+          payload: { userId: user.id, address, city, state, reason: 'Nominatim returned no results' }
+        })
+      } catch (e) {
+        console.warn("Automation queue insert failed (non-critical):", e)
+      }
     }
 
     revalidatePath('/doctor/profile')

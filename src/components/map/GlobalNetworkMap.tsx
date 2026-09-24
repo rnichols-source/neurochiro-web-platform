@@ -103,7 +103,7 @@ export default function GlobalNetworkMap({
     setLoading(true);
     try {
       if (activeLayer === 'seminar') {
-        const result = await getSeminarsForMap(bounds);
+        const result = await getSeminarsForMap();
         setSeminars(result);
       } else if (activeLayer === 'student') {
         const result = await getStudentsForMap({ bounds, limit: 100 });
@@ -172,16 +172,22 @@ export default function GlobalNetworkMap({
     }).filter((f): f is NonNullable<typeof f> => f !== null);
   }, [initialDoctors, listDoctors, externalSearchQuery, externalLocationQuery]);
 
-  // Sync markers to iframe — send once when ready, update without re-fitting on filter changes
-  const hasSentInitialMarkers = useRef(false);
+  // Sync markers to iframe
+  // force-raw-markers (with fit-to-bounds) when the doctor list changes from a new search
+  // update-markers (no re-fitting) when only the filter/highlight changes
+  const prevDoctorIds = useRef<string>('');
   useEffect(() => {
     if (!mapReady || !iframeRef.current?.contentWindow) return;
     const dataToSend = buildMarkerData();
     if (dataToSend.length === 0) return;
-    const isInitial = !hasSentInitialMarkers.current;
-    hasSentInitialMarkers.current = true;
+
+    // Detect if the underlying doctor set changed (new search) vs just filter changes
+    const newIds = initialDoctors.map(d => d.id).sort().join(',');
+    const doctorsChanged = newIds !== prevDoctorIds.current;
+    prevDoctorIds.current = newIds;
+
     iframeRef.current.contentWindow.postMessage({
-      type: isInitial ? 'force-raw-markers' : 'update-markers',
+      type: doctorsChanged ? 'force-raw-markers' : 'update-markers',
       data: dataToSend,
     }, window.location.origin);
   }, [initialDoctors, listDoctors, mapReady, buildMarkerData]);

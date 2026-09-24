@@ -8,7 +8,7 @@ import {
   Check, Plane, Hotel, Sun, Mic2, CheckCircle2, ArrowRight, ChevronRight, Eye, Mail, Send,
 } from "lucide-react";
 import Link from "next/link";
-import { getSeminarById, getSeminars, incrementSeminarStats, captureEventInterest } from "../actions";
+import { getSeminarById, getSeminars, captureEventInterest } from "../actions";
 import Footer from "@/components/landing/Footer";
 import SeminarReviews from "./seminar-reviews";
 
@@ -60,8 +60,10 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
       }
       setLoading(false);
 
-      // Track views (non-blocking)
-      try { if (id) await incrementSeminarStats(id, "page_views"); } catch {}
+      // Track page view via beacon (no server action export)
+      if (id && typeof navigator !== 'undefined' && navigator.sendBeacon) {
+        navigator.sendBeacon('/api/seminars/pageview', JSON.stringify({ seminar_id: id }));
+      }
 
       // Load related seminars (non-blocking)
       try {
@@ -179,7 +181,7 @@ export default function SeminarDetailsPage({ params }: { params: Promise<{ id: s
   ];
 
   const handleRegisterClick = () => {
-    incrementSeminarStats(id, "clicks").catch(() => {});
+    // Register click tracking via seminar_clicks table (Phase 1)
   };
 
   return (

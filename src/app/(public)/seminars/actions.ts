@@ -2,6 +2,10 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 
+// Public columns only. admin_notes, payment_status, host_type_at_submission
+// are revoked from anon/authenticated via column-level grants.
+const SEMINAR_PUBLIC_COLUMNS = 'id, host_id, title, description, dates, location, city, country, venue_name, venue_address, start_time, end_time, event_type, instructor_name, instructor_bio, registration_link, price, ce_hours, categories, tags, target_audience, image_url, hero_image_url, gallery_images, schedule, speakers, faq, listing_tier, is_past, is_approved, page_views, clicks, created_at, updated_at' as const;
+
 export interface SeminarFilterOptions {
   country?: string;
   city?: string;
@@ -16,7 +20,7 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
 
   let query = supabase
     .from('seminars')
-    .select('*')
+    .select(SEMINAR_PUBLIC_COLUMNS)
     .eq('is_approved', true)
 
   if (options.country && options.country !== 'All') {
@@ -66,37 +70,16 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
   return sortedData;
 }
 
-export async function getSeminarsForMap(bounds?: [number, number, number, number]) {
-
+export async function getSeminarsForMap() {
+  // Note: latitude/longitude/is_boosted columns don't exist.
+  // Map uses address-based geocoding via Google Maps embed.
   const supabase = createServerSupabase()
-  
-  let query = supabase
+
+  const { data, error } = await supabase
     .from('seminars')
-    .select(`
-      id,
-      title,
-      city,
-      country,
-      dates,
-      instructor_name,
-      latitude,
-      longitude,
-      listing_tier,
-      is_boosted
-    `)
+    .select('id, title, city, country, dates, instructor_name, venue_address, listing_tier')
     .eq('is_approved', true)
     .eq('is_past', false)
-
-  if (bounds) {
-    query = query
-      .gte('longitude', bounds[0])
-      .lte('longitude', bounds[2])
-      .gte('latitude', bounds[1])
-      .lte('latitude', bounds[3])
-  }
-
-  const { data, error } = await query
-    .order('is_boosted', { ascending: false })
     .order('listing_tier', { ascending: false })
 
   if (error) {
@@ -107,26 +90,14 @@ export async function getSeminarsForMap(bounds?: [number, number, number, number
   return data || []
 }
 
-export async function incrementSeminarStats(id: string, column: 'page_views' | 'clicks') {
-  const supabase = createServerSupabase()
-  const { error } = await supabase.rpc('increment_seminar_stats', {
-    seminar_id: id,
-    stat_column: column
-  })
-  
-  if (error) {
-    console.error(`Error incrementing ${column}:`, error)
-  }
-}
-
 export async function getSeminarById(id: string) {
 
     const supabase = createServerSupabase()
     const { data, error } = await supabase
         .from('seminars')
-        .select('*')
+        .select(SEMINAR_PUBLIC_COLUMNS)
         .eq('id', id)
-        .single()
+        .single() as { data: any; error: any }
 
     if (error) {
         console.error("Error fetching seminar:", error)
@@ -141,7 +112,7 @@ export async function getSeminarById(id: string) {
         .eq('user_id', data.host_id)
         .maybeSingle()
       if (doctor) {
-        (data as any).host_doctor = doctor;
+        data.host_doctor = doctor;
       }
     }
 

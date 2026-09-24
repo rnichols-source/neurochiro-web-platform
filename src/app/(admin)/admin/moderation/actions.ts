@@ -129,6 +129,40 @@ export async function moderateDoctor(doctorId: string, action: 'approve' | 'reje
 
     if (action === 'approve') {
       updateData.is_approved = true;
+
+      // Block verification if coordinates are 0,0 or outside plausible bounds
+      const { data: coordCheck } = await supabase
+        .from('doctors')
+        .select('latitude, longitude, country, address, city, state')
+        .eq('id', doctorId)
+        .single();
+
+      if (coordCheck) {
+        const isUS = !coordCheck.country || coordCheck.country === 'United States' || coordCheck.country === 'US';
+        const lat = coordCheck.latitude;
+        const lng = coordCheck.longitude;
+        const hasZeroCoords = (lat === 0 && lng === 0) || lat == null || lng == null;
+
+        if (isUS && hasZeroCoords) {
+          // Try to geocode before blocking
+          if (coordCheck.address) {
+            try {
+              const { geocodeDoctorAddress } = await import('@/lib/geocode');
+              const result = await geocodeDoctorAddress(coordCheck.address, coordCheck.city || '', coordCheck.state || '');
+              if (result) {
+                updateData.latitude = result.lat;
+                updateData.longitude = result.lng;
+              } else {
+                return { error: `Cannot verify: geocoding failed for "${coordCheck.address}, ${coordCheck.city}, ${coordCheck.state}". Add a valid street address first.` };
+              }
+            } catch {
+              return { error: 'Cannot verify: geocoding service unavailable. Try again later.' };
+            }
+          } else {
+            return { error: 'Cannot verify: no street address on file. Doctor needs to add their clinic address first.' };
+          }
+        }
+      }
     }
 
     const { data: doctor, error: fetchError } = await supabase

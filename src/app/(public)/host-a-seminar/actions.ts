@@ -1,6 +1,7 @@
 'use server'
 import { stripe, PLANS } from '@/lib/stripe'
 import { createServerSupabase } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 
 export async function createMemberSeminar(seminarData: {
   title: string; description: string; location: string; dates: string; registrationLink: string; price: string; capacity: string; hostEmail: string;
@@ -10,7 +11,23 @@ export async function createMemberSeminar(seminarData: {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: "Please log in to create a seminar." }
 
-    const { error } = await supabase.from('seminars').insert({
+    // Validate registration_link
+    if (seminarData.registrationLink && !seminarData.registrationLink.startsWith('https://')) {
+      return { error: "Registration link must use HTTPS." }
+    }
+
+    // Check membership status via admin client (profiles.tier untrusted while RLS off)
+    const adminClient = createAdminClient()
+    const { data: doctor } = await adminClient
+      .from('doctors')
+      .select('membership_tier')
+      .eq('user_id', user.id)
+      .single()
+
+    // Paid = only 'pro'. Stripe webhook hardcodes 'pro' for all paid doctors.
+    const isPaidMember = doctor?.membership_tier === 'pro'
+
+    const { error } = await adminClient.from('seminars').insert({
       title: seminarData.title,
       description: seminarData.description,
       location: seminarData.location,
@@ -18,10 +35,9 @@ export async function createMemberSeminar(seminarData: {
       dates: seminarData.dates,
       registration_link: seminarData.registrationLink,
       price: parseFloat(seminarData.price.replace(/[^0-9.]/g, '')) || 0,
-      max_capacity: parseInt(seminarData.capacity) || null,
       host_id: user.id,
-      payment_status: 'paid',
-      is_approved: true,
+      payment_status: isPaidMember ? 'paid' : 'pending',
+      is_approved: isPaidMember === true,
       listing_tier: 'member',
       host_type_at_submission: 'member',
     })
