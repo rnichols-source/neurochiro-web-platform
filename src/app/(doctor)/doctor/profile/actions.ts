@@ -18,7 +18,7 @@ export async function getDoctorProfile() {
         .maybeSingle(),
       supabase
         .from('doctors')
-        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours')
+        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training')
         .eq('user_id', user.id)
         .maybeSingle()
     ])
@@ -135,6 +135,30 @@ export async function updateDoctorProfile(formData: FormData) {
     const certificationsRaw = formData.get('certifications') as string
     const certifications = certificationsRaw ? certificationsRaw.split('\n').map(s => s.trim()).filter(Boolean) : []
 
+    // Structured bio fields — no URLs or phone numbers in prose
+    const shortIntro = formData.get('short_intro') as string || null
+    const philosophy = formData.get('philosophy') as string || null
+    if (shortIntro && /https?:\/\/|www\.|\.com|\.net|\.org|\(\d{3}\)/i.test(shortIntro)) {
+      return { error: 'Short intro should not contain URLs or phone numbers. Use the dedicated fields for those.' }
+    }
+    if (philosophy && /https?:\/\/|www\.|\.com|\.net|\.org|\(\d{3}\)/i.test(philosophy)) {
+      return { error: 'Philosophy should not contain URLs or phone numbers. Use the dedicated fields for those.' }
+    }
+    if (shortIntro && shortIntro.length > 500) {
+      return { error: 'Short intro is limited to 500 characters.' }
+    }
+    if (philosophy && philosophy.length > 1000) {
+      return { error: 'Philosophy is limited to 1000 characters.' }
+    }
+
+    // Structured education fields
+    const chiropracticSchool = formData.get('chiropractic_school') as string || null
+    const degree = formData.get('degree') as string || 'Doctor of Chiropractic (DC)'
+    const gradYearRaw = formData.get('graduation_year') as string
+    const graduationYear = gradYearRaw ? parseInt(gradYearRaw, 10) || null : null
+    const postDocRaw = formData.get('post_doctoral_training') as string
+    const postDoctoralTraining = postDocRaw ? postDocRaw.split('\n').map(s => s.trim()).filter(Boolean) : null
+
     // Cost & availability fields
     const firstVisitPrice = formData.get('first_visit_price') as string || null
     const paymentModel = formData.get('payment_model') as string || null
@@ -203,6 +227,12 @@ export async function updateDoctorProfile(formData: FormData) {
         free_consultation: freeConsultation,
         has_evening_hours: hasEveningHours,
         has_weekend_hours: hasWeekendHours,
+        short_intro: shortIntro,
+        philosophy: philosophy,
+        chiropractic_school: chiropracticSchool,
+        degree: degree,
+        graduation_year: graduationYear,
+        post_doctoral_training: postDoctoralTraining,
       } as any)
       .eq('user_id', user.id)
 

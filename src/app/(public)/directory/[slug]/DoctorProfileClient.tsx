@@ -99,7 +99,13 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const yearsInPractice = d.years_in_practice as number | null;
   const insuranceNetworks = d.insurance_networks as string[] | null;
   const teamMembersList = d.team_members as { name: string; role: string; photo_url?: string }[] | null;
-  const certificationsList = d.certifications ? [...new Set(d.certifications as string[])] : null;
+  // Certifications: dedupe and filter out marketing claims, awards, and sentences
+  const certificationsList = d.certifications
+    ? [...new Set(d.certifications as string[])].filter((c: string) =>
+        !/\b(only one|fastest|one of the only|finalist|business person|business of the year)\b/i.test(c) &&
+        !/\b(specialties in|specialize in)\b/i.test(c)
+      )
+    : null;
   const mapQuery = doctor.address ? encodeURIComponent(`${doctor.address}, ${doctor.city}, ${doctor.state}`) : doctor.city ? encodeURIComponent(`${doctor.city}, ${doctor.state}`) : null;
 
   // Bio split for pull quote — find the first real sentence (60+ chars)
@@ -346,32 +352,28 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       )}
 
       {/* ═══════════════════════════════════════════
-          4. BIO — Pull Quote
+          4. WHO THEY ARE — structured intro with fallback to bio
       ═══════════════════════════════════════════ */}
-      {doctor.bio && (
-        <Section bg="white" style={{ paddingTop: 80, paddingBottom: 80 }}>
+      {(d.short_intro || doctor.bio) && (
+        <Section bg="white" style={{ paddingTop: 64, paddingBottom: 64 }}>
           <div style={{ maxWidth: 800, margin: "0 auto" }}>
-            {firstSentence && (
-              <p style={{ fontSize: 26, fontWeight: 500, fontStyle: "italic", color: "#1E2D3B", lineHeight: 1.55, borderLeft: "4px solid #D66829", paddingLeft: 28, marginBottom: 28 }}>
+            <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 20 }}>About {doctor.first_name}</h2>
+
+            {/* Structured short_intro (preferred) or pull quote from bio (fallback) */}
+            {d.short_intro ? (
+              <p style={{ fontSize: 17, lineHeight: 1.75, color: "#374151" }}>{d.short_intro}</p>
+            ) : firstSentence ? (
+              <p style={{ fontSize: 22, fontWeight: 500, fontStyle: "italic", color: "#1E2D3B", lineHeight: 1.55, borderLeft: "4px solid #D66829", paddingLeft: 24, marginBottom: 20 }}>
                 &ldquo;{firstSentence}&rdquo;
               </p>
-            )}
-            {restOfBio && (
-              <p style={{ fontSize: 16, lineHeight: 1.8, color: "#4a5568" }}>{restOfBio}</p>
-            )}
-            <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 32, paddingTop: 24, borderTop: "1px solid rgba(30,45,59,0.08)" }}>
-              <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", background: "#1E2D3B", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
-                {doctor.photo_url && !photoError ? (
-                  <img src={doctor.photo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                ) : (
-                  <span style={{ color: "#D66829", fontWeight: 900, fontSize: 16 }}>{(doctor.first_name?.[0] || "N").toUpperCase()}</span>
-                )}
-              </div>
-              <div>
-                <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B" }}>{name}</p>
-                <p style={{ fontSize: 12, color: "#718096" }}>{doctor.clinic_name}{doctor.city ? ` · ${doctor.city}` : ""}</p>
-              </div>
-            </div>
+            ) : null}
+
+            {/* Philosophy (structured) or rest of bio (fallback) */}
+            {d.philosophy ? (
+              <p style={{ fontSize: 15, lineHeight: 1.75, color: "#4a5568", marginTop: 16 }}>{d.philosophy}</p>
+            ) : restOfBio ? (
+              <p style={{ fontSize: 15, lineHeight: 1.75, color: "#4a5568", marginTop: d.short_intro ? 16 : 0 }}>{restOfBio}</p>
+            ) : null}
           </div>
         </Section>
       )}
@@ -410,7 +412,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               <DollarSign style={{ width: 18, height: 18, color: "#D66829" }} />
               <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>Cost</h3>
             </div>
-            {(d.first_visit_price || d.payment_model || (d.accepted_payment && d.accepted_payment.length > 0) || d.insurance_networks?.length > 0) ? (
+            {(d.first_visit_price || d.payment_model || d.insurance_networks?.length > 0 || d.files_insurance || d.payment_plans || d.free_consultation) ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {d.first_visit_price && (
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
@@ -513,13 +515,30 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 </div>
               </div>
             )}
-            {education && education.length > 0 && (
+            {(d.chiropractic_school || (education && education.length > 0)) && (
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
                   <GraduationCap style={{ width: 18, height: 18, color: "#D66829" }} />
                   <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>Education</h3>
                 </div>
-                {education.map((e: string, i: number) => (
+                {/* Structured education (preferred) */}
+                {d.chiropractic_school && (
+                  <div style={{ marginBottom: 8 }}>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: "#1E2D3B" }}>{d.degree || 'Doctor of Chiropractic (DC)'}</p>
+                    <p style={{ fontSize: 13, color: "#718096" }}>{d.chiropractic_school}{d.graduation_year ? `, ${d.graduation_year}` : ''}</p>
+                  </div>
+                )}
+                {/* Post-doctoral training */}
+                {d.post_doctoral_training && d.post_doctoral_training.length > 0 && (
+                  <div style={{ marginTop: 8 }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Post-Doctoral Training</p>
+                    {d.post_doctoral_training.map((t: string, i: number) => (
+                      <p key={i} style={{ fontSize: 13, color: "#4a5568", marginBottom: 2 }}>{t}</p>
+                    ))}
+                  </div>
+                )}
+                {/* Fallback to old education array when no structured data */}
+                {!d.chiropractic_school && education && education.map((e: string, i: number) => (
                   <p key={i} style={{ fontSize: 14, color: "#4a5568", marginBottom: 4 }}>{e}</p>
                 ))}
               </div>
