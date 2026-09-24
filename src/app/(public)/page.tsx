@@ -1,21 +1,18 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ArrowRight, MapPin, Play } from "lucide-react";
+import { ArrowRight, MapPin, Play } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase-admin";
 import Footer from "@/components/landing/Footer";
-import WhoIsItFor from "@/components/landing/WhoIsItFor";
-// Testimonials removed — none were attributable to real people
-import SocialProof from "@/components/landing/SocialProof";
-import DoctorValueProp from "@/components/landing/DoctorValueProp";
 import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
 import { spotlightEpisodes } from "./spotlight/spotlight-data";
+import HeroSearch from "@/components/landing/HeroSearch";
 
 export const metadata = {
   title: "NeuroChiro | Find a Nervous System Chiropractor",
-  description: "The global network for nervous system chiropractors. Find verified specialists, track your health, and connect with the chiropractic community.",
+  description: "Find a nervous system chiropractor near you. Verified doctors who focus on how well your nervous system is communicating, not just whether something hurts.",
 };
 
-export const revalidate = 300; // Cache for 5 minutes
+export const revalidate = 300;
 
 async function getPlatformStats() {
   try {
@@ -42,15 +39,17 @@ async function getPlatformStats() {
   }
 }
 
-async function getFeaturedDoctors() {
+async function getRecentDoctors() {
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
       .from('doctors')
-      .select('first_name, last_name, clinic_name, city, state, slug, photo_url')
+      .select('first_name, last_name, clinic_name, city, state, slug, photo_url, specialties, created_at')
       .eq('verification_status', 'verified')
-      .order('profile_views', { ascending: false })
-      .limit(3);
+      .not('latitude', 'eq', 0)
+      .not('latitude', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(6);
     return data || [];
   } catch {
     return [];
@@ -58,102 +57,134 @@ async function getFeaturedDoctors() {
 }
 
 export default async function HomePage() {
-  const [featured, stats] = await Promise.all([getFeaturedDoctors(), getPlatformStats()]);
+  const [recentDoctors, stats] = await Promise.all([getRecentDoctors(), getPlatformStats()]);
 
   return (
     <div className="min-h-dvh bg-neuro-cream">
-      {/* Hero */}
-      <section className="bg-neuro-navy text-white pt-40 md:pt-48 pb-20 px-6">
+
+      {/* 1. Hero with location search */}
+      <section className="bg-neuro-navy text-white pt-36 md:pt-44 pb-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-heading font-black tracking-tight leading-tight mb-4 text-white">
             Find a Nervous System<br />
             <span className="text-neuro-orange">Chiropractor</span>
           </h1>
           <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto">
-            The global network for doctors who put your nervous system first.
+            Verified doctors who focus on your nervous system, not just pain.
           </p>
 
-          {/* Search Bar */}
-          <form action="/directory" method="GET" className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                name="location"
-                type="text"
-                placeholder="City, state, or doctor name..."
-                className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-neuro-orange"
-              />
-            </div>
-            <button type="submit" className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
-              Search
-            </button>
-          </form>
-        </div>
+          <HeroSearch />
 
-        {/* Live Platform Stats — every number from a single query */}
-        {stats.doctors > 0 && (
-          <div className="max-w-2xl mx-auto mt-12 flex items-center justify-center gap-8 md:gap-12">
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl font-black text-white">{stats.doctors}</p>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Verified Doctors</p>
+          {stats.doctors > 0 && (
+            <div className="max-w-2xl mx-auto mt-12 flex items-center justify-center gap-8 md:gap-12">
+              <div className="text-center">
+                <p className="text-2xl md:text-3xl font-black text-white">{stats.doctors}</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Verified Doctors</p>
+              </div>
+              <div className="w-px h-8 bg-white/10" />
+              <div className="text-center">
+                <p className="text-2xl md:text-3xl font-black text-white">{stats.states}</p>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">States</p>
+              </div>
+              {stats.seminars > 0 && (
+                <>
+                  <div className="w-px h-8 bg-white/10" />
+                  <div className="text-center">
+                    <p className="text-2xl md:text-3xl font-black text-white">{stats.seminars}</p>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Upcoming Events</p>
+                  </div>
+                </>
+              )}
             </div>
-            <div className="w-px h-8 bg-white/10" />
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl font-black text-white">{stats.states}</p>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">States</p>
-            </div>
-            {stats.seminars > 0 && (
-              <>
-                <div className="w-px h-8 bg-white/10" />
-                <div className="text-center">
-                  <p className="text-2xl md:text-3xl font-black text-white">{stats.seminars}</p>
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Upcoming Events</p>
-                </div>
-              </>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </section>
 
-      {/* Featured Doctors */}
-      {featured.length > 0 && (
-        <section className="max-w-5xl mx-auto px-6 py-16">
-          <h2 className="text-2xl font-heading font-black text-neuro-navy text-center mb-10">Most Viewed Doctors</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featured.map((doc) => (
-              <Link
-                key={doc.slug}
-                href={`/directory/${doc.slug}`}
-                className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-lg hover:border-gray-200 transition-all group"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-14 h-14 rounded-xl bg-neuro-navy/5 flex items-center justify-center text-neuro-navy font-black text-lg overflow-hidden relative">
-                    {doc.photo_url ? (
-                      <Image src={doc.photo_url} alt={`Dr. ${doc.first_name} ${doc.last_name}`} fill className="object-cover" />
-                    ) : (
-                      <>{doc.first_name?.[0]}{doc.last_name?.[0]}</>
-                    )}
+      {/* 2. What nervous system chiropractic is */}
+      <section className="max-w-3xl mx-auto px-6 py-16">
+        <h2 className="text-2xl font-heading font-black text-neuro-navy text-center mb-6">What Makes These Doctors Different</h2>
+        <div className="space-y-4 text-gray-600 leading-relaxed">
+          <p>Your brain and spinal cord control every function in your body. A nervous system chiropractor focuses on how well that system is communicating, not just whether something hurts.</p>
+          <p>Doctors in the NeuroChiro directory use specific adjustments to reduce interference in your nervous system. The goal is better function across everything your body does: sleep, digestion, immune response, stress recovery, and pain.</p>
+          <p>Every doctor listed here has been reviewed and verified. Their profiles show credentials, specialties, cost, availability, and what to expect on your first visit.</p>
+        </div>
+      </section>
+
+      {/* 3. Recently joined doctors */}
+      {recentDoctors.length > 0 && (
+        <section className="bg-white py-16 px-6 border-y border-gray-100">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-2xl font-heading font-black text-neuro-navy text-center mb-3">Recently Joined</h2>
+            <p className="text-gray-500 text-sm text-center mb-10">The newest doctors in the NeuroChiro directory</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recentDoctors.map((doc) => (
+                <Link
+                  key={doc.slug}
+                  href={`/directory/${doc.slug}`}
+                  className="bg-neuro-cream/50 rounded-2xl border border-gray-100 p-5 hover:shadow-md hover:border-gray-200 transition-all group"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-xl bg-neuro-navy/5 flex items-center justify-center text-neuro-navy font-black text-sm overflow-hidden relative shrink-0">
+                      {doc.photo_url ? (
+                        <Image src={doc.photo_url} alt={`Dr. ${doc.first_name} ${doc.last_name}`} fill className="object-cover" />
+                      ) : (
+                        <span>{doc.first_name?.[0]}{doc.last_name?.[0]}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-neuro-navy text-sm truncate">Dr. {doc.first_name} {doc.last_name}</p>
+                      <div className="flex items-center gap-1 text-gray-400 text-xs">
+                        <MapPin className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{doc.city}{doc.state ? `, ${doc.state}` : ''}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-neuro-navy">Dr. {doc.first_name} {doc.last_name}</p>
-                    <p className="text-gray-500 text-sm">{doc.clinic_name}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 text-gray-400 text-sm">
-                  <MapPin className="w-3 h-3" />
-                  <span>{doc.city}{doc.state ? `, ${doc.state}` : ''}</span>
-                </div>
-                <p className="text-neuro-orange text-sm font-bold mt-3 group-hover:gap-2 flex items-center gap-1 transition-all">
-                  View Profile <ArrowRight className="w-4 h-4" />
-                </p>
+                  {(doc.specialties || []).length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {(doc.specialties as string[]).slice(0, 2).map((s, i) => (
+                        <span key={i} className="px-2 py-0.5 text-[10px] font-bold text-neuro-orange bg-neuro-orange/5 rounded-md border border-neuro-orange/10">{s}</span>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-neuro-orange text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                    View Profile <ArrowRight className="w-3 h-3" />
+                  </p>
+                </Link>
+              ))}
+            </div>
+            <div className="text-center mt-8">
+              <Link href="/directory" className="inline-flex items-center gap-2 text-neuro-orange font-bold text-sm hover:underline">
+                Browse All Doctors <ArrowRight className="w-4 h-4" />
               </Link>
-            ))}
+            </div>
           </div>
         </section>
       )}
 
-      {/* NeuroChiro Spotlight */}
-      <section className="bg-white py-16 px-6 border-b border-gray-100">
+      {/* 4. How It Works */}
+      <section className="py-16 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl font-heading font-black text-neuro-navy mb-12">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { step: "1", title: "Search", desc: "Enter your ZIP code or city to find verified nervous system chiropractors near you." },
+              { step: "2", title: "Choose", desc: "Review credentials, specialties, cost, availability, and watch their Spotlight interview." },
+              { step: "3", title: "Book", desc: "Contact the doctor directly or book through their office." },
+            ].map((item) => (
+              <div key={item.step} className="text-center">
+                <div className="w-12 h-12 rounded-xl bg-neuro-orange/10 text-neuro-orange font-black text-lg flex items-center justify-center mx-auto mb-4">
+                  {item.step}
+                </div>
+                <h3 className="font-bold text-neuro-navy mb-2">{item.title}</h3>
+                <p className="text-gray-500 text-sm">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. NeuroChiro Spotlight */}
+      <section className="bg-white py-16 px-6 border-y border-gray-100">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
             <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.2em] mb-2">Live Interviews</p>
@@ -203,45 +234,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="bg-white py-16 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl font-heading font-black text-neuro-navy mb-12">How It Works</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { step: "1", title: "Search", desc: "Find a verified nervous system chiropractor by location or specialty." },
-              { step: "2", title: "Choose", desc: "Review credentials, specialties, cost, availability, and watch their Spotlight interview." },
-              { step: "3", title: "Book", desc: "Contact the doctor directly or book through their office." },
-            ].map((item) => (
-              <div key={item.step} className="text-center">
-                <div className="w-12 h-12 rounded-xl bg-neuro-orange/10 text-neuro-orange font-black text-lg flex items-center justify-center mx-auto mb-4">
-                  {item.step}
-                </div>
-                <h3 className="font-bold text-neuro-navy mb-2">{item.title}</h3>
-                <p className="text-gray-500 text-sm">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials removed — none were attributable to real people */}
-
-      {/* For Everyone — client component for region-aware pricing */}
-      <WhoIsItFor />
-
-      {/* Doctor Value Prop */}
-      <DoctorValueProp />
-
-      {/* Email Capture for Non-Account Patients */}
-      {/* Lead Capture */}
+      {/* 6. Patient waitlist capture */}
       <section className="bg-neuro-cream py-12 px-6">
         <div className="max-w-md mx-auto">
           <LeadCaptureInline
             source="homepage"
             role="patient"
             headline="Can't find a doctor near you?"
-            description="Enter your email and city — we'll notify you when a specialist joins your area."
+            description="Enter your email and city. We'll notify you when a specialist joins your area."
             buttonText="Notify Me"
             showLocation
             variant="card"
@@ -249,17 +249,21 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Doctor CTA */}
+      {/* 7. One doctor CTA — links to /pro */}
       <section className="bg-neuro-navy py-16 px-6">
         <div className="max-w-2xl mx-auto text-center">
+          <p className="text-neuro-orange text-xs font-black uppercase tracking-[0.2em] mb-3">For Practitioners</p>
           <h2 className="text-2xl font-heading font-black text-white mb-4">Are you a nervous system chiropractor?</h2>
-          <p className="text-gray-400 mb-8">Join {stats.doctors} verified doctors across {stats.states} states. Get found by patients searching for your specialty.</p>
-          <Link href="/pro?source=homepage_cta" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
-            Learn More <ArrowRight className="w-5 h-5" />
+          <p className="text-gray-400 mb-8 max-w-lg mx-auto">
+            Join {stats.doctors} verified doctors across {stats.states} states. Get a profile that shows patients exactly what you do and how to book.
+          </p>
+          <Link href="/pro?source=homepage_cta" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors min-h-[48px]">
+            See the Membership <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>
 
+      {/* 8. Footer */}
       <Footer />
     </div>
   );
