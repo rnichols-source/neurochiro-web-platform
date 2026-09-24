@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, MapPin, Play } from "lucide-react";
+import { ArrowRight, MapPin, Play, Mail } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase-admin";
 import Footer from "@/components/landing/Footer";
-import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
+// LeadCaptureInline removed — homepage links to /list instead of duplicating capture
 import { spotlightEpisodes } from "./spotlight/spotlight-data";
 import HeroSearch from "@/components/landing/HeroSearch";
 
@@ -234,18 +234,17 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6. Patient waitlist capture */}
+      {/* 6. Patient waitlist */}
       <section className="bg-neuro-cream py-12 px-6">
-        <div className="max-w-md mx-auto">
-          <LeadCaptureInline
-            source="homepage"
-            role="patient"
-            headline="Can't find a doctor near you?"
-            description="Enter your email and city. We'll notify you when a specialist joins your area."
-            buttonText="Notify Me"
-            showLocation
-            variant="card"
-          />
+        <div className="max-w-md mx-auto bg-white rounded-2xl border border-gray-100 p-6 shadow-sm text-center">
+          <h3 className="text-lg font-black text-neuro-navy mb-1">Can't find a doctor near you?</h3>
+          <p className="text-sm text-gray-500 mb-6">Join the patient list. We'll email you the moment a nervous system chiropractor joins your area.</p>
+          <Link
+            href="/list?source=homepage"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors min-h-[48px]"
+          >
+            <Mail className="w-4 h-4" /> Join the Patient List
+          </Link>
         </div>
       </section>
 

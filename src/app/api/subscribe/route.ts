@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { email, zip, consent, source: rawSource, _hp, _ts } = body;
-  const VALID_SOURCES = ['website', 'directory_empty', 'profile_footer', 'site_footer', 'og_share'];
+  const VALID_SOURCES = ['website', 'homepage', 'directory_empty', 'profile_footer', 'site_footer', 'og_share', 'city_page'];
   const source = VALID_SOURCES.includes(rawSource) ? rawSource : 'website';
 
   // Honeypot check
