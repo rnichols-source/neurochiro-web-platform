@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `🎯 **CARE PLAN CLOSER DEMO SIGNUP**\n\n**${first_name || 'Unknown'}** just registered\nEmail: ${email}\nDemo: ${DEMO_DATE} at ${DEMO_TIME}`,
+            content: `🎯 **CARE PLAN CLOSER DEMO SIGNUP**\n\n**${first_name || 'Someone'}** just registered for the demo.`,
           }),
         }).catch(() => {});
       }

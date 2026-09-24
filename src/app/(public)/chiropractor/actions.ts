@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase-admin';
 import { haversineDistance } from '@/lib/geo';
+import { cityToSlug, EMPTY_METROS } from '@/lib/city-data';
 
 const SEARCH_RADIUS_MILES = 30;
 const NEAREST_FALLBACK_COUNT = 5;
@@ -120,8 +121,7 @@ export async function getNearbyCityPages(
   const cityMap = new Map<string, { city: string; state: string; lat: number; lng: number }>();
   for (const d of docs) {
     if (!d.city || !d.state) continue;
-    const { cityToSlug: makeSlug } = await import('@/lib/city-data');
-    const slug = makeSlug(d.city, d.state);
+    const slug = cityToSlug(d.city, d.state);
     if (slug === currentSlug) continue;
     if (!cityMap.has(slug)) {
       cityMap.set(slug, { city: d.city, state: d.state, lat: d.latitude, lng: d.longitude });
@@ -129,7 +129,6 @@ export async function getNearbyCityPages(
   }
 
   // Also include empty metros
-  const { EMPTY_METROS } = await import('@/lib/city-data');
   for (const m of EMPTY_METROS) {
     if (m.slug === currentSlug || cityMap.has(m.slug)) continue;
     cityMap.set(m.slug, { city: m.city, state: m.state, lat: m.lat, lng: m.lng });

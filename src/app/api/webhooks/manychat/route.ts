@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `📱 **SCREENING WEEKEND LEAD (ManyChat)**\n\n**Name:** ${first_name || ''} ${last_name || ''}\n**Interest:** ${tierLabel}\n**Email:** ${email || 'Not provided'}\n**Phone:** ${phone || 'Not provided'}\n**Source:** Instagram comment\n**Time:** ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}`,
+            content: `📱 **SCREENING WEEKEND LEAD (ManyChat)**\n\n**${first_name || 'New lead'}** — ${tierLabel}\n**Source:** Instagram`,
           }),
         }).catch(() => {});
       }

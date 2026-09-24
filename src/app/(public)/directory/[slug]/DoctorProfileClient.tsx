@@ -126,6 +126,19 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
     fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ doctorId: doctor.id, eventType }) }).catch(() => {});
   };
 
+  // Conversion tracking for the conversion_events table
+  const trackConversion = (eventType: string) => {
+    const sessionId = typeof window !== 'undefined'
+      ? (sessionStorage.getItem('nc_sid') || (() => { const id = crypto.randomUUID(); sessionStorage.setItem('nc_sid', id); return id; })())
+      : '';
+    navigator.sendBeacon?.('/api/conversion', JSON.stringify({
+      doctor_id: doctor.id,
+      event_type: eventType,
+      source_page: '/directory/' + slug,
+      session_id: sessionId,
+    }));
+  };
+
   useEffect(() => {
     const fetchSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -255,12 +268,12 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               ) : (
                 <>
                   {doctor.phone && (
-                    <a href={`tel:${doctor.phone}`} onClick={() => trackEvent('phone_tap')} style={{ padding: "14px 28px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", boxShadow: "0 8px 30px rgba(214,104,41,0.3)" }}>
+                    <a href={`tel:${doctor.phone}`} onClick={() => { trackEvent('phone_tap'); trackConversion('call'); }} style={{ padding: "14px 28px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", boxShadow: "0 8px 30px rgba(214,104,41,0.3)" }}>
                       <Phone style={{ width: 16, height: 16 }} /> Call Now
                     </a>
                   )}
                   {bookingUrl ? (
-                    <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('booking_click')} style={{ padding: "14px 28px", background: "#22c55e", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+                    <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent('booking_click'); trackConversion('book'); }} style={{ padding: "14px 28px", background: "#22c55e", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
                       <Calendar style={{ width: 16, height: 16 }} /> Book Online
                     </a>
                   ) : (
@@ -977,16 +990,16 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden" style={{ background: 'rgba(30,45,59,0.95)', backdropFilter: 'blur(20px)', padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
         <div className="flex gap-3 max-w-lg mx-auto">
           {bookingUrl ? (
-            <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Book online with ${name}`}>
+            <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('book')} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Book online with ${name}`}>
               <Calendar className="w-4 h-4" /> Book Online
             </a>
           ) : (
-            <button onClick={() => document.getElementById('appointment-form')?.scrollIntoView({ behavior: 'smooth' })} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label="Request appointment">
+            <button onClick={() => { trackConversion('inquiry'); document.getElementById('appointment-form')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label="Request appointment">
               <Calendar className="w-4 h-4" /> Request Appointment
             </button>
           )}
           {doctor.phone && (
-            <a href={`tel:${doctor.phone}`} className="py-3 px-5 bg-white/10 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Call ${name}`}>
+            <a href={`tel:${doctor.phone}`} onClick={() => trackConversion('call')} className="py-3 px-5 bg-white/10 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Call ${name}`}>
               <Phone className="w-4 h-4" /> Call
             </a>
           )}

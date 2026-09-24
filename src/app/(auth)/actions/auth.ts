@@ -252,7 +252,7 @@ export async function createAccountAction(formData: FormData, role: string, tier
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `🆕 **NEW ${roleLabel} SIGNUP — PENDING APPROVAL**\n\n**Name:** ${name}\n**Email:** ${email}${phone ? `\n**Phone:** ${phone}` : ''}${licenseNumber ? `\n**License:** ${licenseNumber} (${licenseState})` : ''}${approachLine}\n\n⏳ Approve at: https://neurochiro.co/admin/moderation`,
+            content: `🆕 **NEW ${roleLabel} SIGNUP — PENDING APPROVAL**\n\n**Name:** ${name?.split(' ')[0] || 'New doctor'}${approachLine}\n\n⏳ Approve at: https://neurochiro.co/admin/moderation`,
           }),
         }).catch(() => {});
       }
