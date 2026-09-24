@@ -135,10 +135,14 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
       )}
 
       <aside className={cn(
-        "fixed lg:static inset-y-0 left-0 w-64 h-dvh bg-[#0F172A] flex flex-col border-r border-white/5 shrink-0 z-[200] transition-transform duration-300 transform",
+        "fixed lg:static inset-y-0 left-0 w-64 bg-[#0F172A] flex flex-col border-r border-white/5 shrink-0 z-[200] transition-transform duration-300 transform",
+        "h-[100dvh] pb-[env(safe-area-inset-bottom)]",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-      )}>
-        <div className="p-6 flex items-center justify-between">
+      )}
+        style={{ overscrollBehavior: 'contain' }}
+      >
+        {/* Header — fixed */}
+        <div className="p-6 flex items-center justify-between shrink-0">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="w-8 h-8 rounded-lg bg-neuro-orange flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-neuro-orange/20 group-hover:scale-110 transition-transform">N</div>
             <div className="flex flex-col">
@@ -146,7 +150,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
               <span className="text-neuro-orange text-[10px] font-black uppercase tracking-widest mt-1">Admin OS</span>
             </div>
           </Link>
-          <button 
+          <button
             onClick={onClose}
             className="lg:hidden p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg"
           >
@@ -154,7 +158,9 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
           </button>
         </div>
 
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pt-4">
+        {/* Nav list — scrollable, takes remaining space */}
+        <nav className="flex-1 min-h-0 px-4 space-y-1 overflow-y-auto overscroll-contain pt-4"
+          style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="mb-4 px-2">
             <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Platform Control</span>
           </div>
@@ -164,17 +170,18 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={onClose}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
-                  isActive 
-                    ? "bg-neuro-orange text-white shadow-lg shadow-neuro-orange/20" 
+                  isActive
+                    ? "bg-neuro-orange text-white shadow-lg shadow-neuro-orange/20"
                     : "text-gray-400 hover:text-white hover:bg-white/5"
                 )}
               >
                 <item.icon className={cn("w-5 h-5 transition-colors", isActive ? "text-white" : "text-gray-400 group-hover:text-neuro-orange-light")} />
                 <span className="font-medium text-sm">{item.name}</span>
                 {isActive && (
-                  <motion.div 
+                  <motion.div
                     layoutId="active-pill"
                     className="absolute right-2 w-1.5 h-1.5 bg-white rounded-full"
                   />
@@ -182,11 +189,50 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
               </Link>
             );
           })}
+
+          {/* Live Engine — inside scrollable area on mobile, not eating fixed space */}
+          <div className="lg:hidden mt-6 mb-2">
+            <div className="bg-white/[0.02] rounded-2xl p-3 border border-white/5">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-3 h-3 text-neuro-orange" />
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Live Engine</span>
+                </div>
+                <span className={cn(
+                  "text-xs font-black px-2 py-0.5 rounded border",
+                  health?.status === 'OPTIMAL' ? "text-green-500 border-green-500/20 bg-green-500/10" : "text-amber-500 border-amber-500/20 bg-amber-500/10"
+                )}>
+                  {health?.status || "SYNCING..."}
+                </span>
+              </div>
+              <div className="flex gap-1.5">
+                {(health?.services || [1,2,3,4,5]).map((s: any, i: number) => (
+                  <div
+                    key={i}
+                    title={s.name ? `${s.name}: ${s.status} (${s.latency})` : "Syncing..."}
+                    className="h-5 w-full bg-white/5 rounded-sm overflow-hidden relative cursor-help group"
+                  >
+                    <div
+                      className={cn(
+                        "absolute inset-0 transition-colors duration-500",
+                        health ? "bg-green-500" : "bg-gray-700 animate-pulse"
+                      )}
+                      style={{
+                        opacity: health ? 0.4 + (Math.random() * 0.4) : 1,
+                        animationDelay: `${i * 0.1}s`
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </nav>
 
-        <div className="p-4 mt-auto space-y-4">
-          {/* System Health Panel */}
-          <div className="bg-white/[0.02] rounded-2xl p-4 border border-white/5">
+        {/* Bottom section — fixed, does not scroll */}
+        <div className="shrink-0 p-4 space-y-4">
+          {/* Live Engine — desktop only (mobile version is in scrollable nav above) */}
+          <div className="hidden lg:block bg-white/[0.02] rounded-2xl p-4 border border-white/5">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Activity className="w-3 h-3 text-neuro-orange" />
@@ -201,19 +247,19 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
             </div>
             <div className="flex gap-1.5">
               {(health?.services || [1,2,3,4,5]).map((s: any, i: number) => (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   title={s.name ? `${s.name}: ${s.status} (${s.latency})` : "Syncing..."}
                   className="h-5 w-full bg-white/5 rounded-sm overflow-hidden relative cursor-help group"
                 >
-                  <div 
+                  <div
                     className={cn(
                       "absolute inset-0 transition-colors duration-500",
                       health ? "bg-green-500" : "bg-gray-700 animate-pulse"
                     )}
-                    style={{ 
+                    style={{
                       opacity: health ? 0.4 + (Math.random() * 0.4) : 1,
-                      animationDelay: `${i * 0.1}s` 
+                      animationDelay: `${i * 0.1}s`
                     }}
                   />
                   <div className="absolute inset-0 bg-green-500 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse" />
@@ -224,7 +270,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
 
           {/* Profile Actions */}
           <div className="flex items-center gap-3 px-3 py-3 border-t border-white/5">
-            <button 
+            <button
               onClick={onSettingsOpen}
               className="w-10 h-10 rounded-xl bg-neuro-navy-light flex items-center justify-center text-white font-bold text-sm border border-white/10 hover:border-neuro-orange/50 transition-all shadow-xl active:scale-95 overflow-hidden group"
             >
@@ -241,14 +287,14 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
               </p>
             </div>
             <div className="flex items-center gap-1">
-              <button 
+              <button
                 onClick={onSettingsOpen}
                 className="p-2 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-all"
                 title="Admin Settings"
               >
                 <Settings className="w-4 h-4" />
               </button>
-              <button 
+              <button
                 onClick={handleLogout}
                 className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
                 title="Logout"
