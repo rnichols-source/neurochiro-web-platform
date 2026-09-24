@@ -6,7 +6,7 @@ import {
   MapPin, ShieldCheck, CheckCircle2, Mail, ExternalLink, MessageSquare,
   Loader2, Phone, Heart, Share2, Calendar, Send, Globe, Users, Star,
   Copy, Instagram, Facebook, Award, Clock, Stethoscope, GraduationCap,
-  ChevronDown, ArrowLeft, Play, TrendingUp,
+  ChevronDown, ArrowLeft, Play, TrendingUp, DollarSign,
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
@@ -298,15 +298,21 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           3. CLAIM / UPGRADE BANNERS
       ═══════════════════════════════════════════ */}
       {!doctor.user_id && (
-        <Section bg="cream" style={{ paddingTop: 32, paddingBottom: 0 }}>
-          <div style={{ background: "linear-gradient(135deg, #1E2D3B 0%, #1a3048 100%)", borderRadius: 20, padding: "32px 36px", color: "white" }}>
-            <p style={{ fontWeight: 900, fontSize: 20, marginBottom: 8 }}>Welcome, {name}!</p>
-            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>We built this free profile for you based on your public practice info. Claim it to manage your profile — takes 15 seconds. Your free plan is yours forever.</p>
-            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>Upgrade to <span style={{ color: "#D66829", fontWeight: 800 }}>Pro</span> to unlock everything — contact info visible to patients, analytics, practice tools, and more.</p>
-            <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, lineHeight: 1.6, marginBottom: 20 }}>Claim your profile and book an onboarding call to get started. Pro is $99/mo.</p>
-            <a href={`/register?claim_id=${doctor.id}&role=doctor`} style={{ display: "inline-block", padding: "14px 28px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, textDecoration: "none", boxShadow: "0 4px 20px rgba(214,104,41,0.3)" }}>
-              Claim My Profile
-            </a>
+        <Section bg="cream" style={{ paddingTop: 24, paddingBottom: 0 }}>
+          <div style={{ background: "#f0f4f8", border: "1px solid #d1dce6", borderRadius: 16, padding: "20px 24px", fontSize: 13, color: "#5a6b7d", lineHeight: 1.6 }}>
+            <p style={{ margin: "0 0 8px", fontWeight: 700, color: "#1E2D3B", fontSize: 14 }}>This listing was created from public information</p>
+            <p style={{ margin: 0 }}>
+              This profile was built from publicly available practice details and has not been claimed or verified by the doctor.
+              Some information may be incomplete or outdated.
+            </p>
+            <div style={{ marginTop: 12, display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <a href={`/register?claim_id=${doctor.id}&role=doctor`} style={{ fontSize: 13, fontWeight: 700, color: "#D66829", textDecoration: "none" }}>
+                Are you this doctor? Claim this profile &rarr;
+              </a>
+              <a href="mailto:support@neurochirodirectory.com?subject=Listing%20removal%20request" style={{ fontSize: 13, fontWeight: 700, color: "#5a6b7d", textDecoration: "none" }}>
+                Request removal
+              </a>
+            </div>
           </div>
         </Section>
       )}
@@ -322,6 +328,101 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           </div>
         </Section>
       )}
+
+      {/* ═══════════════════════════════════════════
+          COST & AVAILABILITY (Phase 2)
+      ═══════════════════════════════════════════ */}
+      <Section bg="white" style={{ paddingTop: 48, paddingBottom: 48 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 32 }}>
+          {/* Cost */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+              <DollarSign style={{ width: 18, height: 18, color: "#D66829" }} />
+              <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>Cost</h3>
+            </div>
+            {(d.first_visit_price || d.payment_model || (d.accepted_payment && d.accepted_payment.length > 0) || d.insurance_networks?.length > 0) ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {d.first_visit_price && (
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                    <span style={{ color: "#718096" }}>First visit</span>
+                    <span style={{ fontWeight: 700, color: "#1E2D3B" }}>{d.first_visit_price}</span>
+                  </div>
+                )}
+                {d.payment_model && (
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                    <span style={{ color: "#718096" }}>Payment</span>
+                    <span style={{ fontWeight: 700, color: "#1E2D3B" }}>
+                      {d.payment_model === 'cash' ? 'Cash-based' : d.payment_model === 'insurance' ? 'Insurance accepted' : 'Cash & Insurance'}
+                    </span>
+                  </div>
+                )}
+                {d.insurance_networks && d.insurance_networks.length > 0 && (
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, alignItems: "flex-start" }}>
+                    <span style={{ color: "#718096", flexShrink: 0 }}>Carriers</span>
+                    <span style={{ fontWeight: 600, color: "#1E2D3B", textAlign: "right" }}>{d.insurance_networks.join(", ")}</span>
+                  </div>
+                )}
+                {d.files_insurance && (
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                    <span style={{ color: "#718096" }}>Files for you</span>
+                    <span style={{ fontWeight: 700, color: "#22c55e" }}>Yes</span>
+                  </div>
+                )}
+                {d.accepted_payment && d.accepted_payment.includes("HSA/FSA") && (
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                    <span style={{ color: "#718096" }}>HSA/FSA</span>
+                    <span style={{ fontWeight: 700, color: "#22c55e" }}>Accepted</span>
+                  </div>
+                )}
+                {d.payment_plans && (
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                    <span style={{ color: "#718096" }}>Payment plans</span>
+                    <span style={{ fontWeight: 700, color: "#22c55e" }}>Available</span>
+                  </div>
+                )}
+                {d.free_consultation && (
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                    <span style={{ color: "#718096" }}>Free consultation</span>
+                    <span style={{ fontWeight: 700, color: "#22c55e" }}>Yes</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{ padding: "16px 20px", background: "#f8f6f2", borderRadius: 12, fontSize: 14, color: "#718096" }}>
+                <p style={{ margin: 0 }}>Contact the office for pricing and insurance information.</p>
+                {doctor.phone && <p style={{ margin: "8px 0 0", fontWeight: 700, color: "#1E2D3B" }}><a href={'tel:' + doctor.phone} style={{ color: "#1E2D3B", textDecoration: "none" }}>{doctor.phone}</a></p>}
+              </div>
+            )}
+          </div>
+
+          {/* Availability */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+              <Clock style={{ width: 18, height: 18, color: "#D66829" }} />
+              <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>Availability</h3>
+            </div>
+            {(hours || d.accepts_walkins || d.offers_telehealth || d.has_evening_hours || d.has_weekend_hours) ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {hours && (
+                  <p style={{ fontSize: 13, color: "#4a5568", whiteSpace: "pre-line", lineHeight: 1.7, margin: 0 }}>{hours}</p>
+                )}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: hours ? 8 : 0 }}>
+                  {d.has_evening_hours && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Evening hours</span>}
+                  {d.has_weekend_hours && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Weekend hours</span>}
+                  {d.accepts_walkins && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Walk-ins welcome</span>}
+                  {d.offers_telehealth && <span style={{ padding: "4px 12px", background: "#eff6ff", color: "#2563eb", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Telehealth available</span>}
+                  {acceptingNewPatients && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Accepting new patients</span>}
+                </div>
+              </div>
+            ) : (
+              <div style={{ padding: "16px 20px", background: "#f8f6f2", borderRadius: 12, fontSize: 14, color: "#718096" }}>
+                <p style={{ margin: 0 }}>Contact the office for hours and availability.</p>
+                {doctor.phone && <p style={{ margin: "8px 0 0", fontWeight: 700, color: "#1E2D3B" }}><a href={'tel:' + doctor.phone} style={{ color: "#1E2D3B", textDecoration: "none" }}>{doctor.phone}</a></p>}
+              </div>
+            )}
+          </div>
+        </div>
+      </Section>
 
       {/* ═══════════════════════════════════════════
           4. WHY CHOOSE ME / HIGHLIGHTS

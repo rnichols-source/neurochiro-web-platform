@@ -18,7 +18,7 @@ export async function getDoctorProfile() {
         .maybeSingle(),
       supabase
         .from('doctors')
-        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, years_in_practice, insurance_networks, team_members, certifications')
+        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours')
         .eq('user_id', user.id)
         .maybeSingle()
     ])
@@ -135,6 +135,15 @@ export async function updateDoctorProfile(formData: FormData) {
     const certificationsRaw = formData.get('certifications') as string
     const certifications = certificationsRaw ? certificationsRaw.split('\n').map(s => s.trim()).filter(Boolean) : []
 
+    // Cost & availability fields
+    const firstVisitPrice = formData.get('first_visit_price') as string || null
+    const paymentModel = formData.get('payment_model') as string || null
+    const filesInsurance = formData.get('files_insurance') === 'true'
+    const paymentPlans = formData.get('payment_plans') === 'true'
+    const freeConsultation = formData.get('free_consultation') === 'true'
+    const hasEveningHours = formData.get('has_evening_hours') === 'true'
+    const hasWeekendHours = formData.get('has_weekend_hours') === 'true'
+
     // Use admin client for all updates to bypass RLS
     const { createAdminClient } = await import('@/lib/supabase-admin')
     const adminSupabase = createAdminClient()
@@ -187,6 +196,13 @@ export async function updateDoctorProfile(formData: FormData) {
         insurance_networks: insuranceNetworks.length ? insuranceNetworks : null,
         team_members: teamMembers.length ? teamMembers : null,
         certifications: certifications.length ? certifications : null,
+        first_visit_price: firstVisitPrice,
+        payment_model: paymentModel,
+        files_insurance: filesInsurance,
+        payment_plans: paymentPlans,
+        free_consultation: freeConsultation,
+        has_evening_hours: hasEveningHours,
+        has_weekend_hours: hasWeekendHours,
       } as any)
       .eq('user_id', user.id)
 
