@@ -90,7 +90,9 @@ export async function getCoverageDoctors(): Promise<CoverageDoctor[]> {
 
     const lat = d.latitude
     const lng = d.longitude
-    const isInvisible = lat == null || lng == null || (lat === 0 && lng === 0) || !d.address
+    // Invisible = no usable coordinates (0,0 or null). Doctors with coords but no address
+    // have potentially inaccurate city-center coords but are still findable in search.
+    const isInvisible = lat == null || lng == null || (lat === 0 && lng === 0)
 
     return {
       ...d,
@@ -185,7 +187,7 @@ export async function getCoverageStats(): Promise<CoverageStats> {
 
   const verified = usDocs.filter(d => d.verification_status === 'verified' && d.latitude && d.longitude && d.latitude !== 0 && d.longitude !== 0).length
   const pending = usDocs.filter(d => d.verification_status === 'pending').length
-  const invisible = usDocs.filter(d => d.latitude == null || d.longitude == null || (d.latitude === 0 && d.longitude === 0) || !d.address).length
+  const invisible = usDocs.filter(d => d.latitude == null || d.longitude == null || (d.latitude === 0 && d.longitude === 0)).length
 
   // States covered
   const coveredStates = new Set<string>()

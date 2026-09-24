@@ -53,8 +53,8 @@ export default function CoverageMapClient({
       const map = new maplibregl.Map({
         container: mapRef.current!,
         style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-        center: [-98, 39],
-        zoom: 3.5,
+        center: [-96, 38],
+        zoom: 3.8,
         attributionControl: false,
       })
 
@@ -100,13 +100,13 @@ export default function CoverageMapClient({
         },
       }))
 
-    // Clustered source
+    // Clustered source — low radius so metros separate at default zoom
     map.addSource('doctors', {
       type: 'geojson',
       data: { type: 'FeatureCollection', features },
       cluster: true,
-      clusterMaxZoom: 12,
-      clusterRadius: 50,
+      clusterMaxZoom: 14,
+      clusterRadius: 25,
     })
 
     // Cluster circles
@@ -117,7 +117,7 @@ export default function CoverageMapClient({
       filter: ['has', 'point_count'],
       paint: {
         'circle-color': '#D66829',
-        'circle-radius': ['step', ['get', 'point_count'], 18, 5, 24, 20, 32],
+        'circle-radius': ['step', ['get', 'point_count'], 14, 5, 18, 15, 24],
         'circle-stroke-width': 2,
         'circle-stroke-color': '#fff',
       },
