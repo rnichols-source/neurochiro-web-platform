@@ -102,7 +102,10 @@ export async function GET(request: NextRequest) {
   const languageFilter = searchParams.get('language') || '';
 
   // Sort
-  const sort = searchParams.get('sort') || (hasUserCoords ? 'distance' : 'tier');
+  // Default to distance sort. Tier-based sorting removed from patient-facing results (2026-09-23).
+  // A patient must never see a farther doctor ranked higher because that doctor paid more.
+  const requestedSort = searchParams.get('sort') || 'distance';
+  const sort = requestedSort === 'tier' ? 'distance' : requestedSort;
 
   const supabase = createAdminClient();
 

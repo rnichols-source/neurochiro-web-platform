@@ -2,13 +2,25 @@
 
 import { useState } from "react";
 import NextImage from "next/image";
-import { ShieldCheck, ArrowRight, Heart, Phone, MapPin, Star, Sparkles, Navigation, Calendar } from "lucide-react";
+import { ShieldCheck, ArrowRight, Heart, Phone, MapPin, Navigation, Calendar } from "lucide-react";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { formatDistance } from "@/lib/geo";
 import { cn } from "@/lib/utils";
-import { isProfileGated } from "@/lib/profile-gating";
+
+/** Fire-and-forget conversion event. No patient identifiers. Deduped server-side. */
+function trackConversion(doctorId: string, eventType: string) {
+  const sessionId = typeof window !== 'undefined'
+    ? (sessionStorage.getItem('nc_sid') || (() => { const id = crypto.randomUUID(); sessionStorage.setItem('nc_sid', id); return id; })())
+    : '';
+  navigator.sendBeacon?.('/api/conversion', JSON.stringify({
+    doctor_id: doctorId,
+    event_type: eventType,
+    source_page: typeof window !== 'undefined' ? window.location.pathname : '/directory',
+    session_id: sessionId,
+  }));
+}
 
 interface DoctorCardProps {
   doc: any;
@@ -23,7 +35,6 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
   const saved = isSaved('doctors', docId);
   const [showToast, setShowToast] = useState<string | null>(null);
   const [cardPhotoError, setCardPhotoError] = useState(false);
-  const gated = isProfileGated(doc);
 
   const location = [doc.city, doc.state].filter(Boolean).join(", ");
   // Normalize specialties: split concatenated entries on newlines, known category boundaries, and trim
@@ -109,15 +120,9 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
         <div className="flex-1 min-w-0 pr-8">
           <div className="flex items-center gap-1.5 flex-wrap">
             <h3 className={cn("font-bold transition-colors truncate", dark ? "text-white group-hover:text-neuro-orange" : "text-neuro-navy group-hover:text-neuro-orange")}>{name}</h3>
-            {doc.verification_status === 'verified' && <ShieldCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />}
-            {doc.is_founding_member && (
-              <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-neuro-orange/10 text-neuro-orange text-[9px] font-black rounded-md border border-neuro-orange/20 flex-shrink-0 uppercase tracking-wider">
-                <Star className="w-2.5 h-2.5 fill-neuro-orange" /> Founder
-              </span>
-            )}
-            {doc.membership_tier === 'pro' && (
-              <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-violet-50 text-violet-600 text-[9px] font-black rounded-md border border-violet-200 flex-shrink-0 uppercase tracking-wider">
-                <Sparkles className="w-2.5 h-2.5" /> Pro
+            {doc.verification_status === 'verified' && (
+              <span className={cn("flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold rounded-md flex-shrink-0", dark ? "bg-blue-500/15 text-blue-400 border border-blue-500/20" : "bg-blue-50 text-blue-600 border border-blue-200")}>
+                <ShieldCheck className="w-3 h-3" /> Verified
               </span>
             )}
           </div>
@@ -155,30 +160,33 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
         </div>
       )}
 
-      {/* Actions */}
+      {/* Actions — Book primary, Call secondary, Map tertiary */}
       <div className="flex gap-2">
-        <Link href={`/directory/${doc.slug || doc.id}`} className="flex-1">
-          <div className={cn("w-full py-3 font-bold rounded-xl text-xs text-center transition-colors flex items-center justify-center gap-2",
-            dark ? "bg-white/10 text-white hover:bg-white/15" : "bg-neuro-navy text-white hover:bg-neuro-navy/90")}>
-            View Profile <ArrowRight className="w-3.5 h-3.5" />
-          </div>
-        </Link>
-        {!gated && hasBooking && (
+        {hasBooking ? (
           <a
             href={doc.booking_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="py-3 px-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]"
+            onClick={() => trackConversion(doc.id, 'book')}
+            className="flex-1 py-3 bg-neuro-orange text-white rounded-xl hover:bg-neuro-orange/90 transition-colors flex items-center justify-center gap-2 text-xs font-bold min-h-[44px]"
             aria-label={`Book online with ${name}`}
           >
             <Calendar className="w-3.5 h-3.5" />
-            <span>Book</span>
+            Book Online
           </a>
+        ) : (
+          <Link href={`/directory/${doc.slug || doc.id}`} className="flex-1" onClick={() => trackConversion(doc.id, 'profile_view')}>
+            <div className={cn("w-full py-3 font-bold rounded-xl text-xs text-center transition-colors flex items-center justify-center gap-2 min-h-[44px]",
+              dark ? "bg-white/10 text-white hover:bg-white/15" : "bg-neuro-navy text-white hover:bg-neuro-navy/90")}>
+              View Profile <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </Link>
         )}
-        {!gated && doc.phone && (
+        {doc.phone && (
           <a
             href={`tel:${doc.phone}`}
-            className="py-3 px-3 bg-neuro-orange text-white rounded-xl hover:bg-neuro-orange/90 transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]"
+            onClick={() => trackConversion(doc.id, 'call')}
+            className={cn("py-3 px-3 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]", dark ? "bg-white/10 text-white hover:bg-white/15" : "bg-neuro-navy/10 text-neuro-navy hover:bg-neuro-navy/20")}
             aria-label={`Call ${name}`}
           >
             <Phone className="w-3.5 h-3.5" />
@@ -190,12 +198,20 @@ export default function DoctorCard({ doc, index, onHover, dark = false }: Doctor
             href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className={cn("py-3 px-3 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]", dark ? "bg-white/10 text-white/70 hover:bg-white/15" : "bg-gray-100 text-gray-600 hover:bg-gray-200")}
+            onClick={() => trackConversion(doc.id, 'directions')}
+            className={cn("py-3 px-3 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]", dark ? "bg-white/8 text-white/50 hover:bg-white/12" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
             aria-label={`Get directions to ${name}`}
           >
             <Navigation className="w-3.5 h-3.5" />
             <span>Map</span>
           </a>
+        )}
+        {hasBooking && (
+          <Link href={`/directory/${doc.slug || doc.id}`} onClick={() => trackConversion(doc.id, 'profile_view')}>
+            <div className={cn("py-3 px-3 rounded-xl transition-colors flex items-center justify-center text-xs font-bold min-h-[44px]", dark ? "bg-white/8 text-white/50 hover:bg-white/12" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </Link>
         )}
       </div>
     </motion.div>

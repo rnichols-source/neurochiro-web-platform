@@ -66,19 +66,33 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  // Show location prompt on first load if no location is set
+  useEffect(() => {
+    if (!locationQuery && !lastLocation && !hasSearchParam && !hasUserCoords) {
+      setShowLocationPrompt(true);
+    }
+  }, []);
+
   // Filters
   const [showFilters, setShowFilters] = useState(false);
   const [filterNewPatients, setFilterNewPatients] = useState(false);
   const [filterTelehealth, setFilterTelehealth] = useState(false);
   const [filterWalkins, setFilterWalkins] = useState(false);
   const [filterRadius, setFilterRadius] = useState(0); // 0 = no limit
-  const [sortBy, setSortBy] = useState('tier');
+  const [sortBy, setSortBy] = useState('distance');
   const activeFilterCount = [filterNewPatients, filterTelehealth, filterWalkins, filterRadius > 0].filter(Boolean).length + (activeSpecialty ? 1 : 0);
 
-  // Geolocation
-  const [userLat, setUserLat] = useState(0);
-  const [userLng, setUserLng] = useState(0);
+  // Geolocation — restore from localStorage if available
+  const [userLat, setUserLat] = useState(() => {
+    if (typeof window === 'undefined') return 0;
+    return parseFloat(localStorage.getItem('nc_user_lat') || '0') || 0;
+  });
+  const [userLng, setUserLng] = useState(() => {
+    if (typeof window === 'undefined') return 0;
+    return parseFloat(localStorage.getItem('nc_user_lng') || '0') || 0;
+  });
   const hasUserCoords = userLat !== 0 && userLng !== 0;
+  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
 
   // Autocomplete
   const [autocomplete, setAutocomplete] = useState<{cities: any[], doctors: any[], specialties: string[]}>({ cities: [], doctors: [], specialties: [] });
@@ -182,12 +196,14 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
 
   const handleSearch = useCallback(() => {
     setPage(1);
+    if (locationQuery || searchQuery) setShowLocationPrompt(false);
     fetchDoctors(searchQuery, locationQuery, false);
     if (locationQuery) setLastLocation(locationQuery);
   }, [searchQuery, locationQuery]);
 
-  // Debounced search
+  // Debounced search — skip if location prompt is showing and no input
   useEffect(() => {
+    if (showLocationPrompt && !locationQuery && !searchQuery) return;
     const timer = setTimeout(() => {
       handleSearch();
     }, 500);
@@ -209,12 +225,20 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setUserLat(lat);
+        setUserLng(lng);
         try {
-          const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${position.coords.latitude}&longitude=${position.coords.longitude}&localityLanguage=en`);
+          const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
           const data = await response.json();
           const city = data.city || data.locality || "Current Location";
-          setLocationQuery(city);
-        } catch (error) {
+          const state = data.principalSubdivisionCode?.replace('US-', '') || '';
+          const locationStr = state ? `${city}, ${state}` : city;
+          setLocationQuery(locationStr);
+          setLastLocation(locationStr);
+          try { localStorage.setItem('nc_user_lat', String(lat)); localStorage.setItem('nc_user_lng', String(lng)); } catch {}
+        } catch {
           setLocationQuery("Current Location");
         } finally {
           setIsLocating(false);
@@ -374,7 +398,26 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   // Doctor list content — shared between desktop sidebar and mobile bottom sheet
   const doctorListJSX = (
     <>
-      {loading && doctors.length === 0 ? (
+      {showLocationPrompt && !locationQuery && doctors.length === 0 && !loading ? (
+        <div className="text-center py-12 px-6">
+          <div className="w-16 h-16 rounded-full bg-neuro-orange/10 flex items-center justify-center mx-auto mb-5">
+            <MapPin className="w-8 h-8 text-neuro-orange" />
+          </div>
+          <h3 className="text-lg font-black text-white mb-2">Where are you looking?</h3>
+          <p className="text-white/50 text-sm mb-6 leading-relaxed max-w-xs mx-auto">
+            Enter your ZIP code or city above, or tap "Near me" to find chiropractors close to you.
+          </p>
+          <button
+            onClick={handleUseLocation}
+            disabled={isLocating}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors text-sm min-h-[44px]"
+            aria-label="Use my current location"
+          >
+            <Target className={cn("w-4 h-4", isLocating && "animate-spin")} />
+            {isLocating ? "Finding you..." : "Use My Location"}
+          </button>
+        </div>
+      ) : loading && doctors.length === 0 ? (
         <div className="space-y-4">{[1,2,3,4,5].map(i => <DoctorCardSkeleton key={i} />)}</div>
       ) : filteredDoctors.length > 0 ? (
         <>
@@ -459,20 +502,29 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
           header={
             <div ref={searchRef}>
               {/* Search bar — fixed in drag handle, always visible even at peek */}
-              <div className="flex gap-2 mb-2">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <input type="text" placeholder="Search doctors, clinics..." className="w-full pl-9 pr-3 py-2.5 bg-white/10 border border-white/5 focus:outline-none focus:border-white/20 text-white font-medium text-[15px] rounded-xl placeholder:text-white/35"
-                    value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setAcFocusField('search')} />
-                </div>
-                <div className="relative" style={{ width: '120px' }}>
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neuro-orange/80" />
-                  <input type="text" placeholder="Location..." className="w-full pl-9 pr-9 py-2.5 bg-white/10 border border-white/5 focus:outline-none focus:border-white/20 text-white font-medium text-[15px] rounded-xl placeholder:text-white/35"
-                    value={locationQuery} onChange={(e) => setLocationQuery(e.target.value)} onFocus={() => setAcFocusField('location')} />
-                  <button onClick={handleUseLocation} disabled={isLocating} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg text-white/40 active:text-white/70">
-                    <Target className={cn("w-3.5 h-3.5", isLocating && "animate-spin")} />
+              {/* Location first — primary input */}
+              <div className="relative mb-2">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neuro-orange" />
+                <input type="text" placeholder="ZIP code or city..." className="w-full pl-9 pr-20 py-3 bg-white/10 border border-neuro-orange/30 focus:outline-none focus:border-neuro-orange text-white font-bold text-[15px] rounded-xl placeholder:text-white/40"
+                  value={locationQuery} onChange={(e) => setLocationQuery(e.target.value)} onFocus={() => setAcFocusField('location')}
+                  aria-label="Search by ZIP code or city" />
+                {locationQuery ? (
+                  <button onClick={() => setLocationQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 active:text-white/60" aria-label="Clear location">
+                    <X className="w-4 h-4" />
                   </button>
-                </div>
+                ) : (
+                  <button onClick={handleUseLocation} disabled={isLocating} className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-neuro-orange text-[11px] font-bold rounded-lg active:bg-neuro-orange/10 flex items-center gap-1" aria-label="Use my location">
+                    <Target className={cn("w-3.5 h-3.5", isLocating && "animate-spin")} />
+                    {isLocating ? '' : 'Near me'}
+                  </button>
+                )}
+              </div>
+              {/* Search — secondary */}
+              <div className="relative mb-2">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
+                <input type="text" placeholder="Doctor, clinic, or specialty..." className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/5 focus:outline-none focus:border-white/15 text-white/80 text-xs rounded-xl placeholder:text-white/25"
+                  value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setAcFocusField('search')}
+                  aria-label="Search by doctor name, clinic, or specialty" />
               </div>
 
               {/* Autocomplete dropdown */}
@@ -550,37 +602,40 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
 
         {/* Sidebar header — search */}
         <div className="flex-shrink-0 p-4 border-b border-white/10" ref={searchRef}>
-          <div className="flex gap-2 mb-3">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-              <input type="text" placeholder="Doctor, clinic, or specialty..."
-                className="w-full pl-9 pr-8 py-2.5 bg-white/10 border border-white/5 focus:outline-none focus:border-white/20 text-white font-medium text-sm rounded-xl placeholder:text-white/35"
-                value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setAcFocusField('search')}
-                onKeyDown={(e) => { if (e.key === 'Enter') { setShowAutocomplete(false); handleSearch(); } }} />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-            <div className="relative" style={{ width: '140px' }}>
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neuro-orange/70" />
-              <input type="text" placeholder="Location..."
-                className="w-full pl-9 pr-9 py-2.5 bg-white/10 border border-white/5 focus:outline-none focus:border-white/20 text-white font-medium text-sm rounded-xl placeholder:text-white/35"
-                value={locationQuery} onChange={(e) => setLocationQuery(e.target.value)}
-                onFocus={() => setAcFocusField('location')}
-                onKeyDown={(e) => { if (e.key === 'Enter') { setShowAutocomplete(false); handleSearch(); } }} />
-              {locationQuery ? (
-                <button onClick={() => setLocationQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              ) : (
-                <button onClick={handleUseLocation} disabled={isLocating} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
-                  <Target className={cn("w-4 h-4", isLocating && "animate-spin")} />
-                </button>
-              )}
-            </div>
+          {/* Location first — primary input */}
+          <div className="relative mb-2">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neuro-orange" />
+            <input type="text" placeholder="ZIP code or city..."
+              className="w-full pl-9 pr-20 py-3 bg-white/10 border border-neuro-orange/30 focus:outline-none focus:border-neuro-orange text-white font-bold text-sm rounded-xl placeholder:text-white/40"
+              value={locationQuery} onChange={(e) => setLocationQuery(e.target.value)}
+              onFocus={() => setAcFocusField('location')}
+              onKeyDown={(e) => { if (e.key === 'Enter') { setShowAutocomplete(false); handleSearch(); } }}
+              aria-label="Search by ZIP code or city" />
+            {locationQuery ? (
+              <button onClick={() => setLocationQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60" aria-label="Clear location">
+                <X className="w-4 h-4" />
+              </button>
+            ) : (
+              <button onClick={handleUseLocation} disabled={isLocating} className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-neuro-orange text-[11px] font-bold rounded-lg hover:bg-neuro-orange/10 transition-colors flex items-center gap-1" aria-label="Use my location">
+                <Target className={cn("w-3.5 h-3.5", isLocating && "animate-spin")} />
+                {isLocating ? '' : 'Near me'}
+              </button>
+            )}
+          </div>
+          {/* Search — secondary input */}
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
+            <input type="text" placeholder="Doctor, clinic, or specialty..."
+              className="w-full pl-9 pr-8 py-2 bg-white/5 border border-white/5 focus:outline-none focus:border-white/15 text-white/80 text-xs rounded-xl placeholder:text-white/25"
+              value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setAcFocusField('search')}
+              onKeyDown={(e) => { if (e.key === 'Enter') { setShowAutocomplete(false); handleSearch(); } }}
+              aria-label="Search by doctor name, clinic, or specialty" />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60" aria-label="Clear search">
+                <X className="w-3 h-3" />
+              </button>
+            )}
           </div>
 
           {/* Autocomplete */}
@@ -666,7 +721,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
                   </div>
                   <div className="flex items-center gap-2 pt-1 border-t border-white/5">
                     <span className="text-white/30 text-[10px] font-bold">Sort:</span>
-                    {[{ value: 'tier', label: 'Featured' }, { value: 'distance', label: 'Nearest' }, { value: 'name', label: 'A-Z' }].map(opt => (
+                    {[{ value: 'distance', label: 'Nearest' }, { value: 'name', label: 'A-Z' }].map(opt => (
                       <button key={opt.value} onClick={() => setSortBy(opt.value)}
                         className={cn("px-2 py-1 rounded text-[10px] font-bold", sortBy === opt.value ? "bg-neuro-orange text-white" : "text-white/40 hover:text-white/70")}>
                         {opt.label}

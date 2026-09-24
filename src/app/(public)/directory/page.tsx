@@ -13,7 +13,10 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function PublicDirectory() {
-  const initialData = await getDoctors({ limit: 500 });
+  // Don't pre-load a national list of all doctors.
+  // A patient can't act on 148 unsorted results.
+  // The client fetches doctors after a location is entered.
+  const initialData = { doctors: [], total: 0 };
 
   return (
     <ErrorBoundary title="Directory Content Error">
