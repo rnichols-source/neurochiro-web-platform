@@ -81,7 +81,18 @@ export async function updateDoctorProfile(formData: FormData) {
     }
     const website = formData.get('website') as string
     const bio = formData.get('bio') as string
-    const specialties = formData.get('specialties')?.toString().split(',').map((s: string) => s.trim()).filter(Boolean) || []
+    const specialtiesRaw = formData.get('specialties')?.toString().split(',').map((s: string) => s.trim()).filter(Boolean) || []
+    // Validate specialties against controlled vocabulary — no free text
+    const { ALL_SPECIALTY_TERMS, SPECIALTY_MAX } = await import('@/lib/specialty-vocabulary')
+    const validTerms = new Set(ALL_SPECIALTY_TERMS)
+    const invalidTerms = specialtiesRaw.filter(s => !validTerms.has(s))
+    if (invalidTerms.length > 0) {
+      return { error: `Invalid specialty: "${invalidTerms[0]}". Please select from the available options.` }
+    }
+    if (specialtiesRaw.length > SPECIALTY_MAX) {
+      return { error: `You can select up to ${SPECIALTY_MAX} specialties. You have ${specialtiesRaw.length}.` }
+    }
+    const specialties = [...new Set(specialtiesRaw)] // dedupe
     const videoUrl = formData.get('video_url') as string
     const seoKeywords = formData.get('seo_keywords') as string
     const phone = formData.get('phone') as string
