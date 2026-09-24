@@ -340,42 +340,44 @@ export default function CoverageMapClient({
           <div className="space-y-3">
             {/* Row 1: Doctor counts */}
             <div className="grid grid-cols-3 gap-2">
-              <StatCard label="Verified" value={stats.verified} color="text-green-400" />
-              <StatCard label="Pending" value={stats.pending} color="text-amber-400" />
-              <StatCard label="Invisible" value={stats.invisible} color="text-red-400" />
+              <StatCard label="Verified" value={stats.verified} color="text-green-400" sub="Live on directory, searchable" />
+              <StatCard label="Pending" value={stats.pending} color="text-amber-400" sub="Awaiting approval or onboarding" />
+              <StatCard label="Invisible" value={stats.invisible} color="text-red-400" sub="No coordinates. Can't be found." />
             </div>
 
             {/* Row 2: Coverage + subscribers */}
             <div className="grid grid-cols-2 gap-2">
               <div className="bg-white/5 rounded-xl p-3">
-                <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">States Covered</p>
-                <p className="text-xl font-bold">{stats.statesWithDoctor.length}<span className="text-white/30 text-sm">/{ALL_US_STATES.length}</span></p>
-                {stats.statesWithout.length > 0 && stats.statesWithout.length <= 15 && (
-                  <p className="text-[10px] text-red-400/70 mt-1">Missing: {stats.statesWithout.join(', ')}</p>
+                <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">States With a Doctor</p>
+                <p className="text-xl font-bold">{stats.statesWithDoctor.length}<span className="text-white/30 text-sm"> / {ALL_US_STATES.length}</span></p>
+                {stats.statesWithout.length > 0 && (
+                  <p className="text-[10px] text-red-400/70 mt-1">No doctors yet: {stats.statesWithout.join(', ')}</p>
                 )}
               </div>
               <div className="bg-white/5 rounded-xl p-3">
-                <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Waitlist Subscribers</p>
-                <p className="text-xl font-bold">{stats.totalSubscribers}</p>
+                <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Patient Waitlist</p>
+                <p className="text-xl font-bold">{stats.totalSubscribers} <span className="text-white/30 text-sm">confirmed</span></p>
+                <p className="text-[10px] text-white/30 mt-1">People who signed up to find a doctor near them</p>
                 {stats.internationalCount > 0 && (
                   <p className="text-[10px] text-white/30 mt-1 flex items-center gap-1">
-                    <Globe className="w-3 h-3" /> {stats.internationalCount} international doctors
+                    <Globe className="w-3 h-3" /> {stats.internationalCount} international doctors (not on US map)
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Row 3: Top gaps */}
+            {/* Row 3: Top gaps — the recruiting list */}
             {stats.topGaps.length > 0 && (
               <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3">
-                <p className="text-[10px] text-rose-400 uppercase font-bold tracking-wider mb-2 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" /> Top Unserved Areas (no doctor within 50mi)
+                <p className="text-[10px] text-rose-400 uppercase font-bold tracking-wider mb-1 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> Recruit Here First
                 </p>
+                <p className="text-[10px] text-white/40 mb-2">Waitlist subscribers with no doctor within 50 miles. These people signed up and we have nobody to show them.</p>
                 <div className="flex flex-wrap gap-x-3 gap-y-1">
                   {stats.topGaps.map((g, i) => (
                     <span key={i} className="text-xs text-white/80">
                       <span className="font-bold">{g.city}, {g.state}</span>
-                      <span className="text-rose-400 ml-1">{g.count}</span>
+                      <span className="text-rose-400 ml-1">{g.count} waiting</span>
                     </span>
                   ))}
                 </div>
@@ -509,11 +511,12 @@ export default function CoverageMapClient({
 
 // ── Helpers ──
 
-function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
+function StatCard({ label, value, color, sub }: { label: string; value: number; color: string; sub?: string }) {
   return (
     <div className="bg-white/5 rounded-xl p-3">
       <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">{label}</p>
       <p className={`text-xl font-bold ${color}`}>{value}</p>
+      {sub && <p className="text-[10px] text-white/25 mt-0.5 leading-tight">{sub}</p>}
     </div>
   )
 }
