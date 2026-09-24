@@ -26,6 +26,9 @@ export const metadata: Metadata = {
     description: "Directory listing, two interviews, 80-100 clips. $99/month.",
     images: ["https://neurochiro.co/og-pro.png"],
   },
+  alternates: {
+    canonical: "https://neurochiro.co/pro",
+  },
 };
 
 export default function ProLayout({ children }: { children: React.ReactNode }) {

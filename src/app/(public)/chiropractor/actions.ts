@@ -95,6 +95,60 @@ export async function getNearestDoctors(
 }
 
 /**
+ * Get nearby city pages for internal linking.
+ * Returns cities within ~150 miles that have their own page.
+ */
+export async function getNearbyCityPages(
+  lat: number,
+  lng: number,
+  currentSlug: string,
+  limit: number = 6,
+): Promise<{ city: string; state: string; slug: string; distance: number }[]> {
+  const supabase = createAdminClient();
+
+  // Get all doctor cities
+  const { data: docs } = await (supabase as any)
+    .from('doctors')
+    .select('city, state, latitude, longitude')
+    .eq('verification_status', 'verified')
+    .eq('country', 'US')
+    .gt('latitude', 0);
+
+  if (!docs) return [];
+
+  // Unique city/state combos with averaged coords
+  const cityMap = new Map<string, { city: string; state: string; lat: number; lng: number }>();
+  for (const d of docs) {
+    if (!d.city || !d.state) continue;
+    const { cityToSlug: makeSlug } = await import('@/lib/city-data');
+    const slug = makeSlug(d.city, d.state);
+    if (slug === currentSlug) continue;
+    if (!cityMap.has(slug)) {
+      cityMap.set(slug, { city: d.city, state: d.state, lat: d.latitude, lng: d.longitude });
+    }
+  }
+
+  // Also include empty metros
+  const { EMPTY_METROS } = await import('@/lib/city-data');
+  for (const m of EMPTY_METROS) {
+    if (m.slug === currentSlug || cityMap.has(m.slug)) continue;
+    cityMap.set(m.slug, { city: m.city, state: m.state, lat: m.lat, lng: m.lng });
+  }
+
+  // Calculate distances and sort
+  return Array.from(cityMap.entries())
+    .map(([slug, c]) => ({
+      city: c.city,
+      state: c.state,
+      slug,
+      distance: haversineDistance(lat, lng, c.lat, c.lng),
+    }))
+    .filter(c => c.distance < 150 && c.distance > 0)
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, limit);
+}
+
+/**
  * Submit a "help me find someone" request.
  */
 export async function submitFindRequest(formData: FormData): Promise<{ ok: boolean; error?: string }> {

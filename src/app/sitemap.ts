@@ -1,10 +1,11 @@
 import { MetadataRoute } from 'next';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { REGIONS } from '@/lib/regions';
+import { EMPTY_METROS, cityToSlug } from '@/lib/city-data';
 
 export const dynamic = 'force-dynamic';
 
-const BASE_URL = 'https://neurochiro.com';
+const BASE_URL = 'https://neurochiro.co';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createServerSupabase();
@@ -61,5 +62,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...routes, ...regionalRoutes, ...doctorRoutes, ...seminarRoutes];
+  // City pages: every city with a doctor + empty metros
+  const doctorCitySlugs = new Set<string>();
+  const allDoctors = (await supabase
+    .from('doctors')
+    .select('city, state')
+    .eq('verification_status', 'verified')).data || [];
+  for (const d of allDoctors) {
+    if (d.city && d.state && d.state.length === 2) {
+      doctorCitySlugs.add(cityToSlug(d.city, d.state));
+    }
+  }
+  // Add empty metros
+  for (const m of EMPTY_METROS) {
+    doctorCitySlugs.add(m.slug);
+  }
+
+  const cityRoutes = Array.from(doctorCitySlugs).map((slug) => ({
+    url: `${BASE_URL}/chiropractor/${slug}`,
+    lastModified: new Date().toISOString(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.85,
+  }));
+
+  return [...routes, ...regionalRoutes, ...doctorRoutes, ...seminarRoutes, ...cityRoutes];
 }

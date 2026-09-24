@@ -36,6 +36,15 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
   transpilePackages: ["lucide-react", "framer-motion"],
+  async redirects() {
+    return [
+      {
+        source: '/directory/city/:path*',
+        destination: '/chiropractor/:path*',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

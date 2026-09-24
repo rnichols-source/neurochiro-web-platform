@@ -3,7 +3,7 @@ import { MapPin, Phone, ArrowRight, ShieldCheck, Calendar, Navigation, Clock, Ch
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { slugToCity, EMPTY_METROS, STATE_NAMES } from "@/lib/city-data";
-import { getDoctorsNearCity, getNearestDoctors, type CityDoctor } from "../actions";
+import { getDoctorsNearCity, getNearestDoctors, getNearbyCityPages, type CityDoctor } from "../actions";
 import { formatDistance } from "@/lib/geo";
 import Footer from "@/components/landing/Footer";
 import FindSomeoneForm from "./FindSomeoneForm";
@@ -89,8 +89,66 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
     nearestDoctors = await getNearestDoctors(lat, lng, 5);
   }
 
+  // Nearby city pages for internal linking
+  const nearbyCities = await getNearbyCityPages(lat, lng, slug, 6);
+
+  // Structured data — only emit fields we actually have
+  const pageJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalWebPage',
+    name: `Nervous System Chiropractor in ${location}`,
+    url: `https://neurochiro.co/chiropractor/${slug}`,
+    description: `Find a nervous system chiropractor near ${location}.`,
+    about: { '@type': 'MedicalSpecialty', name: 'Chiropractic' },
+  };
+
+  const doctorJsonLd = nearbyDoctors.map(doc => {
+    const ld: Record<string, any> = {
+      '@context': 'https://schema.org',
+      '@type': ['LocalBusiness', 'Physician'],
+      name: doc.clinic_name || `Dr. ${doc.first_name} ${doc.last_name}`,
+      url: `https://neurochiro.co/directory/${doc.slug}`,
+      ...(doc.phone && { telephone: doc.phone }),
+      ...(doc.website_url && { url: doc.website_url }),
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: doc.city,
+        addressRegion: doc.state,
+        addressCountry: 'US',
+      },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: doc.latitude,
+        longitude: doc.longitude,
+      },
+      ...(doc.accepting_new_patients && { isAcceptingNewPatients: true }),
+      ...(doc.photo_url && { image: doc.photo_url }),
+      medicalSpecialty: 'Chiropractic',
+    };
+    // Parse hours if available
+    if (doc.hours) {
+      const dayMap: Record<string, string> = { monday: 'Mo', tuesday: 'Tu', wednesday: 'We', thursday: 'Th', friday: 'Fr', saturday: 'Sa', sunday: 'Su' };
+      const specs: string[] = [];
+      for (const line of doc.hours.split('\n')) {
+        const match = line.match(/^(\w+):\s*(.+)/i);
+        if (match) {
+          const day = dayMap[match[1].toLowerCase()];
+          if (day) specs.push(`${day} ${match[2].replace(/\s/g, '')}`);
+        }
+      }
+      if (specs.length > 0) ld.openingHours = specs;
+    }
+    return ld;
+  });
+
   return (
     <div className="min-h-dvh bg-neuro-cream">
+      {/* Structured Data */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pageJsonLd) }} />
+      {doctorJsonLd.map((ld, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      ))}
+
       {/* Hero */}
       <section className="bg-neuro-navy py-16 px-6">
         <div className="max-w-3xl mx-auto text-center">
@@ -244,6 +302,26 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
           </Link>
         </div>
       </div>
+
+      {/* Also serving — internal links to nearby city pages */}
+      {nearbyCities.length > 0 && (
+        <section className="bg-neuro-cream border-t border-gray-200 py-10 px-6">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Also Serving Nearby</h2>
+            <div className="flex flex-wrap gap-2">
+              {nearbyCities.map((c) => (
+                <Link
+                  key={c.slug}
+                  href={`/chiropractor/${c.slug}`}
+                  className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-neuro-navy font-medium hover:border-neuro-orange/30 hover:shadow-sm transition-all"
+                >
+                  {c.city}, {c.state}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <Footer />
     </div>
