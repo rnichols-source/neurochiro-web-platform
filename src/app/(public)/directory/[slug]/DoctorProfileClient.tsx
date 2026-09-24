@@ -352,6 +352,27 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       )}
 
       {/* ═══════════════════════════════════════════
+          GOOGLE REVIEWS LINK
+      ═══════════════════════════════════════════ */}
+      {d.google_reviews_url && (
+        <Section bg="white" style={{ paddingTop: 32, paddingBottom: 32 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: "#f0f4f8", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Star style={{ width: 16, height: 16, color: "#facc15", fill: "#facc15" }} />
+            </div>
+            <a
+              href={d.google_reviews_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontSize: 15, fontWeight: 700, color: "#1E2D3B", textDecoration: "none" }}
+            >
+              Read patient reviews on Google &rarr;
+            </a>
+          </div>
+        </Section>
+      )}
+
+      {/* ═══════════════════════════════════════════
           4. WHO THEY ARE — structured intro with fallback to bio
       ═══════════════════════════════════════════ */}
       {(d.short_intro || doctor.bio) && (
@@ -697,9 +718,15 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <input type="tel" placeholder="Phone (optional)" value={appointmentForm.phone} onChange={e => setAppointmentForm(f => ({...f, phone: e.target.value}))} style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, outline: "none" }} />
-                    <input type="date" value={appointmentForm.preferredDate} onChange={e => setAppointmentForm(f => ({...f, preferredDate: e.target.value}))} style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, outline: "none" }} />
+                    <div style={{ position: "relative" }}>
+                      <label style={{ position: "absolute", top: -8, left: 14, background: "white", padding: "0 4px", fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>Preferred date (optional)</label>
+                      <input type="date" value={appointmentForm.preferredDate} onChange={e => setAppointmentForm(f => ({...f, preferredDate: e.target.value}))} aria-label="Preferred appointment date" style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, outline: "none", width: "100%" }} />
+                    </div>
                   </div>
-                  <textarea placeholder="What are you looking for? (optional)" value={appointmentForm.message} onChange={e => setAppointmentForm(f => ({...f, message: e.target.value}))} style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, height: 80, resize: "none", outline: "none" }} />
+                  <div>
+                    <textarea placeholder="What are you looking for? (optional)" value={appointmentForm.message} onChange={e => setAppointmentForm(f => ({...f, message: e.target.value}))} style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, height: 80, resize: "none", outline: "none", width: "100%" }} />
+                    <p style={{ fontSize: 11, color: "#b0b8c4", marginTop: 4 }}>Please do not include symptoms, diagnoses, or medical details. This is not a clinical form.</p>
+                  </div>
                   <button disabled={submittingAppointment || !appointmentForm.name || !appointmentForm.email}
                     onClick={async () => {
                       setSubmittingAppointment(true);
@@ -714,7 +741,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                     style={{ padding: "16px 32px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 15, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: submittingAppointment || !appointmentForm.name || !appointmentForm.email ? 0.5 : 1, boxShadow: "0 4px 20px rgba(214,104,41,0.25)" }}>
                     {submittingAppointment ? <><Loader2 style={{ width: 18, height: 18 }} className="animate-spin" /> Sending...</> : <><Send style={{ width: 16, height: 16 }} /> Send Request</>}
                   </button>
-                  <p style={{ fontSize: 12, color: "#9ca3af", textAlign: "center" }}>Your info is sent directly to the doctor. We never share it with anyone else.</p>
+                  <p style={{ fontSize: 12, color: "#9ca3af", textAlign: "center" }}>Your request goes to the doctor&apos;s office. NeuroChiro stores it to make sure it gets there, and we never sell or share it with third parties.</p>
                 </div>
               )}
             </>

@@ -7,9 +7,10 @@ export async function getLeads() {
   await checkAdminAuth()
   const supabase = createServerSupabase()
 
+  // List view: no message body. Use getLeadDetail() to view message content.
   const { data, error } = await supabase
     .from('leads')
-    .select('*')
+    .select('id, email, first_name, source, role, status, doctor_id, created_at')
     .order('created_at', { ascending: false })
     .limit(200)
 
@@ -19,6 +20,30 @@ export async function getLeads() {
   }
 
   return data || []
+}
+
+/**
+ * Get full lead detail including message. Logs the access.
+ */
+export async function getLeadDetail(leadId: string) {
+  const user = await checkAdminAuth()
+  const supabase = createServerSupabase()
+
+  const { data, error } = await supabase
+    .from('leads')
+    .select('*')
+    .eq('id', leadId)
+    .single()
+
+  if (error) {
+    console.error("Error fetching lead detail:", error)
+    return null
+  }
+
+  // Log access for audit
+  console.log(`[LEAD_ACCESS] Admin ${user.id} viewed lead ${leadId} at ${new Date().toISOString()}`)
+
+  return data
 }
 
 export async function updateLeadStatus(leadId: string, status: string) {

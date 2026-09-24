@@ -91,7 +91,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // Discord notification
+    // Discord notification — doctor info only, no patient data
     const discordUrl = process.env.DISCORD_WEBHOOK_URL;
     if (discordUrl) {
       const name = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content: `🔔 **PATIENT REQUEST**\n\nPatient${patientName ? ` (${patientName})` : ''} wants to reach **${name}**\nDoctor profile: https://neurochiro.co/directory/${doctor.slug}\nPatient email: ${patientEmail}`,
+          content: `🔔 **PATIENT INQUIRY**\n\nA patient wants to reach **${name}** in ${doctor.city || 'their area'}.`,
         }),
       }).catch(() => {});
     }

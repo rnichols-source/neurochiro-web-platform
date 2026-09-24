@@ -18,7 +18,7 @@ export async function getDoctorProfile() {
         .maybeSingle(),
       supabase
         .from('doctors')
-        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training')
+        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url')
         .eq('user_id', user.id)
         .maybeSingle()
     ])
@@ -159,6 +159,9 @@ export async function updateDoctorProfile(formData: FormData) {
     const postDocRaw = formData.get('post_doctoral_training') as string
     const postDoctoralTraining = postDocRaw ? postDocRaw.split('\n').map(s => s.trim()).filter(Boolean) : null
 
+    // Google Reviews
+    const googleReviewsUrl = formData.get('google_reviews_url') as string || null
+
     // Cost & availability fields
     const firstVisitPrice = formData.get('first_visit_price') as string || null
     const paymentModel = formData.get('payment_model') as string || null
@@ -233,6 +236,7 @@ export async function updateDoctorProfile(formData: FormData) {
         degree: degree,
         graduation_year: graduationYear,
         post_doctoral_training: postDoctoralTraining,
+        google_reviews_url: googleReviewsUrl,
       } as any)
       .eq('user_id', user.id)
 

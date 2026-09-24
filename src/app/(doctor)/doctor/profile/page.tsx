@@ -271,6 +271,7 @@ export default function ProfilePage() {
               { done: !!profile?.first_visit_price || !!profile?.payment_model, label: 'Cost & insurance', why: 'The #1 question patients have before booking' },
               { done: !!profile?.phone, label: 'Phone number', why: 'Many patients prefer to call' },
               { done: !!profile?.booking_url, label: 'Online booking link', why: 'Patients who can book online are more likely to show up' },
+              { done: !!profile?.google_reviews_url, label: 'Google Reviews link', why: 'Reviews are the #1 trust signal — link patients to your real reviews' },
             ];
             const done = checks.filter(c => c.done).length;
             const pct = Math.round((done / checks.length) * 100);
@@ -357,6 +358,10 @@ export default function ProfilePage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Booking & Availability</h2>
           <input name="booking_url" defaultValue={profile?.booking_url || ''} placeholder="Online booking URL (Jane, ChiroTouch, Fresha, etc.)" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange mb-4" />
+          <div className="mb-4">
+            <label className="block text-xs font-bold text-neuro-navy mb-1">Google Reviews Link <span className="text-gray-400 font-normal">(patients trust reviews more than anything else on this page)</span></label>
+            <input name="google_reviews_url" defaultValue={profile?.google_reviews_url || ''} placeholder="https://g.page/your-practice/review or Google Maps link" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-sm" />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer">
               <input type="checkbox" name="accepting_new_patients" value="true" defaultChecked={profile?.accepting_new_patients !== false} className="w-4 h-4 accent-neuro-orange" />

@@ -80,6 +80,21 @@ export async function GET(req: Request) {
       issues.push(`${noRole} profiles have no role set`);
     }
 
+    // 5. Lead retention: delete leads older than 12 months
+    const twelveMonthsAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
+    const { count: staleLeads } = await supabase
+      .from('leads')
+      .select('id', { count: 'exact', head: true })
+      .lt('created_at', twelveMonthsAgo);
+
+    if (staleLeads && staleLeads > 0) {
+      await supabase
+        .from('leads')
+        .delete()
+        .lt('created_at', twelveMonthsAgo);
+      issues.push(`Deleted ${staleLeads} leads older than 12 months`);
+    }
+
     // Log results
     await supabase.from('audit_logs').insert({
       category: 'AUTOMATION',

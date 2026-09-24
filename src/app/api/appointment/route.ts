@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Discord notification
+    // Discord notification — doctor info only, no patient data
     try {
       const discordUrl = process.env.DISCORD_WEBHOOK_URL;
       if (discordUrl) {
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `📅 **NEW APPOINTMENT REQUEST**\n\n**Patient:** ${patientName}\n**Email:** ${patientEmail}${patientPhone ? `\n**Phone:** ${patientPhone}` : ''}${preferredDate ? `\n**Preferred Date:** ${preferredDate}` : ''}\n**Doctor:** Dr. ${doctor.first_name} ${doctor.last_name}\n**Clinic:** ${doctor.clinic_name || 'N/A'}${message ? `\n**Message:** ${message}` : ''}`,
+            content: `📅 **NEW APPOINTMENT REQUEST**\n\nA patient requested an appointment with **Dr. ${doctor.first_name} ${doctor.last_name}** in ${doctor.clinic_name || 'their practice'}.`,
           }),
         }).catch(() => {});
       }
