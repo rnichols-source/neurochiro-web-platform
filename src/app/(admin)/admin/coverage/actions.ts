@@ -31,7 +31,8 @@ export interface DemandZip {
   state: string
   lat: number
   lng: number
-  count: number
+  confirmed: number
+  pending: number
   /** true if no doctor within 50 miles */
   gap: boolean
 }
@@ -43,8 +44,9 @@ export interface CoverageStats {
   internationalCount: number
   statesWithDoctor: string[]
   statesWithout: string[]
-  totalSubscribers: number
-  topGaps: { city: string; state: string; count: number }[]
+  confirmedSubscribers: number
+  pendingSubscribers: number
+  topGaps: { city: string; state: string; confirmed: number; pending: number }[]
   invisibleCount: number
 }
 
@@ -107,31 +109,36 @@ export async function getDemandData(): Promise<DemandZip[]> {
   await checkAdminAuth()
   const supabase = createAdminClient()
 
-  // Get confirmed subscribers with ZIPs
+  // Get ALL subscribers with ZIPs (confirmed + pending)
   const { data: subscribers } = await (supabase as any)
     .from('subscribers')
-    .select('zip')
-    .eq('status', 'confirmed')
+    .select('zip, status')
+    .in('status', ['confirmed', 'pending'])
     .not('zip', 'is', null)
 
   if (!subscribers || subscribers.length === 0) return []
 
-  // Count by ZIP
-  const zipCounts = new Map<string, number>()
+  // Count by ZIP, split by status
+  const confirmedCounts = new Map<string, number>()
+  const pendingCounts = new Map<string, number>()
   for (const s of subscribers) {
     const z = (s.zip || '').trim().slice(0, 5)
     if (z.length === 5 && /^\d{5}$/.test(z)) {
-      zipCounts.set(z, (zipCounts.get(z) || 0) + 1)
+      if (s.status === 'confirmed') confirmedCounts.set(z, (confirmedCounts.get(z) || 0) + 1)
+      else pendingCounts.set(z, (pendingCounts.get(z) || 0) + 1)
     }
   }
 
-  if (zipCounts.size === 0) return []
+  // All unique ZIPs
+  const allZips = new Set([...confirmedCounts.keys(), ...pendingCounts.keys()])
+  if (allZips.size === 0) return []
 
-  // Look up coordinates for each ZIP
-  const zipList = Array.from(zipCounts.keys())
+  // Look up coordinates for each ZIP (filter by US country)
+  const zipList = Array.from(allZips)
   const { data: zipCoords } = await (supabase as any)
     .from('zip_codes')
     .select('zip, city, state, lat, lng')
+    .eq('country', 'US')
     .in('zip', zipList)
 
   if (!zipCoords) return []
@@ -150,11 +157,11 @@ export async function getDemandData(): Promise<DemandZip[]> {
   )
 
   return zipCoords.map((z: any) => {
-    const count = zipCounts.get(z.zip) || 0
+    const confirmed = confirmedCounts.get(z.zip) || 0
+    const pending = pendingCounts.get(z.zip) || 0
     const lat = Number(z.lat)
     const lng = Number(z.lng)
 
-    // Check if any doctor is within 50 miles
     const hasNearbyDoctor = validDoctors.some(d =>
       haversineDistance(lat, lng, d.latitude!, d.longitude!) <= 50
     )
@@ -165,7 +172,8 @@ export async function getDemandData(): Promise<DemandZip[]> {
       state: z.state || '',
       lat,
       lng,
-      count,
+      confirmed,
+      pending,
       gap: !hasNearbyDoctor,
     }
   })
@@ -182,8 +190,8 @@ export async function getCoverageStats(): Promise<CoverageStats> {
     .in('verification_status', ['verified', 'pending'])
 
   const docs = allDocs || []
-  const usDocs = docs.filter(d => !d.country || d.country === 'United States' || d.country === 'US' || d.country === 'USA')
-  const intlDocs = docs.filter(d => d.country && d.country !== 'United States' && d.country !== 'US' && d.country !== 'USA')
+  const usDocs = docs.filter(d => !d.country || d.country === 'US')
+  const intlDocs = docs.filter(d => d.country && d.country !== 'US')
 
   const verified = usDocs.filter(d => d.verification_status === 'verified' && d.latitude && d.longitude && d.latitude !== 0 && d.longitude !== 0).length
   const pending = usDocs.filter(d => d.verification_status === 'pending').length
@@ -205,15 +213,15 @@ export async function getCoverageStats(): Promise<CoverageStats> {
     .select('zip, status')
 
   const confirmedSubs = (subs || []).filter((s: any) => s.status === 'confirmed')
-  const totalSubscribers = confirmedSubs.length
+  const pendingSubs = (subs || []).filter((s: any) => s.status === 'pending')
 
-  // Top gaps: ZIP areas with subscribers but no doctor within 50mi
+  // Top gaps: ZIP areas with any subscribers but no doctor within 50mi
   const demandData = await getDemandData()
   const gaps = demandData
-    .filter(d => d.gap && d.count >= 1)
-    .sort((a, b) => b.count - a.count)
+    .filter(d => d.gap && (d.confirmed + d.pending) >= 1)
+    .sort((a, b) => (b.confirmed + b.pending) - (a.confirmed + a.pending))
     .slice(0, 10)
-    .map(d => ({ city: d.city, state: d.state, count: d.count }))
+    .map(d => ({ city: d.city, state: d.state, confirmed: d.confirmed, pending: d.pending }))
 
   return {
     verified,
@@ -222,7 +230,8 @@ export async function getCoverageStats(): Promise<CoverageStats> {
     internationalCount: intlDocs.length,
     statesWithDoctor,
     statesWithout,
-    totalSubscribers,
+    confirmedSubscribers: confirmedSubs.length,
+    pendingSubscribers: pendingSubs.length,
     topGaps: gaps,
     invisibleCount: invisible,
   }

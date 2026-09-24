@@ -221,8 +221,12 @@ export default function CoverageMapClient({
           zip: d.zip,
           city: d.city,
           state: d.state,
-          count: d.count,
+          confirmed: d.confirmed,
+          pending: d.pending,
+          total: d.confirmed + d.pending,
           gap: d.gap ? 1 : 0,
+          // Visual type: gap > confirmed-only > pending-only
+          demandType: d.gap ? 'gap' : d.confirmed > 0 ? 'confirmed' : 'pending',
         },
       }))
 
@@ -231,53 +235,77 @@ export default function CoverageMapClient({
         data: { type: 'FeatureCollection', features },
       })
 
-      // Non-gap subscriber ZIPs (has a doctor nearby)
+      // Confirmed subscriber ZIPs with a doctor nearby (purple, solid)
       map.addLayer({
         id: layerId,
         type: 'circle',
         source: sourceId,
-        filter: ['==', ['get', 'gap'], 0],
+        filter: ['==', ['get', 'demandType'], 'confirmed'],
         paint: {
           'circle-color': DEMAND_COLOR,
-          'circle-radius': ['interpolate', ['linear'], ['get', 'count'], 1, 5, 10, 10, 50, 18],
-          'circle-opacity': 0.6,
-          'circle-stroke-width': 1,
-          'circle-stroke-color': DEMAND_COLOR,
+          'circle-radius': ['interpolate', ['linear'], ['get', 'total'], 1, 8, 5, 12, 20, 18],
+          'circle-opacity': 0.7,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#fff',
         },
       })
 
-      // Gap ZIPs (no doctor within 50mi) — pulsing ring effect
+      // Pending-only subscriber ZIPs (lighter purple, dashed feel via lower opacity)
+      map.addLayer({
+        id: 'demand-pending',
+        type: 'circle',
+        source: sourceId,
+        filter: ['==', ['get', 'demandType'], 'pending'],
+        paint: {
+          'circle-color': DEMAND_COLOR,
+          'circle-radius': ['interpolate', ['linear'], ['get', 'total'], 1, 7, 5, 10, 20, 16],
+          'circle-opacity': 0.35,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': DEMAND_COLOR,
+          'circle-stroke-opacity': 0.5,
+        },
+      })
+
+      // Gap ZIPs (no doctor within 50mi) — rose with thick white ring
       map.addLayer({
         id: gapLayerId,
         type: 'circle',
         source: sourceId,
-        filter: ['==', ['get', 'gap'], 1],
+        filter: ['==', ['get', 'demandType'], 'gap'],
         paint: {
           'circle-color': GAP_COLOR,
-          'circle-radius': ['interpolate', ['linear'], ['get', 'count'], 1, 8, 10, 14, 50, 22],
-          'circle-opacity': 0.8,
+          'circle-radius': ['interpolate', ['linear'], ['get', 'total'], 1, 10, 5, 14, 20, 22],
+          'circle-opacity': 0.85,
           'circle-stroke-width': 3,
           'circle-stroke-color': '#fff',
         },
       })
 
-      // Click demand dot → popup
+      // Click any demand dot → popup
       const handleDemandClick = (e: any) => {
         if (!e.features?.length) return
         const p = e.features[0].properties
         const coords = e.features[0].geometry.coordinates.slice()
         const maplibregl = (window as any).maplibregl
         const gapLabel = p.gap === 1
-          ? '<div style="color:#f43f5e;font-weight:700;font-size:11px;margin-top:4px;">No doctor within 50 miles</div>'
-          : '<div style="color:#22c55e;font-size:11px;margin-top:4px;">Doctor nearby</div>'
+          ? '<div style="color:#f43f5e;font-weight:700;font-size:11px;margin-top:6px;">No doctor within 50 miles</div>'
+          : '<div style="color:#22c55e;font-size:11px;margin-top:6px;">Doctor nearby</div>'
+
+        const confirmedLine = p.confirmed > 0
+          ? `<div style="font-size:13px;font-weight:700;color:#8b5cf6;">${p.confirmed} confirmed</div>`
+          : ''
+        const pendingLine = p.pending > 0
+          ? `<div style="font-size:12px;color:#a78bfa;">${p.pending} pending (unconfirmed)</div>`
+          : ''
 
         new maplibregl.Popup({ offset: 12, maxWidth: '240px', closeButton: true, focusAfterOpen: false })
           .setLngLat(coords)
           .setHTML(`
             <div style="padding:12px;font-family:-apple-system,system-ui,sans-serif;">
               <div style="font-size:14px;font-weight:700;color:#1E2D3B;">${p.city}, ${p.state}</div>
-              <div style="font-size:12px;color:#666;">ZIP ${p.zip}</div>
-              <div style="font-size:20px;font-weight:800;color:#8b5cf6;margin:6px 0;">${p.count} subscriber${p.count > 1 ? 's' : ''}</div>
+              <div style="font-size:12px;color:#666;margin-bottom:6px;">ZIP ${p.zip}</div>
+              ${confirmedLine}
+              ${pendingLine}
               ${gapLabel}
             </div>
           `)
@@ -286,13 +314,17 @@ export default function CoverageMapClient({
 
       map.on('click', layerId, handleDemandClick)
       map.on('click', gapLayerId, handleDemandClick)
+      map.on('click', 'demand-pending', handleDemandClick)
       map.on('mouseenter', layerId, () => { map.getCanvas().style.cursor = 'pointer' })
       map.on('mouseleave', layerId, () => { map.getCanvas().style.cursor = '' })
       map.on('mouseenter', gapLayerId, () => { map.getCanvas().style.cursor = 'pointer' })
       map.on('mouseleave', gapLayerId, () => { map.getCanvas().style.cursor = '' })
+      map.on('mouseenter', 'demand-pending', () => { map.getCanvas().style.cursor = 'pointer' })
+      map.on('mouseleave', 'demand-pending', () => { map.getCanvas().style.cursor = '' })
     } else {
       // Remove demand layers
       if (map.getLayer(gapLayerId)) map.removeLayer(gapLayerId)
+      if (map.getLayer('demand-pending')) map.removeLayer('demand-pending')
       if (map.getLayer(layerId)) map.removeLayer(layerId)
       if (map.getSource(sourceId)) map.removeSource(sourceId)
     }
@@ -356,8 +388,11 @@ export default function CoverageMapClient({
               </div>
               <div className="bg-white/5 rounded-xl p-3">
                 <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Patient Waitlist</p>
-                <p className="text-xl font-bold">{stats.totalSubscribers} <span className="text-white/30 text-sm">confirmed</span></p>
-                <p className="text-[10px] text-white/30 mt-1">People who signed up to find a doctor near them</p>
+                <p className="text-xl font-bold">{stats.confirmedSubscribers} <span className="text-white/30 text-sm">confirmed</span></p>
+                {stats.pendingSubscribers > 0 && (
+                  <p className="text-xs text-purple-400/70 mt-0.5">{stats.pendingSubscribers} pending (unconfirmed)</p>
+                )}
+                <p className="text-[10px] text-white/25 mt-1">People who signed up to find a doctor near them</p>
                 {stats.internationalCount > 0 && (
                   <p className="text-[10px] text-white/30 mt-1 flex items-center gap-1">
                     <Globe className="w-3 h-3" /> {stats.internationalCount} international doctors (not on US map)
@@ -377,7 +412,11 @@ export default function CoverageMapClient({
                   {stats.topGaps.map((g, i) => (
                     <span key={i} className="text-xs text-white/80">
                       <span className="font-bold">{g.city}, {g.state}</span>
-                      <span className="text-rose-400 ml-1">{g.count} waiting</span>
+                      <span className="text-rose-400 ml-1">
+                        {g.confirmed > 0 ? `${g.confirmed} confirmed` : ''}
+                        {g.confirmed > 0 && g.pending > 0 ? ' + ' : ''}
+                        {g.pending > 0 ? `${g.pending} pending` : ''}
+                      </span>
                     </span>
                   ))}
                 </div>
@@ -403,8 +442,9 @@ export default function CoverageMapClient({
           Patient Demand
         </button>
         {showDemand && (
-          <div className="flex items-center gap-2 text-[10px] font-bold">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: DEMAND_COLOR }} /> Served
+          <div className="flex items-center gap-2 text-[10px] font-bold flex-wrap">
+            <span className="w-2.5 h-2.5 rounded-full" style={{ background: DEMAND_COLOR }} /> Confirmed
+            <span className="w-2.5 h-2.5 rounded-full ml-1 opacity-40" style={{ background: DEMAND_COLOR }} /> Pending
             <span className="w-2.5 h-2.5 rounded-full ml-1 ring-2 ring-white" style={{ background: GAP_COLOR }} /> Gap
           </div>
         )}
