@@ -11,8 +11,8 @@ const benefits = [
   },
   {
     icon: TrendingUp,
-    title: "Grow Your Practice",
-    desc: "Members report an average of 3+ new patients per month from the directory.",
+    title: "Your Profile, Done Right",
+    desc: "A profile built to answer the questions patients actually ask before they book.",
   },
   {
     icon: ShieldCheck,

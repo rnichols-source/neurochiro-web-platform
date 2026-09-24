@@ -1,10 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ArrowRight, MapPin, ShieldCheck, Globe, Users, Play } from "lucide-react";
+import { Search, ArrowRight, MapPin, Play } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase-admin";
 import Footer from "@/components/landing/Footer";
 import WhoIsItFor from "@/components/landing/WhoIsItFor";
-import Testimonials from "@/components/landing/Testimonials";
+// Testimonials removed — none were attributable to real people
 import SocialProof from "@/components/landing/SocialProof";
 import DoctorValueProp from "@/components/landing/DoctorValueProp";
 import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
@@ -20,19 +20,25 @@ export const revalidate = 300; // Cache for 5 minutes
 async function getPlatformStats() {
   try {
     const supabase = createAdminClient();
-    const [doctors, seminars, countries] = await Promise.all([
-      supabase.from('doctors').select('id', { count: 'exact', head: true }).eq('verification_status', 'verified'),
+    const [doctors, seminars, stateData] = await Promise.all([
+      supabase.from('doctors').select('id', { count: 'exact', head: true })
+        .eq('verification_status', 'verified')
+        .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA'),
       supabase.from('seminars').select('id', { count: 'exact', head: true }).eq('is_approved', true).eq('is_past', false),
-      supabase.from('doctors').select('country').eq('verification_status', 'verified'),
+      supabase.from('doctors').select('state')
+        .eq('verification_status', 'verified')
+        .or('country.is.null,country.eq.United States,country.eq.US,country.eq.USA')
+        .not('latitude', 'eq', 0)
+        .not('latitude', 'is', null),
     ]);
-    const uniqueCountries = new Set((countries.data || []).map((d: any) => d.country).filter(Boolean)).size;
+    const statesCovered = new Set((stateData.data || []).map((d: any) => d.state).filter(Boolean)).size;
     return {
       doctors: doctors.count || 0,
       seminars: seminars.count || 0,
-      countries: uniqueCountries || 1,
+      states: statesCovered,
     };
   } catch {
-    return { doctors: 0, seminars: 0, countries: 0 };
+    return { doctors: 0, seminars: 0, states: 0 };
   }
 }
 
@@ -84,17 +90,17 @@ export default async function HomePage() {
           </form>
         </div>
 
-        {/* Live Platform Stats */}
+        {/* Live Platform Stats — every number from a single query */}
         {stats.doctors > 0 && (
           <div className="max-w-2xl mx-auto mt-12 flex items-center justify-center gap-8 md:gap-12">
             <div className="text-center">
-              <p className="text-2xl md:text-3xl font-black text-white">{stats.doctors}+</p>
+              <p className="text-2xl md:text-3xl font-black text-white">{stats.doctors}</p>
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Verified Doctors</p>
             </div>
             <div className="w-px h-8 bg-white/10" />
             <div className="text-center">
-              <p className="text-2xl md:text-3xl font-black text-white">{stats.countries}</p>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Countries</p>
+              <p className="text-2xl md:text-3xl font-black text-white">{stats.states}</p>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">States</p>
             </div>
             {stats.seminars > 0 && (
               <>
@@ -204,7 +210,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { step: "1", title: "Search", desc: "Find a verified nervous system chiropractor by location or specialty." },
-              { step: "2", title: "Choose", desc: "Review profiles, read patient stories, and check credentials." },
+              { step: "2", title: "Choose", desc: "Review credentials, specialties, cost, availability, and watch their Spotlight interview." },
               { step: "3", title: "Book", desc: "Contact the doctor directly or book through their office." },
             ].map((item) => (
               <div key={item.step} className="text-center">
@@ -219,8 +225,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <Testimonials />
+      {/* Testimonials removed — none were attributable to real people */}
 
       {/* For Everyone — client component for region-aware pricing */}
       <WhoIsItFor />
@@ -248,9 +253,9 @@ export default async function HomePage() {
       <section className="bg-neuro-navy py-16 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl font-heading font-black text-white mb-4">Are you a nervous system chiropractor?</h2>
-          <p className="text-gray-400 mb-8">Join 115+ verified doctors across 30+ states. Get found by patients searching for your specialty. $99/mo.</p>
-          <Link href="/get-started" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
-            Get Started <ArrowRight className="w-5 h-5" />
+          <p className="text-gray-400 mb-8">Join {stats.doctors} verified doctors across {stats.states} states. Get found by patients searching for your specialty.</p>
+          <Link href="/pro?source=homepage_cta" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
+            Learn More <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </section>
