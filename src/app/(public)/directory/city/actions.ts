@@ -1,6 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase-admin";
+import { resolveStateCode } from "@/lib/resolve-state";
 
 export async function getDoctorsByLocation(city: string, state: string) {
   const supabase = createAdminClient();
@@ -13,7 +14,7 @@ export async function getDoctorsByLocation(city: string, state: string) {
     .select("id, first_name, last_name, clinic_name, slug, city, state, photo_url, bio, specialties, profile_views")
     .eq("verification_status", "verified")
     .ilike("city", decodedCity)
-    .ilike("state", decodedState)
+    .eq("state", resolveStateCode(decodedState) || decodedState)
     .order("profile_views", { ascending: false });
 
   return doctors || [];
@@ -28,7 +29,7 @@ export async function getDoctorsByState(state: string) {
     .from("doctors")
     .select("id, first_name, last_name, clinic_name, slug, city, state, photo_url, bio, specialties, profile_views")
     .eq("verification_status", "verified")
-    .ilike("state", decodedState)
+    .eq("state", resolveStateCode(decodedState) || decodedState)
     .order("profile_views", { ascending: false });
 
   return doctors || [];
@@ -45,7 +46,7 @@ export async function getCityStats(city: string, state: string) {
     .select("profile_views", { count: "exact" })
     .eq("verification_status", "verified")
     .ilike("city", decodedCity)
-    .ilike("state", decodedState);
+    .eq("state", resolveStateCode(decodedState) || decodedState);
 
   const totalViews = (data || []).reduce((sum: number, d: any) => sum + (d.profile_views || 0), 0);
 

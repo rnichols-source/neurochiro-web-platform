@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase-admin'
+import { resolveStateCode } from '@/lib/resolve-state'
 
 export async function getMarketData(city: string, state: string) {
   const supabase = createAdminClient();
@@ -10,14 +11,14 @@ export async function getMarketData(city: string, state: string) {
     .from('doctors')
     .select('id', { count: 'exact', head: true })
     .ilike('city', city)
-    .ilike('state', state)
+    .eq('state', resolveStateCode(state) || state)
     .in('verification_status', ['verified', 'pending']);
 
   // Count doctors in this state
   const { count: stateCount } = await supabase
     .from('doctors')
     .select('id', { count: 'exact', head: true })
-    .ilike('state', state)
+    .eq('state', resolveStateCode(state) || state)
     .in('verification_status', ['verified', 'pending']);
 
   // Total nationwide
@@ -42,7 +43,7 @@ export async function getLocationSuggestions(query: string) {
   const { data } = await supabase
     .from('doctors')
     .select('city, state')
-    .or(`city.ilike.%${query}%,state.ilike.%${query}%`)
+    .or(`city.ilike.%${query}%${resolveStateCode(query) ? `,state.eq.${resolveStateCode(query)}` : ''}`)
     .in('verification_status', ['verified', 'pending'])
     .limit(50);
 

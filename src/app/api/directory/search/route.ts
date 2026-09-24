@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { haversineDistance, boundingBox, isValidCoord } from '@/lib/geo';
+import { resolveStateCode } from '@/lib/resolve-state';
+import { getCityCoords } from '@/lib/city-data';
 
 export const revalidate = 60;
 
@@ -52,14 +54,24 @@ function expandQuery(raw: string): string {
   return raw;
 }
 
-function splitCityState(input: string): { city: string; state: string } | null {
+/**
+ * Split "Greenville, SC" or "Greenville South Carolina" into { city, stateCode }.
+ * stateCode is always a 2-letter code resolved via resolveStateCode.
+ */
+function splitCityState(input: string): { city: string; stateCode: string } | null {
   const trimmed = input.trim();
-  if (!trimmed.includes(' ') && !trimmed.includes(',')) return null;
+  if (!trimmed.includes(' ') && !trimmed.includes(',')) {
+    // Single word — might be a state code or name
+    const code = resolveStateCode(trimmed);
+    if (code) return { city: '', stateCode: code };
+    return null;
+  }
 
   if (trimmed.includes(',')) {
     const parts = trimmed.split(',').map(p => p.trim()).filter(Boolean);
     if (parts.length >= 2) {
-      return { city: parts[0], state: expandQuery(parts[1]) };
+      const code = resolveStateCode(parts[parts.length - 1]);
+      if (code) return { city: parts.slice(0, -1).join(', '), stateCode: code };
     }
   }
 
@@ -67,10 +79,10 @@ function splitCityState(input: string): { city: string; state: string } | null {
   for (let stateWordCount = 3; stateWordCount >= 1; stateWordCount--) {
     if (words.length <= stateWordCount) continue;
     const possibleState = words.slice(-stateWordCount).join(' ');
-    const expanded = expandQuery(possibleState);
-    if (expanded !== possibleState || Object.values(STATE_MAP).some(s => s.toLowerCase() === possibleState.toLowerCase())) {
+    const code = resolveStateCode(possibleState);
+    if (code) {
       const city = words.slice(0, -stateWordCount).join(' ');
-      return { city, state: expanded };
+      return { city, stateCode: code };
     }
   }
 
@@ -142,17 +154,46 @@ export async function GET(request: NextRequest) {
       dbQuery = dbQuery.overlaps('specialties', specialtiesFilter);
     }
 
-    // Text search
+    // Text search — state is always queried as 2-letter code via resolveStateCode
     const query = expandQuery(rawQuery);
     const locationInput = rawLocation || '';
     const splitFromQuery = !locationInput ? splitCityState(query) : null;
     const splitFromLocation = splitCityState(locationInput);
 
+    // Resolve coordinates from static city lookup for distance calculation
+    let searchLat = userLat;
+    let searchLng = userLng;
+    let hasSearchCoords = hasUserCoords;
+    const resolvedSplit = splitFromLocation || splitFromQuery;
+    if (!hasSearchCoords && resolvedSplit?.city && resolvedSplit?.stateCode) {
+      const { cityToSlug } = await import('@/lib/city-data');
+      const slug = cityToSlug(resolvedSplit.city, resolvedSplit.stateCode);
+      const coords = getCityCoords(slug);
+      if (coords) {
+        searchLat = coords.lat;
+        searchLng = coords.lng;
+        hasSearchCoords = true;
+      }
+    }
+
+    function applyLocationFilter(q: typeof dbQuery, split: { city: string; stateCode: string } | null, rawLoc: string) {
+      if (split) {
+        if (split.city) q = q.or(`city.ilike.%${split.city}%,address.ilike.%${split.city}%`);
+        q = q.eq('state', split.stateCode);
+      } else {
+        const stateCode = resolveStateCode(rawLoc);
+        if (stateCode) {
+          q = q.eq('state', stateCode);
+        } else {
+          q = q.or(`city.ilike.%${rawLoc}%,address.ilike.%${rawLoc}%`);
+        }
+      }
+      return q;
+    }
+
     if (splitFromQuery) {
-      const cityExpanded = expandQuery(splitFromQuery.city);
-      const stateExpanded = splitFromQuery.state;
-      dbQuery = dbQuery.or(`city.ilike.%${cityExpanded}%,address.ilike.%${cityExpanded}%`);
-      dbQuery = dbQuery.ilike('state', `%${stateExpanded}%`);
+      if (splitFromQuery.city) dbQuery = dbQuery.or(`city.ilike.%${splitFromQuery.city}%,address.ilike.%${splitFromQuery.city}%`);
+      dbQuery = dbQuery.eq('state', splitFromQuery.stateCode);
     } else if (query && locationInput) {
       const nameConditions = [
         `first_name.ilike.%${query}%`,
@@ -161,38 +202,24 @@ export async function GET(request: NextRequest) {
         `bio.ilike.%${query}%`,
       ];
       dbQuery = dbQuery.or(nameConditions.join(','));
-
-      const locExpanded = expandQuery(locationInput);
-      const locSplit = splitFromLocation;
-      if (locSplit) {
-        const cityExp = expandQuery(locSplit.city);
-        dbQuery = dbQuery.or(`city.ilike.%${cityExp}%,address.ilike.%${cityExp}%`);
-        dbQuery = dbQuery.ilike('state', `%${locSplit.state}%`);
-      } else {
-        dbQuery = dbQuery.or(`city.ilike.%${locExpanded}%,state.ilike.%${locExpanded}%,address.ilike.%${locExpanded}%`);
-      }
+      dbQuery = applyLocationFilter(dbQuery, splitFromLocation, locationInput);
     } else if (query) {
-      const expanded = expandQuery(query);
-      const allConditions = [
-        `first_name.ilike.%${query}%`,
-        `last_name.ilike.%${query}%`,
-        `clinic_name.ilike.%${query}%`,
-        `city.ilike.%${expanded}%`,
-        `state.ilike.%${expanded}%`,
-        `address.ilike.%${expanded}%`,
-        `bio.ilike.%${query}%`,
-      ];
-      dbQuery = dbQuery.or(allConditions.join(','));
-    } else if (locationInput) {
-      const locExpanded = expandQuery(locationInput);
-      const locSplit = splitFromLocation;
-      if (locSplit) {
-        const cityExp = expandQuery(locSplit.city);
-        dbQuery = dbQuery.or(`city.ilike.%${cityExp}%,address.ilike.%${cityExp}%`);
-        dbQuery = dbQuery.ilike('state', `%${locSplit.state}%`);
+      const stateCode = resolveStateCode(query);
+      if (stateCode) {
+        dbQuery = dbQuery.eq('state', stateCode);
       } else {
-        dbQuery = dbQuery.or(`city.ilike.%${locExpanded}%,state.ilike.%${locExpanded}%,address.ilike.%${locExpanded}%`);
+        const allConditions = [
+          `first_name.ilike.%${query}%`,
+          `last_name.ilike.%${query}%`,
+          `clinic_name.ilike.%${query}%`,
+          `city.ilike.%${query}%`,
+          `address.ilike.%${query}%`,
+          `bio.ilike.%${query}%`,
+        ];
+        dbQuery = dbQuery.or(allConditions.join(','));
       }
+    } else if (locationInput) {
+      dbQuery = applyLocationFilter(dbQuery, splitFromLocation, locationInput);
     }
 
     const { data, error, count } = await dbQuery.limit(limit);
@@ -202,46 +229,46 @@ export async function GET(request: NextRequest) {
       let fallbackData: any[] = [];
       let fallbackHint = '';
 
-      // Step 1: If both query + location were used, try just location (drop the specialty/name filter)
-      const locationTerm = rawLocation || (splitFromQuery ? `${splitFromQuery.city} ${splitFromQuery.state}` : '');
+      // Step 1: If both query + location were used, try just location
+      const locationTerm = rawLocation || (splitFromQuery ? `${splitFromQuery.city}, ${splitFromQuery.stateCode}` : '');
       if (rawQuery && locationTerm) {
-        const locExpanded = expandQuery(locationTerm);
         const locSplit = splitCityState(locationTerm);
         let locQuery = supabase.from('doctors').select(SELECT_FIELDS).in('verification_status', ['verified', 'pending']);
         if (locSplit) {
-          const cityExp = expandQuery(locSplit.city);
-          locQuery = locQuery.or(`city.ilike.%${cityExp}%,address.ilike.%${cityExp}%`);
-          locQuery = locQuery.ilike('state', `%${locSplit.state}%`);
+          if (locSplit.city) locQuery = locQuery.or(`city.ilike.%${locSplit.city}%,address.ilike.%${locSplit.city}%`);
+          locQuery = locQuery.eq('state', locSplit.stateCode);
         } else {
-          locQuery = locQuery.or(`city.ilike.%${locExpanded}%,state.ilike.%${locExpanded}%,address.ilike.%${locExpanded}%`);
+          const stateCode = resolveStateCode(locationTerm);
+          if (stateCode) { locQuery = locQuery.eq('state', stateCode); }
+          else { locQuery = locQuery.or(`city.ilike.%${locationTerm}%,address.ilike.%${locationTerm}%`); }
         }
         const { data: locFallback } = await locQuery.limit(20);
         if (locFallback?.length) { fallbackData = locFallback; fallbackHint = `Showing all doctors near ${locationTerm}`; }
       }
 
-      // Step 2: Try just the state (from split or expanded query)
+      // Step 2: Try just the state
       if (!fallbackData.length) {
-        const searchedState = splitFromQuery?.state || splitFromLocation?.state || expandQuery(rawLocation || rawQuery);
-        if (searchedState) {
+        const stateCode = splitFromQuery?.stateCode || splitFromLocation?.stateCode || resolveStateCode(rawLocation || rawQuery);
+        if (stateCode) {
           const { data: stateFallback } = await supabase
             .from('doctors')
             .select(SELECT_FIELDS)
             .in('verification_status', ['verified', 'pending'])
-            .ilike('state', `%${searchedState}%`)
+            .eq('state', stateCode)
             .limit(20);
-          if (stateFallback?.length) { fallbackData = stateFallback; fallbackHint = `Showing doctors in ${searchedState}`; }
+          if (stateFallback?.length) { fallbackData = stateFallback; fallbackHint = `Showing doctors in ${stateCode}`; }
         }
       }
 
-      // Step 2b: Try city name as a broad search (catches "Fort Lauderdale" → finds Florida doctors nearby)
+      // Step 2b: Try city name as a broad search
       if (!fallbackData.length) {
-        const cityTerm = splitFromQuery?.city || expandQuery(rawQuery || rawLocation);
+        const cityTerm = splitFromQuery?.city || rawQuery || rawLocation;
         if (cityTerm) {
           const { data: cityFallback } = await supabase
             .from('doctors')
             .select(SELECT_FIELDS)
             .in('verification_status', ['verified', 'pending'])
-            .or(`city.ilike.%${cityTerm}%,state.ilike.%${cityTerm}%,address.ilike.%${cityTerm}%`)
+            .or(`city.ilike.%${cityTerm}%,address.ilike.%${cityTerm}%`)
             .limit(20);
           if (cityFallback?.length) { fallbackData = cityFallback; fallbackHint = `Showing doctors near ${cityTerm}`; }
         }
@@ -285,8 +312,28 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Enrich with distance and apply exact radius filter
-    let enriched = enrichWithDistance(data, userLat, userLng, hasUserCoords);
+    // Enrich with distance using resolved coordinates (user geolocation or city lookup)
+    let enriched = enrichWithDistance(data, searchLat, searchLng, hasSearchCoords);
+
+    // Apply radius: default 50mi for location searches, expand progressively
+    if (hasSearchCoords) {
+      const defaultRadius = radius > 0 ? radius : 50;
+      const nearby = enriched.filter((d: any) => d.distance_miles != null && d.distance_miles <= defaultRadius);
+
+      if (nearby.length >= 3) {
+        enriched = nearby;
+      } else {
+        // Progressive expansion: 50 → 100 → 250
+        for (const expandedRadius of [100, 250]) {
+          const expanded = enriched.filter((d: any) => d.distance_miles != null && d.distance_miles <= expandedRadius);
+          if (expanded.length >= 3) { enriched = expanded; break; }
+        }
+        // If still under 3, keep all results with distance
+        if (enriched.filter((d: any) => d.distance_miles != null).length < 3) {
+          // Keep all, they'll be sorted by distance
+        }
+      }
+    }
 
     // Exact radius filter (bounding box was approximate)
     if (hasUserCoords && radius > 0) {

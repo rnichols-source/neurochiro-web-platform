@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { resolveStateCode } from '@/lib/resolve-state'
 import { Doctor } from '@/types/directory'
 import { revalidatePath } from 'next/cache'
 
@@ -54,10 +55,13 @@ export async function getDoctors(options: {
         'ON': 'Ontario', 'BC': 'British Columbia', 'AB': 'Alberta', 'QC': 'Quebec',
         'MB': 'Manitoba', 'SK': 'Saskatchewan', 'NS': 'Nova Scotia', 'NB': 'New Brunswick',
       };
-      const expandedQuery = stateMap[cleanQuery.toUpperCase()] || cleanQuery;
-
-      // Search across name, clinic, and location fields
-      query = query.or(`first_name.ilike.%${cleanQuery}%,last_name.ilike.%${cleanQuery}%,clinic_name.ilike.%${cleanQuery}%,city.ilike.%${cleanQuery}%,state.ilike.%${expandedQuery}%,address.ilike.%${cleanQuery}%`);
+      // Check if query is a state — use exact match on 2-letter code
+      const stateCode = resolveStateCode(cleanQuery);
+      if (stateCode) {
+        query = query.eq('state', stateCode);
+      } else {
+        query = query.or(`first_name.ilike.%${cleanQuery}%,last_name.ilike.%${cleanQuery}%,clinic_name.ilike.%${cleanQuery}%,city.ilike.%${cleanQuery}%,address.ilike.%${cleanQuery}%`);
+      }
     }
 
     if (bounds) {
@@ -244,7 +248,7 @@ export async function getCityDoctorCount(city: string, state: string): Promise<n
       .select('id', { count: 'exact', head: true })
       .in('verification_status', ['verified', 'pending'])
       .ilike('city', city)
-      .ilike('state', state);
+      .eq('state', resolveStateCode(state) || state);
     return count || 0;
   } catch { return 0; }
 }
@@ -258,7 +262,7 @@ export async function getNearbyDoctors(doctorId: string, state: string, limit = 
       .from('doctors')
       .select('id, first_name, last_name, clinic_name, city, state, slug, photo_url, specialties, latitude, longitude')
       .eq('verification_status', 'verified')
-      .ilike('state', state)
+      .eq('state', resolveStateCode(state) || state)
       .neq('id', doctorId);
 
     if (!data || data.length === 0) return [];
@@ -287,7 +291,7 @@ export async function getCitySearchVolume(city: string, state: string): Promise<
       .select('profile_views')
       .in('verification_status', ['verified', 'pending'])
       .ilike('city', city)
-      .ilike('state', state);
+      .eq('state', resolveStateCode(state) || state);
     return (data || []).reduce((sum, d) => sum + (d.profile_views || 0), 0);
   } catch { return 0; }
 }

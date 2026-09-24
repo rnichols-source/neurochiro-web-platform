@@ -1,6 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase-admin";
+import { resolveStateCode } from "@/lib/resolve-state";
 
 export async function findMatchingDoctors(data: {
   concern: string;
@@ -36,7 +37,7 @@ export async function findMatchingDoctors(data: {
   // Try city match first
   if (data.city && data.state) {
     const { data: cityDocs } = await query
-      .ilike("state", data.state)
+      .eq("state", resolveStateCode(data.state) || data.state)
       .limit(6);
 
     if (cityDocs && cityDocs.length > 0) {

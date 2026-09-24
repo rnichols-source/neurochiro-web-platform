@@ -41,6 +41,9 @@ npx next build       # Production build
 
 If a component needs interactivity (click handlers, state, effects), it must have `"use client"` at the top. When a Server Component needs an interactive piece, extract that piece into a separate client component file and import it.
 
+## Critical: State Column is 2-Letter Codes
+The `doctors.state` column stores **2-letter US state abbreviations** (e.g. "SC", "TX", "CA"), NOT full names. Always use `resolveStateCode()` from `src/lib/resolve-state.ts` to convert user input to a code, then query with `.eq('state', code)`. **Never** use `.ilike('state', '%South Carolina%')` — this silently returns zero results and causes the search to fall back to a nationwide list.
+
 ## Database
 - `profiles` table — user info (all roles), has authoritative `role` field
 - `doctors` table — doctor listings, linked via `user_id`

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { resolveStateCode } from '@/lib/resolve-state';
 
 export const revalidate = 300; // Cache 5 min
 
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
         const { data: stateData } = await supabase
           .from('doctors')
           .select('state, country')
-          .ilike('state', `%${q}%`)
+          .eq('state', resolveStateCode(q) || q)
           .eq('verification_status', 'verified')
           .limit(20);
 
