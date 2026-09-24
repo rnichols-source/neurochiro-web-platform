@@ -68,6 +68,17 @@ export async function updateDoctorProfile(formData: FormData) {
     const city = formData.get('city') as string
     const state = formData.get('state') as string
     const country = formData.get('country') as string || 'United States'
+
+    // Validate city and state to prevent dirty data
+    const { validateCity, validateState } = await import('@/lib/validate-location')
+    if (city) {
+      const cityCheck = validateCity(city)
+      if (!cityCheck.valid) return { error: cityCheck.error }
+    }
+    if (state) {
+      const stateCheck = validateState(state)
+      if (!stateCheck.valid) return { error: stateCheck.error }
+    }
     const website = formData.get('website') as string
     const bio = formData.get('bio') as string
     const specialties = formData.get('specialties')?.toString().split(',').map((s: string) => s.trim()).filter(Boolean) || []
