@@ -36,6 +36,11 @@ npx tsc --noEmit     # Type check
 npx next build       # Production build
 ```
 
+## Critical: Server Component vs Client Component
+**Never put `onClick`, `onChange`, or any event handler in a Server Component.** Turbopack dev server silently accepts it, but the production build (and Vercel) throws a 500 error: "Event handlers cannot be passed to Client Component props." This cost us all 149 city pages going down in production while working fine in dev.
+
+If a component needs interactivity (click handlers, state, effects), it must have `"use client"` at the top. When a Server Component needs an interactive piece, extract that piece into a separate client component file and import it.
+
 ## Database
 - `profiles` table — user info (all roles), has authoritative `role` field
 - `doctors` table — doctor listings, linked via `user_id`
