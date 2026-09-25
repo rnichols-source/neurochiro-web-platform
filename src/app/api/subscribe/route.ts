@@ -65,6 +65,69 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminClient();
 
+  // ── Phase 1: Check coverage before subscribing ──
+  // If doctors exist within 30 miles, show them instead of adding to waitlist
+  try {
+    const { data: zipCoord } = await (supabase as any)
+      .from('zip_codes')
+      .select('lat, lng, city, state')
+      .eq('country', 'US')
+      .eq('zip', normalizedZip)
+      .maybeSingle();
+
+    if (zipCoord) {
+      const { haversineDistance } = await import('@/lib/geo');
+      const lat = Number(zipCoord.lat);
+      const lng = Number(zipCoord.lng);
+
+      const { data: nearbyDocs } = await supabase
+        .from('doctors')
+        .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, photo_url')
+        .eq('verification_status', 'verified')
+        .or('country.is.null,country.eq.US')
+        .not('latitude', 'eq', 0)
+        .not('latitude', 'is', null);
+
+      const nearby = (nearbyDocs || [])
+        .map((d: any) => ({
+          ...d,
+          distance: haversineDistance(lat, lng, d.latitude, d.longitude),
+        }))
+        .filter((d: any) => d.distance <= 30)
+        .sort((a: any, b: any) => a.distance - b.distance)
+        .slice(0, 5);
+
+      if (nearby.length > 0) {
+        // Doctors exist near this ZIP — return them instead of subscribing
+        // Track this in conversion_events for analytics
+        (supabase as any).from('conversion_events').insert({
+          event_type: 'waitlist_coverage_hit',
+          source_page: '/list',
+          had_location: true,
+          session_id: normalizedZip,
+        }).then(() => {}).catch(() => {});
+
+        return NextResponse.json({
+          ok: false,
+          coverage: true,
+          doctors: nearby.map((d: any) => ({
+            name: `Dr. ${d.first_name} ${d.last_name}`,
+            clinic: d.clinic_name,
+            city: d.city,
+            state: d.state,
+            distance: Math.round(d.distance * 10) / 10,
+            slug: d.slug || d.id,
+            photo_url: d.photo_url,
+          })),
+          message: `Good news — there ${nearby.length === 1 ? 'is already a doctor' : `are already ${nearby.length} doctors`} near you.`,
+        });
+      }
+    }
+  } catch (coverageErr) {
+    // Coverage check is non-blocking — proceed with normal signup if it fails
+    console.warn('[SUBSCRIBE] Coverage check error (non-blocking):', coverageErr);
+  }
+
   // Check for existing subscriber
   const { data: existing } = await (supabase as any)
     .from('subscribers')

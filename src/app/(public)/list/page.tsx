@@ -25,8 +25,10 @@ function SubscribeListContent() {
   const [consent, setConsent] = useState(false);
   const [honeypot, setHoneypot] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error" | "coverage">("idle");
   const [serverError, setServerError] = useState("");
+  const [nearbyDoctors, setNearbyDoctors] = useState<any[]>([]);
+  const [coverageMessage, setCoverageMessage] = useState("");
   const tsRef = useRef(Date.now());
 
   useEffect(() => {
@@ -71,6 +73,13 @@ function SubscribeListContent() {
 
       const data = await res.json();
 
+      if (data.coverage) {
+        setNearbyDoctors(data.doctors || []);
+        setCoverageMessage(data.message || "");
+        setStatus("coverage");
+        return;
+      }
+
       if (!res.ok || !data.ok) {
         setServerError(data.error || "Something went wrong. Please try again.");
         setStatus("error");
@@ -83,6 +92,52 @@ function SubscribeListContent() {
       setStatus("error");
     }
   };
+
+  if (status === "coverage") {
+    return (
+      <div className="min-h-dvh bg-neuro-cream flex items-center justify-center px-6 py-12">
+        <div className="max-w-lg w-full">
+          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-8 h-8 text-green-600" />
+          </div>
+          <h1 className="text-2xl font-heading font-black text-neuro-navy text-center mb-2">
+            {coverageMessage || "Good news — there are doctors near you."}
+          </h1>
+          <p className="text-gray-500 text-center text-sm mb-8">
+            You don't need to wait. These nervous system chiropractors are already taking patients in your area.
+          </p>
+          <div className="space-y-3">
+            {nearbyDoctors.map((doc: any, i: number) => (
+              <Link
+                key={i}
+                href={`/directory/${doc.slug}`}
+                className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all"
+              >
+                <div className="w-12 h-12 rounded-xl bg-neuro-navy/5 flex items-center justify-center shrink-0 overflow-hidden">
+                  {doc.photo_url ? (
+                    <img src={doc.photo_url} alt={doc.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-neuro-navy font-bold text-sm">{doc.name.replace('Dr. ', '').split(' ').map((n: string) => n[0]).join('')}</span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-neuro-navy text-sm">{doc.name}</p>
+                  <p className="text-gray-500 text-xs">{doc.clinic}</p>
+                  <p className="text-gray-400 text-xs">{doc.city}, {doc.state} · {doc.distance} mi</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-neuro-orange shrink-0" />
+              </Link>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/directory" className="text-neuro-orange font-bold text-sm hover:underline">
+              Browse all doctors in the directory
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (status === "success") {
     return (
