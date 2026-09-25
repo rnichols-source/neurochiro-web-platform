@@ -1,74 +1,80 @@
 "use client";
 
-import {
-  Loader2,
-  ArrowRight,
-  GraduationCap,
-  Briefcase,
-  Calendar,
-  Map,
-  Users,
-  Compass,
-  BookOpen,
-} from "lucide-react";
-import Link from "next/link";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
-  getStudentDashboardData,
-  getAcademyProgress,
-  getCareerReadinessData,
-  getMatchedJobsCount,
-  transitionToDoctorAction,
-} from "./actions";
-import { getChiroScore } from "./chiroscore-actions";
-import CareerReadiness from "./career-readiness";
-import ChiroScoreDisplay from "./chiroscore-display";
+  Compass, ClipboardList, Briefcase, FileText, DollarSign,
+  Check, ArrowRight, Loader2, ChevronDown, ChevronUp,
+} from "lucide-react";
+import { getCareerReadinessData } from "./actions";
+import { getVerificationStatus } from "../actions/verify-school";
 import SchoolVerificationBanner from "./school-verification-banner";
-import PipelinePreview from "./pipeline-preview";
-import MilestoneTimeline from "./milestone-timeline";
+import { getMatchedJobsCount } from "./actions";
+
+// ── Pipeline stages ──
+
+const STAGES = [
+  {
+    id: "technique", number: 1,
+    title: "Find Your Technique",
+    task: "Explore 18 techniques and take the Find Your Fit quiz",
+    icon: Compass,
+    href: "/student/techniques",
+    check: () => false, // no completion tracking without Academy
+  },
+  {
+    id: "interview", number: 2,
+    title: "Prepare for Interviews",
+    task: "Practice the 20 questions doctors actually ask",
+    icon: ClipboardList,
+    href: "/student/interview-prep",
+    check: () => false,
+  },
+  {
+    id: "jobs", number: 3,
+    title: "Find Your Job",
+    task: "Browse open positions and apply",
+    icon: Briefcase,
+    href: "/student/jobs",
+    check: (m: any) => m?.firstJobApp,
+  },
+  {
+    id: "contract", number: 4,
+    title: "Review Your Contract",
+    task: "Run your offer through the Contract Lab before you sign",
+    icon: FileText,
+    href: "/student/contract-lab",
+    check: (m: any) => m?.contractReviewed,
+  },
+  {
+    id: "money", number: 5,
+    title: "Plan Your Finances",
+    task: "Model your first-year budget and loan repayment",
+    icon: DollarSign,
+    href: "/student/financial-planner",
+    check: (m: any) => m?.financialPlanCreated,
+  },
+];
 
 export default function StudentDashboard() {
-  const [data, setData] = useState<any>(null);
-  const [academyData, setAcademyData] = useState<{ completed: number; total: number }>({ completed: 0, total: 22 });
   const [readiness, setReadiness] = useState<any>(null);
-  const [chiroScore, setChiroScore] = useState<any>(null);
-  const [jobCount, setJobCount] = useState(0);
+  const [verification, setVerification] = useState<any>(null);
+  const [jobCount, setJobCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-  const [transitioning, setTransitioning] = useState(false);
+  const [expandedStage, setExpandedStage] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
-      getStudentDashboardData(),
-      getAcademyProgress(),
       getCareerReadinessData(),
+      getVerificationStatus(),
       getMatchedJobsCount(),
-      getChiroScore(),
-    ]).then(([dashResult, academyResult, readinessResult, jobsResult, chiroResult]) => {
-      if (dashResult) setData(dashResult);
-      if (academyResult) setAcademyData(academyResult);
-      if (readinessResult) setReadiness(readinessResult);
-      setJobCount(jobsResult);
-      if (chiroResult) setChiroScore(chiroResult);
+    ]).then(([r, v, j]) => {
+      setReadiness(r);
+      setVerification(v);
+      setJobCount(j);
       setLoading(false);
     });
   }, []);
-
-  const handleTransition = async () => {
-    if (!confirm("This will switch your account from Student to Doctor. Your student data will be preserved. This can't be undone. Continue?")) return;
-    setTransitioning(true);
-    try {
-      const result = await transitionToDoctorAction();
-      if (result.success) {
-        window.location.href = "/doctor/dashboard";
-      } else {
-        alert("Failed to transition account. Please try again.");
-        setTransitioning(false);
-      }
-    } catch {
-      alert("Failed to transition account. Please try again.");
-      setTransitioning(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -78,209 +84,147 @@ export default function StudentDashboard() {
     );
   }
 
-  const studentName = data?.profile?.name || "Student";
-  const schoolInfo = data?.profile?.school
-    ? `${data.profile.school} '${data.profile.gradYear?.toString().slice(-2) || "27"}`
-    : null;
+  const milestones = readiness?.milestones || {};
+  const gradYear = readiness?.raw?.graduationYear || verification?.graduationYear;
+  const studentName = readiness?.raw?.name?.split(' ')[0] || '';
 
-  const currentYear = new Date().getFullYear();
-  const gradYear = data?.profile?.gradYear ? parseInt(data.profile.gradYear, 10) : null;
-  const isGraduating = gradYear && gradYear <= currentYear;
+  // Graduation countdown
+  let gradLine = '';
+  if (gradYear) {
+    const gradDate = new Date(gradYear, 4, 15); // May of grad year
+    const now = new Date();
+    const monthsLeft = Math.max(0, Math.round((gradDate.getTime() - now.getTime()) / (30.44 * 24 * 60 * 60 * 1000)));
+    if (monthsLeft > 0) {
+      gradLine = `Graduating ${gradYear} · ${monthsLeft} month${monthsLeft !== 1 ? 's' : ''} until you need an offer`;
+    } else {
+      gradLine = `Class of ${gradYear}`;
+    }
+  }
 
-  const daysUntilGrad = gradYear
-    ? Math.max(0, Math.ceil((new Date(`${gradYear}-06-15`).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-    : null;
-
-  const totalScore = readiness?.totalScore || 0;
+  // Find current stage (first incomplete)
+  const completedCount = STAGES.filter(s => s.check(milestones)).length;
+  const currentStage = STAGES.find(s => !s.check(milestones)) || STAGES[STAGES.length - 1];
+  const currentIndex = STAGES.indexOf(currentStage);
 
   return (
-    <div className="p-4 md:p-10 max-w-6xl mx-auto space-y-8">
+    <div className="p-4 md:p-10 max-w-3xl mx-auto space-y-6 pb-20">
       {/* School Verification */}
       <SchoolVerificationBanner />
 
-      {/* Header */}
-      <div className="flex items-end justify-between">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.15em] text-[#D66829] font-semibold mb-1">Welcome back</p>
-          <h1 className="text-3xl font-bold text-white tracking-tight">
-            {studentName}
-          </h1>
-          {schoolInfo && <p className="text-white/30 text-sm mt-1 font-medium">{schoolInfo}</p>}
+      {/* Header: name + graduation countdown */}
+      <div>
+        {studentName && (
+          <h1 className="text-2xl font-bold text-white tracking-tight mb-1">{studentName}</h1>
+        )}
+        {gradLine ? (
+          <p className="text-sm text-white/40">{gradLine}</p>
+        ) : (
+          <Link href="/student/profile" className="text-sm text-[#D66829] hover:underline">
+            Set your graduation year to see your countdown
+          </Link>
+        )}
+      </div>
+
+      {/* Current stage — hero */}
+      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-[#D66829]/30 shadow-lg shadow-black/20 p-5 md:p-8">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829]">
+            Stage {currentStage.number} of {STAGES.length}
+          </span>
+          <span className="text-[10px] text-white/20">·</span>
+          <span className="text-[10px] text-white/20">{completedCount} complete</span>
         </div>
+        <h2 className="text-xl font-bold text-white mb-2">{currentStage.title}</h2>
+        <p className="text-sm text-white/50 mb-6">{currentStage.task}</p>
         <Link
-          href="/student/career-pipeline"
-          className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.04] border border-white/[0.06] text-[11px] text-white/40 hover:text-[#D66829] hover:border-[#D66829]/20 transition-all"
+          href={currentStage.href}
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[#D66829] text-white rounded-xl font-bold text-sm hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors min-h-[44px]"
         >
-          <Map className="w-3.5 h-3.5" /> Career Pipeline
+          {currentStage.id === 'jobs' && jobCount ? `Browse ${jobCount} Open Jobs` : 'Start'}
+          <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
 
-      {/* Stats strip */}
-      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/[0.06]">
-        {[
-          { label: "Readiness", value: chiroScore?.totalScore || totalScore, unit: "/100" },
-          { label: "Open Jobs", value: jobCount, href: "/student/jobs" },
-          { label: "Modules", value: academyData.completed, unit: `/${academyData.total}`, href: "/student/academy" },
-          daysUntilGrad !== null && daysUntilGrad > 0
-            ? { label: "Graduation", value: daysUntilGrad, unit: " days" }
-            : { label: "Applications", value: readiness?.raw?.appsSubmitted || 0 },
-        ].map((stat, i) => {
-          const inner = (
-            <div className="px-3 sm:px-5 py-4 sm:py-6 text-center">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/25 mb-1 sm:mb-2 truncate">{stat.label}</p>
-              <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums">
-                {stat.value}
-                {stat.unit && <span className="text-base text-white/20 font-normal">{stat.unit}</span>}
-              </p>
-            </div>
-          );
-          return stat.href ? (
-            <Link key={i} href={stat.href} className="hover:bg-white/[0.03] transition-colors">{inner}</Link>
-          ) : (
-            <div key={i}>{inner}</div>
+      {/* Progress bar */}
+      <div className="flex gap-1">
+        {STAGES.map((stage) => {
+          const done = stage.check(milestones);
+          const isCurrent = stage.id === currentStage.id;
+          return (
+            <div
+              key={stage.id}
+              className={`flex-1 h-2 rounded-sm transition-all ${
+                done ? "bg-gradient-to-r from-[#D66829] to-[#e8834a]"
+                : isCurrent ? "bg-[#D66829]/30"
+                : "bg-white/[0.06]"
+              }`}
+            />
           );
         })}
       </div>
 
-      {/* First-time guidance */}
-      {totalScore < 20 && (
-        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-4 sm:p-6 md:p-8">
-          <p className="text-[13px] font-semibold text-white mb-5">Here&apos;s how this works</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            <div className="border-l-2 border-[#D66829] pl-4">
-              <p className="text-[13px] font-semibold text-white mb-1">1. Learn</p>
-              <p className="text-[12px] text-white/40 leading-relaxed">Courses, techniques, and interview prep. All included with your membership.</p>
-            </div>
-            <div className="border-l-2 border-white/[0.1] pl-4">
-              <p className="text-[13px] font-semibold text-white mb-1">2. Connect</p>
-              <p className="text-[12px] text-white/40 leading-relaxed">Matched jobs, mentors, and your student network.</p>
-            </div>
-            <div className="border-l-2 border-white/[0.1] pl-4">
-              <p className="text-[13px] font-semibold text-white mb-1">3. Launch</p>
-              <p className="text-[12px] text-white/40 leading-relaxed">Contract review and financial planning before day one.</p>
-            </div>
-          </div>
-          <p className="text-[11px] text-white/20 mt-5">
-            Your readiness score tracks progress across everything. Follow the <Link href="/student/career-pipeline" className="text-[#D66829] hover:underline">Career Pipeline</Link> for a step-by-step guide.
-          </p>
-        </div>
-      )}
+      {/* All stages */}
+      <div className="space-y-2">
+        {STAGES.map((stage) => {
+          const done = stage.check(milestones);
+          const isCurrent = stage.id === currentStage.id;
+          const isExpanded = expandedStage === stage.id;
+          const Icon = stage.icon;
 
-      {/* Main grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        {/* Left: readiness */}
-        <div className="lg:col-span-3">
-          {chiroScore ? (
-            <ChiroScoreDisplay data={chiroScore} />
-          ) : readiness ? (
-            <CareerReadiness totalScore={totalScore} breakdown={readiness.breakdown} />
-          ) : null}
-        </div>
-
-        {/* Right: pipeline + milestones */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
-            {readiness && <PipelinePreview milestones={readiness.milestones} modulesCompleted={readiness.raw.modulesCompleted} />}
-          </div>
-          <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
-            {readiness && <MilestoneTimeline milestones={readiness.milestones} />}
-          </div>
-        </div>
-      </div>
-
-      {/* What to do next */}
-      <div>
-        <p className="text-[10px] uppercase tracking-[0.2em] text-white/25 font-semibold mb-4">What to do next</p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {getSmartActions(data, readiness, jobCount).map((action, i) => (
-            <Link
-              key={i}
-              href={action.href}
-              className={`bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 hover:border-[#D66829]/30 transition-all group ${
-                i === 0 ? "border-l-[3px] border-l-[#D66829]" : ""
+          return (
+            <button
+              key={stage.id}
+              onClick={() => setExpandedStage(isExpanded ? null : stage.id)}
+              className={`w-full text-left rounded-xl border transition-all ${
+                done ? "bg-white/[0.02] border-white/[0.06]"
+                : isCurrent ? "bg-gradient-to-b from-[#1a2e40] to-[#162231] border-[#D66829]/20"
+                : "bg-white/[0.01] border-white/[0.04] opacity-50"
               }`}
             >
-              <action.icon className="w-5 h-5 text-white/15 group-hover:text-[#D66829] transition-colors mb-4" />
-              <p className="text-[14px] font-semibold text-white mb-1">{action.title}</p>
-              <p className="text-[12px] text-white/35 leading-relaxed">{action.desc}</p>
-            </Link>
-          ))}
-        </div>
+              <div className="flex items-center gap-3 p-4">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                  done ? "bg-[#D66829]" : isCurrent ? "bg-[#D66829]/15" : "bg-white/[0.04]"
+                }`}>
+                  {done ? <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                    : <Icon className={`w-4 h-4 ${isCurrent ? "text-[#D66829]" : "text-white/20"}`} />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium ${done ? "text-white/50" : "text-white"}`}>
+                    {stage.title}
+                  </p>
+                  {!done && <p className="text-xs text-white/30 truncate">{stage.task}</p>}
+                </div>
+                <div className="shrink-0 flex items-center gap-2">
+                  {done && <span className="text-[10px] text-[#D66829] font-bold">Done</span>}
+                  {isExpanded ? <ChevronUp className="w-4 h-4 text-white/20" /> : <ChevronDown className="w-4 h-4 text-white/20" />}
+                </div>
+              </div>
+              {isExpanded && (
+                <div className="px-4 pb-4" onClick={e => e.stopPropagation()}>
+                  <Link
+                    href={stage.href}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-white/[0.06] text-white/60 rounded-lg text-xs font-bold hover:bg-white/[0.1] transition-colors"
+                  >
+                    {done ? 'Review' : 'Go'} <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Quick actions */}
-      <div>
-        <p className="text-[10px] uppercase tracking-[0.2em] text-white/25 font-semibold mb-4">Quick actions</p>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
-          {[
-            { label: "Jobs", href: "/student/jobs", icon: Briefcase },
-            { label: "Mentors", href: "/student/mentors", icon: Users },
-            { label: "Academy", href: "/student/academy", icon: BookOpen },
-            { label: "Techniques", href: "/student/techniques", icon: Compass },
-            { label: "Seminars", href: "/student/seminars", icon: Calendar },
-            { label: "Community", href: "/student/community", icon: GraduationCap },
-          ].map((action) => (
-            <Link
-              key={action.href}
-              href={action.href}
-              className="bg-[#162231] rounded-xl border border-white/[0.08] p-3 sm:p-4 text-center hover:border-[#D66829]/30 hover:-translate-y-0.5 transition-all group shadow-md shadow-black/10 min-h-[64px] flex flex-col items-center justify-center"
-            >
-              <action.icon className="w-5 h-5 text-white/15 group-hover:text-[#D66829] transition-colors mx-auto mb-1.5 sm:mb-2" />
-              <p className="text-[11px] font-medium text-white/35 group-hover:text-white/70">{action.label}</p>
-            </Link>
-          ))}
-        </div>
+      {/* Quick links */}
+      <div className="grid grid-cols-2 gap-2 pt-2">
+        <Link href="/directory" className="p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-center hover:bg-white/[0.06] transition-colors">
+          <p className="text-xs font-bold text-white/50">Browse Doctors</p>
+          <p className="text-[10px] text-white/20">Watch Spotlight interviews</p>
+        </Link>
+        <Link href="/student/mentors" className="p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-center hover:bg-white/[0.06] transition-colors">
+          <p className="text-xs font-bold text-white/50">Find a Mentor</p>
+          <p className="text-[10px] text-white/20">Message doctors in the network</p>
+        </Link>
       </div>
-
-      {/* Graduation */}
-      {isGraduating && (
-        <div className="bg-gradient-to-r from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-4 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#D66829] font-semibold mb-2">Congratulations</p>
-            <h3 className="text-xl font-bold text-white">Transition to Doctor</h3>
-            <p className="text-white/35 text-sm mt-1">Switch to a Doctor account to access the provider dashboard.</p>
-          </div>
-          <button
-            onClick={handleTransition}
-            disabled={transitioning}
-            className="w-full md:w-auto px-6 py-3 bg-[#D66829] text-white font-semibold text-sm rounded-lg hover:bg-[#e8834a] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap shadow-lg shadow-[#D66829]/20"
-          >
-            {transitioning && <Loader2 className="w-4 h-4 animate-spin" />}
-            Transition Account <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      )}
     </div>
   );
-}
-
-function getSmartActions(data: any, readiness: any, jobCount: number) {
-  const actions: { title: string; desc: string; href: string; icon: any }[] = [];
-  const milestones = readiness?.milestones;
-
-  if (!milestones?.profileComplete) {
-    actions.push({ title: "Complete your profile", desc: "Powers job matching and mentor discovery", href: "/student/profile", icon: Users });
-  }
-  if (!milestones?.firstCourseStarted) {
-    actions.push({ title: "Start your first course", desc: "Begin with Nervous System Foundations", href: "/student/academy", icon: BookOpen });
-  }
-  if (jobCount > 0 && milestones?.firstCourseCompleted) {
-    actions.push({ title: `${jobCount} jobs available`, desc: "Matched to your profile", href: "/student/jobs", icon: Briefcase });
-  }
-  if (milestones?.firstCourseCompleted && !milestones?.firstJobApp) {
-    actions.push({ title: "Apply to your first job", desc: "You have the knowledge — put it to work", href: "/student/jobs", icon: Briefcase });
-  }
-  if (milestones?.firstJobApp && !milestones?.contractReviewed) {
-    actions.push({ title: "Review a contract", desc: "Don't sign without Contract Lab", href: "/student/contract-lab", icon: Compass });
-  }
-  if (milestones?.contractReviewed && !milestones?.financialPlanCreated) {
-    actions.push({ title: "Create your financial plan", desc: "Know your numbers before day one", href: "/student/financial-planner", icon: Calendar });
-  }
-  if (actions.length < 3) {
-    actions.push({ title: "Explore techniques", desc: "Find the method that fits your style", href: "/student/techniques", icon: Compass });
-  }
-  if (actions.length < 3) {
-    actions.push({ title: "Find a mentor", desc: "Connect with doctors who want to help", href: "/student/mentors", icon: Users });
-  }
-  return actions.slice(0, 3);
 }

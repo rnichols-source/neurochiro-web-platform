@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase,
   MessageSquare, FileText, LogOut, X, Settings, DollarSign, Compass, ClipboardList, HelpCircle,
-  Map, Heart, Search,
+  Heart, Search,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
@@ -19,8 +19,7 @@ const navSections = [
   {
     label: null,
     items: [
-      { name: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
-      { name: "Career Pipeline", href: "/student/career-pipeline", icon: Map },
+      { name: "Home", href: "/student/dashboard", icon: LayoutDashboard },
       { name: "Profile", href: "/student/profile", icon: User },
     ],
   },
