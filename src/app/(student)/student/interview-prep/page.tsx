@@ -1145,227 +1145,121 @@ function InterviewPlaybookContent() {
     </div>
   );
 
-  // ─── TAB 1: Interview Questions ───────────────────────────────────────────
+  // ─── TAB 1: Interview Questions (Practice Mode) ────────────────────────────
 
   const renderInterviewQuestions = () => {
     const filtered = questionFilter === "All"
       ? INTERVIEW_QUESTIONS
       : INTERVIEW_QUESTIONS.filter((q) => q.category === questionFilter);
 
+    const safeIdx = Math.min(questionIndex, Math.max(filtered.length - 1, 0));
+    const q = filtered[safeIdx];
+
+    if (!q) return <p className="text-white/40 text-sm py-10 text-center">No questions in this category.</p>;
+
+    const goNext = () => { setShowAnswer(false); setQuestionIndex(i => Math.min(i + 1, filtered.length - 1)); };
+    const goPrev = () => { setShowAnswer(false); setQuestionIndex(i => Math.max(i - 1, 0)); };
+    const jumpTo = (i: number) => { setShowAnswer(false); setQuestionIndex(i); };
+
     return (
       <div>
-        <div className="flex items-center gap-3 mb-2">
-          <MessageSquare className="w-7 h-7" style={{ color: BRAND_ORANGE }} />
-          <h2 className="text-2xl font-heading font-black" style={{ color: BRAND_NAVY }}>
-            Interview Questions
-          </h2>
-        </div>
-        <p className="text-white/40 text-sm mb-6">
-          Master the 20 most common chiropractic associate interview questions with frameworks, example answers, and practice mode.
-        </p>
-
-        {/* Filter pills */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {FILTER_CATEGORIES.map((cat) => {
-            const isActive = questionFilter === cat;
-            const color = cat === "All" ? BRAND_NAVY : CATEGORY_COLORS[cat] || BRAND_NAVY;
-            return (
-              <button
-                key={cat}
-                onClick={() => setQuestionFilter(cat)}
-                className="px-4 py-1.5 rounded-full text-xs font-bold transition-all border"
-                style={{
-                  backgroundColor: isActive ? color : "transparent",
-                  color: isActive ? "#fff" : color,
-                  borderColor: color,
-                }}
-              >
-                {cat}
-              </button>
-            );
-          })}
+        {/* Category filter */}
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+          {FILTER_CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => { setQuestionFilter(cat); setQuestionIndex(0); setShowAnswer(false); }}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+                questionFilter === cat ? "bg-[#D66829] text-white" : "bg-white/[0.06] text-white/40 hover:text-white/60"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
-        {/* Question cards */}
-        <div className="space-y-3">
-          {filtered.map((q) => {
-            const isFree = q.id <= 5 || purchased;
-            const isExpanded = expandedQ === q.id;
-            const inPractice = practiceMode[q.id];
-            const catColor = CATEGORY_COLORS[q.category] || BRAND_NAVY;
-            const diffColor = DIFFICULTY_COLORS[q.difficulty] || BRAND_NAVY;
+        {/* Progress */}
+        <p className="text-xs text-white/30 mb-4">Question {safeIdx + 1} of {filtered.length}</p>
 
-            return (
-              <div key={q.id} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden relative">
-                {/* Collapsed header */}
-                <button
-                  onClick={() => {
-                    if (isFree) setExpandedQ(isExpanded ? null : q.id);
-                  }}
-                  className="w-full text-left p-5 flex items-start gap-4"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="text-white/35 text-xs font-bold">Q{q.id}</span>
-                      <span
-                        className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
-                        style={{ backgroundColor: diffColor }}
-                      >
-                        {q.difficulty}
-                      </span>
-                      <span
-                        className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
-                        style={{ backgroundColor: catColor }}
-                      >
-                        {q.category}
-                      </span>
-                    </div>
-                    <h3 className="font-bold text-base" style={{ color: BRAND_NAVY }}>
-                      {q.question}
-                    </h3>
-                  </div>
-                  <div className="flex-shrink-0 mt-1">
-                    {isFree ? (
-                      isExpanded ? <ChevronDown className="w-5 h-5 text-white/35" /> : <ChevronRight className="w-5 h-5 text-white/35" />
-                    ) : (
-                      <Lock className="w-5 h-5 text-white/20" />
-                    )}
-                  </div>
-                </button>
+        {/* Question card */}
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-5 md:p-8 mb-4">
+          {/* Tags */}
+          <div className="flex items-center gap-2 mb-4">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ background: `${CATEGORY_COLORS[q.category]}20`, color: CATEGORY_COLORS[q.category] }}>{q.category}</span>
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ background: `${DIFFICULTY_COLORS[q.difficulty]}20`, color: DIFFICULTY_COLORS[q.difficulty] }}>{q.difficulty}</span>
+          </div>
 
-                {/* Lock overlay for 6-20 */}
-                {!isFree && isExpanded && <PurchaseGate />}
+          {/* Question */}
+          <h3 className="text-xl font-bold text-white mb-4 leading-relaxed">&ldquo;{q.question}&rdquo;</h3>
 
-                {/* Expanded content */}
-                {isExpanded && isFree && !inPractice && (
-                  <div className="px-5 pb-6 pt-0 space-y-5 border-t border-white/[0.08]">
-                    {/* Why they ask */}
-                    <p className="text-sm text-white/40 italic leading-relaxed">{q.whyTheyAsk}</p>
+          {/* Why they ask */}
+          <p className="text-xs text-white/30 italic mb-6">{q.whyTheyAsk}</p>
 
-                    {/* Strong answer framework */}
-                    <div>
-                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: BRAND_ORANGE }}>
-                        Strong Answer Framework
-                      </h4>
-                      <ul className="space-y-1.5">
-                        {q.framework.map((f, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-white/60">
-                            <ArrowRight className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: BRAND_ORANGE }} />
-                            {f}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Example answer */}
-                    <div className="rounded-xl p-4 border-2" style={{ borderColor: BRAND_ORANGE, backgroundColor: `${BRAND_ORANGE}08` }}>
-                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: BRAND_ORANGE }}>
-                        Example Answer
-                      </h4>
-                      <p className="text-sm text-white/60 italic leading-relaxed">&ldquo;{q.exampleAnswer}&rdquo;</p>
-                    </div>
-
-                    {/* Red flags */}
-                    <div className="rounded-xl p-4 border-2 border-red-500/20 bg-red-500/10">
-                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-red-600">
-                        Red Flags to Avoid
-                      </h4>
-                      <ul className="space-y-1.5">
-                        {q.redFlags.map((rf, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-red-400">
-                            <X className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-400" />
-                            {rf}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Practice button */}
-                    <button
-                      onClick={() => {
-                        setPracticeMode((prev) => ({ ...prev, [q.id]: true }));
-                        setShowAnswers((prev) => ({ ...prev, [q.id]: false }));
-                      }}
-                      className="flex items-center gap-2 px-5 py-3 rounded-xl text-white text-sm font-bold hover:opacity-90 transition-colors"
-                      style={{ backgroundColor: BRAND_NAVY }}
-                    >
-                      <Target className="w-4 h-4" /> Practice This
-                    </button>
-                  </div>
-                )}
-
-                {/* Practice mode */}
-                {isExpanded && isFree && inPractice && (
-                  <div className="px-5 pb-6 pt-0 space-y-4 border-t border-white/[0.08]">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-bold" style={{ color: BRAND_NAVY }}>Practice Mode</h4>
-                      <div className="flex items-center gap-3">
-                        {timers[q.id] !== undefined && timers[q.id] > 0 && (
-                          <span className="flex items-center gap-1 text-sm font-bold" style={{ color: timers[q.id] <= 10 ? "#ef4444" : BRAND_NAVY }}>
-                            <Timer className="w-4 h-4" /> {timers[q.id]}s
-                          </span>
-                        )}
-                        {timers[q.id] === 0 && (
-                          <span className="text-xs font-bold text-red-500">Time&apos;s up!</span>
-                        )}
-                        <button
-                          onClick={() => startTimer(q.id)}
-                          className="px-3 py-1 rounded-lg text-xs font-bold border border-white/[0.08] hover:bg-white/[0.04] transition-colors"
-                          style={{ color: BRAND_NAVY }}
-                        >
-                          <Clock className="w-3 h-3 inline mr-1" />60s Timer
-                        </button>
-                      </div>
-                    </div>
-
-                    <p className="text-sm font-bold" style={{ color: BRAND_NAVY }}>{q.question}</p>
-
-                    <textarea
-                      value={practiceAnswers[q.id] || ""}
-                      onChange={(e) => setPracticeAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
-                      placeholder="Type your answer here..."
-                      className="w-full h-32 p-4 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none transition-colors resize-none"
-                    />
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setShowAnswers((prev) => ({ ...prev, [q.id]: !prev[q.id] }))}
-                        className="px-5 py-2 rounded-xl text-sm font-bold border-2 transition-colors hover:opacity-90"
-                        style={{ borderColor: BRAND_ORANGE, color: BRAND_ORANGE }}
-                      >
-                        {showAnswers[q.id] ? "Hide Answer" : "Show Answer"}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setPracticeMode((prev) => ({ ...prev, [q.id]: false }));
-                          if (timerRefs.current[q.id]) {
-                            clearInterval(timerRefs.current[q.id]);
-                            delete timerRefs.current[q.id];
-                          }
-                        }}
-                        className="px-5 py-2 rounded-xl text-sm font-bold border border-white/[0.08] text-white/40 hover:bg-white/[0.04] transition-colors"
-                      >
-                        Exit Practice
-                      </button>
-                    </div>
-
-                    {showAnswers[q.id] && (
-                      <div className="rounded-xl p-4 border-2" style={{ borderColor: BRAND_ORANGE, backgroundColor: `${BRAND_ORANGE}08` }}>
-                        <h4 className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: BRAND_ORANGE }}>
-                          Example Answer
-                        </h4>
-                        <p className="text-sm text-white/60 italic leading-relaxed">&ldquo;{q.exampleAnswer}&rdquo;</p>
-                      </div>
-                    )}
-                  </div>
-                )}
+          {/* Reveal framework + answer */}
+          {!showAnswer ? (
+            <button
+              onClick={() => setShowAnswer(true)}
+              className="w-full py-3 bg-[#D66829]/10 border border-[#D66829]/20 text-[#D66829] rounded-xl text-sm font-bold hover:bg-[#D66829]/20 transition-colors min-h-[44px]"
+            >
+              Show Framework &amp; Answer
+            </button>
+          ) : (
+            <div className="space-y-5">
+              <div>
+                <p className="text-xs font-bold text-[#D66829] uppercase tracking-wider mb-2">Strong Answer Framework</p>
+                <ul className="space-y-1.5">
+                  {q.framework.map((point, i) => (
+                    <li key={i} className="text-sm text-white/60 flex items-start gap-2">
+                      <span className="text-[#D66829] mt-0.5 shrink-0">&#8226;</span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            );
-          })}
+
+              <div className="bg-white/[0.04] rounded-xl p-4 border border-white/[0.06]">
+                <p className="text-xs font-bold text-green-400 uppercase tracking-wider mb-2">Example Answer</p>
+                <p className="text-sm text-white/70 leading-relaxed italic">&ldquo;{q.exampleAnswer}&rdquo;</p>
+              </div>
+
+              {q.redFlags.length > 0 && (
+                <div className="bg-red-500/5 rounded-xl p-4 border border-red-500/10">
+                  <p className="text-xs font-bold text-red-400 uppercase tracking-wider mb-2">Avoid</p>
+                  <ul className="space-y-1">
+                    {q.redFlags.map((flag, i) => (
+                      <li key={i} className="text-xs text-red-400/70 flex items-start gap-2">
+                        <span className="mt-0.5 shrink-0">&#10007;</span>
+                        <span>{flag}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Navigation */}
+        <div className="flex items-center justify-between">
+          <button onClick={goPrev} disabled={safeIdx === 0}
+            className="px-4 py-2.5 bg-white/[0.06] text-white/50 rounded-xl text-sm font-bold hover:bg-white/[0.1] disabled:opacity-30 transition-colors min-h-[44px]">
+            Previous
+          </button>
+          <div className="flex gap-1 max-w-[200px] overflow-hidden">
+            {filtered.map((_: any, i: number) => (
+              <button key={i} onClick={() => jumpTo(i)}
+                className={`w-2 h-2 rounded-full shrink-0 transition-all ${i === safeIdx ? 'bg-[#D66829] w-4' : 'bg-white/[0.1]'}`} />
+            ))}
+          </div>
+          <button onClick={goNext} disabled={safeIdx === filtered.length - 1}
+            className="px-4 py-2.5 bg-[#D66829] text-white rounded-xl text-sm font-bold hover:bg-[#e8834a] disabled:opacity-30 transition-colors min-h-[44px]">
+            Next
+          </button>
         </div>
       </div>
     );
   };
+
 
   // ─── TAB 2: Questions to Ask ──────────────────────────────────────────────
 
