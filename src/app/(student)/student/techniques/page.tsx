@@ -619,16 +619,16 @@ export default function TechniqueComparisonGuide() {
                     onClick={() => handleAnswer(q.id, opt.label)}
                     className="w-full text-left p-4 rounded-xl border-2 transition-all"
                     style={{
-                      borderColor: selected ? BRAND_ORANGE : "rgba(255,255,255,0.08)",
-                      backgroundColor: selected ? `${BRAND_ORANGE}10` : "rgba(255,255,255,0.02)",
+                      borderColor: selected ? BRAND_ORANGE : "#DDE2E5",
+                      backgroundColor: selected ? `${BRAND_ORANGE}10` : "#F7F8F9",
                     }}
                   >
                     <div className="flex items-start gap-3">
                       <span
                         className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                         style={{
-                          backgroundColor: selected ? BRAND_ORANGE : "rgba(255,255,255,0.06)",
-                          color: selected ? "#fff" : "rgba(255,255,255,0.5)",
+                          backgroundColor: selected ? BRAND_ORANGE : "#EFF1F2",
+                          color: selected ? "#fff" : "#5A6873",
                         }}
                       >
                         {opt.label}
@@ -714,7 +714,7 @@ export default function TechniqueComparisonGuide() {
               <div
                 key={item.technique.id}
                 className="bg-[#F7F8F9] rounded-2xl border-2 p-5 flex items-start gap-4"
-                style={{ borderColor: rank === 0 ? BRAND_ORANGE : "rgba(255,255,255,0.08)" }}
+                style={{ borderColor: rank === 0 ? BRAND_ORANGE : "#DDE2E5" }}
               >
                 <div
                   className="w-10 h-10 rounded-full flex items-center justify-center text-[#16222D] font-black text-sm flex-shrink-0"
@@ -780,7 +780,7 @@ export default function TechniqueComparisonGuide() {
                     return `${x},${y}`;
                   }).join(" ")}
                   fill="none"
-                  stroke="rgba(255,255,255,0.1)"
+                  stroke="#DDE2E5"
                   strokeWidth="0.5"
                 />
               ))}
@@ -795,7 +795,7 @@ export default function TechniqueComparisonGuide() {
                     y1={cy}
                     x2={x}
                     y2={y}
-                    stroke="rgba(255,255,255,0.1)"
+                    stroke="#DDE2E5"
                     strokeWidth="0.5"
                   />
                 );
@@ -834,7 +834,7 @@ export default function TechniqueComparisonGuide() {
                     textAnchor="middle"
                     dominantBaseline="central"
                     className="text-[8px] font-bold"
-                    fill="rgba(255,255,255,0.4)"
+                    fill="#5A6873"
                   >
                     {axis.label}
                   </text>
@@ -849,7 +849,7 @@ export default function TechniqueComparisonGuide() {
           <button
             onClick={resetQuiz}
             className="px-6 py-3 rounded-xl border-2 text-sm font-bold transition-colors hover:bg-[#F7F8F9]"
-            style={{ borderColor: "rgba(255,255,255,0.08)", color: "#fff" }}
+            style={{ borderColor: "#DDE2E5", color: "#16222D" }}
           >
             Retake Quiz
           </button>
@@ -941,7 +941,7 @@ export default function TechniqueComparisonGuide() {
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
+              <tr style={{ backgroundColor: "#F7F8F9" }}>
                 <th className="text-left p-4 text-[#16222D] text-xs font-bold uppercase tracking-wide w-36">
                   Field
                 </th>

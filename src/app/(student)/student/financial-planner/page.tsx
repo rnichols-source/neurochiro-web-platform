@@ -1236,7 +1236,7 @@ function FinancialPlannerContent() {
               const y = chartPadT + pct * plotH;
               return (
                 <g key={pct}>
-                  <line x1={chartPadL} y1={y} x2={chartW - chartPadR} y2={y} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+                  <line x1={chartPadL} y1={y} x2={chartW - chartPadR} y2={y} stroke="#DDE2E5" strokeWidth="1" />
                   <text x={chartPadL - 8} y={y + 4} textAnchor="end" className="text-[10px]" fill="#9ca3af">
                     ${fmt(Math.round(maxBalance * (1 - pct) / 1000))}k
                   </text>
@@ -1261,7 +1261,7 @@ function FinancialPlannerContent() {
           </svg>
           <div className="flex items-center justify-center gap-6 mt-3">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-0.5 bg-white/30" style={{ borderTop: "2px dashed rgba(255,255,255,0.3)" }} />
+              <div className="w-6 h-0.5 bg-white/30" style={{ borderTop: "2px dashed #5A6873" }} />
               <span className="text-xs text-[#5A6873]">Minimum Payments (25yr)</span>
             </div>
             <div className="flex items-center gap-2">

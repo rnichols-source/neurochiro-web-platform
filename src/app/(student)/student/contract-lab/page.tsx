@@ -354,7 +354,7 @@ function ScoreGauge({ score, label, color }: { score: number; label: string; col
       <svg width="140" height="140" viewBox="0 0 128 128">
         <circle
           cx="64" cy="64" r={radius}
-          fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke}
+          fill="none" stroke="#DDE2E5" strokeWidth={stroke}
           strokeDasharray={`${arcLength} ${circumference}`}
           strokeLinecap="round"
           transform={`rotate(${rotation} 64 64)`}

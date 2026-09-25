@@ -1381,7 +1381,7 @@ function InterviewPlaybookContent() {
                             onClick={() => setScorecardRatings((prev) => ({ ...prev, [q.id]: rating }))}
                             className="w-9 h-9 rounded-lg text-sm flex items-center justify-center transition-all"
                             style={{
-                              backgroundColor: isSelected ? (rating === "green" ? "rgba(34,197,94,0.15)" : rating === "yellow" ? "rgba(245,158,11,0.15)" : "rgba(239,68,68,0.15)") : "rgba(255,255,255,0.06)",
+                              backgroundColor: isSelected ? (rating === "green" ? "rgba(34,197,94,0.15)" : rating === "yellow" ? "rgba(245,158,11,0.15)" : "rgba(239,68,68,0.15)") : "#EFF1F2",
                               border: isSelected ? `2px solid ${rating === "green" ? "#22c55e" : rating === "yellow" ? "#f59e0b" : "#ef4444"}` : "2px solid transparent",
                             }}
                           >
@@ -1502,9 +1502,9 @@ function InterviewPlaybookContent() {
                     onClick={() => setOffer((prev) => ({ ...prev, employmentType: type }))}
                     className="flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all"
                     style={{
-                      borderColor: offer.employmentType === type ? BRAND_NAVY : "rgba(255,255,255,0.08)",
-                      backgroundColor: offer.employmentType === type ? BRAND_NAVY : "rgba(255,255,255,0.04)",
-                      color: offer.employmentType === type ? "#0F1A24" : "rgba(255,255,255,0.5)",
+                      borderColor: offer.employmentType === type ? BRAND_NAVY : "#DDE2E5",
+                      backgroundColor: offer.employmentType === type ? BRAND_NAVY : "#F7F8F9",
+                      color: offer.employmentType === type ? "#0F1A24" : "#5A6873",
                     }}
                   >
                     {type}
@@ -1530,9 +1530,9 @@ function InterviewPlaybookContent() {
                       }}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold border transition-all"
                       style={{
-                        borderColor: checked ? "#22c55e" : "rgba(255,255,255,0.08)",
-                        backgroundColor: checked ? "rgba(34,197,94,0.1)" : "rgba(255,255,255,0.04)",
-                        color: checked ? "#22c55e" : "rgba(255,255,255,0.5)",
+                        borderColor: checked ? "#22c55e" : "#DDE2E5",
+                        backgroundColor: checked ? "rgba(34,197,94,0.1)" : "#F7F8F9",
+                        color: checked ? "#22c55e" : "#5A6873",
                       }}
                     >
                       {checked ? <Check className="w-3 h-3" /> : <div className="w-3 h-3 rounded border border-[#DDE2E5]" />}
@@ -1553,9 +1553,9 @@ function InterviewPlaybookContent() {
                     onClick={() => setOffer((prev) => ({ ...prev, hasNonCompete: val }))}
                     className="flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all"
                     style={{
-                      borderColor: offer.hasNonCompete === val ? (val ? "#ef4444" : "#22c55e") : "rgba(255,255,255,0.08)",
-                      backgroundColor: offer.hasNonCompete === val ? (val ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)") : "rgba(255,255,255,0.04)",
-                      color: offer.hasNonCompete === val ? (val ? "#ef4444" : "#22c55e") : "rgba(255,255,255,0.5)",
+                      borderColor: offer.hasNonCompete === val ? (val ? "#ef4444" : "#22c55e") : "#DDE2E5",
+                      backgroundColor: offer.hasNonCompete === val ? (val ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)") : "#F7F8F9",
+                      color: offer.hasNonCompete === val ? (val ? "#ef4444" : "#22c55e") : "#5A6873",
                     }}
                   >
                     {val ? "Yes" : "No"}
@@ -1597,9 +1597,9 @@ function InterviewPlaybookContent() {
                     onClick={() => setOffer((prev) => ({ ...prev, hasEquityPath: val }))}
                     className="flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all"
                     style={{
-                      borderColor: offer.hasEquityPath === val ? BRAND_NAVY : "rgba(255,255,255,0.08)",
-                      backgroundColor: offer.hasEquityPath === val ? BRAND_NAVY : "rgba(255,255,255,0.04)",
-                      color: offer.hasEquityPath === val ? "#0F1A24" : "rgba(255,255,255,0.5)",
+                      borderColor: offer.hasEquityPath === val ? BRAND_NAVY : "#DDE2E5",
+                      backgroundColor: offer.hasEquityPath === val ? BRAND_NAVY : "#F7F8F9",
+                      color: offer.hasEquityPath === val ? "#0F1A24" : "#5A6873",
                     }}
                   >
                     {val ? "Yes" : "No"}
@@ -1735,7 +1735,7 @@ function InterviewPlaybookContent() {
                   <path
                     d="M 20 100 A 80 80 0 0 1 180 100"
                     fill="none"
-                    stroke="rgba(255,255,255,0.08)"
+                    stroke="#DDE2E5"
                     strokeWidth="12"
                     strokeLinecap="round"
                   />
@@ -1839,7 +1839,7 @@ function InterviewPlaybookContent() {
                       <button
                         onClick={() => copyText(s.whatToSay, s.id)}
                         className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition-colors hover:bg-green-500/15"
-                        style={{ color: copiedId === s.id ? "#22c55e" : "rgba(255,255,255,0.4)" }}
+                        style={{ color: copiedId === s.id ? "#22c55e" : "#5A6873" }}
                       >
                         {copiedId === s.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                         {copiedId === s.id ? "Copied" : "Copy"}
@@ -1931,7 +1931,7 @@ function InterviewPlaybookContent() {
                         <button
                           onClick={() => copyText(t.template, t.id, true)}
                           className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-[#F7F8F9] border border-[#DDE2E5] hover:bg-[#F7F8F9] transition-colors"
-                          style={{ color: copiedTemplateId === t.id ? "#22c55e" : "rgba(255,255,255,0.4)" }}
+                          style={{ color: copiedTemplateId === t.id ? "#22c55e" : "#5A6873" }}
                         >
                           {copiedTemplateId === t.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                           {copiedTemplateId === t.id ? "Copied" : "Copy"}
@@ -2017,13 +2017,13 @@ function InterviewPlaybookContent() {
                       <div
                         className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 transition-all"
                         style={{
-                          backgroundColor: checked ? "#22c55e" : "rgba(255,255,255,0.06)",
+                          backgroundColor: checked ? "#22c55e" : "#EFF1F2",
                           border: checked ? "none" : "2px solid rgba(255,255,255,0.15)",
                         }}
                       >
                         {checked && <Check className="w-3 h-3 text-[#16222D]" />}
                       </div>
-                      <span className="text-sm" style={{ color: checked ? BRAND_NAVY : "rgba(255,255,255,0.4)" }}>{item}</span>
+                      <span className="text-sm" style={{ color: checked ? BRAND_NAVY : "#5A6873" }}>{item}</span>
                     </button>
                   );
                 })}
@@ -2094,8 +2094,8 @@ function InterviewPlaybookContent() {
               onClick={() => setActiveTab(i)}
               className="flex-1 min-w-0 py-3 px-1 text-[9px] sm:text-xs font-bold transition-all border-r last:border-r-0 border-[#DDE2E5] flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1"
               style={{
-                backgroundColor: isActive ? "#D66829" : "rgba(255,255,255,0.04)",
-                color: isActive ? "#fff" : "rgba(255,255,255,0.4)",
+                backgroundColor: isActive ? "#D66829" : "#F7F8F9",
+                color: isActive ? "#fff" : "#5A6873",
               }}
             >
               <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />

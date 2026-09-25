@@ -6,7 +6,7 @@ import type { ChiroScoreResult } from "@/lib/chiroscore";
 function getBarColor(score: number): string {
   if (score >= 75) return "linear-gradient(90deg, #16a34a, #22c55e)";
   if (score >= 40) return "linear-gradient(90deg, #D66829, #e8834a)";
-  return "rgba(255,255,255,0.08)";
+  return "#DDE2E5";
 }
 
 function getStatusLabel(score: number): string {
