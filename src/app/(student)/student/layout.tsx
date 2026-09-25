@@ -77,8 +77,8 @@ function StudentLayoutInner({
   const isExemptPage = pathname === '/student/subscribe' || pathname === '/student/billing' || pathname === '/student/welcome' || pathname === '/student/settings';
   if (!subscriptionChecked && !isExemptPage) {
     return (
-      <div className="flex items-center justify-center h-dvh bg-[#0F1A24]">
-        <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+      <div className="flex items-center justify-center h-dvh bg-[#EFF1F2]">
+        <div className="w-6 h-6 border-2 border-[#DDE2E5] border-t-[#3E6B7C] rounded-full animate-spin" />
       </div>
     );
   }
@@ -87,16 +87,16 @@ function StudentLayoutInner({
 
   return (
     <AuthProvider>
-    <div className="flex flex-col md:flex-row h-dvh bg-[#0F1A24] overflow-hidden">
+    <div className="flex flex-col md:flex-row h-dvh bg-[#EFF1F2] overflow-hidden">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* Header */}
-        <header className="h-14 bg-[#0F1A24]/90 backdrop-blur-xl border-b border-white/[0.06] flex items-center justify-between px-6 md:px-10 shrink-0 sticky top-0 z-[100]">
+        <header className="h-14 bg-white/90 backdrop-blur-xl border-b border-[#DDE2E5] flex items-center justify-between px-6 md:px-10 shrink-0 sticky top-0 z-[100]">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden p-2.5 -ml-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-white/40 hover:text-white rounded-lg transition-colors"
+              className="md:hidden p-2.5 -ml-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#5A6873] hover:text-[#16222D] rounded-lg transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -105,14 +105,14 @@ function StudentLayoutInner({
             <NotificationBell />
             <Link
               href="/student/profile"
-              className="hidden md:flex w-8 h-8 rounded-lg bg-white/[0.06] items-center justify-center text-white/60 font-medium text-[11px] hover:bg-white/[0.1] hover:text-white transition-all"
+              className="hidden md:flex w-8 h-8 rounded-lg bg-[#EFF1F2] items-center justify-center text-[#5A6873] font-medium text-[11px] hover:bg-[#DDE2E5] hover:text-[#16222D] transition-all"
             >
               {initials}
             </Link>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto relative scroll-smooth bg-[#0F1A24] pb-28 md:pb-0">
+        <main className="flex-1 overflow-y-auto relative scroll-smooth bg-[#EFF1F2] pb-28 md:pb-0">
           {children}
         </main>
       </div>

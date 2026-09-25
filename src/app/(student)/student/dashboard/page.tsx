@@ -11,6 +11,19 @@ import { getVerificationStatus } from "../actions/verify-school";
 import SchoolVerificationBanner from "./school-verification-banner";
 import { getMatchedJobsCount } from "./actions";
 
+// ── Color tokens ──
+const T = {
+  paper:    '#EFF1F2',
+  paper2:   '#F7F8F9',
+  ink:      '#16222D',
+  inkMuted: '#5A6873',
+  navy:     '#1E2D3B',
+  orange:   '#D66829',
+  slate:    '#3E6B7C',
+  moss:     '#4A7A5E',
+  line:     '#DDE2E5',
+};
+
 // ── Pipeline stages ──
 
 const STAGES = [
@@ -20,7 +33,7 @@ const STAGES = [
     task: "Explore 18 techniques and take the Find Your Fit quiz",
     icon: Compass,
     href: "/student/techniques",
-    check: () => false, // no completion tracking without Academy
+    check: () => false,
   },
   {
     id: "interview", number: 2,
@@ -79,7 +92,7 @@ export default function StudentDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-5 h-5 text-[#D66829] animate-spin" />
+        <Loader2 className="w-5 h-5 animate-spin" style={{ color: T.slate }} />
       </div>
     );
   }
@@ -88,10 +101,9 @@ export default function StudentDashboard() {
   const gradYear = readiness?.profile?.gradYear || verification?.graduationYear;
   const studentName = readiness?.profile?.name || '';
 
-  // Graduation countdown
   let gradLine = '';
   if (gradYear) {
-    const gradDate = new Date(gradYear, 4, 15); // May of grad year
+    const gradDate = new Date(gradYear, 4, 15);
     const now = new Date();
     const monthsLeft = Math.max(0, Math.round((gradDate.getTime() - now.getTime()) / (30.44 * 24 * 60 * 60 * 1000)));
     if (monthsLeft > 0) {
@@ -101,38 +113,39 @@ export default function StudentDashboard() {
     }
   }
 
-  // Find current stage (first incomplete)
   const currentStage = STAGES.find(s => !s.check(milestones)) || STAGES[STAGES.length - 1];
 
   return (
-    <div className="p-4 md:p-10 max-w-3xl mx-auto space-y-6 pb-20">
+    <div className="p-5 md:p-10 max-w-2xl mx-auto space-y-8 pb-24">
       {/* School Verification */}
       <SchoolVerificationBanner />
 
-      {/* Header: name + graduation countdown */}
+      {/* Name + graduation countdown */}
       <div>
         {studentName && (
-          <h1 className="text-2xl font-bold text-white tracking-tight mb-1">{studentName}</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-1" style={{ color: T.ink }}>{studentName}</h1>
         )}
         {gradLine ? (
-          <p className="text-sm text-white/40">{gradLine}</p>
+          <p className="text-sm" style={{ color: T.inkMuted }}>{gradLine}</p>
         ) : (
-          <Link href="/student/profile" className="text-sm text-[#D66829] hover:underline">
+          <Link href="/student/profile" className="text-sm hover:underline" style={{ color: T.slate }}>
             Set your graduation year to see your countdown
           </Link>
         )}
       </div>
 
-      {/* Current stage — hero */}
-      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-[#D66829]/30 shadow-lg shadow-black/20 p-5 md:p-8">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-3">
+      {/* Current stage — navy inverted card (the "where you are" surface) */}
+      <div className="rounded-2xl p-6 md:p-8" style={{ background: T.navy }}>
+        <p className="text-xs font-medium mb-3" style={{ color: T.slate }}>
           Stage {currentStage.number} of {STAGES.length}
         </p>
         <h2 className="text-xl font-bold text-white mb-2">{currentStage.title}</h2>
         <p className="text-sm text-white/50 mb-6">{currentStage.task}</p>
+        {/* Orange: the single primary action on this screen */}
         <Link
           href={currentStage.href}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-[#D66829] text-white rounded-xl font-bold text-sm hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors min-h-[44px]"
+          className="inline-flex items-center gap-2 px-6 py-3 text-white rounded-xl font-bold text-sm transition-colors min-h-[44px]"
+          style={{ background: T.orange }}
         >
           {currentStage.id === 'jobs' && jobCount ? `Browse ${jobCount} Open Jobs` : 'Start'}
           <ArrowRight className="w-4 h-4" />
@@ -140,28 +153,28 @@ export default function StudentDashboard() {
       </div>
 
       {/* Progress bar */}
-      <div className="flex gap-1">
+      <div className="flex gap-1.5">
         {STAGES.map((stage) => {
           const done = stage.check(milestones);
           const isCurrent = stage.id === currentStage.id;
           return (
             <div
               key={stage.id}
-              className={`flex-1 h-2 rounded-sm transition-all ${
-                done ? "bg-gradient-to-r from-[#D66829] to-[#e8834a]"
-                : isCurrent ? "bg-[#D66829]/30"
-                : "bg-white/[0.06]"
-              }`}
+              className="flex-1 h-2 rounded-sm"
+              style={{
+                background: done ? T.moss
+                  : isCurrent ? T.orange
+                  : T.line,
+              }}
             />
           );
         })}
       </div>
 
-      {/* Remaining stages (current stage is in the hero above) */}
+      {/* Remaining stages */}
       <div className="space-y-2">
         {STAGES.filter(s => s.id !== currentStage.id).map((stage) => {
           const done = stage.check(milestones);
-          const isCurrent = false; // current is in the hero
           const isExpanded = expandedStage === stage.id;
           const Icon = stage.icon;
 
@@ -169,35 +182,39 @@ export default function StudentDashboard() {
             <button
               key={stage.id}
               onClick={() => setExpandedStage(isExpanded ? null : stage.id)}
-              className={`w-full text-left rounded-xl border transition-all ${
-                done ? "bg-white/[0.02] border-white/[0.06]"
-                : isCurrent ? "bg-gradient-to-b from-[#1a2e40] to-[#162231] border-[#D66829]/20"
-                : "bg-white/[0.01] border-white/[0.04] opacity-50"
-              }`}
+              className="w-full text-left rounded-xl transition-all"
+              style={{
+                background: done ? T.paper2 : 'transparent',
+                border: done ? `1px solid ${T.line}` : 'none',
+                opacity: done ? 1 : 0.6,
+              }}
             >
               <div className="flex items-center gap-3 p-4">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                  done ? "bg-[#D66829]" : isCurrent ? "bg-[#D66829]/15" : "bg-white/[0.04]"
-                }`}>
-                  {done ? <Check className="w-4 h-4 text-white" strokeWidth={3} />
-                    : <Icon className={`w-4 h-4 ${isCurrent ? "text-[#D66829]" : "text-white/20"}`} />}
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ background: done ? T.moss : T.line }}>
+                  {done
+                    ? <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                    : <Icon className="w-4 h-4" style={{ color: T.inkMuted }} />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${done ? "text-white/50" : "text-white"}`}>
+                  <p className="text-sm font-medium" style={{ color: done ? T.inkMuted : T.ink }}>
                     {stage.title}
                   </p>
-                  {!done && <p className="text-xs text-white/30 truncate">{stage.task}</p>}
+                  {!done && <p className="text-xs truncate" style={{ color: T.inkMuted }}>{stage.task}</p>}
                 </div>
                 <div className="shrink-0 flex items-center gap-2">
-                  {done && <span className="text-[10px] text-[#D66829] font-bold">Done</span>}
-                  {isExpanded ? <ChevronUp className="w-4 h-4 text-white/20" /> : <ChevronDown className="w-4 h-4 text-white/20" />}
+                  {done && <span className="text-[10px] font-bold" style={{ color: T.moss }}>Done</span>}
+                  {isExpanded
+                    ? <ChevronUp className="w-4 h-4" style={{ color: T.line }} />
+                    : <ChevronDown className="w-4 h-4" style={{ color: T.line }} />}
                 </div>
               </div>
               {isExpanded && (
                 <div className="px-4 pb-4" onClick={e => e.stopPropagation()}>
                   <Link
                     href={stage.href}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-white/[0.06] text-white/60 rounded-lg text-xs font-bold hover:bg-white/[0.1] transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-colors"
+                    style={{ background: T.paper, color: T.ink, border: `1px solid ${T.line}` }}
                   >
                     {done ? 'Review' : 'Go'} <ArrowRight className="w-3 h-3" />
                   </Link>
@@ -209,14 +226,16 @@ export default function StudentDashboard() {
       </div>
 
       {/* Quick links */}
-      <div className="grid grid-cols-2 gap-2 pt-2">
-        <Link href="/directory" className="p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-center hover:bg-white/[0.06] transition-colors">
-          <p className="text-xs font-bold text-white/50">Browse Doctors</p>
-          <p className="text-[10px] text-white/20">See who they are and how they practice</p>
+      <div className="grid grid-cols-2 gap-3 pt-2">
+        <Link href="/directory" className="p-4 rounded-xl text-center transition-colors"
+          style={{ background: T.paper2, border: `1px solid ${T.line}` }}>
+          <p className="text-xs font-bold" style={{ color: T.ink }}>Browse Doctors</p>
+          <p className="text-[10px] mt-0.5" style={{ color: T.inkMuted }}>See who they are and how they practice</p>
         </Link>
-        <Link href="/student/mentors" className="p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-center hover:bg-white/[0.06] transition-colors">
-          <p className="text-xs font-bold text-white/50">Talk to a Doctor</p>
-          <p className="text-[10px] text-white/20">Ask about their practice or a job</p>
+        <Link href="/student/mentors" className="p-4 rounded-xl text-center transition-colors"
+          style={{ background: T.paper2, border: `1px solid ${T.line}` }}>
+          <p className="text-xs font-bold" style={{ color: T.ink }}>Talk to a Doctor</p>
+          <p className="text-[10px] mt-0.5" style={{ color: T.inkMuted }}>Ask about their practice or a job</p>
         </Link>
       </div>
     </div>
