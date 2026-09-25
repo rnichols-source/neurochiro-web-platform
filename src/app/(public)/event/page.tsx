@@ -147,12 +147,12 @@ export default function EventPage() {
               boxShadow: "0 4px 14px rgba(214,104,41,0.4)",
             }}>
             {loading && <Loader2 style={{ width: 18, height: 18, animation: "spin 1s linear infinite" }} />}
-            {loading ? "Creating account..." : role === "student" ? "Join — $33/mo" : "Join — $99/mo"}
+            {loading ? "Creating account..." : role === "student" ? "Join Free" : "Join — $99/mo"}
           </button>
 
           <p style={{ textAlign: "center", fontSize: 11, color: "#9ca3af", marginTop: 12 }}>
             {role === "student"
-              ? "$33/mo. Includes monthly group call with Dr. Ray."
+              ? "Free for students. Access the job board, contract lab, and interview prep."
               : "$99/mo or $990/yr. Personal onboarding call included."}
           </p>
         </form>

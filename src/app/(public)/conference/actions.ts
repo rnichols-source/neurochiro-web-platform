@@ -13,12 +13,12 @@ export async function createConferenceCheckout(data: {
 
   const prices = {
     doctor: { monthly: 9900, annual: 99000 },
-    student: { monthly: 3300, annual: 33000 },
+    student: { monthly: 0, annual: 0 }, // Students are free
   };
 
   const priceLabels = {
     doctor: { monthly: 'Doctor Pro ($99/mo)', annual: 'Doctor Pro Annual ($990/yr)' },
-    student: { monthly: 'Student Premium ($33/mo)', annual: 'Student Premium Annual ($330/yr)' },
+    student: { monthly: 'Student (Free)', annual: 'Student (Free)' },
   };
 
   const amount = prices[data.role][data.billing];

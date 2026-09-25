@@ -1122,9 +1122,12 @@ export default function MessagingSystem({
           <MessageSquare className="w-7 h-7 text-gray-400" />
         </div>
         <h3 className="text-lg font-bold text-gray-800 mb-1">Your Messages</h3>
-        <p className="text-gray-400 text-sm max-w-xs">
-          Select a conversation or start a new one
+        <p className="text-gray-400 text-sm max-w-xs mb-4">
+          Message any doctor in the network to ask about their practice, associateships, or mentorship.
         </p>
+        <a href="/directory" className="text-sm font-bold text-[#D66829] hover:underline">
+          Browse doctors to message &rarr;
+        </a>
       </div>
     );
   }

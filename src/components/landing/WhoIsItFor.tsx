@@ -18,7 +18,7 @@ export default function WhoIsItFor() {
           <GraduationCap className="w-8 h-8 text-neuro-orange mx-auto mb-3" />
           <h3 className="font-bold text-neuro-navy mb-1">For Students</h3>
           <p className="text-gray-500 text-sm mb-3">Find jobs, access the Academy, and launch your career.</p>
-          <p className="text-neuro-orange font-bold text-sm">Get Started — $33/mo <ArrowRight className="w-3 h-3 inline" /></p>
+          <p className="text-neuro-orange font-bold text-sm">Get Started — Free <ArrowRight className="w-3 h-3 inline" /></p>
         </Link>
         <Link href="/directory" className="bg-white rounded-2xl border border-gray-100 p-6 text-center hover:shadow-lg hover:border-gray-200 transition-all">
           <Heart className="w-8 h-8 text-neuro-orange mx-auto mb-3" />

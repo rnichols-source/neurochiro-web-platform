@@ -75,10 +75,11 @@ export default function MentorDiscoveryPage() {
     // Fetch mentors
     supabase
       .from("doctors")
-      .select("id, user_id, first_name, last_name, clinic_name, city, state, specialties, bio, photo_url, rating, review_count, is_mentoring, is_hiring, region_code")
-      .eq("is_mentoring", true)
-      .limit(50)
-      .then(({ data }) => {
+      .select("id, user_id, first_name, last_name, clinic_name, city, state, specialties, bio, photo_url, rating, review_count, is_mentoring, is_hiring, region_code, spotlight_youtube_url")
+      .eq("verification_status", "verified")
+      .not("latitude", "eq", 0)
+      .limit(100)
+      .then(({ data }: any) => {
         if (data) setMentors(data as Mentor[]);
         setLoading(false);
       });
@@ -205,11 +206,10 @@ export default function MentorDiscoveryPage() {
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center bg-[#162231] rounded-2xl border border-dashed border-white/[0.08]">
           <Users className="w-12 h-12 text-white/10 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-1">No mentors match your filters</h3>
+          <h3 className="text-xl font-semibold text-white mb-1">No doctors match your filters</h3>
           <p className="text-white/40 text-sm max-w-md mx-auto mb-4">
-            Try broadening your search or removing the hiring filter. New doctors join NeuroChiro every week.
+            Try broadening your search or clearing your filters.
           </p>
-          <Link href="/student/profile" className="text-sm font-bold text-[#D66829] hover:underline">Add interests to your profile for better matches</Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -36,7 +36,7 @@ export default function StudentPricing() {
         </span>
 
         <div className="text-center mt-4 mb-8">
-          <div className="text-6xl font-black text-neuro-navy">$33<span className="text-lg font-bold text-gray-400">/mo</span></div>
+          <div className="text-6xl font-black text-neuro-navy">Free<span className="text-lg font-bold text-gray-400"></span></div>
           <p className="text-sm text-neuro-orange font-bold mt-1">Includes monthly group call with Dr. Ray.</p>
         </div>
 
@@ -55,7 +55,7 @@ export default function StudentPricing() {
           href="/get-started?role=student"
           className="w-full py-4 bg-neuro-orange text-white font-black rounded-xl text-center text-sm uppercase tracking-wider hover:bg-neuro-orange/90 shadow-lg shadow-neuro-orange/20 transition-all flex items-center justify-center gap-2 block"
         >
-          Get Started — $33/mo <ArrowRight className="w-4 h-4" />
+          Get Started — Free <ArrowRight className="w-4 h-4" />
         </Link>
         <p className="text-center text-xs text-gray-400 mt-3">Includes monthly group call with Dr. Ray. Cancel anytime.</p>
       </div>

@@ -150,7 +150,7 @@ function GetStartedInner() {
             ))}
           </div>
           <p className="text-xs text-gray-400 mt-3">
-            {role === "doctor" ? "$99/mo or $990/yr. Cancel anytime." : "$33/mo. Cancel anytime."}
+            {role === "doctor" ? "$99/mo or $990/yr. Cancel anytime." : "Free for students. No subscription required."}
           </p>
         </div>
 
@@ -194,7 +194,7 @@ function GetStartedInner() {
           <button type="submit" disabled={loading}
             className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors disabled:opacity-50">
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
-            {loading ? "Creating account..." : role === "doctor" ? "Join — $99/mo" : "Join — $33/mo"}
+            {loading ? "Creating account..." : role === "doctor" ? "Join — $99/mo" : "Join Free"}
           </button>
 
           <p className="text-center text-xs text-gray-400">

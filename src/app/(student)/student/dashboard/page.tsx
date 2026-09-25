@@ -114,7 +114,7 @@ export default function StudentDashboard() {
       {/* Stats strip */}
       <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/[0.06]">
         {[
-          { label: "ChiroScore", value: chiroScore?.totalScore || totalScore, unit: "/100" },
+          { label: "Readiness", value: chiroScore?.totalScore || totalScore, unit: "/100" },
           { label: "Open Jobs", value: jobCount, href: "/student/jobs" },
           { label: "Modules", value: academyData.completed, unit: `/${academyData.total}`, href: "/student/academy" },
           daysUntilGrad !== null && daysUntilGrad > 0

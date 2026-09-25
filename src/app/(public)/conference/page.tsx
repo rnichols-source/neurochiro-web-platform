@@ -205,12 +205,12 @@ export default function ConferenceLandingPage() {
               className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors text-base disabled:opacity-50"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
-              {loading ? "Creating account..." : role === "student" ? "Join — $33/mo" : "Join — $99/mo"}
+              {loading ? "Creating account..." : role === "student" ? "Join Free" : "Join — $99/mo"}
             </button>
 
             <p className="text-center text-xs text-gray-400 mt-3">
               {role === "student"
-                ? "$33/mo. Includes monthly group call with Dr. Ray."
+                ? "Free for students. Access the job board, contract lab, and interview prep."
                 : "$99/mo or $990/yr. Personal onboarding call included."}
             </p>
           </form>

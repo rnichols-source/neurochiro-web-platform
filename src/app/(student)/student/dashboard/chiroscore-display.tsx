@@ -3,47 +3,35 @@
 import Link from "next/link";
 import type { ChiroScoreResult } from "@/lib/chiroscore";
 
-const GRADE_COLORS: Record<string, string> = {
-  A: "text-green-400",
-  B: "text-blue-400",
-  C: "text-yellow-400",
-  D: "text-orange-400",
-  F: "text-red-400",
-};
-
-const GRADE_BG: Record<string, string> = {
-  A: "bg-green-400/10 border-green-400/20",
-  B: "bg-blue-400/10 border-blue-400/20",
-  C: "bg-yellow-400/10 border-yellow-400/20",
-  D: "bg-orange-400/10 border-orange-400/20",
-  F: "bg-red-400/10 border-red-400/20",
-};
-
 function getBarColor(score: number): string {
   if (score >= 75) return "linear-gradient(90deg, #16a34a, #22c55e)";
   if (score >= 40) return "linear-gradient(90deg, #D66829, #e8834a)";
   return "rgba(255,255,255,0.08)";
 }
 
+function getStatusLabel(score: number): string {
+  if (score >= 80) return "Strong";
+  if (score >= 60) return "Building";
+  if (score >= 30) return "In Progress";
+  return "Getting Started";
+}
+
 export default function ChiroScoreDisplay({ data }: { data: ChiroScoreResult }) {
-  const { totalScore, breakdown, grade, topRecommendation } = data;
+  const { totalScore, breakdown, topRecommendation } = data;
+  const status = getStatusLabel(totalScore);
 
   return (
     <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-6 md:p-8 shadow-lg shadow-black/20">
-      {/* Score + Grade */}
-      <div className="flex items-start justify-between mb-2">
-        <div>
-          <div className="flex items-end gap-3">
-            <span className="text-6xl font-bold text-white leading-none tabular-nums tracking-tight">{totalScore}</span>
-            <div className="pb-1.5">
-              <span className="text-xl text-white/20 font-light">/100</span>
-            </div>
+      {/* Score — no letter grade */}
+      <div className="mb-2">
+        <div className="flex items-end gap-3">
+          <span className="text-5xl font-bold text-white leading-none tabular-nums tracking-tight">{totalScore}</span>
+          <div className="pb-1">
+            <span className="text-lg text-white/20 font-light">/100</span>
           </div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#D66829] font-semibold mt-2">ChiroScore</p>
         </div>
-        <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center ${GRADE_BG[grade]}`}>
-          <span className={`text-2xl font-black ${GRADE_COLORS[grade]}`}>{grade}</span>
-        </div>
+        <p className="text-[10px] uppercase tracking-[0.2em] text-[#D66829] font-semibold mt-2">Career Readiness</p>
+        <p className="text-xs text-white/40 mt-1">{status}</p>
       </div>
 
       {/* Category Bars */}
@@ -69,15 +57,15 @@ export default function ChiroScoreDisplay({ data }: { data: ChiroScoreResult }) 
         ))}
       </div>
 
-      {/* Boost Recommendation */}
+      {/* Next step */}
       {topRecommendation && (
         <Link
           href={topRecommendation.href}
           className="mt-6 flex items-center justify-between p-4 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:border-[#D66829]/30 transition-all group"
         >
           <div>
-            <p className="text-[13px] font-medium text-white/70">Boost your ChiroScore</p>
-            <p className="text-[11px] text-white/30">{topRecommendation.category} needs attention</p>
+            <p className="text-[13px] font-medium text-white/70">Next step</p>
+            <p className="text-[11px] text-white/30">{topRecommendation.category}</p>
           </div>
           <span className="text-[#D66829] text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
         </Link>
