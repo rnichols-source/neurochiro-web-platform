@@ -17,22 +17,15 @@ export const revalidate = 300;
 async function getPlatformStats() {
   try {
     const supabase = createAdminClient();
-    const [doctors, seminars, stateData] = await Promise.all([
-      supabase.from('doctors').select('id', { count: 'exact', head: true })
-        .eq('verification_status', 'verified')
-        .or('country.is.null,country.eq.US'),
+    const { getDoctorCounts } = await import('@/lib/platform-stats');
+    const [doctorCounts, seminars] = await Promise.all([
+      getDoctorCounts(),
       supabase.from('seminars').select('id', { count: 'exact', head: true }).eq('is_approved', true).eq('is_past', false),
-      supabase.from('doctors').select('state')
-        .eq('verification_status', 'verified')
-        .or('country.is.null,country.eq.US')
-        .not('latitude', 'eq', 0)
-        .not('latitude', 'is', null),
     ]);
-    const statesCovered = new Set((stateData.data || []).map((d: any) => d.state).filter(Boolean)).size;
     return {
-      doctors: doctors.count || 0,
+      doctors: doctorCounts.active,
       seminars: seminars.count || 0,
-      states: statesCovered,
+      states: doctorCounts.statesCovered,
     };
   } catch {
     return { doctors: 0, seminars: 0, states: 0 };
