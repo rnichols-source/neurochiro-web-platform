@@ -41,7 +41,7 @@ const STAGES = [
   {
     id: "contract", number: 4,
     title: "Review Your Contract",
-    task: "Run your offer through the Contract Lab before you sign",
+    task: "Check your offer before you sign",
     icon: FileText,
     href: "/student/contract-lab",
     check: (m: any) => m?.contractReviewed,
@@ -85,8 +85,8 @@ export default function StudentDashboard() {
   }
 
   const milestones = readiness?.milestones || {};
-  const gradYear = readiness?.raw?.graduationYear || verification?.graduationYear;
-  const studentName = readiness?.raw?.name?.split(' ')[0] || '';
+  const gradYear = readiness?.profile?.gradYear || verification?.graduationYear;
+  const studentName = readiness?.profile?.name || '';
 
   // Graduation countdown
   let gradLine = '';
@@ -102,9 +102,7 @@ export default function StudentDashboard() {
   }
 
   // Find current stage (first incomplete)
-  const completedCount = STAGES.filter(s => s.check(milestones)).length;
   const currentStage = STAGES.find(s => !s.check(milestones)) || STAGES[STAGES.length - 1];
-  const currentIndex = STAGES.indexOf(currentStage);
 
   return (
     <div className="p-4 md:p-10 max-w-3xl mx-auto space-y-6 pb-20">
@@ -127,13 +125,9 @@ export default function StudentDashboard() {
 
       {/* Current stage — hero */}
       <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-[#D66829]/30 shadow-lg shadow-black/20 p-5 md:p-8">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829]">
-            Stage {currentStage.number} of {STAGES.length}
-          </span>
-          <span className="text-[10px] text-white/20">·</span>
-          <span className="text-[10px] text-white/20">{completedCount} complete</span>
-        </div>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-3">
+          Stage {currentStage.number} of {STAGES.length}
+        </p>
         <h2 className="text-xl font-bold text-white mb-2">{currentStage.title}</h2>
         <p className="text-sm text-white/50 mb-6">{currentStage.task}</p>
         <Link
@@ -163,11 +157,11 @@ export default function StudentDashboard() {
         })}
       </div>
 
-      {/* All stages */}
+      {/* Remaining stages (current stage is in the hero above) */}
       <div className="space-y-2">
-        {STAGES.map((stage) => {
+        {STAGES.filter(s => s.id !== currentStage.id).map((stage) => {
           const done = stage.check(milestones);
-          const isCurrent = stage.id === currentStage.id;
+          const isCurrent = false; // current is in the hero
           const isExpanded = expandedStage === stage.id;
           const Icon = stage.icon;
 
