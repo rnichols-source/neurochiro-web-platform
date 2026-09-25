@@ -870,6 +870,8 @@ function InterviewPlaybookContent() {
 
   // Tab 1 state
   const [questionFilter, setQuestionFilter] = useState("All");
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
   const [expandedQ, setExpandedQ] = useState<number | null>(null);
   const [practiceMode, setPracticeMode] = useState<Record<number, boolean>>({});
   const [practiceAnswers, setPracticeAnswers] = useState<Record<number, string>>({});
@@ -2185,9 +2187,6 @@ function InterviewPlaybookContent() {
         <p className="text-white/40 text-sm mt-1">
           Everything you need to ace the interview, evaluate the offer, and negotiate like a pro.
         </p>
-        <div className="mt-3 bg-[#162231] border-l-2 border-[#D66829]/40 rounded-lg p-3 text-[12px] text-white/50">
-          <strong className="text-white/70">How to use this:</strong> Start with <strong className="text-white/70">Interview Questions</strong> to practice what doctors actually ask. Then review <strong className="text-white/70">Questions to Ask</strong> them. When you get an offer, use <strong className="text-white/70">Evaluate the Offer</strong> and <strong className="text-white/70">Negotiation Scripts</strong> to make sure it&apos;s fair. After the interview, check <strong className="text-white/70">After the Interview</strong> for follow-up steps.
-        </div>
       </div>
 
       {/* Tabs */}

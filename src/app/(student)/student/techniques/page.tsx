@@ -37,7 +37,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   "soft-tissue": "#22c55e",
 };
 
-const TAB_LABELS = ["Technique Explorer", "Find Your Fit", "Comparison Tool"];
+const TAB_LABELS = ["Find Your Fit", "Comparison Tool", "Technique Explorer"];
 
 const RADAR_AXES = [
   { key: "structural", label: "Structural" },
@@ -1050,9 +1050,6 @@ export default function TechniqueComparisonGuide() {
         <p className="text-xs text-white/35 mt-1">
           Explore, compare, and find the chiropractic techniques that fit your future practice.
         </p>
-        <div className="mt-3 bg-[#162231] border-l-2 border-[#D66829]/40 rounded-lg p-3 text-[12px] text-white/50">
-          <strong className="text-white/70">3 tools in one:</strong> Browse all 18 techniques in the <strong className="text-white/70">Technique Explorer</strong>. Take the <strong className="text-white/70">Find Your Fit</strong> quiz to discover which match your personality. Then use the <strong className="text-white/70">Comparison Tool</strong> to see them side by side.
-        </div>
       </div>
 
       {/* Tabs */}
@@ -1074,9 +1071,9 @@ export default function TechniqueComparisonGuide() {
       </div>
 
       {/* Tab content */}
-      {activeTab === 0 && renderExplorer()}
-      {activeTab === 1 && renderQuiz()}
-      {activeTab === 2 && renderComparison()}
+      {activeTab === 0 && renderQuiz()}
+      {activeTab === 1 && renderComparison()}
+      {activeTab === 2 && renderExplorer()}
 
       {/* Pipeline CTA */}
       <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">

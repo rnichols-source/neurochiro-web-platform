@@ -542,9 +542,9 @@ function ContractLabContent() {
 
   const Tab1 = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* LEFT: Input Panel */}
-        <div className="lg:col-span-5 space-y-6">
+      <div className="space-y-8">
+        {/* Input Panel — full width */}
+        <div className="space-y-6">
           <div className="bg-white/[0.04] rounded-2xl p-6 shadow-lg shadow-black/20 border border-white/[0.08]">
             <h2 className="text-lg font-bold text-white mb-1">Analyze a Contract</h2>
             <p className="text-sm text-white/35 mb-4">Choose an input method below.</p>
@@ -754,8 +754,8 @@ function ContractLabContent() {
           </div>
         </div>
 
-        {/* RIGHT: Results Panel */}
-        <div className="lg:col-span-7">
+        {/* Results Panel — full width below input */}
+        <div>
           {qResult && QuestionnaireResults(qResult)}
           {aiResult && !qResult && AiResults(aiResult)}
           {!hasResults && (
@@ -1317,9 +1317,6 @@ function ContractLabContent() {
           <Shield className="w-7 h-7 text-[#e97325]" /> Contract Lab
         </h1>
         <p className="text-white/40 mt-1 text-sm">Analyze contracts, know your rights, and negotiate with confidence.</p>
-        <div className="mt-3 bg-[#162231] border-l-2 border-[#D66829]/40 rounded-lg p-3 text-[12px] text-white/50">
-          <strong className="text-white/70">How to use this:</strong> Use the <strong className="text-white/70">Questionnaire</strong> tab to input your contract terms and get an instant analysis with red flags and negotiation scripts. Or paste your full contract text in the <strong className="text-white/70">AI Analysis</strong> tab for a detailed clause-by-clause review. Check <strong className="text-white/70">Past Reviews</strong> to see your history.
-        </div>
       </header>
 
       {/* Tab Bar */}

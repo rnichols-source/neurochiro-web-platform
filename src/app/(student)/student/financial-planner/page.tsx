@@ -432,9 +432,9 @@ function FinancialPlannerContent() {
   // ─────────────────────────────────────────────────────────────────────────
 
   const Step1 = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* Left: Form */}
-      <div className="lg:col-span-2 space-y-6">
+    <div className="space-y-6">
+      {/* Form sections */}
+      <div className="space-y-6">
         {/* Section A: Student Loans */}
         <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 space-y-4">
           <h3 className="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2">
@@ -702,9 +702,9 @@ function FinancialPlannerContent() {
         </div>
       </div>
 
-      {/* Right: Live Summary Card */}
-      <div className="lg:col-span-1">
-        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden sticky top-8">
+      {/* Live Summary — full width above form */}
+      <div>
+        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden">
           <div className="bg-[#162231] p-6">
             <p className="text-xs text-white/50 uppercase tracking-wide font-bold">Live Summary</p>
             <h2 className="text-xl font-heading font-black text-white mt-2">
@@ -1606,9 +1606,6 @@ function FinancialPlannerContent() {
           <p className="text-white/40 text-sm mt-1">
             Plan your first-year finances before you graduate.
           </p>
-          <div className="mt-2 bg-[#162231] border-l-2 border-[#D66829]/40 rounded-lg p-3 text-[12px] text-white/50">
-            <strong className="text-white/70">How to use this:</strong> Step 1 — enter your loans and salary. Step 2 — see your take-home pay after taxes. Step 3 — set your monthly budget. Step 4 — get your complete financial roadmap with loan repayment strategies. Your data saves automatically.
-          </div>
         </div>
         <button
           onClick={resetAll}
