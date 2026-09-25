@@ -43,26 +43,56 @@ function cn(...inputs: ClassValue[]) {
 }
 
 // Nav items - visible to all admins
-const allNavItems = [
-  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Doctors", href: "/admin/directory", icon: Stethoscope },
-  { name: "Users", href: "/admin/users", icon: Users },
-  { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
-  { name: "Seminars", href: "/admin/seminars", icon: Calendar },
-  { name: "ChiroMatch", href: "/admin/chiromatch", icon: Shuffle },
-  { name: "Leads", href: "/admin/leads", icon: Tag },
-  { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert },
-  { name: "Spotlight", href: "/admin/spotlight", icon: Video },
-  { name: "Announcements", href: "/admin/announcements", icon: Megaphone },
-  { name: "Inbox", href: "/admin/inbox", icon: MessageSquare },
-  { name: "Outreach", href: "/admin/outreach", icon: Mail },
-  { name: "Content Tracker", href: "/admin/content-tracker", icon: Activity },
-  { name: "Agents", href: "/admin/agents", icon: Bot },
-  { name: "Patient List", href: "/admin/list", icon: Mail },
-  { name: "Coverage Map", href: "/admin/coverage", icon: Globe },
-  { name: "Invisible Doctors", href: "/admin/invisible-doctors", icon: AlertTriangle },
-  { name: "Revenue", href: "/admin/revenue", icon: CreditCard },
-  { name: "Logs", href: "/admin/logs", icon: History },
+const navGroups = [
+  {
+    label: null, // Dashboard has no group label
+    items: [
+      { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: "Growth",
+    items: [
+      { name: "Doctors", href: "/admin/directory", icon: Stethoscope },
+      { name: "Leads", href: "/admin/leads", icon: Tag },
+      { name: "Outreach", href: "/admin/outreach", icon: Mail },
+      { name: "ChiroMatch", href: "/admin/chiromatch", icon: Shuffle },
+    ],
+  },
+  {
+    label: "Patients",
+    items: [
+      { name: "Patient List", href: "/admin/list", icon: Users },
+      { name: "Coverage Map", href: "/admin/coverage", icon: Globe },
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      { name: "Spotlight", href: "/admin/spotlight", icon: Video },
+      { name: "Announcements", href: "/admin/announcements", icon: Megaphone },
+      { name: "Content Tracker", href: "/admin/content-tracker", icon: Activity },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert },
+      { name: "Invisible Doctors", href: "/admin/invisible-doctors", icon: AlertTriangle },
+      { name: "Revenue", href: "/admin/revenue", icon: CreditCard },
+      { name: "Logs", href: "/admin/logs", icon: History },
+      { name: "Agents", href: "/admin/agents", icon: Bot },
+    ],
+  },
+  {
+    label: "Platform",
+    items: [
+      { name: "Users", href: "/admin/users", icon: Users },
+      { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
+      { name: "Seminars", href: "/admin/seminars", icon: Calendar },
+      { name: "Inbox", href: "/admin/inbox", icon: MessageSquare },
+    ],
+  },
 ];
 
 interface SidebarProps {
@@ -83,7 +113,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
   const [userRole, setUserRole] = useState('super_admin'); 
   const [isLockingDown, setIsLockingDown] = useState(false);
 
-  const filteredNavItems = allNavItems;
+  // Nav items are grouped, not filtered
 
   // Fetch real role and health data
   useEffect(() => {
@@ -161,34 +191,40 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
         {/* Nav list — scrollable, takes remaining space */}
         <nav className="flex-1 min-h-0 px-4 space-y-1 overflow-y-auto overscroll-contain pt-4 pb-4"
           style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="mb-4 px-2">
-            <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Platform Control</span>
-          </div>
-          {filteredNavItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={onClose}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
-                  isActive
-                    ? "bg-neuro-orange text-white shadow-lg shadow-neuro-orange/20"
-                    : "text-gray-400 hover:text-white hover:bg-white/5"
-                )}
-              >
-                <item.icon className={cn("w-5 h-5 transition-colors", isActive ? "text-white" : "text-gray-400 group-hover:text-neuro-orange-light")} />
-                <span className="font-medium text-sm">{item.name}</span>
-                {isActive && (
-                  <motion.div
-                    layoutId="active-pill"
-                    className="absolute right-2 w-1.5 h-1.5 bg-white rounded-full"
-                  />
-                )}
-              </Link>
-            );
-          })}
+          {navGroups.map((group, gi) => (
+            <div key={gi} className={gi > 0 ? 'mt-5' : ''}>
+              {group.label && (
+                <div className="mb-2 px-2">
+                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.15em]">{group.label}</span>
+                </div>
+              )}
+              {group.items.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={onClose}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 group relative",
+                      isActive
+                        ? "bg-neuro-orange text-white shadow-lg shadow-neuro-orange/20"
+                        : "text-gray-400 hover:text-white hover:bg-white/5"
+                    )}
+                  >
+                    <item.icon className={cn("w-4 h-4 transition-colors", isActive ? "text-white" : "text-gray-400 group-hover:text-neuro-orange-light")} />
+                    <span className="font-medium text-[13px]">{item.name}</span>
+                    {isActive && (
+                      <motion.div
+                        layoutId="active-pill"
+                        className="absolute right-2 w-1.5 h-1.5 bg-white rounded-full"
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
 
           {/* Live Engine — inside scrollable area on mobile, not eating fixed space */}
           <div className="lg:hidden mt-6 mb-4">

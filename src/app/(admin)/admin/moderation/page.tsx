@@ -1,24 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getModerationData, resolveAlert, moderateDoctor } from "./actions";
-import { getPendingStories, approvePatientStory, rejectPatientStory } from "@/app/actions/patient-stories";
+import { getModerationData, moderateDoctor } from "./actions";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
+import { ShieldCheck, X as XIcon, AlertTriangle, MapPin, Calendar, ExternalLink, Loader2 } from "lucide-react";
 
 export default function ModerationCenter() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedQueue, setSelectedQueue] = useState<string | null>(null);
   const [moderating, setModerating] = useState<string | null>(null);
-  const [pendingStories, setPendingStories] = useState<any[]>([]);
-  const [storyActioning, setStoryActioning] = useState<string | null>(null);
-  const [selectedAlert, setSelectedAlert] = useState<any>(null);
-  const [resolving, setResolving] = useState<string | null>(null);
+  const [actionResult, setActionResult] = useState<{ id: string; msg: string; ok: boolean } | null>(null);
 
-  useEffect(() => {
-    fetchData();
-    getPendingStories().then(setPendingStories);
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -27,197 +21,191 @@ export default function ModerationCenter() {
     setLoading(false);
   };
 
-  const handleModerateDoctor = async (doctorId: string, action: "approve" | "reject" | "flag") => {
+  const handleAction = async (doctorId: string, action: "approve" | "reject" | "flag") => {
     setModerating(doctorId);
+    setActionResult(null);
     const res = await moderateDoctor(doctorId, action);
-    if (res.success) await fetchData();
-    else alert("Error: " + res.error);
+    if (res.success) {
+      setActionResult({ id: doctorId, msg: action === 'approve' ? 'Approved' : action === 'reject' ? 'Rejected' : 'Flagged', ok: true });
+      await fetchData();
+    } else {
+      setActionResult({ id: doctorId, msg: res.error || 'Failed', ok: false });
+    }
     setModerating(null);
   };
 
-  const handleResolveAlert = async (action: "Dismiss" | "Escalate" | "Resolve") => {
-    if (!selectedAlert) return;
-    setResolving(selectedAlert.id);
-    const res = await resolveAlert(selectedAlert.id, action);
-    if (res.success) { await fetchData(); setSelectedAlert(null); }
-    setResolving(null);
-  };
+  if (loading && !data) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <Loader2 className="w-10 h-10 animate-spin text-gray-400" />
+    </div>
+  );
 
-  if (loading && !data) return <p className="text-gray-500 text-center py-20">Loading...</p>;
-
-  const queues = data?.queues || [];
-  const alerts = (data?.alerts || []).filter((a: any) => a.status === "Critical" || a.status === "High");
-  const activeQueue = queues.find((q: any) => q.id === selectedQueue);
+  const pending = data?.pendingDoctors || [];
+  const flagged = data?.flaggedProfiles || [];
+  const pendingSeminars = data?.pendingSeminars || [];
 
   return (
-    <div className="p-6 max-w-6xl mx-auto text-white space-y-6">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto text-white space-y-6">
       <h1 className="text-2xl font-bold">Moderation</h1>
 
-      {/* Queue Cards */}
-      <div className="grid grid-cols-3 gap-4">
-        {queues.map((q: any) => (
-          <button
-            key={q.id}
-            onClick={() => setSelectedQueue(selectedQueue === q.id ? null : q.id)}
-            className={`p-5 rounded-xl text-left border transition-all ${
-              selectedQueue === q.id ? "border-white/30 bg-white/10" : "border-white/5 bg-white/5 hover:bg-white/10"
-            }`}
-          >
-            <p className="text-xs text-gray-400 uppercase mb-1">{q.name}</p>
-            <p className="text-3xl font-bold">{q.count}</p>
-          </button>
-        ))}
-      </div>
-
-      {/* Expanded Queue */}
-      {activeQueue && (
-        <div className="bg-white/5 border border-white/5 rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-white/10 flex items-center justify-between">
-            <h2 className="font-semibold">{activeQueue.name} Queue</h2>
-            <button onClick={() => setSelectedQueue(null)} className="text-gray-500 hover:text-white">&times;</button>
+      {/* ── Doctor Applications ── */}
+      <section>
+        <h2 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-3">
+          Doctor Applications ({pending.length})
+        </h2>
+        {pending.length === 0 ? (
+          <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6 text-center">
+            <p className="text-sm font-bold text-green-400">No pending applications.</p>
           </div>
-          <div className="divide-y divide-white/5">
-            {(!activeQueue.items || activeQueue.items.length === 0) ? (
-              <p className="p-8 text-center text-gray-500 text-sm">No pending items.</p>
-            ) : (
-              activeQueue.items.map((item: any) => (
-                <div key={item.id} className="p-4 flex items-center justify-between gap-4">
-                  <div>
-                    <p className="font-medium">
-                      {item.first_name ? `Dr. ${item.first_name} ${item.last_name}` : item.name || item.title || item.id}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {item.clinic_name && `${item.clinic_name} - `}
-                      {item.created_at && formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
-                    </p>
+        ) : (
+          <div className="space-y-3">
+            {pending.map((doc: any) => {
+              const name = `Dr. ${doc.first_name || ''} ${doc.last_name || ''}`.trim() || doc.clinic_name || 'Unknown';
+              const completeness = [
+                doc.bio ? 'Bio' : null,
+                doc.photo_url ? 'Photo' : null,
+                doc.phone ? 'Phone' : null,
+                doc.address ? 'Address' : null,
+                doc.hours ? 'Hours' : null,
+                doc.booking_url ? 'Booking' : null,
+              ].filter(Boolean);
+              const missing = [
+                !doc.bio ? 'bio' : null,
+                !doc.photo_url ? 'photo' : null,
+                !doc.phone ? 'phone' : null,
+                !doc.address ? 'address' : null,
+              ].filter(Boolean);
+              const isActioning = moderating === doc.id;
+              const result = actionResult?.id === doc.id ? actionResult : null;
+
+              return (
+                <div key={doc.id} className="bg-white/5 border border-white/5 rounded-xl p-4">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="min-w-0">
+                      <p className="font-bold text-white truncate">{name}</p>
+                      {doc.clinic_name && doc.first_name && (
+                        <p className="text-xs text-white/40 truncate">{doc.clinic_name}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-1.5 shrink-0">
+                      <Link href={`/directory/${doc.slug || doc.id}`} target="_blank"
+                        className="p-1.5 bg-white/5 rounded-lg hover:bg-white/10">
+                        <ExternalLink className="w-3 h-3 text-white/50" />
+                      </Link>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      disabled={moderating === item.id}
-                      onClick={() => handleModerateDoctor(item.id, "approve")}
-                      className="px-3 py-1 bg-green-500/10 text-green-400 rounded text-xs hover:bg-green-500/20 disabled:opacity-50"
-                    >Approve</button>
-                    <button
-                      disabled={moderating === item.id}
-                      onClick={() => handleModerateDoctor(item.id, "reject")}
-                      className="px-3 py-1 bg-red-500/10 text-red-400 rounded text-xs hover:bg-red-500/20 disabled:opacity-50"
-                    >Reject</button>
+
+                  {/* Details grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 text-xs">
+                    <div>
+                      <span className="text-white/30">Location</span>
+                      <p className="text-white/70 flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {[doc.city, doc.state].filter(Boolean).join(', ') || 'Not set'}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-white/30">Applied</span>
+                      <p className="text-white/70 flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {doc.created_at ? formatDistanceToNow(new Date(doc.created_at), { addSuffix: true }) : 'Unknown'}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-white/30">Profile</span>
+                      <p className="text-white/70">{completeness.length}/6 fields</p>
+                    </div>
+                    <div>
+                      <span className="text-white/30">Email</span>
+                      <p className="text-white/70 truncate">{doc.email || 'None'}</p>
+                    </div>
+                  </div>
+
+                  {missing.length > 0 && (
+                    <p className="text-[10px] text-amber-400/60 mb-3">Missing: {missing.join(', ')}</p>
+                  )}
+
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleAction(doc.id, 'approve')} disabled={isActioning}
+                      className="px-4 py-2 bg-green-500/15 text-green-400 rounded-lg text-xs font-bold hover:bg-green-500/25 disabled:opacity-50 min-h-[36px]">
+                      {isActioning ? '...' : 'Approve'}
+                    </button>
+                    <button onClick={() => handleAction(doc.id, 'reject')} disabled={isActioning}
+                      className="px-4 py-2 bg-red-500/10 text-red-400 rounded-lg text-xs font-bold hover:bg-red-500/20 disabled:opacity-50 min-h-[36px]">
+                      Reject
+                    </button>
+                    <button onClick={() => handleAction(doc.id, 'flag')} disabled={isActioning}
+                      className="px-4 py-2 bg-amber-500/10 text-amber-400 rounded-lg text-xs font-bold hover:bg-amber-500/20 disabled:opacity-50 min-h-[36px]">
+                      Need Info
+                    </button>
+                    {result && (
+                      <span className={`text-xs font-bold ml-2 ${result.ok ? 'text-green-400' : 'text-red-400'}`}>
+                        {result.msg}
+                      </span>
+                    )}
                   </div>
                 </div>
-              ))
-            )}
+              );
+            })}
           </div>
-        </div>
-      )}
+        )}
+      </section>
 
-      {/* Security Alerts */}
-      <div className="bg-white/5 border border-white/5 rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-white/10">
-          <h2 className="font-semibold">Security Alerts</h2>
-        </div>
-        <div className="divide-y divide-white/5">
-          {alerts.length === 0 ? (
-            <p className="p-8 text-center text-gray-500 text-sm">No active alerts.</p>
-          ) : (
-            alerts.map((alert: any, i: number) => (
-              <div key={i} className="p-4 flex items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                      alert.status === "Critical" ? "bg-red-500/10 text-red-400" : "bg-orange-500/10 text-orange-400"
-                    }`}>{alert.status}</span>
-                    <span className="text-xs text-gray-500">{formatDistanceToNow(new Date(alert.date), { addSuffix: true })}</span>
-                  </div>
-                  <p className="text-sm font-medium">{alert.type}: {alert.source}</p>
-                  <p className="text-xs text-gray-500">{alert.reason}</p>
-                </div>
-                <button
-                  onClick={() => setSelectedAlert(alert)}
-                  className="px-3 py-1 bg-white/10 rounded text-xs hover:bg-white/20 shrink-0"
-                >Resolve</button>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Patient Stories */}
-      {pendingStories.length > 0 && (
-        <div className="bg-white/5 border border-white/5 rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-white/10">
-            <h2 className="font-semibold">Patient Stories ({pendingStories.length})</h2>
-          </div>
-          <div className="divide-y divide-white/5">
-            {pendingStories.map((story) => (
-              <div key={story.id} className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium">
-                    {story.patient_first_name} — for Dr. {story.doctor?.first_name} {story.doctor?.last_name}
+      {/* ── Flagged Profiles ── */}
+      {flagged.length > 0 && (
+        <section>
+          <h2 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-3">
+            Flagged Profiles ({flagged.length})
+          </h2>
+          <div className="space-y-2">
+            {flagged.map((doc: any) => (
+              <div key={doc.id} className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-4 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-white truncate">
+                    Dr. {doc.first_name} {doc.last_name}
                   </p>
-                  <span className="text-xs text-gray-500">{story.doctor?.clinic_name}</span>
+                  <p className="text-xs text-amber-400/80 mt-0.5">{doc.review_notes}</p>
                 </div>
-                <p className="text-xs text-gray-400 mb-1">
-                  <span className="text-gray-500 font-semibold">Before:</span> {story.condition_before} &rarr;{" "}
-                  <span className="text-gray-500 font-semibold">After:</span> {story.outcome_after}
-                </p>
-                <p className="text-xs text-gray-400 italic mb-3">&ldquo;{story.story_text}&rdquo;</p>
-                <div className="flex gap-2">
-                  <button
-                    disabled={storyActioning === story.id}
-                    onClick={async () => {
-                      setStoryActioning(story.id);
-                      await approvePatientStory(story.id);
-                      setPendingStories((prev) => prev.filter((s) => s.id !== story.id));
-                      setStoryActioning(null);
-                    }}
-                    className="px-3 py-1 bg-green-500/10 text-green-400 rounded text-xs hover:bg-green-500/20"
-                  >Approve</button>
-                  <button
-                    disabled={storyActioning === story.id}
-                    onClick={async () => {
-                      setStoryActioning(story.id);
-                      await rejectPatientStory(story.id);
-                      setPendingStories((prev) => prev.filter((s) => s.id !== story.id));
-                      setStoryActioning(null);
-                    }}
-                    className="px-3 py-1 bg-red-500/10 text-red-400 rounded text-xs hover:bg-red-500/20"
-                  >Reject</button>
-                </div>
+                <Link href={`/admin/directory?search=${encodeURIComponent(`${doc.first_name} ${doc.last_name}`)}`}
+                  className="px-3 py-1.5 bg-white/5 rounded-lg text-xs font-bold text-white/50 hover:text-white hover:bg-white/10 shrink-0">
+                  Edit
+                </Link>
               </div>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Alert Resolution Modal */}
-      {selectedAlert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-[#0d1117] border border-white/10 rounded-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-5 border-b border-white/10">
-              <h2 className="text-lg font-bold">Resolve Alert</h2>
-              <button onClick={() => setSelectedAlert(null)} className="text-gray-500 hover:text-white text-xl">&times;</button>
-            </div>
-            <div className="p-5 space-y-4">
-              <div className="bg-white/5 rounded-lg p-4">
-                <p className="text-xs text-gray-500 mb-1">Reason</p>
-                <p className="text-sm text-gray-300">{selectedAlert.reason}</p>
-                <p className="text-xs text-gray-500 mt-3 mb-1">Source</p>
-                <p className="text-sm font-medium">{selectedAlert.source}</p>
+      {/* ── Pending Seminars ── */}
+      {pendingSeminars.length > 0 && (
+        <section>
+          <h2 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-3">
+            Seminars Pending Review ({pendingSeminars.length})
+          </h2>
+          <div className="space-y-2">
+            {pendingSeminars.map((sem: any) => (
+              <div key={sem.id} className="bg-white/5 border border-white/5 rounded-xl p-4 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-white truncate">{sem.title}</p>
+                  <p className="text-xs text-white/40">
+                    {sem.city}{sem.country ? `, ${sem.country}` : ''} — {sem.dates || 'No dates'}
+                  </p>
+                </div>
+                <Link href="/admin/seminars" className="px-3 py-1.5 bg-white/5 rounded-lg text-xs font-bold text-white/50 hover:text-white hover:bg-white/10 shrink-0">
+                  Review
+                </Link>
               </div>
-              <div className="flex gap-3">
-                <button
-                  disabled={resolving !== null}
-                  onClick={() => handleResolveAlert("Dismiss")}
-                  className="flex-1 py-2 bg-white/10 rounded-lg text-sm hover:bg-white/20 disabled:opacity-50"
-                >Dismiss</button>
-                <button
-                  disabled={resolving !== null}
-                  onClick={() => handleResolveAlert("Escalate")}
-                  className="flex-1 py-2 bg-red-500/10 text-red-400 rounded-lg text-sm hover:bg-red-500/20 disabled:opacity-50"
-                >Escalate</button>
-              </div>
-            </div>
+            ))}
           </div>
+        </section>
+      )}
+
+      {/* Empty state */}
+      {pending.length === 0 && flagged.length === 0 && pendingSeminars.length === 0 && (
+        <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-8 text-center mt-4">
+          <ShieldCheck className="w-8 h-8 text-green-400 mx-auto mb-3" />
+          <p className="text-sm font-bold text-green-400">All clear. Nothing to moderate.</p>
         </div>
       )}
     </div>

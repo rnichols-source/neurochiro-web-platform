@@ -37,73 +37,33 @@ export async function getModerationData() {
   try {
     await checkAdminAuth();
     const supabase = createAdminClient();
-    
-    // 1. Fetch real-time counts and queues from database
-    const [
-      { count: pendingDoctorsCount },
-      { count: pendingSeminarsCount },
-      { count: pendingVendorsCount },
-      { count: verifiedDoctorsCount },
-      { count: totalProfilesCount },
-      { data: pendingDoctorsList },
-      { data: recentAuditAlerts }
-    ] = await Promise.all([
-      supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
-      supabase.from('seminars').select('*', { count: 'exact', head: true }).eq('is_approved', false),
-      supabase.from('vendors').select('*', { count: 'exact', head: true }).eq('is_active', false),
-      supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified'),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }),
-      supabase.from('doctors')
-        .select('id, first_name, last_name, clinic_name, city, state, created_at, verification_status')
+
+    const [pendingDoctors, flaggedProfiles, pendingSeminars] = await Promise.all([
+      // Pending doctor applications — rich data for inline approval
+      (supabase as any).from('doctors')
+        .select('id, first_name, last_name, clinic_name, slug, city, state, email, phone, address, bio, photo_url, hours, booking_url, created_at, verification_status')
         .eq('verification_status', 'pending')
+        .order('created_at', { ascending: true }),
+
+      // Profiles flagged for review
+      (supabase as any).from('doctors')
+        .select('id, first_name, last_name, review_notes, created_at')
+        .eq('needs_review', true),
+
+      // Seminars pending review
+      supabase.from('seminars')
+        .select('id, title, city, country, dates, created_at')
+        .eq('is_approved', false)
         .order('created_at', { ascending: false })
         .limit(20),
-      supabase.from('audit_logs')
-        .select('*')
-        .or('severity.eq.High,severity.eq.Critical')
-        .order('created_at', { ascending: false })
-        .limit(10)
     ]);
-
-    // 2. Map real audit logs to ModerationAlerts
-    const alerts: ModerationAlert[] = (recentAuditAlerts || []).map((log) => ({
-      id: log.id,
-      type: log.category as any,
-      source: log.user_name || "System",
-      reason: log.event,
-      date: log.created_at,
-      status: (log.severity === 'Critical' ? 'Critical' : 'Warning') as any
-    }));
-
-    // 3. Dynamic Health Metrics
-    const unverifiedCount = (totalProfilesCount || 0) - (verifiedDoctorsCount || 0);
-    const healthMetrics: PlatformHealthMetrics = {
-      verifiedDoctors: verifiedDoctorsCount || 0,
-      unverifiedDoctors: unverifiedCount > 0 ? unverifiedCount : 0,
-      fraudAttemptRate: '0.0%',
-      vendorCompliance: '100%',
-      seminarVerificationRate: '100%',
-      activeCases: alerts.length,
-      avgResolutionTime: '< 1 hour'
-    };
 
     return {
       success: true,
       data: {
-        queues: [
-          { id: 'doctors', name: "Doctor Applications", count: pendingDoctorsCount || 0, color: "text-blue-500", items: pendingDoctorsList || [] },
-          { id: 'seminars', name: "Seminar Listings", count: pendingSeminarsCount || 0, color: "text-neuro-orange" },
-          { id: 'vendors', name: "Vendor Partners", count: pendingVendorsCount || 0, color: "text-purple-500" }
-        ],
-        alerts: alerts,
-        summary: {
-          totalCleared: verifiedDoctorsCount || 0,
-          escalated: alerts.filter(a => a.status === 'Critical').length,
-          pendingInvestigations: alerts.length,
-          totalFlagged: (pendingDoctorsCount || 0) + (pendingSeminarsCount || 0) + (pendingVendorsCount || 0)
-        },
-        healthMetrics,
-        settings: globalSettings
+        pendingDoctors: pendingDoctors.data || [],
+        flaggedProfiles: flaggedProfiles.data || [],
+        pendingSeminars: pendingSeminars.data || [],
       }
     };
   } catch (error: any) {
