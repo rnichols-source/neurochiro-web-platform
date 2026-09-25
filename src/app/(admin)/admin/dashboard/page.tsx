@@ -150,11 +150,8 @@ export default function AdminDashboard() {
             sub={`${stats?.monthlySubscriptions || 0} monthly, ${stats?.annualSubscriptions || 0} annual`} color="text-blue-400" />
           <StatCard label="Failed Payments" value={stats?.failedPayments || 0}
             sub={stats?.failedPayments > 0 ? "Need attention" : "None"} color={stats?.failedPayments > 0 ? "text-red-400" : "text-green-400"} />
-          <div className="bg-white/5 border border-white/5 rounded-xl p-4 flex items-center justify-center">
-            <Link href="/admin/revenue" className="text-xs text-neuro-orange font-bold hover:underline">
-              Full revenue breakdown &rarr;
-            </Link>
-          </div>
+          <StatCard label="Job Board" value={`${stats?.activeJobPostings || 0} active`}
+            sub={`$${stats?.jobPostRevenue || 0} total job post revenue`} color="text-purple-400" />
         </div>
       </section>
 

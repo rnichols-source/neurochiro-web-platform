@@ -100,16 +100,28 @@ export async function getAdminDashboardStats() {
       .select('id', { count: 'exact', head: true })
       .eq('verification_status', 'pending')
 
+    // Job posting revenue (separate from MRR)
+    const { count: activeJobPostings } = await (supabase as any)
+      .from('job_postings')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'Active')
+    const { count: paidJobPostings } = await (supabase as any)
+      .from('job_postings')
+      .select('id', { count: 'exact', head: true })
+      .eq('is_paid', true)
+
     return {
       doctors: doctorCounts,
       subscribers: subscriberCounts,
       mrr: Math.round(mrr * 100) / 100,
-      newMrr: Math.round((mrr > 0 ? mrr : 0) * 100) / 100, // placeholder until we calculate properly
-      churnedMrr: 0, // placeholder
+      newMrr: Math.round((mrr > 0 ? mrr : 0) * 100) / 100,
+      churnedMrr: 0,
       monthlySubscriptions: monthlyCount,
       annualSubscriptions: annualCount,
       failedPayments: failedPayments.length,
       pendingVerifications: pendingVerifications || 0,
+      activeJobPostings: activeJobPostings || 0,
+      jobPostRevenue: (paidJobPostings || 0) * 99,
     }
   } catch (e) {
     console.error("Admin Dashboard Error:", e)
@@ -199,10 +211,10 @@ export async function getActionList(): Promise<ActionItem[]> {
         .eq('verification_status', 'verified')
         .not('specialties', 'is', null),
 
-      // 7. School verification review requests
+      // 7. School verification review requests + orphaned job payments
       (supabase as any).from('automation_queue')
-        .select('payload, created_at')
-        .eq('event_type', 'school_review_request'),
+        .select('payload, created_at, event_type')
+        .in('event_type', ['school_review_request', 'job_payment_orphan']),
 
       // 8. Failed Stripe charges (recent)
       (async () => {
@@ -326,19 +338,32 @@ export async function getActionList(): Promise<ActionItem[]> {
       })
     }
 
-    // ── 7. School verification review requests (urgency 2) ──
+    // ── 7. School review requests + orphaned job payments (urgency 1-2) ──
     for (const q of (schoolReviewRequests || [])) {
       const p = typeof q.payload === 'string' ? JSON.parse(q.payload) : q.payload
-      items.push({
-        id: `school-review-${p.userId}`,
-        urgency: 2,
-        category: 'Student Verification',
-        title: `School not recognized: ${p.schoolName}`,
-        who: p.email || 'Unknown',
-        waitingSince: q.created_at,
-        waitingDays: Math.floor((now - new Date(q.created_at).getTime()) / dayMs),
-        link: '/admin/users',
-      })
+      if (q.event_type === 'school_review_request') {
+        items.push({
+          id: `school-review-${p.userId}`,
+          urgency: 2,
+          category: 'Student Verification',
+          title: `School not recognized: ${p.schoolName}`,
+          who: p.email || 'Unknown',
+          waitingSince: q.created_at,
+          waitingDays: Math.floor((now - new Date(q.created_at).getTime()) / dayMs),
+          link: '/admin/users',
+        })
+      } else if (q.event_type === 'job_payment_orphan') {
+        items.push({
+          id: `job-orphan-${p.jobId}`,
+          urgency: 1,
+          category: 'Payment',
+          title: 'Job payment received but post not activated',
+          who: `Job ${p.jobId?.slice(0, 8)}`,
+          waitingSince: q.created_at,
+          waitingDays: Math.floor((now - new Date(q.created_at).getTime()) / dayMs),
+          link: '/admin/jobs',
+        })
+      }
     }
 
     // ── 8. Paid members with incomplete profiles (urgency 3) ──
