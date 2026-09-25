@@ -170,7 +170,11 @@ export async function updateDoctorProfile(formData: FormData) {
     const teamMembersRaw = formData.get('team_members') as string
     const teamMembers = teamMembersRaw ? JSON.parse(teamMembersRaw) : []
     const certificationsRaw = formData.get('certifications') as string
-    const certifications = certificationsRaw ? certificationsRaw.split('\n').map(s => s.trim()).filter(Boolean) : []
+    // Filter out baseline licensure from certifications — that belongs in education/degree
+    const BASELINE_LICENSE = /^(licensed\s+)?doctor\s+of\s+chiropractic(\s+\(dc\))?$/i
+    const certifications = certificationsRaw
+      ? certificationsRaw.split('\n').map(s => s.trim()).filter(s => s && !BASELINE_LICENSE.test(s))
+      : []
 
     // Structured bio fields — no URLs or phone numbers in prose
     const shortIntro = formData.get('short_intro') as string || null

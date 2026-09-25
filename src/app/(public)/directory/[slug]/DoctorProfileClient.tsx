@@ -298,7 +298,9 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       {/* ═══════════════════════════════════════════
           2. CLAIM / UPGRADE BANNERS
       ═══════════════════════════════════════════ */}
-      {!doctor.user_id && (
+      {/* Show unclaimed banner only for sparse, un-approved profiles without a user account.
+          A profile with a bio or that's been admin-approved is not "built from public info." */}
+      {!doctor.user_id && !doctor.is_approved && !doctor.bio && (
         <Section bg="cream" style={{ paddingTop: 24, paddingBottom: 0 }}>
           <div style={{ background: "#f0f4f8", border: "1px solid #d1dce6", borderRadius: 16, padding: "20px 24px", fontSize: 13, color: "#5a6b7d", lineHeight: 1.6 }}>
             <p style={{ margin: "0 0 8px", fontWeight: 700, color: "#1E2D3B", fontSize: 14 }}>This listing was created from public information</p>
