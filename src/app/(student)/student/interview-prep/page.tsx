@@ -1128,16 +1128,16 @@ function InterviewPlaybookContent() {
   // ─── Purchase Gate ────────────────────────────────────────────────────────
 
   const PurchaseGate = ({ message }: { message?: string }) => (
-    <div className="absolute inset-0 z-10 backdrop-blur-sm bg-[#0F1A24]/80 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
-      <Lock className="w-8 h-8 mb-3" style={{ color: BRAND_NAVY }} />
-      <p className="font-bold text-lg" style={{ color: BRAND_NAVY }}>
+    <div className="absolute inset-0 z-10 backdrop-blur-sm bg-[#EFF1F2]/80 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
+      <Lock className="w-8 h-8 mb-3" style={{ color: "#16222D" }} />
+      <p className="font-bold text-lg" style={{ color: "#16222D" }}>
         {message || "$29 -- Unlock Full Playbook"}
       </p>
-      <p className="text-white/40 text-sm mt-1 max-w-xs">
+      <p className="text-[#5A6873] text-sm mt-1 max-w-xs">
         Get access to all questions, the offer calculator, negotiation scripts, and follow-up templates.
       </p>
       <button
-        className="mt-4 px-6 py-3 rounded-xl text-white font-bold text-sm transition-colors hover:opacity-90"
+        className="mt-4 px-6 py-3 rounded-xl text-[#16222D] font-bold text-sm transition-colors hover:opacity-90"
         style={{ backgroundColor: BRAND_ORANGE }}
       >
         Unlock for $29
@@ -1155,7 +1155,7 @@ function InterviewPlaybookContent() {
     const safeIdx = Math.min(questionIndex, Math.max(filtered.length - 1, 0));
     const q = filtered[safeIdx];
 
-    if (!q) return <p className="text-white/40 text-sm py-10 text-center">No questions in this category.</p>;
+    if (!q) return <p className="text-[#5A6873] text-sm py-10 text-center">No questions in this category.</p>;
 
     const goNext = () => { setShowAnswer(false); setQuestionIndex(i => Math.min(i + 1, filtered.length - 1)); };
     const goPrev = () => { setShowAnswer(false); setQuestionIndex(i => Math.max(i - 1, 0)); };
@@ -1170,7 +1170,7 @@ function InterviewPlaybookContent() {
               key={cat}
               onClick={() => { setQuestionFilter(cat); setQuestionIndex(0); setShowAnswer(false); }}
               className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
-                questionFilter === cat ? "bg-[#D66829] text-white" : "bg-white/[0.06] text-white/40 hover:text-white/60"
+                questionFilter === cat ? "bg-[#D66829] text-[#16222D]" : "bg-[#EFF1F2] text-[#5A6873] hover:text-[#5A6873]"
               }`}
             >
               {cat}
@@ -1179,10 +1179,10 @@ function InterviewPlaybookContent() {
         </div>
 
         {/* Progress */}
-        <p className="text-xs text-white/30 mb-4">Question {safeIdx + 1} of {filtered.length}</p>
+        <p className="text-xs text-[#5A6873] mb-4">Question {safeIdx + 1} of {filtered.length}</p>
 
         {/* Question card */}
-        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-5 md:p-8 mb-4">
+        <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-5 md:p-8 mb-4">
           {/* Tags */}
           <div className="flex items-center gap-2 mb-4">
             <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ background: `${CATEGORY_COLORS[q.category]}20`, color: CATEGORY_COLORS[q.category] }}>{q.category}</span>
@@ -1190,10 +1190,10 @@ function InterviewPlaybookContent() {
           </div>
 
           {/* Question */}
-          <h3 className="text-xl font-bold text-white mb-4 leading-relaxed">&ldquo;{q.question}&rdquo;</h3>
+          <h3 className="text-xl font-bold text-[#16222D] mb-4 leading-relaxed">&ldquo;{q.question}&rdquo;</h3>
 
           {/* Why they ask */}
-          <p className="text-xs text-white/30 italic mb-6">{q.whyTheyAsk}</p>
+          <p className="text-xs text-[#5A6873] italic mb-6">{q.whyTheyAsk}</p>
 
           {/* Reveal framework + answer */}
           {!showAnswer ? (
@@ -1209,7 +1209,7 @@ function InterviewPlaybookContent() {
                 <p className="text-xs font-bold text-[#D66829] uppercase tracking-wider mb-2">Strong Answer Framework</p>
                 <ul className="space-y-1.5">
                   {q.framework.map((point, i) => (
-                    <li key={i} className="text-sm text-white/60 flex items-start gap-2">
+                    <li key={i} className="text-sm text-[#5A6873] flex items-start gap-2">
                       <span className="text-[#D66829] mt-0.5 shrink-0">&#8226;</span>
                       <span>{point}</span>
                     </li>
@@ -1217,9 +1217,9 @@ function InterviewPlaybookContent() {
                 </ul>
               </div>
 
-              <div className="bg-white/[0.04] rounded-xl p-4 border border-white/[0.06]">
+              <div className="bg-[#F7F8F9] rounded-xl p-4 border border-[#DDE2E5]">
                 <p className="text-xs font-bold text-green-400 uppercase tracking-wider mb-2">Example Answer</p>
-                <p className="text-sm text-white/70 leading-relaxed italic">&ldquo;{q.exampleAnswer}&rdquo;</p>
+                <p className="text-sm text-[#5A6873] leading-relaxed italic">&ldquo;{q.exampleAnswer}&rdquo;</p>
               </div>
 
               {q.redFlags.length > 0 && (
@@ -1242,7 +1242,7 @@ function InterviewPlaybookContent() {
         {/* Navigation */}
         <div className="flex items-center justify-between">
           <button onClick={goPrev} disabled={safeIdx === 0}
-            className="px-4 py-2.5 bg-white/[0.06] text-white/50 rounded-xl text-sm font-bold hover:bg-white/[0.1] disabled:opacity-30 transition-colors min-h-[44px]">
+            className="px-4 py-2.5 bg-[#EFF1F2] text-[#5A6873] rounded-xl text-sm font-bold hover:bg-[#DDE2E5] disabled:opacity-30 transition-colors min-h-[44px]">
             Previous
           </button>
           <div className="flex gap-1 max-w-[200px] overflow-hidden">
@@ -1252,7 +1252,7 @@ function InterviewPlaybookContent() {
             ))}
           </div>
           <button onClick={goNext} disabled={safeIdx === filtered.length - 1}
-            className="px-4 py-2.5 bg-[#D66829] text-white rounded-xl text-sm font-bold hover:bg-[#e8834a] disabled:opacity-30 transition-colors min-h-[44px]">
+            className="px-4 py-2.5 bg-[#D66829] text-[#16222D] rounded-xl text-sm font-bold hover:bg-[#e8834a] disabled:opacity-30 transition-colors min-h-[44px]">
             Next
           </button>
         </div>
@@ -1269,12 +1269,12 @@ function InterviewPlaybookContent() {
     return (
       <div>
         <div className="flex items-center gap-3 mb-2">
-          <Search className="w-7 h-7" style={{ color: BRAND_ORANGE }} />
-          <h2 className="text-2xl font-heading font-black" style={{ color: BRAND_NAVY }}>
+          <Search className="w-7 h-7" style={{ color: "#D66829" }} />
+          <h2 className="text-2xl font-heading font-black" style={{ color: "#16222D" }}>
             Questions to Ask Them
           </h2>
         </div>
-        <p className="text-white/40 text-sm mb-6">
+        <p className="text-[#5A6873] text-sm mb-6">
           15 essential questions to evaluate any practice, with green/red flag detection and a scorecard to guide your decision.
         </p>
 
@@ -1286,7 +1286,7 @@ function InterviewPlaybookContent() {
             const catColor = CATEGORY_COLORS[q.category] || BRAND_NAVY;
 
             return (
-              <div key={q.id} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden relative">
+              <div key={q.id} className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] overflow-hidden relative">
                 <button
                   onClick={() => {
                     if (isFree) setExpandedAsk(isExpanded ? null : q.id);
@@ -1295,23 +1295,23 @@ function InterviewPlaybookContent() {
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="text-white/35 text-xs font-bold">#{q.id}</span>
+                      <span className="text-[#5A6873] text-xs font-bold">#{q.id}</span>
                       <span
-                        className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
+                        className="px-2 py-0.5 rounded-full text-[10px] font-bold text-[#16222D]"
                         style={{ backgroundColor: catColor }}
                       >
                         {q.category}
                       </span>
                     </div>
-                    <h3 className="font-bold text-base" style={{ color: BRAND_NAVY }}>
+                    <h3 className="font-bold text-base" style={{ color: "#16222D" }}>
                       {q.question}
                     </h3>
                   </div>
                   <div className="flex-shrink-0 mt-1">
                     {isFree ? (
-                      isExpanded ? <ChevronDown className="w-5 h-5 text-white/35" /> : <ChevronRight className="w-5 h-5 text-white/35" />
+                      isExpanded ? <ChevronDown className="w-5 h-5 text-[#5A6873]" /> : <ChevronRight className="w-5 h-5 text-[#5A6873]" />
                     ) : (
-                      <Lock className="w-5 h-5 text-white/20" />
+                      <Lock className="w-5 h-5 text-[#5A6873]/40" />
                     )}
                   </div>
                 </button>
@@ -1319,12 +1319,12 @@ function InterviewPlaybookContent() {
                 {!isFree && isExpanded && <PurchaseGate />}
 
                 {isExpanded && isFree && (
-                  <div className="px-5 pb-6 pt-0 space-y-4 border-t border-white/[0.08]">
+                  <div className="px-5 pb-6 pt-0 space-y-4 border-t border-[#DDE2E5]">
                     <div>
-                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-1.5" style={{ color: BRAND_ORANGE }}>
+                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-1.5" style={{ color: "#D66829" }}>
                         Why This Matters
                       </h4>
-                      <p className="text-sm text-white/50 leading-relaxed">{q.whyMatters}</p>
+                      <p className="text-sm text-[#5A6873] leading-relaxed">{q.whyMatters}</p>
                     </div>
 
                     <div className="rounded-xl p-4 border-2 border-green-500/20 bg-green-500/10">
@@ -1341,7 +1341,7 @@ function InterviewPlaybookContent() {
                       <p className="text-sm text-red-400 leading-relaxed">{q.redFlagAnswer}</p>
                     </div>
 
-                    <p className="text-sm font-bold" style={{ color: BRAND_ORANGE }}>
+                    <p className="text-sm font-bold" style={{ color: "#D66829" }}>
                       Follow-up: &ldquo;{q.followUp}&rdquo;
                     </p>
                   </div>
@@ -1357,20 +1357,20 @@ function InterviewPlaybookContent() {
             <PurchaseGate message="Unlock the Red Flag Scorecard for $29" />
           )}
           <div className={!purchased ? "pointer-events-none select-none opacity-30" : ""}>
-            <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+            <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
               <div className="flex items-center gap-3 mb-4">
-                <AlertTriangle className="w-6 h-6" style={{ color: BRAND_ORANGE }} />
-                <h3 className="text-lg font-bold" style={{ color: BRAND_NAVY }}>Red Flag Scorecard</h3>
+                <AlertTriangle className="w-6 h-6" style={{ color: "#D66829" }} />
+                <h3 className="text-lg font-bold" style={{ color: "#16222D" }}>Red Flag Scorecard</h3>
               </div>
-              <p className="text-sm text-white/40 mb-6">
+              <p className="text-sm text-[#5A6873] mb-6">
                 Rate each area based on the answers you received during your interview. This will generate a recommendation.
               </p>
 
               <div className="space-y-3 mb-6">
                 {QUESTIONS_TO_ASK.map((q) => (
-                  <div key={q.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04]">
-                    <span className="text-xs font-bold text-white/35 w-6 flex-shrink-0">#{q.id}</span>
-                    <p className="text-sm text-white/60 flex-1 min-w-0 truncate">{q.question}</p>
+                  <div key={q.id} className="flex items-center gap-3 p-3 rounded-xl bg-[#F7F8F9]">
+                    <span className="text-xs font-bold text-[#5A6873] w-6 flex-shrink-0">#{q.id}</span>
+                    <p className="text-sm text-[#5A6873] flex-1 min-w-0 truncate">{q.question}</p>
                     <div className="flex gap-1 flex-shrink-0">
                       {(["green", "yellow", "red"] as const).map((rating) => {
                         const icons = { green: "🟢", yellow: "🟡", red: "🔴" };
@@ -1397,7 +1397,7 @@ function InterviewPlaybookContent() {
               {verdict && (
                 <div className="rounded-xl p-5 text-center" style={{ backgroundColor: verdict.bg }}>
                   <p className="text-lg font-bold" style={{ color: verdict.color }}>{verdict.label}</p>
-                  <p className="text-sm text-white/40 mt-1">
+                  <p className="text-sm text-[#5A6873] mt-1">
                     {Object.values(scorecardRatings).filter((r) => r === "green").length} green,{" "}
                     {Object.values(scorecardRatings).filter((r) => r === "yellow").length} yellow,{" "}
                     {Object.values(scorecardRatings).filter((r) => r === "red").length} red out of {Object.values(scorecardRatings).length} rated
@@ -1420,38 +1420,38 @@ function InterviewPlaybookContent() {
     return (
       <div>
         <div className="flex items-center gap-3 mb-2">
-          <DollarSign className="w-7 h-7" style={{ color: BRAND_ORANGE }} />
-          <h2 className="text-2xl font-heading font-black" style={{ color: BRAND_NAVY }}>
+          <DollarSign className="w-7 h-7" style={{ color: "#D66829" }} />
+          <h2 className="text-2xl font-heading font-black" style={{ color: "#16222D" }}>
             Evaluate the Offer
           </h2>
         </div>
-        <p className="text-white/40 text-sm mb-6">
+        <p className="text-[#5A6873] text-sm mb-6">
           Enter the details of your offer to see the true compensation, hidden costs, and an overall score.
         </p>
 
         {/* Input Section (always free) */}
-        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 mb-6">
-          <h3 className="text-sm font-bold mb-4" style={{ color: BRAND_NAVY }}>Offer Details</h3>
+        <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6 mb-6">
+          <h3 className="text-sm font-bold mb-4" style={{ color: "#16222D" }}>Offer Details</h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Base Salary */}
             <div>
-              <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Base Salary ($)</label>
+              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Base Salary ($)</label>
               <input
                 type="number"
                 value={offer.baseSalary}
                 onChange={(e) => setOffer((prev) => ({ ...prev, baseSalary: Number(e.target.value) }))}
-                className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
+                className="w-full mt-1 px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D]"
               />
             </div>
 
             {/* Comp Model */}
             <div>
-              <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Compensation Model</label>
+              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Compensation Model</label>
               <select
                 value={offer.compModel}
                 onChange={(e) => setOffer((prev) => ({ ...prev, compModel: e.target.value }))}
-                className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
+                className="w-full mt-1 px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D]"
               >
                 {["Base Only", "Base + Bonus", "% Collections", "Hybrid"].map((m) => (
                   <option key={m} value={m}>{m}</option>
@@ -1463,30 +1463,30 @@ function InterviewPlaybookContent() {
             {showBonus && (
               <>
                 <div>
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Bonus % of Collections</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Bonus % of Collections</label>
                   <input
                     type="number"
                     value={offer.bonusPct}
                     onChange={(e) => setOffer((prev) => ({ ...prev, bonusPct: Number(e.target.value) }))}
-                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
+                    className="w-full mt-1 px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D]"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Bonus Threshold ($)</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Bonus Threshold ($)</label>
                   <input
                     type="number"
                     value={offer.bonusThreshold}
                     onChange={(e) => setOffer((prev) => ({ ...prev, bonusThreshold: Number(e.target.value) }))}
-                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
+                    className="w-full mt-1 px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D]"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Est. Monthly Collections ($)</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Est. Monthly Collections ($)</label>
                   <input
                     type="number"
                     value={offer.estMonthlyCollections}
                     onChange={(e) => setOffer((prev) => ({ ...prev, estMonthlyCollections: Number(e.target.value) }))}
-                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
+                    className="w-full mt-1 px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D]"
                   />
                 </div>
               </>
@@ -1494,7 +1494,7 @@ function InterviewPlaybookContent() {
 
             {/* Employment Type */}
             <div className="sm:col-span-2">
-              <label className="text-xs font-bold text-white/40 uppercase tracking-wide mb-2 block">Employment Type</label>
+              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide mb-2 block">Employment Type</label>
               <div className="flex gap-3">
                 {(["W-2", "1099"] as const).map((type) => (
                   <button
@@ -1515,7 +1515,7 @@ function InterviewPlaybookContent() {
 
             {/* Benefits */}
             <div className="sm:col-span-2">
-              <label className="text-xs font-bold text-white/40 uppercase tracking-wide mb-2 block">Benefits Included</label>
+              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide mb-2 block">Benefits Included</label>
               <div className="flex flex-wrap gap-2">
                 {BENEFITS_LIST.map((b) => {
                   const checked = offer.benefits.includes(b);
@@ -1535,7 +1535,7 @@ function InterviewPlaybookContent() {
                         color: checked ? "#22c55e" : "rgba(255,255,255,0.5)",
                       }}
                     >
-                      {checked ? <Check className="w-3 h-3" /> : <div className="w-3 h-3 rounded border border-white/[0.08]" />}
+                      {checked ? <Check className="w-3 h-3" /> : <div className="w-3 h-3 rounded border border-[#DDE2E5]" />}
                       {b}
                     </button>
                   );
@@ -1545,7 +1545,7 @@ function InterviewPlaybookContent() {
 
             {/* Non-compete */}
             <div className="sm:col-span-2">
-              <label className="text-xs font-bold text-white/40 uppercase tracking-wide mb-2 block">Non-Compete Clause</label>
+              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide mb-2 block">Non-Compete Clause</label>
               <div className="flex gap-3">
                 {[false, true].map((val) => (
                   <button
@@ -1567,21 +1567,21 @@ function InterviewPlaybookContent() {
             {offer.hasNonCompete && (
               <>
                 <div>
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Radius (miles)</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Radius (miles)</label>
                   <input
                     type="number"
                     value={offer.nonCompeteRadius}
                     onChange={(e) => setOffer((prev) => ({ ...prev, nonCompeteRadius: Number(e.target.value) }))}
-                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
+                    className="w-full mt-1 px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D]"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Duration (months)</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Duration (months)</label>
                   <input
                     type="number"
                     value={offer.nonCompeteDuration}
                     onChange={(e) => setOffer((prev) => ({ ...prev, nonCompeteDuration: Number(e.target.value) }))}
-                    className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
+                    className="w-full mt-1 px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D]"
                   />
                 </div>
               </>
@@ -1589,7 +1589,7 @@ function InterviewPlaybookContent() {
 
             {/* Equity Path */}
             <div>
-              <label className="text-xs font-bold text-white/40 uppercase tracking-wide mb-2 block">Equity/Ownership Path</label>
+              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide mb-2 block">Equity/Ownership Path</label>
               <div className="flex gap-3">
                 {[true, false].map((val) => (
                   <button
@@ -1610,12 +1610,12 @@ function InterviewPlaybookContent() {
 
             {/* Signing Bonus */}
             <div>
-              <label className="text-xs font-bold text-white/40 uppercase tracking-wide">Signing Bonus ($)</label>
+              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Signing Bonus ($)</label>
               <input
                 type="number"
                 value={offer.signingBonus}
                 onChange={(e) => setOffer((prev) => ({ ...prev, signingBonus: Number(e.target.value) }))}
-                className="w-full mt-1 px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white"
+                className="w-full mt-1 px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D]"
               />
             </div>
           </div>
@@ -1626,46 +1626,46 @@ function InterviewPlaybookContent() {
           {!purchased && <PurchaseGate message="Unlock Full Offer Analysis for $29" />}
           <div className={!purchased ? "pointer-events-none select-none opacity-30" : ""}>
             {/* Total Comp Breakdown */}
-            <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 mb-4">
-              <h3 className="text-sm font-bold mb-4" style={{ color: BRAND_NAVY }}>Total Compensation Breakdown</h3>
+            <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6 mb-4">
+              <h3 className="text-sm font-bold mb-4" style={{ color: "#16222D" }}>Total Compensation Breakdown</h3>
               <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-white/[0.08]">
-                  <span className="text-sm text-white/50">Base Salary</span>
-                  <span className="text-sm font-bold" style={{ color: BRAND_NAVY }}>
+                <div className="flex justify-between items-center py-2 border-b border-[#DDE2E5]">
+                  <span className="text-sm text-[#5A6873]">Base Salary</span>
+                  <span className="text-sm font-bold" style={{ color: "#16222D" }}>
                     ${calc.base.toLocaleString()}/yr (${Math.round(calc.base / 12).toLocaleString()}/mo)
                   </span>
                 </div>
                 {calc.showBonus && (
-                  <div className="flex justify-between items-center py-2 border-b border-white/[0.08]">
-                    <span className="text-sm text-white/50">Est. Annual Bonuses</span>
-                    <span className="text-sm font-bold" style={{ color: BRAND_NAVY }}>
+                  <div className="flex justify-between items-center py-2 border-b border-[#DDE2E5]">
+                    <span className="text-sm text-[#5A6873]">Est. Annual Bonuses</span>
+                    <span className="text-sm font-bold" style={{ color: "#16222D" }}>
                       ${Math.round(calc.estBonus).toLocaleString()}/yr
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between items-center py-2 border-b border-white/[0.08]">
-                  <span className="text-sm text-white/50">Benefits Value</span>
-                  <span className="text-sm font-bold" style={{ color: BRAND_NAVY }}>
+                <div className="flex justify-between items-center py-2 border-b border-[#DDE2E5]">
+                  <span className="text-sm text-[#5A6873]">Benefits Value</span>
+                  <span className="text-sm font-bold" style={{ color: "#16222D" }}>
                     ${calc.benefitsVal.toLocaleString()}/yr
                   </span>
                 </div>
                 {offer.signingBonus > 0 && (
-                  <div className="flex justify-between items-center py-2 border-b border-white/[0.08]">
-                    <span className="text-sm text-white/50">Signing Bonus</span>
-                    <span className="text-sm font-bold" style={{ color: BRAND_NAVY }}>
+                  <div className="flex justify-between items-center py-2 border-b border-[#DDE2E5]">
+                    <span className="text-sm text-[#5A6873]">Signing Bonus</span>
+                    <span className="text-sm font-bold" style={{ color: "#16222D" }}>
                       ${offer.signingBonus.toLocaleString()}
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between items-center py-3 bg-white/[0.04] rounded-xl px-4">
-                  <span className="text-sm font-bold" style={{ color: BRAND_NAVY }}>Total Compensation</span>
-                  <span className="text-lg font-black" style={{ color: BRAND_ORANGE }}>
+                <div className="flex justify-between items-center py-3 bg-[#F7F8F9] rounded-xl px-4">
+                  <span className="text-sm font-bold" style={{ color: "#16222D" }}>Total Compensation</span>
+                  <span className="text-lg font-black" style={{ color: "#D66829" }}>
                     ${Math.round(calc.totalComp).toLocaleString()}/yr
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-sm text-white/50">Effective Hourly Rate</span>
-                  <span className="text-sm font-bold" style={{ color: BRAND_NAVY }}>
+                  <span className="text-sm text-[#5A6873]">Effective Hourly Rate</span>
+                  <span className="text-sm font-bold" style={{ color: "#16222D" }}>
                     ${calc.hourly.toFixed(2)}/hr
                   </span>
                 </div>
@@ -1673,9 +1673,9 @@ function InterviewPlaybookContent() {
 
               {/* Market comparison */}
               <div className="mt-4 flex items-center gap-2">
-                <span className="text-xs font-bold text-white/40">Market Position:</span>
+                <span className="text-xs font-bold text-[#5A6873]">Market Position:</span>
                 <span
-                  className="px-3 py-1 rounded-full text-xs font-bold text-white"
+                  className="px-3 py-1 rounded-full text-xs font-bold text-[#16222D]"
                   style={{ backgroundColor: calc.marketColor }}
                 >
                   {calc.marketLabel}
@@ -1685,7 +1685,7 @@ function InterviewPlaybookContent() {
 
             {/* Hidden Costs */}
             {calc.hiddenCosts > 0 && (
-              <div className="bg-white/[0.04] rounded-2xl border-2 border-red-500/20 p-6 mb-4">
+              <div className="bg-[#F7F8F9] rounded-2xl border-2 border-red-500/20 p-6 mb-4">
                 <div className="flex items-center gap-2 mb-4">
                   <AlertTriangle className="w-5 h-5 text-red-500" />
                   <h3 className="text-sm font-bold text-red-600">Hidden Costs</h3>
@@ -1726,8 +1726,8 @@ function InterviewPlaybookContent() {
             )}
 
             {/* Offer Score Gauge */}
-            <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
-              <h3 className="text-sm font-bold mb-4" style={{ color: BRAND_NAVY }}>Offer Score</h3>
+            <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
+              <h3 className="text-sm font-bold mb-4" style={{ color: "#16222D" }}>Offer Score</h3>
 
               <div className="flex justify-center mb-6">
                 <svg viewBox="0 0 200 120" className="w-64">
@@ -1765,10 +1765,10 @@ function InterviewPlaybookContent() {
                   { label: "Restrictions", pts: calc.restrictPts, max: 20 },
                   { label: "Growth", pts: calc.growthPts, max: 20 },
                 ].map((item) => (
-                  <div key={item.label} className="bg-white/[0.04] rounded-xl p-3 text-center">
-                    <p className="text-[10px] font-bold text-white/35 uppercase tracking-wide">{item.label}</p>
-                    <p className="text-lg font-black" style={{ color: BRAND_NAVY }}>
-                      {item.pts}<span className="text-xs text-white/35">/{item.max}</span>
+                  <div key={item.label} className="bg-[#F7F8F9] rounded-xl p-3 text-center">
+                    <p className="text-[10px] font-bold text-[#5A6873] uppercase tracking-wide">{item.label}</p>
+                    <p className="text-lg font-black" style={{ color: "#16222D" }}>
+                      {item.pts}<span className="text-xs text-[#5A6873]">/{item.max}</span>
                     </p>
                   </div>
                 ))}
@@ -1785,12 +1785,12 @@ function InterviewPlaybookContent() {
   const renderNegotiationScripts = () => (
     <div>
       <div className="flex items-center gap-3 mb-2">
-        <Shield className="w-7 h-7" style={{ color: BRAND_ORANGE }} />
-        <h2 className="text-2xl font-heading font-black" style={{ color: BRAND_NAVY }}>
+        <Shield className="w-7 h-7" style={{ color: "#D66829" }} />
+        <h2 className="text-2xl font-heading font-black" style={{ color: "#16222D" }}>
           Negotiation Scripts
         </h2>
       </div>
-      <p className="text-white/40 text-sm mb-6">
+      <p className="text-[#5A6873] text-sm mb-6">
         Word-for-word scripts for the 8 most common negotiation scenarios. Copy, customize, and use with confidence.
       </p>
 
@@ -1800,7 +1800,7 @@ function InterviewPlaybookContent() {
           const isExpanded = expandedScript === s.id;
 
           return (
-            <div key={s.id} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden relative">
+            <div key={s.id} className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] overflow-hidden relative">
               <button
                 onClick={() => {
                   if (isFree) setExpandedScript(isExpanded ? null : s.id);
@@ -1808,14 +1808,14 @@ function InterviewPlaybookContent() {
                 className="w-full text-left p-5 flex items-start gap-4"
               >
                 <div className="flex-1 min-w-0">
-                  <span className="text-white/35 text-xs font-bold">Script {s.id}</span>
-                  <h3 className="font-bold text-base mt-1" style={{ color: BRAND_NAVY }}>{s.title}</h3>
+                  <span className="text-[#5A6873] text-xs font-bold">Script {s.id}</span>
+                  <h3 className="font-bold text-base mt-1" style={{ color: "#16222D" }}>{s.title}</h3>
                 </div>
                 <div className="flex-shrink-0 mt-1">
                   {isFree ? (
-                    isExpanded ? <ChevronDown className="w-5 h-5 text-white/35" /> : <ChevronRight className="w-5 h-5 text-white/35" />
+                    isExpanded ? <ChevronDown className="w-5 h-5 text-[#5A6873]" /> : <ChevronRight className="w-5 h-5 text-[#5A6873]" />
                   ) : (
-                    <Lock className="w-5 h-5 text-white/20" />
+                    <Lock className="w-5 h-5 text-[#5A6873]/40" />
                   )}
                 </div>
               </button>
@@ -1823,12 +1823,12 @@ function InterviewPlaybookContent() {
               {!isFree && isExpanded && <PurchaseGate />}
 
               {isExpanded && isFree && (
-                <div className="px-5 pb-6 pt-0 space-y-4 border-t border-white/[0.08]">
+                <div className="px-5 pb-6 pt-0 space-y-4 border-t border-[#DDE2E5]">
                   <div>
-                    <h4 className="text-[10px] font-black uppercase tracking-widest mb-1.5" style={{ color: BRAND_NAVY }}>
+                    <h4 className="text-[10px] font-black uppercase tracking-widest mb-1.5" style={{ color: "#16222D" }}>
                       The Situation
                     </h4>
-                    <p className="text-sm text-white/50 leading-relaxed">{s.situation}</p>
+                    <p className="text-sm text-[#5A6873] leading-relaxed">{s.situation}</p>
                   </div>
 
                   <div className="rounded-xl p-4 border-2 border-green-500/20 bg-green-500/10 relative">
@@ -1856,10 +1856,10 @@ function InterviewPlaybookContent() {
                   </div>
 
                   <div className="rounded-xl p-4 border-2" style={{ borderColor: BRAND_ORANGE, backgroundColor: `${BRAND_ORANGE}08` }}>
-                    <h4 className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: BRAND_ORANGE }}>
+                    <h4 className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: "#D66829" }}>
                       Pro Tip
                     </h4>
-                    <p className="text-sm text-white/60 leading-relaxed">{s.proTip}</p>
+                    <p className="text-sm text-[#5A6873] leading-relaxed">{s.proTip}</p>
                   </div>
                 </div>
               )}
@@ -1883,18 +1883,18 @@ function InterviewPlaybookContent() {
     return (
       <div>
         <div className="flex items-center gap-3 mb-2">
-          <FileText className="w-7 h-7" style={{ color: BRAND_ORANGE }} />
-          <h2 className="text-2xl font-heading font-black" style={{ color: BRAND_NAVY }}>
+          <FileText className="w-7 h-7" style={{ color: "#D66829" }} />
+          <h2 className="text-2xl font-heading font-black" style={{ color: "#16222D" }}>
             After the Interview
           </h2>
         </div>
-        <p className="text-white/40 text-sm mb-6">
+        <p className="text-[#5A6873] text-sm mb-6">
           Thank-you templates, follow-up timeline, and decision tools to help you close the deal or walk away with class.
         </p>
 
         {/* Section 1: Thank You Templates */}
         <div className="mb-10">
-          <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: BRAND_NAVY }}>
+          <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: "#16222D" }}>
             Thank-You Email Templates
           </h3>
           <div className="space-y-3">
@@ -1903,7 +1903,7 @@ function InterviewPlaybookContent() {
               const isExpanded = expandedTemplate === t.id;
 
               return (
-                <div key={t.id} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden relative">
+                <div key={t.id} className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] overflow-hidden relative">
                   <button
                     onClick={() => {
                       if (isFree) setExpandedTemplate(isExpanded ? null : t.id);
@@ -1911,14 +1911,14 @@ function InterviewPlaybookContent() {
                     className="w-full text-left p-5 flex items-start gap-4"
                   >
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-base" style={{ color: BRAND_NAVY }}>{t.title}</h4>
-                      <p className="text-sm text-white/40 mt-1">{t.whenToUse}</p>
+                      <h4 className="font-bold text-base" style={{ color: "#16222D" }}>{t.title}</h4>
+                      <p className="text-sm text-[#5A6873] mt-1">{t.whenToUse}</p>
                     </div>
                     <div className="flex-shrink-0 mt-1">
                       {isFree ? (
-                        isExpanded ? <ChevronDown className="w-5 h-5 text-white/35" /> : <ChevronRight className="w-5 h-5 text-white/35" />
+                        isExpanded ? <ChevronDown className="w-5 h-5 text-[#5A6873]" /> : <ChevronRight className="w-5 h-5 text-[#5A6873]" />
                       ) : (
-                        <Lock className="w-5 h-5 text-white/20" />
+                        <Lock className="w-5 h-5 text-[#5A6873]/40" />
                       )}
                     </div>
                   </button>
@@ -1926,17 +1926,17 @@ function InterviewPlaybookContent() {
                   {!isFree && isExpanded && <PurchaseGate />}
 
                   {isExpanded && isFree && (
-                    <div className="px-5 pb-6 pt-0 border-t border-white/[0.08]">
-                      <div className="relative bg-white/[0.04] rounded-xl p-4 mt-4">
+                    <div className="px-5 pb-6 pt-0 border-t border-[#DDE2E5]">
+                      <div className="relative bg-[#F7F8F9] rounded-xl p-4 mt-4">
                         <button
                           onClick={() => copyText(t.template, t.id, true)}
-                          className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.04] transition-colors"
+                          className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-[#F7F8F9] border border-[#DDE2E5] hover:bg-[#F7F8F9] transition-colors"
                           style={{ color: copiedTemplateId === t.id ? "#22c55e" : "rgba(255,255,255,0.4)" }}
                         >
                           {copiedTemplateId === t.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                           {copiedTemplateId === t.id ? "Copied" : "Copy"}
                         </button>
-                        <pre className="text-sm text-white/60 leading-relaxed whitespace-pre-wrap font-sans">{t.template}</pre>
+                        <pre className="text-sm text-[#5A6873] leading-relaxed whitespace-pre-wrap font-sans">{t.template}</pre>
                       </div>
                     </div>
                   )}
@@ -1950,10 +1950,10 @@ function InterviewPlaybookContent() {
         <div className="relative mb-10">
           {!purchased && <PurchaseGate message="Unlock Follow-Up Timeline for $29" />}
           <div className={!purchased ? "pointer-events-none select-none opacity-30" : ""}>
-            <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: BRAND_NAVY }}>
+            <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: "#16222D" }}>
               Follow-Up Timeline
             </h3>
-            <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+            <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
               <div className="relative">
                 {/* Timeline line */}
                 <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-white/[0.08]" />
@@ -1984,12 +1984,12 @@ function InterviewPlaybookContent() {
                       style={{ backgroundColor: item.color, top: "2px" }}
                     />
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-black px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: item.color }}>
+                      <span className="text-xs font-black px-2 py-0.5 rounded-full text-[#16222D]" style={{ backgroundColor: item.color }}>
                         {item.day}
                       </span>
-                      <h4 className="text-sm font-bold" style={{ color: BRAND_NAVY }}>{item.title}</h4>
+                      <h4 className="text-sm font-bold" style={{ color: "#16222D" }}>{item.title}</h4>
                     </div>
-                    <p className="text-sm text-white/50 leading-relaxed">{item.desc}</p>
+                    <p className="text-sm text-[#5A6873] leading-relaxed">{item.desc}</p>
                   </div>
                 ))}
               </div>
@@ -2001,10 +2001,10 @@ function InterviewPlaybookContent() {
         <div className="relative mb-10">
           {!purchased && <PurchaseGate message="Unlock Decision Tools for $29" />}
           <div className={!purchased ? "pointer-events-none select-none opacity-30" : ""}>
-            <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: BRAND_NAVY }}>
+            <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: "#16222D" }}>
               Offer Decision Checklist
             </h3>
-            <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+            <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
               <div className="space-y-3 mb-6">
                 {DECISION_ITEMS.map((item, idx) => {
                   const checked = decisionChecks[idx] || false;
@@ -2012,7 +2012,7 @@ function InterviewPlaybookContent() {
                     <button
                       key={idx}
                       onClick={() => setDecisionChecks((prev) => ({ ...prev, [idx]: !prev[idx] }))}
-                      className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all hover:bg-white/[0.04]"
+                      className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all hover:bg-[#F7F8F9]"
                     >
                       <div
                         className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 transition-all"
@@ -2021,7 +2021,7 @@ function InterviewPlaybookContent() {
                           border: checked ? "none" : "2px solid rgba(255,255,255,0.15)",
                         }}
                       >
-                        {checked && <Check className="w-3 h-3 text-white" />}
+                        {checked && <Check className="w-3 h-3 text-[#16222D]" />}
                       </div>
                       <span className="text-sm" style={{ color: checked ? BRAND_NAVY : "rgba(255,255,255,0.4)" }}>{item}</span>
                     </button>
@@ -2044,21 +2044,21 @@ function InterviewPlaybookContent() {
         <div className="relative">
           {!purchased && <PurchaseGate message="Unlock Walk-Away Guide for $29" />}
           <div className={!purchased ? "pointer-events-none select-none opacity-30" : ""}>
-            <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: BRAND_NAVY }}>
+            <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: "#16222D" }}>
               Walk-Away Checklist
             </h3>
-            <p className="text-sm text-white/40 mb-4">
+            <p className="text-sm text-[#5A6873] mb-4">
               If ANY of these are present, seriously consider walking away. These are non-negotiable deal-breakers.
             </p>
             <div className="space-y-3">
               {WALK_AWAY_ITEMS.map((item, idx) => (
                 <div
                   key={idx}
-                  className="bg-white/[0.04] rounded-xl p-4 flex items-start gap-3 shadow-lg shadow-black/20"
+                  className="bg-[#F7F8F9] rounded-xl p-4 flex items-start gap-3"
                   style={{ borderLeft: "4px solid #ef4444" }}
                 >
                   <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-white/60 leading-relaxed">{item}</p>
+                  <p className="text-sm text-[#5A6873] leading-relaxed">{item}</p>
                 </div>
               ))}
             </div>
@@ -2074,17 +2074,17 @@ function InterviewPlaybookContent() {
     <div className="p-4 md:p-8 max-w-6xl mx-auto">
       {/* Page header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-heading font-black flex items-center gap-3" style={{ color: BRAND_NAVY }}>
-          <Briefcase className="w-7 h-7" style={{ color: BRAND_ORANGE }} />
+        <h1 className="text-2xl font-heading font-black flex items-center gap-3" style={{ color: "#16222D" }}>
+          <Briefcase className="w-7 h-7" style={{ color: "#D66829" }} />
           Interview Playbook
         </h1>
-        <p className="text-white/40 text-sm mt-1">
+        <p className="text-[#5A6873] text-sm mt-1">
           Practice the questions. Evaluate the offer. Negotiate the contract.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex rounded-2xl overflow-x-auto border border-white/[0.08] mb-6">
+      <div className="flex rounded-2xl overflow-x-auto border border-[#DDE2E5] mb-6">
         {TAB_LABELS.map((label, i) => {
           const isActive = activeTab === i;
           const Icon = TAB_ICONS[i];
@@ -2092,7 +2092,7 @@ function InterviewPlaybookContent() {
             <button
               key={i}
               onClick={() => setActiveTab(i)}
-              className="flex-1 min-w-0 py-3 px-1 text-[9px] sm:text-xs font-bold transition-all border-r last:border-r-0 border-white/[0.08] flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1"
+              className="flex-1 min-w-0 py-3 px-1 text-[9px] sm:text-xs font-bold transition-all border-r last:border-r-0 border-[#DDE2E5] flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1"
               style={{
                 backgroundColor: isActive ? "#D66829" : "rgba(255,255,255,0.04)",
                 color: isActive ? "#fff" : "rgba(255,255,255,0.4)",
@@ -2114,14 +2114,14 @@ function InterviewPlaybookContent() {
       {activeTab === 4 && renderAfterInterview()}
 
       {/* Pipeline CTA */}
-      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
+      <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
         <div>
-          <p className="text-[13px] font-semibold text-white">Feeling confident?</p>
-          <p className="text-xs text-white/30">Browse matched jobs and submit your first application.</p>
+          <p className="text-[13px] font-semibold text-[#16222D]">Feeling confident?</p>
+          <p className="text-xs text-[#5A6873]">Browse matched jobs and submit your first application.</p>
         </div>
         <Link
           href="/student/jobs"
-          className="w-full sm:w-auto px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-5 py-2.5 bg-[#EFF1F2] text-[#5A6873] rounded-lg hover:text-[#16222D] hover:bg-[#DDE2E5] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
           Browse Jobs <ArrowRight className="w-3.5 h-3.5" />
         </Link>

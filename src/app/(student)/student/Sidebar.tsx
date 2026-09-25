@@ -110,7 +110,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {navSections.map((section) => (
           <div key={section.label}>
             {section.label && (
-              <p className="px-3 mb-2 text-[9px] font-medium uppercase tracking-[0.2em] text-white/15">
+              <p className="px-3 mb-2 text-[10px] font-medium tracking-wide text-white/25">
                 {section.label}
               </p>
             )}
@@ -128,7 +128,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                         : "text-white/30 hover:text-white/60 hover:bg-white/[0.02]"
                     }`}
                   >
-                    <item.icon className={`w-[14px] h-[14px] ${active ? "text-[#D66829]" : "text-white/20"}`} />
+                    <item.icon className={`w-[14px] h-[14px] ${active ? "text-[#3E6B7C]" : "text-white/20"}`} />
                     {item.name}
                   </Link>
                 );

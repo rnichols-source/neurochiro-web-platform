@@ -388,13 +388,13 @@ function Accordion({ title, icon, children, defaultOpen = false }: {
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden">
-      <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-3 p-5 hover:bg-white/[0.04] transition-colors text-left">
+    <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] overflow-hidden">
+      <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-3 p-5 hover:bg-[#F7F8F9] transition-colors text-left">
         {icon}
-        <span className="flex-1 font-bold text-white text-sm">{title}</span>
-        {open ? <ChevronDown className="w-4 h-4 text-white/35" /> : <ChevronRight className="w-4 h-4 text-white/35" />}
+        <span className="flex-1 font-bold text-[#16222D] text-sm">{title}</span>
+        {open ? <ChevronDown className="w-4 h-4 text-[#5A6873]" /> : <ChevronRight className="w-4 h-4 text-[#5A6873]" />}
       </button>
-      {open && <div className="px-5 pb-5 border-t border-white/[0.08] pt-4">{children}</div>}
+      {open && <div className="px-5 pb-5 border-t border-[#DDE2E5] pt-4">{children}</div>}
     </div>
   );
 }
@@ -529,7 +529,7 @@ function ContractLabContent() {
     <div className="flex gap-2">
       {options.map((opt) => (
         <button key={opt} onClick={() => onChange(opt)}
-          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${value === opt ? "bg-[#D66829] text-white shadow-lg shadow-black/20" : "bg-white/[0.06] text-white/40 hover:bg-white/[0.08]"}`}>
+          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${value === opt ? "bg-[#D66829] text-[#16222D]" : "bg-[#EFF1F2] text-[#5A6873] hover:bg-white/[0.08]"}`}>
           {opt}
         </button>
       ))}
@@ -545,18 +545,18 @@ function ContractLabContent() {
       <div className="space-y-8">
         {/* Input Panel — full width */}
         <div className="space-y-6">
-          <div className="bg-white/[0.04] rounded-2xl p-6 shadow-lg shadow-black/20 border border-white/[0.08]">
-            <h2 className="text-lg font-bold text-white mb-1">Analyze a Contract</h2>
-            <p className="text-sm text-white/35 mb-4">How do you want to start?</p>
+          <div className="bg-[#F7F8F9] rounded-2xl p-6 border border-[#DDE2E5]">
+            <h2 className="text-lg font-bold text-[#16222D] mb-1">Analyze a Contract</h2>
+            <p className="text-sm text-[#5A6873] mb-4">How do you want to start?</p>
 
             {/* Mode Toggle */}
-            <div className="flex rounded-xl overflow-hidden border border-white/[0.08] mb-5">
+            <div className="flex rounded-xl overflow-hidden border border-[#DDE2E5] mb-5">
               <button onClick={() => setInputMode("paste")}
-                className={`flex-1 py-2.5 text-xs font-bold transition-all ${inputMode === "paste" ? "bg-[#D66829] text-white" : "bg-white/[0.04] text-white/40 hover:bg-white/[0.04]"}`}>
+                className={`flex-1 py-2.5 text-xs font-bold transition-all ${inputMode === "paste" ? "bg-[#D66829] text-[#16222D]" : "bg-[#F7F8F9] text-[#5A6873] hover:bg-[#F7F8F9]"}`}>
                 <FileText className="w-3.5 h-3.5 inline mr-1.5" />Paste Contract
               </button>
               <button onClick={() => setInputMode("questions")}
-                className={`flex-1 py-2.5 text-xs font-bold transition-all ${inputMode === "questions" ? "bg-[#D66829] text-white" : "bg-white/[0.04] text-white/40 hover:bg-white/[0.04]"}`}>
+                className={`flex-1 py-2.5 text-xs font-bold transition-all ${inputMode === "questions" ? "bg-[#D66829] text-[#16222D]" : "bg-[#F7F8F9] text-[#5A6873] hover:bg-[#F7F8F9]"}`}>
                 <MessageSquare className="w-3.5 h-3.5 inline mr-1.5" />Answer Questions
               </button>
             </div>
@@ -565,11 +565,11 @@ function ContractLabContent() {
               <div className="space-y-4">
                 <textarea value={contractText} onChange={(e) => setContractText(e.target.value)}
                   placeholder="Paste your full employment contract text here..."
-                  className="w-full p-4 border-2 border-white/[0.08] rounded-2xl resize-none focus:border-[#D66829]/40 outline-none text-sm min-h-[220px] text-white bg-white/[0.04]" />
-                <p className="text-xs text-white/35">Minimum 100 characters. The AI will analyze every clause.</p>
+                  className="w-full p-4 border-2 border-[#DDE2E5] rounded-2xl resize-none focus:border-[#D66829]/40 outline-none text-sm min-h-[220px] text-[#16222D] bg-[#F7F8F9]" />
+                <p className="text-xs text-[#5A6873]">Minimum 100 characters. The AI will analyze every clause.</p>
                 {analysisError && <p className="text-red-500 text-xs font-bold">{analysisError}</p>}
                 <button onClick={handlePasteAnalyze} disabled={isAnalyzing || !contractText.trim()}
-                  className="w-full py-3 px-6 bg-[#D66829] text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#D66829]/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                  className="w-full py-3 px-6 bg-[#D66829] text-[#16222D] rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#D66829]/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                   {isAnalyzing ? <><Loader2 className="w-4 h-4 animate-spin" /> Analyzing...</> : <><ShieldAlert className="w-4 h-4" /> Analyze Contract</>}
                 </button>
               </div>
@@ -579,25 +579,25 @@ function ContractLabContent() {
               <div className="space-y-5 max-h-[600px] overflow-y-auto pr-1">
                 {/* Employment Type */}
                 <div>
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Employment Type</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Employment Type</label>
                   <TriplePick value={questionnaire.employmentType} options={["W-2", "1099", "Partnership"]} onChange={(v: string) => setQ("employmentType", v as any)} />
                 </div>
 
                 {/* Base Salary */}
                 <div>
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Base Salary</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Base Salary</label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 font-bold">$</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6873] font-bold">$</span>
                     <input type="number" value={questionnaire.baseSalary} onChange={(e) => setQ("baseSalary", Number(e.target.value) || 0)}
-                      className="w-full pl-8 pr-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white bg-white/[0.04]" />
+                      className="w-full pl-8 pr-4 py-3 border border-[#DDE2E5] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-[#16222D] bg-[#F7F8F9]" />
                   </div>
                 </div>
 
                 {/* Comp Model */}
                 <div>
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Compensation Model</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Compensation Model</label>
                   <select value={questionnaire.compModel} onChange={(e) => setQ("compModel", e.target.value)}
-                    className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white">
+                    className="w-full px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D]">
                     {COMP_MODELS.map((m) => <option key={m} value={m}>{m}</option>)}
                   </select>
                 </div>
@@ -606,19 +606,19 @@ function ContractLabContent() {
                 {(questionnaire.compModel === "Base + Bonus" || questionnaire.compModel === "Hybrid") && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Bonus %</label>
+                      <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Bonus %</label>
                       <div className="relative">
                         <input type="number" value={questionnaire.bonusPct} onChange={(e) => setQ("bonusPct", Number(e.target.value) || 0)}
-                          className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white bg-white/[0.04]" />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/35">%</span>
+                          className="w-full px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-[#16222D] bg-[#F7F8F9]" />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5A6873]">%</span>
                       </div>
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Bonus Threshold</label>
+                      <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Bonus Threshold</label>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 font-bold">$</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6873] font-bold">$</span>
                         <input type="number" value={questionnaire.bonusThreshold} onChange={(e) => setQ("bonusThreshold", Number(e.target.value) || 0)}
-                          className="w-full pl-8 pr-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white bg-white/[0.04]" />
+                          className="w-full pl-8 pr-4 py-3 border border-[#DDE2E5] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-[#16222D] bg-[#F7F8F9]" />
                       </div>
                     </div>
                   </div>
@@ -626,44 +626,44 @@ function ContractLabContent() {
 
                 {/* Non-Compete */}
                 <div>
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Non-Compete Clause?</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Non-Compete Clause?</label>
                   <TriplePick value={questionnaire.hasNonCompete} options={["Yes", "No", "Not Sure"]} onChange={(v: string) => setQ("hasNonCompete", v as any)} />
                 </div>
 
                 {questionnaire.hasNonCompete === "Yes" && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Radius (miles)</label>
+                      <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Radius (miles)</label>
                       <input type="number" value={questionnaire.nonCompeteRadius} onChange={(e) => setQ("nonCompeteRadius", Number(e.target.value) || 0)}
-                        className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white bg-white/[0.04]" />
+                        className="w-full px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-[#16222D] bg-[#F7F8F9]" />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Duration (months)</label>
+                      <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Duration (months)</label>
                       <input type="number" value={questionnaire.nonCompeteDuration} onChange={(e) => setQ("nonCompeteDuration", Number(e.target.value) || 0)}
-                        className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-white bg-white/[0.04]" />
+                        className="w-full px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none text-[#16222D] bg-[#F7F8F9]" />
                     </div>
                   </div>
                 )}
 
                 {/* Non-Solicitation */}
                 <div>
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Non-Solicitation Clause?</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Non-Solicitation Clause?</label>
                   <TriplePick value={questionnaire.hasNonSolicitation} options={["Yes", "No", "Not Sure"]} onChange={(v: string) => setQ("hasNonSolicitation", v as any)} />
                 </div>
 
                 {/* Termination */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Termination Notice</label>
+                    <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Termination Notice</label>
                     <select value={questionnaire.terminationNotice} onChange={(e) => setQ("terminationNotice", e.target.value)}
-                      className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white">
+                      className="w-full px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D]">
                       {TERMINATION_NOTICES.map((n) => <option key={n} value={n}>{n}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Who Can Terminate?</label>
+                    <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Who Can Terminate?</label>
                     <select value={questionnaire.whoTerminates} onChange={(e) => setQ("whoTerminates", e.target.value)}
-                      className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white">
+                      className="w-full px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D]">
                       {WHO_TERMINATES.map((w) => <option key={w} value={w}>{w}</option>)}
                     </select>
                   </div>
@@ -671,14 +671,14 @@ function ContractLabContent() {
 
                 {/* Benefits */}
                 <div>
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Benefits Included</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Benefits Included</label>
                   <div className="grid grid-cols-2 gap-2">
                     {BENEFITS_OPTIONS.map((b) => {
                       const checked = questionnaire.benefits.includes(b);
                       return (
                         <button key={b} onClick={() => setQ("benefits", checked ? questionnaire.benefits.filter((x) => x !== b) : [...questionnaire.benefits, b])}
-                          className={`flex items-center gap-2 p-2.5 rounded-xl text-xs font-bold transition-all ${checked ? "bg-[#D66829] text-white" : "bg-white/[0.06] text-white/40 hover:bg-white/[0.08]"}`}>
-                          <CheckCircle className={`w-3.5 h-3.5 ${checked ? "text-green-300" : "text-white/20"}`} />
+                          className={`flex items-center gap-2 p-2.5 rounded-xl text-xs font-bold transition-all ${checked ? "bg-[#D66829] text-[#16222D]" : "bg-[#EFF1F2] text-[#5A6873] hover:bg-white/[0.08]"}`}>
+                          <CheckCircle className={`w-3.5 h-3.5 ${checked ? "text-green-300" : "text-[#5A6873]/40"}`} />
                           {b}
                         </button>
                       );
@@ -688,29 +688,29 @@ function ContractLabContent() {
 
                 {/* Contract Duration */}
                 <div>
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Contract Duration</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Contract Duration</label>
                   <select value={questionnaire.contractDuration} onChange={(e) => setQ("contractDuration", e.target.value)}
-                    className="w-full px-4 py-3 border border-white/[0.08] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white">
+                    className="w-full px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D]">
                     {CONTRACT_DURATIONS.map((d) => <option key={d} value={d}>{d}</option>)}
                   </select>
                 </div>
 
                 {/* Equity Pathway */}
                 <div>
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">Equity/Buy-In Pathway?</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">Equity/Buy-In Pathway?</label>
                   <TriplePick value={questionnaire.equityPathway} options={["Yes", "No", "Not Mentioned"]} onChange={(v: string) => setQ("equityPathway", v as any)} />
                 </div>
 
                 {/* IP Clause */}
                 <div>
-                  <label className="text-xs font-bold text-white/40 uppercase tracking-wide block mb-2">IP/Patient Ownership Clause?</label>
+                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide block mb-2">IP/Patient Ownership Clause?</label>
                   <TriplePick value={questionnaire.hasIPClause} options={["Yes", "No", "Not Sure"]} onChange={(v: string) => setQ("hasIPClause", v as any)} />
                 </div>
 
                 {analysisError && <p className="text-red-500 text-xs font-bold">{analysisError}</p>}
 
                 <button onClick={handleQuestionnaireAnalyze}
-                  className="w-full py-3 px-6 bg-[#e97325] text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#e97325]/90 transition-all flex items-center justify-center gap-2">
+                  className="w-full py-3 px-6 bg-[#e97325] text-[#16222D] rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#e97325]/90 transition-all flex items-center justify-center gap-2">
                   <Scale className="w-4 h-4" /> Analyze Contract
                 </button>
               </div>
@@ -729,25 +729,25 @@ function ContractLabContent() {
           </div>
 
           {/* Past Analyses */}
-          <div className="bg-white/[0.04] rounded-2xl p-6 shadow-lg shadow-black/20 border border-white/[0.08]">
-            <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+          <div className="bg-[#F7F8F9] rounded-2xl p-6 border border-[#DDE2E5]">
+            <h3 className="text-sm font-bold text-[#16222D] uppercase tracking-widest mb-4 flex items-center gap-2">
               <FileText className="w-4 h-4 text-[#e97325]" /> Past Analyses
             </h3>
             <div className="space-y-2">
               {loadingHistory ? (
-                <div className="py-8 text-center"><Loader2 className="w-5 h-5 text-white/20 animate-spin mx-auto mb-2" /><p className="text-xs text-white/35">Loading...</p></div>
+                <div className="py-8 text-center"><Loader2 className="w-5 h-5 text-[#5A6873]/40 animate-spin mx-auto mb-2" /><p className="text-xs text-[#5A6873]">Loading...</p></div>
               ) : pastContracts.length > 0 ? pastContracts.map((c) => (
                 <button key={c.id} onClick={() => { setAiResult(c.analysis_results); setQResult(null); }}
-                  className="w-full text-left p-3 rounded-xl border border-white/[0.04] hover:border-[#e97325] hover:bg-white/[0.04] transition-all flex items-center justify-between">
+                  className="w-full text-left p-3 rounded-xl border border-[#DDE2E5]/50 hover:border-[#e97325] hover:bg-[#F7F8F9] transition-all flex items-center justify-between">
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-white truncate">{c.title}</p>
-                    <p className="text-[10px] text-white/35">{new Date(c.created_at).toLocaleDateString()}</p>
+                    <p className="text-xs font-bold text-[#16222D] truncate">{c.title}</p>
+                    <p className="text-[10px] text-[#5A6873]">{new Date(c.created_at).toLocaleDateString()}</p>
                   </div>
                   <span className="text-xs font-bold text-[#e97325] ml-3">{c.analysis_results?.overallScore || "N/A"}</span>
                 </button>
               )) : (
-                <div className="py-8 text-center bg-white/[0.04] rounded-xl border border-dashed border-white/[0.08]">
-                  <FileText className="w-8 h-8 text-white/10 mx-auto mb-2" /><p className="text-xs text-white/35">No analyses yet.</p>
+                <div className="py-8 text-center bg-[#F7F8F9] rounded-xl border border-dashed border-[#DDE2E5]">
+                  <FileText className="w-8 h-8 text-[#5A6873]/20 mx-auto mb-2" /><p className="text-xs text-[#5A6873]">No analyses yet.</p>
                 </div>
               )}
             </div>
@@ -759,10 +759,10 @@ function ContractLabContent() {
           {qResult && QuestionnaireResults(qResult)}
           {aiResult && !qResult && AiResults(aiResult)}
           {!hasResults && (
-            <div className="bg-white/[0.04] rounded-2xl border border-dashed border-white/[0.08] h-full flex flex-col items-center justify-center p-12 text-center min-h-[400px]">
-              <Search className="w-12 h-12 text-white/20 mb-4" />
-              <h3 className="text-xl font-bold text-white/35 mb-1">No Analysis Yet</h3>
-              <p className="text-white/35 text-sm max-w-md">Paste your contract above or answer the questions to get started.</p>
+            <div className="bg-[#F7F8F9] rounded-2xl border border-dashed border-[#DDE2E5] h-full flex flex-col items-center justify-center p-12 text-center min-h-[400px]">
+              <Search className="w-12 h-12 text-[#5A6873]/40 mb-4" />
+              <h3 className="text-xl font-bold text-[#5A6873] mb-1">No Analysis Yet</h3>
+              <p className="text-[#5A6873] text-sm max-w-md">Paste your contract above or answer the questions to get started.</p>
             </div>
           )}
         </div>
@@ -773,12 +773,12 @@ function ContractLabContent() {
   // ─── Questionnaire Results Renderer ───────────────────────────────────────
 
   const QuestionnaireResults = (r: ScoredResult) => (
-    <div className="bg-white/[0.04] rounded-2xl p-6 sm:p-8 shadow-lg shadow-black/20 border border-white/[0.08] space-y-8">
+    <div className="bg-[#F7F8F9] rounded-2xl p-6 sm:p-8 border border-[#DDE2E5] space-y-8">
       {/* Score + Breakdown */}
       <div className="flex flex-col sm:flex-row items-center gap-6">
         <ScoreGauge score={r.score} label={r.label} color={r.color} />
         <div className="flex-1 space-y-2 w-full">
-          <h2 className="text-xl font-bold text-white mb-3">Contract Score</h2>
+          <h2 className="text-xl font-bold text-[#16222D] mb-3">Contract Score</h2>
           {[
             { name: "Compensation", score: r.compensation, max: 25 },
             { name: "Protection", score: r.protection, max: 25 },
@@ -787,26 +787,26 @@ function ContractLabContent() {
             { name: "Growth", score: r.growth, max: 15 },
           ].map((cat) => (
             <div key={cat.name} className="flex items-center gap-3">
-              <span className="text-xs text-white/40 w-24">{cat.name}</span>
-              <div className="flex-1 bg-white/[0.06] rounded-full h-2.5">
+              <span className="text-xs text-[#5A6873] w-24">{cat.name}</span>
+              <div className="flex-1 bg-[#EFF1F2] rounded-full h-2.5">
                 <div className="h-2.5 rounded-full transition-all duration-500" style={{ width: `${(cat.score / cat.max) * 100}%`, backgroundColor: cat.score / cat.max >= 0.7 ? "#16a34a" : cat.score / cat.max >= 0.4 ? "#eab308" : "#dc2626" }} />
               </div>
-              <span className="text-xs font-bold text-white/50 w-10 text-right">{cat.score}/{cat.max}</span>
+              <span className="text-xs font-bold text-[#5A6873] w-10 text-right">{cat.score}/{cat.max}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Compensation Benchmark */}
-      <div className="bg-white/[0.04] rounded-xl p-4">
+      <div className="bg-[#F7F8F9] rounded-xl p-4">
         <div className="flex items-center gap-2 mb-2">
           <DollarSign className="w-4 h-4 text-[#e97325]" />
-          <h3 className="text-sm font-bold text-white">Compensation Benchmark</h3>
+          <h3 className="text-sm font-bold text-[#16222D]">Compensation Benchmark</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <div>
-            <p className="text-white/40">New Grad Range: <span className="font-bold text-white">$55-75K</span></p>
-            <p className="text-white/40">1-2 Years: <span className="font-bold text-white">$65-85K</span></p>
+            <p className="text-[#5A6873]">New Grad Range: <span className="font-bold text-[#16222D]">$55-75K</span></p>
+            <p className="text-[#5A6873]">1-2 Years: <span className="font-bold text-[#16222D]">$65-85K</span></p>
           </div>
           <div className="flex items-center justify-end">
             <span className={`text-sm font-bold px-3 py-1.5 rounded-full ${r.salaryBenchmark === "Below Market" ? "bg-red-500/15 text-red-600" : r.salaryBenchmark === "Above Market" ? "bg-green-500/15 text-green-600" : "bg-yellow-500/15 text-yellow-600"}`}>
@@ -827,30 +827,30 @@ function ContractLabContent() {
               <div key={i} className="border-2 border-red-500/20 bg-red-500/10 rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertTriangle className="w-4 h-4 text-red-500" />
-                  <h4 className="font-bold text-white text-sm">{flag.title}</h4>
+                  <h4 className="font-bold text-[#16222D] text-sm">{flag.title}</h4>
                   <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${flag.risk === "High" ? "bg-red-500/15 text-red-600" : flag.risk === "Medium" ? "bg-orange-500/15 text-orange-600" : "bg-yellow-500/15 text-yellow-600"}`}>{flag.risk} Risk</span>
                 </div>
-                <p className="text-sm text-white/60 mb-3">{flag.explanation}</p>
+                <p className="text-sm text-[#5A6873] mb-3">{flag.explanation}</p>
                 <div className="space-y-3 border-t border-red-500/20 pt-3">
                   <div className="flex gap-2">
                     <MessageSquare className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
                     <div>
                       <span className="text-[10px] font-bold text-purple-500 uppercase tracking-widest block mb-0.5">What to Say</span>
-                      <p className="text-sm text-white/60">{flag.negotiationScript}</p>
+                      <p className="text-sm text-[#5A6873]">{flag.negotiationScript}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
                     <div>
                       <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest block mb-0.5">What to Ask For</span>
-                      <p className="text-sm text-white/60">{flag.askFor}</p>
+                      <p className="text-sm text-[#5A6873]">{flag.askFor}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <X className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                     <div>
                       <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest block mb-0.5">Walk-Away Point</span>
-                      <p className="text-sm text-white/60">{flag.walkAway}</p>
+                      <p className="text-sm text-[#5A6873]">{flag.walkAway}</p>
                     </div>
                   </div>
                 </div>
@@ -872,8 +872,8 @@ function ContractLabContent() {
                 <div className="flex items-start gap-3">
                   <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-white text-sm mb-1">{gl.title}</h4>
-                    <p className="text-sm text-white/60">{gl.explanation}</p>
+                    <h4 className="font-bold text-[#16222D] text-sm mb-1">{gl.title}</h4>
+                    <p className="text-sm text-[#5A6873]">{gl.explanation}</p>
                   </div>
                 </div>
               </div>
@@ -893,29 +893,29 @@ function ContractLabContent() {
               <div key={i} className="border-2 border-yellow-500/20 bg-yellow-500/10 rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <Info className="w-4 h-4 text-yellow-500" />
-                  <h4 className="font-bold text-white text-sm">{mc.title}</h4>
+                  <h4 className="font-bold text-[#16222D] text-sm">{mc.title}</h4>
                 </div>
-                <p className="text-sm text-white/60 mb-3">{mc.explanation}</p>
+                <p className="text-sm text-[#5A6873] mb-3">{mc.explanation}</p>
                 <div className="space-y-3 border-t border-yellow-500/20 pt-3">
                   <div className="flex gap-2">
                     <MessageSquare className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
                     <div>
                       <span className="text-[10px] font-bold text-purple-500 uppercase tracking-widest block mb-0.5">What to Say</span>
-                      <p className="text-sm text-white/60">{mc.negotiationScript}</p>
+                      <p className="text-sm text-[#5A6873]">{mc.negotiationScript}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
                     <div>
                       <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest block mb-0.5">What to Ask For</span>
-                      <p className="text-sm text-white/60">{mc.askFor}</p>
+                      <p className="text-sm text-[#5A6873]">{mc.askFor}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <X className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                     <div>
                       <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest block mb-0.5">Walk-Away Point</span>
-                      <p className="text-sm text-white/60">{mc.walkAway}</p>
+                      <p className="text-sm text-[#5A6873]">{mc.walkAway}</p>
                     </div>
                   </div>
                 </div>
@@ -927,30 +927,30 @@ function ContractLabContent() {
 
       {/* Negotiation Playbook Summary */}
       {(r.redFlags.length > 0 || r.missingClauses.length > 0) && (
-        <div className="bg-[#D66829] rounded-2xl p-6 text-white">
+        <div className="bg-[#D66829] rounded-2xl p-6 text-[#16222D]">
           <h3 className="text-sm font-bold uppercase tracking-widest mb-3 flex items-center gap-2">
             <Scale className="w-4 h-4 text-[#e97325]" /> Negotiation Playbook Summary
           </h3>
-          <p className="text-white/70 text-sm mb-4">Prioritize these items in your next conversation with the employer:</p>
+          <p className="text-[#5A6873] text-sm mb-4">Prioritize these items in your next conversation with the employer:</p>
           <div className="space-y-2">
             {r.redFlags.filter((f) => f.risk === "High").map((f, i) => (
               <div key={`rf-${i}`} className="flex items-center gap-2 text-sm">
                 <span className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-[10px] font-bold shrink-0">{i + 1}</span>
-                <span className="text-white/90">{f.title}</span>
+                <span className="text-[#16222D]">{f.title}</span>
                 <span className="text-[10px] bg-red-500/30 text-red-300 px-2 py-0.5 rounded-full font-bold">Priority</span>
               </div>
             ))}
             {r.missingClauses.map((mc, i) => (
               <div key={`mc-${i}`} className="flex items-center gap-2 text-sm">
-                <span className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-[10px] font-bold text-white shrink-0">{r.redFlags.filter((f) => f.risk === "High").length + i + 1}</span>
-                <span className="text-white/90">{mc.title}</span>
+                <span className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-[10px] font-bold text-[#16222D] shrink-0">{r.redFlags.filter((f) => f.risk === "High").length + i + 1}</span>
+                <span className="text-[#16222D]">{mc.title}</span>
                 <span className="text-[10px] bg-yellow-500/30 text-yellow-300 px-2 py-0.5 rounded-full font-bold">Add</span>
               </div>
             ))}
             {r.redFlags.filter((f) => f.risk !== "High").map((f, i) => (
               <div key={`rl-${i}`} className="flex items-center gap-2 text-sm">
                 <span className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-[10px] font-bold shrink-0">{r.redFlags.filter((f2) => f2.risk === "High").length + r.missingClauses.length + i + 1}</span>
-                <span className="text-white/90">{f.title}</span>
+                <span className="text-[#16222D]">{f.title}</span>
                 <span className="text-[10px] bg-orange-500/30 text-orange-300 px-2 py-0.5 rounded-full font-bold">Discuss</span>
               </div>
             ))}
@@ -969,12 +969,12 @@ function ContractLabContent() {
     const scoreColor = numScore >= 85 ? "#16a34a" : numScore >= 70 ? "#22c55e" : numScore >= 50 ? "#eab308" : numScore >= 30 ? "#f97316" : "#dc2626";
 
     return (
-      <div className="bg-white/[0.04] rounded-2xl p-6 sm:p-8 shadow-lg shadow-black/20 border border-white/[0.08] space-y-6">
-        <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-white/[0.08]">
+      <div className="bg-[#F7F8F9] rounded-2xl p-6 sm:p-8 border border-[#DDE2E5] space-y-6">
+        <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-[#DDE2E5]">
           <ScoreGauge score={numScore} label={scoreLabel} color={scoreColor} />
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-white mb-1">AI Analysis Results</h2>
-            {result.summary && <p className="text-white/40 text-sm mb-2">{result.summary}</p>}
+            <h2 className="text-xl font-bold text-[#16222D] mb-1">AI Analysis Results</h2>
+            {result.summary && <p className="text-[#5A6873] text-sm mb-2">{result.summary}</p>}
             {result.overallRecommendation && (
               <span className={`text-sm font-bold uppercase tracking-widest ${recColor}`}>{result.overallRecommendation}</span>
             )}
@@ -997,16 +997,16 @@ function ContractLabContent() {
                   <Icon className={`w-5 h-5 mt-0.5 ${iconColor}`} />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-bold text-white text-sm">{clause.name || clause.type}</h4>
+                      <h4 className="font-bold text-[#16222D] text-sm">{clause.name || clause.type}</h4>
                       <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${badgeColors}`}>{risk}</span>
                     </div>
-                    <p className="text-sm text-white/60 mb-2">{clause.finding || clause.text}</p>
+                    <p className="text-sm text-[#5A6873] mb-2">{clause.finding || clause.text}</p>
                     {(clause.insight || clause.recommendation) && (
                       <div className="flex gap-2 mt-2">
                         <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
                         <div>
-                          <span className="text-[10px] font-bold text-white/35 uppercase tracking-widest block mb-0.5">Recommendation</span>
-                          <p className="text-sm text-white/50">{clause.recommendation || clause.insight}</p>
+                          <span className="text-[10px] font-bold text-[#5A6873] uppercase tracking-widest block mb-0.5">Recommendation</span>
+                          <p className="text-sm text-[#5A6873]">{clause.recommendation || clause.insight}</p>
                         </div>
                       </div>
                     )}
@@ -1015,7 +1015,7 @@ function ContractLabContent() {
                         <MessageSquare className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
                         <div>
                           <span className="text-[10px] font-bold text-purple-500 uppercase tracking-widest block mb-0.5">Negotiation Strategy</span>
-                          <p className="text-sm text-white/60 font-medium">{clause.negotiation}</p>
+                          <p className="text-sm text-[#5A6873] font-medium">{clause.negotiation}</p>
                         </div>
                       </div>
                     )}
@@ -1036,7 +1036,7 @@ function ContractLabContent() {
   const Tab2 = () => (
     <div className="space-y-4 max-w-4xl mx-auto">
       <Accordion title="W-2 vs 1099: Know the Difference" icon={<DollarSign className="w-5 h-5 text-[#e97325]" />}>
-        <div className="space-y-4 text-sm text-white/60 leading-relaxed">
+        <div className="space-y-4 text-sm text-[#5A6873] leading-relaxed">
           <p>The distinction between W-2 employee and 1099 independent contractor is one of the most important things to understand in your first contract. Getting this wrong can cost you thousands of dollars annually and expose both you and your employer to IRS penalties.</p>
           <p><strong>The IRS 3-Factor Test:</strong></p>
           <ul className="list-disc pl-5 space-y-1">
@@ -1045,34 +1045,34 @@ function ContractLabContent() {
             <li><strong>Relationship Type:</strong> Are benefits provided? Is there a written contract indicating an employee relationship? Ongoing, indefinite work typically indicates employment.</li>
           </ul>
           <p><strong>Signs of Misclassification:</strong> You work set hours at the employer&apos;s location, use their equipment, follow their protocols, cannot work elsewhere, but are paid as 1099. This is a red flag.</p>
-          <div className="bg-white/[0.04] rounded-xl p-4 mt-3">
-            <p className="font-bold text-white mb-2">Side-by-Side Take-Home Comparison at $60,000:</p>
+          <div className="bg-[#F7F8F9] rounded-xl p-4 mt-3">
+            <p className="font-bold text-[#16222D] mb-2">Side-by-Side Take-Home Comparison at $60,000:</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-white/[0.04] rounded-lg p-3 border border-white/[0.08]">
+              <div className="bg-[#F7F8F9] rounded-lg p-3 border border-[#DDE2E5]">
                 <p className="font-bold text-green-600 text-xs uppercase tracking-widest mb-2">W-2 Employee</p>
                 <p>Gross: $60,000</p>
                 <p>Federal Tax (~12%): -$7,200</p>
                 <p>FICA (7.65%): -$4,590</p>
                 <p>State Tax (~3%): -$1,800</p>
-                <p className="font-bold text-white mt-2 pt-2 border-t">Net: ~$46,410</p>
+                <p className="font-bold text-[#16222D] mt-2 pt-2 border-t">Net: ~$46,410</p>
               </div>
-              <div className="bg-white/[0.04] rounded-lg p-3 border border-white/[0.08]">
+              <div className="bg-[#F7F8F9] rounded-lg p-3 border border-[#DDE2E5]">
                 <p className="font-bold text-red-600 text-xs uppercase tracking-widest mb-2">1099 Contractor</p>
                 <p>Gross: $60,000</p>
                 <p>Federal Tax (~12%): -$7,200</p>
                 <p>Self-Employment (15.3%): -$9,180</p>
                 <p>State Tax (~3%): -$1,800</p>
-                <p className="font-bold text-white mt-2 pt-2 border-t">Net: ~$41,820</p>
+                <p className="font-bold text-[#16222D] mt-2 pt-2 border-t">Net: ~$41,820</p>
               </div>
             </div>
-            <p className="text-xs text-white/40 mt-2">* Approximate. 1099 costs $4,590 MORE annually in self-employment taxes alone, before accounting for benefits you must purchase yourself.</p>
+            <p className="text-xs text-[#5A6873] mt-2">* Approximate. 1099 costs $4,590 MORE annually in self-employment taxes alone, before accounting for benefits you must purchase yourself.</p>
           </div>
-          <p className="bg-white/[0.04] border-l-2 border-[#D66829]/30 rounded-xl p-3 text-sm"><strong>What to say:</strong> &quot;Based on the work arrangement described, this position appears to meet the IRS criteria for W-2 classification. Can we discuss either reclassifying as W-2, or adjusting compensation to offset the additional tax burden?&quot;</p>
+          <p className="bg-[#F7F8F9] border-l-2 border-[#D66829]/30 rounded-xl p-3 text-sm"><strong>What to say:</strong> &quot;Based on the work arrangement described, this position appears to meet the IRS criteria for W-2 classification. Can we discuss either reclassifying as W-2, or adjusting compensation to offset the additional tax burden?&quot;</p>
         </div>
       </Accordion>
 
       <Accordion title="Non-Compete Clauses: What You Need to Know" icon={<Lock className="w-5 h-5 text-[#e97325]" />}>
-        <div className="space-y-4 text-sm text-white/60 leading-relaxed">
+        <div className="space-y-4 text-sm text-[#5A6873] leading-relaxed">
           <p>A non-compete clause restricts where you can practice after leaving an employer. These are common in chiropractic contracts but vary wildly in enforceability and reasonableness. Understanding the landscape is critical before you sign.</p>
           <p><strong>State Enforceability:</strong> Not all states enforce non-competes equally. California, Oklahoma, and North Dakota essentially ban them for employees. Other states like Colorado and Illinois have placed significant restrictions on their use. Many states will only enforce &quot;reasonable&quot; non-competes, meaning a court could throw out overly aggressive terms.</p>
           <p><strong>Reasonable vs. Excessive Benchmarks:</strong></p>
@@ -1101,12 +1101,12 @@ function ContractLabContent() {
             <li>Add a sunset clause — the non-compete expires if you&apos;re terminated without cause</li>
             <li>Define the restricted activities precisely — &quot;chiropractic practice&quot; not &quot;healthcare services&quot;</li>
           </ul>
-          <p className="bg-white/[0.04] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I respect the need to protect the practice, and I&apos;m willing to agree to a reasonable non-compete. Could we adjust the terms to a 10-mile radius for 12 months, with a buyout option? I&apos;d also like the restriction to expire if I&apos;m terminated without cause.&quot;</p>
+          <p className="bg-[#F7F8F9] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I respect the need to protect the practice, and I&apos;m willing to agree to a reasonable non-compete. Could we adjust the terms to a 10-mile radius for 12 months, with a buyout option? I&apos;d also like the restriction to expire if I&apos;m terminated without cause.&quot;</p>
         </div>
       </Accordion>
 
       <Accordion title="Non-Solicitation: The Hidden Trap" icon={<ShieldAlert className="w-5 h-5 text-[#e97325]" />}>
-        <div className="space-y-4 text-sm text-white/60 leading-relaxed">
+        <div className="space-y-4 text-sm text-[#5A6873] leading-relaxed">
           <p>Many new chiropractors focus exclusively on non-compete clauses and overlook non-solicitation agreements. In practice, a non-solicitation clause can be even more restrictive than a non-compete, because it follows you everywhere regardless of geographic distance.</p>
           <p><strong>What is it?</strong> A non-solicitation clause prevents you from contacting, reaching out to, or accepting patients from your former employer&apos;s practice. Even if you open a practice 50 miles away (outside any non-compete zone), you still cannot reach out to patients you treated.</p>
           <p><strong>Why it can be worse than a non-compete:</strong></p>
@@ -1122,36 +1122,36 @@ function ContractLabContent() {
             <li>Broad definitions of &quot;patient&quot; — some clauses cover anyone who visited the practice in the last 2-3 years, even if you never treated them</li>
             <li>Staff solicitation — prevents you from hiring any former coworkers</li>
           </ul>
-          <p className="bg-white/[0.04] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;d like to clarify the non-solicitation clause. I&apos;m comfortable agreeing not to actively solicit patients, but I want to ensure that patients who independently choose to seek care from me are free to do so. Can we change &apos;solicit or accept&apos; to just &apos;directly solicit&apos;?&quot;</p>
+          <p className="bg-[#F7F8F9] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;d like to clarify the non-solicitation clause. I&apos;m comfortable agreeing not to actively solicit patients, but I want to ensure that patients who independently choose to seek care from me are free to do so. Can we change &apos;solicit or accept&apos; to just &apos;directly solicit&apos;?&quot;</p>
         </div>
       </Accordion>
 
       <Accordion title="Compensation Models Explained" icon={<DollarSign className="w-5 h-5 text-[#e97325]" />}>
-        <div className="space-y-4 text-sm text-white/60 leading-relaxed">
+        <div className="space-y-4 text-sm text-[#5A6873] leading-relaxed">
           <p>How you get paid as an associate matters as much as how much. Understanding compensation models helps you evaluate the true value of any offer and spot structures designed to underpay you.</p>
           <p><strong>Base Salary Only:</strong> Fixed annual salary regardless of production. Pros: predictable income, good for new grads building skills. Cons: no upside potential, no reward for growing the practice. Typical range: $55-75K for new graduates.</p>
           <p><strong>Base + Bonus:</strong> Fixed base salary plus bonuses tied to hitting production thresholds. This is the most common model. Key questions: What exactly counts toward the threshold — collections or billings? How is it calculated — monthly or quarterly? Is the threshold achievable based on current patient volume and your expected schedule? Get the formula in writing.</p>
           <p><strong>Percentage of Collections:</strong> You earn a percentage (typically 25-35%) of what the practice collects on your patients. Important distinction: collections (what the practice actually receives) vs. billings (what they charge). Collections are always lower. Also ask about patient assignment — if you only see overflow patients, your collections will be low regardless of the percentage.</p>
           <p><strong>Hybrid:</strong> Typically a lower base salary combined with a percentage of collections above a threshold. Example: $50K base + 25% of collections above $200K. This aligns incentives but requires understanding the practice&apos;s historical collection data.</p>
           <p><strong>Patient Assignment Matters:</strong> No compensation model works if you do not have patients. Ask: How are new patients assigned? What is the current patient volume? How many patients will be on my schedule from day one? Do I have a ramp-up period with guaranteed minimum compensation?</p>
-          <p className="bg-white/[0.04] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;d like to understand the bonus structure better. Can you show me the last 12 months of collections for the associate position so I can see what&apos;s realistically achievable? And can we put the exact bonus formula in the contract?&quot;</p>
+          <p className="bg-[#F7F8F9] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;d like to understand the bonus structure better. Can you show me the last 12 months of collections for the associate position so I can see what&apos;s realistically achievable? And can we put the exact bonus formula in the contract?&quot;</p>
         </div>
       </Accordion>
 
       <Accordion title="Termination Clauses: Your Exit Strategy" icon={<Shield className="w-5 h-5 text-[#e97325]" />}>
-        <div className="space-y-4 text-sm text-white/60 leading-relaxed">
+        <div className="space-y-4 text-sm text-[#5A6873] leading-relaxed">
           <p>How a contract ends is just as important as how it begins. Termination clauses determine your ability to leave a bad situation and what happens to your patient relationships when you do.</p>
           <p><strong>At-Will vs. Term:</strong> At-will means either party can end the relationship at any time. A term contract (1-3 years) locks you in for a defined period. Both have pros and cons — at-will gives flexibility but less security; term gives security but less flexibility.</p>
           <p><strong>Notice Periods:</strong> Most contracts require 30-90 days written notice before termination. Shorter notice benefits the party leaving; longer notice allows for better patient transition. Industry standard is 60-90 days for both parties.</p>
           <p><strong>For Cause vs. Without Cause:</strong> &quot;For cause&quot; termination means there must be a specific reason (malpractice, theft, breach of contract). &quot;Without cause&quot; means either party can end it for any reason. You want the option for either party to terminate without cause with appropriate notice.</p>
           <p><strong>Malpractice Tail Coverage:</strong> If the practice provides claims-made malpractice insurance, who pays for &quot;tail coverage&quot; when you leave? Tail coverage can cost $5,000-15,000. The contract should specify this — ideally the employer pays if they terminate you.</p>
           <p><strong>Patient Ownership on Exit:</strong> What happens to your patients when you leave? Can you notify them? Can they choose to follow you? A fair contract allows you to send a brief departure notice and lets patients choose their provider.</p>
-          <p className="bg-white/[0.04] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I want to ensure the termination clause is fair to both of us. Can we agree on mutual termination rights with 90 days notice, and include language about malpractice tail coverage and patient notification?&quot;</p>
+          <p className="bg-[#F7F8F9] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I want to ensure the termination clause is fair to both of us. Can we agree on mutual termination rights with 90 days notice, and include language about malpractice tail coverage and patient notification?&quot;</p>
         </div>
       </Accordion>
 
       <Accordion title="Equity & Buy-In: Building Your Future" icon={<Scale className="w-5 h-5 text-[#e97325]" />}>
-        <div className="space-y-4 text-sm text-white/60 leading-relaxed">
+        <div className="space-y-4 text-sm text-[#5A6873] leading-relaxed">
           <p>One of the most transformative career decisions for a chiropractor is transitioning from associate to owner. Having an equity or buy-in pathway in your contract can set the stage for this transition — or the absence of one can lock you into perpetual associate status.</p>
           <p><strong>Why it matters:</strong> As an associate, you build the practice&apos;s value every day through patient relationships, community reputation, and revenue generation. Without an ownership path, all that value accrues to the practice owner alone. Ownership is how chiropractors build real wealth.</p>
           <p><strong>How buy-in formulas work:</strong> Most buy-ins are based on a multiple of collections or revenue. Common formulas include 50-70% of one year&apos;s gross collections, or a defined dollar amount with a payment plan over 3-5 years. Some practices offer equity earn-in where you accumulate ownership percentage over time.</p>
@@ -1164,12 +1164,12 @@ function ContractLabContent() {
             <li>Are there performance milestones that accelerate the timeline?</li>
           </ul>
           <p><strong>Red flags:</strong> Vague promises (&quot;we&apos;ll talk about it later&quot;), unreasonable valuations (3x+ revenue), no written timeline, restrictive conditions that make buy-in practically impossible.</p>
-          <p className="bg-white/[0.04] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;m interested in a long-term relationship and eventually having an ownership stake. Can we include language about a buy-in discussion after two years, with right of first refusal if the practice is sold?&quot;</p>
+          <p className="bg-[#F7F8F9] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;m interested in a long-term relationship and eventually having an ownership stake. Can we include language about a buy-in discussion after two years, with right of first refusal if the practice is sold?&quot;</p>
         </div>
       </Accordion>
 
       <Accordion title="Benefits Checklist: What to Expect" icon={<CheckCircle className="w-5 h-5 text-[#e97325]" />}>
-        <div className="space-y-4 text-sm text-white/60 leading-relaxed">
+        <div className="space-y-4 text-sm text-[#5A6873] leading-relaxed">
           <p>Benefits are a significant part of your total compensation package. A position paying $65K with full benefits is often worth more than $75K with none. Here is what to expect and what is negotiable.</p>
           <p><strong>Standard Benefits (should be included):</strong></p>
           <ul className="list-disc pl-5 space-y-1">
@@ -1184,20 +1184,20 @@ function ContractLabContent() {
             <li><strong>Equipment:</strong> All clinical equipment should be provided. If you bring your own tools, negotiate a stipend.</li>
           </ul>
           <p><strong>The Benefits Math:</strong></p>
-          <div className="bg-white/[0.04] rounded-xl p-4">
+          <div className="bg-[#F7F8F9] rounded-xl p-4">
             <p>Health Insurance: ~$6,000/year</p>
             <p>Malpractice: ~$3,500/year</p>
             <p>CE Allowance: ~$2,000/year</p>
             <p>401k Match (3%): ~$1,800/year</p>
             <p>PTO (2 weeks): ~$2,500/year</p>
-            <p className="font-bold text-white mt-2 pt-2 border-t">Total Benefits Value: ~$15,800/year</p>
+            <p className="font-bold text-[#16222D] mt-2 pt-2 border-t">Total Benefits Value: ~$15,800/year</p>
           </div>
-          <p className="bg-white/[0.04] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;d like to discuss the benefits package. Malpractice coverage, health insurance contribution, and a CE allowance are all important to me. What does the current benefits package include?&quot;</p>
+          <p className="bg-[#F7F8F9] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>What to say:</strong> &quot;I&apos;d like to discuss the benefits package. Malpractice coverage, health insurance contribution, and a CE allowance are all important to me. What does the current benefits package include?&quot;</p>
         </div>
       </Accordion>
 
       <Accordion title="10 Questions to Ask Before You Sign" icon={<Search className="w-5 h-5 text-[#e97325]" />}>
-        <div className="space-y-4 text-sm text-white/60 leading-relaxed">
+        <div className="space-y-4 text-sm text-[#5A6873] leading-relaxed">
           <p>Before signing any associate contract, make sure you have clear, written answers to these ten questions. Verbal promises are not enforceable — if it is not in the contract, it does not exist.</p>
           <ol className="list-decimal pl-5 space-y-3">
             <li><strong>How are patients assigned to me?</strong> — Your income depends on patient volume. Understand whether you will get a share of existing patients, only new patients, or only overflow. Ask for patient volume data from the last 12 months.</li>
@@ -1211,7 +1211,7 @@ function ContractLabContent() {
             <li><strong>What equipment and support staff will be available?</strong> — Your efficiency and income depend on having adequate support. Ask about CA staffing, equipment quality, and technology systems.</li>
             <li><strong>Have you had the contract reviewed by a healthcare attorney?</strong> — Spending $500-1,000 on an attorney review is always worth it. They will catch issues you will miss. Ask the employer if they are open to mutually agreed modifications.</li>
           </ol>
-          <p className="bg-white/[0.04] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>Bottom line:</strong> Never sign a contract the same day you receive it. Take at least a week to review it, have it reviewed by an attorney, and prepare your negotiation points. A good employer will respect this process.</p>
+          <p className="bg-[#F7F8F9] border-l-2 border-[#D66829]/30 rounded-xl p-3"><strong>Bottom line:</strong> Never sign a contract the same day you receive it. Take at least a week to review it, have it reviewed by an attorney, and prepare your negotiation points. A good employer will respect this process.</p>
         </div>
       </Accordion>
     </div>
@@ -1225,21 +1225,21 @@ function ContractLabContent() {
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Section 1: Sample Clauses */}
       <div>
-        <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-bold text-[#16222D] mb-4 flex items-center gap-2">
           <FileText className="w-5 h-5 text-[#e97325]" /> Sample Contract Clauses
         </h2>
         <div className="space-y-3">
           {SAMPLE_CLAUSES.map((clause, i) => (
             <Accordion key={i} title={clause.title} icon={<span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${clause.ratingColor}`}>{clause.rating}</span>}>
               <div className="space-y-3">
-                <blockquote className="bg-white/[0.04] border-l-4 border-[#D66829]/30 p-4 rounded-r-xl font-mono text-xs text-white/60 leading-relaxed whitespace-pre-wrap">
+                <blockquote className="bg-[#F7F8F9] border-l-4 border-[#D66829]/30 p-4 rounded-r-xl font-mono text-xs text-[#5A6873] leading-relaxed whitespace-pre-wrap">
                   {clause.language}
                 </blockquote>
                 <div className="flex gap-2">
                   <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-[10px] font-bold text-white/35 uppercase tracking-widest block mb-0.5">What This Means</span>
-                    <p className="text-sm text-white/60">{clause.annotation}</p>
+                    <span className="text-[10px] font-bold text-[#5A6873] uppercase tracking-widest block mb-0.5">What This Means</span>
+                    <p className="text-sm text-[#5A6873]">{clause.annotation}</p>
                   </div>
                 </div>
               </div>
@@ -1250,15 +1250,15 @@ function ContractLabContent() {
 
       {/* Section 2: Comparison Table */}
       <div>
-        <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-bold text-[#16222D] mb-4 flex items-center gap-2">
           <Scale className="w-5 h-5 text-[#e97325]" /> Contract Comparison
         </h2>
-        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden">
+        <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-white/[0.04]">
-                  <th className="text-left px-4 py-3 text-xs font-bold text-white/35 uppercase tracking-widest">Term</th>
+                <tr className="bg-[#F7F8F9]">
+                  <th className="text-left px-4 py-3 text-xs font-bold text-[#5A6873] uppercase tracking-widest">Term</th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-green-600 uppercase tracking-widest">Good Contract</th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-yellow-600 uppercase tracking-widest">Average</th>
                   <th className="text-left px-4 py-3 text-xs font-bold text-red-600 uppercase tracking-widest">Bad Contract</th>
@@ -1266,8 +1266,8 @@ function ContractLabContent() {
               </thead>
               <tbody className="divide-y divide-white/[0.08]">
                 {COMPARISON_ROWS.map((row, i) => (
-                  <tr key={i} className="hover:bg-white/[0.04]">
-                    <td className="px-4 py-3 font-bold text-white">{row.term}</td>
+                  <tr key={i} className="hover:bg-[#F7F8F9]">
+                    <td className="px-4 py-3 font-bold text-[#16222D]">{row.term}</td>
                     <td className="px-4 py-3 text-green-400">{row.good}</td>
                     <td className="px-4 py-3 text-yellow-400">{row.average}</td>
                     <td className="px-4 py-3 text-red-400">{row.bad}</td>
@@ -1281,7 +1281,7 @@ function ContractLabContent() {
 
       {/* Section 3: Red Flag Examples */}
       <div>
-        <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-bold text-[#16222D] mb-4 flex items-center gap-2">
           <ShieldAlert className="w-5 h-5 text-[#e97325]" /> Real-World Red Flag Examples
         </h2>
         <div className="space-y-3">
@@ -1289,15 +1289,15 @@ function ContractLabContent() {
             <div key={i} className="bg-red-500/10 border-2 border-red-500/20 rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="w-4 h-4 text-red-500" />
-                <h4 className="font-bold text-white text-sm">{ex.title}</h4>
+                <h4 className="font-bold text-[#16222D] text-sm">{ex.title}</h4>
                 <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-500/15 text-red-600">Danger</span>
               </div>
-              <blockquote className="bg-white/[0.04] border-l-4 border-red-400 p-3 rounded-r-xl font-mono text-xs text-white/60 leading-relaxed mb-3 whitespace-pre-wrap">
+              <blockquote className="bg-[#F7F8F9] border-l-4 border-red-400 p-3 rounded-r-xl font-mono text-xs text-[#5A6873] leading-relaxed mb-3 whitespace-pre-wrap">
                 {ex.clause}
               </blockquote>
               <div className="flex gap-2">
                 <Info className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                <p className="text-sm text-white/60">{ex.explanation}</p>
+                <p className="text-sm text-[#5A6873]">{ex.explanation}</p>
               </div>
             </div>
           ))}
@@ -1313,17 +1313,17 @@ function ContractLabContent() {
   return (
     <div className="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
       <header>
-        <h1 className="text-2xl font-heading font-black text-white flex items-center gap-3">
+        <h1 className="text-2xl font-heading font-black text-[#16222D] flex items-center gap-3">
           <Shield className="w-7 h-7 text-[#e97325]" /> Contract Lab
         </h1>
-        <p className="text-white/40 mt-1 text-sm">Paste your contract or answer the questions. We'll tell you what's missing, what's risky, and what to push back on.</p>
+        <p className="text-[#5A6873] mt-1 text-sm">Paste your contract or answer the questions. We'll tell you what's missing, what's risky, and what to push back on.</p>
       </header>
 
       {/* Tab Bar */}
-      <div className="flex rounded-2xl overflow-hidden border border-white/[0.08]">
+      <div className="flex rounded-2xl overflow-hidden border border-[#DDE2E5]">
         {tabs.map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-3 px-4 text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 border-r last:border-r-0 border-white/[0.08] ${activeTab === tab.id ? "bg-[#D66829] text-white" : "bg-white/[0.04] text-white/40 hover:text-white/60"}`}>
+            className={`flex-1 py-3 px-4 text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 border-r last:border-r-0 border-[#DDE2E5] ${activeTab === tab.id ? "bg-[#D66829] text-[#16222D]" : "bg-[#F7F8F9] text-[#5A6873] hover:text-[#5A6873]"}`}>
             {tab.icon} {tab.label}
           </button>
         ))}
@@ -1336,14 +1336,14 @@ function ContractLabContent() {
       {activeTab === 3 && Tab3()}
 
       {/* Pipeline CTA */}
-      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
+      <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
         <div>
-          <p className="text-[13px] font-semibold text-white">Contract done?</p>
-          <p className="text-xs text-white/30">Now run your first-year numbers.</p>
+          <p className="text-[13px] font-semibold text-[#16222D]">Contract done?</p>
+          <p className="text-xs text-[#5A6873]">Now run your first-year numbers.</p>
         </div>
         <Link
           href="/student/financial-planner"
-          className="w-full sm:w-auto px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-5 py-2.5 bg-[#EFF1F2] text-[#5A6873] rounded-lg hover:text-[#16222D] hover:bg-[#DDE2E5] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
           Financial Planner <ArrowRight className="w-3.5 h-3.5" />
         </Link>

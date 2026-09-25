@@ -22,11 +22,11 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
   return (
     <div className="p-4 lg:p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Messages</h1>
-        <p className="text-white/35 text-sm mt-1">Your conversations with doctors in the network.</p>
+        <h1 className="text-2xl font-bold text-[#16222D]">Messages</h1>
+        <p className="text-[#5A6873] text-sm mt-1">Your conversations with doctors in the network.</p>
       </div>
 
-      <div className="rounded-2xl overflow-hidden border border-white/[0.08] shadow-lg shadow-black/20 [&_*]:!border-white/[0.06] [&_.bg-white]:!bg-[#162231] [&_.bg-gray-50]:!bg-[#1a2e40] [&_.text-gray-900]:!text-white [&_.text-gray-800]:!text-white [&_.text-gray-700]:!text-white/70 [&_.text-gray-600]:!text-white/60 [&_.text-gray-500]:!text-white/40 [&_.text-gray-400]:!text-white/30 [&_.text-neuro-navy]:!text-white [&_.bg-gray-100]:!bg-white/[0.04] [&_.bg-gray-200]:!bg-white/[0.06] [&_.border-gray-100]:!border-white/[0.06] [&_.border-gray-200]:!border-white/[0.08] [&_.border-gray-300]:!border-white/[0.08] [&_input]:!bg-white/[0.04] [&_input]:!text-white [&_input]:!border-white/[0.08] [&_input::placeholder]:!text-white/20 [&_.hover\\:bg-gray-50:hover]:!bg-white/[0.04] [&_.hover\\:bg-gray-100:hover]:!bg-white/[0.06]">
+      <div className="rounded-2xl overflow-hidden border border-[#DDE2E5] [&_*]:!border-[#DDE2E5] [&_.bg-white]:!bg-[#F7F8F9] [&_.bg-gray-50]:!bg-[#F7F8F9] [&_.text-gray-900]:!text-[#16222D] [&_.text-gray-800]:!text-[#16222D] [&_.text-gray-700]:!text-[#5A6873] [&_.text-gray-600]:!text-[#5A6873] [&_.text-gray-500]:!text-[#5A6873] [&_.text-gray-400]:!text-[#5A6873] [&_.text-neuro-navy]:!text-[#16222D] [&_.bg-gray-100]:!bg-[#F7F8F9] [&_.bg-gray-200]:!bg-[#EFF1F2] [&_.border-gray-100]:!border-[#DDE2E5] [&_.border-gray-200]:!border-[#DDE2E5] [&_.border-gray-300]:!border-[#DDE2E5] [&_input]:!bg-[#F7F8F9] [&_input]:!text-[#16222D] [&_input]:!border-[#DDE2E5] [&_input::placeholder]:!text-[#5A6873]/40 [&_.hover\\:bg-gray-50:hover]:!bg-[#F7F8F9] [&_.hover\\:bg-gray-100:hover]:!bg-[#EFF1F2]">
         <MessagingSystem currentUserId={user.id} userRole={(profile as any)?.role || 'student'} initialOtherUserId={to} />
       </div>
     </div>

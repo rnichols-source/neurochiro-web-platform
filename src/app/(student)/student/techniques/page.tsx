@@ -347,32 +347,32 @@ export default function TechniqueComparisonGuide() {
   const renderExplorer = () => (
     <div>
       <div className="flex items-center gap-3 mb-2">
-        <Compass className="w-7 h-7" style={{ color: BRAND_ORANGE }} />
+        <Compass className="w-7 h-7" style={{ color: "#D66829" }} />
         <h2
           className="text-2xl font-heading font-black"
-          style={{ color: BRAND_NAVY }}
+          style={{ color: "#16222D" }}
         >
           Technique Explorer
         </h2>
       </div>
-      <p className="text-white/40 text-sm mb-6">
+      <p className="text-[#5A6873] text-sm mb-6">
         Browse all 18 chiropractic techniques. Search, filter, and expand any card for the complete breakdown.
       </p>
 
       {/* Search */}
       <div className="relative mb-4">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5A6873]/40" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search techniques by name, category, or keyword..."
-          className="w-full pl-11 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none transition-colors"
+          className="w-full pl-11 pr-4 py-3 bg-[#F7F8F9] border border-[#DDE2E5] rounded-xl text-sm text-[#16222D] placeholder-[#5A6873]/40 focus:border-[#D66829]/40 outline-none transition-colors"
         />
         {search && (
           <button
             onClick={() => setSearch("")}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/40"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5A6873]/40 hover:text-[#5A6873]"
           >
             <X className="w-4 h-4" />
           </button>
@@ -411,7 +411,7 @@ export default function TechniqueComparisonGuide() {
           return (
             <div
               key={t.id}
-              className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-hidden relative"
+              className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] overflow-hidden relative"
             >
               {/* Collapsed header — always visible */}
               <button
@@ -422,12 +422,12 @@ export default function TechniqueComparisonGuide() {
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <h3
                       className="font-bold text-base"
-                      style={{ color: BRAND_NAVY }}
+                      style={{ color: "#16222D" }}
                     >
                       {t.name}
                     </h3>
                     <span
-                      className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
+                      className="px-2 py-0.5 rounded-full text-[10px] font-bold text-[#16222D]"
                       style={{ backgroundColor: catColor }}
                     >
                       {t.category.replace("-", " ")}
@@ -439,46 +439,46 @@ export default function TechniqueComparisonGuide() {
                       </span>
                     )}
                     {t.popularity === "Common" && (
-                      <span className="text-[10px] font-bold text-white/40">
+                      <span className="text-[10px] font-bold text-[#5A6873]">
                         {t.popularity}
                       </span>
                     )}
                     {(t.popularity === "Specialized" || t.popularity === "Niche") && (
-                      <span className="text-[10px] font-bold text-white/40 italic">
+                      <span className="text-[10px] font-bold text-[#5A6873] italic">
                         {t.popularity}
                       </span>
                     )}
                   </div>
-                  <p className="text-white/40 text-sm leading-relaxed">
+                  <p className="text-[#5A6873] text-sm leading-relaxed">
                     {t.summary}
                   </p>
-                  <div className="flex flex-wrap gap-3 mt-2 text-[11px] text-white/30">
+                  <div className="flex flex-wrap gap-3 mt-2 text-[11px] text-[#5A6873]">
                     <span>
-                      <span className="font-bold text-white/50">Learn:</span>{" "}
+                      <span className="font-bold text-[#5A6873]">Learn:</span>{" "}
                       {t.learningTime}
                     </span>
                     <span>
-                      <span className="font-bold text-white/50">Cert:</span>{" "}
+                      <span className="font-bold text-[#5A6873]">Cert:</span>{" "}
                       {t.certCost}
                     </span>
                     <span>
-                      <span className="font-bold text-white/50">Evidence:</span>{" "}
+                      <span className="font-bold text-[#5A6873]">Evidence:</span>{" "}
                       {t.evidenceLevel}
                     </span>
                   </div>
                 </div>
                 <div className="flex-shrink-0 mt-1">
                   {isExpanded ? (
-                    <ChevronDown className="w-5 h-5 text-white/30" />
+                    <ChevronDown className="w-5 h-5 text-[#5A6873]" />
                   ) : (
-                    <ChevronRight className="w-5 h-5 text-white/30" />
+                    <ChevronRight className="w-5 h-5 text-[#5A6873]" />
                   )}
                 </div>
               </button>
 
               {/* Expanded details */}
               {isExpanded && (
-                <div className="px-5 pb-6 pt-0 space-y-5 border-t border-white/[0.08]">
+                <div className="px-5 pb-6 pt-0 space-y-5 border-t border-[#DDE2E5]">
                   {renderDetailSection("What It Is", t.whatItIs)}
                   {renderDetailSection("Philosophy", t.philosophy)}
                   {renderDetailSection("In Practice", t.inPractice)}
@@ -498,17 +498,17 @@ export default function TechniqueComparisonGuide() {
 
                   {/* Best For & Personality */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="bg-white/[0.04] rounded-xl p-4">
+                    <div className="bg-[#F7F8F9] rounded-xl p-4">
                       <p className="text-[10px] font-bold text-[#D66829] uppercase tracking-wide mb-1">
                         Best For
                       </p>
-                      <p className="text-sm text-white/50">{t.bestFor}</p>
+                      <p className="text-sm text-[#5A6873]">{t.bestFor}</p>
                     </div>
-                    <div className="bg-white/[0.04] rounded-xl p-4">
+                    <div className="bg-[#F7F8F9] rounded-xl p-4">
                       <p className="text-[10px] font-bold text-[#D66829] uppercase tracking-wide mb-1">
                         Personality Fit
                       </p>
-                      <p className="text-sm text-white/50">{t.personalityFit}</p>
+                      <p className="text-sm text-[#5A6873]">{t.personalityFit}</p>
                     </div>
                   </div>
 
@@ -523,7 +523,7 @@ export default function TechniqueComparisonGuide() {
                       </p>
                       <ul className="space-y-1.5">
                         {t.pros.map((p, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-white/50">
+                          <li key={i} className="flex items-start gap-2 text-sm text-[#5A6873]">
                             <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
                             {p}
                           </li>
@@ -539,7 +539,7 @@ export default function TechniqueComparisonGuide() {
                       </p>
                       <ul className="space-y-1.5">
                         {t.cons.map((c, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-white/50">
+                          <li key={i} className="flex items-start gap-2 text-sm text-[#5A6873]">
                             <X className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
                             {c}
                           </li>
@@ -553,7 +553,7 @@ export default function TechniqueComparisonGuide() {
           );
         })}
         {filteredTechniques.length === 0 && (
-          <p className="text-center text-white/30 py-12">
+          <p className="text-center text-[#5A6873] py-12">
             No techniques match your search.
           </p>
         )}
@@ -573,27 +573,27 @@ export default function TechniqueComparisonGuide() {
     return (
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-2">
-          <BarChart3 className="w-7 h-7" style={{ color: BRAND_ORANGE }} />
+          <BarChart3 className="w-7 h-7" style={{ color: "#D66829" }} />
           <h2
             className="text-2xl font-heading font-black"
-            style={{ color: BRAND_NAVY }}
+            style={{ color: "#16222D" }}
           >
             Find Your Fit
           </h2>
         </div>
-        <p className="text-white/40 text-sm mb-6">
+        <p className="text-[#5A6873] text-sm mb-6">
           Answer 10 questions to discover which techniques match your personality and goals.
         </p>
 
         {/* Progress bar */}
         <div className="mb-6">
           <div className="flex justify-between text-xs font-bold mb-1.5">
-            <span className="text-white">
+            <span className="text-[#16222D]">
               Question {qIdx + 1} of {QUIZ_QUESTIONS.length}
             </span>
-            <span className="text-white/35">{Math.round(progress)}%</span>
+            <span className="text-[#5A6873]">{Math.round(progress)}%</span>
           </div>
-          <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-[#EFF1F2] rounded-full overflow-hidden">
             <div
               className="h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress}%`, backgroundColor: BRAND_ORANGE }}
@@ -606,7 +606,7 @@ export default function TechniqueComparisonGuide() {
           <div>
             <h3
               className="text-lg font-bold mb-5"
-              style={{ color: BRAND_NAVY }}
+              style={{ color: "#16222D" }}
             >
               {q.question}
             </h3>
@@ -633,7 +633,7 @@ export default function TechniqueComparisonGuide() {
                       >
                         {opt.label}
                       </span>
-                      <span className="text-sm text-white">
+                      <span className="text-sm text-[#16222D]">
                         {opt.text}
                       </span>
                     </div>
@@ -654,7 +654,7 @@ export default function TechniqueComparisonGuide() {
                   currentQuestion: prev.currentQuestion - 1,
                 }))
               }
-              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/[0.08] text-sm font-bold text-white/50 hover:bg-white/[0.04] transition-colors"
+              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-[#DDE2E5] text-sm font-bold text-[#5A6873] hover:bg-[#F7F8F9] transition-colors"
             >
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
@@ -669,7 +669,7 @@ export default function TechniqueComparisonGuide() {
                   currentQuestion: prev.currentQuestion + 1,
                 }))
               }
-              className="flex items-center gap-2 px-6 py-3 rounded-xl text-white text-sm font-bold hover:opacity-90 transition-colors"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl text-[#16222D] text-sm font-bold hover:opacity-90 transition-colors"
               style={{ backgroundColor: BRAND_ORANGE }}
             >
               Next <ArrowRight className="w-4 h-4" />
@@ -694,15 +694,15 @@ export default function TechniqueComparisonGuide() {
     return (
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-2">
-          <Star className="w-7 h-7" style={{ color: BRAND_ORANGE }} />
+          <Star className="w-7 h-7" style={{ color: "#D66829" }} />
           <h2
             className="text-2xl font-heading font-black"
-            style={{ color: BRAND_NAVY }}
+            style={{ color: "#16222D" }}
           >
             Your Top 3 Technique Matches
           </h2>
         </div>
-        <p className="text-white/40 text-sm mb-6">
+        <p className="text-[#5A6873] text-sm mb-6">
           Based on your answers, here are the technique categories that fit you best.
         </p>
 
@@ -713,11 +713,11 @@ export default function TechniqueComparisonGuide() {
             return (
               <div
                 key={item.technique.id}
-                className="bg-[#162231] rounded-2xl border-2 p-5 flex items-start gap-4"
+                className="bg-[#F7F8F9] rounded-2xl border-2 p-5 flex items-start gap-4"
                 style={{ borderColor: rank === 0 ? BRAND_ORANGE : "rgba(255,255,255,0.08)" }}
               >
                 <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm flex-shrink-0"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-[#16222D] font-black text-sm flex-shrink-0"
                   style={{
                     backgroundColor: rank === 0 ? BRAND_ORANGE : BRAND_NAVY,
                   }}
@@ -726,20 +726,20 @@ export default function TechniqueComparisonGuide() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold" style={{ color: BRAND_NAVY }}>
+                    <h3 className="font-bold" style={{ color: "#16222D" }}>
                       {item.technique.name}
                     </h3>
                     <span
-                      className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
+                      className="px-2 py-0.5 rounded-full text-[10px] font-bold text-[#16222D]"
                       style={{ backgroundColor: catColor }}
                     >
                       {item.technique.category.replace("-", " ")}
                     </span>
-                    <span className="text-sm font-bold" style={{ color: BRAND_ORANGE }}>
+                    <span className="text-sm font-bold" style={{ color: "#D66829" }}>
                       {item.pct}% match
                     </span>
                   </div>
-                  <p className="text-sm text-white/40">
+                  <p className="text-sm text-[#5A6873]">
                     {item.technique.personalityFit}
                   </p>
                   <button
@@ -750,7 +750,7 @@ export default function TechniqueComparisonGuide() {
                       setSearch("");
                     }}
                     className="mt-2 text-xs font-bold flex items-center gap-1 hover:underline"
-                    style={{ color: BRAND_ORANGE }}
+                    style={{ color: "#D66829" }}
                   >
                     View full breakdown <ArrowRight className="w-3 h-3" />
                   </button>
@@ -761,10 +761,10 @@ export default function TechniqueComparisonGuide() {
         </div>
 
         {/* Pentagon radar chart */}
-        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 mb-8">
+        <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6 mb-8">
           <h3
             className="text-xs font-black uppercase tracking-wide mb-4"
-            style={{ color: BRAND_NAVY }}
+            style={{ color: "#16222D" }}
           >
             Your Score Profile
           </h3>
@@ -848,7 +848,7 @@ export default function TechniqueComparisonGuide() {
         <div className="text-center">
           <button
             onClick={resetQuiz}
-            className="px-6 py-3 rounded-xl border-2 text-sm font-bold transition-colors hover:bg-white/[0.04]"
+            className="px-6 py-3 rounded-xl border-2 text-sm font-bold transition-colors hover:bg-[#F7F8F9]"
             style={{ borderColor: "rgba(255,255,255,0.08)", color: "#fff" }}
           >
             Retake Quiz
@@ -891,15 +891,15 @@ export default function TechniqueComparisonGuide() {
     return (
       <div>
         <div className="flex items-center gap-3 mb-2">
-          <Filter className="w-7 h-7" style={{ color: BRAND_ORANGE }} />
+          <Filter className="w-7 h-7" style={{ color: "#D66829" }} />
           <h2
             className="text-2xl font-heading font-black"
-            style={{ color: BRAND_NAVY }}
+            style={{ color: "#16222D" }}
           >
             Comparison Tool
           </h2>
         </div>
-        <p className="text-white/40 text-sm mb-6">
+        <p className="text-[#5A6873] text-sm mb-6">
           Compare techniques side-by-side to see the key differences at a glance.
         </p>
 
@@ -910,7 +910,7 @@ export default function TechniqueComparisonGuide() {
               key={idx}
               value={t.id}
               onChange={(e) => setCompareId(idx, e.target.value)}
-              className="w-full sm:w-auto px-4 py-3 border border-white/[0.08] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none bg-white/[0.04] text-white sm:min-w-[180px]"
+              className="w-full sm:w-auto px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm font-bold focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D] sm:min-w-[180px]"
             >
               {TECHNIQUES.map((tech) => (
                 <option key={tech.id} value={tech.id}>
@@ -922,14 +922,14 @@ export default function TechniqueComparisonGuide() {
           {!showThird ? (
             <button
               onClick={addThirdColumn}
-              className="px-4 py-3 rounded-xl border-2 border-dashed border-white/[0.08] text-sm font-bold text-white/30 hover:border-[#D66829] hover:text-[#D66829] transition-colors"
+              className="px-4 py-3 rounded-xl border-2 border-dashed border-[#DDE2E5] text-sm font-bold text-[#5A6873] hover:border-[#D66829] hover:text-[#D66829] transition-colors"
             >
               + Add Third
             </button>
           ) : (
             <button
               onClick={removeThirdColumn}
-              className="px-4 py-3 rounded-xl border border-white/[0.08] text-sm font-bold text-white/30 hover:text-red-400 transition-colors"
+              className="px-4 py-3 rounded-xl border border-[#DDE2E5] text-sm font-bold text-[#5A6873] hover:text-red-400 transition-colors"
             >
               <X className="w-4 h-4 inline mr-1" />
               Remove
@@ -938,17 +938,17 @@ export default function TechniqueComparisonGuide() {
         </div>
 
         {/* Comparison table */}
-        <div className="bg-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 overflow-x-auto">
+        <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
-                <th className="text-left p-4 text-white text-xs font-bold uppercase tracking-wide w-36">
+                <th className="text-left p-4 text-[#16222D] text-xs font-bold uppercase tracking-wide w-36">
                   Field
                 </th>
                 {cols.map((t) => (
                   <th
                     key={t.id}
-                    className="text-left p-4 text-white text-xs font-bold uppercase tracking-wide"
+                    className="text-left p-4 text-[#16222D] text-xs font-bold uppercase tracking-wide"
                   >
                     {t.name}
                   </th>
@@ -959,7 +959,7 @@ export default function TechniqueComparisonGuide() {
               {rows.map((row, rIdx) => (
                 <tr
                   key={row.key}
-                  className={rIdx % 2 === 0 ? "bg-white/[0.02]" : ""}
+                  className={rIdx % 2 === 0 ? "bg-[#F7F8F9]" : ""}
                 >
                   <td
                     className="p-4 font-bold text-xs uppercase tracking-wide text-[#D66829]"
@@ -973,7 +973,7 @@ export default function TechniqueComparisonGuide() {
                       return (
                         <td key={t.id} className="p-4">
                           <span
-                            className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
+                            className="px-2 py-0.5 rounded-full text-[10px] font-bold text-[#16222D]"
                             style={{ backgroundColor: catColor }}
                           >
                             {t.category.replace("-", " ")}
@@ -982,7 +982,7 @@ export default function TechniqueComparisonGuide() {
                       );
                     }
                     return (
-                      <td key={t.id} className="p-4 text-white/50">
+                      <td key={t.id} className="p-4 text-[#5A6873]">
                         {val}
                       </td>
                     );
@@ -995,14 +995,14 @@ export default function TechniqueComparisonGuide() {
 
         {/* Summary */}
         <div
-          className="mt-6 rounded-2xl p-6 bg-white/[0.04] border border-white/[0.08]"
+          className="mt-6 rounded-2xl p-6 bg-[#F7F8F9] border border-[#DDE2E5]"
         >
           <h3
             className="text-xs font-black uppercase tracking-wide mb-2 text-[#D66829]"
           >
             Which should I choose?
           </h3>
-          <p className="text-sm text-white/50 leading-relaxed">
+          <p className="text-sm text-[#5A6873] leading-relaxed">
             {generateSummary()}
           </p>
         </div>
@@ -1016,20 +1016,20 @@ export default function TechniqueComparisonGuide() {
     <div>
       <h4
         className="text-[10px] font-black uppercase tracking-widest mb-1.5"
-        style={{ color: BRAND_ORANGE }}
+        style={{ color: "#D66829" }}
       >
         {title}
       </h4>
-      <p className="text-sm text-white/50 leading-relaxed">{content}</p>
+      <p className="text-sm text-[#5A6873] leading-relaxed">{content}</p>
     </div>
   );
 
   const renderStatCard = (label: string, value: string) => (
-    <div className="bg-white/[0.04] rounded-xl p-3">
-      <p className="text-[10px] font-bold text-white/30 uppercase tracking-wide mb-0.5">
+    <div className="bg-[#F7F8F9] rounded-xl p-3">
+      <p className="text-[10px] font-bold text-[#5A6873] uppercase tracking-wide mb-0.5">
         {label}
       </p>
-      <p className="text-sm font-bold text-white">
+      <p className="text-sm font-bold text-[#16222D]">
         {value}
       </p>
     </div>
@@ -1042,26 +1042,26 @@ export default function TechniqueComparisonGuide() {
       {/* Page header */}
       <div className="mb-6">
         <h1
-          className="text-2xl font-heading font-bold flex items-center gap-3 text-white"
+          className="text-2xl font-heading font-bold flex items-center gap-3 text-[#16222D]"
         >
-          <Compass className="w-7 h-7" style={{ color: BRAND_ORANGE }} />
+          <Compass className="w-7 h-7" style={{ color: "#D66829" }} />
           Techniques
         </h1>
-        <p className="text-xs text-white/35 mt-1">
+        <p className="text-xs text-[#5A6873] mt-1">
           Which technique fits you? Take the quiz, compare them side by side, or browse all 18.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex rounded-2xl overflow-hidden border border-white/[0.08] mb-6">
+      <div className="flex rounded-2xl overflow-hidden border border-[#DDE2E5] mb-6">
         {TAB_LABELS.map((label, i) => {
           const isActive = activeTab === i;
           return (
             <button
               key={i}
               onClick={() => setActiveTab(i)}
-              className={`flex-1 py-3 px-2 text-xs sm:text-sm font-bold transition-all border-r last:border-r-0 border-white/[0.08] ${
-                isActive ? "bg-[#D66829] text-white" : "bg-white/[0.04] text-white/40 hover:text-white/60"
+              className={`flex-1 py-3 px-2 text-xs sm:text-sm font-bold transition-all border-r last:border-r-0 border-[#DDE2E5] ${
+                isActive ? "bg-[#D66829] text-[#16222D]" : "bg-[#F7F8F9] text-[#5A6873] hover:text-[#5A6873]"
               }`}
             >
               {label}
@@ -1076,14 +1076,14 @@ export default function TechniqueComparisonGuide() {
       {activeTab === 2 && renderExplorer()}
 
       {/* Pipeline CTA */}
-      <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
+      <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
         <div>
-          <p className="text-[13px] font-semibold text-white">Know your technique?</p>
-          <p className="text-xs text-white/30">Good. Now practice explaining it in an interview.</p>
+          <p className="text-[13px] font-semibold text-[#16222D]">Know your technique?</p>
+          <p className="text-xs text-[#5A6873]">Good. Now practice explaining it in an interview.</p>
         </div>
         <Link
           href="/student/interview-prep"
-          className="w-full sm:w-auto px-5 py-2.5 bg-white/[0.06] text-white/60 rounded-lg hover:text-white hover:bg-white/[0.1] text-xs font-bold transition-colors flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-5 py-2.5 bg-[#EFF1F2] text-[#5A6873] rounded-lg hover:text-[#16222D] hover:bg-[#DDE2E5] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
           Interview Prep <ArrowRight className="w-3.5 h-3.5" />
         </Link>
