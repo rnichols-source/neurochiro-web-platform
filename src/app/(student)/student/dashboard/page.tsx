@@ -6,10 +6,9 @@ import {
   Compass, ClipboardList, Briefcase, FileText, DollarSign,
   Check, ArrowRight, Loader2, ChevronDown, ChevronUp,
 } from "lucide-react";
-import { getCareerReadinessData } from "./actions";
+import { getCareerReadinessData, getStudentDashboardData, getMatchedJobsCount } from "./actions";
 import { getVerificationStatus } from "../actions/verify-school";
 import SchoolVerificationBanner from "./school-verification-banner";
-import { getMatchedJobsCount } from "./actions";
 
 // ── Color tokens ──
 const T = {
@@ -71,6 +70,7 @@ const STAGES = [
 
 export default function StudentDashboard() {
   const [readiness, setReadiness] = useState<any>(null);
+  const [profileData, setProfileData] = useState<any>(null);
   const [verification, setVerification] = useState<any>(null);
   const [jobCount, setJobCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,10 +79,12 @@ export default function StudentDashboard() {
   useEffect(() => {
     Promise.all([
       getCareerReadinessData(),
+      getStudentDashboardData(),
       getVerificationStatus(),
       getMatchedJobsCount(),
-    ]).then(([r, v, j]) => {
+    ]).then(([r, p, v, j]) => {
       setReadiness(r);
+      setProfileData(p);
       setVerification(v);
       setJobCount(j);
       setLoading(false);
@@ -98,8 +100,8 @@ export default function StudentDashboard() {
   }
 
   const milestones = readiness?.milestones || {};
-  const gradYear = readiness?.profile?.gradYear || verification?.graduationYear;
-  const studentName = readiness?.profile?.name || '';
+  const gradYear = profileData?.profile?.gradYear || verification?.graduationYear;
+  const studentName = profileData?.profile?.name || '';
 
   let gradLine = '';
   if (gradYear) {
