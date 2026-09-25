@@ -211,105 +211,13 @@ export default function MentorDiscoveryPage() {
             Try broadening your search or clearing your filters.
           </p>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filtered.map((mentor) => {
-            const fullName = `Dr. ${mentor.first_name} ${mentor.last_name}`;
-            const location = [mentor.city, mentor.state].filter(Boolean).join(", ");
-            const matchScore = mentor.matchScore;
-
-            return (
-              <div
-                key={mentor.id}
-                className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-5 hover:border-[#D66829]/20 transition-all"
-              >
-                <div className="flex items-start gap-4">
-                  {/* Avatar */}
-                  <div className="w-14 h-14 rounded-2xl bg-white/[0.06] flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    {mentor.photo_url ? (
-                      <img src={mentor.photo_url} alt={fullName} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-lg font-semibold text-white">
-                        {mentor.first_name?.[0]}{mentor.last_name?.[0]}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <h3 className="font-semibold text-white">{fullName}</h3>
-                      {matchScore > 0 && (
-                        <span className="text-[10px] text-white/40 flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: matchScore >= 60 ? "#22c55e" : "#f59e0b" }} />
-                          {matchScore}%
-                        </span>
-                      )}
-                    </div>
-
-                    {mentor.clinic_name && (
-                      <p className="text-xs text-white/40 mb-1">{mentor.clinic_name}</p>
-                    )}
-
-                    <div className="flex flex-wrap gap-2 text-xs text-white/35 mb-3">
-                      {location && (
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" /> {location}
-                        </span>
-                      )}
-                      {mentor.rating > 0 && (
-                        <span className="flex items-center gap-1 text-amber-400">
-                          <Star className="w-3 h-3 fill-amber-400" /> {mentor.rating.toFixed(1)}
-                          {mentor.review_count > 0 && <span className="text-white/20">({mentor.review_count})</span>}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Badges */}
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      <span className="text-[10px] font-medium bg-white/[0.06] text-white/50 px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <Heart className="w-2.5 h-2.5" /> Open to Mentoring
-                      </span>
-                      {mentor.is_hiring && (
-                        <span className="text-[10px] font-medium bg-white/[0.06] text-white/50 px-2 py-0.5 rounded-full flex items-center gap-1">
-                          <Briefcase className="w-2.5 h-2.5" /> Hiring
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Specialties */}
-                    {mentor.specialties?.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {mentor.specialties.slice(0, 4).map((spec) => (
-                          <span key={spec} className="text-[10px] font-medium bg-white/[0.06] text-white/50 px-2 py-0.5 rounded-full">
-                            {spec}
-                          </span>
-                        ))}
-                        {mentor.specialties.length > 4 && (
-                          <span className="text-[10px] text-white/30">+{mentor.specialties.length - 4} more</span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* CTA */}
-                    <Link
-                      href={`/student/messages?to=${mentor.user_id}`}
-                      className="inline-flex items-center gap-2 px-4 py-3 bg-[#D66829] text-white rounded-lg text-xs font-bold hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" /> Send Message
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      ) : (<MentorResults filtered={filtered} />)}
 
       {/* Pipeline CTA */}
       <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <p className="text-[13px] font-semibold text-white">Ready to start applying?</p>
-          <p className="text-xs text-white/30">Browse matched job openings based on your profile.</p>
+          <p className="text-xs text-white/30">Browse job openings from doctors in the network.</p>
         </div>
         <Link
           href="/student/jobs"
@@ -321,3 +229,139 @@ export default function MentorDiscoveryPage() {
     </div>
   );
 }
+
+function MentorResults({ filtered }: { filtered: any[] }) {
+  const openToMentoring = filtered.filter((m: any) => m.is_mentoring);
+  const inNetwork = filtered.filter((m: any) => !m.is_mentoring);
+
+  const renderCard = (mentor: any, canMessage: boolean) => {
+          const fullName = `Dr. ${mentor.first_name} ${mentor.last_name}`;
+          const location = [mentor.city, mentor.state].filter(Boolean).join(", ");
+          const matchScore = mentor.matchScore;
+          const hasSpotlight = !!(mentor as any).spotlight_youtube_url;
+
+          return (
+            <div
+              key={mentor.id}
+              className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-5 hover:border-[#D66829]/20 transition-all"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-white/[0.06] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {mentor.photo_url ? (
+                    <img src={mentor.photo_url} alt={fullName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-lg font-semibold text-white">
+                      {mentor.first_name?.[0]}{mentor.last_name?.[0]}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <h3 className="font-semibold text-white">{fullName}</h3>
+                    {matchScore > 0 && (
+                      <span className="text-[10px] text-white/40 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: matchScore >= 60 ? "#22c55e" : "#f59e0b" }} />
+                        {matchScore}%
+                      </span>
+                    )}
+                  </div>
+
+                  {mentor.clinic_name && (
+                    <p className="text-xs text-white/40 mb-1">{mentor.clinic_name}</p>
+                  )}
+
+                  <div className="flex flex-wrap gap-2 text-xs text-white/35 mb-3">
+                    {location && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3" /> {location}
+                      </span>
+                    )}
+                    {mentor.rating > 0 && (
+                      <span className="flex items-center gap-1 text-amber-400">
+                        <Star className="w-3 h-3 fill-amber-400" /> {mentor.rating.toFixed(1)}
+                        {mentor.review_count > 0 && <span className="text-white/20">({mentor.review_count})</span>}
+                      </span>
+                      )}
+                    </div>
+
+                    {/* Badges */}
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {canMessage && (
+                        <span className="text-[10px] font-medium bg-green-500/10 text-green-400 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <Heart className="w-2.5 h-2.5" /> Open to Students
+                        </span>
+                      )}
+                      {mentor.is_hiring && (
+                        <span className="text-[10px] font-medium bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <Briefcase className="w-2.5 h-2.5" /> Hiring
+                        </span>
+                      )}
+                      {hasSpotlight && (
+                        <span className="text-[10px] font-medium bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full">
+                          Spotlight Interview
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Specialties */}
+                    {mentor.specialties?.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {mentor.specialties.slice(0, 4).map((spec: string) => (
+                          <span key={spec} className="text-[10px] font-medium bg-white/[0.06] text-white/50 px-2 py-0.5 rounded-full">
+                            {spec}
+                          </span>
+                        ))}
+                        {mentor.specialties.length > 4 && (
+                          <span className="text-[10px] text-white/30">+{mentor.specialties.length - 4} more</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* CTA */}
+                    <div className="flex gap-2">
+                      {canMessage && mentor.user_id && (
+                        <Link
+                          href={`/student/messages?to=${mentor.user_id}`}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#D66829] text-white rounded-lg text-xs font-bold hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" /> Message
+                        </Link>
+                      )}
+                      <Link
+                        href={`/directory/${mentor.id}`}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/[0.06] text-white/60 rounded-lg text-xs font-bold hover:bg-white/[0.1] transition-colors"
+                      >
+                        View Profile
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          };
+
+        return (
+          <div className="space-y-8">
+            {openToMentoring.length > 0 && (
+              <div>
+                <h2 className="text-xs font-black text-green-400/60 uppercase tracking-widest mb-3">Open to Mentoring ({openToMentoring.length})</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {openToMentoring.map(m => renderCard(m, true))}
+                </div>
+              </div>
+            )}
+            {inNetwork.length > 0 && (
+              <div>
+                <h2 className="text-xs font-black text-white/20 uppercase tracking-widest mb-3">In the Network ({inNetwork.length})</h2>
+                <p className="text-[11px] text-white/25 mb-3">These doctors haven't opted into mentoring yet. View their profiles and Spotlight interviews.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {inNetwork.map(m => renderCard(m, false))}
+                </div>
+              </div>
+            )}
+          </div>
+  );
+}
+
+// MentorResults helper component ends above

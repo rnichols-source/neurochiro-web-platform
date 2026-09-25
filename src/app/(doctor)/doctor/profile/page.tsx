@@ -376,6 +376,13 @@ export default function ProfilePage() {
               <span className="text-sm font-medium text-gray-700">Walk-Ins Welcome</span>
             </label>
           </div>
+          <label className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-100 rounded-xl cursor-pointer mt-4">
+            <input type="checkbox" name="is_mentoring" value="true" defaultChecked={(profile as any)?.is_mentoring === true} className="w-4 h-4 accent-blue-500" />
+            <div>
+              <span className="text-sm font-medium text-gray-700">Open to hearing from students</span>
+              <p className="text-[11px] text-gray-400">Students in the NeuroChiro network can message you about mentorship, externships, or career questions.</p>
+            </div>
+          </label>
         </div>
 
         {/* Practice Details */}

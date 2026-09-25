@@ -18,7 +18,7 @@ export async function getDoctorProfile() {
         .maybeSingle(),
       supabase
         .from('doctors')
-        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url')
+        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, is_mentoring, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url')
         .eq('user_id', user.id)
         .maybeSingle()
     ])
@@ -163,6 +163,7 @@ export async function updateDoctorProfile(formData: FormData) {
     const offersTelehealth = formData.get('offers_telehealth') === 'true'
     const acceptsWalkins = formData.get('accepts_walkins') === 'true'
     const acceptingNewPatients = formData.get('accepting_new_patients') !== 'false'
+    const isMentoring = formData.get('is_mentoring') === 'true'
     const yearsRaw = formData.get('years_in_practice') as string
     const yearsInPractice = yearsRaw ? parseInt(yearsRaw, 10) || null : null
     const insuranceRaw = formData.get('insurance_networks') as string
@@ -292,6 +293,7 @@ export async function updateDoctorProfile(formData: FormData) {
         offers_telehealth: offersTelehealth,
         accepts_walkins: acceptsWalkins,
         accepting_new_patients: acceptingNewPatients,
+        is_mentoring: isMentoring,
         years_in_practice: yearsInPractice,
         insurance_networks: insuranceNetworks.length ? insuranceNetworks : null,
         team_members: teamMembers.length ? teamMembers : null,

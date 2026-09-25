@@ -324,14 +324,14 @@ function getStudentEmail(step: number, name: string): { subject: string; body: s
         body: `
           <p>Hi ${name},</p>
           <p>School teaches you how to adjust. NeuroChiro teaches you how to <strong>build a career</strong>.</p>
-          <p>Your free student account gets you started. Upgrade to Premium ($33/mo) to unlock:</p>
+          <p>Your student account includes everything, at no cost:</p>
           <ul style="color: #1E2D3B; line-height: 2;">
-            <li><strong>Interview Prep</strong> — 20 real interview questions with frameworks and example answers</li>
+            <li><strong>Interview Playbook</strong> — 20 real interview questions with frameworks and example answers</li>
             <li><strong>Contract Lab</strong> — analyze associate agreements and spot red flags before you sign</li>
             <li><strong>Financial Planner</strong> — model your salary, student loans, and first-year budget</li>
             <li><strong>Technique Explorer</strong> — compare 18 techniques to find your fit</li>
           </ul>
-          <p>Premium is $33/mo. Everything included.</p>
+          <p>All free. No upgrade required.</p>
           <p style="margin: 24px 0;">
             <a href="https://neurochiro.co/careers" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Browse Open Positions</a>
           </p>

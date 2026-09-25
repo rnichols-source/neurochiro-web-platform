@@ -132,9 +132,9 @@ export async function GET(req: Request) {
              <p>You also unlock your full analytics dashboard so you can see exactly who's finding you and how.</p>
              <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/billing" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Upgrade to Pro — $99/mo</a></p>`
           : `<p>Hi ${name},</p>
-             <p>Your free student account gives you access to jobs, seminars, the doctor directory, and community. When you're ready for more, upgrade to Premium ($33/mo) for Interview Prep, Contract Lab, Financial Planner, ChiroMatch, and the full Techniques Library.</p>
-             <p>These are the tools that help you land your first job and negotiate your first contract with confidence.</p>
-             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/dashboard" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">Go to Dashboard</a></p>`;
+             <p>Your NeuroChiro student account is fully active. You have access to the job board, interview playbook, contract lab, financial planner, techniques library, and the full doctor directory.</p>
+             <p>Start with the career pipeline to see exactly where you are and what to work on next.</p>
+             <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/career-pipeline" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none;">View Your Career Pipeline</a></p>`;
       } else if (daysSinceSignup === 30) {
         day = 30;
         subject = `Your first month on NeuroChiro`;
