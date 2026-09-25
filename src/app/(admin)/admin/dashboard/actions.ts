@@ -151,12 +151,18 @@ export async function getActionList(): Promise<ActionItem[]> {
     const fourteenDaysAgo = new Date(now - 14 * dayMs).toISOString()
     const ninetyDaysAgo = new Date(now - 90 * dayMs).toISOString()
 
+    // Controlled vocabularies for tag review queue
+    const VALID_SPECIALTIES = new Set(['Nervous System Focused','Pediatric','Prenatal & Perinatal','Family Wellness','Athletes & Sports','Functional Medicine','Functional Neurology','Upper Cervical','Tonal','Structural & Corrective','Activator Method','Gonstead','Network Spinal','Injury Recovery','Torque Release','Webster Certified','Extremity Adjusting','SOT / Cranial','Animal Chiropractic','Nutrition Counseling','X-Ray / Imaging','Decompression Therapy','Massage Therapy','Corrective Exercises','Custom Orthotics','Dry Needling','Laser Therapy','Rehabilitation','Corporate Wellness','Telehealth','Spanish Speaking','Bilingual Practice','Cash Practice','Community Events','Weekend Hours'])
+    const VALID_CONDITIONS = new Set(['Back Pain','Neck Pain','Headaches & Migraines','Sciatica','Sports Injuries','Pregnancy Discomfort','Pediatric Wellness','Chronic Pain','TMJ / Jaw Pain','Scoliosis','Whiplash','Carpal Tunnel','Plantar Fasciitis','Shoulder Pain','Hip Pain','Knee Pain','Postural Imbalances','Spinal Misalignment','Disc Issues','Nervous System Dysfunction','Stress & Anxiety','Sleep Issues','ADHD & Focus','Sensory Processing','Autism Support','Colic & Reflux','Ear Infections','Bedwetting','Torticollis','Developmental Delays','Growing Pains','Athletic Performance','Vertigo & Dizziness','Numbness & Tingling','Fibromyalgia','Arthritis','Work Injuries','Auto Accident Injuries','Post-Concussion','Pelvic Floor','Breech Positioning','Postpartum Recovery','Family Wellness','Elderly Care','Tech Neck','Injury Recovery','Frozen Shoulder','Tension Headaches','Rib Pain'])
+
     // Fetch all data in parallel
     const [
       pendingDocs,
       invisibleQueue,
       mismatchQueue,
+      needsReviewDocs,
       paidDocs,
+      tagDocs,
       failedCharges,
     ] = await Promise.all([
       // 1. Pending verifications
@@ -175,13 +181,24 @@ export async function getActionList(): Promise<ActionItem[]> {
         .select('payload, created_at')
         .eq('event_type', 'address_mismatch'),
 
-      // 4. Paid doctors missing critical profile fields
+      // 4. Profiles flagged needs_review
+      (supabase as any).from('doctors')
+        .select('id, first_name, last_name, review_notes, created_at')
+        .eq('needs_review', true),
+
+      // 5. Paid doctors missing critical profile fields
       (supabase as any).from('doctors')
         .select('id, first_name, last_name, clinic_name, photo_url, hours, first_visit_price, google_reviews_url, onboarding_call_status, spotlight_status, created_at, membership_tier, price_locked_at')
         .eq('verification_status', 'verified')
         .or('country.is.null,country.eq.US'),
 
-      // 5. Failed Stripe charges (recent)
+      // 6. Doctors with invalid specialty/conditions tags
+      (supabase as any).from('doctors')
+        .select('id, first_name, last_name, specialties, conditions_treated')
+        .eq('verification_status', 'verified')
+        .not('specialties', 'is', null),
+
+      // 7. Failed Stripe charges (recent)
       (async () => {
         try {
           const failed: any[] = []
@@ -255,7 +272,55 @@ export async function getActionList(): Promise<ActionItem[]> {
       })
     }
 
-    // ── 5. Paid members with incomplete profiles (urgency 3) ──
+    // ── 5. Profiles flagged needs_review (urgency 2) ──
+    for (const d of (needsReviewDocs.data || [])) {
+      const name = `${d.first_name} ${d.last_name}`.trim()
+      items.push({
+        id: `review-${d.id}`,
+        urgency: 2,
+        category: 'Content Review',
+        title: d.review_notes || 'Profile flagged for review',
+        who: name,
+        waitingSince: d.created_at,
+        waitingDays: Math.floor((now - new Date(d.created_at).getTime()) / dayMs),
+        link: `/admin/directory?search=${encodeURIComponent(name)}`,
+      })
+    }
+
+    // ── 6. Specialty/conditions tags not in controlled vocabulary (urgency 3) ──
+    const tagIssues = new Map<string, { name: string; id: string; invalid: string[] }>()
+    for (const d of (tagDocs.data || [])) {
+      const invalid: string[] = []
+      for (const s of (d.specialties || [])) {
+        if (!VALID_SPECIALTIES.has(s)) invalid.push(s)
+      }
+      for (const c of (d.conditions_treated || [])) {
+        if (!VALID_CONDITIONS.has(c)) invalid.push(c)
+      }
+      if (invalid.length > 0) {
+        tagIssues.set(d.id, {
+          name: `${d.first_name} ${d.last_name}`.trim(),
+          id: d.id,
+          invalid,
+        })
+      }
+    }
+    if (tagIssues.size > 0) {
+      // Show as a single aggregated item to avoid flooding the list
+      const totalInvalid = Array.from(tagIssues.values()).reduce((sum, t) => sum + t.invalid.length, 0)
+      items.push({
+        id: 'tag-review-queue',
+        urgency: 3,
+        category: 'Tag Review',
+        title: `${totalInvalid} uncontrolled tags across ${tagIssues.size} doctors`,
+        who: `${tagIssues.size} profiles need tag cleanup`,
+        waitingSince: new Date('2026-05-01').toISOString(), // approximate, from vocabulary migration
+        waitingDays: Math.floor((now - new Date('2026-05-01').getTime()) / dayMs),
+        link: '/admin/directory',
+      })
+    }
+
+    // ── 7. Paid members with incomplete profiles (urgency 3) ──
     const paidMembers = (paidDocs.data || []).filter((d: any) =>
       d.membership_tier === 'pro' || d.price_locked_at
     )
