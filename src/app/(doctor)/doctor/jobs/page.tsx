@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Plus,
   X,
@@ -126,6 +127,14 @@ const STAGE_COLORS: Record<string, string> = {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function JobsPage() {
+  return <Suspense><JobsPageInner /></Suspense>
+}
+
+function JobsPageInner() {
+  const searchParams = useSearchParams()
+  const justPosted = searchParams.get('posted') === 'success'
+  const [showPostedBanner, setShowPostedBanner] = useState(justPosted)
+
   const [jobs, setJobs] = useState<any[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -325,6 +334,20 @@ export default function JobsPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
+      {/* Success banner after Stripe checkout */}
+      {showPostedBanner && (
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Check className="w-5 h-5 text-green-600" />
+            <div>
+              <p className="text-sm font-bold text-green-800">Job posted successfully!</p>
+              <p className="text-xs text-green-600">Your listing is now live for 30 days. Applications will arrive in your dashboard and by email.</p>
+            </div>
+          </div>
+          <button onClick={() => setShowPostedBanner(false)} className="text-green-400 hover:text-green-600"><X className="w-4 h-4" /></button>
+        </div>
+      )}
+
       {/* ── Hiring Stats ─────────────────────────────────────────────── */}
       <div className="bg-white border border-gray-200 rounded-lg p-4">
         <div className="flex items-center gap-2 mb-3">
@@ -749,16 +772,7 @@ export default function JobsPage() {
       {/* ── Post Job Modal (with templates) ──────────────────────────── */}
       {showPostModal && (
         <PostJobModal
-          applyMethod={applyMethod}
-          setApplyMethod={setApplyMethod}
-          selectedTemplate={selectedTemplate}
-          setSelectedTemplate={setSelectedTemplate}
-          submitting={submitting}
-          onSubmit={handleCreate}
-          onClose={() => {
-            setShowPostModal(false);
-            setSelectedTemplate("");
-          }}
+          onClose={() => setShowPostModal(false)}
         />
       )}
     </div>
@@ -1246,224 +1260,201 @@ function EmailModal({
 // ─── Post Job Modal (with templates) ─────────────────────────────────────────
 
 function PostJobModal({
-  applyMethod,
-  setApplyMethod,
-  selectedTemplate,
-  setSelectedTemplate,
-  submitting,
-  onSubmit,
   onClose,
 }: {
-  applyMethod: string;
-  setApplyMethod: (v: string) => void;
-  selectedTemplate: string;
-  setSelectedTemplate: (v: string) => void;
-  submitting: boolean;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  applyMethod?: string;
+  setApplyMethod?: (v: string) => void;
+  selectedTemplate?: string;
+  setSelectedTemplate?: (v: string) => void;
+  submitting?: boolean;
+  onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
   onClose: () => void;
 }) {
-  const [formValues, setFormValues] = useState({
-    title: "",
-    description: "",
-    type: "Associate",
-    category: "Clinical",
-    employment_type: "Full-time",
-    salary_min: "",
-    salary_max: "",
-  });
+  const [step, setStep] = useState<'form' | 'preview'>('form')
+  const [posting, setPosting] = useState(false)
+  const [error, setError] = useState('')
+  const [form, setForm] = useState({
+    title: '', description: '', employmentType: 'Full-time',
+    compensationMin: '', compensationMax: '', compensationType: 'salary',
+    city: '', state: '', whatLookingFor: '', applyEmail: '',
+  })
 
-  const handleTemplateChange = (templateId: string) => {
-    setSelectedTemplate(templateId);
-    const tpl = JOB_TEMPLATES.find((t) => t.id === templateId);
-    if (tpl) {
-      setFormValues({
-        title: tpl.title,
-        description: tpl.description,
-        type: tpl.type,
-        category: tpl.category,
-        employment_type: tpl.employment_type,
-        salary_min: tpl.salary_min.toString(),
-        salary_max: tpl.salary_max.toString(),
-      });
+  const update = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }))
+  const compLabel = form.compensationType === 'hourly' ? '/hr' : '/yr'
+  const compDisplay = form.compensationMin && form.compensationMax
+    ? `$${Number(form.compensationMin).toLocaleString()}${compLabel} – $${Number(form.compensationMax).toLocaleString()}${compLabel}`
+    : 'Not set'
+
+  const canPreview = form.title.trim() && form.description.trim() && form.compensationMin && form.compensationMax
+
+  const handleCheckout = async () => {
+    setPosting(true)
+    setError('')
+    try {
+      const res = await fetch('/api/jobs/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: form.title.trim(),
+          description: form.description.trim(),
+          employmentType: form.employmentType,
+          compensationMin: Number(form.compensationMin),
+          compensationMax: Number(form.compensationMax),
+          compensationType: form.compensationType,
+          city: form.city.trim() || undefined,
+          state: form.state.trim() || undefined,
+          whatLookingFor: form.whatLookingFor.trim() || undefined,
+          applyEmail: form.applyEmail.trim() || undefined,
+        }),
+      })
+      const data = await res.json()
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl
+      } else {
+        setError(data.error || 'Checkout failed.')
+        setPosting(false)
+      }
+    } catch {
+      setError('Something went wrong. Please try again.')
+      setPosting(false)
     }
-  };
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] shadow-xl flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
-          <h2 className="text-lg font-semibold">Post New Job</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
-            <X className="w-5 h-5" />
-          </button>
+          <h2 className="text-lg font-semibold">{step === 'form' ? 'Post a Job' : 'Review & Pay'}</h2>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded"><X className="w-5 h-5" /></button>
         </div>
-        <form onSubmit={onSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
-          {/* Template selector */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Start from Template (optional)
-            </label>
-            <select
-              value={selectedTemplate}
-              onChange={(e) => handleTemplateChange(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
-            >
-              <option value="">Custom Job Post</option>
-              {JOB_TEMPLATES.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-            <input
-              name="title"
-              required
-              value={formValues.title}
-              onChange={(e) =>
-                setFormValues((p) => ({ ...p, title: e.target.value }))
-              }
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea
-              name="description"
-              rows={5}
-              value={formValues.description}
-              onChange={(e) =>
-                setFormValues((p) => ({ ...p, description: e.target.value }))
-              }
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-            <select
-              name="type"
-              value={formValues.type}
-              onChange={(e) =>
-                setFormValues((p) => ({ ...p, type: e.target.value }))
-              }
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
-            >
-              <option value="Associate">Associate</option>
-              <option value="Independent Contractor">Independent Contractor</option>
-              <option value="Buy-In">Buy-In</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-            <select
-              name="category"
-              value={formValues.category}
-              onChange={(e) =>
-                setFormValues((p) => ({ ...p, category: e.target.value }))
-              }
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
-            >
-              <option value="Clinical">Clinical</option>
-              <option value="Support Staff">Support Staff</option>
-              <option value="Technical">Technical</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Employment Type
-            </label>
-            <select
-              name="employment_type"
-              value={formValues.employment_type}
-              onChange={(e) =>
-                setFormValues((p) => ({ ...p, employment_type: e.target.value }))
-              }
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
-            >
-              <option value="Full-time">Full-time</option>
-              <option value="Part-time">Part-time</option>
-              <option value="Contract">Contract</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">How to Apply</label>
-            <select
-              name="apply_method"
-              value={applyMethod}
-              onChange={(e) => setApplyMethod(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
-            >
-              <option value="neurochiro">Through NeuroChiro</option>
-              <option value="external">External Link</option>
-            </select>
-          </div>
-          {applyMethod === "external" && (
+
+        {step === 'form' ? (
+          <div className="flex-1 overflow-y-auto p-5 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Apply URL</label>
-              <input
-                name="apply_url"
-                type="url"
-                placeholder="https://..."
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-              />
-            </div>
-          )}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Salary Min ($)
-              </label>
-              <input
-                name="salary_min"
-                type="number"
-                min="0"
-                placeholder="e.g. 60000"
-                value={formValues.salary_min}
-                onChange={(e) =>
-                  setFormValues((p) => ({ ...p, salary_min: e.target.value }))
-                }
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Job Title *</label>
+              <input value={form.title} onChange={e => update('title', e.target.value)} required placeholder="e.g. Associate Doctor (Full-Time)"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Salary Max ($)
-              </label>
-              <input
-                name="salary_max"
-                type="number"
-                min="0"
-                placeholder="e.g. 90000"
-                value={formValues.salary_max}
-                onChange={(e) =>
-                  setFormValues((p) => ({ ...p, salary_max: e.target.value }))
-                }
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+              <textarea value={form.description} onChange={e => update('description', e.target.value)} rows={5} placeholder="Describe the role, your practice, and what a typical day looks like..."
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
+              <select value={form.employmentType} onChange={e => update('employmentType', e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+                <option value="Full-time">Full-time (W-2)</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Contract">Independent Contractor (1099)</option>
+                <option value="Partnership">Partnership / Buy-In</option>
+              </select>
+            </div>
+
+            {/* Compensation — required with explanation */}
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+              <label className="block text-sm font-bold text-gray-700 mb-1">Compensation Range *</label>
+              <p className="text-xs text-gray-500 mb-3">Students filter jobs by pay first. A post without a range gets skipped. Be honest and you'll attract the right candidates.</p>
+              <div className="flex items-center gap-2 mb-2">
+                <select value={form.compensationType} onChange={e => update('compensationType', e.target.value)}
+                  className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs bg-white">
+                  <option value="salary">Annual Salary</option>
+                  <option value="hourly">Hourly Rate</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Minimum ($)</label>
+                  <input type="number" min="0" value={form.compensationMin} onChange={e => update('compensationMin', e.target.value)} required
+                    placeholder={form.compensationType === 'hourly' ? '35' : '60000'}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Maximum ($)</label>
+                  <input type="number" min="0" value={form.compensationMax} onChange={e => update('compensationMax', e.target.value)} required
+                    placeholder={form.compensationType === 'hourly' ? '50' : '90000'}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                <input value={form.city} onChange={e => update('city', e.target.value)} placeholder="e.g. Nashville"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                <input value={form.state} onChange={e => update('state', e.target.value)} placeholder="e.g. TN"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">What you're looking for (optional)</label>
+              <textarea value={form.whatLookingFor} onChange={e => update('whatLookingFor', e.target.value)} rows={3}
+                placeholder="Describe your ideal candidate: technique experience, personality fit, goals..."
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Contact email for applications</label>
+              <input type="email" value={form.applyEmail} onChange={e => update('applyEmail', e.target.value)}
+                placeholder="Applications also appear in your dashboard"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+            </div>
+
+            <button onClick={() => setStep('preview')} disabled={!canPreview}
+              className="w-full py-3 bg-neuro-navy text-white rounded-lg hover:bg-neuro-navy/90 transition-colors text-sm font-bold disabled:opacity-40 min-h-[44px]">
+              Preview Listing
+            </button>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto p-5 space-y-4">
+            {/* Preview */}
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+              <p className="text-xs text-gray-400 uppercase tracking-wider font-bold mb-2">How students will see your listing</p>
+              <h3 className="text-lg font-bold text-neuro-navy mb-1">{form.title}</h3>
+              <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                {form.city && <span>{form.city}{form.state ? `, ${form.state}` : ''}</span>}
+                <span>{form.employmentType}</span>
+                <span className="text-green-600 font-bold">{compDisplay}</span>
+              </div>
+              <p className="text-sm text-gray-600 whitespace-pre-line line-clamp-4">{form.description}</p>
+              {form.whatLookingFor && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <p className="text-xs font-bold text-gray-500 mb-1">Looking for:</p>
+                  <p className="text-sm text-gray-600">{form.whatLookingFor}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Pricing */}
+            <div className="bg-neuro-orange/5 border border-neuro-orange/20 rounded-xl p-4 text-center">
+              <p className="text-2xl font-black text-neuro-navy">$99</p>
+              <p className="text-sm text-gray-500">for 30 days on the NeuroChiro Job Board</p>
+              <p className="text-xs text-gray-400 mt-2">Your listing will be visible to all verified chiropractic students. Applications go to your dashboard and email. You can edit the listing while it's active.</p>
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button onClick={() => setStep('form')} className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-200 min-h-[44px]">
+                Edit
+              </button>
+              <button onClick={handleCheckout} disabled={posting}
+                className="flex-1 py-3 bg-neuro-orange text-white rounded-lg text-sm font-bold hover:bg-neuro-orange/90 disabled:opacity-50 min-h-[44px]">
+                {posting ? 'Redirecting to checkout...' : 'Pay $99 & Post'}
+              </button>
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Benefits (optional)
-            </label>
-            <input
-              name="benefits"
-              placeholder="e.g. Health insurance, CE allowance, PTO"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-2.5 bg-neuro-orange text-white rounded-lg hover:bg-neuro-orange/90 transition-colors text-sm font-bold disabled:opacity-50"
-          >
-            {submitting ? "Posting..." : "Post Job"}
-          </button>
-        </form>
+        )}
       </div>
     </div>
-  );
+  )
 }
