@@ -23,6 +23,7 @@ import {
 import { getChiroScore } from "./chiroscore-actions";
 import CareerReadiness from "./career-readiness";
 import ChiroScoreDisplay from "./chiroscore-display";
+import SchoolVerificationBanner from "./school-verification-banner";
 import PipelinePreview from "./pipeline-preview";
 import MilestoneTimeline from "./milestone-timeline";
 
@@ -94,6 +95,9 @@ export default function StudentDashboard() {
 
   return (
     <div className="p-4 md:p-10 max-w-6xl mx-auto space-y-8">
+      {/* School Verification */}
+      <SchoolVerificationBanner />
+
       {/* Header */}
       <div className="flex items-end justify-between">
         <div>

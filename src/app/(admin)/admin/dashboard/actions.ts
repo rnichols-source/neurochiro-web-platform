@@ -163,6 +163,7 @@ export async function getActionList(): Promise<ActionItem[]> {
       needsReviewDocs,
       paidDocs,
       tagDocs,
+      schoolReviewRequests,
       failedCharges,
     ] = await Promise.all([
       // 1. Pending verifications
@@ -198,7 +199,12 @@ export async function getActionList(): Promise<ActionItem[]> {
         .eq('verification_status', 'verified')
         .not('specialties', 'is', null),
 
-      // 7. Failed Stripe charges (recent)
+      // 7. School verification review requests
+      (supabase as any).from('automation_queue')
+        .select('payload, created_at')
+        .eq('event_type', 'school_review_request'),
+
+      // 8. Failed Stripe charges (recent)
       (async () => {
         try {
           const failed: any[] = []
@@ -320,7 +326,22 @@ export async function getActionList(): Promise<ActionItem[]> {
       })
     }
 
-    // ── 7. Paid members with incomplete profiles (urgency 3) ──
+    // ── 7. School verification review requests (urgency 2) ──
+    for (const q of (schoolReviewRequests || [])) {
+      const p = typeof q.payload === 'string' ? JSON.parse(q.payload) : q.payload
+      items.push({
+        id: `school-review-${p.userId}`,
+        urgency: 2,
+        category: 'Student Verification',
+        title: `School not recognized: ${p.schoolName}`,
+        who: p.email || 'Unknown',
+        waitingSince: q.created_at,
+        waitingDays: Math.floor((now - new Date(q.created_at).getTime()) / dayMs),
+        link: '/admin/users',
+      })
+    }
+
+    // ── 8. Paid members with incomplete profiles (urgency 3) ──
     const paidMembers = (paidDocs.data || []).filter((d: any) =>
       d.membership_tier === 'pro' || d.price_locked_at
     )
