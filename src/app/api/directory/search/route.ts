@@ -476,12 +476,27 @@ export async function GET(request: NextRequest) {
     // Sort
     const sorted = sortResults(enriched, sort);
 
+    // Log search event (non-blocking, fire-and-forget)
+    const resultCount = sorted.length;
+    const searchTerm = rawQuery || rawLocation || '';
+    if (searchTerm) {
+      (supabase as any).from('conversion_events').insert({
+        event_type: 'search',
+        source_page: '/directory',
+        had_location: hasSearchCoords,
+        search_distance_miles: null,
+        session_id: searchTerm.slice(0, 100), // store search term for analysis
+        doctor_id: resultCount > 0 ? sorted[0].id : null, // top result if any
+      }).then(() => {}).catch(() => {});
+    }
+
     return NextResponse.json({
       doctors: sorted,
       total: count || sorted.length,
       isFallback: false,
       error: false,
       locationLabel: locationLabel || undefined,
+      _resultCount: resultCount, // for empty-result tracking on client
     }, {
       headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' }
     });

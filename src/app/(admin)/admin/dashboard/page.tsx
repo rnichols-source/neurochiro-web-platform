@@ -3,25 +3,28 @@
 import { Users, Loader2, AlertCircle, RefreshCw, DollarSign, Eye, EyeOff, MapPin, AlertTriangle, Globe } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { getAdminDashboardStats, getActivityFeed, getActionList, ActionItem } from "./actions";
+import { getAdminDashboardStats, getActivityFeed, getActionList, ActionItem, getFunnelMetrics, FunnelMetrics } from "./actions";
 import { formatDistanceToNow } from "date-fns";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
   const [actions, setActions] = useState<ActionItem[]>([]);
+  const [funnel, setFunnel] = useState<FunnelMetrics | null>(null);
   const [activity, setActivity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAllActions, setShowAllActions] = useState(false);
 
   async function fetchAll() {
     setLoading(true);
-    const [dashData, actionData, actData] = await Promise.all([
+    const [dashData, actionData, funnelData, actData] = await Promise.all([
       getAdminDashboardStats(),
       getActionList(),
+      getFunnelMetrics(),
       getActivityFeed(40),
     ]);
     if (dashData) setStats(dashData);
     setActions(actionData);
+    setFunnel(funnelData);
     setActivity(actData);
     setLoading(false);
   }
@@ -155,6 +158,54 @@ export default function AdminDashboard() {
         </div>
       </section>
 
+      {/* ── Patient Funnel ── */}
+      {funnel && (
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-black text-gray-500 uppercase tracking-widest">Patient Funnel</h2>
+            {funnel.dataStartDate && (
+              <span className="text-[10px] text-white/20">Tracking since {new Date(funnel.dataStartDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+            <FunnelCard label="Searches" d7={funnel.searches7d} d30={funnel.searches30d} />
+            <FunnelCard label="Profile Views" d7={funnel.profileViews7d} d30={funnel.profileViews30d} />
+            <FunnelCard label="Book Clicks" d7={funnel.bookClicks7d} d30={funnel.bookClicks30d} />
+            <FunnelCard label="Inquiries" d7={funnel.inquiries7d} d30={funnel.inquiries30d} />
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+            <StatCard label="Empty Search Rate" value={`${funnel.emptySearchRate7d}%`}
+              sub={`${funnel.emptySearches7d} of ${funnel.searches7d} returned nothing (7d)`}
+              color={funnel.emptySearchRate7d > 30 ? 'text-red-400' : funnel.emptySearchRate7d > 15 ? 'text-amber-400' : 'text-green-400'} />
+            <StatCard label="Waitlist" value={funnel.waitlistConfirmed + funnel.waitlistPending}
+              sub={`${funnel.waitlistConfirmed} confirmed, ${funnel.waitlistPending} pending`} color="text-purple-400" />
+            <StatCard label="New Signups" value={funnel.waitlistNew7d}
+              sub={`Last 7 days (${funnel.waitlistNew30d} in 30d)`} color="text-blue-400" />
+            <StatCard label="Call Clicks" value={funnel.callClicks7d}
+              sub={`Last 7 days (${funnel.callClicks30d} in 30d)`} color="text-green-400" />
+          </div>
+
+          {funnel.topGaps.length > 0 && (
+            <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3">
+              <p className="text-[10px] text-rose-400 uppercase font-bold tracking-wider mb-1 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" /> Recruiting Gaps
+              </p>
+              <p className="text-[10px] text-white/40 mb-2">Waitlist subscribers with no doctor within 50 miles</p>
+              <div className="flex flex-wrap gap-x-3 gap-y-1">
+                {funnel.topGaps.map((g, i) => (
+                  <span key={i} className="text-xs text-white/80">
+                    <span className="font-bold">{g.city}, {g.state}</span>
+                    <span className="text-rose-400 ml-1">{g.confirmed + g.pending}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
       {/* ── Activity Feed ── */}
       <section className="bg-white/5 border border-white/5 rounded-xl overflow-hidden">
         <div className="p-4 border-b border-white/5 flex items-center justify-between">
@@ -198,6 +249,16 @@ function StatCard({ label, value, sub, color, large }: { label: string; value: s
       <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">{label}</p>
       <p className={`${large ? 'text-2xl' : 'text-xl'} font-bold ${color}`}>{value}</p>
       {sub && <p className="text-[10px] text-white/25 mt-0.5 leading-tight">{sub}</p>}
+    </div>
+  );
+}
+
+function FunnelCard({ label, d7, d30 }: { label: string; d7: number; d30: number }) {
+  return (
+    <div className="bg-white/5 border border-white/5 rounded-xl p-4">
+      <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-xl font-bold text-white">{d7}</p>
+      <p className="text-[10px] text-white/25 mt-0.5">Last 7 days ({d30} in 30d)</p>
     </div>
   );
 }

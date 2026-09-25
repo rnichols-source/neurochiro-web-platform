@@ -480,3 +480,161 @@ export async function getActivityFeed(limit: number = 30) {
     return []
   }
 }
+
+// ── Funnel Metrics: "Is the product working" ──
+
+export interface FunnelMetrics {
+  searches7d: number
+  searches30d: number
+  emptySearches7d: number
+  emptySearchRate7d: number   // percentage
+  profileViews7d: number
+  profileViews30d: number
+  bookClicks7d: number
+  bookClicks30d: number
+  callClicks7d: number
+  callClicks30d: number
+  inquiries7d: number
+  inquiries30d: number
+  waitlistConfirmed: number
+  waitlistPending: number
+  waitlistNew7d: number
+  waitlistNew30d: number
+  topGaps: { city: string; state: string; confirmed: number; pending: number }[]
+  dataStartDate: string | null  // when tracking started, so we know if numbers are thin
+}
+
+export async function getFunnelMetrics(): Promise<FunnelMetrics> {
+  try {
+    await checkAdminAuth()
+    const supabase = createAdminClient()
+
+    const now = new Date()
+    const d7 = new Date(now); d7.setDate(d7.getDate() - 7)
+    const d30 = new Date(now); d30.setDate(d30.getDate() - 30)
+    const d7iso = d7.toISOString()
+    const d30iso = d30.toISOString()
+
+    // Conversion events by type and period
+    const { data: events } = await (supabase as any)
+      .from('conversion_events')
+      .select('event_type, created_at, had_location')
+      .gte('created_at', d30iso)
+
+    const allEvents = events || []
+
+    const count = (type: string, since: string) =>
+      allEvents.filter((e: any) => e.event_type === type && e.created_at >= since).length
+
+    const searches7d = count('search', d7iso)
+    const searches30d = count('search', d30iso)
+    // Empty searches: search events where had_location is true but doctor_id is null
+    // We store search term in session_id and top result in doctor_id
+    const { data: emptyEvents } = await (supabase as any)
+      .from('conversion_events')
+      .select('id')
+      .eq('event_type', 'search')
+      .is('doctor_id', null)
+      .gte('created_at', d7iso)
+    const emptySearches7d = (emptyEvents || []).length
+    const emptySearchRate7d = searches7d > 0 ? Math.round((emptySearches7d / searches7d) * 100) : 0
+
+    // Leads/inquiries from leads table (more reliable than conversion_events for now)
+    const { count: inquiries7dCount } = await supabase
+      .from('leads')
+      .select('id', { count: 'exact', head: true })
+      .gte('created_at', d7iso)
+    const { count: inquiries30dCount } = await supabase
+      .from('leads')
+      .select('id', { count: 'exact', head: true })
+      .gte('created_at', d30iso)
+
+    // Waitlist subscribers
+    const { data: subs } = await (supabase as any)
+      .from('subscribers')
+      .select('status, created_at')
+
+    const allSubs = subs || []
+    const waitlistConfirmed = allSubs.filter((s: any) => s.status === 'confirmed').length
+    const waitlistPending = allSubs.filter((s: any) => s.status === 'pending').length
+    const waitlistNew7d = allSubs.filter((s: any) => s.created_at >= d7iso).length
+    const waitlistNew30d = allSubs.filter((s: any) => s.created_at >= d30iso).length
+
+    // Top gaps (reuse coverage map data approach)
+    const { data: confirmedSubs } = await (supabase as any)
+      .from('subscribers')
+      .select('zip, status')
+      .in('status', ['confirmed', 'pending'])
+      .not('zip', 'is', null)
+
+    const zipCounts = new Map<string, { confirmed: number; pending: number }>()
+    for (const s of (confirmedSubs || [])) {
+      const z = (s.zip || '').trim().slice(0, 5)
+      if (z.length !== 5 || !/^\d{5}$/.test(z)) continue
+      if (!zipCounts.has(z)) zipCounts.set(z, { confirmed: 0, pending: 0 })
+      const entry = zipCounts.get(z)!
+      if (s.status === 'confirmed') entry.confirmed++
+      else entry.pending++
+    }
+
+    const { haversineDistance } = await import('@/lib/geo')
+    const zipList = Array.from(zipCounts.keys())
+    let topGaps: FunnelMetrics['topGaps'] = []
+
+    if (zipList.length > 0) {
+      const { data: zipCoords } = await (supabase as any)
+        .from('zip_codes').select('zip, city, state, lat, lng').eq('country', 'US').in('zip', zipList)
+      const { data: doctors } = await supabase.from('doctors')
+        .select('latitude, longitude')
+        .in('verification_status', ['verified', 'pending'])
+        .or('country.is.null,country.eq.US')
+        .not('latitude', 'eq', 0).not('longitude', 'eq', 0)
+      const validDocs = (doctors || []).filter(d => d.latitude && d.longitude)
+
+      topGaps = (zipCoords || [])
+        .map((z: any) => {
+          const counts = zipCounts.get(z.zip)!
+          const hasDoc = validDocs.some(d => haversineDistance(Number(z.lat), Number(z.lng), d.latitude!, d.longitude!) <= 50)
+          return hasDoc ? null : { city: z.city, state: z.state, ...counts }
+        })
+        .filter((g: any): g is NonNullable<typeof g> => g !== null)
+        .sort((a: any, b: any) => (b.confirmed + b.pending) - (a.confirmed + a.pending))
+        .slice(0, 5)
+    }
+
+    // Data start date
+    const { data: oldest } = await (supabase as any)
+      .from('conversion_events').select('created_at').order('created_at', { ascending: true }).limit(1)
+    const dataStartDate = oldest?.[0]?.created_at || null
+
+    return {
+      searches7d,
+      searches30d,
+      emptySearches7d,
+      emptySearchRate7d,
+      profileViews7d: count('profile_view', d7iso),
+      profileViews30d: count('profile_view', d30iso),
+      bookClicks7d: count('book', d7iso),
+      bookClicks30d: count('book', d30iso),
+      callClicks7d: count('call', d7iso),
+      callClicks30d: count('call', d30iso),
+      inquiries7d: inquiries7dCount || 0,
+      inquiries30d: inquiries30dCount || 0,
+      waitlistConfirmed,
+      waitlistPending,
+      waitlistNew7d,
+      waitlistNew30d,
+      topGaps,
+      dataStartDate,
+    }
+  } catch (e) {
+    console.error('Funnel metrics error:', e)
+    return {
+      searches7d: 0, searches30d: 0, emptySearches7d: 0, emptySearchRate7d: 0,
+      profileViews7d: 0, profileViews30d: 0, bookClicks7d: 0, bookClicks30d: 0,
+      callClicks7d: 0, callClicks30d: 0, inquiries7d: 0, inquiries30d: 0,
+      waitlistConfirmed: 0, waitlistPending: 0, waitlistNew7d: 0, waitlistNew30d: 0,
+      topGaps: [], dataStartDate: null,
+    }
+  }
+}
