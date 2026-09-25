@@ -201,7 +201,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
               {group.items.map((item) => {
                 const isActive = pathname === item.href;
                 return (
-                  <Link
+                  <a
                     key={item.name}
                     href={item.href}
                     onClick={onClose}
@@ -215,12 +215,9 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
                     <item.icon className={cn("w-4 h-4 transition-colors", isActive ? "text-white" : "text-gray-400 group-hover:text-neuro-orange-light")} />
                     <span className="font-medium text-[13px]">{item.name}</span>
                     {isActive && (
-                      <motion.div
-                        layoutId="active-pill"
-                        className="absolute right-2 w-1.5 h-1.5 bg-white rounded-full"
-                      />
+                      <div className="absolute right-2 w-1.5 h-1.5 bg-white rounded-full" />
                     )}
-                  </Link>
+                  </a>
                 );
               })}
             </div>
