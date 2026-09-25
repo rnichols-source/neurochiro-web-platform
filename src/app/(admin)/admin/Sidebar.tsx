@@ -204,7 +204,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
                   <a
                     key={item.name}
                     href={item.href}
-                    onClick={onClose}
+                    onClick={() => { if (window.innerWidth < 1024) onClose(); }}
                     className={cn(
                       "flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 group relative",
                       isActive
