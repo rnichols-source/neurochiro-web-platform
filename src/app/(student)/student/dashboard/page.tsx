@@ -212,11 +212,11 @@ export default function StudentDashboard() {
       <div className="grid grid-cols-2 gap-2 pt-2">
         <Link href="/directory" className="p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-center hover:bg-white/[0.06] transition-colors">
           <p className="text-xs font-bold text-white/50">Browse Doctors</p>
-          <p className="text-[10px] text-white/20">Watch Spotlight interviews</p>
+          <p className="text-[10px] text-white/20">See who they are and how they practice</p>
         </Link>
         <Link href="/student/mentors" className="p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-center hover:bg-white/[0.06] transition-colors">
-          <p className="text-xs font-bold text-white/50">Find a Mentor</p>
-          <p className="text-[10px] text-white/20">Message doctors in the network</p>
+          <p className="text-xs font-bold text-white/50">Talk to a Doctor</p>
+          <p className="text-[10px] text-white/20">Ask about their practice or a job</p>
         </Link>
       </div>
     </div>

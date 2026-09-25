@@ -2079,7 +2079,7 @@ function InterviewPlaybookContent() {
           Interview Playbook
         </h1>
         <p className="text-white/40 text-sm mt-1">
-          Everything you need to ace the interview, evaluate the offer, and negotiate like a pro.
+          Practice the questions. Evaluate the offer. Negotiate the contract.
         </p>
       </div>
 

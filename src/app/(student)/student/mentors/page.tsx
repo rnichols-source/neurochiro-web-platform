@@ -142,7 +142,7 @@ export default function MentorDiscoveryPage() {
           Find a Mentor
         </h1>
         <p className="text-xs text-white/35 mt-1">
-          Connect with doctors who are open to mentoring, hosting externs, or hiring new graduates.
+          Message doctors who are open to students. Browse the rest for their profiles and Spotlight interviews.
         </p>
       </header>
 
@@ -206,9 +206,9 @@ export default function MentorDiscoveryPage() {
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center bg-[#162231] rounded-2xl border border-dashed border-white/[0.08]">
           <Users className="w-12 h-12 text-white/10 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-1">No doctors match your filters</h3>
+          <h3 className="text-xl font-semibold text-white mb-1">No doctors match those filters</h3>
           <p className="text-white/40 text-sm max-w-md mx-auto mb-4">
-            Try broadening your search or clearing your filters.
+            Try clearing a filter.
           </p>
         </div>
       ) : (<MentorResults filtered={filtered} />)}
@@ -216,8 +216,8 @@ export default function MentorDiscoveryPage() {
       {/* Pipeline CTA */}
       <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <p className="text-[13px] font-semibold text-white">Ready to start applying?</p>
-          <p className="text-xs text-white/30">Browse job openings from doctors in the network.</p>
+          <p className="text-[13px] font-semibold text-white">Ready to apply?</p>
+          <p className="text-xs text-white/30">See who's hiring.</p>
         </div>
         <Link
           href="/student/jobs"
@@ -354,7 +354,7 @@ function MentorResults({ filtered }: { filtered: any[] }) {
             {inNetwork.length > 0 && (
               <div>
                 <h2 className="text-xs font-black text-white/20 uppercase tracking-widest mb-3">In the Network ({inNetwork.length})</h2>
-                <p className="text-[11px] text-white/25 mb-3">These doctors haven't opted into mentoring yet. View their profiles and Spotlight interviews.</p>
+                <p className="text-[11px] text-white/25 mb-3">These doctors haven't opted in to student messages yet. You can still watch their interviews and read their profiles.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {inNetwork.map(m => renderCard(m, false))}
                 </div>

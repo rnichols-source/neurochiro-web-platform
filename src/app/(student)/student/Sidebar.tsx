@@ -33,7 +33,7 @@ const navSections = [
     ],
   },
   {
-    label: "Prepare",
+    label: "Get Ready",
     items: [
       { name: "Interview Playbook", href: "/student/interview-prep", icon: ClipboardList },
       { name: "Techniques", href: "/student/techniques", icon: Compass },

@@ -90,7 +90,7 @@ export default function ProfilePage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Profile</h1>
           <p className="text-xs text-white/35">
-            Powers job matching, mentor discovery, and your Career Readiness Score.
+            This is what doctors see when you apply to their jobs.
           </p>
         </div>
       </div>
@@ -170,8 +170,8 @@ export default function ProfilePage() {
       {/* Pipeline CTA */}
       <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <p className="text-[13px] font-semibold text-white">Profile updated?</p>
-          <p className="text-xs text-white/30">See how it affects your Career Readiness Score.</p>
+          <p className="text-[13px] font-semibold text-white">Profile done?</p>
+          <p className="text-xs text-white/30">See what's next on your pipeline.</p>
         </div>
         <Link
           href="/student/dashboard"

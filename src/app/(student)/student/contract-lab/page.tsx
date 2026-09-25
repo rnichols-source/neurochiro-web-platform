@@ -547,7 +547,7 @@ function ContractLabContent() {
         <div className="space-y-6">
           <div className="bg-white/[0.04] rounded-2xl p-6 shadow-lg shadow-black/20 border border-white/[0.08]">
             <h2 className="text-lg font-bold text-white mb-1">Analyze a Contract</h2>
-            <p className="text-sm text-white/35 mb-4">Choose an input method below.</p>
+            <p className="text-sm text-white/35 mb-4">How do you want to start?</p>
 
             {/* Mode Toggle */}
             <div className="flex rounded-xl overflow-hidden border border-white/[0.08] mb-5">
@@ -762,7 +762,7 @@ function ContractLabContent() {
             <div className="bg-white/[0.04] rounded-2xl border border-dashed border-white/[0.08] h-full flex flex-col items-center justify-center p-12 text-center min-h-[400px]">
               <Search className="w-12 h-12 text-white/20 mb-4" />
               <h3 className="text-xl font-bold text-white/35 mb-1">No Analysis Yet</h3>
-              <p className="text-white/35 text-sm max-w-md">Answer the questions on the left or paste a contract, then click Analyze to see your results.</p>
+              <p className="text-white/35 text-sm max-w-md">Paste your contract above or answer the questions to get started.</p>
             </div>
           )}
         </div>
@@ -1316,7 +1316,7 @@ function ContractLabContent() {
         <h1 className="text-2xl font-heading font-black text-white flex items-center gap-3">
           <Shield className="w-7 h-7 text-[#e97325]" /> Contract Lab
         </h1>
-        <p className="text-white/40 mt-1 text-sm">Analyze contracts, know your rights, and negotiate with confidence.</p>
+        <p className="text-white/40 mt-1 text-sm">Paste your contract or answer the questions. We'll tell you what's missing, what's risky, and what to push back on.</p>
       </header>
 
       {/* Tab Bar */}
@@ -1338,8 +1338,8 @@ function ContractLabContent() {
       {/* Pipeline CTA */}
       <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
         <div>
-          <p className="text-[13px] font-semibold text-white">Contract reviewed?</p>
-          <p className="text-xs text-white/30">Plan your finances before day one.</p>
+          <p className="text-[13px] font-semibold text-white">Contract done?</p>
+          <p className="text-xs text-white/30">Now run your first-year numbers.</p>
         </div>
         <Link
           href="/student/financial-planner"

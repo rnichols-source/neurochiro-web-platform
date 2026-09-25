@@ -1604,7 +1604,7 @@ function FinancialPlannerContent() {
             <DollarSign className="w-7 h-7 text-[#D66829]" /> Financial Planner
           </h1>
           <p className="text-white/40 text-sm mt-1">
-            Plan your first-year finances before you graduate.
+            What your first year actually looks like, in dollars.
           </p>
         </div>
         <button
@@ -1627,8 +1627,8 @@ function FinancialPlannerContent() {
       {/* Pipeline CTA */}
       <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
         <div>
-          <p className="text-[13px] font-semibold text-white">Financial plan complete?</p>
-          <p className="text-xs text-white/30">You&apos;ve completed the career pipeline. Review your progress.</p>
+          <p className="text-[13px] font-semibold text-white">Got your numbers?</p>
+          <p className="text-xs text-white/30">You&apos;ve done the work. Go see where you stand.</p>
         </div>
         <Link
           href="/student/career-pipeline"

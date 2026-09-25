@@ -208,7 +208,7 @@ export default function JobsPage() {
             <Briefcase className="w-7 h-7 text-[#D66829]" />
             Jobs
           </h1>
-          <p className="text-xs text-white/35 mt-1">Matched to your profile, interests, and goals</p>
+          <p className="text-xs text-white/35 mt-1">Open positions from doctors in the network</p>
         </div>
       </header>
 
@@ -218,7 +218,7 @@ export default function JobsPage() {
           <div className="flex items-center gap-2 mb-4">
             <Zap className="w-4 h-4 text-[#D66829]" />
             <h2 className="text-sm font-semibold text-white">
-              Best Matches For You
+              Best Fit
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -323,9 +323,9 @@ export default function JobsPage() {
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center bg-[#162231] rounded-2xl border border-dashed border-white/[0.08]">
           <Briefcase className="w-12 h-12 text-white/10 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-1">No positions match your current filters</h3>
-          <p className="text-white/40 text-sm mb-4">Try broadening your search, removing filters, or check back soon — new jobs are posted weekly.</p>
-          <Link href="/student/profile" className="text-sm font-bold text-[#D66829] hover:underline">Update your profile to improve match scores</Link>
+          <h3 className="text-xl font-semibold text-white mb-1">Nothing matches these filters</h3>
+          <p className="text-white/40 text-sm mb-4">Clear a filter or check back. New jobs get posted every week.</p>
+          <Link href="/student/profile" className="text-sm font-bold text-[#D66829] hover:underline">Fill out your profile so we can match you better</Link>
         </div>
       ) : (
         <div className="space-y-3">
@@ -404,8 +404,8 @@ export default function JobsPage() {
       {/* Pipeline CTA */}
       <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <p className="text-[13px] font-semibold text-white">Applied to a job?</p>
-          <p className="text-xs text-white/30">Head to Contract Lab to review your offer before signing.</p>
+          <p className="text-[13px] font-semibold text-white">Got an offer?</p>
+          <p className="text-xs text-white/30">Don't sign anything before you run it through Contract Lab.</p>
         </div>
         <Link
           href="/student/contract-lab"

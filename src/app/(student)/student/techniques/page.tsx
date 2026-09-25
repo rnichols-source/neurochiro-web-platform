@@ -1048,7 +1048,7 @@ export default function TechniqueComparisonGuide() {
           Techniques
         </h1>
         <p className="text-xs text-white/35 mt-1">
-          Explore, compare, and find the chiropractic techniques that fit your future practice.
+          Which technique fits you? Take the quiz, compare them side by side, or browse all 18.
         </p>
       </div>
 
@@ -1078,8 +1078,8 @@ export default function TechniqueComparisonGuide() {
       {/* Pipeline CTA */}
       <div className="bg-[#162231] rounded-2xl border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-8">
         <div>
-          <p className="text-[13px] font-semibold text-white">Found your technique?</p>
-          <p className="text-xs text-white/30">Now prep for interviews where you&apos;ll talk about it.</p>
+          <p className="text-[13px] font-semibold text-white">Know your technique?</p>
+          <p className="text-xs text-white/30">Good. Now practice explaining it in an interview.</p>
         </div>
         <Link
           href="/student/interview-prep"
