@@ -108,25 +108,41 @@ function SubscribeListContent() {
           </p>
           <div className="space-y-3">
             {nearbyDoctors.map((doc: any, i: number) => (
-              <Link
-                key={i}
-                href={`/directory/${doc.slug}`}
-                className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all"
-              >
-                <div className="w-12 h-12 rounded-xl bg-neuro-navy/5 flex items-center justify-center shrink-0 overflow-hidden">
-                  {doc.photo_url ? (
-                    <img src={doc.photo_url} alt={doc.name} className="w-full h-full object-cover" />
+              <div key={i} className="bg-white rounded-2xl border border-gray-100 p-4">
+                <Link href={`/directory/${doc.slug}`} className="flex items-center gap-4 mb-3">
+                  <div className="w-12 h-12 rounded-xl bg-neuro-navy/5 flex items-center justify-center shrink-0 overflow-hidden">
+                    {doc.photo_url ? (
+                      <img src={doc.photo_url} alt={doc.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-neuro-navy font-bold text-sm">{doc.name.replace('Dr. ', '').split(' ').map((n: string) => n[0]).join('')}</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-neuro-navy text-sm">{doc.name}</p>
+                    <p className="text-gray-500 text-xs">{doc.clinic}</p>
+                    <p className="text-gray-400 text-xs">{doc.city}, {doc.state} · {doc.distance} mi</p>
+                  </div>
+                </Link>
+                <div className="flex gap-2">
+                  {doc.booking_url ? (
+                    <a href={doc.booking_url} target="_blank" rel="noopener noreferrer"
+                      className="flex-1 py-2.5 bg-neuro-orange text-white rounded-xl text-xs font-bold text-center hover:bg-neuro-orange/90 transition-colors min-h-[44px] flex items-center justify-center">
+                      Book Online
+                    </a>
                   ) : (
-                    <span className="text-neuro-navy font-bold text-sm">{doc.name.replace('Dr. ', '').split(' ').map((n: string) => n[0]).join('')}</span>
+                    <Link href={`/directory/${doc.slug}`}
+                      className="flex-1 py-2.5 bg-neuro-navy text-white rounded-xl text-xs font-bold text-center hover:bg-neuro-navy/90 transition-colors min-h-[44px] flex items-center justify-center">
+                      View Profile
+                    </Link>
+                  )}
+                  {doc.phone && (
+                    <a href={`tel:${doc.phone}`}
+                      className="py-2.5 px-4 bg-neuro-navy/10 text-neuro-navy rounded-xl text-xs font-bold text-center hover:bg-neuro-navy/20 transition-colors min-h-[44px] flex items-center justify-center">
+                      Call
+                    </a>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-neuro-navy text-sm">{doc.name}</p>
-                  <p className="text-gray-500 text-xs">{doc.clinic}</p>
-                  <p className="text-gray-400 text-xs">{doc.city}, {doc.state} · {doc.distance} mi</p>
-                </div>
-                <ArrowRight className="w-4 h-4 text-neuro-orange shrink-0" />
-              </Link>
+              </div>
             ))}
           </div>
           <div className="text-center mt-8">

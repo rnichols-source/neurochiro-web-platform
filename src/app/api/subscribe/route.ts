@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
       const { data: nearbyDocs } = await supabase
         .from('doctors')
-        .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, photo_url')
+        .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, photo_url, booking_url, phone')
         .eq('verification_status', 'verified')
         .or('country.is.null,country.eq.US')
         .not('latitude', 'eq', 0)
@@ -118,6 +118,8 @@ export async function POST(req: NextRequest) {
             distance: Math.round(d.distance * 10) / 10,
             slug: d.slug || d.id,
             photo_url: d.photo_url,
+            booking_url: d.booking_url || null,
+            phone: d.phone || null,
           })),
           message: `Good news — there ${nearby.length === 1 ? 'is already a doctor' : `are already ${nearby.length} doctors`} near you.`,
         });
