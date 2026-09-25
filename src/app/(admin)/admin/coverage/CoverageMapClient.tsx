@@ -31,7 +31,7 @@ function loadSavedLayers(): Record<LayerKey, boolean> {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) return JSON.parse(saved)
   } catch {}
-  return { verified: true, pending: true, confirmedSub: false, pendingSub: false, gaps: false }
+  return { verified: true, pending: true, confirmedSub: true, pendingSub: true, gaps: true }
 }
 
 // ── Main Component ──
