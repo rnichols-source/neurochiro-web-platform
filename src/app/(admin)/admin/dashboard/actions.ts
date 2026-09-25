@@ -127,6 +127,215 @@ export async function getAdminDashboardStats() {
   }
 }
 
+// ── Action List: "What needs me today" ──
+
+export interface ActionItem {
+  id: string
+  urgency: number        // 1=critical, 2=high, 3=medium, 4=low
+  category: string
+  title: string
+  who: string
+  waitingSince: string   // ISO date
+  waitingDays: number
+  link: string
+}
+
+export async function getActionList(): Promise<ActionItem[]> {
+  try {
+    await checkAdminAuth()
+    const supabase = createAdminClient()
+    const items: ActionItem[] = []
+    const now = Date.now()
+    const dayMs = 86400000
+
+    const fourteenDaysAgo = new Date(now - 14 * dayMs).toISOString()
+    const ninetyDaysAgo = new Date(now - 90 * dayMs).toISOString()
+
+    // Fetch all data in parallel
+    const [
+      pendingDocs,
+      invisibleQueue,
+      mismatchQueue,
+      paidDocs,
+      failedCharges,
+    ] = await Promise.all([
+      // 1. Pending verifications
+      supabase.from('doctors')
+        .select('id, first_name, last_name, clinic_name, city, state, created_at')
+        .eq('verification_status', 'pending')
+        .order('created_at', { ascending: true }),
+
+      // 2. Invisible doctor flags
+      (supabase as any).from('automation_queue')
+        .select('payload, created_at')
+        .eq('event_type', 'doctor_invisible'),
+
+      // 3. Address mismatch flags
+      (supabase as any).from('automation_queue')
+        .select('payload, created_at')
+        .eq('event_type', 'address_mismatch'),
+
+      // 4. Paid doctors missing critical profile fields
+      (supabase as any).from('doctors')
+        .select('id, first_name, last_name, clinic_name, photo_url, hours, first_visit_price, google_reviews_url, onboarding_call_status, spotlight_status, created_at, membership_tier, price_locked_at')
+        .eq('verification_status', 'verified')
+        .or('country.is.null,country.eq.US'),
+
+      // 5. Failed Stripe charges (recent)
+      (async () => {
+        try {
+          const failed: any[] = []
+          for await (const charge of stripe.charges.list({ limit: 30 })) {
+            if (charge.status === 'failed') {
+              failed.push(charge)
+              if (failed.length >= 10) break
+            }
+          }
+          return failed
+        } catch { return [] }
+      })(),
+    ])
+
+    // ── 1. Pending verifications (urgency 1) ──
+    for (const d of (pendingDocs.data || [])) {
+      const days = Math.floor((now - new Date(d.created_at).getTime()) / dayMs)
+      items.push({
+        id: `pending-${d.id}`,
+        urgency: 1,
+        category: 'Verification',
+        title: 'Doctor pending approval',
+        who: `${d.first_name} ${d.last_name}`.trim() || d.clinic_name || 'Unknown',
+        waitingSince: d.created_at,
+        waitingDays: days,
+        link: '/admin/moderation',
+      })
+    }
+
+    // ── 2. Failed payments (urgency 1) ──
+    for (const charge of failedCharges) {
+      items.push({
+        id: `failed-${charge.id}`,
+        urgency: 1,
+        category: 'Payment',
+        title: 'Payment failed',
+        who: charge.billing_details?.email || charge.billing_details?.name || 'Unknown',
+        waitingSince: new Date(charge.created * 1000).toISOString(),
+        waitingDays: Math.floor((now - charge.created * 1000) / dayMs),
+        link: '/admin/revenue',
+      })
+    }
+
+    // ── 3. Invisible doctors (urgency 2) ──
+    for (const q of (invisibleQueue || [])) {
+      const p = typeof q.payload === 'string' ? JSON.parse(q.payload) : q.payload
+      items.push({
+        id: `invisible-${p.doctorId}`,
+        urgency: 2,
+        category: 'Invisible',
+        title: p.reason === 'no_address' ? 'No address on file' : 'Geocoding failed',
+        who: p.name || 'Unknown',
+        waitingSince: q.created_at,
+        waitingDays: Math.floor((now - new Date(q.created_at).getTime()) / dayMs),
+        link: '/admin/invisible-doctors',
+      })
+    }
+
+    // ── 4. Address mismatches (urgency 2) ──
+    for (const q of (mismatchQueue || [])) {
+      const p = typeof q.payload === 'string' ? JSON.parse(q.payload) : q.payload
+      items.push({
+        id: `mismatch-${p.doctorId}`,
+        urgency: 2,
+        category: 'Data Quality',
+        title: 'City/address mismatch',
+        who: p.name || 'Unknown',
+        waitingSince: q.created_at,
+        waitingDays: Math.floor((now - new Date(q.created_at).getTime()) / dayMs),
+        link: '/admin/invisible-doctors',
+      })
+    }
+
+    // ── 5. Paid members with incomplete profiles (urgency 3) ──
+    const paidMembers = (paidDocs.data || []).filter((d: any) =>
+      d.membership_tier === 'pro' || d.price_locked_at
+    )
+
+    for (const d of paidMembers) {
+      const name = `${d.first_name} ${d.last_name}`.trim() || d.clinic_name || 'Unknown'
+      const missing: string[] = []
+      if (!d.photo_url) missing.push('photo')
+      if (!d.hours) missing.push('hours')
+      if (!d.google_reviews_url) missing.push('Google reviews')
+
+      // Only surface if missing 2+ critical fields (1 missing is common and not urgent)
+      if (missing.length >= 2) {
+        items.push({
+          id: `profile-gap-${d.id}`,
+          urgency: 3,
+          category: 'Profile Gap',
+          title: `Missing ${missing.join(', ')}`,
+          who: name,
+          waitingSince: d.created_at,
+          waitingDays: Math.floor((now - new Date(d.created_at).getTime()) / dayMs),
+          link: `/admin/directory?search=${encodeURIComponent(name)}`,
+        })
+      }
+    }
+
+    // ── 6. Onboarding calls not booked, past 14 days (urgency 3) ──
+    // Only for doctors who have a user_id (actually signed up, not bulk imports)
+    const recentUnbooked = paidMembers.filter((d: any) =>
+      d.onboarding_call_status === 'not_booked' &&
+      new Date(d.created_at) < new Date(fourteenDaysAgo) &&
+      new Date(d.created_at) > new Date('2026-06-01') // exclude bulk imports
+    )
+    for (const d of recentUnbooked) {
+      const name = `${d.first_name} ${d.last_name}`.trim() || d.clinic_name || 'Unknown'
+      items.push({
+        id: `onboard-${d.id}`,
+        urgency: 3,
+        category: 'Onboarding',
+        title: 'Onboarding call not booked',
+        who: name,
+        waitingSince: d.created_at,
+        waitingDays: Math.floor((now - new Date(d.created_at).getTime()) / dayMs),
+        link: `/admin/directory?search=${encodeURIComponent(name)}`,
+      })
+    }
+
+    // ── 7. Spotlight not scheduled, past 90 days (urgency 4) ──
+    const oldNoSpotlight = paidMembers.filter((d: any) =>
+      d.spotlight_status === 'not_scheduled' &&
+      new Date(d.created_at) < new Date(ninetyDaysAgo) &&
+      new Date(d.created_at) > new Date('2026-06-01')
+    )
+    for (const d of oldNoSpotlight) {
+      const name = `${d.first_name} ${d.last_name}`.trim() || d.clinic_name || 'Unknown'
+      items.push({
+        id: `spotlight-${d.id}`,
+        urgency: 4,
+        category: 'Spotlight',
+        title: 'Interview not scheduled',
+        who: name,
+        waitingSince: d.created_at,
+        waitingDays: Math.floor((now - new Date(d.created_at).getTime()) / dayMs),
+        link: '/admin/spotlight',
+      })
+    }
+
+    // Sort by urgency (critical first), then by waiting days (longest first)
+    items.sort((a, b) => {
+      if (a.urgency !== b.urgency) return a.urgency - b.urgency
+      return b.waitingDays - a.waitingDays
+    })
+
+    return items
+  } catch (e) {
+    console.error('Action list error:', e)
+    return []
+  }
+}
+
 // ── Activity Feed ──
 
 export async function getActivityFeed(limit: number = 30) {

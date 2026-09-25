@@ -3,21 +3,25 @@
 import { Users, Loader2, AlertCircle, RefreshCw, DollarSign, Eye, EyeOff, MapPin, AlertTriangle, Globe } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { getAdminDashboardStats, getActivityFeed } from "./actions";
+import { getAdminDashboardStats, getActivityFeed, getActionList, ActionItem } from "./actions";
 import { formatDistanceToNow } from "date-fns";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
+  const [actions, setActions] = useState<ActionItem[]>([]);
   const [activity, setActivity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAllActions, setShowAllActions] = useState(false);
 
   async function fetchAll() {
     setLoading(true);
-    const [dashData, actData] = await Promise.all([
+    const [dashData, actionData, actData] = await Promise.all([
       getAdminDashboardStats(),
+      getActionList(),
       getActivityFeed(40),
     ]);
     if (dashData) setStats(dashData);
+    setActions(actionData);
     setActivity(actData);
     setLoading(false);
   }
@@ -73,6 +77,50 @@ export default function AdminDashboard() {
           </div>
         </Link>
       )}
+
+      {/* ── What needs me today ── */}
+      <section>
+        <h2 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-3">What Needs You Today</h2>
+        {actions.length === 0 ? (
+          <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6 text-center">
+            <p className="text-sm font-bold text-green-400">Nothing needs your attention right now.</p>
+            <p className="text-xs text-green-400/50 mt-1">All verifications, payments, and profiles are current.</p>
+          </div>
+        ) : (
+          <div className="bg-white/5 border border-white/5 rounded-xl overflow-hidden">
+            <div className="divide-y divide-white/5">
+              {(showAllActions ? actions : actions.slice(0, 8)).map(item => (
+                <Link key={item.id} href={item.link}
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.03] transition-colors">
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${
+                    item.urgency === 1 ? 'bg-red-500' :
+                    item.urgency === 2 ? 'bg-amber-500' :
+                    item.urgency === 3 ? 'bg-blue-400' : 'bg-gray-500'
+                  }`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium text-white truncate">{item.title}</span>
+                      <span className="text-[10px] text-white/20 font-bold uppercase tracking-wider shrink-0">{item.category}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 truncate">{item.who}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className={`text-[11px] font-bold ${item.waitingDays > 30 ? 'text-red-400' : item.waitingDays > 7 ? 'text-amber-400' : 'text-gray-500'}`}>
+                      {item.waitingDays === 0 ? 'Today' : item.waitingDays === 1 ? '1 day' : `${item.waitingDays}d`}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            {actions.length > 8 && (
+              <button onClick={() => setShowAllActions(!showAllActions)}
+                className="w-full py-2.5 text-xs font-bold text-neuro-orange hover:bg-white/5 transition-colors border-t border-white/5">
+                {showAllActions ? 'Show less' : `Show all ${actions.length} items`}
+              </button>
+            )}
+          </div>
+        )}
+      </section>
 
       {/* ── Directory ── */}
       <section>
