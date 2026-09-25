@@ -148,6 +148,22 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 8,
     publishedAt: "2026-09-17T12:00:00Z",
   },
+  {
+    id: "ep-009",
+    doctorName: "Dr. Alisha Davis",
+    doctorSlug: "dr-alisha-davis",
+    clinicName: "Davis Family Chiropractic",
+    city: "Raleigh",
+    state: "NC",
+    videoUrl: "https://www.youtube.com/embed/u6Zaqn8NXFo",
+    thumbnail: "https://img.youtube.com/vi/u6Zaqn8NXFo/hqdefault.jpg",
+    quote:
+      "I love having a child's nervous system in my hands to be able to impact their life from birth on.",
+    description:
+      "Dr. Alisha Davis has been in practice for 28 years at Davis Family Chiropractic in Raleigh, North Carolina. A second-generation chiropractor with her dad and sister both in the profession, she earned her ICPA Diplomate in Pediatrics after her own son was diagnosed with sensory processing disorder, becoming one of only four in the state. She shares the story of a patient who lost his job and marriage to vertigo before chiropractic care turned his life around, why only 10% of the nervous system feels pain, and her full-circle vision of one day adjusting babies she cared for through pregnancy and into parenthood.",
+    episodeNumber: 9,
+    publishedAt: "2026-09-25T12:00:00Z",
+  },
 ];
 
 export function getLatestEpisode(): SpotlightEpisode {
