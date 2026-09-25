@@ -159,7 +159,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
         </div>
 
         {/* Nav list — scrollable, takes remaining space */}
-        <nav className="flex-1 min-h-0 px-4 space-y-1 overflow-y-auto overscroll-contain pt-4"
+        <nav className="flex-1 min-h-0 px-4 space-y-1 overflow-y-auto overscroll-contain pt-4 pb-4"
           style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="mb-4 px-2">
             <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Platform Control</span>
@@ -191,7 +191,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
           })}
 
           {/* Live Engine — inside scrollable area on mobile, not eating fixed space */}
-          <div className="lg:hidden mt-6 mb-2">
+          <div className="lg:hidden mt-6 mb-4">
             <div className="bg-white/[0.02] rounded-2xl p-3 border border-white/5">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
