@@ -142,6 +142,10 @@ function SubscribeListContent() {
                     </a>
                   )}
                 </div>
+                <Link href={`/contact-request?doctor=${doc.slug}`}
+                  className="block text-center text-xs text-gray-400 hover:text-neuro-orange mt-2 transition-colors">
+                  Have their office reach out to me
+                </Link>
               </div>
             ))}
           </div>

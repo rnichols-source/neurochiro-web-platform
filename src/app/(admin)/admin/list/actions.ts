@@ -330,6 +330,9 @@ export async function notifySubscribersNewDoctor(
               <div style="text-align:center;margin:24px 0;">
                 <a href="${profileUrl}" style="display:inline-block;background:#D66829;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">View Their Profile</a>
               </div>
+              <div style="text-align:center;margin:0 0 24px;">
+                <a href="https://neurochiro.co/contact-request?doctor=${doctor.slug}" style="display:inline-block;background:#1E2D3B;color:white;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:14px;">Have Their Office Reach Out to Me</a>
+              </div>
               <p style="font-size:15px;color:#333;line-height:1.7;">Dr. Ray<br><a href="https://neurochiro.co" style="color:#D66829;">neurochiro.co</a></p>
             </div>
             <div style="background:#f5f3ef;padding:20px;text-align:center;font-size:11px;color:#999;line-height:1.6;">
