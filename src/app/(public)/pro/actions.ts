@@ -75,10 +75,11 @@ export async function getDemandMapData(): Promise<{ doctors: MapDoctor[]; demand
     .filter(d => d.latitude != null && d.longitude != null)
     .map(d => ({ lat: d.latitude!, lng: d.longitude! }))
 
-  // Demand: mentions aggregated by city
+  // Demand: mentions aggregated by city (US only for map)
   const { data: mentions } = await (supabase as any)
     .from('demand_mentions')
     .select('city, state, lat, lng')
+    .or('country.eq.US,country.is.null')
 
   const cityMap = new Map<string, MapDemandCity>()
   for (const m of (mentions || [])) {
@@ -229,10 +230,11 @@ export async function checkDemandNearby(query: string): Promise<DemandNearbyResu
     return { cityLabel: '', hasDemand: false, mentionsNearby: null, subscribersNearby: null, doctorsNearby: 0, error: `Couldn't find "${query}". Try "City, ST" or a 5-digit ZIP.` }
   }
 
-  // Count mentions within 50mi
+  // Count mentions within 50mi (US only)
   const { data: allMentions } = await (supabase as any)
     .from('demand_mentions')
     .select('lat, lng')
+    .or('country.eq.US,country.is.null')
 
   let mentionsNearby = 0
   for (const m of (allMentions || [])) {

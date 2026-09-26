@@ -484,6 +484,7 @@ export async function getMentionsData(): Promise<MentionCity[]> {
   const { data: mentions } = await (supabase as any)
     .from('demand_mentions')
     .select('city, state, lat, lng')
+    .or('country.eq.US,country.is.null')
 
   if (!mentions || mentions.length === 0) return []
 
