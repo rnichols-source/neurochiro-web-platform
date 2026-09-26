@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
-import { CoverageDoctor, DemandZip, CoverageStats, LookupResult, lookupNearby } from "./actions"
+import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, LookupResult, lookupNearby } from "./actions"
 
 // ── Colors ──
 const COLORS = {
@@ -12,36 +12,39 @@ const COLORS = {
   confirmedSub: '#8b5cf6',
   pendingSub: '#8b5cf6',
   gap: '#f43f5e',
+  mentions: '#06b6d4',
 }
 
-type LayerKey = 'verified' | 'pending' | 'confirmedSub' | 'pendingSub' | 'gaps'
+type LayerKey = 'verified' | 'pending' | 'confirmedSub' | 'pendingSub' | 'gaps' | 'mentions'
 
 const LAYER_CONFIG: { key: LayerKey; label: string; color: string; opacity?: number }[] = [
   { key: 'verified', label: 'Verified Doctors', color: COLORS.verified },
   { key: 'pending', label: 'Pending Doctors', color: COLORS.pending },
   { key: 'confirmedSub', label: 'Confirmed Subscribers', color: COLORS.confirmedSub },
   { key: 'pendingSub', label: 'Pending Subscribers', color: COLORS.pendingSub, opacity: 0.4 },
+  { key: 'mentions', label: 'Comment Mentions', color: COLORS.mentions },
   { key: 'gaps', label: 'Gaps (no doc <50mi)', color: COLORS.gap },
 ]
 
-const STORAGE_KEY = 'nc_coverage_layers'
+const STORAGE_KEY = 'nc_coverage_layers_v2'
 
 function loadSavedLayers(): Record<LayerKey, boolean> {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) return JSON.parse(saved)
   } catch {}
-  return { verified: true, pending: true, confirmedSub: true, pendingSub: true, gaps: true }
+  return { verified: true, pending: true, confirmedSub: true, pendingSub: true, gaps: true, mentions: true }
 }
 
 // ── Main Component ──
 
 export default function CoverageMapClient({
-  doctors, demand, stats,
+  doctors, demand, stats, mentions,
 }: {
   doctors: CoverageDoctor[]
   demand: DemandZip[]
   stats: CoverageStats
+  mentions: MentionCity[]
 }) {
   const [layers, setLayers] = useState<Record<LayerKey, boolean>>(loadSavedLayers)
   const [showStatsPanel, setShowStatsPanel] = useState(true)
@@ -60,8 +63,8 @@ export default function CoverageMapClient({
   }, [layers])
 
   const toggleLayer = (key: LayerKey) => setLayers(prev => ({ ...prev, [key]: !prev[key] }))
-  const showAll = () => setLayers({ verified: true, pending: true, confirmedSub: true, pendingSub: true, gaps: true })
-  const hideAll = () => setLayers({ verified: false, pending: false, confirmedSub: false, pendingSub: false, gaps: false })
+  const showAll = () => setLayers({ verified: true, pending: true, confirmedSub: true, pendingSub: true, gaps: true, mentions: true })
+  const hideAll = () => setLayers({ verified: false, pending: false, confirmedSub: false, pendingSub: false, gaps: false, mentions: false })
 
   // ── Build doctor features filtered by current toggles ──
   const buildDoctorFeatures = useCallback((showVerified: boolean, showPending: boolean) => {
@@ -152,6 +155,24 @@ export default function CoverageMapClient({
           layout: { visibility: layers.gaps ? 'visible' : 'none' },
         })
 
+        // Mentions source
+        const mentionFeatures = mentions.map(m => ({
+          type: 'Feature' as const,
+          geometry: { type: 'Point' as const, coordinates: [m.lng, m.lat] },
+          properties: { city: m.city, state: m.state, count: m.count, gap: m.gap ? 1 : 0 },
+        }))
+        map.addSource('mentions', { type: 'geojson', data: { type: 'FeatureCollection', features: mentionFeatures } })
+        map.addLayer({ id: 'mentions-dots', type: 'circle', source: 'mentions',
+          paint: {
+            'circle-color': COLORS.mentions,
+            'circle-radius': ['interpolate', ['linear'], ['get', 'count'], 1, 7, 5, 12, 15, 18, 30, 24],
+            'circle-opacity': 0.7,
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#fff',
+          },
+          layout: { visibility: layers.mentions ? 'visible' : 'none' },
+        })
+
         // Click handlers
         map.on('click', 'doctor-clusters', (e: any) => {
           const f = map.queryRenderedFeatures(e.point, { layers: ['doctor-clusters'] })
@@ -189,8 +210,22 @@ export default function CoverageMapClient({
         }
         ;['demand-confirmed','demand-pending','demand-gaps'].forEach(l => { map.on('click', l, demandClick) })
 
+        // Mentions click handler
+        map.on('click', 'mentions-dots', (e: any) => {
+          if (!e.features?.length) return
+          const p = e.features[0].properties, coords = e.features[0].geometry.coordinates.slice()
+          const gl = p.gap === 1 ? '<div style="color:#f43f5e;font-weight:700;font-size:11px;margin-top:6px;">No doctor within 50 miles</div>' : '<div style="color:#22c55e;font-size:11px;margin-top:6px;">Doctor nearby</div>'
+          new maplibregl.Popup({ offset: 12, maxWidth: '240px', closeButton: true, focusAfterOpen: false }).setLngLat(coords).setHTML(`
+            <div style="padding:12px;font-family:-apple-system,system-ui,sans-serif;">
+              <div style="font-size:14px;font-weight:700;color:#1E2D3B;">${p.city}, ${p.state}</div>
+              <div style="font-size:13px;font-weight:700;color:#06b6d4;margin-top:4px;">${p.count} comment mention${p.count > 1 ? 's' : ''}</div>
+              <div style="font-size:11px;color:#999;margin-top:2px;">From Instagram comments</div>
+              ${gl}
+            </div>`).addTo(map)
+        })
+
         // Cursors
-        ;['doctor-dots','doctor-clusters','demand-confirmed','demand-pending','demand-gaps'].forEach(l => {
+        ;['doctor-dots','doctor-clusters','demand-confirmed','demand-pending','demand-gaps','mentions-dots'].forEach(l => {
           map.on('mouseenter', l, () => { map.getCanvas().style.cursor = 'pointer' })
           map.on('mouseleave', l, () => { map.getCanvas().style.cursor = '' })
         })
@@ -211,11 +246,12 @@ export default function CoverageMapClient({
       if (src) src.setData({ type: 'FeatureCollection', features: buildDoctorFeatures(layers.verified, layers.pending) })
     } catch {}
 
-    // Demand layers: toggle visibility
+    // Demand + mentions layers: toggle visibility
     const demandMap: [string, LayerKey][] = [
       ['demand-confirmed', 'confirmedSub'],
       ['demand-pending', 'pendingSub'],
       ['demand-gaps', 'gaps'],
+      ['mentions-dots', 'mentions'],
     ]
     for (const [layerId, key] of demandMap) {
       try {
@@ -247,7 +283,10 @@ export default function CoverageMapClient({
       {/* Stats bar */}
       <div className="px-4 py-3 border-b border-white/10">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-lg font-bold">Coverage Map</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-bold">Coverage Map</h1>
+            <Link href="/admin/coverage/mentions" className="text-[10px] font-bold text-cyan-400/70 hover:text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-lg">+ Mentions</Link>
+          </div>
           <button onClick={() => setShowStatsPanel(!showStatsPanel)} className="text-white/50 text-xs flex items-center gap-1">
             {showStatsPanel ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             {showStatsPanel ? 'Hide' : 'Stats'}
@@ -267,23 +306,30 @@ export default function CoverageMapClient({
                 {stats.statesWithout.length > 0 && <p className="text-[10px] text-red-400/70 mt-1">Missing: {stats.statesWithout.join(', ')}</p>}
               </div>
               <div className="bg-white/5 rounded-xl p-3">
-                <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Patient Waitlist</p>
-                <p className="text-xl font-bold">{stats.confirmedSubscribers} <span className="text-white/30 text-sm">confirmed</span></p>
+                <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Demand Signals</p>
+                <p className="text-xl font-bold">{stats.confirmedSubscribers} <span className="text-white/30 text-sm">waitlist</span></p>
                 {stats.pendingSubscribers > 0 && <p className="text-xs text-purple-400/70 mt-0.5">{stats.pendingSubscribers} pending</p>}
+                {stats.totalMentions > 0 && <p className="text-xs text-cyan-400/70 mt-0.5">{stats.totalMentions} comment mentions</p>}
                 {stats.internationalCount > 0 && <p className="text-[10px] text-white/30 mt-1 flex items-center gap-1"><Globe className="w-3 h-3" /> {stats.internationalCount} intl doctors</p>}
               </div>
             </div>
             {stats.topGaps.length > 0 && (
               <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3">
                 <p className="text-[10px] text-rose-400 uppercase font-bold tracking-wider mb-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Recruit Here First</p>
-                <p className="text-[10px] text-white/40 mb-2">Subscribers with no doctor within 50 miles.</p>
+                <p className="text-[10px] text-white/40 mb-2">Demand with no doctor within 50 miles.</p>
                 <div className="flex flex-wrap gap-x-3 gap-y-1">
-                  {stats.topGaps.map((g, i) => (
-                    <span key={i} className="text-xs text-white/80">
-                      <span className="font-bold">{g.city}, {g.state}</span>
-                      <span className="text-rose-400 ml-1">{g.confirmed > 0 ? `${g.confirmed} confirmed` : ''}{g.confirmed > 0 && g.pending > 0 ? ' + ' : ''}{g.pending > 0 ? `${g.pending} pending` : ''}</span>
-                    </span>
-                  ))}
+                  {stats.topGaps.map((g, i) => {
+                    const parts: string[] = []
+                    if (g.confirmed > 0) parts.push(`${g.confirmed} waitlist`)
+                    if (g.pending > 0) parts.push(`${g.pending} pending`)
+                    if (g.mentions > 0) parts.push(`${g.mentions} mentions`)
+                    return (
+                      <span key={i} className="text-xs text-white/80">
+                        <span className="font-bold">{g.city}, {g.state}</span>
+                        <span className="text-rose-400 ml-1">{parts.join(' + ')}</span>
+                      </span>
+                    )
+                  })}
                 </div>
               </div>
             )}
