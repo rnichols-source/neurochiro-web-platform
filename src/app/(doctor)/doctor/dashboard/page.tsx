@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Eye, Users, DollarSign, MapPin, Briefcase, Calendar, Bell, Mail, ArrowRight, Copy, CheckCircle2, Gift, Zap, X, Lock, TrendingUp, Video, Image as ImageIcon, Star, BarChart3, Search } from "lucide-react";
+import { Loader2, Eye, Users, DollarSign, MapPin, Briefcase, Calendar, Bell, Mail, ArrowRight, Copy, CheckCircle2, Gift, Zap, X, Lock, TrendingUp, Video, Image as ImageIcon, Star, BarChart3, Search, Send } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -250,10 +250,11 @@ export default function DoctorDashboard() {
       </motion.div>
 
       {/* Key Metrics */}
-      <motion.div {...delay(0.05)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/[0.06]">
+      <motion.div {...delay(0.05)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 grid grid-cols-2 sm:grid-cols-5 divide-x divide-white/[0.06]">
         {[
           { icon: Eye, value: profileViews, label: "Profile Views", color: "text-blue-400" },
           { icon: Users, value: patientLeads, label: "Patient Leads", color: "text-emerald-400" },
+          { icon: Send, value: data?.referrals?.count || 0, label: "Pointed Your Way", color: "text-cyan-400" },
           { icon: DollarSign, value: `$${(revenue?.estimatedMonthlyRevenue || 0).toLocaleString()}`, label: "Est. Revenue", color: "text-violet-400" },
           { icon: MapPin, value: intel ? `#${intel.cityRank}` : '—', label: intel ? `in ${intel.city}` : 'Network Rank', color: "text-neuro-orange" },
         ].map((stat, i) => (

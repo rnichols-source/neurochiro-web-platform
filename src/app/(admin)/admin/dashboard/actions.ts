@@ -110,6 +110,28 @@ export async function getAdminDashboardStats() {
       .select('id', { count: 'exact', head: true })
       .eq('is_paid', true)
 
+    // Referral stats
+    const { data: referralRows } = await (supabase as any)
+      .from('referrals')
+      .select('doctor_id, searched_city')
+    const totalReferrals = referralRows?.length || 0
+    const referralsByDoctor = new Map<string, number>()
+    for (const r of (referralRows || [])) {
+      referralsByDoctor.set(r.doctor_id, (referralsByDoctor.get(r.doctor_id) || 0) + 1)
+    }
+    // Get doctor names for the breakdown
+    const refDoctorIds = Array.from(referralsByDoctor.keys())
+    let referralBreakdown: { name: string; count: number }[] = []
+    if (refDoctorIds.length > 0) {
+      const { data: refDocs } = await supabase
+        .from('doctors')
+        .select('id, first_name, last_name')
+        .in('id', refDoctorIds)
+      referralBreakdown = (refDocs || [])
+        .map(d => ({ name: `Dr. ${d.first_name} ${d.last_name}`, count: referralsByDoctor.get(d.id) || 0 }))
+        .sort((a, b) => b.count - a.count)
+    }
+
     return {
       doctors: doctorCounts,
       subscribers: subscriberCounts,
@@ -122,6 +144,8 @@ export async function getAdminDashboardStats() {
       pendingVerifications: pendingVerifications || 0,
       activeJobPostings: activeJobPostings || 0,
       jobPostRevenue: (paidJobPostings || 0) * 99,
+      totalReferrals,
+      referralBreakdown,
     }
   } catch (e) {
     console.error("Admin Dashboard Error:", e)
@@ -135,6 +159,8 @@ export async function getAdminDashboardStats() {
       annualSubscriptions: 0,
       failedPayments: 0,
       pendingVerifications: 0,
+      totalReferrals: 0,
+      referralBreakdown: [],
     }
   }
 }
@@ -201,7 +227,7 @@ export async function getActionList(): Promise<ActionItem[]> {
 
       // 5. Paid doctors missing critical profile fields
       (supabase as any).from('doctors')
-        .select('id, first_name, last_name, clinic_name, photo_url, hours, first_visit_price, google_reviews_url, onboarding_call_status, spotlight_status, created_at, membership_tier, price_locked_at')
+        .select('id, first_name, last_name, clinic_name, photo_url, hours, first_visit_price, google_reviews_url, onboarding_call_status, spotlight_status, created_at, membership_tier, price_locked_at, instagram_url')
         .eq('verification_status', 'verified')
         .or('country.is.null,country.eq.US'),
 
@@ -431,6 +457,22 @@ export async function getActionList(): Promise<ActionItem[]> {
         waitingSince: d.created_at,
         waitingDays: Math.floor((now - new Date(d.created_at).getTime()) / dayMs),
         link: '/admin/spotlight',
+      })
+    }
+
+    // ── 8. Verified doctors missing Instagram handle (urgency 4) ──
+    const missingIG = paidMembers.filter((d: any) => !d.instagram_url || !d.instagram_url.trim())
+    for (const d of missingIG) {
+      const name = `${d.first_name} ${d.last_name}`.trim() || d.clinic_name || 'Unknown'
+      items.push({
+        id: `missing-ig-${d.id}`,
+        urgency: 4,
+        category: 'Profile',
+        title: 'Missing Instagram handle',
+        who: name,
+        waitingSince: d.created_at,
+        waitingDays: Math.floor((now - new Date(d.created_at).getTime()) / dayMs),
+        link: `/admin/directory?search=${encodeURIComponent(name)}`,
       })
     }
 
