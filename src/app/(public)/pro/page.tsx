@@ -1,51 +1,42 @@
-"use client";
-
-import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import Link from "next/link";
+import { getProPageStats, getDemandMapData } from "./actions";
+import ProDemandMap from "./ProDemandMap";
+import ProDemandLookup from "./ProDemandLookup";
+import ProCTA from "./ProCTA";
+import ProFAQ from "./ProFAQ";
 
-const STRIPE_MONTHLY = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY || "";
-const STRIPE_ANNUAL = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL || "";
-const FIT_CALL_LINK = process.env.NEXT_PUBLIC_FIT_CALL_LINK || "";
+export const revalidate = 300;
 
-export default function ProPage() {
-  return (
-    <Suspense>
-      <ProPageContent />
-    </Suspense>
-  );
-}
+const css = `
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap');
+  .pro-page h1, .pro-page h2, .pro-page h3 { color: #F1EDE7 !important; }
+  .pro-page p, .pro-page li, .pro-page span { color: inherit; }
+`;
 
-function ProPageContent() {
-  const searchParams = useSearchParams();
-  const source = searchParams.get("source") || "direct";
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+const faqs = [
+  { q: "Is $99 a month worth it if I'm already busy?", a: "If your schedule is full and you never want another new patient, probably not. Most doctors joining aren't short on patients in general, they're short on the right ones: people who understand nervous system care before they walk in. That's who searches this directory." },
+  { q: "How many patients will I get?", a: "I don't know, and anyone who gives you a number is guessing. It depends on how many people search your area and how fast you respond when one reaches out. What I'd judge it on: a year of content in your own folder, plus a listing in front of patients specifically looking for how you practice." },
+  { q: "How much of my time does this take?", a: "One 30-minute onboarding call and two interviews. That's it. The editing, scheduling, and posting are on us." },
+  { q: "What if I want out?", a: "Cancel anytime by email. You stay active through the period you already paid for, and the clips already in your folder stay yours." },
+  { q: "Nobody's searching my city yet. Why join now?", a: "Then you're the first name in it when they do. We're building a patient list by ZIP code, and when someone in your area is waiting, they hear about you. Early listings also get the most content while the roster is small." },
+  { q: "Who gets in?", a: "Licensed chiropractors practicing with a nervous system focus. Every doctor applies and I review them before they're listed. If you're not a fit, I'll tell you." },
+  { q: "Do you have territories? What stops another doctor a mile from me from joining?", a: "[Territory policy placeholder — Dr. Ray to supply wording. This answer will be updated before the page goes live to prospects.]" },
+  { q: "How do I know this demand is real?", a: "Every number on this page is a live count. The demand signals come from two places: people who commented on my Instagram posts asking for a nervous system chiropractor in their city, and people who joined the patient waitlist with their ZIP code. Not traffic estimates, not impressions, not projections. The map updates as new requests come in. Where the count in a specific area is below three, I suppress the exact number to protect privacy." },
+];
 
-  const monthlyLink = STRIPE_MONTHLY ? `${STRIPE_MONTHLY}${STRIPE_MONTHLY.includes("?") ? "&" : "?"}client_reference_id=pro_${source}` : "#";
-  const annualLink = STRIPE_ANNUAL ? `${STRIPE_ANNUAL}${STRIPE_ANNUAL.includes("?") ? "&" : "?"}client_reference_id=pro_${source}` : "#";
-  const fitCallLink = FIT_CALL_LINK || "#";
-
-  const css = `
-    @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap');
-    .pro-page h1, .pro-page h2, .pro-page h3 { color: #F1EDE7 !important; }
-    .pro-page p, .pro-page li, .pro-page span { color: inherit; }
-  `;
-
-  const faqs = [
-    { q: "Is $99 a month worth it if I'm already busy?", a: "If your schedule is full and you never want another new patient, probably not. Most doctors joining aren't short on patients in general, they're short on the right ones: people who understand nervous system care before they walk in. That's who searches this directory." },
-    { q: "How many patients will I get?", a: "I don't know, and anyone who gives you a number is guessing. It depends on how many people search your area and how fast you respond when one reaches out. What I'd judge it on: a year of content in your own folder, plus a listing in front of patients specifically looking for how you practice." },
-    { q: "How much of my time does this take?", a: "One 30-minute onboarding call and two interviews. That's it. The editing, scheduling, and posting are on us." },
-    { q: "What if I want out?", a: "Cancel anytime by email. You stay active through the period you already paid for, and the clips already in your folder stay yours." },
-    { q: "Nobody's searching my city yet. Why join now?", a: "Then you're the first name in it when they do. We're building a patient list by ZIP code, and when someone in your area is waiting, they hear about you. Early listings also get the most content while the roster is small." },
-    { q: "Who gets in?", a: "Licensed chiropractors practicing with a nervous system focus. Every doctor applies and I review them before they're listed. If you're not a fit, I'll tell you." },
-  ];
+export default async function ProPage() {
+  const [stats, mapData] = await Promise.all([
+    getProPageStats(),
+    getDemandMapData(),
+  ]);
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: css }} />
       <div className="pro-page" style={{ background: "#131E27", color: "#F1EDE7", fontFamily: '"Source Serif 4", Georgia, "Times New Roman", serif', fontSize: 17, lineHeight: 1.65, margin: 0 }}>
 
-        {/* HEADER / HERO */}
+        {/* ═══ 1. HERO ═══ */}
         <header style={{ background: "#0D161D", color: "#F1EDE7", padding: "58px 0 52px" }}>
           <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
             <div style={{ fontFamily: "Archivo, sans-serif", fontWeight: 800, fontSize: 15, letterSpacing: "0.04em", marginBottom: 42 }}>
@@ -79,19 +70,75 @@ function ProPageContent() {
               Run your own numbers. If one care plan in your office is worth more than $1,188, the decision isn't really about the price.
             </p>
 
-            {/* CTA BUTTONS */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 30 }}>
-              <a href={monthlyLink} style={{ fontFamily: "Archivo, sans-serif", fontWeight: 700, fontSize: 16, textDecoration: "none", padding: "14px 22px", borderRadius: 6, background: "#D66829", color: "#fff", border: "2px solid #D66829", display: "inline-block", textAlign: "center", flex: "1 1 auto", minWidth: 180 }}>
-                Join for $99/month
-              </a>
-              <a href={fitCallLink} style={{ fontFamily: "Archivo, sans-serif", fontWeight: 700, fontSize: 16, textDecoration: "none", padding: "14px 22px", borderRadius: 6, background: "transparent", color: "#F1EDE7", border: "2px solid rgba(255,255,255,.35)", display: "inline-block", textAlign: "center", flex: "1 1 auto", minWidth: 180 }}>
-                Talk to me first
-              </a>
-            </div>
+            <Suspense fallback={<div style={{ height: 56, marginTop: 30 }} />}>
+              <ProCTA variant="hero" />
+            </Suspense>
           </div>
         </header>
 
-        {/* YOU'RE PROBABLY LISTED SOMEWHERE ALREADY */}
+        {/* ═══ 2. THE DEMAND NUMBER ═══ */}
+        <section style={{ padding: "52px 0", borderTop: "1px solid #2A3B49" }}>
+          <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
+            <p style={{ fontFamily: "Archivo, sans-serif", fontSize: 13, letterSpacing: "0.06em", color: "#D66829", textTransform: "uppercase", fontWeight: 700, margin: "0 0 12px" }}>
+              Real demand
+            </p>
+            <h2 style={{ fontFamily: "Archivo, sans-serif", fontSize: "clamp(27px, 5vw, 34px)", lineHeight: 1.15, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 16px" }}>
+              {stats.totalDemandSignals.toLocaleString()} people have asked for a nervous system chiropractor in their area.
+            </h2>
+            <p style={{ color: "#93A0AC", fontSize: 16, margin: "0 0 6px" }}>
+              {stats.totalMentions.toLocaleString()} commented on a post asking for a doctor in their city.
+            </p>
+            <p style={{ color: "#93A0AC", fontSize: 16, margin: "0 0 6px" }}>
+              {stats.confirmedSubscribers.toLocaleString()} joined the patient waitlist with their ZIP code.
+            </p>
+            <p style={{ color: "#93A0AC", fontSize: 16, margin: 0 }}>
+              They're in {stats.statesCovered} states. Most haven't found their doctor yet.
+            </p>
+          </div>
+        </section>
+
+        {/* ═══ 3. THE MAP ═══ */}
+        <section>
+          <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px 12px" }}>
+            <p style={{ fontFamily: "Archivo, sans-serif", fontSize: 13, letterSpacing: "0.06em", color: "#D66829", textTransform: "uppercase", fontWeight: 700, margin: "0 0 8px" }}>
+              Here's where they are
+            </p>
+          </div>
+          <ProDemandMap doctors={mapData.doctors} demandCities={mapData.demandCities} />
+        </section>
+
+        {/* ═══ 4. DEMAND LOOKUP ═══ */}
+        <ProDemandLookup />
+
+        {/* ═══ 5. HOW A PATIENT REACHES YOU ═══ */}
+        <section style={{ padding: "52px 0", borderTop: "1px solid #2A3B49" }}>
+          <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
+            <p style={{ fontFamily: "Archivo, sans-serif", fontSize: 13, letterSpacing: "0.06em", color: "#D66829", textTransform: "uppercase", fontWeight: 700, margin: "0 0 12px" }}>
+              The system
+            </p>
+            <h2 style={{ fontFamily: "Archivo, sans-serif", fontSize: 27, lineHeight: 1.2, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 28px" }}>How a patient reaches you</h2>
+            {[
+              { title: "I create demand.", desc: "Content to 185K followers teaching people what nervous system care actually is. Most patients don't know this kind of chiropractic exists." },
+              { title: "They raise their hand.", desc: "People comment their city asking where to find someone. Others join the patient waitlist with their ZIP code." },
+              { title: "The system routes them.", desc: "If a member is nearby, they see that doctor's profile with distance, hours, cost, and how to book. If nobody's nearby, they go on the waitlist for that area." },
+              { title: "The patient asks for contact.", desc: "When a member joins an uncovered area, everyone waiting there gets an email. They tap a button to ask that office to reach out, and give their phone number. The patient initiates it. No cold calls, no purchased lists, explicit consent recorded with the doctor's name on it." },
+              { title: "The doctor follows up.", desc: "The request lands in the member's dashboard and inbox with the patient's name, number, and what they asked for." },
+            ].map((step, i) => (
+              <div key={i} style={{ position: "relative", padding: "0 0 24px 46px" }}>
+                <div style={{ position: "absolute", left: 0, top: -2, fontFamily: "Archivo, sans-serif", fontWeight: 800, fontSize: 15, color: "#D66829", width: 30, height: 30, border: "2px solid #D66829", borderRadius: "50%", display: "grid", placeItems: "center" }}>
+                  {i + 1}
+                </div>
+                <h3 style={{ fontFamily: "Archivo, sans-serif", fontSize: 18, fontWeight: 700, margin: "0 0 6px", color: "#F1EDE7" }}>{step.title}</h3>
+                <p style={{ color: "#A5B0BB", fontSize: 16, margin: 0 }}>{step.desc}</p>
+              </div>
+            ))}
+            <p style={{ color: "#A5B0BB", fontSize: 16, marginTop: 8, borderTop: "1px solid #2A3B49", paddingTop: 20 }}>
+              No referral fees, no per-patient charges, no commission. A flat membership, and a system built so the patient is always the one who reaches out first.
+            </p>
+          </div>
+        </section>
+
+        {/* ═══ 6. YOU'RE PROBABLY LISTED SOMEWHERE ALREADY ═══ */}
         <section style={{ padding: "52px 0", borderTop: "1px solid #2A3B49" }}>
           <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
             <h2 style={{ fontFamily: "Archivo, sans-serif", fontSize: 27, lineHeight: 1.2, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 18px" }}>You're probably listed somewhere already</h2>
@@ -108,10 +155,7 @@ function ProPageContent() {
           </div>
         </section>
 
-        {/* MEMBER QUOTES */}
-        <MemberQuotes />
-
-        {/* WHAT YOU GET */}
+        {/* ═══ 7. WHAT YOU GET ═══ */}
         <section style={{ padding: "52px 0", borderTop: "1px solid #2A3B49" }}>
           <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
             <h2 style={{ fontFamily: "Archivo, sans-serif", fontSize: 27, lineHeight: 1.2, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 18px" }}>What you actually get</h2>
@@ -130,7 +174,7 @@ function ProPageContent() {
           </div>
         </section>
 
-        {/* WHAT I WON'T PROMISE */}
+        {/* ═══ 8. WHAT I WON'T PROMISE ═══ */}
         <section style={{ padding: "52px 0", borderTop: "1px solid #2A3B49" }}>
           <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
             <h2 style={{ fontFamily: "Archivo, sans-serif", fontSize: 27, lineHeight: 1.2, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 18px" }}>What I won't promise you</h2>
@@ -148,7 +192,7 @@ function ProPageContent() {
           </div>
         </section>
 
-        {/* HOW IT WORKS */}
+        {/* ═══ 9. HOW IT WORKS ═══ */}
         <section style={{ padding: "52px 0", borderTop: "1px solid #2A3B49" }}>
           <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
             <h2 style={{ fontFamily: "Archivo, sans-serif", fontSize: 27, lineHeight: 1.2, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 18px" }}>How it works</h2>
@@ -168,52 +212,23 @@ function ProPageContent() {
           </div>
         </section>
 
-        {/* FAQ */}
-        <section style={{ padding: "52px 0", borderTop: "1px solid #2A3B49" }}>
-          <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
-            <h2 style={{ fontFamily: "Archivo, sans-serif", fontSize: 27, lineHeight: 1.2, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 18px" }}>Questions doctors ask me</h2>
-            {faqs.map((faq, i) => (
-              <div key={i} style={{ borderBottom: "1px solid #2A3B49", padding: "16px 0", borderTop: i === 0 ? "1px solid #2A3B49" : "none" }}>
-                <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  style={{ fontFamily: "Archivo, sans-serif", fontWeight: 700, fontSize: 17, cursor: "pointer", display: "flex", justifyContent: "space-between", gap: 16, width: "100%", background: "none", border: "none", color: "#F1EDE7", textAlign: "left", padding: 0 }}
-                >
-                  {faq.q}
-                  <span style={{ color: "#D66829", fontWeight: 700, flexShrink: 0 }}>{openFaq === i ? "\u2013" : "+"}</span>
-                </button>
-                {openFaq === i && (
-                  <p style={{ color: "#A5B0BB", fontSize: 16, margin: "12px 0 0" }}>{faq.a}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* ═══ 10. FAQ ═══ */}
+        <ProFAQ faqs={faqs} />
 
-        {/* CLOSE / CTA */}
+        {/* ═══ 11. CLOSE / CTA ═══ */}
         <section style={{ background: "#0D161D", color: "#F1EDE7", padding: "52px 0", borderTop: "1px solid #2A3B49" }}>
           <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
             <h2 style={{ fontFamily: "Archivo, sans-serif", fontSize: 27, lineHeight: 1.2, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 18px", color: "#F1EDE7" }}>Two ways to start</h2>
             <p style={{ color: "#93A0AC", margin: "0 0 16px" }}>
               If you know it's a fit, join and book your onboarding call today. If you want to ask me something first, take fifteen minutes on my calendar. No pitch, just a straight conversation about whether this is right for your practice.
             </p>
-            <div style={{ fontFamily: "Archivo, sans-serif", fontWeight: 700, fontSize: 16, color: "#F1EDE7", marginBottom: 6 }}>
-              $99/month &nbsp;&middot;&nbsp; or $990/year, two months free
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 20 }}>
-              <a href={monthlyLink} style={{ fontFamily: "Archivo, sans-serif", fontWeight: 700, fontSize: 16, textDecoration: "none", padding: "14px 22px", borderRadius: 6, background: "#D66829", color: "#fff", border: "2px solid #D66829", display: "inline-block", textAlign: "center", flex: "1 1 auto", minWidth: 140 }}>
-                Join monthly
-              </a>
-              <a href={annualLink} style={{ fontFamily: "Archivo, sans-serif", fontWeight: 700, fontSize: 16, textDecoration: "none", padding: "14px 22px", borderRadius: 6, background: "#D66829", color: "#fff", border: "2px solid #D66829", display: "inline-block", textAlign: "center", flex: "1 1 auto", minWidth: 140 }}>
-                Join annual
-              </a>
-              <a href={fitCallLink} style={{ fontFamily: "Archivo, sans-serif", fontWeight: 700, fontSize: 16, textDecoration: "none", padding: "14px 22px", borderRadius: 6, background: "transparent", color: "#F1EDE7", border: "2px solid rgba(255,255,255,.35)", display: "inline-block", textAlign: "center", flex: "1 1 auto", minWidth: 140 }}>
-                Book a Fit Call
-              </a>
-            </div>
+            <Suspense fallback={<div style={{ height: 56 }} />}>
+              <ProCTA variant="close" />
+            </Suspense>
           </div>
         </section>
 
-        {/* FOOTER */}
+        {/* ═══ 12. FOOTER ═══ */}
         <footer style={{ padding: "30px 0 44px", textAlign: "center", color: "#A5B0BB", fontSize: 14 }}>
           <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
             NeuroChiro Network &middot; <a href="https://neurochiro.co" style={{ color: "#A5B0BB", textDecoration: "none" }}>neurochiro.co</a> &middot; support@neurochirodirectory.com
@@ -221,36 +236,5 @@ function ProPageContent() {
         </footer>
       </div>
     </>
-  );
-}
-
-/**
- * Member quotes component. Renders nothing when the list is empty.
- * Add quotes here as they come in.
- */
-const MEMBER_QUOTES: { text: string; name: string; city: string }[] = [
-  // { text: "Quote here.", name: "Dr. First Last", city: "City, ST" },
-];
-
-function MemberQuotes() {
-  if (MEMBER_QUOTES.length === 0) return null;
-
-  return (
-    <section style={{ padding: "40px 0 52px", borderTop: "1px solid #2A3B49" }}>
-      <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
-        <div style={{ display: "grid", gap: 20 }}>
-          {MEMBER_QUOTES.map((q, i) => (
-            <div key={i} style={{ borderLeft: "3px solid #D66829", paddingLeft: 20 }}>
-              <p style={{ fontSize: 16, lineHeight: 1.6, margin: "0 0 8px", fontStyle: "italic" }}>
-                &ldquo;{q.text}&rdquo;
-              </p>
-              <p style={{ fontFamily: "Archivo, sans-serif", fontSize: 14, fontWeight: 700, color: "#A5B0BB", margin: 0 }}>
-                {q.name} &middot; {q.city}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
   );
 }

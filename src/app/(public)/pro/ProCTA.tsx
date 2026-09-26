@@ -1,0 +1,63 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
+
+const STRIPE_MONTHLY = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY || "";
+const STRIPE_ANNUAL = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL || "";
+const FIT_CALL_LINK = process.env.NEXT_PUBLIC_FIT_CALL_LINK || "";
+
+function buildLink(base: string, source: string) {
+  if (!base) return "#";
+  return `${base}${base.includes("?") ? "&" : "?"}client_reference_id=pro_${source}`;
+}
+
+export default function ProCTA({ variant }: { variant: "hero" | "close" }) {
+  const searchParams = useSearchParams();
+  const source = searchParams.get("source") || "direct";
+
+  const monthlyLink = buildLink(STRIPE_MONTHLY, source);
+  const annualLink = buildLink(STRIPE_ANNUAL, source);
+  const fitCallLink = FIT_CALL_LINK || "#";
+
+  const btnStyle = (bg: string, border: string, color: string): React.CSSProperties => ({
+    fontFamily: "Archivo, sans-serif",
+    fontWeight: 700,
+    fontSize: 16,
+    textDecoration: "none",
+    padding: "14px 22px",
+    borderRadius: 6,
+    background: bg,
+    color,
+    border: `2px solid ${border}`,
+    display: "inline-block",
+    textAlign: "center",
+    flex: "1 1 auto",
+    minWidth: variant === "hero" ? 180 : 140,
+  });
+
+  if (variant === "hero") {
+    return (
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 30 }}>
+        <a href={monthlyLink} style={btnStyle("#D66829", "#D66829", "#fff")}>
+          Join for $99/month
+        </a>
+        <a href={fitCallLink} style={btnStyle("transparent", "rgba(255,255,255,.35)", "#F1EDE7")}>
+          Talk to me first
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div style={{ fontFamily: "Archivo, sans-serif", fontWeight: 700, fontSize: 16, color: "#F1EDE7", marginBottom: 6 }}>
+        $99/month &nbsp;&middot;&nbsp; or $990/year, two months free
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 20 }}>
+        <a href={monthlyLink} style={btnStyle("#D66829", "#D66829", "#fff")}>Join monthly</a>
+        <a href={annualLink} style={btnStyle("#D66829", "#D66829", "#fff")}>Join annual</a>
+        <a href={fitCallLink} style={btnStyle("transparent", "rgba(255,255,255,.35)", "#F1EDE7")}>Book a Fit Call</a>
+      </div>
+    </>
+  );
+}

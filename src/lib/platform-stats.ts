@@ -85,3 +85,14 @@ export async function getSubscriberCounts(): Promise<SubscriberCounts> {
     pending: all.filter((s: any) => s.status === 'pending').length,
   }
 }
+
+/**
+ * Canonical demand mention count (Instagram comment requests).
+ */
+export async function getDemandMentionCount(): Promise<number> {
+  const supabase = createAdminClient()
+  const { count } = await (supabase as any)
+    .from('demand_mentions')
+    .select('id', { count: 'exact', head: true })
+  return count || 0
+}
