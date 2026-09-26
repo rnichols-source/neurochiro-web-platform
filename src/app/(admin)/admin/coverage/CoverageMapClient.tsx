@@ -261,12 +261,32 @@ export default function CoverageMapClient({
   }, [layers, buildDoctorFeatures])
 
   // ── Lookup ──
-  const handleLookup = async () => {
-    if (!lookupQuery.trim()) return
+  const [ambiguousOptions, setAmbiguousOptions] = useState<{ city: string; state: string }[] | null>(null)
+
+  const handleLookup = async (overrideQuery?: string) => {
+    const q = overrideQuery || lookupQuery.trim()
+    if (!q) return
     setLookupLoading(true)
-    try { const r = await lookupNearby(lookupQuery.trim()); setLookupResults(r.doctors); setLookupLabel(r.label) }
-    catch { setLookupLabel('Lookup failed'); setLookupResults([]) }
+    setAmbiguousOptions(null)
+    try {
+      const r = await lookupNearby(q)
+      if (r.ambiguous && r.ambiguous.length > 0) {
+        setAmbiguousOptions(r.ambiguous)
+        setLookupLabel(r.label)
+        setLookupResults(null)
+      } else {
+        setLookupResults(r.doctors)
+        setLookupLabel(r.label)
+      }
+    } catch { setLookupLabel('Lookup failed'); setLookupResults([]) }
     setLookupLoading(false)
+  }
+
+  const handlePickAmbiguous = (city: string, state: string) => {
+    const q = `${city}, ${state}`
+    setLookupQuery(q)
+    setAmbiguousOptions(null)
+    handleLookup(q)
   }
   const sortedLookupResults = lookupResults ? [...lookupResults].sort((a, b) => {
     if (lookupSort === 'distance') return a.distance_miles - b.distance_miles
@@ -384,12 +404,22 @@ export default function CoverageMapClient({
               onChange={e => setLookupQuery(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
               className="w-full pl-9 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-neuro-orange" />
           </div>
-          <button onClick={handleLookup} disabled={lookupLoading || !lookupQuery.trim()}
+          <button onClick={() => handleLookup()} disabled={lookupLoading || !lookupQuery.trim()}
             className="px-4 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm disabled:opacity-50">
             {lookupLoading ? '...' : 'Search'}
           </button>
         </div>
         {lookupLabel && <p className="text-xs text-white/50 mb-2">{lookupLabel}</p>}
+        {ambiguousOptions && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {ambiguousOptions.map((opt, i) => (
+              <button key={i} onClick={() => handlePickAmbiguous(opt.city, opt.state)}
+                className="px-3 py-1.5 bg-white/10 hover:bg-neuro-orange/30 border border-white/10 hover:border-neuro-orange rounded-lg text-xs font-bold text-white transition-colors">
+                {opt.city}, {opt.state}
+              </button>
+            ))}
+          </div>
+        )}
         {sortedLookupResults && (sortedLookupResults.length > 0 ? (
           <>
             <div className="flex gap-2 mb-2">

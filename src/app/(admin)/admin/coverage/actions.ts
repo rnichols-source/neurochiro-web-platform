@@ -341,7 +341,11 @@ export async function getCoverageStats(): Promise<CoverageStats> {
   }
 }
 
-export async function lookupNearby(query: string): Promise<{ doctors: LookupResult[]; label: string }> {
+export async function lookupNearby(query: string): Promise<{
+  doctors: LookupResult[];
+  label: string;
+  ambiguous?: { city: string; state: string }[];
+}> {
   await checkAdminAuth()
   const supabase = createAdminClient()
 
@@ -388,17 +392,38 @@ export async function lookupNearby(query: string): Promise<{ doctors: LookupResu
       }
     }
 
-    // Try bare city name
+    // Try bare city name — check for ambiguity
     if (!lat) {
       const { data } = await (supabase as any)
         .from('zip_codes')
         .select('city, state, lat, lng')
         .ilike('city', query.trim())
-        .limit(1)
+        .eq('country', 'US')
+
       if (data && data.length > 0) {
-        lat = Number(data[0].lat)
-        lng = Number(data[0].lng)
-        label = `Showing doctors near ${data[0].city}, ${data[0].state}`
+        // Deduplicate by state
+        const byState = new Map<string, { city: string; state: string; lat: number; lng: number }>()
+        for (const z of data) {
+          if (!byState.has(z.state)) {
+            byState.set(z.state, { city: z.city, state: z.state, lat: Number(z.lat), lng: Number(z.lng) })
+          }
+        }
+
+        if (byState.size === 1) {
+          // Unambiguous
+          const match = Array.from(byState.values())[0]
+          lat = match.lat
+          lng = match.lng
+          label = `Showing doctors near ${match.city}, ${match.state}`
+        } else {
+          // Ambiguous — return options instead of guessing
+          return {
+            doctors: [],
+            label: `"${query.trim()}" exists in ${byState.size} states. Pick one:`,
+            ambiguous: Array.from(byState.values()).map(v => ({ city: v.city, state: v.state }))
+              .sort((a, b) => a.state.localeCompare(b.state)),
+          }
+        }
       }
     }
   }
