@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
-import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff } from "lucide-react"
+import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send } from "lucide-react"
 import Link from "next/link"
-import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, lookupNearby, addMarketLead } from "./actions"
+import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, lookupNearby, addMarketLead, recordReferral } from "./actions"
 
 // ── Colors ──
 const COLORS = {
@@ -429,26 +429,78 @@ export default function CoverageMapClient({
                 </button>
               ))}
             </div>
-            <div className="space-y-1 max-h-[50vh] overflow-y-auto">
+            <div className="space-y-1.5 max-h-[50vh] overflow-y-auto">
               {sortedLookupResults.map(d => (
-                <div key={d.id} className="flex items-center gap-3 py-2 px-3 bg-white/5 rounded-xl">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white truncate">Dr. {d.first_name} {d.last_name}</p>
-                    <p className="text-[11px] text-white/40 truncate">{d.clinic_name} - {d.city}, {d.state}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs font-bold text-neuro-orange">{d.distance_miles} mi</p>
-                    <p className={`text-[10px] font-bold ${d.verification_status === 'verified' ? 'text-green-400' : 'text-amber-400'}`}>{d.verification_status}</p>
-                  </div>
-                  <div className="flex gap-1 shrink-0">
-                    <Link href={`/directory/${d.slug || d.id}`} target="_blank" className="p-1.5 bg-white/5 rounded-lg hover:bg-white/10"><ExternalLink className="w-3 h-3 text-white/50" /></Link>
-                    <Link href={`/admin/directory?search=${encodeURIComponent(`${d.first_name} ${d.last_name}`)}`} target="_blank" className="p-1.5 bg-white/5 rounded-lg hover:bg-white/10"><MapPin className="w-3 h-3 text-white/50" /></Link>
-                  </div>
-                </div>
+                <LookupResultRow key={d.id} doctor={d} searchedCity={lookupQuery} />
               ))}
             </div>
           </>
         ) : <p className="text-xs text-white/30 py-4 text-center">No doctors within 100 miles</p>)}
+      </div>
+    </div>
+  )
+}
+
+function LookupResultRow({ doctor: d, searchedCity }: { doctor: LookupResult; searchedCity: string }) {
+  const [copiedHandle, setCopiedHandle] = useState(false)
+  const [copiedUrl, setCopiedUrl] = useState(false)
+  const [sent, setSent] = useState(false)
+
+  const profileUrl = `https://neurochiro.co/directory/${d.slug || d.id}`
+
+  const copyToClipboard = async (text: string, type: 'handle' | 'url') => {
+    try {
+      await navigator.clipboard.writeText(text)
+      if (type === 'handle') { setCopiedHandle(true); setTimeout(() => setCopiedHandle(false), 1500) }
+      else { setCopiedUrl(true); setTimeout(() => setCopiedUrl(false), 1500) }
+    } catch {}
+  }
+
+  const handleSent = async () => {
+    setSent(true)
+    // Parse city/state from the search query
+    const parts = searchedCity.split(',').map(p => p.trim())
+    const city = parts[0] || searchedCity
+    const state = parts[1] || undefined
+    await recordReferral(d.id, city, state)
+  }
+
+  return (
+    <div className="bg-white/5 rounded-xl px-3 py-2.5">
+      <div className="flex items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-bold text-white truncate">Dr. {d.first_name} {d.last_name}</p>
+            {d.instagram_handle ? (
+              <button onClick={() => copyToClipboard(d.instagram_handle!, 'handle')}
+                className="text-[11px] text-cyan-400 hover:text-cyan-300 font-medium shrink-0 flex items-center gap-1 transition-colors"
+                title="Copy handle">
+                {d.instagram_handle}
+                {copiedHandle ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-2.5 h-2.5 opacity-40" />}
+              </button>
+            ) : (
+              <span className="text-[10px] text-red-400/60 shrink-0">no IG</span>
+            )}
+          </div>
+          <p className="text-[11px] text-white/40 truncate">{d.clinic_name} · {d.city}, {d.state}</p>
+        </div>
+        <div className="text-right shrink-0">
+          <p className="text-xs font-bold text-neuro-orange">{d.distance_miles} mi</p>
+          <p className={`text-[10px] font-bold ${d.verification_status === 'verified' ? 'text-green-400' : 'text-amber-400'}`}>{d.verification_status}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-1.5 mt-2">
+        <button onClick={() => copyToClipboard(profileUrl, 'url')}
+          className="flex items-center gap-1 px-2 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-bold text-white/50 hover:text-white/80 transition-colors">
+          {copiedUrl ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> Profile link</>}
+        </button>
+        <button onClick={handleSent} disabled={sent}
+          className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
+            sent ? 'bg-green-500/20 text-green-400' : 'bg-neuro-orange/20 hover:bg-neuro-orange/30 text-neuro-orange'
+          }`}>
+          {sent ? <><Check className="w-3 h-3" /> Sent</> : <><Send className="w-3 h-3" /> Sent to patient</>}
+        </button>
+        <Link href={`/directory/${d.slug || d.id}`} target="_blank" className="p-1 bg-white/5 rounded-lg hover:bg-white/10 ml-auto"><ExternalLink className="w-3 h-3 text-white/40" /></Link>
       </div>
     </div>
   )

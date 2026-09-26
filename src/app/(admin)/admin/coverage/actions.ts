@@ -83,6 +83,7 @@ export interface LookupResult {
   verification_status: string
   membership_tier: string | null
   distance_miles: number
+  instagram_handle: string | null
 }
 
 // ── All US states ──
@@ -435,7 +436,7 @@ export async function lookupNearby(query: string): Promise<{
   // Fetch all US doctors with valid coords
   const { data: doctors } = await supabase
     .from('doctors')
-    .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier')
+    .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, instagram_url')
     .in('verification_status', ['verified', 'pending'])
     .or('country.is.null,country.eq.US')
 
@@ -447,6 +448,13 @@ export async function lookupNearby(query: string): Promise<{
     if (!d.latitude || !d.longitude || d.latitude === 0) continue
     const dist = haversineDistance(lat, lng, d.latitude, d.longitude)
     if (dist <= 100) {
+      // Extract @handle from instagram URL
+      let instagram_handle: string | null = null
+      if (d.instagram_url) {
+        const match = d.instagram_url.match(/instagram\.com\/([^/?]+)/)
+        if (match) instagram_handle = '@' + match[1].replace(/\/$/, '')
+      }
+
       results.push({
         id: d.id,
         first_name: d.first_name,
@@ -458,6 +466,7 @@ export async function lookupNearby(query: string): Promise<{
         verification_status: d.verification_status,
         membership_tier: d.membership_tier,
         distance_miles: Math.round(dist * 10) / 10,
+        instagram_handle,
       })
     }
   }
@@ -634,5 +643,24 @@ export async function removeMarketLead(id: string): Promise<{ ok: boolean }> {
   const supabase = createAdminClient()
 
   await (supabase as any).from('market_leads').delete().eq('id', id)
+  return { ok: true }
+}
+
+// ── Referrals ──
+
+export async function recordReferral(
+  doctorId: string,
+  searchedCity: string,
+  searchedState?: string,
+): Promise<{ ok: boolean }> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+
+  await (supabase as any).from('referrals').insert({
+    doctor_id: doctorId,
+    searched_city: searchedCity,
+    searched_state: searchedState || null,
+  })
+
   return { ok: true }
 }
