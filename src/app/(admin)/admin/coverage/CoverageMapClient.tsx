@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
-import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, LookupResult, lookupNearby } from "./actions"
+import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, lookupNearby, addMarketLead } from "./actions"
 
 // ── Colors ──
 const COLORS = {
@@ -313,25 +313,21 @@ export default function CoverageMapClient({
                 {stats.internationalCount > 0 && <p className="text-[10px] text-white/30 mt-1 flex items-center gap-1"><Globe className="w-3 h-3" /> {stats.internationalCount} intl doctors</p>}
               </div>
             </div>
-            {stats.topGaps.length > 0 && (
-              <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3">
-                <p className="text-[10px] text-rose-400 uppercase font-bold tracking-wider mb-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Recruit Here First</p>
-                <p className="text-[10px] text-white/40 mb-2">Demand with no doctor within 50 miles.</p>
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
-                  {stats.topGaps.map((g, i) => {
-                    const parts: string[] = []
-                    if (g.confirmed > 0) parts.push(`${g.confirmed} waitlist`)
-                    if (g.pending > 0) parts.push(`${g.pending} pending`)
-                    if (g.mentions > 0) parts.push(`${g.mentions} mentions`)
-                    return (
-                      <span key={i} className="text-xs text-white/80">
-                        <span className="font-bold">{g.city}, {g.state}</span>
-                        <span className="text-rose-400 ml-1">{parts.join(' + ')}</span>
-                      </span>
-                    )
-                  })}
-                </div>
-              </div>
+            {stats.recruitMarkets.length > 0 && (
+              <MarketPanel
+                title="Recruit Here"
+                subtitle="Demand with no doctor within 50 miles."
+                markets={stats.recruitMarkets}
+                color="rose"
+              />
+            )}
+            {stats.coveredMarkets.length > 0 && (
+              <MarketPanel
+                title="Already Covered"
+                subtitle="Demand where a doctor is nearby. Reply to these people."
+                markets={stats.coveredMarkets}
+                color="green"
+              />
             )}
           </div>
         )}
@@ -434,6 +430,91 @@ function StatCard({ label, value, color, sub }: { label: string; value: number; 
       <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">{label}</p>
       <p className={`text-xl font-bold ${color}`}>{value}</p>
       {sub && <p className="text-[10px] text-white/25 mt-0.5 leading-tight">{sub}</p>}
+    </div>
+  )
+}
+
+function MarketPanel({ title, subtitle, markets, color }: {
+  title: string; subtitle: string; markets: MarketCluster[]; color: 'rose' | 'green'
+}) {
+  const [addingTo, setAddingTo] = useState<string | null>(null)
+  const [leadInput, setLeadInput] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const bgClass = color === 'rose' ? 'bg-rose-500/10 border-rose-500/20' : 'bg-green-500/10 border-green-500/20'
+  const titleClass = color === 'rose' ? 'text-rose-400' : 'text-green-400'
+  const badgeClass = color === 'rose' ? 'text-rose-400' : 'text-green-400'
+
+  const handleAddLead = async (market: MarketCluster) => {
+    if (!leadInput.trim()) return
+    setSaving(true)
+    // Use the first city in the cluster for storage
+    const [city, state] = market.cities[0].split(', ')
+    await addMarketLead(city, state, leadInput.trim())
+    market.leads.push(leadInput.trim())
+    setLeadInput('')
+    setAddingTo(null)
+    setSaving(false)
+  }
+
+  return (
+    <div className={`border rounded-xl p-3 ${bgClass}`}>
+      <p className={`text-[10px] uppercase font-bold tracking-wider mb-1 flex items-center gap-1 ${titleClass}`}>
+        <AlertTriangle className="w-3 h-3" /> {title}
+      </p>
+      <p className="text-[10px] text-white/40 mb-3">{subtitle}</p>
+      <div className="space-y-2.5">
+        {markets.map((m, i) => (
+          <div key={i} className="bg-black/20 rounded-lg px-3 py-2">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <span className="text-sm font-bold text-white">{m.name}</span>
+                <span className={`ml-2 text-xs font-bold ${badgeClass}`}>{m.total}</span>
+                {m.waitlist > 0 && m.mentions > 0 ? (
+                  <span className="text-[10px] text-white/30 ml-1">({m.waitlist} waitlist + {m.mentions} mentions)</span>
+                ) : m.waitlist > 0 ? (
+                  <span className="text-[10px] text-white/30 ml-1">({m.waitlist} waitlist)</span>
+                ) : (
+                  <span className="text-[10px] text-white/30 ml-1">({m.mentions} mentions)</span>
+                )}
+              </div>
+              <button
+                onClick={() => setAddingTo(addingTo === m.name ? null : m.name)}
+                className="text-[10px] text-white/30 hover:text-white/60 shrink-0 px-1"
+                title="Add lead"
+              >+ lead</button>
+            </div>
+            {m.cities.length > 1 && (
+              <p className="text-[10px] text-white/25 mt-1 leading-relaxed">{m.cities.join(' · ')}</p>
+            )}
+            {m.leads.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {m.leads.map((l, li) => (
+                  <span key={li} className="text-[10px] bg-white/10 text-cyan-300 px-1.5 py-0.5 rounded font-medium">{l}</span>
+                ))}
+              </div>
+            )}
+            {addingTo === m.name && (
+              <div className="flex gap-1.5 mt-2">
+                <input
+                  type="text"
+                  value={leadInput}
+                  onChange={e => setLeadInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleAddLead(m) }}
+                  placeholder="@handle or name"
+                  className="flex-1 px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white text-[11px] placeholder:text-white/20 focus:outline-none focus:border-cyan-400"
+                  autoFocus
+                />
+                <button
+                  onClick={() => handleAddLead(m)}
+                  disabled={saving || !leadInput.trim()}
+                  className="px-3 py-1.5 bg-cyan-500 text-white rounded-lg text-[10px] font-bold disabled:opacity-50"
+                >Save</button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

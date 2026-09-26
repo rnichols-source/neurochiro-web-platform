@@ -47,6 +47,16 @@ export interface MentionCity {
   gap: boolean
 }
 
+export interface MarketCluster {
+  name: string
+  cities: string[]
+  waitlist: number
+  mentions: number
+  total: number
+  leads: string[]
+  hasDoctor: boolean
+}
+
 export interface CoverageStats {
   verified: number
   pending: number
@@ -57,7 +67,8 @@ export interface CoverageStats {
   confirmedSubscribers: number
   pendingSubscribers: number
   totalMentions: number
-  topGaps: { city: string; state: string; confirmed: number; pending: number; mentions: number }[]
+  recruitMarkets: MarketCluster[]
+  coveredMarkets: MarketCluster[]
   invisibleCount: number
 }
 
@@ -230,33 +241,89 @@ export async function getCoverageStats(): Promise<CoverageStats> {
   const mentionsData = await getMentionsData()
   const totalMentions = mentionsData.reduce((sum, m) => sum + m.count, 0)
 
-  // Top gaps: combine subscriber ZIPs and mention cities, rank by total demand signal
+  // Build ALL demand points (subscribers + mentions) with coords and gap status
   const demandData = await getDemandData()
 
-  // Build a map of city+state -> { confirmed, pending, mentions }
-  const gapMap = new Map<string, { city: string; state: string; confirmed: number; pending: number; mentions: number }>()
+  type DemandPoint = { city: string; state: string; lat: number; lng: number; waitlist: number; mentions: number; hasDoctor: boolean }
+  const demandPoints = new Map<string, DemandPoint>()
 
   for (const d of demandData) {
-    if (!d.gap) continue
     const key = `${d.city}|${d.state}`
-    const existing = gapMap.get(key) || { city: d.city, state: d.state, confirmed: 0, pending: 0, mentions: 0 }
-    existing.confirmed += d.confirmed
-    existing.pending += d.pending
-    gapMap.set(key, existing)
+    const existing = demandPoints.get(key) || { city: d.city, state: d.state, lat: d.lat, lng: d.lng, waitlist: 0, mentions: 0, hasDoctor: !d.gap }
+    existing.waitlist += d.confirmed + d.pending
+    demandPoints.set(key, existing)
   }
 
   for (const m of mentionsData) {
-    if (!m.gap) continue
     const key = `${m.city}|${m.state}`
-    const existing = gapMap.get(key) || { city: m.city, state: m.state, confirmed: 0, pending: 0, mentions: 0 }
+    const existing = demandPoints.get(key) || { city: m.city, state: m.state, lat: m.lat, lng: m.lng, waitlist: 0, mentions: 0, hasDoctor: !m.gap }
     existing.mentions += m.count
-    gapMap.set(key, existing)
+    demandPoints.set(key, existing)
   }
 
-  const gaps = Array.from(gapMap.values())
-    .filter(g => (g.confirmed + g.pending + g.mentions) >= 1)
-    .sort((a, b) => (b.confirmed + b.pending + b.mentions) - (a.confirmed + a.pending + a.mentions))
-    .slice(0, 10)
+  // Fetch leads
+  const { data: leadsData } = await (supabase as any).from('market_leads').select('city, state, note')
+  const leadsByCityState = new Map<string, string[]>()
+  for (const l of (leadsData || [])) {
+    const key = `${l.city}|${l.state}`
+    const arr = leadsByCityState.get(key) || []
+    arr.push(l.note)
+    leadsByCityState.set(key, arr)
+  }
+
+  // Cluster cities within 50mi of each other
+  const points = Array.from(demandPoints.values())
+    .filter(p => (p.waitlist + p.mentions) >= 1)
+    .sort((a, b) => (b.waitlist + b.mentions) - (a.waitlist + a.mentions))
+
+  const clusters: { center: DemandPoint; members: DemandPoint[] }[] = []
+  const assigned = new Set<string>()
+
+  for (const p of points) {
+    const key = `${p.city}|${p.state}`
+    if (assigned.has(key)) continue
+
+    // Start new cluster
+    const cluster = { center: p, members: [p] }
+    assigned.add(key)
+
+    // Pull in nearby unassigned points
+    for (const q of points) {
+      const qKey = `${q.city}|${q.state}`
+      if (assigned.has(qKey)) continue
+      if (haversineDistance(p.lat, p.lng, q.lat, q.lng) <= 50) {
+        cluster.members.push(q)
+        assigned.add(qKey)
+      }
+    }
+    clusters.push(cluster)
+  }
+
+  // Convert clusters to MarketCluster
+  function buildMarket(cluster: { center: DemandPoint; members: DemandPoint[] }): MarketCluster {
+    const waitlist = cluster.members.reduce((s, m) => s + m.waitlist, 0)
+    const mentions = cluster.members.reduce((s, m) => s + m.mentions, 0)
+    const cities = cluster.members.map(m => `${m.city}, ${m.state}`)
+    const hasDoctor = cluster.members.some(m => m.hasDoctor)
+
+    // Collect leads for all cities in cluster
+    const leads: string[] = []
+    for (const m of cluster.members) {
+      const cityLeads = leadsByCityState.get(`${m.city}|${m.state}`)
+      if (cityLeads) leads.push(...cityLeads)
+    }
+
+    // Name: if single city, use "City, ST". If multi, use largest city name + "area"
+    const name = cluster.members.length === 1
+      ? `${cluster.center.city}, ${cluster.center.state}`
+      : `${cluster.center.city} area`
+
+    return { name, cities, waitlist, mentions, total: waitlist + mentions, leads, hasDoctor }
+  }
+
+  const allMarkets = clusters.map(buildMarket).sort((a, b) => b.total - a.total)
+  const recruitMarkets = allMarkets.filter(m => !m.hasDoctor).slice(0, 15)
+  const coveredMarkets = allMarkets.filter(m => m.hasDoctor).slice(0, 15)
 
   return {
     verified,
@@ -268,7 +335,8 @@ export async function getCoverageStats(): Promise<CoverageStats> {
     confirmedSubscribers: confirmedSubs.length,
     pendingSubscribers: pendingSubs.length,
     totalMentions,
-    topGaps: gaps,
+    recruitMarkets,
+    coveredMarkets,
     invisibleCount: invisible,
   }
 }
@@ -523,4 +591,23 @@ export async function saveMentionsBatch(
   }
 
   return { saved: rows.length }
+}
+
+// ── Market Leads ──
+
+export async function addMarketLead(city: string, state: string, note: string): Promise<{ ok: boolean; error?: string }> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+
+  const { error } = await (supabase as any).from('market_leads').insert({ city, state, note })
+  if (error) return { ok: false, error: error.message }
+  return { ok: true }
+}
+
+export async function removeMarketLead(id: string): Promise<{ ok: boolean }> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+
+  await (supabase as any).from('market_leads').delete().eq('id', id)
+  return { ok: true }
 }
