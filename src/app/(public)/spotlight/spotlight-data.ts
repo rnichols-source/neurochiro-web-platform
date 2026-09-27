@@ -164,6 +164,22 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 9,
     publishedAt: "2026-09-25T12:00:00Z",
   },
+  {
+    id: "ep-010",
+    doctorName: "Dr. Johnny Cooper",
+    doctorSlug: "dr-johnny-cooper",
+    clinicName: "Resilient Chiropractic",
+    city: "Altamonte Springs",
+    state: "FL",
+    videoUrl: "https://www.youtube.com/embed/R_EUBVAs4tw",
+    thumbnail: "https://img.youtube.com/vi/R_EUBVAs4tw/hqdefault.jpg",
+    quote:
+      "When I learned that chiropractic is about healing the body naturally, I was like, this is what I want to do.",
+    description:
+      "Dr. Johnny Cooper is the owner of Resilient Chiropractic in Altamonte Springs, Florida, about 20 minutes north of Orlando. A Palmer College graduate, he discovered chiropractic through a high school shadowing assignment where he unknowingly ended up in the office of a distant relative, who later presented his diploma at graduation. Dr. Cooper practices Gonstead Technique using nervoscope instrumentation and x-ray analysis. He shares the story of a nonverbal 9-year-old who went three days without Miralax after a single adjustment, and why chiropractic is about helping the body function better now and for the future.",
+    episodeNumber: 10,
+    publishedAt: "2026-09-26T12:00:00Z",
+  },
 ];
 
 export function getLatestEpisode(): SpotlightEpisode {
