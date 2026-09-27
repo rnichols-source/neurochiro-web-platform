@@ -143,7 +143,7 @@ const SELECT_FIELDS = 'id, first_name, last_name, clinic_name, slug, city, state
 
 // Map region codes to ISO country codes for doctor filtering
 const REGION_TO_COUNTRY: Record<string, string> = {
-  'US': 'US', 'CA': 'CA', 'UK': 'GB', 'NZ': 'NZ', 'AU': 'AU',
+  'US': 'US', 'CA': 'CA', 'UK': 'GB', 'GB': 'GB', 'NZ': 'NZ', 'AU': 'AU',
 }
 
 /** Country-aware doctors query: filters verified/pending + correct country */
