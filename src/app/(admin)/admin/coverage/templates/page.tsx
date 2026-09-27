@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, Save, Check, AlertCircle } from "lucide-react"
+import { ArrowLeft, Save, Check, AlertCircle, Copy } from "lucide-react"
 import Link from "next/link"
 import { getReplyTemplates, updateReplyTemplate, type ReplyTemplate } from "../actions"
 
@@ -10,6 +10,7 @@ export default function TemplatesPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
   const [saved, setSaved] = useState<string | null>(null)
+  const [copied, setCopied] = useState<string | null>(null)
   const [error, setError] = useState("")
   const [edits, setEdits] = useState<Record<string, string>>({})
 
@@ -72,21 +73,35 @@ export default function TemplatesPage() {
                       </p>
                     )}
                   </div>
-                  <button
-                    onClick={() => handleSave(tpl.id)}
-                    disabled={!isDirty || saving === tpl.id}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                      saved === tpl.id
-                        ? 'bg-green-500/20 text-green-400'
-                        : isDirty
-                        ? 'bg-neuro-orange text-white hover:bg-neuro-orange/90'
-                        : 'bg-white/5 text-white/20'
-                    }`}
-                  >
-                    {saved === tpl.id ? <><Check className="w-3 h-3" /> Saved</> :
-                     saving === tpl.id ? 'Saving...' :
-                     <><Save className="w-3 h-3" /> Save</>}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(edits[tpl.id] || tpl.body)
+                        setCopied(tpl.id)
+                        setTimeout(() => setCopied(null), 1500)
+                      }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                        copied === tpl.id ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      {copied === tpl.id ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
+                    </button>
+                    <button
+                      onClick={() => handleSave(tpl.id)}
+                      disabled={!isDirty || saving === tpl.id}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                        saved === tpl.id
+                          ? 'bg-green-500/20 text-green-400'
+                          : isDirty
+                          ? 'bg-neuro-orange text-white hover:bg-neuro-orange/90'
+                          : 'bg-white/5 text-white/20'
+                      }`}
+                    >
+                      {saved === tpl.id ? <><Check className="w-3 h-3" /> Saved</> :
+                       saving === tpl.id ? 'Saving...' :
+                       <><Save className="w-3 h-3" /> Save</>}
+                    </button>
+                  </div>
                 </div>
                 <textarea
                   value={edits[tpl.id] || ''}
