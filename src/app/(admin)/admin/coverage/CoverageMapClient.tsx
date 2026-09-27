@@ -481,6 +481,7 @@ function LookupResultRow({ doctor: d, searchedCity, templates }: { doctor: Looku
   const [sent, setSent] = useState(false)
 
   const profileUrl = `https://neurochiro.co/directory/${d.slug || d.id}`
+  const contactRequestUrl = `https://neurochiro.co/contact-request?doctor=${d.slug || d.id}&source=dm_outreach`
   const doctorName = `${d.first_name} ${d.last_name}`.trim()
   const { city } = parseSearchCity(searchedCity)
 
@@ -490,6 +491,7 @@ function LookupResultRow({ doctor: d, searchedCity, templates }: { doctor: Looku
     handle: d.instagram_handle || '',
     doctor_name: doctorName,
     profile_url: profileUrl,
+    contact_request_url: contactRequestUrl,
   }
 
   const commentTpl = templates.find(t => t.id === 'doctor_comment')
@@ -542,6 +544,7 @@ function LookupResultRow({ doctor: d, searchedCity, templates }: { doctor: Looku
         {dmTpl && (
           <TemplateCopyButton label="DM" text={fillTemplate(dmTpl.body, vars)} templateId="doctor_dm" searchedCity={searchedCity} doctorId={d.id} />
         )}
+        <TemplateCopyButton label="Request link" text={contactRequestUrl} templateId="contact_request_link" searchedCity={searchedCity} doctorId={d.id} />
         <button onClick={() => copyToClipboard(profileUrl, 'url')}
           className="flex items-center gap-1 px-2 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-bold text-white/50 hover:text-white/80 transition-colors">
           {copiedUrl ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> Link</>}

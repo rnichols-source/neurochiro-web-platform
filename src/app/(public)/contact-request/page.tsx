@@ -17,6 +17,7 @@ export default function ContactRequestPage() {
 function ContactRequestContent() {
   const searchParams = useSearchParams();
   const doctorSlug = searchParams.get("doctor");
+  const urlSource = searchParams.get("source") || "doctor_joined";
 
   const [doctor, setDoctor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -96,6 +97,7 @@ function ContactRequestContent() {
           note: note.trim() || undefined,
           consent: true,
           consentText,
+          source: urlSource,
         }),
       });
 
