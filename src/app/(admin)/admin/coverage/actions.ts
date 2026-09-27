@@ -602,3 +602,62 @@ export async function recordReferral(
 
   return { ok: true }
 }
+
+// ── Reply Templates ──
+
+export interface ReplyTemplate {
+  id: string
+  label: string
+  body: string
+  variables: string[]
+}
+
+export async function getReplyTemplates(): Promise<ReplyTemplate[]> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+  const { data } = await (supabase as any).from('reply_templates').select('id, label, body, variables').order('id')
+  return data || []
+}
+
+export async function updateReplyTemplate(id: string, body: string): Promise<{ ok: boolean; error?: string }> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+
+  // Get allowed variables for this template
+  const { data: existing } = await (supabase as any).from('reply_templates').select('variables').eq('id', id).single()
+  if (!existing) return { ok: false, error: 'Template not found' }
+
+  // Validate: check for variables used in body that aren't in the allowed list
+  const usedVars = (body.match(/\{(\w+)\}/g) || []).map((v: string) => v.slice(1, -1))
+  const allowed = new Set(existing.variables)
+  const invalid = usedVars.filter((v: string) => !allowed.has(v))
+  if (invalid.length > 0) {
+    return { ok: false, error: `Unknown variables: {${invalid.join('}, {')}}. Available: {${existing.variables.join('}, {')}}` }
+  }
+
+  const { error } = await (supabase as any).from('reply_templates')
+    .update({ body, updated_at: new Date().toISOString() })
+    .eq('id', id)
+
+  if (error) return { ok: false, error: error.message }
+  return { ok: true }
+}
+
+export async function logReply(
+  templateId: string,
+  searchedCity: string,
+  searchedState?: string,
+  doctorId?: string,
+): Promise<{ ok: boolean }> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+
+  await (supabase as any).from('reply_logs').insert({
+    template_id: templateId,
+    searched_city: searchedCity,
+    searched_state: searchedState || null,
+    doctor_id: doctorId || null,
+  })
+
+  return { ok: true }
+}

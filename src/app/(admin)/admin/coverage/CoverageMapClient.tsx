@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send } from "lucide-react"
 import Link from "next/link"
-import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, lookupNearby, addMarketLead, recordReferral } from "./actions"
+import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, recordReferral, logReply } from "./actions"
 
 // ── Colors ──
 const COLORS = {
@@ -39,12 +39,13 @@ function loadSavedLayers(): Record<LayerKey, boolean> {
 // ── Main Component ──
 
 export default function CoverageMapClient({
-  doctors, demand, stats, mentions,
+  doctors, demand, stats, mentions, templates,
 }: {
   doctors: CoverageDoctor[]
   demand: DemandZip[]
   stats: CoverageStats
   mentions: MentionCity[]
+  templates: ReplyTemplate[]
 }) {
   const [layers, setLayers] = useState<Record<LayerKey, boolean>>(loadSavedLayers)
   const [showStatsPanel, setShowStatsPanel] = useState(true)
@@ -306,6 +307,7 @@ export default function CoverageMapClient({
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-bold">Coverage Map</h1>
             <Link href="/admin/coverage/mentions" className="text-[10px] font-bold text-cyan-400/70 hover:text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-lg">+ Mentions</Link>
+            <Link href="/admin/coverage/templates" className="text-[10px] font-bold text-white/40 hover:text-white/70 bg-white/5 px-2 py-1 rounded-lg">Templates</Link>
           </div>
           <button onClick={() => setShowStatsPanel(!showStatsPanel)} className="text-white/50 text-xs flex items-center gap-1">
             {showStatsPanel ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -431,22 +433,67 @@ export default function CoverageMapClient({
             </div>
             <div className="space-y-1.5 max-h-[50vh] overflow-y-auto">
               {sortedLookupResults.map(d => (
-                <LookupResultRow key={d.id} doctor={d} searchedCity={lookupQuery} />
+                <LookupResultRow key={d.id} doctor={d} searchedCity={lookupQuery} templates={templates} />
               ))}
             </div>
           </>
-        ) : <p className="text-xs text-white/30 py-4 text-center">No doctors within 100 miles</p>)}
+        ) : (
+          <WaitlistReplyButtons searchedCity={lookupQuery} templates={templates} />
+        ))}
       </div>
     </div>
   )
 }
 
-function LookupResultRow({ doctor: d, searchedCity }: { doctor: LookupResult; searchedCity: string }) {
+function fillTemplate(body: string, vars: Record<string, string>): string {
+  return body.replace(/\{(\w+)\}/g, (_, key) => vars[key] || `{${key}}`)
+}
+
+function parseSearchCity(searchedCity: string): { city: string; state?: string } {
+  const parts = searchedCity.split(',').map(p => p.trim())
+  return { city: parts[0] || searchedCity, state: parts[1] || undefined }
+}
+
+function TemplateCopyButton({ label, text, templateId, searchedCity, doctorId, color = 'white/5' }: {
+  label: string; text: string; templateId: string; searchedCity: string; doctorId?: string; color?: string
+}) {
+  const [copied, setCopied] = useState(false)
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+      const { city, state } = parseSearchCity(searchedCity)
+      logReply(templateId, city, state, doctorId)
+    } catch {}
+  }
+  return (
+    <button onClick={handleCopy}
+      className={`flex items-center gap-1 px-2 py-1 bg-${color} hover:bg-white/10 rounded-lg text-[10px] font-bold text-white/50 hover:text-white/80 transition-colors`}>
+      {copied ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> {label}</>}
+    </button>
+  )
+}
+
+function LookupResultRow({ doctor: d, searchedCity, templates }: { doctor: LookupResult; searchedCity: string; templates: ReplyTemplate[] }) {
   const [copiedHandle, setCopiedHandle] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [sent, setSent] = useState(false)
 
   const profileUrl = `https://neurochiro.co/directory/${d.slug || d.id}`
+  const doctorName = `${d.first_name} ${d.last_name}`.trim()
+  const { city } = parseSearchCity(searchedCity)
+
+  const vars: Record<string, string> = {
+    city: d.city || city,
+    state: d.state || '',
+    handle: d.instagram_handle || '',
+    doctor_name: doctorName,
+    profile_url: profileUrl,
+  }
+
+  const commentTpl = templates.find(t => t.id === 'doctor_comment')
+  const dmTpl = templates.find(t => t.id === 'doctor_dm')
 
   const copyToClipboard = async (text: string, type: 'handle' | 'url') => {
     try {
@@ -458,11 +505,8 @@ function LookupResultRow({ doctor: d, searchedCity }: { doctor: LookupResult; se
 
   const handleSent = async () => {
     setSent(true)
-    // Parse city/state from the search query
-    const parts = searchedCity.split(',').map(p => p.trim())
-    const city = parts[0] || searchedCity
-    const state = parts[1] || undefined
-    await recordReferral(d.id, city, state)
+    const { city: c, state: s } = parseSearchCity(searchedCity)
+    await recordReferral(d.id, c, s)
   }
 
   return (
@@ -489,19 +533,49 @@ function LookupResultRow({ doctor: d, searchedCity }: { doctor: LookupResult; se
           <p className={`text-[10px] font-bold ${d.verification_status === 'verified' ? 'text-green-400' : 'text-amber-400'}`}>{d.verification_status}</p>
         </div>
       </div>
-      <div className="flex items-center gap-1.5 mt-2">
+      <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+        {commentTpl && d.instagram_handle ? (
+          <TemplateCopyButton label="Comment" text={fillTemplate(commentTpl.body, vars)} templateId="doctor_comment" searchedCity={searchedCity} doctorId={d.id} />
+        ) : commentTpl ? (
+          <span className="text-[10px] text-white/20 px-2">comment needs IG handle</span>
+        ) : null}
+        {dmTpl && (
+          <TemplateCopyButton label="DM" text={fillTemplate(dmTpl.body, vars)} templateId="doctor_dm" searchedCity={searchedCity} doctorId={d.id} />
+        )}
         <button onClick={() => copyToClipboard(profileUrl, 'url')}
           className="flex items-center gap-1 px-2 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-bold text-white/50 hover:text-white/80 transition-colors">
-          {copiedUrl ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> Profile link</>}
+          {copiedUrl ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> Link</>}
         </button>
         <button onClick={handleSent} disabled={sent}
           className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
             sent ? 'bg-green-500/20 text-green-400' : 'bg-neuro-orange/20 hover:bg-neuro-orange/30 text-neuro-orange'
           }`}>
-          {sent ? <><Check className="w-3 h-3" /> Sent</> : <><Send className="w-3 h-3" /> Sent to patient</>}
+          {sent ? <><Check className="w-3 h-3" /> Sent</> : <><Send className="w-3 h-3" /> Sent</>}
         </button>
         <Link href={`/directory/${d.slug || d.id}`} target="_blank" className="p-1 bg-white/5 rounded-lg hover:bg-white/10 ml-auto"><ExternalLink className="w-3 h-3 text-white/40" /></Link>
       </div>
+    </div>
+  )
+}
+
+function WaitlistReplyButtons({ searchedCity, templates }: { searchedCity: string; templates: ReplyTemplate[] }) {
+  const waitlistDm = templates.find(t => t.id === 'waitlist_dm')
+  const waitlistComment = templates.find(t => t.id === 'waitlist_comment')
+  const { city } = parseSearchCity(searchedCity)
+
+  return (
+    <div className="text-center py-4">
+      <p className="text-xs text-white/30 mb-3">No doctors within 100 miles</p>
+      {(waitlistDm || waitlistComment) && (
+        <div className="flex items-center justify-center gap-2">
+          {waitlistDm && (
+            <TemplateCopyButton label="Copy waitlist DM" text={fillTemplate(waitlistDm.body, { city })} templateId="waitlist_dm" searchedCity={searchedCity} />
+          )}
+          {waitlistComment && (
+            <TemplateCopyButton label="Copy comment" text={fillTemplate(waitlistComment.body, { city })} templateId="waitlist_comment" searchedCity={searchedCity} />
+          )}
+        </div>
+      )}
     </div>
   )
 }

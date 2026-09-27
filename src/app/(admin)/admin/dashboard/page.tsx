@@ -156,27 +156,28 @@ export default function AdminDashboard() {
       </section>
 
       {/* ── Referrals ── */}
-      {(stats?.totalReferrals > 0 || (stats?.referralBreakdown && stats.referralBreakdown.length > 0)) && (
+      {(stats?.totalReferrals > 0 || stats?.replyStats?.total > 0 || (stats?.referralBreakdown && stats.referralBreakdown.length > 0)) && (
         <section>
           <h2 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-3">Patient Introductions</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <StatCard label="Total Referrals" value={stats.totalReferrals} sub="Patients pointed toward a doctor" color="text-cyan-400" />
-            <div className="bg-white/5 rounded-xl p-3 col-span-1 sm:col-span-3">
-              <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider mb-2">By Doctor</p>
-              {stats.referralBreakdown.length > 0 ? (
-                <div className="flex flex-wrap gap-x-4 gap-y-1">
-                  {stats.referralBreakdown.map((r: any, i: number) => (
-                    <span key={i} className="text-xs text-white/70">
-                      <span className="font-bold">{r.name}</span>
-                      <span className="text-cyan-400 ml-1">{r.count}</span>
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-white/30">No referrals yet</p>
-              )}
-            </div>
+            <StatCard label="Replies Sent" value={stats.replyStats?.total || 0} sub="IG comment/DM replies" color="text-cyan-400" />
+            <StatCard label="To a Doctor" value={stats.replyStats?.doctorReplies || 0} sub="Pointed to a member" color="text-green-400" />
+            <StatCard label="To Waitlist" value={stats.replyStats?.waitlistReplies || 0} sub="Demand without a doctor" color="text-amber-400" />
+            <StatCard label="Referrals" value={stats.totalReferrals} sub="Profile links sent" color="text-purple-400" />
           </div>
+          {stats.referralBreakdown.length > 0 && (
+            <div className="bg-white/5 rounded-xl p-3 mt-3">
+              <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider mb-2">Referrals by Doctor</p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1">
+                {stats.referralBreakdown.map((r: any, i: number) => (
+                  <span key={i} className="text-xs text-white/70">
+                    <span className="font-bold">{r.name}</span>
+                    <span className="text-cyan-400 ml-1">{r.count}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
       )}
 

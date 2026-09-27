@@ -146,6 +146,7 @@ export async function getAdminDashboardStats() {
       jobPostRevenue: (paidJobPostings || 0) * 99,
       totalReferrals,
       referralBreakdown,
+      replyStats: await getReplyStats(supabase),
     }
   } catch (e) {
     console.error("Admin Dashboard Error:", e)
@@ -161,8 +162,17 @@ export async function getAdminDashboardStats() {
       pendingVerifications: 0,
       totalReferrals: 0,
       referralBreakdown: [],
+      replyStats: { total: 0, doctorReplies: 0, waitlistReplies: 0 },
     }
   }
+}
+
+async function getReplyStats(supabase: any) {
+  const { data } = await (supabase as any).from('reply_logs').select('template_id')
+  const logs = data || []
+  const doctorReplies = logs.filter((l: any) => l.template_id === 'doctor_comment' || l.template_id === 'doctor_dm').length
+  const waitlistReplies = logs.filter((l: any) => l.template_id === 'waitlist_dm' || l.template_id === 'waitlist_comment').length
+  return { total: logs.length, doctorReplies, waitlistReplies }
 }
 
 // ── Action List: "What needs me today" ──
