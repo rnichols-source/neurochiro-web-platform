@@ -263,14 +263,30 @@ export async function GET(request: NextRequest) {
 
     const resolvedSplit = splitFromLocation || splitFromQuery;
     if (!hasSearchCoords && resolvedSplit?.city && resolvedSplit?.stateCode) {
+      // Try hardcoded city data first (fast)
       const { cityToSlug } = await import('@/lib/city-data');
       const slug = cityToSlug(resolvedSplit.city, resolvedSplit.stateCode);
       const coords = getCityCoords(slug);
       if (coords) {
         searchLat = coords.lat;
-        locationLabel = `Showing doctors near ${resolvedSplit.city}, ${resolvedSplit.stateCode}`;
         searchLng = coords.lng;
         hasSearchCoords = true;
+        locationLabel = `Showing doctors near ${resolvedSplit.city}, ${resolvedSplit.stateCode}`;
+      } else {
+        // Fall back to zip_codes table (handles cities not in hardcoded list)
+        const { data: zipMatch } = await (supabase as any)
+          .from('zip_codes')
+          .select('city, state, lat, lng')
+          .ilike('city', resolvedSplit.city)
+          .eq('state', resolvedSplit.stateCode)
+          .eq('country', searchCountry)
+          .limit(1);
+        if (zipMatch && zipMatch.length > 0) {
+          searchLat = Number(zipMatch[0].lat);
+          searchLng = Number(zipMatch[0].lng);
+          hasSearchCoords = true;
+          locationLabel = `Showing doctors near ${zipMatch[0].city}, ${zipMatch[0].state}`;
+        }
       }
     }
 
@@ -315,7 +331,15 @@ export async function GET(request: NextRequest) {
       dbQuery = dbQuery
         .gte('latitude', minLat).lte('latitude', maxLat)
         .gte('longitude', minLng).lte('longitude', maxLng);
+    } else if (splitFromQuery && hasSearchCoords) {
+      // City+state resolved to coordinates — use distance-based search
+      const searchRadius = radius > 0 ? radius : 250;
+      const [minLng3, minLat3, maxLng3, maxLat3] = boundingBox(searchLat, searchLng, searchRadius * 1.2);
+      dbQuery = dbQuery
+        .gte('latitude', minLat3).lte('latitude', maxLat3)
+        .gte('longitude', minLng3).lte('longitude', maxLng3);
     } else if (splitFromQuery) {
+      // City+state but no coordinates — fall back to text match
       if (splitFromQuery.city) dbQuery = dbQuery.or(`city.ilike.%${splitFromQuery.city}%,address.ilike.%${splitFromQuery.city}%`);
       dbQuery = dbQuery.eq('state', splitFromQuery.stateCode);
     } else if (query && locationInput) {
