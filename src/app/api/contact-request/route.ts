@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
   }
 
-  const { doctorId, name, phone, note, consent, consentText, source } = body
+  const { doctorId, name, phone, email, note, consent, consentText, source, joinList } = body
 
   if (!doctorId) return NextResponse.json({ error: 'Missing doctor.' }, { status: 400 })
   if (!name?.trim()) return NextResponse.json({ error: 'Please enter your name.' }, { status: 400 })
@@ -99,11 +99,60 @@ export async function POST(req: NextRequest) {
     console.warn('[CONTACT_REQUEST] Doctor email failed (non-blocking):', e)
   }
 
-  // Confirmation email to the patient (using the note's absence of email means we can't email them directly)
-  // We don't have the patient's email here. The confirmation will need to come via the page UI.
-
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://neurochiro.co'
   const withdrawUrl = `${siteUrl}/api/contact-request/withdraw?token=${withdrawalToken}`
+
+  // Confirmation email to patient (only if they provided an email)
+  if (email && typeof email === 'string' && email.trim()) {
+    try {
+      const { Resend } = await import('resend')
+      const resend = new Resend(process.env.RESEND_API_KEY)
+      await resend.emails.send({
+        from: 'NeuroChiro <support@neurochirodirectory.com>',
+        to: email.trim(),
+        subject: `Your contact request to ${practiceName} is confirmed`,
+        html: `
+          <div style="font-family:-apple-system,system-ui,sans-serif;max-width:480px;margin:0 auto;color:#1E2D3B;">
+            <p>Hi ${name.trim()},</p>
+            <p>Your request has been sent to <strong>${practiceName}</strong>. They have your name and phone number and will reach out to you.</p>
+            <div style="background:#f5f5f5;padding:16px;border-radius:10px;margin:16px 0;">
+              <p style="margin:0 0 4px;font-size:13px;color:#666;">Your consent:</p>
+              <p style="margin:0;font-size:14px;font-style:italic;">"${consentText}"</p>
+            </div>
+            <p style="font-size:13px;color:#666;">Changed your mind? <a href="${withdrawUrl}" style="color:#D66829;font-weight:700;">Withdraw this request</a>. The doctor's office will be notified not to contact you.</p>
+            <p style="font-size:12px;color:#999;margin-top:24px;">This email was sent because you submitted a contact request on <a href="https://neurochiro.co" style="color:#D66829;">neurochiro.co</a>. No medical information was collected or shared.</p>
+          </div>
+        `,
+      })
+    } catch (e) {
+      console.warn('[CONTACT_REQUEST] Patient confirmation email failed (non-blocking):', e)
+    }
+  }
+
+  // Patient list opt-in (separate from the contact request, separate consent)
+  if (joinList && email && typeof email === 'string' && email.trim()) {
+    try {
+      // Insert as pending subscriber — they'll get the double opt-in confirmation email
+      // via the existing subscribe flow
+      const normalizedEmail = email.trim().toLowerCase()
+      const { data: existingSub } = await (supabase as any)
+        .from('subscribers')
+        .select('id')
+        .eq('email', normalizedEmail)
+        .maybeSingle()
+
+      if (!existingSub) {
+        await (supabase as any).from('subscribers').insert({
+          email: normalizedEmail,
+          status: 'pending',
+          source: 'contact_request',
+          ip,
+        })
+      }
+    } catch (e) {
+      console.warn('[CONTACT_REQUEST] List opt-in failed (non-blocking):', e)
+    }
+  }
 
   return NextResponse.json({
     ok: true,

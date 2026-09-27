@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Phone, User, MessageSquare, CheckCircle2, AlertCircle, Loader2, ShieldCheck } from "lucide-react";
+import { Phone, User, MessageSquare, CheckCircle2, AlertCircle, Loader2, ShieldCheck, Mail } from "lucide-react";
 import Link from "next/link";
 import Footer from "@/components/landing/Footer";
 
@@ -26,8 +26,10 @@ function ContactRequestContent() {
   // Form state
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [consent, setConsent] = useState(false);
+  const [joinList, setJoinList] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [serverError, setServerError] = useState("");
@@ -74,6 +76,9 @@ function ContactRequestContent() {
     if (!phone.trim() || !/^\+?[\d\s\-().]{7,20}$/.test(phone.trim())) {
       e.phone = "Please enter a valid phone number.";
     }
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      e.email = "Please enter a valid email address.";
+    }
     if (!consent) e.consent = "You must agree to be contacted.";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -94,10 +99,12 @@ function ContactRequestContent() {
           doctorId: doctor.id,
           name: name.trim(),
           phone: phone.trim(),
+          email: email.trim() || undefined,
           note: note.trim() || undefined,
           consent: true,
           consentText,
           source: urlSource,
+          joinList: joinList && email.trim() ? true : false,
         }),
       });
 
@@ -170,13 +177,22 @@ function ContactRequestContent() {
                 </p>
               </div>
             </div>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              Changed your mind? You can{" "}
-              <a href={result.withdrawUrl} className="text-neuro-orange hover:underline font-medium">
-                withdraw this request
-              </a>{" "}
-              at any time. The doctor's office will be notified.
-            </p>
+
+            {email.trim() ? (
+              <p className="text-xs text-gray-400 leading-relaxed">
+                We sent a confirmation to <strong className="text-neuro-navy">{email}</strong> with a link to cancel this request if you change your mind.
+              </p>
+            ) : (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mt-3">
+                <p className="text-xs font-bold text-amber-800 mb-1">Save this link to cancel your request</p>
+                <p className="text-xs text-amber-700 leading-relaxed mb-2">
+                  Since you didn't provide an email, this is the only way to withdraw your request. Bookmark it or take a screenshot.
+                </p>
+                <a href={result.withdrawUrl} className="text-xs text-neuro-orange hover:underline font-bold break-all">
+                  {result.withdrawUrl}
+                </a>
+              </div>
+            )}
           </div>
 
           <Link
@@ -267,6 +283,44 @@ function ContactRequestContent() {
               </div>
               {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
             </div>
+
+            {/* Email (optional) */}
+            <div>
+              <label className="block text-sm font-bold text-neuro-navy mb-1.5">
+                Email <span className="text-gray-400 font-normal">(optional, for confirmation only)</span>
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: "" })); }}
+                  placeholder="you@email.com"
+                  className={`w-full pl-10 pr-4 py-3 rounded-xl border ${errors.email ? "border-red-400" : "border-gray-200"} text-neuro-navy text-sm focus:outline-none focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange transition-colors`}
+                />
+              </div>
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+              <p className="text-xs text-gray-400 mt-1">
+                If provided, we'll send you a confirmation with a link to cancel this request. Your email is not shared with the doctor.
+              </p>
+            </div>
+
+            {/* Join patient list (separate consent, only shown when email provided) */}
+            {email.trim() && (
+              <div>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={joinList}
+                    onChange={(e) => setJoinList(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-gray-300 text-neuro-orange focus:ring-neuro-orange"
+                  />
+                  <span className="text-xs text-gray-500 leading-relaxed">
+                    Also add me to the NeuroChiro patient list. I'll get weekly nervous system health education and be notified when new doctors join near me. I can unsubscribe anytime.
+                  </span>
+                </label>
+              </div>
+            )}
 
             {/* Note */}
             <div>
