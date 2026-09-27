@@ -23,13 +23,17 @@ export async function POST(req: Request) {
     }
 
     // Insert patient request
-    await (supabase as any).from('patient_requests').insert({
+    const { error: prError } = await (supabase as any).from('patient_requests').insert({
       doctor_id: doctorId,
       patient_email: patientEmail,
       patient_name: patientName || null,
       patient_city: null,
       source: 'profile_nudge',
     });
+
+    if (prError) {
+      console.error('[PATIENT_REQUEST] Insert failed:', prError);
+    }
 
     // Send notification to doctor (if they have a user account)
     if (doctor.user_id) {

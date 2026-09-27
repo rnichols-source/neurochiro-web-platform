@@ -30,24 +30,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
     }
 
-    // Save to leads
-    await supabase.from('leads').insert({
+    // Save to leads (doctor_id FK references profiles.id, so use user_id)
+    const { error: leadError } = await supabase.from('leads').insert({
       email: patientEmail,
       first_name: patientName,
       source: 'appointment_request',
       role: 'patient',
-      doctor_id: doctorId,
+      doctor_id: doctor.user_id || null,
       metadata: {
         phone: patientPhone || null,
         preferred_date: preferredDate || null,
         message: message || null,
         timestamp: new Date().toISOString(),
+        doctors_table_id: doctorId,
       },
     });
 
+    if (leadError) {
+      console.error('[APPOINTMENT_API] Lead insert failed:', leadError);
+    }
+
     // Send notification to doctor dashboard
     if (doctor.user_id) {
-      await supabase.from('notifications').insert({
+      const { error: notifError } = await supabase.from('notifications').insert({
         user_id: doctor.user_id,
         title: 'New Appointment Request',
         body: `${patientName} wants to book an appointment. Email: ${patientEmail}${patientPhone ? `, Phone: ${patientPhone}` : ''}${message ? `. "${message}"` : ''}`,
@@ -55,6 +60,10 @@ export async function POST(request: NextRequest) {
         priority: 'important',
         link: null,
       });
+
+      if (notifError) {
+        console.error('[APPOINTMENT_API] Notification insert failed:', notifError);
+      }
     }
 
     // Send email to doctor
