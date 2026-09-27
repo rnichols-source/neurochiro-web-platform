@@ -332,15 +332,64 @@ export async function GET(request: NextRequest) {
       if (stateCode) {
         dbQuery = dbQuery.eq('state', stateCode);
       } else {
-        const allConditions = [
-          `first_name.ilike.%${query}%`,
-          `last_name.ilike.%${query}%`,
-          `clinic_name.ilike.%${query}%`,
-          `city.ilike.%${query}%`,
-          `address.ilike.%${query}%`,
-          `bio.ilike.%${query}%`,
-        ];
-        dbQuery = dbQuery.or(allConditions.join(','));
+        // Try geocoding bare city name against zip_codes before text search
+        // This handles "Houston", "Boston", "Costa Mesa" typed in the q param
+        const bareCity = query.trim();
+        if (bareCity && !hasSearchCoords && bareCity.length >= 3) {
+          const { data: cityMatches } = await (supabase as any)
+            .from('zip_codes')
+            .select('city, state, lat, lng')
+            .ilike('city', bareCity)
+            .eq('country', searchCountry);
+
+          if (cityMatches && cityMatches.length > 0) {
+            // Deduplicate by state, pick the state with the most ZIP codes (proxy for largest city)
+            const stateCounts = new Map<string, { city: string; state: string; lat: number; lng: number; count: number }>();
+            for (const z of cityMatches) {
+              const existing = stateCounts.get(z.state);
+              if (existing) {
+                existing.count++;
+              } else {
+                stateCounts.set(z.state, { city: z.city, state: z.state, lat: Number(z.lat), lng: Number(z.lng), count: 1 });
+              }
+            }
+
+            // Pick the state with the most ZIP entries (Houston TX has ~100 ZIPs, Houston AK has 1)
+            const best = Array.from(stateCounts.values()).sort((a, b) => b.count - a.count)[0];
+            searchLat = best.lat;
+            searchLng = best.lng;
+            hasSearchCoords = true;
+            locationLabel = `Showing doctors near ${best.city}, ${best.state}`;
+
+            // Use bounding box search instead of text match
+            const searchRadius = radius > 0 ? radius : 250;
+            const [minLng2, minLat2, maxLng2, maxLat2] = boundingBox(searchLat, searchLng, searchRadius * 1.2);
+            dbQuery = dbQuery
+              .gte('latitude', minLat2).lte('latitude', maxLat2)
+              .gte('longitude', minLng2).lte('longitude', maxLng2);
+          } else {
+            // No city match — fall through to text search (name, clinic, specialty)
+            const allConditions = [
+              `first_name.ilike.%${query}%`,
+              `last_name.ilike.%${query}%`,
+              `clinic_name.ilike.%${query}%`,
+              `city.ilike.%${query}%`,
+              `address.ilike.%${query}%`,
+              `bio.ilike.%${query}%`,
+            ];
+            dbQuery = dbQuery.or(allConditions.join(','));
+          }
+        } else {
+          const allConditions = [
+            `first_name.ilike.%${query}%`,
+            `last_name.ilike.%${query}%`,
+            `clinic_name.ilike.%${query}%`,
+            `city.ilike.%${query}%`,
+            `address.ilike.%${query}%`,
+            `bio.ilike.%${query}%`,
+          ];
+          dbQuery = dbQuery.or(allConditions.join(','));
+        }
       }
     } else if (locationInput && hasSearchCoords && bareLocationTerm) {
       // Bare city name resolved to coordinates — use distance-based search, not text matching
@@ -421,15 +470,8 @@ export async function GET(request: NextRequest) {
         if (specFallback?.length) { fallbackData = specFallback; fallbackHint = `Showing "${rawQuery}" doctors nationwide`; }
       }
 
-      // Step 4: Only if NO location — last resort
-      if (!fallbackData.length && !rawLocation) {
-        let fallbackQuery = doctorsQuery(supabase, searchCountry)
-          .limit(20);
-        if (region && region !== 'ALL') fallbackQuery = fallbackQuery.eq('region_code', region);
-        const { data: regionFallback } = await fallbackQuery;
-        fallbackData = regionFallback || [];
-        fallbackHint = 'Showing featured doctors';
-      }
+      // Step 4: removed. No more "featured doctors" fallback.
+      // A search that can't resolve returns empty with a clear message.
 
       // Add distance to fallback results
       const enriched = enrichWithDistance(fallbackData, userLat, userLng, hasUserCoords);
@@ -504,14 +546,12 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     console.error("[SEARCH_API] Critical Error:", err);
 
-    const { data: emergencyData } = await doctorsQuery(supabase, searchCountry)
-      .limit(20);
-
     return NextResponse.json({
-      doctors: emergencyData || [],
-      total: emergencyData?.length || 0,
-      isFallback: true,
+      doctors: [],
+      total: 0,
+      isFallback: false,
       error: true,
+      locationLabel: 'Something went wrong. Please try again.',
     });
   }
 }
