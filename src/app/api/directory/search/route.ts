@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { haversineDistance, boundingBox, isValidCoord } from '@/lib/geo';
 import { resolveStateCode } from '@/lib/resolve-state';
-import { getCityCoords } from '@/lib/city-data';
+// city-data import removed — using resolve-city.ts shared resolver
 
 export const revalidate = 60;
 
@@ -261,51 +261,31 @@ export async function GET(request: NextRequest) {
       hasSearchCoords = true;
     }
 
+    // Resolve location input (city+state or bare city) via shared resolver
     const resolvedSplit = splitFromLocation || splitFromQuery;
-    if (!hasSearchCoords && resolvedSplit?.city && resolvedSplit?.stateCode) {
-      // Try hardcoded city data first (fast)
-      const { cityToSlug } = await import('@/lib/city-data');
-      const slug = cityToSlug(resolvedSplit.city, resolvedSplit.stateCode);
-      const coords = getCityCoords(slug);
-      if (coords) {
-        searchLat = coords.lat;
-        searchLng = coords.lng;
-        hasSearchCoords = true;
-        locationLabel = `Showing doctors near ${resolvedSplit.city}, ${resolvedSplit.stateCode}`;
-      } else {
-        // Fall back to zip_codes table (handles cities not in hardcoded list)
-        const { data: zipMatch } = await (supabase as any)
-          .from('zip_codes')
-          .select('city, state, lat, lng')
-          .ilike('city', resolvedSplit.city)
-          .eq('state', resolvedSplit.stateCode)
-          .eq('country', searchCountry)
-          .limit(1);
-        if (zipMatch && zipMatch.length > 0) {
-          searchLat = Number(zipMatch[0].lat);
-          searchLng = Number(zipMatch[0].lng);
-          hasSearchCoords = true;
-          locationLabel = `Showing doctors near ${zipMatch[0].city}, ${zipMatch[0].state}`;
-        }
-      }
-    }
+    if (!hasSearchCoords && !postalMatch) {
+      const locationTerm = resolvedSplit
+        ? `${resolvedSplit.city}, ${resolvedSplit.stateCode}`
+        : (locationInput || '').trim();
 
-    // Single city name without state (e.g. "Atlanta", "London") — geocode via zip_codes table
-    // so we can do distance-based search instead of text matching
-    const bareLocationTerm = (!resolvedSplit && !postalMatch) ? (locationInput || '').trim() : '';
-    if (!hasSearchCoords && bareLocationTerm && !resolveStateCode(bareLocationTerm, searchCountry)) {
-      // Look up in zip_codes table for a city match, filtered by country
-      const { data: cityMatch } = await (supabase as any)
-        .from('zip_codes')
-        .select('city, state, lat, lng')
-        .eq('country', searchCountry)
-        .ilike('city', bareLocationTerm)
-        .limit(1);
-      if (cityMatch && cityMatch.length > 0) {
-        searchLat = Number(cityMatch[0].lat);
-        searchLng = Number(cityMatch[0].lng);
-        hasSearchCoords = true;
-        locationLabel = `Showing doctors near ${cityMatch[0].city}, ${cityMatch[0].state}`;
+      if (locationTerm && !resolveStateCode(locationTerm, searchCountry)) {
+        const { resolveLocation } = await import('@/lib/resolve-city');
+        const cityRes = await resolveLocation(locationTerm, searchCountry);
+        if (cityRes.resolved) {
+          searchLat = cityRes.resolved.lat;
+          searchLng = cityRes.resolved.lng;
+          hasSearchCoords = true;
+          locationLabel = cityRes.label;
+        }
+        // Ambiguous bare location: we can't disambiguate in the API (no UI),
+        // so pick the largest (first in list, sorted by ZIP count)
+        if (cityRes.ambiguous && cityRes.ambiguous.length > 0) {
+          const best = cityRes.ambiguous[0];
+          searchLat = best.lat;
+          searchLng = best.lng;
+          hasSearchCoords = true;
+          locationLabel = `Showing doctors near ${best.city}, ${best.state}`;
+        }
       }
     }
 
@@ -355,55 +335,36 @@ export async function GET(request: NextRequest) {
       const stateCode = resolveStateCode(query, searchCountry);
       if (stateCode) {
         dbQuery = dbQuery.eq('state', stateCode);
-      } else {
-        // Try geocoding bare city name against zip_codes before text search
-        // This handles "Houston", "Boston", "Costa Mesa" typed in the q param
-        const bareCity = query.trim();
-        if (bareCity && !hasSearchCoords && bareCity.length >= 3) {
-          const { data: cityMatches } = await (supabase as any)
-            .from('zip_codes')
-            .select('city, state, lat, lng')
-            .ilike('city', bareCity)
-            .eq('country', searchCountry);
+      } else if (!hasSearchCoords && query.trim().length >= 3) {
+        // Try resolving as a city name via the shared resolver
+        const { resolveLocation } = await import('@/lib/resolve-city');
+        const cityRes = await resolveLocation(query.trim(), searchCountry);
 
-          if (cityMatches && cityMatches.length > 0) {
-            // Deduplicate by state, pick the state with the most ZIP codes (proxy for largest city)
-            const stateCounts = new Map<string, { city: string; state: string; lat: number; lng: number; count: number }>();
-            for (const z of cityMatches) {
-              const existing = stateCounts.get(z.state);
-              if (existing) {
-                existing.count++;
-              } else {
-                stateCounts.set(z.state, { city: z.city, state: z.state, lat: Number(z.lat), lng: Number(z.lng), count: 1 });
-              }
-            }
-
-            // Pick the state with the most ZIP entries (Houston TX has ~100 ZIPs, Houston AK has 1)
-            const best = Array.from(stateCounts.values()).sort((a, b) => b.count - a.count)[0];
-            searchLat = best.lat;
-            searchLng = best.lng;
-            hasSearchCoords = true;
-            locationLabel = `Showing doctors near ${best.city}, ${best.state}`;
-
-            // Use bounding box search instead of text match
-            const searchRadius = radius > 0 ? radius : 250;
-            const [minLng2, minLat2, maxLng2, maxLat2] = boundingBox(searchLat, searchLng, searchRadius * 1.2);
-            dbQuery = dbQuery
-              .gte('latitude', minLat2).lte('latitude', maxLat2)
-              .gte('longitude', minLng2).lte('longitude', maxLng2);
-          } else {
-            // No city match — fall through to text search (name, clinic, specialty)
-            const allConditions = [
-              `first_name.ilike.%${query}%`,
-              `last_name.ilike.%${query}%`,
-              `clinic_name.ilike.%${query}%`,
-              `city.ilike.%${query}%`,
-              `address.ilike.%${query}%`,
-              `bio.ilike.%${query}%`,
-            ];
-            dbQuery = dbQuery.or(allConditions.join(','));
-          }
+        if (cityRes.resolved) {
+          searchLat = cityRes.resolved.lat;
+          searchLng = cityRes.resolved.lng;
+          hasSearchCoords = true;
+          locationLabel = cityRes.label;
+          // Use bounding box search
+          const searchRadius = radius > 0 ? radius : 250;
+          const [minLng2, minLat2, maxLng2, maxLat2] = boundingBox(searchLat, searchLng, searchRadius * 1.2);
+          dbQuery = dbQuery
+            .gte('latitude', minLat2).lte('latitude', maxLat2)
+            .gte('longitude', minLng2).lte('longitude', maxLng2);
+        } else if (cityRes.ambiguous && cityRes.ambiguous.length > 0) {
+          // Pick the largest (most ZIPs) for patients — they can't disambiguate inline
+          const best = cityRes.ambiguous[0];
+          searchLat = best.lat;
+          searchLng = best.lng;
+          hasSearchCoords = true;
+          locationLabel = `Showing doctors near ${best.city}, ${best.state}`;
+          const searchRadius = radius > 0 ? radius : 250;
+          const [minLng2, minLat2, maxLng2, maxLat2] = boundingBox(searchLat, searchLng, searchRadius * 1.2);
+          dbQuery = dbQuery
+            .gte('latitude', minLat2).lte('latitude', maxLat2)
+            .gte('longitude', minLng2).lte('longitude', maxLng2);
         } else {
+          // Not a city — fall through to text search (name, clinic, specialty)
           const allConditions = [
             `first_name.ilike.%${query}%`,
             `last_name.ilike.%${query}%`,
@@ -414,8 +375,18 @@ export async function GET(request: NextRequest) {
           ];
           dbQuery = dbQuery.or(allConditions.join(','));
         }
+      } else {
+        const allConditions = [
+          `first_name.ilike.%${query}%`,
+          `last_name.ilike.%${query}%`,
+          `clinic_name.ilike.%${query}%`,
+          `city.ilike.%${query}%`,
+          `address.ilike.%${query}%`,
+          `bio.ilike.%${query}%`,
+        ];
+        dbQuery = dbQuery.or(allConditions.join(','));
       }
-    } else if (locationInput && hasSearchCoords && bareLocationTerm) {
+    } else if (locationInput && hasSearchCoords) {
       // Bare city name resolved to coordinates — use distance-based search, not text matching
       // This catches "Atlanta" finding Marietta doctors 15mi away
       const searchRadius = radius > 0 ? radius : 250;
