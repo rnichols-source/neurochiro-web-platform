@@ -79,14 +79,39 @@ export default function ReferralsClient({ data }: {
       <div className="max-w-6xl mx-auto space-y-8">
         <h1 className="text-xl font-bold">Introductions</h1>
 
-        {/* 1.1 Summary */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <StatCard label="Total" value={stats.total} color="text-cyan-400" />
-          <StatCard label="Last 7 days" value={stats.last7} />
-          <StatCard label="Last 30 days" value={stats.last30} />
-          <StatCard label="To a doctor" value={stats.toDoctor} color="text-green-400" />
-          <StatCard label="To waitlist" value={stats.toWaitlist} color="text-amber-400" sub="Demand without a doctor" />
-          <StatCard label="Doctors reached" value={`${stats.distinctDoctors} of ${stats.verifiedDoctors}`} sub="Have received at least one" />
+        {/* 1.1 Summary — Outreach */}
+        <div>
+          <p className="text-[10px] text-white/30 uppercase font-bold tracking-wider mb-2">My Outreach</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <StatCard label="Replies Sent" value={stats.total} color="text-cyan-400" />
+            <StatCard label="Last 7 days" value={stats.last7} />
+            <StatCard label="Last 30 days" value={stats.last30} />
+            <StatCard label="To a Doctor" value={stats.toDoctor} color="text-green-400" />
+            <StatCard label="To Waitlist" value={stats.toWaitlist} color="text-amber-400" sub="No doctor available" />
+            <StatCard label="Doctors Reached" value={`${stats.distinctDoctors} of ${stats.verifiedDoctors}`} sub="At least one introduction" />
+          </div>
+        </div>
+
+        {/* 1.1b — Patient Actions (separate from outreach) */}
+        <div>
+          <p className="text-[10px] text-white/30 uppercase font-bold tracking-wider mb-2">Patient Actions</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <StatCard label="Appointment Requests" value={stats.appointmentRequests} sub="From the directory" color="text-emerald-400" />
+            <StatCard label="Contact Requests" value={stats.contactRequests} sub="Asked to be called" color="text-purple-400" />
+            <StatCard label="From My DMs" value={stats.contactFromDm} sub="Via outreach link" color="text-cyan-400" />
+            <StatCard label="From Doctor Joined" value={stats.contactFromJoined} sub="Via notification email" color="text-blue-400" />
+            <StatCard label="DM Links Sent" value={stats.dmLinksSent} sub="Request links I copied" color="text-white" />
+          </div>
+          {stats.dmLinksSent > 0 && (
+            <div className="bg-white/5 rounded-xl p-3 mt-2">
+              <p className="text-xs text-white/50">
+                DM outreach conversion: {stats.dmLinksSent} links sent → {stats.contactFromDm} requests received
+                <span className="text-cyan-400 font-bold ml-2">
+                  {Math.round((stats.contactFromDm / stats.dmLinksSent) * 100)}%
+                </span>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* 1.2 By Doctor */}

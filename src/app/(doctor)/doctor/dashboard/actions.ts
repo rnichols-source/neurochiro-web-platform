@@ -18,13 +18,14 @@ export async function getDoctorDashboardStats() {
     const docId = doctorIdRow?.id || user.id;
 
     // Use admin client to bypass any RLS issues
-    const [profileRes, doctorRes, seminarsRes, jobsRes, leadsRes, referralsRes] = await Promise.all([
+    const [profileRes, doctorRes, seminarsRes, jobsRes, leadsRes, referralsRes, contactReqRes] = await Promise.all([
       admin.from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
       (admin as any).from('doctors').select('clinic_name, slug, city, state, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count, membership_tier, verification_status, created_at').eq('user_id', user.id).single(),
       admin.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
       admin.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', docId),
-      admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', docId),
+      admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id).eq('source', 'appointment_request'),
       (admin as any).from('reply_logs').select('searched_city, created_at').eq('doctor_id', docId).in('template_id', ['doctor_comment', 'doctor_dm', 'sent_to_patient']),
+      (admin as any).from('contact_requests').select('name, searched_city, source, created_at').eq('doctor_id', docId).eq('status', 'new'),
     ]);
 
     const profile = profileRes.data;
@@ -34,6 +35,9 @@ export async function getDoctorDashboardStats() {
     const jobCount = jobsRes.count || 0;
     const patientLeads = leadsRes.count || 0;
     const profileViews = (doctor as any)?.profile_views || 0;
+
+    // Contact requests (from DMs and doctor-joined emails)
+    const contactRequests = contactReqRes.data || [];
 
     // Referral introductions from NeuroChiro
     const referralData = referralsRes.data || [];
@@ -156,6 +160,14 @@ export async function getDoctorDashboardStats() {
       referrals: {
         count: referralCount,
         cities: referralCities,
+      },
+      contactRequests: {
+        count: contactRequests.length,
+        items: contactRequests.map((r: any) => ({
+          name: r.name,
+          source: r.source === 'dm_outreach' ? 'From a NeuroChiro introduction' : 'From the directory',
+          date: r.created_at?.slice(0, 10),
+        })),
       },
     }
   } catch (e) {

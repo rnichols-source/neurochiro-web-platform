@@ -174,7 +174,23 @@ async function getReplyStats(supabase: any) {
   const logs = data || []
   const doctorReplies = logs.filter((l: any) => l.template_id === 'doctor_comment' || l.template_id === 'doctor_dm').length
   const waitlistReplies = logs.filter((l: any) => l.template_id === 'waitlist_dm' || l.template_id === 'waitlist_comment').length
-  return { total: logs.length, doctorReplies, waitlistReplies }
+  const dmLinksSent = logs.filter((l: any) => l.template_id === 'contact_request_link').length
+
+  // Contact requests by source
+  const { data: contactReqs } = await (supabase as any).from('contact_requests').select('source')
+  const cr = contactReqs || []
+  const contactFromDm = cr.filter((r: any) => r.source === 'dm_outreach').length
+  const contactFromJoined = cr.filter((r: any) => r.source === 'doctor_joined').length
+  const contactFromOther = cr.filter((r: any) => r.source !== 'dm_outreach' && r.source !== 'doctor_joined').length
+
+  // Appointment requests
+  const { count: appointmentRequests } = await supabase.from('leads').select('id', { count: 'exact', head: true }).eq('source', 'appointment_request')
+
+  return {
+    total: logs.length, doctorReplies, waitlistReplies, dmLinksSent,
+    contactRequests: { total: cr.length, fromDm: contactFromDm, fromJoined: contactFromJoined, fromOther: contactFromOther },
+    appointmentRequests: appointmentRequests || 0,
+  }
 }
 
 // ── Action List: "What needs me today" ──

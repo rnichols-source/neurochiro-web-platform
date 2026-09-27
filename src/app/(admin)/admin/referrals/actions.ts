@@ -44,6 +44,11 @@ export interface ReferralStats {
   toWaitlist: number
   distinctDoctors: number
   verifiedDoctors: number
+  appointmentRequests: number
+  contactRequests: number
+  contactFromDm: number
+  contactFromJoined: number
+  dmLinksSent: number
 }
 
 const DOCTOR_TEMPLATES = new Set(['doctor_comment', 'doctor_dm', 'sent_to_patient'])
@@ -75,6 +80,12 @@ export async function getReferralPageData(): Promise<{
   const last7 = allLogs.filter((l: any) => now - new Date(l.created_at).getTime() < 7 * day).length
   const last30 = allLogs.filter((l: any) => now - new Date(l.created_at).getTime() < 30 * day).length
   const distinctDoctorIds = new Set(allLogs.filter((l: any) => l.doctor_id).map((l: any) => l.doctor_id))
+  const dmLinksSent = allLogs.filter((l: any) => l.template_id === 'contact_request_link').length
+
+  // Contact requests and appointment requests
+  const { data: contactReqs } = await (supabase as any).from('contact_requests').select('source')
+  const cr = contactReqs || []
+  const { count: appointmentRequests } = await (supabase as any).from('leads').select('id', { count: 'exact', head: true }).eq('source', 'appointment_request')
 
   // All verified doctors
   const { data: allDocs } = await (supabase as any)
@@ -192,6 +203,11 @@ export async function getReferralPageData(): Promise<{
       toDoctor, toWaitlist,
       distinctDoctors: distinctDoctorIds.size,
       verifiedDoctors: docs.length,
+      appointmentRequests: appointmentRequests || 0,
+      contactRequests: cr.length,
+      contactFromDm: cr.filter((r: any) => r.source === 'dm_outreach').length,
+      contactFromJoined: cr.filter((r: any) => r.source === 'doctor_joined').length,
+      dmLinksSent,
     },
     byDoctor, zeroDoctors, byCity, log,
   }
