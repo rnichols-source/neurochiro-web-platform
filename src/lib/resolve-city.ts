@@ -83,13 +83,13 @@ export async function resolveLocation(
     // City not in zip_codes — try Nominatim for informal/unincorporated place names
     const geoFallback = await nominatimGeocode(`${parsed.city}, ${expandStateCode(parsed.state)}`)
     if (geoFallback) {
-      // Find the nearest real city in zip_codes to label the result
-      const nearestCity = await findNearestCity(supabase, geoFallback.lat, geoFallback.lng, parsed.state, country)
-      const displayCity = nearestCity?.city || parsed.city
+      // Use Nominatim's own address parsing for the label
+      const displayCity = geoFallback.city || parsed.city
+      const displayState = geoFallback.state || parsed.state
       return {
-        resolved: { city: displayCity, state: parsed.state, lat: geoFallback.lat, lng: geoFallback.lng },
+        resolved: { city: displayCity, state: displayState, lat: geoFallback.lat, lng: geoFallback.lng },
         ambiguous: null,
-        label: `Showing doctors near ${displayCity}, ${parsed.state}`,
+        label: `Showing doctors near ${displayCity}, ${displayState}`,
         parsedState: parsed.state,
       }
     }
@@ -126,9 +126,8 @@ export async function resolveLocation(
     // Last resort: try Nominatim for informal place names
     const geoFallback = await nominatimGeocode(raw)
     if (geoFallback) {
-      const nearestCity = await findNearestCity(supabase, geoFallback.lat, geoFallback.lng, undefined, country)
-      const displayCity = nearestCity?.city || bareCity
-      const displayState = nearestCity?.state || ''
+      const displayCity = geoFallback.city || bareCity
+      const displayState = geoFallback.state || ''
       return {
         resolved: { city: displayCity, state: displayState, lat: geoFallback.lat, lng: geoFallback.lng },
         ambiguous: null,
@@ -312,16 +311,22 @@ function expandStateCode(code: string): string {
   return STATE_EXPAND[code] || code
 }
 
-// In-memory cache for Nominatim results (survives within a serverless instance)
-const nominatimCache = new Map<string, { lat: number; lng: number } | null>()
+interface NominatimResult {
+  lat: number
+  lng: number
+  city: string
+  state: string
+}
 
-async function nominatimGeocode(query: string): Promise<{ lat: number; lng: number } | null> {
+const nominatimCache = new Map<string, NominatimResult | null>()
+
+async function nominatimGeocode(query: string): Promise<NominatimResult | null> {
   const key = query.toLowerCase().trim()
   if (nominatimCache.has(key)) return nominatimCache.get(key) || null
 
   try {
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=us&addressdetails=0`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=us&addressdetails=1`,
       {
         headers: { 'User-Agent': 'NeuroChiro/1.0 (support@neurochirodirectory.com)' },
         signal: AbortSignal.timeout(5000),
@@ -332,7 +337,20 @@ async function nominatimGeocode(query: string): Promise<{ lat: number; lng: numb
       nominatimCache.set(key, null)
       return null
     }
-    const result = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
+
+    const r = data[0]
+    const addr = r.address || {}
+    // Use Nominatim's own address parsing for the city label
+    // Prefer: city > town > village > county (in that order)
+    const city = addr.city || addr.town || addr.village || addr.county || ''
+    const stateAbbr = resolveStateCode(addr.state || '') || addr.state || ''
+
+    const result: NominatimResult = {
+      lat: parseFloat(r.lat),
+      lng: parseFloat(r.lon),
+      city,
+      state: stateAbbr,
+    }
     nominatimCache.set(key, result)
     return result
   } catch {
@@ -340,33 +358,4 @@ async function nominatimGeocode(query: string): Promise<{ lat: number; lng: numb
   }
 }
 
-async function findNearestCity(
-  supabase: any,
-  lat: number,
-  lng: number,
-  state?: string,
-  country: string = 'US',
-): Promise<{ city: string; state: string } | null> {
-  // Find zip_codes entries near the coordinates and return the closest city name
-  // Use a rough bounding box (±0.5 degrees ≈ 35 miles)
-  let query = (supabase as any)
-    .from('zip_codes')
-    .select('city, state, lat, lng')
-    .eq('country', country)
-    .gte('lat', lat - 0.5).lte('lat', lat + 0.5)
-    .gte('lng', lng - 0.5).lte('lng', lng + 0.5)
-
-  if (state) query = query.eq('state', state)
-
-  const { data } = await query.limit(20)
-  if (!data || data.length === 0) return null
-
-  // Pick the closest by simple distance
-  let best = data[0]
-  let bestDist = Math.abs(data[0].lat - lat) + Math.abs(data[0].lng - lng)
-  for (const z of data) {
-    const d = Math.abs(z.lat - lat) + Math.abs(z.lng - lng)
-    if (d < bestDist) { best = z; bestDist = d }
-  }
-  return { city: best.city, state: best.state }
-}
+// findNearestCity removed — using Nominatim's own address parsing instead
