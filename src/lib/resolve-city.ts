@@ -23,6 +23,10 @@ export interface ResolveResult {
   resolved: CityResolution | null
   ambiguous: CityResolution[] | null
   label: string
+  /** State code extracted from input, even when city didn't resolve. Used for state-level fallback. */
+  parsedState?: string
+  /** True when the input was understood but no coordinates could be found. False when coords were found but no doctors nearby. */
+  couldNotGeocode?: boolean
 }
 
 /**
@@ -76,8 +80,22 @@ export async function resolveLocation(
       }
     }
 
-    // City not found in that state
-    return { resolved: null, ambiguous: null, label: `Couldn't find "${parsed.city}" in ${parsed.state}.` }
+    // City not in zip_codes — try Nominatim for informal/unincorporated place names
+    const geoFallback = await nominatimGeocode(`${parsed.city}, ${expandStateCode(parsed.state)}`)
+    if (geoFallback) {
+      // Find the nearest real city in zip_codes to label the result
+      const nearestCity = await findNearestCity(supabase, geoFallback.lat, geoFallback.lng, parsed.state, country)
+      const displayCity = nearestCity?.city || parsed.city
+      return {
+        resolved: { city: displayCity, state: parsed.state, lat: geoFallback.lat, lng: geoFallback.lng },
+        ambiguous: null,
+        label: `Showing doctors near ${displayCity}, ${parsed.state}`,
+        parsedState: parsed.state,
+      }
+    }
+
+    // Genuinely could not geocode
+    return { resolved: null, ambiguous: null, label: `Couldn't find "${parsed.city}" in ${parsed.state}.`, parsedState: parsed.state, couldNotGeocode: true }
   }
 
   // ── Bare city name — check for ambiguity ──
@@ -105,7 +123,20 @@ export async function resolveLocation(
       }
     }
 
-    return { resolved: null, ambiguous: null, label: `Couldn't find "${raw}".` }
+    // Last resort: try Nominatim for informal place names
+    const geoFallback = await nominatimGeocode(raw)
+    if (geoFallback) {
+      const nearestCity = await findNearestCity(supabase, geoFallback.lat, geoFallback.lng, undefined, country)
+      const displayCity = nearestCity?.city || bareCity
+      const displayState = nearestCity?.state || ''
+      return {
+        resolved: { city: displayCity, state: displayState, lat: geoFallback.lat, lng: geoFallback.lng },
+        ambiguous: null,
+        label: `Showing doctors near ${displayCity}${displayState ? ', ' + displayState : ''}`,
+      }
+    }
+
+    return { resolved: null, ambiguous: null, label: `Couldn't find "${raw}".`, couldNotGeocode: true }
   }
 
   return dedupeByState(cityMatches, bareCity)
@@ -259,4 +290,83 @@ function dedupeByState(matches: any[], searchedCity: string): ResolveResult {
     ambiguous: sorted,
     label: `"${searchedCity}" exists in ${byState.size} states. Pick one:`,
   }
+}
+
+// ── Nominatim fallback for informal/unincorporated place names ──
+
+const STATE_EXPAND: Record<string, string> = {
+  'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+  'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'DC': 'District of Columbia',
+  'FL': 'Florida', 'GA': 'Georgia', 'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois',
+  'IN': 'Indiana', 'IA': 'Iowa', 'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana',
+  'ME': 'Maine', 'MD': 'Maryland', 'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota',
+  'MS': 'Mississippi', 'MO': 'Missouri', 'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada',
+  'NH': 'New Hampshire', 'NJ': 'New Jersey', 'NM': 'New Mexico', 'NY': 'New York',
+  'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio', 'OK': 'Oklahoma', 'OR': 'Oregon',
+  'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina', 'SD': 'South Dakota',
+  'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont', 'VA': 'Virginia',
+  'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming',
+}
+
+function expandStateCode(code: string): string {
+  return STATE_EXPAND[code] || code
+}
+
+// In-memory cache for Nominatim results (survives within a serverless instance)
+const nominatimCache = new Map<string, { lat: number; lng: number } | null>()
+
+async function nominatimGeocode(query: string): Promise<{ lat: number; lng: number } | null> {
+  const key = query.toLowerCase().trim()
+  if (nominatimCache.has(key)) return nominatimCache.get(key) || null
+
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=us&addressdetails=0`,
+      {
+        headers: { 'User-Agent': 'NeuroChiro/1.0 (support@neurochirodirectory.com)' },
+        signal: AbortSignal.timeout(5000),
+      }
+    )
+    const data = await response.json()
+    if (!data || data.length === 0) {
+      nominatimCache.set(key, null)
+      return null
+    }
+    const result = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
+    nominatimCache.set(key, result)
+    return result
+  } catch {
+    return null
+  }
+}
+
+async function findNearestCity(
+  supabase: any,
+  lat: number,
+  lng: number,
+  state?: string,
+  country: string = 'US',
+): Promise<{ city: string; state: string } | null> {
+  // Find zip_codes entries near the coordinates and return the closest city name
+  // Use a rough bounding box (±0.5 degrees ≈ 35 miles)
+  let query = (supabase as any)
+    .from('zip_codes')
+    .select('city, state, lat, lng')
+    .eq('country', country)
+    .gte('lat', lat - 0.5).lte('lat', lat + 0.5)
+    .gte('lng', lng - 0.5).lte('lng', lng + 0.5)
+
+  if (state) query = query.eq('state', state)
+
+  const { data } = await query.limit(20)
+  if (!data || data.length === 0) return null
+
+  // Pick the closest by simple distance
+  let best = data[0]
+  let bestDist = Math.abs(data[0].lat - lat) + Math.abs(data[0].lng - lng)
+  for (const z of data) {
+    const d = Math.abs(z.lat - lat) + Math.abs(z.lng - lng)
+    if (d < bestDist) { best = z; bestDist = d }
+  }
+  return { city: best.city, state: best.state }
 }

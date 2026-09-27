@@ -363,6 +363,36 @@ export async function lookupNearby(query: string): Promise<{
   }
 
   if (!resolution.resolved) {
+    // Could not geocode — if we have a state, show all doctors in that state as fallback
+    if (resolution.couldNotGeocode && resolution.parsedState) {
+      const { data: stateDocs } = await supabase
+        .from('doctors')
+        .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, instagram_url')
+        .in('verification_status', ['verified', 'pending'])
+        .eq('state', resolution.parsedState)
+
+      if (stateDocs && stateDocs.length > 0) {
+        const results: LookupResult[] = stateDocs
+          .filter(d => d.latitude && d.longitude && d.latitude !== 0)
+          .map(d => {
+            let instagram_handle: string | null = null
+            if (d.instagram_url) {
+              const match = d.instagram_url.match(/instagram\.com\/([^/?]+)/)
+              if (match) instagram_handle = '@' + match[1].replace(/\/$/, '')
+            }
+            return {
+              id: d.id, first_name: d.first_name, last_name: d.last_name, clinic_name: d.clinic_name,
+              slug: d.slug, city: d.city, state: d.state, verification_status: d.verification_status,
+              membership_tier: d.membership_tier, distance_miles: 0, instagram_handle,
+            }
+          })
+
+        return {
+          doctors: results,
+          label: `Couldn't geocode "${query}". Showing all doctors in ${resolution.parsedState}:`,
+        }
+      }
+    }
     return { doctors: [], label: resolution.label || `Could not resolve "${query}"` }
   }
 
