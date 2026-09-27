@@ -616,22 +616,7 @@ export async function removeMarketLead(id: string): Promise<{ ok: boolean }> {
 
 // ── Referrals ──
 
-export async function recordReferral(
-  doctorId: string,
-  searchedCity: string,
-  searchedState?: string,
-): Promise<{ ok: boolean }> {
-  await checkAdminAuth()
-  const supabase = createAdminClient()
-
-  await (supabase as any).from('referrals').insert({
-    doctor_id: doctorId,
-    searched_city: searchedCity,
-    searched_state: searchedState || null,
-  })
-
-  return { ok: true }
-}
+// recordReferral removed — consolidated into logReply with template_id='sent_to_patient'
 
 // ── Reply Templates ──
 

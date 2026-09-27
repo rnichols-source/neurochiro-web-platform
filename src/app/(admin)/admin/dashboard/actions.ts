@@ -110,16 +110,18 @@ export async function getAdminDashboardStats() {
       .select('id', { count: 'exact', head: true })
       .eq('is_paid', true)
 
-    // Referral stats
-    const { data: referralRows } = await (supabase as any)
-      .from('referrals')
-      .select('doctor_id, searched_city')
-    const totalReferrals = referralRows?.length || 0
+    // Reply/referral stats from consolidated reply_logs table
+    const { data: replyRows } = await (supabase as any)
+      .from('reply_logs')
+      .select('template_id, doctor_id, searched_city, created_at')
+    const allReplies = replyRows || []
+    const doctorTemplates = new Set(['doctor_comment', 'doctor_dm', 'sent_to_patient'])
+    const doctorReplies = allReplies.filter((r: any) => doctorTemplates.has(r.template_id))
+    const totalReferrals = doctorReplies.length
     const referralsByDoctor = new Map<string, number>()
-    for (const r of (referralRows || [])) {
-      referralsByDoctor.set(r.doctor_id, (referralsByDoctor.get(r.doctor_id) || 0) + 1)
+    for (const r of doctorReplies) {
+      if (r.doctor_id) referralsByDoctor.set(r.doctor_id, (referralsByDoctor.get(r.doctor_id) || 0) + 1)
     }
-    // Get doctor names for the breakdown
     const refDoctorIds = Array.from(referralsByDoctor.keys())
     let referralBreakdown: { name: string; count: number }[] = []
     if (refDoctorIds.length > 0) {

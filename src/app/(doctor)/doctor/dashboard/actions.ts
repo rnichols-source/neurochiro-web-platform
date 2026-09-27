@@ -24,7 +24,7 @@ export async function getDoctorDashboardStats() {
       admin.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
       admin.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', docId),
       admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', docId),
-      (admin as any).from('referrals').select('searched_city, created_at').eq('doctor_id', docId),
+      (admin as any).from('reply_logs').select('searched_city, created_at').eq('doctor_id', docId).in('template_id', ['doctor_comment', 'doctor_dm', 'sent_to_patient']),
     ]);
 
     const profile = profileRes.data;

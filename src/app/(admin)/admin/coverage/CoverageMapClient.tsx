@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send } from "lucide-react"
 import Link from "next/link"
-import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, recordReferral, logReply } from "./actions"
+import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, logReply } from "./actions"
 
 // ── Colors ──
 const COLORS = {
@@ -506,7 +506,7 @@ function LookupResultRow({ doctor: d, searchedCity, templates }: { doctor: Looku
   const handleSent = async () => {
     setSent(true)
     const { city: c, state: s } = parseSearchCity(searchedCity)
-    await recordReferral(d.id, c, s)
+    await logReply('sent_to_patient', c, s, d.id)
   }
 
   return (
