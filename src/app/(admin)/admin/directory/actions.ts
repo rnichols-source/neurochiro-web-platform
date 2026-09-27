@@ -636,3 +636,22 @@ export async function activateStudentAfterOnboardingCall(studentId: string) {
   return { success: true };
 }
 
+export async function getDoctorIntroductions(doctorId: string): Promise<{ city: string; state: string; date: string; type: string }[]> {
+  await checkAdminAuth();
+  const supabase = createAdminClient();
+
+  const { data } = await (supabase as any)
+    .from('reply_logs')
+    .select('searched_city, searched_state, created_at, template_id')
+    .eq('doctor_id', doctorId)
+    .in('template_id', ['doctor_comment', 'doctor_dm', 'sent_to_patient'])
+    .order('created_at', { ascending: false });
+
+  return (data || []).map((r: any) => ({
+    city: r.searched_city || '',
+    state: r.searched_state || '',
+    date: r.created_at?.slice(0, 10) || '',
+    type: r.template_id === 'doctor_comment' ? 'Comment' : r.template_id === 'doctor_dm' ? 'DM' : 'Sent',
+  }));
+}
+

@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getAllDoctors, updateDoctorManually, deleteDoctorManually, bulkDeleteDoctors, migrateDoctorsFromCSV, sendMigrationEmails, registerAllUnlinkedDoctors, activateAfterOnboardingCall } from "./actions";
-import { Trash2, Upload, CheckSquare, Square, AlertTriangle, CheckCircle2, Loader2, X, Mail, UserPlus, Phone } from "lucide-react";
+import { getAllDoctors, updateDoctorManually, deleteDoctorManually, bulkDeleteDoctors, migrateDoctorsFromCSV, sendMigrationEmails, registerAllUnlinkedDoctors, activateAfterOnboardingCall, getDoctorIntroductions } from "./actions";
+import { Trash2, Upload, CheckSquare, Square, AlertTriangle, CheckCircle2, Loader2, X, Mail, UserPlus, Phone, Send } from "lucide-react";
 
 export default function DirectoryManager() {
   const [doctors, setDoctors] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
+  const [introductions, setIntroductions] = useState<{ city: string; state: string; date: string; type: string }[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
@@ -22,6 +23,13 @@ export default function DirectoryManager() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetchDoctors(); }, []);
+  useEffect(() => {
+    if (selectedDoctor?.id) {
+      getDoctorIntroductions(selectedDoctor.id).then(setIntroductions);
+    } else {
+      setIntroductions([]);
+    }
+  }, [selectedDoctor?.id]);
 
   const fetchDoctors = async (query?: string) => {
     setLoading(true);
@@ -528,6 +536,28 @@ export default function DirectoryManager() {
                   />
                 </div>
               </div>
+              {/* Introductions */}
+              <div className="border-t border-white/10 pt-4 mt-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Send className="w-3 h-3 text-cyan-400" />
+                  <span className="text-xs font-bold text-white/60 uppercase tracking-wider">Patients pointed their way</span>
+                  <span className="text-xs font-bold text-cyan-400">{introductions.length}</span>
+                </div>
+                {introductions.length > 0 ? (
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
+                    {introductions.map((intro, i) => (
+                      <div key={i} className="flex items-center gap-3 text-xs text-white/40">
+                        <span className="text-white/20 w-20 shrink-0">{intro.date}</span>
+                        <span className="text-white/60">{intro.city}{intro.state ? ', ' + intro.state : ''}</span>
+                        <span className="text-cyan-400/60 text-[10px]">{intro.type}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-white/20">No introductions yet.</p>
+                )}
+              </div>
+
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" onClick={() => setSelectedDoctor(null)} className="px-4 py-2 bg-white/5 rounded-lg text-sm hover:bg-white/10">Cancel</button>
                 <button type="submit" disabled={isUpdating} className="px-4 py-2 bg-blue-600 rounded-lg text-sm hover:bg-blue-500 disabled:opacity-50">

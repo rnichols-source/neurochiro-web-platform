@@ -53,6 +53,7 @@ export default function DoctorDashboard() {
   const [referralCode, setReferralCode] = useState("");
   const [referralStats, setReferralStats] = useState<any>(null);
   const [copied, setCopied] = useState(false);
+  const [showIntroductions, setShowIntroductions] = useState(false);
 
   useEffect(() => {
     Promise.allSettled([
@@ -252,19 +253,50 @@ export default function DoctorDashboard() {
       {/* Key Metrics */}
       <motion.div {...delay(0.05)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 grid grid-cols-2 sm:grid-cols-5 divide-x divide-white/[0.06]">
         {[
-          { icon: Eye, value: profileViews, label: "Profile Views", color: "text-blue-400" },
-          { icon: Users, value: patientLeads, label: "Patient Leads", color: "text-emerald-400" },
-          { icon: Send, value: data?.referrals?.count || 0, label: "Pointed Your Way", color: "text-cyan-400" },
-          { icon: DollarSign, value: `$${(revenue?.estimatedMonthlyRevenue || 0).toLocaleString()}`, label: "Est. Revenue", color: "text-violet-400" },
-          { icon: MapPin, value: intel ? `#${intel.cityRank}` : '—', label: intel ? `in ${intel.city}` : 'Network Rank', color: "text-neuro-orange" },
+          { icon: Eye, value: profileViews, label: "Profile Views", color: "text-blue-400", clickable: false },
+          { icon: Users, value: patientLeads, label: "Patient Leads", color: "text-emerald-400", clickable: false },
+          { icon: Send, value: data?.referrals?.count || 0, label: "Pointed Your Way", color: "text-cyan-400", clickable: true },
+          { icon: DollarSign, value: `$${(revenue?.estimatedMonthlyRevenue || 0).toLocaleString()}`, label: "Est. Revenue", color: "text-violet-400", clickable: false },
+          { icon: MapPin, value: intel ? `#${intel.cityRank}` : '—', label: intel ? `in ${intel.city}` : 'Network Rank', color: "text-neuro-orange", clickable: false },
         ].map((stat, i) => (
-          <div key={i} className="px-3 sm:px-5 py-4 sm:py-6 text-center">
+          <div key={i}
+            className={`px-3 sm:px-5 py-4 sm:py-6 text-center ${stat.clickable ? 'cursor-pointer hover:bg-white/[0.03] transition-colors' : ''}`}
+            onClick={stat.clickable ? () => setShowIntroductions(!showIntroductions) : undefined}
+          >
             <stat.icon className={`w-4 h-4 ${stat.color} mx-auto mb-2`} />
             <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums">{stat.value}</p>
             <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-white/25 mt-1">{stat.label}</p>
           </div>
         ))}
       </motion.div>
+
+      {/* Introductions detail */}
+      {showIntroductions && data?.referrals?.cities && (
+        <motion.div {...delay(0)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-cyan-400 font-semibold mb-1">Introductions</p>
+              <h3 className="text-sm font-bold text-white">Patients we pointed toward you</h3>
+            </div>
+            <button onClick={() => setShowIntroductions(false)} className="text-white/30 hover:text-white/60">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          {data.referrals.cities.length > 0 ? (
+            <div className="space-y-2">
+              {data.referrals.cities.map((city: string, i: number) => (
+                <div key={i} className="flex items-center gap-3 py-2 px-3 bg-white/[0.03] rounded-xl">
+                  <MapPin className="w-3 h-3 text-cyan-400 shrink-0" />
+                  <span className="text-sm text-white/70">{city}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-white/30">No introductions yet. When we point a patient toward you, it'll show here.</p>
+          )}
+          <p className="text-[10px] text-white/20 mt-4">These are people we introduced to your practice. Whether they booked is between you and them.</p>
+        </motion.div>
+      )}
 
       {/* What You Get This Month */}
       <motion.div {...delay(0.1)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
