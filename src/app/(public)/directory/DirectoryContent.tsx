@@ -93,6 +93,7 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
   });
   const hasUserCoords = userLat !== 0 && userLng !== 0;
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
+  const [nearestDoctors, setNearestDoctors] = useState<any[]>([]);
 
   // Autocomplete
   const [autocomplete, setAutocomplete] = useState<{cities: any[], doctors: any[], specialties: string[]}>({ cities: [], doctors: [], specialties: [] });
@@ -427,6 +428,16 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
               <p className="text-xs text-amber-600 ml-7">We didn&apos;t find exact matches. Here are some verified specialists.</p>
             </div>
           )}
+          {!hasUserCoords && !locationQuery && filteredDoctors.length > 0 && filteredDoctors[0]?.distance_miles == null && (
+            <button
+              onClick={handleUseLocation}
+              disabled={isLocating}
+              className="flex items-center gap-2 w-full px-4 py-3 bg-neuro-navy/80 text-white/80 rounded-2xl mb-4 text-sm hover:bg-neuro-navy transition-colors"
+            >
+              <Target className={cn("w-4 h-4 text-neuro-orange shrink-0", isLocating && "animate-spin")} />
+              <span>{isLocating ? "Finding you..." : "Add your location to see who's nearest"}</span>
+            </button>
+          )}
           {filteredDoctors.map((doc, i) => (
             <div
               key={`${doc.id}-${i}`}
@@ -453,11 +464,12 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
             We're growing the network every week. Join the patient list and you'll be the first to know when a nervous system chiropractor joins near you.
           </p>
           <Link
-            href="/list?source=directory_empty"
+            href={`/list?source=directory_empty${locationQuery ? `&zip=${encodeURIComponent(locationQuery)}` : ''}`}
             className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors text-sm"
           >
             <Mail className="w-4 h-4" /> Get on the List
           </Link>
+          <NearestDoctorsWidget searchQuery={searchQuery} locationQuery={locationQuery} />
           <div className="mt-6 pt-6 border-t border-gray-100">
             <button onClick={resetFilters} className="text-neuro-navy text-xs font-bold uppercase tracking-widest hover:text-neuro-orange transition-colors">
               <RotateCcw className="w-3 h-3 inline mr-1" /> Reset Filters
@@ -762,6 +774,51 @@ export default function DirectoryContent({ initialData }: { initialData: { docto
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {doctorListJSX}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function NearestDoctorsWidget({ searchQuery, locationQuery }: { searchQuery: string; locationQuery: string }) {
+  const [nearest, setNearest] = useState<any[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const loc = locationQuery || searchQuery;
+    if (!loc || loaded) return;
+    setLoaded(true);
+    fetch(`/api/directory/search?q=${encodeURIComponent(loc)}&limit=5`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.doctors?.length > 0) setNearest(data.doctors.slice(0, 5));
+      })
+      .catch(() => {});
+  }, [locationQuery, searchQuery, loaded]);
+
+  if (nearest.length === 0) return null;
+
+  return (
+    <div className="mt-8 pt-6 border-t border-gray-100 text-left">
+      <p className="text-xs font-black text-neuro-navy uppercase tracking-widest mb-3">Nearest Doctors</p>
+      <div className="space-y-2">
+        {nearest.map((doc: any) => (
+          <Link key={doc.id} href={`/directory/${doc.slug || doc.id}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
+            <div className="w-10 h-10 rounded-lg bg-neuro-navy/5 flex items-center justify-center shrink-0 overflow-hidden">
+              {doc.photo_url ? (
+                <img src={doc.photo_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-neuro-navy font-bold text-xs">{(doc.first_name?.[0] || '') + (doc.last_name?.[0] || '')}</span>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-neuro-navy truncate">Dr. {doc.first_name} {doc.last_name}</p>
+              <p className="text-xs text-gray-400 truncate">{doc.clinic_name} · {doc.city}, {doc.state}</p>
+            </div>
+            {doc.distance_miles != null && (
+              <span className="text-xs font-bold text-neuro-orange shrink-0">{Math.round(doc.distance_miles)} mi</span>
+            )}
+          </Link>
+        ))}
       </div>
     </div>
   );

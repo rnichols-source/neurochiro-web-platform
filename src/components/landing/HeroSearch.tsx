@@ -22,9 +22,15 @@ export default function HeroSearch() {
     router.push(`/directory?${params.toString()}`)
   }
 
+  const [locationError, setLocationError] = useState("")
+
   const handleNearMe = () => {
-    if (!navigator.geolocation) return
+    if (!navigator.geolocation) {
+      setLocationError("Location isn't available in this browser.")
+      return
+    }
     setLocating(true)
+    setLocationError("")
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
@@ -40,7 +46,10 @@ export default function HeroSearch() {
         }
         setLocating(false)
       },
-      () => setLocating(false),
+      () => {
+        setLocating(false)
+        setLocationError("Couldn't get your location. Type your city or ZIP instead.")
+      },
       { timeout: 5000 }
     )
   }
@@ -106,6 +115,10 @@ export default function HeroSearch() {
           aria-label="Search by doctor name, clinic, or specialty"
         />
       </div>
+
+      {locationError && (
+        <p className="text-red-400 text-xs">{locationError}</p>
+      )}
 
       <button
         type="submit"
