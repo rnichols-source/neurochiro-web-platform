@@ -145,90 +145,28 @@ export async function checkDemandNearby(query: string): Promise<DemandNearbyResu
 
   const supabase = createAdminClient()
 
-  // Resolve query to coordinates
-  let lat: number | null = null
-  let lng: number | null = null
-  let cityLabel = ''
+  // Resolve query using the shared resolver
+  const { resolveLocation } = await import('@/lib/resolve-city')
+  const resolution = await resolveLocation(query)
 
-  // Try ZIP first
-  const zipMatch = query.trim().match(/^(\d{5})/)
-  if (zipMatch) {
-    const { data } = await (supabase as any)
-      .from('zip_codes')
-      .select('city, state, lat, lng')
-      .eq('zip', zipMatch[1])
-      .eq('country', 'US')
-      .maybeSingle()
-    if (data) {
-      lat = Number(data.lat)
-      lng = Number(data.lng)
-      cityLabel = `${data.city}, ${data.state}`
+  if (resolution.ambiguous) {
+    return {
+      cityLabel: '',
+      hasDemand: false,
+      mentionsNearby: null,
+      subscribersNearby: null,
+      doctorsNearby: 0,
+      ambiguous: resolution.ambiguous.map(v => ({ city: v.city, state: v.state })),
     }
   }
 
-  // Try "City, ST" format
-  if (!lat) {
-    const { resolveStateCode } = await import('@/lib/resolve-state')
-    const parts = query.split(',').map(p => p.trim())
-    if (parts.length >= 2) {
-      const stateCode = resolveStateCode(parts[parts.length - 1])
-      if (stateCode) {
-        const city = parts.slice(0, -1).join(', ')
-        const { data } = await (supabase as any)
-          .from('zip_codes')
-          .select('city, state, lat, lng')
-          .ilike('city', city)
-          .eq('state', stateCode)
-          .eq('country', 'US')
-          .limit(1)
-        if (data && data.length > 0) {
-          lat = Number(data[0].lat)
-          lng = Number(data[0].lng)
-          cityLabel = `${data[0].city}, ${data[0].state}`
-        }
-      }
-    }
-
-    // Try bare city name with ambiguity detection
-    if (!lat) {
-      const { data } = await (supabase as any)
-        .from('zip_codes')
-        .select('city, state, lat, lng')
-        .ilike('city', query.trim())
-        .eq('country', 'US')
-
-      if (data && data.length > 0) {
-        const byState = new Map<string, { city: string; state: string; lat: number; lng: number }>()
-        for (const z of data) {
-          if (!byState.has(z.state)) {
-            byState.set(z.state, { city: z.city, state: z.state, lat: Number(z.lat), lng: Number(z.lng) })
-          }
-        }
-
-        if (byState.size === 1) {
-          const match = Array.from(byState.values())[0]
-          lat = match.lat
-          lng = match.lng
-          cityLabel = `${match.city}, ${match.state}`
-        } else {
-          return {
-            cityLabel: '',
-            hasDemand: false,
-            mentionsNearby: null,
-            subscribersNearby: null,
-            doctorsNearby: 0,
-            ambiguous: Array.from(byState.values())
-              .map(v => ({ city: v.city, state: v.state }))
-              .sort((a, b) => a.state.localeCompare(b.state)),
-          }
-        }
-      }
-    }
+  if (!resolution.resolved) {
+    return { cityLabel: '', hasDemand: false, mentionsNearby: null, subscribersNearby: null, doctorsNearby: 0, error: resolution.label || `Couldn't find "${query}".` }
   }
 
-  if (!lat || !lng) {
-    return { cityLabel: '', hasDemand: false, mentionsNearby: null, subscribersNearby: null, doctorsNearby: 0, error: `Couldn't find "${query}". Try "City, ST" or a 5-digit ZIP.` }
-  }
+  const lat = resolution.resolved.lat
+  const lng = resolution.resolved.lng
+  const cityLabel = `${resolution.resolved.city}, ${resolution.resolved.state}`
 
   // Count mentions within 50mi (US only)
   const { data: allMentions } = await (supabase as any)

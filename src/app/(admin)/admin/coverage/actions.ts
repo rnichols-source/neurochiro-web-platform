@@ -350,88 +350,25 @@ export async function lookupNearby(query: string): Promise<{
   await checkAdminAuth()
   const supabase = createAdminClient()
 
-  // Resolve query to coordinates
-  let lat: number | null = null
-  let lng: number | null = null
-  let label = ''
+  // Resolve query using the shared resolver
+  const { resolveLocation } = await import('@/lib/resolve-city')
+  const resolution = await resolveLocation(query)
 
-  // Try ZIP first
-  const zipMatch = query.trim().match(/^(\d{5})/)
-  if (zipMatch) {
-    const { data } = await (supabase as any)
-      .from('zip_codes')
-      .select('city, state, lat, lng')
-      .eq('zip', zipMatch[1])
-      .maybeSingle()
-    if (data) {
-      lat = Number(data.lat)
-      lng = Number(data.lng)
-      label = `Showing doctors near ${data.city}, ${data.state}`
+  if (resolution.ambiguous) {
+    return {
+      doctors: [],
+      label: resolution.label,
+      ambiguous: resolution.ambiguous.map(v => ({ city: v.city, state: v.state })),
     }
   }
 
-  // Try city name
-  if (!lat) {
-    // Try "City, ST" format
-    const { resolveStateCode } = await import('@/lib/resolve-state')
-    const parts = query.split(',').map(p => p.trim())
-    if (parts.length >= 2) {
-      const stateCode = resolveStateCode(parts[parts.length - 1])
-      if (stateCode) {
-        const city = parts.slice(0, -1).join(', ')
-        const { data } = await (supabase as any)
-          .from('zip_codes')
-          .select('city, state, lat, lng')
-          .ilike('city', city)
-          .eq('state', stateCode)
-          .limit(1)
-        if (data && data.length > 0) {
-          lat = Number(data[0].lat)
-          lng = Number(data[0].lng)
-          label = `Showing doctors near ${data[0].city}, ${data[0].state}`
-        }
-      }
-    }
-
-    // Try bare city name — check for ambiguity
-    if (!lat) {
-      const { data } = await (supabase as any)
-        .from('zip_codes')
-        .select('city, state, lat, lng')
-        .ilike('city', query.trim())
-        .eq('country', 'US')
-
-      if (data && data.length > 0) {
-        // Deduplicate by state
-        const byState = new Map<string, { city: string; state: string; lat: number; lng: number }>()
-        for (const z of data) {
-          if (!byState.has(z.state)) {
-            byState.set(z.state, { city: z.city, state: z.state, lat: Number(z.lat), lng: Number(z.lng) })
-          }
-        }
-
-        if (byState.size === 1) {
-          // Unambiguous
-          const match = Array.from(byState.values())[0]
-          lat = match.lat
-          lng = match.lng
-          label = `Showing doctors near ${match.city}, ${match.state}`
-        } else {
-          // Ambiguous — return options instead of guessing
-          return {
-            doctors: [],
-            label: `"${query.trim()}" exists in ${byState.size} states. Pick one:`,
-            ambiguous: Array.from(byState.values()).map(v => ({ city: v.city, state: v.state }))
-              .sort((a, b) => a.state.localeCompare(b.state)),
-          }
-        }
-      }
-    }
+  if (!resolution.resolved) {
+    return { doctors: [], label: resolution.label || `Could not resolve "${query}"` }
   }
 
-  if (!lat || !lng) {
-    return { doctors: [], label: `Could not resolve "${query}"` }
-  }
+  const lat = resolution.resolved.lat
+  const lng = resolution.resolved.lng
+  const label = resolution.label
 
   // Fetch all US doctors with valid coords
   const { data: doctors } = await supabase
