@@ -80,30 +80,30 @@ export async function resolveLocation(
       }
     }
 
-    // City not in zip_codes — try Nominatim for informal/unincorporated place names
+    // City not in zip_codes — try the RAW input through Nominatim first (before the parsed version)
+    // This catches "Broughton Astley" which gets falsely split into city=Broughton state=Astley
+    // The parsed version would find "Broughton in Preston" (wrong place, 106mi away)
+    const rawFallback = await nominatimGeocode(raw, country)
+    if (rawFallback) {
+      const displayCity = rawFallback.city || parsed.city
+      const displayState = rawFallback.state || parsed.state
+      return {
+        resolved: { city: displayCity, state: displayState, lat: rawFallback.lat, lng: rawFallback.lng },
+        ambiguous: null,
+        label: `Showing doctors near ${displayCity}${displayState ? ', ' + displayState : ''}`,
+        parsedState: parsed.state,
+      }
+    }
+
+    // Raw failed — try the parsed version as a last resort
     const geoFallback = await nominatimGeocode(`${parsed.city}, ${expandStateCode(parsed.state)}`, country)
     if (geoFallback) {
-      // Use Nominatim's own address parsing for the label
       const displayCity = geoFallback.city || parsed.city
       const displayState = geoFallback.state || parsed.state
       return {
         resolved: { city: displayCity, state: displayState, lat: geoFallback.lat, lng: geoFallback.lng },
         ambiguous: null,
         label: `Showing doctors near ${displayCity}, ${displayState}`,
-        parsedState: parsed.state,
-      }
-    }
-
-    // Parsed path failed — try the raw input as a whole string through Nominatim
-    // This handles cases like "Broughton Astley" where "Astley" was falsely parsed as a state
-    const rawFallback = await nominatimGeocode(raw, country)
-    if (rawFallback) {
-      const displayCity = rawFallback.city || raw
-      const displayState = rawFallback.state || parsed.state
-      return {
-        resolved: { city: displayCity, state: displayState, lat: rawFallback.lat, lng: rawFallback.lng },
-        ambiguous: null,
-        label: `Showing doctors near ${displayCity}${displayState ? ', ' + displayState : ''}`,
         parsedState: parsed.state,
       }
     }
