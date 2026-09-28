@@ -273,7 +273,10 @@ export async function GET(request: NextRequest) {
       // Use original raw input so resolveLocation can try it as a whole string via Nominatim
       const locationTerm = (locationInput || rawQuery || '').trim();
 
-      if (locationTerm && !resolveStateCode(locationTerm, searchCountry)) {
+      // Skip the resolveStateCode guard — it's too permissive for GB/NZ/AU
+      // (accepts any short string as a "state"). resolveLocation handles state
+      // names internally and won't misresolve them.
+      if (locationTerm) {
         const { resolveLocation } = await import('@/lib/resolve-city');
         const cityRes = await resolveLocation(locationTerm, searchCountry);
         if (cityRes.resolved) {
