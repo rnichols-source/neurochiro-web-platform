@@ -34,8 +34,10 @@ export function detectPostalCode(input: string, regionHint: string = 'US'): Post
   // US: 5-digit ZIP, optionally +4
   const usMatch = collapsed.match(/^(\d{5})(?:-?\d{4})?$/)
   if (usMatch) {
-    // Could be US or could be a 5-digit that looks like AU (AU is 4 digits, so 5 digits is always US)
-    return { code: usMatch[1], country: 'US' }
+    const zip = usMatch[1]
+    // Reject obvious placeholder values
+    if (zip === '00000') return null
+    return { code: zip, country: 'US' }
   }
 
   // CA: full postal code A1A1A1 or FSA A1A

@@ -20,6 +20,7 @@ interface SubscriberStats {
     confirmed_at: string | null;
   }[];
   growthByWeek: { week: string; count: number }[];
+  unresolvable: { id: string; email: string; zip: string; status: string }[];
 }
 
 export async function getSubscriberStats(): Promise<SubscriberStats> {
@@ -108,6 +109,22 @@ export async function getSubscriberStats(): Promise<SubscriberStats> {
     .map(([week, count]) => ({ week, count }))
     .reverse();
 
+  // Find subscribers whose ZIP can't resolve (unnotifiable)
+  const unresolvable: { id: string; email: string; zip: string; status: string }[] = [];
+  for (const s of all) {
+    if (!s.zip || s.status === 'unsubscribed') continue;
+    const cc = (s as any).country || 'US';
+    const { data: match } = await (supabase as any)
+      .from('zip_codes')
+      .select('city')
+      .eq('zip', s.zip.trim().slice(0, cc === 'US' ? 5 : 10))
+      .eq('country', cc)
+      .limit(1);
+    if (!match?.length) {
+      unresolvable.push({ id: s.id, email: s.email, zip: s.zip, status: s.status });
+    }
+  }
+
   return {
     total: all.length,
     confirmed: confirmed.length,
@@ -117,6 +134,7 @@ export async function getSubscriberStats(): Promise<SubscriberStats> {
     byZipPrefix,
     recentSignups,
     growthByWeek,
+    unresolvable,
   };
 }
 

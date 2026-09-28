@@ -110,6 +110,23 @@ export default function AdminListPage() {
         />
       </div>
 
+      {/* Unresolvable ZIPs */}
+      {stats.unresolvable && stats.unresolvable.length > 0 && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 mb-6">
+          <p className="text-xs font-bold text-red-400 mb-2 flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" /> {stats.unresolvable.length} subscriber{stats.unresolvable.length > 1 ? 's' : ''} with unresolvable postal codes
+          </p>
+          <p className="text-[10px] text-white/40 mb-2">These people can never be notified when a doctor joins near them.</p>
+          <div className="space-y-1">
+            {stats.unresolvable.map((s: any) => (
+              <div key={s.id} className="text-xs text-white/50">
+                {s.email} — ZIP: <span className="text-red-400 font-mono">{s.zip}</span> — {s.status}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Growth Chart (simple bar) */}
       {stats.growthByWeek.length > 0 && (
         <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-6 mb-8">
