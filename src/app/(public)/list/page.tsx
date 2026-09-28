@@ -2,9 +2,11 @@
 
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Mail, MapPin, CheckCircle2, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, MapPin, CheckCircle2, AlertCircle, ArrowRight, Loader2, Globe } from "lucide-react";
 import Link from "next/link";
 import Footer from "@/components/landing/Footer";
+import { useRegion } from "@/context/RegionContext";
+import { detectPostalCode } from "@/lib/detect-postal";
 
 export default function SubscribeListPage() {
   return (
@@ -19,9 +21,11 @@ function SubscribeListContent() {
   const urlError = searchParams.get("error");
   const urlSource = searchParams.get("source") || "website";
   const urlZip = searchParams.get("zip") || "";
+  const { region } = useRegion();
 
   const [email, setEmail] = useState("");
   const [zip, setZip] = useState(urlZip);
+  const [country, setCountry] = useState(region.code === 'US' ? 'US' : region.code === 'CA' ? 'CA' : region.code === 'UK' ? 'GB' : region.code === 'NZ' ? 'NZ' : region.code === 'AU' ? 'AU' : 'US');
   const [consent, setConsent] = useState(false);
   const [honeypot, setHoneypot] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -40,8 +44,21 @@ function SubscribeListContent() {
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       e.email = "Please enter a valid email address.";
     }
-    if (!zip.trim() || !/^\d{5}$/.test(zip.trim())) {
-      e.zip = "Please enter a valid 5-digit ZIP code.";
+    if (!zip.trim()) {
+      e.zip = "Please enter your postal code.";
+    } else {
+      // Validate format based on country
+      const detection = detectPostalCode(zip.trim(), country);
+      if (!detection) {
+        const hints: Record<string, string> = {
+          US: 'Please enter a valid 5-digit ZIP code.',
+          CA: 'Please enter a valid postal code (e.g. V5K 1A1).',
+          GB: 'Please enter a valid postcode (e.g. SW1A 1AA).',
+          NZ: 'Please enter a valid 4-digit postcode.',
+          AU: 'Please enter a valid 4-digit postcode.',
+        };
+        e.zip = hints[country] || 'Please enter a valid postal code.';
+      }
     }
     if (!consent) {
       e.consent = "You must agree to receive emails.";
@@ -64,6 +81,7 @@ function SubscribeListContent() {
         body: JSON.stringify({
           email: email.trim(),
           zip: zip.trim(),
+          country,
           consent: true,
           source: urlSource,
           _hp: honeypot,
@@ -244,20 +262,39 @@ function SubscribeListContent() {
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
 
-            {/* ZIP */}
+            {/* Postal Code + Country */}
             <div>
-              <label className="block text-sm font-bold text-neuro-navy mb-1.5">
-                ZIP Code
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-bold text-neuro-navy">
+                  {country === 'US' ? 'ZIP Code' : 'Postal Code'}
+                </label>
+                <select
+                  value={country}
+                  onChange={(e) => { setCountry(e.target.value); setErrors((p) => ({ ...p, zip: "" })); }}
+                  className="text-xs text-gray-500 bg-transparent border-none focus:outline-none cursor-pointer"
+                >
+                  <option value="US">🇺🇸 US</option>
+                  <option value="CA">🇨🇦 Canada</option>
+                  <option value="GB">🇬🇧 UK</option>
+                  <option value="NZ">🇳🇿 NZ</option>
+                  <option value="AU">🇦🇺 Australia</option>
+                </select>
+              </div>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  inputMode="numeric"
-                  maxLength={5}
+                  inputMode={country === 'US' || country === 'NZ' || country === 'AU' ? 'numeric' : 'text'}
+                  maxLength={country === 'US' ? 10 : country === 'CA' ? 7 : country === 'GB' ? 8 : 4}
                   value={zip}
-                  onChange={(e) => { setZip(e.target.value.replace(/\D/g, "").slice(0, 5)); setErrors((p) => ({ ...p, zip: "" })); }}
-                  placeholder="12345"
+                  onChange={(e) => { setZip(e.target.value); setErrors((p) => ({ ...p, zip: "" })); }}
+                  placeholder={
+                    country === 'US' ? '12345' :
+                    country === 'CA' ? 'V5K 1A1' :
+                    country === 'GB' ? 'SW1A 1AA' :
+                    country === 'NZ' ? '1010' :
+                    country === 'AU' ? '3000' : '12345'
+                  }
                   className={`w-full pl-10 pr-4 py-3 rounded-xl border ${errors.zip ? "border-red-400" : "border-gray-200"} text-neuro-navy text-sm focus:outline-none focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange transition-colors`}
                 />
               </div>
