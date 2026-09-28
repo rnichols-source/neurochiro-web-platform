@@ -266,12 +266,12 @@ export async function GET(request: NextRequest) {
       hasSearchCoords = true;
     }
 
-    // Resolve location input (city+state or bare city) via shared resolver
+    // Resolve location input via shared resolver — pass the ORIGINAL input, not pre-parsed
+    // resolveLocation does its own parsing and has fallbacks for false parses
     const resolvedSplit = splitFromLocation || splitFromQuery;
     if (!hasSearchCoords && !postalMatch) {
-      const locationTerm = resolvedSplit
-        ? `${resolvedSplit.city}, ${resolvedSplit.stateCode}`
-        : (locationInput || '').trim();
+      // Use original raw input so resolveLocation can try it as a whole string via Nominatim
+      const locationTerm = (locationInput || rawQuery || '').trim();
 
       if (locationTerm && !resolveStateCode(locationTerm, searchCountry)) {
         const { resolveLocation } = await import('@/lib/resolve-city');
