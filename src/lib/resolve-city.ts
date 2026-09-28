@@ -81,7 +81,7 @@ export async function resolveLocation(
     }
 
     // City not in zip_codes — try Nominatim for informal/unincorporated place names
-    const geoFallback = await nominatimGeocode(`${parsed.city}, ${expandStateCode(parsed.state)}`)
+    const geoFallback = await nominatimGeocode(`${parsed.city}, ${expandStateCode(parsed.state)}`, country)
     if (geoFallback) {
       // Use Nominatim's own address parsing for the label
       const displayCity = geoFallback.city || parsed.city
@@ -124,7 +124,7 @@ export async function resolveLocation(
     }
 
     // Last resort: try Nominatim for informal place names
-    const geoFallback = await nominatimGeocode(raw)
+    const geoFallback = await nominatimGeocode(raw, country)
     if (geoFallback) {
       const displayCity = geoFallback.city || bareCity
       const displayState = geoFallback.state || ''
@@ -320,13 +320,18 @@ interface NominatimResult {
 
 const nominatimCache = new Map<string, NominatimResult | null>()
 
-async function nominatimGeocode(query: string): Promise<NominatimResult | null> {
-  const key = query.toLowerCase().trim()
+const ISO_TO_NOMINATIM: Record<string, string> = {
+  'US': 'us', 'CA': 'ca', 'GB': 'gb', 'NZ': 'nz', 'AU': 'au',
+}
+
+async function nominatimGeocode(query: string, country: string = 'US'): Promise<NominatimResult | null> {
+  const cc = ISO_TO_NOMINATIM[country] || 'us'
+  const key = `${query.toLowerCase().trim()}|${cc}`
   if (nominatimCache.has(key)) return nominatimCache.get(key) || null
 
   try {
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=us&addressdetails=1`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=${cc}&addressdetails=1`,
       {
         headers: { 'User-Agent': 'NeuroChiro/1.0 (support@neurochirodirectory.com)' },
         signal: AbortSignal.timeout(5000),

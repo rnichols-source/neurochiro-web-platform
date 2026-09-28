@@ -50,6 +50,10 @@ export default function CoverageMapClient({
   const [layers, setLayers] = useState<Record<LayerKey, boolean>>(loadSavedLayers)
   const [showStatsPanel, setShowStatsPanel] = useState(true)
   const [lookupQuery, setLookupQuery] = useState('')
+  const [lookupCountry, setLookupCountry] = useState(() => {
+    if (typeof window === 'undefined') return 'US'
+    return localStorage.getItem('nc_lookup_country') || 'US'
+  })
   const [lookupResults, setLookupResults] = useState<LookupResult[] | null>(null)
   const [lookupLabel, setLookupLabel] = useState('')
   const [lookupLoading, setLookupLoading] = useState(false)
@@ -270,15 +274,22 @@ export default function CoverageMapClient({
     setLookupLoading(true)
     setAmbiguousOptions(null)
     try {
-      const r = await lookupNearby(q)
-      if (r.ambiguous && r.ambiguous.length > 0) {
+      const r = await lookupNearby(q, lookupCountry)
+      if (r.detectedCountry && r.detectedCountry !== lookupCountry) {
+        // Auto-detected a different country from the postal format
+        setLookupCountry(r.detectedCountry)
+        try { localStorage.setItem('nc_lookup_country', r.detectedCountry) } catch {}
+        setLookupLabel(`Detected ${r.detectedCountry} postal code. ${r.label}`)
+      } else if (r.ambiguous && r.ambiguous.length > 0) {
         setAmbiguousOptions(r.ambiguous)
         setLookupLabel(r.label)
         setLookupResults(null)
+        setLookupLoading(false)
+        return
       } else {
-        setLookupResults(r.doctors)
         setLookupLabel(r.label)
       }
+      setLookupResults(r.doctors)
     } catch { setLookupLabel('Lookup failed'); setLookupResults([]) }
     setLookupLoading(false)
   }
@@ -398,11 +409,30 @@ export default function CoverageMapClient({
 
       {/* Lookup */}
       <div className="px-4 py-4 border-t border-white/10">
-        <p className="text-xs font-bold text-white/60 uppercase tracking-wider mb-2">Doctor Lookup</p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-bold text-white/60 uppercase tracking-wider">Doctor Lookup</p>
+          <select value={lookupCountry} onChange={e => {
+            setLookupCountry(e.target.value)
+            try { localStorage.setItem('nc_lookup_country', e.target.value) } catch {}
+            setLookupResults(null); setLookupLabel(''); setAmbiguousOptions(null)
+          }} className="bg-white/5 border border-white/10 rounded-lg text-xs text-white/60 px-2 py-1">
+            <option value="US">🇺🇸 US</option>
+            <option value="CA">🇨🇦 Canada</option>
+            <option value="GB">🇬🇧 UK</option>
+            <option value="NZ">🇳🇿 NZ</option>
+            <option value="AU">🇦🇺 Australia</option>
+          </select>
+        </div>
         <div className="flex gap-2 mb-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
-            <input type="text" placeholder="City, ZIP, or 'Tulsa, OK'..." value={lookupQuery}
+            <input type="text" placeholder={
+              lookupCountry === 'US' ? "29651 or Greenville, SC" :
+              lookupCountry === 'CA' ? "V5K 1A1 or Vancouver, BC" :
+              lookupCountry === 'GB' ? "SW1A 1AA or Manchester" :
+              lookupCountry === 'NZ' ? "1010 or Auckland" :
+              lookupCountry === 'AU' ? "3000 or Melbourne, VIC" : "City or postal code"
+            } value={lookupQuery}
               onChange={e => setLookupQuery(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
               className="w-full pl-9 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-neuro-orange" />
           </div>

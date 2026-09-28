@@ -343,23 +343,33 @@ export async function getCoverageStats(): Promise<CoverageStats> {
   }
 }
 
-export async function lookupNearby(query: string): Promise<{
+export async function lookupNearby(query: string, country: string = 'US'): Promise<{
   doctors: LookupResult[];
   label: string;
   ambiguous?: { city: string; state: string }[];
+  detectedCountry?: string;
 }> {
   await checkAdminAuth()
   const supabase = createAdminClient()
 
-  // Resolve query using the shared resolver
+  // Auto-detect country from postal format
+  const { detectPostalCode } = await import('@/lib/detect-postal')
+  const postalDetection = detectPostalCode(query.trim(), country)
+  const resolveCountry = postalDetection?.country || country
+
+  // Resolve query using the shared resolver, scoped to the correct country
   const { resolveLocation } = await import('@/lib/resolve-city')
-  const resolution = await resolveLocation(query)
+  const resolution = await resolveLocation(query, resolveCountry)
+
+  const countryOverride = postalDetection && postalDetection.country !== country
+    ? postalDetection.country : undefined
 
   if (resolution.ambiguous) {
     return {
       doctors: [],
       label: resolution.label,
       ambiguous: resolution.ambiguous.map(v => ({ city: v.city, state: v.state })),
+      detectedCountry: countryOverride,
     }
   }
 
@@ -401,12 +411,17 @@ export async function lookupNearby(query: string): Promise<{
   const lng = resolution.resolved.lng
   const label = resolution.label
 
-  // Fetch all US doctors with valid coords
-  const { data: doctors } = await supabase
+  // Fetch doctors for the resolved country
+  let docQuery = supabase
     .from('doctors')
     .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, instagram_url')
     .in('verification_status', ['verified', 'pending'])
-    .or('country.is.null,country.eq.US')
+  if (resolveCountry === 'US') {
+    docQuery = docQuery.or('country.is.null,country.eq.US')
+  } else {
+    docQuery = docQuery.eq('country', resolveCountry)
+  }
+  const { data: doctors } = await docQuery
 
   if (!doctors) return { doctors: [], label }
 
