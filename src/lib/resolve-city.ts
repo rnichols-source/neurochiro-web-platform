@@ -94,6 +94,20 @@ export async function resolveLocation(
       }
     }
 
+    // Parsed path failed — try the raw input as a whole string through Nominatim
+    // This handles cases like "Broughton Astley" where "Astley" was falsely parsed as a state
+    const rawFallback = await nominatimGeocode(raw, country)
+    if (rawFallback) {
+      const displayCity = rawFallback.city || raw
+      const displayState = rawFallback.state || parsed.state
+      return {
+        resolved: { city: displayCity, state: displayState, lat: rawFallback.lat, lng: rawFallback.lng },
+        ambiguous: null,
+        label: `Showing doctors near ${displayCity}${displayState ? ', ' + displayState : ''}`,
+        parsedState: parsed.state,
+      }
+    }
+
     // Genuinely could not geocode
     return { resolved: null, ambiguous: null, label: `Couldn't find "${parsed.city}" in ${parsed.state}.`, parsedState: parsed.state, couldNotGeocode: true }
   }

@@ -122,6 +122,11 @@ function extractPostalCode(input: string, regionHint: string = 'US'): { code: st
     return { code: cleaned, country: 'NZ' }
   }
 
+  // AU: 4-digit (only if region hint is AU)
+  if (/^\d{4}$/.test(cleaned) && regionHint === 'AU') {
+    return { code: cleaned, country: 'AU' }
+  }
+
   return null
 }
 
