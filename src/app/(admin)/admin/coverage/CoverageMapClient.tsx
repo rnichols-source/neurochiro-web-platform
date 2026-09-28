@@ -71,9 +71,24 @@ export default function CoverageMapClient({
   const showAll = () => setLayers({ verified: true, pending: true, confirmedSub: true, pendingSub: true, gaps: true, mentions: true })
   const hideAll = () => setLayers({ verified: false, pending: false, confirmedSub: false, pendingSub: false, gaps: false, mentions: false })
 
-  // ── Build doctor features filtered by current toggles ──
+  // Country centres and zoom levels for map recentring
+  const COUNTRY_VIEWS: Record<string, { center: [number, number]; zoom: number; label: string }> = {
+    US: { center: [-96, 38], zoom: 3.8, label: 'States' },
+    CA: { center: [-96, 56], zoom: 3.2, label: 'Provinces' },
+    GB: { center: [-2, 54], zoom: 5.2, label: 'Regions' },
+    NZ: { center: [174, -41], zoom: 5, label: 'Regions' },
+    AU: { center: [134, -25], zoom: 3.5, label: 'States' },
+  }
+
+  // Filter doctors by selected country
+  const countryDoctors = doctors.filter(d => {
+    const dc = d.country || 'US'
+    return lookupCountry === 'US' ? (dc === 'US') : dc === lookupCountry
+  })
+
+  // ── Build doctor features filtered by current toggles + country ──
   const buildDoctorFeatures = useCallback((showVerified: boolean, showPending: boolean) => {
-    return doctors
+    return countryDoctors
       .filter(d => {
         if (d.pin_status === 'invisible' || !d.latitude || !d.longitude || d.latitude === 0) return false
         if (d.pin_status === 'verified' && !showVerified) return false
@@ -92,7 +107,7 @@ export default function CoverageMapClient({
           color: d.pin_status === 'verified' ? COLORS.verified : COLORS.pending,
         },
       }))
-  }, [doctors])
+  }, [countryDoctors])
 
   // ── Map init ──
   useEffect(() => {
@@ -265,6 +280,21 @@ export default function CoverageMapClient({
     }
   }, [layers, buildDoctorFeatures])
 
+  // ── Recentre map when country changes ──
+  useEffect(() => {
+    const map = mapInstanceRef.current
+    if (!map || !mapReadyRef.current) return
+
+    const view = COUNTRY_VIEWS[lookupCountry] || COUNTRY_VIEWS.US
+    map.easeTo({ center: view.center, zoom: view.zoom, duration: 800 })
+
+    // Rebuild doctor pins for new country
+    try {
+      const src = map.getSource('doctors')
+      if (src) src.setData({ type: 'FeatureCollection', features: buildDoctorFeatures(layers.verified, layers.pending) })
+    } catch {}
+  }, [lookupCountry])
+
   // ── Lookup ──
   const [ambiguousOptions, setAmbiguousOptions] = useState<{ city: string; state: string }[] | null>(null)
 
@@ -306,7 +336,11 @@ export default function CoverageMapClient({
     return ({ verified: 0, pending: 1 }[a.verification_status] ?? 2) - ({ verified: 0, pending: 1 }[b.verification_status] ?? 2)
   }) : null
 
-  const invisibleDocs = doctors.filter(d => d.pin_status === 'invisible')
+  const invisibleDocs = countryDoctors.filter(d => d.pin_status === 'invisible')
+  const countryVerified = countryDoctors.filter(d => d.pin_status === 'verified').length
+  const countryPending = countryDoctors.filter(d => d.pin_status === 'pending').length
+  const countryInvisible = invisibleDocs.length
+  const countryView = COUNTRY_VIEWS[lookupCountry] || COUNTRY_VIEWS.US
   const anyOn = Object.values(layers).some(Boolean)
   const allOn = Object.values(layers).every(Boolean)
 
@@ -328,22 +362,35 @@ export default function CoverageMapClient({
         {showStatsPanel && (
           <div className="space-y-3">
             <div className="grid grid-cols-3 gap-2">
-              <StatCard label="Verified" value={stats.verified} color="text-green-400" sub="Live, searchable" />
-              <StatCard label="Pending" value={stats.pending} color="text-amber-400" sub="Awaiting approval" />
-              <StatCard label="Invisible" value={stats.invisible} color="text-red-400" sub="No coordinates" />
+              <StatCard label="Verified" value={countryVerified} color="text-green-400" sub="Live, searchable" />
+              <StatCard label="Pending" value={countryPending} color="text-amber-400" sub="Awaiting approval" />
+              <StatCard label="Invisible" value={countryInvisible} color="text-red-400" sub="No coordinates" />
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <div className="bg-white/5 rounded-xl p-3">
-                <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">States With a Doctor</p>
-                <p className="text-xl font-bold">{stats.statesWithDoctor.length}<span className="text-white/30 text-sm"> / {ALL_US_STATES.length}</span></p>
-                {stats.statesWithout.length > 0 && <p className="text-[10px] text-red-400/70 mt-1">Missing: {stats.statesWithout.join(', ')}</p>}
-              </div>
+              {lookupCountry === 'US' ? (
+                <div className="bg-white/5 rounded-xl p-3">
+                  <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">States With a Doctor</p>
+                  <p className="text-xl font-bold">{stats.statesWithDoctor.length}<span className="text-white/30 text-sm"> / {ALL_US_STATES.length}</span></p>
+                  {stats.statesWithout.length > 0 && <p className="text-[10px] text-red-400/70 mt-1">Missing: {stats.statesWithout.join(', ')}</p>}
+                </div>
+              ) : (
+                <div className="bg-white/5 rounded-xl p-3">
+                  <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">{countryView.label} With a Doctor</p>
+                  <p className="text-xl font-bold">{new Set(countryDoctors.filter(d => d.state && d.pin_status !== 'invisible').map(d => d.state)).size}</p>
+                  <p className="text-[10px] text-white/25 mt-0.5">{countryDoctors.filter(d => d.pin_status !== 'invisible').length} doctors total</p>
+                </div>
+              )}
               <div className="bg-white/5 rounded-xl p-3">
                 <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Demand Signals</p>
-                <p className="text-xl font-bold">{stats.confirmedSubscribers} <span className="text-white/30 text-sm">waitlist</span></p>
-                {stats.pendingSubscribers > 0 && <p className="text-xs text-purple-400/70 mt-0.5">{stats.pendingSubscribers} pending</p>}
-                {stats.totalMentions > 0 && <p className="text-xs text-cyan-400/70 mt-0.5">{stats.totalMentions} comment mentions</p>}
-                {stats.internationalCount > 0 && <p className="text-[10px] text-white/30 mt-1 flex items-center gap-1"><Globe className="w-3 h-3" /> {stats.internationalCount} intl doctors</p>}
+                {lookupCountry === 'US' ? (
+                  <>
+                    <p className="text-xl font-bold">{stats.confirmedSubscribers} <span className="text-white/30 text-sm">waitlist</span></p>
+                    {stats.pendingSubscribers > 0 && <p className="text-xs text-purple-400/70 mt-0.5">{stats.pendingSubscribers} pending</p>}
+                    {stats.totalMentions > 0 && <p className="text-xs text-cyan-400/70 mt-0.5">{stats.totalMentions} comment mentions</p>}
+                  </>
+                ) : (
+                  <p className="text-sm text-white/30 mt-1">Switch to US for demand data</p>
+                )}
               </div>
             </div>
             {stats.recruitMarkets.length > 0 && (

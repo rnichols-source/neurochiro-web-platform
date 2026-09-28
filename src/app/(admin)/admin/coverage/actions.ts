@@ -110,22 +110,21 @@ export async function getCoverageDoctors(): Promise<CoverageDoctor[]> {
   if (error || !data) return []
 
   return data.map(d => {
-    const isInternational = d.country && d.country !== 'United States' && d.country !== 'US' && d.country !== 'USA'
-    if (isInternational) return null // excluded from map, counted separately
-
     const lat = d.latitude
     const lng = d.longitude
-    // Invisible = no usable coordinates (0,0 or null). Doctors with coords but no address
-    // have potentially inaccurate city-center coords but are still findable in search.
     const isInvisible = lat == null || lng == null || (lat === 0 && lng === 0)
+
+    // Normalize country to ISO code
+    const normalizedCountry = (!d.country || d.country === 'United States' || d.country === 'USA') ? 'US' : d.country
 
     return {
       ...d,
+      country: normalizedCountry,
       pin_status: isInvisible ? 'invisible' as const
         : d.verification_status === 'verified' ? 'verified' as const
         : 'pending' as const,
     } as CoverageDoctor
-  }).filter((d): d is CoverageDoctor => d !== null)
+  })
 }
 
 export async function getDemandData(): Promise<DemandZip[]> {
