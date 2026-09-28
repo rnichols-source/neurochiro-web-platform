@@ -132,12 +132,13 @@ export async function getDemandData(): Promise<DemandZip[]> {
   await checkAdminAuth()
   const supabase = createAdminClient()
 
-  // Get ALL subscribers with ZIPs (confirmed + pending)
+  // Get US subscribers with ZIPs (confirmed + pending)
   const { data: subscribers } = await (supabase as any)
     .from('subscribers')
     .select('zip, status')
     .in('status', ['confirmed', 'pending'])
     .not('zip', 'is', null)
+    .or('country.eq.US,country.is.null')
 
   if (!subscribers || subscribers.length === 0) return []
 

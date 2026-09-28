@@ -168,7 +168,7 @@ export async function previewDoctorNotification(
 
   const { data: doctor } = await (supabase as any)
     .from('doctors')
-    .select('first_name, last_name, clinic_name, city, state, slug, address')
+    .select('first_name, last_name, clinic_name, city, state, slug, address, country')
     .eq('id', doctorId)
     .single();
 
@@ -242,7 +242,7 @@ export async function notifySubscribersNewDoctor(
 
   const { data: doctor } = await (supabase as any)
     .from('doctors')
-    .select('first_name, last_name, clinic_name, city, state, slug, address')
+    .select('first_name, last_name, clinic_name, city, state, slug, address, country')
     .eq('id', doctorId)
     .single();
 
@@ -253,13 +253,21 @@ export async function notifySubscribersNewDoctor(
   const doctorZip = extractZipFromAddress(doctor.address);
   const doctorZipPrefix = doctorZip ? doctorZip.slice(0, 3) : null;
 
-  // Get confirmed subscribers in scope
+  // Get confirmed subscribers in scope — match country
+  const doctorCountry = doctor.country || 'US';
   let query = (supabase as any)
     .from('subscribers')
     .select('id, email, zip, state')
     .eq('status', 'confirmed')
     .is('unsubscribed_at', null)
     .eq('state', doctor.state);
+
+  // Country isolation: only notify subscribers in the same country
+  if (doctorCountry === 'US') {
+    query = query.or('country.eq.US,country.is.null');
+  } else {
+    query = query.eq('country', doctorCountry);
+  }
 
   const { data: subscribers } = await query;
   if (!subscribers || subscribers.length === 0) {

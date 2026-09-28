@@ -29,9 +29,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Invalid request.' }, { status: 400 });
   }
 
-  const { email, zip, consent, source: rawSource, _hp, _ts } = body;
-  const VALID_SOURCES = ['website', 'homepage', 'directory_empty', 'profile_footer', 'site_footer', 'og_share', 'city_page'];
+  const { email, zip, consent, source: rawSource, _hp, _ts, country: rawCountry } = body;
+  const VALID_SOURCES = ['website', 'homepage', 'directory_empty', 'profile_footer', 'site_footer', 'og_share', 'city_page', 'contact_request'];
   const source = VALID_SOURCES.includes(rawSource) ? rawSource : 'website';
+  const VALID_COUNTRIES = ['US', 'CA', 'GB', 'NZ', 'AU'];
+  const subscriberCountry = VALID_COUNTRIES.includes(rawCountry) ? rawCountry : 'US';
 
   // Honeypot check
   if (_hp) {
@@ -48,9 +50,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Please enter a valid email address.' }, { status: 400 });
   }
 
-  // Validate ZIP
-  if (!zip || typeof zip !== 'string' || !/^\d{5}$/.test(zip.trim())) {
-    return NextResponse.json({ ok: false, error: 'Please enter a valid 5-digit ZIP code.' }, { status: 400 });
+  // Validate postal code (international)
+  if (!zip || typeof zip !== 'string' || !zip.trim()) {
+    return NextResponse.json({ ok: false, error: 'Please enter a valid postal code.' }, { status: 400 });
+  }
+  const { detectPostalCode } = await import('@/lib/detect-postal');
+  const postalDetection = detectPostalCode(zip.trim(), subscriberCountry);
+  if (!postalDetection) {
+    return NextResponse.json({ ok: false, error: 'Please enter a valid postal code for your country.' }, { status: 400 });
   }
 
   // Validate consent
@@ -59,8 +66,9 @@ export async function POST(req: NextRequest) {
   }
 
   const normalizedEmail = email.trim().toLowerCase();
-  const normalizedZip = zip.trim();
-  const state = zipToState(normalizedZip);
+  const normalizedZip = postalDetection.code; // Use the detected/normalized code
+  const detectedCountry = postalDetection.country;
+  const state = detectedCountry === 'US' ? zipToState(normalizedZip) : '';
   const userAgent = req.headers.get('user-agent') || '';
 
   const supabase = createAdminClient();
@@ -71,7 +79,7 @@ export async function POST(req: NextRequest) {
     const { data: zipCoord } = await (supabase as any)
       .from('zip_codes')
       .select('lat, lng, city, state')
-      .eq('country', 'US')
+      .eq('country', detectedCountry)
       .eq('zip', normalizedZip)
       .maybeSingle();
 
@@ -80,13 +88,19 @@ export async function POST(req: NextRequest) {
       const lat = Number(zipCoord.lat);
       const lng = Number(zipCoord.lng);
 
-      const { data: nearbyDocs } = await supabase
+      // Country-isolated doctor query
+      let docQuery = supabase
         .from('doctors')
         .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, photo_url, booking_url, phone')
         .eq('verification_status', 'verified')
-        .or('country.is.null,country.eq.US')
         .not('latitude', 'eq', 0)
         .not('latitude', 'is', null);
+      if (detectedCountry === 'US') {
+        docQuery = docQuery.or('country.is.null,country.eq.US');
+      } else {
+        docQuery = docQuery.eq('country', detectedCountry);
+      }
+      const { data: nearbyDocs } = await docQuery;
 
       const nearby = (nearbyDocs || [])
         .map((d: any) => ({
@@ -155,6 +169,7 @@ export async function POST(req: NextRequest) {
           status: 'pending',
           zip: normalizedZip,
           state,
+          country: detectedCountry,
           token_hash: tokenHash,
           token_expires_at: expiresAt,
           unsubscribed_at: null,
@@ -205,6 +220,7 @@ export async function POST(req: NextRequest) {
       email: normalizedEmail,
       zip: normalizedZip,
       state,
+      country: detectedCountry,
       status: 'pending',
       token_hash: tokenHash,
       token_expires_at: expiresAt,

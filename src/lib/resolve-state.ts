@@ -78,6 +78,16 @@ const NZ_NAME_TO_CODE: Record<string, string> = {
   'waikato': 'E8', 'bay of plenty': 'E9', 'otago': 'F9',
 }
 
+// ── Australian States/Territories ──
+
+const AU_VALID_CODES = new Set(['NSW', 'VIC', 'QLD', 'SA', 'WA', 'TAS', 'NT', 'ACT'])
+
+const AU_NAME_TO_CODE: Record<string, string> = {
+  'new south wales': 'NSW', 'victoria': 'VIC', 'queensland': 'QLD',
+  'south australia': 'SA', 'western australia': 'WA', 'tasmania': 'TAS',
+  'northern territory': 'NT', 'australian capital territory': 'ACT',
+}
+
 // ── Main resolver ──
 
 /**
@@ -128,6 +138,14 @@ export function resolveStateCode(input: string, country: string = 'US'): string 
       if (NZ_VALID_CODES.has(upper)) return upper
       if (NZ_NAME_TO_CODE[lower]) return NZ_NAME_TO_CODE[lower]
       // NZ region codes are opaque, accept stored values
+      if (upper.length <= 10) return upper
+      return null
+    }
+
+    case 'AU': {
+      if (AU_VALID_CODES.has(upper)) return upper
+      if (AU_NAME_TO_CODE[lower]) return AU_NAME_TO_CODE[lower]
+      // Accept stored values
       if (upper.length <= 10) return upper
       return null
     }

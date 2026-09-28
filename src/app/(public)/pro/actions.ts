@@ -92,12 +92,13 @@ export async function getDemandMapData(): Promise<{ doctors: MapDoctor[]; demand
     }
   }
 
-  // Demand: subscribers by ZIP, joined to zip_codes for coords
+  // Demand: US subscribers by ZIP, joined to zip_codes for coords
   const { data: subscribers } = await (supabase as any)
     .from('subscribers')
     .select('zip')
     .eq('status', 'confirmed')
     .not('zip', 'is', null)
+    .or('country.eq.US,country.is.null')
 
   const zipCounts = new Map<string, number>()
   for (const s of (subscribers || [])) {
@@ -179,12 +180,13 @@ export async function checkDemandNearby(query: string): Promise<DemandNearbyResu
     if (haversineDistance(lat, lng, Number(m.lat), Number(m.lng)) <= 50) mentionsNearby++
   }
 
-  // Count subscribers within 50mi
+  // Count US subscribers within 50mi
   const { data: allSubs } = await (supabase as any)
     .from('subscribers')
     .select('zip')
     .eq('status', 'confirmed')
     .not('zip', 'is', null)
+    .or('country.eq.US,country.is.null')
 
   const subZips = new Set<string>()
   for (const s of (allSubs || [])) {
