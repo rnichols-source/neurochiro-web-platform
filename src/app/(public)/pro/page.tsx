@@ -12,6 +12,8 @@ export const revalidate = 300;
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap');
+  body { background: #131E27 !important; }
+  header.fixed { display: none !important; }
   .pro-page h1, .pro-page h2, .pro-page h3 { color: #F1EDE7 !important; }
   .pro-page p, .pro-page li, .pro-page span { color: inherit; }
 `;
