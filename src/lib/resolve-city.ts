@@ -27,6 +27,8 @@ export interface ResolveResult {
   parsedState?: string
   /** True when the input was understood but no coordinates could be found. False when coords were found but no doctors nearby. */
   couldNotGeocode?: boolean
+  /** True when resolution failed because an external service (Nominatim) was unavailable, not because the input was invalid. */
+  serviceUnavailable?: boolean
 }
 
 /**
@@ -109,7 +111,13 @@ export async function resolveLocation(
     }
 
     // Genuinely could not geocode
-    return { resolved: null, ambiguous: null, label: `Couldn't find "${parsed.city}" in ${parsed.state}.`, parsedState: parsed.state, couldNotGeocode: true }
+    return {
+      resolved: null, ambiguous: null, parsedState: parsed.state, couldNotGeocode: true,
+      serviceUnavailable: nominatimCircuitOpen,
+      label: nominatimCircuitOpen
+        ? `Location lookup is temporarily unavailable. Try again in a moment, or enter a postal code instead.`
+        : `Couldn't find "${parsed.city}" in ${parsed.state}.`,
+    }
   }
 
   // ── Bare city name — check for ambiguity ──
@@ -149,7 +157,13 @@ export async function resolveLocation(
       }
     }
 
-    return { resolved: null, ambiguous: null, label: `Couldn't find "${raw}".`, couldNotGeocode: true }
+    return {
+      resolved: null, ambiguous: null, couldNotGeocode: true,
+      serviceUnavailable: nominatimCircuitOpen,
+      label: nominatimCircuitOpen
+        ? `Location lookup is temporarily unavailable. Try again in a moment, or enter a postal code instead.`
+        : `Couldn't find "${raw}".`,
+    }
   }
 
   return dedupeByState(cityMatches, bareCity)
@@ -332,17 +346,66 @@ interface NominatimResult {
   state: string
 }
 
+// In-memory cache for Nominatim results. Survives within a serverless instance.
 const nominatimCache = new Map<string, NominatimResult | null>()
+
+// Persistent cache in Supabase for common cities. Checked before Nominatim.
+// Written on successful resolution so cold starts don't re-hit the service.
+async function getCachedGeocode(supabase: any, key: string): Promise<NominatimResult | null> {
+  try {
+    const { data } = await (supabase as any)
+      .from('geocode_cache')
+      .select('city, state, lat, lng')
+      .eq('cache_key', key)
+      .maybeSingle()
+    if (data) return { city: data.city, state: data.state, lat: Number(data.lat), lng: Number(data.lng) }
+  } catch {} // Table may not exist yet — fail gracefully
+  return null
+}
+
+async function setCachedGeocode(supabase: any, key: string, result: NominatimResult): Promise<void> {
+  try {
+    await (supabase as any).from('geocode_cache').upsert({
+      cache_key: key,
+      city: result.city,
+      state: result.state,
+      lat: result.lat,
+      lng: result.lng,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'cache_key' })
+  } catch {} // Non-blocking — if cache write fails, lookup still works
+}
 
 const ISO_TO_NOMINATIM: Record<string, string> = {
   'US': 'us', 'CA': 'ca', 'GB': 'gb', 'NZ': 'nz', 'AU': 'au',
 }
 
+// Tracks whether Nominatim failed recently to avoid hammering a down service
+let nominatimCircuitOpen = false
+let nominatimCircuitResetAt = 0
+
 async function nominatimGeocode(query: string, country: string = 'US'): Promise<NominatimResult | null> {
   const cc = ISO_TO_NOMINATIM[country] || 'us'
   const key = `${query.toLowerCase().trim()}|${cc}`
+
+  // 1. In-memory cache (fastest)
   if (nominatimCache.has(key)) return nominatimCache.get(key) || null
 
+  // 2. Persistent Supabase cache (survives cold starts)
+  const { createAdminClient } = await import('@/lib/supabase-admin')
+  const supabase = createAdminClient()
+  const cached = await getCachedGeocode(supabase, key)
+  if (cached) {
+    nominatimCache.set(key, cached)
+    return cached
+  }
+
+  // 3. Circuit breaker — if Nominatim failed recently, skip it
+  if (nominatimCircuitOpen && Date.now() < nominatimCircuitResetAt) {
+    return null
+  }
+
+  // 4. Call Nominatim
   try {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=${cc}&addressdetails=1`,
@@ -352,6 +415,10 @@ async function nominatimGeocode(query: string, country: string = 'US'): Promise<
       }
     )
     const data = await response.json()
+
+    // Reset circuit breaker on success
+    nominatimCircuitOpen = false
+
     if (!data || data.length === 0) {
       nominatimCache.set(key, null)
       return null
@@ -359,8 +426,6 @@ async function nominatimGeocode(query: string, country: string = 'US'): Promise<
 
     const r = data[0]
     const addr = r.address || {}
-    // Use Nominatim's own address parsing for the city label
-    // Prefer: city > town > village > county (in that order)
     const city = addr.city || addr.town || addr.village || addr.county || ''
     const stateAbbr = resolveStateCode(addr.state || '') || addr.state || ''
 
@@ -370,9 +435,17 @@ async function nominatimGeocode(query: string, country: string = 'US'): Promise<
       city,
       state: stateAbbr,
     }
+
+    // Cache in memory AND in Supabase for persistence
     nominatimCache.set(key, result)
+    setCachedGeocode(supabase, key, result) // fire-and-forget
+
     return result
   } catch {
+    // Open circuit breaker for 30 seconds to avoid hammering
+    nominatimCircuitOpen = true
+    nominatimCircuitResetAt = Date.now() + 30_000
+    console.warn('[NOMINATIM] Request failed — circuit open for 30s')
     return null
   }
 }
