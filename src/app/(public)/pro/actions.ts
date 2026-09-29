@@ -135,7 +135,7 @@ export async function getDemandMapData(): Promise<{ doctors: MapDoctor[]; demand
 
 const lookupLimiter = rateLimit('pro_demand_lookup', { maxRequests: 30, windowMs: 60_000 })
 
-export async function checkDemandNearby(query: string): Promise<DemandNearbyResult> {
+export async function checkDemandNearby(query: string, country: string = 'US'): Promise<DemandNearbyResult> {
   // Rate limit by IP
   const hdrs = await headers()
   const ip = hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() || hdrs.get('x-real-ip') || 'unknown'
@@ -146,9 +146,14 @@ export async function checkDemandNearby(query: string): Promise<DemandNearbyResu
 
   const supabase = createAdminClient()
 
-  // Resolve query using the shared resolver
+  // Auto-detect country from postal format
+  const { detectPostalCode } = await import('@/lib/detect-postal')
+  const postalDetection = detectPostalCode(query.trim(), country)
+  const resolveCountry = postalDetection?.country || country
+
+  // Resolve query using the shared resolver, scoped to country
   const { resolveLocation } = await import('@/lib/resolve-city')
-  const resolution = await resolveLocation(query)
+  const resolution = await resolveLocation(query, resolveCountry)
 
   if (resolution.ambiguous) {
     return {
@@ -169,24 +174,29 @@ export async function checkDemandNearby(query: string): Promise<DemandNearbyResu
   const lng = resolution.resolved.lng
   const cityLabel = `${resolution.resolved.city}, ${resolution.resolved.state}`
 
-  // Count mentions within 50mi (US only)
-  const { data: allMentions } = await (supabase as any)
-    .from('demand_mentions')
-    .select('lat, lng')
-    .or('country.eq.US,country.is.null')
+  // Count mentions within 50mi, scoped to country
+  let mentionQuery = (supabase as any).from('demand_mentions').select('lat, lng')
+  if (resolveCountry === 'US') {
+    mentionQuery = mentionQuery.or('country.eq.US,country.is.null')
+  } else {
+    mentionQuery = mentionQuery.eq('country', resolveCountry)
+  }
+  const { data: allMentions } = await mentionQuery
 
   let mentionsNearby = 0
   for (const m of (allMentions || [])) {
     if (haversineDistance(lat, lng, Number(m.lat), Number(m.lng)) <= 50) mentionsNearby++
   }
 
-  // Count US subscribers within 50mi
-  const { data: allSubs } = await (supabase as any)
-    .from('subscribers')
-    .select('zip')
-    .eq('status', 'confirmed')
-    .not('zip', 'is', null)
-    .or('country.eq.US,country.is.null')
+  // Count subscribers within 50mi, scoped to country
+  let subQuery = (supabase as any).from('subscribers').select('zip')
+    .eq('status', 'confirmed').not('zip', 'is', null)
+  if (resolveCountry === 'US') {
+    subQuery = subQuery.or('country.eq.US,country.is.null')
+  } else {
+    subQuery = subQuery.eq('country', resolveCountry)
+  }
+  const { data: allSubs } = await subQuery
 
   const subZips = new Set<string>()
   for (const s of (allSubs || [])) {
@@ -199,7 +209,7 @@ export async function checkDemandNearby(query: string): Promise<DemandNearbyResu
     const { data: zipCoords } = await (supabase as any)
       .from('zip_codes')
       .select('zip, lat, lng')
-      .eq('country', 'US')
+      .eq('country', resolveCountry)
       .in('zip', Array.from(subZips))
 
     const zipToCoord = new Map<string, { lat: number; lng: number }>()
@@ -214,14 +224,16 @@ export async function checkDemandNearby(query: string): Promise<DemandNearbyResu
     }
   }
 
-  // Count doctors within 50mi
-  const { data: allDocs } = await supabase
-    .from('doctors')
-    .select('latitude, longitude')
+  // Count doctors within 50mi, scoped to country
+  let docQuery = supabase.from('doctors').select('latitude, longitude')
     .eq('verification_status', 'verified')
-    .or('country.is.null,country.eq.US')
-    .not('latitude', 'eq', 0)
-    .not('longitude', 'eq', 0)
+    .not('latitude', 'eq', 0).not('longitude', 'eq', 0)
+  if (resolveCountry === 'US') {
+    docQuery = docQuery.or('country.is.null,country.eq.US')
+  } else {
+    docQuery = docQuery.eq('country', resolveCountry)
+  }
+  const { data: allDocs } = await docQuery
 
   let doctorsNearby = 0
   for (const d of (allDocs || [])) {

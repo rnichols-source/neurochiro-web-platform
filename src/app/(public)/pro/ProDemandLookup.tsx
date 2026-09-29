@@ -3,8 +3,17 @@
 import { useState } from "react";
 import { checkDemandNearby, type DemandNearbyResult } from "./actions";
 
+const PLACEHOLDERS: Record<string, string> = {
+  US: "29651 or Greenville, SC",
+  CA: "V5K 1A1 or Vancouver, BC",
+  GB: "SW1A 1AA or Manchester",
+  NZ: "1010 or Auckland",
+  AU: "3000 or Melbourne, VIC",
+};
+
 export default function ProDemandLookup() {
   const [query, setQuery] = useState("");
+  const [country, setCountry] = useState("US");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DemandNearbyResult | null>(null);
 
@@ -14,7 +23,7 @@ export default function ProDemandLookup() {
     setLoading(true);
     setResult(null);
     try {
-      const r = await checkDemandNearby(q);
+      const r = await checkDemandNearby(q, country);
       setResult(r);
     } catch {
       setResult({ cityLabel: "", hasDemand: false, mentionsNearby: null, subscribersNearby: null, doctorsNearby: 0, error: "Something went wrong. Try again." });
@@ -36,16 +45,16 @@ export default function ProDemandLookup() {
           Is there demand where you practice?
         </h2>
         <p style={{ color: "#93A0AC", fontSize: 16, margin: "0 0 22px" }}>
-          Enter your city or ZIP to see how many people in your area are looking.
+          Enter your city or postal code to see how many people in your area are looking.
         </p>
 
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
-            placeholder="City, ST or ZIP code"
+            placeholder={PLACEHOLDERS[country] || "City or postal code"}
             style={{
               flex: 1,
               fontFamily: "Archivo, sans-serif",
@@ -58,6 +67,27 @@ export default function ProDemandLookup() {
               outline: "none",
             }}
           />
+          <select
+            value={country}
+            onChange={(e) => { setCountry(e.target.value); setResult(null); }}
+            style={{
+              fontFamily: "Archivo, sans-serif",
+              fontSize: 14,
+              padding: "14px 8px",
+              borderRadius: 8,
+              border: "2px solid #2A3B49",
+              background: "#1A2833",
+              color: "#93A0AC",
+              outline: "none",
+              cursor: "pointer",
+            }}
+          >
+            <option value="US">🇺🇸 US</option>
+            <option value="CA">🇨🇦 CA</option>
+            <option value="GB">🇬🇧 UK</option>
+            <option value="NZ">🇳🇿 NZ</option>
+            <option value="AU">🇦🇺 AU</option>
+          </select>
           <button
             onClick={() => handleSearch()}
             disabled={loading || !query.trim()}
@@ -107,9 +137,14 @@ export default function ProDemandLookup() {
           </div>
         )}
 
-        {/* Error */}
+        {/* Error — distinct from "no demand" */}
         {result?.error && (
-          <p style={{ color: "#93A0AC", fontSize: 15, marginTop: 16 }}>{result.error}</p>
+          <div style={{ marginTop: 20, background: "#1A2833", border: "1px solid #f43f5e40", borderRadius: 10, padding: 24 }}>
+            <p style={{ fontFamily: "Archivo, sans-serif", fontWeight: 700, fontSize: 16, color: "#f43f5e", margin: "0 0 6px" }}>
+              Couldn't find that location
+            </p>
+            <p style={{ fontSize: 14, color: "#93A0AC", margin: 0 }}>{result.error}</p>
+          </div>
         )}
 
         {/* Results */}
@@ -119,35 +154,46 @@ export default function ProDemandLookup() {
               {result.cityLabel}
             </p>
 
+            {/* Case (a): demand nearby, show count */}
             {result.hasDemand && result.mentionsNearby !== null ? (
               <>
                 <p style={{ fontSize: 16, color: "#06b6d4", fontWeight: 700, margin: "0 0 6px" }}>
                   {(result.mentionsNearby! + (result.subscribersNearby || 0))} people in this area are looking for a nervous system chiropractor.
                 </p>
-                {result.mentionsNearby! > 0 && result.subscribersNearby! > 0 ? (
+                {result.mentionsNearby! > 0 && (result.subscribersNearby || 0) > 0 ? (
                   <p style={{ fontSize: 14, color: "#93A0AC", margin: "0 0 12px" }}>
                     {result.mentionsNearby} asked in comments. {result.subscribersNearby} joined the waitlist.
                   </p>
                 ) : null}
               </>
             ) : result.hasDemand ? (
+              /* Case (a) with suppression: demand exists but count < 3 */
               <p style={{ fontSize: 16, color: "#06b6d4", fontWeight: 700, margin: "0 0 12px" }}>
                 There is demand in your area.
               </p>
             ) : (
-              <p style={{ fontSize: 16, color: "#93A0AC", margin: "0 0 12px" }}>
-                No significant demand signal yet in this area.
-              </p>
+              /* Case (c): no demand recorded */
+              <div>
+                <p style={{ fontSize: 15, color: "#93A0AC", lineHeight: 1.6, margin: "0 0 16px" }}>
+                  I haven't had anyone ask me for a chiropractor in {result.cityLabel} yet. Most of my audience is in the US, and that's where the requests come from today.
+                </p>
+                <p style={{ fontSize: 15, color: "#A5B0BB", lineHeight: 1.6, margin: 0 }}>
+                  Here's what you'd get anyway: two interviews cut into 80–100 clips posted for you across IG, TikTok and YouTube for a year, in front of an audience of 185K. A verified profile patients can find and book from. And you'd be the doctor I point to first when someone in your area does ask.
+                </p>
+              </div>
             )}
 
-            {result.doctorsNearby > 0 ? (
-              <p style={{ fontSize: 14, color: "#93A0AC", margin: 0 }}>
-                {result.doctorsNearby} NeuroChiro {result.doctorsNearby === 1 ? "member practices" : "members practice"} within 50 miles.
-              </p>
-            ) : (
-              <p style={{ fontSize: 14, color: "#D66829", fontWeight: 700, margin: 0 }}>
-                No NeuroChiro member listed here yet. You'd be the first.
-              </p>
+            {/* Doctor count — always shown when demand exists */}
+            {(result.hasDemand) && (
+              result.doctorsNearby > 0 ? (
+                <p style={{ fontSize: 14, color: "#93A0AC", margin: "12px 0 0" }}>
+                  {result.doctorsNearby} NeuroChiro {result.doctorsNearby === 1 ? "member practices" : "members practice"} within 50 miles.
+                </p>
+              ) : (
+                <p style={{ fontSize: 14, color: "#D66829", fontWeight: 700, margin: "12px 0 0" }}>
+                  No NeuroChiro member listed here yet. You'd be the first.
+                </p>
+              )
             )}
           </div>
         )}
