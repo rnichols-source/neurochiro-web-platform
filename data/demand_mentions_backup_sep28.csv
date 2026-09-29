@@ -1,0 +1,113 @@
+id,city,state,lat,lng,source,post_ref,mentioned_on,created_at,country
+02125b23-3192-4c38-9f65-359709492f53,"Melbourne",VIC,-37.8136,144.9631,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:58:39.327914+00:00,AU
+4a2aa5e7-a3b0-45ef-a195-99d93ae3e387,"Singapore",,1.3521,103.8198,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:58:39.327914+00:00,SG
+2defe183-3e10-45fe-a0cf-4d826620c9f1,"Anchorage",AK,61.2116,-149.8761,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+86416eec-247c-48df-832d-9a896fd1ad17,"Birmingham",AL,33.5207,-86.8025,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+8e3aadf0-c5fa-404a-b4a1-4bbc0edcaf67,"Haleyville",AL,34.2314,-87.5938,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+9dc9defe-288f-4e73-9fc7-db9031b064a0,"Little Rock",AR,34.7399,-92.34,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+82155db7-88cc-46a7-8d09-167090b898df,"Mesa",AZ,33.4317,-111.8469,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+81bffab0-b339-4924-a5ca-28a51697cb20,"Scottsdale",AZ,33.5218,-111.9049,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+d2928a34-4445-43ad-8e01-ce91bf53c2ee,"Scottsdale",AZ,33.5218,-111.9049,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+4f2e4f25-070c-4e06-902e-5318fadcbf45,"Tucson",AZ,32.2139,-110.9694,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+a2f90bab-e1d0-446e-8f36-5a175d749259,"Chatsworth",CA,34.2583,-118.5914,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+354d6de7-4301-4f95-adcf-62c3b03c86d7,"Corona",CA,33.8753,-117.5664,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+aff1da51-952d-41fe-b601-ee933b6562c3,"Costa Mesa",CA,33.6801,-117.9085,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+facdcc4c-cdd4-41e3-ae9e-796039322839,"Costa Mesa",CA,33.6801,-117.9085,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+37de74d2-cb88-4795-96a5-139bb5063629,"Inglewood",CA,33.955,-118.3556,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+1d1a81c8-9691-4aba-82d8-4805e0c571ed,"Kingsburg",CA,36.508,-119.5433,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+13741496-b076-4469-bdf1-ce25abd0ee2b,"La Palma",CA,33.8491,-118.0398,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+200618e4-0ff9-4a08-b17d-2ed3018715fc,"Lakewood",CA,33.7866,-118.2987,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+6f4def83-8509-444d-a926-0840066b4a28,"Monterey Park",CA,34.0534,-118.1271,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+382c392d-5527-4104-ad13-9b50ca104040,"Palm Springs",CA,33.8414,-116.5347,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+72e2ccb4-c071-4f95-9d51-d8f04be594c4,"Redlands",CA,34.0397,-117.1804,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+5056da75-3100-473d-af09-345b638a3cb3,"Redondo Beach",CA,33.8307,-118.3832,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+6e2170db-85ab-43d5-a959-a688e629b0aa,"Sacramento",CA,38.5816,-121.4944,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+da265b61-1908-44b1-9371-0907eb4eab2f,"San Francisco",CA,37.7813,-122.4167,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+7a7bd480-01ee-4e98-a84a-7f4ef06e3fb1,"San Francisco",CA,37.7813,-122.4167,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+28b7503d-3b1d-4985-869f-d9f0d21a334f,"San Jose",CA,37.3894,-121.8868,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+0a4c491c-c8f7-427f-b679-240a33f47fc9,"Santa Rosa",CA,38.4432,-122.7547,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+7aaaf41e-367b-4f4a-9405-5cb3b02859c4,"Temecula",CA,33.4936,-117.1484,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+3aca33c6-543b-4dc1-9bef-f7b325c4faed,"Ventura",CA,34.3308,-119.3584,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+ceae27f2-a377-4de7-9f62-447cac27d41d,"Denver",CO,39.838,-104.9988,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+63494180-d617-4ee8-a2c5-79dc4ad12a94,"Lone Tree",CO,39.5517,-104.8863,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+6305ce77-a973-4111-96c8-1a993a7ba605,"Thornton",CO,39.868,-104.9719,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+b1edf9ce-bdd2-484b-926e-04c04de54aea,"Fairfield",CT,41.1692,-73.2681,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+2fb8670a-da34-48aa-8191-df6842625654,"Hartford",CT,41.7801,-72.6771,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+5b2655b3-c6fe-46e2-af16-45326d438b97,"Wallingford",CT,41.46,-72.8222,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+b11f8894-d171-47c8-8e7e-5009faed68fd,"Miami",FL,25.7791,-80.1978,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+76449115-c88e-4ee5-a507-85ce1baa6715,"Palm Coast",FL,29.4661,-81.2828,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+8116d66d-e4f2-49bf-aba3-a01db6148dc2,"Saint Augustine",FL,29.7964,-81.2649,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+a324e127-7a92-47e3-b2cd-d9e7711294c8,"Saint Petersburg",FL,27.8201,-82.7308,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T01:00:33.128198+00:00,US
+8d5b5ab1-17ef-4c58-a7fd-234569d376ac,"Stuart",FL,27.1968,-80.2538,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+2c8c5334-7501-4c32-b0e9-62d92d2518cf,"Athens",GA,33.9761,-83.3632,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+080103f1-0432-4e49-8948-a1f59ab23932,"Atlanta",GA,33.8687,-84.3351,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+fd702a62-7db4-48fb-b140-92387b89db4b,"Atlanta",GA,33.8687,-84.3351,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+aafc3ce5-f72f-4967-a48e-c753d6baf8b0,"Cumming",GA,34.2897,-84.1796,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+35f2a197-8c0d-414f-93a2-a438fae92ec8,"Boise",ID,43.4599,-116.244,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+9c729d7b-fad4-41f4-8d60-9aabd4a2c53e,"Downers Grove",IL,41.8034,-88.0138,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+ec626d66-6762-4d18-bf22-8c552e777c34,"South Bend",IN,41.6727,-86.2535,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+053e27a9-cc8f-451d-91cf-8096c2896517,"Wichita",KS,37.6922,-97.3375,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+9fdea02e-f304-4bf2-92c0-3e4e05aa4921,"Hammond",LA,30.5191,-90.4879,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+075ced59-6bd3-4848-85d1-bccf788c987a,"Lafayette",LA,30.2361,-92.0083,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+15cc67ac-fee5-4ed6-9a97-b34301b6ae91,"New Orleans",LA,29.9614,-90.1577,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+9b545986-4abb-4dbf-88ed-255d4fadaa94,"Boston",MA,42.3584,-71.0598,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+08a9f5fb-9715-4e48-b92a-bd39347ecf10,"Chicopee",MA,42.1487,-72.6079,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+7547fcdd-3df7-4926-946c-4c41fce7c7b9,"Mansfield",MA,42.0212,-71.2178,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+985abdb8-a0d1-46fd-ab96-52c3e7c5db88,"Shrewsbury",MA,42.2848,-71.7205,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+ed71ea70-4d77-4024-93f1-4da9053c669c,"Scarborough",ME,43.577,-70.2736,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+82ce6350-c5c6-4b28-8460-71bc8a565a26,"Grand Rapids",MI,42.9842,-85.6291,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+4f8ef829-b436-467d-ae0b-5c8e564180ac,"Howell",MI,42.6159,-83.9248,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+bec12faa-12c7-4652-b6d9-2924e704c131,"Mora",MN,45.8958,-93.2942,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+0b1c79b1-bf7a-41e9-9d95-eadcf8799b4e,"Kansas City",MO,39.1479,-94.568,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+ed7fd4de-2b33-40cb-a07e-ccc02d52d384,"Nevada",MO,37.8409,-94.3571,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+2c3fe9f5-d0d4-429e-b0b1-718545fa05dc,"Springfield",MO,37.2581,-93.3437,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+e650c892-f889-471c-816d-a2850ecdf32f,"Beaufort",NC,34.758,-76.6228,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+1a2635c7-ea3a-43a8-b092-486b022e153f,"Charlotte",NC,35.26,-80.8042,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+519b6a4e-a228-48a6-84a0-85310ebc3664,"Greensboro",NC,36.0697,-79.7682,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+2dd7fdf4-3169-457c-9571-77e375d99a71,"Raleigh",NC,35.7727,-78.6324,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+ff4782ae-eb48-4956-b6cb-1220949178fb,"Salisbury",NC,35.6515,-80.4889,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+fbbc48aa-001a-47ed-bf68-ff38fdb6ef10,"Sneads Ferry",NC,34.5426,-77.4038,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+7a5dc4fe-e8b1-4139-892a-db2391a42b3d,"Wilmington",NC,34.2257,-77.9447,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+f8aac1f0-6a6e-4eb9-83a0-c85f7f1df42b,"Lincoln",NE,40.8651,-96.8231,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+16973c0f-8281-4d41-add6-16f3c91603ab,"Hackettstown",NJ,40.8529,-74.8343,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+05993ada-180b-47ec-b6f7-55f86ba53b26,"Lavallette",NJ,39.9775,-74.0704,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+6fc6367b-ea1f-45d0-8e83-c3923a4b1c59,"Newton",NJ,41.0695,-74.8069,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+8205951a-c61f-4bc6-bb6e-20bebc921990,"New York",NY,40.7484,-73.9967,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+df3b33b7-ed98-4f4f-afa3-f0f67429f5dd,"Yonkers",NY,40.9461,-73.8669,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+42cc5ce0-b7cf-48b6-8fc8-211502e76646,"Amelia",OH,39.0211,-84.2112,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+1a3ed1b3-fcf3-4264-b7a4-6d9cec22e95d,"Canton",OH,40.7824,-81.3712,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+3278582c-80f3-47f1-a08e-fe1a79f385d7,"Cincinnati",OH,39.162,-84.4569,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+839b0fe9-2203-4b81-964e-89f9d60f14a0,"North Olmsted",OH,41.4201,-81.9131,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+bbdef4f2-d9ca-40ea-ba4a-f81ad226e5f4,"Toledo",OH,41.6868,-83.4394,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+40f64ef7-50ce-46c3-ba3b-d5405644d7ad,"Edmond",OK,35.6748,-97.4997,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+732dae0b-602b-4f77-88b0-03e1d81aaa2e,"Oklahoma City",OK,35.3792,-97.5362,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+fb7e272b-faf9-4628-98b5-644306c70c8d,"Salem",OR,44.949,-123.004,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+6c747588-68f7-4562-830e-61326914c40f,"Doylestown",PA,40.3054,-75.1489,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+cdc0e021-1fe4-48ea-9049-1c2855a2447a,"Greenville",PA,41.4057,-80.3739,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+755067e2-63de-40ac-beb4-ebe0bc209d69,"Lancaster",PA,40.0766,-76.3107,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+e55fe7cc-38e7-4b5b-bbfb-25b167db3e99,"Media",PA,39.9188,-75.3991,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+c26904d5-e73d-4df5-8e73-d6787350c361,"Pittsburgh",PA,40.3688,-80.0224,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+15d6a91a-3c4f-4b0e-a79b-64dc3a979959,"Beaufort",SC,32.4244,-80.5653,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+6d750279-c195-434d-8663-98f8954b5f3d,"Charleston",SC,32.9668,-79.8528,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+41a2db6b-1ba6-4b59-a423-c13766f4b925,"Charleston",SC,32.9668,-79.8528,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+57a39f12-a94a-437b-86d2-f72a7dd385e7,"Myrtle Beach",SC,33.7587,-78.8044,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+ece4263a-b201-4955-b2e0-0213c1393bf3,"Myrtle Beach",SC,33.7587,-78.8044,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+30ccb380-0f7e-4f3b-92fd-880dee7e663d,"Sioux Falls",SD,43.5464,-96.6906,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+6e1eae43-8a5e-41ba-b1bc-a55ce2f03d06,"Chattanooga",TN,35.0456,-85.3097,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+92663074-7891-4474-b1da-25f18fd25f33,"Nashville",TN,36.1657,-86.7781,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+ffbc4c98-4773-40da-b660-5079318b5635,"Austin",TX,30.3264,-97.7713,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+db285734-03e4-4d6e-af63-e2d2e426126a,"Boerne",TX,29.7327,-98.6646,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+d69038fd-58b0-411b-a1a4-19b42a4d6c6f,"College Station",TX,30.6045,-96.3123,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+008b932e-b182-4150-bc6f-84cc1a7c9559,"Dallas",TX,32.7673,-96.7776,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+b2a9171c-4616-4d3f-b0d7-dabed1acbdbc,"Houston",TX,29.6364,-95.2216,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+4d3e5a36-bac4-496d-9606-fe768950f10b,"Houston",TX,29.6364,-95.2216,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+85c6c4b7-3156-4bc4-b886-e00eba183154,"Mansfield",TX,32.5773,-97.1416,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+72d7736a-f692-4d7f-8535-97d2c84d91da,"Plano",TX,33.055,-96.7365,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+e3852a21-8721-40c1-8088-9b915018d46b,"Sugar Land",TX,29.6196,-95.607,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+4f8aa6ab-83ae-4c1c-9f10-6f73ce43603a,"Weatherford",TX,32.7676,-97.7516,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+f3b1b5fd-85ba-4e36-a630-6518112c6e0a,"Richmond",VA,37.4373,-77.4788,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
+69057f3e-ba1d-4a91-920f-30911772c283,"Warrenton",VA,38.6898,-77.8361,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+4f02c56e-c1d8-416d-a81a-6f123681aa3e,"Bennington",VT,42.8827,-73.1923,instagram_comment,"IG comment CTA batch 3",2026-09-26,2026-09-26T22:41:14.875419+00:00,US
+183cc1ff-d5b3-4f8d-bbe4-c557ce575aaa,"Seattle",WA,47.6114,-122.3305,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+6f39320f-cc49-47c7-a6ca-0bd33261b298,"Kenosha",WI,42.6052,-87.8299,instagram_comment,"IG comment CTA",2026-09-25,2026-09-26T00:53:42.237922+00:00,US
+1e9732d8-9543-4670-8705-ad235c0dc782,"Oconomowoc",WI,43.1095,-88.4862,instagram_comment,"IG comment CTA batch 2",2026-09-25,2026-09-26T00:59:27.497592+00:00,US
