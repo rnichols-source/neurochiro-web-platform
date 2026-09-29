@@ -21,6 +21,7 @@ export interface ProPageStats {
 export interface MapDoctor {
   lat: number
   lng: number
+  country: string
 }
 
 export interface MapDemandCity {
@@ -29,6 +30,7 @@ export interface MapDemandCity {
   count: number
   city: string
   state: string
+  country: string
 }
 
 export interface DemandNearbyResult {
@@ -77,75 +79,82 @@ export async function getProPageStats(): Promise<ProPageStats> {
   }
 }
 
-// ── Map Data ──
+// ── Map Data (all countries, aggregated to city level) ──
 
 export async function getDemandMapData(): Promise<{ doctors: MapDoctor[]; demandCities: MapDemandCity[] }> {
   const supabase = createAdminClient()
 
-  // Doctor locations (verified, US, valid coords — no PII)
+  // All verified doctors with valid coords (no PII, just location + country)
   const { data: docs } = await supabase
     .from('doctors')
-    .select('latitude, longitude')
+    .select('latitude, longitude, country')
     .eq('verification_status', 'verified')
-    .or('country.is.null,country.eq.US')
     .not('latitude', 'eq', 0)
     .not('longitude', 'eq', 0)
 
   const doctors: MapDoctor[] = (docs || [])
     .filter(d => d.latitude != null && d.longitude != null)
-    .map(d => ({ lat: d.latitude!, lng: d.longitude! }))
+    .map(d => ({ lat: d.latitude!, lng: d.longitude!, country: d.country || 'US' }))
 
-  // Demand: mentions aggregated by city (US only for map)
+  // All demand mentions, aggregated by city+state+country
   const { data: mentions } = await (supabase as any)
     .from('demand_mentions')
-    .select('city, state, lat, lng')
-    .or('country.eq.US,country.is.null')
+    .select('city, state, lat, lng, country')
 
   const cityMap = new Map<string, MapDemandCity>()
   for (const m of (mentions || [])) {
-    const key = `${m.city}|${m.state}`
+    const cc = m.country || 'US'
+    const key = `${cc}|${m.city}|${m.state}`
     const existing = cityMap.get(key)
     if (existing) {
       existing.count++
     } else {
-      cityMap.set(key, { city: m.city, state: m.state, lat: Number(m.lat), lng: Number(m.lng), count: 1 })
+      cityMap.set(key, { city: m.city, state: m.state, lat: Number(m.lat), lng: Number(m.lng), count: 1, country: cc })
     }
   }
 
-  // Demand: US subscribers by ZIP, joined to zip_codes for coords
+  // Subscribers by ZIP, joined to zip_codes for coords
   const { data: subscribers } = await (supabase as any)
     .from('subscribers')
-    .select('zip')
+    .select('zip, country')
     .eq('status', 'confirmed')
     .not('zip', 'is', null)
-    .or('country.eq.US,country.is.null')
 
-  const zipCounts = new Map<string, number>()
+  const zipCounts = new Map<string, { count: number; country: string }>()
   for (const s of (subscribers || [])) {
     const z = (s.zip || '').trim().slice(0, 5)
-    if (/^\d{5}$/.test(z)) zipCounts.set(z, (zipCounts.get(z) || 0) + 1)
+    if (/^\d{5}$/.test(z)) {
+      const cc = s.country || 'US'
+      const key = `${cc}|${z}`
+      const existing = zipCounts.get(key)
+      if (existing) existing.count++
+      else zipCounts.set(key, { count: 1, country: cc })
+    }
   }
 
   if (zipCounts.size > 0) {
+    const allZips = Array.from(zipCounts.entries()).map(([k]) => k.split('|')[1])
     const { data: zipCoords } = await (supabase as any)
       .from('zip_codes')
-      .select('zip, city, state, lat, lng')
-      .eq('country', 'US')
-      .in('zip', Array.from(zipCounts.keys()))
+      .select('zip, city, state, lat, lng, country')
+      .in('zip', allZips)
 
     for (const z of (zipCoords || [])) {
-      const key = `${z.city}|${z.state}`
-      const count = zipCounts.get(z.zip) || 0
-      const existing = cityMap.get(key)
+      const cc = z.country || 'US'
+      const zipKey = `${cc}|${z.zip}`
+      const zc = zipCounts.get(zipKey)
+      if (!zc) continue
+      const cityKey = `${cc}|${z.city}|${z.state}`
+      const existing = cityMap.get(cityKey)
       if (existing) {
-        existing.count += count
+        existing.count += zc.count
       } else {
-        cityMap.set(key, { city: z.city, state: z.state, lat: Number(z.lat), lng: Number(z.lng), count })
+        cityMap.set(cityKey, { city: z.city, state: z.state, lat: Number(z.lat), lng: Number(z.lng), count: zc.count, country: cc })
       }
     }
   }
 
-  // No suppression on map data — all cities shown regardless of count
+  // City-level aggregates only — no individual records leave the server
   const demandCities = Array.from(cityMap.values())
 
   return { doctors, demandCities }

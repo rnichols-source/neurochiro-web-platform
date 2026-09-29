@@ -1,8 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { getProPageStats, getDemandMapData } from "./actions";
-import ProDemandMap from "./ProDemandMap";
-import ProDemandLookup from "./ProDemandLookup";
+import ProDemandSection from "./ProDemandSection";
 import ProCTA from "./ProCTA";
 import ProFAQ from "./ProFAQ";
 
@@ -102,18 +101,8 @@ export default async function ProPage() {
           </div>
         </section>
 
-        {/* ═══ 3. THE MAP ═══ */}
-        <section>
-          <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px 12px" }}>
-            <p style={{ fontFamily: "Archivo, sans-serif", fontSize: 13, letterSpacing: "0.06em", color: "#D66829", textTransform: "uppercase", fontWeight: 700, margin: "0 0 8px" }}>
-              Here's where they are
-            </p>
-          </div>
-          <ProDemandMap doctors={mapData.doctors} demandCities={mapData.demandCities} />
-        </section>
-
-        {/* ═══ 4. DEMAND LOOKUP ═══ */}
-        <ProDemandLookup />
+        {/* ═══ 3. MAP + 4. DEMAND LOOKUP (shared country state) ═══ */}
+        <ProDemandSection allDoctors={mapData.doctors} allDemandCities={mapData.demandCities} />
 
         {/* ═══ 5. HOW A PATIENT REACHES YOU ═══ */}
         <section style={{ padding: "52px 0", borderTop: "1px solid #2A3B49" }}>

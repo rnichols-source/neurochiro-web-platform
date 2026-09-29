@@ -11,9 +11,14 @@ const PLACEHOLDERS: Record<string, string> = {
   AU: "3000 or Melbourne, VIC",
 };
 
-export default function ProDemandLookup() {
+export default function ProDemandLookup({
+  country,
+  onCountryChange,
+}: {
+  country: string;
+  onCountryChange: (c: string) => void;
+}) {
   const [query, setQuery] = useState("");
-  const [country, setCountry] = useState("US");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DemandNearbyResult | null>(null);
 
@@ -36,6 +41,11 @@ export default function ProDemandLookup() {
     setQuery(q);
     setResult(null);
     handleSearch(q);
+  };
+
+  const handleCountryChange = (c: string) => {
+    onCountryChange(c);
+    setResult(null);
   };
 
   return (
@@ -69,7 +79,7 @@ export default function ProDemandLookup() {
           />
           <select
             value={country}
-            onChange={(e) => { setCountry(e.target.value); setResult(null); }}
+            onChange={(e) => handleCountryChange(e.target.value)}
             style={{
               fontFamily: "Archivo, sans-serif",
               fontSize: 14,
@@ -141,7 +151,7 @@ export default function ProDemandLookup() {
         {result?.error && (
           <div style={{ marginTop: 20, background: "#1A2833", border: "1px solid #f43f5e40", borderRadius: 10, padding: 24 }}>
             <p style={{ fontFamily: "Archivo, sans-serif", fontWeight: 700, fontSize: 16, color: "#f43f5e", margin: "0 0 6px" }}>
-              Couldn't find that location
+              Couldn&rsquo;t find that location
             </p>
             <p style={{ fontSize: 14, color: "#93A0AC", margin: 0 }}>{result.error}</p>
           </div>
@@ -175,10 +185,10 @@ export default function ProDemandLookup() {
               /* Case (c): no demand recorded */
               <div>
                 <p style={{ fontSize: 15, color: "#93A0AC", lineHeight: 1.6, margin: "0 0 16px" }}>
-                  I haven't had anyone ask me for a chiropractor in {result.cityLabel} yet. Most of my audience is in the US, and that's where the requests come from today.
+                  I haven&rsquo;t had anyone ask me for a chiropractor in {result.cityLabel} yet. Most of my audience is in the US, and that&rsquo;s where the requests come from today.
                 </p>
                 <p style={{ fontSize: 15, color: "#A5B0BB", lineHeight: 1.6, margin: 0 }}>
-                  Here's what you'd get anyway: two interviews cut into 80–100 clips posted for you across IG, TikTok and YouTube for a year, in front of an audience of 185K. A verified profile patients can find and book from. And you'd be the doctor I point to first when someone in your area does ask.
+                  Here&rsquo;s what you&rsquo;d get anyway: two interviews cut into 80-100 clips posted for you across IG, TikTok and YouTube for a year, in front of an audience of 185K. A verified profile patients can find and book from. And you&rsquo;d be the doctor I point to first when someone in your area does ask.
                 </p>
               </div>
             )}
@@ -191,7 +201,7 @@ export default function ProDemandLookup() {
                 </p>
               ) : (
                 <p style={{ fontSize: 14, color: "#D66829", fontWeight: 700, margin: "12px 0 0" }}>
-                  No NeuroChiro member listed here yet. You'd be the first.
+                  No NeuroChiro member listed here yet. You&rsquo;d be the first.
                 </p>
               )
             )}
