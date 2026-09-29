@@ -1,9 +1,11 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { getProPageStats, getDemandMapData } from "./actions";
+import { ProCountryProvider } from "./ProCountryContext";
 import ProDemandSection from "./ProDemandSection";
 import ProCTA from "./ProCTA";
 import ProFAQ from "./ProFAQ";
+import { HeroMathBlock, PriceRef } from "./ProPriceDisplay";
 
 export const revalidate = 300;
 
@@ -33,6 +35,7 @@ export default async function ProPage() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: css }} />
+      <ProCountryProvider>
       <div className="pro-page" style={{ background: "#131E27", color: "#F1EDE7", fontFamily: '"Source Serif 4", Georgia, "Times New Roman", serif', fontSize: 17, lineHeight: 1.65, margin: 0 }}>
 
         {/* ═══ 1. HERO ═══ */}
@@ -50,23 +53,10 @@ export default async function ProPage() {
               NeuroChiro is the directory that puts you in front of them, and a content engine that keeps you in front of them all year.
             </p>
 
-            {/* MATH BLOCK */}
-            <div style={{ margin: "40px 0 8px" }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 14, padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,.12)" }}>
-                <div style={{ fontFamily: "Archivo, sans-serif", fontWeight: 800, fontSize: "clamp(28px, 5vw, 34px)", letterSpacing: "-0.03em", minWidth: "clamp(104px, 20vw, 132px)" }}>$99</div>
-                <span style={{ color: "#93A0AC", fontSize: 16 }}>per month, cancel anytime</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 14, padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,.12)" }}>
-                <div style={{ fontFamily: "Archivo, sans-serif", fontWeight: 800, fontSize: "clamp(28px, 5vw, 34px)", letterSpacing: "-0.03em", minWidth: "clamp(104px, 20vw, 132px)" }}>$1,188</div>
-                <span style={{ color: "#93A0AC", fontSize: 16 }}>what a full year costs you</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 14, padding: "12px 0" }}>
-                <div style={{ fontFamily: "Archivo, sans-serif", fontWeight: 800, fontSize: "clamp(28px, 5vw, 34px)", letterSpacing: "-0.03em", minWidth: "clamp(104px, 20vw, 132px)", color: "#D66829" }}>1</div>
-                <span style={{ color: "#93A0AC", fontSize: 16 }}>new patient who starts care, in most practices, covers it</span>
-              </div>
-            </div>
+            {/* MATH BLOCK — reacts to country selector */}
+            <HeroMathBlock />
             <p style={{ color: "#93A0AC", fontSize: 15, marginTop: 18 }}>
-              Run your own numbers. If one care plan in your office is worth more than $1,188, the decision isn't really about the price.
+              Run your own numbers. If one care plan in your office is worth more than <PriceRef amount={1188} />, the decision isn't really about the price.
             </p>
 
             <Suspense fallback={<div style={{ height: 56, marginTop: 30 }} />}>
@@ -180,7 +170,7 @@ export default async function ProPage() {
                 <li style={{ marginBottom: 8 }}>What I can guarantee is the work: your profile goes up, your interviews get recorded, your clips get made and scheduled, and the files are yours.</li>
               </ul>
               <p style={{ marginTop: 14, fontSize: 16, color: "#A5B0BB" }}>
-                Price out 80 to 100 edited clips from a video team and you'll pass $1,188 before anyone touches the directory. That's the floor. The patients are the upside.
+                Price out 80 to 100 edited clips from a video team and you'll pass <PriceRef amount={1188} /> before anyone touches the directory. That's the floor. The patients are the upside.
               </p>
             </div>
           </div>
@@ -229,6 +219,7 @@ export default async function ProPage() {
           </div>
         </footer>
       </div>
+      </ProCountryProvider>
     </>
   );
 }

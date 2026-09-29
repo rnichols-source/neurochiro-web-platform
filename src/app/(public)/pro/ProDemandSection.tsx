@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import ProDemandMap from "./ProDemandMap";
 import ProDemandLookup from "./ProDemandLookup";
+import { useProCountry } from "./ProCountryContext";
 import type { MapDoctor, MapDemandCity } from "./actions";
 
 export default function ProDemandSection({
@@ -12,7 +12,7 @@ export default function ProDemandSection({
   allDoctors: MapDoctor[];
   allDemandCities: MapDemandCity[];
 }) {
-  const [country, setCountry] = useState("US");
+  const { country, setCountry } = useProCountry();
 
   const doctors = allDoctors.filter((d) => d.country === country);
   const demandCities = allDemandCities.filter((d) => d.country === country);
