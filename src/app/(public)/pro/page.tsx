@@ -87,12 +87,17 @@ export default async function ProPage() {
             </h2>
             <p style={{ color: "#93A0AC", fontSize: 16, margin: "0 0 6px" }}>
               {stats.totalMentions.toLocaleString()} commented on a post asking for a doctor in their city.
-            </p>
-            <p style={{ color: "#93A0AC", fontSize: 16, margin: "0 0 6px" }}>
-              {stats.confirmedSubscribers.toLocaleString()} joined the patient waitlist with their ZIP code.
+              {" "}{stats.confirmedSubscribers > 0 && `${stats.confirmedSubscribers.toLocaleString()} joined the patient waitlist.`}
             </p>
             <p style={{ color: "#93A0AC", fontSize: 16, margin: 0 }}>
-              They're in {stats.statesCovered} states. Most haven't found their doctor yet.
+              {stats.mentionsByCountry.length > 1 ? (
+                <>Across {stats.countriesWithDemand} countries: {stats.mentionsByCountry.map(c => {
+                  const labels: Record<string, string> = { US: 'US', CA: 'Canada', GB: 'UK', AU: 'Australia', SG: 'Singapore' }
+                  return `${c.count} ${labels[c.country] || c.country}`
+                }).join(', ')}.</>
+              ) : (
+                <>They're in {stats.statesCovered} states. Most haven't found their doctor yet.</>
+              )}
             </p>
           </div>
         </section>

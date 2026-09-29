@@ -14,6 +14,8 @@ export interface ProPageStats {
   confirmedSubscribers: number
   totalMentions: number
   totalDemandSignals: number
+  mentionsByCountry: { country: string; count: number }[]
+  countriesWithDemand: number
 }
 
 export interface MapDoctor {
@@ -42,11 +44,27 @@ export interface DemandNearbyResult {
 // ── Stats ──
 
 export async function getProPageStats(): Promise<ProPageStats> {
+  const supabase = createAdminClient()
   const [doctors, subs, mentions] = await Promise.all([
     getDoctorCounts(),
     getSubscriberCounts(),
     getDemandMentionCount(),
   ])
+
+  // Get mention breakdown by country
+  const { data: mentionRows } = await (supabase as any)
+    .from('demand_mentions')
+    .select('country')
+
+  const byCountry = new Map<string, number>()
+  for (const m of (mentionRows || [])) {
+    const cc = m.country || 'US'
+    byCountry.set(cc, (byCountry.get(cc) || 0) + 1)
+  }
+
+  const mentionsByCountry = Array.from(byCountry.entries())
+    .map(([country, count]) => ({ country, count }))
+    .sort((a, b) => b.count - a.count)
 
   return {
     activeDoctors: doctors.active,
@@ -54,6 +72,8 @@ export async function getProPageStats(): Promise<ProPageStats> {
     confirmedSubscribers: subs.confirmed,
     totalMentions: mentions,
     totalDemandSignals: subs.confirmed + mentions,
+    mentionsByCountry,
+    countriesWithDemand: byCountry.size,
   }
 }
 
