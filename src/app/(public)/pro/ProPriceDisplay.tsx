@@ -21,11 +21,18 @@ export function HeroMathBlock() {
 
   return (
     <div style={{ margin: "40px 0 8px" }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 14, padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,.12)" }}>
-        <div style={{ fontFamily: "Archivo, sans-serif", fontWeight: 800, fontSize: "clamp(28px, 5vw, 34px)", letterSpacing: "-0.03em", minWidth: "clamp(104px, 20vw, 132px)" }}>
-          ${USD_MONTHLY}{usdSuffix}
+      <div style={{ padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,.12)" }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
+          <div style={{ fontFamily: "Archivo, sans-serif", fontWeight: 800, fontSize: "clamp(28px, 5vw, 34px)", letterSpacing: "-0.03em", minWidth: "clamp(104px, 20vw, 132px)" }}>
+            ${USD_MONTHLY}{usdSuffix}
+          </div>
+          <span style={{ color: "#93A0AC", fontSize: 16 }}>per month, cancel anytime</span>
         </div>
-        <span style={{ color: "#93A0AC", fontSize: 16 }}>per month, cancel anytime</span>
+        {conversionLine && (
+          <p style={{ fontSize: 15, color: "#93A0AC", margin: "6px 0 0" }}>
+            {conversionLine}
+          </p>
+        )}
       </div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 14, padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,.12)" }}>
         <div style={{ fontFamily: "Archivo, sans-serif", fontWeight: 800, fontSize: "clamp(28px, 5vw, 34px)", letterSpacing: "-0.03em", minWidth: "clamp(104px, 20vw, 132px)" }}>
@@ -37,11 +44,6 @@ export function HeroMathBlock() {
         <div style={{ fontFamily: "Archivo, sans-serif", fontWeight: 800, fontSize: "clamp(28px, 5vw, 34px)", letterSpacing: "-0.03em", minWidth: "clamp(104px, 20vw, 132px)", color: "#D66829" }}>1</div>
         <span style={{ color: "#93A0AC", fontSize: 16 }}>new patient who starts care, in most practices, covers it</span>
       </div>
-      {conversionLine && (
-        <p style={{ fontSize: 13, color: "#93A0AC", margin: "10px 0 0" }}>
-          {conversionLine}
-        </p>
-      )}
     </div>
   );
 }
