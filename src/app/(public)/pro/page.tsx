@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getProPageStats, getDemandMapData } from "./actions";
 import { ProCountryProvider } from "./ProCountryContext";
 import ProDemandSection from "./ProDemandSection";
+import ProDemandLookup from "./ProDemandLookup";
 import ProCTA from "./ProCTA";
 import ProFAQ from "./ProFAQ";
 import { HeroMathBlock, PriceRef } from "./ProPriceDisplay";
@@ -53,7 +54,6 @@ export default async function ProPage() {
               NeuroChiro is the directory that puts you in front of them, and a content engine that keeps you in front of them all year.
             </p>
 
-            {/* MATH BLOCK — reacts to country selector */}
             <HeroMathBlock />
             <p style={{ color: "#93A0AC", fontSize: 15, marginTop: 18 }}>
               Run your own numbers. If one care plan in your office is worth more than <PriceRef amount={1188} />, the decision isn't really about the price.
@@ -65,7 +65,12 @@ export default async function ProPage() {
           </div>
         </header>
 
-        {/* ═══ 2. THE DEMAND NUMBER ═══ */}
+        {/* ═══ 2. DEMAND LOOKUP — the primary action ═══ */}
+        <Suspense fallback={<div style={{ height: 200 }} />}>
+          <ProDemandLookup />
+        </Suspense>
+
+        {/* ═══ 3. THE DEMAND NUMBER ═══ */}
         <section style={{ padding: "52px 0", borderTop: "1px solid #2A3B49" }}>
           <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
             <p style={{ fontFamily: "Archivo, sans-serif", fontSize: 13, letterSpacing: "0.06em", color: "#D66829", textTransform: "uppercase", fontWeight: 700, margin: "0 0 12px" }}>
@@ -80,7 +85,7 @@ export default async function ProPage() {
             </p>
             <p style={{ color: "#93A0AC", fontSize: 16, margin: 0 }}>
               {stats.mentionsByCountry.length > 1 ? (
-                <>Across {stats.countriesWithDemand} countries: {stats.mentionsByCountry.map(c => {
+                <>Comment requests came from {stats.countriesWithDemand} countries: {stats.mentionsByCountry.map(c => {
                   const labels: Record<string, string> = { US: 'US', CA: 'Canada', GB: 'UK', AU: 'Australia', SG: 'Singapore' }
                   return `${c.count} ${labels[c.country] || c.country}`
                 }).join(', ')}.</>
@@ -91,7 +96,7 @@ export default async function ProPage() {
           </div>
         </section>
 
-        {/* ═══ 3. MAP + 4. DEMAND LOOKUP (shared country state) ═══ */}
+        {/* ═══ 4. THE MAP ═══ */}
         <ProDemandSection allDoctors={mapData.doctors} allDemandCities={mapData.demandCities} />
 
         {/* ═══ 5. HOW A PATIENT REACHES YOU ═══ */}
@@ -105,7 +110,7 @@ export default async function ProPage() {
               { title: "I create demand.", desc: "Content to 185K followers teaching people what nervous system care actually is. Most patients don't know this kind of chiropractic exists." },
               { title: "They raise their hand.", desc: "People comment their city asking where to find someone. Others join the patient waitlist with their ZIP code." },
               { title: "The system routes them.", desc: "If a member is nearby, they see that doctor's profile with distance, hours, cost, and how to book. If nobody's nearby, they go on the waitlist for that area." },
-              { title: "The patient asks for contact.", desc: "When a member joins an uncovered area, everyone waiting there gets an email. They tap a button to ask that office to reach out, and give their phone number. The patient initiates it. No cold calls, no purchased lists, explicit consent recorded with the doctor's name on it." },
+              { title: "The patient asks for contact.", desc: "When a member joins an uncovered area, I email everyone waiting there. They tap a button to ask that office to reach out, and give their phone number. The patient initiates it. No cold calls, no purchased lists, explicit consent recorded with the doctor's name on it." },
               { title: "The doctor follows up.", desc: "The request lands in the member's dashboard and inbox with the patient's name, number, and what they asked for." },
             ].map((step, i) => (
               <div key={i} style={{ position: "relative", padding: "0 0 24px 46px" }}>
@@ -148,7 +153,6 @@ export default async function ProPage() {
               { title: "Two interviews with me", desc: "A recorded NeuroChiro Spotlight and a live interview on my Instagram, where I put you in front of my audience." },
               { title: "80 to 100 short-form clips", desc: "We cut both interviews into clips and schedule them across Instagram, TikTok, and YouTube for up to 12 months. You do two interviews. The content runs for a year." },
               { title: "Every clip, in your own folder", desc: "A shared Drive of all of it, yours to run as ads, post yourself, or hand to whoever manages your marketing. You keep them even if you leave." },
-              { title: "The room", desc: "Dashboard, job board, seminars marketplace, and a community of doctors practicing the same way you do." },
             ].map((item, i) => (
               <div key={i} style={{ padding: "18px 0", borderTop: i > 0 ? "1px solid #2A3B49" : "none" }}>
                 <h3 style={{ fontFamily: "Archivo, sans-serif", fontSize: 18, fontWeight: 700, margin: "0 0 6px" }}>{item.title}</h3>
@@ -172,6 +176,13 @@ export default async function ProPage() {
               <p style={{ marginTop: 14, fontSize: 16, color: "#A5B0BB" }}>
                 Price out 80 to 100 edited clips from a video team and you'll pass <PriceRef amount={1188} /> before anyone touches the directory. That's the floor. The patients are the upside.
               </p>
+            </div>
+
+            {/* Mid-page CTA — catches the skeptical doctor who just finished reading the honest section */}
+            <div style={{ marginTop: 28 }}>
+              <Suspense fallback={<div style={{ height: 56 }} />}>
+                <ProCTA variant="mid" />
+              </Suspense>
             </div>
           </div>
         </section>
@@ -203,7 +214,7 @@ export default async function ProPage() {
         <section style={{ background: "#0D161D", color: "#F1EDE7", padding: "52px 0", borderTop: "1px solid #2A3B49" }}>
           <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
             <h2 style={{ fontFamily: "Archivo, sans-serif", fontSize: 27, lineHeight: 1.2, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 18px", color: "#F1EDE7" }}>Two ways to start</h2>
-            <p style={{ color: "#93A0AC", margin: "0 0 16px" }}>
+            <p style={{ color: "#93A0AC", margin: "0 0 6px" }}>
               If you know it's a fit, join and book your onboarding call today. If you want to ask me something first, take fifteen minutes on my calendar. No pitch, just a straight conversation about whether this is right for your practice.
             </p>
             <Suspense fallback={<div style={{ height: 56 }} />}>

@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { checkDemandNearby, type DemandNearbyResult } from "./actions";
+import { useProCountry } from "./ProCountryContext";
+import { CURRENCY_RATES, USD_MONTHLY } from "./currency-config";
 
 const PLACEHOLDERS: Record<string, string> = {
   US: "29651 or Greenville, SC",
@@ -11,16 +14,24 @@ const PLACEHOLDERS: Record<string, string> = {
   AU: "3000 or Melbourne, VIC",
 };
 
-export default function ProDemandLookup({
-  country,
-  onCountryChange,
-}: {
-  country: string;
-  onCountryChange: (c: string) => void;
-}) {
+const STRIPE_MONTHLY = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY || "";
+const FIT_CALL_LINK = process.env.NEXT_PUBLIC_FIT_CALL_LINK || "";
+
+function buildLink(base: string, source: string) {
+  if (!base) return "#";
+  return `${base}${base.includes("?") ? "&" : "?"}client_reference_id=pro_${source}`;
+}
+
+export default function ProDemandLookup() {
+  const { country, setCountry } = useProCountry();
+  const searchParams = useSearchParams();
+  const source = searchParams.get("source") || "direct";
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DemandNearbyResult | null>(null);
+
+  const isIntl = country !== "US" && country in CURRENCY_RATES;
+  const usdSuffix = isIntl ? " USD" : "";
 
   const handleSearch = async (overrideQuery?: string) => {
     const q = overrideQuery || query.trim();
@@ -44,18 +55,62 @@ export default function ProDemandLookup({
   };
 
   const handleCountryChange = (c: string) => {
-    onCountryChange(c);
+    setCountry(c);
     setResult(null);
   };
 
+  const monthlyLink = buildLink(STRIPE_MONTHLY, source);
+  const fitCallLink = FIT_CALL_LINK || "#";
+
+  const resultButtons = (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 16 }}>
+      <a
+        href={monthlyLink}
+        style={{
+          fontFamily: "Archivo, sans-serif",
+          fontWeight: 700,
+          fontSize: 15,
+          textDecoration: "none",
+          padding: "12px 20px",
+          borderRadius: 6,
+          background: "#D66829",
+          color: "#fff",
+          border: "2px solid #D66829",
+          flex: "1 1 auto",
+          textAlign: "center",
+        }}
+      >
+        Join for ${USD_MONTHLY}{usdSuffix}/month
+      </a>
+      <a
+        href={fitCallLink}
+        style={{
+          fontFamily: "Archivo, sans-serif",
+          fontWeight: 700,
+          fontSize: 15,
+          textDecoration: "none",
+          padding: "12px 20px",
+          borderRadius: 6,
+          background: "transparent",
+          color: "#F1EDE7",
+          border: "2px solid #F1EDE7",
+          flex: "1 1 auto",
+          textAlign: "center",
+        }}
+      >
+        Book a Fit Call
+      </a>
+    </div>
+  );
+
   return (
-    <section style={{ padding: "52px 0", borderTop: "1px solid #2A3B49" }}>
+    <section style={{ padding: "52px 0 48px", borderTop: "1px solid #2A3B49" }}>
       <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 22px" }}>
-        <h2 style={{ fontFamily: "Archivo, sans-serif", fontSize: 27, lineHeight: 1.2, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 8px", color: "#F1EDE7" }}>
+        <h2 style={{ fontFamily: "Archivo, sans-serif", fontSize: "clamp(24px, 5vw, 30px)", lineHeight: 1.15, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 10px", color: "#F1EDE7" }}>
           Is there demand where you practice?
         </h2>
-        <p style={{ color: "#93A0AC", fontSize: 16, margin: "0 0 22px" }}>
-          Enter your city or postal code to see how many people in your area are looking.
+        <p style={{ color: "#93A0AC", fontSize: 17, margin: "0 0 24px" }}>
+          Enter your city or postal code to see how many people in your area are looking for a nervous system chiropractor.
         </p>
 
         <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
@@ -68,8 +123,8 @@ export default function ProDemandLookup({
             style={{
               flex: 1,
               fontFamily: "Archivo, sans-serif",
-              fontSize: 16,
-              padding: "14px 16px",
+              fontSize: 17,
+              padding: "16px 18px",
               borderRadius: 8,
               border: "2px solid #2A3B49",
               background: "#1A2833",
@@ -83,7 +138,7 @@ export default function ProDemandLookup({
             style={{
               fontFamily: "Archivo, sans-serif",
               fontSize: 14,
-              padding: "14px 8px",
+              padding: "16px 8px",
               borderRadius: 8,
               border: "2px solid #2A3B49",
               background: "#1A2833",
@@ -105,7 +160,7 @@ export default function ProDemandLookup({
               fontFamily: "Archivo, sans-serif",
               fontWeight: 700,
               fontSize: 16,
-              padding: "14px 24px",
+              padding: "16px 24px",
               borderRadius: 8,
               border: "none",
               background: "#D66829",
@@ -115,7 +170,7 @@ export default function ProDemandLookup({
               whiteSpace: "nowrap",
             }}
           >
-            {loading ? "..." : "Check"}
+            {loading ? "..." : "See who's looking"}
           </button>
         </div>
 
@@ -147,7 +202,7 @@ export default function ProDemandLookup({
           </div>
         )}
 
-        {/* Error — distinct from "no demand" */}
+        {/* Error */}
         {result?.error && (
           <div style={{ marginTop: 20, background: "#1A2833", border: "1px solid #f43f5e40", borderRadius: 10, padding: 24 }}>
             <p style={{ fontFamily: "Archivo, sans-serif", fontWeight: 700, fontSize: 16, color: "#f43f5e", margin: "0 0 6px" }}>
@@ -171,20 +226,40 @@ export default function ProDemandLookup({
                   {(result.mentionsNearby! + (result.subscribersNearby || 0))} people in this area are looking for a nervous system chiropractor.
                 </p>
                 {result.mentionsNearby! > 0 && (result.subscribersNearby || 0) > 0 ? (
-                  <p style={{ fontSize: 14, color: "#93A0AC", margin: "0 0 12px" }}>
+                  <p style={{ fontSize: 14, color: "#93A0AC", margin: "0 0 4px" }}>
                     {result.mentionsNearby} asked in comments. {result.subscribersNearby} joined the waitlist.
                   </p>
                 ) : null}
+                {result.doctorsNearby > 0 ? (
+                  <p style={{ fontSize: 14, color: "#93A0AC", margin: "4px 0 0" }}>
+                    {result.doctorsNearby} {result.doctorsNearby === 1 ? "member practices" : "members practice"} within 50 miles.
+                  </p>
+                ) : (
+                  <p style={{ fontSize: 15, color: "#D66829", fontWeight: 700, margin: "4px 0 0" }}>
+                    You&rsquo;d be the first doctor I could send these people to.
+                  </p>
+                )}
               </>
             ) : result.hasDemand ? (
-              /* Case (a) with suppression: demand exists but count < 3 */
-              <p style={{ fontSize: 16, color: "#06b6d4", fontWeight: 700, margin: "0 0 12px" }}>
-                There is demand in your area.
-              </p>
+              /* Suppressed count */
+              <>
+                <p style={{ fontSize: 16, color: "#06b6d4", fontWeight: 700, margin: "0 0 6px" }}>
+                  There is demand in your area.
+                </p>
+                {result.doctorsNearby > 0 ? (
+                  <p style={{ fontSize: 14, color: "#93A0AC", margin: "4px 0 0" }}>
+                    {result.doctorsNearby} {result.doctorsNearby === 1 ? "member practices" : "members practice"} within 50 miles.
+                  </p>
+                ) : (
+                  <p style={{ fontSize: 15, color: "#D66829", fontWeight: 700, margin: "4px 0 0" }}>
+                    You&rsquo;d be the first doctor I could send these people to.
+                  </p>
+                )}
+              </>
             ) : (
-              /* Case (c): no demand recorded */
+              /* No demand */
               <div>
-                <p style={{ fontSize: 15, color: "#93A0AC", lineHeight: 1.6, margin: "0 0 16px" }}>
+                <p style={{ fontSize: 15, color: "#93A0AC", lineHeight: 1.6, margin: "0 0 12px" }}>
                   I haven&rsquo;t had anyone ask me for a chiropractor in {result.cityLabel} yet. Most of my audience is in the US, and that&rsquo;s where the requests come from today.
                 </p>
                 <p style={{ fontSize: 15, color: "#A5B0BB", lineHeight: 1.6, margin: 0 }}>
@@ -193,18 +268,8 @@ export default function ProDemandLookup({
               </div>
             )}
 
-            {/* Doctor count — always shown when demand exists */}
-            {(result.hasDemand) && (
-              result.doctorsNearby > 0 ? (
-                <p style={{ fontSize: 14, color: "#93A0AC", margin: "12px 0 0" }}>
-                  {result.doctorsNearby} NeuroChiro {result.doctorsNearby === 1 ? "member practices" : "members practice"} within 50 miles.
-                </p>
-              ) : (
-                <p style={{ fontSize: 14, color: "#D66829", fontWeight: 700, margin: "12px 0 0" }}>
-                  No NeuroChiro member listed here yet. You&rsquo;d be the first.
-                </p>
-              )
-            )}
+            {/* CTA buttons inside every result */}
+            {resultButtons}
           </div>
         )}
 
