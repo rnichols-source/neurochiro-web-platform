@@ -66,6 +66,7 @@ const navGroups = [
       { name: "Patient List", href: "/admin/list", icon: Users },
       { name: "Coverage Map", href: "/admin/coverage", icon: Globe },
       { name: "Introductions", href: "/admin/referrals", icon: Send },
+      { name: "Notifications", href: "/admin/notifications", icon: Mail },
     ],
   },
   {
