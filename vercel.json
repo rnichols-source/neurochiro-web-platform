@@ -95,11 +95,11 @@
     },
     {
       "path": "/api/cron/doctor-joined-scan",
-      "schedule": "0 10,22 * * *"
+      "schedule": "0 14,22 * * *"
     },
     {
       "path": "/api/cron/doctor-joined-send",
-      "schedule": "0 11,23 * * *"
+      "schedule": "0 15,23 * * *"
     }
   ]
 }
