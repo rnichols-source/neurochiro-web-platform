@@ -721,6 +721,25 @@ export async function logReply(
   return { ok: true }
 }
 
+export async function getFarDistanceThreshold(): Promise<number> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+  const { data } = await (supabase as any)
+    .from('platform_settings')
+    .select('value')
+    .eq('key', 'far_distance_threshold')
+    .maybeSingle()
+  return data?.value?.miles ?? 30
+}
+
+export async function updateFarDistanceThreshold(miles: number): Promise<void> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+  await (supabase as any)
+    .from('platform_settings')
+    .upsert({ key: 'far_distance_threshold', value: { miles }, updated_at: new Date().toISOString() })
+}
+
 export async function getSentDoctorIds(): Promise<string[]> {
   await checkAdminAuth()
   const supabase = createAdminClient()

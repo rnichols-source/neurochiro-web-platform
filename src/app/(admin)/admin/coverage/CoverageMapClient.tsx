@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send, MessageSquare } from "lucide-react"
 import Link from "next/link"
-import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, logReply, getSentDoctorIds } from "./actions"
+import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, logReply, getSentDoctorIds, getFarDistanceThreshold } from "./actions"
 
 // ── Colors ──
 const COLORS = {
@@ -59,14 +59,16 @@ export default function CoverageMapClient({
   const [lookupLoading, setLookupLoading] = useState(false)
   const [lookupSort, setLookupSort] = useState<'distance' | 'name' | 'tier'>('distance')
   const [sentDoctorIds, setSentDoctorIds] = useState<Set<string>>(new Set())
+  const [farThreshold, setFarThreshold] = useState(30)
   const lookupInputRef = useRef<HTMLInputElement>(null)
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
   const mapReadyRef = useRef(false)
 
-  // Load sent doctor IDs on mount (item 7: persistent sent state)
+  // Load sent doctor IDs + far threshold on mount
   useEffect(() => {
     getSentDoctorIds().then(ids => setSentDoctorIds(new Set(ids))).catch(() => {})
+    getFarDistanceThreshold().then(setFarThreshold).catch(() => {})
   }, [])
 
   // Persist layer selections
@@ -534,7 +536,7 @@ export default function CoverageMapClient({
             </div>
             <div className="space-y-1.5 max-h-[50vh] overflow-y-auto">
               {sortedLookupResults.map(d => (
-                <LookupResultRow key={d.id} doctor={d} searchedCity={lookupQuery} templates={templates} sentDoctorIds={sentDoctorIds} />
+                <LookupResultRow key={d.id} doctor={d} searchedCity={lookupQuery} templates={templates} sentDoctorIds={sentDoctorIds} farThreshold={farThreshold} />
               ))}
             </div>
           </>
@@ -576,7 +578,13 @@ function TemplateCopyButton({ label, text, templateId, searchedCity, doctorId, c
   )
 }
 
-function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds }: { doctor: LookupResult; searchedCity: string; templates: ReplyTemplate[]; sentDoctorIds: Set<string> }) {
+// Round distance humanly: nearest 5 for > 20mi, nearest 1 for <= 20
+function humanDistance(miles: number): string {
+  if (miles <= 20) return String(Math.round(miles))
+  return String(Math.round(miles / 5) * 5)
+}
+
+function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, farThreshold }: { doctor: LookupResult; searchedCity: string; templates: ReplyTemplate[]; sentDoctorIds: Set<string>; farThreshold: number }) {
   const [copiedReply, setCopiedReply] = useState(false)
   const [copiedDM, setCopiedDM] = useState(false)
   const [copiedHandle, setCopiedHandle] = useState(false)
@@ -589,16 +597,22 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds }: 
   const contactRequestUrl = `https://neurochiro.co/contact-request?doctor=${d.slug || d.id}&source=dm_outreach`
   const doctorName = `Dr. ${d.first_name} ${d.last_name}`.trim()
   const handle = d.instagram_handle || ''
+  const isFar = d.distance_miles >= farThreshold
 
-  // Combined copy texts — Reply uses the database template (editable at /admin/coverage)
-  const commentTpl = templates.find(t => t.id === 'doctor_comment')
+  // Pick the right templates based on distance
+  const commentTplId = isFar ? 'doctor_comment_far' : 'doctor_comment'
+  const dmTplId = isFar ? 'doctor_dm_far' : 'doctor_dm'
+  const commentTpl = templates.find(t => t.id === commentTplId)
+  const dmTpl = templates.find(t => t.id === dmTplId)
+
   const vars: Record<string, string> = {
     handle, city: d.city || '', state: d.state || '',
-    doctor_name: doctorName, profile_url: profileUrl, contact_request_url: contactRequestUrl,
-    distance: String(d.distance_miles),
+    doctor_name: doctorName, doctor_city: d.city || '',
+    profile_url: profileUrl, contact_request_url: contactRequestUrl,
+    distance: humanDistance(d.distance_miles),
   }
   const replyText = handle && commentTpl ? fillTemplate(commentTpl.body, vars) : ''
-  const dmText = `Hey! I found a nervous system chiropractor near you.\n\n${doctorName} — ${d.city}, ${d.state} (${d.distance_miles} mi)\nProfile: ${profileUrl}\n\nWant their office to reach out to you? Leave your name and number here and I'll pass it along:\n${contactRequestUrl}`
+  const dmText = dmTpl ? fillTemplate(dmTpl.body, vars) : `Hey! I found a nervous system chiropractor near you.\n\n${doctorName} — ${d.city}, ${d.state} (${d.distance_miles} mi)\nProfile: ${profileUrl}\n\nWant their office to reach out to you? Leave your name and number here and I'll pass it along:\n${contactRequestUrl}`
 
   const quickCopy = async (text: string, setter: (v: boolean) => void) => {
     try { await navigator.clipboard.writeText(text); setter(true); setTimeout(() => setter(false), 1500) } catch {}
@@ -643,14 +657,14 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds }: 
       {/* Row 3: Primary actions (Reply, DM, Sent) + secondary (profile link, request link) */}
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
         {handle && (
-          <button onClick={() => quickCopy(replyText, setCopiedReply)}
-            className="flex items-center gap-1 px-2.5 py-1 bg-neuro-orange/20 hover:bg-neuro-orange/30 rounded-lg text-[11px] font-bold text-neuro-orange transition-colors">
-            {copiedReply ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> Reply</>}
+          <button onClick={() => { quickCopy(replyText, setCopiedReply); logReply(commentTplId, vars.city, vars.state, d.id) }}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${isFar ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400' : 'bg-neuro-orange/20 hover:bg-neuro-orange/30 text-neuro-orange'}`}>
+            {copiedReply ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> {isFar ? 'Reply (far)' : 'Reply'}</>}
           </button>
         )}
-        <button onClick={() => quickCopy(dmText, setCopiedDM)}
-          className="flex items-center gap-1 px-2.5 py-1 bg-cyan-500/15 hover:bg-cyan-500/25 rounded-lg text-[11px] font-bold text-cyan-400 transition-colors">
-          {copiedDM ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> DM</>}
+        <button onClick={() => { quickCopy(dmText, setCopiedDM); logReply(dmTplId, vars.city, vars.state, d.id) }}
+          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${isFar ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-400' : 'bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400'}`}>
+          {copiedDM ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> {isFar ? 'DM (far)' : 'DM'}</>}
         </button>
         <button onClick={handleSent}
           className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
