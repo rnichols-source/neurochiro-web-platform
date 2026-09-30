@@ -1,5 +1,6 @@
 import { getDoctorBySlug, incrementDoctorViews, getDoctorSeminars, getDoctorJobs, getCityDoctorCount, getNearbyDoctors, getCitySearchVolume } from "../actions";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase-admin";
 import DoctorProfileClient from "./DoctorProfileClient";
 import { Metadata } from "next";
 import SchemaMarkup from "@/components/seo/SchemaMarkup";
@@ -62,6 +63,16 @@ export default async function DoctorProfilePage({ params }: Props) {
   const { doctor } = await getDoctorBySlug(resolvedParams.slug);
 
   if (!doctor) {
+    // Check for slug redirect (old slug → new slug)
+    const supabase = createAdminClient();
+    const { data: redir } = await (supabase as any)
+      .from('slug_redirects')
+      .select('new_slug')
+      .eq('old_slug', resolvedParams.slug)
+      .maybeSingle();
+    if (redir?.new_slug) {
+      redirect(`/directory/${redir.new_slug}`);
+    }
     notFound();
   }
 
