@@ -590,10 +590,14 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds }: 
   const doctorName = `Dr. ${d.first_name} ${d.last_name}`.trim()
   const handle = d.instagram_handle || ''
 
-  // Combined copy texts
-  const replyText = handle
-    ? `${handle} is on NeuroChiro in ${d.city}, ${d.state} — ${d.distance_miles} miles from you. Check out their profile: ${profileUrl}`
-    : ''
+  // Combined copy texts — Reply uses the database template (editable at /admin/coverage)
+  const commentTpl = templates.find(t => t.id === 'doctor_comment')
+  const vars: Record<string, string> = {
+    handle, city: d.city || '', state: d.state || '',
+    doctor_name: doctorName, profile_url: profileUrl, contact_request_url: contactRequestUrl,
+    distance: String(d.distance_miles),
+  }
+  const replyText = handle && commentTpl ? fillTemplate(commentTpl.body, vars) : ''
   const dmText = `Hey! I found a nervous system chiropractor near you.\n\n${doctorName} — ${d.city}, ${d.state} (${d.distance_miles} mi)\nProfile: ${profileUrl}\n\nWant their office to reach out to you? Leave your name and number here and I'll pass it along:\n${contactRequestUrl}`
 
   const quickCopy = async (text: string, setter: (v: boolean) => void) => {
