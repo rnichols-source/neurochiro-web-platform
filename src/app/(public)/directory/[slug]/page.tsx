@@ -1,5 +1,5 @@
 import { getDoctorBySlug, incrementDoctorViews, getDoctorSeminars, getDoctorJobs, getCityDoctorCount, getNearbyDoctors, getCitySearchVolume } from "../actions";
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase-admin";
 import DoctorProfileClient from "./DoctorProfileClient";
 import { Metadata } from "next";
@@ -71,7 +71,7 @@ export default async function DoctorProfilePage({ params }: Props) {
       .eq('old_slug', resolvedParams.slug)
       .maybeSingle();
     if (redir?.new_slug) {
-      redirect(`/directory/${redir.new_slug}`);
+      permanentRedirect(`/directory/${redir.new_slug}`);
     }
     notFound();
   }

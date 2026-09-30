@@ -103,14 +103,8 @@
     }
   ],
   "redirects": [
-    { "source": "/directory/dr.-colton-o'brien", "destination": "/directory/colton-obrien", "permanent": true },
-    { "source": "/directory/dr.-jared-d'amico", "destination": "/directory/jared-damico", "permanent": true },
-    { "source": "/directory/dr.-paul-sanchez-b1hn", "destination": "/directory/paul-sanchez", "permanent": true },
-    { "source": "/directory/drs.-michelle-&-adam-coats-wg0x", "destination": "/directory/michelle-adam-coats", "permanent": true },
     { "source": "/directory/bethany-alleman,-dc", "destination": "/directory/bethany-alleman-dc", "permanent": true },
     { "source": "/directory/michelle-arietta,-dc", "destination": "/directory/michelle-arietta-dc", "permanent": true },
-    { "source": "/directory/nikolai-a.-young", "destination": "/directory/nikolai-a-young", "permanent": true },
-    { "source": "/directory/i.-keith-lavender-d.c.", "destination": "/directory/i-keith-lavender-dc", "permanent": true },
     { "source": "/directory/dr.-:slug*", "destination": "/directory/:slug*", "permanent": true }
   ]
 }
