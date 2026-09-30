@@ -582,7 +582,8 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds }: 
   const [copiedHandle, setCopiedHandle] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [copiedReqLink, setCopiedReqLink] = useState(false)
-  const [sent, setSent] = useState(sentDoctorIds.has(d.id))
+  const [localIntroCount, setLocalIntroCount] = useState(d.intro_count)
+  const [justSent, setJustSent] = useState(false)
 
   const profileUrl = `https://neurochiro.co/directory/${d.slug || d.id}`
   const contactRequestUrl = `https://neurochiro.co/contact-request?doctor=${d.slug || d.id}&source=dm_outreach`
@@ -600,13 +601,15 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds }: 
   }
 
   const handleSent = async () => {
-    setSent(true)
+    setLocalIntroCount(prev => prev + 1)
+    setJustSent(true)
+    setTimeout(() => setJustSent(false), 1500)
     const { city: c, state: s } = parseSearchCity(searchedCity)
     await logReply('sent_to_patient', c, s, d.id)
   }
 
   return (
-    <div className={`rounded-xl px-3 py-2 ${sent ? 'bg-green-500/5 border border-green-500/20' : 'bg-white/5'}`}>
+    <div className={`rounded-xl px-3 py-2 ${localIntroCount > 0 ? 'bg-green-500/5 border border-green-500/20' : 'bg-white/5'}`}>
       {/* Row 1: Name, handle, completeness dots, distance, intro count */}
       <div className="flex items-center gap-2">
         <div className="flex-1 min-w-0 flex items-center gap-2">
@@ -627,7 +630,7 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds }: 
           </span>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          {d.intro_count > 0 && <span className="text-[10px] text-white/30" title="Times sent">{d.intro_count} sent</span>}
+          {localIntroCount > 0 && <span className="text-[10px] text-white/30" title="Times sent">{localIntroCount} sent</span>}
           <span className="text-xs font-bold text-neuro-orange">{d.distance_miles} mi</span>
         </div>
       </div>
@@ -645,11 +648,11 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds }: 
           className="flex items-center gap-1 px-2.5 py-1 bg-cyan-500/15 hover:bg-cyan-500/25 rounded-lg text-[11px] font-bold text-cyan-400 transition-colors">
           {copiedDM ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> DM</>}
         </button>
-        <button onClick={handleSent} disabled={sent}
+        <button onClick={handleSent}
           className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
-            sent ? 'bg-green-500/20 text-green-400' : 'bg-white/5 hover:bg-white/10 text-white/50 hover:text-white/80'
+            justSent ? 'bg-green-500/20 text-green-400' : 'bg-white/5 hover:bg-white/10 text-white/50 hover:text-white/80'
           }`}>
-          {sent ? <><Check className="w-3 h-3" /> Sent</> : <><Send className="w-3 h-3" /> Sent</>}
+          {justSent ? <><Check className="w-3 h-3" /> Logged</> : <><Send className="w-3 h-3" /> Sent</>}
         </button>
         <span className="flex items-center gap-1 ml-auto">
           <button onClick={() => quickCopy(profileUrl, setCopiedUrl)} title="Copy profile link"
