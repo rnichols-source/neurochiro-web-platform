@@ -143,22 +143,22 @@ export async function GET(req: NextRequest) {
       try {
         const resend = getMarketingResend()
         const from = getMarketingFrom()
-        const distLabel = sub.distance_miles < 1 ? 'less than a mile' : `${Math.round(sub.distance_miles)} miles`
+        const distLabel = sub.distance_miles < 1 ? 'less than a mile' : `${sub.distance_miles} miles`
 
         const bodyHtml = `
-          <p style="font-size:15px;color:#333;line-height:1.7;">You signed up to be notified when a nervous system chiropractor listed near you. One just did.</p>
+          <p style="font-size:15px;color:#333;line-height:1.7;">You've been waiting for a nervous system chiropractor near you. ${doctorName} just listed in ${doctor.city}, ${distLabel} from your ZIP.</p>
           <div style="background:#f8f6f2;border-radius:12px;padding:20px;margin:20px 0;text-align:center;">
             ${doctor.photo_url ? `<img src="${doctor.photo_url}" alt="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block;" />` : ''}
             <p style="font-size:18px;font-weight:900;color:#1E2D3B;margin:0 0 4px;">${doctorName}</p>
             <p style="font-size:14px;color:#718096;margin:0;">${doctor.clinic_name ? `${doctor.clinic_name} · ` : ''}${doctor.city}, ${doctor.state}</p>
             <p style="font-size:13px;color:#718096;margin:4px 0 0;">${distLabel} from you</p>
           </div>
-          <p style="font-size:15px;color:#333;line-height:1.7;">Want their office to call you? Tap the button below, leave your name and number, and I'll send your request straight to them.</p>
+          <p style="font-size:15px;color:#333;line-height:1.7;">If you'd rather they reach out to you, tap below and leave your name and number. I'll send it straight to their office.</p>
           <div style="text-align:center;margin:24px 0;">
-            <a href="${contactUrl}" style="display:inline-block;background:#D66829;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">Have Their Office Reach Out to Me</a>
+            <a href="${contactUrl}" style="display:inline-block;background:#D66829;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">Have their office call me</a>
           </div>
           <div style="text-align:center;margin:0 0 24px;">
-            <a href="${profileUrl}" style="color:#D66829;font-size:14px;text-decoration:none;">or view their full profile</a>
+            <a href="${profileUrl}" style="color:#D66829;font-size:14px;text-decoration:none;">Or take a look at their profile first</a>
           </div>
           <p style="font-size:15px;color:#333;line-height:1.7;">Dr. Ray<br><a href="https://neurochiro.co" style="color:#D66829;">neurochiro.co</a></p>
         `
@@ -166,7 +166,7 @@ export async function GET(req: NextRequest) {
         const result = await resend.emails.send({
           from,
           to: [sub.email],
-          subject: `A nervous system chiropractor just listed in ${doctor.city}`,
+          subject: `${doctorName} just listed ${distLabel} from you`,
           html: wrapMarketingEmail(bodyHtml),
           headers: {
             'List-Unsubscribe': '<{{{RESEND_UNSUBSCRIBE_URL}}}>',
@@ -354,13 +354,9 @@ export async function GET(req: NextRequest) {
         const from = getMarketingFrom()
 
         const bodyHtml = `
-          <p style="font-size:15px;color:#333;line-height:1.7;">A few days ago I let you know that ${doctorName} listed in ${doctor.city}, ${doctor.state}.</p>
-          <p style="font-size:15px;color:#333;line-height:1.7;">If you'd like their office to reach out to you, the easiest way is the link below. You leave your number, and they call you.</p>
+          <p style="font-size:15px;color:#333;line-height:1.7;">A few days ago ${doctorName} listed near you. If you haven't had a chance yet, the easiest way is to let them call you. Leave your name and number and I'll pass it along.</p>
           <div style="text-align:center;margin:24px 0;">
-            <a href="${contactUrl}" style="display:inline-block;background:#D66829;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">Request a Call from Their Office</a>
-          </div>
-          <div style="text-align:center;margin:0 0 24px;">
-            <a href="${profileUrl}" style="color:#D66829;font-size:14px;text-decoration:none;">View their profile</a>
+            <a href="${contactUrl}" style="display:inline-block;background:#D66829;color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">Have their office call me</a>
           </div>
           <p style="font-size:15px;color:#333;line-height:1.7;">Dr. Ray<br><a href="https://neurochiro.co" style="color:#D66829;">neurochiro.co</a></p>
         `
@@ -368,7 +364,7 @@ export async function GET(req: NextRequest) {
         const result = await resend.emails.send({
           from,
           to: [sub.email],
-          subject: `Did you get a chance to reach out to ${doctorName}?`,
+          subject: `Still looking in ${doctor.city}?`,
           html: wrapMarketingEmail(bodyHtml),
           headers: {
             'List-Unsubscribe': '<{{{RESEND_UNSUBSCRIBE_URL}}}>',
