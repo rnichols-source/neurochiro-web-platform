@@ -20,6 +20,7 @@ export interface NotifySettings {
   hold_hours: number
   max_per_doctor: number
   max_per_day: number
+  cutoff_date: string // ISO date — only doctors verified after this get auto-queued
 }
 
 export interface QueuedNotification {
@@ -70,6 +71,7 @@ const DEFAULT_SETTINGS: NotifySettings = {
   hold_hours: 24,
   max_per_doctor: 25,
   max_per_day: 100,
+  cutoff_date: '2026-09-29T00:00:00Z',
 }
 
 export async function getNotifySettings(): Promise<NotifySettings> {
@@ -109,14 +111,14 @@ interface DoctorRecord {
   verified_at: string | null
   photo_url: string | null
   created_at: string
-  needs_review?: boolean
+  is_test?: boolean
 }
 
 function isDoctorExcluded(doctor: DoctorRecord): string | null {
   if (doctor.verification_status !== 'verified') return 'not_verified'
+  if (doctor.is_test) return 'test_account'
   if (!doctor.latitude || !doctor.longitude) return 'no_coordinates'
   if (doctor.latitude === 0 && doctor.longitude === 0) return 'zero_coordinates'
-  if (doctor.needs_review) return 'needs_review'
   // Incomplete profile: must have name, city, state, and slug
   if (!doctor.first_name || !doctor.last_name) return 'incomplete_name'
   if (!doctor.city || !doctor.state) return 'incomplete_location'
@@ -134,7 +136,7 @@ export async function findMatchingSubscribers(
   // Load doctor
   const { data: doctor } = await (supabase as any)
     .from('doctors')
-    .select('id, first_name, last_name, clinic_name, city, state, country, slug, latitude, longitude, verification_status, verified_at, photo_url, created_at, needs_review')
+    .select('id, first_name, last_name, clinic_name, city, state, country, slug, latitude, longitude, verification_status, verified_at, photo_url, created_at, is_test')
     .eq('id', doctorId)
     .single()
 
@@ -462,12 +464,17 @@ export async function logNotification(entry: {
 
 export async function findUnqueuedVerifiedDoctors(): Promise<DoctorRecord[]> {
   const supabase = createAdminClient()
+  const settings = await getNotifySettings()
 
-  // All verified doctors with valid coords
+  // Only doctors verified AFTER the cutoff date get auto-queued.
+  // This prevents all 115 existing doctors from flooding the queue
+  // the first time the cron runs.
   const { data: doctors } = await (supabase as any)
     .from('doctors')
-    .select('id, first_name, last_name, clinic_name, city, state, country, slug, latitude, longitude, verification_status, verified_at, photo_url, created_at, needs_review')
+    .select('id, first_name, last_name, clinic_name, city, state, country, slug, latitude, longitude, verification_status, verified_at, photo_url, created_at, is_test')
     .eq('verification_status', 'verified')
+    .eq('is_test', false)
+    .gte('verified_at', settings.cutoff_date)
     .not('latitude', 'is', null)
     .not('longitude', 'is', null)
     .not('latitude', 'eq', 0)
