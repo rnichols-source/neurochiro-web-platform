@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
-import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send } from "lucide-react"
+import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send, MessageSquare } from "lucide-react"
 import Link from "next/link"
-import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, logReply } from "./actions"
+import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, logReply, getSentDoctorIds } from "./actions"
 
 // ── Colors ──
 const COLORS = {
@@ -58,9 +58,16 @@ export default function CoverageMapClient({
   const [lookupLabel, setLookupLabel] = useState('')
   const [lookupLoading, setLookupLoading] = useState(false)
   const [lookupSort, setLookupSort] = useState<'distance' | 'name' | 'tier'>('distance')
+  const [sentDoctorIds, setSentDoctorIds] = useState<Set<string>>(new Set())
+  const lookupInputRef = useRef<HTMLInputElement>(null)
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
   const mapReadyRef = useRef(false)
+
+  // Load sent doctor IDs on mount (item 7: persistent sent state)
+  useEffect(() => {
+    getSentDoctorIds().then(ids => setSentDoctorIds(new Set(ids))).catch(() => {})
+  }, [])
 
   // Persist layer selections
   useEffect(() => {
@@ -322,6 +329,8 @@ export default function CoverageMapClient({
       setLookupResults(r.doctors)
     } catch { setLookupLabel('Lookup failed'); setLookupResults([]) }
     setLookupLoading(false)
+    // Item 3: Refocus input and select-all so next city can be typed immediately
+    setTimeout(() => { lookupInputRef.current?.focus(); lookupInputRef.current?.select() }, 50)
   }
 
   const handlePickAmbiguous = (city: string, state: string) => {
@@ -494,6 +503,7 @@ export default function CoverageMapClient({
               lookupCountry === 'NZ' ? "1010 or Auckland" :
               lookupCountry === 'AU' ? "3000 or Melbourne, VIC" : "City or postal code"
             } value={lookupQuery}
+              ref={lookupInputRef}
               onChange={e => setLookupQuery(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
               className="w-full pl-9 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-neuro-orange" />
           </div>
@@ -524,7 +534,7 @@ export default function CoverageMapClient({
             </div>
             <div className="space-y-1.5 max-h-[50vh] overflow-y-auto">
               {sortedLookupResults.map(d => (
-                <LookupResultRow key={d.id} doctor={d} searchedCity={lookupQuery} templates={templates} />
+                <LookupResultRow key={d.id} doctor={d} searchedCity={lookupQuery} templates={templates} sentDoctorIds={sentDoctorIds} />
               ))}
             </div>
           </>
@@ -566,34 +576,27 @@ function TemplateCopyButton({ label, text, templateId, searchedCity, doctorId, c
   )
 }
 
-function LookupResultRow({ doctor: d, searchedCity, templates }: { doctor: LookupResult; searchedCity: string; templates: ReplyTemplate[] }) {
+function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds }: { doctor: LookupResult; searchedCity: string; templates: ReplyTemplate[]; sentDoctorIds: Set<string> }) {
+  const [copiedReply, setCopiedReply] = useState(false)
+  const [copiedDM, setCopiedDM] = useState(false)
   const [copiedHandle, setCopiedHandle] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState(false)
-  const [sent, setSent] = useState(false)
+  const [copiedReqLink, setCopiedReqLink] = useState(false)
+  const [sent, setSent] = useState(sentDoctorIds.has(d.id))
 
   const profileUrl = `https://neurochiro.co/directory/${d.slug || d.id}`
   const contactRequestUrl = `https://neurochiro.co/contact-request?doctor=${d.slug || d.id}&source=dm_outreach`
-  const doctorName = `${d.first_name} ${d.last_name}`.trim()
-  const { city } = parseSearchCity(searchedCity)
+  const doctorName = `Dr. ${d.first_name} ${d.last_name}`.trim()
+  const handle = d.instagram_handle || ''
 
-  const vars: Record<string, string> = {
-    city: d.city || city,
-    state: d.state || '',
-    handle: d.instagram_handle || '',
-    doctor_name: doctorName,
-    profile_url: profileUrl,
-    contact_request_url: contactRequestUrl,
-  }
+  // Combined copy texts
+  const replyText = handle
+    ? `${handle} is on NeuroChiro in ${d.city}, ${d.state} — ${d.distance_miles} miles from you. Check out their profile: ${profileUrl}`
+    : ''
+  const dmText = `Hey! I found a nervous system chiropractor near you.\n\n${doctorName} — ${d.city}, ${d.state} (${d.distance_miles} mi)\nProfile: ${profileUrl}\n\nWant their office to reach out to you? Leave your name and number here and I'll pass it along:\n${contactRequestUrl}`
 
-  const commentTpl = templates.find(t => t.id === 'doctor_comment')
-  const dmTpl = templates.find(t => t.id === 'doctor_dm')
-
-  const copyToClipboard = async (text: string, type: 'handle' | 'url') => {
-    try {
-      await navigator.clipboard.writeText(text)
-      if (type === 'handle') { setCopiedHandle(true); setTimeout(() => setCopiedHandle(false), 1500) }
-      else { setCopiedUrl(true); setTimeout(() => setCopiedUrl(false), 1500) }
-    } catch {}
+  const quickCopy = async (text: string, setter: (v: boolean) => void) => {
+    try { await navigator.clipboard.writeText(text); setter(true); setTimeout(() => setter(false), 1500) } catch {}
   }
 
   const handleSent = async () => {
@@ -603,50 +606,61 @@ function LookupResultRow({ doctor: d, searchedCity, templates }: { doctor: Looku
   }
 
   return (
-    <div className="bg-white/5 rounded-xl px-3 py-2.5">
-      <div className="flex items-center gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-bold text-white truncate">Dr. {d.first_name} {d.last_name}</p>
-            {d.instagram_handle ? (
-              <button onClick={() => copyToClipboard(d.instagram_handle!, 'handle')}
-                className="text-[11px] text-cyan-400 hover:text-cyan-300 font-medium shrink-0 flex items-center gap-1 transition-colors"
-                title="Copy handle">
-                {d.instagram_handle}
-                {copiedHandle ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-2.5 h-2.5 opacity-40" />}
-              </button>
-            ) : (
-              <span className="text-[10px] text-red-400/60 shrink-0">no IG</span>
-            )}
-          </div>
-          <p className="text-[11px] text-white/40 truncate">{d.clinic_name} · {d.city}, {d.state}</p>
+    <div className={`rounded-xl px-3 py-2 ${sent ? 'bg-green-500/5 border border-green-500/20' : 'bg-white/5'}`}>
+      {/* Row 1: Name, handle, completeness dots, distance, intro count */}
+      <div className="flex items-center gap-2">
+        <div className="flex-1 min-w-0 flex items-center gap-2">
+          <p className="text-sm font-bold text-white truncate">{doctorName}</p>
+          {handle ? (
+            <button onClick={() => quickCopy(handle, setCopiedHandle)}
+              className="text-[11px] text-cyan-400 hover:text-cyan-300 font-medium shrink-0 flex items-center gap-0.5"
+              title="Copy handle">
+              {handle} {copiedHandle ? <Check className="w-2.5 h-2.5 text-green-400" /> : <Copy className="w-2 h-2 opacity-30" />}
+            </button>
+          ) : (
+            <span className="text-[10px] text-red-400/60 shrink-0">no IG</span>
+          )}
+          <span className="flex items-center gap-0.5 shrink-0" title="Photo · Booking · Hours">
+            <span className={`w-1.5 h-1.5 rounded-full ${d.has_photo ? 'bg-green-400' : 'bg-red-400/60'}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${d.has_booking ? 'bg-green-400' : 'bg-red-400/60'}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${d.has_hours ? 'bg-green-400' : 'bg-red-400/60'}`} />
+          </span>
         </div>
-        <div className="text-right shrink-0">
-          <p className="text-xs font-bold text-neuro-orange">{d.distance_miles} mi</p>
-          <p className={`text-[10px] font-bold ${d.verification_status === 'verified' ? 'text-green-400' : 'text-amber-400'}`}>{d.verification_status}</p>
+        <div className="flex items-center gap-3 shrink-0">
+          {d.intro_count > 0 && <span className="text-[10px] text-white/30" title="Times sent">{d.intro_count} sent</span>}
+          <span className="text-xs font-bold text-neuro-orange">{d.distance_miles} mi</span>
         </div>
       </div>
-      <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-        {commentTpl && d.instagram_handle ? (
-          <TemplateCopyButton label="Comment" text={fillTemplate(commentTpl.body, vars)} templateId="doctor_comment" searchedCity={searchedCity} doctorId={d.id} />
-        ) : commentTpl ? (
-          <span className="text-[10px] text-white/20 px-2">comment needs IG handle</span>
-        ) : null}
-        {dmTpl && (
-          <TemplateCopyButton label="DM" text={fillTemplate(dmTpl.body, vars)} templateId="doctor_dm" searchedCity={searchedCity} doctorId={d.id} />
+      {/* Row 2: Clinic, city */}
+      <p className="text-[11px] text-white/40 truncate mt-0.5">{d.clinic_name ? `${d.clinic_name} · ` : ''}{d.city}, {d.state}</p>
+      {/* Row 3: Primary actions (Reply, DM, Sent) + secondary (profile link, request link) */}
+      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+        {handle && (
+          <button onClick={() => quickCopy(replyText, setCopiedReply)}
+            className="flex items-center gap-1 px-2.5 py-1 bg-neuro-orange/20 hover:bg-neuro-orange/30 rounded-lg text-[11px] font-bold text-neuro-orange transition-colors">
+            {copiedReply ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> Reply</>}
+          </button>
         )}
-        <TemplateCopyButton label="Request link" text={contactRequestUrl} templateId="contact_request_link" searchedCity={searchedCity} doctorId={d.id} />
-        <button onClick={() => copyToClipboard(profileUrl, 'url')}
-          className="flex items-center gap-1 px-2 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-bold text-white/50 hover:text-white/80 transition-colors">
-          {copiedUrl ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> Link</>}
+        <button onClick={() => quickCopy(dmText, setCopiedDM)}
+          className="flex items-center gap-1 px-2.5 py-1 bg-cyan-500/15 hover:bg-cyan-500/25 rounded-lg text-[11px] font-bold text-cyan-400 transition-colors">
+          {copiedDM ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> DM</>}
         </button>
         <button onClick={handleSent} disabled={sent}
           className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
-            sent ? 'bg-green-500/20 text-green-400' : 'bg-neuro-orange/20 hover:bg-neuro-orange/30 text-neuro-orange'
+            sent ? 'bg-green-500/20 text-green-400' : 'bg-white/5 hover:bg-white/10 text-white/50 hover:text-white/80'
           }`}>
           {sent ? <><Check className="w-3 h-3" /> Sent</> : <><Send className="w-3 h-3" /> Sent</>}
         </button>
-        <Link href={`/directory/${d.slug || d.id}`} target="_blank" className="p-1 bg-white/5 rounded-lg hover:bg-white/10 ml-auto"><ExternalLink className="w-3 h-3 text-white/40" /></Link>
+        <span className="flex items-center gap-1 ml-auto">
+          <button onClick={() => quickCopy(profileUrl, setCopiedUrl)} title="Copy profile link"
+            className="p-1 bg-white/5 hover:bg-white/10 rounded text-white/30 hover:text-white/60 transition-colors">
+            {copiedUrl ? <Check className="w-3 h-3 text-green-400" /> : <ExternalLink className="w-3 h-3" />}
+          </button>
+          <button onClick={() => quickCopy(contactRequestUrl, setCopiedReqLink)} title="Copy contact request link"
+            className="p-1 bg-white/5 hover:bg-white/10 rounded text-white/30 hover:text-white/60 transition-colors">
+            {copiedReqLink ? <Check className="w-3 h-3 text-green-400" /> : <MessageSquare className="w-3 h-3" />}
+          </button>
+        </span>
       </div>
     </div>
   )

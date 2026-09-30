@@ -87,6 +87,10 @@ export interface LookupResult {
   membership_tier: string | null
   distance_miles: number
   instagram_handle: string | null
+  has_photo: boolean
+  has_booking: boolean
+  has_hours: boolean
+  intro_count: number
 }
 
 // ── All US states ──
@@ -383,7 +387,7 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
     if (resolution.couldNotGeocode && resolution.parsedState) {
       const { data: stateDocs } = await (supabase as any)
         .from('doctors')
-        .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, instagram_url')
+        .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, instagram_url, photo_url, booking_url, hours')
         .in('verification_status', ['verified', 'pending'])
         .eq('is_test', false)
         .eq('state', resolution.parsedState)
@@ -401,6 +405,7 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
               id: d.id, first_name: d.first_name, last_name: d.last_name, clinic_name: d.clinic_name,
               slug: d.slug, city: d.city, state: d.state, verification_status: d.verification_status,
               membership_tier: d.membership_tier, distance_miles: 0, instagram_handle,
+              has_photo: !!d.photo_url, has_booking: !!d.booking_url, has_hours: !!d.hours, intro_count: 0,
             }
           })
 
@@ -420,7 +425,7 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
   // Fetch doctors for the resolved country (exclude test accounts)
   let docQuery = (supabase as any)
     .from('doctors')
-    .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, instagram_url')
+    .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, instagram_url, photo_url, booking_url, hours')
     .in('verification_status', ['verified', 'pending'])
     .eq('is_test', false)
   if (resolveCountry === 'US') {
@@ -431,6 +436,18 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
   const { data: doctors } = await docQuery
 
   if (!doctors) return { doctors: [], label }
+
+  // Fetch intro counts from reply_logs
+  const doctorIds = doctors.filter((d: any) => d.latitude && d.longitude && d.latitude !== 0).map((d: any) => d.id)
+  const { data: introData } = await (supabase as any)
+    .from('reply_logs')
+    .select('doctor_id')
+    .in('doctor_id', doctorIds.length > 0 ? doctorIds : ['__none__'])
+
+  const introCounts = new Map<string, number>()
+  for (const r of (introData || [])) {
+    introCounts.set(r.doctor_id, (introCounts.get(r.doctor_id) || 0) + 1)
+  }
 
   // Calculate distances, filter to 100mi
   const results: LookupResult[] = []
@@ -457,6 +474,10 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
         membership_tier: d.membership_tier,
         distance_miles: Math.round(dist * 10) / 10,
         instagram_handle,
+        has_photo: !!d.photo_url,
+        has_booking: !!d.booking_url,
+        has_hours: !!d.hours,
+        intro_count: introCounts.get(d.id) || 0,
       })
     }
   }
@@ -698,4 +719,17 @@ export async function logReply(
   })
 
   return { ok: true }
+}
+
+export async function getSentDoctorIds(): Promise<string[]> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  const { data } = await (supabase as any)
+    .from('reply_logs')
+    .select('doctor_id')
+    .eq('template_id', 'sent_to_patient')
+    .gte('created_at', since)
+    .not('doctor_id', 'is', null)
+  return [...new Set((data || []).map((r: any) => r.doctor_id))] as string[]
 }
