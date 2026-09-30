@@ -778,7 +778,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             
             const { data: profile } = await supabaseAdmin.from('profiles').select('role, full_name, email').eq('id', userId).single();
             if (profile?.role === 'doctor') {
-               await supabaseAdmin.from('doctors').update({ verification_status: 'verified' }).eq('user_id', userId);
+               await supabaseAdmin.from('doctors').update({ verification_status: 'verified', verified_at: new Date().toISOString() }).eq('user_id', userId);
                
                // CLEAR CACHE ON SUCCESSFUL INITIAL PAYMENT
                revalidatePath('/doctor/dashboard');

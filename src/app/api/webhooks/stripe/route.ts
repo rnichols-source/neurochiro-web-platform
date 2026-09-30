@@ -81,7 +81,7 @@ export async function POST(req: Request) {
           if (profile?.role === 'doctor') {
             await supabase
               .from('doctors')
-              .update({ verification_status: 'verified', membership_tier: membershipTier as any })
+              .update({ verification_status: 'verified', membership_tier: membershipTier as any, verified_at: new Date().toISOString() })
               .eq('user_id', userId);
           }
 
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
           if (metaType === 'neuros_signup') {
             await supabase
               .from('doctors')
-              .update({ neuros_tier: 'neuros', membership_tier: 'pro', verification_status: 'verified' })
+              .update({ neuros_tier: 'neuros', membership_tier: 'pro', verification_status: 'verified', verified_at: new Date().toISOString() })
               .eq('user_id', userId);
 
             await supabase
