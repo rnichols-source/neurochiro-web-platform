@@ -105,6 +105,6 @@
   "redirects": [
     { "source": "/directory/bethany-alleman,-dc", "destination": "/directory/bethany-alleman-dc", "permanent": true },
     { "source": "/directory/michelle-arietta,-dc", "destination": "/directory/michelle-arietta-dc", "permanent": true },
-    { "source": "/directory/dr.-:slug*", "destination": "/directory/:slug*", "permanent": true }
+    { "source": "/directory/dr.-:path(.*)", "destination": "/directory/:path", "permanent": true }
   ]
 }
