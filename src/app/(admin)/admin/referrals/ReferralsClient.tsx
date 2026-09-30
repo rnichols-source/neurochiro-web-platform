@@ -47,9 +47,12 @@ export default function ReferralsClient({ data }: {
     const labels: Record<string, string> = {
       doctor_comment: 'Comment',
       doctor_dm: 'DM',
+      doctor_comment_far: 'Comment (far)',
+      doctor_dm_far: 'DM (far)',
       sent_to_patient: 'Sent',
       waitlist_dm: 'Waitlist DM',
       waitlist_comment: 'Waitlist comment',
+      contact_request_link: 'Request link',
     }
     return labels[id] || id
   }
@@ -86,7 +89,7 @@ export default function ReferralsClient({ data }: {
             <StatCard label="Replies Sent" value={stats.total} color="text-cyan-400" />
             <StatCard label="Last 7 days" value={stats.last7} />
             <StatCard label="Last 30 days" value={stats.last30} />
-            <StatCard label="To a Doctor" value={stats.toDoctor} color="text-green-400" />
+            <StatCard label="To a Doctor" value={stats.toDoctor} color="text-green-400" sub={stats.toDoctorFar > 0 ? `${stats.toDoctorFar} far-distance` : undefined} />
             <StatCard label="To Waitlist" value={stats.toWaitlist} color="text-amber-400" sub="No doctor available" />
             <StatCard label="Doctors Reached" value={`${stats.distinctDoctors} of ${stats.verifiedDoctors}`} sub="At least one introduction" />
           </div>
@@ -211,6 +214,8 @@ export default function ReferralsClient({ data }: {
                 <option value="">All types</option>
                 <option value="doctor_comment">Comment</option>
                 <option value="doctor_dm">DM</option>
+                <option value="doctor_comment_far">Comment (far)</option>
+                <option value="doctor_dm_far">DM (far)</option>
                 <option value="sent_to_patient">Sent to patient</option>
                 <option value="waitlist_dm">Waitlist DM</option>
                 <option value="waitlist_comment">Waitlist comment</option>

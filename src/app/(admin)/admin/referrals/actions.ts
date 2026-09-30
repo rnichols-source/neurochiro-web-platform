@@ -41,6 +41,7 @@ export interface ReferralStats {
   last7: number
   last30: number
   toDoctor: number
+  toDoctorFar: number
   toWaitlist: number
   distinctDoctors: number
   verifiedDoctors: number
@@ -51,8 +52,9 @@ export interface ReferralStats {
   dmLinksSent: number
 }
 
-const DOCTOR_TEMPLATES = new Set(['doctor_comment', 'doctor_dm', 'sent_to_patient'])
+const DOCTOR_TEMPLATES = new Set(['doctor_comment', 'doctor_dm', 'doctor_comment_far', 'doctor_dm_far', 'sent_to_patient'])
 const WAITLIST_TEMPLATES = new Set(['waitlist_dm', 'waitlist_comment'])
+const FAR_TEMPLATES = new Set(['doctor_comment_far', 'doctor_dm_far'])
 
 export async function getReferralPageData(): Promise<{
   stats: ReferralStats
@@ -76,6 +78,7 @@ export async function getReferralPageData(): Promise<{
 
   // Stats
   const toDoctor = allLogs.filter((l: any) => DOCTOR_TEMPLATES.has(l.template_id)).length
+  const toDoctorFar = allLogs.filter((l: any) => FAR_TEMPLATES.has(l.template_id)).length
   const toWaitlist = allLogs.filter((l: any) => WAITLIST_TEMPLATES.has(l.template_id)).length
   const last7 = allLogs.filter((l: any) => now - new Date(l.created_at).getTime() < 7 * day).length
   const last30 = allLogs.filter((l: any) => now - new Date(l.created_at).getTime() < 30 * day).length
@@ -200,7 +203,7 @@ export async function getReferralPageData(): Promise<{
     stats: {
       total: allLogs.length,
       last7, last30,
-      toDoctor, toWaitlist,
+      toDoctor, toDoctorFar, toWaitlist,
       distinctDoctors: distinctDoctorIds.size,
       verifiedDoctors: docs.length,
       appointmentRequests: appointmentRequests || 0,
