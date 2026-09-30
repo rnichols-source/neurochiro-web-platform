@@ -337,6 +337,7 @@ export default function CoverageMapClient({
   }) : null
 
   const invisibleDocs = countryDoctors.filter(d => d.pin_status === 'invisible')
+  const missingCountryDocs = doctors.filter(d => d.missing_country)
   const countryVerified = countryDoctors.filter(d => d.pin_status === 'verified').length
   const countryPending = countryDoctors.filter(d => d.pin_status === 'pending').length
   const countryInvisible = invisibleDocs.length
@@ -448,6 +449,19 @@ export default function CoverageMapClient({
             {invisibleDocs.map(d => (
               <Link key={d.id} href={`/admin/directory?search=${encodeURIComponent([d.first_name, d.last_name].filter(Boolean).join(' '))}`} className="text-xs text-white/50 hover:text-white/80">
                 {[d.first_name, d.last_name].filter(Boolean).join(' ') || d.clinic_name}<span className="text-white/20 ml-1">({d.city}, {d.state})</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {missingCountryDocs.length > 0 && (
+        <div className="px-4 py-3 border-t border-white/10">
+          <p className="text-xs font-bold text-yellow-400 mb-2 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {missingCountryDocs.length} doctor{missingCountryDocs.length > 1 ? 's' : ''} missing country — defaulting to US</p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            {missingCountryDocs.map(d => (
+              <Link key={d.id} href={`/admin/directory?search=${encodeURIComponent([d.first_name, d.last_name].filter(Boolean).join(' '))}`} className="text-xs text-yellow-400/60 hover:text-yellow-400">
+                {[d.first_name, d.last_name].filter(Boolean).join(' ')}<span className="text-white/20 ml-1">({d.city}, {d.state})</span>
               </Link>
             ))}
           </div>

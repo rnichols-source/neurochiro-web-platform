@@ -23,6 +23,9 @@ export interface CoverageDoctor {
   address: string | null
   /** 'verified' | 'pending' | 'invisible' */
   pin_status: 'verified' | 'pending' | 'invisible'
+  /** true if doctor has no country set — needs admin attention */
+  missing_country?: boolean
+  is_test?: boolean
 }
 
 export interface DemandZip {
@@ -101,25 +104,28 @@ export async function getCoverageDoctors(): Promise<CoverageDoctor[]> {
   await checkAdminAuth()
   const supabase = createAdminClient()
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('doctors')
-    .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, created_at, country, address')
+    .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, created_at, country, address, is_test')
     .in('verification_status', ['verified', 'pending'])
+    .eq('is_test', false)
     .order('last_name')
 
   if (error || !data) return []
 
-  return data.map(d => {
+  return data.map((d: any) => {
     const lat = d.latitude
     const lng = d.longitude
     const isInvisible = lat == null || lng == null || (lat === 0 && lng === 0)
+    const missingCountry = d.country == null || d.country === ''
 
-    // Normalize country to ISO code
+    // Normalize country to ISO code — but flag the null so admin can fix it
     const normalizedCountry = (!d.country || d.country === 'United States' || d.country === 'USA') ? 'US' : d.country
 
     return {
       ...d,
       country: normalizedCountry,
+      missing_country: missingCountry,
       pin_status: isInvisible ? 'invisible' as const
         : d.verification_status === 'verified' ? 'verified' as const
         : 'pending' as const,
@@ -375,16 +381,17 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
   if (!resolution.resolved) {
     // Could not geocode — if we have a state, show all doctors in that state as fallback
     if (resolution.couldNotGeocode && resolution.parsedState) {
-      const { data: stateDocs } = await supabase
+      const { data: stateDocs } = await (supabase as any)
         .from('doctors')
         .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, instagram_url')
         .in('verification_status', ['verified', 'pending'])
+        .eq('is_test', false)
         .eq('state', resolution.parsedState)
 
       if (stateDocs && stateDocs.length > 0) {
         const results: LookupResult[] = stateDocs
-          .filter(d => d.latitude && d.longitude && d.latitude !== 0)
-          .map(d => {
+          .filter((d: any) => d.latitude && d.longitude && d.latitude !== 0)
+          .map((d: any) => {
             let instagram_handle: string | null = null
             if (d.instagram_url) {
               const match = d.instagram_url.match(/instagram\.com\/([^/?]+)/)
@@ -410,11 +417,12 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
   const lng = resolution.resolved.lng
   const label = resolution.label
 
-  // Fetch doctors for the resolved country
-  let docQuery = supabase
+  // Fetch doctors for the resolved country (exclude test accounts)
+  let docQuery = (supabase as any)
     .from('doctors')
     .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, instagram_url')
     .in('verification_status', ['verified', 'pending'])
+    .eq('is_test', false)
   if (resolveCountry === 'US') {
     docQuery = docQuery.or('country.is.null,country.eq.US')
   } else {
