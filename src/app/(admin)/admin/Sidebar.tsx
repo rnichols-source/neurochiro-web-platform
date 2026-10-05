@@ -82,6 +82,7 @@ const navGroups = [
     items: [
       { name: "Moderation", href: "/admin/moderation", icon: ShieldAlert },
       { name: "Invisible Doctors", href: "/admin/invisible-doctors", icon: AlertTriangle },
+      { name: "Rec Stats", href: "/admin/stats/recommendations", icon: BarChart3 },
       { name: "Revenue", href: "/admin/revenue", icon: CreditCard },
       { name: "Logs", href: "/admin/logs", icon: History },
       { name: "Agents", href: "/admin/agents", icon: Bot },
