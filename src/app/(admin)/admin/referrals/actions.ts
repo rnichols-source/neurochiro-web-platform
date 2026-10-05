@@ -102,10 +102,10 @@ export async function getReferralPageData(): Promise<{
   const docMap = new Map<string, typeof docs[0]>()
   for (const d of docs) docMap.set(d.id, d)
 
-  // By doctor
+  // By doctor — count only deliberate "Sent" clicks, not every copy action
   const refByDoctor = new Map<string, { count: number; last: string }>()
   for (const l of allLogs) {
-    if (!l.doctor_id || !DOCTOR_TEMPLATES.has(l.template_id)) continue
+    if (!l.doctor_id || l.template_id !== 'sent_to_patient') continue
     const existing = refByDoctor.get(l.doctor_id)
     if (existing) {
       existing.count++

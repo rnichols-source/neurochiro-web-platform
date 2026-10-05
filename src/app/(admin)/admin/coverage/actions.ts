@@ -437,11 +437,12 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
 
   if (!doctors) return { doctors: [], label }
 
-  // Fetch intro counts from reply_logs
+  // Fetch intro counts — only deliberate "Sent" clicks, not every copy action
   const doctorIds = doctors.filter((d: any) => d.latitude && d.longitude && d.latitude !== 0).map((d: any) => d.id)
   const { data: introData } = await (supabase as any)
     .from('reply_logs')
     .select('doctor_id')
+    .eq('template_id', 'sent_to_patient')
     .in('doctor_id', doctorIds.length > 0 ? doctorIds : ['__none__'])
 
   const introCounts = new Map<string, number>()
