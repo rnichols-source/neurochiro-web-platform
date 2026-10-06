@@ -475,7 +475,7 @@ export default function CoverageMapClient({
   const allOn = Object.values(layers).every(Boolean)
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden">
 
       {/* ══════ LOOKUP SECTION (top) ══════ */}
       <div className="px-4 py-4 border-b border-white/10">
@@ -491,7 +491,7 @@ export default function CoverageMapClient({
               setLookupCountry(e.target.value)
               try { localStorage.setItem('nc_lookup_country', e.target.value) } catch {}
               setLookupResults(null); setLookupLabel(''); setAmbiguousOptions(null); setCouldNotResolve(false)
-            }} className="bg-white/5 border border-white/10 rounded-lg text-xs text-white/60 px-2 py-1">
+            }} className="bg-white/5 border border-white/10 rounded-lg text-base text-white/60 px-2 py-1">
               <option value="US">🇺🇸 US</option>
               <option value="CA">🇨🇦 Canada</option>
               <option value="GB">🇬🇧 UK</option>
@@ -512,10 +512,10 @@ export default function CoverageMapClient({
             } value={lookupQuery}
               ref={lookupInputRef}
               onChange={e => setLookupQuery(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
-              className="w-full pl-9 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-neuro-orange" />
+              className="w-full pl-9 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-base placeholder:text-white/25 focus:outline-none focus:border-neuro-orange" />
           </div>
           <button onClick={() => handleLookup()} disabled={lookupLoading || !lookupQuery.trim()}
-            className="px-4 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm disabled:opacity-50">
+            className="px-4 py-3 bg-neuro-orange text-white rounded-xl font-bold text-base disabled:opacity-50">
             {lookupLoading ? '...' : 'Search'}
           </button>
         </div>
@@ -880,34 +880,34 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
       {/* Row 2: Clinic, city */}
       <p className="text-[11px] text-white/40 truncate mt-0.5">{d.clinic_name ? `${d.clinic_name} · ` : ''}{d.city}, {d.state}</p>
       {/* Row 3: Primary actions (Reply, DM, Sent) + secondary (profile link, request link) */}
-      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 mt-1.5">
         {handle && (
           <button
             ref={isPick ? replyBtnRef : undefined}
             onClick={() => { quickCopy(replyText, () => {}); setCopiedReply(true); logReply(commentTplId, vars.city, vars.state, d.id) }}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${
+            className={`flex items-center justify-center gap-1.5 px-3 min-h-[44px] sm:min-h-0 sm:py-1 rounded-lg text-sm sm:text-[11px] font-bold transition-colors ${
               copiedReply ? 'bg-green-500/20 text-green-400'
               : isFar ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400' : 'bg-neuro-orange/20 hover:bg-neuro-orange/30 text-neuro-orange'
             }`}>
-            {copiedReply ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> {isFar ? 'Reply (far)' : 'Reply'}</>}
+            {copiedReply ? <><Check className="w-4 h-4 sm:w-3 sm:h-3 text-green-400" /> Copied</> : <><Copy className="w-4 h-4 sm:w-3 sm:h-3" /> {isFar ? '1. Reply (far)' : '1. Reply'}</>}
           </button>
         )}
         <button
           ref={isPick ? dmBtnRef : undefined}
           onClick={() => { quickCopy(dmText, () => {}); setCopiedDM(true); logReply(dmTplId, vars.city, vars.state, d.id) }}
-          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${
+          className={`flex items-center justify-center gap-1.5 px-3 min-h-[44px] sm:min-h-0 sm:py-1 rounded-lg text-sm sm:text-[11px] font-bold transition-colors ${
             copiedDM ? 'bg-green-500/20 text-green-400'
             : isFar ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-400' : 'bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400'
           }`}>
-          {copiedDM ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> {isFar ? 'DM (far)' : 'DM'}</>}
+          {copiedDM ? <><Check className="w-4 h-4 sm:w-3 sm:h-3 text-green-400" /> Copied</> : <><Copy className="w-4 h-4 sm:w-3 sm:h-3" /> {isFar ? '2. DM (far)' : '2. DM'}</>}
         </button>
         <button
           ref={isPick ? sentBtnRef : undefined}
           onClick={handleSent}
-          className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
+          className={`flex items-center justify-center gap-1.5 px-3 min-h-[44px] sm:min-h-0 sm:py-1 rounded-lg text-sm sm:text-[10px] font-bold transition-colors ${
             justSent ? 'bg-green-500/20 text-green-400' : 'bg-white/5 hover:bg-white/10 text-white/50 hover:text-white/80'
           }`}>
-          {justSent ? <><Check className="w-3 h-3" /> Logged</> : <><Send className="w-3 h-3" /> Sent</>}
+          {justSent ? <><Check className="w-4 h-4 sm:w-3 sm:h-3" /> Logged</> : <><Send className="w-4 h-4 sm:w-3 sm:h-3" /> Sent</>}
         </button>
         <span className="flex items-center gap-1 ml-auto">
           <button onClick={() => quickCopy(profileUrl, setCopiedUrl)} title="Copy profile link"
