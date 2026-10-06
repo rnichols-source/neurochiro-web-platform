@@ -171,11 +171,9 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
       )}
 
       <aside className={cn(
-        "fixed lg:static inset-y-0 left-0 w-64 bg-[#0F172A] flex flex-col border-r border-white/5 shrink-0 z-[200] transition-transform duration-300 transform",
-        "h-[100dvh] pb-[env(safe-area-inset-bottom)]",
+        "fixed lg:static top-0 bottom-0 left-0 w-64 bg-[#0F172A] flex flex-col border-r border-white/5 shrink-0 z-[200] transition-transform duration-300 transform",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}
-        style={{ overscrollBehavior: 'contain' }}
       >
         {/* Header — fixed */}
         <div className="p-6 flex items-center justify-between shrink-0">
@@ -195,7 +193,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
         </div>
 
         {/* Nav list — scrollable, takes remaining space */}
-        <nav className="flex-1 min-h-0 px-4 space-y-1 overflow-y-auto overscroll-contain pt-4 pb-4"
+        <nav className="flex-1 min-h-0 px-4 space-y-1 overflow-y-scroll pt-4 pb-4"
           style={{ WebkitOverflowScrolling: 'touch' }}>
           {navGroups.map((group, gi) => (
             <div key={gi} className={gi > 0 ? 'mt-5' : ''}>
@@ -268,7 +266,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
         </nav>
 
         {/* Bottom section — fixed, does not scroll */}
-        <div className="shrink-0 p-4 space-y-4">
+        <div className="shrink-0 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-4">
           {/* Live Engine — desktop only (mobile version is in scrollable nav above) */}
           <div className="hidden lg:block bg-white/[0.02] rounded-2xl p-4 border border-white/5">
             <div className="flex items-center justify-between mb-3">

@@ -117,7 +117,7 @@ export default function AdminLayout({
                 <input 
                   type="text" 
                   placeholder="Search platform resources..." 
-                  className="bg-transparent border-none focus:outline-none text-sm text-white w-full placeholder:text-gray-500"
+                  className="bg-transparent border-none focus:outline-none text-base text-white w-full placeholder:text-gray-500"
                   value={globalSearchQuery}
                   onChange={(e) => setGlobalSearchQuery(e.target.value)}
                   onKeyDown={handleGlobalSearch}

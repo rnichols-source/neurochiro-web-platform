@@ -243,7 +243,7 @@ export default function BroadcastPage() {
               <select
                 value={segmentValue}
                 onChange={(e) => setSegmentValue(e.target.value)}
-                className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-neuro-orange"
+                className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-2.5 text-white text-base focus:outline-none focus:border-neuro-orange"
               >
                 <option value="">Select state...</option>
                 {availableStates.map((s) => (
@@ -259,7 +259,7 @@ export default function BroadcastPage() {
                 value={segmentValue}
                 onChange={(e) => setSegmentValue(e.target.value.replace(/\D/g, "").slice(0, 3))}
                 placeholder="e.g. 296"
-                className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-neuro-orange"
+                className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-2.5 text-white text-base focus:outline-none focus:border-neuro-orange"
               />
             )}
 
@@ -287,7 +287,7 @@ export default function BroadcastPage() {
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="This week: why your nervous system matters"
-              className="w-full bg-white/[0.06] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-neuro-orange"
+              className="w-full bg-white/[0.06] border border-white/10 rounded-xl px-4 py-3 text-white text-base focus:outline-none focus:border-neuro-orange"
             />
           </div>
 
@@ -301,7 +301,7 @@ export default function BroadcastPage() {
               onChange={(e) => setBody(e.target.value)}
               rows={16}
               placeholder={"Hi there,\n\nWrite your email here. Use **bold**, *italic*, and [links](https://neurochiro.co).\n\nSeparate paragraphs with a blank line."}
-              className="w-full bg-white/[0.06] border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-mono leading-relaxed focus:outline-none focus:border-neuro-orange resize-y"
+              className="w-full bg-white/[0.06] border border-white/10 rounded-xl px-4 py-3 text-white text-base font-mono leading-relaxed focus:outline-none focus:border-neuro-orange resize-y"
             />
           </div>
 

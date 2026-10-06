@@ -107,7 +107,7 @@ export default function TemplatesPage() {
                   value={edits[tpl.id] || ''}
                   onChange={e => setEdits(prev => ({ ...prev, [tpl.id]: e.target.value }))}
                   rows={tpl.body.split('\n').length + 2}
-                  className="w-full px-3 py-3 bg-black/30 border border-white/10 rounded-xl text-white text-sm font-mono placeholder:text-white/20 focus:outline-none focus:border-neuro-orange resize-none leading-relaxed"
+                  className="w-full px-3 py-3 bg-black/30 border border-white/10 rounded-xl text-white text-base font-mono placeholder:text-white/20 focus:outline-none focus:border-neuro-orange resize-none leading-relaxed"
                 />
                 {isDirty && (
                   <button

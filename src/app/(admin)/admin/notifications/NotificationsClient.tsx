@@ -248,7 +248,7 @@ export default function NotificationsClient() {
               min={0}
               value={draftHoldHours}
               onChange={(e) => setDraftHoldHours(Number(e.target.value))}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-neuro-orange focus:outline-none"
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-base focus:border-neuro-orange focus:outline-none"
             />
           </div>
           <div>
@@ -260,7 +260,7 @@ export default function NotificationsClient() {
               min={1}
               value={draftMaxPerDoctor}
               onChange={(e) => setDraftMaxPerDoctor(Number(e.target.value))}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-neuro-orange focus:outline-none"
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-base focus:border-neuro-orange focus:outline-none"
             />
           </div>
           <div>
@@ -272,7 +272,7 @@ export default function NotificationsClient() {
               min={1}
               value={draftMaxPerDay}
               onChange={(e) => setDraftMaxPerDay(Number(e.target.value))}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-neuro-orange focus:outline-none"
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-base focus:border-neuro-orange focus:outline-none"
             />
           </div>
           <div>
@@ -427,7 +427,7 @@ export default function NotificationsClient() {
                 setLogFilter(e.target.value);
                 setLogPage(0);
               }}
-              className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm focus:border-neuro-orange focus:outline-none"
+              className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-base focus:border-neuro-orange focus:outline-none"
             >
               <option value="">All statuses</option>
               <option value="sent">Sent</option>

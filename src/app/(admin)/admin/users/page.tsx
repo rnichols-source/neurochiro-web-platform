@@ -90,7 +90,7 @@ export default function UsersPage() {
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           placeholder="Search by name or email..."
-          className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-neuro-orange transition-colors"
+          className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-base text-white placeholder-gray-500 focus:outline-none focus:border-neuro-orange transition-colors"
         />
       </div>
 

@@ -96,30 +96,30 @@ export default function AdminChiroMatchPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Name</label>
-              <input name="name" required placeholder="Fall 2026" className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm" />
+              <input name="name" required placeholder="Fall 2026" className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base" />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Season</label>
-              <select name="season" required className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+              <select name="season" required className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base">
                 <option value="spring">Spring</option>
                 <option value="fall">Fall</option>
               </select>
             </div>
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Year</label>
-              <input name="year" type="number" required defaultValue={new Date().getFullYear()} className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm" />
+              <input name="year" type="number" required defaultValue={new Date().getFullYear()} className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base" />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Ranking Opens</label>
-              <input name="ranking_opens_at" type="datetime-local" required className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm" />
+              <input name="ranking_opens_at" type="datetime-local" required className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base" />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Ranking Closes</label>
-              <input name="ranking_closes_at" type="datetime-local" required className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm" />
+              <input name="ranking_closes_at" type="datetime-local" required className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base" />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Match Day</label>
-              <input name="match_day" type="datetime-local" required className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm" />
+              <input name="match_day" type="datetime-local" required className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-base" />
             </div>
           </div>
           <div className="flex gap-2">
