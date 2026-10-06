@@ -556,11 +556,14 @@ export interface ParsedMention {
   lat: number | null
   lng: number | null
   matched: boolean
+  country?: string
 }
 
-export async function parseMentionsBatch(lines: string[]): Promise<ParsedMention[]> {
+export async function parseMentionsBatch(lines: string[], country: string = 'US'): Promise<ParsedMention[]> {
   await checkAdminAuth()
   const { resolveStateCode } = await import('@/lib/resolve-state')
+  const { detectPostalCode } = await import('@/lib/detect-postal')
+  const { resolveLocation } = await import('@/lib/resolve-city')
   const supabase = createAdminClient()
 
   const results: ParsedMention[] = []
@@ -569,7 +572,42 @@ export async function parseMentionsBatch(lines: string[]): Promise<ParsedMention
     const line = raw.trim()
     if (!line) continue
 
-    // Parse city/state from messy input: "tulsa ok", "Tulsa, Oklahoma", "TULSA OK", "tulsa, ok"
+    // Step 1: Check if the input is a postal/ZIP code
+    const postal = detectPostalCode(line, country)
+    if (postal) {
+      const res = await resolveLocation(postal.code, postal.country)
+      if (res.resolved) {
+        results.push({
+          input: line,
+          city: res.resolved.city,
+          state: res.resolved.state,
+          lat: res.resolved.lat,
+          lng: res.resolved.lng,
+          matched: true,
+          country: postal.country,
+        })
+      } else {
+        results.push({ input: line, city: null, state: null, lat: null, lng: null, matched: false })
+      }
+      continue
+    }
+
+    // Step 2: Try resolveLocation for any free-text input (handles "city, state", bare city, international)
+    const res = await resolveLocation(line, country)
+    if (res.resolved) {
+      results.push({
+        input: line,
+        city: res.resolved.city,
+        state: res.resolved.state,
+        lat: res.resolved.lat,
+        lng: res.resolved.lng,
+        matched: true,
+        country,
+      })
+      continue
+    }
+
+    // Step 3: Legacy city/state parsing as fallback
     let city = ''
     let stateInput = ''
 
@@ -578,10 +616,8 @@ export async function parseMentionsBatch(lines: string[]): Promise<ParsedMention
       city = parts[0]
       stateInput = parts.slice(1).join(' ').trim()
     } else {
-      // No comma: last token is state
       const tokens = line.split(/\s+/)
       if (tokens.length >= 2) {
-        // Check if last 2 tokens form a state name (e.g. "new york")
         const lastTwo = tokens.slice(-2).join(' ')
         const lastTwoCode = resolveStateCode(lastTwo)
         if (lastTwoCode && tokens.length > 2) {
@@ -602,16 +638,14 @@ export async function parseMentionsBatch(lines: string[]): Promise<ParsedMention
       continue
     }
 
-    // Normalize city casing
     city = city.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())
 
-    // Look up coords from zip_codes
     const { data } = await (supabase as any)
       .from('zip_codes')
       .select('city, state, lat, lng')
       .ilike('city', city)
       .eq('state', stateCode)
-      .eq('country', 'US')
+      .eq('country', country)
       .limit(1)
 
     if (data && data.length > 0) {
@@ -622,6 +656,7 @@ export async function parseMentionsBatch(lines: string[]): Promise<ParsedMention
         lat: Number(data[0].lat),
         lng: Number(data[0].lng),
         matched: true,
+        country,
       })
     } else {
       results.push({ input: line, city, state: stateCode, lat: null, lng: null, matched: false })
@@ -632,9 +667,10 @@ export async function parseMentionsBatch(lines: string[]): Promise<ParsedMention
 }
 
 export async function saveMentionsBatch(
-  mentions: { city: string; state: string; lat: number; lng: number }[],
+  mentions: { city: string; state: string; lat: number; lng: number; country?: string }[],
   postRef: string,
   mentionedOn: string,
+  country: string = 'US',
 ): Promise<{ saved: number; error?: string }> {
   await checkAdminAuth()
   const supabase = createAdminClient()
@@ -644,6 +680,7 @@ export async function saveMentionsBatch(
     state: m.state,
     lat: m.lat,
     lng: m.lng,
+    country: m.country || country,
     source: 'instagram_comment',
     post_ref: postRef || null,
     mentioned_on: mentionedOn || null,

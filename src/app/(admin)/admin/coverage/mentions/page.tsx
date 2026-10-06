@@ -9,6 +9,7 @@ export default function MentionsEntryPage() {
   const [input, setInput] = useState("")
   const [postRef, setPostRef] = useState("")
   const [mentionedOn, setMentionedOn] = useState(new Date().toISOString().slice(0, 10))
+  const [country, setCountry] = useState("US")
   const [parsed, setParsed] = useState<ParsedMention[] | null>(null)
   const [parsing, setParsing] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -25,7 +26,7 @@ export default function MentionsEntryPage() {
     setSaved(null)
 
     try {
-      const results = await parseMentionsBatch(lines)
+      const results = await parseMentionsBatch(lines, country)
       setParsed(results)
     } catch {
       setError("Failed to parse. Try again.")
@@ -43,9 +44,10 @@ export default function MentionsEntryPage() {
 
     try {
       const result = await saveMentionsBatch(
-        matched.map(m => ({ city: m.city!, state: m.state!, lat: m.lat!, lng: m.lng! })),
+        matched.map(m => ({ city: m.city!, state: m.state!, lat: m.lat!, lng: m.lng!, country: m.country || country })),
         postRef,
         mentionedOn,
+        country,
       )
       if (result.error) {
         setError(result.error)
@@ -72,7 +74,7 @@ export default function MentionsEntryPage() {
 
         <h1 className="text-xl font-bold mb-1">Add Comment Mentions</h1>
         <p className="text-white/40 text-sm mb-6">
-          Paste city/state lines from Instagram comments. One per line. Messy input is fine.
+          Paste city/state lines or ZIP codes from Instagram comments. One per line. Messy input is fine.
         </p>
 
         {saved !== null && (
@@ -91,7 +93,7 @@ export default function MentionsEntryPage() {
 
         <div className="space-y-4">
           {/* Post reference + date */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-bold text-white/50 mb-1.5">Post Reference</label>
               <input
@@ -99,7 +101,7 @@ export default function MentionsEntryPage() {
                 value={postRef}
                 onChange={e => setPostRef(e.target.value)}
                 placeholder="e.g. 'Sept 25 reel' or URL"
-                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-neuro-orange"
+                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-base placeholder:text-white/25 focus:outline-none focus:border-neuro-orange"
               />
             </div>
             <div>
@@ -108,20 +110,34 @@ export default function MentionsEntryPage() {
                 type="date"
                 value={mentionedOn}
                 onChange={e => setMentionedOn(e.target.value)}
-                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-neuro-orange"
+                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-base focus:outline-none focus:border-neuro-orange"
               />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-white/50 mb-1.5">Country</label>
+              <select
+                value={country}
+                onChange={e => { setCountry(e.target.value); setParsed(null) }}
+                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-base focus:outline-none focus:border-neuro-orange"
+              >
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+                <option value="GB">United Kingdom</option>
+                <option value="AU">Australia</option>
+                <option value="NZ">New Zealand</option>
+              </select>
             </div>
           </div>
 
           {/* City/state input */}
           <div>
-            <label className="block text-xs font-bold text-white/50 mb-1.5">Cities (one per line)</label>
+            <label className="block text-xs font-bold text-white/50 mb-1.5">Cities or ZIP codes (one per line)</label>
             <textarea
               value={input}
               onChange={e => { setInput(e.target.value); setParsed(null); setSaved(null) }}
-              placeholder={"tulsa ok\nAustin, Texas\nSan Diego CA\nportland, oregon\nNASHVILLE TN"}
+              placeholder={"tulsa ok\nAustin, Texas\n90210\nSan Diego CA\nV5K 1A1\nNASHVILLE TN"}
               rows={10}
-              className="w-full px-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm font-mono placeholder:text-white/20 focus:outline-none focus:border-neuro-orange resize-none"
+              className="w-full px-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-base font-mono placeholder:text-white/20 focus:outline-none focus:border-neuro-orange resize-none"
             />
           </div>
 
