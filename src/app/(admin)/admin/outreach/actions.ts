@@ -9,7 +9,7 @@ import { revalidatePath } from 'next/cache'
 
 // ── Voice Validator ──
 
-export function validateTemplate(text: string): { errors: string[]; warnings: string[] } {
+export async function validateTemplate(text: string): Promise<{ errors: string[]; warnings: string[] }> {
   const errors: string[] = []
   const warnings: string[] = []
 
@@ -388,7 +388,7 @@ export async function renderTemplate(templateKey: string, prospectId: string) {
   }
 
   // Voice validation
-  const validation = validateTemplate(rendered)
+  const validation = await validateTemplate(rendered)
   const warnings = [...validation.warnings]
   if (validation.errors.length) {
     warnings.push(...validation.errors.map(e => `VOICE: ${e}`))
