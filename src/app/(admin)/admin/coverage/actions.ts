@@ -566,14 +566,37 @@ export async function parseMentionsBatch(lines: string[], country: string = 'US'
   const { resolveLocation } = await import('@/lib/resolve-city')
   const supabase = createAdminClient()
 
+  // Country name → ISO code map for auto-detection from input like "Sydney, Australia"
+  const COUNTRY_NAMES: Record<string, string> = {
+    'australia': 'AU', 'aus': 'AU',
+    'canada': 'CA', 'can': 'CA',
+    'united kingdom': 'GB', 'uk': 'GB', 'england': 'GB', 'scotland': 'GB', 'wales': 'GB',
+    'new zealand': 'NZ', 'nz': 'NZ',
+    'united states': 'US', 'usa': 'US', 'us': 'US',
+    'south africa': 'ZA', 'nigeria': 'NG', 'singapore': 'SG', 'japan': 'JP',
+    'switzerland': 'CH', 'trinidad': 'TT', 'trinidad and tobago': 'TT',
+  }
+
   const results: ParsedMention[] = []
 
   for (const raw of lines) {
     const line = raw.trim()
     if (!line) continue
 
+    // Step 0: Detect country name in input (e.g. "Sydney, Australia" → country=AU, city="Sydney")
+    let effectiveCountry = country
+    let effectiveLine = line
+    if (line.includes(',')) {
+      const lastPart = line.split(',').pop()!.trim().toLowerCase()
+      const detected = COUNTRY_NAMES[lastPart]
+      if (detected) {
+        effectiveCountry = detected
+        effectiveLine = line.split(',').slice(0, -1).join(',').trim()
+      }
+    }
+
     // Step 1: Check if the input is a postal/ZIP code
-    const postal = detectPostalCode(line, country)
+    const postal = detectPostalCode(effectiveLine, effectiveCountry)
     if (postal) {
       const res = await resolveLocation(postal.code, postal.country)
       if (res.resolved) {
@@ -593,7 +616,7 @@ export async function parseMentionsBatch(lines: string[], country: string = 'US'
     }
 
     // Step 2: Try resolveLocation for any free-text input (handles "city, state", bare city, international)
-    const res = await resolveLocation(line, country)
+    const res = await resolveLocation(effectiveLine, effectiveCountry)
     if (res.resolved) {
       results.push({
         input: line,
@@ -602,7 +625,7 @@ export async function parseMentionsBatch(lines: string[], country: string = 'US'
         lat: res.resolved.lat,
         lng: res.resolved.lng,
         matched: true,
-        country,
+        country: effectiveCountry,
       })
       continue
     }
@@ -611,12 +634,12 @@ export async function parseMentionsBatch(lines: string[], country: string = 'US'
     let city = ''
     let stateInput = ''
 
-    if (line.includes(',')) {
-      const parts = line.split(',').map(p => p.trim())
+    if (effectiveLine.includes(',')) {
+      const parts = effectiveLine.split(',').map(p => p.trim())
       city = parts[0]
       stateInput = parts.slice(1).join(' ').trim()
     } else {
-      const tokens = line.split(/\s+/)
+      const tokens = effectiveLine.split(/\s+/)
       if (tokens.length >= 2) {
         const lastTwo = tokens.slice(-2).join(' ')
         const lastTwoCode = resolveStateCode(lastTwo)
@@ -645,7 +668,7 @@ export async function parseMentionsBatch(lines: string[], country: string = 'US'
       .select('city, state, lat, lng')
       .ilike('city', city)
       .eq('state', stateCode)
-      .eq('country', country)
+      .eq('country', effectiveCountry)
       .limit(1)
 
     if (data && data.length > 0) {
@@ -656,7 +679,7 @@ export async function parseMentionsBatch(lines: string[], country: string = 'US'
         lat: Number(data[0].lat),
         lng: Number(data[0].lng),
         matched: true,
-        country,
+        country: effectiveCountry,
       })
     } else {
       results.push({ input: line, city, state: stateCode, lat: null, lng: null, matched: false })
