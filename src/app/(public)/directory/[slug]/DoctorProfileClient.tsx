@@ -66,7 +66,9 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
 
   const gated = isProfileGated(doctor);
   const saved = isSaved('doctors', doctor.id?.toString());
-  const name = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
+  const isPracticeProfile = (doctor as any).profile_style === 'practice';
+  const doctorName = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
+  const name = isPracticeProfile ? (doctor.clinic_name || doctorName) : doctorName;
   const spotlightEpisode = getEpisodeByDoctorSlug(slug);
   const location = [doctor.city, doctor.state].filter(Boolean).join(", ");
   // Filter specialties: split concatenated entries, drop free-text sentences
@@ -194,7 +196,13 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           {/* Centered content */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
             {/* Photo */}
-            <div style={{ width: 140, height: 140, borderRadius: "50%", border: "4px solid rgba(214,104,41,0.4)", overflow: "hidden", background: "#1E2D3B", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", boxShadow: "0 25px 60px rgba(0,0,0,0.4)", marginBottom: 24 }}>
+            <div style={{
+              width: isPracticeProfile ? 280 : 140,
+              height: isPracticeProfile ? 180 : 140,
+              borderRadius: isPracticeProfile ? 24 : "50%",
+              border: "4px solid rgba(214,104,41,0.4)",
+              overflow: "hidden", background: "#1E2D3B", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", boxShadow: "0 25px 60px rgba(0,0,0,0.4)", marginBottom: 24
+            }}>
               {doctor.photo_url && !photoError ? (
                 <img src={doctor.photo_url} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={() => setPhotoError(true)} />
               ) : (
@@ -206,7 +214,9 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             <h1 style={{ fontSize: 42, fontWeight: 900, color: "white", fontFamily: "Lato, sans-serif", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: 8 }}>{name}</h1>
 
             {/* Clinic */}
-            <p style={{ fontSize: 14, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 6 }}>{doctor.clinic_name || 'Private Practice'}</p>
+            <p style={{ fontSize: 14, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 6 }}>
+              {isPracticeProfile ? `Led by ${doctorName}` : (doctor.clinic_name || 'Private Practice')}
+            </p>
 
             {/* Location */}
             {location && (
@@ -357,7 +367,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             ) : doctor.video_url && (
               <>
                 <h2 style={{ textAlign: "center", fontSize: 13, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                  <Play style={{ width: 14, height: 14 }} /> Meet {doctor.first_name}
+                  <Play style={{ width: 14, height: 14 }} /> Meet {isPracticeProfile ? 'the Team' : doctor.first_name}
                 </h2>
                 <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.3)", aspectRatio: "16 / 9" }}>
                   <iframe src={doctor.video_url.replace('watch?v=', 'embed/').replace('vimeo.com/', 'player.vimeo.com/video/')} style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
@@ -395,7 +405,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       {(d.short_intro || doctor.bio) && (
         <Section bg="white" style={{ paddingTop: 64, paddingBottom: 64 }}>
           <div style={{ maxWidth: 800, margin: "0 auto" }}>
-            <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 20 }}>About {doctor.first_name}</h2>
+            <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 20 }}>About {isPracticeProfile ? (doctor.clinic_name || doctor.first_name) : doctor.first_name}</h2>
 
             {/* Structured short_intro (preferred) or pull quote from bio (fallback) */}
             {d.short_intro ? (
