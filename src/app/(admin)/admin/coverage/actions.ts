@@ -3,6 +3,7 @@
 import { createAdminClient } from '@/lib/supabase-admin'
 import { checkAdminAuth } from '@/lib/admin-auth'
 import { haversineDistance } from '@/lib/geo'
+import { revalidatePath } from 'next/cache'
 
 // ── Types ──
 
@@ -715,6 +716,7 @@ export async function saveMentionsBatch(
     return { saved: 0, error: error.message }
   }
 
+  revalidatePath('/admin/coverage')
   return { saved: rows.length }
 }
 
