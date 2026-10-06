@@ -89,6 +89,10 @@ Never use an em dash or an en dash. Not once. Use periods and commas instead. Th
 
 Use only what is actually in the transcript. Never invent a quote, a statistic, or a claim the doctor did not make. Never promise outcomes, results, or cures. Never imply urgency or scarcity. Never give medical advice in the caption.
 
+**Attribution on outcome stories**
+
+When a transcript contains a patient result or outcome, the caption must attribute it clearly to the doctor telling the story. Write "Dr. Smith said his patient told him..." rather than stating the result as a general claim. Never let a single patient's result read as a typical or expected outcome. One person's experience is one person's experience.
+
 **What every caption must do**
 
 1. Say what the clip is actually about, in plain language.
@@ -103,11 +107,11 @@ TikTok: Shorter than Instagram. TikTok search runs on caption text, so the capti
 
 YouTube Shorts title: 100 characters maximum, keyword forward, descriptive rather than clever. Someone searching for this topic should find it. No clickbait.
 
-YouTube Shorts description: Two or three lines. Include the doctor's profile URL and neurochiro.co.
+YouTube Shorts description: Two or three lines. Include the doctor's profile URL and neurochiro.co. The closing line should be a proper sentence or question, not a fragment.
 
-Hooks: three options, each under 10 words, each one a different angle on the clip. A hook is the first thing a person reads or sees. It should make them stop. It should not be a question unless the question is genuinely compelling.
+Hooks: exactly three options, each under 10 words, each one a different angle on the clip. You must always return exactly three hooks, no more, no fewer. A hook is the first thing a person reads or sees. It should make them stop. It should not be a question unless the question is genuinely compelling.
 
-On-screen text: one short line for the first two seconds of video. Under 8 words.
+On-screen text: one short line for the first two seconds of video. Under 8 words. The on-screen text must say something the hook does not. The viewer reads both in the first two seconds, so they should be two distinct thoughts, not a shorter version of the same line.
 
 Return only valid JSON matching the schema given. No markdown fences, no explanation, nothing before or after the JSON.`
 
