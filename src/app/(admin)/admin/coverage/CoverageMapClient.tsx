@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
-import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send, MessageSquare } from "lucide-react"
+import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send, MessageSquare, Map as MapIcon } from "lucide-react"
 import Link from "next/link"
 import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, logReply, getSentDoctorIds, getFarDistanceThreshold } from "./actions"
 
@@ -27,6 +27,7 @@ const LAYER_CONFIG: { key: LayerKey; label: string; color: string; opacity?: num
 ]
 
 const STORAGE_KEY = 'nc_coverage_layers_v2'
+const MAP_COLLAPSED_KEY = 'nc_coverage_map_collapsed'
 
 function loadSavedLayers(): Record<LayerKey, boolean> {
   try {
@@ -34,6 +35,14 @@ function loadSavedLayers(): Record<LayerKey, boolean> {
     if (saved) return JSON.parse(saved)
   } catch {}
   return { verified: true, pending: true, confirmedSub: true, pendingSub: true, gaps: true, mentions: true }
+}
+
+function loadMapCollapsed(): boolean {
+  try {
+    const saved = localStorage.getItem(MAP_COLLAPSED_KEY)
+    if (saved !== null) return saved === 'true'
+  } catch {}
+  return true // default collapsed
 }
 
 // ── Main Component ──
@@ -60,14 +69,30 @@ export default function CoverageMapClient({
   const [lookupSort, setLookupSort] = useState<'distance' | 'name' | 'tier'>('distance')
   const [sentDoctorIds, setSentDoctorIds] = useState<Set<string>>(new Set())
   const [farThreshold, setFarThreshold] = useState(30)
+  const [mapCollapsed, setMapCollapsed] = useState(loadMapCollapsed)
+  const [sessionCount, setSessionCount] = useState(0)
+  const [todayCount, setTodayCount] = useState(0)
+  const [couldNotResolve, setCouldNotResolve] = useState(false)
+  const [resolvedCity, setResolvedCity] = useState('')
+  const [resolvedState, setResolvedState] = useState('')
+  const [confidence, setConfidence] = useState<'exact' | 'dominant' | 'ambiguous' | 'approximate' | undefined>(undefined)
+  const [rejectedCandidates, setRejectedCandidates] = useState<{ city: string; state: string }[] | null>(null)
+  const [showOtherResults, setShowOtherResults] = useState(false)
   const lookupInputRef = useRef<HTMLInputElement>(null)
+  const replyBtnRef = useRef<HTMLButtonElement>(null)
+  const dmBtnRef = useRef<HTMLButtonElement>(null)
+  const sentBtnRef = useRef<HTMLButtonElement>(null)
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
   const mapReadyRef = useRef(false)
+  const mapInitializedRef = useRef(false)
 
   // Load sent doctor IDs + far threshold on mount
   useEffect(() => {
-    getSentDoctorIds().then(ids => setSentDoctorIds(new Set(ids))).catch(() => {})
+    getSentDoctorIds().then(ids => {
+      setSentDoctorIds(new Set(ids))
+      setTodayCount(ids.length)
+    }).catch(() => {})
     getFarDistanceThreshold().then(setFarThreshold).catch(() => {})
   }, [])
 
@@ -75,6 +100,11 @@ export default function CoverageMapClient({
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(layers)) } catch {}
   }, [layers])
+
+  // Persist map collapsed state
+  useEffect(() => {
+    try { localStorage.setItem(MAP_COLLAPSED_KEY, String(mapCollapsed)) } catch {}
+  }, [mapCollapsed])
 
   const toggleLayer = (key: LayerKey) => setLayers(prev => ({ ...prev, [key]: !prev[key] }))
   const showAll = () => setLayers({ verified: true, pending: true, confirmedSub: true, pendingSub: true, gaps: true, mentions: true })
@@ -118,9 +148,9 @@ export default function CoverageMapClient({
       }))
   }, [countryDoctors])
 
-  // ── Map init ──
+  // ── Map init (only when map section is visible) ──
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return
+    if (mapCollapsed || !mapRef.current || mapInstanceRef.current) return
     const script = document.createElement('script')
     script.src = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js'
     script.onload = () => {
@@ -139,6 +169,7 @@ export default function CoverageMapClient({
       map.on('load', () => {
         mapInstanceRef.current = map
         mapReadyRef.current = true
+        mapInitializedRef.current = true
 
         // Doctor source (clustered)
         map.addSource('doctors', {
@@ -261,8 +292,8 @@ export default function CoverageMapClient({
       })
     }
     document.head.appendChild(script)
-    return () => { mapInstanceRef.current?.remove(); mapInstanceRef.current = null }
-  }, [])
+    return () => { mapInstanceRef.current?.remove(); mapInstanceRef.current = null; mapReadyRef.current = false }
+  }, [mapCollapsed])
 
   // ── Sync layer visibility when toggles change ──
   useEffect(() => {
@@ -307,15 +338,57 @@ export default function CoverageMapClient({
   // ── Lookup ──
   const [ambiguousOptions, setAmbiguousOptions] = useState<{ city: string; state: string }[] | null>(null)
 
+  const clearResults = useCallback(() => {
+    setLookupQuery('')
+    setLookupResults(null)
+    setLookupLabel('')
+    setAmbiguousOptions(null)
+    setCouldNotResolve(false)
+    setResolvedCity('')
+    setResolvedState('')
+    setConfidence(undefined)
+    setRejectedCandidates(null)
+    setShowOtherResults(false)
+    setTimeout(() => { lookupInputRef.current?.focus(); lookupInputRef.current?.select() }, 50)
+  }, [])
+
+  const handleSentFromParent = useCallback(() => {
+    setLookupQuery('')
+    setLookupResults(null)
+    setLookupLabel('')
+    setAmbiguousOptions(null)
+    setCouldNotResolve(false)
+    setResolvedCity('')
+    setResolvedState('')
+    setConfidence(undefined)
+    setRejectedCandidates(null)
+    setShowOtherResults(false)
+    setSessionCount(prev => prev + 1)
+    setTodayCount(prev => prev + 1)
+    setTimeout(() => { lookupInputRef.current?.focus(); lookupInputRef.current?.select() }, 50)
+  }, [])
+
   const handleLookup = async (overrideQuery?: string) => {
     const q = overrideQuery || lookupQuery.trim()
     if (!q) return
     setLookupLoading(true)
     setAmbiguousOptions(null)
+    setCouldNotResolve(false)
+    setShowOtherResults(false)
+    setConfidence(undefined)
+    setRejectedCandidates(null)
     try {
       const r = await lookupNearby(q, lookupCountry)
+
+      if (r.couldNotResolve === true) {
+        setCouldNotResolve(true)
+        setLookupResults(null)
+        setLookupLabel('')
+        setLookupLoading(false)
+        return
+      }
+
       if (r.detectedCountry && r.detectedCountry !== lookupCountry) {
-        // Auto-detected a different country from the postal format
         setLookupCountry(r.detectedCountry)
         try { localStorage.setItem('nc_lookup_country', r.detectedCountry) } catch {}
         setLookupLabel(`Detected ${r.detectedCountry} postal code. ${r.label}`)
@@ -329,9 +402,12 @@ export default function CoverageMapClient({
         setLookupLabel(r.label)
       }
       setLookupResults(r.doctors)
+      setConfidence(r.confidence)
+      setRejectedCandidates(r.rejectedCandidates || null)
+      setResolvedCity(r.resolvedCity || '')
+      setResolvedState(r.resolvedState || '')
     } catch { setLookupLabel('Lookup failed'); setLookupResults([]) }
     setLookupLoading(false)
-    // Item 3: Refocus input and select-all so next city can be typed immediately
     setTimeout(() => { lookupInputRef.current?.focus(); lookupInputRef.current?.select() }, 50)
   }
 
@@ -347,6 +423,48 @@ export default function CoverageMapClient({
     return ({ verified: 0, pending: 1 }[a.verification_status] ?? 2) - ({ verified: 0, pending: 1 }[b.verification_status] ?? 2)
   }) : null
 
+  // Auto-select: first result is "the pick", rest are secondary
+  const pickDoctor = sortedLookupResults && sortedLookupResults.length > 0 ? sortedLookupResults[0] : null
+  const otherDoctors = sortedLookupResults && sortedLookupResults.length > 1 ? sortedLookupResults.slice(1) : []
+
+  // ── Keyboard shortcuts ──
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      const inInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
+
+      if (e.key === '/' && !inInput) {
+        e.preventDefault()
+        lookupInputRef.current?.focus()
+        lookupInputRef.current?.select()
+        return
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        clearResults()
+        return
+      }
+      if (inInput) return
+      if (e.key === '1' && replyBtnRef.current) {
+        e.preventDefault()
+        replyBtnRef.current.click()
+        return
+      }
+      if (e.key === '2' && dmBtnRef.current) {
+        e.preventDefault()
+        dmBtnRef.current.click()
+        return
+      }
+      if (e.key === 'Enter' && sentBtnRef.current) {
+        e.preventDefault()
+        sentBtnRef.current.click()
+        return
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [clearResults])
+
   const invisibleDocs = countryDoctors.filter(d => d.pin_status === 'invisible')
   const missingCountryDocs = doctors.filter(d => d.missing_country)
   const countryVerified = countryDoctors.filter(d => d.pin_status === 'verified').length
@@ -358,142 +476,29 @@ export default function CoverageMapClient({
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Stats bar */}
-      <div className="px-4 py-3 border-b border-white/10">
+
+      {/* ══════ LOOKUP SECTION (top) ══════ */}
+      <div className="px-4 py-4 border-b border-white/10">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-bold">Coverage Map</h1>
+            <p className="text-xs font-bold text-white/60 uppercase tracking-wider">Doctor Lookup</p>
             <Link href="/admin/coverage/mentions" className="text-[10px] font-bold text-cyan-400/70 hover:text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-lg">+ Mentions</Link>
             <Link href="/admin/coverage/templates" className="text-[10px] font-bold text-white/40 hover:text-white/70 bg-white/5 px-2 py-1 rounded-lg">Templates</Link>
           </div>
-          <button onClick={() => setShowStatsPanel(!showStatsPanel)} className="text-white/50 text-xs flex items-center gap-1">
-            {showStatsPanel ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            {showStatsPanel ? 'Hide' : 'Stats'}
-          </button>
-        </div>
-        {showStatsPanel && (
-          <div className="space-y-3">
-            <div className="grid grid-cols-3 gap-2">
-              <StatCard label="Verified" value={countryVerified} color="text-green-400" sub="Live, searchable" />
-              <StatCard label="Pending" value={countryPending} color="text-amber-400" sub="Awaiting approval" />
-              <StatCard label="Invisible" value={countryInvisible} color="text-red-400" sub="No coordinates" />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {lookupCountry === 'US' ? (
-                <div className="bg-white/5 rounded-xl p-3">
-                  <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">States With a Doctor</p>
-                  <p className="text-xl font-bold">{stats.statesWithDoctor.length}<span className="text-white/30 text-sm"> / {ALL_US_STATES.length}</span></p>
-                  {stats.statesWithout.length > 0 && <p className="text-[10px] text-red-400/70 mt-1">Missing: {stats.statesWithout.join(', ')}</p>}
-                </div>
-              ) : (
-                <div className="bg-white/5 rounded-xl p-3">
-                  <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">{countryView.label} With a Doctor</p>
-                  <p className="text-xl font-bold">{new Set(countryDoctors.filter(d => d.state && d.pin_status !== 'invisible').map(d => d.state)).size}</p>
-                  <p className="text-[10px] text-white/25 mt-0.5">{countryDoctors.filter(d => d.pin_status !== 'invisible').length} doctors total</p>
-                </div>
-              )}
-              <div className="bg-white/5 rounded-xl p-3">
-                <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Demand Signals</p>
-                {lookupCountry === 'US' ? (
-                  <>
-                    <p className="text-xl font-bold">{stats.confirmedSubscribers} <span className="text-white/30 text-sm">waitlist</span></p>
-                    {stats.pendingSubscribers > 0 && <p className="text-xs text-purple-400/70 mt-0.5">{stats.pendingSubscribers} pending</p>}
-                    {stats.totalMentions > 0 && <p className="text-xs text-cyan-400/70 mt-0.5">{stats.totalMentions} comment mentions</p>}
-                  </>
-                ) : (
-                  <p className="text-sm text-white/30 mt-1">Switch to US for demand data</p>
-                )}
-              </div>
-            </div>
-            {stats.recruitMarkets.length > 0 && (
-              <MarketPanel
-                title="Recruit Here"
-                subtitle="Demand with no doctor within 50 miles."
-                markets={stats.recruitMarkets}
-                color="rose"
-              />
-            )}
-            {stats.coveredMarkets.length > 0 && (
-              <MarketPanel
-                title="Already Covered"
-                subtitle="Demand where a doctor is nearby. Reply to these people."
-                markets={stats.coveredMarkets}
-                color="green"
-              />
-            )}
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] text-white/30">Session: {sessionCount} · Today: {todayCount}</span>
+            <select value={lookupCountry} onChange={e => {
+              setLookupCountry(e.target.value)
+              try { localStorage.setItem('nc_lookup_country', e.target.value) } catch {}
+              setLookupResults(null); setLookupLabel(''); setAmbiguousOptions(null); setCouldNotResolve(false)
+            }} className="bg-white/5 border border-white/10 rounded-lg text-xs text-white/60 px-2 py-1">
+              <option value="US">🇺🇸 US</option>
+              <option value="CA">🇨🇦 Canada</option>
+              <option value="GB">🇬🇧 UK</option>
+              <option value="NZ">🇳🇿 NZ</option>
+              <option value="AU">🇦🇺 Australia</option>
+            </select>
           </div>
-        )}
-      </div>
-
-      {/* Layer toggles */}
-      <div className="px-4 py-2 border-b border-white/10">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {LAYER_CONFIG.map(l => (
-            <button key={l.key} onClick={() => toggleLayer(l.key)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all min-h-[32px] ${
-                layers[l.key]
-                  ? 'bg-white/15 text-white border border-white/20'
-                  : 'bg-transparent text-white/30 border border-white/5'
-              }`}>
-              <span className="w-2.5 h-2.5 rounded-full shrink-0 transition-opacity"
-                style={{ background: l.color, opacity: layers[l.key] ? (l.opacity || 1) : 0.2 }} />
-              <span className="hidden sm:inline">{l.label}</span>
-              <span className="sm:hidden">{l.label.split(' ')[0]}</span>
-            </button>
-          ))}
-          <span className="w-px h-5 bg-white/10 mx-0.5" />
-          <button onClick={allOn ? hideAll : showAll}
-            className="px-2 py-1.5 text-[10px] font-bold text-white/40 hover:text-white/70 transition-colors">
-            {allOn ? 'Hide all' : 'Show all'}
-          </button>
-        </div>
-      </div>
-
-      {/* Map */}
-      <div ref={mapRef} className="w-full" style={{ height: 'min(60vh, 500px)' }} />
-
-      {/* Invisible doctors */}
-      {invisibleDocs.length > 0 && (
-        <div className="px-4 py-3 border-t border-white/10">
-          <p className="text-xs font-bold text-red-400 mb-2 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {invisibleDocs.length} doctors not on map</p>
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {invisibleDocs.map(d => (
-              <Link key={d.id} href={`/admin/directory?search=${encodeURIComponent([d.first_name, d.last_name].filter(Boolean).join(' '))}`} className="text-xs text-white/50 hover:text-white/80">
-                {[d.first_name, d.last_name].filter(Boolean).join(' ') || d.clinic_name}<span className="text-white/20 ml-1">({d.city}, {d.state})</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {missingCountryDocs.length > 0 && (
-        <div className="px-4 py-3 border-t border-white/10">
-          <p className="text-xs font-bold text-yellow-400 mb-2 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {missingCountryDocs.length} doctor{missingCountryDocs.length > 1 ? 's' : ''} missing country — defaulting to US</p>
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {missingCountryDocs.map(d => (
-              <Link key={d.id} href={`/admin/directory?search=${encodeURIComponent([d.first_name, d.last_name].filter(Boolean).join(' '))}`} className="text-xs text-yellow-400/60 hover:text-yellow-400">
-                {[d.first_name, d.last_name].filter(Boolean).join(' ')}<span className="text-white/20 ml-1">({d.city}, {d.state})</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Lookup */}
-      <div className="px-4 py-4 border-t border-white/10">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-bold text-white/60 uppercase tracking-wider">Doctor Lookup</p>
-          <select value={lookupCountry} onChange={e => {
-            setLookupCountry(e.target.value)
-            try { localStorage.setItem('nc_lookup_country', e.target.value) } catch {}
-            setLookupResults(null); setLookupLabel(''); setAmbiguousOptions(null)
-          }} className="bg-white/5 border border-white/10 rounded-lg text-xs text-white/60 px-2 py-1">
-            <option value="US">🇺🇸 US</option>
-            <option value="CA">🇨🇦 Canada</option>
-            <option value="GB">🇬🇧 UK</option>
-            <option value="NZ">🇳🇿 NZ</option>
-            <option value="AU">🇦🇺 Australia</option>
-          </select>
         </div>
         <div className="flex gap-2 mb-3">
           <div className="relative flex-1">
@@ -514,7 +519,30 @@ export default function CoverageMapClient({
             {lookupLoading ? '...' : 'Search'}
           </button>
         </div>
-        {lookupLabel && <p className="text-xs text-white/50 mb-2">{lookupLabel}</p>}
+
+        {/* Could not resolve - RED band */}
+        {couldNotResolve && (
+          <div className="bg-red-500/20 border border-red-500/40 rounded-xl px-4 py-3 mb-3">
+            <p className="text-sm font-bold text-red-400">We could not find that location. Try a postal code instead.</p>
+          </div>
+        )}
+
+        {/* Resolution label + confidence indicators */}
+        {lookupLabel && !couldNotResolve && (
+          <div className="mb-2">
+            <p className="text-xs text-white/50">{lookupLabel}</p>
+            {confidence === 'dominant' && rejectedCandidates && rejectedCandidates.length > 0 && resolvedCity && (
+              <p className="text-[10px] text-white/30 mt-1">
+                Matched to {resolvedCity}, {resolvedState}. Also exists in {rejectedCandidates.map(rc => rc.state).join(', ')}.
+              </p>
+            )}
+            {confidence === 'approximate' && (
+              <p className="text-[10px] text-amber-400/70 mt-1">Approximate match. Double-check this is right.</p>
+            )}
+          </div>
+        )}
+
+        {/* Ambiguous options */}
         {ambiguousOptions && (
           <div className="flex flex-wrap gap-1.5 mb-3">
             {ambiguousOptions.map((opt, i) => (
@@ -525,7 +553,9 @@ export default function CoverageMapClient({
             ))}
           </div>
         )}
-        {sortedLookupResults && (sortedLookupResults.length > 0 ? (
+
+        {/* Results */}
+        {!couldNotResolve && sortedLookupResults && (sortedLookupResults.length > 0 ? (
           <>
             <div className="flex gap-2 mb-2">
               {(['distance', 'name', 'tier'] as const).map(s => (
@@ -534,15 +564,196 @@ export default function CoverageMapClient({
                 </button>
               ))}
             </div>
-            <div className="space-y-1.5 max-h-[50vh] overflow-y-auto">
-              {sortedLookupResults.map(d => (
-                <LookupResultRow key={d.id} doctor={d} searchedCity={lookupQuery} templates={templates} sentDoctorIds={sentDoctorIds} farThreshold={farThreshold} />
-              ))}
-            </div>
+
+            {/* Primary pick (first/nearest doctor) */}
+            {pickDoctor && (
+              <LookupResultRow
+                key={pickDoctor.id}
+                doctor={pickDoctor}
+                searchedCity={lookupQuery}
+                templates={templates}
+                sentDoctorIds={sentDoctorIds}
+                farThreshold={farThreshold}
+                isPick
+                onSent={handleSentFromParent}
+                replyBtnRef={replyBtnRef}
+                dmBtnRef={dmBtnRef}
+                sentBtnRef={sentBtnRef}
+              />
+            )}
+
+            {/* Other results */}
+            {otherDoctors.length > 0 && (
+              <div className="mt-2">
+                <button onClick={() => setShowOtherResults(!showOtherResults)}
+                  className="text-[11px] text-white/40 hover:text-white/60 font-bold flex items-center gap-1">
+                  {showOtherResults ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  {showOtherResults ? 'Hide other options' : `Show other options (${otherDoctors.length})`}
+                </button>
+                {showOtherResults && (
+                  <div className="space-y-1.5 mt-2 max-h-[40vh] overflow-y-auto">
+                    {otherDoctors.map(d => (
+                      <LookupResultRow key={d.id} doctor={d} searchedCity={lookupQuery} templates={templates} sentDoctorIds={sentDoctorIds} farThreshold={farThreshold} onSent={handleSentFromParent} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </>
         ) : (
-          <WaitlistReplyButtons searchedCity={lookupQuery} templates={templates} />
+          <div className="text-center py-4">
+            {resolvedCity ? (
+              <p className="text-xs text-white/30 mb-3">We found {resolvedCity}, {resolvedState} but no doctor within 100 miles.</p>
+            ) : (
+              <p className="text-xs text-white/30 mb-3">No doctors within 100 miles</p>
+            )}
+            <WaitlistReplyButtons searchedCity={lookupQuery} templates={templates} />
+          </div>
         ))}
+
+        {/* Keyboard shortcuts */}
+        <div className="mt-4 pt-3 border-t border-white/5">
+          <p className="text-[10px] text-white/20">
+            <span className="font-bold">/</span> focus search &nbsp;
+            <span className="font-bold">1</span> copy reply &nbsp;
+            <span className="font-bold">2</span> copy DM &nbsp;
+            <span className="font-bold">Enter</span> mark sent &nbsp;
+            <span className="font-bold">Esc</span> clear
+          </p>
+        </div>
+      </div>
+
+      {/* ══════ COLLAPSIBLE MAP SECTION ══════ */}
+      <div className="border-b border-white/10">
+        <button onClick={() => setMapCollapsed(!mapCollapsed)}
+          className="w-full px-4 py-2 flex items-center justify-between text-white/50 hover:text-white/70 transition-colors">
+          <span className="text-xs font-bold flex items-center gap-1.5">
+            <MapIcon className="w-3.5 h-3.5" />
+            {mapCollapsed ? 'Show Map' : 'Hide Map'}
+          </span>
+          {mapCollapsed ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
+        </button>
+
+        {!mapCollapsed && (
+          <>
+            {/* Stats bar */}
+            <div className="px-4 py-3 border-t border-white/10">
+              <div className="flex items-center justify-between mb-2">
+                <h1 className="text-lg font-bold">Coverage Map</h1>
+                <button onClick={() => setShowStatsPanel(!showStatsPanel)} className="text-white/50 text-xs flex items-center gap-1">
+                  {showStatsPanel ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  {showStatsPanel ? 'Hide' : 'Stats'}
+                </button>
+              </div>
+              {showStatsPanel && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-3 gap-2">
+                    <StatCard label="Verified" value={countryVerified} color="text-green-400" sub="Live, searchable" />
+                    <StatCard label="Pending" value={countryPending} color="text-amber-400" sub="Awaiting approval" />
+                    <StatCard label="Invisible" value={countryInvisible} color="text-red-400" sub="No coordinates" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {lookupCountry === 'US' ? (
+                      <div className="bg-white/5 rounded-xl p-3">
+                        <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">States With a Doctor</p>
+                        <p className="text-xl font-bold">{stats.statesWithDoctor.length}<span className="text-white/30 text-sm"> / {ALL_US_STATES.length}</span></p>
+                        {stats.statesWithout.length > 0 && <p className="text-[10px] text-red-400/70 mt-1">Missing: {stats.statesWithout.join(', ')}</p>}
+                      </div>
+                    ) : (
+                      <div className="bg-white/5 rounded-xl p-3">
+                        <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">{countryView.label} With a Doctor</p>
+                        <p className="text-xl font-bold">{new Set(countryDoctors.filter(d => d.state && d.pin_status !== 'invisible').map(d => d.state)).size}</p>
+                        <p className="text-[10px] text-white/25 mt-0.5">{countryDoctors.filter(d => d.pin_status !== 'invisible').length} doctors total</p>
+                      </div>
+                    )}
+                    <div className="bg-white/5 rounded-xl p-3">
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Demand Signals</p>
+                      {lookupCountry === 'US' ? (
+                        <>
+                          <p className="text-xl font-bold">{stats.confirmedSubscribers} <span className="text-white/30 text-sm">waitlist</span></p>
+                          {stats.pendingSubscribers > 0 && <p className="text-xs text-purple-400/70 mt-0.5">{stats.pendingSubscribers} pending</p>}
+                          {stats.totalMentions > 0 && <p className="text-xs text-cyan-400/70 mt-0.5">{stats.totalMentions} comment mentions</p>}
+                        </>
+                      ) : (
+                        <p className="text-sm text-white/30 mt-1">Switch to US for demand data</p>
+                      )}
+                    </div>
+                  </div>
+                  {stats.recruitMarkets.length > 0 && (
+                    <MarketPanel
+                      title="Recruit Here"
+                      subtitle="Demand with no doctor within 50 miles."
+                      markets={stats.recruitMarkets}
+                      color="rose"
+                    />
+                  )}
+                  {stats.coveredMarkets.length > 0 && (
+                    <MarketPanel
+                      title="Already Covered"
+                      subtitle="Demand where a doctor is nearby. Reply to these people."
+                      markets={stats.coveredMarkets}
+                      color="green"
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Layer toggles */}
+            <div className="px-4 py-2 border-t border-white/10">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {LAYER_CONFIG.map(l => (
+                  <button key={l.key} onClick={() => toggleLayer(l.key)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all min-h-[32px] ${
+                      layers[l.key]
+                        ? 'bg-white/15 text-white border border-white/20'
+                        : 'bg-transparent text-white/30 border border-white/5'
+                    }`}>
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0 transition-opacity"
+                      style={{ background: l.color, opacity: layers[l.key] ? (l.opacity || 1) : 0.2 }} />
+                    <span className="hidden sm:inline">{l.label}</span>
+                    <span className="sm:hidden">{l.label.split(' ')[0]}</span>
+                  </button>
+                ))}
+                <span className="w-px h-5 bg-white/10 mx-0.5" />
+                <button onClick={allOn ? hideAll : showAll}
+                  className="px-2 py-1.5 text-[10px] font-bold text-white/40 hover:text-white/70 transition-colors">
+                  {allOn ? 'Hide all' : 'Show all'}
+                </button>
+              </div>
+            </div>
+
+            {/* Map */}
+            <div ref={mapRef} className="w-full" style={{ height: 'min(60vh, 500px)' }} />
+
+            {/* Invisible doctors */}
+            {invisibleDocs.length > 0 && (
+              <div className="px-4 py-3 border-t border-white/10">
+                <p className="text-xs font-bold text-red-400 mb-2 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {invisibleDocs.length} doctors not on map</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                  {invisibleDocs.map(d => (
+                    <Link key={d.id} href={`/admin/directory?search=${encodeURIComponent([d.first_name, d.last_name].filter(Boolean).join(' '))}`} className="text-xs text-white/50 hover:text-white/80">
+                      {[d.first_name, d.last_name].filter(Boolean).join(' ') || d.clinic_name}<span className="text-white/20 ml-1">({d.city}, {d.state})</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {missingCountryDocs.length > 0 && (
+              <div className="px-4 py-3 border-t border-white/10">
+                <p className="text-xs font-bold text-yellow-400 mb-2 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {missingCountryDocs.length} doctor{missingCountryDocs.length > 1 ? 's' : ''} missing country — defaulting to US</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                  {missingCountryDocs.map(d => (
+                    <Link key={d.id} href={`/admin/directory?search=${encodeURIComponent([d.first_name, d.last_name].filter(Boolean).join(' '))}`} className="text-xs text-yellow-400/60 hover:text-yellow-400">
+                      {[d.first_name, d.last_name].filter(Boolean).join(' ')}<span className="text-white/20 ml-1">({d.city}, {d.state})</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   )
@@ -584,7 +795,14 @@ function humanDistance(miles: number): string {
   return String(Math.round(miles / 5) * 5)
 }
 
-function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, farThreshold }: { doctor: LookupResult; searchedCity: string; templates: ReplyTemplate[]; sentDoctorIds: Set<string>; farThreshold: number }) {
+function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, farThreshold, isPick, onSent, replyBtnRef, dmBtnRef, sentBtnRef }: {
+  doctor: LookupResult; searchedCity: string; templates: ReplyTemplate[]; sentDoctorIds: Set<string>; farThreshold: number;
+  isPick?: boolean; onSent?: () => void;
+  replyBtnRef?: React.RefObject<HTMLButtonElement | null>;
+  dmBtnRef?: React.RefObject<HTMLButtonElement | null>;
+  sentBtnRef?: React.RefObject<HTMLButtonElement | null>;
+}) {
+  // copiedReply/copiedDM persist until row unmounts (no setTimeout reset)
   const [copiedReply, setCopiedReply] = useState(false)
   const [copiedDM, setCopiedDM] = useState(false)
   const [copiedHandle, setCopiedHandle] = useState(false)
@@ -621,17 +839,24 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
   const handleSent = async () => {
     setLocalIntroCount(prev => prev + 1)
     setJustSent(true)
-    setTimeout(() => setJustSent(false), 1500)
     const { city: c, state: s } = parseSearchCity(searchedCity)
     await logReply('sent_to_patient', c, s, d.id)
+    // After logging, call parent onSent to clear and refocus
+    if (onSent) onSent()
   }
 
+  const pickReason = isPick ? `Closest verified doctor. ${d.distance_miles} miles.` : undefined
+
   return (
-    <div className={`rounded-xl px-3 py-2 ${localIntroCount > 0 ? 'bg-green-500/5 border border-green-500/20' : 'bg-white/5'}`}>
+    <div className={`rounded-xl px-3 py-2 ${isPick ? 'bg-neuro-orange/10 border-2 border-neuro-orange/30' : localIntroCount > 0 ? 'bg-green-500/5 border border-green-500/20' : 'bg-white/5'}`}>
+      {/* Pick badge */}
+      {isPick && pickReason && (
+        <p className="text-[10px] font-bold text-neuro-orange mb-1">{pickReason}</p>
+      )}
       {/* Row 1: Name, handle, completeness dots, distance, intro count */}
       <div className="flex items-center gap-2">
         <div className="flex-1 min-w-0 flex items-center gap-2">
-          <p className="text-sm font-bold text-white truncate">{doctorName}</p>
+          <p className={`font-bold text-white truncate ${isPick ? 'text-base' : 'text-sm'}`}>{doctorName}</p>
           {handle ? (
             <button onClick={() => quickCopy(handle, setCopiedHandle)}
               className="text-[11px] text-cyan-400 hover:text-cyan-300 font-medium shrink-0 flex items-center gap-0.5"
@@ -649,7 +874,7 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
         </div>
         <div className="flex items-center gap-3 shrink-0">
           {localIntroCount > 0 && <span className="text-[10px] text-white/30" title="Times sent">{localIntroCount} sent</span>}
-          <span className="text-xs font-bold text-neuro-orange">{d.distance_miles} mi</span>
+          <span className={`font-bold text-neuro-orange ${isPick ? 'text-sm' : 'text-xs'}`}>{d.distance_miles} mi</span>
         </div>
       </div>
       {/* Row 2: Clinic, city */}
@@ -657,16 +882,28 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
       {/* Row 3: Primary actions (Reply, DM, Sent) + secondary (profile link, request link) */}
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
         {handle && (
-          <button onClick={() => { quickCopy(replyText, setCopiedReply); logReply(commentTplId, vars.city, vars.state, d.id) }}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${isFar ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400' : 'bg-neuro-orange/20 hover:bg-neuro-orange/30 text-neuro-orange'}`}>
+          <button
+            ref={isPick ? replyBtnRef : undefined}
+            onClick={() => { quickCopy(replyText, () => {}); setCopiedReply(true); logReply(commentTplId, vars.city, vars.state, d.id) }}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${
+              copiedReply ? 'bg-green-500/20 text-green-400'
+              : isFar ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400' : 'bg-neuro-orange/20 hover:bg-neuro-orange/30 text-neuro-orange'
+            }`}>
             {copiedReply ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> {isFar ? 'Reply (far)' : 'Reply'}</>}
           </button>
         )}
-        <button onClick={() => { quickCopy(dmText, setCopiedDM); logReply(dmTplId, vars.city, vars.state, d.id) }}
-          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${isFar ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-400' : 'bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400'}`}>
+        <button
+          ref={isPick ? dmBtnRef : undefined}
+          onClick={() => { quickCopy(dmText, () => {}); setCopiedDM(true); logReply(dmTplId, vars.city, vars.state, d.id) }}
+          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${
+            copiedDM ? 'bg-green-500/20 text-green-400'
+            : isFar ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-400' : 'bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400'
+          }`}>
           {copiedDM ? <><Check className="w-3 h-3 text-green-400" /> Copied</> : <><Copy className="w-3 h-3" /> {isFar ? 'DM (far)' : 'DM'}</>}
         </button>
-        <button onClick={handleSent}
+        <button
+          ref={isPick ? sentBtnRef : undefined}
+          onClick={handleSent}
           className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
             justSent ? 'bg-green-500/20 text-green-400' : 'bg-white/5 hover:bg-white/10 text-white/50 hover:text-white/80'
           }`}>
@@ -693,8 +930,7 @@ function WaitlistReplyButtons({ searchedCity, templates }: { searchedCity: strin
   const { city } = parseSearchCity(searchedCity)
 
   return (
-    <div className="text-center py-4">
-      <p className="text-xs text-white/30 mb-3">No doctors within 100 miles</p>
+    <>
       {(waitlistDm || waitlistComment) && (
         <div className="flex items-center justify-center gap-2">
           {waitlistDm && (
@@ -705,7 +941,7 @@ function WaitlistReplyButtons({ searchedCity, templates }: { searchedCity: strin
           )}
         </div>
       )}
-    </div>
+    </>
   )
 }
 
