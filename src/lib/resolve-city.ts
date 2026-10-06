@@ -23,6 +23,10 @@ export interface ResolveResult {
   resolved: CityResolution | null
   ambiguous: CityResolution[] | null
   label: string
+  /** 'exact' = postal/unambiguous city, 'dominant' = city with overwhelming match, 'ambiguous' = multiple states, 'approximate' = geocoder fallback */
+  confidence?: 'exact' | 'dominant' | 'ambiguous' | 'approximate'
+  /** Other candidates that were rejected when confidence is 'dominant' */
+  rejectedCandidates?: CityResolution[]
   /** State code extracted from input, even when city didn't resolve. Used for state-level fallback. */
   parsedState?: string
   /** True when the input was understood but no coordinates could be found. False when coords were found but no doctors nearby. */
@@ -61,7 +65,7 @@ export async function resolveLocation(
     if (data) {
       return {
         resolved: { city: data.city, state: data.state, lat: Number(data.lat), lng: Number(data.lng) },
-        ambiguous: null,
+        ambiguous: null, confidence: 'exact' as const,
         label: `Showing doctors near ${data.city}, ${data.state}`,
       }
     }
@@ -77,7 +81,7 @@ export async function resolveLocation(
     if (match) {
       return {
         resolved: match,
-        ambiguous: null,
+        ambiguous: null, confidence: 'exact' as const,
         label: `Showing doctors near ${match.city}, ${match.state}`,
       }
     }
@@ -91,7 +95,7 @@ export async function resolveLocation(
       const displayState = rawFallback.state || parsed.state
       return {
         resolved: { city: displayCity, state: displayState, lat: rawFallback.lat, lng: rawFallback.lng },
-        ambiguous: null,
+        ambiguous: null, confidence: 'approximate' as const,
         label: `Showing doctors near ${displayCity}${displayState ? ', ' + displayState : ''}`,
         parsedState: parsed.state,
       }
@@ -104,7 +108,7 @@ export async function resolveLocation(
       const displayState = geoFallback.state || parsed.state
       return {
         resolved: { city: displayCity, state: displayState, lat: geoFallback.lat, lng: geoFallback.lng },
-        ambiguous: null,
+        ambiguous: null, confidence: 'approximate' as const,
         label: `Showing doctors near ${displayCity}, ${displayState}`,
         parsedState: parsed.state,
       }
@@ -152,7 +156,7 @@ export async function resolveLocation(
       const displayState = geoFallback.state || ''
       return {
         resolved: { city: displayCity, state: displayState, lat: geoFallback.lat, lng: geoFallback.lng },
-        ambiguous: null,
+        ambiguous: null, confidence: 'approximate' as const,
         label: `Showing doctors near ${displayCity}${displayState ? ', ' + displayState : ''}`,
       }
     }
@@ -303,18 +307,34 @@ function dedupeByState(matches: any[], searchedCity: string): ResolveResult {
     return {
       resolved: { city: match.city, state: match.state, lat: match.lat, lng: match.lng },
       ambiguous: null,
+      confidence: 'exact',
       label: `Showing doctors near ${match.city}, ${match.state}`,
     }
   }
 
-  // Ambiguous — return all options sorted by ZIP count (largest city first)
+  // Sort by ZIP count (largest city first)
   const sorted = Array.from(byState.values())
     .sort((a, b) => b.count - a.count)
-    .map(v => ({ city: v.city, state: v.state, lat: v.lat, lng: v.lng }))
 
+  // Dominance rule: if top candidate has >3x the zips of second, auto-resolve
+  const top = sorted[0]
+  const second = sorted[1]
+  if (top.count > second.count * 3) {
+    const rejected = sorted.slice(1).map(v => ({ city: v.city, state: v.state, lat: v.lat, lng: v.lng }))
+    return {
+      resolved: { city: top.city, state: top.state, lat: top.lat, lng: top.lng },
+      ambiguous: null,
+      confidence: 'dominant',
+      rejectedCandidates: rejected,
+      label: `Showing doctors near ${top.city}, ${top.state}`,
+    }
+  }
+
+  // Truly ambiguous — return all options
   return {
     resolved: null,
-    ambiguous: sorted,
+    ambiguous: sorted.map(v => ({ city: v.city, state: v.state, lat: v.lat, lng: v.lng })),
+    confidence: 'ambiguous',
     label: `"${searchedCity}" exists in ${byState.size} states. Pick one:`,
   }
 }

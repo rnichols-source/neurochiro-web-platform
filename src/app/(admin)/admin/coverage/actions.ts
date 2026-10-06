@@ -357,6 +357,11 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
   label: string;
   ambiguous?: { city: string; state: string }[];
   detectedCountry?: string;
+  confidence?: 'exact' | 'dominant' | 'ambiguous' | 'approximate';
+  rejectedCandidates?: { city: string; state: string }[];
+  couldNotResolve?: boolean;
+  resolvedCity?: string;
+  resolvedState?: string;
 }> {
   await checkAdminAuth()
   const supabase = createAdminClient()
@@ -379,7 +384,13 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
       label: resolution.label,
       ambiguous: resolution.ambiguous.map(v => ({ city: v.city, state: v.state })),
       detectedCountry: countryOverride,
+      confidence: 'ambiguous',
     }
+  }
+
+  // Dominant match — resolved with note
+  if (resolution.confidence === 'dominant' && resolution.rejectedCandidates) {
+    // Fall through to normal doctor lookup, but pass confidence
   }
 
   if (!resolution.resolved) {
@@ -415,7 +426,7 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
         }
       }
     }
-    return { doctors: [], label: resolution.label || `Could not resolve "${query}"` }
+    return { doctors: [], label: resolution.label || `Could not resolve "${query}"`, couldNotResolve: true }
   }
 
   const lat = resolution.resolved.lat
@@ -484,7 +495,14 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
   }
 
   results.sort((a, b) => a.distance_miles - b.distance_miles)
-  return { doctors: results, label }
+  return {
+    doctors: results,
+    label,
+    confidence: resolution.confidence || 'exact',
+    rejectedCandidates: resolution.rejectedCandidates?.map(v => ({ city: v.city, state: v.state })),
+    resolvedCity: resolution.resolved?.city,
+    resolvedState: resolution.resolved?.state,
+  }
 }
 
 // ── Mentions ──
@@ -708,8 +726,9 @@ export async function logReply(
   searchedCity: string,
   searchedState?: string,
   doctorId?: string,
+  demandMentionId?: string,
 ): Promise<{ ok: boolean }> {
-  await checkAdminAuth()
+  const user = await checkAdminAuth()
   const supabase = createAdminClient()
 
   await (supabase as any).from('reply_logs').insert({
@@ -717,6 +736,8 @@ export async function logReply(
     searched_city: searchedCity,
     searched_state: searchedState || null,
     doctor_id: doctorId || null,
+    operator: user.id,
+    demand_mention_id: demandMentionId || null,
   })
 
   return { ok: true }
