@@ -113,6 +113,8 @@ Hooks: exactly three options, each under 10 words, each one a different angle on
 
 On-screen text: one short line for the first two seconds of video. Under 8 words. The on-screen text must say something the hook does not. The viewer reads both in the first two seconds, so they should be two distinct thoughts, not a shorter version of the same line.
 
+Hashtags: must be correctly spelled, real, searchable terms. Double-check spelling before including. Common correct hashtags for this niche: #nervoussystemchiropractic, #pediatricchiropractor, #chiropractorforkids, #neurologicallybasedchiropractic, #nervoussystemhealth. Note the double S in "nervous system." Never misspell a hashtag.
+
 Return only valid JSON matching the schema given. No markdown fences, no explanation, nothing before or after the JSON.`
 
 export async function generateCaptions(
@@ -244,6 +246,39 @@ Return valid JSON with this exact schema:
   if (dashesStripped > 0) {
     console.log(`[CLIP-CAPTIONS] Stripped ${dashesStripped} em/en dashes from generated output for ${doctorName}`)
   }
+
+  // Hashtag validation: fix common misspellings
+  const HASHTAG_FIXES: Record<string, string> = {
+    '#nervousystemhealth': '#nervoussystemhealth',
+    '#nervousystemchiropractor': '#nervoussystemchiropractor',
+    '#nervousystem': '#nervoussystem',
+    '#neurologicallybased': '#neurologicallybasedchiropractic',
+    '#neurologybased': '#neurologybasedchiropractic',
+    '#chiropractornereme': '#chiropractornearme',
+    '#chiropractorner': '#chiropractornearme',
+  }
+
+  const fixHashtags = (text: string): string => {
+    let fixed = text
+    for (const [bad, good] of Object.entries(HASHTAG_FIXES)) {
+      if (fixed.toLowerCase().includes(bad)) {
+        fixed = fixed.replace(new RegExp(bad.replace('#', '#'), 'gi'), good)
+        console.log(`[CLIP-CAPTIONS] Fixed hashtag: ${bad} → ${good}`)
+      }
+    }
+    // Check for any hashtag with consecutive identical letters removed (common AI typo)
+    const hashtags = fixed.match(/#\w+/g) || []
+    for (const tag of hashtags) {
+      if (tag.match(/nervou?s(?!s)ystem/i)) {
+        fixed = fixed.replace(tag, tag.replace(/nervou?ssystem/i, 'nervoussystem').replace(/nervousystem/i, 'nervoussystem'))
+        console.log(`[CLIP-CAPTIONS] Fixed missing S in hashtag: ${tag}`)
+      }
+    }
+    return fixed
+  }
+
+  parsed.instagram_caption = fixHashtags(parsed.instagram_caption)
+  parsed.tiktok_caption = fixHashtags(parsed.tiktok_caption)
 
   // Auto-save to database
   const { data: inserted, error: insertErr } = await (supabase as any)
