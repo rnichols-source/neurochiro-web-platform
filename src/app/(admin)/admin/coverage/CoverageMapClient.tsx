@@ -215,8 +215,9 @@ export default function CoverageMapClient({
           layout: { visibility: layers.gaps ? 'visible' : 'none' },
         })
 
-        // Mentions source
-        const mentionFeatures = mentions.map(m => ({
+        // Mentions source — filter by selected country
+        const countryMentions = mentions.filter(m => (m.country || 'US') === lookupCountry)
+        const mentionFeatures = countryMentions.map(m => ({
           type: 'Feature' as const,
           geometry: { type: 'Point' as const, coordinates: [m.lng, m.lat] },
           properties: { city: m.city, state: m.state, count: m.count, gap: m.gap ? 1 : 0 },
@@ -332,6 +333,19 @@ export default function CoverageMapClient({
     try {
       const src = map.getSource('doctors')
       if (src) src.setData({ type: 'FeatureCollection', features: buildDoctorFeatures(layers.verified, layers.pending) })
+    } catch {}
+
+    // Rebuild mention dots for new country
+    try {
+      const mentionSrc = map.getSource('mentions')
+      if (mentionSrc) {
+        const countryMentions = mentions.filter(m => (m.country || 'US') === lookupCountry)
+        mentionSrc.setData({ type: 'FeatureCollection', features: countryMentions.map(m => ({
+          type: 'Feature' as const,
+          geometry: { type: 'Point' as const, coordinates: [m.lng, m.lat] },
+          properties: { city: m.city, state: m.state, count: m.count, gap: m.gap ? 1 : 0 },
+        })) })
+      }
     } catch {}
   }, [lookupCountry])
 

@@ -46,6 +46,7 @@ export interface MentionCity {
   lat: number
   lng: number
   count: number
+  country: string
   /** true if no doctor within 50 miles */
   gap: boolean
 }
@@ -513,20 +514,19 @@ export async function getMentionsData(): Promise<MentionCity[]> {
 
   const { data: mentions } = await (supabase as any)
     .from('demand_mentions')
-    .select('city, state, lat, lng')
-    .or('country.eq.US,country.is.null')
+    .select('city, state, lat, lng, country')
 
   if (!mentions || mentions.length === 0) return []
 
   // Aggregate by city+state
-  const cityMap = new Map<string, { city: string; state: string; lat: number; lng: number; count: number }>()
+  const cityMap = new Map<string, { city: string; state: string; lat: number; lng: number; count: number; country: string }>()
   for (const m of mentions) {
     const key = `${m.city}|${m.state}`
     const existing = cityMap.get(key)
     if (existing) {
       existing.count++
     } else {
-      cityMap.set(key, { city: m.city, state: m.state, lat: Number(m.lat), lng: Number(m.lng), count: 1 })
+      cityMap.set(key, { city: m.city, state: m.state, lat: Number(m.lat), lng: Number(m.lng), count: 1, country: m.country || 'US' })
     }
   }
 
