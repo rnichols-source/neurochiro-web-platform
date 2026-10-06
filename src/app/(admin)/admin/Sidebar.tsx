@@ -72,6 +72,7 @@ const navGroups = [
   {
     label: "Content",
     items: [
+      { name: "Clip Captions", href: "/admin/clips", icon: Video },
       { name: "Spotlight", href: "/admin/spotlight", icon: Video },
       { name: "Announcements", href: "/admin/announcements", icon: Megaphone },
       { name: "Content Tracker", href: "/admin/content-tracker", icon: Activity },
