@@ -376,3 +376,232 @@ export async function deleteClip(id: string): Promise<boolean> {
   const { error } = await (supabase as any).from('clip_captions').delete().eq('id', id)
   return !error
 }
+
+// ── Bulk status update ──
+
+export async function bulkUpdateClipStatus(ids: string[], status: string): Promise<{ success: number; failed: number }> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+  let success = 0
+  let failed = 0
+  for (const id of ids) {
+    const updates: any = { status, updated_at: new Date().toISOString() }
+    if (status === 'approved') updates.approved_at = new Date().toISOString()
+    if (status === 'scheduled') updates.scheduled_at = new Date().toISOString()
+    if (status === 'posted') updates.posted_at = new Date().toISOString()
+    const { error } = await (supabase as any).from('clip_captions').update(updates).eq('id', id)
+    if (error) failed++
+    else success++
+  }
+  return { success, failed }
+}
+
+// ── Delivery data ──
+
+export interface DeliveryRow {
+  doctorId: string
+  doctorName: string
+  city: string
+  membershipStart: string
+  target: number
+  generated: number
+  approved: number
+  scheduled: number
+  posted: number
+  percentDelivered: number
+  expected: number
+  variance: number
+}
+
+export async function getDeliveryData(): Promise<DeliveryRow[]> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+
+  // Get all verified non-test doctors
+  const { data: doctors } = await (supabase as any)
+    .from('doctors')
+    .select('id, first_name, last_name, city, created_at')
+    .eq('verification_status', 'verified')
+    .eq('is_test', false)
+    .order('last_name')
+
+  if (!doctors || doctors.length === 0) return []
+
+  // Get all clip_captions counts grouped by doctor_id and status
+  const { data: clips } = await (supabase as any)
+    .from('clip_captions')
+    .select('doctor_id, status')
+
+  // Try to get custom targets
+  const { data: targets } = await (supabase as any)
+    .from('doctor_clip_targets')
+    .select('doctor_id, target_clips, membership_start')
+    .catch(() => ({ data: null }))
+
+  const targetMap = new Map<string, { target: number; membershipStart: string }>()
+  if (targets) {
+    for (const t of targets) {
+      targetMap.set(t.doctor_id, { target: t.target_clips || 90, membershipStart: t.membership_start })
+    }
+  }
+
+  // Build counts per doctor
+  const countMap = new Map<string, { generated: number; approved: number; scheduled: number; posted: number }>()
+  for (const c of (clips || [])) {
+    if (!countMap.has(c.doctor_id)) {
+      countMap.set(c.doctor_id, { generated: 0, approved: 0, scheduled: 0, posted: 0 })
+    }
+    const entry = countMap.get(c.doctor_id)!
+    entry.generated++
+    if (c.status === 'approved') entry.approved++
+    if (c.status === 'scheduled') entry.scheduled++
+    if (c.status === 'posted') entry.posted++
+  }
+
+  const now = Date.now()
+
+  return doctors.map((d: any) => {
+    const custom = targetMap.get(d.id)
+    const target = custom?.target || 90
+    const membershipStart = custom?.membershipStart || d.created_at
+    const counts = countMap.get(d.id) || { generated: 0, approved: 0, scheduled: 0, posted: 0 }
+    const daysSinceStart = Math.max(1, (now - new Date(membershipStart).getTime()) / (1000 * 60 * 60 * 24))
+    const expected = Math.round((daysSinceStart / 365) * target)
+    const delivered = counts.posted + counts.scheduled
+    const variance = delivered - expected
+    const percentDelivered = target > 0 ? Math.round((delivered / target) * 100) : 0
+
+    return {
+      doctorId: d.id,
+      doctorName: `Dr. ${d.first_name} ${d.last_name}`,
+      city: d.city || '',
+      membershipStart,
+      target,
+      generated: counts.generated,
+      approved: counts.approved,
+      scheduled: counts.scheduled,
+      posted: counts.posted,
+      percentDelivered,
+      expected,
+      variance,
+    }
+  })
+}
+
+// ── Approval actions ──
+
+export async function getDraftClips(): Promise<ClipCaption[]> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+
+  const { data } = await (supabase as any)
+    .from('clip_captions')
+    .select('id, doctor_id, transcript, topic, clip_length, generated, hook_selected, status, created_by, approved_at, created_at')
+    .eq('status', 'draft')
+    .order('created_at', { ascending: true })
+
+  if (!data || data.length === 0) return []
+
+  const doctorIds = [...new Set(data.map((c: any) => c.doctor_id))]
+  const { data: doctors } = await (supabase as any).from('doctors').select('id, first_name, last_name, city').in('id', doctorIds)
+  const docMap = new Map<string, any>()
+  for (const d of (doctors || [])) docMap.set(d.id, d)
+
+  return data.map((c: any) => {
+    const doc = docMap.get(c.doctor_id)
+    return {
+      ...c,
+      doctor_name: doc ? `Dr. ${doc.first_name} ${doc.last_name}` : 'Unknown',
+      doctor_city: doc?.city || '',
+    }
+  })
+}
+
+export async function approveClip(id: string): Promise<boolean> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+  const { error } = await (supabase as any)
+    .from('clip_captions')
+    .update({
+      status: 'approved',
+      approved_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+  return !error
+}
+
+export async function updateClipGenerated(id: string, generated: any): Promise<boolean> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+  const { error } = await (supabase as any)
+    .from('clip_captions')
+    .update({
+      generated,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+  return !error
+}
+
+// ── Export CSV ──
+
+export async function exportClipsCSV(filters?: { doctorId?: string; status?: string }): Promise<string> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+
+  let query = (supabase as any)
+    .from('clip_captions')
+    .select('id, doctor_id, generated, hook_selected, status, created_at')
+    .order('created_at', { ascending: false })
+
+  if (filters?.doctorId) query = query.eq('doctor_id', filters.doctorId)
+  if (filters?.status) query = query.eq('status', filters.status)
+
+  const { data } = await query
+
+  if (!data || data.length === 0) return ''
+
+  // Get doctor info
+  const doctorIds = [...new Set(data.map((c: any) => c.doctor_id))]
+  const { data: doctors } = await (supabase as any)
+    .from('doctors')
+    .select('id, first_name, last_name, city, instagram_url')
+    .in('id', doctorIds)
+
+  const docMap = new Map<string, any>()
+  for (const d of (doctors || [])) docMap.set(d.id, d)
+
+  const BOM = '\uFEFF'
+  const headers = ['doctor_name', 'doctor_handle', 'doctor_city', 'hook', 'on_screen_text', 'instagram_caption', 'tiktok_caption', 'youtube_title', 'youtube_description', 'status', 'created_at']
+
+  const escapeCSV = (val: string): string => {
+    if (!val) return ''
+    if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+      return '"' + val.replace(/"/g, '""') + '"'
+    }
+    return val
+  }
+
+  const rows = data.map((c: any) => {
+    const doc = docMap.get(c.doctor_id)
+    const g = c.generated || {}
+    const handle = doc ? extractInstagramHandle(doc.instagram_url) || '' : ''
+    const hook = c.hook_selected || (g.hooks && g.hooks[0]) || ''
+    return [
+      doc ? `Dr. ${doc.first_name} ${doc.last_name}` : 'Unknown',
+      handle,
+      doc?.city || '',
+      hook,
+      g.on_screen_text || '',
+      g.instagram_caption || '',
+      g.tiktok_caption || '',
+      g.youtube_title || '',
+      g.youtube_description || '',
+      c.status || '',
+      c.created_at || '',
+    ].map(escapeCSV).join(',')
+  })
+
+  return BOM + headers.join(',') + '\n' + rows.join('\n')
+}

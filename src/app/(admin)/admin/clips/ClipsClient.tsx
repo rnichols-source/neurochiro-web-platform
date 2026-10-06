@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import type { DoctorOption, GeneratedCaptions } from './actions'
 import { getDoctorsForClips, generateCaptions, updateClipHook } from './actions'
+import TabNav from './TabNav'
 
 // ── Copy Button ──
 
@@ -173,6 +174,8 @@ export default function ClipsClient() {
 
   return (
     <div className="min-h-screen bg-[#15202B] text-white p-6 md:p-10 max-w-4xl mx-auto space-y-8">
+      <TabNav />
+
       <h1 className="text-2xl font-bold">Clip Caption Generator</h1>
 
       {/* ── Section 1: Doctor Selector ── */}
