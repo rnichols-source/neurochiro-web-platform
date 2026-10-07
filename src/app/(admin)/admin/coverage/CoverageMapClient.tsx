@@ -428,7 +428,9 @@ export default function CoverageMapClient({
       // Only auto-log when the resolver returned a real location (city + state + coords).
       // If the resolver succeeded, the state is already normalized. Garbage input like
       // "njjjjjj" or "TXu" fails at the resolver level and never reaches here.
-      if (r.resolvedCity && r.resolvedState && r.resolvedLat && r.resolvedLng && !r.ambiguous && !r.couldNotResolve && r.confidence !== 'ambiguous') {
+      // Only exact and dominant resolutions write a row. Approximate and ambiguous do not.
+      const highConfidence = r.confidence === 'exact' || r.confidence === 'dominant'
+      if (r.resolvedCity && r.resolvedState && r.resolvedLat && r.resolvedLng && highConfidence && !r.ambiguous && !r.couldNotResolve) {
         const nearest = r.doctors[0] // sorted by distance
         autoLogDemand({
           city: r.resolvedCity,
