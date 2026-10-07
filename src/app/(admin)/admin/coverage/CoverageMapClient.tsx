@@ -444,6 +444,24 @@ export default function CoverageMapClient({
         }).then(result => {
           if (result.logged && result.id) {
             setAutoLogResult({ id: result.id, reason: result.reason || '' })
+            // Add the dot to the map immediately
+            const map = mapInstanceRef.current
+            if (map && mapReadyRef.current) {
+              try {
+                const src = map.getSource('mentions')
+                if (src) {
+                  const existing = src._data || src.serialize()?.data
+                  if (existing && existing.features) {
+                    existing.features.push({
+                      type: 'Feature',
+                      geometry: { type: 'Point', coordinates: [r.resolvedLng, r.resolvedLat] },
+                      properties: { city: r.resolvedCity, state: r.resolvedState, count: 1, gap: r.doctors.length === 0 ? 1 : 0 },
+                    })
+                    src.setData(existing)
+                  }
+                }
+              } catch {}
+            }
           }
         }).catch(() => {})
       }
