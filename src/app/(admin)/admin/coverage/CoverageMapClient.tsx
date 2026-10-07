@@ -425,9 +425,10 @@ export default function CoverageMapClient({
 
       // Auto-log demand if resolved and qualifies
       setAutoLogResult(null)
-      // State must be a valid short code (2-3 letters, no digits, no garbage)
-      const validState = r.resolvedState && /^[A-Z]{2,3}$/.test(r.resolvedState)
-      if (r.resolvedCity && validState && r.resolvedLat && r.resolvedLng && !r.ambiguous && !r.couldNotResolve && r.confidence !== 'ambiguous') {
+      // Only auto-log when the resolver returned a real location (city + state + coords).
+      // If the resolver succeeded, the state is already normalized. Garbage input like
+      // "njjjjjj" or "TXu" fails at the resolver level and never reaches here.
+      if (r.resolvedCity && r.resolvedState && r.resolvedLat && r.resolvedLng && !r.ambiguous && !r.couldNotResolve && r.confidence !== 'ambiguous') {
         const nearest = r.doctors[0] // sorted by distance
         autoLogDemand({
           city: r.resolvedCity,
