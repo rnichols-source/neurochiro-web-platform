@@ -185,15 +185,15 @@ export async function getDemandForProspect(prospectId: string) {
     }
   }
 
-  // City+state exact match
+  // City+state exact match (exclude coverage_search so numbers are defensible)
   let demandCity = 0
   if (p.city && p.state) {
-    const { count } = await db.from('demand_mentions' as any).select('*', { count: 'exact', head: true }).ilike('city', p.city).eq('state', p.state)
+    const { count } = await db.from('demand_mentions' as any).select('*', { count: 'exact', head: true }).ilike('city', p.city).eq('state', p.state).neq('source', 'coverage_search')
     demandCity = count || 0
   }
 
-  // Total demand
-  const { count: totalDemand } = await db.from('demand_mentions' as any).select('*', { count: 'exact', head: true })
+  // Total demand (exclude coverage_search)
+  const { count: totalDemand } = await db.from('demand_mentions' as any).select('*', { count: 'exact', head: true }).neq('source', 'coverage_search')
 
   let demand25 = 0, demand50 = 0, demand100 = 0
   let nearestDist: number | null = null, nearestCity = '', nearestName = ''
@@ -202,6 +202,7 @@ export async function getDemandForProspect(prospectId: string) {
     // Radius demand counts using bounding box pre-filter + haversine
     const [minLng100, minLat100, maxLng100, maxLat100] = boundingBox(lat!, lng!, 100)
     const { data: mentions } = await db.from('demand_mentions' as any).select('lat, lng')
+      .neq('source', 'coverage_search')
       .gte('lat', minLat100).lte('lat', maxLat100)
       .gte('lng', minLng100).lte('lng', maxLng100)
 
@@ -711,6 +712,7 @@ export async function getQueue(options: {
 
   // Get all demand mentions + all pro members for distance computation
   const { data: mentions } = await db.from('demand_mentions' as any).select('lat, lng')
+    .neq('source', 'coverage_search')
     .not('lat', 'is', null).not('lng', 'is', null)
   const allMentions = (mentions || []) as unknown as { lat: number; lng: number }[]
 

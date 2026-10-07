@@ -364,6 +364,8 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
   couldNotResolve?: boolean;
   resolvedCity?: string;
   resolvedState?: string;
+  resolvedLat?: number;
+  resolvedLng?: number;
 }> {
   await checkAdminAuth()
   const supabase = createAdminClient()
@@ -504,7 +506,93 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
     rejectedCandidates: resolution.rejectedCandidates?.map(v => ({ city: v.city, state: v.state })),
     resolvedCity: resolution.resolved?.city,
     resolvedState: resolution.resolved?.state,
+    resolvedLat: resolution.resolved?.lat,
+    resolvedLng: resolution.resolved?.lng,
   }
+}
+
+// ── Auto-log demand from coverage search ──
+
+export async function autoLogDemand(data: {
+  city: string; state: string; lat: number; lng: number; country: string;
+  nearestDoctorId?: string; nearestDoctorName?: string; nearestDistanceMi?: number;
+  doctorCount: number;
+}): Promise<{ logged: boolean; id?: string; reason?: string }> {
+  const user = await checkAdminAuth()
+  const supabase = createAdminClient()
+
+  // Load config
+  const { data: configRow } = await (supabase as any).from('platform_settings').select('value').eq('key', 'coverage_auto_log').single()
+  const config = configRow?.value || { enabled: true, distance_threshold_miles: 20, dedupe_minutes: 10 }
+  if (!config.enabled) return { logged: false, reason: 'Auto-log disabled' }
+
+  const threshold = config.distance_threshold_miles || 20
+  const dedupeMinutes = config.dedupe_minutes || 10
+
+  // Determine if this qualifies
+  const noDoctor = data.doctorCount === 0
+  const tooFar = data.nearestDistanceMi !== undefined && data.nearestDistanceMi > threshold
+  if (!noDoctor && !tooFar) return { logged: false, reason: `Nearest doctor within ${threshold}mi` }
+
+  // Dedupe: check for same city+state+operator within dedupe window
+  const cutoff = new Date(Date.now() - dedupeMinutes * 60000).toISOString()
+  const { data: dupes } = await (supabase as any)
+    .from('demand_mentions')
+    .select('id')
+    .ilike('city', data.city)
+    .eq('state', data.state)
+    .eq('operator', user.id)
+    .gte('created_at', cutoff)
+    .limit(1)
+  if (dupes && dupes.length > 0) return { logged: false, reason: `Already logged within ${dedupeMinutes} minutes` }
+
+  const status = noDoctor ? 'uncovered' : 'underserved'
+
+  const { data: inserted, error } = await (supabase as any)
+    .from('demand_mentions')
+    .insert({
+      city: data.city,
+      state: data.state,
+      lat: data.lat,
+      lng: data.lng,
+      country: data.country || 'US',
+      source: 'coverage_search',
+      mentioned_on: new Date().toISOString().slice(0, 10),
+      status,
+      operator: user.id,
+      nearest_doctor_id: data.nearestDoctorId || null,
+      nearest_distance_mi: data.nearestDistanceMi != null ? Math.round(data.nearestDistanceMi * 10) / 10 : null,
+    })
+    .select('id')
+    .single()
+
+  if (error) {
+    console.error('[AUTO-LOG] Insert error:', error)
+    return { logged: false, reason: error.message }
+  }
+
+  revalidatePath('/admin/coverage')
+  return { logged: true, id: inserted.id, reason: status === 'uncovered'
+    ? `${data.city}, ${data.state}: no doctor found`
+    : `${data.city}, ${data.state}: nearest doctor ${Math.round(data.nearestDistanceMi!)}mi away`
+  }
+}
+
+export async function undoAutoLogDemand(id: string): Promise<{ success: boolean }> {
+  const user = await checkAdminAuth()
+  const supabase = createAdminClient()
+
+  // Only delete if it was created by coverage_search and by this operator
+  const { error } = await (supabase as any)
+    .from('demand_mentions')
+    .delete()
+    .eq('id', id)
+    .eq('source', 'coverage_search')
+    .eq('operator', user.id)
+
+  if (error) return { success: false }
+  revalidatePath('/admin/coverage')
+  return { success: true }
 }
 
 // ── Mentions ──

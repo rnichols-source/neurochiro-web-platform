@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send, MessageSquare, Map as MapIcon } from "lucide-react"
 import Link from "next/link"
-import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, logReply, getSentDoctorIds, getFarDistanceThreshold } from "./actions"
+import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, logReply, getSentDoctorIds, getFarDistanceThreshold, autoLogDemand, undoAutoLogDemand } from "./actions"
 
 // ── Colors ──
 const COLORS = {
@@ -78,6 +78,7 @@ export default function CoverageMapClient({
   const [confidence, setConfidence] = useState<'exact' | 'dominant' | 'ambiguous' | 'approximate' | undefined>(undefined)
   const [rejectedCandidates, setRejectedCandidates] = useState<{ city: string; state: string }[] | null>(null)
   const [showOtherResults, setShowOtherResults] = useState(false)
+  const [autoLogResult, setAutoLogResult] = useState<{ id: string; reason: string } | null>(null)
   const lookupInputRef = useRef<HTMLInputElement>(null)
   const replyBtnRef = useRef<HTMLButtonElement>(null)
   const dmBtnRef = useRef<HTMLButtonElement>(null)
@@ -363,6 +364,7 @@ export default function CoverageMapClient({
     setConfidence(undefined)
     setRejectedCandidates(null)
     setShowOtherResults(false)
+    setAutoLogResult(null)
     setTimeout(() => { lookupInputRef.current?.focus(); lookupInputRef.current?.select() }, 50)
   }, [])
 
@@ -420,6 +422,26 @@ export default function CoverageMapClient({
       setRejectedCandidates(r.rejectedCandidates || null)
       setResolvedCity(r.resolvedCity || '')
       setResolvedState(r.resolvedState || '')
+
+      // Auto-log demand if resolved and qualifies
+      setAutoLogResult(null)
+      if (r.resolvedCity && r.resolvedState && r.resolvedLat && r.resolvedLng && !r.ambiguous && !r.couldNotResolve && r.confidence !== 'ambiguous') {
+        const nearest = r.doctors[0] // sorted by distance
+        autoLogDemand({
+          city: r.resolvedCity,
+          state: r.resolvedState,
+          lat: r.resolvedLat, lng: r.resolvedLng,
+          country: lookupCountry,
+          nearestDoctorId: nearest?.id,
+          nearestDoctorName: nearest ? `${nearest.first_name} ${nearest.last_name}` : undefined,
+          nearestDistanceMi: nearest?.distance_miles,
+          doctorCount: r.doctors.length,
+        }).then(result => {
+          if (result.logged && result.id) {
+            setAutoLogResult({ id: result.id, reason: result.reason || '' })
+          }
+        }).catch(() => {})
+      }
     } catch { setLookupLabel('Lookup failed'); setLookupResults([]) }
     setLookupLoading(false)
     setTimeout(() => { lookupInputRef.current?.focus(); lookupInputRef.current?.select() }, 50)
@@ -538,6 +560,22 @@ export default function CoverageMapClient({
         {couldNotResolve && (
           <div className="bg-red-500/20 border border-red-500/40 rounded-xl px-4 py-3 mb-3">
             <p className="text-sm font-bold text-red-400">We could not find that location. Try a postal code instead.</p>
+          </div>
+        )}
+
+        {/* Auto-log notification */}
+        {autoLogResult && (
+          <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl px-3 py-2 mb-2 flex items-center justify-between">
+            <span className="text-[11px] text-cyan-400">{autoLogResult.reason}</span>
+            <button
+              onClick={async () => {
+                await undoAutoLogDemand(autoLogResult.id)
+                setAutoLogResult(null)
+              }}
+              className="text-[11px] text-cyan-400/60 hover:text-cyan-300 ml-3 shrink-0"
+            >
+              Undo
+            </button>
           </div>
         )}
 
