@@ -425,11 +425,13 @@ export default function CoverageMapClient({
 
       // Auto-log demand if resolved and qualifies
       setAutoLogResult(null)
-      if (r.resolvedCity && r.resolvedState && r.resolvedLat && r.resolvedLng && !r.ambiguous && !r.couldNotResolve && r.confidence !== 'ambiguous') {
+      // State must be a valid short code (2-3 letters, no digits, no garbage)
+      const validState = r.resolvedState && /^[A-Z]{2,3}$/i.test(r.resolvedState)
+      if (r.resolvedCity && validState && r.resolvedLat && r.resolvedLng && !r.ambiguous && !r.couldNotResolve && r.confidence !== 'ambiguous') {
         const nearest = r.doctors[0] // sorted by distance
         autoLogDemand({
           city: r.resolvedCity,
-          state: r.resolvedState,
+          state: r.resolvedState!,
           lat: r.resolvedLat, lng: r.resolvedLng,
           country: lookupCountry,
           nearestDoctorId: nearest?.id,

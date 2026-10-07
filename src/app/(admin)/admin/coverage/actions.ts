@@ -534,17 +534,19 @@ export async function autoLogDemand(data: {
   const tooFar = data.nearestDistanceMi !== undefined && data.nearestDistanceMi > threshold
   if (!noDoctor && !tooFar) return { logged: false, reason: `Nearest doctor within ${threshold}mi` }
 
-  // Dedupe: check for same city+state+operator within dedupe window
-  const cutoff = new Date(Date.now() - dedupeMinutes * 60000).toISOString()
+  // Dedupe: check for same city+state from ANY source within 24 hours
+  // This prevents double counting when someone comments a city and then I search it
+  const cutoff24h = new Date(Date.now() - 24 * 60 * 60000).toISOString()
   const { data: dupes } = await (supabase as any)
     .from('demand_mentions')
-    .select('id')
+    .select('id, source')
     .ilike('city', data.city)
     .eq('state', data.state)
-    .eq('operator', user.id)
-    .gte('created_at', cutoff)
+    .gte('created_at', cutoff24h)
     .limit(1)
-  if (dupes && dupes.length > 0) return { logged: false, reason: `Already logged within ${dedupeMinutes} minutes` }
+  if (dupes && dupes.length > 0) {
+    return { logged: false, reason: `${data.city}, ${data.state} already logged within 24h (source: ${dupes[0].source})` }
+  }
 
   const status = noDoctor ? 'uncovered' : 'underserved'
 
