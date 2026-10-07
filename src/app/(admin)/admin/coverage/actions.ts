@@ -648,6 +648,7 @@ export interface ParsedMention {
   lng: number | null
   matched: boolean
   country?: string
+  commenter_handle?: string | null
 }
 
 export async function parseMentionsBatch(lines: string[], country: string = 'US'): Promise<ParsedMention[]> {
@@ -671,8 +672,17 @@ export async function parseMentionsBatch(lines: string[], country: string = 'US'
   const results: ParsedMention[] = []
 
   for (const raw of lines) {
-    const line = raw.trim()
+    let line = raw.trim()
     if (!line) continue
+
+    // Extract optional @handle from start or end of line
+    let commenterHandle: string | null = null
+    const handleMatch = line.match(/^(@\w[\w.]*)\s+(.+)$/) || line.match(/^(.+)\s+(@\w[\w.]*)$/)
+    if (handleMatch) {
+      const [, part1, part2] = handleMatch
+      if (part1.startsWith('@')) { commenterHandle = part1; line = part2.trim() }
+      else if (part2.startsWith('@')) { commenterHandle = part2; line = part1.trim() }
+    }
 
     // Step 0: Detect country name in input (e.g. "Sydney, Australia" → country=AU, city="Sydney")
     let effectiveCountry = country
@@ -699,9 +709,10 @@ export async function parseMentionsBatch(lines: string[], country: string = 'US'
           lng: res.resolved.lng,
           matched: true,
           country: postal.country,
+          commenter_handle: commenterHandle,
         })
       } else {
-        results.push({ input: line, city: null, state: null, lat: null, lng: null, matched: false })
+        results.push({ input: line, city: null, state: null, lat: null, lng: null, matched: false, commenter_handle: commenterHandle })
       }
       continue
     }
@@ -717,6 +728,7 @@ export async function parseMentionsBatch(lines: string[], country: string = 'US'
         lng: res.resolved.lng,
         matched: true,
         country: effectiveCountry,
+        commenter_handle: commenterHandle,
       })
       continue
     }
@@ -748,7 +760,7 @@ export async function parseMentionsBatch(lines: string[], country: string = 'US'
 
     const stateCode = resolveStateCode(stateInput)
     if (!stateCode || !city) {
-      results.push({ input: line, city: null, state: null, lat: null, lng: null, matched: false })
+      results.push({ input: line, city: null, state: null, lat: null, lng: null, matched: false, commenter_handle: commenterHandle })
       continue
     }
 
@@ -771,9 +783,10 @@ export async function parseMentionsBatch(lines: string[], country: string = 'US'
         lng: Number(data[0].lng),
         matched: true,
         country: effectiveCountry,
+        commenter_handle: commenterHandle,
       })
     } else {
-      results.push({ input: line, city, state: stateCode, lat: null, lng: null, matched: false })
+      results.push({ input: line, city, state: stateCode, lat: null, lng: null, matched: false, commenter_handle: commenterHandle })
     }
   }
 
@@ -781,7 +794,7 @@ export async function parseMentionsBatch(lines: string[], country: string = 'US'
 }
 
 export async function saveMentionsBatch(
-  mentions: { city: string; state: string; lat: number; lng: number; country?: string }[],
+  mentions: { city: string; state: string; lat: number; lng: number; country?: string; commenter_handle?: string | null }[],
   postRef: string,
   mentionedOn: string,
   country: string = 'US',
@@ -798,6 +811,7 @@ export async function saveMentionsBatch(
     source: 'instagram_comment',
     post_ref: postRef || null,
     mentioned_on: mentionedOn || null,
+    commenter_handle: m.commenter_handle || null,
   }))
 
   const { error } = await (supabase as any).from('demand_mentions').insert(rows)

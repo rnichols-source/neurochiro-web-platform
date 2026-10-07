@@ -44,7 +44,7 @@ export default function MentionsEntryPage() {
 
     try {
       const result = await saveMentionsBatch(
-        matched.map(m => ({ city: m.city!, state: m.state!, lat: m.lat!, lng: m.lng!, country: m.country || country })),
+        matched.map(m => ({ city: m.city!, state: m.state!, lat: m.lat!, lng: m.lng!, country: m.country || country, commenter_handle: m.commenter_handle || null })),
         postRef,
         mentionedOn,
         country,
@@ -135,7 +135,7 @@ export default function MentionsEntryPage() {
             <textarea
               value={input}
               onChange={e => { setInput(e.target.value); setParsed(null); setSaved(null) }}
-              placeholder={"tulsa ok\nAustin, Texas\n90210\nSan Diego CA\nV5K 1A1\nNASHVILLE TN"}
+              placeholder={"@userhandle tulsa ok\nAustin, Texas\n@someone 90210\nSan Diego CA\nV5K 1A1\nNASHVILLE TN"}
               rows={10}
               className="w-full px-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-base font-mono placeholder:text-white/20 focus:outline-none focus:border-neuro-orange resize-none"
             />
@@ -169,7 +169,10 @@ export default function MentionsEntryPage() {
                     <span className="text-white/50 font-mono text-xs min-w-[120px]">{p.input}</span>
                     <span className="text-white/30">→</span>
                     {p.matched ? (
-                      <span className="text-white font-medium">{p.city}, {p.state}</span>
+                      <span className="text-white font-medium">
+                        {p.city}, {p.state}
+                        {p.commenter_handle && <span className="text-pink-400 ml-2 text-xs">{p.commenter_handle}</span>}
+                      </span>
                     ) : (
                       <span className="text-red-400/70">
                         {p.city && p.state ? `${p.city}, ${p.state} (not in zip_codes)` : 'Could not parse'}
