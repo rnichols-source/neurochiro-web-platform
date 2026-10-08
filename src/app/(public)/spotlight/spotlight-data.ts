@@ -196,6 +196,22 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 11,
     publishedAt: "2026-10-07T12:00:00Z",
   },
+  {
+    id: "ep-012",
+    doctorName: "Dr. Devin DiCenzo",
+    doctorSlug: "dr-devin-dicenzo",
+    clinicName: "Lighthouse Family Chiropractic",
+    city: "Mount Pleasant",
+    state: "SC",
+    videoUrl: "https://www.youtube.com/embed/_341ojIYcT8",
+    thumbnail: "https://img.youtube.com/vi/_341ojIYcT8/hqdefault.jpg",
+    quote:
+      "Don't stop chiropractic. — A nonverbal child's message to his mom after learning to communicate through a spelling program.",
+    description:
+      "Dr. Devin DiCenzo is the founder of Lighthouse Family Chiropractic in Mount Pleasant, South Carolina, just outside Charleston. A Life University graduate and PX Doc, he specializes in pediatric and family nervous system care with a focus on neurodevelopmental cases including autism, ADHD, seizures, and sensory processing disorders. He shares the story of Declan, a nonverbal autistic child who now communicates and told his mom not to stop chiropractic, a child with grand mal seizures who is 8 months seizure-free, and why adults are just big kids who need the same care.",
+    episodeNumber: 12,
+    publishedAt: "2026-10-08T12:00:00Z",
+  },
 ];
 
 export function getLatestEpisode(): SpotlightEpisode {
