@@ -1,12 +1,39 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { rateLimit, getIP } from '@/lib/rate-limit';
 
-export async function POST(req: Request) {
+const limiter = rateLimit('patient-request', { maxRequests: 3, windowMs: 60_000 });
+
+export async function POST(req: NextRequest) {
   try {
-    const { doctorId, patientEmail, patientName } = await req.json();
+    const ip = getIP(req);
+    const { allowed } = limiter.check(ip);
+    if (!allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
+    const { doctorId, patientEmail, patientName, _hp } = await req.json();
+
+    // Honeypot — silent reject
+    if (_hp) {
+      return NextResponse.json({ success: true });
+    }
 
     if (!doctorId || !patientEmail) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Block obvious spam email patterns
+    const emailLower = patientEmail.toLowerCase();
+    const domain = emailLower.split('@')[1] || '';
+    const blockedDomains = ['mailinator.com', 'tempmail.com', 'throwaway.email', 'guerrillamail.com', 'sharklasers.com', 'grr.la', 'guerrillamailblock.com', 'yopmail.com', 'trashmail.com'];
+    if (blockedDomains.includes(domain)) {
+      return NextResponse.json({ success: true }); // Silent reject
+    }
+    // Reject emails with suspicious patterns (random chars with dots/numbers)
+    const localPart = emailLower.split('@')[0] || '';
+    if (/^[a-z]\.[a-z]{2}\.[a-z]\.[a-z]{2}\.[a-z]{2}\.\d/.test(localPart) || /^[a-z]{1,2}\.\d{1,3}$/.test(localPart.split('.').slice(-1)[0] || '')) {
+      return NextResponse.json({ success: true }); // Silent reject
     }
 
     const supabase = createAdminClient();

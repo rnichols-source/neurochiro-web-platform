@@ -34,10 +34,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Block obvious fake/test domains
+    // Block obvious fake/test/disposable domains
     const domain = email.split('@')[1]?.toLowerCase();
-    const blockedDomains = ['demo.com', 'test.com', 'example.com', 'fake.com', 'mailinator.com', 'tempmail.com', 'throwaway.email', 'guerrillamail.com'];
+    const blockedDomains = ['demo.com', 'test.com', 'example.com', 'fake.com', 'mailinator.com', 'tempmail.com', 'throwaway.email', 'guerrillamail.com', 'sharklasers.com', 'grr.la', 'guerrillamailblock.com', 'yopmail.com', 'trashmail.com', 'dispostable.com', 'maildrop.cc', 'mailnesia.com', 'tempinbox.com', 'fakeinbox.com', 'emailondeck.com', 'mintemail.com'];
     if (domain && blockedDomains.includes(domain)) {
+      return NextResponse.json({ success: true }); // Silent reject
+    }
+
+    // Block spam pattern emails (e.g. m.arys.te.wart.c4.o.o.q@gmail.com, o.z.ufuwa.547@gmail.com)
+    const localPart = email.split('@')[0]?.toLowerCase() || '';
+    const dotSegments = localPart.split('.');
+    // Reject if local part has 4+ dot-separated segments (real emails rarely do this)
+    if (dotSegments.length >= 4) {
+      return NextResponse.json({ success: true }); // Silent reject
+    }
+    // Reject local parts that are mostly single characters separated by dots
+    const singleCharSegments = dotSegments.filter((s: string) => s.length <= 2).length;
+    if (dotSegments.length >= 3 && singleCharSegments >= dotSegments.length - 1) {
       return NextResponse.json({ success: true }); // Silent reject
     }
 

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { getIP } from '@/lib/rate-limit'
+import { rateLimit, getIP } from '@/lib/rate-limit'
 import crypto from 'crypto'
+
+const limiter = rateLimit('contact-request', { maxRequests: 3, windowMs: 60_000 })
 
 /**
  * POST /api/contact-request
@@ -9,12 +11,23 @@ import crypto from 'crypto'
  * Requires explicit consent naming the doctor.
  */
 export async function POST(req: NextRequest) {
+  const ip = getIP(req)
+  const { allowed } = limiter.check(ip)
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+  }
+
   let body: any
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
   }
 
-  const { doctorId, name, phone, email, note, consent, consentText, source, joinList } = body
+  const { doctorId, name, phone, email, note, consent, consentText, source, joinList, _hp } = body
+
+  // Honeypot — silent reject
+  if (_hp) {
+    return NextResponse.json({ ok: true, doctorName: '', practiceName: '', withdrawUrl: '' })
+  }
 
   if (!doctorId) return NextResponse.json({ error: 'Missing doctor.' }, { status: 400 })
   if (!name?.trim()) return NextResponse.json({ error: 'Please enter your name.' }, { status: 400 })
@@ -29,7 +42,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Please do not include medical or health details in your note. Share those directly with the doctor.' }, { status: 400 })
   }
 
-  const ip = getIP(req)
   const supabase = createAdminClient()
   const withdrawalToken = crypto.randomBytes(32).toString('hex')
 
