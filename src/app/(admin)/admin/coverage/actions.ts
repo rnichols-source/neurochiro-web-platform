@@ -665,7 +665,11 @@ export async function parseMentionsBatch(lines: string[], country: string = 'US'
     'united kingdom': 'GB', 'uk': 'GB', 'england': 'GB', 'scotland': 'GB', 'wales': 'GB',
     'new zealand': 'NZ', 'nz': 'NZ',
     'united states': 'US', 'usa': 'US', 'us': 'US',
+    'germany': 'DE', 'deutschland': 'DE',
+    'ireland': 'IE', 'france': 'FR', 'italy': 'IT', 'spain': 'ES',
+    'netherlands': 'NL', 'holland': 'NL', 'sweden': 'SE', 'norway': 'NO', 'denmark': 'DK',
     'south africa': 'ZA', 'nigeria': 'NG', 'singapore': 'SG', 'japan': 'JP',
+    'india': 'IN', 'brazil': 'BR', 'mexico': 'MX',
     'switzerland': 'CH', 'trinidad': 'TT', 'trinidad and tobago': 'TT',
   }
 
