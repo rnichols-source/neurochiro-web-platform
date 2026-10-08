@@ -180,6 +180,22 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 10,
     publishedAt: "2026-09-26T12:00:00Z",
   },
+  {
+    id: "ep-011",
+    doctorName: "Dr. Danika Phillips",
+    doctorSlug: "danika-phillips",
+    clinicName: "Fika Chiropractic",
+    city: "Oakland",
+    state: "CA",
+    videoUrl: "https://www.youtube.com/embed/YJ0rWIw15R4",
+    thumbnail: "https://img.youtube.com/vi/YJ0rWIw15R4/hqdefault.jpg",
+    quote:
+      "I heard 'I love you' in my office for the very first time to mom. That always melts my heart.",
+    description:
+      "Dr. Danika Phillips is the founder of Fika Chiropractic in Oakland, California. A former Canadian hockey player, she experienced a complete health breakdown during chiropractic school that forced her to step away for a quarter. That crisis led her to nervous system focused care and changed everything about how she practices. Now specializing in pediatric and prenatal care, she shares the story of her first complex pediatric case, an autistic child who slept through the night after one adjustment, a child who said 'I love you' for the first time in her office, and why Fika means taking a pause from your day to focus on your health.",
+    episodeNumber: 11,
+    publishedAt: "2026-10-07T12:00:00Z",
+  },
 ];
 
 export function getLatestEpisode(): SpotlightEpisode {
