@@ -25,7 +25,7 @@ export async function getDoctorDashboardStats() {
       admin.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', docId),
       admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id).eq('source', 'appointment_request'),
       (admin as any).from('reply_logs').select('searched_city, created_at').eq('doctor_id', docId).in('template_id', ['doctor_comment', 'doctor_dm', 'sent_to_patient']),
-      (admin as any).from('contact_requests').select('name, searched_city, source, created_at').eq('doctor_id', docId).eq('status', 'new'),
+      (admin as any).from('contact_requests').select('id, name, phone, note, source, created_at, acknowledged_at, contact_outcome').eq('doctor_id', docId).in('status', ['new', 'acknowledged']).order('created_at', { ascending: false }),
     ]);
 
     const profile = profileRes.data;
@@ -608,4 +608,35 @@ export async function getLeadPipelineStages() {
   } catch {
     return null
   }
+}
+
+/**
+ * Doctor acknowledges a contact request from their dashboard.
+ */
+export async function acknowledgeContactRequest(requestId: string, action: 'called' | 'will_call') {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const admin = createAdminClient()
+  const now = new Date().toISOString()
+
+  if (action === 'called') {
+    await (admin as any).from('contact_requests').update({
+      acknowledged_at: now,
+      acknowledged_via: 'dashboard',
+      acknowledged_by: user.id,
+      contact_outcome: 'patient_contacted_confirmed',
+      status: 'acknowledged',
+    }).eq('id', requestId)
+  } else {
+    await (admin as any).from('contact_requests').update({
+      acknowledged_at: now,
+      acknowledged_via: 'dashboard',
+      acknowledged_by: user.id,
+      contact_outcome: 'will_call_today',
+    }).eq('id', requestId)
+  }
+
+  return { success: true }
 }

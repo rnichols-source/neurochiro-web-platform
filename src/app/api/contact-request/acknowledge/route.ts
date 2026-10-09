@@ -3,59 +3,108 @@ import { createAdminClient } from '@/lib/supabase-admin'
 
 /**
  * GET /api/contact-request/acknowledge?token=...
- * One-tap acknowledgment from doctor. No login required.
- * Token is single-purpose, tied to one contact request, expires after 30 days.
+ * Validates the token and redirects to the confirmation page.
+ * Does NOT mark as acknowledged yet — the confirmation page asks the question.
  */
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token')
   if (!token || token.length < 32) {
-    return redirectWithStatus('invalid')
+    return redirect('invalid')
   }
 
   const supabase = createAdminClient()
 
-  // Look up the contact request by token
   const { data: request } = await (supabase as any)
     .from('contact_requests')
-    .select('id, name, phone, note, status, acknowledged_at, acknowledge_token_expires, doctor_id')
+    .select('id, status, acknowledged_at, acknowledge_token_expires, contact_outcome')
     .eq('acknowledge_token', token)
     .single()
 
-  if (!request) {
-    return redirectWithStatus('invalid')
-  }
+  if (!request) return redirect('invalid')
 
-  // Already acknowledged — show the same confirmation (idempotent)
-  if (request.acknowledged_at) {
-    return redirectWithStatus('already', request.id)
+  // Already fully confirmed (called the patient)
+  if (request.contact_outcome === 'patient_contacted_confirmed') {
+    return redirect('already', token)
   }
 
   // Token expired
   if (request.acknowledge_token_expires && new Date(request.acknowledge_token_expires) < new Date()) {
-    return redirectWithStatus('expired')
+    return redirect('expired')
   }
 
-  // Withdrawn by patient
-  if (request.status === 'withdrawn') {
-    return redirectWithStatus('withdrawn')
-  }
+  // Withdrawn
+  if (request.status === 'withdrawn') return redirect('withdrawn')
 
-  // Acknowledge it
-  await (supabase as any)
-    .from('contact_requests')
-    .update({
-      acknowledged_at: new Date().toISOString(),
-      acknowledged_via: 'email_link',
-      status: 'acknowledged',
-    })
-    .eq('id', request.id)
-
-  return redirectWithStatus('success', request.id)
+  // Valid — send to the confirmation page with the token
+  return redirect('confirm', token)
 }
 
-function redirectWithStatus(status: string, requestId?: string) {
-  const url = new URL('https://neurochiro.co/contact-acknowledged')
+/**
+ * POST /api/contact-request/acknowledge
+ * Records the doctor's response: called or will call.
+ */
+export async function POST(req: NextRequest) {
+  let body: any
+  try { body = await req.json() } catch {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  }
+
+  const { token, action } = body
+  if (!token || !action) {
+    return NextResponse.json({ error: 'Missing token or action' }, { status: 400 })
+  }
+
+  const supabase = createAdminClient()
+
+  const { data: request } = await (supabase as any)
+    .from('contact_requests')
+    .select('id, acknowledged_at, contact_outcome, acknowledge_token_expires, status')
+    .eq('acknowledge_token', token)
+    .single()
+
+  if (!request) return NextResponse.json({ error: 'Invalid token' }, { status: 404 })
+  if (request.status === 'withdrawn') return NextResponse.json({ error: 'Withdrawn' }, { status: 410 })
+  if (request.acknowledge_token_expires && new Date(request.acknowledge_token_expires) < new Date()) {
+    return NextResponse.json({ error: 'Token expired' }, { status: 410 })
+  }
+
+  // Already fully confirmed — idempotent
+  if (request.contact_outcome === 'patient_contacted_confirmed') {
+    return NextResponse.json({ ok: true, already: true })
+  }
+
+  const now = new Date().toISOString()
+
+  if (action === 'called') {
+    await (supabase as any)
+      .from('contact_requests')
+      .update({
+        acknowledged_at: request.acknowledged_at || now,
+        acknowledged_via: 'email_link',
+        contact_outcome: 'patient_contacted_confirmed',
+        status: 'acknowledged',
+      })
+      .eq('id', request.id)
+  } else if (action === 'will_call') {
+    // Record that they saw it, but keep it open. It comes back in 24h.
+    await (supabase as any)
+      .from('contact_requests')
+      .update({
+        acknowledged_at: request.acknowledged_at || now,
+        acknowledged_via: 'email_link',
+        contact_outcome: 'will_call_today',
+        // status stays 'new' so it remains on the overdue list
+      })
+      .eq('id', request.id)
+  }
+
+  return NextResponse.json({ ok: true })
+}
+
+function redirect(status: string, token?: string) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://neurochiro.co'
+  const url = new URL(`${siteUrl}/contact-acknowledged`)
   url.searchParams.set('status', status)
-  if (requestId) url.searchParams.set('id', requestId)
+  if (token) url.searchParams.set('token', token)
   return NextResponse.redirect(url.toString())
 }
