@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminClient()
   const withdrawalToken = crypto.randomBytes(32).toString('hex')
+  const acknowledgeToken = crypto.randomBytes(32).toString('hex')
 
   // Verify the doctor exists
   const { data: doctor } = await supabase
@@ -70,6 +71,8 @@ export async function POST(req: NextRequest) {
     ip,
     status: 'new',
     withdrawal_token: withdrawalToken,
+    acknowledge_token: acknowledgeToken,
+    acknowledge_token_expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     source: validSource,
   })
 
@@ -80,6 +83,7 @@ export async function POST(req: NextRequest) {
 
   const doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`.trim()
   const practiceName = doctor.clinic_name || doctorName
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://neurochiro.co'
 
   // Email the doctor
   try {
@@ -87,6 +91,7 @@ export async function POST(req: NextRequest) {
     if (doctorEmail) {
       const { Resend } = await import('resend')
       const resend = new Resend(process.env.RESEND_API_KEY)
+      const ackUrl = `${siteUrl}/api/contact-request/acknowledge?token=${acknowledgeToken}`
       await resend.emails.send({
         from: 'NeuroChiro <support@neurochirodirectory.com>',
         to: doctorEmail,
@@ -101,8 +106,9 @@ export async function POST(req: NextRequest) {
             </div>
             <p style="font-size:13px;color:#666;">This patient explicitly requested contact from ${practiceName}. Their consent is recorded.</p>
             <p style="margin:24px 0;">
-              <a href="https://neurochiro.co/doctor/dashboard" style="display:inline-block;padding:14px 28px;background:#D66829;color:white;text-decoration:none;border-radius:10px;font-weight:700;">View in Dashboard</a>
+              <a href="${ackUrl}" style="display:inline-block;padding:16px 32px;background:#22c55e;color:white;text-decoration:none;border-radius:10px;font-weight:700;font-size:16px;">I've contacted this patient</a>
             </p>
+            <p style="font-size:12px;color:#999;">One tap lets us know you handled it. You can also acknowledge from your <a href="https://neurochiro.co/doctor/dashboard" style="color:#D66829;">dashboard</a>.</p>
           </div>
         `,
       })
@@ -111,7 +117,6 @@ export async function POST(req: NextRequest) {
     console.warn('[CONTACT_REQUEST] Doctor email failed (non-blocking):', e)
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://neurochiro.co'
   const withdrawUrl = `${siteUrl}/api/contact-request/withdraw?token=${withdrawalToken}`
 
   // Confirmation email to patient (only if they provided an email)
