@@ -125,6 +125,20 @@ export async function POST(req: NextRequest) {
     console.warn('[CONTACT_REQUEST] Doctor email failed (non-blocking):', e)
   }
 
+  // Discord notification to Dr. Ray
+  try {
+    const webhookUrl = process.env.DISCORD_WEBHOOK_URL
+    if (webhookUrl) {
+      await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: `📱 **New Contact Request**\n**Patient:** ${name.trim()}\n**Phone:** ${phone.trim()}\n**Doctor:** ${doctorName} (${doctor.city}, ${doctor.state})\n**Source:** ${validSource}${note ? `\n**Note:** ${note.trim()}` : ''}\n\n→ https://neurochiro.co/admin/contact-requests`
+        }),
+      })
+    }
+  } catch { /* non-blocking */ }
+
   const withdrawUrl = `${siteUrl}/api/contact-request/withdraw?token=${withdrawalToken}`
 
   // Confirmation email to patient (only if they provided an email)
