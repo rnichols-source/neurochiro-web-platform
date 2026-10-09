@@ -162,11 +162,17 @@ export async function getDoctorDashboardStats() {
         cities: referralCities,
       },
       contactRequests: {
-        count: contactRequests.length,
+        count: contactRequests.filter((r: any) => !r.acknowledged_at || r.contact_outcome === 'will_call_today').length,
         items: contactRequests.map((r: any) => ({
+          id: r.id,
           name: r.name,
+          phone: r.phone,
+          note: r.note,
           source: r.source === 'dm_outreach' ? 'From a NeuroChiro introduction' : 'From the directory',
           date: r.created_at?.slice(0, 10),
+          created_at: r.created_at,
+          acknowledged_at: r.acknowledged_at,
+          contact_outcome: r.contact_outcome,
         })),
       },
     }

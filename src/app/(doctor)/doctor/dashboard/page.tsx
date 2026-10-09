@@ -14,6 +14,7 @@ import {
   getSmartActionItems,
   getRevenueIntelligence,
   getLeadPipelineStages,
+  acknowledgeContactRequest,
 } from "./actions";
 import { formatDistanceToNow } from "date-fns";
 import { getOrCreateReferralCode, getReferralStats } from "@/app/actions/referral-program";
@@ -295,6 +296,60 @@ export default function DoctorDashboard() {
             <p className="text-sm text-white/30">No introductions yet. When we point a patient toward you, it'll show here.</p>
           )}
           <p className="text-[10px] text-white/20 mt-4">These are people we introduced to your practice. Whether they booked is between you and them.</p>
+        </motion.div>
+      )}
+
+      {/* Contact Requests */}
+      {data?.contactRequests?.items?.length > 0 && (
+        <motion.div {...delay(0.07)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
+          <div className="mb-4">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-purple-400 font-semibold mb-1">Patient Requests</p>
+            <h3 className="text-sm font-bold text-white">People who asked your office to call them</h3>
+          </div>
+          <div className="space-y-3">
+            {data.contactRequests.items.map((req: any) => (
+              <div key={req.id} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-white text-sm">{req.name}</p>
+                    <a href={`tel:${req.phone}`} className="text-neuro-orange font-bold text-sm">{req.phone}</a>
+                    {req.note && <p className="text-xs text-white/40 mt-1">"{req.note}"</p>}
+                    <p className="text-[10px] text-white/20 mt-1">{req.source} · {req.date}</p>
+                  </div>
+                  <div className="shrink-0">
+                    {req.contact_outcome === 'patient_contacted_confirmed' ? (
+                      <span className="text-[10px] px-2 py-1 bg-green-500/20 text-green-400 rounded-full font-bold">Called</span>
+                    ) : req.contact_outcome === 'will_call_today' ? (
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] px-2 py-1 bg-amber-500/20 text-amber-400 rounded-full font-bold text-center">Pending</span>
+                        <button
+                          onClick={async () => { await acknowledgeContactRequest(req.id, 'called'); const d = await getDoctorDashboardStats(); setData(d); }}
+                          className="text-[10px] px-2 py-1 bg-green-600 text-white rounded-full font-bold hover:bg-green-500 min-h-[28px]"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-1">
+                        <button
+                          onClick={async () => { await acknowledgeContactRequest(req.id, 'called'); const d = await getDoctorDashboardStats(); setData(d); }}
+                          className="text-[10px] px-3 py-1.5 bg-green-600 text-white rounded-lg font-bold hover:bg-green-500 min-h-[32px]"
+                        >
+                          I called them
+                        </button>
+                        <button
+                          onClick={async () => { await acknowledgeContactRequest(req.id, 'will_call'); const d = await getDoctorDashboardStats(); setData(d); }}
+                          className="text-[10px] px-3 py-1.5 bg-white/10 text-white/70 rounded-lg font-bold hover:bg-white/20 min-h-[32px]"
+                        >
+                          I'll call today
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </motion.div>
       )}
 
