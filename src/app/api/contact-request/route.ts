@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
   const validSource = VALID_SOURCES.includes(source) ? source : 'doctor_joined'
 
   // Insert contact request
-  const { error: insertErr } = await (supabase as any).from('contact_requests').insert({
+  const { data: insertedRequest, error: insertErr } = await (supabase as any).from('contact_requests').insert({
     doctor_id: doctorId,
     name: name.trim(),
     phone: phone.trim(),
@@ -74,12 +74,14 @@ export async function POST(req: NextRequest) {
     acknowledge_token: acknowledgeToken,
     acknowledge_token_expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     source: validSource,
-  })
+  }).select('id').single()
 
   if (insertErr) {
     console.error('[CONTACT_REQUEST] Insert error:', insertErr)
     return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
   }
+
+  const requestId = insertedRequest?.id
 
   const doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`.trim()
   const practiceName = doctor.clinic_name || doctorName
@@ -112,6 +114,12 @@ export async function POST(req: NextRequest) {
           </div>
         `,
       })
+      // Log step 1 in escalation table
+      if (requestId) {
+        await (supabase as any).from('contact_request_escalations').insert({
+          contact_request_id: requestId, step: 1, channel: 'email',
+        }).then(() => {}).catch(() => {})
+      }
     }
   } catch (e) {
     console.warn('[CONTACT_REQUEST] Doctor email failed (non-blocking):', e)

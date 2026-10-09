@@ -393,8 +393,9 @@ export async function renderTemplate(templateKey: string, prospectId: string) {
     }
   }
 
-  // Voice validation
-  const validation = await validateTemplate(rendered)
+  // Voice validation — check both body and subject
+  const textToValidate = subject ? `${subject}\n${rendered}` : rendered
+  const validation = await validateTemplate(textToValidate)
   const warnings = [...validation.warnings]
   if (validation.errors.length) {
     warnings.push(...validation.errors.map(e => `VOICE: ${e}`))
