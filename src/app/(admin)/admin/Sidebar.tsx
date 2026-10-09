@@ -31,7 +31,8 @@ import {
   Video,
   Bot,
   Shuffle,
-  Send
+  Send,
+  Phone
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -64,6 +65,7 @@ const navGroups = [
     label: "Patients",
     items: [
       { name: "Reply Station", href: "/admin/coverage", icon: Activity },
+      { name: "Contact Requests", href: "/admin/contact-requests", icon: Phone },
       { name: "Patient List", href: "/admin/list", icon: Users },
       { name: "Coverage Map", href: "/admin/coverage", icon: Globe },
       { name: "Introductions", href: "/admin/referrals", icon: Send },
