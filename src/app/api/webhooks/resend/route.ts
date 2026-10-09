@@ -35,6 +35,7 @@ export async function POST(req: Request) {
         console.warn(`[REPUTATION ALERT] Email bounced for: ${email}`);
         await handleProfileEmailEvent(email, supabase, { has_bounced: true });
         await handleSubscriberUnsubscribe(email, adminDb);
+        await handleContactRequestBounce(email, adminDb);
         break;
 
       case "email.complained":
@@ -91,6 +92,53 @@ async function handleSubscriberUnsubscribe(email: string, adminDb: any) {
       })
       .eq('id', data.id);
     console.log(`[SUBSCRIBER] Unsubscribed via webhook: ${email}`);
+  }
+}
+
+/**
+ * When a doctor's email bounces, mark all their pending contact request
+ * escalations as bounced and flag the requests for immediate admin attention.
+ */
+async function handleContactRequestBounce(email: string, adminDb: any) {
+  try {
+    // Find doctors with this email
+    const { data: doctors } = await adminDb
+      .from('doctors')
+      .select('id')
+      .eq('email', email)
+    if (!doctors?.length) return
+
+    const doctorIds = doctors.map((d: any) => d.id)
+
+    // Find open contact requests for these doctors
+    const { data: requests } = await adminDb
+      .from('contact_requests')
+      .select('id')
+      .in('doctor_id', doctorIds)
+      .eq('status', 'new')
+
+    if (!requests?.length) return
+
+    for (const r of requests) {
+      // Mark all escalation steps as bounced
+      await adminDb
+        .from('contact_request_escalations')
+        .update({ delivered: false, error: 'Email bounced' })
+        .eq('contact_request_id', r.id)
+        .is('delivered', null)
+
+      // Flag the request so it appears as overdue immediately
+      await adminDb
+        .from('contact_requests')
+        .update({ admin_note: (await adminDb.from('contact_requests').select('admin_note').eq('id', r.id).single()).data?.admin_note
+          ? undefined  // Don't overwrite existing note
+          : 'Doctor email bounced. Needs manual follow-up.' })
+        .eq('id', r.id)
+    }
+
+    console.warn(`[CONTACT_REQUEST] Bounce detected for ${email}, flagged ${requests.length} requests`)
+  } catch (e) {
+    console.error('[CONTACT_REQUEST] Bounce handler error:', e)
   }
 }
 

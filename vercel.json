@@ -103,7 +103,7 @@
     },
     {
       "path": "/api/cron/contact-escalation",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 8,12,16,20 * * *"
     }
   ],
   "redirects": [

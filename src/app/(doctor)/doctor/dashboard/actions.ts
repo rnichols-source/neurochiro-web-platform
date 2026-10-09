@@ -636,11 +636,13 @@ export async function acknowledgeContactRequest(requestId: string, action: 'call
       status: 'acknowledged',
     }).eq('id', requestId)
   } else {
+    const deadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
     await (admin as any).from('contact_requests').update({
       acknowledged_at: now,
       acknowledged_via: 'dashboard',
       acknowledged_by: user.id,
       contact_outcome: 'will_call_today',
+      will_call_deadline: deadline,
     }).eq('id', requestId)
   }
 

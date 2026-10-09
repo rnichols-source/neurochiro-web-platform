@@ -86,14 +86,15 @@ export async function POST(req: NextRequest) {
       })
       .eq('id', request.id)
   } else if (action === 'will_call') {
-    // Record that they saw it, but keep it open. It comes back in 24h.
+    // Record that they saw it. Suppresses escalation for 24h, then returns to list.
+    const deadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
     await (supabase as any)
       .from('contact_requests')
       .update({
         acknowledged_at: request.acknowledged_at || now,
         acknowledged_via: 'email_link',
         contact_outcome: 'will_call_today',
-        // status stays 'new' so it remains on the overdue list
+        will_call_deadline: deadline,
       })
       .eq('id', request.id)
   }
