@@ -963,20 +963,24 @@ export async function updateReplyTemplate(id: string, body: string): Promise<{ o
  * Picks the active variant least recently used by this operator
  * within the last N copies (default 10).
  *
- * If excludeKey is provided, that variant is excluded (for reshuffle).
+ * source: 'reply' queries reply_template_variants via reply_template_id FK and reply_logs.
+ *         'outreach' queries via outreach_template_key FK and outreach_logs.
  */
 export async function selectVariant(
   templateId: string,
   excludeKey?: string,
+  source: 'reply' | 'outreach' = 'reply',
 ): Promise<{ variant_key: string; body: string } | null> {
   const user = await checkAdminAuth()
   const supabase = createAdminClient()
 
-  // Get all active variants for this template
+  // Get all active variants for this template, using the correct FK column
+  const fkColumn = source === 'reply' ? 'reply_template_id' : 'outreach_template_key'
   const { data: variants } = await (supabase as any)
     .from('reply_template_variants')
     .select('variant_key, body')
-    .eq('template_id', templateId)
+    .eq(fkColumn, templateId)
+    .eq('variant_source', source)
     .eq('active', true)
     .order('variant_key')
 
@@ -986,17 +990,30 @@ export async function selectVariant(
     ? variants.filter((v: any) => v.variant_key !== excludeKey)
     : variants
 
-  if (!available.length) return variants[0] // Only one variant and it was excluded, return it anyway
+  if (!available.length) return variants[0]
 
-  // Get the last 10 copies of this template by this operator
-  const { data: recentLogs } = await (supabase as any)
-    .from('reply_logs')
-    .select('variant_key')
-    .eq('template_id', templateId)
-    .eq('operator', user.id)
-    .not('variant_key', 'is', null)
-    .order('created_at', { ascending: false })
-    .limit(10)
+  // Get the last 10 copies by this operator from the correct log table
+  let recentLogs: any[] = []
+  if (source === 'reply') {
+    const { data } = await (supabase as any)
+      .from('reply_logs')
+      .select('variant_key')
+      .eq('template_id', templateId)
+      .eq('operator', user.id)
+      .not('variant_key', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(10)
+    recentLogs = data || []
+  } else {
+    const { data } = await (supabase as any)
+      .from('outreach_logs')
+      .select('template_key')
+      .eq('template_key', templateId)
+      .eq('operator', user.id)
+      .order('created_at', { ascending: false })
+      .limit(10)
+    recentLogs = (data || []).map((l: any) => ({ variant_key: l.template_key }))
+  }
 
   const recentKeys = (recentLogs || []).map((l: any) => l.variant_key)
 
