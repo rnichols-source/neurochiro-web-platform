@@ -15,6 +15,15 @@ const DOCTOR_SCENARIOS: OutreachScenario[] = [
   { key: 'student_or_associate', label: 'Student', commentKey: 'student_ig_comment', dmKey: 'student_ig_dm' },
 ]
 
+const CLOSING_SCENARIOS: OutreachScenario[] = [
+  { key: 'skip_the_call_close', label: 'Skip Call Close', commentKey: null, dmKey: 'skip_the_call_close_ig_dm' },
+  { key: 'post_call_close', label: 'Post Call Close', commentKey: null, dmKey: 'post_call_close_ig_dm' },
+  { key: 'objection_price_close', label: 'Price Objection', commentKey: null, dmKey: 'objection_price_ig_dm' },
+  { key: 'objection_timing_close', label: 'Timing Objection', commentKey: null, dmKey: 'objection_timing_ig_dm' },
+  { key: 'went_quiet', label: 'Went Quiet', commentKey: null, dmKey: 'went_quiet_ig_dm' },
+  { key: 'ready_but_no_payment', label: 'No Payment', commentKey: null, dmKey: 'ready_no_payment_ig_dm' },
+]
+
 // ── Colors ──
 const COLORS = {
   verified: '#22c55e',
@@ -66,7 +75,7 @@ export default function CoverageMapClient({
   mentions: MentionCity[]
   templates: ReplyTemplate[]
   demandDots?: DemandDot[]
-  outreachLinks?: { calendly_url: string; mastermind_url: string }
+  outreachLinks?: { calendly_url: string; mastermind_url: string; checkout_url_monthly: string; checkout_url_annual: string }
 }) {
   const [layers, setLayers] = useState<Record<LayerKey, boolean>>(loadSavedLayers)
   const [showStatsPanel, setShowStatsPanel] = useState(true)
@@ -805,7 +814,7 @@ export default function CoverageMapClient({
             state={resolvedState}
             country={lookupCountry}
             demandCount50={demandCount50}
-            outreachLinks={outreachLinks || { calendly_url: '', mastermind_url: '' }}
+            outreachLinks={outreachLinks || { calendly_url: '', mastermind_url: '', checkout_url_monthly: '', checkout_url_annual: '' }}
             scenario={doctorScenario}
             onScenarioChange={setDoctorScenario}
             handle={doctorHandle}
@@ -1165,7 +1174,7 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
   state: string
   country: string
   demandCount50: number | null
-  outreachLinks: { calendly_url: string; mastermind_url: string }
+  outreachLinks: { calendly_url: string; mastermind_url: string; checkout_url_monthly: string; checkout_url_annual: string }
   scenario: OutreachScenario | null
   onScenarioChange: (s: OutreachScenario | null) => void
   handle: string
@@ -1184,8 +1193,11 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
   const [prospectInfo, setProspectInfo] = useState<string | null>(null)
   const [memberCheck, setMemberCheck] = useState<{ blocked: boolean; memberName?: string; memberTier?: string } | null>(null)
   const [memberCheckLoading, setMemberCheckLoading] = useState(false)
+  const [firstName, setFirstName] = useState('')
   const handleInputRef = useRef<HTMLInputElement>(null)
   const memberCheckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const isClosingScenario = scenario ? CLOSING_SCENARIOS.some(s => s.key === scenario.key) : false
 
   // Pass raw number, templates own the word "people"
   const demandStr = demandCount50 != null && demandCount50 > 0 ? String(demandCount50) : ''
@@ -1235,6 +1247,8 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
       demand_50mi: demandStr,
       calendly_link: outreachLinks.calendly_url,
       mastermind_link: outreachLinks.mastermind_url,
+      checkout_link_monthly: outreachLinks.checkout_url_monthly,
+      checkout_link_annual: outreachLinks.checkout_url_annual,
     }
 
     const promises: Promise<any>[] = []
@@ -1264,19 +1278,24 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
   // Template variable substitution
   const vars: Record<string, string> = {
     handle: handle.startsWith('@') ? handle : handle ? `@${handle}` : '',
+    first_name: firstName,
     city,
     state,
     demand_50mi: demandStr,
     calendly_link: outreachLinks.calendly_url,
     mastermind_link: outreachLinks.mastermind_url,
+    checkout_link_monthly: outreachLinks.checkout_url_monthly,
+    checkout_link_annual: outreachLinks.checkout_url_annual,
   }
 
   const commentText = commentVariant ? fillTemplate(commentVariant.body, vars) : ''
   const dmText = dmVariant ? fillTemplate(dmVariant.body, vars) : ''
 
-  // Copy blocked if member is pro (checked before copy, not during)
+  // Copy blocked if member is pro, or closing template with missing checkout URLs
   const isBlocked = memberCheck?.blocked === true
-  const canCopy = handle.trim().length > 0 && !isBlocked && !memberCheckLoading
+  const missingCheckoutUrl = isClosingScenario && (!outreachLinks.checkout_url_monthly || !outreachLinks.checkout_url_annual)
+  const missingFirstName = isClosingScenario && !firstName.trim()
+  const canCopy = handle.trim().length > 0 && !isBlocked && !memberCheckLoading && !missingCheckoutUrl && !missingFirstName
 
   // Copy handler: clipboard FIRST (sync in gesture), then server logging (async, non-blocking)
   const doCopy = (channel: 'ig_comment' | 'ig_dm') => {
@@ -1342,6 +1361,8 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
       demand_50mi: demandStr,
       calendly_link: outreachLinks.calendly_url,
       mastermind_link: outreachLinks.mastermind_url,
+      checkout_link_monthly: outreachLinks.checkout_url_monthly,
+      checkout_link_annual: outreachLinks.checkout_url_annual,
     }
 
     const promises: Promise<any>[] = []
@@ -1394,6 +1415,27 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
         {memberCheckLoading && <p className="text-[10px] text-white/30 mt-1">Checking...</p>}
       </div>
 
+      {/* First name input — shown for closing scenarios */}
+      {isClosingScenario && (
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Their first name"
+            value={firstName}
+            onChange={e => setFirstName(e.target.value)}
+            className="w-full px-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-base placeholder:text-white/25 focus:outline-none focus:border-neuro-orange"
+          />
+          {!firstName.trim() && <p className="text-[10px] text-amber-400/70 mt-1">First name required for closing templates</p>}
+        </div>
+      )}
+
+      {/* Checkout URL missing warning */}
+      {isClosingScenario && missingCheckoutUrl && (
+        <div className="bg-red-500/20 border border-red-500/40 rounded-xl px-4 py-3">
+          <p className="text-sm font-bold text-red-400">checkout_url not configured in platform_settings. Cannot render closing templates.</p>
+        </div>
+      )}
+
       {/* Member block / prospect info banners */}
       {copyError && (
         <div className="bg-red-500/20 border border-red-500/40 rounded-xl px-4 py-3">
@@ -1406,20 +1448,42 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
         </div>
       )}
 
-      {/* Scenario buttons */}
-      <div className="flex flex-wrap gap-1.5">
-        {scenarios.map(s => (
-          <button
-            key={s.key}
-            onClick={() => { onScenarioChange(scenario?.key === s.key ? null : s); setCopyError(null); setProspectInfo(null); setCopiedComment(false); setCopiedDM(false) }}
-            className={`px-3 py-2 rounded-lg text-xs font-bold transition-colors min-h-[44px] ${
-              scenario?.key === s.key
-                ? 'bg-purple-500 text-white'
-                : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80'
-            }`}>
-            {s.label}
-          </button>
-        ))}
+      {/* First Contact scenarios */}
+      <div>
+        <p className="text-[9px] text-white/30 uppercase tracking-wider font-bold mb-1.5">First Contact</p>
+        <div className="flex flex-wrap gap-1.5">
+          {scenarios.map(s => (
+            <button
+              key={s.key}
+              onClick={() => { onScenarioChange(scenario?.key === s.key ? null : s); setCopyError(null); setProspectInfo(null); setCopiedComment(false); setCopiedDM(false) }}
+              className={`px-3 py-2 rounded-lg text-xs font-bold transition-colors min-h-[44px] ${
+                scenario?.key === s.key
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80'
+              }`}>
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Closing scenarios */}
+      <div>
+        <p className="text-[9px] text-neuro-orange/60 uppercase tracking-wider font-bold mb-1.5">Closing</p>
+        <div className="flex flex-wrap gap-1.5">
+          {CLOSING_SCENARIOS.map(s => (
+            <button
+              key={s.key}
+              onClick={() => { onScenarioChange(scenario?.key === s.key ? null : s); setCopyError(null); setProspectInfo(null); setCopiedComment(false); setCopiedDM(false) }}
+              className={`px-3 py-2 rounded-lg text-xs font-bold transition-colors min-h-[44px] ${
+                scenario?.key === s.key
+                  ? 'bg-neuro-orange text-white'
+                  : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80'
+              }`}>
+              {s.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Template preview + copy */}

@@ -1150,7 +1150,7 @@ export async function checkHandleAgainstMembers(handle: string): Promise<{
   }
 }
 
-export async function getOutreachLinks(): Promise<{ calendly_url: string; mastermind_url: string }> {
+export async function getOutreachLinks(): Promise<{ calendly_url: string; mastermind_url: string; checkout_url_monthly: string; checkout_url_annual: string }> {
   await checkAdminAuth()
   const supabase = createAdminClient()
   const { data } = await (supabase as any).from('platform_settings').select('value').eq('key', 'doctor_outreach').single()
@@ -1158,6 +1158,8 @@ export async function getOutreachLinks(): Promise<{ calendly_url: string; master
   return {
     calendly_url: config.calendly_url || '',
     mastermind_url: config.mastermind_url || '',
+    checkout_url_monthly: config.checkout_url_monthly || '',
+    checkout_url_annual: config.checkout_url_annual || '',
   }
 }
 
