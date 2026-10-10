@@ -268,11 +268,11 @@ export default function CoverageMapClient({
         map.addLayer({ id: 'mention-labels', type: 'symbol', source: 'mention-labels',
           layout: {
             'text-field': ['get', 'label'],
-            'text-size': 13,
+            'text-size': ['interpolate', ['linear'], ['zoom'], 4, 11, 7, 14],
             'text-font': ['Open Sans Bold'],
-            'text-offset': [0, -1.5],
-            'text-allow-overlap': true,
-            'text-ignore-placement': true,
+            'text-offset': [0, -1.3],
+            'text-allow-overlap': false,
+            'symbol-sort-key': ['*', -1, ['to-number', ['get', 'label']]], // highest count wins collision
             visibility: layers.mentions ? 'visible' : 'none',
           },
           paint: {
