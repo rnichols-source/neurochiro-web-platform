@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send, MessageSquare, Map as MapIcon } from "lucide-react"
 import Link from "next/link"
-import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, logReply, getSentDoctorIds, getFarDistanceThreshold, autoLogDemand, undoAutoLogDemand } from "./actions"
+import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, logReply, getSentDoctorIds, getFarDistanceThreshold, autoLogDemand, undoAutoLogDemand, selectVariant } from "./actions"
 
 // ── Colors ──
 const COLORS = {
@@ -843,8 +843,8 @@ function parseSearchCity(searchedCity: string): { city: string; state?: string }
   return { city: parts[0] || searchedCity, state: parts[1] || undefined }
 }
 
-function TemplateCopyButton({ label, text, templateId, searchedCity, doctorId, color = 'white/5' }: {
-  label: string; text: string; templateId: string; searchedCity: string; doctorId?: string; color?: string
+function TemplateCopyButton({ label, text, templateId, searchedCity, doctorId, color = 'white/5', variantKey }: {
+  label: string; text: string; templateId: string; searchedCity: string; doctorId?: string; color?: string; variantKey?: string
 }) {
   const [copied, setCopied] = useState(false)
   const handleCopy = async () => {
@@ -853,7 +853,7 @@ function TemplateCopyButton({ label, text, templateId, searchedCity, doctorId, c
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
       const { city, state } = parseSearchCity(searchedCity)
-      logReply(templateId, city, state, doctorId)
+      logReply(templateId, city, state, doctorId, undefined, variantKey)
     } catch {}
   }
   return (
@@ -886,6 +886,11 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
   const [localIntroCount, setLocalIntroCount] = useState(d.intro_count)
   const [justSent, setJustSent] = useState(false)
 
+  // Variant state: selected once on mount, stable per Rule 3
+  const [commentVariant, setCommentVariant] = useState<{ variant_key: string; body: string } | null>(null)
+  const [dmVariant, setDmVariant] = useState<{ variant_key: string; body: string } | null>(null)
+  const [variantsLoaded, setVariantsLoaded] = useState(false)
+
   const profileUrl = `https://neurochiro.co/directory/${d.slug || d.id}`
   const contactRequestUrl = `https://neurochiro.co/contact-request?doctor=${d.slug || d.id}&source=dm_outreach`
   const doctorName = `Dr. ${d.first_name} ${d.last_name}`.trim()
@@ -898,14 +903,35 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
   const commentTpl = templates.find(t => t.id === commentTplId)
   const dmTpl = templates.find(t => t.id === dmTplId)
 
+  // Select variants via server LRU on mount
+  useEffect(() => {
+    let cancelled = false
+    async function loadVariants() {
+      const [cv, dv] = await Promise.all([
+        selectVariant(commentTplId),
+        selectVariant(dmTplId),
+      ])
+      if (cancelled) return
+      setCommentVariant(cv)
+      setDmVariant(dv)
+      setVariantsLoaded(true)
+    }
+    loadVariants()
+    return () => { cancelled = true }
+  }, [d.id]) // Re-select only when doctor changes
+
   const vars: Record<string, string> = {
     handle, city: d.city || '', state: d.state || '',
     doctor_name: doctorName, doctor_city: d.city || '',
     profile_url: profileUrl, contact_request_url: contactRequestUrl,
     distance: humanDistance(d.distance_miles),
   }
-  const replyText = handle && commentTpl ? fillTemplate(commentTpl.body, vars) : ''
-  const dmText = dmTpl ? fillTemplate(dmTpl.body, vars) : `Hey! I found a nervous system chiropractor near you.\n\n${doctorName} — ${d.city}, ${d.state} (${d.distance_miles} mi)\nProfile: ${profileUrl}\n\nWant their office to reach out to you? Leave your name and number here and I'll pass it along:\n${contactRequestUrl}`
+
+  // Use variant body if available, fall back to parent template body with warning
+  const commentBody = commentVariant?.body || commentTpl?.body || ''
+  const dmBody = dmVariant?.body || dmTpl?.body || ''
+  const replyText = handle ? fillTemplate(commentBody, vars) : ''
+  const dmText = fillTemplate(dmBody, vars)
 
   const quickCopy = async (text: string, setter: (v: boolean) => void) => {
     try { await navigator.clipboard.writeText(text); setter(true); setTimeout(() => setter(false), 1500) } catch {}
@@ -959,7 +985,7 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
         {handle && (
           <button
             ref={isPick ? replyBtnRef : undefined}
-            onClick={() => { quickCopy(replyText, () => {}); setCopiedReply(true); logReply(commentTplId, vars.city, vars.state, d.id) }}
+            onClick={() => { quickCopy(replyText, () => {}); setCopiedReply(true); logReply(commentTplId, vars.city, vars.state, d.id, undefined, commentVariant?.variant_key) }}
             className={`flex items-center justify-center gap-1.5 px-3 min-h-[44px] sm:min-h-0 sm:py-1 rounded-lg text-sm sm:text-[11px] font-bold transition-colors ${
               copiedReply ? 'bg-green-500/20 text-green-400'
               : isFar ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400' : 'bg-neuro-orange/20 hover:bg-neuro-orange/30 text-neuro-orange'
@@ -969,7 +995,7 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
         )}
         <button
           ref={isPick ? dmBtnRef : undefined}
-          onClick={() => { quickCopy(dmText, () => {}); setCopiedDM(true); logReply(dmTplId, vars.city, vars.state, d.id) }}
+          onClick={() => { quickCopy(dmText, () => {}); setCopiedDM(true); logReply(dmTplId, vars.city, vars.state, d.id, undefined, dmVariant?.variant_key) }}
           className={`flex items-center justify-center gap-1.5 px-3 min-h-[44px] sm:min-h-0 sm:py-1 rounded-lg text-sm sm:text-[11px] font-bold transition-colors ${
             copiedDM ? 'bg-green-500/20 text-green-400'
             : isFar ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-400' : 'bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400'
@@ -1004,15 +1030,37 @@ function WaitlistReplyButtons({ searchedCity, templates }: { searchedCity: strin
   const waitlistComment = templates.find(t => t.id === 'waitlist_comment')
   const { city } = parseSearchCity(searchedCity)
 
+  // Variant selection for waitlist templates
+  const [wlDmVariant, setWlDmVariant] = useState<{ variant_key: string; body: string } | null>(null)
+  const [wlCommentVariant, setWlCommentVariant] = useState<{ variant_key: string; body: string } | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      const [dv, cv] = await Promise.all([
+        selectVariant('waitlist_dm'),
+        selectVariant('waitlist_comment'),
+      ])
+      if (cancelled) return
+      setWlDmVariant(dv)
+      setWlCommentVariant(cv)
+    }
+    load()
+    return () => { cancelled = true }
+  }, [searchedCity])
+
+  const dmBody = wlDmVariant?.body || waitlistDm?.body || ''
+  const commentBody = wlCommentVariant?.body || waitlistComment?.body || ''
+
   return (
     <>
       {(waitlistDm || waitlistComment) && (
         <div className="flex items-center justify-center gap-2">
           {waitlistDm && (
-            <TemplateCopyButton label="Copy waitlist DM" text={fillTemplate(waitlistDm.body, { city })} templateId="waitlist_dm" searchedCity={searchedCity} />
+            <TemplateCopyButton label="Copy waitlist DM" text={fillTemplate(dmBody, { city })} templateId="waitlist_dm" searchedCity={searchedCity} variantKey={wlDmVariant?.variant_key} />
           )}
           {waitlistComment && (
-            <TemplateCopyButton label="Copy comment" text={fillTemplate(waitlistComment.body, { city })} templateId="waitlist_comment" searchedCity={searchedCity} />
+            <TemplateCopyButton label="Copy comment" text={fillTemplate(commentBody, { city })} templateId="waitlist_comment" searchedCity={searchedCity} variantKey={wlCommentVariant?.variant_key} />
           )}
         </div>
       )}

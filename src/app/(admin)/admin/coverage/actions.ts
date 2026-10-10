@@ -891,12 +891,76 @@ export async function updateReplyTemplate(id: string, body: string): Promise<{ o
   return { ok: true }
 }
 
+/**
+ * Select the best variant for a template using LRU rotation.
+ * Picks the active variant least recently used by this operator
+ * within the last N copies (default 10).
+ *
+ * If excludeKey is provided, that variant is excluded (for reshuffle).
+ */
+export async function selectVariant(
+  templateId: string,
+  excludeKey?: string,
+): Promise<{ variant_key: string; body: string } | null> {
+  const user = await checkAdminAuth()
+  const supabase = createAdminClient()
+
+  // Get all active variants for this template
+  const { data: variants } = await (supabase as any)
+    .from('reply_template_variants')
+    .select('variant_key, body')
+    .eq('template_id', templateId)
+    .eq('active', true)
+    .order('variant_key')
+
+  if (!variants?.length) return null
+
+  const available = excludeKey
+    ? variants.filter((v: any) => v.variant_key !== excludeKey)
+    : variants
+
+  if (!available.length) return variants[0] // Only one variant and it was excluded, return it anyway
+
+  // Get the last 10 copies of this template by this operator
+  const { data: recentLogs } = await (supabase as any)
+    .from('reply_logs')
+    .select('variant_key')
+    .eq('template_id', templateId)
+    .eq('operator', user.id)
+    .not('variant_key', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(10)
+
+  const recentKeys = (recentLogs || []).map((l: any) => l.variant_key)
+
+  // Pick the variant that appears least recently (or not at all) in the recent window
+  // Variants not in the window are preferred. Among those in the window, pick the one
+  // that appeared earliest (least recently).
+  const notRecent = available.filter((v: any) => !recentKeys.includes(v.variant_key))
+  if (notRecent.length > 0) {
+    // Among those not recently used, pick one (first alphabetically for determinism)
+    return notRecent[0]
+  }
+
+  // All variants have been used recently. Pick the one used longest ago.
+  const oldest = available.sort((a: any, b: any) => {
+    const aIdx = recentKeys.lastIndexOf(a.variant_key)
+    const bIdx = recentKeys.lastIndexOf(b.variant_key)
+    // Higher index = more recent. We want the one with the highest index (used longest ago from the front)
+    // Actually: recentKeys[0] is most recent, recentKeys[9] is oldest.
+    // lastIndexOf gives the position. Lower position = more recent. We want highest position.
+    return bIdx - aIdx
+  })
+  return oldest[0]
+}
+
 export async function logReply(
   templateId: string,
   searchedCity: string,
   searchedState?: string,
   doctorId?: string,
   demandMentionId?: string,
+  variantKey?: string,
 ): Promise<{ ok: boolean }> {
   const user = await checkAdminAuth()
   const supabase = createAdminClient()
@@ -908,6 +972,7 @@ export async function logReply(
     doctor_id: doctorId || null,
     operator: user.id,
     demand_mention_id: demandMentionId || null,
+    variant_key: variantKey || null,
   })
 
   return { ok: true }
