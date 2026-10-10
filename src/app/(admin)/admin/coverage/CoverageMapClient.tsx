@@ -238,14 +238,12 @@ export default function CoverageMapClient({
               5, '#0e7490',   // ~25 requests
               7, '#155e75',   // ~49 requests
             ],
-            'circle-radius': ['interpolate', ['linear'],
-              ['sqrt', ['get', 'cityCount']],
-              1, 4,   // 1 request: 4px
-              3, 6,   // ~9 requests: 6px
-              5, 8,   // ~25 requests: 8px
-              7, 10,  // ~49 requests: 10px
+            'circle-radius': ['interpolate', ['linear'], ['zoom'],
+              3, ['interpolate', ['linear'], ['sqrt', ['get', 'cityCount']], 1, 3, 3, 5, 5, 7, 7, 9],
+              6, ['interpolate', ['linear'], ['sqrt', ['get', 'cityCount']], 1, 4, 3, 6, 5, 8, 7, 10],
+              10, ['interpolate', ['linear'], ['sqrt', ['get', 'cityCount']], 1, 5, 3, 8, 5, 11, 7, 14],
             ],
-            'circle-opacity': 0.75,
+            'circle-opacity': 0.7,
             'circle-stroke-width': 0,
           },
           layout: { visibility: layers.mentions ? 'visible' : 'none' },
