@@ -970,6 +970,7 @@ export async function selectVariant(
   templateId: string,
   excludeKey?: string,
   source: 'reply' | 'outreach' = 'reply',
+  availableVars?: Record<string, string>,
 ): Promise<{ variant_key: string; body: string } | null> {
   const user = await checkAdminAuth()
   const supabase = createAdminClient()
@@ -978,7 +979,7 @@ export async function selectVariant(
   const fkColumn = source === 'reply' ? 'reply_template_id' : 'outreach_template_key'
   const { data: variants } = await (supabase as any)
     .from('reply_template_variants')
-    .select('variant_key, body')
+    .select('variant_key, body, required_variables')
     .eq(fkColumn, templateId)
     .eq('variant_source', source)
     .eq('active', true)
@@ -986,11 +987,26 @@ export async function selectVariant(
 
   if (!variants?.length) return null
 
-  const available = excludeKey
+  // Filter: exclude the reshuffle key, then exclude variants whose required_variables cannot resolve
+  let eligible = excludeKey
     ? variants.filter((v: any) => v.variant_key !== excludeKey)
-    : variants
+    : [...variants]
 
-  if (!available.length) return variants[0]
+  if (availableVars) {
+    eligible = eligible.filter((v: any) => {
+      const reqVars: string[] = v.required_variables || []
+      return reqVars.every((rv: string) => {
+        const val = availableVars[rv]
+        return val !== undefined && val !== null && val !== '' && val !== '0'
+      })
+    })
+  }
+
+  if (!eligible.length) {
+    // All variants blocked. Fall back to any variant with no required_variables.
+    const fallbacks = variants.filter((v: any) => !v.required_variables?.length)
+    return fallbacks[0] || variants[0]
+  }
 
   // Get the last 10 copies by this operator from the correct log table
   let recentLogs: any[] = []
@@ -1021,7 +1037,7 @@ export async function selectVariant(
   // Pick the variant that appears least recently (or not at all) in the recent window
   // Variants not in the window are preferred. Among those in the window, pick the one
   // that appeared earliest (least recently).
-  const notRecent = available.filter((v: any) => !recentKeys.includes(v.variant_key))
+  const notRecent = eligible.filter((v: any) => !recentKeys.includes(v.variant_key))
   if (notRecent.length > 0) {
     // Among those not recently used, pick one (first alphabetically for determinism)
     return notRecent[0]
@@ -1030,7 +1046,7 @@ export async function selectVariant(
   // All variants have been used recently. Pick the one whose most recent use is oldest.
   // recentKeys[0] is most recent. indexOf gives the first (most recent) position.
   // Higher indexOf = used longer ago. We want the highest indexOf.
-  const oldest = available.sort((a: any, b: any) => {
+  const oldest = eligible.sort((a: any, b: any) => {
     const aIdx = recentKeys.indexOf(a.variant_key)
     const bIdx = recentKeys.indexOf(b.variant_key)
     return bIdx - aIdx
