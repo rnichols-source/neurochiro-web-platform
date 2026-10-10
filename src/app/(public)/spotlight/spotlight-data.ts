@@ -75,8 +75,8 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     clinicName: "Shiozawa Wellness",
     city: "London",
     state: "UK",
-    videoUrl: "https://www.youtube.com/embed/2ftGcUjed4I",
-    thumbnail: "https://img.youtube.com/vi/2ftGcUjed4I/hqdefault.jpg",
+    videoUrl: "https://www.youtube.com/embed/2ftGcUjed4I?rel=0",
+    thumbnail: "https://img.youtube.com/vi/2ftGcUjed4I/maxresdefault.jpg",
     quote:
       "The more I do this, the more I want and the more I learn. And the less I feel like I know. That's a level of mastery.",
     description:
