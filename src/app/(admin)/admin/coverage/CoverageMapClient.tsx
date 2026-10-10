@@ -1294,8 +1294,8 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
   // Copy blocked if member is pro, or closing template with missing checkout URLs
   const isBlocked = memberCheck?.blocked === true
   const missingCheckoutUrl = isClosingScenario && (!outreachLinks.checkout_url_monthly || !outreachLinks.checkout_url_annual)
-  const missingFirstName = isClosingScenario && !firstName.trim()
-  const canCopy = handle.trim().length > 0 && !isBlocked && !memberCheckLoading && !missingCheckoutUrl && !missingFirstName
+  const canCopyComment = handle.trim().length > 0 && !isBlocked && !memberCheckLoading
+  const canCopyDM = handle.trim().length > 0 && !isBlocked && !memberCheckLoading && !missingCheckoutUrl && firstName.trim().length > 0
 
   // Copy handler: clipboard FIRST (sync in gesture), then server logging (async, non-blocking)
   const doCopy = (channel: 'ig_comment' | 'ig_dm') => {
@@ -1415,19 +1415,16 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
         {memberCheckLoading && <p className="text-[10px] text-white/30 mt-1">Checking...</p>}
       </div>
 
-      {/* First name input — shown for closing scenarios */}
-      {isClosingScenario && (
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Their first name"
-            value={firstName}
-            onChange={e => setFirstName(e.target.value)}
-            className="w-full px-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-base placeholder:text-white/25 focus:outline-none focus:border-neuro-orange"
-          />
-          {!firstName.trim() && <p className="text-[10px] text-amber-400/70 mt-1">First name required for closing templates</p>}
-        </div>
-      )}
+      {/* First name input — shown for all scenarios (DMs use it for greeting) */}
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Their first name (for DM greeting)"
+          value={firstName}
+          onChange={e => setFirstName(e.target.value)}
+          className="w-full px-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-base placeholder:text-white/25 focus:outline-none focus:border-neuro-orange"
+        />
+      </div>
 
       {/* Checkout URL missing warning */}
       {isClosingScenario && missingCheckoutUrl && (
@@ -1501,10 +1498,10 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
               <p className="text-sm text-white/80 whitespace-pre-wrap leading-relaxed mb-2">{commentText}</p>
               <button
                 onClick={() => doCopy('ig_comment')}
-                disabled={!canCopy}
+                disabled={!canCopyComment}
                 className={`flex items-center justify-center gap-1.5 px-3 min-h-[44px] w-full rounded-lg text-sm font-bold transition-colors ${
                   copiedComment ? 'bg-green-500/20 text-green-400'
-                    : !canCopy ? 'bg-white/5 text-white/20 cursor-not-allowed'
+                    : !canCopyComment ? 'bg-white/5 text-white/20 cursor-not-allowed'
                     : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400'
                 }`}>
                 {copiedComment ? <><Check className="w-4 h-4" /> Copied</> : <><Copy className="w-4 h-4" /> Copy Comment</>}
@@ -1524,10 +1521,10 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
               <p className="text-sm text-white/80 whitespace-pre-wrap leading-relaxed mb-2">{dmText}</p>
               <button
                 onClick={() => doCopy('ig_dm')}
-                disabled={!canCopy}
+                disabled={!canCopyDM}
                 className={`flex items-center justify-center gap-1.5 px-3 min-h-[44px] w-full rounded-lg text-sm font-bold transition-colors ${
                   copiedDM ? 'bg-green-500/20 text-green-400'
-                    : !canCopy ? 'bg-white/5 text-white/20 cursor-not-allowed'
+                    : !canCopyDM ? 'bg-white/5 text-white/20 cursor-not-allowed'
                     : 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400'
                 }`}>
                 {copiedDM ? <><Check className="w-4 h-4" /> Copied</> : <><Copy className="w-4 h-4" /> Copy DM</>}
