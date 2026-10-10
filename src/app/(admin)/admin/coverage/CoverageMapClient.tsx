@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send, MessageSquare, Map as MapIcon } from "lucide-react"
 import Link from "next/link"
-import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, DemandDot, OutreachScenario, lookupNearby, addMarketLead, logReply, getSentDoctorIds, getFarDistanceThreshold, autoLogDemand, undoAutoLogDemand, selectVariant, getDemandCountNearby, logDoctorOutreachCopy } from "./actions"
+import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, DemandDot, OutreachScenario, lookupNearby, addMarketLead, logReply, getSentDoctorIds, getFarDistanceThreshold, autoLogDemand, undoAutoLogDemand, selectVariant, getDemandCountNearby, logDoctorOutreachCopy, checkHandleAgainstMembers } from "./actions"
 import { getCountriesWithDemand, getCountryByIso2, type CountryConfig } from "@/config/countries"
 
 // ── Doctor Reply Scenarios ──
@@ -1182,10 +1182,38 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
   const [copiedDM, setCopiedDM] = useState(false)
   const [copyError, setCopyError] = useState<string | null>(null)
   const [prospectInfo, setProspectInfo] = useState<string | null>(null)
+  const [memberCheck, setMemberCheck] = useState<{ blocked: boolean; memberName?: string; memberTier?: string } | null>(null)
+  const [memberCheckLoading, setMemberCheckLoading] = useState(false)
   const handleInputRef = useRef<HTMLInputElement>(null)
+  const memberCheckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Bug 2 fix: pass raw number, templates own the word "people"
+  // Pass raw number, templates own the word "people"
   const demandStr = demandCount50 != null && demandCount50 > 0 ? String(demandCount50) : ''
+
+  // Member check: runs when handle changes (debounced 500ms)
+  useEffect(() => {
+    if (memberCheckTimerRef.current) clearTimeout(memberCheckTimerRef.current)
+    setMemberCheck(null)
+    setCopyError(null)
+
+    const normalized = handle.replace(/^@/, '').trim()
+    if (normalized.length < 2) return
+
+    setMemberCheckLoading(true)
+    memberCheckTimerRef.current = setTimeout(() => {
+      checkHandleAgainstMembers(normalized).then(result => {
+        setMemberCheck(result.isMember ? result : null)
+        setMemberCheckLoading(false)
+        if (result.blocked) {
+          setCopyError(`${result.memberName} is already a paying member. Do not send.`)
+        } else if (result.isMember && result.memberTier !== 'pro') {
+          setProspectInfo(`${result.memberName} has a directory listing on a legacy free tier.`)
+        }
+      }).catch(() => setMemberCheckLoading(false))
+    }, 500)
+
+    return () => { if (memberCheckTimerRef.current) clearTimeout(memberCheckTimerRef.current) }
+  }, [handle])
 
   // Fetch variants when scenario changes
   useEffect(() => {
@@ -1199,8 +1227,6 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
     setVariantsLoading(true)
     setCopiedComment(false)
     setCopiedDM(false)
-    setCopyError(null)
-    setProspectInfo(null)
 
     const availableVars: Record<string, string> = {
       handle: handle || '',
@@ -1248,18 +1274,26 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
   const commentText = commentVariant ? fillTemplate(commentVariant.body, vars) : ''
   const dmText = dmVariant ? fillTemplate(dmVariant.body, vars) : ''
 
-  // Copy handler: creates prospect, logs outreach, then copies to clipboard
-  const doCopy = async (channel: 'ig_comment' | 'ig_dm') => {
-    if (!handle || !scenario) return
+  // Copy blocked if member is pro (checked before copy, not during)
+  const isBlocked = memberCheck?.blocked === true
+  const canCopy = handle.trim().length > 0 && !isBlocked && !memberCheckLoading
+
+  // Copy handler: clipboard FIRST (sync in gesture), then server logging (async, non-blocking)
+  const doCopy = (channel: 'ig_comment' | 'ig_dm') => {
+    if (!handle || !scenario || isBlocked) return
     const templateKey = channel === 'ig_comment' ? scenario.commentKey : scenario.dmKey
     const variantUsed = channel === 'ig_comment' ? commentVariant : dmVariant
     const textToCopy = channel === 'ig_comment' ? commentText : dmText
     if (!templateKey || !textToCopy) return
 
-    setCopyError(null)
-    setProspectInfo(null)
+    // Clipboard write FIRST, synchronous within the user gesture
+    navigator.clipboard.writeText(textToCopy).catch(() => {})
 
-    const result = await logDoctorOutreachCopy({
+    if (channel === 'ig_comment') setCopiedComment(true)
+    else setCopiedDM(true)
+
+    // Server logging AFTER, non-blocking
+    logDoctorOutreachCopy({
       templateKey,
       channel,
       intent: scenario.key,
@@ -1274,40 +1308,22 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
       lng: resolvedLng,
       prospectType: scenario.key === 'student_or_associate' ? 'student' : 'doctor',
       demandCount50: demandCount50 ?? undefined,
-    })
-
-    if (result.blocked) {
-      setCopyError(`${result.memberName} is already a paying member. Do not send.`)
-      return
-    }
-
-    if (!result.ok) {
-      setCopyError(result.reason || 'Failed to create prospect')
-      return
-    }
-
-    // Copy to clipboard only after server confirms OK
-    try { await navigator.clipboard.writeText(textToCopy) } catch {}
-
-    if (channel === 'ig_comment') setCopiedComment(true)
-    else setCopiedDM(true)
-
-    // Free/hidden tier notice (not blocked, but noteworthy)
-    if (result.memberTier && result.memberTier !== 'pro') {
-      setProspectInfo(`${result.memberName} has a directory listing on a legacy free tier.`)
-    } else if (result.existingProspect) {
-      // Suppress "existing prospect" banner if created <60s ago (comment-then-DM for same person)
-      const createdAt = result.existingProspect.createdAt ? new Date(result.existingProspect.createdAt).getTime() : 0
-      const ageSeconds = (Date.now() - createdAt) / 1000
-      if (ageSeconds < 60) {
-        // Suppress: second copy for a prospect we just created
-      } else {
-        const ago = result.existingProspect.lastContactAt
-          ? `Last contact: ${new Date(result.existingProspect.lastContactAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-          : 'No prior contact logged'
-        setProspectInfo(`Existing prospect (${result.existingProspect.status}). ${ago}`)
+    }).then(result => {
+      if (!result.ok) {
+        setCopyError(`Copied, but prospect not recorded: ${result.reason || 'unknown error'}`)
+      } else if (result.existingProspect) {
+        const createdAt = result.existingProspect.createdAt ? new Date(result.existingProspect.createdAt).getTime() : 0
+        const ageSeconds = (Date.now() - createdAt) / 1000
+        if (ageSeconds >= 60) {
+          const ago = result.existingProspect.lastContactAt
+            ? `Last contact: ${new Date(result.existingProspect.lastContactAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+            : 'No prior contact logged'
+          setProspectInfo(`Existing prospect (${result.existingProspect.status}). ${ago}`)
+        }
       }
-    }
+    }).catch(err => {
+      setCopyError(`Copied, but prospect not recorded: ${err?.message || 'network error'}`)
+    })
 
     onCopied()
   }
@@ -1346,8 +1362,6 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
     setVariantsLoading(false)
   }
 
-  const canCopy = handle.trim().length > 0
-
   return (
     <div className="space-y-3">
       {/* Demand count badge */}
@@ -1377,6 +1391,7 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
           className="w-full pl-7 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-base placeholder:text-white/25 focus:outline-none focus:border-purple-400"
         />
         {!handle && <p className="text-[10px] text-amber-400/70 mt-1">Handle required before copy</p>}
+        {memberCheckLoading && <p className="text-[10px] text-white/30 mt-1">Checking...</p>}
       </div>
 
       {/* Member block / prospect info banners */}
@@ -1396,7 +1411,7 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
         {scenarios.map(s => (
           <button
             key={s.key}
-            onClick={() => { onScenarioChange(scenario?.key === s.key ? null : s); setCopyError(null); setProspectInfo(null) }}
+            onClick={() => { onScenarioChange(scenario?.key === s.key ? null : s); setCopyError(null); setProspectInfo(null); setCopiedComment(false); setCopiedDM(false) }}
             className={`px-3 py-2 rounded-lg text-xs font-bold transition-colors min-h-[44px] ${
               scenario?.key === s.key
                 ? 'bg-purple-500 text-white'

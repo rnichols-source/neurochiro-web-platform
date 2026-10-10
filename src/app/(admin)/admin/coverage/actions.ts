@@ -1121,6 +1121,35 @@ export interface OutreachScenario {
 
 // Scenarios defined in CoverageMapClient.tsx (static data, not a server action)
 
+export async function checkHandleAgainstMembers(handle: string): Promise<{
+  isMember: boolean
+  blocked: boolean
+  memberName?: string
+  memberTier?: string
+}> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+  const normalized = handle.replace(/^@/, '').toLowerCase()
+  if (!normalized) return { isMember: false, blocked: false }
+
+  const { data } = await (supabase as any)
+    .from('doctors')
+    .select('id, first_name, last_name, membership_tier')
+    .eq('instagram_handle_normalized', normalized)
+    .limit(1)
+
+  if (!data?.length) return { isMember: false, blocked: false }
+  const d = data[0]
+  const name = `Dr. ${d.first_name || ''} ${d.last_name || ''}`.trim()
+  const tier = d.membership_tier || 'free'
+  return {
+    isMember: true,
+    blocked: tier === 'pro',
+    memberName: name,
+    memberTier: tier,
+  }
+}
+
 export async function getOutreachLinks(): Promise<{ calendly_url: string; mastermind_url: string }> {
   await checkAdminAuth()
   const supabase = createAdminClient()
