@@ -1275,10 +1275,10 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
     return () => { cancelled = true }
   }, [scenario?.key, demandCount50, handle, city])
 
-  // Template variable substitution
+  // Template variable substitution — first_name falls back to "Doc", handle optional
   const vars: Record<string, string> = {
     handle: handle.startsWith('@') ? handle : handle ? `@${handle}` : '',
-    first_name: firstName,
+    first_name: firstName.trim() || 'Doc',
     city,
     state,
     demand_50mi: demandStr,
@@ -1291,15 +1291,15 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
   const commentText = commentVariant ? fillTemplate(commentVariant.body, vars) : ''
   const dmText = dmVariant ? fillTemplate(dmVariant.body, vars) : ''
 
-  // Copy blocked if member is pro, or closing template with missing checkout URLs
+  // Copy blocked only if member is pro or closing template with missing checkout URLs
   const isBlocked = memberCheck?.blocked === true
   const missingCheckoutUrl = isClosingScenario && (!outreachLinks.checkout_url_monthly || !outreachLinks.checkout_url_annual)
-  const canCopyComment = handle.trim().length > 0 && !isBlocked && !memberCheckLoading
-  const canCopyDM = handle.trim().length > 0 && !isBlocked && !memberCheckLoading && !missingCheckoutUrl && firstName.trim().length > 0
+  const canCopyComment = !isBlocked && !missingCheckoutUrl
+  const canCopyDM = !isBlocked && !missingCheckoutUrl
 
   // Copy handler: clipboard FIRST (sync in gesture), then server logging (async, non-blocking)
   const doCopy = (channel: 'ig_comment' | 'ig_dm') => {
-    if (!handle || !scenario || isBlocked) return
+    if (!scenario || isBlocked) return
     const templateKey = channel === 'ig_comment' ? scenario.commentKey : scenario.dmKey
     const variantUsed = channel === 'ig_comment' ? commentVariant : dmVariant
     const textToCopy = channel === 'ig_comment' ? commentText : dmText
@@ -1311,38 +1311,40 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
     if (channel === 'ig_comment') setCopiedComment(true)
     else setCopiedDM(true)
 
-    // Server logging AFTER, non-blocking
-    logDoctorOutreachCopy({
-      templateKey,
-      channel,
-      intent: scenario.key,
-      scenarioKey: scenario.key,
-      renderedBody: textToCopy,
-      variantKey: variantUsed?.variant_key,
-      city,
-      state,
-      country,
-      handle: vars.handle,
-      lat: resolvedLat,
-      lng: resolvedLng,
-      prospectType: scenario.key === 'student_or_associate' ? 'student' : 'doctor',
-      demandCount50: demandCount50 ?? undefined,
-    }).then(result => {
-      if (!result.ok) {
-        setCopyError(`Copied, but prospect not recorded: ${result.reason || 'unknown error'}`)
-      } else if (result.existingProspect) {
-        const createdAt = result.existingProspect.createdAt ? new Date(result.existingProspect.createdAt).getTime() : 0
-        const ageSeconds = (Date.now() - createdAt) / 1000
-        if (ageSeconds >= 60) {
-          const ago = result.existingProspect.lastContactAt
-            ? `Last contact: ${new Date(result.existingProspect.lastContactAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-            : 'No prior contact logged'
-          setProspectInfo(`Existing prospect (${result.existingProspect.status}). ${ago}`)
+    // Server logging AFTER, non-blocking — only if handle is provided
+    if (handle.trim()) {
+      logDoctorOutreachCopy({
+        templateKey,
+        channel,
+        intent: scenario.key,
+        scenarioKey: scenario.key,
+        renderedBody: textToCopy,
+        variantKey: variantUsed?.variant_key,
+        city,
+        state,
+        country,
+        handle: vars.handle,
+        lat: resolvedLat,
+        lng: resolvedLng,
+        prospectType: scenario.key === 'student_or_associate' ? 'student' : 'doctor',
+        demandCount50: demandCount50 ?? undefined,
+      }).then(result => {
+        if (!result.ok) {
+          setCopyError(`Copied, but prospect not recorded: ${result.reason || 'unknown error'}`)
+        } else if (result.existingProspect) {
+          const createdAt = result.existingProspect.createdAt ? new Date(result.existingProspect.createdAt).getTime() : 0
+          const ageSeconds = (Date.now() - createdAt) / 1000
+          if (ageSeconds >= 60) {
+            const ago = result.existingProspect.lastContactAt
+              ? `Last contact: ${new Date(result.existingProspect.lastContactAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+              : 'No prior contact logged'
+            setProspectInfo(`Existing prospect (${result.existingProspect.status}). ${ago}`)
+          }
         }
-      }
-    }).catch(err => {
-      setCopyError(`Copied, but prospect not recorded: ${err?.message || 'network error'}`)
-    })
+      }).catch(err => {
+        setCopyError(`Copied, but prospect not recorded: ${err?.message || 'network error'}`)
+      })
+    }
 
     onCopied()
   }
@@ -1411,7 +1413,7 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
           onChange={e => onHandleChange(e.target.value.replace(/^@/, '').replace(/[^A-Za-z0-9._]/g, '').slice(0, 30))}
           className="w-full pl-7 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-base placeholder:text-white/25 focus:outline-none focus:border-purple-400"
         />
-        {!handle && <p className="text-[10px] text-amber-400/70 mt-1">Handle required before copy</p>}
+        {!handle && <p className="text-[10px] text-white/20 mt-1">Optional. Tracks the prospect.</p>}
         {memberCheckLoading && <p className="text-[10px] text-white/30 mt-1">Checking...</p>}
       </div>
 
@@ -1419,7 +1421,7 @@ function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, 
       <div className="relative">
         <input
           type="text"
-          placeholder="Their first name (for DM greeting)"
+          placeholder="Their first name (optional, defaults to Doc)"
           value={firstName}
           onChange={e => setFirstName(e.target.value)}
           className="w-full px-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-base placeholder:text-white/25 focus:outline-none focus:border-neuro-orange"
