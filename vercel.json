@@ -10,24 +10,12 @@
       "schedule": "0 8 * * 2"
     },
     {
-      "path": "/api/cron/follow-up-bot",
-      "schedule": "0 11 * * *"
-    },
-    {
       "path": "/api/cron/profile-nudger",
       "schedule": "0 13 * * *"
     },
     {
       "path": "/api/cron/onboarding-sequence",
       "schedule": "0 14 * * *"
-    },
-    {
-      "path": "/api/cron/upgrade-nudger",
-      "schedule": "0 15 * * *"
-    },
-    {
-      "path": "/api/cron/outreach-sender",
-      "schedule": "0 12 * * 1-5"
     },
     {
       "path": "/api/cron/analytics-compiler",
@@ -38,24 +26,12 @@
       "schedule": "0 7 * * 0"
     },
     {
-      "path": "/api/cron/churn-preventer",
-      "schedule": "0 10 * * *"
-    },
-    {
       "path": "/api/cron/spotlight-promoter",
       "schedule": "0 14 * * 4"
     },
     {
       "path": "/api/cron/student-opportunity",
       "schedule": "0 13 * * 3"
-    },
-    {
-      "path": "/api/cron/vendor-outreach",
-      "schedule": "0 14 * * 1-5"
-    },
-    {
-      "path": "/api/cron/seminar-host-outreach",
-      "schedule": "0 15 * * 2,4"
     },
     {
       "path": "/api/cron/lead-nurture",
@@ -68,10 +44,6 @@
     {
       "path": "/api/cron/expire-boosts",
       "schedule": "0 5 * * *"
-    },
-    {
-      "path": "/api/cron/free-to-paid",
-      "schedule": "0 9 * * *"
     },
     {
       "path": "/api/cron/monthly-growth-report",

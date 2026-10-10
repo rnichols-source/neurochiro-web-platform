@@ -1109,3 +1109,221 @@ export async function getSentDoctorIds(): Promise<string[]> {
     .not('doctor_id', 'is', null)
   return [...new Set((data || []).map((r: any) => r.doctor_id))] as string[]
 }
+
+// ── Doctor Outreach (coverage map doctor mode) ──
+
+export interface OutreachScenario {
+  key: string
+  label: string
+  commentKey: string | null
+  dmKey: string | null
+}
+
+// Scenarios defined in CoverageMapClient.tsx (static data, not a server action)
+
+export async function getOutreachLinks(): Promise<{ calendly_url: string; mastermind_url: string }> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+  const { data } = await (supabase as any).from('platform_settings').select('value').eq('key', 'doctor_outreach').single()
+  const config = data?.value || {}
+  return {
+    calendly_url: config.calendly_url || '',
+    mastermind_url: config.mastermind_url || '',
+  }
+}
+
+export async function getDemandCountNearby(lat: number, lng: number, radiusMi: number = 50): Promise<number> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+
+  // Load demand source filter
+  const { data: configRow } = await (supabase as any).from('platform_settings').select('value').eq('key', 'doctor_outreach').single()
+  const demandSources: string[] = configRow?.value?.demand_sources || ['instagram', 'instagram_comment']
+
+  // Bounding box pre-filter
+  const latDeg = radiusMi / 69
+  const lngDeg = radiusMi / (69 * Math.cos(lat * Math.PI / 180))
+
+  const { data: mentions } = await (supabase as any)
+    .from('demand_mentions')
+    .select('lat, lng')
+    .in('source', demandSources)
+    .gte('lat', lat - latDeg).lte('lat', lat + latDeg)
+    .gte('lng', lng - lngDeg).lte('lng', lng + lngDeg)
+
+  let count = 0
+  for (const m of (mentions || []) as any[]) {
+    if (haversineDistance(lat, lng, Number(m.lat), Number(m.lng)) <= radiusMi) count++
+  }
+  return count
+}
+
+export async function logDoctorOutreachCopy(data: {
+  templateKey: string
+  channel: string
+  intent: string
+  scenarioKey: string
+  renderedBody: string
+  variantKey?: string
+  city: string
+  state: string
+  country: string
+  handle: string
+  lat?: number
+  lng?: number
+  prospectType: 'doctor' | 'student'
+  demandCount50?: number
+}): Promise<{
+  ok: boolean
+  blocked?: boolean
+  reason?: string
+  memberName?: string
+  memberTier?: string
+  prospectId?: string
+  existingProspect?: { status: string; lastContactAt: string | null; createdAt: string | null; operatorId: string | null }
+}> {
+  const user = await checkAdminAuth()
+  const supabase = createAdminClient()
+  const handleNormalized = data.handle.replace(/^@/, '').toLowerCase()
+
+  // ── Duplicate guard: indexed lookup on instagram_handle_normalized ──
+  const { data: memberMatches } = await (supabase as any)
+    .from('doctors')
+    .select('id, first_name, last_name, slug, membership_tier')
+    .eq('instagram_handle_normalized', handleNormalized)
+    .limit(1)
+
+  const memberMatch = memberMatches?.[0] || null
+
+  if (memberMatch) {
+    const memberName = `Dr. ${memberMatch.first_name || ''} ${memberMatch.last_name || ''}`.trim()
+    const tier = memberMatch.membership_tier || 'free'
+
+    if (tier === 'pro') {
+      return {
+        ok: false,
+        blocked: true,
+        reason: 'existing_member',
+        memberName,
+        memberTier: 'pro',
+      }
+    }
+
+    // Free/hidden tier: not blocked. Fall through to prospect creation with is_existing_member = true.
+  }
+
+  // ── Check if handle already exists as a prospect (exact match on normalized handle) ──
+  const { data: existingProspect } = await (supabase as any)
+    .from('outreach_prospects')
+    .select('id, status, next_follow_up_at, created_at')
+    .eq('instagram_handle', handleNormalized)
+    .limit(1)
+
+  let prospectId: string
+  let statusBefore: string
+
+  if (existingProspect && existingProspect.length > 0) {
+    // Existing prospect: attach log to them
+    prospectId = existingProspect[0].id
+    statusBefore = existingProspect[0].status
+
+    // Get last contact info
+    const { data: lastLog } = await (supabase as any)
+      .from('outreach_logs')
+      .select('created_at, operator')
+      .eq('prospect_id', prospectId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+    // Write outreach_logs with the real prospect_id
+    await (supabase as any).from('outreach_logs').insert({
+      prospect_id: prospectId,
+      template_key: data.templateKey,
+      channel: data.channel,
+      intent: data.intent,
+      rendered_body: data.renderedBody,
+      operator: user.id,
+      variant_key: data.variantKey || null,
+      status_before: statusBefore,
+      status_after: statusBefore,
+      demand_snapshot: { city: data.city, state: data.state, demand_50mi: data.demandCount50 ?? null },
+    })
+
+    return {
+      ok: true,
+      prospectId,
+      existingProspect: {
+        status: statusBefore,
+        lastContactAt: lastLog?.[0]?.created_at || null,
+        createdAt: existingProspect[0].created_at || null,
+        operatorId: lastLog?.[0]?.operator || null,
+      },
+      ...(memberMatch ? {
+        memberName: `Dr. ${memberMatch.first_name || ''} ${memberMatch.last_name || ''}`.trim(),
+        memberTier: memberMatch.membership_tier || 'free',
+      } : {}),
+    }
+  }
+
+  // ── New prospect: create record ──
+
+  // Load follow-up config
+  const { data: configRow } = await (supabase as any)
+    .from('platform_settings').select('value').eq('key', 'doctor_outreach').single()
+  const config = configRow?.value || {}
+  const followUpDays = config.follow_up_days?.first || 5
+  const followUpAt = new Date()
+  followUpAt.setDate(followUpAt.getDate() + followUpDays)
+
+  const { data: inserted, error: insertError } = await (supabase as any)
+    .from('outreach_prospects')
+    .insert({
+      name: handleNormalized,
+      instagram_handle: handleNormalized,
+      city: data.city,
+      state: data.state,
+      country: data.country || 'US',
+      latitude: data.lat ?? null,
+      longitude: data.lng ?? null,
+      source: data.channel === 'ig_dm' ? 'ig_dm' : 'ig_comment',
+      source_detail: data.scenarioKey,
+      status: 'contacted',
+      prospect_type: data.prospectType,
+      has_usable_location: data.lat != null && data.lng != null,
+      is_existing_member: memberMatch != null,
+      next_follow_up_at: followUpAt.toISOString(),
+      contacted_at: new Date().toISOString(),
+    })
+    .select('id')
+    .single()
+
+  if (insertError) {
+    return { ok: false, reason: insertError.message }
+  }
+
+  prospectId = inserted.id
+
+  // Write outreach_logs with the real prospect_id
+  await (supabase as any).from('outreach_logs').insert({
+    prospect_id: prospectId,
+    template_key: data.templateKey,
+    channel: data.channel,
+    intent: data.intent,
+    rendered_body: data.renderedBody,
+    operator: user.id,
+    variant_key: data.variantKey || null,
+    status_before: 'new',
+    status_after: 'contacted',
+    demand_snapshot: { city: data.city, state: data.state, demand_50mi: data.demandCount50 ?? null },
+  })
+
+  revalidatePath('/admin/outreach')
+  return {
+    ok: true,
+    prospectId,
+    ...(memberMatch ? {
+      memberName: `Dr. ${memberMatch.first_name || ''} ${memberMatch.last_name || ''}`.trim(),
+      memberTier: memberMatch.membership_tier || 'free',
+    } : {}),
+  }
+}

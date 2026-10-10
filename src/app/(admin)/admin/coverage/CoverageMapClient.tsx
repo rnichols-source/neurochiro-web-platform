@@ -3,8 +3,17 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send, MessageSquare, Map as MapIcon } from "lucide-react"
 import Link from "next/link"
-import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, DemandDot, lookupNearby, addMarketLead, logReply, getSentDoctorIds, getFarDistanceThreshold, autoLogDemand, undoAutoLogDemand, selectVariant } from "./actions"
+import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, DemandDot, OutreachScenario, lookupNearby, addMarketLead, logReply, getSentDoctorIds, getFarDistanceThreshold, autoLogDemand, undoAutoLogDemand, selectVariant, getDemandCountNearby, logDoctorOutreachCopy } from "./actions"
 import { getCountriesWithDemand, getCountryByIso2, type CountryConfig } from "@/config/countries"
+
+// ── Doctor Reply Scenarios ──
+const DOCTOR_SCENARIOS: OutreachScenario[] = [
+  { key: 'doctor_commented', label: 'Doctor Commented', commentKey: 'doctor_commented_ig_comment', dmKey: 'doctor_commented_ig_dm' },
+  { key: 'patient_tagged_their_doctor', label: 'Patient Tagged', commentKey: 'patient_tagged_doctor_ig_comment', dmKey: 'patient_tagged_doctor_ig_dm' },
+  { key: 'someone_tagged_an_office', label: 'Office Tagged', commentKey: 'someone_tagged_office_ig_comment', dmKey: 'someone_tagged_office_ig_dm' },
+  { key: 'doctor_dmed_me', label: 'Doctor DM\'d Me', commentKey: null, dmKey: 'doctor_dmed_me_ig_dm' },
+  { key: 'student_or_associate', label: 'Student', commentKey: 'student_ig_comment', dmKey: 'student_ig_dm' },
+]
 
 // ── Colors ──
 const COLORS = {
@@ -49,7 +58,7 @@ function loadMapCollapsed(): boolean {
 // ── Main Component ──
 
 export default function CoverageMapClient({
-  doctors, demand, stats, mentions, templates, demandDots,
+  doctors, demand, stats, mentions, templates, demandDots, outreachLinks,
 }: {
   doctors: CoverageDoctor[]
   demand: DemandZip[]
@@ -57,6 +66,7 @@ export default function CoverageMapClient({
   mentions: MentionCity[]
   templates: ReplyTemplate[]
   demandDots?: DemandDot[]
+  outreachLinks?: { calendly_url: string; mastermind_url: string }
 }) {
   const [layers, setLayers] = useState<Record<LayerKey, boolean>>(loadSavedLayers)
   const [showStatsPanel, setShowStatsPanel] = useState(true)
@@ -77,10 +87,19 @@ export default function CoverageMapClient({
   const [couldNotResolve, setCouldNotResolve] = useState(false)
   const [resolvedCity, setResolvedCity] = useState('')
   const [resolvedState, setResolvedState] = useState('')
+  const [resolvedLat, setResolvedLat] = useState<number | undefined>(undefined)
+  const [resolvedLng, setResolvedLng] = useState<number | undefined>(undefined)
   const [confidence, setConfidence] = useState<'exact' | 'dominant' | 'ambiguous' | 'approximate' | undefined>(undefined)
   const [rejectedCandidates, setRejectedCandidates] = useState<{ city: string; state: string }[] | null>(null)
   const [showOtherResults, setShowOtherResults] = useState(false)
   const [autoLogResult, setAutoLogResult] = useState<{ id: string; reason: string } | null>(null)
+  // Doctor reply mode state
+  const [replyMode, setReplyMode] = useState<'patient' | 'doctor'>('patient')
+  const [doctorScenario, setDoctorScenario] = useState<OutreachScenario | null>(null)
+  const [doctorHandle, setDoctorHandle] = useState('')
+  const [demandCount50, setDemandCount50] = useState<number | null>(null)
+  const [demandLoading, setDemandLoading] = useState(false)
+
   const lookupInputRef = useRef<HTMLInputElement>(null)
   const replyBtnRef = useRef<HTMLButtonElement>(null)
   const dmBtnRef = useRef<HTMLButtonElement>(null)
@@ -420,10 +439,14 @@ export default function CoverageMapClient({
     setCouldNotResolve(false)
     setResolvedCity('')
     setResolvedState('')
+    setResolvedLat(undefined)
+    setResolvedLng(undefined)
     setConfidence(undefined)
     setRejectedCandidates(null)
     setShowOtherResults(false)
     setAutoLogResult(null)
+    setDemandCount50(null)
+    setDoctorScenario(null)
     setTimeout(() => { lookupInputRef.current?.focus(); lookupInputRef.current?.select() }, 50)
   }, [])
 
@@ -438,6 +461,8 @@ export default function CoverageMapClient({
     setConfidence(undefined)
     setRejectedCandidates(null)
     setShowOtherResults(false)
+    setDemandCount50(null)
+    setDoctorScenario(null)
     setSessionCount(prev => prev + 1)
     setTodayCount(prev => prev + 1)
     setTimeout(() => { lookupInputRef.current?.focus(); lookupInputRef.current?.select() }, 50)
@@ -481,6 +506,16 @@ export default function CoverageMapClient({
       setRejectedCandidates(r.rejectedCandidates || null)
       setResolvedCity(r.resolvedCity || '')
       setResolvedState(r.resolvedState || '')
+      setResolvedLat(r.resolvedLat)
+      setResolvedLng(r.resolvedLng)
+
+      // Fetch demand count for doctor mode (non-blocking)
+      setDemandCount50(null)
+      if (r.resolvedLat && r.resolvedLng) {
+        getDemandCountNearby(r.resolvedLat, r.resolvedLng, 50)
+          .then(count => setDemandCount50(count))
+          .catch(() => {})
+      }
 
       // Auto-log demand if resolved and qualifies
       setAutoLogResult(null)
@@ -686,8 +721,28 @@ export default function CoverageMapClient({
           </div>
         )}
 
-        {/* Results */}
-        {!couldNotResolve && sortedLookupResults && (sortedLookupResults.length > 0 ? (
+        {/* Patient / Doctor mode toggle — only show when we have a resolved city */}
+        {!couldNotResolve && lookupResults !== null && resolvedCity && (
+          <div className="flex items-center gap-1 mb-3">
+            <button
+              onClick={() => setReplyMode('patient')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors min-h-[36px] ${
+                replyMode === 'patient' ? 'bg-neuro-orange text-white' : 'bg-white/5 text-white/40 hover:text-white/60'
+              }`}>
+              Patient
+            </button>
+            <button
+              onClick={() => setReplyMode('doctor')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors min-h-[36px] ${
+                replyMode === 'doctor' ? 'bg-purple-500 text-white' : 'bg-white/5 text-white/40 hover:text-white/60'
+              }`}>
+              Doctor
+            </button>
+          </div>
+        )}
+
+        {/* Results — Patient mode */}
+        {replyMode === 'patient' && !couldNotResolve && sortedLookupResults && (sortedLookupResults.length > 0 ? (
           <>
             <div className="flex gap-2 mb-2">
               {(['distance', 'name', 'tier'] as const).map(s => (
@@ -732,7 +787,7 @@ export default function CoverageMapClient({
               </div>
             )}
           </>
-        ) : (
+        ) : replyMode === 'patient' && !couldNotResolve && sortedLookupResults && (
           <div className="text-center py-4">
             {resolvedCity ? (
               <p className="text-xs text-white/30 mb-3">We found {resolvedCity}, {resolvedState} but no doctor within 100 miles.</p>
@@ -742,6 +797,27 @@ export default function CoverageMapClient({
             <WaitlistReplyButtons searchedCity={lookupQuery} templates={templates} />
           </div>
         ))}
+
+        {/* Results — Doctor mode */}
+        {replyMode === 'doctor' && !couldNotResolve && lookupResults !== null && resolvedCity && (
+          <DoctorReplyPanel
+            city={resolvedCity}
+            state={resolvedState}
+            country={lookupCountry}
+            demandCount50={demandCount50}
+            outreachLinks={outreachLinks || { calendly_url: '', mastermind_url: '' }}
+            scenario={doctorScenario}
+            onScenarioChange={setDoctorScenario}
+            handle={doctorHandle}
+            onHandleChange={setDoctorHandle}
+            onCopied={() => {
+              setSessionCount(prev => prev + 1)
+              setTodayCount(prev => prev + 1)
+            }}
+            resolvedLat={resolvedLat}
+            resolvedLng={resolvedLng}
+          />
+        )}
 
         {/* Keyboard shortcuts */}
         <div className="mt-4 pt-3 border-t border-white/5">
@@ -1078,6 +1154,332 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
           </button>
         </span>
       </div>
+    </div>
+  )
+}
+
+// ── Doctor Reply Panel ──
+
+function DoctorReplyPanel({ city, state, country, demandCount50, outreachLinks, scenario, onScenarioChange, handle, onHandleChange, onCopied, resolvedLat, resolvedLng }: {
+  city: string
+  state: string
+  country: string
+  demandCount50: number | null
+  outreachLinks: { calendly_url: string; mastermind_url: string }
+  scenario: OutreachScenario | null
+  onScenarioChange: (s: OutreachScenario | null) => void
+  handle: string
+  onHandleChange: (h: string) => void
+  onCopied: () => void
+  resolvedLat?: number
+  resolvedLng?: number
+}) {
+  const scenarios = DOCTOR_SCENARIOS
+  const [commentVariant, setCommentVariant] = useState<{ variant_key: string; body: string } | null>(null)
+  const [dmVariant, setDmVariant] = useState<{ variant_key: string; body: string } | null>(null)
+  const [variantsLoading, setVariantsLoading] = useState(false)
+  const [copiedComment, setCopiedComment] = useState(false)
+  const [copiedDM, setCopiedDM] = useState(false)
+  const [copyError, setCopyError] = useState<string | null>(null)
+  const [prospectInfo, setProspectInfo] = useState<string | null>(null)
+  const handleInputRef = useRef<HTMLInputElement>(null)
+
+  // Bug 2 fix: pass raw number, templates own the word "people"
+  const demandStr = demandCount50 != null && demandCount50 > 0 ? String(demandCount50) : ''
+
+  // Fetch variants when scenario changes
+  useEffect(() => {
+    if (!scenario) {
+      setCommentVariant(null)
+      setDmVariant(null)
+      return
+    }
+
+    let cancelled = false
+    setVariantsLoading(true)
+    setCopiedComment(false)
+    setCopiedDM(false)
+    setCopyError(null)
+    setProspectInfo(null)
+
+    const availableVars: Record<string, string> = {
+      handle: handle || '',
+      city,
+      state,
+      demand_50mi: demandStr,
+      calendly_link: outreachLinks.calendly_url,
+      mastermind_link: outreachLinks.mastermind_url,
+    }
+
+    const promises: Promise<any>[] = []
+    if (scenario.commentKey) {
+      promises.push(selectVariant(scenario.commentKey, undefined, 'outreach', availableVars))
+    } else {
+      promises.push(Promise.resolve(null))
+    }
+    if (scenario.dmKey) {
+      promises.push(selectVariant(scenario.dmKey, undefined, 'outreach', availableVars))
+    } else {
+      promises.push(Promise.resolve(null))
+    }
+
+    Promise.all(promises).then(([cv, dv]) => {
+      if (cancelled) return
+      setCommentVariant(cv)
+      setDmVariant(dv)
+      setVariantsLoading(false)
+    }).catch(() => {
+      if (!cancelled) setVariantsLoading(false)
+    })
+
+    return () => { cancelled = true }
+  }, [scenario?.key, demandCount50, handle, city])
+
+  // Template variable substitution
+  const vars: Record<string, string> = {
+    handle: handle.startsWith('@') ? handle : handle ? `@${handle}` : '',
+    city,
+    state,
+    demand_50mi: demandStr,
+    calendly_link: outreachLinks.calendly_url,
+    mastermind_link: outreachLinks.mastermind_url,
+  }
+
+  const commentText = commentVariant ? fillTemplate(commentVariant.body, vars) : ''
+  const dmText = dmVariant ? fillTemplate(dmVariant.body, vars) : ''
+
+  // Copy handler: creates prospect, logs outreach, then copies to clipboard
+  const doCopy = async (channel: 'ig_comment' | 'ig_dm') => {
+    if (!handle || !scenario) return
+    const templateKey = channel === 'ig_comment' ? scenario.commentKey : scenario.dmKey
+    const variantUsed = channel === 'ig_comment' ? commentVariant : dmVariant
+    const textToCopy = channel === 'ig_comment' ? commentText : dmText
+    if (!templateKey || !textToCopy) return
+
+    setCopyError(null)
+    setProspectInfo(null)
+
+    const result = await logDoctorOutreachCopy({
+      templateKey,
+      channel,
+      intent: scenario.key,
+      scenarioKey: scenario.key,
+      renderedBody: textToCopy,
+      variantKey: variantUsed?.variant_key,
+      city,
+      state,
+      country,
+      handle: vars.handle,
+      lat: resolvedLat,
+      lng: resolvedLng,
+      prospectType: scenario.key === 'student_or_associate' ? 'student' : 'doctor',
+      demandCount50: demandCount50 ?? undefined,
+    })
+
+    if (result.blocked) {
+      setCopyError(`${result.memberName} is already a paying member. Do not send.`)
+      return
+    }
+
+    if (!result.ok) {
+      setCopyError(result.reason || 'Failed to create prospect')
+      return
+    }
+
+    // Copy to clipboard only after server confirms OK
+    try { await navigator.clipboard.writeText(textToCopy) } catch {}
+
+    if (channel === 'ig_comment') setCopiedComment(true)
+    else setCopiedDM(true)
+
+    // Free/hidden tier notice (not blocked, but noteworthy)
+    if (result.memberTier && result.memberTier !== 'pro') {
+      setProspectInfo(`${result.memberName} has a directory listing on a legacy free tier.`)
+    } else if (result.existingProspect) {
+      // Suppress "existing prospect" banner if created <60s ago (comment-then-DM for same person)
+      const createdAt = result.existingProspect.createdAt ? new Date(result.existingProspect.createdAt).getTime() : 0
+      const ageSeconds = (Date.now() - createdAt) / 1000
+      if (ageSeconds < 60) {
+        // Suppress: second copy for a prospect we just created
+      } else {
+        const ago = result.existingProspect.lastContactAt
+          ? `Last contact: ${new Date(result.existingProspect.lastContactAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+          : 'No prior contact logged'
+        setProspectInfo(`Existing prospect (${result.existingProspect.status}). ${ago}`)
+      }
+    }
+
+    onCopied()
+  }
+
+  const handleReshuffle = async () => {
+    if (!scenario) return
+    setVariantsLoading(true)
+    setCopiedComment(false)
+    setCopiedDM(false)
+    setCopyError(null)
+    setProspectInfo(null)
+
+    const availableVars: Record<string, string> = {
+      handle: handle || '',
+      city, state,
+      demand_50mi: demandStr,
+      calendly_link: outreachLinks.calendly_url,
+      mastermind_link: outreachLinks.mastermind_url,
+    }
+
+    const promises: Promise<any>[] = []
+    if (scenario.commentKey) {
+      promises.push(selectVariant(scenario.commentKey, commentVariant?.variant_key, 'outreach', availableVars))
+    } else {
+      promises.push(Promise.resolve(null))
+    }
+    if (scenario.dmKey) {
+      promises.push(selectVariant(scenario.dmKey, dmVariant?.variant_key, 'outreach', availableVars))
+    } else {
+      promises.push(Promise.resolve(null))
+    }
+
+    const [cv, dv] = await Promise.all(promises)
+    setCommentVariant(cv)
+    setDmVariant(dv)
+    setVariantsLoading(false)
+  }
+
+  const canCopy = handle.trim().length > 0
+
+  return (
+    <div className="space-y-3">
+      {/* Demand count badge */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-purple-400 font-bold">Doctor Mode</span>
+        <span className="text-[10px] text-white/30">
+          {city}, {state}
+        </span>
+        {demandCount50 !== null && (
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+            demandCount50 > 0 ? 'bg-cyan-500/20 text-cyan-400' : 'bg-white/5 text-white/30'
+          }`}>
+            {demandCount50} demand within 50mi
+          </span>
+        )}
+      </div>
+
+      {/* Handle input */}
+      <div className="relative">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm">@</span>
+        <input
+          ref={handleInputRef}
+          type="text"
+          placeholder="their_instagram_handle"
+          value={handle.replace(/^@/, '')}
+          onChange={e => onHandleChange(e.target.value.replace(/^@/, '').replace(/[^A-Za-z0-9._]/g, '').slice(0, 30))}
+          className="w-full pl-7 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-base placeholder:text-white/25 focus:outline-none focus:border-purple-400"
+        />
+        {!handle && <p className="text-[10px] text-amber-400/70 mt-1">Handle required before copy</p>}
+      </div>
+
+      {/* Member block / prospect info banners */}
+      {copyError && (
+        <div className="bg-red-500/20 border border-red-500/40 rounded-xl px-4 py-3">
+          <p className="text-sm font-bold text-red-400">{copyError}</p>
+        </div>
+      )}
+      {prospectInfo && (
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2">
+          <p className="text-[11px] text-amber-400">{prospectInfo}</p>
+        </div>
+      )}
+
+      {/* Scenario buttons */}
+      <div className="flex flex-wrap gap-1.5">
+        {scenarios.map(s => (
+          <button
+            key={s.key}
+            onClick={() => { onScenarioChange(scenario?.key === s.key ? null : s); setCopyError(null); setProspectInfo(null) }}
+            className={`px-3 py-2 rounded-lg text-xs font-bold transition-colors min-h-[44px] ${
+              scenario?.key === s.key
+                ? 'bg-purple-500 text-white'
+                : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80'
+            }`}>
+            {s.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Template preview + copy */}
+      {scenario && !variantsLoading && (
+        <div className="space-y-2">
+          {/* Comment template */}
+          {commentVariant && (
+            <div className="bg-white/5 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Comment Reply</span>
+                {commentVariant.variant_key && (
+                  <span className="text-[9px] text-white/20">{commentVariant.variant_key}</span>
+                )}
+              </div>
+              <p className="text-sm text-white/80 whitespace-pre-wrap leading-relaxed mb-2">{commentText}</p>
+              <button
+                onClick={() => doCopy('ig_comment')}
+                disabled={!canCopy}
+                className={`flex items-center justify-center gap-1.5 px-3 min-h-[44px] w-full rounded-lg text-sm font-bold transition-colors ${
+                  copiedComment ? 'bg-green-500/20 text-green-400'
+                    : !canCopy ? 'bg-white/5 text-white/20 cursor-not-allowed'
+                    : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400'
+                }`}>
+                {copiedComment ? <><Check className="w-4 h-4" /> Copied</> : <><Copy className="w-4 h-4" /> Copy Comment</>}
+              </button>
+            </div>
+          )}
+
+          {/* DM template */}
+          {dmVariant && (
+            <div className="bg-white/5 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">DM</span>
+                {dmVariant.variant_key && (
+                  <span className="text-[9px] text-white/20">{dmVariant.variant_key}</span>
+                )}
+              </div>
+              <p className="text-sm text-white/80 whitespace-pre-wrap leading-relaxed mb-2">{dmText}</p>
+              <button
+                onClick={() => doCopy('ig_dm')}
+                disabled={!canCopy}
+                className={`flex items-center justify-center gap-1.5 px-3 min-h-[44px] w-full rounded-lg text-sm font-bold transition-colors ${
+                  copiedDM ? 'bg-green-500/20 text-green-400'
+                    : !canCopy ? 'bg-white/5 text-white/20 cursor-not-allowed'
+                    : 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400'
+                }`}>
+                {copiedDM ? <><Check className="w-4 h-4" /> Copied</> : <><Copy className="w-4 h-4" /> Copy DM</>}
+              </button>
+            </div>
+          )}
+
+          {/* No templates available */}
+          {!commentVariant && !dmVariant && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">
+              <p className="text-xs text-red-400">No eligible templates for this scenario. Missing variables may be blocking all variants.</p>
+            </div>
+          )}
+
+          {/* Reshuffle */}
+          {(commentVariant || dmVariant) && (
+            <button
+              onClick={handleReshuffle}
+              className="text-[10px] text-white/30 hover:text-white/50 font-bold"
+            >
+              Reshuffle variants
+            </button>
+          )}
+        </div>
+      )}
+
+      {scenario && variantsLoading && (
+        <div className="py-4 text-center">
+          <p className="text-xs text-white/30">Loading variants...</p>
+        </div>
+      )}
     </div>
   )
 }
