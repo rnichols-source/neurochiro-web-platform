@@ -1007,12 +1007,13 @@ export async function selectVariant(
   } else {
     const { data } = await (supabase as any)
       .from('outreach_logs')
-      .select('template_key')
+      .select('variant_key')
       .eq('template_key', templateId)
       .eq('operator', user.id)
+      .not('variant_key', 'is', null)
       .order('created_at', { ascending: false })
       .limit(10)
-    recentLogs = (data || []).map((l: any) => ({ variant_key: l.template_key }))
+    recentLogs = data || []
   }
 
   const recentKeys = (recentLogs || []).map((l: any) => l.variant_key)
@@ -1026,13 +1027,12 @@ export async function selectVariant(
     return notRecent[0]
   }
 
-  // All variants have been used recently. Pick the one used longest ago.
+  // All variants have been used recently. Pick the one whose most recent use is oldest.
+  // recentKeys[0] is most recent. indexOf gives the first (most recent) position.
+  // Higher indexOf = used longer ago. We want the highest indexOf.
   const oldest = available.sort((a: any, b: any) => {
-    const aIdx = recentKeys.lastIndexOf(a.variant_key)
-    const bIdx = recentKeys.lastIndexOf(b.variant_key)
-    // Higher index = more recent. We want the one with the highest index (used longest ago from the front)
-    // Actually: recentKeys[0] is most recent, recentKeys[9] is oldest.
-    // lastIndexOf gives the position. Lower position = more recent. We want highest position.
+    const aIdx = recentKeys.indexOf(a.variant_key)
+    const bIdx = recentKeys.indexOf(b.variant_key)
     return bIdx - aIdx
   })
   return oldest[0]
