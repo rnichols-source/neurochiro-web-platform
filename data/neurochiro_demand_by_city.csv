@@ -1,0 +1,1418 @@
+country,iso2,region,city,requests,postal_codes
+UK,GB,England,London,16,KT4; SE22; SW11 3DS; SW15; W11
+USA,US,CA,Los Angeles,13,90027; 90029; 90033; 90034; 90035; 90046; 90049; 90057; 90065; 90066; 90094
+USA,US,TX,Dallas,12,75205; 75209; 75214; 75218; 75225; 75228; 75244; 75248
+USA,US,AZ,Phoenix,12,85003; 85016; 85017; 85018; 85020; 85032; 85050
+USA,US,NC,Charlotte,11,28209; 28210; 28215; 28216; 28269; 28270; 28273; 28278
+USA,US,OH,Cincinnati,11,45206; 45215; 45216; 45227; 45236; 45237; 45248; 45249
+USA,US,IL,Chicago,11,60610; 60612; 60613; 60618; 60620; 60622; 60637; 60647
+Canada,CA,ON,Toronto,11,M4E 2N4; M6A 1W4; M6B 2H3; M9M; M9R 2R9
+USA,US,FL,Jacksonville,11,32210; 32211; 32216; 32219; 32224; 32225; 32244; 32246; 32258
+USA,US,FL,Miami,10,33133; 33143; 33155; 33156; 33173; 33176; 33179; 33183
+USA,US,PA,Pittsburgh,10,15205; 15211; 15222; 15234; 15241; 15243
+USA,US,GA,Atlanta,10,30307; 30312; 30327; 30328; 30339
+Australia,AU,NSW,Sydney,10,2000; 2086; 2093; 2153; 2191
+USA,US,NY,New York,10,10013; 10016; 10023; 10028; 10034; 10128; 10282
+USA,US,NY,Brooklyn,9,11204; 11209; 11213; 11221; 11230; 11235
+UK,GB,England,,9,
+USA,US,TX,Austin,8,78732; 78735; 78736; 78738; 78748
+USA,US,TN,Nashville,8,37206; 37209; 37210; 37215; 37218; 37221
+USA,US,FL,Orlando,8,32804; 32806; 32808; 32819; 32832; 32836
+UAE,AE,,Dubai,8,
+USA,US,SC,Myrtle Beach,8,29579; 29588
+USA,US,TX,Houston,8,77005; 77014; 77024; 77035; 77092; 77095
+USA,US,UT,Salt Lake City,7,84102; 84106; 84111; 84116; 84117; 84123
+USA,US,LA,New Orleans,7,70121; 70124; 70131
+USA,US,CA,San Diego,7,92101; 92108; 92117; 92139; 92154
+USA,US,AZ,Tucson,7,85712; 85737; 85741; 85747
+USA,US,MD,Baltimore,7,21201; 21206; 21209; 21215
+USA,US,CO,Denver,7,80206; 80219; 80220; 80224; 80228; 80247
+USA,US,NC,Raleigh,6,27603; 27613; 27614; 27615
+USA,US,OK,Oklahoma City,6,73120; 73142; 73162
+USA,US,PA,Philadelphia,6,19116; 19120; 19132; 19146; 19154
+USA,US,ID,Meridian,6,83642; 83646
+USA,US,NV,Henderson,6,89012; 89015; 89044; 89052; 89074
+USA,US,FL,Tampa,6,33609; 33616; 33629
+USA,US,FL,Winter Garden,6,34787
+USA,US,TX,San Antonio,5,78232; 78233; 78254; 78263
+USA,US,IN,Indianapolis,5,46202; 46224; 46234; 46237
+USA,US,OH,Columbus,5,43213; 43221
+USA,US,TN,Murfreesboro,5,37128; 37130
+South Africa,ZA,,Cape Town,5,7708; 8001
+USA,US,AZ,Scottsdale,5,85251; 85255; 85258
+USA,US,ID,Boise,5,83716
+USA,US,TX,Fort Worth,5,76107; 76108; 76110; 76116; 76126
+USA,US,OR,Salem,5,97301; 97302; 97306
+USA,US,TX,New Braunfels,5,78130; 78132
+Canada,CA,BC,Vancouver,5,
+USA,US,FL,Naples,5,34102; 34113; 34119; 34120
+USA,US,LA,Baton Rouge,5,70808; 70809; 70810; 70817
+USA,US,NC,Mooresville,5,28115; 28117
+USA,US,NY,Bronx,4,10466; 10469; 10475
+USA,US,KY,Louisville,4,40211; 40220; 40245
+USA,US,VA,Alexandria,4,22305; 22308; 22310; 22312
+USA,US,MO,Kansas City,4,64155; 64164
+USA,US,MO,St. Louis,4,63123; 63129; 63130
+UK,GB,England,Essex,4,
+USA,US,AZ,Queen Creek,4,85142
+USA,US,CA,Santa Rosa,4,95403; 95404; 95405
+USA,US,FL,Boca Raton,4,33428; 33431; 33432; 33496
+USA,US,WA,Seattle,4,98118
+USA,US,CA,Long Beach,4,90803; 90808
+USA,US,VA,Virginia Beach,4,23451; 23453; 23462; 23464
+USA,US,TX,Plano,4,75024; 75025
+USA,US,OK,Edmond,4,73012; 73013; 73034
+USA,US,FL,Miami Beach,4,33139; 33141
+USA,US,FL,Fort Lauderdale,4,33301; 33308; 33309
+USA,US,TX,El Paso,4,79925; 79928; 79934; 79938
+USA,US,CA,Sacramento,4,95816; 95826
+USA,US,TX,Frisco,4,75033; 75034
+USA,US,TX,Conroe,4,77304; 77384
+Australia,AU,WA,Perth,4,6030
+USA,US,CA,Riverside,3,92504; 92505; 92509
+USA,US,CA,Chico,3,95926; 95928; 95973
+USA,US,CA,Temecula,3,92592
+South Africa,ZA,,Johannesburg,3,2195
+USA,US,PA,Lancaster,3,17601
+USA,US,UT,Spanish Fork,3,84660
+UK,GB,England,Surrey,3,
+USA,US,NC,Durham,3,27703; 27705; 27713
+USA,US,WA,Bothell,3,98011; 98012; 98021
+USA,US,NC,Greensboro,3,27410
+USA,US,UT,Lehi,3,84043
+USA,US,TX,The Woodlands,3,77380; 77382
+USA,US,FL,Pembroke Pines,3,33028; 33029
+Nigeria,NG,,Lagos,3,100001
+USA,US,AZ,Gilbert,3,85298
+USA,US,UT,Cottonwood Heights,3,84121
+USA,US,UT,South Jordan,3,84009
+USA,US,MN,Minneapolis,3,55410; 55416; 55436
+USA,US,FL,Fort Myers,3,33912; 33913
+USA,US,CA,Dublin,3,94568
+USA,US,PA,York,3,17402; 17407
+USA,US,TX,Keller,3,76244; 76248; 76262
+USA,US,CA,San Jose,3,95121; 95122
+USA,US,NJ,Toms River,3,08753; 08755
+USA,US,TX,Prosper,3,75078
+USA,US,MA,Boston,3,
+USA,US,IL,Winnetka,3,60093
+Australia,AU,QLD,Brisbane,3,4030; 4152
+USA,US,AL,Madison,3,35757; 35758
+USA,US,NV,Las Vegas,3,89128; 89134; 89147
+USA,US,CO,Colorado Springs,3,80906; 80910; 80919
+USA,US,CA,El Cajon,3,92019; 92020
+Canada,CA,ON,North York,3,M2K 2S2
+USA,US,CT,Fairfield,3,06824
+USA,US,NY,Queens,3,11104; 11413
+USA,US,CA,Lakewood,3,90712; 90715
+USA,US,PA,Wayne,3,19087
+USA,US,UT,Provo,3,84604
+USA,US,UT,St. George,3,84770; 84790
+USA,US,NC,Wilmington,3,28405; 28409
+Australia,AU,,,3,
+USA,US,CA,Studio City,3,91604
+USA,US,CA,San Clemente,3,92672; 92673
+Nigeria,NG,,,3,"600211; no city, posted +234"
+USA,US,UT,Ogden,3,84404; 84414
+USA,US,MA,,3,
+USA,US,TX,Sugar Land,3,77479; 77498
+USA,US,CA,Redlands,3,92373; 92374
+South Africa,ZA,,,3,
+USA,US,WI,Milwaukee,3,53207; 53227
+USA,US,TX,Nacogdoches,3,75964; 75965
+USA,US,MA,Dorchester,3,02122; 02125
+USA,US,KS,Wichita,3,67219; 67228
+USA,US,TX,Cypress,3,77429
+USA,US,AK,Anchorage,3,99507
+USA,US,OH,Willoughby,3,44094
+USA,US,MI,Birmingham,3,48009
+USA,US,FL,St. Augustine,3,32084; 32092
+USA,US,CA,Corona,3,92882
+USA,US,CA,Ventura,3,93003
+USA,US,OH,Dayton,3,
+USA,US,GA,Woodstock,3,30188
+USA,US,VA,Richmond,3,23229
+USA,US,CA,Costa Mesa,3,92626
+UK,GB,Scotland,Glasgow,3,G12 9ED
+USA,US,TN,Franklin,3,37069
+USA,US,MA,Groveland,3,01834
+USA,US,SC,Mount Pleasant,3,29466
+USA,US,CA,Bakersfield,3,93308; 93312; 93314
+Canada,CA,ON,Mississauga,3,L5V 1W5
+USA,US,FL,West Palm Beach,3,33409; 33412; 33415
+Canada,CA,QC,Montreal,2,
+USA,US,NY,Massapequa,2,11758
+USA,US,CA,Concord,2,94519; 94521
+USA,US,GA,Acworth,2,30101; 30102
+USA,US,CA,Moreno Valley,2,92555; 92557
+USA,US,GA,Alpharetta,2,30005; 30022
+USA,US,NV,North Las Vegas,2,89031; 89086
+USA,US,UT,Herriman,2,84096
+Germany,DE,,,2,
+USA,US,AR,Little Rock,2,
+USA,US,AZ,Mesa,2,85212
+USA,US,VA,Charlottesville,2,22901
+UAE,AE,,Dubai/Abu Dhabi,2,
+USA,US,FL,Inverness,2,34450; 34452
+USA,US,IA,West Des Moines,2,50265; 50266
+USA,US,GA,Carrollton,2,30116; 30117
+USA,US,AL,Trussville,2,35173
+USA,US,NC,Gastonia,2,28056
+USA,US,MA,Mansfield,2,02048
+USA,US,CO,Lakewood,2,80227; 80228
+USA,US,NY,Wappingers Falls,2,12590
+USA,US,GA,Augusta,2,30909
+USA,US,IA,Spencer,2,51301
+USA,US,CA,Clovis,2,93619
+Canada,CA,MB,Winnipeg,2,
+USA,US,VA,Fredericksburg,2,22405; 22406
+USA,US,NC,Cary,2,27511
+USA,US,OH,Dublin,2,43016; 43017
+USA,US,TX,Arlington,2,76012; 76013
+India,IN,,Mumbai,2,400016
+USA,US,NH,Salem,2,03079
+USA,US,TX,College Station,2,77845
+USA,US,TX,Spring,2,77381; 77386
+USA,US,CA,Claremont,2,91711
+USA,US,GA,Covington,2,30014; 30016
+USA,US,KY,Hebron,2,41048
+USA,US,FL,Orange City,2,32763
+USA,US,MT,Bozeman,2,59718
+USA,US,CA,Santa Barbara,2,93108; 93109
+USA,US,AZ,Flagstaff,2,86001
+USA,US,TN,Collierville,2,38017
+USA,US,FL,Cape Coral,2,33904; 33909
+USA,US,CA,Westlake Village,2,91361
+USA,US,TX,Forney,2,75126
+USA,US,CT,West Haven,2,06516
+USA,US,OH,Loveland,2,45140
+USA,US,MT,Kalispell,2,59901
+USA,US,IL,Grayslake,2,60030
+USA,US,TN,Chattanooga,2,37415
+USA,US,PA,Downingtown,2,19335
+USA,US,PA,Perkasie,2,18944
+USA,US,NH,Manchester,2,03103; 03104
+USA,US,CA,Mission Viejo,2,92692
+UK,GB,England,Liverpool,2,
+USA,US,FL,Stuart,2,34997
+Canada,CA,AB,Edmonton,2,T6X 2Z6
+USA,US,WY,Cody,2,82414
+USA,US,NJ,Piscataway,2,08854
+USA,US,FL,Tallahassee,2,32301; 32308
+USA,US,WA,Spokane,2,99201; 99207
+USA,US,TX,Tomball,2,77375; 77377
+USA,US,NE,,2,
+USA,US,MI,Lake Orion,2,48360
+USA,US,OR,Eugene,2,97401
+USA,US,CA,Lancaster,2,93534; 93536
+USA,US,NY,Long Island,2,
+USA,US,MS,Biloxi,2,39532
+Australia,AU,WA,Bunbury,2,
+USA,US,TN,Nolensville,2,37135
+USA,US,FL,Jupiter,2,33458
+USA,US,MI,Waterford,2,48328
+USA,US,NC,Concord,2,28027
+USA,US,FL,St. Petersburg,2,33702
+USA,US,DC,Washington,2,20002; 20008
+USA,US,CO,Castle Rock,2,80104; 80108
+USA,US,AL,Huntsville,2,35801; 35806
+USA,US,CA,Palm Springs,2,
+USA,US,SC,Charleston,2,
+USA,US,WI,Pewaukee,2,53072
+USA,US,GA,Dallas,2,30132
+USA,US,MA,Shrewsbury,2,01545
+USA,US,CO,Aurora,2,80010; 80013
+USA,US,TX,Rockwall,2,75032; 75087
+USA,US,FL,Jacksonville Beach,2,32250
+USA,US,MI,Macomb,2,48042
+USA,US,TX,Katy,2,77449; 77493
+USA,US,TN,Brentwood,2,37027
+USA,US,IL,Elburn,2,60119
+Canada,CA,ON,Niagara Falls,2,L2H 3N9
+USA,US,NY,Levittown,2,11756
+USA,US,CT,Danbury,2,
+USA,US,SC,Conway,2,29526
+USA,US,LA,Gonzales,2,70737
+USA,US,MA,Tewksbury,2,01876
+USA,US,DE,Dover,2,19904
+USA,US,IL,Naperville,2,60564
+USA,US,SC,Greenville,2,29609
+USA,US,MI,Grand Rapids,2,49525
+USA,US,CA,Vacaville,2,95687; 95688
+USA,US,IL,Downers Grove,2,60515
+USA,US,FL,Hollywood,2,33019; 33024
+USA,US,OH,Akron,2,44312; 44333
+USA,US,AZ,Peoria,2,85383
+USA,US,FL,North Miami,2,33161
+USA,US,MD,Frederick,2,21702; 21703
+USA,US,TX,Rosharon,2,77583
+USA,US,CA,Upland,2,91784; 91786
+USA,US,NC,Waxhaw,2,28173
+Canada,CA,AB,Calgary,2,T2S 2S7; T2X 1X4
+USA,US,CA,La Mesa,2,91942
+USA,US,CA,Stockton,2,95210; 95212
+Denmark,DK,,,2,
+USA,US,CA,Oxnard,2,93035; 93036
+USA,US,GA,Smyrna,2,30082
+USA,US,OH,Westerville,2,43082
+USA,US,TX,Colleyville,2,76034
+USA,US,OH,Canfield,2,44406
+USA,US,AL,Hoover,2,35226; 35244
+Canada,CA,SK,Moose Jaw,2,S6H 7L3; S6K 0A3
+USA,US,MA,Braintree,2,02184
+UK,GB,Scotland,,2,
+Canada,CA,ON,St. Catharines,2,L2R 5S7; L2S 4C4
+USA,US,WA,Vancouver,2,98665; 98682
+USA,US,IN,South Bend,2,
+USA,US,UT,Pleasant Grove,2,84062
+USA,US,FL,,2,posted 34346
+USA,US,AL,Wetumpka,2,36093
+USA,US,CA,Mill Valley,2,94941
+USA,US,GA,Flowery Branch,2,30542
+USA,US,WI,Oconomowoc,2,53066
+USA,US,NV,Reno,2,89503
+USA,US,SD,Sioux Falls,2,57106
+USA,US,NC,Wake Forest,2,27587
+Canada,CA,ON,Eastern Ontario,2,K0H 2H0; K0K 3E0
+USA,US,SC,Fort Mill,2,29715
+Canada,CA,ON,Hamilton,2,L8E 2M6
+USA,US,OR,Beaverton,2,97007; 97008
+USA,US,NC,Brevard,2,28712
+USA,US,SC,Piedmont,2,29673
+USA,US,FL,Land O' Lakes,2,34638
+USA,US,TX,Midland,2,79701; 79705
+Canada,CA,AB,Northern Alberta,2,T0G 1R2; T0H 1L0
+USA,US,AL,Birmingham,2,35242
+USA,US,NC,Mocksville,2,27028
+USA,US,NY,Huntington Station,2,11746; 11750
+USA,US,PA,Bethlehem,2,18015; 18017
+USA,US,MI,Dearborn Heights,2,48127
+USA,US,CA,Ontario,2,91761
+UK,GB,England,Kent,2,
+USA,US,CA,Alpine,2,91901
+Canada,CA,BC,Vernon,2,V1B 4E7; V1H 1B9
+USA,US,CA,Carlsbad,2,92009; 92010
+USA,US,GA,Duluth,2,30097
+USA,US,IN,Kokomo,2,46902
+USA,US,NY,Rochester,2,14624; 14625
+USA,US,WA,Everett,2,98208
+USA,US,CA,Apple Valley,2,92308
+USA,US,CA,Elk Grove,2,95757
+USA,US,CA,La Verne,2,91750
+USA,US,WI,Burlington,2,53105; 53185
+USA,US,NJ,Red Bank,2,07701
+Mexico,MX,,Mexico City,2,
+USA,US,MI,Troy,2,48084; 48098
+Portugal,PT,,,2,
+USA,US,TX,Rowlett,2,75088
+USA,US,MD,Elkton,2,21921
+USA,US,NY,Pittsford,2,14534
+USA,US,PA,Harrisburg,2,17110; 17112
+USA,US,CA,Orange,2,92865; 92868
+USA,US,NY,Staten Island,2,10309; 10312
+Canada,CA,AB,,2,
+Canada,CA,BC,Abbotsford,2,V2S 1B7; V4X 1G6
+USA,US,IN,Zionsville,2,46077
+USA,US,CT,Glastonbury,2,06033
+USA,US,UT,Bountiful,2,84010
+USA,US,PA,Newtown Square,2,19073
+USA,US,PA,Greenville,2,16125
+USA,US,LA,Lafayette,2,70503
+Australia,AU,VIC,Melbourne,2,
+UK,GB,England,Reading,2,
+USA,US,FL,Homestead,2,33030; 33035
+USA,US,NE,Omaha,2,68130; 68135
+USA,US,NY,New City,2,10956
+USA,US,VA,Manassas,2,20111; 20112
+USA,US,CA,San Francisco,2,
+USA,US,CA,Hayward,2,94545
+USA,US,MN,Bloomington,2,55431; 55438
+USA,US,OH,Cleveland area,2,"posted 44000, invalid zip"
+USA,US,MD,Pikesville,2,21208
+USA,US,CA,Rancho Cucamonga,2,91739
+UK,GB,England,Birmingham,2,B11
+USA,US,TN,Hendersonville,2,37075
+USA,US,AZ,Surprise,2,85387; 85388
+USA,US,CA,Chatsworth,2,91311
+USA,US,OR,Portland,2,97214; 97229
+India,IN,,,2,
+USA,US,CA,Camarillo,2,93010; 93012
+USA,US,TX,Kyle,2,78640
+USA,US,CA,Fresno,2,93722; 93727
+Nigeria,NG,,Abuja,2,900001
+USA,US,TX,Converse,2,78109
+USA,US,NC,Dobson,1,27017
+Switzerland,CH,,,1,
+USA,US,TX,Cedar Park,1,78630
+USA,US,NC,Sneads Ferry,1,
+UK,GB,England,Hertfordshire,1,
+USA,US,PA,Bryn Mawr,1,19010
+USA,US,NC,Huntersville,1,28078
+USA,US,MI,Northville,1,48168
+USA,US,NE,Bennington,1,68007
+USA,US,FL,Palmetto,1,34221
+USA,US,NH,Alton Bay,1,03810
+USA,US,MI,Capac,1,48014
+USA,US,NY,Vestal,1,13850
+Australia,AU,,Melbourne,1,
+USA,US,TN,Kingsport,1,37663
+Canada,CA,ON,London,1,
+USA,US,ME,Dover-Foxcroft,1,04426
+USA,US,NJ,Hoboken,1,07030
+USA,US,TX,Justin,1,76247
+USA,US,WA,Walla Walla,1,99362
+USA,US,VA,Wise,1,24293
+USA,US,GA,Decatur,1,30030
+USA,US,CA,San Luis Obispo,1,93401
+USA,US,TX,Boerne/San Antonio,1,
+USA,US,IN,New Albany,1,47150
+USA,US,CA,Oakland,1,94611
+USA,US,MD,Phoenix,1,21131
+USA,US,MA,Watertown,1,02472
+USA,US,TN,Hermitage,1,37076
+USA,US,OH,Barnesville,1,43713
+USA,US,VA,Aylett,1,23009
+USA,US,IL,Sycamore,1,60178
+USA,US,MN,Mantorville,1,55955
+USA,US,ID,Twin Falls,1,83301
+UK,GB,England,Leicester,1,
+USA,US,CA,Castro Valley,1,94546
+USA,US,NH,Greenfield,1,03047
+USA,US,UT,Logan,1,84341
+USA,US,HI,Hilo,1,96720
+USA,US,TX,Grapevine,1,76051
+USA,US,NY,East Hampton,1,11937
+UK,GB,England,"Launceston, Cornwall",1,PL15 9SP
+USA,US,PA,Harleysville,1,19438
+UK,GB,England,Dartford,1,
+USA,US,MI,Whitehall,1,49461
+USA,US,FL,North Port,1,34287
+USA,US,CA,Sunnyvale,1,94086
+USA,US,MD,New Market,1,21774
+USA,US,AK,Eagle River,1,99577
+USA,US,CO,South Denver,1,
+USA,US,MA,South Hamilton,1,01982
+USA,US,NJ,Far Hills,1,07931
+USA,US,KS,,1,
+USA,US,KY,Crestwood,1,40014
+USA,US,SD,Wagner,1,57380
+USA,US,MD,La Plata,1,20646
+USA,US,MD,Mount Airy,1,21771
+USA,US,NJ,Annandale,1,08801
+USA,US,SC,Barnwell,1,29812
+UK,GB,England,Nottinghamshire,1,
+USA,US,IN,Bedford,1,47421
+USA,US,TX,Royse City,1,75189
+USA,US,HI,Wahiawa,1,96786
+USA,US,GA,Watkinsville,1,30677
+USA,US,TN,Sparta,1,38583
+USA,US,PA,Sellersville,1,18960
+USA,US,WA,Black Diamond,1,98010
+USA,US,FL,Bradenton,1,34208
+USA,US,MI,Ann Arbor,1,48104
+USA,US,NC,Statesville,1,28677
+USA,US,FL,Palm Beach,1,33480
+USA,US,TX,Mansfield,1,
+USA,US,TX,Lubbock,1,79424
+USA,US,WV,St. Albans,1,25177
+USA,US,AZ,Golden Valley,1,86413
+USA,US,MO,Kirkwood,1,63122
+Australia,AU,NSW,Ettalong Beach,1,2257
+USA,US,GA,Columbus,1,31909
+USA,US,NC,Nebo,1,28761
+USA,US,MA,Andover,1,01810
+USA,US,ID,Rexburg,1,83440
+USA,US,IN,St. Joe,1,46785
+USA,US,NJ,Vineland,1,08360
+USA,US,NC,Asheville,1,28801
+USA,US,NY,Buffalo,1,
+USA,US,TX,Alvin,1,77511
+USA,US,AZ,San Tan Valley,1,85140
+USA,US,AZ,Marana,1,85653
+Japan,JP,,Okinawa,1,
+USA,US,NJ,Newton,1,
+USA,US,MO,Nevada,1,
+USA,US,PA,Bangor,1,18013
+USA,US,DE,Bear,1,19701
+USA,US,FL,Clermont,1,34711
+USA,US,AL,Jemison,1,35085
+USA,US,PA,Carlisle,1,17013
+USA,US,CA,Tarzana,1,91356
+USA,US,FL,Ponte Vedra Beach,1,32082
+USA,US,NY,Fonda,1,12068
+USA,US,TN,Selmer,1,38375
+USA,US,MN,St. Paul,1,55117
+USA,US,IL,Marseilles,1,61341
+USA,US,KS,Garden City,1,67846
+USA,US,OR,Sutherlin,1,97479
+USA,US,SC,Surfside Beach,1,29575
+USA,US,TN,Farragut,1,37934
+USA,US,IL,Crystal Lake,1,60014
+USA,US,NJ,Flanders,1,07836
+USA,US,WA,Orting,1,98360
+USA,US,IA,Sioux City,1,51106
+USA,US,PA,Laurys Station,1,18059
+USA,US,FL,Port St. Lucie,1,34953
+USA,US,WI,Sun Prairie,1,53590
+UK,GB,England,Knutsford,1,WA16
+USA,US,IA,Vinton,1,52349
+USA,US,PA,Pittston,1,18640
+USA,US,KS,Newton,1,67114
+USA,US,AL,Decatur,1,35601
+USA,US,NJ,Port Murray,1,07865
+UK,GB,England,West Malling,1,
+USA,US,PA,Irwin,1,15642
+USA,US,NC,Rutherfordton,1,28139
+Australia,AU,VIC,Kyneton,1,3444
+USA,US,MO,Ballwin,1,63021
+USA,US,SC,Murrells Inlet,1,29576
+USA,US,TX,Smithville,1,78957
+USA,US,ID,Filer,1,83328
+USA,US,CO,Grand Junction,1,81503
+USA,US,VA,Williamsburg,1,23185
+USA,US,TX,Magnolia,1,
+USA,US,VA,Midlothian,1,23112
+Canada,CA,AB,Medicine Hat,1,T1B 2G5
+USA,US,IA,Woodburn,1,50275
+UK,GB,England,Buckinghamshire,1,HP10
+USA,US,FL,Fort Myers area,1,
+USA,US,IL,Darien,1,60561
+USA,US,NY,Kingston,1,12401
+USA,US,NJ,Union,1,07083
+USA,US,SC,Okatie/Bluffton,1,29909
+USA,US,GA,Guyton,1,31312
+USA,US,ND,Minot,1,58701
+USA,US,SC,Fountain Inn,1,
+USA,US,FL,St. Johns,1,32259
+USA,US,CA,Escondido,1,92026
+Canada,CA,BC,Williams Lake,1,
+USA,US,NH,Lebanon,1,03766
+USA,US,PA,Easton,1,18040
+USA,US,CA,Murphys,1,95247
+UK,GB,England,"Ipswich, Suffolk",1,
+USA,US,WI,Menomonee Falls,1,53051
+USA,US,MN,Vadnais Heights,1,55127
+USA,US,NC,Louisburg,1,27549
+USA,US,TX,Flower Mound,1,75022
+USA,US,FL,Eustis,1,32736
+USA,US,PA,North Wales,1,19454
+USA,US,NC,Davidson,1,28036
+USA,US,NJ,Lavallette,1,
+USA,US,TX,Buda,1,78610
+USA,US,WI,Madison,1,53716
+USA,US,NY,Woodmere,1,11598
+USA,US,NY,Auburn,1,13021
+USA,US,WI,Watertown,1,53094
+USA,US,MA,Hampden,1,01036
+USA,US,MI,Sturgis,1,49091
+USA,US,NY,West Hurley,1,12491
+USA,US,OH,Perrysburg,1,43551
+USA,US,TX,Richmond,1,77407
+USA,US,IL,Metamora,1,61548
+USA,US,NJ,Wallington,1,07057
+USA,US,UT,Murray,1,84107
+USA,US,NC,Hampstead,1,28443
+USA,US,NM,Las Cruces,1,88012
+USA,US,IA,Clinton,1,52732
+Trinidad and Tobago,TT,,,1,
+USA,US,TN,Elizabethton,1,37643
+USA,US,CA,Encino,1,91436
+USA,US,CA,Lafayette,1,94549
+USA,US,NJ,Egg Harbor Township,1,08234
+USA,US,CA,Rancho Santa Margarita,1,92688
+USA,US,PA,Fort Washington,1,19034
+USA,US,PA,Monaca,1,15061
+USA,US,TN,Gallatin,1,37066
+USA,US,CA,Auburn,1,95603
+USA,US,TX,Cleveland,1,77327
+Canada,CA,,,1,
+USA,US,NY,Commack,1,11725
+USA,US,CA,Huntington Beach,1,92649
+USA,US,NC,Harmony,1,28634
+USA,US,NY,West Islip,1,11795
+Japan,JP,,Yokosuka,1,
+USA,US,TX,Cibolo,1,78108
+USA,US,FL,Pensacola,1,32534
+USA,US,MI,Greenville,1,48838
+USA,US,MN,Champlin,1,55316
+UK,GB,England,East of England,1,
+USA,US,NY,Patchogue,1,11772
+USA,US,MD,Hanover,1,21076
+USA,US,MD,Bowie,1,20715
+USA,US,CA,Visalia,1,93291
+Australia,AU,QLD,Bundaberg region,1,4673
+USA,US,CA,Burbank,1,91506
+USA,US,TX,Southlake,1,76092
+USA,US,UT,Saratoga Springs,1,84045
+USA,US,VA,Fort Belvoir,1,22060
+USA,US,SD,Spearfish,1,57783
+Canada,CA,ON,Thornhill,1,L4J 9A2
+USA,US,NY,Lancaster,1,14086
+USA,US,GA,Johns Creek,1,
+USA,US,ID,Star,1,83669
+USA,US,NY,Chappaqua,1,10514
+USA,US,LA,Monroe,1,71203
+USA,US,KY,Union,1,41091
+USA,US,FL,North Miami Beach,1,33160
+USA,US,CA,Poway,1,92064
+USA,US,MN,Lakeville,1,55044
+USA,US,CA,Pinon Hills,1,92372
+Germany,DE,,Berlin,1,13507
+USA,US,SC,Anderson,1,29621
+USA,US,GA,Winder,1,30680
+USA,US,WA,Liberty Lake,1,99019
+USA,US,IL,Park Ridge,1,
+USA,US,NJ,Hammonton,1,08037
+USA,US,NY,Yonkers,1,
+USA,US,MO,Summersville,1,65936
+USA,US,MI,Belleville,1,48111
+USA,US,MD,Pasadena,1,21122
+USA,US,NC,Emerald Isle,1,28594
+USA,US,OH,Reynoldsburg,1,43068
+USA,US,OH,North Olmsted,1,
+USA,US,CA,Salinas,1,93907
+USA,US,NJ,Hackettstown,1,
+USA,US,CA,La Palma,1,
+USA,US,PA,Reading,1,19607
+USA,US,VA,Chesapeake,1,23321
+USA,US,KY,Independence,1,41051
+USA,US,NJ,Springfield,1,07081
+USA,US,NY,Ballston Spa,1,12020
+UK,GB,England,Wirral,1,CH63 5PA
+USA,US,WI,Mequon,1,53097
+UK,GB,England,"Brentwood, Essex",1,CM15
+USA,US,MN,Scandia,1,55073
+USA,US,NE,Gothenburg,1,69138
+Canada,CA,BC,Mackenzie,1,V0J 2C0
+USA,US,CO,Erie,1,80516
+Canada,CA,ON,Kleinburg,1,L0J 1C0
+USA,US,NJ,Jackson,1,08527
+USA,US,FL,Wellington,1,33414
+UK,GB,England,Watford,1,WD24
+USA,US,WA,Issaquah,1,98027
+USA,US,FL,Coral Gables,1,33146
+USA,US,MI,West Bloomfield,1,
+USA,US,MO,Liberty,1,64068
+USA,US,NJ,Wyckoff,1,07481
+USA,US,NJ,Belmar,1,07719
+Switzerland,CH,,Laufenburg,1,5080
+USA,US,MO,Washington,1,63090
+USA,US,TX,Granbury,1,76048
+USA,US,GA,Richmond Hill,1,31324
+USA,US,NY,Millbrook,1,12545
+USA,US,TX,Copperas Cove,1,76522
+USA,US,TX,Stephenville,1,76402
+USA,US,CA,Murrieta,1,92562
+USA,US,TX,Coppell,1,75019
+USA,US,NJ,Monmouth County,1,
+USA,US,CA,North Fork,1,93643
+USA,US,CT,Bridgeport,1,06606
+USA,US,MS,Philadelphia,1,39350
+USA,US,CA,Tulare,1,93274
+USA,US,FL,Spring Hill,1,34609
+USA,US,NY,Mount Kisco,1,10549
+USA,US,WI,Kenosha,1,
+USA,US,LA,Welsh,1,70591
+USA,US,MO,Arcadia,1,63621
+USA,US,IA,Davenport,1,52807
+USA,US,CT,Norwalk,1,06850
+USA,US,TX,Temple,1,76502
+USA,US,IL,Arlington Heights,1,60005
+USA,US,CA,Agoura Hills,1,91301
+Canada,CA,ON,Huntsville,1,P1H 2J3
+USA,US,MA,Westport,1,02790
+USA,US,AL,Theodore,1,36582
+USA,US,CA,Yucaipa,1,92399
+USA,US,WI,Baileys Harbor,1,54202
+USA,US,CA,La Jolla,1,92037
+USA,US,GA,Chamblee,1,30341
+USA,US,TN,Nashville area,1,
+USA,US,NC,Mount Holly,1,28120
+South Africa,ZA,,Pretoria,1,
+USA,US,MA,Wales,1,01081
+Australia,AU,QLD,Rockhampton,1,4700
+USA,US,CA,Grass Valley,1,95945
+USA,US,CA,Morgan Hill,1,95037
+USA,US,WI,Franklin,1,53132
+Australia,AU,VIC,Mount Eliza,1,3930
+USA,US,CT,Sandy Hook,1,06482
+USA,US,IL,Tinley Park,1,60477
+USA,US,IL,Channahon,1,60410
+USA,US,NY,Mineola,1,11501
+USA,US,NY,Bay Shore,1,11706
+USA,US,MN,Maple Grove,1,55369
+USA,US,CA,Palos Verdes Peninsula,1,90274
+USA,US,OH,Rome,1,44085
+Germany,DE,,Munich,1,
+USA,US,MI,Yale,1,48097
+USA,US,FL,Umatilla,1,34752
+USA,US,GA,Gainesville,1,30501
+USA,US,VA,Chesterfield,1,23832
+USA,US,WA,Tacoma,1,98444
+USA,US,CO,Breckenridge,1,80424
+UK,GB,England,Kings Langley,1,WD4 8BS
+UK,GB,England,Thanet,1,
+USA,US,WA,Mountlake Terrace,1,98043
+USA,US,CO,Wheat Ridge,1,80033
+USA,US,FL,Delray Beach,1,33445
+USA,US,VA,Front Royal,1,22630
+USA,US,NJ,Norwood,1,07648
+USA,US,GA,Kennesaw,1,30144
+USA,US,IL,"Illinois, city unverified",1,62155
+UK,GB,England,East Sussex,1,
+USA,US,IL,Congerville,1,61729
+UK,GB,England,Eastbourne,1,BN23 7EQ
+USA,US,GA,Toccoa,1,30577
+USA,US,WI,Waukesha,1,53189
+USA,US,NJ,Westwood,1,07675
+USA,US,OH,Custar,1,43511
+USA,US,MA,Sharon,1,02067
+Canada,CA,SK,Rural Saskatchewan,1,S0A 0W0
+USA,US,NY,Savannah,1,13146
+USA,US,TN,Clarksville,1,37043
+USA,US,NY,Nanuet,1,10954
+Nigeria,NG,,Port Harcourt,1,500231
+USA,US,FL,Casselberry,1,32707
+USA,US,IN,Monticello,1,47959
+Türkiye,TR,,,1,
+UK,GB,England,Lutterworth,1,LE17
+USA,US,MN,Eden Prairie,1,55347
+Canada,CA,BC,Parksville,1,V9P 1Z8
+USA,US,CA,Fort Bragg,1,95437
+USA,US,NY,Riverhead,1,11901
+USA,US,WV,Falling Waters,1,25419
+USA,US,TX,Pasadena,1,77502
+USA,US,NJ,Denville,1,07834
+USA,US,MA,Marlborough,1,01752
+USA,US,MO,,1,
+USA,US,WI,Viroqua,1,54665
+USA,US,CA,Redwood City,1,94061
+USA,US,WA,Battle Ground,1,98604
+USA,US,MI,Bridgman,1,49106
+USA,US,SD,Black Hawk,1,57718
+USA,US,CT,Weston,1,06883
+USA,US,MI,Howell,1,
+USA,US,AZ,Waddell,1,
+USA,US,CA,Monrovia,1,91016
+USA,US,KS,Kansas City,1,66103
+USA,US,KS,Lawrence,1,66047
+USA,US,UT,Layton,1,84041
+USA,US,CA,Venice,1,90291
+USA,US,CO,Thornton/Brighton,1,
+USA,US,FL,Estero,1,33928
+USA,US,CT,Danielson,1,06239
+USA,US,DE,Lewes,1,19958
+USA,US,GA,Villa Rica,1,30185
+USA,US,NJ,Westfield,1,07090
+USA,US,MI,Southeast Michigan,1,
+USA,US,RI,West Warwick,1,02893
+UK,GB,England,Folkestone,1,CT19
+USA,US,OK,Owasso,1,74055
+USA,US,PA,Chicora,1,16025
+USA,US,NY,Pleasant Valley,1,12569
+USA,US,WI,McFarland,1,53558
+USA,US,PA,,1,
+USA,US,NY,Depew,1,14043
+USA,US,AZ,Litchfield Park,1,85340
+USA,US,NY,Jamaica,1,11432
+USA,US,CA,Valley Springs,1,
+USA,US,CA,Redondo Beach,1,
+USA,US,NC,Salisbury,1,
+USA,US,MD,District Heights,1,20747
+USA,US,FL,Miami-Dade,1,
+USA,US,MI,Jackson,1,49203
+USA,US,OK,Tulsa,1,
+USA,US,TN,Dickson,1,37055
+USA,US,VA,Lynchburg,1,24503
+USA,US,MN,Blaine,1,55449
+USA,US,WI,Beloit,1,53512
+USA,US,MA,Gardner,1,01440
+USA,US,VA,Keller,1,23401
+Bulgaria,BG,,,1,
+Australia,AU,VIC,,1,
+USA,US,CT,Enfield,1,06082
+USA,US,MT,Great Falls,1,59405
+UK,GB,England,East Midlands,1,
+USA,US,VA,Quantico,1,22134
+USA,US,NY,Oswego,1,13126
+USA,US,IL,Bloomington,1,61701
+UK,GB,England,Wilmslow,1,
+USA,US,OR,Bend,1,97701
+USA,US,CA,Pleasanton,1,94588
+USA,US,MD,Havre de Grace,1,21078
+USA,US,GA,Mableton,1,30126
+USA,US,WA,Enumclaw,1,98022
+USA,US,TX,Orange,1,77630
+USA,US,OH,Toledo,1,
+USA,US,PA,Feasterville-Trevose,1,19053
+USA,US,TX,Georgetown,1,78626
+USA,US,IN,Decatur,1,46733
+USA,US,SC,Shoals Junction,1,29638
+USA,US,OH,Canton,1,
+USA,US,NY,Seaford,1,11783
+USA,US,MD,Stevensville,1,21666
+USA,US,MI,Davison,1,48423
+USA,US,ME,Falmouth,1,04105
+USA,US,NY,Troy,1,12180
+USA,US,VA,Fairfax,1,22033
+USA,US,FL,Melbourne,1,32904
+USA,US,PA,Bellefonte,1,16823
+USA,US,CA,Encinitas,1,92024
+USA,US,TN,Arlington,1,38002
+USA,US,NJ,Riverton,1,08077
+USA,US,NY,Manorville,1,11949
+USA,US,CA,Norco,1,92860
+USA,US,IL,Carbondale,1,
+Australia,AU,NSW,Newcastle,1,
+USA,US,PA,West Chester,1,19380
+USA,US,FL,Lutz,1,33549
+USA,US,NC,Hillsborough,1,27278
+USA,US,MD,Glen Burnie,1,21060
+Canada,CA,ON,Stoney Creek,1,L8J 2E6
+USA,US,CA,Kingsburg,1,
+USA,US,CA,Hesperia,1,92345
+USA,US,PA,Newville,1,17241
+USA,US,FL,Sarasota,1,34241
+USA,US,MN,Brooklyn Park,1,55428
+USA,US,FL,Ponte Vedra,1,32081
+USA,US,OH,Sandusky,1,44870
+USA,US,IN,Fort Wayne,1,46804
+USA,US,CO,Broomfield,1,80020
+Canada,CA,AB,Wetaskiwin,1,T9A 3N7
+USA,US,MO,Mount Vernon,1,65712
+USA,US,OR,Gladstone,1,97027
+USA,US,VA,Herndon,1,20170
+USA,US,NJ,Asbury Park,1,07712
+Canada,CA,ON,Etobicoke,1,M8Y 1N2
+USA,US,KY,Shelbyville,1,40065
+USA,US,IL,Mount Prospect,1,60056
+USA,US,PA,Stroudsburg,1,18360
+USA,US,NE,Lincoln,1,
+USA,US,OK,Moore,1,73160
+USA,US,AZ,Buckeye,1,85326
+USA,US,MI,St. Joseph,1,49085
+USA,US,AZ,Florence,1,85132
+USA,US,IA,Decorah,1,52101
+USA,US,NC,Graham,1,
+USA,US,TN,Signal Mountain,1,37377
+USA,US,TX,Denton,1,76210
+USA,US,FL,Zephyrhills,1,33541
+USA,US,FL,Anna Maria,1,34216
+UK,GB,England,Gloucester,1,GL4
+USA,US,CA,Half Moon Bay,1,94019
+USA,US,NJ,Jersey City,1,07305
+USA,US,LA,Breaux Bridge,1,70517
+USA,US,CA,Vernalis,1,95385
+Canada,CA,ON,Hamilton-Niagara area,1,L0R 1B6
+USA,US,GA,McDonough,1,30252
+USA,US,OH,Grove City,1,43123
+USA,US,KS,Mission,1,66205
+USA,US,FL,Daytona Beach,1,32124
+USA,US,CT,Branford,1,06405
+USA,US,FL,Dade City,1,33523
+UK,GB,England,North West,1,
+UK,GB,England,"Snodland, Kent",1,ME6
+USA,US,PA,Hatboro,1,19040
+USA,US,MD,Cockeysville,1,21030
+USA,US,AL,Foley,1,36535
+USA,US,MI,Clinton Township,1,48036
+USA,US,MD,Marriottsville,1,21104
+USA,US,AL,Grant,1,35747
+USA,US,NY,Mechanicville,1,12118
+USA,US,GA,Hoschton,1,30548
+USA,US,MD,Kensington,1,20895
+USA,US,NV,Carson City,1,89701
+USA,US,CT,Madison,1,06443
+USA,US,NH,Southern NH,1,
+USA,US,MT,Belgrade,1,59714
+USA,US,MA,Sutton,1,
+Australia,AU,VIC,Mount Martha,1,3934
+USA,US,PA,Southampton,1,18966
+USA,US,PA,Kane,1,16735
+USA,US,MA,Chicopee,1,
+USA,US,TN,Old Hickory,1,37138
+USA,US,NY,Niagara Falls,1,14301
+USA,US,PA,Newtown,1,18940
+USA,US,PA,Richboro,1,18954
+USA,US,NJ,Northvale,1,07647
+USA,US,WA,Gig Harbor,1,98332
+UK,GB,England,Sheffield,1,
+USA,US,NC,Kill Devil Hills,1,27948
+USA,US,CO,Longmont,1,80504
+USA,US,MN,Bemidji,1,56601
+USA,US,CA,Santa Maria,1,93454
+USA,US,TX,Cleburne,1,76033
+USA,US,AR,Van Buren,1,72956
+USA,US,IL,Rockford,1,61107
+UK,GB,England,Altrincham,1,WA15 7YS
+USA,US,TX,Floresville,1,78114
+USA,US,IN,Austin,1,47102
+USA,US,WY,Riverton,1,82501
+UK,GB,England,Chelmsford,1,
+USA,US,PA,Macungie,1,18062
+USA,US,KY,Shepherdsville,1,40165
+USA,US,CO,Lone Tree,1,
+USA,US,NY,Bayside,1,11360
+USA,US,OK,Broken Arrow,1,74014
+USA,US,OH,Delaware,1,43015
+USA,US,WI,Oshkosh,1,54901
+USA,US,NH,Rindge,1,
+UK,GB,England,East London,1,
+USA,US,MI,,1,
+USA,US,NY,Brightwaters,1,11718
+USA,US,CA,Carmel,1,93923
+USA,US,NC,Fayetteville,1,
+USA,US,MI,Bay City,1,48706
+USA,US,TN,Dandridge,1,37725
+USA,US,MI,Saginaw,1,48602
+USA,US,RI,Middletown,1,02842
+USA,US,NJ,Berkeley Heights,1,07922
+USA,US,FL,Lithia,1,33547
+Canada,CA,ON,Shelburne,1,
+USA,US,AL,Newville,1,36353
+USA,US,MN,Sauk Rapids,1,56379
+Canada,CA,ON,Wasaga Beach,1,L9Z 0A5
+USA,US,MA,Somerset,1,02726
+Australia,AU,NSW,Orange,1,
+USA,US,MS,Natchez,1,39120
+USA,US,MA,Ayer,1,01432
+USA,US,CT,Terryville,1,06786
+USA,US,GA,Chatsworth,1,30705
+USA,US,PA,Elizabeth,1,15037
+USA,US,DE,Clayton,1,19938
+USA,US,NY,Merrick,1,11566
+USA,US,HI,Kailua-Kona,1,96740
+USA,US,NJ,Montvale,1,07645
+USA,US,CT,Sherman,1,06784
+USA,US,CA,Del Mar,1,92014
+USA,US,VA,Afton,1,22920
+USA,US,KS,Overland Park,1,66212
+USA,US,MI,Clawson,1,48017
+USA,US,WA,Bellevue,1,98004
+USA,US,MO,Joplin,1,64804
+USA,US,NJ,Whippany,1,
+USA,US,MA,Stoneham,1,02180
+USA,US,MN,Duluth,1,
+USA,US,CO,Brighton,1,80601
+USA,US,NC,Weaverville,1,28787
+USA,US,NE,Elkhorn,1,68022
+USA,US,KS,Shawnee,1,66218
+USA,US,TX,Waelder,1,78959
+USA,US,NM,Albuquerque,1,87123
+USA,US,OH,Painesville,1,
+USA,US,NJ,Berlin,1,
+USA,US,IN,St. John,1,46373
+USA,US,AR,Rogers,1,72758
+USA,US,FL,Milton,1,32583
+USA,US,TX,Round Rock,1,78665
+USA,US,CO,Monument,1,80132
+USA,US,AL,Florence,1,35633
+USA,US,WA,Lake Stevens,1,98258
+USA,US,TN,Sweetwater,1,37874
+USA,US,SC,Campobello,1,29322
+USA,US,NJ,Cliffside Park,1,07010
+USA,US,IA,Cedar Rapids,1,52403
+USA,US,HI,Kailua,1,96734
+USA,US,PA,New Kensington,1,15068
+USA,US,MN,Moorhead,1,56560
+USA,US,WA,,1,
+USA,US,TX,Keller/Justin,1,
+USA,US,VA,Powhatan,1,23139
+USA,US,MS,Oxford,1,38655
+USA,US,MA,Shirley,1,01464
+Canada,CA,QC,Mount Royal,1,H3R 1X9
+UK,GB,England,Hampshire,1,
+USA,US,TX,Liberty Hill,1,78642
+USA,US,NC,Sunset Beach,1,28468
+Canada,CA,ON,Cambridge,1,N3H 5P2
+UK,GB,Wales,Aberdare,1,CF44
+USA,US,PA,Huntingdon Valley,1,19006
+USA,US,PA,Delmont,1,15626
+Sweden,SE,,Malmo,1,215 64
+USA,US,WA,Yakima,1,
+USA,US,NC,Fuquay-Varina,1,27526
+USA,US,OR,Scappoose,1,97056
+USA,US,UT,,1,
+USA,US,MI,Boyne City,1,49712
+USA,US,MA,Sterling,1,01564
+USA,US,KY,Alexandria,1,41001
+USA,US,LA,Mandeville,1,70448
+Canada,CA,BC,Fraser Valley,1,
+USA,US,MA,Seekonk,1,02771
+USA,US,IL,Waukegan,1,60085
+USA,US,NH,Bedford,1,03110
+USA,US,MI,Utica,1,48316
+USA,US,MN,Stillwater,1,55082
+Canada,CA,QC,Kirkland,1,H9J 3A8
+USA,US,NY,Port Washington,1,
+USA,US,FL,Lakeland,1,33811
+USA,US,NC,Rocky Mount,1,27804
+USA,US,CA,Tracy,1,95376
+USA,US,NJ,Fort Lee,1,07024
+USA,US,CA,Manteca,1,95336
+USA,US,CA,Red Bluff,1,96080
+USA,US,MN,Mora,1,
+USA,US,PA,Allison Park,1,15101
+USA,US,TX,Wimberley,1,78676
+USA,US,NH,Freedom,1,03836
+UK,GB,Northern Ireland,Magherafelt,1,BT45 7JS
+USA,US,CA,Roseville,1,95747
+USA,US,SC,Simpsonville,1,29681
+USA,US,AL,Calera,1,35040
+USA,US,MI,St. Clair Shores,1,48081
+USA,US,MS,Brandon,1,39042
+USA,US,NY,Eastchester,1,10709
+USA,US,MA,Revere,1,02151
+USA,US,VT,Essex Junction,1,05452
+USA,US,FL,Mulberry,1,33860
+USA,US,NJ,Monroe Township,1,08831
+France,FR,,,1,
+UK,GB,England,Guildford,1,
+South Africa,ZA,,Bellville,1,7530
+USA,US,VA,Louisa,1,23093
+USA,US,CA,Vista,1,92084
+USA,US,GA,Jonesboro,1,30236
+USA,US,CA,Fair Oaks,1,95628
+USA,US,OR,Newberg,1,97132
+USA,US,MA,Feeding Hills,1,01030
+USA,US,MD,Takoma Park,1,20912
+Sweden,SE,,,1,
+USA,US,MI,Menominee,1,49858
+USA,US,CT,Monroe,1,06468
+USA,US,CA,Calexico,1,92231
+USA,US,NY,Walton,1,13856
+USA,US,KY,Hartford,1,42347
+USA,US,MD,Easton,1,21601
+Croatia,HR,,,1,
+USA,US,UT,Draper,1,84020
+USA,US,KY,Bowling Green,1,42101
+USA,US,NY,Gardiner,1,12525
+Pakistan,PK,,Lahore,1,
+USA,US,IN,Jeffersonville,1,47130
+Mexico,MX,,Chihuahua,1,31215
+USA,US,NY,Monroe,1,10950
+USA,US,MI,Saline,1,48176
+USA,US,MA,Foxborough,1,02035
+USA,US,FL,Fernandina Beach,1,32034
+USA,US,VA,Reston,1,20191
+USA,US,TX,Chappell Hill,1,77426
+USA,US,PA,Cranberry Township,1,16066
+USA,US,CA,Newport Beach,1,92660
+USA,US,SD,Rapid City,1,57702
+Canada,CA,AB,Red Deer,1,T4P 3V4
+USA,US,PA,Harveys Lake,1,18618
+USA,US,OH,Newark,1,43055
+USA,US,UT,Payson,1,84651
+USA,US,MD,Thurmont,1,21788
+USA,US,FL,Florida Keys,1,
+USA,US,FL,Seminole,1,33777
+USA,US,MI,Dryden,1,48428
+USA,US,CA,Cardiff by the Sea,1,92007
+Canada,CA,AB,Southern Alberta,1,T0K 1W0
+USA,US,KS,Liberal,1,67901
+USA,US,UT,Orem,1,84058
+Trinidad and Tobago,TT,,Trinidad,1,
+USA,US,MS,Meridian,1,39307
+USA,US,CA,Truckee,1,96161
+USA,US,CT,Wallingford,1,
+USA,US,AL,Anniston,1,36207
+USA,US,UT,Tooele,1,84074
+USA,US,CA,Monterey Park,1,
+USA,US,IL,Oswego,1,
+USA,US,CA,Fremont,1,94538
+Australia,AU,NSW,Northern Rivers,1,2483
+USA,US,MN,St. Michael,1,55376
+USA,US,TX,Laredo,1,78045
+USA,US,HI,Haiku,1,96708
+USA,US,UT,American Fork,1,84003
+USA,US,FL,Palm Harbor,1,34683
+USA,US,NC,Hickory,1,28601
+USA,US,NY,Moriches,1,11955
+USA,US,TX,Montgomery,1,77316
+North Macedonia,MK,,Skopje,1,
+USA,US,CO,Elizabeth,1,80107
+USA,US,AZ,Laveen,1,85339
+USA,US,AL,Malvern,1,36455
+UK,GB,England,Derby,1,DE22 3NE
+USA,US,KS,Bonner Springs,1,66012
+USA,US,CO,Canon City,1,81212
+USA,US,OH,Brecksville,1,44141
+UK,GB,England,East Berkshire,1,
+USA,US,VA,Arlington,1,22202
+USA,US,CA,San Gabriel,1,91776
+USA,US,AZ,Chandler,1,85226
+USA,US,TX,Glen Rose,1,76043
+USA,US,NY,Hudson,1,12534
+USA,US,IN,Sharpsville,1,46068
+USA,US,MO,Maryland Heights,1,63043
+Australia,AU,NSW,Coffs Harbour,1,2450
+USA,US,CA,Castaic,1,91384
+USA,US,CT,Amston,1,06231
+USA,US,NJ,Montclair,1,07043
+USA,US,MD,Columbia,1,21045
+USA,US,AZ,,1,
+Philippines,PH,,,1,
+USA,US,PA,Fairview,1,16415
+USA,US,NY,Hamlin,1,14464
+USA,US,MD,Laurel,1,20707
+USA,US,IN,Mishawaka,1,46545
+USA,US,IL,Springfield,1,62702
+USA,US,GA,Braselton,1,30548
+USA,US,WA,Marysville,1,98270
+USA,US,TX,Weatherford,1,
+USA,US,CA,Oakley,1,94561
+USA,US,CA,Tehachapi,1,93561
+USA,US,WA,Renton,1,98058
+USA,US,AZ,Vail,1,85641
+USA,US,NJ,Hamilton,1,08619
+USA,US,MA,Westminster,1,01473
+UK,GB,England,Suffolk,1,
+USA,US,PA,Murrysville,1,
+USA,US,VA,Woodbridge,1,22191
+USA,US,NY,Hudson Valley,1,
+USA,US,OH,Twinsburg,1,44087
+Canada,CA,BC,Kamloops,1,V2C 5H1
+USA,US,TX,Terrell,1,75160
+UK,GB,England,Barnet,1,EN5
+South Africa,ZA,,Centurion,1,0157
+USA,US,NJ,Bridgewater,1,08807
+USA,US,CT,Woodstock,1,06281
+USA,US,CA,Rialto,1,92376
+USA,US,WA,Pasco,1,99301
+USA,US,TX,Carrollton,1,75010
+USA,US,MA,Wrentham,1,02093
+USA,US,GA,Stockbridge,1,30281
+Zambia,ZM,,,1,
+USA,US,NC,Smithfield,1,27577
+USA,US,FL,Punta Gorda,1,33955
+USA,US,AR,West Memphis,1,
+USA,US,NC,Maiden,1,28650
+USA,US,TX,Killeen,1,76540
+USA,US,MN,Plymouth,1,55447
+USA,US,IN,Crown Point,1,46307
+USA,US,OK,Prague,1,74860
+USA,US,IA,Shelby,1,51570
+USA,US,NJ,Passaic,1,07055
+USA,US,CA,Middletown,1,95461
+USA,US,FL,Davie,1,33330
+USA,US,MN,Coon Rapids,1,55448
+USA,US,CA,Rancho Palos Verdes,1,90275
+USA,US,FL,Largo,1,33773
+USA,US,NJ,Freehold,1,07728
+USA,US,MI,Martin,1,49070
+USA,US,CA,Santee,1,92071
+USA,US,NE,Hastings,1,68901
+USA,US,MA,Walpole,1,02081
+USA,US,WA,Wenatchee,1,
+USA,US,CA,Fairfield,1,94533
+USA,US,WI,Sparta,1,54656
+USA,US,NH,Plaistow,1,03865
+USA,US,NC,Morganton,1,28655
+USA,US,MA,Canton,1,02021
+USA,US,SC,Aiken,1,29803
+USA,US,FL,Plant City,1,33565
+USA,US,NY,South Bethlehem,1,12161
+USA,US,NC,Marshall,1,28753
+UK,GB,England,South West England,1,
+USA,US,ME,Scarborough,1,
+USA,US,GA,Kingsland,1,31548
+USA,US,OR,Central Point,1,97502
+USA,US,IL,Richton Park,1,60471
+USA,US,MO,Springfield,1,
+USA,US,GA,Pine Mountain,1,31822
+USA,US,IA,Lisbon,1,52253
+USA,US,CO,Woodland Park,1,80863
+USA,US,FL,Windermere,1,34786
+USA,US,CT,Greenwich,1,06830
+USA,US,TN,Columbia,1,38401
+USA,US,FL,Palm Coast,1,
+USA,US,NY,East Meadow,1,11554
+UK,GB,England,Banbury,1,OX17
+Canada,CA,ON,Grimsby,1,L3M 1X5
+USA,US,IN,Plymouth,1,46563
+USA,US,CA,South Pasadena,1,91030
+USA,US,NY,Potsdam,1,13676
+Canada,CA,AB,Airdrie,1,T4B 2W2
+Canada,CA,MB,,1,
+UK,GB,England,Northampton,1,
+USA,US,VA,Springfield,1,22152
+USA,US,MN,Rochester,1,55902
+USA,US,NJ,Eatontown,1,07724
+Canada,CA,AB,Spruce Grove area,1,T7X 0T1
+USA,US,MI,South Lyon,1,48178
+USA,US,SC,Wellford,1,29385
+India,IN,,New Delhi,1,110017
+USA,US,NY,Wantagh,1,11793
+USA,US,NJ,Roseland,1,07068
+USA,US,NC,Beaufort,1,
+USA,US,WA,Sammamish,1,98075
+USA,US,PA,Kingston,1,18704
+USA,US,PA,Clifton Heights,1,19018
+USA,US,PA,New Providence,1,17560
+Canada,CA,ON,Collingwood,1,L9Y 0H6
+USA,US,VA,Leesburg,1,20176
+USA,US,MA,Wilmington,1,01887
+USA,US,WA,Arlington,1,98223
+USA,US,GA,Jefferson,1,30549
+USA,US,IL,Tuscola,1,61953
+USA,US,MA,Lynn,1,01902
+USA,US,AL,Haleyville,1,
+USA,US,CO,Littleton,1,80128
+USA,US,RI,Cranston,1,02921
+USA,US,OH,Independence,1,44131
+USA,US,MA,Saugus,1,01906
+USA,US,CA,Oceanside,1,92057
+USA,US,MD,Clinton,1,20735
+USA,US,CA,Fullerton,1,92833
+USA,US,IN,Wabash,1,46992
+USA,US,KS,Lenexa,1,66227
+USA,US,GA,Ball Ground,1,30107
+USA,US,UT,Park City,1,84098
+USA,US,FL,Green Cove Springs,1,32043
+USA,US,MN,Litchfield,1,55355
+Singapore,SG,,,1,
+Canada,CA,ON,St. Thomas,1,N5R 2A1
+UK,GB,England,"Swanley, Kent",1,BR8 7JE
+USA,US,NY,Elma,1,14059
+USA,US,NJ,Martinsville,1,08836
+USA,US,CT,East Haven,1,06512
+USA,US,PA,Canonsburg,1,15317
+USA,US,VA,Blacksburg,1,24060
+UK,GB,England,Peterborough area,1,PE6 8QQ
+USA,US,GA,Cumming,1,
+UK,GB,England,Manchester,1,
+USA,US,NY,Williamsville,1,14221
+USA,US,SC,Johns Island,1,29455
+USA,US,SD,Gettysburg,1,57442
+USA,US,WI,Eau Claire,1,54701
+USA,US,NC,Hendersonville,1,28791
+Saudi Arabia,SA,,,1,
+USA,US,NC,Timberlake,1,27583
+USA,US,MI,Battle Creek,1,49017
+USA,US,CA,Rancho Cordova,1,95670
+USA,US,NJ,Cedar Grove,1,07009
+Canada,CA,QC,Montreal area,1,J6R 2L1
+USA,US,MA,East Longmeadow,1,01028
+USA,US,LA,Hammond,1,
+USA,US,TX,The Colony,1,75056
+USA,US,KY,Fort Mitchell,1,41017
+USA,US,IA,Sheldon,1,51248
+USA,US,CO,Boulder,1,80302
+USA,US,TX,Bastrop,1,78602
+USA,US,MA,Framingham,1,01701
+USA,US,IN,Monrovia,1,46157
+Japan,JP,,,1,
+USA,US,TX,Wylie,1,75098
+USA,US,VA,Warrenton,1,
+USA,US,CA,Whittier,1,90602
+USA,US,MO,St. Joseph,1,64506
+UK,GB,England,Yorkshire,1,
+USA,US,MN,Chaska,1,55318
+USA,US,IN,Vevay,1,47043
+USA,US,NJ,Clark,1,07066
+Zimbabwe,ZW,,,1,
+USA,US,FL,Palm Beach Gardens,1,33418
+USA,US,IN,Valparaiso,1,46385
+USA,US,VT,Bennington,1,
+USA,US,NY,Westchester County,1,
+USA,US,AZ,Sun City,1,85373
+USA,US,MT,Three Forks,1,59752
+USA,US,WY,Pinedale,1,82941
+UK,GB,England,Lancashire,1,
+UAE,AE,,,1,
+USA,US,NV,Battle Mountain,1,89820
+Canada,CA,ON,Oshawa,1,L1G 5G7
+USA,US,GA,Peachtree City,1,30269
+USA,US,IL,Peoria,1,61615
+USA,US,PA,Horsham,1,19044
+USA,US,VA,Norfolk,1,23510
+USA,US,UT,Midway,1,84049
+USA,US,TX,Bloomburg,1,75556
+USA,US,CA,Morro Bay,1,93442
+USA,US,CA,Newbury Park,1,91320
+UK,GB,England,"Luton, England",1,LU3 1JP
+USA,US,CA,Thousand Oaks,1,91362
+Canada,CA,ON,Waterloo Region,1,N0B 2R0
+Canada,CA,ON,Niagara,1,
+USA,US,MN,Brainerd,1,56401
+USA,US,NY,Farmingville,1,11738
+USA,US,NJ,East Orange,1,07018
+USA,US,AL,Piedmont,1,36272
+USA,US,OH,Blacklick,1,43004
+USA,US,CA,Fairfax,1,94930
+USA,US,IN,Shelbyville,1,46176
+UK,GB,England,Chester,1,
+USA,US,TX,Athens,1,75752
+USA,US,CA,Alturas,1,96101
+USA,US,OR,Damascus,1,97089
+South Africa,ZA,,Durban,1,4000
+USA,US,MO,Jefferson City,1,65101
+Canada,CA,AB,Spruce Grove,1,T7Y 2W4
+USA,US,CA,Chino,1,91710
+USA,US,WA,Puyallup,1,98374
+USA,US,TN,Knoxville,1,37938
+USA,US,RI,Pawtucket,1,02860
+USA,US,GA,Powder Springs,1,30127
+USA,US,CO,Centennial,1,80122
+USA,US,CO,Golden,1,80403
+USA,US,WI,New Richmond,1,54017
+USA,US,SC,Seneca,1,29678
+USA,US,TN,McMinnville,1,37110
+USA,US,NY,Lindenhurst,1,11757
+USA,US,CT,Groton,1,06340
+USA,US,NV,Minden,1,89423
+USA,US,MA,Westford,1,01886
+Canada,CA,ON,Kitchener,1,N2R 0E6
+USA,US,WI,Cudahy,1,53110
+USA,US,NY,Hempstead,1,11550
+USA,US,VA,Ashburn,1,20148
+UK,GB,Wales,,1,
+USA,US,CA,Tustin,1,92780
+USA,US,TX,Levelland,1,79336
+USA,US,MI,Taylor,1,48180
+USA,US,MS,Starkville,1,39759
+UK,GB,England,"Chesterfield, England",1,S40
+USA,US,NY,Montgomery,1,12549
+USA,US,SC,Beaufort,1,
+USA,US,RI,Riverside,1,02915
+USA,US,NJ,Edison,1,08817
+USA,US,FL,Central Florida,1,
+USA,US,MA,Brewster,1,02631
+USA,US,VA,Stafford,1,22556
+Canada,CA,ON,Ottawa,1,K1Y 0N3
+Canada,CA,ON,Milton,1,L9T 6K2
+Canada,CA,BC,Surrey,1,V3T 3J1
+UK,GB,England,Nottingham,1,
+USA,US,NJ,Mendham,1,07945
+USA,US,MD,California,1,20619
+USA,US,TX,Houston/The Woodlands/Conroe,1,
+USA,US,TN,Thompson's Station,1,37179
+USA,US,MD,Bethesda,1,20817
+USA,US,SC,Chapin,1,29036
+USA,US,VA,Petersburg,1,23805
+USA,US,VA,Roanoke,1,24014
+USA,US,SC,Edisto Island,1,29438
+USA,US,VA,Staunton,1,24401
+USA,US,CT,,1,
+USA,US,CA,Manhattan Beach,1,90266
+USA,US,MI,Adrian,1,49221
+USA,US,PA,Mechanicsburg,1,17055
+USA,US,NJ,,1,
+Australia,AU,NSW,Murwillumbah,1,2484
+USA,US,CA,Torrance,1,90504
+USA,US,OH,Metamora,1,43540
+UK,GB,England,"Benfleet, Essex",1,SS7 3DU
+USA,US,MI,Romulus,1,48174
+USA,US,NY,North Syracuse,1,13212
+USA,US,FL,Valrico,1,33594
+USA,US,KS,Hillsboro,1,67063
+USA,US,OR,St. Paul,1,97137
+Australia,AU,QLD,Townsville,1,
+USA,US,PA,Effort,1,18330
+Australia,AU,TAS,,1,
+USA,US,NC,Matthews,1,28104
+USA,US,IN,,1,
+USA,US,MN,Twin Cities,1,
+USA,US,NY,Huntington,1,11743
+USA,US,AZ,Tempe,1,
+USA,US,MD,Owings Mills,1,21117
+USA,US,PA,Hamburg,1,19526
+USA,US,GA,Savannah,1,31404
+UK,GB,Wales,Cardiff,1,
+Canada,CA,BC,Nanaimo,1,V9S 1C2
+UK,GB,England,Leeds,1,
+USA,US,NJ,Barnegat,1,08005
+USA,US,MN,Hanover,1,55341
+USA,US,TX,White Oak,1,75693
+USA,US,TX,Pottsboro,1,75076
+USA,US,AZ,Wickenburg,1,85390
+USA,US,SC,New Ellenton,1,29809
+USA,US,TX,Charlotte,1,78011
+USA,US,AR,Gravette,1,72736
+USA,US,MD,Elkridge,1,21075
+USA,US,TX,Beaumont,1,77706
+USA,US,AR,Springdale,1,72762
+USA,US,NJ,Trenton,1,08610
+USA,US,CO,Highlands Ranch,1,80130
+USA,US,NC,Morehead City,1,28557
+USA,US,VA,,1,
+USA,US,OH,Central Ohio,1,
+USA,US,NY,Queensbury,1,12804
+USA,US,GA,Grovetown,1,30813
+USA,US,FL,Hialeah,1,33018
+UK,GB,England,Cambridge,1,
+USA,US,FL,Riverview,1,33579
+USA,US,OH,Amelia,1,
+USA,US,ID,Nampa,1,83687
+USA,US,NJ,Roselle,1,07203
+USA,US,NC,Monroe,1,
+USA,US,TX,Mission,1,78572
+USA,US,IL,Rantoul,1,61866
+USA,US,TX,Bryan,1,77808
+USA,US,LA,West Monroe,1,71291
+USA,US,IL,Somonauk,1,60552
+UK,GB,England,West Midlands,1,
+USA,US,CA,Inglewood,1,
+USA,US,FL,Titusville,1,32796
+USA,US,NC,Jacksonville,1,28540
+Canada,CA,AB,Lloydminster,1,T9V 3P6
+USA,US,GA,Athens,1,
+USA,US,TX,Bullard,1,75757
+USA,US,CT,Hartford,1,
+USA,US,NY,,1,
+USA,US,NY,Clarence,1,14031
+USA,US,CT,Wilton,1,06897
+USA,US,CA,Walnut Creek,1,94596
+Chile,CL,,Santiago,1,
+Canada,CA,BC,New Westminster,1,V3L
+USA,US,TX,Odessa,1,79766
+USA,US,PA,Jenkintown,1,19046
+Canada,CA,AB,Lethbridge,1,T1K 5C1
+USA,US,CA,Pacific Palisades,1,90272
+USA,US,WI,River Falls,1,54022
+France,FR,,Biarritz,1,64200
+USA,US,IL,Villa Park,1,60181
+USA,US,NC,Cornelius,1,28031
+USA,US,AR,Northwest Arkansas,1,
+USA,US,PA,Doylestown,1,
+USA,US,WI,Shawano,1,54166
+USA,US,OR,Lorane,1,97451
+USA,US,OH,Broadview Heights,1,44147
+New Zealand,NZ,,Raglan,1,
+Kenya,KE,,Nairobi,1,
+USA,US,IN,Bloomington,1,47401
+USA,US,OH,Hudson,1,44236
+USA,US,MN,Rosemount,1,55068
+USA,US,CA,Skyforest,1,92385
+USA,US,WI,Belleville,1,53508
+USA,US,ID,Sandpoint,1,83864
+USA,US,PA,Fredonia,1,16124
+USA,US,OH,Findlay,1,
+USA,US,CA,Paso Robles,1,93446
+Morocco,MA,,,1,
+USA,US,CA,Anaheim,1,92802
+USA,US,TX,McKinney,1,75069
+USA,US,GA,Calhoun,1,30701
+USA,US,AL,Prattville,1,36067
+USA,US,CA,Santa Ana,1,92705
+USA,US,PA,Media,1,
+UK,GB,England,Brighton,1,
+USA,US,ID,Coeur d'Alene,1,83814
+USA,US,NY,Plainview,1,11803
+USA,US,CA,Gilroy,1,95020
+USA,US,FL,Oviedo,1,32766
+USA,US,NJ,Paterson,1,07522
+USA,US,WY,"Wyoming, city unverified",1,83054
+USA,US,GA,Sandy Springs,1,30350
+Kenya,KE,,,1,
+USA,US,NJ,Matawan,1,07747
+USA,US,NY,New Rochelle,1,10804
+USA,US,VA,McLean,1,22102
+USA,US,OH,North Canton,1,44720
+USA,US,MA,Palmer,1,01069
+USA,US,GA,Fayetteville,1,
+USA,US,RI,Jamestown,1,02835
+USA,US,NC,Burnsville,1,28714
+USA,US,GA,Buford,1,30518
+USA,US,VA,Portsmouth,1,23707
+Australia,AU,,Sydney,1,

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send, MessageSquare, Map as MapIcon } from "lucide-react"
 import Link from "next/link"
 import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, logReply, getSentDoctorIds, getFarDistanceThreshold, autoLogDemand, undoAutoLogDemand, selectVariant } from "./actions"
+import { getCountriesWithDemand, getCountryByIso2, type CountryConfig } from "@/config/countries"
 
 // ── Colors ──
 const COLORS = {
@@ -111,14 +112,16 @@ export default function CoverageMapClient({
   const showAll = () => setLayers({ verified: true, pending: true, confirmedSub: true, pendingSub: true, gaps: true, mentions: true })
   const hideAll = () => setLayers({ verified: false, pending: false, confirmedSub: false, pendingSub: false, gaps: false, mentions: false })
 
-  // Country centres and zoom levels for map recentring
-  const COUNTRY_VIEWS: Record<string, { center: [number, number]; zoom: number; label: string }> = {
-    US: { center: [-96, 38], zoom: 3.8, label: 'States' },
-    CA: { center: [-96, 56], zoom: 3.2, label: 'Provinces' },
-    GB: { center: [-2, 54], zoom: 5.2, label: 'Regions' },
-    NZ: { center: [174, -41], zoom: 5, label: 'Regions' },
-    AU: { center: [134, -25], zoom: 3.5, label: 'States' },
+  // Country centres and zoom levels for map recentring — from config, with fallback
+  const demandCountries = getCountriesWithDemand()
+  const COUNTRY_VIEWS: Record<string, { center: [number, number]; zoom: number; label: string }> = {}
+  for (const c of demandCountries) {
+    if (c.mapView) {
+      COUNTRY_VIEWS[c.iso2] = { ...c.mapView, label: c.regionLabel + 's' }
+    }
   }
+  // Fallback for countries without a mapView
+  if (!COUNTRY_VIEWS.US) COUNTRY_VIEWS.US = { center: [-96, 38], zoom: 3.8, label: 'States' }
 
   // Filter doctors by selected country
   const countryDoctors = doctors.filter(d => {
@@ -551,11 +554,9 @@ export default function CoverageMapClient({
               try { localStorage.setItem('nc_lookup_country', e.target.value) } catch {}
               setLookupResults(null); setLookupLabel(''); setAmbiguousOptions(null); setCouldNotResolve(false)
             }} className="bg-white/5 border border-white/10 rounded-lg text-base text-white/60 px-2 py-1">
-              <option value="US">🇺🇸 US</option>
-              <option value="CA">🇨🇦 Canada</option>
-              <option value="GB">🇬🇧 UK</option>
-              <option value="NZ">🇳🇿 NZ</option>
-              <option value="AU">🇦🇺 Australia</option>
+              {demandCountries.map(c => (
+                <option key={c.iso2} value={c.iso2}>{c.flag} {c.name}</option>
+              ))}
             </select>
           </div>
         </div>
