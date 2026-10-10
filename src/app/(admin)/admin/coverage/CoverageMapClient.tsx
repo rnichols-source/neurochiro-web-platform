@@ -250,12 +250,12 @@ export default function CoverageMapClient({
           },
           layout: { visibility: layers.mentions ? 'visible' : 'none' },
         })
-        // Count labels for cities above threshold
-        // Aggregate city counts for labels (one label per city, not per dot)
+        // Count labels from un-jittered mentions data (city centers, not scattered dots)
+        const countryMentionsForLabels = mentions.filter(m => (m.country || 'US') === lookupCountry)
         const cityLabelMap = new Map<string, { lng: number; lat: number; count: number; city: string; state: string }>()
-        for (const d of countryDots) {
-          const key = `${d.city}|${d.state}`
-          if (!cityLabelMap.has(key)) cityLabelMap.set(key, { lng: d.lng, lat: d.lat, count: d.cityCount, city: d.city, state: d.state })
+        for (const m of countryMentionsForLabels) {
+          const key = `${m.city}|${m.state}`
+          if (!cityLabelMap.has(key)) cityLabelMap.set(key, { lng: m.lng, lat: m.lat, count: m.count, city: m.city, state: m.state })
         }
         const labelFeatures = Array.from(cityLabelMap.values())
           .filter(c => c.count >= 5) // threshold from config default
@@ -268,16 +268,17 @@ export default function CoverageMapClient({
         map.addLayer({ id: 'mention-labels', type: 'symbol', source: 'mention-labels',
           layout: {
             'text-field': ['get', 'label'],
-            'text-size': 11,
+            'text-size': 13,
             'text-font': ['Open Sans Bold'],
-            'text-offset': [0, -1.2],
-            'text-allow-overlap': false,
+            'text-offset': [0, -1.5],
+            'text-allow-overlap': true,
+            'text-ignore-placement': true,
             visibility: layers.mentions ? 'visible' : 'none',
           },
           paint: {
             'text-color': '#06b6d4',
             'text-halo-color': '#0B1118',
-            'text-halo-width': 1.5,
+            'text-halo-width': 2,
           },
         })
 
@@ -394,21 +395,16 @@ export default function CoverageMapClient({
           properties: { city: d.city, state: d.state, cityCount: d.cityCount },
         })) })
       }
-      // Rebuild labels
+      // Rebuild labels from un-jittered mentions
       const labelSrc = map.getSource('mention-labels')
       if (labelSrc) {
-        const countryDots = (demandDots || []).filter(d => (d.country || 'US') === lookupCountry)
-        const cityLabelMap = new Map<string, { lng: number; lat: number; count: number; city: string }>()
-        for (const d of countryDots) {
-          const key = `${d.city}|${d.state}`
-          if (!cityLabelMap.has(key)) cityLabelMap.set(key, { lng: d.lng, lat: d.lat, count: d.cityCount, city: d.city })
-        }
-        labelSrc.setData({ type: 'FeatureCollection', features: Array.from(cityLabelMap.values())
-          .filter(c => c.count >= 5)
-          .map(c => ({
+        const countryMentionsForLabels = mentions.filter(m => (m.country || 'US') === lookupCountry)
+        labelSrc.setData({ type: 'FeatureCollection', features: countryMentionsForLabels
+          .filter(m => m.count >= 5)
+          .map(m => ({
             type: 'Feature' as const,
-            geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
-            properties: { label: String(c.count), city: c.city },
+            geometry: { type: 'Point' as const, coordinates: [m.lng, m.lat] },
+            properties: { label: String(m.count), city: m.city },
           }))
         })
       }
