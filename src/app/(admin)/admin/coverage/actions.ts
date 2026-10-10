@@ -640,6 +640,73 @@ export async function getMentionsData(): Promise<MentionCity[]> {
   }))
 }
 
+export interface DemandDot {
+  lat: number
+  lng: number
+  city: string
+  state: string
+  country: string
+  cityCount: number // how many requests in this city
+}
+
+/**
+ * Returns individual demand dots with deterministic jitter for the scatter layer.
+ * Each demand_mentions row becomes one dot, jittered within a configurable radius
+ * of the city center using the row's UUID as a seed.
+ */
+export async function getDemandScatterData(): Promise<DemandDot[]> {
+  await checkAdminAuth()
+  const supabase = createAdminClient()
+
+  // Get jitter config
+  const { data: configRow } = await (supabase as any)
+    .from('platform_settings').select('value').eq('key', 'demand_scatter').single()
+  const jitterMiles = configRow?.value?.jitter_radius_miles || 4
+
+  const { data: rows } = await (supabase as any)
+    .from('demand_mentions')
+    .select('id, city, state, lat, lng, country')
+
+  if (!rows?.length) return []
+
+  // Count per city for sizing
+  const cityCountMap = new Map<string, number>()
+  for (const r of rows) {
+    const key = `${r.city}|${r.state}|${r.country || 'US'}`
+    cityCountMap.set(key, (cityCountMap.get(key) || 0) + 1)
+  }
+
+  // Convert jitter miles to approximate degrees (1 degree lat ≈ 69 miles)
+  const jitterDeg = jitterMiles / 69
+
+  return rows.map((r: any) => {
+    const key = `${r.city}|${r.state}|${r.country || 'US'}`
+    const cityCount = cityCountMap.get(key) || 1
+
+    // Deterministic jitter from UUID
+    // Use the first 8 hex chars of the UUID as two seeds
+    const id = r.id as string
+    const seed1 = parseInt(id.substring(0, 8), 16)
+    const seed2 = parseInt(id.substring(9, 17).replace('-', ''), 16)
+
+    // Map to [-1, 1] range deterministically
+    const angle = (seed1 / 0xFFFFFFFF) * 2 * Math.PI
+    const radius = Math.sqrt(seed2 / 0xFFFFFFFF) * jitterDeg // sqrt for uniform distribution within circle
+
+    const jitteredLat = Number(r.lat) + radius * Math.cos(angle)
+    const jitteredLng = Number(r.lng) + radius * Math.sin(angle) / Math.cos(Number(r.lat) * Math.PI / 180) // correct for longitude compression
+
+    return {
+      lat: Math.round(jitteredLat * 1000) / 1000,
+      lng: Math.round(jitteredLng * 1000) / 1000,
+      city: r.city || '',
+      state: r.state || '',
+      country: r.country || 'US',
+      cityCount,
+    }
+  })
+}
+
 export interface ParsedMention {
   input: string
   city: string | null

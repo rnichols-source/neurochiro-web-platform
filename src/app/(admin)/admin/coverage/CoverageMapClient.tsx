@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { MapPin, Search, AlertTriangle, ExternalLink, Globe, ChevronDown, ChevronUp, Eye, EyeOff, Copy, Check, Send, MessageSquare, Map as MapIcon } from "lucide-react"
 import Link from "next/link"
-import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, lookupNearby, addMarketLead, logReply, getSentDoctorIds, getFarDistanceThreshold, autoLogDemand, undoAutoLogDemand, selectVariant } from "./actions"
+import { CoverageDoctor, DemandZip, CoverageStats, MentionCity, MarketCluster, LookupResult, ReplyTemplate, DemandDot, lookupNearby, addMarketLead, logReply, getSentDoctorIds, getFarDistanceThreshold, autoLogDemand, undoAutoLogDemand, selectVariant } from "./actions"
 import { getCountriesWithDemand, getCountryByIso2, type CountryConfig } from "@/config/countries"
 
 // ── Colors ──
@@ -49,13 +49,14 @@ function loadMapCollapsed(): boolean {
 // ── Main Component ──
 
 export default function CoverageMapClient({
-  doctors, demand, stats, mentions, templates,
+  doctors, demand, stats, mentions, templates, demandDots,
 }: {
   doctors: CoverageDoctor[]
   demand: DemandZip[]
   stats: CoverageStats
   mentions: MentionCity[]
   templates: ReplyTemplate[]
+  demandDots?: DemandDot[]
 }) {
   const [layers, setLayers] = useState<Record<LayerKey, boolean>>(loadSavedLayers)
   const [showStatsPanel, setShowStatsPanel] = useState(true)
@@ -219,23 +220,65 @@ export default function CoverageMapClient({
           layout: { visibility: layers.gaps ? 'visible' : 'none' },
         })
 
-        // Mentions source — filter by selected country
-        const countryMentions = mentions.filter(m => (m.country || 'US') === lookupCountry)
-        const mentionFeatures = countryMentions.map(m => ({
+        // Demand scatter dots — individual jittered points, sized by city count
+        const countryDots = (demandDots || []).filter(d => (d.country || 'US') === lookupCountry)
+        const scatterFeatures = countryDots.map(d => ({
           type: 'Feature' as const,
-          geometry: { type: 'Point' as const, coordinates: [m.lng, m.lat] },
-          properties: { city: m.city, state: m.state, count: m.count, gap: m.gap ? 1 : 0 },
+          geometry: { type: 'Point' as const, coordinates: [d.lng, d.lat] },
+          properties: { city: d.city, state: d.state, cityCount: d.cityCount },
         }))
-        map.addSource('mentions', { type: 'geojson', data: { type: 'FeatureCollection', features: mentionFeatures } })
+        map.addSource('mentions', { type: 'geojson', data: { type: 'FeatureCollection', features: scatterFeatures } })
+        // Individual dots — radius scales by sqrt of city count
         map.addLayer({ id: 'mentions-dots', type: 'circle', source: 'mentions',
           paint: {
-            'circle-color': COLORS.mentions,
-            'circle-radius': ['interpolate', ['linear'], ['get', 'count'], 1, 7, 5, 12, 15, 18, 30, 24],
-            'circle-opacity': 0.7,
-            'circle-stroke-width': 2,
-            'circle-stroke-color': '#fff',
+            'circle-color': ['interpolate', ['linear'],
+              ['sqrt', ['get', 'cityCount']],
+              1, '#06b6d4',   // 1 request: light cyan
+              3, '#0891b2',   // ~9 requests
+              5, '#0e7490',   // ~25 requests
+              7, '#155e75',   // ~49 requests
+            ],
+            'circle-radius': ['interpolate', ['linear'],
+              ['sqrt', ['get', 'cityCount']],
+              1, 4,   // 1 request: 4px
+              3, 6,   // ~9 requests: 6px
+              5, 8,   // ~25 requests: 8px
+              7, 10,  // ~49 requests: 10px
+            ],
+            'circle-opacity': 0.75,
+            'circle-stroke-width': 0,
           },
           layout: { visibility: layers.mentions ? 'visible' : 'none' },
+        })
+        // Count labels for cities above threshold
+        // Aggregate city counts for labels (one label per city, not per dot)
+        const cityLabelMap = new Map<string, { lng: number; lat: number; count: number; city: string; state: string }>()
+        for (const d of countryDots) {
+          const key = `${d.city}|${d.state}`
+          if (!cityLabelMap.has(key)) cityLabelMap.set(key, { lng: d.lng, lat: d.lat, count: d.cityCount, city: d.city, state: d.state })
+        }
+        const labelFeatures = Array.from(cityLabelMap.values())
+          .filter(c => c.count >= 5) // threshold from config default
+          .map(c => ({
+            type: 'Feature' as const,
+            geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
+            properties: { label: String(c.count), city: c.city },
+          }))
+        map.addSource('mention-labels', { type: 'geojson', data: { type: 'FeatureCollection', features: labelFeatures } })
+        map.addLayer({ id: 'mention-labels', type: 'symbol', source: 'mention-labels',
+          layout: {
+            'text-field': ['get', 'label'],
+            'text-size': 11,
+            'text-font': ['Open Sans Bold'],
+            'text-offset': [0, -1.2],
+            'text-allow-overlap': false,
+            visibility: layers.mentions ? 'visible' : 'none',
+          },
+          paint: {
+            'text-color': '#06b6d4',
+            'text-halo-color': '#0B1118',
+            'text-halo-width': 1.5,
+          },
         })
 
         // Click handlers
@@ -317,6 +360,7 @@ export default function CoverageMapClient({
       ['demand-pending', 'pendingSub'],
       ['demand-gaps', 'gaps'],
       ['mentions-dots', 'mentions'],
+      ['mention-labels', 'mentions'],
     ]
     for (const [layerId, key] of demandMap) {
       try {
@@ -339,16 +383,34 @@ export default function CoverageMapClient({
       if (src) src.setData({ type: 'FeatureCollection', features: buildDoctorFeatures(layers.verified, layers.pending) })
     } catch {}
 
-    // Rebuild mention dots for new country
+    // Rebuild scatter dots for new country
     try {
       const mentionSrc = map.getSource('mentions')
       if (mentionSrc) {
-        const countryMentions = mentions.filter(m => (m.country || 'US') === lookupCountry)
-        mentionSrc.setData({ type: 'FeatureCollection', features: countryMentions.map(m => ({
+        const countryDots = (demandDots || []).filter(d => (d.country || 'US') === lookupCountry)
+        mentionSrc.setData({ type: 'FeatureCollection', features: countryDots.map(d => ({
           type: 'Feature' as const,
-          geometry: { type: 'Point' as const, coordinates: [m.lng, m.lat] },
-          properties: { city: m.city, state: m.state, count: m.count, gap: m.gap ? 1 : 0 },
+          geometry: { type: 'Point' as const, coordinates: [d.lng, d.lat] },
+          properties: { city: d.city, state: d.state, cityCount: d.cityCount },
         })) })
+      }
+      // Rebuild labels
+      const labelSrc = map.getSource('mention-labels')
+      if (labelSrc) {
+        const countryDots = (demandDots || []).filter(d => (d.country || 'US') === lookupCountry)
+        const cityLabelMap = new Map<string, { lng: number; lat: number; count: number; city: string }>()
+        for (const d of countryDots) {
+          const key = `${d.city}|${d.state}`
+          if (!cityLabelMap.has(key)) cityLabelMap.set(key, { lng: d.lng, lat: d.lat, count: d.cityCount, city: d.city })
+        }
+        labelSrc.setData({ type: 'FeatureCollection', features: Array.from(cityLabelMap.values())
+          .filter(c => c.count >= 5)
+          .map(c => ({
+            type: 'Feature' as const,
+            geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
+            properties: { label: String(c.count), city: c.city },
+          }))
+        })
       }
     } catch {}
   }, [lookupCountry])
@@ -458,7 +520,7 @@ export default function CoverageMapClient({
                     existing.features.push({
                       type: 'Feature',
                       geometry: { type: 'Point', coordinates: [r.resolvedLng, r.resolvedLat] },
-                      properties: { city: r.resolvedCity, state: r.resolvedState, count: 1, gap: r.doctors.length === 0 ? 1 : 0 },
+                      properties: { city: r.resolvedCity, state: r.resolvedState, cityCount: 1 },
                     })
                     src.setData(existing)
                   }
