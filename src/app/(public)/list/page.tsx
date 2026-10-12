@@ -25,9 +25,24 @@ function SubscribeListContent() {
 
   const [email, setEmail] = useState("");
   const [zip, setZip] = useState(urlZip);
-  const [country, setCountry] = useState(region.code === 'US' ? 'US' : region.code === 'CA' ? 'CA' : region.code === 'UK' ? 'GB' : region.code === 'NZ' ? 'NZ' : region.code === 'AU' ? 'AU' : 'US');
+  const regionToCountry = (code: string) => {
+    if (code === 'UK') return 'GB'
+    if (['US','CA','NZ','AU'].includes(code)) return code
+    if (code === 'EU') return 'GB' // Best default for European visitors
+    return 'US'
+  }
+  const [country, setCountry] = useState(regionToCountry(region.code));
   const [consent, setConsent] = useState(false);
   const [honeypot, setHoneypot] = useState("");
+
+  // Sync country when region auto-detects from timezone (runs after initial render)
+  const regionSynced = useRef(false);
+  useEffect(() => {
+    if (!regionSynced.current && region.code !== 'US') {
+      setCountry(regionToCountry(region.code));
+      regionSynced.current = true;
+    }
+  }, [region.code]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error" | "coverage">("idle");
   const [serverError, setServerError] = useState("");
