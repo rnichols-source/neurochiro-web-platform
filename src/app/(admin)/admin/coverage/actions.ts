@@ -214,7 +214,10 @@ export async function getDemandData(): Promise<DemandZip[]> {
   })
 }
 
-export async function getCoverageStats(): Promise<CoverageStats> {
+export async function getCoverageStats(
+  prefetchedMentions?: MentionCity[],
+  prefetchedDemand?: DemandZip[],
+): Promise<CoverageStats> {
   await checkAdminAuth()
   const supabase = createAdminClient()
 
@@ -250,12 +253,11 @@ export async function getCoverageStats(): Promise<CoverageStats> {
   const confirmedSubs = (subs || []).filter((s: any) => s.status === 'confirmed')
   const pendingSubs = (subs || []).filter((s: any) => s.status === 'pending')
 
-  // Mentions count
-  const mentionsData = await getMentionsData()
+  // Use prefetched data if available, otherwise fetch (backward compat)
+  const mentionsData = prefetchedMentions || await getMentionsData()
   const totalMentions = mentionsData.reduce((sum, m) => sum + m.count, 0)
 
-  // Build ALL demand points (subscribers + mentions) with coords and gap status
-  const demandData = await getDemandData()
+  const demandData = prefetchedDemand || await getDemandData()
 
   type DemandPoint = { city: string; state: string; lat: number; lng: number; waitlist: number; mentions: number; hasDoctor: boolean }
   const demandPoints = new Map<string, DemandPoint>()
