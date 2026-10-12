@@ -64,6 +64,10 @@ function loadMapCollapsed(): boolean {
   return true // default collapsed
 }
 
+// ── Perf instrumentation ──
+const PERF_START = typeof window !== 'undefined' ? performance.now() : 0
+let RENDER_COUNT = 0
+
 // ── Main Component ──
 
 export default function CoverageMapClient({
@@ -77,6 +81,9 @@ export default function CoverageMapClient({
   demandDots?: DemandDot[]
   outreachLinks?: { calendly_url: string; mastermind_url: string; checkout_url_monthly: string; checkout_url_annual: string }
 }) {
+  RENDER_COUNT++
+  if (typeof window !== 'undefined') console.log(`[PERF-CLIENT] Render #${RENDER_COUNT} at ${(performance.now() - PERF_START).toFixed(0)}ms`)
+
   const [layers, setLayers] = useState<Record<LayerKey, boolean>>(loadSavedLayers)
   const [showStatsPanel, setShowStatsPanel] = useState(true)
   const [lookupQuery, setLookupQuery] = useState('')
@@ -117,6 +124,11 @@ export default function CoverageMapClient({
   const mapInstanceRef = useRef<any>(null)
   const mapReadyRef = useRef(false)
   const mapInitializedRef = useRef(false)
+
+  // Perf: log mount
+  useEffect(() => {
+    console.log(`[PERF-CLIENT] Component mounted at ${(performance.now() - PERF_START).toFixed(0)}ms. Props: ${doctors.length} doctors, ${(demandDots || []).length} demandDots, ${mentions.length} mentions, ${templates.length} templates`)
+  }, [])
 
   // Load sent doctor IDs + far threshold on mount
   useEffect(() => {
@@ -184,22 +196,28 @@ export default function CoverageMapClient({
   // ── Map init (only when map section is visible) ──
   useEffect(() => {
     if (mapCollapsed || !mapRef.current || mapInstanceRef.current) return
+    const mapEffectStart = performance.now()
+    console.log(`[PERF-CLIENT] Map useEffect started at ${(mapEffectStart - PERF_START).toFixed(0)}ms`)
     const script = document.createElement('script')
     script.src = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js'
     script.onload = () => {
+      console.log(`[PERF-CLIENT] MapLibre CDN loaded at ${(performance.now() - PERF_START).toFixed(0)}ms (${(performance.now() - mapEffectStart).toFixed(0)}ms to load script)`)
       const link = document.createElement('link')
       link.rel = 'stylesheet'
       link.href = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css'
       document.head.appendChild(link)
 
       const maplibregl = (window as any).maplibregl
+      const mapCreateStart = performance.now()
       const map = new maplibregl.Map({
         container: mapRef.current!, style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
         center: [-96, 38], zoom: 3.8, attributionControl: false,
       })
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
+      console.log(`[PERF-CLIENT] Map created at ${(performance.now() - PERF_START).toFixed(0)}ms (${(performance.now() - mapCreateStart).toFixed(0)}ms to create)`)
 
       map.on('load', () => {
+        console.log(`[PERF-CLIENT] Map style+tiles loaded at ${(performance.now() - PERF_START).toFixed(0)}ms (${(performance.now() - mapEffectStart).toFixed(0)}ms since effect start)`)
         mapInstanceRef.current = map
         mapReadyRef.current = true
         mapInitializedRef.current = true
@@ -248,7 +266,10 @@ export default function CoverageMapClient({
           layout: { visibility: layers.gaps ? 'visible' : 'none' },
         })
 
+        console.log(`[PERF-CLIENT] Doctor+demand sources added at ${(performance.now() - PERF_START).toFixed(0)}ms`)
+
         // Demand scatter dots — individual jittered points, sized by city count
+        const scatterBuildStart = performance.now()
         const countryDots = (demandDots || []).filter(d => (d.country || 'US') === lookupCountry)
         const scatterFeatures = countryDots.map(d => ({
           type: 'Feature' as const,
@@ -307,6 +328,8 @@ export default function CoverageMapClient({
             'text-halo-width': 2,
           },
         })
+
+        console.log(`[PERF-CLIENT] All sources+layers added at ${(performance.now() - PERF_START).toFixed(0)}ms (scatter build: ${(performance.now() - scatterBuildStart).toFixed(0)}ms, ${countryDots.length} dots, ${labelFeatures.length} labels)`)
 
         // Click handlers
         map.on('click', 'doctor-clusters', (e: any) => {
