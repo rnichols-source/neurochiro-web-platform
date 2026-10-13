@@ -226,7 +226,8 @@ export async function getDailyData(): Promise<DailyCount[]> {
   const result: DailyCount[] = []
   const today = toETDate(new Date().toISOString())
   const start = TRACKING_SINCE
-  console.log(`[REC-STATS] getDailyData: today=${today}, total deduped recs=${recs.length}, today recs=${recsByDate.get(today) || 0}, yesterday recs=${recsByDate.get(addDays(today, -1)) || 0}`)
+  const lastRecDate = recs.length > 0 ? toETDate(recs[recs.length - 1].created_at) : 'none'
+  console.log(`[REC-STATS] getDailyData: today="${today}" lastRecDate="${lastRecDate}" totalRecs=${recs.length} todayRecs=${recsByDate.get(today) || 0} yesterdayRecs=${recsByDate.get(addDays(today, -1)) || 0} dates=[${[...recsByDate.keys()].slice(-3).join(',')}]`)
   let current = start
   while (current <= today) {
     result.push({
@@ -392,7 +393,12 @@ function dedupeRows(rows: any[], byDoctor: boolean): any[] {
 
 function toETDate(utcIso: string): string {
   const d = new Date(utcIso)
-  return d.toLocaleDateString('en-CA', { timeZone: TZ }) // YYYY-MM-DD
+  // Use Intl.DateTimeFormat for guaranteed YYYY-MM-DD regardless of Node version
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(d)
+  const y = parts.find(p => p.type === 'year')!.value
+  const m = parts.find(p => p.type === 'month')!.value
+  const day = parts.find(p => p.type === 'day')!.value
+  return `${y}-${m}-${day}`
 }
 
 function toETTimestamp(utcIso: string): string {
