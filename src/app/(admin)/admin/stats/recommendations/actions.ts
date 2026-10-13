@@ -226,6 +226,7 @@ export async function getDailyData(): Promise<DailyCount[]> {
   const result: DailyCount[] = []
   const today = toETDate(new Date().toISOString())
   const start = TRACKING_SINCE
+  console.log(`[REC-STATS] getDailyData: today=${today}, total deduped recs=${recs.length}, today recs=${recsByDate.get(today) || 0}, yesterday recs=${recsByDate.get(addDays(today, -1)) || 0}`)
   let current = start
   while (current <= today) {
     result.push({
