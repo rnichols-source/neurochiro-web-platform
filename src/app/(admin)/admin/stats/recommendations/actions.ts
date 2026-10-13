@@ -93,12 +93,14 @@ export async function getRecommendationStats(): Promise<RangeStats> {
     .select('id, searched_city, searched_state, doctor_id, created_at, template_id')
     .eq('template_id', 'sent_to_patient')
     .order('created_at', { ascending: true })
+    .limit(10000)
 
   const { data: allWaitlist } = await (supabase as any)
     .from('reply_logs')
     .select('id, searched_city, searched_state, created_at, template_id')
     .in('template_id', ['waitlist_dm', 'waitlist_comment'])
     .order('created_at', { ascending: true })
+    .limit(10000)
 
   const { count: rawCount } = await (supabase as any)
     .from('reply_logs')
@@ -200,12 +202,14 @@ export async function getDailyData(): Promise<DailyCount[]> {
     .select('id, searched_city, doctor_id, created_at')
     .eq('template_id', 'sent_to_patient')
     .order('created_at', { ascending: true })
+    .limit(10000)
 
   const { data: allWaitlist } = await (supabase as any)
     .from('reply_logs')
     .select('id, searched_city, created_at')
     .in('template_id', ['waitlist_dm', 'waitlist_comment'])
     .order('created_at', { ascending: true })
+    .limit(10000)
 
   const recs = dedupeRows(allSent || [], true)
   const waitlist = dedupeRows(allWaitlist || [], false)
