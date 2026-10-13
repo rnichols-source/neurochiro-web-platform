@@ -6,6 +6,28 @@ import { Automations } from '@/lib/automations'
 import { cookies } from 'next/headers'
 import { isFounderEmail } from '@/lib/founder'
 
+/**
+ * Strips leading titles (Dr., Dr, Doctor) and trailing credentials (DC, D.C.)
+ * from a full name string, then splits into firstName / lastName.
+ * Preserves legitimate multi-word names like "St. Louis" and "Blossom Jones".
+ */
+function cleanDoctorName(raw: string | null | undefined): { firstName: string; lastName: string; cleaned: string } {
+  if (!raw || !raw.trim()) return { firstName: '', lastName: '', cleaned: '' }
+  let s = raw.trim()
+  // Strip leading title: "Dr.", "Dr", "Doctor" (case-insensitive, followed by space)
+  s = s.replace(/^(?:Doctor|Dr\.?)\s+/i, '')
+  // Strip trailing credentials: ", DC", " DC", " D.C.", " DC." (with optional leading comma)
+  s = s.replace(/[,\s]+D\.?C\.?\s*$/i, '')
+  s = s.trim()
+  if (!s) return { firstName: raw.trim(), lastName: '', cleaned: raw.trim() }
+  const parts = s.split(/\s+/)
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(' '),
+    cleaned: s,
+  }
+}
+
 export async function login(formData: FormData, redirectUrl?: string | null) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
@@ -157,10 +179,8 @@ export async function createAccountAction(formData: FormData, role: string, tier
     if (role === 'doctor') {
       const { createAdminClient } = await import('@/lib/supabase-admin');
       const adminDb = createAdminClient();
-      const nameParts = name?.split(' ') || [''];
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
-      const slug = (name || 'doctor').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
+      const { firstName, lastName, cleaned: cleanedName } = cleanDoctorName(name);
+      const slug = (cleanedName || 'doctor').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
 
       // Only create if no doctors row exists yet
       const { data: existingDoc } = await adminDb.from('doctors').select('id').eq('user_id', data.user.id).maybeSingle();
@@ -192,7 +212,7 @@ export async function createAccountAction(formData: FormData, role: string, tier
       try {
         const { Resend } = await import('resend');
         const resend = new Resend(process.env.RESEND_API_KEY || '');
-        const firstName = name?.split(' ')[0] || 'Doctor';
+        const emailGreeting = cleanDoctorName(name).firstName || 'Doctor';
         await resend.emails.send({
           from: 'NeuroChiro <support@neurochirodirectory.com>',
           to: [email],
@@ -204,7 +224,7 @@ export async function createAccountAction(formData: FormData, role: string, tier
                 <p style="color:#e97325;font-size:14px;font-weight:bold;margin:8px 0 0;">Welcome to the Network</p>
               </div>
               <div style="padding:28px;background:white;">
-                <p style="font-size:15px;color:#333;line-height:1.6;">Hey Dr. ${firstName},</p>
+                <p style="font-size:15px;color:#333;line-height:1.6;">Hey Dr. ${emailGreeting},</p>
                 <p style="font-size:15px;color:#333;line-height:1.6;">Welcome to NeuroChiro — the global network for nervous system chiropractors. Your listing is live, but it needs a few things before patients can find you.</p>
                 <div style="background:#fff7ed;border-left:4px solid #e97325;border-radius:8px;padding:16px;margin:20px 0;">
                   <p style="margin:0 0 8px;font-weight:bold;color:#1a2744;font-size:14px;">To complete your profile:</p>
@@ -252,7 +272,7 @@ export async function createAccountAction(formData: FormData, role: string, tier
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `🆕 **NEW ${roleLabel} SIGNUP — PENDING APPROVAL**\n\n**Name:** ${name?.split(' ')[0] || 'New doctor'}${approachLine}\n\n⏳ Approve at: https://neurochiro.co/admin/moderation`,
+            content: `🆕 **NEW ${roleLabel} SIGNUP — PENDING APPROVAL**\n\n**Name:** ${cleanDoctorName(name).firstName || 'New doctor'}${approachLine}\n\n⏳ Approve at: https://neurochiro.co/admin/moderation`,
           }),
         }).catch(() => {});
       }
