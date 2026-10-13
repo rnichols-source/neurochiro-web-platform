@@ -1059,6 +1059,9 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
   const profileUrl = `https://neurochiro.co/directory/${d.slug || d.id}`
   const contactRequestUrl = `https://neurochiro.co/contact-request?doctor=${d.slug || d.id}&source=dm_outreach`
   const doctorName = `Dr. ${d.first_name} ${d.last_name}`.trim()
+  const practiceIntro = d.profile_style === 'practice' && d.clinic_name
+    ? `${d.clinic_name}, ${doctorName}'s practice`
+    : doctorName
   const handle = d.instagram_handle || ''
   const isFar = d.distance_miles >= farThreshold
 
@@ -1087,7 +1090,7 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
 
   const vars: Record<string, string> = {
     handle, city: d.city || '', state: d.state || '',
-    doctor_name: doctorName, doctor_city: d.city || '',
+    doctor_name: doctorName, practice_intro: practiceIntro, doctor_city: d.city || '',
     profile_url: profileUrl, contact_request_url: contactRequestUrl,
     distance: humanDistance(d.distance_miles),
   }

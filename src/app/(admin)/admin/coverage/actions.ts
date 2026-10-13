@@ -93,6 +93,7 @@ export interface LookupResult {
   has_booking: boolean
   has_hours: boolean
   intro_count: number
+  profile_style: string
 }
 
 // ── All US states ──
@@ -404,7 +405,7 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
     if (resolution.couldNotGeocode && resolution.parsedState) {
       const { data: stateDocs } = await (supabase as any)
         .from('doctors')
-        .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, instagram_url, photo_url, booking_url, hours')
+        .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, instagram_url, photo_url, booking_url, hours, profile_style')
         .in('verification_status', ['verified', 'pending'])
         .eq('is_test', false)
         .eq('state', resolution.parsedState)
@@ -422,7 +423,7 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
               id: d.id, first_name: d.first_name, last_name: d.last_name, clinic_name: d.clinic_name,
               slug: d.slug, city: d.city, state: d.state, verification_status: d.verification_status,
               membership_tier: d.membership_tier, distance_miles: 0, instagram_handle,
-              has_photo: !!d.photo_url, has_booking: !!d.booking_url, has_hours: !!d.hours, intro_count: 0,
+              has_photo: !!d.photo_url, has_booking: !!d.booking_url, has_hours: !!d.hours, intro_count: 0, profile_style: d.profile_style || 'personal',
             }
           })
 
@@ -442,7 +443,7 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
   // Fetch doctors for the resolved country (exclude test accounts)
   let docQuery = (supabase as any)
     .from('doctors')
-    .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, instagram_url, photo_url, booking_url, hours')
+    .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, verification_status, membership_tier, instagram_url, photo_url, booking_url, hours, profile_style')
     .in('verification_status', ['verified', 'pending'])
     .eq('is_test', false)
   if (resolveCountry === 'US') {
@@ -496,6 +497,7 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
         has_booking: !!d.booking_url,
         has_hours: !!d.hours,
         intro_count: introCounts.get(d.id) || 0,
+        profile_style: d.profile_style || 'personal',
       })
     }
   }
