@@ -100,11 +100,9 @@ export async function getRecommendationStats(): Promise<RangeStats> {
     .in('template_id', ['waitlist_dm', 'waitlist_comment'])
     .order('created_at', { ascending: true })
 
-  const { data: allRaw } = await (supabase as any)
+  const { count: rawCount } = await (supabase as any)
     .from('reply_logs')
     .select('id', { count: 'exact', head: true })
-
-  const rawCount = allRaw || 0
 
   // Dedupe recommendations (60s rule)
   const recs = dedupeRows(allSent || [], true)
@@ -137,11 +135,11 @@ export async function getRecommendationStats(): Promise<RangeStats> {
 
   // Check far vs standard from the original sent rows' nearby template logs
   // Since sent_to_patient doesn't distinguish, count far from doctor_dm_far/doctor_comment_far
-  const { data: farRows } = await (supabase as any)
+  const { count: farRowCount } = await (supabase as any)
     .from('reply_logs')
     .select('id', { count: 'exact', head: true })
     .in('template_id', ['doctor_dm_far', 'doctor_comment_far'])
-  farCount = farRows || 0
+  farCount = farRowCount || 0
 
   const totalRecs = recs.length
   const totalWaitlist = waitlist.length
