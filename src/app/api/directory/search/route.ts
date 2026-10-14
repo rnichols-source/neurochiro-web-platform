@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { haversineDistance, boundingBox, isValidCoord } from '@/lib/geo';
 import { resolveStateCode } from '@/lib/resolve-state';
+import { getThresholds } from '@/lib/thresholds';
 // city-data import removed — using resolve-city.ts shared resolver
 
 export const revalidate = 60;
@@ -493,16 +494,17 @@ export async function GET(request: NextRequest) {
     // Enrich with distance using resolved coordinates (user geolocation or city lookup)
     let enriched = enrichWithDistance(data, searchLat, searchLng, hasSearchCoords);
 
-    // Apply radius: default 50mi for location searches, expand progressively
+    // Apply radius: default directory_default mi for location searches, expand progressively
+    const t = await getThresholds();
     if (hasSearchCoords) {
-      const defaultRadius = radius > 0 ? radius : 50;
+      const defaultRadius = radius > 0 ? radius : t.directory_default;
       const nearby = enriched.filter((d: any) => d.distance_miles != null && d.distance_miles <= defaultRadius);
 
       if (nearby.length >= 3) {
         enriched = nearby;
       } else {
-        // Progressive expansion: 50 → 100 → 250
-        for (const expandedRadius of [100, 250]) {
+        // Progressive expansion
+        for (const expandedRadius of [t.directory_expansion_1, t.directory_expansion_2]) {
           const expanded = enriched.filter((d: any) => d.distance_miles != null && d.distance_miles <= expandedRadius);
           if (expanded.length >= 3) { enriched = expanded; break; }
         }

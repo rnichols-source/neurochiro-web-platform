@@ -4,6 +4,7 @@ import { checkAdminAuth } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { haversineDistance } from '@/lib/geo'
 import { extractInstagramHandle } from '@/lib/instagram'
+import { getThresholds } from '@/lib/thresholds'
 
 // ── Types ──
 
@@ -67,16 +68,8 @@ export interface SessionStats {
 
 // ── Settings ──
 
-async function getThresholds(): Promise<{ standard: number; waitlist: number; tiebreak: number }> {
-  const supabase = createAdminClient()
-  const { data } = await (supabase as any)
-    .from('platform_settings')
-    .select('value')
-    .eq('key', 'coverage_queue_rules')
-    .maybeSingle()
-  const defaults = { standard: 30, waitlist: 75, tiebreak: 5 }
-  return data?.value ? { ...defaults, ...data.value } : defaults
-}
+// Thresholds loaded from centralized getThresholds() module (imported above).
+// Property mapping: standard→standard_cutoff, waitlist→waitlist_cutoff, tiebreak→tiebreak
 
 // ── Core lookup ──
 
@@ -200,18 +193,18 @@ export async function workLookup(query: string, country: string = 'US'): Promise
 
   // Template path
   let templatePath: 'standard' | 'far' | 'waitlist' = 'waitlist'
-  let templateReason = `No doctor within ${thresholds.waitlist} miles. Waitlist templates.`
+  let templateReason = `No doctor within ${thresholds.waitlist_cutoff} miles. Waitlist templates.`
 
   if (picked) {
-    if (picked.distanceMiles <= thresholds.standard) {
+    if (picked.distanceMiles <= thresholds.standard_cutoff) {
       templatePath = 'standard'
-      templateReason = `Standard templates. Nearest doctor is ${picked.distanceMiles} miles, under the ${thresholds.standard} mile threshold.`
-    } else if (picked.distanceMiles <= thresholds.waitlist) {
+      templateReason = `Standard templates. Nearest doctor is ${picked.distanceMiles} miles, under the ${thresholds.standard_cutoff} mile threshold.`
+    } else if (picked.distanceMiles <= thresholds.waitlist_cutoff) {
       templatePath = 'far'
-      templateReason = `Far distance templates. Nearest doctor is ${picked.distanceMiles} miles, over the ${thresholds.standard} mile threshold.`
+      templateReason = `Far distance templates. Nearest doctor is ${picked.distanceMiles} miles, over the ${thresholds.standard_cutoff} mile threshold.`
     } else {
       templatePath = 'waitlist'
-      templateReason = `Waitlist templates. Nearest doctor is ${picked.distanceMiles} miles, over the ${thresholds.waitlist} mile threshold.`
+      templateReason = `Waitlist templates. Nearest doctor is ${picked.distanceMiles} miles, over the ${thresholds.waitlist_cutoff} mile threshold.`
       picked = null
     }
   }

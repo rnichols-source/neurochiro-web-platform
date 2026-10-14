@@ -5,6 +5,7 @@ import { getDoctorCounts, getSubscriberCounts, getDemandMentionCount } from '@/l
 import { haversineDistance } from '@/lib/geo'
 import { rateLimit, getIP } from '@/lib/rate-limit'
 import { headers } from 'next/headers'
+import { getThresholds } from '@/lib/thresholds'
 
 // ── Types ──
 
@@ -174,6 +175,7 @@ export async function checkDemandNearby(query: string, country: string = 'US'): 
   }
 
   const supabase = createAdminClient()
+  const t = await getThresholds()
 
   // Auto-detect country from postal format
   const { detectPostalCode } = await import('@/lib/detect-postal')
@@ -214,7 +216,7 @@ export async function checkDemandNearby(query: string, country: string = 'US'): 
 
   let mentionsNearby = 0
   for (const m of (allMentions || [])) {
-    if (haversineDistance(lat, lng, Number(m.lat), Number(m.lng)) <= 50) mentionsNearby++
+    if (haversineDistance(lat, lng, Number(m.lat), Number(m.lng)) <= t.gap_radius) mentionsNearby++
   }
 
   // Count subscribers within 50mi, scoped to country
@@ -249,7 +251,7 @@ export async function checkDemandNearby(query: string, country: string = 'US'): 
     for (const s of (allSubs || [])) {
       const z = (s.zip || '').trim().slice(0, 5)
       const coord = zipToCoord.get(z)
-      if (coord && haversineDistance(lat, lng, coord.lat, coord.lng) <= 50) subscribersNearby++
+      if (coord && haversineDistance(lat, lng, coord.lat, coord.lng) <= t.gap_radius) subscribersNearby++
     }
   }
 
@@ -266,7 +268,7 @@ export async function checkDemandNearby(query: string, country: string = 'US'): 
 
   let doctorsNearby = 0
   for (const d of (allDocs || [])) {
-    if (d.latitude && d.longitude && haversineDistance(lat, lng, d.latitude, d.longitude) <= 50) doctorsNearby++
+    if (d.latitude && d.longitude && haversineDistance(lat, lng, d.latitude, d.longitude) <= t.gap_radius) doctorsNearby++
   }
 
   // Suppression: if total demand < 3, don't show exact counts

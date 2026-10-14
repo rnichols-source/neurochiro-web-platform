@@ -4,6 +4,7 @@ import { rateLimit, getIP } from '@/lib/rate-limit';
 import { zipToState } from '@/lib/zip-to-state';
 import { getMarketingResend, getMarketingFrom, wrapMarketingEmail } from '@/lib/marketing-email';
 import crypto from 'crypto';
+import { getThresholds } from '@/lib/thresholds';
 
 const limiter = rateLimit('subscribe', { maxRequests: 5, windowMs: 3600_000 });
 
@@ -85,6 +86,7 @@ export async function POST(req: NextRequest) {
 
     if (zipCoord) {
       const { haversineDistance } = await import('@/lib/geo');
+      const t = await getThresholds();
       const lat = Number(zipCoord.lat);
       const lng = Number(zipCoord.lng);
 
@@ -107,7 +109,7 @@ export async function POST(req: NextRequest) {
           ...d,
           distance: haversineDistance(lat, lng, d.latitude, d.longitude),
         }))
-        .filter((d: any) => d.distance <= 30)
+        .filter((d: any) => d.distance <= t.subscribe_nearby)
         .sort((a: any, b: any) => a.distance - b.distance)
         .slice(0, 5);
 

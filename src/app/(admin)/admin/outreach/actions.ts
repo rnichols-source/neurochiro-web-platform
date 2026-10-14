@@ -6,6 +6,7 @@ import { haversineDistance, boundingBox, isValidCoord } from '@/lib/geo'
 import { extractInstagramHandle } from '@/lib/instagram'
 import { resolveLocation } from '@/lib/resolve-city'
 import { revalidatePath } from 'next/cache'
+import { getThresholds } from '@/lib/thresholds'
 
 // ── Voice Validator ──
 
@@ -167,6 +168,7 @@ export async function getTemplatesForChannel(channel: string, intent?: string) {
 export async function getDemandForProspect(prospectId: string) {
   const user = await checkAdminAuth()
   const db = createAdminClient()
+  const t = await getThresholds()
 
   const { data: prospect } = await db.from('outreach_prospects' as any).select('*').eq('id', prospectId).single()
   if (!prospect) return null
@@ -205,7 +207,9 @@ export async function getDemandForProspect(prospectId: string) {
 
   if (isValidCoord(lat, lng)) {
     // Radius demand counts using bounding box pre-filter + haversine
-    const [minLng100, minLat100, maxLng100, maxLat100] = boundingBox(lat!, lng!, 100)
+    const demandBuckets = t.demand_buckets
+    const maxBucket = demandBuckets[demandBuckets.length - 1]
+    const [minLng100, minLat100, maxLng100, maxLat100] = boundingBox(lat!, lng!, maxBucket)
     const { data: mentions } = await db.from('demand_mentions' as any).select('lat, lng')
       .in('source', demandSources)
       .gte('lat', minLat100).lte('lat', maxLat100)
@@ -215,13 +219,13 @@ export async function getDemandForProspect(prospectId: string) {
       const mLat = Number(m.lat), mLng = Number(m.lng)
       if (!isValidCoord(mLat, mLng)) continue
       const dist = haversineDistance(lat!, lng!, mLat, mLng)
-      if (dist <= 25) demand25++
-      if (dist <= 50) demand50++
-      if (dist <= 100) demand100++
+      if (dist <= demandBuckets[0]) demand25++
+      if (dist <= demandBuckets[1]) demand50++
+      if (dist <= demandBuckets[2]) demand100++
     }
 
     // Nearest active member
-    const [mMinLng, mMinLat, mMaxLng, mMaxLat] = boundingBox(lat!, lng!, 200)
+    const [mMinLng, mMinLat, mMaxLng, mMaxLat] = boundingBox(lat!, lng!, t.outreach_prefilter)
     const { data: docs } = await db.from('doctors' as any)
       .select('first_name, last_name, city, latitude, longitude')
       .eq('membership_tier', 'pro').not('verified_at', 'is', null).eq('is_test', false)
@@ -262,7 +266,7 @@ export async function getDemandForProspect(prospectId: string) {
   return {
     demand_city: demandCity, demand_25mi: demand25, demand_50mi: demand50, demand_100mi: demand100,
     nearest_member_distance: nearestDist, nearest_member_city: nearestCity, nearest_member_name: nearestName,
-    is_uncovered: nearestDist === null || nearestDist > 50,
+    is_uncovered: nearestDist === null || nearestDist > t.gap_radius,
     total_demand: totalDemand || 0,
     prospect_lat: lat, prospect_lng: lng,
   }
@@ -360,8 +364,9 @@ export async function renderTemplate(templateKey: string, prospectId: string) {
   // Coverage-based template blocking
   // city_led = claims nobody is nearby, only allowed in gaps (>75mi)
   // thin_coverage = acknowledges a distant member, allowed in thin (30-75mi)
-  const gapThreshold = config.gap_threshold || 75
-  const thinThreshold = config.thin_threshold || 30
+  const tRender = await getThresholds()
+  const gapThreshold = tRender.outreach_gap
+  const thinThreshold = tRender.outreach_thin
   const memberDist = demand?.nearest_member_distance ?? Infinity
 
   if (t.intent === 'city_led' && memberDist <= gapThreshold) {
@@ -689,8 +694,9 @@ export async function getQueue(options: {
   const config = (configResult.data as any)?.value || {}
   const demandFloor = config.demand_floor || 3
 
-  const thinThreshold = config.thin_threshold || 30 // covered below this
-  const gapThreshold = config.gap_threshold || 75  // gap above this, thin between
+  const tQueue = await getThresholds()
+  const thinThreshold = tQueue.outreach_thin // covered below this
+  const gapThreshold = tQueue.outreach_gap  // gap above this, thin between
 
   // Get prospects with coords and usable location, must have at least one contact method
   let query = db.from('outreach_prospects' as any).select('*')
@@ -735,7 +741,7 @@ export async function getQueue(options: {
 
     let demand50 = 0
     for (const m of allMentions) {
-      if (haversineDistance(pLat, pLng, Number(m.lat), Number(m.lng)) <= 50) demand50++
+      if (haversineDistance(pLat, pLng, Number(m.lat), Number(m.lng)) <= tQueue.gap_radius) demand50++
     }
 
     let nearestDist = Infinity, nearestName = '', nearestCity = ''

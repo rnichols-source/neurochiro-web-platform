@@ -196,7 +196,9 @@ export async function findMatchingSubscribers(
 
   const alreadySentSet = new Set((alreadySent || []).map((r: any) => r.subscriber_id))
 
-  // Match within 50 miles
+  // Match within doctor_joined_radius
+  const { getThresholds } = await import('@/lib/thresholds')
+  const t = await getThresholds()
   const matches: MatchedSubscriber[] = []
   for (const sub of subscribers) {
     if (alreadySentSet.has(sub.id)) continue
@@ -204,7 +206,7 @@ export async function findMatchingSubscribers(
     const coord = zipMap.get(z)
     if (!coord) continue
     const dist = haversineDistance(doctorLat, doctorLng, coord.lat, coord.lng)
-    if (dist <= 50) {
+    if (dist <= t.doctor_joined_radius) {
       matches.push({
         id: sub.id,
         email: sub.email,

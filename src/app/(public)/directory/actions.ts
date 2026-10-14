@@ -4,6 +4,7 @@ import { createServerSupabase } from '@/lib/supabase-server'
 import { resolveStateCode } from '@/lib/resolve-state'
 import { Doctor } from '@/types/directory'
 import { revalidatePath } from 'next/cache'
+import { getThresholds } from '@/lib/thresholds'
 
 export async function getDoctors(options: {
   regionCode?: string;
@@ -268,12 +269,13 @@ export async function getNearbyDoctors(doctorId: string, state: string, limit = 
 
     if (!data || data.length === 0) return [];
 
-    // If we have the source doctor's coordinates, calculate distance and cap at 50 miles
+    // If we have the source doctor's coordinates, calculate distance and cap at profile_nearby radius
     if (doctorLat && doctorLng) {
       const { haversineDistance } = await import('@/lib/geo');
+      const t = await getThresholds();
       return data
         .map(d => ({ ...d, distance_miles: haversineDistance(doctorLat, doctorLng, d.latitude || 0, d.longitude || 0) }))
-        .filter(d => d.distance_miles <= 50 && d.latitude > 0)
+        .filter(d => d.distance_miles <= t.profile_nearby && d.latitude > 0)
         .sort((a, b) => a.distance_miles - b.distance_miles)
         .slice(0, limit);
     }

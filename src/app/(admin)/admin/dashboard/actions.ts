@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { stripe } from "@/lib/stripe"
 import { checkAdminAuth } from '@/lib/admin-auth'
 import { getDoctorCounts, getSubscriberCounts } from '@/lib/platform-stats'
+import { getThresholds } from '@/lib/thresholds'
 
 // ── Dashboard Stats ──
 
@@ -694,6 +695,7 @@ export async function getFunnelMetrics(): Promise<FunnelMetrics> {
     }
 
     const { haversineDistance } = await import('@/lib/geo')
+    const t = await getThresholds()
     const zipList = Array.from(zipCounts.keys())
     let topGaps: FunnelMetrics['topGaps'] = []
 
@@ -710,7 +712,7 @@ export async function getFunnelMetrics(): Promise<FunnelMetrics> {
       topGaps = (zipCoords || [])
         .map((z: any) => {
           const counts = zipCounts.get(z.zip)!
-          const hasDoc = validDocs.some(d => haversineDistance(Number(z.lat), Number(z.lng), d.latitude!, d.longitude!) <= 50)
+          const hasDoc = validDocs.some(d => haversineDistance(Number(z.lat), Number(z.lng), d.latitude!, d.longitude!) <= t.gap_radius)
           return hasDoc ? null : { city: z.city, state: z.state, ...counts }
         })
         .filter((g: any): g is NonNullable<typeof g> => g !== null)

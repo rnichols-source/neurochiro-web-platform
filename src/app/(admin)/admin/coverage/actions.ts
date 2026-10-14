@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { checkAdminAuth } from '@/lib/admin-auth'
 import { haversineDistance } from '@/lib/geo'
 import { revalidatePath } from 'next/cache'
+import { getThresholds } from '@/lib/thresholds'
 
 // ── Types ──
 
@@ -143,6 +144,7 @@ export async function getCoverageDoctors(): Promise<CoverageDoctor[]> {
 export async function getDemandData(): Promise<DemandZip[]> {
   await checkAdminAuth()
   const supabase = createAdminClient()
+  const t = await getThresholds()
 
   // Get US subscribers with ZIPs (confirmed + pending)
   const { data: subscribers } = await (supabase as any)
@@ -199,7 +201,7 @@ export async function getDemandData(): Promise<DemandZip[]> {
     const lng = Number(z.lng)
 
     const hasNearbyDoctor = validDoctors.some(d =>
-      haversineDistance(lat, lng, d.latitude!, d.longitude!) <= 50
+      haversineDistance(lat, lng, d.latitude!, d.longitude!) <= t.gap_radius
     )
 
     return {
@@ -221,6 +223,7 @@ export async function getCoverageStats(
 ): Promise<CoverageStats> {
   await checkAdminAuth()
   const supabase = createAdminClient()
+  const t = await getThresholds()
 
   // Doctor counts
   const { data: allDocs } = await supabase
@@ -307,7 +310,7 @@ export async function getCoverageStats(
     for (const q of points) {
       const qKey = `${q.city}|${q.state}`
       if (assigned.has(qKey)) continue
-      if (haversineDistance(p.lat, p.lng, q.lat, q.lng) <= 50) {
+      if (haversineDistance(p.lat, p.lng, q.lat, q.lng) <= t.gap_radius) {
         cluster.members.push(q)
         assigned.add(qKey)
       }
@@ -468,12 +471,13 @@ export async function lookupNearby(query: string, country: string = 'US'): Promi
     introCounts.set(r.doctor_id, (introCounts.get(r.doctor_id) || 0) + 1)
   }
 
-  // Calculate distances, filter to 100mi
+  // Calculate distances, filter to lookup_max radius
+  const t = await getThresholds()
   const results: LookupResult[] = []
   for (const d of doctors) {
     if (!d.latitude || !d.longitude || d.latitude === 0) continue
     const dist = haversineDistance(lat, lng, d.latitude, d.longitude)
-    if (dist <= 100) {
+    if (dist <= t.lookup_max) {
       // Extract @handle from instagram URL
       let instagram_handle: string | null = null
       if (d.instagram_url) {
@@ -524,13 +528,14 @@ export async function autoLogDemand(data: {
 }): Promise<{ logged: boolean; id?: string; reason?: string }> {
   const user = await checkAdminAuth()
   const supabase = createAdminClient()
+  const t = await getThresholds()
 
-  // Load config
+  // Load config (for enabled flag and dedupe_minutes only; threshold comes from getThresholds)
   const { data: configRow } = await (supabase as any).from('platform_settings').select('value').eq('key', 'coverage_auto_log').single()
-  const config = configRow?.value || { enabled: true, distance_threshold_miles: 20, dedupe_minutes: 10 }
+  const config = configRow?.value || { enabled: true, dedupe_minutes: 10 }
   if (!config.enabled) return { logged: false, reason: 'Auto-log disabled' }
 
-  const threshold = config.distance_threshold_miles || 20
+  const threshold = t.auto_log_distance
   const dedupeMinutes = config.dedupe_minutes || 10
 
   // Determine if this qualifies
@@ -606,6 +611,7 @@ export async function undoAutoLogDemand(id: string): Promise<{ success: boolean 
 export async function getMentionsData(): Promise<MentionCity[]> {
   await checkAdminAuth()
   const supabase = createAdminClient()
+  const t = await getThresholds()
 
   const { data: mentions } = await (supabase as any)
     .from('demand_mentions')
@@ -640,7 +646,7 @@ export async function getMentionsData(): Promise<MentionCity[]> {
 
   return Array.from(cityMap.values()).map(m => ({
     ...m,
-    gap: !validDoctors.some(d => haversineDistance(m.lat, m.lng, d.latitude!, d.longitude!) <= 50),
+    gap: !validDoctors.some(d => haversineDistance(m.lat, m.lng, d.latitude!, d.longitude!) <= t.gap_radius),
   }))
 }
 
@@ -661,11 +667,9 @@ export interface DemandDot {
 export async function getDemandScatterData(): Promise<DemandDot[]> {
   await checkAdminAuth()
   const supabase = createAdminClient()
+  const t = await getThresholds()
 
-  // Get jitter config
-  const { data: configRow } = await (supabase as any)
-    .from('platform_settings').select('value').eq('key', 'demand_scatter').single()
-  const jitterMiles = configRow?.value?.jitter_radius_miles || 4
+  const jitterMiles = t.scatter_jitter
 
   const { data: rows } = await (supabase as any)
     .from('demand_mentions')
@@ -1084,13 +1088,8 @@ export async function logReply(
 
 export async function getFarDistanceThreshold(): Promise<number> {
   await checkAdminAuth()
-  const supabase = createAdminClient()
-  const { data } = await (supabase as any)
-    .from('platform_settings')
-    .select('value')
-    .eq('key', 'far_distance_threshold')
-    .maybeSingle()
-  return data?.value?.miles ?? 30
+  const t = await getThresholds()
+  return t.far_distance
 }
 
 export async function updateFarDistanceThreshold(miles: number): Promise<void> {

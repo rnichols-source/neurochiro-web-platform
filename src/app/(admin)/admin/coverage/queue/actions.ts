@@ -4,6 +4,7 @@ import { checkAdminAuth } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { haversineDistance } from '@/lib/geo'
 import { extractInstagramHandle } from '@/lib/instagram'
+import { getThresholds } from '@/lib/thresholds'
 
 // ── Types ──
 
@@ -69,16 +70,8 @@ export interface QueueStats {
 
 // ── Settings ──
 
-async function getThresholds(): Promise<{ standard: number; waitlist: number; tiebreak: number; claimTimeout: number }> {
-  const supabase = createAdminClient()
-  const { data } = await (supabase as any)
-    .from('platform_settings')
-    .select('value')
-    .eq('key', 'coverage_queue_rules')
-    .maybeSingle()
-  const defaults = { standard: 30, waitlist: 75, tiebreak: 5, claimTimeout: 30 }
-  return data?.value ? { ...defaults, ...data.value } : defaults
-}
+// Thresholds are loaded from the centralized getThresholds() module (imported above).
+// Property mapping: standard→standard_cutoff, waitlist→waitlist_cutoff, tiebreak→tiebreak, claimTimeout→claim_timeout
 
 // ── Queue loading ──
 
@@ -117,15 +110,15 @@ export async function getQueueStats(): Promise<QueueStats> {
       // Release stale claims
       if (r.assigned_to && r.claimed_at) {
         const claimAge = (now - new Date(r.claimed_at).getTime()) / 60000
-        if (claimAge > thresholds.claimTimeout) {
+        if (claimAge > thresholds.claim_timeout) {
           // Will be released by the queue load
         }
       }
       // Tier
       const nearest = findNearestDoctorDistance(r.lat, r.lng, r.country || 'US', doctors)
       if (nearest === null) tier4++
-      else if (nearest <= thresholds.standard) tier1++
-      else if (nearest <= thresholds.waitlist) tier2++
+      else if (nearest <= thresholds.standard_cutoff) tier1++
+      else if (nearest <= thresholds.waitlist_cutoff) tier2++
       else tier3++
 
       if (!oldestUnworked || (r.mentioned_on && r.mentioned_on < oldestUnworked)) {
@@ -153,7 +146,7 @@ export async function getQueueItems(limit: number = 50, offset: number = 0, filt
   const thresholds = await getThresholds()
 
   // Release stale claims first
-  const staleTime = new Date(Date.now() - thresholds.claimTimeout * 60000).toISOString()
+  const staleTime = new Date(Date.now() - thresholds.claim_timeout * 60000).toISOString()
   await (supabase as any)
     .from('demand_mentions')
     .update({ status: 'unworked', assigned_to: null, claimed_at: null })
@@ -189,8 +182,8 @@ export async function getQueueItems(limit: number = 50, offset: number = 0, filt
     const nearest = findNearestDoctor(r.lat, r.lng, r.country || 'US', doctors, thresholds)
     let tier: 1 | 2 | 3 | 4 = 4
     if (nearest) {
-      if (nearest.distanceMiles <= thresholds.standard) tier = 1
-      else if (nearest.distanceMiles <= thresholds.waitlist) tier = 2
+      if (nearest.distanceMiles <= thresholds.standard_cutoff) tier = 1
+      else if (nearest.distanceMiles <= thresholds.waitlist_cutoff) tier = 2
       else tier = 3
     }
     if (filters?.tier && tier !== filters.tier) return null
@@ -233,7 +226,7 @@ export async function claimItem(mentionId: string): Promise<{ success: boolean; 
 
   if (item.status === 'in_progress' && item.assigned_to && item.assigned_to !== user.id) {
     const claimAge = (Date.now() - new Date(item.claimed_at).getTime()) / 60000
-    if (claimAge < thresholds.claimTimeout) {
+    if (claimAge < thresholds.claim_timeout) {
       return { success: false, error: `Already claimed by another operator ${Math.round(claimAge)} minutes ago` }
     }
   }
@@ -358,15 +351,15 @@ export async function getWorkItem(mentionId: string): Promise<WorkItem | null> {
   let templateReason = 'No doctor found within range. Using waitlist templates.'
 
   if (picked) {
-    if (picked.distanceMiles <= thresholds.standard) {
+    if (picked.distanceMiles <= thresholds.standard_cutoff) {
       templatePath = 'standard'
-      templateReason = `${picked.distanceMiles} miles. Under ${thresholds.standard}mi threshold. Standard templates.`
-    } else if (picked.distanceMiles <= thresholds.waitlist) {
+      templateReason = `${picked.distanceMiles} miles. Under ${thresholds.standard_cutoff}mi threshold. Standard templates.`
+    } else if (picked.distanceMiles <= thresholds.waitlist_cutoff) {
       templatePath = 'far'
-      templateReason = `${picked.distanceMiles} miles. Over ${thresholds.standard}mi but under ${thresholds.waitlist}mi. Far distance templates.`
+      templateReason = `${picked.distanceMiles} miles. Over ${thresholds.standard_cutoff}mi but under ${thresholds.waitlist_cutoff}mi. Far distance templates.`
     } else {
       templatePath = 'waitlist'
-      templateReason = `Nearest doctor is ${picked.distanceMiles} miles. Over ${thresholds.waitlist}mi threshold. Waitlist templates.`
+      templateReason = `Nearest doctor is ${picked.distanceMiles} miles. Over ${thresholds.waitlist_cutoff}mi threshold. Waitlist templates.`
       picked = null // Don't recommend
     }
   }

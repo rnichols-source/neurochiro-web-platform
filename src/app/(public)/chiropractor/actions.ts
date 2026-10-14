@@ -3,8 +3,7 @@
 import { createAdminClient } from '@/lib/supabase-admin';
 import { haversineDistance } from '@/lib/geo';
 import { cityToSlug, EMPTY_METROS } from '@/lib/city-data';
-
-const SEARCH_RADIUS_MILES = 30;
+import { getThresholds, THRESHOLD_DEFAULTS } from '@/lib/thresholds';
 const NEAREST_FALLBACK_COUNT = 5;
 
 export interface CityDoctor {
@@ -38,7 +37,7 @@ export interface CityDoctor {
 export async function getDoctorsNearCity(
   lat: number,
   lng: number,
-  radiusMiles: number = SEARCH_RADIUS_MILES,
+  radiusMiles: number = THRESHOLD_DEFAULTS.city_page_radius,
 ): Promise<CityDoctor[]> {
   const supabase = createAdminClient();
 
