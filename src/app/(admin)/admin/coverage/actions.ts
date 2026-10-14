@@ -613,11 +613,22 @@ export async function getMentionsData(): Promise<MentionCity[]> {
   const supabase = createAdminClient()
   const t = await getThresholds()
 
-  const { data: mentions } = await (supabase as any)
-    .from('demand_mentions')
-    .select('city, state, lat, lng, country')
+  // Paginate: Supabase default limit is 1000
+  let mentions: any[] = []
+  let offset = 0
+  const PAGE = 1000
+  while (true) {
+    const { data } = await (supabase as any)
+      .from('demand_mentions')
+      .select('city, state, lat, lng, country')
+      .range(offset, offset + PAGE - 1)
+    if (!data || data.length === 0) break
+    mentions = mentions.concat(data)
+    if (data.length < PAGE) break
+    offset += PAGE
+  }
 
-  if (!mentions || mentions.length === 0) return []
+  if (mentions.length === 0) return []
 
   // Aggregate by city+state
   const cityMap = new Map<string, { city: string; state: string; lat: number; lng: number; count: number; country: string }>()
@@ -671,11 +682,22 @@ export async function getDemandScatterData(): Promise<DemandDot[]> {
 
   const jitterMiles = t.scatter_jitter
 
-  const { data: rows } = await (supabase as any)
-    .from('demand_mentions')
-    .select('id, city, state, lat, lng, country')
+  // Paginate: Supabase default limit is 1000
+  let rows: any[] = []
+  let offset = 0
+  const PAGE = 1000
+  while (true) {
+    const { data } = await (supabase as any)
+      .from('demand_mentions')
+      .select('id, city, state, lat, lng, country')
+      .range(offset, offset + PAGE - 1)
+    if (!data || data.length === 0) break
+    rows = rows.concat(data)
+    if (data.length < PAGE) break
+    offset += PAGE
+  }
 
-  if (!rows?.length) return []
+  if (!rows.length) return []
 
   // Count per city for sizing
   const cityCountMap = new Map<string, number>()
