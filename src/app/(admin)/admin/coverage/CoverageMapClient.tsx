@@ -1045,6 +1045,8 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
   // copiedReply/copiedDM persist until row unmounts (no setTimeout reset)
   const [copiedReply, setCopiedReply] = useState(false)
   const [copiedDM, setCopiedDM] = useState(false)
+  const [copiedNoCovComment, setCopiedNoCovComment] = useState(false)
+  const [copiedNoCovDM, setCopiedNoCovDM] = useState(false)
   const [copiedHandle, setCopiedHandle] = useState(false)
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [copiedReqLink, setCopiedReqLink] = useState(false)
@@ -1054,6 +1056,8 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
   // Variant state: selected once on mount, stable per Rule 3
   const [commentVariant, setCommentVariant] = useState<{ variant_key: string; body: string } | null>(null)
   const [dmVariant, setDmVariant] = useState<{ variant_key: string; body: string } | null>(null)
+  const [noCovCommentVariant, setNoCovCommentVariant] = useState<{ variant_key: string; body: string } | null>(null)
+  const [noCovDmVariant, setNoCovDmVariant] = useState<{ variant_key: string; body: string } | null>(null)
   const [variantsLoaded, setVariantsLoaded] = useState(false)
 
   const profileUrl = `https://neurochiro.co/directory/${d.slug || d.id}`
@@ -1076,13 +1080,21 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
   useEffect(() => {
     let cancelled = false
     async function loadVariants() {
-      const [cv, dv] = await Promise.all([
+      const promises: Promise<any>[] = [
         selectVariant(commentTplId),
         selectVariant(dmTplId),
-      ])
+      ]
+      if (isFar) {
+        promises.push(selectVariant('waitlist_comment'), selectVariant('waitlist_dm'))
+      }
+      const results = await Promise.all(promises)
       if (cancelled) return
-      setCommentVariant(cv)
-      setDmVariant(dv)
+      setCommentVariant(results[0])
+      setDmVariant(results[1])
+      if (isFar) {
+        setNoCovCommentVariant(results[2])
+        setNoCovDmVariant(results[3])
+      }
       setVariantsLoaded(true)
     }
     loadVariants()
@@ -1101,6 +1113,15 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
   const dmBody = dmVariant?.body || dmTpl?.body || ''
   const replyText = handle ? fillTemplate(commentBody, vars) : ''
   const dmText = fillTemplate(dmBody, vars)
+
+  // No-coverage templates (waitlist) for far results
+  const noCovCommentTpl = templates.find(t => t.id === 'waitlist_comment')
+  const noCovDmTpl = templates.find(t => t.id === 'waitlist_dm')
+  const noCovCommentBody = noCovCommentVariant?.body || noCovCommentTpl?.body || ''
+  const noCovDmBody = noCovDmVariant?.body || noCovDmTpl?.body || ''
+  const { city: searchCity } = parseSearchCity(searchedCity)
+  const noCovCommentText = fillTemplate(noCovCommentBody, { city: searchCity })
+  const noCovDmText = fillTemplate(noCovDmBody, { city: searchCity })
 
   const quickCopy = async (text: string, setter: (v: boolean) => void) => {
     try { await navigator.clipboard.writeText(text); setter(true); setTimeout(() => setter(false), 1500) } catch {}
@@ -1190,6 +1211,26 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
           </button>
         </span>
       </div>
+      {/* No coverage buttons — shown when nearest doctor is far */}
+      {isFar && (
+        <div className="flex items-center gap-1.5 mt-1.5 pt-1.5 border-t border-white/5">
+          <span className="text-[9px] text-rose-400/60 font-bold uppercase tracking-wider shrink-0">No coverage</span>
+          <button
+            onClick={() => { quickCopy(noCovCommentText, () => {}); setCopiedNoCovComment(true); logReply('waitlist_comment', searchCity, '', undefined, undefined, noCovCommentVariant?.variant_key) }}
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
+              copiedNoCovComment ? 'bg-green-500/20 text-green-400' : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-400'
+            }`}>
+            {copiedNoCovComment ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Comment</>}
+          </button>
+          <button
+            onClick={() => { quickCopy(noCovDmText, () => {}); setCopiedNoCovDM(true); logReply('waitlist_dm', searchCity, '', undefined, undefined, noCovDmVariant?.variant_key) }}
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
+              copiedNoCovDM ? 'bg-green-500/20 text-green-400' : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-400'
+            }`}>
+            {copiedNoCovDM ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> DM</>}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
