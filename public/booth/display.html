@@ -3,22 +3,72 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NeuroChiro UK Demand</title>
+<title>NeuroChiro UK</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --navy: #1E2D3B;
+  --orange: #D66829;
+  --black: #131313;
+  --cream: #F5F3EF;
+  --gray: #4B5563;
+}
+
 html, body {
   width: 100vw; height: 100vh; overflow: hidden;
-  background: #0A0E1A;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #F5F3EF;
+  background: var(--black);
+  color: var(--cream);
   cursor: none;
+  font-family: 'Montserrat', -apple-system, sans-serif;
 }
+
 body {
-  background: radial-gradient(ellipse at 50% 50%, #12172a 0%, #0A0E1A 70%);
+  background:
+    radial-gradient(circle at 1px 1px, rgba(245,243,239,0.03) 1px, transparent 0) 0 0 / 30px 30px,
+    var(--black);
 }
+
+/* ── PERSISTENT CHROME ── */
+.chrome-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 2.5vh 3vw;
+  pointer-events: none;
+}
+.brand-lockup {
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 2vh;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(245,243,239,0.6);
+  line-height: 1.3;
+}
+.brand-lockup span { display: block; }
+.handle {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 1.8vh;
+  color: var(--gray);
+  padding-top: 0.5vh;
+}
+
+.progress-bar {
+  position: fixed; bottom: 0; left: 0; z-index: 100;
+  width: 100vw; height: 6px;
+  background: rgba(30,45,59,0.5);
+}
+.progress-fill {
+  height: 100%; width: 0%;
+  background: var(--orange);
+  transition: none;
+}
+
+/* ── SLIDES ── */
 .slide {
   position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
   display: flex; align-items: center; justify-content: center;
@@ -27,148 +77,205 @@ body {
   pointer-events: none;
   will-change: opacity, transform;
 }
-.slide.active {
-  opacity: 1; transform: scale(1);
-  pointer-events: auto;
-}
+.slide.active { opacity: 1; transform: scale(1); pointer-events: auto; }
 
-/* SLIDE 1 */
-.slide1-inner {
+/* ── SLIDE 1: THE NUMBER ── */
+.s1-bg {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(ellipse at 50% 45%, var(--navy) 0%, var(--black) 65%);
+  animation: ambientDrift 20s ease-in-out infinite alternate;
+}
+@keyframes ambientDrift {
+  0%   { background-position: 50% 45%; }
+  50%  { background-position: 48% 48%; }
+  100% { background-position: 52% 43%; }
+}
+.s1-inner {
+  position: relative; z-index: 1;
   text-align: center;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
+.big-number-wrap { position: relative; }
+.big-number-glow {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60vw; height: 40vh;
+  background: radial-gradient(ellipse, rgba(214,104,41,0.15) 0%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+}
 .big-number {
-  font-size: 40vh; font-weight: 900; line-height: 0.9;
-  letter-spacing: -0.02em;
-  background: linear-gradient(180deg, #F5F3EF 0%, #b8c4d4 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
+  position: relative;
+  font-family: 'Lato', sans-serif;
+  font-size: 40vh; font-weight: 900; line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: var(--cream);
+  text-shadow: 0 0 80px rgba(214,104,41,0.3), 0 0 160px rgba(214,104,41,0.15);
 }
+.orange-rule {
+  width: 200px; height: 4px;
+  background: var(--orange);
+  border: none; border-radius: 2px;
+  margin: 3vh auto 0;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.orange-rule.show { opacity: 1; transform: translateY(0); }
 .sub-line {
-  font-size: 4vh; font-weight: 400; margin-top: 3vh;
-  color: #F5F3EF; line-height: 1.3;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 4vh; font-weight: 500; margin-top: 3vh;
+  color: var(--cream); line-height: 1.3;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
+.sub-line.show { opacity: 1; transform: translateY(0); }
 .sub-line-dim {
-  font-size: 3vh; font-weight: 300; margin-top: 1.5vh;
-  color: rgba(245, 243, 239, 0.55);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 3vh; font-weight: 400; margin-top: 1.5vh;
+  color: var(--gray); line-height: 1.3;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
+.sub-line-dim.show { opacity: 1; transform: translateY(0); }
 
-/* SLIDE 2 */
+/* ── SLIDE 2: MAP ── */
+.s2-bg {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(ellipse at 40% 50%, rgba(30,45,59,0.6) 0%, var(--black) 70%);
+}
 .slide2-inner {
+  position: relative; z-index: 1;
   width: 100vw; height: 100vh;
   display: flex; flex-direction: row; align-items: stretch;
-  position: relative;
 }
 .map-area {
   flex: 1; position: relative; display: flex; align-items: center; justify-content: center;
 }
 .map-container {
-  position: relative;
-  width: 55vh; height: 90vh;
+  position: relative; width: 55vh; height: 88vh; margin-top: 4vh;
 }
-.map-container svg {
-  width: 100%; height: 100%;
-}
+.map-container svg { width: 100%; height: 100%; }
 .dot {
   opacity: 0; transform-origin: center;
   transition: opacity 400ms ease, transform 400ms ease;
 }
-.dot.visible {
-  opacity: 1;
-}
-.london-cluster {
-  opacity: 0;
-  transition: opacity 400ms ease, transform 400ms ease;
-}
+.dot.visible { opacity: 1; }
+.london-cluster { opacity: 0; transition: opacity 400ms ease, transform 400ms ease; }
 .london-cluster.visible { opacity: 1; }
-.london-cluster text {
-  font-family: 'Inter', sans-serif; font-weight: 700;
-  fill: #F5F3EF;
-}
-.birmingham-label {
-  opacity: 0;
-  transition: opacity 400ms ease;
-}
+.london-cluster text { font-family: 'Lato', sans-serif; font-weight: 700; }
+.birmingham-label { opacity: 0; transition: opacity 400ms ease; }
 .birmingham-label.visible { opacity: 1; }
-.birmingham-label text {
-  font-family: 'Inter', sans-serif; font-weight: 600;
-  fill: #F5F3EF;
-}
+.birmingham-label text { font-family: 'Montserrat', sans-serif; font-weight: 600; }
 .sidebar {
-  width: 28vw; padding: 5vh 3vw;
+  width: 28vw; padding: 12vh 3vw 5vh;
   display: flex; flex-direction: column; justify-content: center;
 }
 .sidebar h3 {
-  font-size: 2.2vh; font-weight: 600; text-transform: uppercase;
-  letter-spacing: 0.15em; color: rgba(245,243,239,0.5);
+  font-family: 'Lato', sans-serif;
+  font-size: 2vh; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.15em; color: var(--gray);
   margin-bottom: 3vh;
 }
 .city-row {
   display: flex; justify-content: space-between; align-items: baseline;
   padding: 1.4vh 0;
-  border-bottom: 1px solid rgba(245,243,239,0.08);
-  font-size: 2.8vh;
+  border-bottom: 1px solid rgba(245,243,239,0.06);
+  font-size: 2.6vh;
+  font-family: 'Montserrat', sans-serif;
 }
-.city-row .city-name { font-weight: 400; }
-.city-row .city-count { font-weight: 700; color: #4A90D9; }
+.city-row .city-name { font-weight: 400; color: var(--cream); }
+.city-row .city-count { font-weight: 600; color: var(--orange); font-family: 'Lato', sans-serif; }
 .running-total {
-  position: absolute; bottom: 4vh; left: 4vw;
-  font-size: 3.5vh; font-weight: 300;
-  color: rgba(245,243,239,0.6);
+  position: absolute; bottom: 5vh; left: 4vw;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 3vh; font-weight: 400; color: var(--gray);
 }
 .running-total span {
-  font-weight: 700; color: #4A90D9; font-size: 4.5vh;
+  font-family: 'Lato', sans-serif;
+  font-weight: 700; color: var(--orange); font-size: 4vh;
 }
 
-/* SLIDE 3 */
+/* ── SLIDE 3: THE ASK ── */
+.s3-bg {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(ellipse at 50% 40%, rgba(30,45,59,0.5) 0%, var(--black) 65%);
+}
 .slide3-inner {
+  position: relative; z-index: 1;
   text-align: center;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  height: 100vh; width: 100vw; position: relative;
+  height: 100vh; width: 100vw;
+}
+.s3-accent-line {
+  width: 80px; height: 3px; background: var(--orange); border-radius: 2px;
+  margin-bottom: 3vh;
 }
 .ask-headline {
-  font-size: 5.5vh; font-weight: 600; line-height: 1.2;
+  font-family: 'Lato', sans-serif;
+  font-size: 5.5vh; font-weight: 700; line-height: 1.2;
   max-width: 80vw; margin-bottom: 5vh;
   font-style: italic;
-  color: rgba(245,243,239,0.9);
+  color: var(--cream);
+}
+.qr-card {
+  background: var(--cream); border-radius: 16px;
+  padding: 2vh; display: inline-block;
 }
 #qr-canvas {
-  width: min(35vh, 35vw); height: min(35vh, 35vw);
+  width: min(32vh, 32vw); height: min(32vh, 32vw);
   image-rendering: pixelated;
+  display: block;
 }
 .qr-label {
-  font-size: 3.5vh; font-weight: 600; margin-top: 3vh;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 3.5vh; font-weight: 500; margin-top: 3vh;
+  color: var(--cream);
 }
 .qr-price {
-  font-size: 3vh; font-weight: 400; margin-top: 1.5vh;
-  color: rgba(245,243,239,0.7);
+  font-family: 'Lato', sans-serif;
+  font-size: 4vh; font-weight: 900; margin-top: 1.5vh;
+  color: var(--orange);
 }
 .bottom-info {
-  position: absolute; bottom: 3vh; right: 4vw;
-  text-align: right; font-size: 2.2vh; font-weight: 300;
-  color: rgba(245,243,239,0.4);
+  position: absolute; bottom: 4vh; right: 4vw;
+  text-align: right;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2vh; font-weight: 400;
+  color: var(--gray);
   line-height: 1.6;
 }
 </style>
 </head>
 <body>
 
+<!-- PERSISTENT CHROME -->
+<div class="chrome-header">
+  <div class="brand-lockup"><span>NEUROCHIRO</span><span>DIRECTORY</span></div>
+  <div class="handle">@dr.raymondnichols</div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
 <!-- SLIDE 1: THE NUMBER -->
 <div class="slide active" id="slide1">
-  <div class="slide1-inner">
-    <div class="big-number">139</div>
-    <div class="sub-line">people in the UK asked me for a chiropractor</div>
-    <div class="sub-line-dim">in the last 10 days</div>
+  <div class="s1-bg"></div>
+  <div class="s1-inner">
+    <div class="big-number-wrap">
+      <div class="big-number-glow"></div>
+      <div class="big-number" id="heroNumber">0</div>
+    </div>
+    <hr class="orange-rule" id="orangeRule">
+    <div class="sub-line" id="subLine1">people in the UK asked me for a chiropractor</div>
+    <div class="sub-line-dim" id="subLine2">in the last 10 days</div>
   </div>
 </div>
 
 <!-- SLIDE 2: THE MAP -->
 <div class="slide" id="slide2">
+  <div class="s2-bg"></div>
   <div class="slide2-inner">
     <div class="map-area">
-      <div class="map-container" id="mapContainer">
-        <!-- SVG built by JS -->
-      </div>
+      <div class="map-container" id="mapContainer"></div>
       <div class="running-total">Requests: <span id="runningCount">0</span></div>
     </div>
     <div class="sidebar">
@@ -180,14 +287,14 @@ body {
 
 <!-- SLIDE 3: THE ASK -->
 <div class="slide" id="slide3">
+  <div class="s3-bg"></div>
   <div class="slide3-inner">
+    <div class="s3-accent-line"></div>
     <div class="ask-headline">"I had nobody to send them to."</div>
-    <canvas id="qr-canvas"></canvas>
+    <div class="qr-card"><canvas id="qr-canvas"></canvas></div>
     <div class="qr-label">Join the UK directory</div>
-    <div class="qr-price">&pound;79/month</div>
-    <div class="bottom-info">
-      neurochiro.co<br>@dr.raymondnichols
-    </div>
+    <div class="qr-price">&pound;79</div>
+    <div class="bottom-info">neurochiro.co<br>@dr.raymondnichols</div>
   </div>
 </div>
 
@@ -195,17 +302,46 @@ body {
 // ===== DEMAND DATA =====
 const DEMAND_DATA = [{"city":"United Kingdom","region":"","lat":55.378,"lng":-3.436,"date":"2026-09-21","approximate":true},{"city":"United Kingdom","region":"","lat":55.378,"lng":-3.436,"date":"2026-09-26","approximate":true},{"city":"Ipswich","region":"England","lat":52.058,"lng":1.153,"date":"2026-09-27","approximate":false},{"city":"Kent","region":"","lat":51.28,"lng":0.52,"date":"2026-09-28","approximate":false},{"city":"Heslington","region":"England","lat":53.947,"lng":-1.038,"date":"2026-09-28","approximate":false},{"city":"Sandwell","region":"England","lat":52.56,"lng":-2.026,"date":"2026-09-29","approximate":false},{"city":"United Kingdom","region":"","lat":55.378,"lng":-3.436,"date":"2026-09-29","approximate":true},{"city":"Greater London","region":"England","lat":51.531,"lng":-0.021,"date":"2026-09-29","approximate":false},{"city":"Greater London","region":"England","lat":51.565,"lng":-0.387,"date":"2026-09-29","approximate":false},{"city":"United Kingdom","region":"","lat":55.378,"lng":-3.436,"date":"2026-09-30","approximate":true},{"city":"Wolverhampton","region":"ENG","lat":52.405,"lng":-2.22,"date":"2026-09-30","approximate":false},{"city":"Scotland","region":"Alba / Scotland","lat":56.786,"lng":-4.114,"date":"2026-10-01","approximate":false},{"city":"Wealden","region":"England","lat":51.103,"lng":0.06,"date":"2026-10-02","approximate":false},{"city":"Oldham","region":"ENG","lat":53.541,"lng":-2.118,"date":"2026-10-02","approximate":false},{"city":"Luton","region":"England","lat":51.892,"lng":-0.432,"date":"2026-10-03","approximate":false},{"city":"Chesterfield","region":"England","lat":53.236,"lng":-1.426,"date":"2026-10-03","approximate":false},{"city":"Chesterfield","region":"England","lat":53.242,"lng":-1.338,"date":"2026-10-03","approximate":false},{"city":"Lancashire","region":"England","lat":53.861,"lng":-2.565,"date":"2026-10-05","approximate":false},{"city":"Portsmouth","region":"England","lat":50.8,"lng":-1.091,"date":"2026-10-05","approximate":false},{"city":"Fife","region":"SCT","lat":56.055,"lng":-3.438,"date":"2026-10-05","approximate":false},{"city":"Fife","region":"","lat":56.21,"lng":-3.15,"date":"2026-10-05","approximate":false},{"city":"Edinburgh","region":"SCT","lat":55.952,"lng":-3.196,"date":"2026-10-06","approximate":false},{"city":"Leeds","region":"England","lat":53.789,"lng":-1.572,"date":"2026-10-07","approximate":false},{"city":"Surrey","region":"England","lat":51.272,"lng":-0.341,"date":"2026-10-08","approximate":false},{"city":"Sheffield","region":"ENG","lat":53.422,"lng":-1.463,"date":"2026-10-08","approximate":false},{"city":"Greater London","region":"England","lat":51.507,"lng":-0.128,"date":"2026-10-08","approximate":false},{"city":"Greater London","region":"England","lat":51.507,"lng":-0.128,"date":"2026-10-08","approximate":false},{"city":"Wales","region":"Cymru / Wales","lat":52.293,"lng":-3.739,"date":"2026-10-08","approximate":false},{"city":"Harborough","region":"England","lat":52.461,"lng":-1.213,"date":"2026-10-08","approximate":false},{"city":"Thanet","region":"England","lat":51.353,"lng":1.332,"date":"2026-10-08","approximate":false},{"city":"Birmingham","region":"England","lat":52.501,"lng":-1.875,"date":"2026-10-08","approximate":false},{"city":"Glasgow City","region":"Alba / Scotland","lat":55.829,"lng":-4.256,"date":"2026-10-08","approximate":false},{"city":"East","region":"England","lat":53.119,"lng":-1.26,"date":"2026-10-08","approximate":false},{"city":"Folkestone and Hythe","region":"England","lat":51.092,"lng":1.196,"date":"2026-10-08","approximate":false},{"city":"Castle Point","region":"England","lat":51.564,"lng":0.594,"date":"2026-10-08","approximate":false},{"city":"Gillingham","region":"England","lat":51.384,"lng":0.545,"date":"2026-10-08","approximate":false},{"city":"Guildford","region":"","lat":51.24,"lng":-0.57,"date":"2026-10-08","approximate":false},{"city":"Kent","region":"","lat":51.28,"lng":0.52,"date":"2026-10-08","approximate":false},{"city":"Greater London","region":"England","lat":51.507,"lng":-0.128,"date":"2026-10-08","approximate":false},{"city":"Glasgow","region":"SCT","lat":55.865,"lng":-4.258,"date":"2026-10-08","approximate":false},{"city":"Scotland","region":"Alba / Scotland","lat":56.786,"lng":-4.114,"date":"2026-10-08","approximate":false},{"city":"Liverpool","region":"ENG","lat":53.411,"lng":-2.978,"date":"2026-10-08","approximate":false},{"city":"Uk","region":"Alba / Scotland","lat":56.786,"lng":-4.114,"date":"2026-10-08","approximate":false},{"city":"Greater London","region":"England","lat":51.507,"lng":-0.128,"date":"2026-10-08","approximate":false},{"city":"Crowthorne","region":"England","lat":51.375,"lng":-0.813,"date":"2026-10-08","approximate":false},{"city":"Chelmsford","region":"England","lat":51.735,"lng":0.473,"date":"2026-10-08","approximate":false},{"city":"Nottingham","region":"ENG","lat":52.954,"lng":-1.15,"date":"2026-10-08","approximate":false},{"city":"Greater London","region":"England","lat":51.473,"lng":-0.172,"date":"2026-10-08","approximate":false},{"city":"Stoke Mandeville","region":"England","lat":51.783,"lng":-0.895,"date":"2026-10-08","approximate":false},{"city":"Glasgow City","region":"Alba / Scotland","lat":55.875,"lng":-4.298,"date":"2026-10-08","approximate":false},{"city":"Wilmslow","region":"England","lat":53.326,"lng":-2.233,"date":"2026-10-08","approximate":false},{"city":"Essex","region":"England","lat":51.77,"lng":0.465,"date":"2026-10-08","approximate":false},{"city":"Stroud","region":"England","lat":51.835,"lng":-2.198,"date":"2026-10-08","approximate":false},{"city":"United Kingdom","region":"","lat":55.378,"lng":-3.436,"date":"2026-10-08","approximate":true},{"city":"Hampshire","region":"","lat":51.06,"lng":-1.31,"date":"2026-10-08","approximate":false},{"city":"Eastbourne","region":"England","lat":50.799,"lng":0.315,"date":"2026-10-08","approximate":false},{"city":"City of Nottingham","region":"England","lat":52.956,"lng":-1.156,"date":"2026-10-08","approximate":false},{"city":"Suffolk","region":"England","lat":52.241,"lng":1.047,"date":"2026-10-08","approximate":false},{"city":"Derby","region":"England","lat":52.916,"lng":-1.479,"date":"2026-10-08","approximate":false},{"city":"United Kingdom","region":"","lat":55.378,"lng":-3.436,"date":"2026-10-08","approximate":true},{"city":"London","region":"","lat":51.51,"lng":-0.13,"date":"2026-10-08","approximate":false},{"city":"City of Westminster","region":"England","lat":51.509,"lng":-0.127,"date":"2026-10-08","approximate":false},{"city":"Banbury","region":"","lat":52.07,"lng":-1.27,"date":"2026-10-08","approximate":false},{"city":"Leeds","region":"ENG","lat":51.247,"lng":0.607,"date":"2026-10-08","approximate":false},{"city":"Birmingham","region":"ENG","lat":52.481,"lng":-1.9,"date":"2026-10-08","approximate":false},{"city":"Surrey","region":"England","lat":51.272,"lng":-0.341,"date":"2026-10-08","approximate":false},{"city":"South Kesteven","region":"England","lat":52.675,"lng":-0.304,"date":"2026-10-08","approximate":false},{"city":"Reading","region":"","lat":51.45,"lng":-0.97,"date":"2026-10-08","approximate":false},{"city":"Warwickshire","region":"England","lat":52.505,"lng":-1.965,"date":"2026-10-09","approximate":false},{"city":"Stoke-on-Trent","region":"England","lat":53.016,"lng":-2.181,"date":"2026-10-09","approximate":false},{"city":"Greater London","region":"England","lat":51.507,"lng":-0.128,"date":"2026-10-09","approximate":false},{"city":"Surrey","region":"England","lat":51.272,"lng":-0.341,"date":"2026-10-09","approximate":false},{"city":"Greater London","region":"England","lat":51.507,"lng":-0.128,"date":"2026-10-09","approximate":false},{"city":"Northampton","region":"ENG","lat":52.25,"lng":-0.883,"date":"2026-10-09","approximate":false},{"city":"Greater London","region":"England","lat":51.621,"lng":-0.172,"date":"2026-10-09","approximate":false},{"city":"Uk","region":"England","lat":53.861,"lng":-2.565,"date":"2026-10-09","approximate":false},{"city":"Nottinghamshire","region":"England","lat":53.146,"lng":-1.021,"date":"2026-10-09","approximate":false},{"city":"Whitwell-on-the-Hill","region":"England","lat":54.082,"lng":-0.881,"date":"2026-10-09","approximate":false},{"city":"Greater London","region":"England","lat":51.507,"lng":-0.128,"date":"2026-10-09","approximate":false},{"city":"City of Nottingham","region":"England","lat":52.956,"lng":-1.156,"date":"2026-10-09","approximate":false},{"city":"Brentwood","region":"England","lat":51.62,"lng":0.302,"date":"2026-10-09","approximate":false},{"city":"United Kingdom","region":"","lat":55.378,"lng":-3.436,"date":"2026-10-09","approximate":true},{"city":"Kernow / Cornwall","region":"England","lat":50.647,"lng":-4.349,"date":"2026-10-09","approximate":false},{"city":"United","region":"KINGDOM","lat":54.702,"lng":-3.277,"date":"2026-10-09","approximate":false},{"city":"Trafford","region":"England","lat":53.389,"lng":-2.301,"date":"2026-10-09","approximate":false},{"city":"Cardiff","region":"","lat":51.48,"lng":-3.18,"date":"2026-10-09","approximate":false},{"city":"East Sussex","region":"England","lat":50.94,"lng":0.37,"date":"2026-10-09","approximate":false},{"city":"Tonbridge and Malling","region":"England","lat":51.295,"lng":0.409,"date":"2026-10-09","approximate":false},{"city":"West","region":"England","lat":53.741,"lng":-1.72,"date":"2026-10-09","approximate":false},{"city":"Derby","region":"England","lat":52.911,"lng":-1.514,"date":"2026-10-09","approximate":false},{"city":"Hertfordshire","region":"England","lat":51.84,"lng":-0.098,"date":"2026-10-09","approximate":false},{"city":"United Kingdom","region":"","lat":55.378,"lng":-3.436,"date":"2026-10-09","approximate":true},{"city":"Brighton","region":"","lat":50.82,"lng":-0.14,"date":"2026-10-09","approximate":false},{"city":"Essex","region":"England","lat":51.77,"lng":0.465,"date":"2026-10-09","approximate":false},{"city":"Charnwood","region":"England","lat":52.69,"lng":-1.129,"date":"2026-10-09","approximate":false},{"city":"Yorkshire","region":"England","lat":53.983,"lng":-1.385,"date":"2026-10-09","approximate":false},{"city":"Greater London","region":"England","lat":51.508,"lng":-0.076,"date":"2026-10-09","approximate":false},{"city":"Cambridge","region":"ENG","lat":52.209,"lng":0.148,"date":"2026-10-09","approximate":false},{"city":"Greater London","region":"England","lat":51.507,"lng":-0.128,"date":"2026-10-09","approximate":false},{"city":"Reading","region":"England","lat":51.456,"lng":-0.97,"date":"2026-10-09","approximate":false},{"city":"Knutsford","region":"England","lat":53.236,"lng":-2.385,"date":"2026-10-09","approximate":false},{"city":"Dacorum","region":"England","lat":51.719,"lng":-0.451,"date":"2026-10-09","approximate":false},{"city":"Manchester","region":"ENG","lat":53.522,"lng":-2.214,"date":"2026-10-09","approximate":false},{"city":"Uk","region":"","lat":54.702,"lng":-3.277,"date":"2026-10-09","approximate":false},{"city":"Greater London","region":"England","lat":51.476,"lng":-0.399,"date":"2026-10-09","approximate":false},{"city":"Manchester","region":"England","lat":53.442,"lng":-2.232,"date":"2026-10-10","approximate":false},{"city":"Yorkshire","region":"England","lat":53.983,"lng":-1.385,"date":"2026-10-10","approximate":false},{"city":"Greater London","region":"England","lat":51.507,"lng":0.066,"date":"2026-10-10","approximate":false},{"city":"United Kingdom","region":"","lat":55.378,"lng":-3.436,"date":"2026-10-10","approximate":true},{"city":"Wakefield","region":"England","lat":53.7,"lng":-1.323,"date":"2026-10-10","approximate":false},{"city":"City of Leicester","region":"England","lat":52.639,"lng":-1.105,"date":"2026-10-10","approximate":false},{"city":"City of Nottingham","region":"England","lat":52.956,"lng":-1.156,"date":"2026-10-10","approximate":false},{"city":"Greater London","region":"England","lat":51.435,"lng":-0.349,"date":"2026-10-11","approximate":false},{"city":"Greater London","region":"England","lat":51.568,"lng":-0.029,"date":"2026-10-11","approximate":false},{"city":"Leeds","region":"ENG","lat":51.247,"lng":0.607,"date":"2026-10-11","approximate":false},{"city":"Greater London","region":"England","lat":51.531,"lng":-0.021,"date":"2026-10-11","approximate":false},{"city":"Dorset","region":"England","lat":50.797,"lng":-2.345,"date":"2026-10-11","approximate":false},{"city":"Essex","region":"England","lat":51.77,"lng":0.465,"date":"2026-10-11","approximate":false},{"city":"Southwest England","region":"","lat":50.72,"lng":-3.53,"date":"2026-10-11","approximate":false},{"city":"Glasgow","region":"Alba / Scotland","lat":55.861,"lng":-4.25,"date":"2026-10-11","approximate":false},{"city":"Birmingham","region":"England","lat":52.401,"lng":-1.998,"date":"2026-10-11","approximate":false},{"city":"West Midlands","region":"","lat":52.48,"lng":-1.9,"date":"2026-10-11","approximate":false},{"city":"North East","region":"England","lat":55.132,"lng":-2.072,"date":"2026-10-11","approximate":false},{"city":"Birmingham","region":"England","lat":52.495,"lng":-1.852,"date":"2026-10-11","approximate":false},{"city":"Rochdale","region":"England","lat":53.615,"lng":-2.156,"date":"2026-10-11","approximate":false},{"city":"Nottinghamshire","region":"England","lat":53.146,"lng":-1.021,"date":"2026-10-11","approximate":false},{"city":"Cornwall","region":"","lat":50.27,"lng":-5.05,"date":"2026-10-11","approximate":false},{"city":"Central Bedfordshire","region":"England","lat":52.064,"lng":-0.411,"date":"2026-10-11","approximate":false},{"city":"London","region":"ENG","lat":51.509,"lng":-0.126,"date":"2026-10-11","approximate":false},{"city":"East Suffolk","region":"England","lat":52.314,"lng":1.657,"date":"2026-10-11","approximate":false},{"city":"Manchester","region":"ENG","lat":53.522,"lng":-2.214,"date":"2026-10-11","approximate":false},{"city":"Clandown","region":"England","lat":51.288,"lng":-2.458,"date":"2026-10-12","approximate":false},{"city":"Greater London","region":"England","lat":51.512,"lng":-0.001,"date":"2026-10-12","approximate":false},{"city":"Greater London","region":"England","lat":51.564,"lng":-0.104,"date":"2026-10-12","approximate":false},{"city":"United Kingdom","region":"","lat":55.378,"lng":-3.436,"date":"2026-10-12","approximate":true},{"city":"Greater London","region":"England","lat":51.323,"lng":-0.109,"date":"2026-10-12","approximate":false},{"city":"New Forest","region":"England","lat":50.893,"lng":-1.804,"date":"2026-10-12","approximate":false},{"city":"Central Bedfordshire","region":"England","lat":52.064,"lng":-0.411,"date":"2026-10-12","approximate":false},{"city":"Greater London","region":"England","lat":51.512,"lng":-0.001,"date":"2026-10-12","approximate":false},{"city":"Cumbria","region":"England","lat":54.614,"lng":-2.942,"date":"2026-10-12","approximate":false},{"city":"Northampton","region":"","lat":52.27,"lng":-0.85,"date":"2026-10-12","approximate":false},{"city":"Harrogate","region":"ENG","lat":53.991,"lng":-1.537,"date":"2026-10-12","approximate":false},{"city":"Warwickshire","region":"England","lat":52.321,"lng":-1.554,"date":"2026-10-12","approximate":false},{"city":"Maidstone","region":"England","lat":51.328,"lng":0.528,"date":"2026-10-12","approximate":false},{"city":"Winchester","region":"England","lat":51.078,"lng":-1.334,"date":"2026-10-12","approximate":false},{"city":"Chedzoy","region":"England","lat":51.126,"lng":-2.972,"date":"2026-10-13","approximate":false},{"city":"Stirling","region":"Alba / Scotland","lat":56.116,"lng":-3.919,"date":"2026-10-13","approximate":false},{"city":"Greater London","region":"England","lat":51.428,"lng":-0.332,"date":"2026-10-13","approximate":false},{"city":"Greater London","region":"England","lat":51.531,"lng":-0.48,"date":"2026-10-13","approximate":false},{"city":"Greater London","region":"England","lat":51.449,"lng":-0.325,"date":"2026-10-13","approximate":false},{"city":"Cheshire","region":"England","lat":53.214,"lng":-2.472,"date":"2026-10-13","approximate":false},{"city":"Rugby","region":"England","lat":52.373,"lng":-1.262,"date":"2026-10-14","approximate":false},{"city":"Bedford","region":"ENG","lat":52.135,"lng":-0.466,"date":"2026-10-14","approximate":false}];
 
+// ===== SLIDE 1: COUNT-UP ANIMATION =====
+let s1Animated = false;
+function animateSlide1() {
+  if (s1Animated) return;
+  s1Animated = true;
+  const el = document.getElementById('heroNumber');
+  const target = 139;
+  const duration = 1200;
+  const start = performance.now();
+
+  function tick(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+    el.textContent = Math.round(eased * target);
+    if (t < 1) requestAnimationFrame(tick);
+    else {
+      el.textContent = target;
+      // Stagger the reveal
+      setTimeout(() => document.getElementById('orangeRule').classList.add('show'), 100);
+      setTimeout(() => document.getElementById('subLine1').classList.add('show'), 250);
+      setTimeout(() => document.getElementById('subLine2').classList.add('show'), 400);
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+function resetSlide1() {
+  s1Animated = false;
+  document.getElementById('heroNumber').textContent = '0';
+  document.getElementById('orangeRule').classList.remove('show');
+  document.getElementById('subLine1').classList.remove('show');
+  document.getElementById('subLine2').classList.remove('show');
+}
+
 // ===== CITY COUNTING =====
 function isLondon(city) {
   const c = city.toLowerCase();
   return c === 'london' || c === 'greater london' || c === 'city of westminster';
 }
-
-function isBirmingham(city) {
-  return city.toLowerCase() === 'birmingham';
-}
-
-// Normalize city names for counting
+function isBirmingham(city) { return city.toLowerCase() === 'birmingham'; }
 function normalizeCity(city) {
   if (isLondon(city)) return 'London';
   if (city.toLowerCase() === 'glasgow city' || city.toLowerCase() === 'glasgow') return 'Glasgow';
@@ -217,20 +353,10 @@ function normalizeCity(city) {
 }
 
 const cityCounts = {};
-DEMAND_DATA.forEach(d => {
-  const norm = normalizeCity(d.city);
-  if (norm) cityCounts[norm] = (cityCounts[norm] || 0) + 1;
-});
-
+DEMAND_DATA.forEach(d => { const n = normalizeCity(d.city); if (n) cityCounts[n] = (cityCounts[n] || 0) + 1; });
 const londonCount = cityCounts['London'] || 0;
 const birminghamCount = cityCounts['Birmingham'] || 0;
-
-// Top 8 cities
-const topCities = Object.entries(cityCounts)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 8);
-
-// Build sidebar
+const topCities = Object.entries(cityCounts).sort((a,b) => b[1] - a[1]).slice(0, 8);
 const topCitiesEl = document.getElementById('topCities');
 topCities.forEach(([name, count]) => {
   const row = document.createElement('div');
@@ -240,737 +366,229 @@ topCities.forEach(([name, count]) => {
 });
 
 // ===== PROJECTION =====
-const LAT_MIN = 49.5, LAT_MAX = 59.0;
-const LNG_MIN = -8.5, LNG_MAX = 2.2;
-
+const LAT_MIN = 49.5, LAT_MAX = 59.0, LNG_MIN = -8.5, LNG_MAX = 2.2;
 function projectLat(lat) {
-  // Mercator Y
-  const latRad = lat * Math.PI / 180;
-  const mercY = Math.log(Math.tan(Math.PI / 4 + latRad / 2));
-  const minRad = LAT_MIN * Math.PI / 180;
-  const maxRad = LAT_MAX * Math.PI / 180;
-  const mercMin = Math.log(Math.tan(Math.PI / 4 + minRad / 2));
-  const mercMax = Math.log(Math.tan(Math.PI / 4 + maxRad / 2));
-  return 1 - (mercY - mercMin) / (mercMax - mercMin); // 0=top, 1=bottom
+  const r = lat * Math.PI / 180;
+  const mY = Math.log(Math.tan(Math.PI/4 + r/2));
+  const mMin = Math.log(Math.tan(Math.PI/4 + LAT_MIN*Math.PI/360));
+  const mMax = Math.log(Math.tan(Math.PI/4 + LAT_MAX*Math.PI/360));
+  return 1 - (mY - mMin) / (mMax - mMin);
 }
+function projectLng(lng) { return (lng - LNG_MIN) / (LNG_MAX - LNG_MIN); }
+function seededRandom(seed) { let x = Math.sin(seed*127.1+seed*311.7)*43758.5453; return x - Math.floor(x); }
 
-function projectLng(lng) {
-  return (lng - LNG_MIN) / (LNG_MAX - LNG_MIN);
-}
-
-// ===== DETERMINISTIC JITTER for approximate rows =====
-function seededRandom(seed) {
-  let x = Math.sin(seed * 127.1 + seed * 311.7) * 43758.5453;
-  return x - Math.floor(x);
-}
-
-// ===== BUILD MAP SVG =====
+// ===== BUILD MAP =====
 function buildMap() {
-  const svgNS = 'http://www.w3.org/2000/svg';
-  const vbW = 1000, vbH = 1600;
-  const pad = 40;
-
-  const svg = document.createElementNS(svgNS, 'svg');
-  svg.setAttribute('viewBox', '0 0 ' + vbW + ' ' + vbH);
+  const NS = 'http://www.w3.org/2000/svg';
+  const W = 1000, H = 1600, pad = 40;
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 '+W+' '+H);
   svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-  svg.style.width = '100%';
-  svg.style.height = '100%';
+  svg.style.width = '100%'; svg.style.height = '100%';
 
-  // Defs for glow
-  const defs = document.createElementNS(svgNS, 'defs');
-  const filter = document.createElementNS(svgNS, 'filter');
-  filter.setAttribute('id', 'glow');
-  filter.setAttribute('x', '-50%'); filter.setAttribute('y', '-50%');
-  filter.setAttribute('width', '200%'); filter.setAttribute('height', '200%');
-  const blur = document.createElementNS(svgNS, 'feGaussianBlur');
-  blur.setAttribute('stdDeviation', '6'); blur.setAttribute('result', 'blur');
-  const merge = document.createElementNS(svgNS, 'feMerge');
-  const mn1 = document.createElementNS(svgNS, 'feMergeNode');
-  mn1.setAttribute('in', 'blur');
-  const mn2 = document.createElementNS(svgNS, 'feMergeNode');
-  mn2.setAttribute('in', 'SourceGraphic');
-  merge.appendChild(mn1); merge.appendChild(mn2);
-  filter.appendChild(blur); filter.appendChild(merge);
-  defs.appendChild(filter);
-  svg.appendChild(defs);
+  // Glow filter
+  const defs = document.createElementNS(NS, 'defs');
+  const f = document.createElementNS(NS, 'filter');
+  f.setAttribute('id','glow'); f.setAttribute('x','-50%'); f.setAttribute('y','-50%');
+  f.setAttribute('width','200%'); f.setAttribute('height','200%');
+  const bl = document.createElementNS(NS, 'feGaussianBlur');
+  bl.setAttribute('stdDeviation','8'); bl.setAttribute('result','blur');
+  const mg = document.createElementNS(NS, 'feMerge');
+  const m1 = document.createElementNS(NS, 'feMergeNode'); m1.setAttribute('in','blur');
+  const m2 = document.createElementNS(NS, 'feMergeNode'); m2.setAttribute('in','SourceGraphic');
+  mg.appendChild(m1); mg.appendChild(m2); f.appendChild(bl); f.appendChild(mg);
+  defs.appendChild(f); svg.appendChild(defs);
 
-  // UK outline path (simplified)
-  const ukPath = document.createElementNS(svgNS, 'path');
-  // Convert key UK coastline points to SVG coords
-  const coastPoints = [
-    // Southwest England - Cornwall
-    [50.07, -5.71], [50.27, -5.05], [50.35, -4.77],
-    // South coast
-    [50.37, -4.14], [50.22, -3.64], [50.55, -3.43],
-    [50.62, -2.46], [50.63, -1.97], [50.72, -1.80],
-    [50.77, -1.30], [50.73, -0.78],
-    // Southeast
-    [50.78, -0.25], [50.83, 0.25], [50.92, 0.70],
-    [51.08, 1.10], [51.15, 1.38],
-    // East coast going north
-    [51.38, 1.42], [51.75, 1.05], [51.88, 1.25],
-    [52.05, 1.16], [52.31, 1.66],
-    [52.48, 1.73], [52.65, 1.75],
-    [52.93, 1.30], [53.09, 0.34],
-    [53.30, 0.08], [53.55, 0.08],
-    [53.74, -0.07], [54.08, -0.18],
-    // Northeast
-    [54.50, -0.60], [54.63, -1.17],
-    [55.01, -1.42], [55.37, -1.56],
-    [55.64, -1.69],
-    // Scottish east coast
-    [55.77, -2.00], [55.95, -2.18],
-    [56.05, -2.52], [56.21, -2.64],
-    [56.33, -2.78], [56.45, -2.95],
-    [56.53, -3.20], [56.70, -2.95],
-    [56.84, -2.52], [57.05, -2.06],
-    [57.35, -1.97], [57.52, -1.77],
-    [57.68, -2.03], [57.69, -3.38],
-    [58.24, -3.50], [58.50, -3.10],
-    [58.60, -5.01],
-    // North Scotland west
-    [58.25, -5.10], [57.80, -5.20],
-    [57.55, -5.60], [57.25, -5.80],
-    [57.00, -5.85], [56.73, -5.60],
-    [56.50, -5.50], [56.30, -5.65],
-    // West Scotland
-    [55.90, -5.35], [55.65, -4.90],
-    [55.45, -4.85], [55.22, -4.68],
-    [55.00, -5.10], [54.80, -5.00],
-    // Northern Ireland border area / Solway
-    [54.65, -4.95], [54.88, -3.60],
-    [54.90, -3.38],
-    // Northwest England
-    [54.50, -3.58], [54.20, -3.35],
-    [54.07, -3.21], [53.87, -3.05],
-    [53.70, -3.06], [53.50, -3.07],
-    [53.40, -3.02], [53.32, -3.10],
-    // Wales
-    [53.22, -3.17], [53.12, -3.08],
-    [53.00, -3.50], [52.84, -3.80],
-    [52.70, -4.07], [52.55, -4.08],
-    [52.30, -4.12], [52.13, -4.70],
-    [51.87, -4.95], [51.70, -5.10],
-    [51.59, -5.08], [51.55, -4.95],
-    [51.62, -4.35], [51.58, -3.78],
-    [51.40, -3.25], [51.38, -3.10],
-    // South Wales / Bristol Channel
-    [51.20, -3.30], [51.07, -3.10],
-    [51.00, -3.50], [50.95, -3.68],
-    [50.68, -3.42],
-    // Back to start
-    [50.40, -3.90], [50.27, -4.30],
-    [50.07, -5.71]
-  ];
-
+  // UK coastline
+  const coast = [[50.07,-5.71],[50.27,-5.05],[50.35,-4.77],[50.37,-4.14],[50.22,-3.64],[50.55,-3.43],[50.62,-2.46],[50.63,-1.97],[50.72,-1.80],[50.77,-1.30],[50.73,-0.78],[50.78,-0.25],[50.83,0.25],[50.92,0.70],[51.08,1.10],[51.15,1.38],[51.38,1.42],[51.75,1.05],[51.88,1.25],[52.05,1.16],[52.31,1.66],[52.48,1.73],[52.65,1.75],[52.93,1.30],[53.09,0.34],[53.30,0.08],[53.55,0.08],[53.74,-0.07],[54.08,-0.18],[54.50,-0.60],[54.63,-1.17],[55.01,-1.42],[55.37,-1.56],[55.64,-1.69],[55.77,-2.00],[55.95,-2.18],[56.05,-2.52],[56.21,-2.64],[56.33,-2.78],[56.45,-2.95],[56.53,-3.20],[56.70,-2.95],[56.84,-2.52],[57.05,-2.06],[57.35,-1.97],[57.52,-1.77],[57.68,-2.03],[57.69,-3.38],[58.24,-3.50],[58.50,-3.10],[58.60,-5.01],[58.25,-5.10],[57.80,-5.20],[57.55,-5.60],[57.25,-5.80],[57.00,-5.85],[56.73,-5.60],[56.50,-5.50],[56.30,-5.65],[55.90,-5.35],[55.65,-4.90],[55.45,-4.85],[55.22,-4.68],[55.00,-5.10],[54.80,-5.00],[54.65,-4.95],[54.88,-3.60],[54.90,-3.38],[54.50,-3.58],[54.20,-3.35],[54.07,-3.21],[53.87,-3.05],[53.70,-3.06],[53.50,-3.07],[53.40,-3.02],[53.32,-3.10],[53.22,-3.17],[53.12,-3.08],[53.00,-3.50],[52.84,-3.80],[52.70,-4.07],[52.55,-4.08],[52.30,-4.12],[52.13,-4.70],[51.87,-4.95],[51.70,-5.10],[51.59,-5.08],[51.55,-4.95],[51.62,-4.35],[51.58,-3.78],[51.40,-3.25],[51.38,-3.10],[51.20,-3.30],[51.07,-3.10],[51.00,-3.50],[50.95,-3.68],[50.68,-3.42],[50.40,-3.90],[50.27,-4.30],[50.07,-5.71]];
   let pathD = '';
-  coastPoints.forEach((p, i) => {
-    const x = pad + projectLng(p[1]) * (vbW - pad * 2);
-    const y = pad + projectLat(p[0]) * (vbH - pad * 2);
-    pathD += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+  coast.forEach((p,i) => {
+    const x = pad + projectLng(p[1]) * (W-pad*2);
+    const y = pad + projectLat(p[0]) * (H-pad*2);
+    pathD += (i===0?'M':'L') + x.toFixed(1) + ',' + y.toFixed(1);
   });
   pathD += 'Z';
+  const ukP = document.createElementNS(NS, 'path');
+  ukP.setAttribute('d', pathD);
+  ukP.setAttribute('fill', 'none');
+  ukP.setAttribute('stroke', '#4B5563');
+  ukP.setAttribute('stroke-width', '1.5');
+  svg.appendChild(ukP);
 
-  ukPath.setAttribute('d', pathD);
-  ukPath.setAttribute('fill', 'none');
-  ukPath.setAttribute('stroke', 'rgba(30,75,142,0.4)');
-  ukPath.setAttribute('stroke-width', '2');
-  svg.appendChild(ukPath);
-
-  // Sort data by date for animation
-  const sorted = DEMAND_DATA.map((d, i) => ({ ...d, idx: i }))
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-  // Separate London dots, Birmingham dots, and others
-  const londonDots = [];
-  const birminghamDots = [];
-  const otherDots = [];
-
-  sorted.forEach((d, i) => {
+  // Sort by date
+  const sorted = DEMAND_DATA.map((d,i) => ({...d, idx:i})).sort((a,b) => new Date(a.date) - new Date(b.date));
+  const lonDots = [], brmDots = [], other = [];
+  sorted.forEach((d,i) => {
     let lat = d.lat, lng = d.lng;
-    if (d.approximate) {
-      const s1 = seededRandom(d.idx * 7 + 1);
-      const s2 = seededRandom(d.idx * 13 + 2);
-      lat += (s1 - 0.5) * 1.0;
-      lng += (s2 - 0.5) * 1.0;
-    }
-    const x = pad + projectLng(lng) * (vbW - pad * 2);
-    const y = pad + projectLat(lat) * (vbH - pad * 2);
-    const entry = { ...d, x, y, sortIdx: i };
-
-    if (isLondon(d.city)) londonDots.push(entry);
-    else if (isBirmingham(d.city)) birminghamDots.push(entry);
-    else otherDots.push(entry);
+    if (d.approximate) { lat += (seededRandom(d.idx*7+1)-0.5)*1.0; lng += (seededRandom(d.idx*13+2)-0.5)*1.0; }
+    const x = pad + projectLng(lng)*(W-pad*2);
+    const y = pad + projectLat(lat)*(H-pad*2);
+    const e = {...d, x, y, si: i};
+    if (isLondon(d.city)) lonDots.push(e);
+    else if (isBirmingham(d.city)) brmDots.push(e);
+    else other.push(e);
   });
 
-  // Draw other dots
-  const dotRadius = 12;
-  const allDotEls = [];
+  const R = 12;
+  const allEls = [];
 
-  otherDots.forEach(d => {
-    const c = document.createElementNS(svgNS, 'circle');
-    c.setAttribute('cx', d.x); c.setAttribute('cy', d.y);
-    c.setAttribute('r', dotRadius);
-    c.setAttribute('fill', '#4A90D9');
-    c.setAttribute('filter', 'url(#glow)');
-    c.setAttribute('opacity', '0.85');
-    c.classList.add('dot');
-    c.dataset.sortIdx = d.sortIdx;
+  // Other dots
+  other.forEach(d => {
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx',d.x); c.setAttribute('cy',d.y); c.setAttribute('r',R);
+    c.setAttribute('fill','#D66829'); c.setAttribute('filter','url(#glow)'); c.setAttribute('opacity','0.85');
+    c.classList.add('dot'); c.dataset.si = d.si;
     svg.appendChild(c);
-    allDotEls.push({ el: c, sortIdx: d.sortIdx });
+    allEls.push({el:c, si:d.si});
   });
 
-  // Birmingham dots (render individually but also add label)
-  birminghamDots.forEach(d => {
-    const c = document.createElementNS(svgNS, 'circle');
-    c.setAttribute('cx', d.x); c.setAttribute('cy', d.y);
-    c.setAttribute('r', dotRadius);
-    c.setAttribute('fill', '#4A90D9');
-    c.setAttribute('filter', 'url(#glow)');
-    c.setAttribute('opacity', '0.85');
-    c.classList.add('dot');
-    c.dataset.sortIdx = d.sortIdx;
+  // Birmingham dots + label
+  brmDots.forEach(d => {
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx',d.x); c.setAttribute('cy',d.y); c.setAttribute('r',R);
+    c.setAttribute('fill','#D66829'); c.setAttribute('filter','url(#glow)'); c.setAttribute('opacity','0.85');
+    c.classList.add('dot'); c.dataset.si = d.si;
     svg.appendChild(c);
-    allDotEls.push({ el: c, sortIdx: d.sortIdx });
+    allEls.push({el:c, si:d.si});
   });
-
-  // Birmingham label
-  if (birminghamDots.length > 0) {
-    const avgX = birminghamDots.reduce((s, d) => s + d.x, 0) / birminghamDots.length;
-    const avgY = birminghamDots.reduce((s, d) => s + d.y, 0) / birminghamDots.length;
-    const bGroup = document.createElementNS(svgNS, 'g');
-    bGroup.classList.add('birmingham-label');
-    // Circle
-    const bc = document.createElementNS(svgNS, 'circle');
-    bc.setAttribute('cx', avgX); bc.setAttribute('cy', avgY);
-    bc.setAttribute('r', 28);
-    bc.setAttribute('fill', 'rgba(74,144,217,0.3)');
-    bc.setAttribute('stroke', '#4A90D9');
-    bc.setAttribute('stroke-width', '2');
-    bGroup.appendChild(bc);
-    // Count
-    const bt = document.createElementNS(svgNS, 'text');
-    bt.setAttribute('x', avgX); bt.setAttribute('y', avgY + 6);
-    bt.setAttribute('text-anchor', 'middle');
-    bt.setAttribute('font-size', '20');
-    bt.textContent = birminghamCount;
-    bGroup.appendChild(bt);
-    // Label
-    const bl = document.createElementNS(svgNS, 'text');
-    bl.setAttribute('x', avgX + 38); bl.setAttribute('y', avgY + 5);
-    bl.setAttribute('text-anchor', 'start');
-    bl.setAttribute('font-size', '18');
-    bl.setAttribute('fill', 'rgba(245,243,239,0.7)');
-    bl.textContent = 'Birmingham';
-    bGroup.appendChild(bl);
-    // Star marker for event
-    const star = document.createElementNS(svgNS, 'text');
-    star.setAttribute('x', avgX); star.setAttribute('y', avgY - 38);
-    star.setAttribute('text-anchor', 'middle');
-    star.setAttribute('font-size', '16');
-    star.setAttribute('fill', '#D66829');
-    star.textContent = 'YOU ARE HERE';
-    bGroup.appendChild(star);
-    svg.appendChild(bGroup);
-    allDotEls.push({ el: bGroup, sortIdx: Math.min(...birminghamDots.map(d => d.sortIdx)), isBirmingham: true });
+  if (brmDots.length) {
+    const ax = brmDots.reduce((s,d)=>s+d.x,0)/brmDots.length;
+    const ay = brmDots.reduce((s,d)=>s+d.y,0)/brmDots.length;
+    const g = document.createElementNS(NS, 'g');
+    g.classList.add('birmingham-label');
+    const bc = document.createElementNS(NS, 'circle');
+    bc.setAttribute('cx',ax); bc.setAttribute('cy',ay); bc.setAttribute('r',28);
+    bc.setAttribute('fill','rgba(214,104,41,0.2)'); bc.setAttribute('stroke','#D66829'); bc.setAttribute('stroke-width','2');
+    g.appendChild(bc);
+    const bt = document.createElementNS(NS, 'text');
+    bt.setAttribute('x',ax); bt.setAttribute('y',ay+7); bt.setAttribute('text-anchor','middle');
+    bt.setAttribute('font-size','20'); bt.setAttribute('fill','#F5F3EF');
+    bt.textContent = birminghamCount; g.appendChild(bt);
+    const bl2 = document.createElementNS(NS, 'text');
+    bl2.setAttribute('x',ax+38); bl2.setAttribute('y',ay+5); bl2.setAttribute('text-anchor','start');
+    bl2.setAttribute('font-size','18'); bl2.setAttribute('fill','#4B5563');
+    bl2.textContent = 'Birmingham'; g.appendChild(bl2);
+    const star = document.createElementNS(NS, 'text');
+    star.setAttribute('x',ax); star.setAttribute('y',ay-38); star.setAttribute('text-anchor','middle');
+    star.setAttribute('font-size','14'); star.setAttribute('fill','#D66829'); star.setAttribute('font-weight','600');
+    star.textContent = 'YOU ARE HERE'; g.appendChild(star);
+    svg.appendChild(g);
+    allEls.push({el:g, si:Math.min(...brmDots.map(d=>d.si)), isB:true});
   }
 
   // London cluster
-  if (londonDots.length > 0) {
-    const avgX = londonDots.reduce((s, d) => s + d.x, 0) / londonDots.length;
-    const avgY = londonDots.reduce((s, d) => s + d.y, 0) / londonDots.length;
-    const londonGroup = document.createElementNS(svgNS, 'g');
-    londonGroup.classList.add('london-cluster');
-    // Outer glow
-    const outerC = document.createElementNS(svgNS, 'circle');
-    outerC.setAttribute('cx', avgX); outerC.setAttribute('cy', avgY);
-    outerC.setAttribute('r', 52);
-    outerC.setAttribute('fill', 'rgba(74,144,217,0.15)');
-    outerC.setAttribute('filter', 'url(#glow)');
-    londonGroup.appendChild(outerC);
-    // Main circle
-    const mc = document.createElementNS(svgNS, 'circle');
-    mc.setAttribute('cx', avgX); mc.setAttribute('cy', avgY);
-    mc.setAttribute('r', 40);
-    mc.setAttribute('fill', 'rgba(74,144,217,0.5)');
-    mc.setAttribute('stroke', '#4A90D9');
-    mc.setAttribute('stroke-width', '2.5');
-    londonGroup.appendChild(mc);
-    // Count text
-    const t = document.createElementNS(svgNS, 'text');
-    t.setAttribute('x', avgX); t.setAttribute('y', avgY + 10);
-    t.setAttribute('text-anchor', 'middle');
-    t.setAttribute('font-size', '30');
-    t.textContent = londonCount;
-    londonGroup.appendChild(t);
-    // Label
-    const label = document.createElementNS(svgNS, 'text');
-    label.setAttribute('x', avgX + 52); label.setAttribute('y', avgY + 5);
-    label.setAttribute('text-anchor', 'start');
-    label.setAttribute('font-size', '20');
-    label.setAttribute('fill', 'rgba(245,243,239,0.7)');
-    label.textContent = 'London';
-    londonGroup.appendChild(label);
-    svg.appendChild(londonGroup);
-    // Show London cluster when first London dot would appear
-    allDotEls.push({ el: londonGroup, sortIdx: Math.min(...londonDots.map(d => d.sortIdx)), isLondon: true, count: londonCount });
+  if (lonDots.length) {
+    const ax = lonDots.reduce((s,d)=>s+d.x,0)/lonDots.length;
+    const ay = lonDots.reduce((s,d)=>s+d.y,0)/lonDots.length;
+    const g = document.createElementNS(NS, 'g');
+    g.classList.add('london-cluster');
+    const oc = document.createElementNS(NS, 'circle');
+    oc.setAttribute('cx',ax); oc.setAttribute('cy',ay); oc.setAttribute('r',52);
+    oc.setAttribute('fill','rgba(214,104,41,0.12)'); oc.setAttribute('filter','url(#glow)');
+    g.appendChild(oc);
+    const mc = document.createElementNS(NS, 'circle');
+    mc.setAttribute('cx',ax); mc.setAttribute('cy',ay); mc.setAttribute('r',40);
+    mc.setAttribute('fill','rgba(214,104,41,0.35)'); mc.setAttribute('stroke','#D66829'); mc.setAttribute('stroke-width','2.5');
+    g.appendChild(mc);
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('x',ax); t.setAttribute('y',ay+10); t.setAttribute('text-anchor','middle');
+    t.setAttribute('font-size','30'); t.setAttribute('fill','#F5F3EF'); t.setAttribute('font-weight','700');
+    t.textContent = londonCount; g.appendChild(t);
+    const lb = document.createElementNS(NS, 'text');
+    lb.setAttribute('x',ax+52); lb.setAttribute('y',ay+5); lb.setAttribute('text-anchor','start');
+    lb.setAttribute('font-size','20'); lb.setAttribute('fill','#D66829'); lb.setAttribute('font-weight','600');
+    lb.textContent = 'London'; g.appendChild(lb);
+    svg.appendChild(g);
+    allEls.push({el:g, si:Math.min(...lonDots.map(d=>d.si)), isL:true, cnt:londonCount});
   }
 
   document.getElementById('mapContainer').appendChild(svg);
-
-  // Sort by animation order
-  allDotEls.sort((a, b) => a.sortIdx - b.sortIdx);
-  return { allDotEls, totalCount: DEMAND_DATA.length, londonCount };
+  allEls.sort((a,b) => a.si - b.si);
+  return {allEls, total: DEMAND_DATA.length, londonCount};
 }
 
 const mapData = buildMap();
 
-// ===== MAP ANIMATION =====
-let mapAnimationTimer = null;
-let mapAnimated = false;
-
 function animateMap() {
-  const { allDotEls, totalCount, londonCount } = mapData;
-  const countEl = document.getElementById('runningCount');
-  let currentCount = 0;
-  const totalDuration = 5000; // 5 seconds
-  const perDot = totalDuration / allDotEls.length;
-
-  // Reset
-  allDotEls.forEach(d => {
-    d.el.classList.remove('visible');
-    d.el.style.transform = 'scale(0.8)';
-  });
-  countEl.textContent = '0';
-
-  allDotEls.forEach((d, i) => {
+  const {allEls, total, londonCount} = mapData;
+  const cEl = document.getElementById('runningCount');
+  let cur = 0;
+  const dur = 5000, per = dur / allEls.length;
+  allEls.forEach(d => { d.el.classList.remove('visible'); d.el.style.transform = 'scale(0.8)'; });
+  cEl.textContent = '0';
+  allEls.forEach((d,i) => {
     setTimeout(() => {
-      d.el.classList.add('visible');
-      d.el.style.transform = 'scale(1)';
-      if (d.isLondon) {
-        currentCount += londonCount;
-      } else if (d.isBirmingham) {
-        // Birmingham dots counted individually
-      } else {
-        currentCount++;
-      }
-      // Smooth counter
-      countEl.textContent = Math.min(currentCount, totalCount);
-    }, i * perDot);
+      d.el.classList.add('visible'); d.el.style.transform = 'scale(1)';
+      if (d.isL) cur += londonCount; else if (!d.isB) cur++;
+      cEl.textContent = Math.min(cur, total);
+    }, i * per);
   });
-
-  // Final count correction
-  setTimeout(() => {
-    countEl.textContent = totalCount;
-  }, totalDuration + 200);
+  setTimeout(() => { cEl.textContent = total; }, dur + 200);
 }
 
 function resetMap() {
-  const { allDotEls } = mapData;
-  allDotEls.forEach(d => {
-    d.el.classList.remove('visible');
-    d.el.style.transform = 'scale(0.8)';
-  });
+  mapData.allEls.forEach(d => { d.el.classList.remove('visible'); d.el.style.transform = 'scale(0.8)'; });
   document.getElementById('runningCount').textContent = '0';
-  mapAnimated = false;
 }
 
-// ===== QR CODE GENERATOR =====
-// Minimal QR Code generator for alphanumeric data (version 2, EC level L)
-(function() {
-  // This is a compact QR code implementation
-  function generateQR(text) {
-    // We'll use a simple approach: build the QR matrix using Reed-Solomon and masking
-    // For a short URL, Version 2-L (25x25) is sufficient
-    // Since embedding a full RS encoder is complex, we use a lookup-based approach
-    // for this specific URL
-
-    // Actually, let's embed a minimal but complete QR generator
-    const QRCode = (function() {
-      // Galois field math for GF(256)
-      const EXP = new Uint8Array(256);
-      const LOG = new Uint8Array(256);
-      let val = 1;
-      for (let i = 0; i < 255; i++) {
-        EXP[i] = val;
-        LOG[val] = i;
-        val <<= 1;
-        if (val >= 256) val ^= 285;
-      }
-      EXP[255] = EXP[0];
-
-      function gfMul(a, b) {
-        if (a === 0 || b === 0) return 0;
-        return EXP[(LOG[a] + LOG[b]) % 255];
-      }
-
-      function polyMul(p1, p2) {
-        const r = new Uint8Array(p1.length + p2.length - 1);
-        for (let i = 0; i < p1.length; i++)
-          for (let j = 0; j < p2.length; j++)
-            r[i + j] ^= gfMul(p1[i], p2[j]);
-        return r;
-      }
-
-      function polyRest(dividend, divisor) {
-        const result = new Uint8Array(dividend);
-        for (let i = 0; i < dividend.length - divisor.length + 1; i++) {
-          if (result[i] === 0) continue;
-          const coef = result[i];
-          for (let j = 0; j < divisor.length; j++)
-            result[i + j] ^= gfMul(divisor[j], coef);
-        }
-        return result.slice(dividend.length - divisor.length + 1);
-      }
-
-      function rsGenPoly(n) {
-        let p = new Uint8Array([1]);
-        for (let i = 0; i < n; i++)
-          p = polyMul(p, new Uint8Array([1, EXP[i]]));
-        return p;
-      }
-
-      function encodeBytes(text) {
-        // Byte mode encoding
-        const bytes = [];
-        for (let i = 0; i < text.length; i++) {
-          const c = text.charCodeAt(i);
-          if (c < 128) bytes.push(c);
-          else if (c < 2048) {
-            bytes.push(192 | (c >> 6));
-            bytes.push(128 | (c & 63));
-          }
-        }
-        return bytes;
-      }
-
-      function create(text) {
-        const dataBytes = encodeBytes(text);
-        const len = dataBytes.length;
-
-        // Determine version
-        // V1-L: 17 bytes, V2-L: 32 bytes, V3-L: 53 bytes
-        let version, totalCodewords, ecCodewords, ecBlocks, size;
-        if (len <= 14) { version = 1; totalCodewords = 19; ecCodewords = 7; ecBlocks = 1; size = 21; }
-        else if (len <= 30) { version = 2; totalCodewords = 34; ecCodewords = 10; ecBlocks = 1; size = 25; }
-        else if (len <= 51) { version = 3; totalCodewords = 55; ecCodewords = 15; ecBlocks = 1; size = 29; }
-        else { version = 4; totalCodewords = 80; ecCodewords = 20; ecBlocks = 1; size = 33; }
-
-        const dataCodewords = totalCodewords - ecCodewords;
-
-        // Build data bitstream
-        const bits = [];
-        function pushBits(val, count) {
-          for (let i = count - 1; i >= 0; i--)
-            bits.push((val >> i) & 1);
-        }
-
-        // Mode indicator: byte = 0100
-        pushBits(4, 4);
-        // Character count (8 bits for V1-9 byte mode)
-        pushBits(len, 8);
-        // Data
-        for (let i = 0; i < len; i++) pushBits(dataBytes[i], 8);
-        // Terminator
-        const totalBits = dataCodewords * 8;
-        const termLen = Math.min(4, totalBits - bits.length);
-        pushBits(0, termLen);
-        // Pad to byte boundary
-        while (bits.length % 8 !== 0) bits.push(0);
-        // Pad codewords
-        const padBytes = [236, 17];
-        let padIdx = 0;
-        while (bits.length < totalBits) {
-          pushBits(padBytes[padIdx % 2], 8);
-          padIdx++;
-        }
-
-        // Convert bits to bytes
-        const data = new Uint8Array(dataCodewords);
-        for (let i = 0; i < dataCodewords; i++) {
-          let b = 0;
-          for (let j = 0; j < 8; j++) b = (b << 1) | (bits[i * 8 + j] || 0);
-          data[i] = b;
-        }
-
-        // Reed-Solomon
-        const gen = rsGenPoly(ecCodewords);
-        const msgPoly = new Uint8Array(dataCodewords + ecCodewords);
-        msgPoly.set(data);
-        const ec = polyRest(msgPoly, gen);
-
-        // Final codewords
-        const finalData = new Uint8Array(totalCodewords);
-        finalData.set(data);
-        finalData.set(ec, dataCodewords);
-
-        // Build matrix
-        const matrix = Array.from({ length: size }, () => new Int8Array(size).fill(-1));
-        const reserved = Array.from({ length: size }, () => new Uint8Array(size));
-
-        function setModule(r, c, val) {
-          if (r >= 0 && r < size && c >= 0 && c < size) {
-            matrix[r][c] = val ? 1 : 0;
-            reserved[r][c] = 1;
-          }
-        }
-
-        // Finder patterns
-        function finderPattern(row, col) {
-          for (let r = -1; r <= 7; r++)
-            for (let c = -1; c <= 7; c++) {
-              const rr = row + r, cc = col + c;
-              if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
-              const val = (r >= 0 && r <= 6 && (c === 0 || c === 6)) ||
-                          (c >= 0 && c <= 6 && (r === 0 || r === 6)) ||
-                          (r >= 2 && r <= 4 && c >= 2 && c <= 4);
-              setModule(rr, cc, val);
-            }
-        }
-
-        finderPattern(0, 0);
-        finderPattern(0, size - 7);
-        finderPattern(size - 7, 0);
-
-        // Alignment pattern (V2+)
-        if (version >= 2) {
-          const alignPos = version === 2 ? [6, 18] : version === 3 ? [6, 22] : [6, 26];
-          for (const ar of alignPos)
-            for (const ac of alignPos) {
-              if (reserved[ar] && reserved[ar][ac]) continue;
-              for (let r = -2; r <= 2; r++)
-                for (let c = -2; c <= 2; c++) {
-                  const val = Math.abs(r) === 2 || Math.abs(c) === 2 || (r === 0 && c === 0);
-                  setModule(ar + r, ac + c, val);
-                }
-            }
-        }
-
-        // Timing patterns
-        for (let i = 8; i < size - 8; i++) {
-          setModule(6, i, i % 2 === 0);
-          setModule(i, 6, i % 2 === 0);
-        }
-
-        // Dark module
-        setModule(size - 8, 8, 1);
-
-        // Reserve format info areas
-        for (let i = 0; i < 8; i++) {
-          if (!reserved[8][i]) { reserved[8][i] = 1; matrix[8][i] = 0; }
-          if (!reserved[8][size - 1 - i]) { reserved[8][size - 1 - i] = 1; matrix[8][size - 1 - i] = 0; }
-          if (!reserved[i][8]) { reserved[i][8] = 1; matrix[i][8] = 0; }
-          if (!reserved[size - 1 - i][8]) { reserved[size - 1 - i][8] = 1; matrix[size - 1 - i][8] = 0; }
-        }
-        if (!reserved[8][8]) { reserved[8][8] = 1; matrix[8][8] = 0; }
-
-        // Version info (V7+) - not needed for V1-4
-
-        // Place data
-        const allBits = [];
-        for (let i = 0; i < finalData.length; i++)
-          for (let j = 7; j >= 0; j--)
-            allBits.push((finalData[i] >> j) & 1);
-
-        let bitIdx = 0;
-        for (let col = size - 1; col >= 1; col -= 2) {
-          if (col === 6) col = 5; // Skip timing
-          for (let cnt = 0; cnt < size; cnt++) {
-            const up = ((Math.floor((size - 1 - col) / 2)) % 2 === 0);
-            const row = up ? size - 1 - cnt : cnt;
-            for (let dc = 0; dc <= 1; dc++) {
-              const c = col - dc;
-              if (c < 0 || c >= size) continue;
-              if (reserved[row][c]) continue;
-              matrix[row][c] = bitIdx < allBits.length ? allBits[bitIdx] : 0;
-              bitIdx++;
-            }
-          }
-        }
-
-        // Masking - try mask 0 (checkerboard)
-        function applyMask(matrix, mask) {
-          const m = matrix.map(r => new Int8Array(r));
-          for (let r = 0; r < size; r++)
-            for (let c = 0; c < size; c++) {
-              if (reserved[r][c]) continue;
-              let flip = false;
-              switch (mask) {
-                case 0: flip = (r + c) % 2 === 0; break;
-                case 1: flip = r % 2 === 0; break;
-                case 2: flip = c % 3 === 0; break;
-                case 3: flip = (r + c) % 3 === 0; break;
-                case 4: flip = (Math.floor(r/2) + Math.floor(c/3)) % 2 === 0; break;
-                case 5: flip = (r*c)%2 + (r*c)%3 === 0; break;
-                case 6: flip = ((r*c)%2 + (r*c)%3) % 2 === 0; break;
-                case 7: flip = ((r+c)%2 + (r*c)%3) % 2 === 0; break;
-              }
-              if (flip) m[r][c] ^= 1;
-            }
-          return m;
-        }
-
-        // Simple penalty scoring
-        function penalty(m) {
-          let score = 0;
-          for (let r = 0; r < size; r++) {
-            let run = 1;
-            for (let c = 1; c < size; c++) {
-              if (m[r][c] === m[r][c-1]) { run++; if (run === 5) score += 3; else if (run > 5) score++; }
-              else run = 1;
-            }
-          }
-          for (let c = 0; c < size; c++) {
-            let run = 1;
-            for (let r = 1; r < size; r++) {
-              if (m[r][c] === m[r-1][c]) { run++; if (run === 5) score += 3; else if (run > 5) score++; }
-              else run = 1;
-            }
-          }
-          return score;
-        }
-
-        // Try all masks, pick best
-        let bestMask = 0, bestScore = Infinity;
-        for (let mask = 0; mask < 8; mask++) {
-          const masked = applyMask(matrix, mask);
-          const s = penalty(masked);
-          if (s < bestScore) { bestScore = s; bestMask = mask; }
-        }
-
-        const finalMatrix = applyMask(matrix, bestMask);
-
-        // Format info
-        // EC level L = 01, mask pattern
-        const formatData = (1 << 3) | bestMask; // 01 xxx
-        // BCH encoding for format info
-        let fmt = formatData << 10;
-        let gen2 = 0b10100110111;
-        for (let i = 14; i >= 10; i--) {
-          if (fmt & (1 << i)) fmt ^= gen2 << (i - 10);
-        }
-        fmt = ((formatData << 10) | fmt) ^ 0b101010000010010;
-
-        // Place format bits
-        const formatBits = [];
-        for (let i = 14; i >= 0; i--) formatBits.push((fmt >> i) & 1);
-
-        // Around top-left finder
-        const positions1 = [
-          [8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],
-          [7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]
-        ];
-        const positions2 = [
-          [size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],
-          [8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]
-        ];
-
-        for (let i = 0; i < 15; i++) {
-          const bit = formatBits[i];
-          finalMatrix[positions1[i][0]][positions1[i][1]] = bit;
-          finalMatrix[positions2[i][0]][positions2[i][1]] = bit;
-        }
-
-        return { matrix: finalMatrix, size };
-      }
-
-      return { create };
-    })();
-
-    return QRCode.create(text);
-  }
-
-  function drawQR(canvasId, text, fgColor, bgColor) {
-    const { matrix, size } = generateQR(text);
-    const canvas = document.getElementById(canvasId);
-    const scale = 16; // pixels per module
-    const quiet = 4; // quiet zone modules
-    const totalSize = (size + quiet * 2) * scale;
-    canvas.width = totalSize;
-    canvas.height = totalSize;
-    const ctx = canvas.getContext('2d');
-
-    // Background
-    ctx.fillStyle = bgColor || '#F5F3EF';
-    ctx.fillRect(0, 0, totalSize, totalSize);
-
-    // Modules
-    ctx.fillStyle = fgColor || '#0A0E1A';
-    for (let r = 0; r < size; r++) {
-      for (let c = 0; c < size; c++) {
-        if (matrix[r][c] === 1) {
-          ctx.fillRect((c + quiet) * scale, (r + quiet) * scale, scale, scale);
-        }
-      }
-    }
-  }
-
-  window.drawQR = drawQR;
+// ===== QR CODE =====
+(function(){
+function generateQR(text){const QRCode=(function(){const EXP=new Uint8Array(256);const LOG=new Uint8Array(256);let val=1;for(let i=0;i<255;i++){EXP[i]=val;LOG[val]=i;val<<=1;if(val>=256)val^=285;}EXP[255]=EXP[0];function gfMul(a,b){if(a===0||b===0)return 0;return EXP[(LOG[a]+LOG[b])%255];}function polyMul(p1,p2){const r=new Uint8Array(p1.length+p2.length-1);for(let i=0;i<p1.length;i++)for(let j=0;j<p2.length;j++)r[i+j]^=gfMul(p1[i],p2[j]);return r;}function polyRest(dividend,divisor){const result=new Uint8Array(dividend);for(let i=0;i<dividend.length-divisor.length+1;i++){if(result[i]===0)continue;const coef=result[i];for(let j=0;j<divisor.length;j++)result[i+j]^=gfMul(divisor[j],coef);}return result.slice(dividend.length-divisor.length+1);}function rsGenPoly(n){let p=new Uint8Array([1]);for(let i=0;i<n;i++)p=polyMul(p,new Uint8Array([1,EXP[i]]));return p;}function encodeBytes(text){const bytes=[];for(let i=0;i<text.length;i++){const c=text.charCodeAt(i);if(c<128)bytes.push(c);else if(c<2048){bytes.push(192|(c>>6));bytes.push(128|(c&63));}}return bytes;}function create(text){const dataBytes=encodeBytes(text);const len=dataBytes.length;let version,totalCodewords,ecCodewords,size;if(len<=14){version=1;totalCodewords=19;ecCodewords=7;size=21;}else if(len<=30){version=2;totalCodewords=34;ecCodewords=10;size=25;}else if(len<=51){version=3;totalCodewords=55;ecCodewords=15;size=29;}else{version=4;totalCodewords=80;ecCodewords=20;size=33;}const dataCodewords=totalCodewords-ecCodewords;const bits=[];function pushBits(v,c){for(let i=c-1;i>=0;i--)bits.push((v>>i)&1);}pushBits(4,4);pushBits(len,8);for(let i=0;i<len;i++)pushBits(dataBytes[i],8);const totalBits=dataCodewords*8;pushBits(0,Math.min(4,totalBits-bits.length));while(bits.length%8!==0)bits.push(0);const pb=[236,17];let pi=0;while(bits.length<totalBits){pushBits(pb[pi%2],8);pi++;}const data=new Uint8Array(dataCodewords);for(let i=0;i<dataCodewords;i++){let b=0;for(let j=0;j<8;j++)b=(b<<1)|(bits[i*8+j]||0);data[i]=b;}const gen=rsGenPoly(ecCodewords);const msgPoly=new Uint8Array(dataCodewords+ecCodewords);msgPoly.set(data);const ec=polyRest(msgPoly,gen);const finalData=new Uint8Array(totalCodewords);finalData.set(data);finalData.set(ec,dataCodewords);const matrix=Array.from({length:size},()=>new Int8Array(size).fill(-1));const reserved=Array.from({length:size},()=>new Uint8Array(size));function setMod(r,c,v){if(r>=0&&r<size&&c>=0&&c<size){matrix[r][c]=v?1:0;reserved[r][c]=1;}}function finder(row,col){for(let r=-1;r<=7;r++)for(let c=-1;c<=7;c++){const rr=row+r,cc=col+c;if(rr<0||rr>=size||cc<0||cc>=size)continue;const v=(r>=0&&r<=6&&(c===0||c===6))||(c>=0&&c<=6&&(r===0||r===6))||(r>=2&&r<=4&&c>=2&&c<=4);setMod(rr,cc,v);}}finder(0,0);finder(0,size-7);finder(size-7,0);if(version>=2){const ap=version===2?[6,18]:version===3?[6,22]:[6,26];for(const ar of ap)for(const ac of ap){if(reserved[ar]&&reserved[ar][ac])continue;for(let r=-2;r<=2;r++)for(let c=-2;c<=2;c++){setMod(ar+r,ac+c,Math.abs(r)===2||Math.abs(c)===2||(r===0&&c===0));}}}for(let i=8;i<size-8;i++){setMod(6,i,i%2===0);setMod(i,6,i%2===0);}setMod(size-8,8,1);for(let i=0;i<8;i++){if(!reserved[8][i]){reserved[8][i]=1;matrix[8][i]=0;}if(!reserved[8][size-1-i]){reserved[8][size-1-i]=1;matrix[8][size-1-i]=0;}if(!reserved[i][8]){reserved[i][8]=1;matrix[i][8]=0;}if(!reserved[size-1-i][8]){reserved[size-1-i][8]=1;matrix[size-1-i][8]=0;}}if(!reserved[8][8]){reserved[8][8]=1;matrix[8][8]=0;}const allBits=[];for(let i=0;i<finalData.length;i++)for(let j=7;j>=0;j--)allBits.push((finalData[i]>>j)&1);let bi=0;for(let col=size-1;col>=1;col-=2){if(col===6)col=5;for(let cnt=0;cnt<size;cnt++){const up=((Math.floor((size-1-col)/2))%2===0);const row=up?size-1-cnt:cnt;for(let dc=0;dc<=1;dc++){const c=col-dc;if(c<0||c>=size)continue;if(reserved[row][c])continue;matrix[row][c]=bi<allBits.length?allBits[bi]:0;bi++;}}}function applyMask(mx,mask){const m=mx.map(r=>new Int8Array(r));for(let r=0;r<size;r++)for(let c=0;c<size;c++){if(reserved[r][c])continue;let flip=false;switch(mask){case 0:flip=(r+c)%2===0;break;case 1:flip=r%2===0;break;case 2:flip=c%3===0;break;case 3:flip=(r+c)%3===0;break;case 4:flip=(Math.floor(r/2)+Math.floor(c/3))%2===0;break;case 5:flip=(r*c)%2+(r*c)%3===0;break;case 6:flip=((r*c)%2+(r*c)%3)%2===0;break;case 7:flip=((r+c)%2+(r*c)%3)%2===0;break;}if(flip)m[r][c]^=1;}return m;}function penalty(m){let s=0;for(let r=0;r<size;r++){let run=1;for(let c=1;c<size;c++){if(m[r][c]===m[r][c-1]){run++;if(run===5)s+=3;else if(run>5)s++;}else run=1;}}for(let c=0;c<size;c++){let run=1;for(let r=1;r<size;r++){if(m[r][c]===m[r-1][c]){run++;if(run===5)s+=3;else if(run>5)s++;}else run=1;}}return s;}let bestMask=0,bestScore=Infinity;for(let mask=0;mask<8;mask++){const masked=applyMask(matrix,mask);const s=penalty(masked);if(s<bestScore){bestScore=s;bestMask=mask;}}const finalMatrix=applyMask(matrix,bestMask);const formatData=(1<<3)|bestMask;let fmt=formatData<<10;let g2=0b10100110111;for(let i=14;i>=10;i--){if(fmt&(1<<i))fmt^=g2<<(i-10);}fmt=((formatData<<10)|fmt)^0b101010000010010;const fb=[];for(let i=14;i>=0;i--)fb.push((fmt>>i)&1);const p1=[[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];const p2=[[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],[8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];for(let i=0;i<15;i++){finalMatrix[p1[i][0]][p1[i][1]]=fb[i];finalMatrix[p2[i][0]][p2[i][1]]=fb[i];}return{matrix:finalMatrix,size};}return{create};})();return QRCode.create(text);}
+function drawQR(id,text,fg,bg){const{matrix,size}=generateQR(text);const canvas=document.getElementById(id);const sc=16,q=4,ts=(size+q*2)*sc;canvas.width=ts;canvas.height=ts;const ctx=canvas.getContext('2d');ctx.fillStyle=bg||'#F5F3EF';ctx.fillRect(0,0,ts,ts);ctx.fillStyle=fg||'#131313';for(let r=0;r<size;r++)for(let c=0;c<size;c++){if(matrix[r][c]===1)ctx.fillRect((c+q)*sc,(r+q)*sc,sc,sc);}}
+window.drawQR=drawQR;
 })();
+drawQR('qr-canvas', 'https://neurochiro.co/uk', '#131313', '#F5F3EF');
 
-// Generate QR
-drawQR('qr-canvas', 'https://neurochiro.co/uk', '#0A0E1A', '#F5F3EF');
-
-// ===== SLIDESHOW ENGINE =====
+// ===== SLIDESHOW + PROGRESS BAR =====
 const slides = [
-  { el: document.getElementById('slide1'), duration: 6000 },
-  { el: document.getElementById('slide2'), duration: 12000 },
-  { el: document.getElementById('slide3'), duration: 8000 }
+  {el: document.getElementById('slide1'), duration: 6000},
+  {el: document.getElementById('slide2'), duration: 12000},
+  {el: document.getElementById('slide3'), duration: 8000}
 ];
+let currentSlide = 0, paused = false, autoTimer = null, progressAnim = null;
+const progressFill = document.getElementById('progressFill');
 
-let currentSlide = 0;
-let paused = false;
-let autoTimer = null;
+function startProgress(duration) {
+  progressFill.style.transition = 'none';
+  progressFill.style.width = '0%';
+  // Force reflow
+  progressFill.offsetWidth;
+  progressFill.style.transition = 'width ' + duration + 'ms linear';
+  progressFill.style.width = '100%';
+}
 
 function showSlide(idx) {
-  slides.forEach((s, i) => {
-    s.el.classList.toggle('active', i === idx);
-  });
+  slides.forEach((s,i) => s.el.classList.toggle('active', i === idx));
   currentSlide = idx;
-
-  // Trigger map animation when slide 2 becomes active
-  if (idx === 1) {
-    resetMap();
-    setTimeout(animateMap, 300);
-  }
+  startProgress(slides[idx].duration);
+  if (idx === 0) { resetSlide1(); setTimeout(animateSlide1, 200); }
+  if (idx === 1) { resetMap(); setTimeout(animateMap, 300); }
 }
 
-function nextSlide() {
-  showSlide((currentSlide + 1) % slides.length);
-  scheduleNext();
-}
-
-function prevSlide() {
-  showSlide((currentSlide - 1 + slides.length) % slides.length);
-  if (!paused) scheduleNext();
-}
-
+function nextSlide() { showSlide((currentSlide + 1) % slides.length); scheduleNext(); }
 function scheduleNext() {
   clearTimeout(autoTimer);
-  if (!paused) {
-    autoTimer = setTimeout(nextSlide, slides[currentSlide].duration);
-  }
+  if (!paused) autoTimer = setTimeout(nextSlide, slides[currentSlide].duration);
 }
 
-// Start
+// Initial
+setTimeout(animateSlide1, 300);
+startProgress(slides[0].duration);
 scheduleNext();
 
-// ===== CONTROLS =====
+// Controls
 document.addEventListener('keydown', function(e) {
   if (e.code === 'Space') {
-    e.preventDefault();
-    paused = !paused;
-    if (!paused) scheduleNext();
-    else clearTimeout(autoTimer);
+    e.preventDefault(); paused = !paused;
+    if (!paused) scheduleNext(); else clearTimeout(autoTimer);
   } else if (e.code === 'ArrowRight') {
-    e.preventDefault();
-    clearTimeout(autoTimer);
-    showSlide((currentSlide + 1) % slides.length);
+    e.preventDefault(); clearTimeout(autoTimer);
+    showSlide((currentSlide+1) % slides.length);
     if (!paused) scheduleNext();
   } else if (e.code === 'ArrowLeft') {
-    e.preventDefault();
-    clearTimeout(autoTimer);
-    prevSlide();
+    e.preventDefault(); clearTimeout(autoTimer);
+    showSlide((currentSlide-1+slides.length) % slides.length);
+    if (!paused) scheduleNext();
   }
 });
 </script>
