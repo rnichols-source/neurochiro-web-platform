@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 }
 
 // ── EDITABLE CONSTANTS ──
-const STRIPE_URL = 'https://buy.stripe.com/PLACEHOLDER_UK_79'
+const STRIPE_URL = 'https://buy.stripe.com/14A00ldfh3ZO9uC9Q87wA0Z'
 const SPOTS_REMAINING = 23
 const SPOTS_TOTAL = 25
 
