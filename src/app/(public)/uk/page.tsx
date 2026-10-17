@@ -27,8 +27,8 @@ export default function UKLandingPage() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: '48px 24px',
+        justifyContent: 'flex-start',
+        padding: '100px 24px 48px',
         textAlign: 'center',
       }}>
         <div style={{ maxWidth: 480, width: '100%' }}>
