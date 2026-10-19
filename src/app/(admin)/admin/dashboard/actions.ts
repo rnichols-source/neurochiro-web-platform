@@ -171,8 +171,8 @@ export async function getAdminDashboardStats() {
 }
 
 async function getReplyStats(supabase: any) {
-  const { data } = await (supabase as any).from('reply_logs').select('template_id')
-  const logs = data || []
+  const { fetchAllRows } = await import('@/lib/supabase-admin')
+  const logs = await fetchAllRows(supabase, 'reply_logs', 'template_id')
   const doctorReplies = logs.filter((l: any) => l.template_id === 'doctor_comment' || l.template_id === 'doctor_dm').length
   const waitlistReplies = logs.filter((l: any) => l.template_id === 'waitlist_dm' || l.template_id === 'waitlist_comment').length
   const dmLinksSent = logs.filter((l: any) => l.template_id === 'contact_request_link').length

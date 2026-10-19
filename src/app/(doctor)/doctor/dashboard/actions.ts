@@ -24,7 +24,7 @@ export async function getDoctorDashboardStats() {
       admin.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
       admin.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', docId),
       admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id).eq('source', 'appointment_request'),
-      (admin as any).from('reply_logs').select('searched_city, created_at').eq('doctor_id', docId).in('template_id', ['doctor_comment', 'doctor_dm', 'sent_to_patient']),
+      (admin as any).from('reply_logs').select('searched_city, created_at').eq('doctor_id', docId).in('template_id', ['doctor_comment', 'doctor_dm', 'sent_to_patient']).range(0, 4999), // intentional bound: per-doctor recs, unlikely to exceed 5000
       (admin as any).from('contact_requests').select('id, name, phone, note, source, created_at, acknowledged_at, contact_outcome').eq('doctor_id', docId).in('status', ['new', 'acknowledged']).order('created_at', { ascending: false }),
     ]);
 

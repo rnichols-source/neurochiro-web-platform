@@ -1,7 +1,7 @@
 'use server'
 
 import { checkAdminAuth } from '@/lib/admin-auth'
-import { createAdminClient } from '@/lib/supabase-admin'
+import { createAdminClient, fetchAllRows } from '@/lib/supabase-admin'
 
 const TZ = 'America/New_York'
 const TRACKING_SINCE = '2026-09-27'
@@ -75,34 +75,15 @@ const DEDUPE_WAITLIST_SQL = `
   WHERE prev_at IS NULL OR EXTRACT(EPOCH FROM (created_at - prev_at)) > 60
 `
 
-// ── Paginated fetch (Supabase default limit is 1000) ──
-
-async function fetchAllRows(supabase: any, table: string, select: string, filters: { eq?: [string, string]; in?: [string, string[]] }, orderBy: string): Promise<any[]> {
-  const PAGE = 1000
-  let all: any[] = []
-  let offset = 0
-  while (true) {
-    let q = (supabase as any).from(table).select(select).order(orderBy, { ascending: true }).range(offset, offset + PAGE - 1)
-    if (filters.eq) q = q.eq(filters.eq[0], filters.eq[1])
-    if (filters.in) q = q.in(filters.in[0], filters.in[1])
-    const { data } = await q
-    if (!data || data.length === 0) break
-    all = all.concat(data)
-    if (data.length < PAGE) break
-    offset += PAGE
-  }
-  return all
-}
-
 // ── Queries ──
 
 export async function getRecommendationStats(): Promise<RangeStats> {
   await checkAdminAuth()
   const supabase = createAdminClient()
 
-  const allSent = await fetchAllRows(supabase, 'reply_logs', 'id, searched_city, searched_state, doctor_id, created_at, template_id', { eq: ['template_id', 'sent_to_patient'] }, 'created_at')
+  const allSent = await fetchAllRows(supabase, 'reply_logs', 'id, searched_city, searched_state, doctor_id, created_at, template_id', (q: any) => q.eq('template_id', 'sent_to_patient'))
 
-  const allWaitlist = await fetchAllRows(supabase, 'reply_logs', 'id, searched_city, searched_state, created_at, template_id', { in: ['template_id', ['waitlist_dm', 'waitlist_comment']] }, 'created_at')
+  const allWaitlist = await fetchAllRows(supabase, 'reply_logs', 'id, searched_city, searched_state, created_at, template_id', (q: any) => q.in('template_id', ['waitlist_dm', 'waitlist_comment']))
 
   const { count: rawCount } = await (supabase as any)
     .from('reply_logs')
@@ -199,9 +180,9 @@ export async function getDailyData(): Promise<DailyCount[]> {
   await checkAdminAuth()
   const supabase = createAdminClient()
 
-  const allSent = await fetchAllRows(supabase, 'reply_logs', 'id, searched_city, doctor_id, created_at', { eq: ['template_id', 'sent_to_patient'] }, 'created_at')
+  const allSent = await fetchAllRows(supabase, 'reply_logs', 'id, searched_city, doctor_id, created_at', (q: any) => q.eq('template_id', 'sent_to_patient'))
 
-  const allWaitlist = await fetchAllRows(supabase, 'reply_logs', 'id, searched_city, created_at', { in: ['template_id', ['waitlist_dm', 'waitlist_comment']] }, 'created_at')
+  const allWaitlist = await fetchAllRows(supabase, 'reply_logs', 'id, searched_city, created_at', (q: any) => q.in('template_id', ['waitlist_dm', 'waitlist_comment']))
 
   const recs = dedupeRows(allSent, true)
   const waitlist = dedupeRows(allWaitlist, false)

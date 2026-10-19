@@ -206,13 +206,11 @@ export async function checkDemandNearby(query: string, country: string = 'US'): 
   const cityLabel = `${resolution.resolved.city}, ${resolution.resolved.state}`
 
   // Count mentions within 50mi, scoped to country
-  let mentionQuery = (supabase as any).from('demand_mentions').select('lat, lng')
-  if (resolveCountry === 'US') {
-    mentionQuery = mentionQuery.or('country.eq.US,country.is.null')
-  } else {
-    mentionQuery = mentionQuery.eq('country', resolveCountry)
-  }
-  const { data: allMentions } = await mentionQuery
+  const { fetchAllRows } = await import('@/lib/supabase-admin')
+  const allMentions = await fetchAllRows(supabase, 'demand_mentions', 'lat, lng', (q: any) => {
+    if (resolveCountry === 'US') return q.or('country.eq.US,country.is.null')
+    return q.eq('country', resolveCountry)
+  })
 
   let mentionsNearby = 0
   for (const m of (allMentions || [])) {
