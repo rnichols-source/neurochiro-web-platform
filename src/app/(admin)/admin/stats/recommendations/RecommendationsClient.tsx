@@ -451,13 +451,13 @@ export default function RecommendationsClient() {
               <span>
                 30-day avg:{' '}
                 <strong style={{ color: '#fff' }}>
-                  {stats.trackingDays >= 30 && stats.avg30d !== null ? stats.avg30d.toFixed(1) : 'not enough data yet'}
+                  {stats.avg30d !== null ? stats.avg30d.toFixed(1) : 'not enough data yet'}
                 </strong>
               </span>
               <span>
                 All-time avg:{' '}
                 <strong style={{ color: '#fff' }}>
-                  {stats.trackingDays >= 90 && stats.avgAllTime !== null ? stats.avgAllTime.toFixed(1) : 'not enough data yet'}
+                  {stats.avgAllTime !== null ? stats.avgAllTime.toFixed(1) : 'not enough data yet'}
                 </strong>
               </span>
             </div>
