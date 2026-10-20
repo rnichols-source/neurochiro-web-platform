@@ -20,7 +20,7 @@ import {
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
-import { sendMessage, markMessagesRead, searchUsersForMessage } from "@/app/actions/messaging-actions";
+import { sendMessage, markMessagesRead, searchUsersForMessage, blockUser, muteConversation, unmuteConversation, reportMessage, deleteMessage } from "@/app/actions/messaging-actions";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -214,6 +214,11 @@ export default function MessagingSystem({
   const [convSearchQuery, setConvSearchQuery] = useState("");
   const [showCannedReplies, setShowCannedReplies] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportMessageId, setReportMessageId] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState("");
+  const [isMuted, setIsMuted] = useState(false);
 
   // Compose
   const [isComposeOpen, setIsComposeOpen] = useState(false);
@@ -799,6 +804,7 @@ export default function MessagingSystem({
     if (!selectedConversation) return null;
     const { otherUser } = selectedConversation;
     return (
+      <>
       <header className="px-4 py-3 border-b border-gray-200 bg-white flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           {isMobile && (
@@ -844,13 +850,33 @@ export default function MessagingSystem({
                 transition={{ duration: 0.15 }}
                 className="absolute right-0 top-full mt-1 w-40 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-30"
               >
-                <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-600 hover:bg-gray-50">
-                  <Archive className="w-4 h-4" /> Archive
+                <button
+                  onClick={async () => {
+                    if (selectedConversation) {
+                      if (isMuted) {
+                        await unmuteConversation(selectedConversation.id);
+                        setIsMuted(false);
+                      } else {
+                        await muteConversation(selectedConversation.id);
+                        setIsMuted(true);
+                      }
+                      setShowMoreMenu(false);
+                    }
+                  }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                >
+                  <Archive className="w-4 h-4" /> {isMuted ? 'Unmute' : 'Mute'}
                 </button>
-                <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-600 hover:bg-gray-50">
+                <button
+                  onClick={() => { setShowBlockConfirm(true); setShowMoreMenu(false); }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                >
                   <X className="w-4 h-4" /> Block
                 </button>
-                <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50">
+                <button
+                  onClick={() => { setShowReportModal(true); setShowMoreMenu(false); }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50"
+                >
                   <Flag className="w-4 h-4" /> Report
                 </button>
               </motion.div>
@@ -858,6 +884,53 @@ export default function MessagingSystem({
           </AnimatePresence>
         </div>
       </header>
+
+      {/* Block confirm dialog */}
+      {showBlockConfirm && selectedConversation && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowBlockConfirm(false)}>
+          <div className="bg-white rounded-2xl p-6 max-w-sm mx-4 shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Block {selectedConversation.otherUser.full_name}?</h3>
+            <p className="text-sm text-gray-500 mb-4">They will not be able to message you, and this conversation will be removed from your inbox. You can unblock from settings.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowBlockConfirm(false)} className="flex-1 py-2 px-4 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200">Cancel</button>
+              <button onClick={async () => {
+                await blockUser(selectedConversation.otherUser.id);
+                setShowBlockConfirm(false);
+                setSelectedConversation(null);
+                setConversations(prev => prev.filter(c => c.otherUser.id !== selectedConversation.otherUser.id));
+              }} className="flex-1 py-2 px-4 text-sm font-bold text-white bg-red-500 rounded-xl hover:bg-red-600">Block</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Report modal */}
+      {showReportModal && selectedConversation && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => { setShowReportModal(false); setReportReason(""); }}>
+          <div className="bg-white rounded-2xl p-6 max-w-sm mx-4 shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Report Conversation</h3>
+            <p className="text-sm text-gray-500 mb-3">Describe the issue. Dr. Ray will review this report.</p>
+            <textarea
+              value={reportReason}
+              onChange={e => setReportReason(e.target.value)}
+              placeholder="What's the issue?"
+              className="w-full p-3 border border-gray-200 rounded-xl text-sm resize-none h-24 focus:outline-none focus:border-[#D66829]"
+            />
+            <div className="flex gap-3 mt-3">
+              <button onClick={() => { setShowReportModal(false); setReportReason(""); }} className="flex-1 py-2 px-4 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200">Cancel</button>
+              <button onClick={async () => {
+                if (reportReason.trim() && messages.length > 0) {
+                  const lastMsg = messages[messages.length - 1];
+                  await reportMessage(lastMsg.id, reportReason.trim());
+                }
+                setShowReportModal(false);
+                setReportReason("");
+              }} className="flex-1 py-2 px-4 text-sm font-bold text-white bg-red-500 rounded-xl hover:bg-red-600">Report</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
     );
   }
 
@@ -930,7 +1003,7 @@ export default function MessagingSystem({
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2 }}
-                    className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                    className={`flex group ${isMine ? "justify-end" : "justify-start"}`}
                   >
                     <div
                       className={`max-w-[80%] md:max-w-[65%] px-4 py-2.5 ${
@@ -964,6 +1037,17 @@ export default function MessagingSystem({
                             <Check className="w-3 h-3 text-white/40" />
                           ))}
                       </div>
+                      {isMine && (
+                        <button
+                          onClick={async () => {
+                            await deleteMessage(msg.id);
+                            setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, body: '', deleted_at: new Date().toISOString() } as any : m));
+                          }}
+                          className="text-[10px] text-white/30 hover:text-red-400 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          Delete
+                        </button>
+                      )}
                     </div>
                   </motion.div>
                 );

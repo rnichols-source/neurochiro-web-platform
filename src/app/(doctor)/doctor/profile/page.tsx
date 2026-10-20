@@ -377,10 +377,10 @@ export default function ProfilePage() {
             </label>
           </div>
           <label className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-100 rounded-xl cursor-pointer mt-4">
-            <input type="checkbox" name="is_mentoring" value="true" defaultChecked={(profile as any)?.is_mentoring === true} className="w-4 h-4 accent-blue-500" />
+            <input type="checkbox" name="accepts_student_messages" value="true" defaultChecked={(profile as any)?.accepts_student_messages === true} className="w-4 h-4 accent-blue-500" />
             <div>
-              <span className="text-sm font-medium text-gray-700">Open to hearing from students</span>
-              <p className="text-[11px] text-gray-400">Students in the NeuroChiro network can message you about mentorship, externships, or career questions.</p>
+              <span className="text-sm font-medium text-gray-700">Open to Student Messages</span>
+              <p className="text-[11px] text-gray-400">Let chiropractic students message you about mentorship and associate opportunities.</p>
             </div>
           </label>
         </div>

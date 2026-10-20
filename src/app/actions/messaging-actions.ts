@@ -267,6 +267,13 @@ export async function markMessagesRead(conversationId: string) {
     .eq('conversation_id', conversationId)
     .eq('recipient_id', user.id)
     .is('read_at', null)
+
+  // Clear the email log for this conversation so next unread can trigger a new email
+  await (admin as any)
+    .from('message_email_log')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('conversation_id', conversationId)
 }
 
 // ── 3. Search users for compose ─────────────────────────────────────────────
@@ -458,7 +465,75 @@ export async function reportMessage(messageId: string, reason: string) {
   return { success: true }
 }
 
-// ── 8. Get unread message count (for nav badge) ─────────────────────────────
+// ── 8. Get message reports (admin only) ────────────────────────────────────
+
+export async function getMessageReports() {
+  const user = await getAuthUser()
+  if (!user) return []
+
+  const profile = await getUserProfile(user.id)
+  if (!profile || !['admin', 'super_admin', 'founder'].includes(profile.role || '')) return []
+
+  const admin = createAdminClient()
+  const { data } = await (admin as any)
+    .from('message_reports')
+    .select('id, reason, created_at, reviewed_at, reporter_id, message_id')
+    .order('created_at', { ascending: false })
+    .range(0, 99) // intentional bound — admin review list
+
+  if (!data || data.length === 0) return []
+
+  // Fetch reporter names and message details
+  const reporterIds: string[] = Array.from(new Set<string>(data.map((r: any) => String(r.reporter_id))))
+  const messageIds: string[] = Array.from(new Set<string>(data.map((r: any) => String(r.message_id))))
+
+  const [{ data: reporters }, { data: msgs }] = await Promise.all([
+    admin.from('profiles').select('id, full_name').in('id', reporterIds),
+    admin.from('messages').select('id, body, sender_id, created_at').in('id', messageIds),
+  ])
+
+  const reporterMap = new Map((reporters || []).map((r: any) => [r.id, r.full_name]))
+  const msgMap = new Map((msgs || []).map((m: any) => [m.id, m]))
+
+  // Get sender names
+  const senderIds = [...new Set((msgs || []).map((m: any) => m.sender_id))]
+  const { data: senders } = await admin.from('profiles').select('id, full_name').in('id', senderIds.length > 0 ? senderIds : ['none'])
+  const senderMap = new Map((senders || []).map((s: any) => [s.id, s.full_name]))
+
+  return data.map((r: any) => {
+    const msg = msgMap.get(r.message_id)
+    return {
+      id: r.id,
+      reporterName: reporterMap.get(r.reporter_id) || 'Unknown',
+      reason: r.reason,
+      messageBody: msg?.body || '[deleted]',
+      messageSenderName: senderMap.get(msg?.sender_id) || 'Unknown',
+      messageDate: msg?.created_at,
+      reportDate: r.created_at,
+      reviewed: !!r.reviewed_at,
+    }
+  })
+}
+
+export async function markReportReviewed(reportId: string) {
+  const user = await getAuthUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const profile = await getUserProfile(user.id)
+  if (!profile || !['admin', 'super_admin', 'founder'].includes(profile.role || '')) {
+    return { error: 'Admin access required' }
+  }
+
+  const admin = createAdminClient()
+  await (admin as any)
+    .from('message_reports')
+    .update({ reviewed_at: new Date().toISOString(), reviewed_by: user.id })
+    .eq('id', reportId)
+
+  return { success: true }
+}
+
+// ── 9. Get unread message count (for nav badge) ─────────────────────────────
 
 export async function getUnreadMessageCount(): Promise<number> {
   const user = await getAuthUser()

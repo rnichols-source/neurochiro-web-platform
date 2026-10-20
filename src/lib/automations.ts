@@ -919,21 +919,71 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
       case 'unread_message_email':
         if (supabaseAdmin && emailEnabled) {
           const { recipient_id, sender_id } = payload;
+          const MESSAGE_EMAIL_DAILY_CAP = 10;
+
+          // 1. Check if the message is still unread
+          const { data: unreadMsg } = await supabaseAdmin
+            .from('messages')
+            .select('id, conversation_id, body')
+            .eq('sender_id', sender_id)
+            .eq('recipient_id', recipient_id)
+            .is('read_at', null)
+            .order('created_at', { ascending: false })
+            .limit(1) // intentional bound
+            .maybeSingle();
+
+          if (!unreadMsg) break; // Message was read within the 15-min window
+
+          // 2. Check per-conversation dedup: don't re-email for same conversation until read
+          const { data: existingLog } = await (supabaseAdmin as any)
+            .from('message_email_log')
+            .select('id, sent_at')
+            .eq('user_id', recipient_id)
+            .eq('conversation_id', unreadMsg.conversation_id)
+            .maybeSingle();
+
+          if (existingLog) break; // Already emailed about this conversation's unread messages
+
+          // 3. Check daily cap
+          const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+          const { count: dailyCount } = await (supabaseAdmin as any)
+            .from('message_email_log')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', recipient_id)
+            .gte('sent_at', oneDayAgo);
+
+          if ((dailyCount || 0) >= MESSAGE_EMAIL_DAILY_CAP) {
+            console.log(`[MSG_EMAIL] Daily cap (${MESSAGE_EMAIL_DAILY_CAP}) reached for user ${recipient_id}, skipping`);
+            break;
+          }
+
+          // 4. Send the email
           const { data: recipient } = await supabaseAdmin.from('profiles').select('email, full_name, role').eq('id', recipient_id).single();
           const { data: sender } = await supabaseAdmin.from('profiles').select('full_name').eq('id', sender_id).single();
-          
+
           if (recipient?.email) {
             const messagesUrl = recipient.role === 'student' ? 'https://neurochiro.co/student/messages'
               : recipient.role === 'admin' || recipient.role === 'super_admin' || recipient.role === 'founder' ? 'https://neurochiro.co/admin/inbox'
               : 'https://neurochiro.co/doctor/messages';
+
+            const preview = (unreadMsg.body || '').slice(0, 200) + ((unreadMsg.body || '').length > 200 ? '...' : '');
+
             await sendPremiumEmail({
               to: recipient.email,
               subject: `New Message from ${sender?.full_name || 'a member'}`,
               title: 'New Message',
-              body: `<p>Hi ${recipient.full_name || 'Member'}, you have a new unread message from ${sender?.full_name || 'someone in the network'}. Please log in to reply to keep the conversation active.</p>`,
+              body: `<p>Hi ${recipient.full_name || 'Member'}, you have an unread message from <strong>${sender?.full_name || 'someone in the network'}</strong>.</p><p style="color:#6B7280;font-style:italic;border-left:3px solid #D66829;padding-left:12px;margin:16px 0;">${preview}</p><p>Log in to reply.</p>`,
               ctaText: 'View Message',
               ctaUrl: messagesUrl
             });
+
+            // 5. Log the send to prevent re-emailing for this conversation
+            await (supabaseAdmin as any)
+              .from('message_email_log')
+              .upsert(
+                { user_id: recipient_id, conversation_id: unreadMsg.conversation_id, sent_at: new Date().toISOString() },
+                { onConflict: 'user_id,conversation_id' }
+              );
           }
         }
         break;

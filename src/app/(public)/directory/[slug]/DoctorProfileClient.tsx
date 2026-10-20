@@ -247,6 +247,11 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               {acceptsWalkins && (
                 <span style={{ padding: "5px 14px", borderRadius: 20, background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)", fontSize: 11, fontWeight: 800, color: "#c084fc" }}>Walk-Ins</span>
               )}
+              {d.accepts_student_messages && (
+                <span style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 14px", borderRadius: 20, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)", fontSize: 11, fontWeight: 800, color: "#34d399" }}>
+                  <GraduationCap style={{ width: 12, height: 12 }} /> Open to Students
+                </span>
+              )}
             </div>
 
             {/* Social links */}
