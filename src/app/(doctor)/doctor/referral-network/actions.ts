@@ -99,13 +99,13 @@ export interface ReferralDoctorResult {
 export async function searchDoctorsForReferral(
   query: string,
   country: string = 'US'
-): Promise<{ doctors: ReferralDoctorResult[]; noResults: boolean; searchLabel: string }> {
+): Promise<{ doctors: ReferralDoctorResult[]; noResults: boolean; geocodeFailed: boolean; searchLabel: string }> {
   const me = await getCurrentDoctor()
-  if (!me) return { doctors: [], noResults: true, searchLabel: 'Not authenticated' }
+  if (!me) return { doctors: [], noResults: true, geocodeFailed: false, searchLabel: 'Not authenticated' }
 
   const geo = await geocodeQuery(query, country)
   if (!geo) {
-    return { doctors: [], noResults: true, searchLabel: `Could not find location "${query}"` }
+    return { doctors: [], noResults: true, geocodeFailed: true, searchLabel: `We couldn't find that postcode or city. Try searching by city name instead.` }
   }
 
   const admin = createAdminClient()
@@ -152,6 +152,7 @@ export async function searchDoctorsForReferral(
       return {
         doctors: results,
         noResults: false,
+        geocodeFailed: false,
         searchLabel: `${results.length} doctor${results.length === 1 ? '' : 's'} near ${geo.city}, ${geo.state}`,
       }
     }
@@ -163,6 +164,7 @@ export async function searchDoctorsForReferral(
   return {
     doctors: [],
     noResults: true,
+    geocodeFailed: false,
     searchLabel: `No NeuroChiro member found near ${geo.city}, ${geo.state}`,
   }
 }

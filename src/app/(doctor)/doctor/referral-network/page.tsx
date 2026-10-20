@@ -257,6 +257,7 @@ function ReferTab({ onReferralSent }: { onReferralSent: () => void }) {
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState<ReferralDoctorResult[] | null>(null);
   const [noResults, setNoResults] = useState(false);
+  const [geocodeFailed, setGeocodeFailed] = useState(false);
   const [searchLabel, setSearchLabel] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState<ReferralDoctorResult | null>(null);
   const [gapLogged, setGapLogged] = useState(false);
@@ -272,6 +273,7 @@ function ReferTab({ onReferralSent }: { onReferralSent: () => void }) {
     const res = await searchDoctorsForReferral(query.trim(), country);
     setResults(res.doctors);
     setNoResults(res.noResults);
+    setGeocodeFailed(res.geocodeFailed);
     setSearchLabel(res.searchLabel);
     setSearching(false);
   };
@@ -327,7 +329,16 @@ function ReferTab({ onReferralSent }: { onReferralSent: () => void }) {
       )}
 
       {/* No results */}
-      {noResults && !searching && (
+      {noResults && !searching && geocodeFailed && (
+        <div style={{ ...cardStyle, textAlign: "center", padding: 32 }}>
+          <AlertTriangle style={{ width: 32, height: 32, color: "#f59e0b", margin: "0 auto 12px" }} />
+          <p style={{ color: "#fff", fontWeight: 700, fontSize: 16, marginBottom: 8 }}>Location Not Found</p>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
+            We couldn&apos;t find that postcode or city. Try searching by city name instead (e.g. &quot;Austin&quot; or &quot;London&quot;).
+          </p>
+        </div>
+      )}
+      {noResults && !searching && !geocodeFailed && (
         <div style={{ ...cardStyle, textAlign: "center", padding: 32 }}>
           <AlertTriangle style={{ width: 32, height: 32, color: "#f59e0b", margin: "0 auto 12px" }} />
           <p style={{ color: "#fff", fontWeight: 700, fontSize: 16, marginBottom: 8 }}>No Member in That Area</p>
