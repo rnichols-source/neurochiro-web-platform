@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { Send, Search, MapPin, Clock, CheckCircle, XCircle, AlertTriangle, Phone, Mail, ChevronRight, User, Loader2 } from "lucide-react";
 import UpgradeGate from "@/components/doctor/UpgradeGate";
 import {
@@ -146,10 +146,31 @@ function timeAgo(dateStr: string): string {
 
 // ── Main page ────────────────────────────────────────────────────────────────
 
+function ReferralNetworkSkeleton() {
+  return (
+    <div style={{ padding: "16px", maxWidth: 900, margin: "0 auto" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+        <Send style={{ width: 24, height: 24, color: "#D66829" }} />
+        <div style={{ height: 28, width: 200, background: "rgba(255,255,255,0.06)", borderRadius: 8 }} />
+      </div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+        {["Refer a Patient", "Sent", "Received"].map(label => (
+          <div key={label} style={{ height: 40, width: 120, background: "rgba(255,255,255,0.06)", borderRadius: 12 }} />
+        ))}
+      </div>
+      <div style={{ ...cardStyle, height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Loader2 style={{ width: 24, height: 24, color: "#D66829", animation: "spin 1s linear infinite" }} />
+      </div>
+    </div>
+  );
+}
+
 export default function ReferralNetworkPage() {
   return (
     <UpgradeGate feature="Referral Network" requiredTier="pro" description="Refer patients to other NeuroChiro doctors and receive referrals from the network.">
-      <ReferralNetworkContent />
+      <Suspense fallback={<ReferralNetworkSkeleton />}>
+        <ReferralNetworkContent />
+      </Suspense>
     </UpgradeGate>
   );
 }
