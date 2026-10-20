@@ -771,60 +771,6 @@ export interface Database {
         }
         Relationships: []
       }
-      referrals: {
-        Row: {
-          id: string
-          referrer_id: string
-          recipient_id: string
-          patient_name: string | null
-          notes: string | null
-          status: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          referrer_id: string
-          recipient_id: string
-          patient_name?: string | null
-          notes?: string | null
-          status?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          referrer_id?: string
-          recipient_id?: string
-          patient_name?: string | null
-          notes?: string | null
-          status?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
-      doctor_connections: {
-        Row: {
-          id: string
-          requester_id: string
-          receiver_id: string
-          status: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          requester_id: string
-          receiver_id: string
-          status?: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          requester_id?: string
-          receiver_id?: string
-          status?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
       market_benchmarks: {
         Row: {
           id: string
