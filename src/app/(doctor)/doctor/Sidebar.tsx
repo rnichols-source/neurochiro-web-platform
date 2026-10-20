@@ -88,6 +88,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const router = useRouter();
   const [userName, setUserName] = useState<string | null>(null);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const [memberTier, setMemberTier] = useState<string>("basic");
   const [showPracticeTools, setShowPracticeTools] = useState(false);
 
@@ -100,6 +101,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         supabase.from("notifications").select("*", { count: "exact", head: true })
           .eq("user_id", user.id).is("read_at", null)
           .then(({ count }) => setUnreadNotifs(count || 0));
+        supabase.from("messages").select("id", { count: "exact", head: true })
+          .eq("recipient_id", user.id).is("read_at", null)
+          .then(({ count }: any) => setUnreadMessages(count || 0));
         supabase.from("doctors").select("membership_tier, is_founding_member, neuros_tier, created_at").eq("user_id", user.id).single()
           .then(({ data }: any) => {
             if (data?.neuros_tier === 'neuros' || data?.neuros_tier === 'neuros_founding') {
@@ -230,6 +234,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                             )}
                             {item.name === 'Notifications' && unreadNotifs > 0 && (
                               <span className="ml-auto bg-neuro-orange text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">{unreadNotifs > 9 ? '9+' : unreadNotifs}</span>
+                            )}
+                            {item.name === 'Messages' && unreadMessages > 0 && (
+                              <span className="ml-auto bg-blue-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">{unreadMessages > 9 ? '9+' : unreadMessages}</span>
                             )}
                             {active && (
                               <motion.div

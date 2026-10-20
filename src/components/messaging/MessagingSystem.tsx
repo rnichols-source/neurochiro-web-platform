@@ -75,12 +75,6 @@ const CANNED_REPLIES: Record<string, string[]> = {
     "Would it be possible to shadow for a day?",
     "I'm very interested in your practice.",
   ],
-  patient: [
-    "I need to reschedule my appointment.",
-    "Question about my care plan.",
-    "Running a few minutes late.",
-    "Thank you for the great visit!",
-  ],
 };
 
 const ROLE_COLORS: Record<string, string> = {
@@ -502,7 +496,7 @@ export default function MessagingSystem({
   // -----------------------------------------------------------------------
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedConversation) return;
-    if (newMessage.length > 500) return;
+    if (newMessage.length > 2000) return;
 
     const messageText = newMessage.trim();
     setNewMessage("");
@@ -738,7 +732,7 @@ export default function MessagingSystem({
               <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">
                 <MessageSquare className="w-6 h-6 text-gray-400" />
               </div>
-              <p className="text-sm font-medium text-gray-500 mb-1">No messages yet. Find a doctor and send them a message to get started.</p>
+              <p className="text-sm font-medium text-gray-500 mb-1">Your inbox is where conversations live. When you accept a patient referral, your conversation with that doctor starts here automatically. You can also message any doctor in the network directly.</p>
               <button
                 onClick={() => setIsComposeOpen(true)}
                 className="text-sm font-medium mt-2 px-4 py-1.5 rounded-full transition-colors hover:opacity-90"
@@ -907,7 +901,8 @@ export default function MessagingSystem({
             <div className="space-y-2">
               {group.messages.map((msg) => {
                 const isMine = msg.sender_id === currentUserId;
-                const isSystem = msg.body?.startsWith("[SYSTEM]");
+                const isSystem = (msg as any).message_type === 'system' || msg.body?.startsWith("[SYSTEM]");
+                const isDeleted = !!(msg as any).deleted_at;
 
                 if (isSystem) {
                   return (
@@ -915,6 +910,16 @@ export default function MessagingSystem({
                       <span className="text-xs text-gray-400 italic">
                         {msg.body.replace("[SYSTEM]", "").trim()}
                       </span>
+                    </div>
+                  );
+                }
+
+                if (isDeleted) {
+                  return (
+                    <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                      <div className="max-w-[80%] md:max-w-[65%] px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200">
+                        <p className="text-sm text-gray-400 italic">This message was deleted.</p>
+                      </div>
                     </div>
                   );
                 }
@@ -1031,7 +1036,7 @@ export default function MessagingSystem({
               ref={textareaRef}
               value={newMessage}
               onChange={(e) => {
-                if (e.target.value.length <= 500) {
+                if (e.target.value.length <= 2000) {
                   setNewMessage(e.target.value);
                 }
               }}
@@ -1049,10 +1054,10 @@ export default function MessagingSystem({
             {charCount > 400 && (
               <span
                 className={`absolute bottom-1 right-2 text-[10px] ${
-                  charCount >= 500 ? "text-red-500" : "text-gray-400"
+                  charCount >= 2000 ? "text-red-500" : charCount >= 1800 ? "text-amber-500" : "text-gray-400"
                 }`}
               >
-                {charCount}/500
+                {charCount}/2,000
               </span>
             )}
           </div>

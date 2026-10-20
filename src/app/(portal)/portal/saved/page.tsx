@@ -99,14 +99,6 @@ export default function SavedPage() {
                 </div>
               )}
               <div className="flex gap-2">
-                {doc.user_id && (
-                  <Link
-                    href={`/portal/messages?to=${doc.user_id}`}
-                    className="flex-1 text-center py-3 bg-[#D66829]/10 text-[#D66829] text-xs font-bold rounded-xl hover:bg-[#D66829]/20 transition-colors flex items-center justify-center gap-1.5"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5" /> Message
-                  </Link>
-                )}
                 <Link
                   href={`/directory/${doc.slug}`}
                   className="flex-1 text-center py-3 bg-[#D66829] text-white text-xs font-bold rounded-xl hover:bg-[#e8834a] transition-colors shadow-lg shadow-[#D66829]/20"

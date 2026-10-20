@@ -924,7 +924,6 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           
           if (recipient?.email) {
             const messagesUrl = recipient.role === 'student' ? 'https://neurochiro.co/student/messages'
-              : recipient.role === 'patient' ? 'https://neurochiro.co/portal/messages'
               : recipient.role === 'admin' || recipient.role === 'super_admin' || recipient.role === 'founder' ? 'https://neurochiro.co/admin/inbox'
               : 'https://neurochiro.co/doctor/messages';
             await sendPremiumEmail({
@@ -1134,20 +1133,19 @@ export const Automations = {
   },
   onMessageSent: async (senderId: string, senderName: string, recipientId: string, recipientRole: string) => {
     const messagesLink = recipientRole === 'student' ? '/student/messages'
-      : recipientRole === 'patient' ? '/portal/messages'
       : recipientRole === 'admin' || recipientRole === 'super_admin' || recipientRole === 'founder' ? '/admin/inbox'
       : '/doctor/messages';
-    // In-app notification
+    // In-app notification — type 'message' (not 'system')
     await insertNotification(
       recipientId,
-      'New Message',
+      `Message from ${senderName}`,
       `You have a new message from ${senderName}.`,
-      'system',
+      'message',
       messagesLink,
       'info'
     );
-    // Delayed email (2 min) — only sent if still unread
-    await enqueue('unread_message_email', { userId: recipientId, recipient_id: recipientId, sender_id: senderId }, 2);
+    // Delayed email (15 min) — only sent if still unread
+    await enqueue('unread_message_email', { userId: recipientId, recipient_id: recipientId, sender_id: senderId }, 15);
   },
   retryAutomation: async (queueId: string) => {
     const supabaseAdmin = getSupabaseAdmin();

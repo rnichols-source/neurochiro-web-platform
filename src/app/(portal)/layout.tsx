@@ -49,7 +49,6 @@ const navSections = [
     items: [
       { name: "Find a Doctor", href: "/directory", icon: Search },
       { name: "Saved Doctors", href: "/portal/saved", icon: Heart },
-      { name: "Messages", href: "/portal/messages", icon: MessageSquare },
     ],
   },
   {

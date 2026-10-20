@@ -42,6 +42,7 @@ function StudentLayoutInner({
   const [initials, setInitials] = useState("--");
   const [subscriptionChecked, setSubscriptionChecked] = useState(false);
   const [studentName, setStudentName] = useState("");
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
     const supabase = createClient();
@@ -64,6 +65,11 @@ function StudentLayoutInner({
         setStudentName(parts[0] || '');
       }
       setSubscriptionChecked(true);
+
+      // Unread message count
+      supabase.from('messages').select('id', { count: 'exact', head: true })
+        .eq('recipient_id', user.id).is('read_at', null)
+        .then(({ count }: any) => setUnreadMessages(count || 0));
     };
 
     checkAuth();
@@ -117,7 +123,7 @@ function StudentLayoutInner({
         </main>
       </div>
       <MobileBottomNav
-        items={mobileNavItems}
+        items={mobileNavItems.map(item => item.name === 'Messages' ? { ...item, badge: unreadMessages } : item)}
         onMenuClick={() => setIsSidebarOpen(true)}
       />
     </div>

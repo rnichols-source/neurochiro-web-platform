@@ -405,6 +405,21 @@ export async function respondToReferral(
     // Non-critical
   }
 
+  // Create context-attached conversation on accept
+  if (action === 'accept' && referringDoctor.user_id && me.userId) {
+    try {
+      const { createContextConversation } = await import('@/app/actions/messaging-actions')
+      await createContextConversation(
+        referringDoctor.user_id,
+        'referral',
+        referralId,
+        `Referral accepted: ${referral.patient_first_name} ${referral.patient_last_initial}. from ${referringDoctor.city || 'their area'}. This conversation was created automatically so you can coordinate care.`
+      )
+    } catch (e) {
+      console.error('[REFERRAL] Context conversation error:', e)
+    }
+  }
+
   return { success: true }
 }
 
