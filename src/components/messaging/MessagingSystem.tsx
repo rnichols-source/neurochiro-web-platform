@@ -20,7 +20,7 @@ import {
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
-import { notifyNewMessage } from "@/app/actions/comms-actions";
+import { sendMessage, markMessagesRead, searchUsersForMessage } from "@/app/actions/messaging-actions";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -342,18 +342,12 @@ export default function MessagingSystem({
         if (error) throw error;
         setMessages((data as Message[]) || []);
 
-        // Mark unread messages as read
-        const unread = data?.filter(
+        // Mark unread messages as read via server action
+        const hasUnread = data?.some(
           (m: any) => m.recipient_id === currentUserId && !m.read_at
         );
-        if (unread && unread.length > 0) {
-          await supabase
-            .from("messages")
-            .update({ read_at: new Date().toISOString() })
-            .in(
-              "id",
-              unread.map((m: any) => m.id)
-            );
+        if (hasUnread) {
+          markMessagesRead(conversationId);
         }
 
         setTimeout(scrollToBottom, 100);
@@ -396,19 +390,30 @@ export default function MessagingSystem({
       }
     });
 
-    const convChannel = supabase
-      .channel("conversations_changes")
+    // Scoped realtime: only listen to conversations where current user is a participant
+    // Supabase Realtime postgres_changes filter supports only eq on a single column,
+    // so we subscribe to both participant columns separately.
+    const convChannel1 = supabase
+      .channel(`conv_p1_${currentUserId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "conversations" },
-        () => {
-          fetchConversations();
-        }
+        { event: "*", schema: "public", table: "conversations", filter: `participant_one_id=eq.${currentUserId}` },
+        () => { fetchConversations(); }
+      )
+      .subscribe();
+
+    const convChannel2 = supabase
+      .channel(`conv_p2_${currentUserId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "conversations", filter: `participant_two_id=eq.${currentUserId}` },
+        () => { fetchConversations(); }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(convChannel);
+      supabase.removeChannel(convChannel1);
+      supabase.removeChannel(convChannel2);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -437,13 +442,9 @@ export default function MessagingSystem({
               return [...prev, newMsg];
             });
 
-            // Mark as read if we are the recipient
-            if (newMsg.recipient_id === currentUserId) {
-              supabase
-                .from("messages")
-                .update({ read_at: new Date().toISOString() })
-                .eq("id", newMsg.id)
-                .then();
+            // Mark as read if we are the recipient (via server action)
+            if (newMsg.recipient_id === currentUserId && selectedConversation) {
+              markMessagesRead(selectedConversation.id);
             }
 
             setTimeout(scrollToBottom, 100);
@@ -464,14 +465,14 @@ export default function MessagingSystem({
   // Realtime: bump unread for non-selected conversations
   // -----------------------------------------------------------------------
   useEffect(() => {
+    // Scoped: only listen for messages where current user is recipient
     const globalMsgChannel = supabase
-      .channel("global_messages")
+      .channel(`my_messages_${currentUserId}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages" },
+        { event: "INSERT", schema: "public", table: "messages", filter: `recipient_id=eq.${currentUserId}` },
         (payload: any) => {
           const msg = payload.new;
-          if (msg.recipient_id !== currentUserId) return;
           if (selectedConversation && msg.conversation_id === selectedConversation.id) return;
 
           setConversations((prev) =>
@@ -508,59 +509,23 @@ export default function MessagingSystem({
     setShowCannedReplies(false);
 
     try {
-      let convId = selectedConversation.id;
+      const result = await sendMessage(
+        selectedConversation.otherUser.id,
+        messageText,
+        selectedConversation.isTemp ? undefined : selectedConversation.id
+      );
 
-      if (selectedConversation.isTemp) {
-        const { data: newConv, error: convError } = await supabase
-          .from("conversations")
-          .insert({
-            participant_one_id: currentUserId,
-            participant_two_id: selectedConversation.otherUser.id,
-          })
-          .select()
-          .single();
-
-        if (convError) {
-          // Try to find existing
-          const { data: existing } = await supabase
-            .from("conversations")
-            .select("*")
-            .or(
-              `participant_one_id.eq.${currentUserId},participant_two_id.eq.${currentUserId}`
-            )
-            .or(
-              `participant_one_id.eq.${selectedConversation.otherUser.id},participant_two_id.eq.${selectedConversation.otherUser.id}`
-            )
-            .single();
-
-          if (existing) {
-            convId = existing.id;
-          } else {
-            throw convError;
-          }
-        } else {
-          convId = newConv.id;
-        }
-
-        const updatedConv = { ...selectedConversation, id: convId, isTemp: false };
-        setSelectedConversation(updatedConv);
-        fetchConversations();
+      if (result.error) {
+        console.error("Send error:", result.error);
+        setNewMessage(messageText);
+        return;
       }
 
-      const { error } = await supabase.from("messages").insert({
-        conversation_id: convId,
-        sender_id: currentUserId,
-        recipient_id: selectedConversation.otherUser.id,
-        body: messageText,
-      });
-
-      if (error) throw error;
-
-      // Notify recipient (in-app + email)
-      notifyNewMessage(selectedConversation.otherUser.id, selectedConversation.otherUser.role);
-
-      if (selectedConversation.isTemp) {
-        fetchMessages(convId);
+      if (result.conversationId && selectedConversation.isTemp) {
+        const updatedConv = { ...selectedConversation, id: result.conversationId, isTemp: false };
+        setSelectedConversation(updatedConv);
+        fetchConversations();
+        fetchMessages(result.conversationId);
       }
     } catch (err) {
       console.error("Error sending message:", err);
@@ -579,20 +544,14 @@ export default function MessagingSystem({
       }
       setSearching(true);
       try {
-        const { data } = await supabase
-          .from("profiles")
-          .select("id, full_name, role")
-          .neq("id", currentUserId)
-          .ilike("full_name", `%${query}%`)
-          .limit(8);
-
-        if (data) setSearchResults(data as unknown as Profile[]);
+        const results = await searchUsersForMessage(query);
+        setSearchResults(results as Profile[]);
       } catch {
         // ignore
       }
       setSearching(false);
     },
-    [supabase, currentUserId]
+    []
   );
 
   useEffect(() => {
