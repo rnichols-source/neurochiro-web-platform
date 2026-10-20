@@ -81,6 +81,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const bannerUrl = d.banner_url as string | null;
   const instagramUrl = d.instagram_url as string | null;
   const facebookUrl = d.facebook_url as string | null;
+  const tiktokUrl = d.tiktok_url as string | null;
   const highlights = d.highlights as string[] | null;
   // Filter treatment tags: controlled vocabulary only, no free-text sentences
   const rawConditions = d.conditions_treated as string[] | null;
@@ -258,6 +259,11 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               {!gated && facebookUrl && (
                 <a href={facebookUrl} target="_blank" rel="noopener noreferrer" style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.6)" }}>
                   <Facebook style={{ width: 16, height: 16 }} />
+                </a>
+              )}
+              {!gated && tiktokUrl && (
+                <a href={tiktokUrl} target="_blank" rel="noopener noreferrer" style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.6)" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V9.48a8.2 8.2 0 0 0 4.8 1.54V7.58a4.84 4.84 0 0 1-1.04-.89z"/></svg>
                 </a>
               )}
               {!gated && formatUrl(doctor.website_url) && (
