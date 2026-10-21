@@ -118,6 +118,7 @@ export async function getCoverageDoctors(): Promise<CoverageDoctor[]> {
     .in('verification_status', ['verified', 'pending'])
     .eq('is_test', false)
     .order('last_name')
+    .range(0, 4999) // intentional bound: all verified doctors
 
   if (error || !data) return []
 
@@ -152,6 +153,7 @@ export async function getDemandData(): Promise<DemandZip[]> {
     .select('zip, status, country')
     .in('status', ['confirmed', 'pending'])
     .not('zip', 'is', null)
+    .range(0, 4999) // intentional bound: all subscribers
 
   if (!subscribers || subscribers.length === 0) return []
 
@@ -261,6 +263,7 @@ export async function getCoverageStats(
   const { data: subs } = await (supabase as any)
     .from('subscribers')
     .select('zip, status')
+    .range(0, 4999) // intentional bound: all subscribers
 
   const confirmedSubs = (subs || []).filter((s: any) => s.status === 'confirmed')
   const pendingSubs = (subs || []).filter((s: any) => s.status === 'pending')
