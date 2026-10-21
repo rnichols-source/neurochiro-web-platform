@@ -26,6 +26,8 @@ export async function submitUKProfile(data: {
   website: string
   phone: string
   stripe_session_id: string
+  country_code?: string
+  source?: string
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = createAdminClient()
 
@@ -43,7 +45,7 @@ export async function submitUKProfile(data: {
     clinic_name: data.clinic_name.trim(),
     city: data.city.trim(),
     state: data.postcode.trim().toUpperCase(),
-    country: 'GB',
+    country: data.country_code || 'GB',
     address: '',
     bio: '',
     phone: data.phone.trim() || null,
@@ -56,7 +58,7 @@ export async function submitUKProfile(data: {
     region_code: 'GB',
     is_approved: false,
     onboarding_call_status: 'not_scheduled',
-    source: 'uca_birmingham_2026',
+    source: data.source || 'uca_birmingham_2026',
     stripe_session_id: data.stripe_session_id || null,
     latitude: 0,
     longitude: 0,

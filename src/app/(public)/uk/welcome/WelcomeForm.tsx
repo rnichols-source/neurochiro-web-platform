@@ -9,9 +9,13 @@ interface Props {
   prefillName: string
   prefillEmail: string
   sessionId: string
+  countryCode?: string
+  source?: string
+  postcodeLabel?: string
+  postcodeHint?: string
 }
 
-export default function WelcomeForm({ prefillName, prefillEmail, sessionId }: Props) {
+export default function WelcomeForm({ prefillName, prefillEmail, sessionId, countryCode = 'GB', source = 'uca_birmingham_2026', postcodeLabel = 'Postcode', postcodeHint = 'SW6 1QR' }: Props) {
   const [name, setName] = useState(prefillName)
   const [email, setEmail] = useState(prefillEmail)
   const [clinic, setClinic] = useState('')
@@ -57,6 +61,8 @@ export default function WelcomeForm({ prefillName, prefillEmail, sessionId }: Pr
       website: website.trim(),
       phone: phone.trim(),
       stripe_session_id: sessionId,
+      country_code: countryCode,
+      source: source,
     }
 
     try {
@@ -194,8 +200,8 @@ export default function WelcomeForm({ prefillName, prefillEmail, sessionId }: Pr
             <label style={labelStyle}>City *</label>
             <input type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="Birmingham" style={inputStyle} autoComplete="address-level2" required />
 
-            <label style={labelStyle}>Postcode *</label>
-            <input type="text" value={postcode} onChange={e => setPostcode(e.target.value)} placeholder="B1 1AA" style={inputStyle} autoComplete="postal-code" required />
+            <label style={labelStyle}>{postcodeLabel} *</label>
+            <input type="text" value={postcode} onChange={e => setPostcode(e.target.value)} placeholder={postcodeHint} style={inputStyle} autoComplete="postal-code" required />
 
             <label style={labelStyle}>Instagram handle *</label>
             <input type="text" value={instagram} onChange={e => setInstagram(e.target.value)} placeholder="@yourhandle" style={inputStyle} required />
