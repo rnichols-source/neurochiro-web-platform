@@ -11,14 +11,17 @@ export interface CountryPageConfig {
   demonym: string       // "Australian"
   currency: string      // "AUD"
   symbol: string        // "A$"
-  price: number         // 129
-  stripeUrl: string     // payment link URL
+  price: number         // monthly price: 129
+  priceAnnual: number   // annual price: 1290
+  stripeUrl: string     // monthly payment link URL
+  stripeUrlAnnual: string // annual payment link URL
   foundingSpots: number // 0 = no founding framing
   spotsRemaining: number // editable between sends
   welcomePath: string   // "/au/welcome"
   source: string        // stored on doctor rows: 'au_founding_2026'
   postcodeLabel: string // "Postcode" | "Postal code" | "ZIP"
   postcodeHint: string  // "2000" | "M5V 3L9" | "SW6 1QR"
+  mapCenter?: [number, number] // [lat, lng] for map viewport
 }
 
 export const COUNTRY_PAGES: Record<string, CountryPageConfig> = {
@@ -29,13 +32,16 @@ export const COUNTRY_PAGES: Record<string, CountryPageConfig> = {
     currency: 'AUD',
     symbol: 'A$',
     price: 129,
+    priceAnnual: 1290,
     stripeUrl: 'https://buy.stripe.com/cNieVfdfh53SbCK8M47wA10',
+    stripeUrlAnnual: 'https://buy.stripe.com/eVq5kFgrtgMA5em0fy7wA12',
     foundingSpots: 15,
     spotsRemaining: 15,
     welcomePath: '/au/welcome',
     source: 'au_founding_2026',
     postcodeLabel: 'Postcode',
     postcodeHint: '2000',
+    mapCenter: [-25.2744, 133.7751],
   },
   CA: {
     code: 'CA',
@@ -44,7 +50,9 @@ export const COUNTRY_PAGES: Record<string, CountryPageConfig> = {
     currency: 'CAD',
     symbol: 'CA$',
     price: 139,
+    priceAnnual: 1390,
     stripeUrl: 'https://buy.stripe.com/8x28wR5MP7c04ai9Q87wA11',
+    stripeUrlAnnual: '',
     foundingSpots: 25,
     spotsRemaining: 25,
     welcomePath: '/ca/welcome',
@@ -59,7 +67,9 @@ export const COUNTRY_PAGES: Record<string, CountryPageConfig> = {
     currency: 'GBP',
     symbol: '£',
     price: 79,
+    priceAnnual: 790,
     stripeUrl: 'https://buy.stripe.com/14A00ldfh3ZO9uC9Q87wA0Z',
+    stripeUrlAnnual: '',
     foundingSpots: 25,
     spotsRemaining: 22,
     welcomePath: '/uk/welcome',
