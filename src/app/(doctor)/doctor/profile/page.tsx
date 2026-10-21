@@ -105,14 +105,15 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Convert HEIC/HEIF to JPEG before processing
+    // Try client-side HEIC conversion (works on iOS/macOS Safari/Chrome).
+    // If it fails, send the original HEIC file — server converts via Sharp.
     let processedFile = file;
     if (isHeic(file)) {
       try {
         processedFile = await convertToJpeg(file);
       } catch {
-        toast('Could not convert HEIC image. Please try a JPEG or PNG file.', 'error');
-        return;
+        // Client can't decode HEIC (Windows Chrome, Firefox) — server will handle it
+        processedFile = file;
       }
     }
 
@@ -186,7 +187,7 @@ export default function ProfilePage() {
     setUploadingBanner(true);
     let processedFile = file;
     if (isHeic(file)) {
-      try { processedFile = await convertToJpeg(file); } catch { toast('Could not convert HEIC image. Please try a JPEG or PNG file.', 'error'); setUploadingBanner(false); return; }
+      try { processedFile = await convertToJpeg(file); } catch { processedFile = file; }
     }
     let uploadFile = processedFile;
     if (processedFile.size > 1 * 1024 * 1024) {
@@ -206,7 +207,7 @@ export default function ProfilePage() {
     for (let i = 0; i < Math.min(files.length, 10 - galleryUrls.length); i++) {
       let processedFile: File = files[i];
       if (isHeic(processedFile)) {
-        try { processedFile = await convertToJpeg(processedFile); } catch { continue; }
+        try { processedFile = await convertToJpeg(processedFile); } catch { /* server handles it */ }
       }
       let uploadFile = processedFile;
       if (processedFile.size > 1 * 1024 * 1024) {

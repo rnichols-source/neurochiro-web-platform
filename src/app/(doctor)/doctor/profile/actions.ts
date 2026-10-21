@@ -480,10 +480,13 @@ export async function uploadAvatar(formData: FormData) {
             return { error: "No valid image file detected." }
         }
 
-        // Validate file type
+        // Validate file type — accept HEIC/HEIF and convert server-side
         const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!allowedTypes.includes(file.type)) {
-            return { error: "Supported formats: JPEG, PNG, or WebP. If you uploaded a HEIC file, your browser may not support automatic conversion — please convert it to JPEG first." }
+        const heicTypes = ['image/heic', 'image/heif'];
+        const isHeic = heicTypes.includes(file.type) || /\.(heic|heif)$/i.test(file.name);
+
+        if (!allowedTypes.includes(file.type) && !isHeic) {
+            return { error: "Supported formats: JPEG, PNG, WebP, or HEIC." }
         }
 
         // Validate file size (max 5MB)
@@ -491,19 +494,41 @@ export async function uploadAvatar(formData: FormData) {
             return { error: "Image must be under 5MB." }
         }
 
+        // Convert HEIC to JPEG server-side via Sharp
+        let uploadFile: File | Buffer = file;
+        let uploadType = file.type;
+        let uploadExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+        if (isHeic) {
+            try {
+                const sharp = (await import('sharp')).default;
+                const buffer = Buffer.from(await file.arrayBuffer());
+                const converted = await sharp(buffer).jpeg({ quality: 90 }).toBuffer();
+                uploadFile = converted;
+                uploadType = 'image/jpeg';
+                uploadExt = 'jpg';
+            } catch (convErr) {
+                console.error('[HEIC_CONVERT] Failed:', convErr);
+                return { error: "Could not convert HEIC image. Please convert to JPEG and try again." }
+            }
+        }
+
         // Use admin client for storage to bypass RLS policies
         const { createAdminClient } = await import('@/lib/supabase-admin')
         const adminSupabase = createAdminClient()
 
-        const fileExt = file.name.split('.').pop()?.toLowerCase() || 'png'
-        const fileName = `${Date.now()}.${fileExt}`
+        const finalExt = isHeic ? uploadExt : (file.name.split('.').pop()?.toLowerCase() || 'png')
+        const fileName = `${Date.now()}.${finalExt}`
         const filePath = `${user.id}/${fileName}`
+
+        const uploadBody = uploadFile instanceof Buffer ? uploadFile : file;
+        const contentType = isHeic ? uploadType : file.type;
 
         const { data: uploadData, error: uploadError } = await adminSupabase.storage
             .from('clinic-photos')
-            .upload(filePath, file, {
+            .upload(filePath, uploadBody, {
                 cacheControl: '3600',
-                upsert: true
+                upsert: true,
+                contentType,
             })
 
         if (uploadError) {
@@ -548,18 +573,37 @@ async function uploadImage(subfolder: string, formData: FormData) {
     if (!file || !(file instanceof File)) return { error: "No valid image file." }
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
-    if (!allowedTypes.includes(file.type)) return { error: "Supported formats: JPEG, PNG, or WebP. If you uploaded a HEIC file, your browser may not support automatic conversion — please convert it to JPEG first." }
+    const heicTypes = ['image/heic', 'image/heif']
+    const isHeicFile = heicTypes.includes(file.type) || /\.(heic|heif)$/i.test(file.name)
+
+    if (!allowedTypes.includes(file.type) && !isHeicFile) return { error: "Supported formats: JPEG, PNG, WebP, or HEIC." }
     if (file.size > 5 * 1024 * 1024) return { error: "Image must be under 5MB." }
+
+    let uploadBody: File | Buffer = file
+    let finalExt = file.name.split('.').pop()?.toLowerCase() || 'png'
+    let contentType = file.type
+
+    if (isHeicFile) {
+        try {
+            const sharp = (await import('sharp')).default
+            const buffer = Buffer.from(await file.arrayBuffer())
+            uploadBody = await sharp(buffer).jpeg({ quality: 90 }).toBuffer()
+            finalExt = 'jpg'
+            contentType = 'image/jpeg'
+        } catch (convErr) {
+            console.error('[HEIC_CONVERT] Failed:', convErr)
+            return { error: "Could not convert HEIC image. Please convert to JPEG and try again." }
+        }
+    }
 
     const { createAdminClient } = await import('@/lib/supabase-admin')
     const adminSupabase = createAdminClient()
 
-    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'png'
-    const filePath = `${user.id}/${subfolder}/${Date.now()}.${fileExt}`
+    const filePath = `${user.id}/${subfolder}/${Date.now()}.${finalExt}`
 
     const { error: uploadError } = await adminSupabase.storage
         .from('clinic-photos')
-        .upload(filePath, file, { cacheControl: '3600', upsert: true })
+        .upload(filePath, uploadBody, { cacheControl: '3600', upsert: true, contentType })
 
     if (uploadError) return { error: `Upload failed: ${uploadError.message}` }
 
