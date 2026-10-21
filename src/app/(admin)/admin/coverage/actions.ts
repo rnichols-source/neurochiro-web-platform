@@ -146,47 +146,50 @@ export async function getDemandData(): Promise<DemandZip[]> {
   const supabase = createAdminClient()
   const t = await getThresholds()
 
-  // Get US subscribers with ZIPs (confirmed + pending)
+  // Get all subscribers with ZIPs (confirmed + pending), all countries
   const { data: subscribers } = await (supabase as any)
     .from('subscribers')
-    .select('zip, status')
+    .select('zip, status, country')
     .in('status', ['confirmed', 'pending'])
     .not('zip', 'is', null)
-    .or('country.eq.US,country.is.null')
 
   if (!subscribers || subscribers.length === 0) return []
 
   // Count by ZIP, split by status
   const confirmedCounts = new Map<string, number>()
   const pendingCounts = new Map<string, number>()
+  const zipCountry = new Map<string, string>() // track country per zip
   for (const s of subscribers) {
-    const z = (s.zip || '').trim().slice(0, 5)
-    if (z.length === 5 && /^\d{5}$/.test(z)) {
-      if (s.status === 'confirmed') confirmedCounts.set(z, (confirmedCounts.get(z) || 0) + 1)
-      else pendingCounts.set(z, (pendingCounts.get(z) || 0) + 1)
-    }
+    const subCountry = s.country || 'US'
+    const z = (s.zip || '').trim()
+    // Accept US 5-digit ZIPs or any international postal code
+    const key = subCountry === 'US' ? z.slice(0, 5) : z.split(' ')[0] // FSA for CA, outward for GB
+    if (!key || key.length < 2) continue
+    if (subCountry === 'US' && (key.length !== 5 || !/^\d{5}$/.test(key))) continue
+    if (s.status === 'confirmed') confirmedCounts.set(key, (confirmedCounts.get(key) || 0) + 1)
+    else pendingCounts.set(key, (pendingCounts.get(key) || 0) + 1)
+    zipCountry.set(key, subCountry)
   }
 
   // All unique ZIPs
   const allZips = new Set([...confirmedCounts.keys(), ...pendingCounts.keys()])
   if (allZips.size === 0) return []
 
-  // Look up coordinates for each ZIP (filter by US country)
+  // Look up coordinates — query all countries
   const zipList = Array.from(allZips)
   const { data: zipCoords } = await (supabase as any)
     .from('zip_codes')
-    .select('zip, city, state, lat, lng')
-    .eq('country', 'US')
+    .select('zip, city, state, lat, lng, country')
     .in('zip', zipList)
 
   if (!zipCoords) return []
 
-  // Get all US doctors with valid coords for gap detection
+  // Get all doctors with valid coords for gap detection (all countries)
   const { data: doctors } = await supabase
     .from('doctors')
-    .select('latitude, longitude')
+    .select('latitude, longitude, country')
     .in('verification_status', ['verified', 'pending'])
-    .or('country.is.null,country.eq.US')
+    .eq('is_test', false)
     .not('latitude', 'eq', 0)
     .not('longitude', 'eq', 0)
 
@@ -199,8 +202,11 @@ export async function getDemandData(): Promise<DemandZip[]> {
     const pending = pendingCounts.get(z.zip) || 0
     const lat = Number(z.lat)
     const lng = Number(z.lng)
+    const zCountry = z.country || zipCountry.get(z.zip) || 'US'
 
-    const hasNearbyDoctor = validDoctors.some(d =>
+    // Country-aware gap detection
+    const countryDocs = validDoctors.filter(d => (d.country || 'US') === zCountry)
+    const hasNearbyDoctor = countryDocs.some(d =>
       haversineDistance(lat, lng, d.latitude!, d.longitude!) <= t.gap_radius
     )
 
@@ -213,6 +219,7 @@ export async function getDemandData(): Promise<DemandZip[]> {
       confirmed,
       pending,
       gap: !hasNearbyDoctor,
+      country: zCountry,
     }
   })
 }
@@ -225,11 +232,12 @@ export async function getCoverageStats(
   const supabase = createAdminClient()
   const t = await getThresholds()
 
-  // Doctor counts
+  // Doctor counts (exclude test accounts)
   const { data: allDocs } = await supabase
     .from('doctors')
     .select('verification_status, state, country, latitude, longitude, address')
     .in('verification_status', ['verified', 'pending'])
+    .eq('is_test', false)
 
   const docs = allDocs || []
   const usDocs = docs.filter(d => !d.country || d.country === 'US')
@@ -642,12 +650,12 @@ export async function getMentionsData(): Promise<MentionCity[]> {
     }
   }
 
-  // Gap detection
+  // Gap detection — country-aware: check doctors in the same country as each demand row
   const { data: doctors } = await supabase
     .from('doctors')
-    .select('latitude, longitude')
+    .select('latitude, longitude, country')
     .in('verification_status', ['verified', 'pending'])
-    .or('country.is.null,country.eq.US')
+    .eq('is_test', false)
     .not('latitude', 'eq', 0)
     .not('longitude', 'eq', 0)
 
@@ -655,10 +663,18 @@ export async function getMentionsData(): Promise<MentionCity[]> {
     d.latitude != null && d.longitude != null && d.latitude !== 0 && d.longitude !== 0
   )
 
-  return Array.from(cityMap.values()).map(m => ({
-    ...m,
-    gap: !validDoctors.some(d => haversineDistance(m.lat, m.lng, d.latitude!, d.longitude!) <= t.gap_radius),
-  }))
+  return Array.from(cityMap.values()).map(m => {
+    // Scope gap detection to doctors in the same country
+    const countryDocs = validDoctors.filter(d => {
+      const dc = d.country || 'US'
+      const mc = m.country || 'US'
+      return dc === mc
+    })
+    return {
+      ...m,
+      gap: !countryDocs.some(d => haversineDistance(m.lat, m.lng, d.latitude!, d.longitude!) <= t.gap_radius),
+    }
+  })
 }
 
 export interface DemandDot {

@@ -71,7 +71,7 @@ let RENDER_COUNT = 0
 // ── Main Component ──
 
 export default function CoverageMapClient({
-  doctors, demand, stats, mentions, templates, demandDots, outreachLinks,
+  doctors, demand, stats, mentions, templates, demandDots, outreachLinks, gapRadius = 50, lookupMax = 100,
 }: {
   doctors: CoverageDoctor[]
   demand: DemandZip[]
@@ -80,6 +80,8 @@ export default function CoverageMapClient({
   templates: ReplyTemplate[]
   demandDots?: DemandDot[]
   outreachLinks?: { calendly_url: string; mastermind_url: string; checkout_url_monthly: string; checkout_url_annual: string }
+  gapRadius?: number
+  lookupMax?: number
 }) {
   RENDER_COUNT++
   if (typeof window !== 'undefined') console.log(`[PERF-CLIENT] Render #${RENDER_COUNT} at ${(performance.now() - PERF_START).toFixed(0)}ms`)
@@ -356,7 +358,7 @@ export default function CoverageMapClient({
         const demandClick = (e: any) => {
           if (!e.features?.length) return
           const p = e.features[0].properties, coords = e.features[0].geometry.coordinates.slice()
-          const gl = p.gap === 1 ? '<div style="color:#f43f5e;font-weight:700;font-size:11px;margin-top:6px;">No doctor within 50 miles</div>' : '<div style="color:#22c55e;font-size:11px;margin-top:6px;">Doctor nearby</div>'
+          const gl = p.gap === 1 ? `<div style="color:#f43f5e;font-weight:700;font-size:11px;margin-top:6px;">No doctor within ${gapRadius} miles</div>` : '<div style="color:#22c55e;font-size:11px;margin-top:6px;">Doctor nearby</div>'
           new maplibregl.Popup({ offset: 12, maxWidth: '240px', closeButton: true, focusAfterOpen: false }).setLngLat(coords).setHTML(`
             <div style="padding:12px;font-family:-apple-system,system-ui,sans-serif;">
               <div style="font-size:14px;font-weight:700;color:#1E2D3B;">${p.city}, ${p.state}</div>
@@ -372,7 +374,7 @@ export default function CoverageMapClient({
         map.on('click', 'mentions-dots', (e: any) => {
           if (!e.features?.length) return
           const p = e.features[0].properties, coords = e.features[0].geometry.coordinates.slice()
-          const gl = p.gap === 1 ? '<div style="color:#f43f5e;font-weight:700;font-size:11px;margin-top:6px;">No doctor within 50 miles</div>' : '<div style="color:#22c55e;font-size:11px;margin-top:6px;">Doctor nearby</div>'
+          const gl = p.gap === 1 ? `<div style="color:#f43f5e;font-weight:700;font-size:11px;margin-top:6px;">No doctor within ${gapRadius} miles</div>` : '<div style="color:#22c55e;font-size:11px;margin-top:6px;">Doctor nearby</div>'
           new maplibregl.Popup({ offset: 12, maxWidth: '240px', closeButton: true, focusAfterOpen: false }).setLngLat(coords).setHTML(`
             <div style="padding:12px;font-family:-apple-system,system-ui,sans-serif;">
               <div style="font-size:14px;font-weight:700;color:#1E2D3B;">${p.city}, ${p.state}</div>
@@ -822,9 +824,9 @@ export default function CoverageMapClient({
         ) : replyMode === 'patient' && !couldNotResolve && sortedLookupResults && (
           <div className="text-center py-4">
             {resolvedCity ? (
-              <p className="text-xs text-white/30 mb-3">We found {resolvedCity}, {resolvedState} but no doctor within 100 miles.</p>
+              <p className="text-xs text-white/30 mb-3">We found {resolvedCity}, {resolvedState} but no doctor within {lookupMax} miles.</p>
             ) : (
-              <p className="text-xs text-white/30 mb-3">No doctors within 100 miles</p>
+              <p className="text-xs text-white/30 mb-3">No doctors within {lookupMax} miles</p>
             )}
             <WaitlistReplyButtons searchedCity={lookupQuery} templates={templates} />
           </div>
@@ -922,7 +924,7 @@ export default function CoverageMapClient({
                   {stats.recruitMarkets.length > 0 && (
                     <MarketPanel
                       title="Recruit Here"
-                      subtitle="Demand with no doctor within 50 miles."
+                      subtitle={`Demand with no doctor within ${gapRadius} miles.`}
                       markets={stats.recruitMarkets}
                       color="rose"
                     />
