@@ -19,7 +19,7 @@ export async function getDoctors(options: {
   try {
     // DATA MINIMIZATION: Only fetch essential columns for the LIST view
     // Removed: email, website_url, instagram_url, facebook_url, address (private-ish)
-    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, phone, photo_url, created_at';
+    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, phone, photo_url, created_at, accepting_new_patients';
     
     let query = supabase
       .from('doctors')
@@ -260,9 +260,9 @@ export async function getNearbyDoctors(doctorId: string, state: string, limit = 
   if (!state) return [];
   const supabase = createServerSupabase();
   try {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from('doctors')
-      .select('id, first_name, last_name, clinic_name, city, state, slug, photo_url, specialties, latitude, longitude')
+      .select('id, first_name, last_name, clinic_name, city, state, slug, photo_url, specialties, latitude, longitude, accepting_new_patients')
       .eq('verification_status', 'verified')
       .eq('state', resolveStateCode(state) || state)
       .neq('id', doctorId);
@@ -274,9 +274,9 @@ export async function getNearbyDoctors(doctorId: string, state: string, limit = 
       const { haversineDistance } = await import('@/lib/geo');
       const t = await getThresholds();
       return data
-        .map(d => ({ ...d, distance_miles: haversineDistance(doctorLat, doctorLng, d.latitude || 0, d.longitude || 0) }))
-        .filter(d => d.distance_miles <= t.profile_nearby && d.latitude > 0)
-        .sort((a, b) => a.distance_miles - b.distance_miles)
+        .map((d: any) => ({ ...d, distance_miles: haversineDistance(doctorLat, doctorLng, d.latitude || 0, d.longitude || 0) }))
+        .filter((d: any) => d.distance_miles <= t.profile_nearby && d.latitude > 0)
+        .sort((a: any, b: any) => a.distance_miles - b.distance_miles)
         .slice(0, limit);
     }
 

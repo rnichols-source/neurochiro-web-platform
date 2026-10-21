@@ -30,8 +30,9 @@ export async function findMatchingDoctors(data: {
   // Find doctors in or near the patient's state
   let query = supabase
     .from("doctors")
-    .select("id, first_name, last_name, clinic_name, slug, city, state, photo_url, bio, specialties, profile_views")
+    .select("id, first_name, last_name, clinic_name, slug, city, state, photo_url, bio, specialties, profile_views, accepting_new_patients")
     .eq("verification_status", "verified")
+    .eq("accepting_new_patients", true)
     .order("profile_views", { ascending: false });
 
   // Try city match first
@@ -51,11 +52,12 @@ export async function findMatchingDoctors(data: {
     }
   }
 
-  // Fallback: any doctors, sorted by views
+  // Fallback: any doctors accepting new patients, sorted by views
   const { data: allDocs } = await supabase
     .from("doctors")
-    .select("id, first_name, last_name, clinic_name, slug, city, state, photo_url, bio, specialties, profile_views")
+    .select("id, first_name, last_name, clinic_name, slug, city, state, photo_url, bio, specialties, profile_views, accepting_new_patients")
     .eq("verification_status", "verified")
+    .eq("accepting_new_patients", true)
     .order("profile_views", { ascending: false })
     .limit(3);
 

@@ -80,6 +80,7 @@ export async function getNearestDoctors(
     .from('doctors')
     .select('id, first_name, last_name, slug, clinic_name, city, state, phone, website_url, booking_url, photo_url, bio, specialties, accepting_new_patients, latitude, longitude, hours, accepted_payment, offers_telehealth, accepts_walkins')
     .eq('verification_status', 'verified')
+    .eq('accepting_new_patients', true)
     .or('country.is.null,country.eq.US')
     .gt('latitude', 0);
 

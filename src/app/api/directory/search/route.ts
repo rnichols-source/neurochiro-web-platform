@@ -419,6 +419,7 @@ export async function GET(request: NextRequest) {
       if (rawQuery && locationTerm) {
         const locSplit = splitCityState(locationTerm, searchCountry);
         let locQuery = doctorsQuery(supabase, searchCountry);
+        if (newPatientsFilter) locQuery = locQuery.eq('accepting_new_patients', true);
         if (locSplit) {
           if (locSplit.city) locQuery = locQuery.or(`city.ilike.%${locSplit.city}%,address.ilike.%${locSplit.city}%`);
           locQuery = locQuery.eq('state', locSplit.stateCode);
@@ -435,9 +436,9 @@ export async function GET(request: NextRequest) {
       if (!fallbackData.length) {
         const stateCode = splitFromQuery?.stateCode || splitFromLocation?.stateCode || resolveStateCode(rawLocation || rawQuery, searchCountry);
         if (stateCode) {
-          const { data: stateFallback } = await doctorsQuery(supabase, searchCountry)
-            .eq('state', stateCode)
-            .limit(20);
+          let stateFallbackQuery = doctorsQuery(supabase, searchCountry).eq('state', stateCode);
+          if (newPatientsFilter) stateFallbackQuery = stateFallbackQuery.eq('accepting_new_patients', true);
+          const { data: stateFallback } = await stateFallbackQuery.limit(20);
           if (stateFallback?.length) { fallbackData = stateFallback; fallbackHint = `Showing doctors in ${stateCode}`; }
         }
       }
@@ -446,9 +447,10 @@ export async function GET(request: NextRequest) {
       if (!fallbackData.length) {
         const cityTerm = splitFromQuery?.city || rawQuery || rawLocation;
         if (cityTerm) {
-          const { data: cityFallback } = await doctorsQuery(supabase, searchCountry)
-            .or(`city.ilike.%${cityTerm}%,address.ilike.%${cityTerm}%`)
-            .limit(20);
+          let cityFallbackQuery = doctorsQuery(supabase, searchCountry)
+            .or(`city.ilike.%${cityTerm}%,address.ilike.%${cityTerm}%`);
+          if (newPatientsFilter) cityFallbackQuery = cityFallbackQuery.eq('accepting_new_patients', true);
+          const { data: cityFallback } = await cityFallbackQuery.limit(20);
           if (cityFallback?.length) { fallbackData = cityFallback; fallbackHint = `Showing doctors near ${cityTerm}`; }
         }
       }
@@ -468,9 +470,10 @@ export async function GET(request: NextRequest) {
 
       // Step 3: Only if NO location was specified — try specialty or nationwide
       if (!fallbackData.length && !rawLocation && rawQuery) {
-        const { data: specFallback } = await doctorsQuery(supabase, searchCountry)
-          .or(`bio.ilike.%${rawQuery}%,clinic_name.ilike.%${rawQuery}%`)
-          .limit(20);
+        let specFallbackQuery = doctorsQuery(supabase, searchCountry)
+          .or(`bio.ilike.%${rawQuery}%,clinic_name.ilike.%${rawQuery}%`);
+        if (newPatientsFilter) specFallbackQuery = specFallbackQuery.eq('accepting_new_patients', true);
+        const { data: specFallback } = await specFallbackQuery.limit(20);
         if (specFallback?.length) { fallbackData = specFallback; fallbackHint = `Showing "${rawQuery}" doctors nationwide`; }
       }
 

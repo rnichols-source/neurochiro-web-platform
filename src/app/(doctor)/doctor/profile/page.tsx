@@ -7,6 +7,31 @@ import Image from "next/image";
 import { getDoctorProfile, updateDoctorProfile, uploadAvatar, generateAIProfileBio, uploadGalleryImage, uploadBannerImage, uploadTeamPhoto } from "./actions";
 import VerifiedBadge from "@/components/doctor/VerifiedBadge";
 
+async function convertToJpeg(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { reject(new Error('Canvas not supported')); return; }
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob((blob) => {
+        if (!blob) { reject(new Error('Conversion failed')); return; }
+        resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
+      }, 'image/jpeg', 0.9);
+    };
+    img.onerror = () => reject(new Error('Could not load image'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function isHeic(file: File): boolean {
+  const name = file.name.toLowerCase();
+  return name.endsWith('.heic') || name.endsWith('.heif') || file.type === 'image/heic' || file.type === 'image/heif';
+}
+
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -14,6 +39,7 @@ export default function ProfilePage() {
   const [showToast, setShowToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: "", type: 'success' });
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -37,9 +63,16 @@ export default function ProfilePage() {
 
   const [error, setError] = useState(false);
 
+  const [loadError, setLoadError] = useState(false);
+
   useEffect(() => {
     getDoctorProfile()
       .then((data) => {
+        // If data is null or has no meaningful fields, treat as load failure
+        if (!data || (!data.slug && !data.clinic_name && !data.email)) {
+          setLoadError(true);
+          return;
+        }
         setProfile(data);
         setFaqItems(data?.faq || []);
         setTeamMembers(data?.team_members || []);
@@ -60,7 +93,11 @@ export default function ProfilePage() {
     setSaving(true);
     const result = await updateDoctorProfile(new FormData(e.currentTarget));
     setSaving(false);
-    if (result.success) setHasUnsavedChanges(false);
+    if (result.success) {
+      setHasUnsavedChanges(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    }
     toast(result.success ? "Profile saved." : (result.error || "Failed to save."), result.success ? 'success' : 'error');
   };
 
@@ -68,17 +105,28 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Convert HEIC/HEIF to JPEG before processing
+    let processedFile = file;
+    if (isHeic(file)) {
+      try {
+        processedFile = await convertToJpeg(file);
+      } catch {
+        toast('Could not convert HEIC image. Please try a JPEG or PNG file.', 'error');
+        return;
+      }
+    }
+
     // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    if (processedFile.size > 5 * 1024 * 1024) {
       toast("Image too large. Please use a photo under 5MB.", "error");
       return;
     }
 
     // Compress image client-side before uploading
-    let uploadFile = file;
-    if (file.size > 1 * 1024 * 1024) {
+    let uploadFile = processedFile;
+    if (processedFile.size > 1 * 1024 * 1024) {
       try {
-        uploadFile = await compressImage(file, 800, 0.8);
+        uploadFile = await compressImage(processedFile, 800, 0.8);
       } catch {
         // If compression fails, use original
       }
@@ -136,9 +184,13 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadingBanner(true);
-    let uploadFile = file;
-    if (file.size > 1 * 1024 * 1024) {
-      try { uploadFile = await compressImage(file, 1400, 0.85); } catch {}
+    let processedFile = file;
+    if (isHeic(file)) {
+      try { processedFile = await convertToJpeg(file); } catch { toast('Could not convert HEIC image. Please try a JPEG or PNG file.', 'error'); setUploadingBanner(false); return; }
+    }
+    let uploadFile = processedFile;
+    if (processedFile.size > 1 * 1024 * 1024) {
+      try { uploadFile = await compressImage(processedFile, 1400, 0.85); } catch {}
     }
     const fd = new FormData(); fd.append('file', uploadFile);
     const result = await uploadBannerImage(fd);
@@ -152,9 +204,13 @@ export default function ProfilePage() {
     if (!files || files.length === 0) return;
     setUploadingGallery(true);
     for (let i = 0; i < Math.min(files.length, 10 - galleryUrls.length); i++) {
-      let uploadFile = files[i];
-      if (uploadFile.size > 1 * 1024 * 1024) {
-        try { uploadFile = await compressImage(uploadFile, 1000, 0.8); } catch {}
+      let processedFile: File = files[i];
+      if (isHeic(processedFile)) {
+        try { processedFile = await convertToJpeg(processedFile); } catch { continue; }
+      }
+      let uploadFile = processedFile;
+      if (processedFile.size > 1 * 1024 * 1024) {
+        try { uploadFile = await compressImage(processedFile, 1000, 0.8); } catch {}
       }
       const fd = new FormData(); fd.append('file', uploadFile);
       const result = await uploadGalleryImage(fd);
@@ -168,10 +224,20 @@ export default function ProfilePage() {
   const AMENITY_OPTIONS = ["Kid-Friendly", "Wheelchair Accessible", "Open Adjusting", "Private Rooms", "Digital X-Ray", "On-Site Parking", "Prenatal Room", "Same-Day Appointments", "Baby Changing Station", "Play Area"];
 
   if (loading) return <div className="flex items-center justify-center min-h-dvh"><Loader2 className="w-8 h-8 text-neuro-orange animate-spin" /></div>;
-  if (error) return <div className="flex flex-col items-center justify-center min-h-dvh gap-4"><p className="text-red-500 font-bold">Failed to load profile.</p><button onClick={() => window.location.reload()} className="px-4 py-2 bg-neuro-navy text-white rounded-xl text-sm font-bold">Retry</button></div>;
+  if (error || loadError) return (
+    <div className="p-4 md:p-10 max-w-3xl mx-auto">
+      <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-8 text-center">
+        <h2 className="text-xl font-bold text-neuro-navy mb-2">Could not load your profile</h2>
+        <p className="text-gray-500 text-sm mb-4">Something went wrong loading your profile data. Please try again.</p>
+        <button onClick={() => window.location.reload()} className="px-6 py-3 bg-[#D66829] text-white font-bold rounded-xl">
+          Retry
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto pb-20">
+    <div className="p-6 md:p-8 max-w-4xl mx-auto pb-28">
       {/* Toast */}
       {showToast.show && (
         <div className={`fixed bottom-4 right-4 z-50 px-4 py-3 rounded-xl text-sm font-bold shadow-lg ${showToast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
@@ -205,7 +271,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <form onSubmit={handleSave} onChange={() => setHasUnsavedChanges(true)} className="space-y-8">
+      <form onSubmit={handleSave} onChange={() => { setHasUnsavedChanges(true); setSaveSuccess(false); }} className="space-y-8">
         {/* Photo */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Photo</h2>
@@ -221,39 +287,8 @@ export default function ProfilePage() {
               <button type="button" onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-neuro-navy text-white rounded-xl text-sm font-bold hover:bg-neuro-navy/90">
                 Upload Photo
               </button>
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-              <p className="text-xs text-gray-400 mt-1">JPG, PNG. Max 5MB.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Personal Info */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Personal Info</h2>
-          <input name="full_name" defaultValue={profile?.full_name || ''} placeholder="Full Name" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange mb-4" />
-        </div>
-
-        {/* Clinic Info */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Clinic Info</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input name="clinic_name" defaultValue={profile?.clinic_name || ''} placeholder="Clinic Name" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
-            <input name="phone" defaultValue={profile?.phone || ''} placeholder="Clinic phone number" inputMode="tel" autoComplete="tel" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
-            <input name="address" defaultValue={profile?.address || ''} placeholder="Street Address" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange md:col-span-2" />
-            <input name="city" defaultValue={profile?.city || ''} placeholder="City" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
-            <input name="state" defaultValue={profile?.state || ''} placeholder="State / Province" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
-            <input name="country" defaultValue={profile?.country || ''} placeholder="Country" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
-          </div>
-        </div>
-
-        {/* Online Presence */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Online Presence</h2>
-          <div className="space-y-4">
-            <input name="website" defaultValue={profile?.website_url || ''} placeholder="Website URL" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input name="instagram_url" defaultValue={profile?.instagram_url || ''} placeholder="Instagram URL" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
-              <input name="facebook_url" defaultValue={profile?.facebook_url || ''} placeholder="Facebook URL" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" className="hidden" onChange={handleImageUpload} />
+              <p className="text-xs text-gray-400 mt-1">JPG, PNG, WebP, or HEIC. Max 5MB.</p>
             </div>
           </div>
         </div>
@@ -302,6 +337,50 @@ export default function ProfilePage() {
           })()}
         </div>
 
+        {/* Personal Info */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Personal Info</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">First Name</label>
+              <input name="first_name" defaultValue={profile?.first_name || ''} placeholder="First Name" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Last Name</label>
+              <input name="last_name" defaultValue={profile?.last_name || ''} placeholder="Last Name" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+            </div>
+          </div>
+        </div>
+
+        {/* Clinic Info */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Clinic Info</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input name="clinic_name" defaultValue={profile?.clinic_name || ''} placeholder="Clinic Name" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+            <input name="phone" defaultValue={profile?.phone || ''} placeholder="Clinic phone number" inputMode="tel" autoComplete="tel" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+            <input name="address" defaultValue={profile?.address || ''} placeholder="Street Address" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange md:col-span-2" />
+            <input name="city" defaultValue={profile?.city || ''} placeholder="City" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+            <input name="state" defaultValue={profile?.state || ''} placeholder="State / Province" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+            <input name="country" defaultValue={profile?.country || ''} placeholder="Country" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+          </div>
+        </div>
+
+        {/* Online Presence */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Online Presence</h2>
+          <div className="space-y-4">
+            <input name="website" defaultValue={profile?.website_url || ''} placeholder="Website URL" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input name="instagram_url" defaultValue={profile?.instagram_url || ''} placeholder="Instagram URL" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+              <input name="facebook_url" defaultValue={profile?.facebook_url || ''} placeholder="Facebook URL" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">TikTok URL</label>
+                <input name="tiktok_url" defaultValue={profile?.tiktok_url || ''} placeholder="https://tiktok.com/@yourhandle" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-base" />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* About You — structured intro */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-1">About You</h2>
@@ -316,7 +395,7 @@ export default function ProfilePage() {
                 onChange={(e) => { if (e.target.value.length <= 500) setProfile((p: any) => ({...p, short_intro: e.target.value})); }}
                 placeholder="e.g. I'm a nervous system chiropractor in Austin, TX specializing in families and pediatric care. I opened my practice in 2019 because I believe every family deserves access to care that focuses on how the body actually works."
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none text-sm"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none text-base"
               />
               <div className="flex justify-between mt-1">
                 <span className="text-[10px] text-gray-400">No URLs or phone numbers — use the dedicated fields for those</span>
@@ -332,7 +411,7 @@ export default function ProfilePage() {
                 onChange={(e) => { if (e.target.value.length <= 1000) setProfile((p: any) => ({...p, philosophy: e.target.value})); }}
                 placeholder="e.g. I believe the body is designed to heal when the nervous system is functioning properly. My goal isn't to treat symptoms — it's to find and correct the interference so your body can do what it already knows how to do."
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none text-sm"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none text-base"
               />
               <div className="flex justify-between mt-1">
                 <span className="text-[10px] text-gray-400">No URLs or phone numbers</span>
@@ -360,7 +439,7 @@ export default function ProfilePage() {
           <input name="booking_url" defaultValue={profile?.booking_url || ''} placeholder="Online booking URL (Jane, ChiroTouch, Fresha, etc.)" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange mb-4" />
           <div className="mb-4">
             <label className="block text-xs font-bold text-neuro-navy mb-1">Google Reviews Link <span className="text-gray-400 font-normal">(patients trust reviews more than anything else on this page)</span></label>
-            <input name="google_reviews_url" defaultValue={profile?.google_reviews_url || ''} placeholder="https://g.page/your-practice/review or Google Maps link" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-sm" />
+            <input name="google_reviews_url" defaultValue={profile?.google_reviews_url || ''} placeholder="https://g.page/your-practice/review or Google Maps link" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-base" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer">
@@ -420,20 +499,20 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-neuro-navy mb-1">Chiropractic School</label>
-              <input name="chiropractic_school" defaultValue={profile?.chiropractic_school || ''} placeholder="e.g. Life University" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-sm" />
+              <input name="chiropractic_school" defaultValue={profile?.chiropractic_school || ''} placeholder="e.g. Life University" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-base" />
             </div>
             <div>
               <label className="block text-xs font-bold text-neuro-navy mb-1">Degree</label>
-              <input name="degree" defaultValue={profile?.degree || 'Doctor of Chiropractic (DC)'} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-sm" />
+              <input name="degree" defaultValue={profile?.degree || 'Doctor of Chiropractic (DC)'} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-base" />
             </div>
             <div>
               <label className="block text-xs font-bold text-neuro-navy mb-1">Graduation Year</label>
-              <input name="graduation_year" type="number" min="1950" max="2030" defaultValue={profile?.graduation_year || ''} placeholder="e.g. 2018" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-sm" />
+              <input name="graduation_year" type="number" min="1950" max="2030" defaultValue={profile?.graduation_year || ''} placeholder="e.g. 2018" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-base" />
             </div>
           </div>
           <div className="mt-4">
             <label className="block text-xs font-bold text-neuro-navy mb-1">Post-Doctoral Training <span className="text-gray-400 font-normal">(optional, one per line)</span></label>
-            <textarea name="post_doctoral_training" defaultValue={(profile?.post_doctoral_training || []).join('\n')} placeholder={"e.g. Webster Technique Certification — ICPA\nPediatric Certification — The Pediatric Experience"} rows={3} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none text-sm" />
+            <textarea name="post_doctoral_training" defaultValue={(profile?.post_doctoral_training || []).join('\n')} placeholder={"e.g. Webster Technique Certification — ICPA\nPediatric Certification — The Pediatric Experience"} rows={3} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange resize-none text-base" />
           </div>
         </div>
 
@@ -444,7 +523,7 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-neuro-navy mb-1">First Visit Price <span className="text-gray-400 font-normal">(or "Call for pricing")</span></label>
-              <input name="first_visit_price" defaultValue={profile?.first_visit_price || ''} placeholder="e.g. $150-$250 or Call for pricing" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-sm" />
+              <input name="first_visit_price" defaultValue={profile?.first_visit_price || ''} placeholder="e.g. $150-$250 or Call for pricing" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange text-base" />
             </div>
             <div>
               <label className="block text-xs font-bold text-neuro-navy mb-1">Payment Model</label>
@@ -540,8 +619,8 @@ export default function ProfilePage() {
           <div className="space-y-3">
             {faqItems.map((item, i) => (
               <div key={i} className="bg-gray-50 rounded-xl p-4 space-y-2">
-                <input placeholder="Question" value={item.question} onChange={e => { const updated = [...faqItems]; updated[i] = {...updated[i], question: e.target.value}; setFaqItems(updated); setHasUnsavedChanges(true); }} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-neuro-orange" />
-                <textarea placeholder="Answer" value={item.answer} onChange={e => { const updated = [...faqItems]; updated[i] = {...updated[i], answer: e.target.value}; setFaqItems(updated); setHasUnsavedChanges(true); }} rows={2} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-neuro-orange resize-none" />
+                <input placeholder="Question" value={item.question} onChange={e => { const updated = [...faqItems]; updated[i] = {...updated[i], question: e.target.value}; setFaqItems(updated); setHasUnsavedChanges(true); }} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-base focus:outline-neuro-orange" />
+                <textarea placeholder="Answer" value={item.answer} onChange={e => { const updated = [...faqItems]; updated[i] = {...updated[i], answer: e.target.value}; setFaqItems(updated); setHasUnsavedChanges(true); }} rows={2} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-base focus:outline-neuro-orange resize-none" />
                 <button type="button" onClick={() => { setFaqItems(prev => prev.filter((_, j) => j !== i)); setHasUnsavedChanges(true); }} className="text-xs text-red-500 font-bold flex items-center gap-1"><Trash2 className="w-3 h-3" /> Remove</button>
               </div>
             ))}
@@ -561,8 +640,8 @@ export default function ProfilePage() {
                     <div className="w-full h-full flex items-center justify-center text-gray-400 text-lg font-bold">{member.name?.[0] || '?'}</div>}
                 </div>
                 <div className="flex-1 space-y-2">
-                  <input placeholder="Name" value={member.name} onChange={e => { const u = [...teamMembers]; u[i] = {...u[i], name: e.target.value}; setTeamMembers(u); setHasUnsavedChanges(true); }} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-neuro-orange" />
-                  <input placeholder="Role (e.g. Chiropractic Assistant)" value={member.role} onChange={e => { const u = [...teamMembers]; u[i] = {...u[i], role: e.target.value}; setTeamMembers(u); setHasUnsavedChanges(true); }} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-neuro-orange" />
+                  <input placeholder="Name" value={member.name} onChange={e => { const u = [...teamMembers]; u[i] = {...u[i], name: e.target.value}; setTeamMembers(u); setHasUnsavedChanges(true); }} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-base focus:outline-neuro-orange" />
+                  <input placeholder="Role (e.g. Chiropractic Assistant)" value={member.role} onChange={e => { const u = [...teamMembers]; u[i] = {...u[i], role: e.target.value}; setTeamMembers(u); setHasUnsavedChanges(true); }} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-base focus:outline-neuro-orange" />
                   <div className="flex items-center gap-2">
                     <button type="button" onClick={async () => { const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = async (ev: any) => { const f = ev.target.files?.[0]; if (!f) return; const fd = new FormData(); fd.append('file', f); const r = await uploadTeamPhoto(fd); if (r.success && r.publicUrl) { const u = [...teamMembers]; u[i] = {...u[i], photo_url: r.publicUrl}; setTeamMembers(u); setHasUnsavedChanges(true); } }; input.click(); }} className="text-xs text-neuro-orange font-bold">Upload Photo</button>
                     <button type="button" onClick={() => { setTeamMembers(prev => prev.filter((_, j) => j !== i)); setHasUnsavedChanges(true); }} className="text-xs text-red-500 font-bold flex items-center gap-1"><Trash2 className="w-3 h-3" /> Remove</button>
@@ -591,7 +670,7 @@ export default function ProfilePage() {
               {uploadingGallery ? 'Uploading...' : 'Add Photos'}
             </button>
           )}
-          <input ref={galleryInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleGalleryUpload} />
+          <input ref={galleryInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" multiple className="hidden" onChange={handleGalleryUpload} />
           <p className="text-xs text-gray-400 mt-1">Up to 10 photos. JPG, PNG, WebP.</p>
         </div>
 
@@ -606,19 +685,40 @@ export default function ProfilePage() {
           <button type="button" onClick={() => bannerInputRef.current?.click()} disabled={uploadingBanner} className="px-4 py-2 bg-neuro-navy text-white rounded-xl text-sm font-bold hover:bg-neuro-navy/90 disabled:opacity-50">
             {uploadingBanner ? 'Uploading...' : profile?.banner_url ? 'Change Banner' : 'Upload Banner'}
           </button>
-          <input ref={bannerInputRef} type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
+          <input ref={bannerInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" className="hidden" onChange={handleBannerUpload} />
           <p className="text-xs text-gray-400 mt-1">Wide image for your profile header. Recommended 1400x400.</p>
         </div>
 
-        {/* Save */}
-        <button type="submit" disabled={saving} className="w-full py-3 px-6 bg-neuro-navy text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-neuro-navy/90 disabled:opacity-50">
-          <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Profile'}
-        </button>
-        {profile?.slug && (
-          <p className="text-center text-xs text-gray-400 mt-3">
-            After saving, <Link href={`/directory/${profile.slug}`} target="_blank" className="text-neuro-orange font-bold hover:underline">preview your public profile</Link> to see what patients see.
-          </p>
-        )}
+        {/* Sticky save bar */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 md:left-64" style={{
+          background: 'linear-gradient(to top, rgba(22,34,49,0.98), rgba(22,34,49,0.9))',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          padding: '12px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          backdropFilter: 'blur(12px)',
+        }}>
+          <div className="flex items-center gap-2">
+            {hasUnsavedChanges && (
+              <span className="text-amber-400 text-xs font-bold">Unsaved changes</span>
+            )}
+            {saveSuccess && (
+              <span className="text-emerald-400 text-xs font-bold">Profile saved</span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            {profile?.slug && (
+              <a href={`/directory/${profile.slug}`} target="_blank" rel="noopener noreferrer" className="text-xs text-white/30 hover:text-white/50 font-medium">
+                View Public Profile
+              </a>
+            )}
+            <button type="submit" disabled={saving} className="px-6 py-2.5 bg-[#D66829] text-white font-bold text-sm rounded-xl hover:bg-[#e8834a] disabled:opacity-50 transition-colors shadow-lg shadow-[#D66829]/20">
+              {saving ? 'Saving...' : 'Save Profile'}
+            </button>
+          </div>
+        </div>
       </form>
 
       {/* Verified Badge */}

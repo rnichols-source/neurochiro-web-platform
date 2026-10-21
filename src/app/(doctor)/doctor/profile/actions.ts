@@ -18,7 +18,7 @@ export async function getDoctorProfile() {
         .maybeSingle(),
       supabase
         .from('doctors')
-        .select('clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, accepts_student_messages, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url')
+        .select('first_name, last_name, clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, tiktok_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, accepts_student_messages, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url')
         .eq('user_id', user.id)
         .maybeSingle()
     ])
@@ -63,7 +63,13 @@ export async function updateDoctorProfile(formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: "Unauthorized" }
 
-    const fullName = formData.get('full_name') as string
+    // Name fields — strip common prefixes/suffixes
+    const rawFirstName = (formData.get('first_name') as string || '').trim();
+    const rawLastName = (formData.get('last_name') as string || '').trim();
+    const cleanFirst = rawFirstName.replace(/^(Dr\.?\s*)/i, '').trim();
+    const cleanLast = rawLastName.replace(/,?\s*(DC|D\.C\.|DACNB|FICPA|CCSP|MS|BS)$/gi, '').trim();
+    const fullName = `${cleanFirst} ${cleanLast}`.trim();
+
     const clinicName = formData.get('clinic_name') as string
     const city = formData.get('city') as string
     const state = formData.get('state') as string
@@ -124,6 +130,7 @@ export async function updateDoctorProfile(formData: FormData) {
     const phone = formData.get('phone') as string
     const instagramUrl = formData.get('instagram_url') as string
     const facebookUrl = formData.get('facebook_url') as string
+    const tiktokUrl = formData.get('tiktok_url') as string
 
     // Extended profile fields
     const address = formData.get('address') as string
@@ -235,7 +242,7 @@ export async function updateDoctorProfile(formData: FormData) {
     // Get current record to detect address change
     const { data: currentDoc } = await adminSupabase
       .from('doctors')
-      .select('address, city, state, latitude, longitude')
+      .select('address, city, state, latitude, longitude, clinic_name, phone, first_name, last_name, slug')
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -259,11 +266,21 @@ export async function updateDoctorProfile(formData: FormData) {
       }
     }
 
+    // Guard against accidental data wipe from failed load
+    const existingClinic = (currentDoc as any)?.clinic_name || '';
+    const existingCity = (currentDoc as any)?.city || '';
+    const existingPhone = (currentDoc as any)?.phone || '';
+    if (!clinicName && !city && !phone && (existingClinic || existingCity || existingPhone)) {
+      return { error: 'Save blocked: all major fields are empty but your existing profile has data. This usually means the profile failed to load. Please refresh and try again.' };
+    }
+
     // 3. Update Doctor table
 
     const { error: doctorError } = await adminSupabase
       .from('doctors')
       .update({
+        first_name: cleanFirst,
+        last_name: cleanLast,
         clinic_name: clinicName,
         city: city,
         state: state,
@@ -277,6 +294,7 @@ export async function updateDoctorProfile(formData: FormData) {
         phone: phone || null,
         instagram_url: instagramUrl || null,
         facebook_url: facebookUrl || null,
+        tiktok_url: tiktokUrl || null,
         address: address || null,
         hours: hoursText || null,
         highlights: highlights.length ? highlights : null,
@@ -318,6 +336,19 @@ export async function updateDoctorProfile(formData: FormData) {
     if (doctorError) {
       console.error("Doctor update error:", doctorError)
       return { error: `Failed to update clinic info: ${doctorError.message}` }
+    }
+
+    // Slug regeneration on name change
+    if (currentDoc && (cleanFirst !== (currentDoc as any).first_name || cleanLast !== (currentDoc as any).last_name)) {
+      const newSlug = `dr-${cleanFirst}-${cleanLast}`.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+      const existingSlug = (currentDoc as any).slug;
+      if (existingSlug && existingSlug !== newSlug) {
+        await (adminSupabase as any).from('slug_redirects').upsert(
+          { old_slug: existingSlug, new_slug: newSlug },
+          { onConflict: 'old_slug' }
+        );
+      }
+      await adminSupabase.from('doctors').update({ slug: newSlug } as any).eq('user_id', user.id);
     }
 
     // Refresh search index for high-performance GIN/RPC search
@@ -452,7 +483,7 @@ export async function uploadAvatar(formData: FormData) {
         // Validate file type
         const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
         if (!allowedTypes.includes(file.type)) {
-            return { error: "Only JPEG, PNG, and WebP images are allowed." }
+            return { error: "Supported formats: JPEG, PNG, or WebP. If you uploaded a HEIC file, your browser may not support automatic conversion — please convert it to JPEG first." }
         }
 
         // Validate file size (max 5MB)
@@ -517,7 +548,7 @@ async function uploadImage(subfolder: string, formData: FormData) {
     if (!file || !(file instanceof File)) return { error: "No valid image file." }
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
-    if (!allowedTypes.includes(file.type)) return { error: "Only JPEG, PNG, and WebP allowed." }
+    if (!allowedTypes.includes(file.type)) return { error: "Supported formats: JPEG, PNG, or WebP. If you uploaded a HEIC file, your browser may not support automatic conversion — please convert it to JPEG first." }
     if (file.size > 5 * 1024 * 1024) return { error: "Image must be under 5MB." }
 
     const { createAdminClient } = await import('@/lib/supabase-admin')
