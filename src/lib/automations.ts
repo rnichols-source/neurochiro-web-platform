@@ -118,7 +118,7 @@ const sendPremiumEmail = async (options: {
           &copy; 2026 NeuroChiro Network. All Rights Reserved.
         </div>
         <div style="text-align: center; padding: 0 30px 20px; font-size: 11px; color: #D1D5DB;">
-          <a href="https://neurochiro.co/settings" style="color: #D1D5DB; text-decoration: underline;">Manage email preferences</a> &middot;
+          <a href="https://neurochiro.co/unsubscribe" style="color: #D1D5DB; text-decoration: underline;">Manage email preferences</a> &middot;
           NeuroChiro &middot; neurochiro.co<br>
           Pelham Falls, SC &middot; support@neurochirodirectory.com
         </div>

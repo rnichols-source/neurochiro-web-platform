@@ -3,7 +3,7 @@
  * Includes unsubscribe link (legally required for CAN-SPAM compliance).
  */
 export function wrapEmail(body: string, options?: { unsubscribeUrl?: string }) {
-  const unsubscribeUrl = options?.unsubscribeUrl || 'https://neurochiro.co/settings';
+  const unsubscribeUrl = options?.unsubscribeUrl || 'https://neurochiro.co/unsubscribe';
 
   return `<!DOCTYPE html>
 <html>
