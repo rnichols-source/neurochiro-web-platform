@@ -9,7 +9,7 @@ export const CONDITIONS_MAX = 12;
 export const CONDITIONS_VOCABULARY = [
   // Pain & Musculoskeletal
   'Back Pain', 'Neck Pain', 'Headaches & Migraines', 'Sciatica', 'Joint Pain', 'Shoulder Pain',
-  'Knee Pain', 'Carpal Tunnel', 'Fibromyalgia', 'Chronic Pain', 'TMJ / Jaw Pain', 'Whiplash',
+  'Knee Pain', 'Hip Pain', 'Carpal Tunnel', 'Fibromyalgia', 'Chronic Pain', 'TMJ / Jaw Pain', 'Whiplash',
   'Arthritis', 'Plantar Fasciitis',
   // Nervous System
   'Nervous System Dysfunction', 'Vertigo & Dizziness', 'Neuropathy', 'Numbness & Tingling',
