@@ -231,6 +231,7 @@ export default function ColdDmQueuePage() {
               <option value="uncovered_short">Short</option>
               <option value="uncovered_full">Full</option>
             </select>
+            <span className="text-[10px] text-gray-500 self-center">uncovered markets only</span>
 
             <button
               onClick={handleProcess}
@@ -364,10 +365,13 @@ export default function ColdDmQueuePage() {
                           {r.state_90d}
                         </div>
 
-                        {/* Tier */}
-                        <div className="text-center">
+                        {/* Tier + Template */}
+                        <div className="text-center space-y-1">
                           <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${TIER_COLORS[r.tier]}`}>
                             {TIER_LABELS[r.tier]}
+                          </span>
+                          <span className="block text-[9px] text-gray-500 uppercase">
+                            {r.template_used === 'uncovered_short' ? 'SHORT' : r.template_used === 'uncovered_full' ? 'FULL' : r.template_used === 'covered' ? 'COVERED' : r.template_used === 'no_number' ? 'NO NUMBER' : r.template_used.toUpperCase()}
                           </span>
                         </div>
 
