@@ -78,10 +78,10 @@ function Section({
       style={{
         background: bg === "cream" ? C.cream : C.white,
         width: "100%",
-        padding: "48px 0",
+        padding: "32px 0",
       }}
     >
-      <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 20px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 20px" }}>
         {children}
       </div>
     </section>
@@ -96,7 +96,7 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
         fontWeight: 900,
         fontSize: 24,
         color: C.black,
-        marginBottom: 24,
+        marginBottom: 16,
         letterSpacing: "-0.02em",
       }}
     >
@@ -278,9 +278,24 @@ export default function ProfileRedesign({
 
   const doctorName = `Dr. ${d.first_name || ""} ${d.last_name || ""}`.trim();
   const location = [d.city, d.state].filter(Boolean).join(", ");
-  const shortIntro = d.short_intro
-    ? d.short_intro.split(/[.!?]/)[0]?.trim() + "."
-    : null;
+  const descriptor = (() => {
+    const specs = d.specialties || [];
+    const city = d.city || '';
+    const state = d.state || '';
+    const hasPediatric = specs.some((s: string) => /pediatric/i.test(s));
+    const hasPrenatal = specs.some((s: string) => /prenatal/i.test(s));
+    const hasFamily = specs.some((s: string) => /family/i.test(s));
+
+    let focus = '';
+    if (hasPediatric && hasPrenatal) focus = 'Pediatric and prenatal care';
+    else if (hasPediatric) focus = 'Pediatric nervous system care';
+    else if (hasPrenatal) focus = 'Prenatal and family chiropractic';
+    else if (hasFamily) focus = 'Family chiropractic care';
+    else if (specs.length > 0) focus = specs[0] + ' chiropractic';
+    else focus = 'Nervous system chiropractic';
+
+    return `${focus} for families across the ${city}${state ? ', ' + state : ''} area.`;
+  })();
 
   const specialties = (d.specialties || [])
     .flatMap((s: string) => s.split(/\n/).map((t: string) => t.trim()))
@@ -352,16 +367,24 @@ export default function ProfileRedesign({
       ? encodeURIComponent(`${d.city}, ${d.state}`)
       : null;
 
-  // Deduplicate specialties vs conditions
-  const conditionsLower = new Set(
-    conditionsTreated.map((c: string) => c.toLowerCase())
-  );
+  // Dedup: each term appears exactly once. Precedence: conditions > badges > specialties
+  const allConditions = new Set(conditionsTreated.map((c: string) => c));
+  const badgeSpecialty = specialties[0] || null;
   const dedupedSpecialties = specialties.filter(
-    (s: string) => !conditionsLower.has(s.toLowerCase())
+    (s: string) => !allConditions.has(s) && s !== badgeSpecialty
+  );
+  const badgeTerms = new Set([badgeSpecialty].filter(Boolean));
+  const dedupedConditions = conditionsTreated.filter(
+    (c: string) => !badgeTerms.has(c)
   );
 
-  // Bio truncation
-  const bioTruncated = bio ? truncateWords(bio, 200) : null;
+  // Bio: filter out business/directory content then truncate
+  const cleanBio = (bio || '').split(/\n\n|\n/).map(p =>
+    p.split(/(?<=[.!?])\s+/).filter(s =>
+      !/neurochiro|directory|chiropractors across|serving chiropractors/i.test(s)
+    ).join(' ')
+  ).filter(p => p.trim()).join('\n\n');
+  const bioTruncated = cleanBio ? truncateWords(cleanBio, 120) : null;
 
   /* ─── badges (max 3) ─── */
 
@@ -496,18 +519,19 @@ export default function ProfileRedesign({
         fontFamily: "'Montserrat', sans-serif",
       }}
     >
+      <style>{`.profile-two-col { grid-template-columns: 1fr; } @media (min-width: 768px) { .profile-two-col { grid-template-columns: 1fr 1fr; } }`}</style>
       {/* ─── 1. HEADER ─── */}
       <section
         style={{
           background: C.navy,
           width: "100%",
-          paddingTop: 60,
-          paddingBottom: 48,
+          paddingTop: 48,
+          paddingBottom: 36,
         }}
       >
         <div
           style={{
-            maxWidth: 800,
+            maxWidth: 1100,
             margin: "0 auto",
             padding: "0 20px",
             display: "flex",
@@ -617,22 +641,20 @@ export default function ProfileRedesign({
           )}
 
           {/* One-line descriptor */}
-          {shortIntro && (
-            <p
-              style={{
-                color: C.white,
-                fontSize: 15,
-                fontStyle: "italic",
-                marginTop: 14,
-                marginBottom: 0,
-                maxWidth: 520,
-                lineHeight: 1.5,
-                opacity: 0.9,
-              }}
-            >
-              {shortIntro}
-            </p>
-          )}
+          <p
+            style={{
+              color: C.white,
+              fontSize: 15,
+              fontStyle: "italic",
+              marginTop: 14,
+              marginBottom: 0,
+              maxWidth: 520,
+              lineHeight: 1.5,
+              opacity: 0.9,
+            }}
+          >
+            {descriptor}
+          </p>
 
           {/* Badges */}
           {headerBadges.length > 0 && (
@@ -798,11 +820,11 @@ export default function ProfileRedesign({
       </section>
 
       {/* ─── 2. CAN YOU HELP ME (Patients We Help) ─── */}
-      {conditionsTreated.length > 0 && (
+      {dedupedConditions.length > 0 && (
         <Section bg="cream">
           <SectionHeading>Patients We Help</SectionHeading>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {conditionsTreated.map((c: string, i: number) => (
+            {dedupedConditions.map((c: string, i: number) => (
               <Pill key={i}>{c}</Pill>
             ))}
           </div>
@@ -810,7 +832,7 @@ export default function ProfileRedesign({
       )}
 
       {/* ─── 3. WHY THIS DOCTOR ─── */}
-      {(philosophy || bio) && (
+      {(philosophy || cleanBio) && (
         <Section bg="white">
           {philosophy && (
             <blockquote
@@ -829,7 +851,7 @@ export default function ProfileRedesign({
               {philosophy}
             </blockquote>
           )}
-          {bio && (
+          {cleanBio && (
             <div>
               <p
                 style={{
@@ -841,7 +863,7 @@ export default function ProfileRedesign({
                 }}
               >
                 {bioExpanded || !bioTruncated?.truncated
-                  ? bio
+                  ? cleanBio
                   : bioTruncated.text}
               </p>
               {bioTruncated?.truncated && !bioExpanded && (
@@ -867,145 +889,158 @@ export default function ProfileRedesign({
       )}
 
       {/* ─── 4. FIRST VISIT ─── */}
-      {firstVisitInfo && (
-        <Section bg="cream">
-          <SectionHeading>Your First Visit</SectionHeading>
-          <div
-            style={{
-              fontSize: 15,
-              lineHeight: 1.8,
-              color: C.gray,
-              whiteSpace: "pre-line",
-            }}
-          >
-            {firstVisitInfo}
-          </div>
-        </Section>
-      )}
-
-      {/* ─── 5. COST & INSURANCE ─── */}
-      {hasCostData && (
-        <Section bg="white">
-          <SectionHeading>Cost</SectionHeading>
-          <div
-            style={{
-              display: "grid",
-              gap: 14,
-              fontSize: 15,
-              lineHeight: 1.6,
-              color: C.gray,
-            }}
-          >
-            {d.first_visit_price && (
-              <p style={{ margin: 0 }}>
-                <strong style={{ color: C.black }}>First Visit:</strong>{" "}
-                {d.first_visit_price}
-              </p>
-            )}
-            {d.payment_model && (
-              <p style={{ margin: 0 }}>
-                <strong style={{ color: C.black }}>Payment Model:</strong>{" "}
-                {d.payment_model}
-              </p>
-            )}
-            {d.files_insurance && (
-              <p style={{ margin: 0 }}>
-                <strong style={{ color: C.black }}>Files Insurance:</strong> Yes
-              </p>
-            )}
-            {d.payment_plans && (
-              <p style={{ margin: 0 }}>
-                <strong style={{ color: C.black }}>Payment Plans:</strong>{" "}
-                Available
-              </p>
-            )}
-            {d.free_consultation && (
-              <p style={{ margin: 0 }}>
-                <strong style={{ color: C.black }}>
-                  Free Consultation:
-                </strong>{" "}
-                Yes
-              </p>
-            )}
-            {acceptedPayment.length > 0 && (
-              <div>
-                <strong style={{ color: C.black }}>Accepted Payment:</strong>
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 6,
-                    marginTop: 8,
-                  }}
-                >
-                  {acceptedPayment.map((p: string, i: number) => (
-                    <Pill key={i}>{p}</Pill>
-                  ))}
-                </div>
+      <Section bg="cream">
+        <SectionHeading>Your First Visit</SectionHeading>
+        <div style={{ display: "grid", gap: 20 }}>
+          {[
+            { step: 1, text: "You call or book online. We ask a few questions so we are ready for you." },
+            { step: 2, text: "Consultation and full assessment. We listen to your story, check your spine, and run any scans we need. About 45 minutes." },
+            { step: 3, text: "We sit down and explain what we found, what it means, and what we recommend. No pressure, no jargon." },
+            { step: 4, text: "If you are ready, your first adjustment happens that day. If not, you go home with answers either way." },
+          ].map((item) => (
+            <div key={item.step} style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: "50%", background: C.orange,
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                color: C.white, fontFamily: "'Lato', sans-serif", fontWeight: 900, fontSize: 16,
+              }}>
+                {item.step}
               </div>
-            )}
-            {insuranceNetworks.length > 0 && (
-              <div>
-                <strong style={{ color: C.black }}>Insurance Networks:</strong>
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 6,
-                    marginTop: 8,
-                  }}
-                >
-                  {insuranceNetworks.map((n: string, i: number) => (
-                    <Pill key={i}>{n}</Pill>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </Section>
-      )}
-
-      {/* ─── 6. AVAILABILITY / HOURS ─── */}
-      {hasAvailData && (
-        <Section bg={hasCostData ? "cream" : "white"}>
-          <SectionHeading>Hours</SectionHeading>
-          {hours && (
-            <div
-              style={{
-                fontSize: 15,
-                lineHeight: 2,
-                color: C.gray,
-                whiteSpace: "pre-line",
-                marginBottom: 16,
-              }}
-            >
-              {hours}
+              <p style={{ margin: 0, fontSize: 15, lineHeight: 1.7, color: C.gray, paddingTop: 6 }}>
+                {item.text}
+              </p>
             </div>
-          )}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {d.accepting_new_patients && (
-              <Pill>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  <CheckCircle2 size={14} color={C.orange} />
-                  Accepting New Patients
-                </span>
-              </Pill>
+          ))}
+        </div>
+      </Section>
+
+      {/* ─── 5+6. COST & HOURS (two-column on desktop) ─── */}
+      {(hasCostData || hasAvailData) && (
+        <Section bg="white">
+          <div style={{ display: "grid", gap: 32 }} className="profile-two-col">
+            {hasCostData && (
+              <div>
+                <SectionHeading>Cost</SectionHeading>
+                <div
+                  style={{
+                    display: "grid",
+                    gap: 14,
+                    fontSize: 15,
+                    lineHeight: 1.6,
+                    color: C.gray,
+                  }}
+                >
+                  {d.first_visit_price && (
+                    <p style={{ margin: 0 }}>
+                      <strong style={{ color: C.black }}>First Visit:</strong>{" "}
+                      {d.first_visit_price}
+                    </p>
+                  )}
+                  {d.payment_model && (
+                    <p style={{ margin: 0 }}>
+                      <strong style={{ color: C.black }}>Payment Model:</strong>{" "}
+                      {d.payment_model}
+                    </p>
+                  )}
+                  {d.files_insurance && (
+                    <p style={{ margin: 0 }}>
+                      <strong style={{ color: C.black }}>Files Insurance:</strong> Yes
+                    </p>
+                  )}
+                  {d.payment_plans && (
+                    <p style={{ margin: 0 }}>
+                      <strong style={{ color: C.black }}>Payment Plans:</strong>{" "}
+                      Available
+                    </p>
+                  )}
+                  {d.free_consultation && (
+                    <p style={{ margin: 0 }}>
+                      <strong style={{ color: C.black }}>
+                        Free Consultation:
+                      </strong>{" "}
+                      Yes
+                    </p>
+                  )}
+                  {acceptedPayment.length > 0 && (
+                    <div>
+                      <strong style={{ color: C.black }}>Accepted Payment:</strong>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: 6,
+                          marginTop: 8,
+                        }}
+                      >
+                        {acceptedPayment.map((p: string, i: number) => (
+                          <Pill key={i}>{p}</Pill>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {insuranceNetworks.length > 0 && (
+                    <div>
+                      <strong style={{ color: C.black }}>Insurance Networks:</strong>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: 6,
+                          marginTop: 8,
+                        }}
+                      >
+                        {insuranceNetworks.map((n: string, i: number) => (
+                          <Pill key={i}>{n}</Pill>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
-            {d.has_evening_hours && (
-              <Pill>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  <Clock size={14} color={C.orange} />
-                  Evening Hours
-                </span>
-              </Pill>
-            )}
-            {d.has_weekend_hours && (
-              <Pill>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  <Clock size={14} color={C.orange} />
-                  Weekend Hours
-                </span>
-              </Pill>
+            {hasAvailData && (
+              <div>
+                <SectionHeading>Hours</SectionHeading>
+                {hours && (
+                  <div
+                    style={{
+                      fontSize: 15,
+                      lineHeight: 2,
+                      color: C.gray,
+                      whiteSpace: "pre-line",
+                      marginBottom: 16,
+                    }}
+                  >
+                    {hours}
+                  </div>
+                )}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {d.accepting_new_patients && (
+                    <Pill>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        <CheckCircle2 size={14} color={C.orange} />
+                        Accepting New Patients
+                      </span>
+                    </Pill>
+                  )}
+                  {d.has_evening_hours && (
+                    <Pill>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        <Clock size={14} color={C.orange} />
+                        Evening Hours
+                      </span>
+                    </Pill>
+                  )}
+                  {d.has_weekend_hours && (
+                    <Pill>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        <Clock size={14} color={C.orange} />
+                        Weekend Hours
+                      </span>
+                    </Pill>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </Section>
@@ -1015,6 +1050,21 @@ export default function ProfileRedesign({
       {(d.address || d.city) && (
         <Section bg="cream">
           <SectionHeading>Location</SectionHeading>
+          {d.latitude && d.longitude && process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ? (
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${d.address || ''} ${d.city || ''} ${d.state || ''}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: "block", borderRadius: 16, overflow: "hidden", marginBottom: 16 }}
+            >
+              <img
+                src={`https://maps.googleapis.com/maps/api/staticmap?center=${d.latitude},${d.longitude}&zoom=14&size=600x250&scale=2&markers=color:0xD66829|${d.latitude},${d.longitude}&style=feature:all|element:labels.text.fill|color:0x1E2D3B&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}`}
+                alt={`Map showing ${d.clinic_name || doctorName}`}
+                style={{ width: "100%", height: "auto", display: "block" }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            </a>
+          ) : null}
           <div style={{ fontSize: 15, lineHeight: 1.8, color: C.gray }}>
             {d.address && <p style={{ margin: "0 0 4px" }}>{d.address}</p>}
             <p style={{ margin: 0 }}>{location}</p>
@@ -1025,24 +1075,24 @@ export default function ProfileRedesign({
               </p>
             )}
           </div>
-          {mapQuery && (
+          {d.latitude && d.longitude && (
             <a
-              href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`}
+              href={`https://www.google.com/maps/search/?api=1&query=${d.latitude},${d.longitude}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                marginTop: 16,
+                marginTop: 12,
                 color: C.orange,
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: 14,
                 textDecoration: "none",
               }}
             >
               <MapPin size={16} />
-              View on Google Maps
+              Open in Google Maps
               <ExternalLink size={14} />
             </a>
           )}
@@ -1123,7 +1173,7 @@ export default function ProfileRedesign({
       )}
 
       {/* ─── 10. TEAM ─── */}
-      {teamMembers.length > 0 && (
+      {teamMembers.length >= 2 && teamMembers.some(m => m.photo_url) && (
         <Section bg="white">
           <SectionHeading>Our Team</SectionHeading>
           <div
@@ -1264,7 +1314,7 @@ export default function ProfileRedesign({
       {/* ─── 13. NEARBY DOCTORS ─── */}
       {nearbyDoctors.length > 0 && (
         <Section bg="cream">
-          <SectionHeading>Nearby Doctors</SectionHeading>
+          <SectionHeading>Other Doctors Near {d.city || 'You'}</SectionHeading>
           <div
             style={{
               display: "grid",
@@ -1343,6 +1393,11 @@ export default function ProfileRedesign({
                     >
                       {ndName}
                     </p>
+                    {nd.clinic_name && (
+                      <p style={{ margin: "2px 0 0", fontSize: 12, color: C.gray }}>
+                        {nd.clinic_name}
+                      </p>
+                    )}
                     <p
                       style={{
                         margin: "2px 0 0",
@@ -1356,6 +1411,9 @@ export default function ProfileRedesign({
                       <MapPin size={12} />
                       {ndLocation}
                     </p>
+                    <span style={{ fontSize: 12, color: C.orange, fontWeight: 600, marginTop: 4, display: "inline-block" }}>
+                      View Profile
+                    </span>
                   </div>
                 </Link>
               );
