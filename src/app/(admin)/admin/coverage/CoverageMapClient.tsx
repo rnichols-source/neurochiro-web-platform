@@ -1054,6 +1054,8 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
   const [copiedReqLink, setCopiedReqLink] = useState(false)
   const [localIntroCount, setLocalIntroCount] = useState(d.intro_count)
   const [justSent, setJustSent] = useState(false)
+  // Redirect URL generated after first logReply — used for profile link copy
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null)
 
   // Variant state: selected once on mount, stable per Rule 3
   const [commentVariant, setCommentVariant] = useState<{ variant_key: string; body: string } | null>(null)
@@ -1133,7 +1135,8 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
     setLocalIntroCount(prev => prev + 1)
     setJustSent(true)
     const { city: c, state: s } = parseSearchCity(searchedCity)
-    await logReply('sent_to_patient', c, s, d.id)
+    const r = await logReply('sent_to_patient', c, s, d.id)
+    if (r.redirectUrl) setRedirectUrl(r.redirectUrl)
     // After logging, call parent onSent to clear and refocus
     if (onSent) onSent()
   }
@@ -1177,7 +1180,7 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
         {handle && (
           <button
             ref={isPick ? replyBtnRef : undefined}
-            onClick={() => { quickCopy(replyText, () => {}); setCopiedReply(true); logReply(commentTplId, vars.city, vars.state, d.id, undefined, commentVariant?.variant_key) }}
+            onClick={async () => { quickCopy(replyText, () => {}); setCopiedReply(true); const r = await logReply(commentTplId, vars.city, vars.state, d.id, undefined, commentVariant?.variant_key); if (r.redirectUrl) setRedirectUrl(r.redirectUrl) }}
             className={`flex items-center justify-center gap-1.5 px-3 min-h-[44px] sm:min-h-0 sm:py-1 rounded-lg text-sm sm:text-[11px] font-bold transition-colors ${
               copiedReply ? 'bg-green-500/20 text-green-400'
               : isFar ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400' : 'bg-neuro-orange/20 hover:bg-neuro-orange/30 text-neuro-orange'
@@ -1187,7 +1190,7 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
         )}
         <button
           ref={isPick ? dmBtnRef : undefined}
-          onClick={() => { quickCopy(dmText, () => {}); setCopiedDM(true); logReply(dmTplId, vars.city, vars.state, d.id, undefined, dmVariant?.variant_key) }}
+          onClick={async () => { quickCopy(dmText, () => {}); setCopiedDM(true); const r = await logReply(dmTplId, vars.city, vars.state, d.id, undefined, dmVariant?.variant_key); if (r.redirectUrl) setRedirectUrl(r.redirectUrl) }}
           className={`flex items-center justify-center gap-1.5 px-3 min-h-[44px] sm:min-h-0 sm:py-1 rounded-lg text-sm sm:text-[11px] font-bold transition-colors ${
             copiedDM ? 'bg-green-500/20 text-green-400'
             : isFar ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-400' : 'bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400'
@@ -1203,8 +1206,8 @@ function LookupResultRow({ doctor: d, searchedCity, templates, sentDoctorIds, fa
           {justSent ? <><Check className="w-4 h-4 sm:w-3 sm:h-3" /> Logged</> : <><Send className="w-4 h-4 sm:w-3 sm:h-3" /> Sent</>}
         </button>
         <span className="flex items-center gap-1 ml-auto">
-          <button onClick={() => quickCopy(profileUrl, setCopiedUrl)} title="Copy profile link"
-            className="p-1 bg-white/5 hover:bg-white/10 rounded text-white/30 hover:text-white/60 transition-colors">
+          <button onClick={() => quickCopy(redirectUrl || profileUrl, setCopiedUrl)} title={redirectUrl ? 'Copy tracked redirect link' : 'Copy profile link'}
+            className={`p-1 rounded transition-colors ${redirectUrl ? 'bg-green-500/10 hover:bg-green-500/20 text-green-400/60 hover:text-green-400' : 'bg-white/5 hover:bg-white/10 text-white/30 hover:text-white/60'}`}>
             {copiedUrl ? <Check className="w-3 h-3 text-green-400" /> : <ExternalLink className="w-3 h-3" />}
           </button>
           <button onClick={() => quickCopy(contactRequestUrl, setCopiedReqLink)} title="Copy contact request link"

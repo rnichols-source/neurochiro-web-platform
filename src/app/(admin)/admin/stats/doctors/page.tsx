@@ -7,7 +7,7 @@ import type { DoctorRoutingRow, DoctorRoutingData } from './actions'
 
 // ── Types ──
 
-type SortKey = keyof Pick<DoctorRoutingRow, 'name' | 'clinic' | 'city' | 'total' | 'last7' | 'last30' | 'daysSince' | 'tier' | 'status'>
+type SortKey = keyof Pick<DoctorRoutingRow, 'name' | 'clinic' | 'city' | 'total' | 'last7' | 'last30' | 'daysSince' | 'tier' | 'status' | 'profile_clicks' | 'action_clicks' | 'click_rate' | 'action_rate'>
 type SortDir = 'asc' | 'desc'
 type FilterKey = 'all' | 'never' | 'cold30'
 
@@ -27,7 +27,7 @@ function locationLabel(row: DoctorRoutingRow): string {
 }
 
 function exportCsv(rows: DoctorRoutingRow[]) {
-  const headers = ['Name', 'Clinic', 'Location', 'Total', 'Last 7d', 'Last 30d', 'Last Routed', 'Days Since', 'Tier', 'Status']
+  const headers = ['Name', 'Clinic', 'Location', 'Total', 'Last 7d', 'Last 30d', 'Last Routed', 'Days Since', 'Tier', 'Status', 'Clicks', 'Click Rate %', 'Actions', 'Action Rate %']
   const lines = [headers.join(',')]
   for (const r of rows) {
     lines.push([
@@ -41,6 +41,10 @@ function exportCsv(rows: DoctorRoutingRow[]) {
       r.daysSince ?? '',
       r.tier,
       r.status,
+      r.profile_clicks,
+      r.click_rate,
+      r.action_clicks,
+      r.action_rate,
     ].join(','))
   }
   const blob = new Blob([lines.join('\n')], { type: 'text/csv' })
@@ -276,6 +280,21 @@ export default function DoctorRoutingPage() {
             value={`${summary.mean} / ${summary.median}`}
             sub="Total recs per doctor"
           />
+          <SummaryCard
+            label="Profile Clicks"
+            value={summary.total_profile_clicks}
+            sub={summary.overall_click_rate > 0 ? `${summary.overall_click_rate}% click rate` : 'No clicks yet'}
+          />
+          <SummaryCard
+            label="Action Clicks"
+            value={summary.total_action_clicks}
+            sub={summary.overall_action_rate > 0 ? `${summary.overall_action_rate}% action rate` : 'Book/Call/Email/Web'}
+          />
+          <SummaryCard
+            label="Tracking Since"
+            value={summary.tracking_since ? new Date(summary.tracking_since).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+            sub={summary.tracking_since ? 'First click recorded' : 'No clicks recorded yet'}
+          />
         </div>
 
         {/* Toolbar: filters + export */}
@@ -388,6 +407,25 @@ export default function DoctorRoutingPage() {
                   Last Routed
                 </th>
                 <SortHeader col="daysSince" label="Days Since" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                <SortHeader col="profile_clicks" label="Clicks" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                <SortHeader col="click_rate" label="Click %" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                <SortHeader col="action_clicks" label="Actions" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                <SortHeader col="action_rate" label="Action %" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                <th
+                  style={{
+                    textAlign: 'left',
+                    padding: '10px 12px',
+                    color: 'rgba(255,255,255,0.4)',
+                    fontWeight: 600,
+                    fontSize: 11,
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.8,
+                    whiteSpace: 'nowrap',
+                    borderBottom: '1px solid rgba(255,255,255,0.08)',
+                  }}
+                >
+                  Contacts
+                </th>
                 <SortHeader col="tier" label="Tier" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                 <SortHeader col="status" label="Status" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
               </tr>
@@ -453,6 +491,21 @@ export default function DoctorRoutingPage() {
                       }}
                     >
                       {row.daysSince !== null ? `${row.daysSince}d` : '--'}
+                    </td>
+                    <td style={{ padding: '10px 12px', color: row.profile_clicks > 0 ? '#fff' : 'rgba(255,255,255,0.2)' }}>
+                      {row.profile_clicks}
+                    </td>
+                    <td style={{ padding: '10px 12px', color: row.click_rate > 0 ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.2)' }}>
+                      {row.click_rate > 0 ? `${row.click_rate}%` : '--'}
+                    </td>
+                    <td style={{ padding: '10px 12px', color: row.action_clicks > 0 ? '#fff' : 'rgba(255,255,255,0.2)' }}>
+                      {row.action_clicks}
+                    </td>
+                    <td style={{ padding: '10px 12px', color: row.action_rate > 0 ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.2)' }}>
+                      {row.action_rate > 0 ? `${row.action_rate}%` : '--'}
+                    </td>
+                    <td style={{ padding: '10px 12px', color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>
+                      --
                     </td>
                     <td style={{ padding: '10px 12px' }}>
                       <span

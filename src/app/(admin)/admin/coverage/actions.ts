@@ -1110,11 +1110,14 @@ export async function logReply(
   doctorId?: string,
   demandMentionId?: string,
   variantKey?: string,
-): Promise<{ ok: boolean }> {
+): Promise<{ ok: boolean; redirectCode?: string; redirectUrl?: string }> {
   const user = await checkAdminAuth()
   const supabase = createAdminClient()
 
-  await (supabase as any).from('reply_logs').insert({
+  // Generate short unique redirect code when a doctor is associated
+  const redirectCode = doctorId ? Math.random().toString(36).slice(2, 8) : undefined
+
+  const { data } = await (supabase as any).from('reply_logs').insert({
     template_id: templateId,
     searched_city: searchedCity,
     searched_state: searchedState || null,
@@ -1122,9 +1125,12 @@ export async function logReply(
     operator: user.id,
     demand_mention_id: demandMentionId || null,
     variant_key: variantKey || null,
-  })
+    redirect_code: redirectCode || null,
+  }).select('id, redirect_code').single()
 
-  return { ok: true }
+  const redirectUrl = redirectCode ? `https://neurochiro.co/r/${redirectCode}` : undefined
+
+  return { ok: true, redirectCode: data?.redirect_code, redirectUrl }
 }
 
 export async function getFarDistanceThreshold(): Promise<number> {
