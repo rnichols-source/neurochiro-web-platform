@@ -46,9 +46,9 @@ export interface ProspectData {
 const OUTREACH_TEMPLATES: Record<string, string> = {
   short: `Hey Dr. [Name], came across your page.\n\nI run NeuroChiro. [X] people [scope_label] have asked me for a nervous system doc in the last [window] and I've had nobody to send them to.\n\nHere's how it works: [link]\n\nWorth a look if your schedule has room.`,
 
-  tighter: `Hey Dr. [Name], came across your page and had to reach out.\n\nI'm Dr. Ray, I practice in Greer SC. I've been building NeuroChiro for the last couple years.\n\nShort version. I post about nervous system care to about 185k people and they comment their zip codes asking who I'd send them to. I route every single one by hand to the closest doctor in the network. [X] of those requests came from [scope_label] in the last [window] and I had nowhere to send them.\n\nThe doctors in it get routed patients, a profile built to convert, and access to the other docs for referrals when a patient relocates.\n\nEverything's here: [link]\n\nTake a look and tell me what you think. If it's not for you no hard feelings, but I wanted you to at least see it since your market keeps coming up.`,
+  tighter: `Hey Dr. [Name], came across your page and had to reach out.\n\nI'm Dr. Ray, I practice in Greer SC. I've been building NeuroChiro for the last couple years.\n\nShort version. I post about nervous system care to about 189k people and they comment their zip codes asking who I'd send them to. I route every single one by hand to the closest doctor in the network. [X] of those requests came from [scope_label] in the last [window] and I had nowhere to send them.\n\nThe doctors in it get routed patients, a profile built to convert, and access to the other docs for referrals when a patient relocates.\n\nEverything's here: [link]\n\nTake a look and tell me what you think. If it's not for you no hard feelings, but I wanted you to at least see it since your market keeps coming up.`,
 
-  full: `Hey Dr. [Name], came across your page. Good to see another doc [scope_label] doing nervous system work.\n\nI'm Dr. Ray. I practice in Greer, South Carolina and I've spent the last couple years building NeuroChiro.\n\nHere's what it actually is. I have about 185k people following me and most of them have never been adjusted by someone who works the way we do. Every time I post, they comment their zip code asking who I'd send them to. Thousands of them. I read every one and I personally send them to the closest doctor in the network.\n\nIn the last [window], [X] people asked me for someone [scope_label]. I had nobody to send.\n\nThat's the whole thing. It's not a listing you sit on. It's me actively putting patients in front of you, plus a network of docs who refer to each other when someone moves or travels.\n\nIf you want to see it: [link]\n\nNo pressure either way. But [scope_label] has people asking and I'd rather send them to you than tell them I don't have anyone.`,
+  full: `Hey Dr. [Name], came across your page. Good to see another doc [scope_label] doing nervous system work.\n\nI'm Dr. Ray. I practice in Greer, South Carolina and I've spent the last couple years building NeuroChiro.\n\nHere's what it actually is. I have about 189k people following me and most of them have never been adjusted by someone who works the way we do. Every time I post, they comment their zip code asking who I'd send them to. Thousands of them. I read every one and I personally send them to the closest doctor in the network.\n\nIn the last [window], [X] people asked me for someone [scope_label]. I had nobody to send.\n\nThat's the whole thing. It's not a listing you sit on. It's me actively putting patients in front of you, plus a network of docs who refer to each other when someone moves or travels.\n\nIf you want to see it: [link]\n\nNo pressure either way. But [scope_label] has people asking and I'd rather send them to you than tell them I don't have anyone.`,
 
   fallback: `Hey Dr. [Name], came across your page.\n\nI'm Dr. Ray, I practice in Greer SC. I run NeuroChiro, a network of nervous system focused chiropractors.\n\nPeople comment their zip codes on my posts asking who I'd send them to and I route every one by hand to the closest doctor in the network. [State] is thin right now and I'd rather have someone there before the requests start coming in than after.\n\nHere's how it works: [link]\n\nWorth a look if you're open to it.`,
 }
@@ -204,12 +204,28 @@ export async function computeProspectData(
 
     if (prospect.location) {
       try {
+        // Pre-process: resolve full state names to codes (e.g. "North Carolina" -> "NC")
+        const { resolveStateCode } = await import('@/lib/resolve-state')
+        let normalizedLocation = prospect.location.trim()
+        const locationParts = normalizedLocation.split(/[,\s]+/)
+        // Check if the last 1-2 words are a full state name
+        for (let words = 3; words >= 1; words--) {
+          if (locationParts.length > words) {
+            const candidate = locationParts.slice(-words).join(' ')
+            const stateCode = resolveStateCode(candidate, country)
+            if (stateCode && stateCode.length === 2) {
+              normalizedLocation = locationParts.slice(0, -words).join(' ') + ', ' + stateCode
+              break
+            }
+          }
+        }
+
         const { detectPostalCode } = await import('@/lib/detect-postal')
-        const postalDetection = detectPostalCode(prospect.location.trim(), country)
+        const postalDetection = detectPostalCode(normalizedLocation, country)
         const resolveCountry = postalDetection?.country || country
 
         const { resolveLocation } = await import('@/lib/resolve-city')
-        const resolution = await resolveLocation(prospect.location, resolveCountry)
+        const resolution = await resolveLocation(normalizedLocation, resolveCountry)
 
         if (resolution.resolved) {
           lat = resolution.resolved.lat
