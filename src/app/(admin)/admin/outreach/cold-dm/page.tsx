@@ -406,7 +406,7 @@ export default function ColdDmQueuePage() {
                             {TIER_LABELS[r.tier]}
                           </span>
                           <span className="block text-[9px] text-gray-500 uppercase">
-                            {r.template_used === 'uncovered_short' ? 'SHORT' : r.template_used === 'uncovered_full' ? 'FULL' : r.template_used === 'covered' ? 'COVERED' : r.template_used === 'no_number' ? 'NO NUMBER' : r.template_used.toUpperCase()}
+                            {r.template_used === 'uncovered_short' ? 'SHORT' : r.template_used === 'uncovered_full' ? 'FULL' : r.template_used === 'covered_volume' ? 'COVERED-VOL' : r.template_used === 'covered_distance' ? 'COVERED-DIST' : r.template_used === 'no_number' ? 'NO NUMBER' : r.template_used.toUpperCase()}
                           </span>
                         </div>
 

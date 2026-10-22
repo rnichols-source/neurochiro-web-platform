@@ -46,6 +46,7 @@ export interface ProspectData {
 // ── Config ──
 
 const FOLLOWER_COUNT = '189k'
+const COVERED_DISTANCE_THRESHOLD_MI = 15
 
 // ── Templates ──
 // scope_label already carries its preposition: "in Huntersville", "across the Charlotte metro", "in North Carolina"
@@ -56,7 +57,9 @@ const OUTREACH_TEMPLATES: Record<string, string> = {
 
   uncovered_full: `Hey Dr. [Name], random DM, I know.\n\nI'm a chiropractor in Greer SC. I post about nervous system stuff on Instagram and somewhere along the way people started commenting their zip codes under my posts asking me who they should go see near them.\n\n[X] of those came [scope_label] in the last [window]. I can't adjust any of them from here.\n\nSo I've been putting together a group of docs who actually do this work and sending people to whoever is closest. Nobody's in [City] yet.\n\nYour page looked like the real thing, which is why I stopped. You open to hearing about it?`,
 
-  covered: `Hey Dr. [Name], I'll be quick.\n\nPeople comment their zip codes under my posts asking who I'd send them to. [X] came [scope_label] in the last [window] and I route every one of them by hand.\n\nProblem is [City] itself keeps coming up and the closest doc I've got is [covering_distance] miles out. Most people won't drive that for a first visit.\n\nWant me to tell you how it works?`,
+  covered_volume: `Hey Dr. [Name], I'll be quick.\n\nPeople comment their zip codes under my posts asking who I'd send them to. [X] came [scope_label] in the last [window] and I route every one of them by hand.\n\nI've got docs in the area already but that's more than a couple practices can take, and people pick based on more than distance anyway. Schedule, fit, whether you take their insurance.\n\nWant me to tell you how it works?`,
+
+  covered_distance: `Hey Dr. [Name], I'll be quick.\n\nPeople comment their zip codes under my posts asking who I'd send them to. [X] came [scope_label] in the last [window] and I route every one of them by hand.\n\nClosest doc I've got to [City] is [covering_distance] miles out. That's a real drive for somebody who's never been adjusted before, so a lot of them just don't go.\n\nWant me to tell you how it works?`,
 
   no_number: `Hey Dr. [Name], random DM, I know.\n\nI'm a chiropractor in Greer SC. I post about nervous system stuff and people comment their zip codes asking who they should go see near them. I route every one of them by hand to the closest doc I trust.\n\n[State] is thin right now. I'd rather have somebody there before those messages start coming in than scramble after.\n\nYour page looked like the real thing, which is why I stopped. You open to hearing about it?`,
 
@@ -378,9 +381,10 @@ export async function computeProspectData(
     }
 
     // Generate message
-    // Template selection: covered if doctors exist, no_number if fallback, else user's choice
+    // Template selection: covered variants by distance, no_number if fallback, else user's choice
+    const nearestDist = covering_doctors.length > 0 ? covering_doctors[0].distance : 0
     let template_used = tier === 'fallback' ? 'no_number'
-      : covering_doctors.length > 0 ? 'covered'
+      : covering_doctors.length > 0 ? (nearestDist > COVERED_DISTANCE_THRESHOLD_MI ? 'covered_distance' : 'covered_volume')
       : templateKey
     const templateText = OUTREACH_TEMPLATES[template_used] || OUTREACH_TEMPLATES.uncovered_short
 
@@ -391,7 +395,6 @@ export async function computeProspectData(
 
     const countryLink = getProLink(country)
     const coveringCount = covering_doctors.length
-    const nearestDist = covering_doctors.length > 0 ? covering_doctors[0].distance : 0
     const docPlural = coveringCount === 1 ? '' : 's'
 
     const tokens: Record<string, string> = {
