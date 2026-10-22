@@ -302,7 +302,7 @@ export default function ColdDmQueuePage() {
                         className={`grid grid-cols-[140px_120px_100px_70px_70px_70px_80px_80px_auto_70px_60px] gap-2 px-3 py-2.5 border-b border-white/[0.03] items-center ${
                           r.already_sent
                             ? "opacity-50 bg-white/[0.01]"
-                            : r.geocode_failed
+                            : r.geocode_failed || r.tier_error
                               ? "bg-orange-500/[0.03]"
                               : ""
                         }`}
@@ -323,6 +323,11 @@ export default function ColdDmQueuePage() {
                           {r.geocode_failed && (
                             <span className="text-[10px] text-orange-400 font-bold flex items-center gap-1">
                               <AlertTriangle className="w-3 h-3" /> Could not geocode
+                            </span>
+                          )}
+                          {r.tier_error && (
+                            <span className="text-[10px] text-red-400 font-bold flex items-center gap-1">
+                              <AlertTriangle className="w-3 h-3" /> Tier math error
                             </span>
                           )}
                         </div>

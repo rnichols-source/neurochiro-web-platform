@@ -39,16 +39,21 @@ export interface ProspectData {
   covering_doctors: { name: string; city: string; distance: number }[]
   message: string
   template_used: string
+  tier_error: boolean
 }
 
 // ── Templates ──
 
+// scope_label is a bare noun: "Huntersville", "the Charlotte metro", "North Carolina"
+// Templates supply prepositions ("in", "from", "across") as needed.
 const OUTREACH_TEMPLATES: Record<string, string> = {
-  short: `Hey Dr. [Name], came across your page.\n\nI run NeuroChiro. [X] people [scope_label] have asked me for a nervous system doc in the last [window] and I've had nobody to send them to.\n\nHere's how it works: [link]\n\nWorth a look if your schedule has room.`,
+  short: `Hey Dr. [Name], came across your page.\n\nI run NeuroChiro. [X] people in [scope_label] have asked me for a nervous system doc in the last [window] and I've had nobody to send them to.\n\nHere's how it works: [link]\n\nWorth a look if your schedule has room.`,
 
   tighter: `Hey Dr. [Name], came across your page and had to reach out.\n\nI'm Dr. Ray, I practice in Greer SC. I've been building NeuroChiro for the last couple years.\n\nShort version. I post about nervous system care to about 189k people and they comment their zip codes asking who I'd send them to. I route every single one by hand to the closest doctor in the network. [X] of those requests came from [scope_label] in the last [window] and I had nowhere to send them.\n\nThe doctors in it get routed patients, a profile built to convert, and access to the other docs for referrals when a patient relocates.\n\nEverything's here: [link]\n\nTake a look and tell me what you think. If it's not for you no hard feelings, but I wanted you to at least see it since your market keeps coming up.`,
 
-  full: `Hey Dr. [Name], came across your page. Good to see another doc [scope_label] doing nervous system work.\n\nI'm Dr. Ray. I practice in Greer, South Carolina and I've spent the last couple years building NeuroChiro.\n\nHere's what it actually is. I have about 189k people following me and most of them have never been adjusted by someone who works the way we do. Every time I post, they comment their zip code asking who I'd send them to. Thousands of them. I read every one and I personally send them to the closest doctor in the network.\n\nIn the last [window], [X] people asked me for someone [scope_label]. I had nobody to send.\n\nThat's the whole thing. It's not a listing you sit on. It's me actively putting patients in front of you, plus a network of docs who refer to each other when someone moves or travels.\n\nIf you want to see it: [link]\n\nNo pressure either way. But [scope_label] has people asking and I'd rather send them to you than tell them I don't have anyone.`,
+  full: `Hey Dr. [Name], came across your page. Good to see another doc in [scope_label] doing nervous system work.\n\nI'm Dr. Ray. I practice in Greer, South Carolina and I've spent the last couple years building NeuroChiro.\n\nHere's what it actually is. I have about 189k people following me and most of them have never been adjusted by someone who works the way we do. Every time I post, they comment their zip code asking who I'd send them to. Thousands of them. I read every one and I personally send them to the closest doctor in the network.\n\nIn the last [window], [X] people asked me for someone in [scope_label]. I had nobody to send.\n\nThat's the whole thing. It's not a listing you sit on. It's me actively putting patients in front of you, plus a network of docs who refer to each other when someone moves or travels.\n\nIf you want to see it: [link]\n\nNo pressure either way. But [scope_label] has people asking and I'd rather send them to you than tell them I don't have anyone.`,
+
+  covered: `Hey Dr. [Name], came across your page.\n\nI'm Dr. Ray, I practice in Greer SC. I run NeuroChiro, a network of nervous system focused chiropractors.\n\nI post about nervous system care to about 189k people. They comment their zip codes asking who I'd send them to and I route every one by hand. [X] people in [scope_label] have asked in the last [window]. I have a couple docs there already but the demand is outpacing what one or two practices can absorb.\n\nHere's how it works: [link]\n\nWorth a look if your market has room for another nervous system doc.`,
 
   fallback: `Hey Dr. [Name], came across your page.\n\nI'm Dr. Ray, I practice in Greer SC. I run NeuroChiro, a network of nervous system focused chiropractors.\n\nPeople comment their zip codes on my posts asking who I'd send them to and I route every one by hand to the closest doctor in the network. [State] is thin right now and I'd rather have someone there before the requests start coming in than after.\n\nHere's how it works: [link]\n\nWorth a look if you're open to it.`,
 }
@@ -249,65 +254,56 @@ export async function computeProspectData(
     let metro_90d = 0
     let metro_label = ''
     let state_90d = 0
+    let tier_error = false
 
     if (lat !== null && lng !== null) {
-      const gapRadius = t.gap_radius // 50mi
+      const LOCAL_RADIUS = 10 // miles — tight, just the town
+      const METRO_RADIUS = 30 // miles — the metro area the practice draws from
 
       // Filter mentions by country
       const countryMentions = allMentions.filter((m: any) => (m.country || 'US') === country)
 
-      // Local 30d: demand within 50mi in last 30 days
-      const localMentions30d = countryMentions.filter((m: any) => {
-        if (!m.lat || !m.lng) return false
-        const mDate = new Date(m.created_at)
-        if (mDate < thirtyDaysAgo) return false
-        return haversineDistance(lat!, lng!, Number(m.lat), Number(m.lng)) <= gapRadius
-      })
-      local_30d = localMentions30d.length
+      // Pre-compute distances from prospect point for all mentions
+      const mentionsWithDist = countryMentions
+        .filter((m: any) => m.lat && m.lng)
+        .map((m: any) => ({
+          ...m,
+          dist: haversineDistance(lat!, lng!, Number(m.lat), Number(m.lng)),
+          date: new Date(m.created_at),
+        }))
 
-      // Metro: group demand within 50mi by city, find the city with most mentions
-      const cityGroups = new Map<string, { count: number; latSum: number; lngSum: number }>()
-      const mentionsNear50 = countryMentions.filter((m: any) => {
-        if (!m.lat || !m.lng) return false
-        return haversineDistance(lat!, lng!, Number(m.lat), Number(m.lng)) <= gapRadius
-      })
+      // Local 30d: demand within 10mi in last 30 days (tight, just the town)
+      local_30d = mentionsWithDist.filter(m => m.dist <= LOCAL_RADIUS && m.date >= thirtyDaysAgo).length
 
+      // Metro: find the largest demand city within 50mi to use as metro label,
+      // then count everything within METRO_RADIUS of the prospect point.
+      // Metro uses the prospect point, not the metro center, so it always contains local.
+      const mentionsNear50 = mentionsWithDist.filter(m => m.dist <= 50)
+      const cityGroups = new Map<string, number>()
       for (const m of mentionsNear50) {
         const key = (m.city || 'Unknown').toLowerCase()
-        const existing = cityGroups.get(key) || { count: 0, latSum: 0, lngSum: 0 }
-        existing.count++
-        existing.latSum += Number(m.lat)
-        existing.lngSum += Number(m.lng)
-        cityGroups.set(key, existing)
+        cityGroups.set(key, (cityGroups.get(key) || 0) + 1)
       }
 
-      let metroCenter: { lat: number; lng: number } | null = null
+      // Find the largest city for the metro label
       let maxCount = 0
-      for (const [cityName, group] of cityGroups) {
-        if (group.count > maxCount) {
-          maxCount = group.count
+      for (const [cityName, count] of cityGroups) {
+        if (count > maxCount && cityName !== (city || '').toLowerCase()) {
+          maxCount = count
           metro_label = cityName.charAt(0).toUpperCase() + cityName.slice(1)
-          metroCenter = { lat: group.latSum / group.count, lng: group.lngSum / group.count }
         }
       }
-
-      if (metroCenter) {
-        // Metro 30d: demand within 30mi of metro center in last 30 days
-        metro_30d = countryMentions.filter((m: any) => {
-          if (!m.lat || !m.lng) return false
-          const mDate = new Date(m.created_at)
-          if (mDate < thirtyDaysAgo) return false
-          return haversineDistance(metroCenter!.lat, metroCenter!.lng, Number(m.lat), Number(m.lng)) <= 30
-        }).length
-
-        // Metro 90d: demand within 30mi of metro center in last 90 days
-        metro_90d = countryMentions.filter((m: any) => {
-          if (!m.lat || !m.lng) return false
-          const mDate = new Date(m.created_at)
-          if (mDate < ninetyDaysAgo) return false
-          return haversineDistance(metroCenter!.lat, metroCenter!.lng, Number(m.lat), Number(m.lng)) <= 30
-        }).length
+      // If the prospect's own city is the largest, use it
+      if (!metro_label) {
+        metro_label = city || ''
       }
+
+      // Metro 30d: demand within METRO_RADIUS of the prospect in last 30 days
+      // This always >= local because METRO_RADIUS > LOCAL_RADIUS and same center point
+      metro_30d = mentionsWithDist.filter(m => m.dist <= METRO_RADIUS && m.date >= thirtyDaysAgo).length
+
+      // Metro 90d: demand within METRO_RADIUS of the prospect in last 90 days
+      metro_90d = mentionsWithDist.filter(m => m.dist <= METRO_RADIUS && m.date >= ninetyDaysAgo).length
 
       // State 90d: demand in same state in last 90 days
       if (state) {
@@ -317,6 +313,9 @@ export async function computeProspectData(
           return (m.state || '').toUpperCase() === state!.toUpperCase()
         }).length
       }
+
+      // Invariant checks: each tier must be >= the one inside it
+      tier_error = metro_30d < local_30d || state_90d < metro_90d
     }
 
     // Headline number selection (tier walk)
@@ -325,25 +324,27 @@ export async function computeProspectData(
     let scope_label = ''
     let window_label = ''
 
+    // scope_label is a bare noun phrase. No prepositions.
+    // Templates say "in [scope_label]" or "from [scope_label]" as needed.
     if (local_30d >= 5) {
       tier = 'local'
       headline_number = local_30d
-      scope_label = `in ${city || prospect.location}`
+      scope_label = city || prospect.location
       window_label = '30 days'
     } else if (metro_30d >= 5) {
       tier = 'metro'
       headline_number = metro_30d
-      scope_label = `across the ${metro_label} metro`
+      scope_label = `the ${metro_label} metro`
       window_label = '30 days'
     } else if (metro_90d >= 8) {
       tier = 'metro_90'
       headline_number = metro_90d
-      scope_label = `across the ${metro_label} metro`
+      scope_label = `the ${metro_label} metro`
       window_label = '90 days'
     } else if (state_90d >= 10) {
       tier = 'state'
       headline_number = state_90d
-      scope_label = `in ${state || ''}`
+      scope_label = state || ''
       window_label = '90 days'
     } else {
       tier = 'fallback'
@@ -373,8 +374,11 @@ export async function computeProspectData(
     }
 
     // Generate message
-    let template_used = tier === 'fallback' ? 'fallback' : templateKey
-    // If templateKey is not 'fallback' but tier is fallback, use fallback template
+    // If covering doctors exist, use the 'covered' template (never say "nobody to send")
+    // If no number, use fallback
+    let template_used = tier === 'fallback' ? 'fallback'
+      : covering_doctors.length > 0 ? 'covered'
+      : templateKey
     const templateText = OUTREACH_TEMPLATES[template_used] || OUTREACH_TEMPLATES.tighter
 
     // Extract first name from prospect name
@@ -416,8 +420,9 @@ export async function computeProspectData(
       scope_label,
       window_label,
       covering_doctors,
-      message,
-      template_used,
+      message: tier_error ? '' : message,
+      template_used: tier_error ? 'error' : template_used,
+      tier_error,
     })
   }
 
