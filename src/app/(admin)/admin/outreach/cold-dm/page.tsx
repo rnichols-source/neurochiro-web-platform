@@ -39,6 +39,7 @@ export default function ColdDmQueuePage() {
   const [processing, setProcessing] = useState(false);
   const [results, setResults] = useState<ProspectData[]>([]);
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
+  const [showAlreadySent, setShowAlreadySent] = useState(false);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [expandedMessage, setExpandedMessage] = useState<string | null>(null);
   const [copiedHandle, setCopiedHandle] = useState<string | null>(null);
@@ -116,8 +117,13 @@ export default function ColdDmQueuePage() {
   }
 
   // ── Mark Sent ──
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [sendSuccess, setSendSuccess] = useState<string | null>(null);
+
   async function handleSent(prospect: ProspectData) {
     setSendingHandle(prospect.handle);
+    setSendError(null);
+    setSendSuccess(null);
     try {
       const result = await logColdDmOutreach({
         handle: prospect.handle,
@@ -135,7 +141,16 @@ export default function ColdDmQueuePage() {
       });
       if (result.ok) {
         setSentHandles((prev) => new Set([...prev, prospect.handle]));
+        setSendSuccess(`@${prospect.handle} marked sent`);
+        setTimeout(() => setSendSuccess(null), 3000);
+        loadStats(); // Reload counters
+      } else {
+        setSendError(result.error || 'Failed to log outreach');
+        setTimeout(() => setSendError(null), 5000);
       }
+    } catch (e: any) {
+      setSendError(e.message || 'Network error');
+      setTimeout(() => setSendError(null), 5000);
     } finally {
       setSendingHandle(null);
     }
@@ -143,6 +158,8 @@ export default function ColdDmQueuePage() {
 
   // ── Filtering ──
   const filteredResults = results.filter((r) => {
+    // Hide already-sent rows unless toggled on
+    if (!showAlreadySent && (r.already_sent || sentHandles.has(r.handle))) return false;
     if (filterMode === "uncovered") return r.covering_doctors.length === 0;
     if (filterMode === "has_number") return r.headline_number !== null;
     return true;
@@ -274,10 +291,28 @@ export default function ColdDmQueuePage() {
                   {label}
                 </button>
               ))}
-              <span className="text-xs text-gray-600 ml-auto">
-                Sorted by metro demand DESC
-              </span>
+              <label className="flex items-center gap-1.5 text-xs text-gray-500 ml-auto cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showAlreadySent}
+                  onChange={(e) => setShowAlreadySent(e.target.checked)}
+                  className="rounded"
+                />
+                Include already sent
+              </label>
             </div>
+
+            {/* Toast */}
+            {sendSuccess && (
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-2 text-sm text-emerald-400 font-bold">
+                {sendSuccess}
+              </div>
+            )}
+            {sendError && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2 text-sm text-red-400 font-bold">
+                Error: {sendError}
+              </div>
+            )}
 
             {/* Table wrapper with horizontal scroll */}
             <div className="overflow-x-auto -mx-4 sm:mx-0">
