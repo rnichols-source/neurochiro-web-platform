@@ -323,34 +323,38 @@ export async function computeProspectData(
       tier_error = metro_30d < local_30d || state_90d < metro_90d
     }
 
-    // Headline number selection: pick the LARGEST number that clears its credibility floor.
-    // scope_label carries its own preposition for templates.
+    // Tier ladder: tightest credible geography, first match wins.
+    // A tight number a doctor can picture beats a big number they cannot.
+    // 55 in their metro is more convincing than 183 across a state
+    // they only serve one corner of. State is a last resort.
     let tier: ProspectData['tier'] = 'fallback'
     let headline_number: number | null = null
     let scope_label = ''
     let window_label = ''
 
-    // Tier ladder: prefer tighter geography. Walk from most specific to least.
-    // Pick the first tier where the number clears its credibility floor.
-    // A doctor in Huntersville cares more about "55 across the Charlotte metro"
-    // than "183 in North Carolina" even though 183 is bigger.
-    const candidates: { tier: ProspectData['tier']; n: number; scope: string; window: string; min: number }[] = [
-      { tier: 'local',    n: local_30d, scope: `in ${city || prospect.location}`,           window: '30 days', min: 8 },
-      { tier: 'metro',    n: metro_30d, scope: `across the ${metro_label} metro`,            window: '30 days', min: 8 },
-      { tier: 'metro_90', n: metro_90d, scope: `across the ${metro_label} metro`,            window: '90 days', min: 15 },
-      { tier: 'state',    n: state_90d, scope: `in ${state || ''}`,                          window: '90 days', min: 25 },
-    ]
-
-    // Pick the candidate with the highest n among those that clear their minimum.
-    // The minimums act as credibility floors per geography. Higher minimums on
-    // broader geographies mean they only win when local/metro are thin.
-    const qualifying = candidates.filter(c => c.n >= c.min)
-    if (qualifying.length > 0) {
-      const chosen = qualifying.reduce((best, c) => c.n > best.n ? c : best)
-      tier = chosen.tier
-      headline_number = chosen.n
-      scope_label = chosen.scope
-      window_label = chosen.window
+    if (local_30d >= 15) {
+      tier = 'local'
+      headline_number = local_30d
+      scope_label = `in ${city || prospect.location}`
+      window_label = '30 days'
+    } else if (metro_30d >= 10) {
+      tier = 'metro'
+      headline_number = metro_30d
+      // If the metro label is the same city, use "in City" not "across the City metro"
+      const metroIsSameCity = metro_label.toLowerCase() === (city || '').toLowerCase()
+      scope_label = metroIsSameCity ? `in ${city || prospect.location}` : `across the ${metro_label} metro`
+      window_label = '30 days'
+    } else if (metro_90d >= 20) {
+      tier = 'metro_90'
+      headline_number = metro_90d
+      const metroIsSameCity90 = metro_label.toLowerCase() === (city || '').toLowerCase()
+      scope_label = metroIsSameCity90 ? `in ${city || prospect.location}` : `across the ${metro_label} metro`
+      window_label = '90 days'
+    } else if (state_90d >= 40) {
+      tier = 'state'
+      headline_number = state_90d
+      scope_label = `in ${state || ''}`
+      window_label = '90 days'
     }
 
     // Coverage check: verified+pro doctors within 30mi
