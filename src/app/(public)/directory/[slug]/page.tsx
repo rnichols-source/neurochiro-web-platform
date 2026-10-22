@@ -2,6 +2,7 @@ import { getDoctorBySlug, incrementDoctorViews, getDoctorSeminars, getDoctorJobs
 import { notFound, permanentRedirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase-admin";
 import DoctorProfileClient from "./DoctorProfileClient";
+import ProfileRedesign from "./ProfileRedesign";
 import { Metadata } from "next";
 import SchemaMarkup from "@/components/seo/SchemaMarkup";
 
@@ -113,10 +114,14 @@ export default async function DoctorProfilePage({ params }: Props) {
     }
   };
 
+  // Reference implementation: show redesigned profile for dr-raymond-nichols only
+  const useRedesign = resolvedParams.slug === 'dr-raymond-nichols';
+  const ProfileComponent = useRedesign ? ProfileRedesign : DoctorProfileClient;
+
   return (
     <>
       <SchemaMarkup data={jsonLd} />
-      <DoctorProfileClient doctor={doctor} slug={resolvedParams.slug} seminars={seminars} jobs={jobs} cityDoctorCount={cityDoctorCount} nearbyDoctors={nearbyDoctors} citySearchVolume={citySearchVolume} />
+      <ProfileComponent doctor={doctor} slug={resolvedParams.slug} seminars={seminars} jobs={jobs} cityDoctorCount={cityDoctorCount} nearbyDoctors={nearbyDoctors} citySearchVolume={citySearchVolume} />
     </>
   );
 }
