@@ -35,13 +35,14 @@ type FilterMode = "all" | "uncovered" | "has_number";
 export default function ColdDmQueuePage() {
   // ── State ──
   const [input, setInput] = useState("");
-  const [templateKey, setTemplateKey] = useState("tighter");
+  const [templateKey, setTemplateKey] = useState("uncovered_short");
   const [processing, setProcessing] = useState(false);
   const [results, setResults] = useState<ProspectData[]>([]);
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [expandedMessage, setExpandedMessage] = useState<string | null>(null);
   const [copiedHandle, setCopiedHandle] = useState<string | null>(null);
+  const [copiedFollowUp, setCopiedFollowUp] = useState<string | null>(null);
   const [sentHandles, setSentHandles] = useState<Set<string>>(new Set());
   const [sendingHandle, setSendingHandle] = useState<string | null>(null);
 
@@ -103,7 +104,15 @@ export default function ColdDmQueuePage() {
   async function handleCopy(prospect: ProspectData) {
     await navigator.clipboard.writeText(prospect.message);
     setCopiedHandle(prospect.handle);
+    setCopiedFollowUp(null);
     setTimeout(() => setCopiedHandle(null), 2000);
+  }
+
+  async function handleCopyFollowUp(prospect: ProspectData) {
+    await navigator.clipboard.writeText(prospect.follow_up);
+    setCopiedFollowUp(prospect.handle);
+    setCopiedHandle(null);
+    setTimeout(() => setCopiedFollowUp(null), 2000);
   }
 
   // ── Mark Sent ──
@@ -219,9 +228,8 @@ export default function ColdDmQueuePage() {
               onChange={(e) => setTemplateKey(e.target.value)}
               className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-base text-gray-300 focus:outline-none focus:border-neuro-orange min-h-[44px]"
             >
-              <option value="short">Short</option>
-              <option value="tighter">Tighter</option>
-              <option value="full">Full</option>
+              <option value="uncovered_short">Short</option>
+              <option value="uncovered_full">Full</option>
             </select>
 
             <button
@@ -274,7 +282,7 @@ export default function ColdDmQueuePage() {
             <div className="overflow-x-auto -mx-4 sm:mx-0">
               <div className="min-w-[900px] px-4 sm:px-0">
                 {/* Header row */}
-                <div className="grid grid-cols-[140px_120px_100px_70px_70px_70px_80px_80px_auto_70px_60px] gap-2 px-3 py-2 text-[10px] font-black text-gray-500 uppercase tracking-wider border-b border-white/5">
+                <div className="grid grid-cols-[140px_120px_100px_70px_70px_70px_80px_80px_auto_70px_70px_60px] gap-2 px-3 py-2 text-[10px] font-black text-gray-500 uppercase tracking-wider border-b border-white/5">
                   <div className="sticky left-0 bg-[#0B1118] z-10">Handle</div>
                   <div>Name</div>
                   <div>City</div>
@@ -285,6 +293,7 @@ export default function ColdDmQueuePage() {
                   <div className="text-center">Covering</div>
                   <div>Message</div>
                   <div className="text-center">Copy</div>
+                  <div className="text-center">Follow Up</div>
                   <div className="text-center">Sent</div>
                 </div>
 
@@ -299,7 +308,7 @@ export default function ColdDmQueuePage() {
                   return (
                     <div key={r.handle}>
                       <div
-                        className={`grid grid-cols-[140px_120px_100px_70px_70px_70px_80px_80px_auto_70px_60px] gap-2 px-3 py-2.5 border-b border-white/[0.03] items-center ${
+                        className={`grid grid-cols-[140px_120px_100px_70px_70px_70px_80px_80px_auto_70px_70px_60px] gap-2 px-3 py-2.5 border-b border-white/[0.03] items-center ${
                           r.already_sent
                             ? "opacity-50 bg-white/[0.01]"
                             : r.geocode_failed || r.tier_error
@@ -400,6 +409,20 @@ export default function ColdDmQueuePage() {
                             } disabled:opacity-30 disabled:cursor-not-allowed`}
                           >
                             {isCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                          </button>
+                        </div>
+
+                        {/* Follow Up */}
+                        <div className="text-center">
+                          <button
+                            onClick={() => handleCopyFollowUp(r)}
+                            className={`p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center mx-auto ${
+                              copiedFollowUp === r.handle
+                                ? "bg-green-500/20 text-green-400"
+                                : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+                            }`}
+                          >
+                            {copiedFollowUp === r.handle ? <Check className="w-4 h-4" /> : <Send className="w-3.5 h-3.5" />}
                           </button>
                         </div>
 

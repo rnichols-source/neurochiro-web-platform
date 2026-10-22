@@ -38,24 +38,29 @@ export interface ProspectData {
   window_label: string
   covering_doctors: { name: string; city: string; distance: number }[]
   message: string
+  follow_up: string
   template_used: string
   tier_error: boolean
 }
 
+// ── Config ──
+
+const FOLLOWER_COUNT = '189k'
+
 // ── Templates ──
+// scope_label already carries its preposition: "in Huntersville", "across the Charlotte metro", "in North Carolina"
+// Templates must NOT add another preposition before [scope_label].
 
-// scope_label is a bare noun: "Huntersville", "the Charlotte metro", "North Carolina"
-// Templates supply prepositions ("in", "from", "across") as needed.
 const OUTREACH_TEMPLATES: Record<string, string> = {
-  short: `Hey Dr. [Name], came across your page.\n\nI run NeuroChiro. [X] people in [scope_label] have asked me for a nervous system doc in the last [window] and I've had nobody to send them to.\n\nHere's how it works: [link]\n\nWorth a look if your schedule has room.`,
+  uncovered_short: `Hey Dr. [Name], quick one.\n\nI run NeuroChiro. I post about nervous system care to about [follower_count] people and they comment their zip codes asking who I'd send them to. [X] of those came [scope_label] in the last [window].\n\nI route every one by hand to the closest doctor in the network. [City] doesn't have anyone yet, so those people are getting sent somewhere else or nowhere.\n\nWant me to send you how it works?`,
 
-  tighter: `Hey Dr. [Name], came across your page and had to reach out.\n\nI'm Dr. Ray, I practice in Greer SC. I've been building NeuroChiro for the last couple years.\n\nShort version. I post about nervous system care to about 189k people and they comment their zip codes asking who I'd send them to. I route every single one by hand to the closest doctor in the network. [X] of those requests came from [scope_label] in the last [window] and I had nowhere to send them.\n\nThe doctors in it get routed patients, a profile built to convert, and access to the other docs for referrals when a patient relocates.\n\nEverything's here: [link]\n\nTake a look and tell me what you think. If it's not for you no hard feelings, but I wanted you to at least see it since your market keeps coming up.`,
+  uncovered_full: `Hey Dr. [Name], came across your page. Looks like you're doing real nervous system work, which is why I'm reaching out.\n\nI'm Dr. Ray, I practice in Greer SC. A couple years ago I started posting about nervous system care and it got away from me a little. About [follower_count] people follow me now and every time I post, they comment their zip code asking who I'd send them to.\n\nI read every one of them. [X] came [scope_label] in the last [window].\n\nI built NeuroChiro so I'd have somewhere to send them. It's a network of nervous system focused docs and I personally route people to the closest one. It's not a listing you pay for and forget about. I'm actively putting patients in front of the doctors in it.\n\n[City] is open right now.\n\nWant me to send you how it works?`,
 
-  full: `Hey Dr. [Name], came across your page. Good to see another doc in [scope_label] doing nervous system work.\n\nI'm Dr. Ray. I practice in Greer, South Carolina and I've spent the last couple years building NeuroChiro.\n\nHere's what it actually is. I have about 189k people following me and most of them have never been adjusted by someone who works the way we do. Every time I post, they comment their zip code asking who I'd send them to. Thousands of them. I read every one and I personally send them to the closest doctor in the network.\n\nIn the last [window], [X] people asked me for someone in [scope_label]. I had nobody to send.\n\nThat's the whole thing. It's not a listing you sit on. It's me actively putting patients in front of you, plus a network of docs who refer to each other when someone moves or travels.\n\nIf you want to see it: [link]\n\nNo pressure either way. But [scope_label] has people asking and I'd rather send them to you than tell them I don't have anyone.`,
+  covered: `Hey Dr. [Name], quick one.\n\nI run NeuroChiro. People comment their zip codes on my posts asking who I'd send them to and I route every one by hand. [X] came [scope_label] in the last [window].\n\nI've got [covering_count] doc[s] in that area already and they're getting a lot of these. [City] keeps coming up specifically and I'd rather have someone right there than keep routing people [covering_distance] miles out.\n\nWant me to send you how it works?`,
 
-  covered: `Hey Dr. [Name], came across your page.\n\nI'm Dr. Ray, I practice in Greer SC. I run NeuroChiro, a network of nervous system focused chiropractors.\n\nI post about nervous system care to about 189k people. They comment their zip codes asking who I'd send them to and I route every one by hand. [X] people in [scope_label] have asked in the last [window]. I have a couple docs there already but the demand is outpacing what one or two practices can absorb.\n\nHere's how it works: [link]\n\nWorth a look if your market has room for another nervous system doc.`,
+  no_number: `Hey Dr. [Name], came across your page.\n\nI'm Dr. Ray, I practice in Greer SC. I run NeuroChiro, a network of nervous system focused chiropractors. People comment their zip codes on my posts asking who I'd send them to and I route every one by hand to the closest doctor in the network.\n\n[State] is thin right now. I'd rather have someone there before the requests start than scramble after.\n\nWant me to send you how it works?`,
 
-  fallback: `Hey Dr. [Name], came across your page.\n\nI'm Dr. Ray, I practice in Greer SC. I run NeuroChiro, a network of nervous system focused chiropractors.\n\nPeople comment their zip codes on my posts asking who I'd send them to and I route every one by hand to the closest doctor in the network. [State] is thin right now and I'd rather have someone there before the requests start coming in than after.\n\nHere's how it works: [link]\n\nWorth a look if you're open to it.`,
+  follow_up: `Appreciate it. Here's everything: [country_link]\n\nShort version. You get a profile built to convert, I route patients to you by hand, and you get access to the other docs in the network for referrals when a patient moves or travels.\n\n[X] people [scope_label] are already asking. Happy to answer anything.`,
 }
 
 function fillTemplate(template: string, tokens: Record<string, string>): string {
@@ -318,39 +323,34 @@ export async function computeProspectData(
       tier_error = metro_30d < local_30d || state_90d < metro_90d
     }
 
-    // Headline number selection (tier walk)
+    // Headline number selection: pick the LARGEST number that clears its credibility floor.
+    // scope_label carries its own preposition for templates.
     let tier: ProspectData['tier'] = 'fallback'
     let headline_number: number | null = null
     let scope_label = ''
     let window_label = ''
 
-    // scope_label is a bare noun phrase. No prepositions.
-    // Templates say "in [scope_label]" or "from [scope_label]" as needed.
-    if (local_30d >= 5) {
-      tier = 'local'
-      headline_number = local_30d
-      scope_label = city || prospect.location
-      window_label = '30 days'
-    } else if (metro_30d >= 5) {
-      tier = 'metro'
-      headline_number = metro_30d
-      scope_label = `the ${metro_label} metro`
-      window_label = '30 days'
-    } else if (metro_90d >= 8) {
-      tier = 'metro_90'
-      headline_number = metro_90d
-      scope_label = `the ${metro_label} metro`
-      window_label = '90 days'
-    } else if (state_90d >= 10) {
-      tier = 'state'
-      headline_number = state_90d
-      scope_label = state || ''
-      window_label = '90 days'
-    } else {
-      tier = 'fallback'
-      headline_number = null
-      scope_label = ''
-      window_label = ''
+    // Tier ladder: prefer tighter geography. Walk from most specific to least.
+    // Pick the first tier where the number clears its credibility floor.
+    // A doctor in Huntersville cares more about "55 across the Charlotte metro"
+    // than "183 in North Carolina" even though 183 is bigger.
+    const candidates: { tier: ProspectData['tier']; n: number; scope: string; window: string; min: number }[] = [
+      { tier: 'local',    n: local_30d, scope: `in ${city || prospect.location}`,           window: '30 days', min: 8 },
+      { tier: 'metro',    n: metro_30d, scope: `across the ${metro_label} metro`,            window: '30 days', min: 8 },
+      { tier: 'metro_90', n: metro_90d, scope: `across the ${metro_label} metro`,            window: '90 days', min: 15 },
+      { tier: 'state',    n: state_90d, scope: `in ${state || ''}`,                          window: '90 days', min: 25 },
+    ]
+
+    // Pick the candidate with the highest n among those that clear their minimum.
+    // The minimums act as credibility floors per geography. Higher minimums on
+    // broader geographies mean they only win when local/metro are thin.
+    const qualifying = candidates.filter(c => c.n >= c.min)
+    if (qualifying.length > 0) {
+      const chosen = qualifying.reduce((best, c) => c.n > best.n ? c : best)
+      tier = chosen.tier
+      headline_number = chosen.n
+      scope_label = chosen.scope
+      window_label = chosen.window
     }
 
     // Coverage check: verified+pro doctors within 30mi
@@ -374,30 +374,39 @@ export async function computeProspectData(
     }
 
     // Generate message
-    // If covering doctors exist, use the 'covered' template (never say "nobody to send")
-    // If no number, use fallback
-    let template_used = tier === 'fallback' ? 'fallback'
+    // Template selection: covered if doctors exist, no_number if fallback, else user's choice
+    let template_used = tier === 'fallback' ? 'no_number'
       : covering_doctors.length > 0 ? 'covered'
       : templateKey
-    const templateText = OUTREACH_TEMPLATES[template_used] || OUTREACH_TEMPLATES.tighter
+    const templateText = OUTREACH_TEMPLATES[template_used] || OUTREACH_TEMPLATES.uncovered_short
 
     // Extract first name from prospect name
     const firstName = prospect.name
       .replace(/^dr\.?\s*/i, '')
       .split(/\s+/)[0] || prospect.name
 
-    const link = getProLink(country)
+    const countryLink = getProLink(country)
+    const coveringCount = covering_doctors.length
+    const nearestDist = covering_doctors.length > 0 ? covering_doctors[0].distance : 0
+    const docPlural = coveringCount === 1 ? '' : 's'
 
     const tokens: Record<string, string> = {
       Name: firstName,
+      follower_count: FOLLOWER_COUNT,
       X: headline_number !== null ? String(headline_number) : '',
       scope_label: scope_label,
       window: window_label,
-      link: link,
+      country_link: countryLink,
+      City: city || prospect.location,
+      Metro: metro_label,
       State: state || country,
+      covering_count: String(coveringCount),
+      covering_distance: String(nearestDist),
+      's': docPlural,
     }
 
     const message = fillTemplate(templateText, tokens)
+    const follow_up = fillTemplate(OUTREACH_TEMPLATES.follow_up, tokens)
 
     results.push({
       handle: prospect.handle,
@@ -421,6 +430,7 @@ export async function computeProspectData(
       window_label,
       covering_doctors,
       message: tier_error ? '' : message,
+      follow_up: tier_error ? '' : follow_up,
       template_used: tier_error ? 'error' : template_used,
       tier_error,
     })
