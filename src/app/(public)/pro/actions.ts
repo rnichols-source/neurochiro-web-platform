@@ -1,6 +1,6 @@
 'use server'
 
-import { createAdminClient } from '@/lib/supabase-admin'
+import { createAdminClient, fetchAllRows } from '@/lib/supabase-admin'
 import { getDoctorCounts, getSubscriberCounts, getDemandMentionCount } from '@/lib/platform-stats'
 import { haversineDistance } from '@/lib/geo'
 import { rateLimit, getIP } from '@/lib/rate-limit'
@@ -54,13 +54,11 @@ export async function getProPageStats(): Promise<ProPageStats> {
     getDemandMentionCount(),
   ])
 
-  // Get mention breakdown by country
-  const { data: mentionRows } = await (supabase as any)
-    .from('demand_mentions')
-    .select('country')
+  // Get mention breakdown by country — must paginate, 4900+ rows
+  const mentionRows = await fetchAllRows(supabase, 'demand_mentions', 'country')
 
   const byCountry = new Map<string, number>()
-  for (const m of (mentionRows || [])) {
+  for (const m of mentionRows) {
     const cc = m.country || 'US'
     byCountry.set(cc, (byCountry.get(cc) || 0) + 1)
   }
@@ -98,9 +96,12 @@ export async function getDemandMapData(): Promise<{ doctors: MapDoctor[]; demand
     .map(d => ({ lat: d.latitude!, lng: d.longitude!, country: d.country || 'US' }))
 
   // All demand mentions, aggregated by city+state+country
-  const { data: mentions } = await (supabase as any)
-    .from('demand_mentions')
-    .select('city, state, lat, lng, country')
+  // Must use fetchAllRows — 4900+ rows, silent truncation at 1000 has hit this codebase 7 times
+  const mentions = await fetchAllRows(
+    supabase,
+    'demand_mentions',
+    'city, state, lat, lng, country',
+  )
 
   const cityMap = new Map<string, MapDemandCity>()
   for (const m of (mentions || [])) {
