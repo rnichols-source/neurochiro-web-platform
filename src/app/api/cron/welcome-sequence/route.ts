@@ -13,6 +13,9 @@ export const maxDuration = 300;
  * Dry run: add ?dry_run=true to see who would receive what.
  */
 export async function GET(req: NextRequest) {
+  // DISABLED — sending welcome emails to unknown/bot signups. Re-enable after spam filtering is added.
+  return NextResponse.json({ skipped: true, reason: 'Welcome sequence disabled' });
+
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {

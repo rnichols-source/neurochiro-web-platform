@@ -26,6 +26,9 @@ const getResend = () => new Resend(process.env.RESEND_API_KEY || '');
  * After step 4, lead is marked 'closed' if they haven't converted.
  */
 export async function GET(req: Request) {
+  // DISABLED — sending nurture emails to unknown/bot signups. Re-enable after spam filtering is added.
+  return NextResponse.json({ skipped: true, reason: 'Lead nurture disabled' });
+
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
