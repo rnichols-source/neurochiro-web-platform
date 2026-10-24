@@ -2,6 +2,7 @@ import { wrapEmail } from '@/lib/email-template';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { getNudgeTarget } from '@/lib/profile-completeness';
 
 export const maxDuration = 300;
 
@@ -14,9 +15,9 @@ const getSupabase = () => createClient(
 const getResend = () => new Resend(process.env.RESEND_API_KEY || '');
 
 /**
- * PROFILE NUDGER — Runs every day at 9 AM EST
- * Finds doctors with incomplete profiles and sends ONE nudge per missing item.
- * Tracks nudges so it doesn't spam — only sends each nudge type once.
+ * PROFILE NUDGER — Runs daily
+ * Uses the SAME completeness function as the profile editor widget.
+ * One source of truth: src/lib/profile-completeness.ts
  */
 export async function GET(req: Request) {
   const authHeader = req.headers.get('authorization');
@@ -29,10 +30,10 @@ export async function GET(req: Request) {
     const supabase = getSupabase();
     const resend = getResend();
 
-    // Get all verified doctors with accounts
+    // Get all verified doctors with accounts — include all fields the completeness check needs
     const { data: doctors } = await supabase
       .from('doctors')
-      .select('user_id, first_name, last_name, photo_url, bio, specialties, slug, city')
+      .select('user_id, first_name, last_name, photo_url, bio, short_intro, specialties, slug, city, chiropractic_school, hours, first_visit_price, payment_model, phone, booking_url, google_reviews_url')
       .eq('verification_status', 'verified')
       .not('user_id', 'is', null);
 
@@ -49,7 +50,7 @@ export async function GET(req: Request) {
 
     const emailMap = new Map((profiles || []).map(p => [p.id, { email: p.email, name: p.full_name }]));
 
-    // Check existing nudges to avoid spamming
+    // Check existing nudges to avoid spamming (7 day window)
     const { data: existingNudges } = await supabase
       .from('automation_queue')
       .select('payload')
@@ -61,61 +62,42 @@ export async function GET(req: Request) {
     );
 
     let sent = 0;
+    const wouldSend: { name: string; email: string; nudge: string }[] = [];
+    const dryRun = new URL(req.url).searchParams.get('dry_run') === 'true';
 
     for (const doc of doctors) {
       const profile = emailMap.get(doc.user_id);
       if (!profile?.email) continue;
 
-      const rawName = doc.first_name || profile.name?.split(' ')[0] || 'Doctor';
-      const name = rawName.replace(/^Dr\.?$/i, '') || 'Doctor';
-      const profileUrl = doc.slug ? `https://neurochiro.co/directory/${doc.slug}` : 'https://neurochiro.co/doctor/profile';
+      // Use the shared completeness function — same as the profile editor widget
+      const nudgeTarget = getNudgeTarget(doc);
+      if (!nudgeTarget || !nudgeTarget.nudgeSubject) continue;
 
-      // Determine what's missing
-      let nudgeType: string | null = null;
-      let subject = '';
-      let body = '';
-
-      if (!doc.photo_url) {
-        nudgeType = 'missing_photo';
-        subject = 'Add your photo — profiles with photos get 3x more clicks';
-        body = `<p>Hi Dr. ${name},</p>
-          <p>Your NeuroChiro profile is live, but it's missing a photo.</p>
-          <p>Profiles with photos get <strong>3x more patient clicks</strong> than those without. It takes 30 seconds to upload one.</p>
-          <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/profile" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 14px;">Add Your Photo</a></p>`;
-      } else if (!doc.bio || doc.bio.length < 20) {
-        nudgeType = 'missing_bio';
-        subject = 'Your profile needs a bio — patients want to know your story';
-        body = `<p>Hi Dr. ${name},</p>
-          <p>Your NeuroChiro profile has a great photo, but patients want to know more about you. A bio helps them decide if you're the right fit.</p>
-          <p>Don't know what to write? Use our <strong>AI Bio Generator</strong> — it writes a professional bio for you in seconds.</p>
-          <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/profile" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 14px;">Write Your Bio</a></p>`;
-      } else if (!doc.specialties || doc.specialties.length === 0) {
-        nudgeType = 'missing_specialties';
-        subject = 'Add your specialties so the right patients find you';
-        body = `<p>Hi Dr. ${name},</p>
-          <p>Your NeuroChiro profile looks great! One more thing — adding your specialties helps patients searching for specific care find you faster.</p>
-          <p>Just list 2-3 things you focus on: Pediatrics, Prenatal, Sports, Neurological, etc.</p>
-          <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/profile" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 14px;">Add Specialties</a></p>`;
-      }
-
-      if (!nudgeType) continue; // Profile is complete
-
-      // Check if we already sent this nudge recently
-      const nudgeKey = `${doc.user_id}-${nudgeType}`;
+      const nudgeKey = `${doc.user_id}-${nudgeTarget.key}`;
       if (recentNudgeKeys.has(nudgeKey)) continue;
 
+      const rawName = doc.first_name || profile.name?.split(' ')[0] || 'Doctor';
+      const name = rawName.replace(/^Dr\.?$/i, '') || 'Doctor';
+
+      wouldSend.push({ name: `Dr. ${doc.first_name} ${doc.last_name}`, email: profile.email, nudge: nudgeTarget.key });
+
+      if (dryRun) continue;
+
       try {
+        const body = `<p>Hi Dr. ${name},</p>
+          <p>${nudgeTarget.nudgeBody}</p>
+          <p style="margin-top: 20px;"><a href="https://neurochiro.co/doctor/profile" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 14px;">${nudgeTarget.label === 'Profile photo' ? 'Add Your Photo' : nudgeTarget.label === 'Bio or intro' ? 'Write Your Bio' : 'Add ' + nudgeTarget.label}</a></p>`;
+
         await resend.emails.send({
           from: 'NeuroChiro <support@neurochirodirectory.com>',
           to: profile.email,
-          subject,
+          subject: nudgeTarget.nudgeSubject,
           html: wrapEmail(body),
         });
 
-        // Log the nudge so we don't repeat it
         await supabase.from('automation_queue').insert({
           event_type: 'profile_nudge',
-          payload: { userId: doc.user_id, nudgeType, email: profile.email },
+          payload: { userId: doc.user_id, nudgeType: nudgeTarget.key, email: profile.email },
           status: 'completed',
         });
 
@@ -127,12 +109,13 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `Profile nudger: ${sent} nudges sent`,
-      sent,
+      message: dryRun ? `Dry run: ${wouldSend.length} would receive nudges` : `Profile nudger: ${sent} nudges sent`,
+      sent: dryRun ? 0 : sent,
+      wouldSend,
+      dryRun,
     });
   } catch (err: any) {
     console.error('[PROFILE NUDGER ERROR]', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
-

@@ -294,20 +294,20 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Profile Completeness */}
+        {/* Profile Completeness — uses shared function (same as profile-nudger) */}
         <div className="bg-gradient-to-r from-neuro-navy to-[#1a3048] rounded-2xl p-6 text-white">
           <h2 className="text-sm font-bold text-white/50 uppercase tracking-wide mb-3">Profile Completeness</h2>
           {(() => {
             const checks = [
               { done: !!profile?.photo_url, label: 'Profile photo', why: 'Profiles with photos get 3x more patient views' },
-              { done: !!profile?.short_intro, label: 'Short intro', why: 'Tells patients who you are in 2-3 sentences' },
+              { done: !!(profile?.bio && profile.bio.length >= 20) || !!(profile?.short_intro && profile.short_intro.length >= 20), label: 'Bio or intro', why: 'Tells patients who you are and what you do' },
               { done: !!profile?.chiropractic_school, label: 'Education', why: 'Builds trust — patients want to know where you trained' },
               { done: (profile?.specialties || []).length > 0, label: 'Specialties', why: 'Helps patients find you when searching' },
               { done: !!profile?.hours, label: 'Office hours', why: 'Patients check hours before calling' },
               { done: !!profile?.first_visit_price || !!profile?.payment_model, label: 'Cost & insurance', why: 'The #1 question patients have before booking' },
               { done: !!profile?.phone, label: 'Phone number', why: 'Many patients prefer to call' },
               { done: !!profile?.booking_url, label: 'Online booking link', why: 'Patients who can book online are more likely to show up' },
-              { done: !!profile?.google_reviews_url, label: 'Google Reviews link', why: 'Reviews are the #1 trust signal — link patients to your real reviews' },
+              { done: !!profile?.google_reviews_url, label: 'Google Reviews link', why: 'Reviews are the #1 trust signal' },
             ];
             const done = checks.filter(c => c.done).length;
             const pct = Math.round((done / checks.length) * 100);

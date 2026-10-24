@@ -55,7 +55,7 @@ export async function submitUKProfile(data: {
     specialties: [],
     verification_status: 'pending',
     membership_tier: 'pro',
-    region_code: 'GB',
+    region_code: data.country_code || 'GB',
     is_approved: false,
     onboarding_call_status: 'not_scheduled',
     source: data.source || 'uca_birmingham_2026',
