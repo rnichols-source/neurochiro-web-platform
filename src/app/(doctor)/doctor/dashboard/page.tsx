@@ -27,6 +27,7 @@ import CompetitiveIntelWidget from "./competitive-intel-widget";
 import RevenueWidget from "./revenue-widget";
 import WeeklyInsight from "./weekly-insight";
 import ProfileOptimization from "./profile-optimization";
+import RoutingWidget from "./routing-widget";
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
@@ -389,6 +390,11 @@ export default function DoctorDashboard() {
       <motion.div {...delay(0.15)}>
         <p className="text-[10px] uppercase tracking-[0.2em] text-neuro-orange font-semibold mb-3">Action Items</p>
         <ActionItems items={actionItems} />
+      </motion.div>
+
+      {/* Patients Sent to You */}
+      <motion.div {...delay(0.12)}>
+        <RoutingWidget />
       </motion.div>
 
       {/* Two-Column: Pipeline + Activity */}

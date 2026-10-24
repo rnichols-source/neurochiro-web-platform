@@ -648,3 +648,74 @@ export async function acknowledgeContactRequest(requestId: string, action: 'call
 
   return { success: true }
 }
+
+// ── Routing stats for doctor dashboard ──────────────────────────────────────
+
+export async function getMyRoutingStats() {
+  try {
+    const supabase = createServerSupabase()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const admin = createAdminClient()
+
+    // Get doctor record
+    const { data: doc } = await admin
+      .from('doctors')
+      .select('id')
+      .eq('user_id', user.id)
+      .single()
+
+    if (!doc) return null
+
+    const now = new Date()
+    const sevenAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    const thirtyAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+    // Last 7 days detailed (for the list)
+    const { data: recent } = await (admin as any)
+      .from('reply_logs')
+      .select('searched_city, searched_state, created_at')
+      .eq('doctor_id', doc.id)
+      .not('template_id', 'in', '("waitlist_comment","waitlist_dm")')
+      .gte('created_at', sevenAgo)
+      .order('created_at', { ascending: false })
+      .range(0, 19) // intentional bound — show at most 20 recent
+
+    // Last 30 days count
+    const { count: last30Count } = await (admin as any)
+      .from('reply_logs')
+      .select('id', { count: 'exact', head: true })
+      .eq('doctor_id', doc.id)
+      .not('template_id', 'in', '("waitlist_comment","waitlist_dm")')
+      .gte('created_at', thirtyAgo)
+
+    // All time count
+    const { count: allTimeCount } = await (admin as any)
+      .from('reply_logs')
+      .select('id', { count: 'exact', head: true })
+      .eq('doctor_id', doc.id)
+      .not('template_id', 'in', '("waitlist_comment","waitlist_dm")')
+
+    // Click count (profile clicks attributed to this doctor)
+    const { count: clickCount } = await (admin as any)
+      .from('link_clicks')
+      .select('id', { count: 'exact', head: true })
+      .eq('doctor_id', doc.id)
+      .eq('destination', 'profile')
+
+    return {
+      last7: (recent || []).map((r: any) => ({
+        city: r.searched_city || 'Unknown',
+        state: (r.searched_state || '').toUpperCase(),
+        date: new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      })),
+      last30Count: last30Count || 0,
+      allTimeCount: allTimeCount || 0,
+      clickCount: clickCount || 0,
+    }
+  } catch (err) {
+    console.error('[ROUTING_STATS]', err)
+    return null
+  }
+}
