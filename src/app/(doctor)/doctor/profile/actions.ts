@@ -101,30 +101,27 @@ export async function updateDoctorProfile(formData: FormData) {
       }
     }
 
-    // Validate city and state to prevent dirty data
+    // Validate city and state to prevent dirty data.
+    // Full names ("Texas", "Ontario") are stored as codes.
+    // A city already saved as a street address does not block the rest of the save.
     const { validateCity, validateState } = await import('@/lib/validate-location')
-    if (city) {
-      const cityCheck = validateCity(city)
-      if (!cityCheck.valid) return { error: cityCheck.error }
-    }
+    let normalizedState = state
     if (state) {
       const stateCheck = validateState(state, country)
       if (!stateCheck.valid) return { error: stateCheck.error }
+      normalizedState = stateCheck.normalized || state.trim()
     }
     const website = formData.get('website') as string
     const bio = formData.get('bio') as string
-    const specialtiesRaw = formData.get('specialties')?.toString().split(',').map((s: string) => s.trim()).filter(Boolean) || []
-    // Validate specialties against controlled vocabulary — no free text
-    const { ALL_SPECIALTY_TERMS, SPECIALTY_MAX } = await import('@/lib/specialty-vocabulary')
-    const validTerms = new Set(ALL_SPECIALTY_TERMS)
-    const invalidTerms = specialtiesRaw.filter(s => !validTerms.has(s))
-    if (invalidTerms.length > 0) {
-      return { error: `Invalid specialty: "${invalidTerms[0]}". Please select from the available options.` }
-    }
-    if (specialtiesRaw.length > SPECIALTY_MAX) {
-      return { error: `You can select up to ${SPECIALTY_MAX} specialties. You have ${specialtiesRaw.length}.` }
-    }
-    const specialties = [...new Set(specialtiesRaw)] // dedupe
+    const specialtiesRaw = (formData.get('specialties')?.toString() || '').split(',').map((s: string) => s.trim()).filter(Boolean)
+    // Map known tags onto the vocabulary. Unknown tags stay on the profile
+    // so an old label cannot block the rest of the save.
+    const { mapTag, SPECIALTY_MAX } = await import('@/lib/specialty-vocabulary')
+    const specialties = [...new Set(specialtiesRaw.flatMap(raw => {
+      const mapped = mapTag(raw)
+      if (!mapped) return []
+      return ['term' in mapped ? mapped.term : raw]
+    }))]
     const videoUrl = formData.get('video_url') as string
     const seoKeywords = formData.get('seo_keywords') as string
     const phone = formData.get('phone') as string
@@ -139,16 +136,7 @@ export async function updateDoctorProfile(formData: FormData) {
     const highlights = highlightsRaw ? highlightsRaw.split('\n').map(s => s.trim()).filter(Boolean) : []
     const conditionsRaw = formData.get('conditions_treated') as string
     const conditionsRawArray = conditionsRaw ? conditionsRaw.split(',').map(s => s.trim()).filter(Boolean) : []
-    // Validate conditions against controlled vocabulary — no free text
-    const { CONDITIONS_VOCABULARY, CONDITIONS_MAX } = await import('@/lib/conditions-vocabulary')
-    const validConditions = new Set(CONDITIONS_VOCABULARY)
-    const invalidConditions = conditionsRawArray.filter(c => !validConditions.has(c))
-    if (invalidConditions.length > 0) {
-      return { error: `Invalid condition: "${invalidConditions[0]}". Please select from the available options.` }
-    }
-    if (conditionsRawArray.length > CONDITIONS_MAX) {
-      return { error: `You can select up to ${CONDITIONS_MAX} conditions. You have ${conditionsRawArray.length}.` }
-    }
+    const { CONDITIONS_MAX } = await import('@/lib/conditions-vocabulary')
     const conditionsTreated = [...new Set(conditionsRawArray)]
     const educationRaw = formData.get('education') as string
     const education = educationRaw ? educationRaw.split('\n').map(s => s.trim()).filter(Boolean) : []
@@ -224,6 +212,38 @@ export async function updateDoctorProfile(formData: FormData) {
     const { createAdminClient } = await import('@/lib/supabase-admin')
     const adminSupabase = createAdminClient()
 
+    // Load the current row before any write so validation can compare it.
+    const { data: currentDocRow } = await adminSupabase
+      .from('doctors')
+      .select('address, city, state, latitude, longitude, clinic_name, phone, first_name, last_name, slug, specialties, conditions_treated')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    // Generated doctors types omit columns this form already saves.
+    const currentDoc = currentDocRow as any
+
+    if (city) {
+      const cityCheck = validateCity(city)
+      const cityUnchanged = city.trim() === String((currentDoc as any)?.city || '').trim()
+      if (!cityCheck.valid && !cityUnchanged) return { error: cityCheck.error }
+    }
+
+    // Reject before any write. Existing over-cap lists can still be saved.
+    const existingClinic = (currentDoc as any)?.clinic_name || '';
+    const existingCity = (currentDoc as any)?.city || '';
+    const existingPhone = (currentDoc as any)?.phone || '';
+    if (!clinicName && !city && !phone && (existingClinic || existingCity || existingPhone)) {
+      return { error: 'Save blocked: all major fields are empty but your existing profile has data. This usually means the profile failed to load. Please refresh and try again.' };
+    }
+
+    const existingSpecCount = Array.isArray((currentDoc as any)?.specialties) ? (currentDoc as any).specialties.length : 0
+    if (specialties.length > SPECIALTY_MAX && specialties.length > existingSpecCount) {
+      return { error: `You can select up to ${SPECIALTY_MAX} specialties. You have ${specialties.length}.` }
+    }
+    const existingCondCount = Array.isArray((currentDoc as any)?.conditions_treated) ? (currentDoc as any).conditions_treated.length : 0
+    if (conditionsTreated.length > CONDITIONS_MAX && conditionsTreated.length > existingCondCount) {
+      return { error: `You can select up to ${CONDITIONS_MAX} conditions. You have ${conditionsTreated.length}.` }
+    }
+
     // 1. Update Profile (Name)
     const { error: profileError } = await adminSupabase
       .from('profiles')
@@ -239,23 +259,16 @@ export async function updateDoctorProfile(formData: FormData) {
     let newLat: number | undefined
     let newLng: number | undefined
 
-    // Get current record to detect address change
-    const { data: currentDoc } = await adminSupabase
-      .from('doctors')
-      .select('address, city, state, latitude, longitude, clinic_name, phone, first_name, last_name, slug')
-      .eq('user_id', user.id)
-      .maybeSingle()
-
     const addressChanged = currentDoc && (
       currentDoc.address !== (address || null) ||
       currentDoc.city !== (city || null) ||
-      currentDoc.state !== (state || null)
+      currentDoc.state !== (normalizedState || null)
     )
 
     if (addressChanged && address) {
       try {
         const { geocodeDoctorAddress } = await import('@/lib/geocode')
-        const result = await geocodeDoctorAddress(address, city, state)
+        const result = await geocodeDoctorAddress(address, city, normalizedState)
         if (result) {
           newLat = result.lat
           newLng = result.lng
@@ -264,14 +277,6 @@ export async function updateDoctorProfile(formData: FormData) {
       } catch (e) {
         console.warn('Geocoding failed (non-blocking):', e)
       }
-    }
-
-    // Guard against accidental data wipe from failed load
-    const existingClinic = (currentDoc as any)?.clinic_name || '';
-    const existingCity = (currentDoc as any)?.city || '';
-    const existingPhone = (currentDoc as any)?.phone || '';
-    if (!clinicName && !city && !phone && (existingClinic || existingCity || existingPhone)) {
-      return { error: 'Save blocked: all major fields are empty but your existing profile has data. This usually means the profile failed to load. Please refresh and try again.' };
     }
 
     // 3. Update Doctor table
@@ -283,7 +288,7 @@ export async function updateDoctorProfile(formData: FormData) {
         last_name: cleanLast,
         clinic_name: clinicName,
         city: city,
-        state: state,
+        state: normalizedState,
         country: country,
         website_url: website,
         ...(newLat !== undefined && newLng !== undefined ? { latitude: newLat, longitude: newLng } : {}),
@@ -364,7 +369,7 @@ export async function updateDoctorProfile(formData: FormData) {
       try {
         await adminSupabase.from('automation_queue').insert({
           event_type: 'geocode_failed',
-          payload: { userId: user.id, address, city, state, reason: 'Nominatim returned no results' }
+          payload: { userId: user.id, address, city, state: normalizedState, reason: 'Nominatim returned no results' }
         })
       } catch (e) {
         console.warn("Automation queue insert failed (non-critical):", e)

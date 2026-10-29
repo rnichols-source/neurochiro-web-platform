@@ -3,6 +3,8 @@
  * Prevents dirty city/state data from entering the database.
  */
 
+import { resolveStateCode } from '@/lib/resolve-state'
+
 const VALID_US_STATES = new Set([
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
   'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
@@ -36,40 +38,34 @@ const CITY_BANNED_PATTERNS = /\d{4,}|Suite\s|Ste\s|Unit\s|#\d/i
 /**
  * Validate state/province/region for a given country.
  * Country defaults to 'US' for backwards compatibility.
+ * Full names ("Texas", "Ontario") are accepted and returned as codes.
  */
-export function validateState(state: string, country: string = 'US'): { valid: boolean; error?: string } {
+export function validateState(state: string, country: string = 'US'): { valid: boolean; error?: string; normalized?: string } {
   if (!state || !state.trim()) {
     return { valid: false, error: 'State/province is required.' }
   }
   const trimmed = state.trim()
-  const upper = trimmed.toUpperCase()
-  const c = country.toUpperCase()
+  const normalized = resolveStateCode(trimmed, country)
+  if (normalized) {
+    const c = country.toUpperCase()
+    const onlyCase = normalized.toUpperCase() === trimmed.toUpperCase()
+    // "London" stays "London". "tx" and "Texas" are stored as TX.
+    const keepTyped = onlyCase && (c === 'GB' || c === 'NZ' || (c === 'AU' && normalized.length > 3))
+    return { valid: true, normalized: keepTyped ? trimmed : normalized }
+  }
 
+  const c = country.toUpperCase()
   if (c === 'US') {
-    if (VALID_US_STATES.has(upper)) return { valid: true }
     return { valid: false, error: `"${trimmed}" is not a valid US state. Use the 2-letter code (e.g. SC, TX, CA).` }
   }
-
   if (c === 'CA') {
-    if (VALID_CA_PROVINCES.has(upper)) return { valid: true }
     return { valid: false, error: `"${trimmed}" is not a valid Canadian province. Use the 2-letter code (e.g. AB, BC, ON).` }
   }
-
-  if (c === 'GB') {
-    if (VALID_GB_REGIONS.has(upper) || VALID_GB_REGIONS.has(trimmed)) return { valid: true }
-    // Accept any string under 30 chars for UK counties (too many to enumerate)
-    if (trimmed.length <= 30 && /^[A-Za-z\s]+$/.test(trimmed)) return { valid: true }
-    return { valid: false, error: `"${trimmed}" is not a valid UK region.` }
+  if (c === 'AU') {
+    return { valid: false, error: `"${trimmed}" is not a valid Australian state. Use the code (e.g. NSW, QLD, VIC).` }
   }
-
-  if (c === 'NZ') {
-    if (VALID_NZ_REGIONS.has(upper) || VALID_NZ_REGIONS.has(trimmed)) return { valid: true }
-    // Accept any short code for NZ
-    if (trimmed.length <= 20 && /^[A-Za-z0-9\s]+$/.test(trimmed)) return { valid: true }
-    return { valid: false, error: `"${trimmed}" is not a valid NZ region.` }
-  }
-
-  // Unknown country — reject
+  if (c === 'GB') return { valid: false, error: `"${trimmed}" is not a valid UK region.` }
+  if (c === 'NZ') return { valid: false, error: `"${trimmed}" is not a valid NZ region.` }
   return { valid: false, error: `Unsupported country "${country}".` }
 }
 

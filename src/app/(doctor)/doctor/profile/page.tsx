@@ -425,7 +425,7 @@ export default function ProfilePage() {
         {/* Specialties */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Specialties</h2>
-          <input name="specialties" defaultValue={(profile?.specialties || []).join(', ')} placeholder="e.g. Neurological, Pediatrics, Sports Performance (comma separated)" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+          <input name="specialties" defaultValue={(profile?.specialties || []).join(', ')} placeholder="e.g. Nervous System Focused, Pediatric, Upper Cervical (comma separated)" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
         </div>
 
         {/* Video URL */}
@@ -490,7 +490,7 @@ export default function ProfilePage() {
         {/* Patients We Help */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Patients We Help</h2>
-          <input name="conditions_treated" defaultValue={(profile?.conditions_treated || []).join(', ')} placeholder="Back Pain, Neck Pain, Pediatric, Prenatal, Sports Injuries (comma separated)" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
+          <input name="conditions_treated" defaultValue={(profile?.conditions_treated || []).join(', ')} placeholder="Back Pain, Neck Pain, Headaches & Migraines, Sports Injuries (comma separated)" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-neuro-orange" />
         </div>
 
         {/* Education — structured */}
