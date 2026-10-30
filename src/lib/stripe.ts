@@ -1,12 +1,27 @@
 import Stripe from "stripe";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("STRIPE_SECRET_KEY environment variable is not set");
+function createStripe(): Stripe {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    throw new Error("STRIPE_SECRET_KEY environment variable is not set");
+  }
+  return new Stripe(key, {
+    apiVersion: "2026-02-25.clover",
+    typescript: true,
+  });
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2026-02-25.clover",
-  typescript: true,
+let stripeClient: Stripe | null = null;
+
+// Importing this module must not crash the build. Some Vercel projects
+// compile the app without STRIPE_SECRET_KEY. The client is created on
+// the first real Stripe call, and that call still fails if the key is missing.
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop, receiver) {
+    if (!stripeClient) stripeClient = createStripe();
+    const value = Reflect.get(stripeClient, prop, receiver);
+    return typeof value === "function" ? value.bind(stripeClient) : value;
+  },
 });
 
 export const PLANS = {
