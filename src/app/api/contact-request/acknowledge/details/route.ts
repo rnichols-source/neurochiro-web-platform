@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { isMissingColumn } from '@/lib/leads/schema'
+import { parseLegacyNote } from '@/lib/leads/validate'
 
 /**
  * GET /api/contact-request/acknowledge/details?token=...
- * Returns patient name, phone, note for the confirmation page.
- * Token serves as auth — only someone with the token can see the data.
+ * Token is the only auth. Returns the contact details the doctor needs to call.
  */
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token')
@@ -12,14 +13,31 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid token' }, { status: 400 })
   }
 
-  const supabase = createAdminClient()
-  const { data } = await (supabase as any)
+  const db = createAdminClient() as any
+  const extended = await db
     .from('contact_requests')
-    .select('name, phone, note')
+    .select('name, phone, note, email, preferred_time, message')
     .eq('acknowledge_token', token)
-    .single()
+    .maybeSingle()
+
+  let data = extended.data
+  if (extended.error && isMissingColumn(extended.error)) {
+    console.error('[LEADS] acknowledge details is missing follow-up columns. Apply migration 20261030000000_lead_followup.sql.', extended.error.message)
+    const basic = await db.from('contact_requests').select('name, phone, note').eq('acknowledge_token', token).maybeSingle()
+    data = basic.data
+  } else if (extended.error) {
+    console.error('[LEADS] acknowledge details failed:', extended.error.message)
+  }
 
   if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  return NextResponse.json({ name: data.name, phone: data.phone, note: data.note || '' })
+  const legacy = parseLegacyNote(data.note)
+  return NextResponse.json({
+    name: data.name,
+    phone: data.phone || '',
+    note: data.note || '',
+    email: data.email || legacy.email || '',
+    preferredTime: data.preferred_time || legacy.preferredTime || '',
+    message: data.message || '',
+  })
 }

@@ -36,8 +36,9 @@ function LeadsPipelineContent() {
 
   useEffect(() => { load(); }, []);
 
-  async function handleStageChange(leadId: string, newStage: string) {
-    await updateLeadStage(leadId, newStage);
+  async function handleStageChange(leadId: string, newStage: string, leadType?: string) {
+    const result = await updateLeadStage(leadId, newStage, leadType);
+    if (result?.error) alert(result.error);
     load();
   }
 
@@ -130,6 +131,7 @@ function LeadsPipelineContent() {
                       <div className="flex flex-wrap gap-3 text-xs text-white/40">
                         {lead.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{lead.email}</span>}
                         {lead.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{lead.phone}</span>}
+                        {lead.preferred_time && <span>Best time: {lead.preferred_time}</span>}
                         {lead.last_contacted_at && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />Last contacted: {new Date(lead.last_contacted_at).toLocaleDateString()}</span>}
                       </div>
 
@@ -160,7 +162,7 @@ function LeadsPipelineContent() {
                       {/* Stage Actions */}
                       {nextStage && (
                         <button
-                          onClick={() => handleStageChange(lead.id, nextStage.key)}
+                          onClick={() => handleStageChange(lead.id, nextStage.key, lead._type)}
                           className={`w-full py-2.5 ${nextStage.color} text-white text-xs font-bold rounded-lg flex items-center justify-center gap-2`}
                         >
                           <CheckCircle2 className="w-3 h-3" /> Move to {nextStage.label}
