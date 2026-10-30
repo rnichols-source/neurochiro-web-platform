@@ -24,7 +24,7 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
   {
     id: "ep-001",
     doctorName: "Dr. Jordan Wolff",
-    doctorSlug: "dr.-jordan-wolff",
+    doctorSlug: "jordan-wolff",
     clinicName: "Wolff Chiropractic",
     city: "New York City",
     state: "NY",
@@ -39,7 +39,7 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
   {
     id: "ep-002",
     doctorName: "Dr. Kara Zuleg",
-    doctorSlug: "dr.-kara-zuleg",
+    doctorSlug: "kara-zuleg",
     clinicName: "Hand in Hand Chiropractic",
     city: "Mendham",
     state: "NJ",
@@ -55,7 +55,7 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
   {
     id: "ep-003",
     doctorName: "Dr. Matt Lawrence",
-    doctorSlug: "dr.-matthew-lawrence",
+    doctorSlug: "matthew-lawrence",
     clinicName: "AlignLife",
     city: "Cary",
     state: "NC",
@@ -87,7 +87,7 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
   {
     id: "ep-005",
     doctorName: "Dr. Haley Turpin",
-    doctorSlug: "dr.-haley-turpin",
+    doctorSlug: "haley-turpin",
     clinicName: "Blue Oak Family Chiropractic",
     city: "Broomfield",
     state: "CO",
@@ -222,6 +222,19 @@ export function getEpisodeById(id: string): SpotlightEpisode | undefined {
   return spotlightEpisodes.find((ep) => ep.id === id);
 }
 
+/** "dr.-kara-zuleg", "dr-kara-zuleg", and "kara-zuleg" all become "kara-zuleg". */
+export function normalizeDoctorSlug(slug: string): string {
+  return slug
+    .trim()
+    .toLowerCase()
+    .replace(/^dr[.\-]+/, "")
+    .replace(/\./g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 export function getEpisodeByDoctorSlug(slug: string): SpotlightEpisode | undefined {
-  return spotlightEpisodes.find((ep) => ep.doctorSlug === slug);
+  const target = normalizeDoctorSlug(slug);
+  if (!target) return undefined;
+  return spotlightEpisodes.find((ep) => normalizeDoctorSlug(ep.doctorSlug) === target);
 }

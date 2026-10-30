@@ -6,18 +6,28 @@ import {
   MapPin, ShieldCheck, CheckCircle2, Mail, ExternalLink, MessageSquare,
   Loader2, Phone, Heart, Share2, Calendar, Send, Globe, Users, Star,
   Copy, Instagram, Facebook, Award, Clock, Stethoscope, GraduationCap,
-  ChevronDown, ArrowLeft, Play, TrendingUp, DollarSign,
+  ArrowLeft, Play, TrendingUp, DollarSign,
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { sendReferral } from "@/app/actions/referrals";
-import { submitPatientStory, getApprovedStories } from "@/app/actions/patient-stories";
 import { isProfileGated } from "@/lib/profile-gating";
 import ContactGateCTA from "@/components/directory/ContactGateCTA";
-import GoogleReviews from "@/components/directory/GoogleReviews";
 import Image from "next/image";
 import { getEpisodeByDoctorSlug } from "../../spotlight/spotlight-data";
+import { displayAddress, nameInitials, uniqueLabels } from "@/lib/profile-display";
+
+function parseContact(value: string): { email: string; phone: string; valid: boolean } {
+  const trimmed = value.trim();
+  if (!trimmed) return { email: "", phone: "", valid: false };
+  if (trimmed.includes("@")) {
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+    return { email: valid ? trimmed : "", phone: "", valid };
+  }
+  const digits = trimmed.replace(/\D/g, "");
+  return { email: "", phone: trimmed, valid: digits.length >= 7 };
+}
 
 function formatUrl(url: string | null | undefined): string | null {
   if (!url || !url.trim()) return null;
@@ -40,19 +50,18 @@ function Section({ bg = "white", children, id, style: extra }: { bg?: "white" | 
   );
 }
 
-export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs = [], cityDoctorCount = 0, nearbyDoctors = [], citySearchVolume = 0 }: { doctor: any; slug: string; seminars?: any[]; jobs?: any[]; cityDoctorCount?: number; nearbyDoctors?: any[]; citySearchVolume?: number }) {
+export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs = [], cityDoctorCount = 0, nearbyDoctors = [], citySearchVolume = 0, stories = [] }: { doctor: any; slug: string; seminars?: any[]; jobs?: any[]; cityDoctorCount?: number; nearbyDoctors?: any[]; citySearchVolume?: number; stories?: { id: string; patient_first_name?: string | null; condition_before?: string | null; outcome_after?: string | null; story_text?: string | null }[] }) {
   const { toggleSave, isSaved } = useUserPreferences();
   const [copied, setCopied] = useState(false);
   const [session, setSession] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [stories, setStories] = useState<any[]>([]);
   const [showStoryForm, setShowStoryForm] = useState(false);
   const [storySubmitted, setStorySubmitted] = useState(false);
   const [storyForm, setStoryForm] = useState({ patientFirstName: '', conditionBefore: '', outcomeAfter: '', storyText: '' });
   const [submittingStory, setSubmittingStory] = useState(false);
   const [appointmentSubmitted, setAppointmentSubmitted] = useState(false);
   const [submittingAppointment, setSubmittingAppointment] = useState(false);
-  const [appointmentForm, setAppointmentForm] = useState({ name: '', email: '', phone: '', preferredDate: '', message: '' });
+  const [appointmentForm, setAppointmentForm] = useState({ name: '', contact: '', bestTime: '', message: '' });
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const [showReferralModal, setShowReferralModal] = useState(false);
@@ -60,7 +69,6 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const [referring, setReferring] = useState(false);
   const [referralPatientName, setReferralPatientName] = useState('');
   const [referralNotes, setReferralNotes] = useState('');
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const supabase = createClient();
   const [photoError, setPhotoError] = useState(false);
 
@@ -72,9 +80,11 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const spotlightEpisode = getEpisodeByDoctorSlug(slug);
   const location = [doctor.city, doctor.state].filter(Boolean).join(", ");
   // Filter specialties: split concatenated entries, drop free-text sentences
-  const specialties = (doctor.specialties || [])
-    .flatMap((s: string) => s.split(/\n/).map((t: string) => t.trim()))
-    .filter((s: string) => s.length > 0 && s.length <= 50);
+  const specialties = uniqueLabels(
+    (doctor.specialties || [])
+      .flatMap((s: string) => s.split(/\n/).map((t: string) => t.trim()))
+      .filter((s: string) => s.length > 0 && s.length <= 50)
+  );
   const d = doctor as any;
 
   // Extended fields
@@ -85,7 +95,9 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const highlights = d.highlights as string[] | null;
   // Filter treatment tags: controlled vocabulary only, no free-text sentences
   const rawConditions = d.conditions_treated as string[] | null;
-  const conditionsTreated = rawConditions?.filter((c: string) => c.length <= 50 && !/\b(any|every|all)\s+(condition|problem)/i.test(c)) || null;
+  const conditionsTreated = rawConditions
+    ? uniqueLabels(rawConditions.filter((c: string) => c.length <= 50 && !/\b(any|every|all)\s+(condition|problem)/i.test(c)))
+    : null;
   const education = d.education as string[] | null;
   const languages = d.languages as string[] | null;
   const hours = d.hours as string | null;
@@ -109,7 +121,14 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         !/\b(specialties in|specialize in)\b/i.test(c)
       )
     : null;
-  const mapQuery = doctor.address ? encodeURIComponent(`${doctor.address}, ${doctor.city}, ${doctor.state}`) : doctor.city ? encodeURIComponent(`${doctor.city}, ${doctor.state}`) : null;
+  const addressLine = displayAddress(doctor.address, doctor.city, doctor.state);
+  const mapQuery = addressLine
+    ? encodeURIComponent(addressLine)
+    : doctor.city
+      ? encodeURIComponent([doctor.city, doctor.state].filter(Boolean).join(", "))
+      : null;
+  const parsedContact = parseContact(appointmentForm.contact);
+  const canSendRequest = Boolean(appointmentForm.name.trim()) && parsedContact.valid;
   const hasCostData = d.first_visit_price || d.payment_model || d.insurance_networks?.length > 0 || d.files_insurance || d.payment_plans || d.free_consultation;
   const hasAvailData = hours || d.accepts_walkins || d.offers_telehealth || d.has_evening_hours || d.has_weekend_hours;
 
@@ -154,8 +173,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       }
     };
     fetchSession();
-    getApprovedStories(doctor.id).then(setStories);
-  }, [supabase, doctor.id]);
+  }, [supabase]);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -167,6 +185,52 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  const sendAppointmentRequest = async () => {
+    if (!canSendRequest || submittingAppointment) return;
+    setSubmittingAppointment(true);
+    try {
+      const res = await fetch('/api/appointment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientName: appointmentForm.name.trim(),
+          patientEmail: parsedContact.email,
+          patientPhone: parsedContact.phone,
+          preferredDate: appointmentForm.bestTime,
+          message: appointmentForm.message,
+          doctorId: doctor.id,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setAppointmentSubmitted(true);
+      trackConversion('inquiry');
+    } catch {
+      alert('Something went wrong. Please try again or call the office directly.');
+    }
+    setSubmittingAppointment(false);
+  };
+
+  const requestFields = () => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <input type="text" placeholder="Your name *" autoComplete="name" value={appointmentForm.name} onChange={e => setAppointmentForm(f => ({ ...f, name: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
+      <input type="text" placeholder="Phone or email *" autoComplete="tel" value={appointmentForm.contact} onChange={e => setAppointmentForm(f => ({ ...f, contact: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
+      <input type="text" placeholder="Best time to reach you" value={appointmentForm.bestTime} onChange={e => setAppointmentForm(f => ({ ...f, bestTime: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
+      <textarea placeholder="Message (optional)" value={appointmentForm.message} onChange={e => setAppointmentForm(f => ({ ...f, message: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, height: 72, resize: "none", outline: "none", width: "100%" }} />
+      <p style={{ fontSize: 11, color: "#b0b8c4", margin: 0 }}>Please do not include symptoms, diagnoses, or medical details. This is not a clinical form.</p>
+      <button type="button" disabled={submittingAppointment || !canSendRequest} onClick={sendAppointmentRequest} style={{ padding: "14px 18px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 15, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: submittingAppointment || !canSendRequest ? 0.5 : 1 }}>
+        {submittingAppointment ? <><Loader2 style={{ width: 18, height: 18 }} className="animate-spin" /> Sending...</> : <><Send style={{ width: 16, height: 16 }} /> Send request</>}
+      </button>
+    </div>
+  );
+
+  const requestSuccess = () => (
+    <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 16, padding: 20, textAlign: "center" }}>
+      <CheckCircle2 style={{ width: 28, height: 28, color: "#22c55e", margin: "0 auto 8px" }} />
+      <p style={{ fontWeight: 800, color: "#15803d", fontSize: 15, margin: 0 }}>Request sent</p>
+      <p style={{ color: "#16a34a", fontSize: 13, marginTop: 4 }}>The office typically replies within 1 business day.</p>
+    </div>
+  );
 
   return (
     <div style={{ minHeight: "100dvh", background: "#F5F3EF" }}>
@@ -252,6 +316,11 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                   <GraduationCap style={{ width: 12, height: 12 }} /> Open to Students
                 </span>
               )}
+              {spotlightEpisode && (
+                <Link href="#spotlight" style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 14px", borderRadius: 20, background: "rgba(214,104,41,0.16)", border: "1px solid rgba(214,104,41,0.4)", fontSize: 11, fontWeight: 800, color: "#fdba74", textDecoration: "none" }}>
+                  <Play style={{ width: 12, height: 12 }} /> Featured on NeuroChiro Spotlight
+                </Link>
+              )}
             </div>
 
             {/* Social links */}
@@ -294,11 +363,10 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                     <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent('booking_click'); trackConversion('book'); }} style={{ padding: "14px 28px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", boxShadow: "0 8px 30px rgba(214,104,41,0.3)" }}>
                       <Calendar style={{ width: 16, height: 16 }} /> Book Online
                     </a>
-                  ) : (
-                    <a href="#appointment" style={{ padding: "14px 28px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", boxShadow: "0 8px 30px rgba(214,104,41,0.3)" }}>
-                      <Calendar style={{ width: 16, height: 16 }} /> Book Consultation
-                    </a>
-                  )}
+                  ) : null}
+                  <a href="#appointment-form" style={{ padding: "14px 28px", background: bookingUrl ? "rgba(255,255,255,0.1)" : "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", boxShadow: bookingUrl ? "none" : "0 8px 30px rgba(214,104,41,0.3)", border: bookingUrl ? "1px solid rgba(255,255,255,0.15)" : "none" }}>
+                    <Calendar style={{ width: 16, height: 16 }} /> {bookingUrl ? "Request a time" : "Book Consultation"}
+                  </a>
                   {doctor.phone && (
                     <a href={`tel:${doctor.phone}`} onClick={() => { trackEvent('phone_tap'); trackConversion('call'); }} style={{ padding: "14px 28px", background: "rgba(255,255,255,0.1)", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", border: "1px solid rgba(255,255,255,0.15)" }}>
                       <Phone style={{ width: 16, height: 16 }} /> Call
@@ -315,6 +383,71 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           </div>
         </div>
       </section>
+
+      <style>{`
+        .nc-profile-shell { display: flex; flex-direction: column; }
+        .nc-profile-aside { order: -1; padding: 20px 16px 0; }
+        .nc-profile-main { min-width: 0; }
+        @media (min-width: 1024px) {
+          .nc-profile-shell {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 380px;
+            align-items: start;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding-right: 24px;
+          }
+          .nc-profile-aside {
+            order: 0;
+            position: sticky;
+            top: 88px;
+            padding: 28px 0 24px;
+            max-height: calc(100vh - 104px);
+            overflow: auto;
+          }
+        }
+      `}</style>
+      <div className="nc-profile-shell">
+        <aside className="nc-profile-aside">
+          <div id="appointment-form" style={{ background: "white", borderRadius: 20, padding: 20, border: "1px solid rgba(30,45,59,0.08)", boxShadow: "0 16px 40px rgba(30,45,59,0.08)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+              <Calendar style={{ width: 18, height: 18, color: "#D66829" }} />
+              <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", margin: 0 }}>Request an appointment</h2>
+            </div>
+            <p style={{ fontSize: 13, color: "#718096", margin: "0 0 14px" }}>
+              Send a note to {doctor.clinic_name || name}. The office gets it by email and in their NeuroChiro portal.
+            </p>
+            {gated ? (
+              <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
+            ) : appointmentSubmitted ? requestSuccess() : (
+              <>
+                {acceptingNewPatients !== false && (
+                  <p style={{ fontSize: 13, fontWeight: 800, color: "#15803d", margin: "0 0 4px" }}>New patients welcome</p>
+                )}
+                <p style={{ fontSize: 13, color: "#4a5568", margin: "0 0 12px" }}>The office typically replies within 1 business day.</p>
+                {requestFields()}
+                {bookingUrl && (
+                  <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent('booking_click'); trackConversion('book'); }} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 12, fontSize: 13, fontWeight: 800, color: "#1E2D3B", textDecoration: "none" }}>
+                    <ExternalLink style={{ width: 14, height: 14 }} /> Or book on their website
+                  </a>
+                )}
+                {doctor.phone && (
+                  <a href={`tel:${doctor.phone}`} onClick={() => { trackEvent('phone_tap'); trackConversion('call'); }} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 10, padding: "12px 16px", borderRadius: 12, background: "#1E2D3B", color: "white", fontWeight: 800, fontSize: 14, textDecoration: "none" }}>
+                    <Phone style={{ width: 16, height: 16 }} /> Call {doctor.phone}
+                  </a>
+                )}
+              </>
+            )}
+          </div>
+          <div style={{ marginTop: 16, background: "#fff", borderRadius: 20, padding: 20, border: "1px solid rgba(30,45,59,0.08)" }}>
+            <p style={{ fontSize: 12, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px" }}>Your first visit</p>
+            {firstVisitInfo && (
+              <p style={{ fontSize: 14, color: "#4a5568", lineHeight: 1.6, whiteSpace: "pre-line", margin: "0 0 10px" }}>{firstVisitInfo}</p>
+            )}
+            <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B", margin: 0 }}>{d.first_visit_price || "Contact the office for pricing"}</p>
+          </div>
+        </aside>
+        <div className="nc-profile-main">
 
       {/* ═══════════════════════════════════════════
           2. CLAIM / UPGRADE BANNERS
@@ -353,11 +486,21 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         </Section>
       )}
 
+      <Section bg="cream" style={{ paddingTop: 28, paddingBottom: 8 }}>
+        <div style={{ background: "white", borderRadius: 20, padding: "22px 24px", border: "1px solid rgba(30,45,59,0.06)" }}>
+          <p style={{ fontSize: 12, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 8px" }}>What is nervous-system chiropractic?</p>
+          <p style={{ fontSize: 15, lineHeight: 1.7, color: "#374151", margin: 0 }}>
+            This kind of care looks at how well your body is communicating, not only where it hurts. A visit usually includes a checkup of how your spine and nerves are working, then a gentle adjustment meant to help that communication.{" "}
+            <Link href="/nervous-system" style={{ color: "#D66829", fontWeight: 800, textDecoration: "none" }}>Read the short explanation</Link>.
+          </p>
+        </div>
+      </Section>
+
       {/* ═══════════════════════════════════════════
           3. VIDEO / SPOTLIGHT — Cinematic
       ═══════════════════════════════════════════ */}
       {(spotlightEpisode || doctor.video_url) && (
-        <section style={{ background: "linear-gradient(180deg, #1E2D3B 0%, #162230 100%)", padding: "80px 24px" }}>
+        <section id="spotlight" style={{ background: "linear-gradient(180deg, #1E2D3B 0%, #162230 100%)", padding: "80px 24px" }}>
           <div style={{ maxWidth: 960, margin: "0 auto" }}>
             {spotlightEpisode ? (
               <>
@@ -389,24 +532,29 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         </section>
       )}
 
-      {/* ═══════════════════════════════════════════
-          GOOGLE REVIEWS LINK
-      ═══════════════════════════════════════════ */}
-      {d.google_reviews_url && (
-        <Section bg="white" style={{ paddingTop: 32, paddingBottom: 32 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: "#f0f4f8", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Star style={{ width: 16, height: 16, color: "#facc15", fill: "#facc15" }} />
+      {(stories.length > 0 || d.google_reviews_url) && (
+        <Section bg="white" style={{ paddingTop: 48, paddingBottom: 48 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 28 }}>What patients say</h2>
+          {stories.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 800, margin: "0 auto" }}>
+              {stories.map((story) => (
+                <blockquote key={story.id} style={{ margin: 0, background: "#F5F3EF", borderRadius: 16, padding: "20px 22px" }}>
+                  {story.story_text && <p style={{ fontSize: 16, lineHeight: 1.7, color: "#1E2D3B", margin: 0 }}>&ldquo;{story.story_text}&rdquo;</p>}
+                  {story.patient_first_name && <p style={{ fontSize: 13, fontWeight: 800, color: "#D66829", margin: "12px 0 0" }}>{story.patient_first_name}</p>}
+                  {story.condition_before && <p style={{ fontSize: 13, color: "#4a5568", margin: "8px 0 0" }}><strong>Before:</strong> {story.condition_before}</p>}
+                  {story.outcome_after && <p style={{ fontSize: 13, color: "#4a5568", margin: "4px 0 0" }}><strong>After:</strong> {story.outcome_after}</p>}
+                </blockquote>
+              ))}
             </div>
-            <a
-              href={d.google_reviews_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ fontSize: 15, fontWeight: 700, color: "#1E2D3B", textDecoration: "none" }}
-            >
-              Read patient reviews on Google &rarr;
-            </a>
-          </div>
+          )}
+          {d.google_reviews_url && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginTop: stories.length > 0 ? 24 : 0 }}>
+              <Star style={{ width: 16, height: 16, color: "#facc15", fill: "#facc15" }} />
+              <a href={d.google_reviews_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 15, fontWeight: 700, color: "#1E2D3B", textDecoration: "none" }}>
+                Read patient reviews on Google &rarr;
+              </a>
+            </div>
+          )}
         </Section>
       )}
 
@@ -649,17 +797,8 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                   <MapPin style={{ width: 18, height: 18, color: "#D66829", flexShrink: 0, marginTop: 2 }} />
                   <div>
                     <p style={{ fontWeight: 800, fontSize: 14, color: "#1E2D3B", marginBottom: 2 }}>{doctor.clinic_name}</p>
-                    <p style={{ fontSize: 13, color: "#718096" }}>{doctor.address}{doctor.address?.toLowerCase().includes(doctor.city?.toLowerCase() || '___') ? '' : `, ${location}`}</p>
+                    <p style={{ fontSize: 13, color: "#718096" }}>{addressLine}</p>
                   </div>
-                </div>
-              )}
-              {hours && (
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                    <Clock style={{ width: 16, height: 16, color: "#D66829" }} />
-                    <span style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em" }}>Hours</span>
-                  </div>
-                  <p style={{ fontSize: 14, color: "#4a5568", whiteSpace: "pre-line", lineHeight: 1.7 }}>{hours}</p>
                 </div>
               )}
               {parkingInfo && (
@@ -721,15 +860,10 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", textAlign: "center", marginBottom: 32 }}>Frequently Asked Questions</h2>
           <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", flexDirection: "column", gap: 8 }}>
             {faq.map((item, i) => (
-              <div key={i} style={{ border: "1px solid rgba(30,45,59,0.08)", borderRadius: 16, overflow: "hidden" }}>
-                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ width: "100%", padding: "18px 24px", textAlign: "left", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer" }}>
-                  <span style={{ fontWeight: 800, color: "#1E2D3B", fontSize: 15 }}>{item.question}</span>
-                  <ChevronDown style={{ width: 18, height: 18, color: "#9ca3af", transition: "transform 0.2s", transform: openFaq === i ? "rotate(180deg)" : "none" }} />
-                </button>
-                {openFaq === i && (
-                  <div style={{ padding: "0 24px 18px" }}><p style={{ fontSize: 14, color: "#4a5568", lineHeight: 1.7 }}>{item.answer}</p></div>
-                )}
-              </div>
+              <details key={i} style={{ border: "1px solid rgba(30,45,59,0.08)", borderRadius: 16, overflow: "hidden", background: "white" }}>
+                <summary style={{ padding: "18px 24px", fontWeight: 800, color: "#1E2D3B", fontSize: 15, cursor: "pointer" }}>{item.question}</summary>
+                <div style={{ padding: "0 24px 18px" }}><p style={{ fontSize: 14, color: "#4a5568", lineHeight: 1.7, margin: 0 }}>{item.answer}</p></div>
+              </details>
             ))}
           </div>
         </Section>
@@ -739,7 +873,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           10. APPOINTMENT REQUEST
       ═══════════════════════════════════════════ */}
       <Section bg="white" id="appointment" style={{ paddingTop: 80, paddingBottom: 80 }}>
-        <div id="appointment-form" style={{ maxWidth: 700, margin: "0 auto" }}>
+        <div style={{ maxWidth: 700, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", marginBottom: 8 }}>
             <Calendar style={{ width: 20, height: 20, color: "#D66829" }} />
             <h2 style={{ fontSize: 22, fontWeight: 900, color: "#1E2D3B" }}>Request a Consultation</h2>
@@ -750,46 +884,16 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             </div>
           ) : (
             <>
-              <p style={{ textAlign: "center", color: "#718096", fontSize: 14, marginBottom: 28 }}>Send a request to {doctor.clinic_name || name}. They&apos;ll get back to you directly.</p>
-              {appointmentSubmitted ? (
-                <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 20, padding: 28, textAlign: "center" }}>
-                  <CheckCircle2 style={{ width: 28, height: 28, color: "#22c55e", margin: "0 auto 8px" }} />
-                  <p style={{ fontWeight: 800, color: "#15803d", fontSize: 15 }}>Request Sent!</p>
-                  <p style={{ color: "#16a34a", fontSize: 13, marginTop: 4 }}>They&apos;ll contact you within 1-2 business days.</p>
-                </div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <input type="text" placeholder="Your name *" value={appointmentForm.name} onChange={e => setAppointmentForm(f => ({...f, name: e.target.value}))} style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, outline: "none" }} />
-                    <input type="email" placeholder="Email *" value={appointmentForm.email} onChange={e => setAppointmentForm(f => ({...f, email: e.target.value}))} style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, outline: "none" }} />
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <input type="tel" placeholder="Phone (optional)" value={appointmentForm.phone} onChange={e => setAppointmentForm(f => ({...f, phone: e.target.value}))} style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, outline: "none" }} />
-                    <div style={{ position: "relative" }}>
-                      <label style={{ position: "absolute", top: -8, left: 14, background: "white", padding: "0 4px", fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>Preferred date (optional)</label>
-                      <input type="date" value={appointmentForm.preferredDate} onChange={e => setAppointmentForm(f => ({...f, preferredDate: e.target.value}))} aria-label="Preferred appointment date" style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, outline: "none", width: "100%" }} />
-                    </div>
-                  </div>
-                  <div>
-                    <textarea placeholder="What are you looking for? (optional)" value={appointmentForm.message} onChange={e => setAppointmentForm(f => ({...f, message: e.target.value}))} style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, height: 80, resize: "none", outline: "none", width: "100%" }} />
-                    <p style={{ fontSize: 11, color: "#b0b8c4", marginTop: 4 }}>Please do not include symptoms, diagnoses, or medical details. This is not a clinical form.</p>
-                  </div>
-                  <button disabled={submittingAppointment || !appointmentForm.name || !appointmentForm.email}
-                    onClick={async () => {
-                      setSubmittingAppointment(true);
-                      try {
-                        const res = await fetch('/api/appointment', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ patientName: appointmentForm.name, patientEmail: appointmentForm.email, patientPhone: appointmentForm.phone, preferredDate: appointmentForm.preferredDate, message: appointmentForm.message, doctorId: doctor.id }) });
-                        if (!res.ok) throw new Error();
-                        setAppointmentSubmitted(true);
-                      } catch { alert('Something went wrong. Please try again or call the office directly.'); }
-                      setSubmittingAppointment(false);
-                    }}
-                    style={{ padding: "16px 32px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 15, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: submittingAppointment || !appointmentForm.name || !appointmentForm.email ? 0.5 : 1, boxShadow: "0 4px 20px rgba(214,104,41,0.25)" }}>
-                    {submittingAppointment ? <><Loader2 style={{ width: 18, height: 18 }} className="animate-spin" /> Sending...</> : <><Send style={{ width: 16, height: 16 }} /> Send Request</>}
-                  </button>
-                  <p style={{ fontSize: 12, color: "#9ca3af", textAlign: "center" }}>Your request goes to the doctor&apos;s office. NeuroChiro stores it to make sure it gets there, and we never sell or share it with third parties.</p>
-                </div>
+              <p style={{ textAlign: "center", color: "#718096", fontSize: 14, marginBottom: 8 }}>Send a request to {doctor.clinic_name || name}. They&apos;ll get back to you directly.</p>
+              {acceptingNewPatients !== false && (
+                <p style={{ textAlign: "center", fontSize: 13, fontWeight: 800, color: "#15803d", marginBottom: 4 }}>New patients welcome</p>
+              )}
+              <p style={{ textAlign: "center", fontSize: 13, color: "#4a5568", marginBottom: 20 }}>The office typically replies within 1 business day.</p>
+              {appointmentSubmitted ? requestSuccess() : (
+                <>
+                  {requestFields()}
+                  <p style={{ fontSize: 12, color: "#9ca3af", textAlign: "center", marginTop: 12 }}>Your request goes to the doctor&apos;s office. NeuroChiro stores it to make sure it gets there, and we never sell or share it with third parties.</p>
+                </>
               )}
             </>
           )}
@@ -845,7 +949,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               <div key={i} style={{ textAlign: "center" }}>
                 <div style={{ width: 80, height: 80, borderRadius: 16, background: "#f3f4f6", overflow: "hidden", margin: "0 auto 10px" }}>
                   {m.photo_url ? <img src={m.photo_url} alt={m.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
-                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#d1d5db", fontSize: 24, fontWeight: 700 }}>{m.name?.[0]}</div>}
+                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af", fontSize: 18, fontWeight: 800 }}>{nameInitials(m.name)}</div>}
                 </div>
                 <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B" }}>{m.name}</p>
                 <p style={{ fontSize: 12, color: "#718096" }}>{m.role}</p>
@@ -860,7 +964,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 32 }}>Photos</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
             {galleryImages.map((img: string, i: number) => (
-              <img key={i} src={img} alt="" style={{ width: "100%", aspectRatio: "4 / 3", objectFit: "cover", borderRadius: 16 }} />
+              <img key={i} src={img} alt={`${doctor.clinic_name || name} office photo ${i + 1}`} style={{ width: "100%", aspectRatio: "4 / 3", objectFit: "cover", borderRadius: 16 }} />
             ))}
           </div>
         </Section>
@@ -1008,6 +1112,13 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         </>
       )}
 
+      <div style={{ background: "#F5F3EF", padding: "8px 24px 28px", textAlign: "center" }}>
+        <p style={{ fontSize: 13, color: "#718096", margin: 0 }}>
+          Are you a nervous system chiropractor?{" "}
+          <Link href="/pro" style={{ color: "#D66829", fontWeight: 800, textDecoration: "none" }}>Get a profile like this →</Link>
+        </p>
+      </div>
+
       {/* Patient list CTA */}
       <div style={{ background: "#f5f3ef", padding: "32px 24px", textAlign: "center" }}>
         <p style={{ fontSize: 14, color: "#718096", marginBottom: 8 }}>
@@ -1017,25 +1128,34 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           Join the patient list and get notified when one joins your area →
         </a>
       </div>
+        </div>
+      </div>
 
       {/* ═══════════════════════════════════════════
           STICKY BOOKING BAR
       ═══════════════════════════════════════════ */}
       <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden" style={{ background: 'rgba(30,45,59,0.95)', backdropFilter: 'blur(20px)', padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
         <div className="flex gap-3 max-w-lg mx-auto">
-          {bookingUrl ? (
-            <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('book')} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Book online with ${name}`}>
-              <Calendar className="w-4 h-4" /> Book Online
-            </a>
-          ) : (
-            <button onClick={() => { trackConversion('inquiry'); document.getElementById('appointment-form')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label="Request appointment">
+          {gated ? (
+            <button onClick={() => document.getElementById('appointment-form')?.scrollIntoView({ behavior: 'smooth' })} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label="Request appointment">
               <Calendar className="w-4 h-4" /> Request Appointment
             </button>
-          )}
-          {doctor.phone && (
-            <a href={`tel:${doctor.phone}`} onClick={() => trackConversion('call')} className="py-3 px-5 bg-white/10 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Call ${name}`}>
-              <Phone className="w-4 h-4" /> Call
-            </a>
+          ) : (
+            <>
+              {bookingUrl ? (
+                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('book')} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Book online with ${name}`}>
+                  <Calendar className="w-4 h-4" /> Book
+                </a>
+              ) : null}
+              <button onClick={() => { trackConversion('inquiry'); document.getElementById('appointment-form')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label="Request appointment">
+                <Calendar className="w-4 h-4" /> {bookingUrl ? "Request" : "Request Appointment"}
+              </button>
+              {doctor.phone && (
+                <a href={`tel:${doctor.phone}`} onClick={() => trackConversion('call')} className="py-3 px-5 bg-white/10 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Call ${name}`}>
+                  <Phone className="w-4 h-4" /> Call
+                </a>
+              )}
+            </>
           )}
         </div>
       </div>
