@@ -39,6 +39,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { getSystemHealth, logoutAdmin, triggerEmergencyLockdown } from "./SidebarActions";
+import { getLeadAttentionCount } from "./contact-requests/actions";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -120,6 +121,7 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
   const [health, setHealth] = useState<any>(null);
   const [userRole, setUserRole] = useState('super_admin'); 
   const [isLockingDown, setIsLockingDown] = useState(false);
+  const [leadAttention, setLeadAttention] = useState(0);
 
   // Nav items are grouped, not filtered
 
@@ -142,6 +144,11 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
 
       const healthData = await getSystemHealth();
       setHealth(healthData);
+      try {
+        setLeadAttention(await getLeadAttentionCount());
+      } catch {
+        setLeadAttention(0);
+      }
     }
     
     loadData();
@@ -219,6 +226,11 @@ export default function Sidebar({ isOpen, onClose, onSettingsOpen }: SidebarProp
                   >
                     <item.icon className={cn("w-4 h-4 transition-colors", isActive ? "text-white" : "text-gray-400 group-hover:text-neuro-orange-light")} />
                     <span className="font-medium text-[13px]">{item.name}</span>
+                    {item.href === "/admin/contact-requests" && leadAttention > 0 && (
+                      <span className="ml-auto min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center">
+                        {leadAttention}
+                      </span>
+                    )}
                     {isActive && (
                       <div className="absolute right-2 w-1.5 h-1.5 bg-white rounded-full" />
                     )}

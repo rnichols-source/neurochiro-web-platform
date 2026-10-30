@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Phone, User, MessageSquare, CheckCircle2, AlertCircle, Loader2, ShieldCheck, Mail } from "lucide-react";
 import Link from "next/link";
 import Footer from "@/components/landing/Footer";
+import { containsHealthWords, isPlausibleEmail, isPlausiblePhone } from "@/lib/leads/validate";
 
 export default function ContactRequestPage() {
   return (
@@ -33,7 +34,7 @@ function ContactRequestContent() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [serverError, setServerError] = useState("");
-  const [result, setResult] = useState<{ doctorName: string; practiceName: string; withdrawUrl: string } | null>(null);
+  const [result, setResult] = useState<{ doctorName: string; practiceName: string; withdrawUrl: string; message?: string } | null>(null);
 
   // Load doctor info
   useEffect(() => {
@@ -73,10 +74,14 @@ function ContactRequestContent() {
   const validate = () => {
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = "Please enter your name.";
-    if (!phone.trim() || !/^\+?[\d\s\-().]{7,20}$/.test(phone.trim())) {
+    const phoneOk = isPlausiblePhone(phone);
+    const emailOk = isPlausibleEmail(email);
+    if (!phoneOk && !emailOk) {
+      e.phone = "Enter a phone number or an email so the office can reach you.";
+    } else if (phone.trim() && !phoneOk) {
       e.phone = "Please enter a valid phone number.";
     }
-    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    if (email.trim() && !emailOk) {
       e.email = "Please enter a valid email address.";
     }
     if (!consent) e.consent = "You must agree to be contacted.";
@@ -160,11 +165,10 @@ function ContactRequestContent() {
             Request Sent
           </h1>
           <p className="text-gray-500 leading-relaxed mb-2">
-            We've let <strong className="text-neuro-navy">{result.practiceName}</strong> know you'd like them to reach out.
-            Expect a call or text from their office.
+            {result.message || <>We&apos;ve let <strong className="text-neuro-navy">{result.practiceName}</strong> know you&apos;d like them to reach out. Expect a call or text from their office.</>}
           </p>
           <p className="text-sm text-gray-400 mb-8">
-            They have your name and phone number. No medical details were shared.
+            They have the contact details you shared. No medical details were shared.
           </p>
 
           <div className="bg-white rounded-2xl border border-gray-100 p-5 text-left mb-6">
@@ -269,7 +273,7 @@ function ContactRequestContent() {
             {/* Phone */}
             <div>
               <label className="block text-sm font-bold text-neuro-navy mb-1.5">
-                Phone Number
+                Phone or email
               </label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -341,6 +345,9 @@ function ContactRequestContent() {
               <p className="text-xs text-gray-400 mt-1">
                 Do not include medical or health details. Share those directly with the doctor.
               </p>
+              {containsHealthWords(note) && (
+                <p className="text-xs text-amber-700 mt-1">Please don&apos;t include medical details.</p>
+              )}
             </div>
 
             {/* Consent */}

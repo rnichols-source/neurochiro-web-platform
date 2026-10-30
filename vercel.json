@@ -59,7 +59,11 @@
     },
     {
       "path": "/api/cron/contact-escalation",
-      "schedule": "0 8,12,16,20 * * *"
+      "schedule": "15 * * * *"
+    },
+    {
+      "path": "/api/cron/lead-admin-digest",
+      "schedule": "0 12 * * *"
     }
   ],
   "redirects": [

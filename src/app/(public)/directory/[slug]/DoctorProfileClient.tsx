@@ -17,6 +17,7 @@ import ContactGateCTA from "@/components/directory/ContactGateCTA";
 import Image from "next/image";
 import { getEpisodeByDoctorSlug } from "../../spotlight/spotlight-data";
 import { displayAddress, nameInitials, uniqueLabels } from "@/lib/profile-display";
+import { containsHealthWords } from "@/lib/leads/validate";
 
 function parseContact(value: string): { email: string; phone: string; valid: boolean } {
   const trimmed = value.trim();
@@ -202,11 +203,13 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           doctorId: doctor.id,
         }),
       });
-      if (!res.ok) throw new Error();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Something went wrong.');
       setAppointmentSubmitted(true);
       trackConversion('inquiry');
-    } catch {
-      alert('Something went wrong. Please try again or call the office directly.');
+    } catch (err) {
+      const message = err instanceof Error && err.message ? err.message : 'Something went wrong. Please try again or call the office directly.';
+      alert(message);
     }
     setSubmittingAppointment(false);
   };
@@ -218,6 +221,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       <input type="text" placeholder="Best time to reach you" value={appointmentForm.bestTime} onChange={e => setAppointmentForm(f => ({ ...f, bestTime: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
       <textarea placeholder="Message (optional)" value={appointmentForm.message} onChange={e => setAppointmentForm(f => ({ ...f, message: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, height: 72, resize: "none", outline: "none", width: "100%" }} />
       <p style={{ fontSize: 11, color: "#b0b8c4", margin: 0 }}>Please do not include symptoms, diagnoses, or medical details. This is not a clinical form.</p>
+      {containsHealthWords(appointmentForm.message) ? <p style={{ fontSize: 12, color: "#b45309", margin: 0 }}>Please don&apos;t include medical details.</p> : null}
       <button type="button" disabled={submittingAppointment || !canSendRequest} onClick={sendAppointmentRequest} style={{ padding: "14px 18px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 15, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: submittingAppointment || !canSendRequest ? 0.5 : 1 }}>
         {submittingAppointment ? <><Loader2 style={{ width: 18, height: 18 }} className="animate-spin" /> Sending...</> : <><Send style={{ width: 16, height: 16 }} /> Send request</>}
       </button>
