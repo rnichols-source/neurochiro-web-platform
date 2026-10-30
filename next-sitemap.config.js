@@ -1,6 +1,6 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: process.env.SITE_URL || 'https://neurochiro.com',
+  siteUrl: process.env.SITE_URL || 'https://www.neurochiro.co',
   generateRobotsTxt: true,
   exclude: ['/admin*', '/doctor*', '/student*', '/portal*'],
   robotsTxtOptions: {

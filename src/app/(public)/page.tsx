@@ -10,6 +10,9 @@ import HeroSearch from "@/components/landing/HeroSearch";
 export const metadata = {
   title: "NeuroChiro | Find a Nervous System Chiropractor",
   description: "Find a nervous system chiropractor near you. Verified doctors who focus on how well your nervous system is communicating, not just whether something hurts.",
+  alternates: {
+    canonical: "https://www.neurochiro.co",
+  },
 };
 
 export const revalidate = 300;

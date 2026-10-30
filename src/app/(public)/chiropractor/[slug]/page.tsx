@@ -26,10 +26,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     openGraph: {
       title: `Nervous System Chiropractor in ${location}`,
       description: `Find a nervous system chiropractor near ${location}. Verified doctors, real profiles, book directly.`,
-      url: `https://neurochiro.co/chiropractor/${slug}`,
+      url: `https://www.neurochiro.co/chiropractor/${slug}`,
     },
     alternates: {
-      canonical: `https://neurochiro.co/chiropractor/${slug}`,
+      canonical: `https://www.neurochiro.co/chiropractor/${slug}`,
     },
   };
 }

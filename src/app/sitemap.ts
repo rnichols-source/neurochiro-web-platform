@@ -5,15 +5,39 @@ import { EMPTY_METROS, cityToSlug } from '@/lib/city-data';
 
 export const dynamic = 'force-dynamic';
 
-const BASE_URL = 'https://neurochiro.co';
+const BASE_URL = 'https://www.neurochiro.co';
+
+async function fetchPublishedDoctors(supabase: ReturnType<typeof createServerSupabase>) {
+  const pageSize = 1000;
+  const doctors: { slug: string; created_at: string | null }[] = [];
+
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .from('doctors')
+      .select('slug, created_at')
+      .eq('verification_status', 'verified')
+      .not('slug', 'is', null)
+      .order('created_at', { ascending: true })
+      .range(from, from + pageSize - 1);
+
+    if (error) {
+      console.error('[sitemap] doctor query failed:', error.message);
+      break;
+    }
+    if (!data?.length) break;
+
+    for (const doctor of data) {
+      if (doctor.slug) doctors.push({ slug: doctor.slug, created_at: doctor.created_at });
+    }
+    if (data.length < pageSize) break;
+  }
+
+  return doctors;
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createServerSupabase();
-
-  const { data: doctors } = await supabase
-    .from('doctors')
-    .select('slug, updated_at')
-    .eq('verification_status', 'verified');
+  const doctors = await fetchPublishedDoctors(supabase);
 
   const { data: seminars } = await supabase
     .from('seminars')
@@ -31,7 +55,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/about',
     '/contact',
     '/careers',
-    '/nervous-system',
     '/login',
     '/register',
   ].map((route) => ({
@@ -50,7 +73,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const doctorRoutes = (doctors || []).map((doctor) => ({
     url: `${BASE_URL}/directory/${doctor.slug}`,
-    lastModified: doctor.updated_at || new Date().toISOString(),
+    lastModified: doctor.created_at || new Date().toISOString(),
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }));

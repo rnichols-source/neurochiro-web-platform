@@ -38,7 +38,7 @@ export default function DirectorySkeleton() {
 
         {/* Map Column Skeleton */}
         <div className="lg:col-span-5 h-[600px] sticky top-32 rounded-2xl bg-gray-100 animate-pulse overflow-hidden flex items-center justify-center">
-          <p className="text-gray-300 font-black uppercase tracking-widest text-xs">Syncing Global Nodes...</p>
+          <p className="text-gray-400 font-semibold text-sm">Loading doctors…</p>
         </div>
       </div>
     </div>

@@ -48,7 +48,7 @@ export default async function ArticlePage({ params }: Props) {
       "name": "NeuroChiro",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://neurochiro.com/logo.png"
+        "url": "https://www.neurochiro.co/logo.png"
       }
     }
   };

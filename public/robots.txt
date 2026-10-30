@@ -7,7 +7,7 @@ Disallow: /student
 Disallow: /portal
 
 # Host
-Host: https://neurochiro.com
+Host: https://www.neurochiro.co
 
 # Sitemaps
-Sitemap: https://neurochiro.com/sitemap.xml
+Sitemap: https://www.neurochiro.co/sitemap.xml
