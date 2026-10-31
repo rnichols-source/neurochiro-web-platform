@@ -834,7 +834,10 @@ function ProfileEditor() {
           </form>
 
           <div className="mt-8">
-            <VerifiedBadge doctorSlug={profile?.slug || ""} doctorName={profile?.full_name || ""} tier={profile?.membership_tier || "basic"} />
+            <VerifiedBadge
+              doctorSlug={profile?.slug || ""}
+              doctorName={profile?.first_name && profile?.last_name ? `Dr. ${profile.first_name} ${profile.last_name}` : ""}
+            />
           </div>
         </>
       )}
