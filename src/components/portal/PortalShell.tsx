@@ -138,7 +138,7 @@ export default function PortalShell({ children }: { children: React.ReactNode })
           </button>
           <span className="hidden md:block" />
           <div className="flex items-center gap-1">
-            <NotificationBell unreadOverride={ctx.unreadNotifications} includeAnnouncements={false} variant="light" />
+            <NotificationBell unreadOverride={ctx.unreadNotifications} includeAnnouncements={false} variant="light" viewAllHref="/doctor/notifications" />
             <Link href="/doctor/profile" className="hidden md:inline-flex w-11 h-11 rounded-lg bg-portal-surface items-center justify-center text-sm font-bold" aria-label="My profile" title="My profile">
               {ctx.initials}
             </Link>

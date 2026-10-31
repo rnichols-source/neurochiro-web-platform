@@ -43,7 +43,7 @@ export default function StudentShell({ children }: { children: React.ReactNode }
           </button>
           <div className="flex-1" />
           <div className="flex items-center gap-2">
-            <NotificationBell />
+            <NotificationBell viewAllHref="/student/notifications" />
             <Link href="/student/profile" className="hidden md:inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-portal-surface text-sm font-bold text-portal-ink" aria-label="Profile" title="Profile">
               {initial}
             </Link>

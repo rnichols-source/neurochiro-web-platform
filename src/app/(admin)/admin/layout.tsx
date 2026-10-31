@@ -131,7 +131,7 @@ export default function AdminLayout({
                 <span className="text-[10px] font-black text-green-500 uppercase tracking-widest">Live Engine</span>
               </div>
               
-              <NotificationBell />
+              <NotificationBell viewAllHref="/admin/notifications" />
               
               <div className="h-8 w-px bg-white/5 mx-2 hidden sm:block" />
               
