@@ -1,14 +1,10 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase-admin';
 import { executeAutomation } from '@/lib/automations';
 
 export const maxDuration = 60;
 
-const getSupabase = () => createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+const getSupabase = () => createAdminClient();
 
 export async function GET(req: Request) {
   const authHeader = req.headers.get('authorization');

@@ -1,16 +1,12 @@
 import { wrapEmail } from '@/lib/email-template';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase-admin';
 import { Resend } from 'resend';
 import { getNudgeTarget } from '@/lib/profile-completeness';
 
 export const maxDuration = 300;
 
-const getSupabase = () => createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+const getSupabase = () => createAdminClient();
 
 const getResend = () => new Resend(process.env.RESEND_API_KEY || '');
 

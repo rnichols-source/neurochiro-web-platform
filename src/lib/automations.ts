@@ -1,6 +1,7 @@
+import 'server-only';
 import { Resend } from 'resend';
-import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
+import { createAdminClient } from '@/lib/supabase-admin';
 
 /**
  * LAZY RESEND LOADER
@@ -58,15 +59,14 @@ const sendDiscordNotification = async (message: string) => {
   }
 };
 
-// Admin client for backend operations
+// Admin client for backend operations. Returns null when the secret key is unset
+// so existing callers can skip the write instead of crashing mid-email.
 const getSupabaseAdmin = () => {
-  if (typeof window !== 'undefined') return null;
-
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!url || !key) return null;
-  return createClient(url, key);
+  try {
+    return createAdminClient();
+  } catch {
+    return null;
+  }
 };
 
 /**

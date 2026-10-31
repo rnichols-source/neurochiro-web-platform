@@ -1,10 +1,17 @@
 import { ImageResponse } from '@vercel/og';
+import { SUPABASE_URL } from '@/lib/supabase-env';
+import { getSupabaseSecretKey } from '@/lib/supabase-secret';
 
 export const runtime = 'edge';
 
 async function fetchSeminars(userId: string) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = SUPABASE_URL;
+  let key: string | null = null;
+  try {
+    key = getSupabaseSecretKey();
+  } catch {
+    key = null;
+  }
   if (!url || !key) return [];
 
   const headers = { 'apikey': key, 'Authorization': `Bearer ${key}` };
