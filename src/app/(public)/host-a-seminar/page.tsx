@@ -1,2 +1,2 @@
-import { redirect } from "next/navigation";
-export default function HostRedirect() { redirect("/seminars"); }
+import { permanentRedirect } from "next/navigation";
+export default function HostRedirect() { permanentRedirect("/seminars/host"); }

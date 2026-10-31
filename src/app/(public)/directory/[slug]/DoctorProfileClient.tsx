@@ -9,6 +9,7 @@ import {
   ArrowLeft, Play, TrendingUp, DollarSign,
 } from "lucide-react";
 import Link from "next/link";
+import { priceLabel } from "@/lib/seminars/format";
 import { createClient } from "@/lib/supabase";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { sendReferral } from "@/app/actions/referrals";
@@ -281,6 +282,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
 
             {/* Name */}
             <h1 style={{ fontSize: 42, fontWeight: 900, color: "white", fontFamily: "Lato, sans-serif", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: 8 }}>{name}</h1>
+            {seminars.length > 0 && <p style={{ display: "inline-block", marginBottom: 10, background: "rgba(214,104,41,0.15)", color: "#D66829", borderRadius: 999, padding: "6px 12px", fontSize: 12, fontWeight: 800 }}>Hosting</p>}
 
             {/* Clinic */}
             <p style={{ fontSize: 14, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 6 }}>
@@ -985,7 +987,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", marginBottom: 16 }}>Seminars & Events</h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {seminars.map((sem: any) => (
-                    <Link key={sem.id} href={`/seminars/${sem.id}`} style={{ background: "white", borderRadius: 16, padding: "16px 20px", textDecoration: "none", border: "1px solid rgba(30,45,59,0.06)", display: "block" }}>
+                    <Link key={sem.id} href={`/seminars/${sem.slug || sem.id}`} style={{ background: "white", borderRadius: 16, padding: "16px 20px", textDecoration: "none", border: "1px solid rgba(30,45,59,0.06)", display: "block" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                         <div>
                           <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B", marginBottom: 6 }}>{sem.title}</p>
@@ -994,7 +996,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                             {(sem.city || sem.location) && <span style={{ fontSize: 12, color: "#718096", display: "flex", alignItems: "center", gap: 4 }}><MapPin style={{ width: 12, height: 12 }} /> {sem.city || sem.location}</span>}
                           </div>
                         </div>
-                        {sem.price ? <span style={{ fontSize: 12, fontWeight: 800, color: "#D66829" }}>${sem.price}</span> : <span style={{ fontSize: 12, fontWeight: 800, color: "#16a34a" }}>Free</span>}
+                        <span style={{ fontSize: 12, fontWeight: 800, color: "#D66829" }}>{priceLabel({ price: sem.price, country: sem.country })}</span>
                       </div>
                     </Link>
                   ))}

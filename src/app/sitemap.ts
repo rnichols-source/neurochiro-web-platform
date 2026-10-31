@@ -66,10 +66,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createServerSupabase();
   const doctors = await fetchPublishedDoctors(supabase);
 
-  const { data: seminars } = await supabase
-    .from('seminars')
-    .select('id, created_at')
-    .eq('is_approved', true);
+  const { listSeminars } = await import('@/lib/seminars/queries');
+  const [upcomingSeminars, pastSeminars] = await Promise.all([
+    listSeminars({}),
+    listSeminars({ past: true }),
+  ]);
 
   const routes = [
     '',
@@ -107,11 +108,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const seminarRoutes = (seminars || []).map((seminar) => ({
-    url: `${BASE_URL}/seminars/${seminar.id}`,
-    lastModified: seminar.created_at || new Date().toISOString(),
+  const seminarRoutes = [...upcomingSeminars, ...pastSeminars].map((seminar) => ({
+    url: `${BASE_URL}/seminars/${seminar.slug}`,
+    lastModified: new Date().toISOString(),
     changeFrequency: 'weekly' as const,
-    priority: 0.6,
+    priority: seminar.upcoming ? 0.7 : 0.4,
   }));
 
   // City pages: every city with a doctor + empty metros

@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { isUpcoming, parseSeminarDates } from '@/lib/seminars/dates'
 
 // Public columns only. admin_notes, payment_status, host_type_at_submission
 // are revoked from anon/authenticated via column-level grants.
@@ -52,22 +53,17 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
     return []
   }
 
-  // Final manual sort for robust tier ordering
-  const sortedData = (data || []).sort((a: any, b: any) => {
-    // 1. Boosted always first
-    if (a.is_boosted !== b.is_boosted) return a.is_boosted ? -1 : 1;
-    
-    // 2. Tier hierarchy
-    const tierMap: any = { 'premium': 3, 'featured': 2, 'basic': 1 };
-    const tierA = tierMap[a.listing_tier] || 1;
-    const tierB = tierMap[b.listing_tier] || 1;
-    if (tierA !== tierB) return tierB - tierA;
-    
-    // 3. Newest first
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  });
+  const rows = ((data || []) as Array<{ dates?: string | null; is_past?: boolean | null }>).filter((row) => {
+    const end = parseSeminarDates(row.dates)?.end || null
+    return options.showPast ? !isUpcoming(end, row.is_past) : isUpcoming(end, row.is_past)
+  })
+  rows.sort((a, b) => {
+    const aStart = parseSeminarDates(a.dates)?.start || ""
+    const bStart = parseSeminarDates(b.dates)?.start || ""
+    return options.showPast ? bStart.localeCompare(aStart) : aStart.localeCompare(bStart)
+  })
 
-  return sortedData;
+  return rows
 }
 
 export async function getSeminarsForMap() {
@@ -80,14 +76,28 @@ export async function getSeminarsForMap() {
     .select('id, title, city, country, dates, instructor_name, venue_address, listing_tier')
     .eq('is_approved', true)
     .eq('is_past', false)
-    .order('listing_tier', { ascending: false })
+    .order('created_at', { ascending: true })
 
   if (error) {
     console.error("Error fetching map seminars:", error)
     return []
   }
 
-  return data || []
+  return ((data || []) as Array<{ dates?: string | null }>).filter((row) => isUpcoming(parseSeminarDates(row.dates)?.end || null, false))
+}
+
+export async function getSeminarBySlugAction(param: string) {
+  const { getSeminarBySlug } = await import('@/lib/seminars/queries')
+  const seminar = await getSeminarBySlug(param)
+  if (!seminar) return null
+  return {
+    id: seminar.id,
+    slug: seminar.slug,
+    title: seminar.title,
+    speakers: seminar.speakers,
+    city: seminar.city,
+    dates: seminar.dates,
+  }
 }
 
 export async function getSeminarById(id: string) {
@@ -120,43 +130,8 @@ export async function getSeminarById(id: string) {
 }
 
 export async function registerForSeminar(seminarId: string) {
-  const supabase = createServerSupabase()
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) return { error: "You must be logged in to register." }
-
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-
-  const { error } = await supabase
-    .from('seminar_registrations')
-    .insert({
-      seminar_id: seminarId,
-      profile_id: user.id,
-      payment_status: 'paid', // For now, assume free/member registration is success
-      amount_paid: 0
-    })
-
-  if (error) {
-    if (error.code === '23505') return { error: "You are already registered for this seminar." }
-    console.error("Seminar registration error:", error)
-    return { error: "Failed to register." }
-  }
-
-  // Notify the user of successful registration
-  try {
-    const { data: seminar } = await supabase.from('seminars').select('title').eq('id', seminarId).single()
-    const { Automations } = await import('@/lib/automations')
-    await Automations.onSeminarRegistration(
-      user.id,
-      user.email || '',
-      '',
-      seminar?.title || 'Seminar'
-    )
-  } catch (e) {
-    console.error("Seminar registration automation failed:", e)
-  }
-
-  return { success: true }
+  void seminarId
+  return { error: "Open the seminar page to RSVP or register." }
 }
 
 export async function captureEventInterest(seminarId: string, email: string, name?: string) {

@@ -1,6 +1,8 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { parseSeminarDates } from '@/lib/seminars/dates'
+import { seminarSlug } from '@/lib/seminars/slug'
 import { resolveStateCode } from '@/lib/resolve-state'
 import { Doctor } from '@/types/directory'
 import { revalidatePath } from 'next/cache'
@@ -180,7 +182,20 @@ export async function getDoctorSeminars(userId: string) {
       .eq('is_approved', true)
       .order('dates', { ascending: false })
       .limit(6);
-    return data || [];
+    const rows = (data || []) as unknown as Array<{
+      id: string;
+      title: string;
+      dates: string | null;
+      location: string | null;
+      city: string | null;
+      country: string | null;
+      price: number | null;
+      is_past: boolean | null;
+    }>;
+    return rows.map((row) => ({
+      ...row,
+      slug: seminarSlug(row.title, row.city, parseSeminarDates(row.dates)?.year || null),
+    }));
   } catch { return []; }
 }
 

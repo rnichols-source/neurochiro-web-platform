@@ -175,10 +175,7 @@ export async function createSeminarAction(formData: FormData) {
     .single()
 
   const isVerified = (doctor as any)?.verification_status === 'verified';
-  // Paid = only 'pro'. All other values (free, null, undefined, unknown) = not paid.
-  // Tier is set server-side by Stripe webhook (hardcoded 'pro' for all paid doctors).
-  const membershipTier = (doctor as any)?.membership_tier;
-  const isPaidMember = membershipTier === 'pro';
+  void tier
 
   // 3. Extract city/country from simple location input
   const locParts = location.split(',').map(s => s.trim())
@@ -186,7 +183,7 @@ export async function createSeminarAction(formData: FormData) {
   const country = locParts[1] || ''
 
   // 4. Save to Database (admin client already created above for membership check)
-  const insertData: any = {
+  const insertData: Record<string, unknown> = {
     host_id: user.id,
     title,
     description,
@@ -196,22 +193,23 @@ export async function createSeminarAction(formData: FormData) {
     dates,
     registration_link,
     price,
-    listing_tier: tier,
+    capacity: max_capacity,
     target_audience: target_audience.length > 0 ? target_audience : ['Doctors', 'Students'],
     tags,
-    payment_status: isPaidMember ? 'paid' : 'pending',
-    is_approved: isPaidMember, // Only paid members auto-approved
+    payment_status: 'pending',
+    is_approved: false,
+    status: 'submitted',
+    registration_mode: 'external',
     host_type_at_submission: isVerified ? 'doctor' : 'external',
   };
   if (ce_hours !== null) insertData.ce_hours = ce_hours;
 
-  const { data, error } = await adminClient
-    .from('seminars')
-    .insert(insertData)
-    .select()
-    .single()
+  const { insertFlexible } = await import('@/lib/seminars/write')
+  const inserted = await insertFlexible('seminars', insertData)
+  const data = inserted.data
+  const error = inserted.error
 
-  if (error) {
+  if (error || !data?.id) {
     console.error("Error creating seminar:", error)
     throw new Error("Failed to create seminar")
   }
@@ -238,18 +236,18 @@ export async function createSeminarAction(formData: FormData) {
       const { Resend } = await import('resend');
       const resend = new Resend(process.env.RESEND_API_KEY || '');
       await resend.emails.send({
-        from: 'NeuroChiro <support@neurochirodirectory.com>',
+        from: process.env.RESEND_FROM_SEMINARS || 'NeuroChiro Seminars <seminars@neurochiro.co>',
         to: [profile.email],
-        subject: `Your seminar "${title}" is live on NeuroChiro!`,
+        subject: `Seminar submitted: "${title}" — under review`,
         html: `
           <div style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;">
             <div style="background:#1a2744;padding:28px;text-align:center;">
               <h1 style="color:white;font-size:22px;margin:0;">NeuroChiro Seminars</h1>
-              <p style="color:#e97325;font-size:16px;font-weight:bold;margin:8px 0 0;">Seminar Published!</p>
+              <p style="color:#e97325;font-size:16px;font-weight:bold;margin:8px 0 0;">Submitted for review</p>
             </div>
             <div style="padding:28px;background:white;">
               <p style="font-size:15px;color:#1a2744;">Hey Dr. ${profile.full_name?.split(' ')[0] || 'there'},</p>
-              <p style="color:#666;line-height:1.6;">Your seminar is now live and visible to the NeuroChiro community.</p>
+              <p style="color:#666;line-height:1.6;">Your seminar was submitted for review. It is not live yet.</p>
               <div style="background:#f8f9fa;border-radius:10px;padding:16px;margin:20px 0;">
                 <p style="margin:0;font-weight:bold;color:#1a2744;">${title}</p>
                 <p style="margin:4px 0 0;color:#666;font-size:14px;">${location} &middot; ${dates}</p>
@@ -275,7 +273,7 @@ export async function createSeminarAction(formData: FormData) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content: `📢 **NEW SEMINAR CREATED**\n\n**Title:** ${title}\n**Host:** Dr. ${user.email?.split('@')[0] || 'Unknown'}\n**Location:** ${location}\n**Date:** ${dates}\n**Status:** Auto-approved (verified member)`,
+          content: `📢 **SEMINAR SUBMITTED**\n\n**Title:** ${title}\n**Host:** Dr. ${user.email?.split('@')[0] || 'Unknown'}\n**Location:** ${location}\n**Date:** ${dates}\n**Status:** Submitted for review`,
         }),
       }).catch(() => {});
     }

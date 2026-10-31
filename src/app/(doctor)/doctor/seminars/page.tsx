@@ -34,6 +34,7 @@ export default function SeminarsPage() {
   useEffect(() => { loadData(); }, []);
 
   function getSeminarStatus(seminar: any): { label: string; color: string } {
+    if (!seminar.is_approved) return { label: "In review", color: "bg-amber-100 text-amber-800" };
     if (seminar.is_approved && seminar.dates) {
       const seminarDate = new Date(seminar.dates);
       if (seminarDate < new Date()) return { label: "Past", color: "bg-gray-100 text-gray-600" };

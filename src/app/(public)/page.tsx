@@ -6,6 +6,8 @@ import Footer from "@/components/landing/Footer";
 // LeadCaptureInline removed — homepage links to /list instead of duplicating capture
 import { spotlightEpisodes } from "./spotlight/spotlight-data";
 import HeroSearch from "@/components/landing/HeroSearch";
+import { listSeminars } from "@/lib/seminars/queries";
+import { SeminarCard } from "@/components/seminars/SeminarCard";
 
 export const metadata = {
   title: "NeuroChiro | Find a Nervous System Chiropractor",
@@ -19,15 +21,11 @@ export const revalidate = 300;
 
 async function getPlatformStats() {
   try {
-    const supabase = createAdminClient();
     const { getDoctorCounts } = await import('@/lib/platform-stats');
-    const [doctorCounts, seminars] = await Promise.all([
-      getDoctorCounts(),
-      supabase.from('seminars').select('id', { count: 'exact', head: true }).eq('is_approved', true).eq('is_past', false),
-    ]);
+    const doctorCounts = await getDoctorCounts();
     return {
       doctors: doctorCounts.active,
-      seminars: seminars.count || 0,
+      seminars: 0,
       states: doctorCounts.statesCovered,
     };
   } catch {
@@ -53,7 +51,12 @@ async function getRecentDoctors() {
 }
 
 export default async function HomePage() {
-  const [recentDoctors, stats] = await Promise.all([getRecentDoctors(), getPlatformStats()]);
+  const [recentDoctors, stats, upcomingSeminars] = await Promise.all([
+    getRecentDoctors(),
+    getPlatformStats(),
+    listSeminars({ when: "next-3-months" }).catch(() => []),
+  ]);
+  stats.seminars = upcomingSeminars.length;
 
   return (
     <div className="min-h-dvh bg-neuro-cream">
@@ -95,6 +98,22 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      {upcomingSeminars.length > 0 && (
+        <section className="mx-auto max-w-6xl px-6 py-12">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <h2 className="text-2xl font-heading font-black text-neuro-navy">Upcoming seminars</h2>
+            <Link href="/seminars?when=next-3-months" className="text-sm font-bold text-neuro-orange">See all</Link>
+          </div>
+          <div className="flex snap-x gap-4 overflow-x-auto pb-2">
+            {upcomingSeminars.slice(0, 6).map((seminar) => (
+              <div key={seminar.id} className="w-[78%] shrink-0 snap-start sm:w-80">
+                <SeminarCard seminar={seminar} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 2. What nervous system chiropractic is */}
       <section className="max-w-3xl mx-auto px-6 py-16">

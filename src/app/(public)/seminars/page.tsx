@@ -1,173 +1,198 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { Calendar, MapPin, Users, ArrowRight, ExternalLink, Zap } from "lucide-react";
-import { getSeminars } from "./actions";
-import Footer from "@/components/landing/Footer";
+import { SEMINAR_CONFIG } from "@/config/seminars";
+import { listSeminars } from "@/lib/seminars/queries";
+import { formatMoney, monthKey, monthLabel } from "@/lib/seminars/format";
+import { itemListJsonLd } from "@/lib/seminars/jsonld";
+import { SeminarCard } from "@/components/seminars/SeminarCard";
 import LeadCaptureInline from "@/components/leads/LeadCaptureInline";
+import { Countdown } from "./countdown";
+import { FilterSheet } from "./filter-sheet";
+import { SeminarMap } from "./seminar-map";
 
-export default function SeminarsPage() {
-  const [seminars, setSeminars] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export const revalidate = 300;
 
-  useEffect(() => {
-    getSeminars({}).then((data) => {
-      setSeminars(data || []);
-      setLoading(false);
-    });
-  }, []);
+export const metadata: Metadata = {
+  title: "Seminars | NeuroChiro",
+  description: "Upcoming chiropractic seminars in adjusting, communication, neurology, pediatrics, and practice growth.",
+  alternates: { canonical: "https://www.neurochiro.co/seminars" },
+  openGraph: {
+    title: "NeuroChiro Seminars",
+    description: "Browse upcoming seminars and open a registration page for each event.",
+    url: "https://www.neurochiro.co/seminars",
+  },
+};
+
+const TOPIC_LABELS: Record<string, string> = {
+  adjusting: "Adjusting",
+  communication: "Communication",
+  "practice-growth": "Practice growth",
+  "pediatrics-prenatal": "Pediatrics",
+  neurology: "Neurology",
+  philosophy: "Philosophy",
+  students: "Students",
+  business: "Business",
+};
+
+type Search = Record<string, string | string[] | undefined>;
+
+function one(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? value[0] || "" : value || "";
+}
+
+function hrefFor(current: Record<string, string>, patch: Record<string, string | null>): string {
+  const next = { ...current };
+  for (const [key, value] of Object.entries(patch)) {
+    if (!value) delete next[key];
+    else next[key] = value;
+  }
+  const params = new URLSearchParams(next);
+  const query = params.toString();
+  return query ? `/seminars?${query}` : "/seminars";
+}
+
+export default async function SeminarsPage({ searchParams }: { searchParams: Promise<Search> }) {
+  const raw = await searchParams;
+  const current = {
+    topic: one(raw.topic),
+    when: one(raw.when),
+    country: one(raw.country),
+    format: one(raw.format),
+    ce: one(raw.ce),
+    price: one(raw.price),
+    q: one(raw.q),
+    past: one(raw.past),
+    view: one(raw.view),
+  };
+  const past = current.past === "1" || current.when === "past";
+  const seminars = await listSeminars({
+    topic: current.topic || undefined,
+    when: current.when || undefined,
+    country: current.country || undefined,
+    format: current.format || undefined,
+    ce: current.ce === "1",
+    price: current.price || undefined,
+    q: current.q || undefined,
+    past,
+  });
+  const featured = past ? [] : seminars.filter((seminar) => seminar.featured);
+  const nextEvent = seminars.find((seminar) => seminar.startDate) || seminars[0];
+  const groups = new Map<string, typeof seminars>();
+  for (const seminar of seminars) {
+    const key = monthKey(seminar.startDate, seminar.dates);
+    groups.set(key, [...(groups.get(key) || []), seminar]);
+  }
+  const preserved = Object.fromEntries(Object.entries(current).filter(([, value]) => value && value !== "0"));
+  const filterLinks = (
+    <div className="flex flex-col gap-2">
+      <Link className="min-h-11 rounded-xl px-3 py-2 text-sm font-bold text-neuro-navy hover:bg-neuro-cream" href={hrefFor(preserved, { past: null, when: null })}>Upcoming</Link>
+      <Link className="min-h-11 rounded-xl px-3 py-2 text-sm font-bold text-neuro-navy hover:bg-neuro-cream" href={hrefFor(preserved, { past: "1", when: null })}>Past seminars</Link>
+      <Link className="min-h-11 rounded-xl px-3 py-2 text-sm font-bold text-neuro-navy hover:bg-neuro-cream" href={hrefFor(preserved, { when: "next-3-months", past: null })}>Next 3 months</Link>
+      <Link className="min-h-11 rounded-xl px-3 py-2 text-sm font-bold text-neuro-navy hover:bg-neuro-cream" href={hrefFor(preserved, { ce: current.ce === "1" ? null : "1" })}>CE hours</Link>
+      <Link className="min-h-11 rounded-xl px-3 py-2 text-sm font-bold text-neuro-navy hover:bg-neuro-cream" href={hrefFor(preserved, { price: "under-500" })}>Under $500</Link>
+      <Link className="min-h-11 rounded-xl px-3 py-2 text-sm font-bold text-neuro-navy hover:bg-neuro-cream" href={hrefFor(preserved, { price: "500-plus" })}>$500 and up</Link>
+      {["US", "AU", "GB", "CA"].map((code) => (
+        <Link key={code} className="min-h-11 rounded-xl px-3 py-2 text-sm font-bold text-neuro-navy hover:bg-neuro-cream" href={hrefFor(preserved, { country: code })}>{code}</Link>
+      ))}
+      {SEMINAR_CONFIG.topics.map((topic) => (
+        <Link key={topic} className="min-h-11 rounded-xl px-3 py-2 text-sm font-bold text-neuro-navy hover:bg-neuro-cream" href={hrefFor(preserved, { topic })}>{TOPIC_LABELS[topic]}</Link>
+      ))}
+      <Link className="min-h-11 rounded-xl px-3 py-2 text-sm font-bold text-neuro-orange" href="/seminars">Clear filters</Link>
+    </div>
+  );
 
   return (
-    <div className="min-h-dvh bg-neuro-cream">
-      {/* Hero */}
-      <section className="bg-neuro-navy text-white pt-32 pb-16 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-10 right-10 w-60 h-60 bg-neuro-orange rounded-full blur-3xl" />
-          <div className="absolute bottom-10 left-10 w-40 h-40 bg-blue-500 rounded-full blur-3xl" />
-        </div>
-        <div className="max-w-4xl mx-auto relative z-10 text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neuro-orange mb-3">Events &amp; Workshops</p>
-          <h1 className="text-4xl md:text-5xl font-heading font-black mb-4 text-white">
-            Upcoming <span className="text-neuro-orange">Seminars</span>
-          </h1>
-          <p className="text-gray-400 text-lg max-w-xl mx-auto mb-8">
-            Learn from the best in nervous system chiropractic. Attend live events, workshops, and summits around the world.
-          </p>
-          <Link
-            href="/host-a-seminar"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-colors text-sm"
-          >
-            Host Your Own Seminar <ArrowRight className="w-4 h-4" />
-          </Link>
+    <main data-nc-seminars="ready" className="min-h-dvh bg-neuro-cream pb-28">
+      <section className="bg-neuro-navy px-5 pb-8 pt-28 text-white">
+        <div className="mx-auto max-w-6xl">
+          <h1 className="text-4xl font-black tracking-tight">Seminars</h1>
+          <p className="mt-2 max-w-xl text-sm text-white/70">Adjusting, communication, neurology, and the rest of the work. Every event is reviewed before it is listed.</p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {nextEvent?.startDate && !past ? <Countdown start={nextEvent.startDate} /> : null}
+            <a href="#results" className="inline-flex min-h-11 items-center rounded-xl bg-white px-4 text-sm font-bold text-neuro-navy">Browse</a>
+            <Link href="/seminars/host" className="inline-flex min-h-11 items-center rounded-xl bg-neuro-orange px-4 text-sm font-bold text-white">Host a seminar</Link>
+          </div>
         </div>
       </section>
 
-      {/* Seminars List */}
-      <section className="max-w-4xl mx-auto px-6 py-12">
-        {loading ? (
-          <div className="text-center py-20">
-            <div className="w-8 h-8 border-4 border-neuro-orange border-t-transparent rounded-full animate-spin mx-auto" />
-          </div>
-        ) : seminars.length > 0 ? (
-          <div className="space-y-6">
-            {seminars.map((seminar, i) => (
-              <div
-                key={seminar.id}
-                className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-lg transition-all ${i === 0 ? 'border-neuro-orange' : 'border-gray-100'}`}
-              >
-                {/* Featured badge for first seminar */}
-                {i === 0 && (
-                  <div className="bg-neuro-orange px-4 py-2 flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-white" />
-                    <span className="text-white text-xs font-black uppercase tracking-widest">Featured Event</span>
-                  </div>
-                )}
-
-                <div className="p-6 md:p-8">
-                  {/* Date + Location Row */}
-                  <div className="flex flex-wrap items-center gap-4 mb-4">
-                    <div className="flex items-center gap-2 bg-neuro-navy/5 px-3 py-1.5 rounded-lg">
-                      <Calendar className="w-4 h-4 text-neuro-orange" />
-                      <span className="text-sm font-bold text-neuro-navy">{seminar.dates}</span>
-                    </div>
-                    {(seminar.city || seminar.location) && (
-                      <div className="flex items-center gap-2 bg-neuro-navy/5 px-3 py-1.5 rounded-lg">
-                        <MapPin className="w-4 h-4 text-neuro-orange" />
-                        <span className="text-sm font-bold text-neuro-navy">
-                          {seminar.location ? `${seminar.location}, ` : ''}{seminar.city}{seminar.country ? `, ${seminar.country}` : ''}
-                        </span>
-                      </div>
-                    )}
-                    {(seminar as any).ce_hours && (
-                      <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
-                        <span className="text-sm font-bold text-blue-700">{(seminar as any).ce_hours} CE Hours</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Title */}
-                  <h2 className="text-2xl md:text-3xl font-heading font-black text-neuro-navy mb-3">
-                    {seminar.title}
-                  </h2>
-
-                  {/* Description */}
-                  {seminar.description && (
-                    <p className="text-gray-500 leading-relaxed mb-6 line-clamp-3">
-                      {seminar.description}
-                    </p>
-                  )}
-
-                  {/* Price + CTA */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div>
-                      {seminar.price > 0 ? (
-                        <p className="text-lg font-black text-neuro-navy">${seminar.price} <span className="text-sm font-normal text-gray-400">per person</span></p>
-                      ) : (
-                        <p className="text-lg font-black text-green-600">Free Event</p>
-                      )}
-                    </div>
-                    <div className="flex gap-3">
-                      {seminar.registration_link && (
-                        <a
-                          href={seminar.registration_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm hover:bg-neuro-orange/90 transition-colors flex items-center gap-2"
-                        >
-                          Register Now <ExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
-                      <Link
-                        href={`/seminars/${seminar.id}`}
-                        className="px-6 py-3 bg-gray-100 text-neuro-navy font-bold rounded-xl text-sm hover:bg-gray-200 transition-colors"
-                      >
-                        Learn More
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+      {featured.length > 0 && (
+        <section className="mx-auto max-w-6xl px-5 pt-6" data-featured-rail>
+          <h2 className="mb-3 text-sm font-black uppercase tracking-widest text-neuro-orange">Featured</h2>
+          <div className="flex snap-x gap-4 overflow-x-auto pb-2">
+            {featured.map((seminar) => (
+              <div key={seminar.id} className="w-[78%] shrink-0 snap-start sm:w-80">
+                <SeminarCard seminar={seminar} />
               </div>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
-            <Calendar className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-neuro-navy mb-2">No upcoming seminars yet</h3>
-            <p className="text-gray-400 text-sm mb-6">Be the first to host an event for the NeuroChiro community.</p>
-            <Link href="/host-a-seminar" className="px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm inline-flex items-center gap-2">
-              Host a Seminar <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        )}
-      </section>
+        </section>
+      )}
 
-      {/* Lead Capture */}
-      <section className="bg-neuro-cream py-12 px-6">
-        <div className="max-w-md mx-auto">
-          <LeadCaptureInline
-            source="seminars_page"
-            role="doctor"
-            headline="Get notified about new events"
-            description="We'll email you when new seminars and CE events are posted."
-            buttonText="Subscribe"
-            variant="card"
-          />
-        </div>
-      </section>
-
-      {/* Host CTA */}
-      <section className="bg-neuro-navy py-16 px-6">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl font-heading font-black text-white mb-4">Want to Host a Seminar?</h2>
-          <p className="text-gray-400 mb-8">Share your expertise with the global nervous system chiropractic community. Seminar listings are included with membership.</p>
-          <Link href="/host-a-seminar" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
-            Get Started <ArrowRight className="w-5 h-5" />
+      <div className="sticky top-16 z-30 border-b border-black/5 bg-neuro-cream/95 px-5 py-3 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center gap-2 overflow-x-auto">
+          <FilterSheet>{filterLinks}</FilterSheet>
+          <form action="/seminars" className="min-w-48 flex-1">
+            {Object.entries(preserved).filter(([key]) => key !== "q").map(([key, value]) => (
+              <input key={key} type="hidden" name={key} value={value} />
+            ))}
+            <input name="q" defaultValue={current.q} placeholder="Search seminars" className="min-h-11 w-full rounded-full border border-black/10 bg-white px-4 text-base" />
+          </form>
+          <Link href={hrefFor(preserved, { view: current.view === "map" ? null : "map" })} className="hidden min-h-11 items-center rounded-full border border-black/10 bg-white px-4 text-sm font-bold lg:inline-flex">
+            {current.view === "map" ? "List" : "Map"}
           </Link>
         </div>
+      </div>
+
+      <div id="results" className="mx-auto grid max-w-6xl gap-8 px-5 py-8 lg:grid-cols-[240px_1fr]">
+        <aside className="hidden lg:block">{filterLinks}</aside>
+        <div>
+          {current.view === "map" && !past ? (
+            <div className="h-[70vh] overflow-hidden rounded-3xl border border-black/5 bg-white">
+              <SeminarMap />
+            </div>
+          ) : seminars.length === 0 ? (
+            <div className="rounded-3xl bg-white p-8 text-center">
+              <h2 className="text-xl font-black text-neuro-navy">No seminars match those filters</h2>
+              <div className="mt-4 flex justify-center gap-3">
+                <Link href="/seminars" className="inline-flex min-h-11 items-center rounded-xl bg-neuro-navy px-4 text-sm font-bold text-white">Clear filters</Link>
+                <a href="#notify" className="inline-flex min-h-11 items-center rounded-xl border border-black/10 px-4 text-sm font-bold">Get notified</a>
+              </div>
+            </div>
+          ) : (
+            <div data-seminar-list className="space-y-8">
+              {[...groups.entries()].map(([key, rows]) => (
+                <section key={key} data-month={key}>
+                  <h2 className="mb-4 text-lg font-black text-neuro-navy">{monthLabel(key)}</h2>
+                  <div className="grid gap-4 lg:grid-cols-3">
+                    {rows.map((seminar) => <SeminarCard key={seminar.id} seminar={seminar} past={past} />)}
+                  </div>
+                </section>
+              ))}
+            </div>
+          )}
+          {!past && (
+            <p className="mt-8">
+              <Link href="/seminars?past=1" className="text-sm font-bold text-neuro-orange">Past seminars</Link>
+            </p>
+          )}
+        </div>
+      </div>
+
+      <section id="notify" className="mx-auto max-w-3xl px-5 pb-8">
+        <LeadCaptureInline source="seminar_newsletter" headline="New seminars, once a month" description="Dates, cities, and CE hours. No filler." buttonText="Email me" variant="card" />
       </section>
 
-      <Footer />
-    </div>
+      <section className="mx-auto mb-10 max-w-6xl rounded-3xl bg-neuro-navy px-6 py-8 text-white">
+        <h2 className="text-2xl font-black">Host a seminar</h2>
+        <p className="mt-2 text-sm text-white/70">Everyone applies. Pro members pay to host too.</p>
+        <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+          <li className="rounded-2xl bg-white/10 p-4"><p className="font-black">{SEMINAR_CONFIG.packages.single.name}</p><p>{formatMoney(SEMINAR_CONFIG.packages.single.priceUsd, "USD")}</p></li>
+          <li className="rounded-2xl bg-white/10 p-4"><p className="font-black">{SEMINAR_CONFIG.packages.annual.name}</p><p>{formatMoney(SEMINAR_CONFIG.packages.annual.priceUsd, "USD")} / year</p></li>
+          <li className="rounded-2xl bg-white/10 p-4"><p className="font-black">{SEMINAR_CONFIG.featuredAddon.name}</p><p>{formatMoney(SEMINAR_CONFIG.featuredAddon.priceUsd, "USD")}</p></li>
+        </ul>
+        <Link href="/seminars/host" className="mt-5 inline-flex min-h-11 items-center rounded-xl bg-neuro-orange px-5 text-sm font-bold">See host packages</Link>
+      </section>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd(past ? [] : seminars)) }} />
+    </main>
   );
 }

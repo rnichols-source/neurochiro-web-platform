@@ -1,7 +1,6 @@
 'use server'
 import { stripe, PLANS } from '@/lib/stripe'
 import { createServerSupabase } from '@/lib/supabase-server'
-import { createAdminClient } from '@/lib/supabase-admin'
 
 export async function createMemberSeminar(seminarData: {
   title: string; description: string; location: string; dates: string; registrationLink: string; price: string; capacity: string; hostEmail: string;
@@ -16,18 +15,8 @@ export async function createMemberSeminar(seminarData: {
       return { error: "Registration link must use HTTPS." }
     }
 
-    // Check membership status via admin client (profiles.tier untrusted while RLS off)
-    const adminClient = createAdminClient()
-    const { data: doctor } = await adminClient
-      .from('doctors')
-      .select('membership_tier')
-      .eq('user_id', user.id)
-      .single()
-
-    // Paid = only 'pro'. Stripe webhook hardcodes 'pro' for all paid doctors.
-    const isPaidMember = doctor?.membership_tier === 'pro'
-
-    const { error } = await adminClient.from('seminars').insert({
+    const { insertFlexible } = await import('@/lib/seminars/write')
+    const inserted = await insertFlexible('seminars', {
       title: seminarData.title,
       description: seminarData.description,
       location: seminarData.location,
@@ -35,12 +24,15 @@ export async function createMemberSeminar(seminarData: {
       dates: seminarData.dates,
       registration_link: seminarData.registrationLink,
       price: parseFloat(seminarData.price.replace(/[^0-9.]/g, '')) || 0,
+      capacity: Number(seminarData.capacity) || null,
       host_id: user.id,
-      payment_status: isPaidMember ? 'paid' : 'pending',
-      is_approved: isPaidMember === true,
-      listing_tier: 'member',
+      payment_status: 'pending',
+      is_approved: false,
+      status: 'submitted',
       host_type_at_submission: 'member',
+      registration_mode: 'external',
     })
+    const error = inserted.error
 
     if (error) {
       console.error("Seminar creation error:", error)
@@ -52,17 +44,17 @@ export async function createMemberSeminar(seminarData: {
       const { Resend } = await import('resend');
       const resend = new Resend(process.env.RESEND_API_KEY || '');
       await resend.emails.send({
-        from: 'NeuroChiro <support@neurochirodirectory.com>',
+        from: process.env.RESEND_FROM_SEMINARS || 'NeuroChiro Seminars <seminars@neurochiro.co>',
         to: [seminarData.hostEmail],
-        subject: `Your seminar "${seminarData.title}" is live!`,
+        subject: `Seminar submitted: "${seminarData.title}" — under review`,
         html: `
           <div style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;">
             <div style="background:#1a2744;padding:28px;text-align:center;">
               <h1 style="color:white;font-size:22px;margin:0;">NeuroChiro Seminars</h1>
-              <p style="color:#e97325;font-size:16px;font-weight:bold;margin:8px 0 0;">Seminar Published!</p>
+              <p style="color:#e97325;font-size:16px;font-weight:bold;margin:8px 0 0;">Submitted for review</p>
             </div>
             <div style="padding:28px;background:white;">
-              <p style="color:#333;font-size:15px;">Your seminar is now live and visible to the NeuroChiro community.</p>
+              <p style="color:#333;font-size:15px;">Your seminar was submitted for review. It is not live yet.</p>
               <div style="background:#f8f9fa;border-radius:10px;padding:16px;margin:20px 0;">
                 <p style="margin:0;font-weight:bold;color:#1a2744;">${seminarData.title}</p>
                 <p style="margin:4px 0 0;color:#666;font-size:14px;">${seminarData.location} &middot; ${seminarData.dates}</p>
@@ -86,7 +78,7 @@ export async function createMemberSeminar(seminarData: {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `📢 **NEW MEMBER SEMINAR**\n\n**Title:** ${seminarData.title}\n**Location:** ${seminarData.location}\n**Date:** ${seminarData.dates}\n**Host:** ${seminarData.hostEmail}\n**Status:** Auto-approved (member)`,
+            content: `📢 **SEMINAR SUBMITTED**\n\n**Title:** ${seminarData.title}\n**Location:** ${seminarData.location}\n**Date:** ${seminarData.dates}\n**Host:** ${seminarData.hostEmail}\n**Status:** Submitted for review`,
           }),
         }).catch(() => {});
       }
@@ -108,11 +100,10 @@ export async function createSeminarListingCheckout(seminarData: {
 
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
-    payment_method_types: ['card'],
     customer_email: seminarData.hostEmail,
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${siteUrl}/seminars?listed=true`,
-    cancel_url: `${siteUrl}/host-a-seminar?canceled=true`,
+    cancel_url: `${siteUrl}/seminars/host?canceled=true`,
     metadata: {
       type: 'seminar_listing',
       title: seminarData.title,

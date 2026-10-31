@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint .",
     "test:e2e": "playwright test",
-    "test:leads": "node --experimental-strip-types --test src/lib/doctor-timezone.test.ts src/lib/leads/escalation.test.ts"
+    "test:leads": "node --experimental-strip-types --test src/lib/doctor-timezone.test.ts src/lib/leads/escalation.test.ts",
+    "test:seminars": "node --experimental-strip-types --test src/lib/seminars/seminars.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",

@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, Award, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function SeminarCheckInPage() {
-  const { id } = useParams();
+  const params = useParams();
+  const token = useSearchParams().get("t");
+  const slug = params.slug;
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
@@ -17,7 +19,7 @@ export default function SeminarCheckInPage() {
       const res = await fetch("/api/seminars/checkin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ seminarId: id }),
+        body: JSON.stringify({ seminarId: slug, token }),
       });
       const data = await res.json();
 
