@@ -7,6 +7,7 @@ import * as Icons from 'lucide-react';
 import { LayoutDashboard, Inbox, MessageSquare, User, Menu, Lock, LogOut } from 'lucide-react';
 import NotificationBell from '@/components/layout/NotificationBell';
 import { usePortal } from '@/components/portal/PortalProvider';
+import { ReferButton } from '@/components/portal/ReferralProvider';
 import { createClient } from '@/lib/supabase';
 import type { PortalNavItem } from '@/lib/portal/features';
 
@@ -34,7 +35,7 @@ export default function PortalShell({ children }: { children: React.ReactNode })
   const [open, setOpen] = useState(false);
   const [locked, setLocked] = useState<PortalNavItem | null>(null);
 
-  const referral = ctx.nav.find((item) => item.key === 'referral_network');
+  const referral = ctx.nav.find((item) => item.key === 'referrals');
 
   function signOut() {
     const supabase = createClient();
@@ -57,11 +58,9 @@ export default function PortalShell({ children }: { children: React.ReactNode })
         <button type="button" onClick={() => setLocked(referral)} className="mx-3 mb-3 min-h-11 rounded-lg bg-portal-accent text-white text-sm font-bold">
           Refer a patient
         </button>
-      ) : (
-        <Link href="/doctor/referral-network" className="mx-3 mb-3 min-h-11 rounded-lg bg-portal-accent text-white text-sm font-bold inline-flex items-center justify-center">
-          Refer a patient
-        </Link>
-      )}
+      ) : referral ? (
+        <ReferButton className="mx-3 mb-3 min-h-11 rounded-lg bg-portal-accent text-white text-sm font-bold inline-flex items-center justify-center" />
+      ) : null}
       <nav className="flex-1 overflow-y-auto px-2 pb-4">
         {GROUPS.map((group) => {
           const items = ctx.nav.filter((item) => item.group === group);

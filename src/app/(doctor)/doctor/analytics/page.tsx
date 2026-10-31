@@ -20,7 +20,7 @@ export default async function DoctorAnalytics() {
   const profileViews = stats.viewsInRange ?? stats.profileViews;
   const patientRequests = stats.patientRequests.total;
   const profileClicks = stats.profileClicks;
-  const empty = profileViews === 0 && patientRequests === 0 && profileClicks === 0;
+  const empty = profileViews === 0 && patientRequests === 0 && profileClicks === 0 && stats.introductions === 0;
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -49,6 +49,11 @@ export default async function DoctorAnalytics() {
               label: 'Profile clicks',
               value: String(profileClicks),
               hint: 'Profile clicks: times someone clicked through to your profile in the last 30 days.',
+            },
+            {
+              label: 'Patients the directory sent you',
+              value: String(stats.introductions),
+              hint: 'Patients the directory sent you: introductions from the directory in the last 30 days. This is separate from doctor-to-doctor referrals.',
             },
           ]}
         />

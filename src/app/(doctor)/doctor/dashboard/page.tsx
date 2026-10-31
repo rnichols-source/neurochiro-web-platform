@@ -12,6 +12,7 @@ import { redirect } from 'next/navigation';
 import SetupChecklist from './setup-checklist';
 import AttentionList from './attention-list';
 import InviteColleague from './invite-colleague';
+import { ReferButton } from '@/components/portal/ReferralProvider';
 import { getAttention, getSetupFields, getViewSeries } from './home-data';
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -48,7 +49,7 @@ async function DashboardBody() {
       <PageHeader
         title={hello}
         description="Here's what needs you today."
-        primary={{ label: 'Refer a patient', href: '/doctor/referral-network' }}
+        action={<ReferButton />}
       />
       <p className="text-sm text-portal-ink-2 -mt-4">
         {doctor.clinic_name || 'Your practice'}

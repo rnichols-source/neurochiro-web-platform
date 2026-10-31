@@ -27,6 +27,7 @@ export type PortalContextValue = {
   membership: Membership;
   unreadNotifications: number;
   unreadMessages: number;
+  unreadReferrals: number;
   hasPurchase: boolean;
   chiroMatchOpen: boolean;
   nav: PortalNavItem[];

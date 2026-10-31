@@ -31,7 +31,8 @@ export const PORTAL_FEATURES: PortalFeature[] = [
   { key: 'chiromatch', label: 'ChiroMatch', href: '/doctor/chiromatch', group: 'grow', subtitle: 'Match with graduating students', state: 'coming_soon', requires: 'pro', comingSoonBlurb: 'ChiroMatch opens when a cycle is running. You will be able to rank graduating students from here.', icon: 'Shuffle' },
   // RAYMOND: confirm the show is running; else coming_soon
   { key: 'lives', label: 'The Weekly Adjustment', href: '/doctor/lives', group: 'grow', subtitle: 'Live show every Thursday 8 PM ET', state: 'beta', icon: 'Video' },
-  { key: 'referral_network', label: 'Referral network', href: '/doctor/referral-network', group: 'grow', subtitle: 'Refer patients to doctors you trust', state: 'beta', requires: 'pro', icon: 'Users' },
+  // RAYMOND: stays beta until supabase/migrations/20261102000000_referrals_v2.sql has been run, then set state to 'live'.
+  { key: 'referrals', label: 'Referrals', href: '/doctor/referrals', group: 'grow', subtitle: 'Refer a patient to another doctor', state: 'beta', requires: 'pro', icon: 'Users' },
   { key: 'community', label: 'Community', href: '/doctor/community', group: 'grow', subtitle: 'Private doctor community', state: 'coming_soon', comingSoonBlurb: 'A private place for doctors in the network. We will tell you when it opens.', icon: 'Users' },
   { key: 'marketplace', label: 'Marketplace', href: '/doctor/marketplace', group: 'grow', subtitle: 'Vetted vendors with member deals', state: 'beta', icon: 'ShoppingBag' },
   { key: 'practice_tools', label: 'Practice tools', href: '/doctor/tools', group: 'tools', subtitle: 'Care plan, scan reports, KPIs, P&L, CE, billing guide', state: 'live', requires: 'practice_tools', icon: 'Wrench' },

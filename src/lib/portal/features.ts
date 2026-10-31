@@ -8,6 +8,7 @@ export type PortalNavContext = {
   chiroMatchOpen: boolean;
   unreadMessages: number;
   unreadNotifications: number;
+  unreadReferrals?: number;
 };
 
 export type PortalNavItem = PortalFeature & {
@@ -49,6 +50,7 @@ export function navFor(ctx: PortalNavContext): PortalNavItem[] {
       locked: !requirementMet(feature, ctx),
     };
     if (feature.key === 'messages') item.badge = ctx.unreadMessages;
+    if (feature.key === 'referrals') item.badge = ctx.unreadReferrals;
     if (feature.key === 'leads') item.badge = undefined;
     return item;
   });

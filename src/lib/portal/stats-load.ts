@@ -19,8 +19,8 @@ export async function getDoctorPortalStats(input: {
     admin.from('doctors').select('profile_views').eq('id', input.doctorId).maybeSingle(),
     admin.from('reply_logs').select('id, kind, created_at').eq('doctor_id', input.doctorId),
     admin.from('link_clicks').select('id, created_at').eq('doctor_id', input.doctorId).eq('destination', 'profile'),
-    admin.from('doctor_referrals').select('id, created_at').eq('referrer_doctor_id', input.doctorId),
-    admin.from('doctor_referrals').select('id, created_at').eq('receiver_doctor_id', input.doctorId),
+    admin.from('doctor_referrals').select('id, created_at').eq('referring_doctor_id', input.doctorId),
+    admin.from('doctor_referrals').select('id, created_at').eq('receiving_doctor_id', input.doctorId),
   ]);
 
   const contacts: LeadLike[] = (contactsRes.data || []).map((row: any) => {

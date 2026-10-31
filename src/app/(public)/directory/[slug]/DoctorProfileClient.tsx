@@ -12,7 +12,6 @@ import Link from "next/link";
 import { priceLabel } from "@/lib/seminars/format";
 import { createClient } from "@/lib/supabase";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
-import { sendReferral } from "@/app/actions/referrals";
 import { isProfileGated } from "@/lib/profile-gating";
 import ContactGateCTA from "@/components/directory/ContactGateCTA";
 import Image from "next/image";
@@ -66,11 +65,6 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const [appointmentForm, setAppointmentForm] = useState({ name: '', contact: '', bestTime: '', message: '' });
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportSubmitted, setReportSubmitted] = useState(false);
-  const [showReferralModal, setShowReferralModal] = useState(false);
-  const [referralSent, setReferralSent] = useState(false);
-  const [referring, setReferring] = useState(false);
-  const [referralPatientName, setReferralPatientName] = useState('');
-  const [referralNotes, setReferralNotes] = useState('');
   const supabase = createClient();
   const [photoError, setPhotoError] = useState(false);
 
@@ -1031,12 +1025,18 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       {/* ═══════════════════════════════════════════
           14. REFERRAL (doctor-to-doctor)
       ═══════════════════════════════════════════ */}
-      {session && userRole === 'doctor' && doctor.user_id !== session.user.id && (
+      {doctor.user_id !== session?.user?.id && (
         <Section bg="cream" style={{ paddingTop: 40, paddingBottom: 40 }}>
           <div style={{ textAlign: "center" }}>
-            <button onClick={() => setShowReferralModal(true)} style={{ padding: "14px 32px", background: "#eff6ff", color: "#2563eb", borderRadius: 14, fontWeight: 800, fontSize: 14, border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 }}>
-              <Users style={{ width: 16, height: 16 }} /> Refer a Patient to {name}
-            </button>
+            {session && userRole === 'doctor' ? (
+              <Link href={`/doctor/referrals?to=${doctor.id}`} style={{ padding: "14px 32px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 16, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, minHeight: 44 }}>
+                <Users style={{ width: 16, height: 16 }} /> Refer a patient to {name}
+              </Link>
+            ) : (
+              <Link href={`/login?next=/directory/${slug}`} style={{ padding: "14px 32px", background: "#1E2D3B", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 16, textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 44 }}>
+                Sign in to refer
+              </Link>
+            )}
           </div>
         </Section>
       )}
@@ -1078,45 +1078,6 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           </p>
         </div>
       </Section>
-
-      {/* ═══════════════════════════════════════════
-          REFERRAL MODAL
-      ═══════════════════════════════════════════ */}
-      {showReferralModal && (
-        <>
-          <div onClick={() => setShowReferralModal(false)} style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }} />
-          <div style={{ position: "fixed", left: "50%", top: "50%", transform: "translate(-50%, -50%)", zIndex: 501, width: "100%", maxWidth: 440, padding: 24 }}>
-            <div style={{ background: "white", borderRadius: 24, padding: 32, boxShadow: "0 25px 60px rgba(0,0,0,0.2)" }}>
-              {referralSent ? (
-                <div style={{ textAlign: "center", padding: "24px 0" }}>
-                  <CheckCircle2 style={{ width: 48, height: 48, color: "#22c55e", margin: "0 auto 12px" }} />
-                  <h3 style={{ fontSize: 20, fontWeight: 900, color: "#1E2D3B" }}>Referral Sent!</h3>
-                </div>
-              ) : (
-                <>
-                  <h3 style={{ fontSize: 20, fontWeight: 900, color: "#1E2D3B", marginBottom: 20 }}>Refer a Patient to {name}</h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                    <input type="text" value={referralPatientName} onChange={e => setReferralPatientName(e.target.value)} placeholder="Patient name (optional)" style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14 }} />
-                    <textarea value={referralNotes} onChange={e => setReferralNotes(e.target.value)} placeholder="Notes (optional)" style={{ padding: "14px 18px", border: "1px solid #e5e7eb", borderRadius: 14, fontSize: 14, height: 80, resize: "none" }} />
-                    <div style={{ display: "flex", gap: 12 }}>
-                      <button onClick={() => setShowReferralModal(false)} style={{ flex: 1, padding: "14px", border: "1px solid #e5e7eb", borderRadius: 14, fontWeight: 800, color: "#718096", fontSize: 14, background: "none", cursor: "pointer" }}>Cancel</button>
-                      <button onClick={async () => {
-                        setReferring(true);
-                        try { await sendReferral(doctor.id, referralPatientName || undefined, referralNotes || undefined); setReferralSent(true);
-                          setTimeout(() => { setShowReferralModal(false); setReferralSent(false); setReferralPatientName(''); setReferralNotes(''); }, 2000);
-                        } catch (err: any) { alert(err.message || 'Failed'); }
-                        setReferring(false);
-                      }} disabled={referring} style={{ flex: 1, padding: "14px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, border: "none", cursor: "pointer", opacity: referring ? 0.5 : 1 }}>
-                        {referring ? 'Sending...' : 'Send Referral'}
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </>
-      )}
 
       <div style={{ background: "#F5F3EF", padding: "8px 24px 28px", textAlign: "center" }}>
         <p style={{ fontSize: 13, color: "#718096", margin: 0 }}>

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { after } from 'next/server';
 import { AuthProvider } from '@/context/AuthContext';
 import PortalShell from '@/components/portal/PortalShell';
+import ReferralProvider from '@/components/portal/ReferralProvider';
 import OnboardingGate from '@/components/portal/OnboardingGate';
 import { PortalProvider } from '@/components/portal/PortalProvider';
 import { getPortalContext } from '@/lib/portal/context';
@@ -31,9 +32,11 @@ export default async function DoctorLayout({ children }: { children: React.React
     <AuthProvider>
       <div className={`${inter.variable} portal min-h-dvh`}>
         <PortalProvider value={ctx}>
-          <OnboardingGate needsCall={needsCall} callStatus={callStatus} doctorName={firstName(ctx.fullName) === 'there' ? ctx.fullName : ctx.fullName}>
-            <PortalShell>{children}</PortalShell>
-          </OnboardingGate>
+          <ReferralProvider>
+            <OnboardingGate needsCall={needsCall} callStatus={callStatus} doctorName={firstName(ctx.fullName) === 'there' ? ctx.fullName : ctx.fullName}>
+              <PortalShell>{children}</PortalShell>
+            </OnboardingGate>
+          </ReferralProvider>
         </PortalProvider>
       </div>
     </AuthProvider>
