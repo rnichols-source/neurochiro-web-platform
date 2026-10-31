@@ -52,3 +52,21 @@
 .portal .portal-sidebar span {
   color: inherit;
 }
+
+.portal .portal-sidebar .sidebar-quiet {
+  color: rgb(255 255 255 / 0.62);
+}
+
+.portal .portal-sidebar a.sidebar-link {
+  color: rgb(255 255 255 / 0.88);
+}
+
+.portal .portal-sidebar a.sidebar-link:hover,
+.portal .portal-sidebar a.sidebar-link[aria-current="page"] {
+  color: #fff;
+  background: rgb(255 255 255 / 0.08);
+}
+
+.portal .portal-sidebar a.sidebar-link[aria-current="page"] {
+  box-shadow: inset 2px 0 0 #d66829;
+}
