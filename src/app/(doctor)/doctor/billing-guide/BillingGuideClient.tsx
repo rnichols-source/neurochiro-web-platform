@@ -269,7 +269,7 @@ export default function BillingGuideClient({ hasAccess = false }: { hasAccess?: 
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto">
       {hasAccess || purchased ? (
-        <PageHeader title="Your billing and coding guide (included with your membership)" />
+        <PageHeader title="Billing & coding guide" description="Included with your membership. Codes, modifiers, scripts and templates." />
       ) : (
         <div className="mb-6">
           <h1 className="text-2xl font-heading font-bold text-neuro-navy">Insurance &amp; Billing Toolkit</h1>
