@@ -10,6 +10,9 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request, context: { params: Promise<{ slug: string }> }) {
   const { slug } = await context.params;
   const seminar = await getSeminarBySlug(slug);
+  if (seminar && !seminar.upcoming) {
+    return NextResponse.redirect(new URL(`/seminars/${seminar.slug}`, request.url), 302);
+  }
   if (!seminar?.registrationLink) {
     return NextResponse.redirect(new URL("/seminars", request.url), 302);
   }

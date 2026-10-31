@@ -21,7 +21,7 @@ function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const errorParam = searchParams.get("error");
-  const redirectParam = searchParams.get("redirect");
+  const redirectParam = searchParams.get("redirect") || searchParams.get("next");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

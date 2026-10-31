@@ -58,6 +58,7 @@
     var patientMobile = window.innerWidth < 1024;
     var pendingUser = null;
     window.__ncMapFeatureCount = 0;
+    var seminarMode = /(?:\?|&)layer=seminar(?:&|$)/.test(window.location.search);
 
     function escapeHtml(value) {
         return String(value == null ? '' : value)
@@ -68,14 +69,17 @@
             .replace(/'/g, '&#39;');
     }
 
-    var map = new maplibregl.Map({
+    var mapOptions = {
         container: 'map',
         style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
         center: [-98, 38],
         zoom: 4,
         maxPitch: 60,
         attributionControl: false
-    });
+    };
+    if (seminarMode) mapOptions.cooperativeGestures = false;
+    var map = new maplibregl.Map(mapOptions);
+    window.__ncMap = map;
 
     // Only show zoom controls on desktop — mobile uses pinch to zoom like Apple Maps
     var isMobile = window.innerWidth < 1024;
@@ -101,6 +105,34 @@
         html += '</div>';
         return html;
     }
+
+    function createSeminarPopupHtml(props) {
+        var title = escapeHtml(props.title || props.name || 'Seminar');
+        var dates = escapeHtml(props.dateLabel || '');
+        var city = escapeHtml(props.cityLabel || props.city || '');
+        var price = escapeHtml(props.priceLabel || '');
+        var ce = props.ceHours ? escapeHtml(String(props.ceHours)) + ' CE' : '';
+        var slug = String(props.slug || '');
+        var html = '<div class="popup-card">';
+        html += '<div class="doctor-name">' + title + '</div>';
+        if (dates) html += '<div class="clinic-name">' + dates + '</div>';
+        if (city) html += '<div class="location">' + city + '</div>';
+        if (price || ce) html += '<div class="clinic-name">' + [price, ce].filter(Boolean).join(' · ') + '</div>';
+        if (/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+            html += '<button type="button" class="view-btn" data-seminar-slug="' + escapeHtml(slug) + '">View seminar</button>';
+        }
+        html += '</div>';
+        return html;
+    }
+
+    document.addEventListener('click', function(event) {
+        var target = event.target && event.target.closest ? event.target.closest('[data-seminar-slug]') : null;
+        if (!target) return;
+        event.preventDefault();
+        var slug = target.getAttribute('data-seminar-slug') || '';
+        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return;
+        window.parent.postMessage({ type: 'open-seminar', slug: slug }, window.location.origin);
+    });
 
     function paintSelection(id) {
         if (!map.getLayer('doctor-dots')) return;
@@ -164,10 +196,10 @@
             source: 'doctors',
             filter: ['!', ['has', 'point_count']],
             paint: {
-                'circle-color': '#D66829',
-                'circle-radius': 12,
-                'circle-stroke-width': 2,
-                'circle-stroke-color': '#ffffff'
+                'circle-color': ['case', ['==', ['get', 'kind'], 'seminar'], '#D66829', '#D66829'],
+                'circle-radius': ['case', ['==', ['get', 'kind'], 'seminar'], 14, 12],
+                'circle-stroke-width': ['case', ['==', ['get', 'kind'], 'seminar'], 3, 2],
+                'circle-stroke-color': ['case', ['==', ['get', 'kind'], 'seminar'], '#1E2D3B', '#ffffff']
             }
         });
         map.addLayer({
@@ -205,13 +237,14 @@
         function openDoctor(feature) {
             var coords = feature.geometry.coordinates.slice();
             var props = feature.properties || {};
+            var isSeminar = props.kind === 'seminar';
             selectedDoctorId = props.doctorId;
             paintSelection(selectedDoctorId);
-            if (!patientMobile) {
+            if (isSeminar || !patientMobile) {
                 if (activePopup) activePopup.remove();
                 activePopup = new maplibregl.Popup({ offset: 14, closeButton: true, closeOnClick: true, maxWidth: '280px', focusAfterOpen: false })
                     .setLngLat(coords)
-                    .setHTML(createPopupHtml(props))
+                    .setHTML(isSeminar ? createSeminarPopupHtml(props) : createPopupHtml(props))
                     .addTo(map);
                 activePopup.on('close', function() { activePopup = null; });
             }
@@ -274,6 +307,7 @@
     function setFeatures(features) {
         pendingFeatures = features || [];
         window.__ncMapFeatureCount = pendingFeatures.length;
+        window.__ncMapFeatures = pendingFeatures;
         console.log('[MAP] setFeatures called with', pendingFeatures.length, 'features');
         if (!layersReady) {
             console.log('[MAP] Layers not ready, features queued');
@@ -304,14 +338,23 @@
         }
     }
 
+    function isSeminarFit(features) {
+        return seminarMode || (features[0] && features[0].properties && features[0].properties.kind === 'seminar');
+    }
+
     function fitToFeatures(features) {
         if (!features || features.length === 0) return;
+        var seminarFit = isSeminarFit(features);
         if (features.length === 1) {
-            map.flyTo({ center: features[0].geometry.coordinates, zoom: 13, duration: 1200, essential: true });
+            map.flyTo({ center: features[0].geometry.coordinates, zoom: seminarFit ? 8 : 13, duration: 1200, essential: true });
             return;
         }
         var bounds = new maplibregl.LngLatBounds();
         features.forEach(function(f) { bounds.extend(f.geometry.coordinates); });
+        if (seminarFit) {
+            map.fitBounds(bounds, { padding: 40, maxZoom: 9, duration: 1200 });
+            return;
+        }
         map.fitBounds(bounds, { padding: { top: 80, bottom: 80, left: 60, right: 60 }, maxZoom: 14, duration: 1200 });
     }
 
@@ -452,6 +495,19 @@
 
             case 'select-marker':
                 flyToDoctor(d.doctorId);
+                break;
+
+            case 'focus-seminar':
+                var focusSlug = String(d.slug || '');
+                var focusList = pendingFeatures || [];
+                for (var fi = 0; fi < focusList.length; fi++) {
+                    var focusFeature = focusList[fi];
+                    if (focusFeature.properties && focusFeature.properties.kind === 'seminar' && focusFeature.properties.slug === focusSlug) {
+                        openDoctor(focusFeature);
+                        map.flyTo({ center: focusFeature.geometry.coordinates, zoom: Math.max(map.getZoom(), 8), duration: 600, essential: true });
+                        break;
+                    }
+                }
                 break;
 
             case 'deselect-marker':

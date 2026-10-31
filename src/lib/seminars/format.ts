@@ -75,6 +75,126 @@ export function flagEmoji(code: string): string {
   return String.fromCodePoint(...code.split("").map((char) => 127397 + char.charCodeAt(0)));
 }
 
+const REGION_LABELS: Record<string, string> = {
+  ia: "IA", iowa: "IA",
+  fl: "FL", florida: "FL",
+  ga: "GA", georgia: "GA",
+  ca: "CA", california: "CA",
+  de: "DE", delaware: "DE",
+  nj: "NJ", "new jersey": "NJ",
+};
+
+const COUNTRY_LABELS: Record<string, string> = {
+  US: "United States",
+  AU: "Australia",
+  GB: "United Kingdom",
+  CA: "Canada",
+  NZ: "New Zealand",
+};
+
+function tidyToken(value?: string | null): string {
+  return (value || "").trim().replace(/\s+/g, " ");
+}
+
+function tokenKey(value: string): string {
+  return value.toLowerCase().replace(/\./g, "");
+}
+
+function pushUnique(parts: string[], seen: Set<string>, value?: string | null) {
+  const token = tidyToken(value);
+  if (!token) return;
+  const key = tokenKey(token);
+  if (seen.has(key)) return;
+  seen.add(key);
+  parts.push(token);
+}
+
+export function regionLabel(region?: string | null, location?: string | null, city?: string | null): string {
+  const direct = tidyToken(region);
+  const source = direct || (() => {
+    const parts = (location || "").split(",").map((part) => part.trim()).filter(Boolean);
+    if (parts.length < 2) return "";
+    const last = parts[parts.length - 1];
+    if (tokenKey(last) === tokenKey(city || "")) return "";
+    if (["united states", "usa", "us", "australia", "united kingdom", "uk"].includes(tokenKey(last))) return "";
+    return last;
+  })();
+  if (!source) return "";
+  return REGION_LABELS[tokenKey(source)] || source;
+}
+
+export function formatSeminarLocation(input: {
+  city?: string | null;
+  region?: string | null;
+  state?: string | null;
+  country?: string | null;
+  countryCode?: string | null;
+  location?: string | null;
+  format?: string | null;
+}): string {
+  if (input.format === "virtual") return "Virtual";
+  const city = tidyToken(input.city);
+  const region = regionLabel(input.region || input.state, input.location, city);
+  const code = countryCode(input.countryCode || input.country);
+  const country = code === "US" && region ? "" : (COUNTRY_LABELS[code] || tidyToken(input.country));
+  const parts: string[] = [];
+  const seen = new Set<string>();
+  pushUnique(parts, seen, city);
+  pushUnique(parts, seen, region);
+  if (country && tokenKey(country) !== tokenKey(city) && tokenKey(country) !== "united states") pushUnique(parts, seen, country);
+  else if (country && !region) pushUnique(parts, seen, country);
+  if (!parts.length && input.location) {
+    for (const part of input.location.split(",")) pushUnique(parts, seen, part);
+  }
+  return parts.join(", ");
+}
+
+export function isPlaceholderVenue(name?: string | null, city?: string | null): boolean {
+  const venue = tidyToken(name);
+  if (!venue) return false;
+  if (/event venue$/i.test(venue)) return true;
+  return Boolean(city && tokenKey(venue) === tokenKey(`${city} Event Venue`));
+}
+
+export function displayVenueName(name?: string | null, city?: string | null): string {
+  if (!tidyToken(name) || isPlaceholderVenue(name, city)) return "Venue TBA";
+  return tidyToken(name);
+}
+
+export function formatSeminarAddress(input: {
+  city?: string | null;
+  region?: string | null;
+  state?: string | null;
+  country?: string | null;
+  countryCode?: string | null;
+  location?: string | null;
+  venueName?: string | null;
+  venueAddress?: string | null;
+  format?: string | null;
+}): string {
+  const place = formatSeminarLocation(input);
+  const venue = tidyToken(input.venueName);
+  const showVenue = venue && !isPlaceholderVenue(venue, input.city);
+  const placeKeys = new Set(place.split(",").map((part) => tokenKey(part.trim())).filter(Boolean));
+  if (input.city) placeKeys.add(tokenKey(input.city));
+  const addressParts = isPlaceholderVenue(input.venueAddress, input.city)
+    ? []
+    : (input.venueAddress || "").split(",").map((part) => part.trim()).filter((part) => part && !placeKeys.has(tokenKey(part)) && tokenKey(part) !== tokenKey(venue));
+  const parts: string[] = [];
+  const seen = new Set<string>();
+  if (showVenue) pushUnique(parts, seen, venue);
+  for (const part of addressParts) pushUnique(parts, seen, part);
+  if (place) pushUnique(parts, seen, place);
+  return parts.join(", ");
+}
+
+export function seminarMetaTitle(title: string, place: string, when: string): string {
+  const city = place.split(",")[0]?.trim().toLowerCase() || "";
+  const includePlace = Boolean(place) && Boolean(city) && !title.toLowerCase().includes(city);
+  const suffix = [includePlace ? place : "", when].filter(Boolean).join(" · ");
+  return suffix ? `${title} — ${suffix} | NeuroChiro Seminars` : `${title} | NeuroChiro Seminars`;
+}
+
 export function seatsLeftLabel(capacity?: number | null, sold?: number | null): string | null {
   if (!capacity || capacity <= 0) return null;
   const left = capacity - (sold || 0);

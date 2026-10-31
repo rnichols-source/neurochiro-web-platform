@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { parseSeminarDates, timezoneForCity, isUpcoming, zonedIso } from "./dates.ts";
 import { seminarSlug } from "./slug.ts";
-import { formatMoney, priceLabel, seatsLeftLabel } from "./format.ts";
+import { formatMoney, formatSeminarAddress, formatSeminarLocation, priceLabel, seatsLeftLabel, seminarMetaTitle } from "./format.ts";
+import { normalizeAgenda } from "./agenda.ts";
+import { resolveSeminarHost } from "./host.ts";
+import { resolveSeminarCoordinates } from "./geo.ts";
 import { appendUtm, memberTicketPrice, seatsAvailable } from "./utm.ts";
 import { fulfillSeminarSession, releaseSeminarHold, refundSeminarCharge, type SeminarStore } from "./fulfill.ts";
 import { buildTicketCheckoutSession } from "./checkout-params.ts";
@@ -131,5 +134,80 @@ describe("calendar", () => {
     });
     assert.match(ics, /DTSTART;TZID=America\/New_York:20261106T090000/);
     assert.match(ics, /DTEND;TZID=America\/New_York:20261107T170000/);
+    assert.match(ics, /LOCATION:Fort Lauderdale/);
+    assert.doesNotMatch(ics, /Fort Lauderdale, Fort Lauderdale/);
+  });
+});
+
+describe("locations", () => {
+  it("drops repeated city and country tokens", () => {
+    assert.equal(formatSeminarLocation({
+      city: "Davenport",
+      location: "Davenport, IA",
+      country: "United States",
+    }), "Davenport, IA");
+    assert.equal(formatSeminarAddress({
+      city: "Fort Lauderdale",
+      location: "Fort Lauderdale, FL",
+      country: "United States",
+      venueAddress: "Fort Lauderdale, FL",
+    }), "Fort Lauderdale, FL");
+    assert.equal(formatSeminarAddress({
+      city: "Fort Lauderdale",
+      location: "Fort Lauderdale, FL",
+      country: "United States",
+      venueName: "Westin Fort Lauderdale Beach Resort",
+      venueAddress: "Fort Lauderdale",
+    }), "Westin Fort Lauderdale Beach Resort, Fort Lauderdale, FL");
+    assert.equal(seminarMetaTitle("MLS ONE | CATALYST — Davenport, IA", "Davenport, IA", "Nov 21–22, 2026"), "MLS ONE | CATALYST — Davenport, IA — Nov 21–22, 2026 | NeuroChiro Seminars");
+  });
+});
+
+describe("agenda", () => {
+  it("renders nested item titles and keeps real pre days", () => {
+    const agenda = normalizeAgenda([
+      { day: "November 4, 2026", items: [{ time: "4:00 PM", title: "Check-in", description: "Registration opens" }] },
+      { day: "November 5, 2026", items: [{ time: "9:00 AM", title: "Vendor setup" }] },
+      { day: "November 6, 2026", items: [{ time: "8:30 AM", title: "Adjusting intensive" }] },
+      { day: "Empty", items: [{ time: "", title: "Session" }] },
+    ]);
+    const titles = agenda.flatMap((day) => day.items.map((item) => item.title));
+    assert.deepEqual(titles, ["Check-in", "Vendor setup", "Adjusting intensive"]);
+    assert.equal(titles.includes("Session"), false);
+    assert.equal(agenda[0].label, "November 4, 2026");
+  });
+});
+
+describe("host attribution", () => {
+  it("shows the instructor instead of the admin host", () => {
+    const credit = resolveSeminarHost({
+      hosts: null,
+      instructorName: "Dr. Wade Port, Jim Deegan D.C. & MLS Staff",
+      hostDoctor: { slug: "raymond-nichols", first_name: "Raymond", last_name: "Nichols", photo_url: null, clinic_name: "NeuroChiro" },
+    });
+    assert.equal(credit.name, "Dr. Wade Port, Jim Deegan D.C. & MLS Staff");
+    assert.equal(credit.verified, false);
+    assert.equal(credit.profileSlug, null);
+  });
+
+  it("credits an external doctor only when no instructor is set", () => {
+    const credit = resolveSeminarHost({
+      hosts: null,
+      instructorName: null,
+      hostDoctor: { slug: "waldo-amadeo-dc", first_name: "Waldo", last_name: "Amadeo", photo_url: null, clinic_name: null },
+    });
+    assert.equal(credit.name, "Waldo Amadeo");
+    assert.equal(credit.verified, true);
+    assert.equal(credit.profileSlug, "waldo-amadeo-dc");
+  });
+});
+
+describe("coordinates", () => {
+  it("uses the static city table when latitude is missing", () => {
+    const point = resolveSeminarCoordinates({ city: "Davenport", location: "Davenport, IA", country: "United States" });
+    assert.equal(point?.lat, 41.5236);
+    assert.equal(resolveSeminarCoordinates({ city: "Nowhere", country: "United States" }), null);
+    const stored = resolveSeminarCoordinates({ latitude: 1.5, longitude: 2.5, city: "Davenport" });
+    assert.deepEqual(stored, { lat: 1.5, lng: 2.5 });
   });
 });

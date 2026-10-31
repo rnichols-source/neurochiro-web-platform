@@ -7,8 +7,8 @@ module.exports = {
     policies: [
       {
         userAgent: '*',
-        allow: '/',
-        disallow: ['/admin', '/doctor', '/student', '/portal'],
+        allow: ['/', '/api/og/'],
+        disallow: ['/api/', '/admin', '/doctor', '/student', '/portal'],
       },
     ],
   },

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { getDoctors, getStudentsForMap } from "@/app/(public)/directory/actions";
 import { getSeminarsForMap } from "@/app/(public)/seminars/actions";
+import { pinsToFeatures, type SeminarMapPin } from "@/lib/seminars/map-pins";
 import { Doctor } from "@/types/directory";
 
 interface GlobalNetworkMapProps {
@@ -30,6 +31,7 @@ interface GlobalNetworkMapProps {
   onMarkerClick?: (doctor: Record<string, any>) => void;
   onMarkerDeselect?: () => void;
   patientMode?: boolean;
+  seminarPins?: SeminarMapPin[];
   userLocation?: { lat: number; lng: number } | null;
   emptyLabel?: string;
   onUserMove?: (bounds: [number, number, number, number]) => void;
@@ -46,12 +48,14 @@ export default function GlobalNetworkMap({
   onMarkerClick,
   onMarkerDeselect,
   patientMode = false,
+  seminarPins,
   userLocation = null,
   emptyLabel = "",
   onUserMove,
 }: GlobalNetworkMapProps) {
   const router = useRouter();
   const { region } = useRegion();
+  const seminarOnly = defaultLayer === "seminar";
   const [activeLayer, setActiveLayer] = useState<"all" | "student" | "seminar">(defaultLayer);
   const [selectedPin, setSelectedPin] = useState<Record<string, any> | null>(null);
   const [internalSearchQuery, setInternalSearchQuery] = useState("");
@@ -89,7 +93,7 @@ export default function GlobalNetworkMap({
   const updateMapData = useCallback(async (bounds: [number, number, number, number], zoom: number) => {
     currentBounds.current = bounds;
     currentZoom.current = zoom;
-    if (initialDoctors.length > 0 && activeLayer === 'all') return;
+    if ((seminarOnly && seminarPins) || (initialDoctors.length > 0 && activeLayer === 'all')) return;
 
     setLoading(true);
     try {
@@ -108,7 +112,7 @@ export default function GlobalNetworkMap({
     } finally {
       setLoading(false);
     }
-  }, [activeLayer, region.code, initialDoctors.length]);
+  }, [activeLayer, region.code, initialDoctors.length, seminarOnly, seminarPins]);
 
   const [mapReady, setMapReady] = useState(false);
 
@@ -123,7 +127,7 @@ export default function GlobalNetworkMap({
   // Set initial view when map is ready (only once per region change)
   const initialViewSent = useRef(false);
   useEffect(() => {
-    if (!mapReady || !iframeRef.current?.contentWindow) return;
+    if (!mapReady || !iframeRef.current?.contentWindow || seminarOnly) return;
     // Only send initial view once — markers handle fit-to-bounds
     if (!initialViewSent.current) {
       initialViewSent.current = true;
@@ -133,7 +137,7 @@ export default function GlobalNetworkMap({
         zoom: region.mapDefaults.zoom
       }, window.location.origin);
     }
-  }, [mapReady, region.code]);
+  }, [mapReady, region.code, seminarOnly]);
 
   // Build marker data — include extra props for preview card
   const buildMarkerData = useCallback(() => {
@@ -168,8 +172,20 @@ export default function GlobalNetworkMap({
   // force-raw-markers (with fit-to-bounds) when the doctor list changes from a new search
   // update-markers (no re-fitting) when only the filter/highlight changes
   const prevDoctorIds = useRef<string>('');
+  const seminarFeatures = useMemo(() => {
+    const source = seminarPins ?? seminars;
+    return pinsToFeatures(source as SeminarMapPin[]);
+  }, [seminarPins, seminars]);
+
   useEffect(() => {
     if (!mapReady || !iframeRef.current?.contentWindow) return;
+    if (seminarOnly) {
+      iframeRef.current.contentWindow.postMessage({
+        type: "force-raw-markers",
+        data: seminarFeatures,
+      }, window.location.origin);
+      return;
+    }
     const dataToSend = buildMarkerData();
 
     // Detect if the underlying doctor set changed (new search) vs just filter changes
@@ -181,7 +197,7 @@ export default function GlobalNetworkMap({
       type: doctorsChanged ? 'force-raw-markers' : 'update-markers',
       data: dataToSend,
     }, window.location.origin);
-  }, [initialDoctors, listDoctors, mapReady, buildMarkerData]);
+  }, [initialDoctors, listDoctors, mapReady, buildMarkerData, seminarOnly, seminarFeatures]);
 
   useEffect(() => {
     if (!mapReady || !iframeRef.current?.contentWindow) return;
@@ -199,8 +215,12 @@ export default function GlobalNetworkMap({
   // Handle iframe messages
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin || !e.data?.type) return;
       if (e.data.type === 'MAP_INITIALIZED' || e.data.type === 'map-ready') {
         setMapReady(true);
+      } else if (e.data.type === 'open-seminar') {
+        const slug = String(e.data.slug || "");
+        if (/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) router.push(`/seminars/${slug}`);
       } else if (e.data.type === 'map-move') {
         currentBounds.current = e.data.bounds;
         currentZoom.current = e.data.zoom;
@@ -216,7 +236,7 @@ export default function GlobalNetworkMap({
     };
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [updateMapData, onMarkerClick, onMarkerDeselect, patientMode, onUserMove]);
+  }, [updateMapData, onMarkerClick, onMarkerDeselect, patientMode, onUserMove, router]);
 
   useEffect(() => {
     if (initialDoctors && initialDoctors.length > 0) setDoctors(initialDoctors);
@@ -244,7 +264,7 @@ export default function GlobalNetworkMap({
       <iframe
         ref={iframeRef}
         id="network-map-iframe"
-        src="/network-map.html"
+        src={seminarOnly ? "/network-map.html?layer=seminar" : "/network-map.html"}
         loading="lazy"
         className="absolute inset-0 w-full h-full border-none"
         title="Global Network Map"
@@ -257,7 +277,7 @@ export default function GlobalNetworkMap({
       )}
 
       {/* Layer toggles stay off the patient directory. */}
-      {!patientMode && <div className="absolute bottom-6 right-6 z-10 hidden lg:flex flex-col gap-2">
+      {!patientMode && !seminarOnly && <div className="absolute bottom-6 right-6 z-10 hidden lg:flex flex-col gap-2">
         {[
           { id: "all", label: "Doctors", icon: MapPin, bg: "bg-neuro-orange" },
           { id: "student", label: "Students", icon: GraduationCap, bg: "bg-blue-500" },
@@ -282,7 +302,7 @@ export default function GlobalNetworkMap({
 
       {/* Selected pin slide-out stays on internal maps. Patient search uses the list and peek card. */}
       <AnimatePresence>
-        {!patientMode && selectedPin && (
+        {!patientMode && !seminarOnly && selectedPin && (
           <motion.div
             initial={{ x: "100%", opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}

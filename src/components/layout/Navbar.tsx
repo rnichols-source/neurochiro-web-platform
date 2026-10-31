@@ -218,7 +218,10 @@ export default function Navbar() {
           {/* Mobile Menu Toggle */}
           <div className="flex items-center lg:hidden">
             <CartButton />
-            <button 
+            <button
+              type="button"
+              aria-label="Open menu"
+              aria-expanded={mobileMenuOpen}
               className={`p-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`}
               onClick={() => setMobileMenuOpen(true)}
             >

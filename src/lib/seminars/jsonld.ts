@@ -1,5 +1,7 @@
 import type { SeminarRecord } from "./types";
 import { zonedIso } from "./dates";
+import { displayVenueName, regionLabel } from "./format";
+import { resolveSeminarHost } from "./host";
 
 function records(value: unknown): Record<string, unknown>[] {
   if (!Array.isArray(value)) return [];
@@ -17,24 +19,24 @@ export function seminarJsonLd(seminar: SeminarRecord): Record<string, unknown> {
     : seminar.format === "hybrid"
       ? "https://schema.org/MixedEventAttendanceMode"
       : "https://schema.org/OfflineEventAttendanceMode";
+  const venueName = displayVenueName(seminar.venueName, seminar.city);
   const place = seminar.format === "virtual"
     ? { "@type": "VirtualLocation", url }
     : {
         "@type": "Place",
-        name: seminar.venueName || seminar.city || seminar.title,
+        name: venueName === "Venue TBA" ? (seminar.city || seminar.title) : venueName,
         address: {
           "@type": "PostalAddress",
-          streetAddress: seminar.venueAddress || undefined,
+          streetAddress: venueName === "Venue TBA" ? undefined : (seminar.venueAddress || undefined),
           addressLocality: seminar.city || undefined,
-          addressRegion: seminar.state || undefined,
+          addressRegion: regionLabel(seminar.state, seminar.location, seminar.city) || undefined,
           addressCountry: seminar.countryCode || undefined,
         },
       };
   const price = seminar.priceFrom && seminar.priceFrom > 0 ? seminar.priceFrom : null;
   const soldOut = seminar.capacity != null && seminar.seatsSold >= seminar.capacity;
-  const hostName = seminar.hostDoctor
-    ? [seminar.hostDoctor.first_name, seminar.hostDoctor.last_name].filter(Boolean).join(" ")
-    : seminar.instructorName;
+  const host = resolveSeminarHost(seminar);
+  const hostName = host.name;
   const offers = price == null ? undefined : {
     "@type": "Offer",
     price,
@@ -61,9 +63,9 @@ export function seminarJsonLd(seminar: SeminarRecord): Record<string, unknown> {
     description: (seminar.tagline || seminar.description || "").slice(0, 500) || undefined,
     offers,
     organizer: hostName ? {
-      "@type": seminar.hostDoctor ? "Person" : "Organization",
+      "@type": host.verified ? "Person" : "Organization",
       name: hostName,
-      url: seminar.hostDoctor?.slug ? `https://www.neurochiro.co/directory/${seminar.hostDoctor.slug}` : "https://www.neurochiro.co",
+      url: host.profileSlug ? `https://www.neurochiro.co/directory/${host.profileSlug}` : "https://www.neurochiro.co",
     } : { "@type": "Organization", name: "NeuroChiro", url: "https://www.neurochiro.co" },
     performer: performers.length ? performers : undefined,
     url,

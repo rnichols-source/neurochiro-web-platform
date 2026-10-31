@@ -5,6 +5,10 @@ export const SEMINAR_CONFIG = {
   },
   featuredAddon: { name: "Featured Placement (30 days)", priceUsd: 149, days: 30, stripePriceEnv: "STRIPE_SEMINAR_FEATURED_PRICE_ID" },
   proFreeSeminarsPerYear: 0,
+  adminHosts: {
+    slugs: ["raymond-nichols"],
+    names: ["raymond nichols", "dr raymond nichols", "dr. raymond nichols"],
+  },
   defaultMemberDiscountPct: 10,
   platformFeePct: 7,
   payoutDelayDaysAfterEvent: 3,
