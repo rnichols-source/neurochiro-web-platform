@@ -71,12 +71,12 @@ const DEFAULT_EXPENSES: Record<string, number> = {
 };
 
 const EXPENSE_GROUPS: { label: string; icon: string; keys: string[] }[] = [
-  { label: "Housing", icon: "🏠", keys: ["Rent", "Utilities", "Insurance_Home"] },
-  { label: "Transport", icon: "🚗", keys: ["Car", "CarInsurance", "Gas"] },
-  { label: "Living", icon: "🛒", keys: ["Groceries", "DiningOut", "Phone", "Subscriptions", "Personal"] },
-  { label: "Professional", icon: "💼", keys: ["Malpractice", "License", "CE", "Associations"] },
-  { label: "Health", icon: "🏥", keys: ["HealthInsurance", "Dental"] },
-  { label: "Other", icon: "📦", keys: ["Other"] },
+  { label: "Housing", icon: "", keys: ["Rent", "Utilities", "Insurance_Home"] },
+  { label: "Transport", icon: "", keys: ["Car", "CarInsurance", "Gas"] },
+  { label: "Living", icon: "", keys: ["Groceries", "DiningOut", "Phone", "Subscriptions", "Personal"] },
+  { label: "Professional", icon: "", keys: ["Malpractice", "License", "CE", "Associations"] },
+  { label: "Health", icon: "", keys: ["HealthInsurance", "Dental"] },
+  { label: "Other", icon: "", keys: ["Other"] },
 ];
 
 const EXPENSE_LABELS: Record<string, string> = {
@@ -127,21 +127,21 @@ const STEP_LABELS = [
 const INITIAL_STATE: PlannerState = {
   step: 1,
   name: "",
-  loanBalance: 250000,
-  interestRate: 6.5,
+  loanBalance: 0,
+  interestRate: 0,
   hasPrivateLoans: false,
   hasConsolidated: false,
   currentPayment: 0,
   employmentType: "Associate (W-2)",
-  annualSalary: 60000,
+  annualSalary: 0,
   compModel: "Base Only",
   monthlyBonus: 0,
-  state: "GA",
-  expenses: { ...DEFAULT_EXPENSES },
+  state: "",
+  expenses: Object.fromEntries(Object.keys(DEFAULT_EXPENSES).map((key) => [key, 0])),
   emergencyMonths: 6,
   openPractice: "Maybe",
   practiceTimeline: 3,
-  retirementSaving: 100,
+  retirementSaving: 0,
   isPurchased: false,
   checkingPurchase: true,
   completedSteps: [],
@@ -177,6 +177,7 @@ function calcFederalTax(taxableIncome: number): number {
 }
 
 function getStateTaxRate(st: string): number {
+  if (!st) return 0;
   return (STATE_TAX_RATES[st] ?? 5) / 100;
 }
 
@@ -382,7 +383,7 @@ function FinancialPlannerContent() {
           <button
             key={step}
             onClick={() => clickable && goToStep(step)}
-            className={`flex-1 min-w-0 py-3 px-1 sm:px-2 text-[10px] sm:text-sm font-bold transition-all border-r last:border-r-0 border-[#DDE2E5] ${
+            className={`flex-1 min-w-0 py-3 px-1 sm:px-2 text-xs sm:text-sm font-bold transition-all border-r last:border-r-0 border-[#DDE2E5] ${
               isActive
                 ? "bg-[#D66829] text-[#16222D]"
                 : isCompleted
@@ -437,28 +438,30 @@ function FinancialPlannerContent() {
       <div className="space-y-6">
         {/* Section A: Student Loans */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6 space-y-4">
-          <h3 className="text-sm font-black text-[#16222D] uppercase tracking-wide flex items-center gap-2">
+          <h3 className="text-sm font-bold text-[#16222D] tracking-wide flex items-center gap-2">
             <GraduationCap className="w-4 h-4 text-[#D66829]" /> Student Loans
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Loan Balance</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide">Loan Balance</label>
               <div className="relative mt-1">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6873] font-bold">$</span>
                 <input
                   type="number"
-                  value={state.loanBalance}
+                  value={state.loanBalance || ""}
+                  placeholder="Example: 180000"
                   onChange={(e) => set("loanBalance", Number(e.target.value) || 0)}
-                  className="w-full pl-8 pr-4 py-3 bg-[#F7F8F9] border border-[#DDE2E5] rounded-xl text-sm font-bold text-[#16222D] focus:border-[#D66829]/40 outline-none transition-colors"
+                  className="w-full pl-8 pr-4 py-3 bg-[#F7F8F9] border border-[#DDE2E5] rounded-xl text-base font-bold text-[#16222D] focus:border-[#D66829]/40 outline-none transition-colors"
                 />
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Interest Rate (%)</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide">Interest Rate (%)</label>
               <input
                 type="number"
                 step="0.1"
-                value={state.interestRate}
+                value={state.interestRate || ""}
+                placeholder="Example: 6.5"
                 onChange={(e) => set("interestRate", Number(e.target.value) || 0)}
                 className="mt-1 w-full px-4 py-3 bg-[#F7F8F9] border border-[#DDE2E5] rounded-xl text-sm font-bold text-[#16222D] focus:border-[#D66829]/40 outline-none transition-colors"
               />
@@ -470,7 +473,7 @@ function FinancialPlannerContent() {
               className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-colors ${
                 state.hasPrivateLoans
                   ? "border-[#DDE2E5] bg-[#F7F8F9] text-[#16222D]"
-                  : "border-[#DDE2E5] text-[#5A6873] hover:border-white/[0.15]"
+                  : "border-[#DDE2E5] text-[#5A6873] hover:border-[#e3e8ed]"
               }`}
             >
               {state.hasPrivateLoans && <Check className="w-3 h-3 inline mr-1" />}Has Private Loans
@@ -480,14 +483,14 @@ function FinancialPlannerContent() {
               className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-colors ${
                 state.hasConsolidated
                   ? "border-[#DDE2E5] bg-[#F7F8F9] text-[#16222D]"
-                  : "border-[#DDE2E5] text-[#5A6873] hover:border-white/[0.15]"
+                  : "border-[#DDE2E5] text-[#5A6873] hover:border-[#e3e8ed]"
               }`}
             >
               {state.hasConsolidated && <Check className="w-3 h-3 inline mr-1" />}Has Consolidated
             </button>
           </div>
           <div>
-            <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Current Monthly Payment (optional)</label>
+            <label className="text-xs font-bold text-[#5A6873] tracking-wide">Current Monthly Payment (optional)</label>
             <div className="relative mt-1">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6873] font-bold">$</span>
               <input
@@ -502,11 +505,11 @@ function FinancialPlannerContent() {
 
         {/* Section B: Income */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6 space-y-4">
-          <h3 className="text-sm font-black text-[#16222D] uppercase tracking-wide flex items-center gap-2">
+          <h3 className="text-sm font-bold text-[#16222D] tracking-wide flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-[#D66829]" /> Income
           </h3>
           <div>
-            <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide mb-2 block">Employment Type</label>
+            <label className="text-xs font-bold text-[#5A6873] tracking-wide mb-2 block">Employment Type</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {EMPLOYMENT_TYPES.map((t) => (
                 <button
@@ -515,7 +518,7 @@ function FinancialPlannerContent() {
                   className={`px-3 py-3 rounded-xl text-xs font-bold border-2 transition-colors ${
                     state.employmentType === t
                       ? "border-[#D66829] bg-[#D66829] text-[#16222D]"
-                      : "border-[#DDE2E5] text-[#5A6873] hover:border-white/[0.15]"
+                      : "border-[#DDE2E5] text-[#5A6873] hover:border-[#e3e8ed]"
                   }`}
                 >
                   {t}
@@ -525,19 +528,20 @@ function FinancialPlannerContent() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Annual Salary</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide">Annual Salary</label>
               <div className="relative mt-1">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6873] font-bold">$</span>
                 <input
                   type="number"
-                  value={state.annualSalary}
+                  value={state.annualSalary || ""}
+                  placeholder="Example: 70000"
                   onChange={(e) => set("annualSalary", Number(e.target.value) || 0)}
                   className="w-full pl-8 pr-4 py-3 bg-[#F7F8F9] border border-[#DDE2E5] rounded-xl text-sm font-bold text-[#16222D] focus:border-[#D66829]/40 outline-none transition-colors"
                 />
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Comp Model</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide">Comp Model</label>
               <div className="relative mt-1">
                 <select
                   value={state.compModel}
@@ -554,7 +558,7 @@ function FinancialPlannerContent() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Monthly Bonus (optional)</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide">Monthly Bonus (optional)</label>
               <div className="relative mt-1">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6873] font-bold">$</span>
                 <input
@@ -566,13 +570,14 @@ function FinancialPlannerContent() {
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">State</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide">State</label>
               <div className="relative mt-1">
                 <select
                   value={state.state}
                   onChange={(e) => set("state", e.target.value)}
                   className="w-full px-4 py-3 bg-[#F7F8F9] border border-[#DDE2E5] rounded-xl text-sm font-bold text-[#16222D] focus:border-[#D66829]/40 outline-none transition-colors appearance-none"
                 >
+                  <option value="">Select a state</option>
                   {US_STATES.map((s) => (
                     <option key={s} value={s}>{s}</option>
                   ))}
@@ -586,30 +591,31 @@ function FinancialPlannerContent() {
         {/* Section C: Monthly Expenses */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-black text-[#16222D] uppercase tracking-wide flex items-center gap-2">
+            <h3 className="text-sm font-bold text-[#16222D] tracking-wide flex items-center gap-2">
               <Calculator className="w-4 h-4 text-[#D66829]" /> Monthly Expenses
             </h3>
             <button
               onClick={resetExpenses}
               className="text-xs font-bold text-[#D66829] hover:underline flex items-center gap-1"
             >
-              <RotateCcw className="w-3 h-3" /> Use Defaults
+              <RotateCcw className="w-3 h-3" /> Use example numbers
             </button>
           </div>
           {EXPENSE_GROUPS.map((group) => (
             <div key={group.label}>
-              <p className="text-xs font-bold text-[#5A6873] uppercase tracking-wide mb-2">
-                {group.icon} {group.label}
+              <p className="text-xs font-bold text-[#5A6873] tracking-wide mb-2">
+                {group.label}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {group.keys.map((k) => (
                   <div key={k}>
-                    <label className="text-[10px] font-bold text-[#5A6873] uppercase">{EXPENSE_LABELS[k]}</label>
+                    <label className="text-xs font-bold text-[#5A6873] uppercase">{EXPENSE_LABELS[k]}</label>
                     <div className="relative mt-0.5">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5A6873] text-xs">$</span>
                       <input
                         type="number"
-                        value={state.expenses[k] ?? 0}
+                        value={state.expenses[k] || ""}
+                        placeholder="Example"
                         onChange={(e) => setExpense(k, Number(e.target.value) || 0)}
                         className="w-full pl-7 pr-3 py-3 bg-[#F7F8F9] border border-[#DDE2E5] rounded-lg text-sm font-bold text-[#16222D] focus:border-[#D66829]/40 outline-none transition-colors"
                       />
@@ -621,18 +627,18 @@ function FinancialPlannerContent() {
           ))}
           <div className="bg-[#F7F8F9] rounded-xl p-4 text-[#16222D] flex justify-between items-center">
             <span className="text-sm font-bold text-[#5A6873]">Total Monthly Expenses</span>
-            <span className="text-xl font-black">${fmt(totalExpenses)}</span>
+            <span className="text-xl font-bold">${fmt(totalExpenses)}</span>
           </div>
         </div>
 
         {/* Section D: Goals */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6 space-y-4">
-          <h3 className="text-sm font-black text-[#16222D] uppercase tracking-wide flex items-center gap-2">
+          <h3 className="text-sm font-bold text-[#16222D] tracking-wide flex items-center gap-2">
             <Target className="w-4 h-4 text-[#D66829]" /> Goals
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Emergency Fund (months)</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide">Emergency Fund (months)</label>
               <div className="relative mt-1">
                 <select
                   value={state.emergencyMonths}
@@ -647,7 +653,7 @@ function FinancialPlannerContent() {
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Retirement Saving (/mo)</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide">Retirement Saving (/mo)</label>
               <div className="relative mt-1">
                 <select
                   value={state.retirementSaving}
@@ -664,7 +670,7 @@ function FinancialPlannerContent() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide mb-2 block">Open Your Own Practice?</label>
+            <label className="text-xs font-bold text-[#5A6873] tracking-wide mb-2 block">Open Your Own Practice?</label>
             <div className="flex gap-2">
               {["Yes", "No", "Maybe"].map((v) => (
                 <button
@@ -673,7 +679,7 @@ function FinancialPlannerContent() {
                   className={`flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-colors ${
                     state.openPractice === v
                       ? "border-[#D66829] bg-[#D66829] text-[#16222D]"
-                      : "border-[#DDE2E5] text-[#5A6873] hover:border-white/[0.15]"
+                      : "border-[#DDE2E5] text-[#5A6873] hover:border-[#e3e8ed]"
                   }`}
                 >
                   {v}
@@ -683,7 +689,7 @@ function FinancialPlannerContent() {
           </div>
           {state.openPractice === "Yes" && (
             <div>
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Practice Timeline</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide">Practice Timeline</label>
               <div className="relative mt-1">
                 <select
                   value={state.practiceTimeline}
@@ -706,47 +712,47 @@ function FinancialPlannerContent() {
       <div>
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] overflow-hidden">
           <div className="bg-[#F7F8F9] p-6">
-            <p className="text-xs text-[#5A6873] uppercase tracking-wide font-bold">Live Summary</p>
-            <h2 className="text-xl font-heading font-black text-[#16222D] mt-2">
+            <p className="text-xs text-[#5A6873] tracking-wide font-bold">Live Summary</p>
+            <h2 className="text-xl font-heading font-bold text-[#16222D] mt-2">
               {state.name || "Your Finances"}
             </h2>
           </div>
           <div className="p-6 space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-[#5A6873] uppercase">Monthly Take-Home</span>
-              <span className="text-lg font-black text-[#16222D]">${fmt(Math.round(netMonthly))}</span>
+              <span className="text-lg font-bold text-[#16222D]">${fmt(Math.round(netMonthly))}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-[#5A6873] uppercase">Total Expenses</span>
-              <span className="text-lg font-black text-[#16222D]">${fmt(totalExpenses)}</span>
+              <span className="text-lg font-bold text-[#16222D]">${fmt(totalExpenses)}</span>
             </div>
             <div className="h-px bg-[#EFF1F2]" />
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-[#5A6873] uppercase">
                 {surplus >= 0 ? "Monthly Surplus" : "Monthly Deficit"}
               </span>
-              <span className={`text-lg font-black ${surplus >= 0 ? "text-green-600" : "text-red-600"}`}>
+              <span className={`text-lg font-bold ${surplus >= 0 ? "text-green-600" : "text-red-600"}`}>
                 {surplus >= 0 ? "+" : ""}${fmt(Math.round(surplus))}
               </span>
             </div>
             <div className="h-px bg-[#EFF1F2]" />
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-[#5A6873] uppercase">Debt-to-Income</span>
-              <span className={`text-sm font-black ${dti > 200 ? "text-red-600" : dti > 100 ? "text-[#D66829]" : "text-green-600"}`}>
+              <span className={`text-sm font-bold ${dti > 200 ? "text-red-600" : dti > 100 ? "text-[#D66829]" : "text-green-600"}`}>
                 {fmtDec(dti, 0)}%
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-[#5A6873] uppercase">Std. Payoff</span>
-              <span className="text-sm font-black text-[#16222D]">{yearsToPayOff} years</span>
+              <span className="text-sm font-bold text-[#16222D]">{yearsToPayOff} years</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-[#5A6873] uppercase">Std. Payment</span>
-              <span className="text-sm font-black text-[#16222D]">${fmt(Math.round(standardPayment))}/mo</span>
+              <span className="text-sm font-bold text-[#16222D]">${fmt(Math.round(standardPayment))}/mo</span>
             </div>
             {/* Visual bar */}
             <div>
-              <p className="text-[10px] font-bold text-[#5A6873] uppercase mb-1">Income Allocation</p>
+              <p className="text-xs font-bold text-[#5A6873] uppercase mb-1">Income Allocation</p>
               <div className="flex rounded-lg overflow-hidden h-4">
                 {netMonthly > 0 && (
                   <>
@@ -763,7 +769,7 @@ function FinancialPlannerContent() {
                   </>
                 )}
               </div>
-              <div className="flex justify-between text-[10px] text-[#5A6873] mt-1">
+              <div className="flex justify-between text-xs text-[#5A6873] mt-1">
                 <span>Expenses {netMonthly > 0 ? Math.round((totalExpenses / netMonthly) * 100) : 0}%</span>
                 <span className={surplus >= 0 ? "text-green-600" : "text-red-600"}>
                   {surplus >= 0 ? "Free" : "Over"} {netMonthly > 0 ? Math.abs(Math.round((surplus / netMonthly) * 100)) : 0}%
@@ -909,35 +915,35 @@ function FinancialPlannerContent() {
       <div className="space-y-8">
         {/* Section A: Take-Home Pay Calculator */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
-          <h3 className="text-sm font-black text-[#16222D] uppercase tracking-wide flex items-center gap-2 mb-4">
+          <h3 className="text-sm font-bold text-[#16222D] tracking-wide flex items-center gap-2 mb-4">
             <DollarSign className="w-4 h-4 text-[#D66829]" /> Take-Home Pay Breakdown
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
             <div className="bg-[#F7F8F9] rounded-xl p-4 text-center">
-              <p className="text-[10px] font-bold text-[#5A6873] uppercase">Gross Monthly</p>
-              <p className="text-lg font-black text-[#16222D]">${fmt(Math.round(grossAnnual / 12))}</p>
+              <p className="text-xs font-bold text-[#5A6873] uppercase">Gross Monthly</p>
+              <p className="text-lg font-bold text-[#16222D]">${fmt(Math.round(grossAnnual / 12))}</p>
             </div>
             <div className="bg-[#F7F8F9] rounded-xl p-4 text-center">
-              <p className="text-[10px] font-bold text-[#5A6873] uppercase">Federal Tax</p>
-              <p className="text-lg font-black text-red-600">-${fmt(Math.round(federalTaxAnnual / 12))}</p>
+              <p className="text-xs font-bold text-[#5A6873] uppercase">Federal Tax</p>
+              <p className="text-lg font-bold text-red-600">-${fmt(Math.round(federalTaxAnnual / 12))}</p>
             </div>
             <div className="bg-[#F7F8F9] rounded-xl p-4 text-center">
-              <p className="text-[10px] font-bold text-[#5A6873] uppercase">State Tax ({state.state})</p>
-              <p className="text-lg font-black text-red-600">-${fmt(Math.round(stateTaxAnnual / 12))}</p>
+              <p className="text-xs font-bold text-[#5A6873] uppercase">State Tax ({state.state})</p>
+              <p className="text-lg font-bold text-red-600">-${fmt(Math.round(stateTaxAnnual / 12))}</p>
             </div>
             <div className="bg-[#F7F8F9] rounded-xl p-4 text-center">
-              <p className="text-[10px] font-bold text-[#5A6873] uppercase">FICA {is1099 ? "(SE)" : ""}</p>
-              <p className="text-lg font-black text-red-600">-${fmt(Math.round(ficaAnnual / 12))}</p>
+              <p className="text-xs font-bold text-[#5A6873] uppercase">FICA {is1099 ? "(SE)" : ""}</p>
+              <p className="text-lg font-bold text-red-600">-${fmt(Math.round(ficaAnnual / 12))}</p>
             </div>
             {is1099 && (
               <div className="bg-yellow-500/10 rounded-xl p-4 text-center border border-yellow-500/20">
-                <p className="text-[10px] font-bold text-yellow-400 uppercase">Quarterly Est.</p>
-                <p className="text-lg font-black text-yellow-400">${fmt(Math.round(totalTaxAnnual / 4))}</p>
+                <p className="text-xs font-bold text-yellow-400 uppercase">Quarterly Est.</p>
+                <p className="text-lg font-bold text-yellow-400">${fmt(Math.round(totalTaxAnnual / 4))}</p>
               </div>
             )}
             <div className="bg-[#F7F8F9] rounded-xl p-4 text-center">
-              <p className="text-[10px] font-bold text-[#5A6873] uppercase">Net Take-Home</p>
-              <p className="text-lg font-black text-[#16222D]">${fmt(Math.round(netMonthly))}</p>
+              <p className="text-xs font-bold text-[#5A6873] uppercase">Net Take-Home</p>
+              <p className="text-lg font-bold text-[#16222D]">${fmt(Math.round(netMonthly))}</p>
             </div>
           </div>
           {is1099 && (
@@ -952,18 +958,18 @@ function FinancialPlannerContent() {
 
         {/* Section B: Loan Repayment Strategy */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
-          <h3 className="text-sm font-black text-[#16222D] uppercase tracking-wide flex items-center gap-2 mb-4">
+          <h3 className="text-sm font-bold text-[#16222D] tracking-wide flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 h-4 text-[#D66829]" /> Loan Repayment Strategies
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b-2 border-[#DDE2E5]">
-                  <th className="text-left py-3 px-3 text-xs font-black text-[#5A6873] uppercase">Plan</th>
-                  <th className="text-right py-3 px-3 text-xs font-black text-[#5A6873] uppercase">Monthly</th>
-                  <th className="text-right py-3 px-3 text-xs font-black text-[#5A6873] uppercase">Total Paid</th>
-                  <th className="text-right py-3 px-3 text-xs font-black text-[#5A6873] uppercase">Years</th>
-                  <th className="text-right py-3 px-3 text-xs font-black text-[#5A6873] uppercase">Forgiveness?</th>
+                  <th className="text-left py-3 px-3 text-xs font-bold text-[#5A6873] uppercase">Plan</th>
+                  <th className="text-right py-3 px-3 text-xs font-bold text-[#5A6873] uppercase">Monthly</th>
+                  <th className="text-right py-3 px-3 text-xs font-bold text-[#5A6873] uppercase">Total Paid</th>
+                  <th className="text-right py-3 px-3 text-xs font-bold text-[#5A6873] uppercase">Years</th>
+                  <th className="text-right py-3 px-3 text-xs font-bold text-[#5A6873] uppercase">Forgiveness?</th>
                 </tr>
               </thead>
               <tbody>
@@ -977,12 +983,12 @@ function FinancialPlannerContent() {
                     <td className="py-3 px-3 font-bold text-[#16222D]">
                       {plan.name}
                       {plan.recommended && (
-                        <span className="ml-2 text-[10px] font-black text-[#D66829] bg-[#D66829]/10 px-2 py-0.5 rounded-full uppercase">
+                        <span className="ml-2 text-xs font-bold text-[#D66829] bg-[#D66829]/10 px-2 py-0.5 rounded-full uppercase">
                           Recommended
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-3 text-right font-black text-[#16222D]">${fmt(plan.payment)}</td>
+                    <td className="py-3 px-3 text-right font-bold text-[#16222D]">${fmt(plan.payment)}</td>
                     <td className="py-3 px-3 text-right font-bold text-[#5A6873]">${fmt(plan.totalPaid)}</td>
                     <td className="py-3 px-3 text-right font-bold text-[#5A6873]">{plan.years}</td>
                     <td className="py-3 px-3 text-right font-bold text-[#5A6873]">{plan.forgiveness}</td>
@@ -995,7 +1001,7 @@ function FinancialPlannerContent() {
 
         {/* Section C: First 90 Days Checklist */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
-          <h3 className="text-sm font-black text-[#16222D] uppercase tracking-wide flex items-center gap-2 mb-4">
+          <h3 className="text-sm font-bold text-[#16222D] tracking-wide flex items-center gap-2 mb-4">
             <FileText className="w-4 h-4 text-[#D66829]" /> First 90 Days Checklist ({isW2 ? "W-2" : "1099"})
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -1012,7 +1018,7 @@ function FinancialPlannerContent() {
 
         {/* Section D: Budget Allocation Bar */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
-          <h3 className="text-sm font-black text-[#16222D] uppercase tracking-wide flex items-center gap-2 mb-4">
+          <h3 className="text-sm font-bold text-[#16222D] tracking-wide flex items-center gap-2 mb-4">
             <Wallet className="w-4 h-4 text-[#D66829]" /> Budget Allocation
           </h3>
           <div className="flex rounded-xl overflow-hidden h-12 mb-4">
@@ -1022,7 +1028,7 @@ function FinancialPlannerContent() {
               return (
                 <div
                   key={seg.label}
-                  className="flex items-center justify-center text-[#16222D] text-[9px] font-bold px-1"
+                  className="flex items-center justify-center text-[#16222D] text-xs font-bold px-1"
                   style={{ width: `${pct}%`, backgroundColor: seg.color, minWidth: pct > 3 ? "30px" : "0" }}
                   title={`${seg.label}: $${fmt(seg.value)}`}
                 >
@@ -1036,8 +1042,8 @@ function FinancialPlannerContent() {
               <div key={seg.label} className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: seg.color }} />
                 <div>
-                  <p className="text-[10px] font-bold text-[#5A6873]">{seg.label}</p>
-                  <p className="text-xs font-black text-[#16222D]">
+                  <p className="text-xs font-bold text-[#5A6873]">{seg.label}</p>
+                  <p className="text-xs font-bold text-[#16222D]">
                     ${fmt(seg.value)} <span className="text-[#5A6873] font-normal">({budgetTotal > 0 ? Math.round((seg.value / budgetTotal) * 100) : 0}%)</span>
                   </p>
                 </div>
@@ -1048,7 +1054,7 @@ function FinancialPlannerContent() {
 
         {/* Section E: Tax Deductions */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
-          <h3 className="text-sm font-black text-[#16222D] uppercase tracking-wide flex items-center gap-2 mb-4">
+          <h3 className="text-sm font-bold text-[#16222D] tracking-wide flex items-center gap-2 mb-4">
             <Calculator className="w-4 h-4 text-[#D66829]" /> Tax Deductions ({Math.round(marginalRate * 100)}% Marginal Rate)
           </h3>
           <div className="space-y-2">
@@ -1059,14 +1065,14 @@ function FinancialPlannerContent() {
                   <p className="text-xs text-[#5A6873]">${fmt(d.annualCost)}/yr deductible</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-black text-green-600">Save ${fmt(d.saved)}/yr</p>
+                  <p className="text-sm font-bold text-green-600">Save ${fmt(d.saved)}/yr</p>
                 </div>
               </div>
             ))}
           </div>
           <div className="mt-4 bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex justify-between items-center">
             <span className="text-sm font-bold text-green-400">Total Estimated Annual Tax Savings</span>
-            <span className="text-xl font-black text-green-400">${fmt(totalDeductionSavings)}</span>
+            <span className="text-xl font-bold text-green-400">${fmt(totalDeductionSavings)}</span>
           </div>
         </div>
       </div>
@@ -1205,14 +1211,14 @@ function FinancialPlannerContent() {
           {yearCards.map((card) => (
             <div key={card.title} className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] overflow-hidden">
               <div className="p-5" style={{ backgroundColor: card.color }}>
-                <p className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">{card.title}</p>
-                <h3 className="text-lg font-heading font-black text-[#16222D] mt-1">{card.subtitle}</h3>
+                <p className="text-xs font-bold text-[#5A6873] tracking-wide">{card.title}</p>
+                <h3 className="text-lg font-heading font-bold text-[#16222D] mt-1">{card.subtitle}</h3>
               </div>
               <div className="p-5 space-y-3">
                 {card.milestones.map((m, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[#16222D] text-[10px] font-black flex-shrink-0 mt-0.5"
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-[#16222D] text-xs font-bold flex-shrink-0 mt-0.5"
                       style={{ backgroundColor: card.color }}
                     >
                       {i + 1}
@@ -1227,7 +1233,7 @@ function FinancialPlannerContent() {
 
         {/* Loan Payoff Chart */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
-          <h3 className="text-sm font-black text-[#16222D] uppercase tracking-wide flex items-center gap-2 mb-4">
+          <h3 className="text-sm font-bold text-[#16222D] tracking-wide flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 h-4 text-[#D66829]" /> Loan Payoff Projection
           </h3>
           <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full" style={{ maxHeight: "300px" }}>
@@ -1237,7 +1243,7 @@ function FinancialPlannerContent() {
               return (
                 <g key={pct}>
                   <line x1={chartPadL} y1={y} x2={chartW - chartPadR} y2={y} stroke="#DDE2E5" strokeWidth="1" />
-                  <text x={chartPadL - 8} y={y + 4} textAnchor="end" className="text-[10px]" fill="#9ca3af">
+                  <text x={chartPadL - 8} y={y + 4} textAnchor="end" className="text-xs" fill="#9ca3af">
                     ${fmt(Math.round(maxBalance * (1 - pct) / 1000))}k
                   </text>
                 </g>
@@ -1247,7 +1253,7 @@ function FinancialPlannerContent() {
             {[0, 5, 10, 15, 20, 25].map((yr) => {
               const x = chartPadL + (yr / maxYears) * plotW;
               return (
-                <text key={yr} x={x} y={chartH - 8} textAnchor="middle" className="text-[10px]" fill="#9ca3af">
+                <text key={yr} x={x} y={chartH - 8} textAnchor="middle" className="text-xs" fill="#9ca3af">
                   Yr {yr}
                 </text>
               );
@@ -1273,25 +1279,25 @@ function FinancialPlannerContent() {
 
         {/* Net Worth Projection */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
-          <h3 className="text-sm font-black text-[#16222D] uppercase tracking-wide flex items-center gap-2 mb-4">
+          <h3 className="text-sm font-bold text-[#16222D] tracking-wide flex items-center gap-2 mb-4">
             <DollarSign className="w-4 h-4 text-[#D66829]" /> Net Worth Projection
           </h3>
           <svg viewBox={`0 0 ${nwChartW} ${nwChartH}`} className="w-full" style={{ maxHeight: "250px" }}>
             {/* Zero line */}
             <line x1={chartPadL} y1={nwZeroY} x2={nwChartW - chartPadR} y2={nwZeroY} stroke="#9ca3af" strokeWidth="1" strokeDasharray="4 4" />
-            <text x={chartPadL - 8} y={nwZeroY + 4} textAnchor="end" className="text-[10px]" fill="#9ca3af">$0</text>
+            <text x={chartPadL - 8} y={nwZeroY + 4} textAnchor="end" className="text-xs" fill="#9ca3af">$0</text>
             {/* Y-axis labels */}
-            <text x={chartPadL - 8} y={chartPadT + 4} textAnchor="end" className="text-[10px]" fill="#9ca3af">
+            <text x={chartPadL - 8} y={chartPadT + 4} textAnchor="end" className="text-xs" fill="#9ca3af">
               ${fmt(Math.round(nwMax / 1000))}k
             </text>
-            <text x={chartPadL - 8} y={nwChartH - chartPadB + 4} textAnchor="end" className="text-[10px]" fill="#9ca3af">
+            <text x={chartPadL - 8} y={nwChartH - chartPadB + 4} textAnchor="end" className="text-xs" fill="#9ca3af">
               ${fmt(Math.round(nwMin / 1000))}k
             </text>
             {/* X-axis labels */}
             {[0, 5, 10, 15].map((yr) => {
               const x = chartPadL + (yr / nwYears) * (nwChartW - chartPadL - chartPadR);
               return (
-                <text key={yr} x={x} y={nwChartH - 8} textAnchor="middle" className="text-[10px]" fill="#9ca3af">
+                <text key={yr} x={x} y={nwChartH - 8} textAnchor="middle" className="text-xs" fill="#9ca3af">
                   Yr {yr}
                 </text>
               );
@@ -1311,7 +1317,7 @@ function FinancialPlannerContent() {
                   x={chartPadL + (breakEvenYear / nwYears) * (nwChartW - chartPadL - chartPadR)}
                   y={nwZeroY - 14}
                   textAnchor="middle"
-                  className="text-[11px]"
+                  className="text-xs"
                   fill="#e97325"
                   fontWeight="bold"
                 >
@@ -1371,8 +1377,8 @@ function FinancialPlannerContent() {
         <div className="print-area bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] overflow-hidden">
           {/* Header */}
           <div className="print-header bg-[#F7F8F9] p-8 sm:p-10">
-            <p className="text-[#5A6873] text-xs font-bold uppercase tracking-[0.2em]">NeuroChiro</p>
-            <h1 className="font-heading text-2xl sm:text-3xl font-black text-[#16222D] mt-2">
+            <p className="text-[#5A6873] text-xs font-bold tracking-[0.2em]">NeuroChiro</p>
+            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#16222D] mt-2">
               Your Financial Roadmap
             </h1>
             <div className="flex items-center gap-3 mt-2">
@@ -1387,26 +1393,26 @@ function FinancialPlannerContent() {
             <section>
               <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-[#D66829]/30">
                 <div className="w-2 h-2 rounded-full bg-[#D66829]" />
-                <h3 className="text-xs font-black text-[#D66829] uppercase tracking-widest">
+                <h3 className="text-xs font-bold text-[#D66829] tracking-widest">
                   Financial Snapshot
                 </h3>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="bg-[#F7F8F9] rounded-xl p-4">
-                  <p className="text-[10px] font-bold text-[#5A6873] uppercase">Loan Balance</p>
-                  <p className="text-xl font-black text-[#16222D]">${fmt(state.loanBalance)}</p>
+                  <p className="text-xs font-bold text-[#5A6873] uppercase">Loan Balance</p>
+                  <p className="text-xl font-bold text-[#16222D]">${fmt(state.loanBalance)}</p>
                 </div>
                 <div className="bg-[#F7F8F9] rounded-xl p-4">
-                  <p className="text-[10px] font-bold text-[#5A6873] uppercase">Annual Income</p>
-                  <p className="text-xl font-black text-[#16222D]">${fmt(grossAnnual)}</p>
+                  <p className="text-xs font-bold text-[#5A6873] uppercase">Annual Income</p>
+                  <p className="text-xl font-bold text-[#16222D]">${fmt(grossAnnual)}</p>
                 </div>
                 <div className="bg-[#F7F8F9] rounded-xl p-4">
-                  <p className="text-[10px] font-bold text-[#5A6873] uppercase">Net Monthly</p>
-                  <p className="text-xl font-black text-[#16222D]">${fmt(Math.round(netMonthly))}</p>
+                  <p className="text-xs font-bold text-[#5A6873] uppercase">Net Monthly</p>
+                  <p className="text-xl font-bold text-[#16222D]">${fmt(Math.round(netMonthly))}</p>
                 </div>
                 <div className="bg-[#F7F8F9] rounded-xl p-4">
-                  <p className="text-[10px] font-bold text-[#5A6873] uppercase">Surplus/Deficit</p>
-                  <p className={`text-xl font-black ${surplus >= 0 ? "text-green-600" : "text-red-600"}`}>
+                  <p className="text-xs font-bold text-[#5A6873] uppercase">Surplus/Deficit</p>
+                  <p className={`text-xl font-bold ${surplus >= 0 ? "text-green-600" : "text-red-600"}`}>
                     {surplus >= 0 ? "+" : ""}${fmt(Math.round(surplus))}
                   </p>
                 </div>
@@ -1417,7 +1423,7 @@ function FinancialPlannerContent() {
             <section>
               <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-[#D66829]/30">
                 <div className="w-2 h-2 rounded-full bg-[#D66829]" />
-                <h3 className="text-xs font-black text-[#D66829] uppercase tracking-widest">
+                <h3 className="text-xs font-bold text-[#D66829] tracking-widest">
                   Take-Home Pay
                 </h3>
               </div>
@@ -1439,8 +1445,8 @@ function FinancialPlannerContent() {
                   <span className="font-bold text-red-600">-${fmt(Math.round(ficaAnnual / 12))}</span>
                 </div>
                 <div className="flex justify-between text-base pt-2 border-t-2 border-[#DDE2E5]">
-                  <span className="font-black text-[#16222D]">Net Monthly Take-Home</span>
-                  <span className="text-xl font-black text-[#16222D]">${fmt(Math.round(netMonthly))}</span>
+                  <span className="font-bold text-[#16222D]">Net Monthly Take-Home</span>
+                  <span className="text-xl font-bold text-[#16222D]">${fmt(Math.round(netMonthly))}</span>
                 </div>
               </div>
             </section>
@@ -1449,7 +1455,7 @@ function FinancialPlannerContent() {
             <section>
               <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-[#D66829]/30">
                 <div className="w-2 h-2 rounded-full bg-[#D66829]" />
-                <h3 className="text-xs font-black text-[#D66829] uppercase tracking-widest">
+                <h3 className="text-xs font-bold text-[#D66829] tracking-widest">
                   Recommended Repayment: {recommendedPlan}
                 </h3>
               </div>
@@ -1457,10 +1463,10 @@ function FinancialPlannerContent() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b-2 border-[#DDE2E5]">
-                      <th className="text-left py-2 px-3 text-xs font-black text-[#5A6873] uppercase">Plan</th>
-                      <th className="text-right py-2 px-3 text-xs font-black text-[#5A6873] uppercase">Monthly</th>
-                      <th className="text-right py-2 px-3 text-xs font-black text-[#5A6873] uppercase">Total</th>
-                      <th className="text-right py-2 px-3 text-xs font-black text-[#5A6873] uppercase">Years</th>
+                      <th className="text-left py-2 px-3 text-xs font-bold text-[#5A6873] uppercase">Plan</th>
+                      <th className="text-right py-2 px-3 text-xs font-bold text-[#5A6873] uppercase">Monthly</th>
+                      <th className="text-right py-2 px-3 text-xs font-bold text-[#5A6873] uppercase">Total</th>
+                      <th className="text-right py-2 px-3 text-xs font-bold text-[#5A6873] uppercase">Years</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1486,7 +1492,7 @@ function FinancialPlannerContent() {
             <section>
               <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-[#D66829]/30">
                 <div className="w-2 h-2 rounded-full bg-[#D66829]" />
-                <h3 className="text-xs font-black text-[#D66829] uppercase tracking-widest">
+                <h3 className="text-xs font-bold text-[#D66829] tracking-widest">
                   Monthly Budget
                 </h3>
               </div>
@@ -1494,9 +1500,9 @@ function FinancialPlannerContent() {
                 {budgetSegments.map((seg) => (
                   <div key={seg.label} className="text-center bg-[#F7F8F9] rounded-xl p-3">
                     <div className="w-4 h-4 rounded-sm mx-auto mb-1" style={{ backgroundColor: seg.color }} />
-                    <p className="text-[10px] font-bold text-[#5A6873]">{seg.label}</p>
-                    <p className="text-sm font-black text-[#16222D]">${fmt(seg.value)}</p>
-                    <p className="text-[10px] text-[#5A6873]">{budgetTotal > 0 ? Math.round((seg.value / budgetTotal) * 100) : 0}%</p>
+                    <p className="text-xs font-bold text-[#5A6873]">{seg.label}</p>
+                    <p className="text-sm font-bold text-[#16222D]">${fmt(seg.value)}</p>
+                    <p className="text-xs text-[#5A6873]">{budgetTotal > 0 ? Math.round((seg.value / budgetTotal) * 100) : 0}%</p>
                   </div>
                 ))}
               </div>
@@ -1506,7 +1512,7 @@ function FinancialPlannerContent() {
             <section>
               <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-[#D66829]/30">
                 <div className="w-2 h-2 rounded-full bg-[#D66829]" />
-                <h3 className="text-xs font-black text-[#D66829] uppercase tracking-widest">
+                <h3 className="text-xs font-bold text-[#D66829] tracking-widest">
                   3-Year Roadmap
                 </h3>
               </div>
@@ -1517,7 +1523,7 @@ function FinancialPlannerContent() {
                   { yr: "Year 3", sub: "Accelerate" },
                 ].map((card) => (
                   <div key={card.yr} className="text-center bg-[#F7F8F9] rounded-xl p-4">
-                    <p className="text-xs font-black text-[#16222D] uppercase">{card.yr}</p>
+                    <p className="text-xs font-bold text-[#16222D] uppercase">{card.yr}</p>
                     <p className="text-sm font-bold text-[#D66829]">{card.sub}</p>
                   </div>
                 ))}
@@ -1528,13 +1534,13 @@ function FinancialPlannerContent() {
             <section>
               <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-[#D66829]/30">
                 <div className="w-2 h-2 rounded-full bg-[#D66829]" />
-                <h3 className="text-xs font-black text-[#D66829] uppercase tracking-widest">
+                <h3 className="text-xs font-bold text-[#D66829] tracking-widest">
                   Estimated Tax Savings
                 </h3>
               </div>
               <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 text-center">
                 <p className="text-sm text-green-400">Estimated annual savings from deductions</p>
-                <p className="text-3xl font-black text-green-400 mt-1">${fmt(totalDeductionSavings)}/yr</p>
+                <p className="text-3xl font-bold text-green-400 mt-1">${fmt(totalDeductionSavings)}/yr</p>
               </div>
             </section>
           </div>
@@ -1545,7 +1551,7 @@ function FinancialPlannerContent() {
               This report is for educational and planning purposes only. It does not constitute financial, tax, or legal advice.
               Consult a licensed financial advisor or CPA for personalized guidance.
             </p>
-            <div className="flex justify-between text-[10px] text-[#5A6873]/40">
+            <div className="flex justify-between text-xs text-[#5A6873]/40">
               <span>NeuroChiro Student Financial Planner</span>
               <span>{state.name || "Student"}</span>
               <span>{today}</span>
@@ -1600,7 +1606,7 @@ function FinancialPlannerContent() {
       {/* Page Header */}
       <div className="no-print flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-heading font-black text-[#16222D] flex items-center gap-3">
+          <h1 className="text-2xl font-heading font-bold text-[#16222D] flex items-center gap-3">
             <DollarSign className="w-7 h-7 text-[#D66829]" /> Financial Planner
           </h1>
           <p className="text-[#5A6873] text-sm mt-1">
@@ -1631,7 +1637,7 @@ function FinancialPlannerContent() {
           <p className="text-xs text-[#5A6873]">You&apos;ve done the work. Go see where you stand.</p>
         </div>
         <Link
-          href="/student/career-pipeline"
+          href="/student/roadmap"
           className="w-full sm:w-auto px-5 py-2.5 bg-[#EFF1F2] text-[#5A6873] rounded-lg hover:text-[#16222D] hover:bg-[#DDE2E5] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
           Career Pipeline <ArrowRight className="w-3.5 h-3.5" />

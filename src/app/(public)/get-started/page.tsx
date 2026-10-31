@@ -15,6 +15,7 @@ function GetStartedInner() {
   const paramChiroscore = searchParams.get("chiroscore");
   const paramCity = searchParams.get("city");
   const paramState = searchParams.get("state");
+  const paramPlan = searchParams.get("plan") === "annual" ? "annual" : "monthly";
 
   const [role, setRole] = useState<Role>(paramRole === "student" ? "student" : "doctor");
   const [name, setName] = useState("");
@@ -48,7 +49,7 @@ function GetStartedInner() {
     if (role === "doctor") {
       window.location.href = "/doctor/onboarding";
     } else {
-      window.location.href = "/student/dashboard";
+      window.location.href = `/student/subscribe?plan=${paramPlan}`;
     }
   };
 
@@ -62,7 +63,7 @@ function GetStartedInner() {
             <p className="text-gray-500 mb-4">
               {role === "doctor"
                 ? "Your account is created. Log in to book your onboarding call with Dr. Ray and get started."
-                : "Your account is created. Log in to book your onboarding call and explore your career tools."}
+                : "Your account is created. Log in to choose $33/month or $333/year."}
             </p>
 
             <Link
@@ -150,7 +151,7 @@ function GetStartedInner() {
             ))}
           </div>
           <p className="text-xs text-gray-400 mt-3">
-            {role === "doctor" ? "$99/mo or $990/yr. Cancel anytime." : "Free for students. No subscription required."}
+            {role === "doctor" ? "$99/mo or $990/yr. Cancel anytime." : "$33/month or $333/year. Cancel anytime."}
           </p>
         </div>
 
@@ -160,11 +161,11 @@ function GetStartedInner() {
           <div className="grid grid-cols-2 gap-3">
             <button type="button" onClick={() => setRole("doctor")}
               className={`py-3 rounded-xl text-sm font-bold transition-all border-2 ${role === "doctor" ? "bg-neuro-orange text-white border-neuro-orange" : "bg-white text-gray-500 border-gray-200"}`}>
-              🩺 Doctor
+              Doctor
             </button>
             <button type="button" onClick={() => setRole("student")}
               className={`py-3 rounded-xl text-sm font-bold transition-all border-2 ${role === "student" ? "bg-neuro-orange text-white border-neuro-orange" : "bg-white text-gray-500 border-gray-200"}`}>
-              🎓 Student
+              Student
             </button>
           </div>
 

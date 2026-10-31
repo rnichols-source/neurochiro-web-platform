@@ -1,45 +1,59 @@
 'use server'
 
+import { STUDENT_CONFIG } from '@/config/students'
+import { priceMatches } from '@/lib/students/price-guard'
 import { stripe } from '@/lib/stripe'
 import { createServerSupabase } from '@/lib/supabase-server'
 
-export async function createStudentCheckout(billing: 'monthly' | 'annual' = 'monthly') {
-  const supabase = createServerSupabase()
-  const { data: { user } } = await supabase.auth.getUser()
+type Plan = 'monthly' | 'annual'
 
-  if (!user) {
-    return { error: 'Not authenticated' }
+function planSpec(plan: Plan) {
+  return plan === 'annual' ? STUDENT_CONFIG.membership.annual : STUDENT_CONFIG.membership.monthly
+}
+
+export async function createStudentCheckout(plan: Plan = 'monthly') {
+  if (plan !== 'monthly' && plan !== 'annual') {
+    return { error: 'Choose monthly or yearly.' }
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://neurochiro.co'
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const spec = planSpec(plan)
+  const priceId = process.env[spec.stripePriceEnv]
+  if (!priceId) {
+    return { error: 'Membership checkout is not ready yet. Email support@neurochirodirectory.com.' }
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://www.neurochiro.co'
 
   try {
-    // Check if user already has a stripe customer ID
+    const price = await stripe.prices.retrieve(priceId)
+    const interval = price.recurring?.interval
+    if (!priceMatches(price.unit_amount, interval, spec.expectCents, spec.interval)) {
+      console.error('Student price refused', priceId)
+      return { error: 'Membership checkout is not ready yet. Email support@neurochirodirectory.com.' }
+    }
+
     const { data: profile } = await supabase
       .from('profiles')
       .select('stripe_customer_id, email, full_name')
       .eq('id', user.id)
       .single()
 
-    let customerId = (profile as any)?.stripe_customer_id
+    let customerId = (profile as { stripe_customer_id?: string | null } | null)?.stripe_customer_id
 
-    // Create Stripe customer if none exists
     if (!customerId) {
       const customer = await stripe.customers.create({
-        email: (profile as any)?.email || user.email,
-        name: (profile as any)?.full_name || undefined,
+        email: (profile as { email?: string | null } | null)?.email || user.email,
+        name: (profile as { full_name?: string | null } | null)?.full_name || undefined,
         metadata: { userId: user.id, role: 'student' },
       })
       customerId = customer.id
-
-      // Save customer ID to profile
-      await supabase
-        .from('profiles')
-        .update({ stripe_customer_id: customerId })
-        .eq('id', user.id)
+      await supabase.from('profiles').update({ stripe_customer_id: customerId }).eq('id', user.id)
     }
 
-    // Check if student already has an active subscription
     const activeSubs = await stripe.subscriptions.list({
       customer: customerId,
       status: 'active',
@@ -49,48 +63,24 @@ export async function createStudentCheckout(billing: 'monthly' | 'annual' = 'mon
       return { error: 'You already have an active subscription.' }
     }
 
-    const priceAmount = billing === 'monthly' ? 3300 : 33000 // $33/mo or $330/yr ($28/mo)
-
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: 'NeuroChiro Student Membership',
-              description: billing === 'monthly'
-                ? 'Full access to all student tools — $33/month'
-                : 'Full access to all student tools — $28/month (billed annually)',
-            },
-            unit_amount: billing === 'monthly' ? 3300 : 2750,
-            recurring: {
-              interval: billing === 'monthly' ? 'month' : 'year',
-            },
-          },
-          quantity: 1,
-        },
-      ],
-      success_url: `${siteUrl}/student/welcome?subscribed=true`,
-      cancel_url: `${siteUrl}/student/subscribe?canceled=true`,
-      metadata: {
-        userId: user.id,
-        role: 'student',
-        billing,
-      },
+      client_reference_id: user.id,
+      line_items: [{ price: priceId, quantity: 1 }],
+      allow_promotion_codes: true,
+      success_url: `${siteUrl}/student/welcome?subscribed=1`,
+      cancel_url: `${siteUrl}/student/subscribe?canceled=1`,
+      metadata: { userId: user.id, role: 'student', plan },
       subscription_data: {
-        metadata: {
-          userId: user.id,
-          role: 'student',
-        },
+        metadata: { userId: user.id, role: 'student', plan },
       },
     })
 
     return { url: session.url }
-  } catch (error: any) {
-    console.error('Student checkout error:', error)
-    return { error: error.message || 'Failed to create checkout' }
+  } catch (error: unknown) {
+    console.error('Student checkout error')
+    const message = error instanceof Error ? error.message : 'Failed to create checkout'
+    return { error: message }
   }
 }

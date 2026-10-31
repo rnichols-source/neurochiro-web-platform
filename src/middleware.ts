@@ -4,7 +4,9 @@ import type { NextRequest } from 'next/server';
 import { SUPABASE_PUBLIC_KEY, SUPABASE_URL } from '@/lib/supabase-env';
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set('x-pathname', req.nextUrl.pathname);
+  const res = NextResponse.next({ request: { headers: requestHeaders } });
 
   const supabase = createServerClient(
     SUPABASE_URL,

@@ -1,6 +1,7 @@
 'use server'
 
 import { stripe } from '@/lib/stripe'
+import { STUDENT_CONFIG } from '@/config/students'
 
 export async function createConferenceCheckout(data: {
   name: string;
@@ -13,12 +14,18 @@ export async function createConferenceCheckout(data: {
 
   const prices = {
     doctor: { monthly: 9900, annual: 99000 },
-    student: { monthly: 0, annual: 0 }, // Students are free
+    student: {
+      monthly: STUDENT_CONFIG.membership.monthly.expectCents,
+      annual: STUDENT_CONFIG.membership.annual.expectCents,
+    },
   };
 
   const priceLabels = {
     doctor: { monthly: 'Doctor Pro ($99/mo)', annual: 'Doctor Pro Annual ($990/yr)' },
-    student: { monthly: 'Student (Free)', annual: 'Student (Free)' },
+    student: {
+      monthly: `Student ($${STUDENT_CONFIG.membership.monthly.usd}/mo)`,
+      annual: `Student ($${STUDENT_CONFIG.membership.annual.usd}/yr)`,
+    },
   };
 
   const amount = prices[data.role][data.billing];

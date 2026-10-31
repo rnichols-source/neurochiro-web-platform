@@ -98,14 +98,14 @@ export default function ProfilePage() {
       <form onSubmit={handleSave} className="space-y-4">
         {/* Personal Info */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
-          <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Personal Info</h2>
+          <h2 className="text-xs font-semibold tracking-[0.15em] text-[#D66829] mb-4">Personal Info</h2>
           <label className="block text-[12px] font-medium text-[#5A6873] mb-1.5">Full Name <span className="text-[#D66829]">*</span></label>
           <input className={inputClass} value={form.name} onChange={(e) => update("name", e.target.value)} maxLength={100} required />
         </div>
 
         {/* Education */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6 space-y-4">
-          <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-2">Education</h2>
+          <h2 className="text-xs font-semibold tracking-[0.15em] text-[#D66829] mb-2">Education</h2>
           <div>
             <label className="block text-[12px] font-medium text-[#5A6873] mb-1.5">School <span className="text-[#D66829]">*</span></label>
             <input className={inputClass} value={form.school} onChange={(e) => update("school", e.target.value)} maxLength={200} required />
@@ -118,25 +118,25 @@ export default function ProfilePage() {
 
         {/* Location */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
-          <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Location</h2>
+          <h2 className="text-xs font-semibold tracking-[0.15em] text-[#D66829] mb-4">Location</h2>
           <label className="block text-[12px] font-medium text-[#5A6873] mb-1.5">City</label>
-          <p className="text-[11px] text-[#5A6873]/60 mb-2">Used to match you with nearby jobs and mentors.</p>
+          <p className="text-xs text-[#5A6873]/60 mb-2">Used to match you with nearby jobs and mentors.</p>
           <input className={inputClass} value={form.city} onChange={(e) => update("city", e.target.value)} maxLength={100} />
         </div>
 
         {/* Interests */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
-          <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Interests</h2>
+          <h2 className="text-xs font-semibold tracking-[0.15em] text-[#D66829] mb-4">Interests</h2>
           <label className="block text-[12px] font-medium text-[#5A6873] mb-1.5">Clinical Interests</label>
-          <p className="text-[11px] text-[#5A6873]/60 mb-2">Comma-separated. Matches you with jobs and mentors who share these interests.</p>
+          <p className="text-xs text-[#5A6873]/60 mb-2">Comma-separated. Matches you with jobs and mentors who share these interests.</p>
           <input className={inputClass} placeholder="Pediatrics, Sports Performance" value={form.interests} onChange={(e) => update("interests", e.target.value)} maxLength={500} />
         </div>
 
         {/* Skills */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
-          <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Skills</h2>
+          <h2 className="text-xs font-semibold tracking-[0.15em] text-[#D66829] mb-4">Skills</h2>
           <label className="block text-[12px] font-medium text-[#5A6873] mb-1.5">Skills</label>
-          <p className="text-[11px] text-[#5A6873]/60 mb-2">Comma-separated techniques you know. Helps employers see what you bring to their practice.</p>
+          <p className="text-xs text-[#5A6873]/60 mb-2">Comma-separated techniques you know. Helps employers see what you bring to their practice.</p>
           <input className={inputClass} placeholder="Diversified, Activator, Dry Needling" value={form.skills} onChange={(e) => update("skills", e.target.value)} maxLength={500} />
         </div>
 
@@ -144,13 +144,13 @@ export default function ProfilePage() {
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829]">Mentorship</h2>
+              <h2 className="text-xs font-semibold tracking-[0.15em] text-[#D66829]">Mentorship</h2>
               <p className="text-xs text-[#5A6873] mt-1">Are you looking for a mentor?</p>
             </div>
             <button
               type="button"
               onClick={() => update("mentorship", !form.mentorship)}
-              className={`relative w-11 h-6 rounded-full transition-colors ${form.mentorship ? 'bg-[#D66829]' : 'bg-white/[0.08]'}`}
+              className={`relative w-11 h-6 rounded-full transition-colors ${form.mentorship ? 'bg-[#D66829]' : 'bg-[#f7f8fa]'}`}
             >
               <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${form.mentorship ? 'left-[22px]' : 'left-0.5'}`} />
             </button>

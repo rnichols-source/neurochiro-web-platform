@@ -110,7 +110,7 @@ export default function IntentGateway() {
                   <p className="text-gray-500">Access mentorship, seminars, and job placements at elite nervous system focused clinics.</p>
                 </div>
                 <div className="w-full md:w-auto flex flex-col gap-4 min-w-[300px]">
-                   <Link href="/get-started" className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
+                   <Link href="/get-started?role=student" className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
                      Join Student Platform <ArrowRight className="w-5 h-5" />
                    </Link>
                    <div className="flex justify-between text-sm font-medium text-gray-500 px-2">

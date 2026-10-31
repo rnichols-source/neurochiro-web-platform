@@ -4,6 +4,7 @@ import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { revalidatePath } from 'next/cache'
 import { stripe } from '@/lib/stripe'
+import { STUDENT_CONFIG } from '@/config/students'
 
 
 export async function getDoctorSeminars() {
@@ -146,8 +147,7 @@ export async function createSeminarAction(formData: FormData) {
   // 3. Check membership status — only paying members get auto-approved
   //    Read from doctors table via admin client (profiles.tier is untrusted while RLS is off)
   const adminClient = createAdminClient();
-  const { data: doctor } = await adminClient
-    .from('doctors')
+  const { data: doctor } = await (adminClient as any).from('doctors')
     .select('verification_status, membership_tier')
     .eq('user_id', user.id)
     .single()
@@ -339,6 +339,47 @@ export async function exportAttendeesToCSV(seminarId: string) {
   return header + rows
 }
 
+export async function addStudentTicketsAction(seminarId: string) {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Sign in required.' }
+  if (!seminarId || !/^[0-9a-f-]{36}$/i.test(seminarId)) return { error: 'Missing seminar.' }
+
+  const admin = createAdminClient()
+  const { data: seminar } = await admin
+    .from('seminars')
+    .select('id, host_id, price')
+    .eq('id', seminarId)
+    .eq('host_id', user.id)
+    .maybeSingle()
+  if (!seminar) return { error: 'That seminar is not yours.' }
+
+  const existing = await (admin as any).from('seminar_ticket_types')
+    .select('id')
+    .eq('seminar_id', seminarId)
+    .eq('name', 'Student')
+    .limit(1)
+  if (existing.data && existing.data.length > 0) return { ok: true, already: true }
+
+  const price = Number(seminar.price) || 0
+  const withAudience = {
+    seminar_id: seminarId,
+    name: 'Student',
+    price,
+    capacity: STUDENT_CONFIG.seminars.defaultStudentSeats,
+    is_active: true,
+    audience: 'student',
+  }
+  let inserted = await (admin as any).from('seminar_ticket_types').insert(withAudience).select('id').maybeSingle()
+  const message = inserted.error?.message || ''
+  if (inserted.error && /audience|42703|schema cache/i.test(message)) {
+    const { audience: _audience, ...rest } = withAudience
+    inserted = await (admin as any).from('seminar_ticket_types').insert(rest).select('id').maybeSingle()
+  }
+  if (inserted.error) return { error: 'Could not add student tickets yet.' }
+  revalidatePath('/doctor/seminars')
+  return { ok: true }
+}
 
 // Alias for the page component
 export async function getSeminarRegistrants(seminarId: string) {
@@ -358,8 +399,7 @@ export async function getRecommendedSeminars() {
   if (!user) return [];
 
   // Get doctor's specialties and location
-  const { data: doctor } = await supabase
-    .from('doctors')
+  const { data: doctor } = await (supabase as any).from('doctors')
     .select('specialties, city, state')
     .eq('user_id', user.id)
     .single();

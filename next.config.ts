@@ -49,6 +49,8 @@ const nextConfig: NextConfig = {
         destination: '/chiropractor/:path*',
         permanent: true,
       },
+      { source: '/student/career-pipeline', destination: '/student/dashboard', permanent: false },
+      { source: '/student/mentors', destination: '/student/doctors', permanent: false },
       ...LEGACY_STORE_PRODUCT_IDS.map((id) => ({
         source: `/store/${id}`,
         destination: '/store',

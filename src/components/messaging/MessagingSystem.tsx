@@ -79,11 +79,13 @@ export default function MessagingSystem({
   userRole,
   initialOtherUserId,
   initialConversationId,
+  emptyMessage,
 }: {
   currentUserId: string;
   userRole: string;
   initialOtherUserId?: string;
   initialConversationId?: string;
+  emptyMessage?: string;
 }) {
   const referral = useReferralOptional();
   const router = useRouter();
@@ -362,6 +364,7 @@ export default function MessagingSystem({
           canLoadMore={canLoadMore}
           messageHits={hits}
           unreadTotal={unreadTotal}
+          emptyMessage={emptyMessage}
         />
       </div>
       <div className={showList ? 'hidden md:flex flex-1' : 'flex flex-1 min-w-0'}>

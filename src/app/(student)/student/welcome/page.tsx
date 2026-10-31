@@ -64,7 +64,7 @@ export default function StudentWelcomePage() {
       : true;
 
   const inputClass =
-    "w-full px-4 py-3.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 focus:ring-1 focus:ring-[#D66829]/20 outline-none transition-colors";
+    "w-full px-4 py-3.5 bg-[#f7f8fa] border border-[#e3e8ed] rounded-xl text-sm text-portal-ink placeholder:text-portal-muted focus:border-[#D66829]/40 focus:ring-1 focus:ring-[#D66829]/20 outline-none transition-colors";
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
@@ -75,7 +75,7 @@ export default function StudentWelcomePage() {
             <div
               key={i}
               className={`h-1 flex-1 rounded-full transition-colors ${
-                i <= step ? "bg-[#D66829]" : "bg-white/[0.08]"
+                i <= step ? "bg-[#D66829]" : "bg-[#f7f8fa]"
               }`}
             />
           ))}
@@ -88,17 +88,17 @@ export default function StudentWelcomePage() {
               <div className="w-14 h-14 bg-[#D66829]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <GraduationCap className="w-7 h-7 text-[#D66829]" />
               </div>
-              <h1 className="text-2xl font-bold text-white mb-2">
+              <h1 className="text-2xl font-bold text-portal-ink mb-2">
                 Welcome to NeuroChiro
               </h1>
-              <p className="text-white/40 text-sm">
+              <p className="text-portal-ink-2 text-sm">
                 Let&apos;s set up your profile so we can match you with the right jobs and mentors.
               </p>
             </div>
 
-            <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-6 space-y-4">
+            <div className="bg-white border border-[#e3e8ed] rounded-2xl border border-[#e3e8ed] p-6 space-y-4">
               <div>
-                <label className="block text-[12px] font-medium text-white/60 mb-1.5">
+                <label className="block text-[12px] font-medium text-portal-ink-2 mb-1.5">
                   Chiropractic School
                 </label>
                 <input
@@ -111,7 +111,7 @@ export default function StudentWelcomePage() {
                 />
               </div>
               <div>
-                <label className="block text-[12px] font-medium text-white/60 mb-1.5">
+                <label className="block text-[12px] font-medium text-portal-ink-2 mb-1.5">
                   Expected Graduation Year
                 </label>
                 <input
@@ -135,16 +135,16 @@ export default function StudentWelcomePage() {
               <div className="w-14 h-14 bg-[#D66829]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MapPin className="w-7 h-7 text-[#D66829]" />
               </div>
-              <h1 className="text-2xl font-bold text-white mb-2">
+              <h1 className="text-2xl font-bold text-portal-ink mb-2">
                 Where are you based?
               </h1>
-              <p className="text-white/40 text-sm">
+              <p className="text-portal-ink-2 text-sm">
                 We&apos;ll match you with jobs and mentors near you.
               </p>
             </div>
 
-            <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-6">
-              <label className="block text-[12px] font-medium text-white/60 mb-1.5">
+            <div className="bg-white border border-[#e3e8ed] rounded-2xl border border-[#e3e8ed] p-6">
+              <label className="block text-[12px] font-medium text-portal-ink-2 mb-1.5">
                 City
               </label>
               <input
@@ -166,10 +166,10 @@ export default function StudentWelcomePage() {
               <div className="w-14 h-14 bg-[#D66829]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="w-7 h-7 text-[#D66829]" />
               </div>
-              <h1 className="text-2xl font-bold text-white mb-2">
+              <h1 className="text-2xl font-bold text-portal-ink mb-2">
                 What interests you?
               </h1>
-              <p className="text-white/40 text-sm">
+              <p className="text-portal-ink-2 text-sm">
                 Pick as many as you want. This helps us personalize your experience.
               </p>
             </div>
@@ -185,7 +185,7 @@ export default function StudentWelcomePage() {
                     className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all border ${
                       selected
                         ? "bg-[#D66829] text-white border-[#D66829] shadow-lg shadow-[#D66829]/20"
-                        : "bg-white/[0.04] text-white/50 border-white/[0.08] hover:border-white/20 hover:text-white/70"
+                        : "bg-[#f7f8fa] text-portal-ink-2 border-[#e3e8ed] hover:border-white/20 hover:text-portal-ink-2"
                     }`}
                   >
                     {interest}
@@ -226,7 +226,7 @@ export default function StudentWelcomePage() {
 
           <button
             onClick={handleSkip}
-            className="w-full py-2.5 text-white/30 text-sm hover:text-white/50 transition-colors"
+            className="w-full py-2.5 text-portal-ink-2 text-sm hover:text-portal-ink-2 transition-colors"
           >
             Skip for now
           </button>

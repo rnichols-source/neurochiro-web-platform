@@ -25,7 +25,7 @@ export default function PositionDetailPage() {
   if (!position) {
     return (
       <div className="p-10 text-center">
-        <p className="text-white/30">Position not found.</p>
+        <p className="text-portal-ink-2">Position not found.</p>
         <Link href="/student/chiromatch/positions" className="text-neuro-orange text-sm mt-4 inline-block">Back to positions</Link>
       </div>
     );
@@ -35,12 +35,12 @@ export default function PositionDetailPage() {
 
   return (
     <div className="p-4 md:p-10 max-w-3xl mx-auto space-y-6">
-      <Link href="/student/chiromatch/positions" className="text-xs text-white/30 hover:text-neuro-orange transition-colors inline-flex items-center gap-1">
+      <Link href="/student/chiromatch/positions" className="text-xs text-portal-ink-2 hover:text-neuro-orange transition-colors inline-flex items-center gap-1">
         <ArrowLeft className="w-3 h-3" /> All Positions
       </Link>
 
       {/* Header */}
-      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-6 md:p-8">
+      <div className="bg-white border border-[#e3e8ed] rounded-2xl border border-[#e3e8ed] p-6 md:p-8">
         <div className="flex items-start gap-4 mb-4">
           {doc.photo_url ? (
             <img src={doc.photo_url} alt="" className="w-16 h-16 rounded-2xl object-cover" />
@@ -50,13 +50,13 @@ export default function PositionDetailPage() {
             </div>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-white">{position.title}</h1>
-            <p className="text-white/40">{doc.clinic_name}</p>
-            <p className="text-white/30 text-sm">Dr. {doc.first_name} {doc.last_name}</p>
+            <h1 className="text-2xl font-bold text-portal-ink">{position.title}</h1>
+            <p className="text-portal-ink-2">{doc.clinic_name}</p>
+            <p className="text-portal-ink-2 text-sm">Dr. {doc.first_name} {doc.last_name}</p>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-4 text-sm text-white/40">
+        <div className="flex flex-wrap gap-4 text-sm text-portal-ink-2">
           {position.city && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{position.city}{position.state ? `, ${position.state}` : ''}</span>}
           {position.salary_min && <span className="flex items-center gap-1"><DollarSign className="w-4 h-4" />${position.salary_min.toLocaleString()}{position.salary_max ? ` – $${position.salary_max.toLocaleString()}` : ''}</span>}
           {position.compensation_type && <span className="capitalize">{position.compensation_type}</span>}
@@ -66,20 +66,20 @@ export default function PositionDetailPage() {
 
       {/* Description */}
       {position.description && (
-        <div className="bg-[#162231] rounded-2xl border border-white/[0.06] p-6">
-          <h2 className="text-sm font-bold text-white/50 uppercase tracking-widest mb-3">About This Position</h2>
-          <p className="text-white/60 text-sm leading-relaxed whitespace-pre-line">{position.description}</p>
+        <div className="bg-white rounded-2xl border border-[#e3e8ed] p-6">
+          <h2 className="text-sm font-bold text-portal-ink-2 tracking-widest mb-3">About This Position</h2>
+          <p className="text-portal-ink-2 text-sm leading-relaxed whitespace-pre-line">{position.description}</p>
         </div>
       )}
 
       {/* Details Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {position.benefits && position.benefits.length > 0 && (
-          <div className="bg-[#162231] rounded-2xl border border-white/[0.06] p-5">
-            <h3 className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3">Benefits</h3>
+          <div className="bg-white rounded-2xl border border-[#e3e8ed] p-5">
+            <h3 className="text-xs font-bold text-portal-ink-2 tracking-widest mb-3">Benefits</h3>
             <ul className="space-y-2">
               {position.benefits.map((b, i) => (
-                <li key={i} className="flex items-center gap-2 text-sm text-white/60">
+                <li key={i} className="flex items-center gap-2 text-sm text-portal-ink-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0" /> {b}
                 </li>
               ))}
@@ -88,11 +88,11 @@ export default function PositionDetailPage() {
         )}
 
         {position.requirements && position.requirements.length > 0 && (
-          <div className="bg-[#162231] rounded-2xl border border-white/[0.06] p-5">
-            <h3 className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3">Requirements</h3>
+          <div className="bg-white rounded-2xl border border-[#e3e8ed] p-5">
+            <h3 className="text-xs font-bold text-portal-ink-2 tracking-widest mb-3">Requirements</h3>
             <ul className="space-y-2">
               {position.requirements.map((r, i) => (
-                <li key={i} className="flex items-center gap-2 text-sm text-white/60">
+                <li key={i} className="flex items-center gap-2 text-sm text-portal-ink-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-neuro-orange shrink-0" /> {r}
                 </li>
               ))}
@@ -103,8 +103,8 @@ export default function PositionDetailPage() {
 
       {/* Specialties */}
       {doc.specialties && doc.specialties.length > 0 && (
-        <div className="bg-[#162231] rounded-2xl border border-white/[0.06] p-5">
-          <h3 className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3">Practice Specialties</h3>
+        <div className="bg-white rounded-2xl border border-[#e3e8ed] p-5">
+          <h3 className="text-xs font-bold text-portal-ink-2 tracking-widest mb-3">Practice Specialties</h3>
           <div className="flex flex-wrap gap-2">
             {doc.specialties.map((s, i) => (
               <span key={i} className="px-3 py-1 bg-neuro-orange/10 text-neuro-orange text-xs font-bold rounded-lg">{s}</span>
@@ -116,8 +116,8 @@ export default function PositionDetailPage() {
       {/* CTA */}
       <div className="bg-gradient-to-r from-neuro-orange/10 to-transparent rounded-2xl border border-neuro-orange/20 p-5 flex items-center justify-between">
         <div>
-          <p className="text-white font-bold">Interested in this position?</p>
-          <p className="text-white/30 text-sm">Add it to your rankings to be considered on Match Day.</p>
+          <p className="text-portal-ink font-bold">Interested in this position?</p>
+          <p className="text-portal-ink-2 text-sm">Add it to your rankings to be considered on Match Day.</p>
         </div>
         <Link
           href="/student/chiromatch/rankings"

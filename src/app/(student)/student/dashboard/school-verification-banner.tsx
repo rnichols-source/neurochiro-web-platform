@@ -89,7 +89,7 @@ export default function SchoolVerificationBanner() {
               />
             </div>
             <button onClick={handleVerify} disabled={sending || !email.trim()}
-              className="px-4 py-3 bg-[#3E6B7C] text-white rounded-xl text-xs font-bold hover:bg-[#2E5A6B] disabled:opacity-50 min-h-[44px] shrink-0">
+              className="px-4 py-3 bg-[#3E6B7C] text-portal-ink rounded-xl text-xs font-bold hover:bg-[#2E5A6B] disabled:opacity-50 min-h-[44px] shrink-0">
               {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify'}
             </button>
           </div>
@@ -100,10 +100,10 @@ export default function SchoolVerificationBanner() {
               onChange={e => setGradYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
               onBlur={handleGradYear}
               placeholder="Graduation year (e.g. 2027)"
-              className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-xs text-white placeholder:text-[#5A6873]/40 focus:outline-none focus:border-blue-400/50"
+              className="flex-1 px-3 py-2 bg-white/5 border border-[#e3e8ed] rounded-lg text-xs text-portal-ink placeholder:text-[#5A6873]/40 focus:outline-none focus:border-blue-400/50"
             />
           </div>
-          <button onClick={() => setShowUnlisted(true)} className="text-[11px] text-[#3E6B7C]/60 hover:text-[#3E6B7C] transition-colors">
+          <button onClick={() => setShowUnlisted(true)} className="text-xs text-[#3E6B7C]/60 hover:text-[#3E6B7C] transition-colors">
             My school isn't listed
           </button>
         </div>
@@ -126,7 +126,7 @@ export default function SchoolVerificationBanner() {
           />
           <div className="flex gap-2">
             <button onClick={handleUnlisted} disabled={sending || !unlistedSchool.trim() || !unlistedEmail.trim()}
-              className="px-4 py-2.5 bg-[#3E6B7C] text-white rounded-xl text-xs font-bold hover:bg-[#2E5A6B] disabled:opacity-50 min-h-[44px]">
+              className="px-4 py-2.5 bg-[#3E6B7C] text-portal-ink rounded-xl text-xs font-bold hover:bg-[#2E5A6B] disabled:opacity-50 min-h-[44px]">
               {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit for Review'}
             </button>
             <button onClick={() => setShowUnlisted(false)} className="px-4 py-2.5 bg-[#EFF1F2] text-[#5A6873] rounded-xl text-xs font-bold hover:bg-[#DDE2E5]">

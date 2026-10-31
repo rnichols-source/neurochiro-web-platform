@@ -8,6 +8,7 @@ import {
   createSeminarAction,
   updateSeminarAction,
   deleteSeminarAction,
+  addStudentTicketsAction,
   getSeminarRegistrants,
   getEnhancedSeminarAnalytics,
 } from "./actions";
@@ -38,6 +39,7 @@ function SeminarsPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [seminars, setSeminars] = useState<any[]>([]);
+  const [ticketNote, setTicketNote] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [editSeminar, setEditSeminar] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -217,6 +219,7 @@ function SeminarsPageInner() {
       </div>
 
       {/* Seminar List */}
+      {ticketNote ? <p className="text-sm text-portal-ink-2">{ticketNote}</p> : null}
       {seminars.length === 0 ? (
         <EmptyState
           icon={Calendar}
@@ -256,6 +259,18 @@ function SeminarsPageInner() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const result = await addStudentTicketsAction(sem.id);
+                        if ("error" in result && result.error) setTicketNote(result.error);
+                        else if ("already" in result && result.already) setTicketNote("Student tickets are already on this seminar.");
+                        else setTicketNote("Student tickets added.");
+                      }}
+                      className="min-h-11 px-3 text-sm font-bold text-[#B4501A]"
+                    >
+                      Add student tickets
+                    </button>
                     <button
                       type="button"
                       onClick={() => setEditSeminar(sem)}

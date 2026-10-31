@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { Automations } from '@/lib/automations'
 import { cookies } from 'next/headers'
 import { isFounderEmail } from '@/lib/founder'
+import { assertSelfServeRole } from '@/lib/auth/roles'
 
 /**
  * Strips leading titles (Dr., Dr, Doctor) and trailing credentials (DC, D.C.)
@@ -139,7 +140,9 @@ export async function signInWithProvider(provider: 'google') {
  * Creates the auth account but doesn't redirect yet.
  * Returns the user data so the client can continue to Profile Setup.
  */
-export async function createAccountAction(formData: FormData, role: string, tier: string, billingCycle: string) {
+export async function createAccountAction(formData: FormData, role: string, _tier: string, billingCycle: string) {
+  assertSelfServeRole(role);
+  const tier = 'free';
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const name = formData.get('name') as string

@@ -1,15 +1,17 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase-admin'
+import { assertSelfServeRole } from '@/lib/auth/roles'
 
 export async function createFreeAccount(data: {
   name: string;
   email: string;
   password: string;
-  role: 'doctor' | 'student';
+  role: 'doctor' | 'student' | 'patient';
   phone?: string;
 }) {
   try {
+    assertSelfServeRole(data.role);
     const supabase = createAdminClient();
 
     // Create auth user
@@ -70,6 +72,7 @@ export async function createFreeAccount(data: {
     if (data.role === 'student') {
       await (supabase as any).from('students').upsert({
         id: userId,
+        user_id: userId,
         full_name: data.name,
         region_code: 'US',
         onboarding_call_status: 'not_booked',

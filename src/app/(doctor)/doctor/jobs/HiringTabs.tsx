@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation';
 
 const TABS = [
   { href: '/doctor/jobs', label: 'My job posts', active: (path: string) => path.startsWith('/doctor/jobs') },
-  { href: '/doctor/students', label: 'Browse students', active: (path: string) => path.startsWith('/doctor/students') },
+  { href: '/doctor/students', label: 'Browse students', active: (path: string) => path === '/doctor/students' },
+  { href: '/doctor/students/shadow', label: 'Shadow days', active: (path: string) => path.startsWith('/doctor/students/shadow') },
   { href: '/doctor/chiromatch', label: 'ChiroMatch', active: (path: string) => path.startsWith('/doctor/chiromatch') },
 ] as const;
 

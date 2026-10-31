@@ -141,8 +141,8 @@ export default function ChiroMatchPublicPage() {
           <h2 className="text-3xl font-heading font-black text-neuro-navy mb-4">Ready to Find Your Match?</h2>
           <p className="text-gray-500 mb-8">Join NeuroChiro to participate in the next ChiroMatch cycle. All paid members are eligible.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/get-started" className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
-              Student Sign Up — Free
+            <Link href="/get-started?role=student" className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
+              Join as a student
             </Link>
             <Link href="/pricing" className="px-8 py-4 bg-neuro-navy text-white font-bold rounded-xl hover:bg-neuro-navy-light transition-colors">
               Doctor Plans

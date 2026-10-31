@@ -1,43 +1,34 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { getMembership } from '@/lib/portal/membership-load'
+
+const STUDENT_FIELDS = 'id, user_id, full_name, school, graduation_year, interests, skills, is_looking_for_mentorship, location_city, latitude, longitude, created_at'
+
 export async function searchStudents(query?: string) {
   const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+  const membership = await getMembership(user.id)
+  if (membership.tier === 'free') return []
 
-  let dbQuery = supabase
-    .from('students')
-    .select('id, user_id, full_name, school, graduation_year, interests, skills, is_looking_for_mentorship, location_city, latitude, longitude, created_at')
-    .order('created_at', { ascending: false })
-    .limit(50)
-
-  if (query && query.trim()) {
-    const q = query.trim()
-    dbQuery = dbQuery.or(`full_name.ilike.%${q}%,school.ilike.%${q}%,location_city.ilike.%${q}%`)
+  const base = () => supabase.from('students').select(STUDENT_FIELDS).order('created_at', { ascending: false }).limit(50)
+  if (!query?.trim()) {
+    const { data, error } = await base()
+    if (error) return []
+    return (data || []).map((row) => ({ ...row, name: row.full_name || 'Student' }))
   }
 
-  const { data, error } = await dbQuery
-
-  if (error) {
-    console.error("Error searching students:", error)
-    return []
+  const safe = query.trim().replace(/[%_,()]/g, '').slice(0, 80)
+  if (!safe) return []
+  const [byName, bySchool, byCity] = await Promise.all([
+    base().ilike('full_name', `%${safe}%`),
+    base().ilike('school', `%${safe}%`),
+    base().ilike('location_city', `%${safe}%`),
+  ])
+  const merged = new Map<string, { full_name?: string | null }>()
+  for (const result of [byName, bySchool, byCity]) {
+    for (const row of result.data || []) merged.set(row.id, row)
   }
-
-  // Enrich with profile email for messaging
-  if (data && data.length > 0) {
-    const userIds = data.map(s => s.user_id).filter(Boolean) as string[]
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, email, full_name')
-      .in('id', userIds)
-
-    const profileMap = new Map((profiles || []).map(p => [p.id, p]))
-
-    return data.map(s => ({
-      ...s,
-      email: profileMap.get(s.user_id || '')?.email || null,
-      name: s.full_name || profileMap.get(s.user_id || '')?.full_name || 'Student',
-    }))
-  }
-
-  return data || []
+  return [...merged.values()].map((row) => ({ ...row, name: row.full_name || 'Student' }))
 }

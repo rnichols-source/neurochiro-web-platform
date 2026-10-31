@@ -35,7 +35,6 @@ function StudentsContent() {
           gradYear: s.graduation_year ? String(s.graduation_year) : "",
           interests: s.interests || [],
           location: s.location_city || "",
-          email: s.email,
           bio: s.bio || "",
           isSeeking: s.is_looking_for_mentorship,
         }));
@@ -181,13 +180,6 @@ function StudentsContent() {
                 >
                   Send Message
                 </Link>
-              ) : selectedStudent.email ? (
-                <a
-                  href={`mailto:${selectedStudent.email}`}
-                  className="block w-full text-center py-2.5 bg-neuro-navy text-white rounded-lg hover:bg-neuro-navy/90 transition-colors text-sm font-bold"
-                >
-                  Email Student
-                </a>
               ) : (
                 <p className="text-center text-xs text-gray-400">No contact info available</p>
               )}

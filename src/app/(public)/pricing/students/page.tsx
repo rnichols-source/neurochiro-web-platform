@@ -1,68 +1,25 @@
-"use client";
+import Link from 'next/link';
+import { STUDENT_CONFIG } from '@/config/students';
 
-import { Check, ArrowRight } from "lucide-react";
-import Link from "next/link";
+export const metadata = {
+  title: 'Student membership',
+  description: 'NeuroChiro student membership is $33 a month or $333 a year.',
+};
 
 export default function StudentPricing() {
-  const features = [
-    "Browse and apply to job listings",
-    "ChiroMatch (residency-style matching with top practices)",
-    "Academy courses (6 courses, 28 modules)",
-    "Interview Prep (100+ real questions with frameworks)",
-    "Contract Lab (AI-powered contract review)",
-    "Financial Planner (salary modeling, loans, budgeting)",
-    "Full ChiroScore (7 categories, career readiness rating)",
-    "Techniques Library (18 techniques with video)",
-    "CE credit tracker + certificates",
-    "Direct messaging with doctors and mentors",
-    "Student profile visible to hiring practices",
-  ];
-
+  const monthly = STUDENT_CONFIG.membership.monthly.usd;
+  const annual = STUDENT_CONFIG.membership.annual.usd;
   return (
-    <div className="max-w-xl mx-auto">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl md:text-5xl font-heading font-black text-neuro-navy uppercase tracking-tight">
-          Launch Your <span className="text-neuro-orange">Career.</span>
-        </h1>
-        <p className="text-gray-500 mt-3 max-w-lg mx-auto">
-          Everything you need to land your first associate position. One plan. Everything included.
-        </p>
-      </div>
-
-      {/* Single pricing card */}
-      <div className="bg-white rounded-3xl border-2 border-neuro-orange shadow-2xl shadow-neuro-orange/10 p-10 relative overflow-hidden">
-        <span className="absolute -top-0 left-1/2 -translate-x-1/2 px-5 py-1.5 bg-neuro-orange text-white text-[10px] font-black uppercase tracking-widest rounded-b-xl">
-          Student Premium
-        </span>
-
-        <div className="text-center mt-4 mb-8">
-          <div className="text-6xl font-black text-neuro-navy">Free<span className="text-lg font-bold text-gray-400"></span></div>
-          <p className="text-sm text-neuro-orange font-bold mt-1">Includes monthly group call with Dr. Ray.</p>
-        </div>
-
-        <div className="space-y-3 mb-8">
-          {features.map((f, i) => (
-            <div key={i} className="flex items-start gap-3">
-              <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                <Check className="w-3 h-3 text-green-600" />
-              </div>
-              <span className="text-sm text-gray-700 leading-relaxed">{f}</span>
-            </div>
-          ))}
-        </div>
-
-        <Link
-          href="/get-started?role=student"
-          className="w-full py-4 bg-neuro-orange text-white font-black rounded-xl text-center text-sm uppercase tracking-wider hover:bg-neuro-orange/90 shadow-lg shadow-neuro-orange/20 transition-all flex items-center justify-center gap-2 block"
-        >
-          Get Started — Free <ArrowRight className="w-4 h-4" />
-        </Link>
-        <p className="text-center text-xs text-gray-400 mt-3">Includes monthly group call with Dr. Ray. Cancel anytime.</p>
-      </div>
-
-      <div className="text-center mt-8">
-        <p className="text-sm text-gray-500 font-bold">Graduate with a job offer, not just a degree.</p>
-      </div>
+    <div className="max-w-xl mx-auto px-4 py-16">
+      <h1 className="text-3xl font-bold text-[#16202a]">Student membership</h1>
+      <p className="mt-3 text-base text-[#3d4a57]">{STUDENT_CONFIG.membership.tagline}</p>
+      <article className="mt-6 bg-white border border-[#e3e8ed] rounded-xl p-6">
+        <p className="text-3xl font-bold text-[#16202a]">${monthly}/month</p>
+        <p className="mt-1 text-lg text-[#16202a]">${annual}/year</p>
+        <p className="mt-2 text-base text-[#3d4a57]">Two months free on the yearly plan. Cancel anytime.</p>
+        <Link href="/students" className="mt-4 inline-flex min-h-11 items-center text-base font-bold text-[#d66829]">See what is included</Link>
+        <Link href="/get-started?role=student&plan=monthly" className="mt-4 min-h-11 w-full inline-flex items-center justify-center rounded-lg bg-[#d66829] px-4 text-base font-bold text-white">Join as a student</Link>
+      </article>
     </div>
   );
 }

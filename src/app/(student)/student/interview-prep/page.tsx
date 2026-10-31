@@ -804,7 +804,7 @@ interface OfferInputs {
 }
 
 const INITIAL_OFFER: OfferInputs = {
-  baseSalary: 60000,
+  baseSalary: 0,
   compModel: "Base Only",
   bonusPct: 0,
   bonusThreshold: 0,
@@ -865,7 +865,7 @@ export default function InterviewPlaybook() {
 
 function InterviewPlaybookContent() {
   const [activeTab, setActiveTab] = useState(0);
-  const [purchased, setPurchased] = useState(true);
+  const purchased = true;
   const [loaded, setLoaded] = useState(false);
 
   // Tab 1 state
@@ -895,31 +895,7 @@ function InterviewPlaybookContent() {
   const [copiedTemplateId, setCopiedTemplateId] = useState<number | null>(null);
   const [decisionChecks, setDecisionChecks] = useState<Record<number, boolean>>({});
 
-  // ─── Purchase check ──────────────────────────────────────────────────────
-
-  useEffect(() => {
-    let cancelled = false;
-    async function checkPurchase() {
-      try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data } = await (supabase as any)
-            .from("course_purchases")
-            .select("id")
-            .eq("course_id", "interview-playbook")
-            .eq("user_id", user.id)
-            .maybeSingle();
-          if (!cancelled && data) setPurchased(true);
-        }
-      } catch {
-        // Not logged in or table missing
-      }
-    }
-    checkPurchase();
-    return () => { cancelled = true; };
-  }, []);
+  // Membership gates this page. The old course_purchases check is not used here.
 
   // ─── Load from Supabase (fallback: localStorage) ──────────────────────────
 
@@ -1185,8 +1161,8 @@ function InterviewPlaybookContent() {
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-5 md:p-8 mb-4">
           {/* Tags */}
           <div className="flex items-center gap-2 mb-4">
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ background: `${CATEGORY_COLORS[q.category]}20`, color: CATEGORY_COLORS[q.category] }}>{q.category}</span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold" style={{ background: `${DIFFICULTY_COLORS[q.difficulty]}20`, color: DIFFICULTY_COLORS[q.difficulty] }}>{q.difficulty}</span>
+            <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: `${CATEGORY_COLORS[q.category]}20`, color: CATEGORY_COLORS[q.category] }}>{q.category}</span>
+            <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: `${DIFFICULTY_COLORS[q.difficulty]}20`, color: DIFFICULTY_COLORS[q.difficulty] }}>{q.difficulty}</span>
           </div>
 
           {/* Question */}
@@ -1206,7 +1182,7 @@ function InterviewPlaybookContent() {
           ) : (
             <div className="space-y-5">
               <div>
-                <p className="text-xs font-bold text-[#D66829] uppercase tracking-wider mb-2">Strong Answer Framework</p>
+                <p className="text-xs font-bold text-[#D66829] tracking-wider mb-2">Strong Answer Framework</p>
                 <ul className="space-y-1.5">
                   {q.framework.map((point, i) => (
                     <li key={i} className="text-sm text-[#5A6873] flex items-start gap-2">
@@ -1218,13 +1194,13 @@ function InterviewPlaybookContent() {
               </div>
 
               <div className="bg-[#F7F8F9] rounded-xl p-4 border border-[#DDE2E5]">
-                <p className="text-xs font-bold text-green-400 uppercase tracking-wider mb-2">Example Answer</p>
+                <p className="text-xs font-bold text-green-400 tracking-wider mb-2">Example Answer</p>
                 <p className="text-sm text-[#5A6873] leading-relaxed italic">&ldquo;{q.exampleAnswer}&rdquo;</p>
               </div>
 
               {q.redFlags.length > 0 && (
                 <div className="bg-red-500/5 rounded-xl p-4 border border-red-500/10">
-                  <p className="text-xs font-bold text-red-400 uppercase tracking-wider mb-2">Avoid</p>
+                  <p className="text-xs font-bold text-red-400 tracking-wider mb-2">Avoid</p>
                   <ul className="space-y-1">
                     {q.redFlags.map((flag, i) => (
                       <li key={i} className="text-xs text-red-400/70 flex items-start gap-2">
@@ -1248,7 +1224,7 @@ function InterviewPlaybookContent() {
           <div className="flex gap-1 max-w-[200px] overflow-hidden">
             {filtered.map((_: any, i: number) => (
               <button key={i} onClick={() => jumpTo(i)}
-                className={`w-2 h-2 rounded-full shrink-0 transition-all ${i === safeIdx ? 'bg-[#D66829] w-4' : 'bg-white/[0.1]'}`} />
+                className={`w-2 h-2 rounded-full shrink-0 transition-all ${i === safeIdx ? 'bg-[#D66829] w-4' : 'bg-[#f7f8fa]'}`} />
             ))}
           </div>
           <button onClick={goNext} disabled={safeIdx === filtered.length - 1}
@@ -1270,7 +1246,7 @@ function InterviewPlaybookContent() {
       <div>
         <div className="flex items-center gap-3 mb-2">
           <Search className="w-7 h-7" style={{ color: "#D66829" }} />
-          <h2 className="text-2xl font-heading font-black" style={{ color: "#16222D" }}>
+          <h2 className="text-2xl font-heading font-bold" style={{ color: "#16222D" }}>
             Questions to Ask Them
           </h2>
         </div>
@@ -1297,7 +1273,7 @@ function InterviewPlaybookContent() {
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span className="text-[#5A6873] text-xs font-bold">#{q.id}</span>
                       <span
-                        className="px-2 py-0.5 rounded-full text-[10px] font-bold text-[#16222D]"
+                        className="px-2 py-0.5 rounded-full text-xs font-bold text-[#16222D]"
                         style={{ backgroundColor: catColor }}
                       >
                         {q.category}
@@ -1321,21 +1297,21 @@ function InterviewPlaybookContent() {
                 {isExpanded && isFree && (
                   <div className="px-5 pb-6 pt-0 space-y-4 border-t border-[#DDE2E5]">
                     <div>
-                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-1.5" style={{ color: "#D66829" }}>
+                      <h4 className="text-xs font-bold tracking-widest mb-1.5" style={{ color: "#D66829" }}>
                         Why This Matters
                       </h4>
                       <p className="text-sm text-[#5A6873] leading-relaxed">{q.whyMatters}</p>
                     </div>
 
                     <div className="rounded-xl p-4 border-2 border-green-500/20 bg-green-500/10">
-                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-1.5 text-green-400">
+                      <h4 className="text-xs font-bold tracking-widest mb-1.5 text-green-400">
                         Good Answer Sounds Like
                       </h4>
                       <p className="text-sm text-green-400 leading-relaxed">{q.goodAnswer}</p>
                     </div>
 
                     <div className="rounded-xl p-4 border-2 border-red-500/20 bg-red-500/10">
-                      <h4 className="text-[10px] font-black uppercase tracking-widest mb-1.5 text-red-600">
+                      <h4 className="text-xs font-bold tracking-widest mb-1.5 text-red-600">
                         Red Flag Answer
                       </h4>
                       <p className="text-sm text-red-400 leading-relaxed">{q.redFlagAnswer}</p>
@@ -1373,19 +1349,22 @@ function InterviewPlaybookContent() {
                     <p className="text-sm text-[#5A6873] flex-1 min-w-0 truncate">{q.question}</p>
                     <div className="flex gap-1 flex-shrink-0">
                       {(["green", "yellow", "red"] as const).map((rating) => {
-                        const icons = { green: "🟢", yellow: "🟡", red: "🔴" };
+                        const labels = { green: "Good", yellow: "Mixed", red: "No" };
                         const isSelected = scorecardRatings[q.id] === rating;
                         return (
                           <button
                             key={rating}
+                            type="button"
+                            aria-label={labels[rating]}
+                            title={labels[rating]}
                             onClick={() => setScorecardRatings((prev) => ({ ...prev, [q.id]: rating }))}
-                            className="w-9 h-9 rounded-lg text-sm flex items-center justify-center transition-all"
+                            className="min-h-11 min-w-11 rounded-lg text-xs font-bold flex items-center justify-center transition-all"
                             style={{
                               backgroundColor: isSelected ? (rating === "green" ? "rgba(34,197,94,0.15)" : rating === "yellow" ? "rgba(245,158,11,0.15)" : "rgba(239,68,68,0.15)") : "#EFF1F2",
                               border: isSelected ? `2px solid ${rating === "green" ? "#22c55e" : rating === "yellow" ? "#f59e0b" : "#ef4444"}` : "2px solid transparent",
                             }}
                           >
-                            {icons[rating]}
+                            {labels[rating]}
                           </button>
                         );
                       })}
@@ -1421,7 +1400,7 @@ function InterviewPlaybookContent() {
       <div>
         <div className="flex items-center gap-3 mb-2">
           <DollarSign className="w-7 h-7" style={{ color: "#D66829" }} />
-          <h2 className="text-2xl font-heading font-black" style={{ color: "#16222D" }}>
+          <h2 className="text-2xl font-heading font-bold" style={{ color: "#16222D" }}>
             Evaluate the Offer
           </h2>
         </div>
@@ -1436,18 +1415,19 @@ function InterviewPlaybookContent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Base Salary */}
             <div>
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Base Salary ($)</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide">Base Salary ($)</label>
               <input
                 type="number"
-                value={offer.baseSalary}
-                onChange={(e) => setOffer((prev) => ({ ...prev, baseSalary: Number(e.target.value) }))}
+                value={offer.baseSalary || ""}
+                placeholder="Example: 65000"
+                onChange={(e) => setOffer((prev) => ({ ...prev, baseSalary: Number(e.target.value) || 0 }))}
                 className="w-full mt-1 px-4 py-3 border border-[#DDE2E5] rounded-xl text-sm focus:border-[#D66829]/40 outline-none bg-[#F7F8F9] text-[#16222D]"
               />
             </div>
 
             {/* Comp Model */}
             <div>
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Compensation Model</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide">Compensation Model</label>
               <select
                 value={offer.compModel}
                 onChange={(e) => setOffer((prev) => ({ ...prev, compModel: e.target.value }))}
@@ -1463,7 +1443,7 @@ function InterviewPlaybookContent() {
             {showBonus && (
               <>
                 <div>
-                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Bonus % of Collections</label>
+                  <label className="text-xs font-bold text-[#5A6873] tracking-wide">Bonus % of Collections</label>
                   <input
                     type="number"
                     value={offer.bonusPct}
@@ -1472,7 +1452,7 @@ function InterviewPlaybookContent() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Bonus Threshold ($)</label>
+                  <label className="text-xs font-bold text-[#5A6873] tracking-wide">Bonus Threshold ($)</label>
                   <input
                     type="number"
                     value={offer.bonusThreshold}
@@ -1481,7 +1461,7 @@ function InterviewPlaybookContent() {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Est. Monthly Collections ($)</label>
+                  <label className="text-xs font-bold text-[#5A6873] tracking-wide">Est. Monthly Collections ($)</label>
                   <input
                     type="number"
                     value={offer.estMonthlyCollections}
@@ -1494,7 +1474,7 @@ function InterviewPlaybookContent() {
 
             {/* Employment Type */}
             <div className="sm:col-span-2">
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide mb-2 block">Employment Type</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide mb-2 block">Employment Type</label>
               <div className="flex gap-3">
                 {(["W-2", "1099"] as const).map((type) => (
                   <button
@@ -1515,7 +1495,7 @@ function InterviewPlaybookContent() {
 
             {/* Benefits */}
             <div className="sm:col-span-2">
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide mb-2 block">Benefits Included</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide mb-2 block">Benefits Included</label>
               <div className="flex flex-wrap gap-2">
                 {BENEFITS_LIST.map((b) => {
                   const checked = offer.benefits.includes(b);
@@ -1545,7 +1525,7 @@ function InterviewPlaybookContent() {
 
             {/* Non-compete */}
             <div className="sm:col-span-2">
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide mb-2 block">Non-Compete Clause</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide mb-2 block">Non-Compete Clause</label>
               <div className="flex gap-3">
                 {[false, true].map((val) => (
                   <button
@@ -1567,7 +1547,7 @@ function InterviewPlaybookContent() {
             {offer.hasNonCompete && (
               <>
                 <div>
-                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Radius (miles)</label>
+                  <label className="text-xs font-bold text-[#5A6873] tracking-wide">Radius (miles)</label>
                   <input
                     type="number"
                     value={offer.nonCompeteRadius}
@@ -1576,7 +1556,7 @@ function InterviewPlaybookContent() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Duration (months)</label>
+                  <label className="text-xs font-bold text-[#5A6873] tracking-wide">Duration (months)</label>
                   <input
                     type="number"
                     value={offer.nonCompeteDuration}
@@ -1589,7 +1569,7 @@ function InterviewPlaybookContent() {
 
             {/* Equity Path */}
             <div>
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide mb-2 block">Equity/Ownership Path</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide mb-2 block">Equity/Ownership Path</label>
               <div className="flex gap-3">
                 {[true, false].map((val) => (
                   <button
@@ -1610,7 +1590,7 @@ function InterviewPlaybookContent() {
 
             {/* Signing Bonus */}
             <div>
-              <label className="text-xs font-bold text-[#5A6873] uppercase tracking-wide">Signing Bonus ($)</label>
+              <label className="text-xs font-bold text-[#5A6873] tracking-wide">Signing Bonus ($)</label>
               <input
                 type="number"
                 value={offer.signingBonus}
@@ -1659,7 +1639,7 @@ function InterviewPlaybookContent() {
                 )}
                 <div className="flex justify-between items-center py-3 bg-[#F7F8F9] rounded-xl px-4">
                   <span className="text-sm font-bold" style={{ color: "#16222D" }}>Total Compensation</span>
-                  <span className="text-lg font-black" style={{ color: "#D66829" }}>
+                  <span className="text-lg font-bold" style={{ color: "#D66829" }}>
                     ${Math.round(calc.totalComp).toLocaleString()}/yr
                   </span>
                 </div>
@@ -1719,7 +1699,7 @@ function InterviewPlaybookContent() {
                   )}
                   <div className="flex justify-between items-center py-3 mt-2 bg-red-500/10 rounded-xl px-4">
                     <span className="text-sm font-bold text-red-400">True Net Compensation</span>
-                    <span className="text-lg font-black text-red-400">${Math.round(calc.trueNet).toLocaleString()}/yr</span>
+                    <span className="text-lg font-bold text-red-400">${Math.round(calc.trueNet).toLocaleString()}/yr</span>
                   </div>
                 </div>
               </div>
@@ -1748,7 +1728,7 @@ function InterviewPlaybookContent() {
                     strokeLinecap="round"
                     strokeDasharray={`${(calc.totalScore / 100) * 251.2} 251.2`}
                   />
-                  <text x="100" y="85" textAnchor="middle" className="text-3xl font-black" fill={BRAND_NAVY}>
+                  <text x="100" y="85" textAnchor="middle" className="text-3xl font-bold" fill={BRAND_NAVY}>
                     {calc.totalScore}
                   </text>
                   <text x="100" y="100" textAnchor="middle" className="text-xs" fill="#9ca3af">
@@ -1766,8 +1746,8 @@ function InterviewPlaybookContent() {
                   { label: "Growth", pts: calc.growthPts, max: 20 },
                 ].map((item) => (
                   <div key={item.label} className="bg-[#F7F8F9] rounded-xl p-3 text-center">
-                    <p className="text-[10px] font-bold text-[#5A6873] uppercase tracking-wide">{item.label}</p>
-                    <p className="text-lg font-black" style={{ color: "#16222D" }}>
+                    <p className="text-xs font-bold text-[#5A6873] tracking-wide">{item.label}</p>
+                    <p className="text-lg font-bold" style={{ color: "#16222D" }}>
                       {item.pts}<span className="text-xs text-[#5A6873]">/{item.max}</span>
                     </p>
                   </div>
@@ -1786,7 +1766,7 @@ function InterviewPlaybookContent() {
     <div>
       <div className="flex items-center gap-3 mb-2">
         <Shield className="w-7 h-7" style={{ color: "#D66829" }} />
-        <h2 className="text-2xl font-heading font-black" style={{ color: "#16222D" }}>
+        <h2 className="text-2xl font-heading font-bold" style={{ color: "#16222D" }}>
           Negotiation Scripts
         </h2>
       </div>
@@ -1825,7 +1805,7 @@ function InterviewPlaybookContent() {
               {isExpanded && isFree && (
                 <div className="px-5 pb-6 pt-0 space-y-4 border-t border-[#DDE2E5]">
                   <div>
-                    <h4 className="text-[10px] font-black uppercase tracking-widest mb-1.5" style={{ color: "#16222D" }}>
+                    <h4 className="text-xs font-bold tracking-widest mb-1.5" style={{ color: "#16222D" }}>
                       The Situation
                     </h4>
                     <p className="text-sm text-[#5A6873] leading-relaxed">{s.situation}</p>
@@ -1833,7 +1813,7 @@ function InterviewPlaybookContent() {
 
                   <div className="rounded-xl p-4 border-2 border-green-500/20 bg-green-500/10 relative">
                     <div className="flex items-start justify-between mb-2">
-                      <h4 className="text-[10px] font-black uppercase tracking-widest text-green-400">
+                      <h4 className="text-xs font-bold tracking-widest text-green-400">
                         What to Say
                       </h4>
                       <button
@@ -1849,14 +1829,14 @@ function InterviewPlaybookContent() {
                   </div>
 
                   <div className="rounded-xl p-4 border-2 border-red-500/20 bg-red-500/10">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-red-600">
+                    <h4 className="text-xs font-bold tracking-widest mb-2 text-red-600">
                       What NOT to Say
                     </h4>
                     <p className="text-sm text-red-400 leading-relaxed italic">&ldquo;{s.whatNotToSay}&rdquo;</p>
                   </div>
 
                   <div className="rounded-xl p-4 border-2" style={{ borderColor: BRAND_ORANGE, backgroundColor: `${BRAND_ORANGE}08` }}>
-                    <h4 className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: "#D66829" }}>
+                    <h4 className="text-xs font-bold tracking-widest mb-2" style={{ color: "#D66829" }}>
                       Pro Tip
                     </h4>
                     <p className="text-sm text-[#5A6873] leading-relaxed">{s.proTip}</p>
@@ -1884,7 +1864,7 @@ function InterviewPlaybookContent() {
       <div>
         <div className="flex items-center gap-3 mb-2">
           <FileText className="w-7 h-7" style={{ color: "#D66829" }} />
-          <h2 className="text-2xl font-heading font-black" style={{ color: "#16222D" }}>
+          <h2 className="text-2xl font-heading font-bold" style={{ color: "#16222D" }}>
             After the Interview
           </h2>
         </div>
@@ -1894,7 +1874,7 @@ function InterviewPlaybookContent() {
 
         {/* Section 1: Thank You Templates */}
         <div className="mb-10">
-          <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: "#16222D" }}>
+          <h3 className="text-sm font-bold tracking-widest mb-4" style={{ color: "#16222D" }}>
             Thank-You Email Templates
           </h3>
           <div className="space-y-3">
@@ -1950,13 +1930,13 @@ function InterviewPlaybookContent() {
         <div className="relative mb-10">
           {!purchased && <PurchaseGate message="Unlock Follow-Up Timeline for $29" />}
           <div className={!purchased ? "pointer-events-none select-none opacity-30" : ""}>
-            <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: "#16222D" }}>
+            <h3 className="text-sm font-bold tracking-widest mb-4" style={{ color: "#16222D" }}>
               Follow-Up Timeline
             </h3>
             <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
               <div className="relative">
                 {/* Timeline line */}
-                <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-white/[0.08]" />
+                <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-[#f7f8fa]" />
 
                 {[
                   {
@@ -1984,7 +1964,7 @@ function InterviewPlaybookContent() {
                       style={{ backgroundColor: item.color, top: "2px" }}
                     />
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-black px-2 py-0.5 rounded-full text-[#16222D]" style={{ backgroundColor: item.color }}>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full text-[#16222D]" style={{ backgroundColor: item.color }}>
                         {item.day}
                       </span>
                       <h4 className="text-sm font-bold" style={{ color: "#16222D" }}>{item.title}</h4>
@@ -2001,7 +1981,7 @@ function InterviewPlaybookContent() {
         <div className="relative mb-10">
           {!purchased && <PurchaseGate message="Unlock Decision Tools for $29" />}
           <div className={!purchased ? "pointer-events-none select-none opacity-30" : ""}>
-            <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: "#16222D" }}>
+            <h3 className="text-sm font-bold tracking-widest mb-4" style={{ color: "#16222D" }}>
               Offer Decision Checklist
             </h3>
             <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6">
@@ -2044,7 +2024,7 @@ function InterviewPlaybookContent() {
         <div className="relative">
           {!purchased && <PurchaseGate message="Unlock Walk-Away Guide for $29" />}
           <div className={!purchased ? "pointer-events-none select-none opacity-30" : ""}>
-            <h3 className="text-sm font-black uppercase tracking-widest mb-4" style={{ color: "#16222D" }}>
+            <h3 className="text-sm font-bold tracking-widest mb-4" style={{ color: "#16222D" }}>
               Walk-Away Checklist
             </h3>
             <p className="text-sm text-[#5A6873] mb-4">
@@ -2074,7 +2054,7 @@ function InterviewPlaybookContent() {
     <div className="p-4 md:p-8 max-w-6xl mx-auto">
       {/* Page header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-heading font-black flex items-center gap-3" style={{ color: "#16222D" }}>
+        <h1 className="text-2xl font-heading font-bold flex items-center gap-3" style={{ color: "#16222D" }}>
           <Briefcase className="w-7 h-7" style={{ color: "#D66829" }} />
           Interview Playbook
         </h1>
@@ -2092,7 +2072,7 @@ function InterviewPlaybookContent() {
             <button
               key={i}
               onClick={() => setActiveTab(i)}
-              className="flex-1 min-w-0 py-3 px-1 text-[9px] sm:text-xs font-bold transition-all border-r last:border-r-0 border-[#DDE2E5] flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1"
+              className="flex-1 min-w-0 py-3 px-1 text-xs sm:text-xs font-bold transition-all border-r last:border-r-0 border-[#DDE2E5] flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1"
               style={{
                 backgroundColor: isActive ? "#D66829" : "#F7F8F9",
                 color: isActive ? "#fff" : "#5A6873",

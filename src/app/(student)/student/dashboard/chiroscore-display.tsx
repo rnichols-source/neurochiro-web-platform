@@ -21,17 +21,17 @@ export default function ChiroScoreDisplay({ data }: { data: ChiroScoreResult }) 
   const status = getStatusLabel(totalScore);
 
   return (
-    <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-6 md:p-8 shadow-lg shadow-black/20">
+    <div className="bg-white border border-[#e3e8ed] rounded-2xl border border-[#e3e8ed] p-6 md:p-8 shadow-lg shadow-black/20">
       {/* Score — no letter grade */}
       <div className="mb-2">
         <div className="flex items-end gap-3">
-          <span className="text-5xl font-bold text-white leading-none tabular-nums tracking-tight">{totalScore}</span>
+          <span className="text-5xl font-bold text-portal-ink leading-none tabular-nums tracking-tight">{totalScore}</span>
           <div className="pb-1">
-            <span className="text-lg text-white/20 font-light">/100</span>
+            <span className="text-lg text-portal-ink-2 font-light">/100</span>
           </div>
         </div>
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[#D66829] font-semibold mt-2">Career Readiness</p>
-        <p className="text-xs text-white/40 mt-1">{status}</p>
+        <p className="text-xs tracking-[0.2em] text-[#D66829] font-semibold mt-2">Career Readiness</p>
+        <p className="text-xs text-portal-ink-2 mt-1">{status}</p>
       </div>
 
       {/* Category Bars */}
@@ -39,12 +39,12 @@ export default function ChiroScoreDisplay({ data }: { data: ChiroScoreResult }) 
         {Object.entries(breakdown).map(([key, cat]) => (
           <Link key={key} href={cat.href} className="group block">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[12px] text-white/50 font-medium group-hover:text-[#D66829] transition-colors">
+              <span className="text-[12px] text-portal-ink-2 font-medium group-hover:text-[#D66829] transition-colors">
                 {cat.label}
               </span>
-              <span className="text-[11px] text-white/30 tabular-nums font-medium">{cat.score}%</span>
+              <span className="text-xs text-portal-ink-2 tabular-nums font-medium">{cat.score}%</span>
             </div>
-            <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
+            <div className="h-2 bg-[#f7f8fa] rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-700"
                 style={{
@@ -61,11 +61,11 @@ export default function ChiroScoreDisplay({ data }: { data: ChiroScoreResult }) 
       {topRecommendation && (
         <Link
           href={topRecommendation.href}
-          className="mt-6 flex items-center justify-between p-4 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:border-[#D66829]/30 transition-all group"
+          className="mt-6 flex items-center justify-between p-4 rounded-xl bg-[#f7f8fa] border border-[#e3e8ed] hover:border-[#D66829]/30 transition-all group"
         >
           <div>
-            <p className="text-[13px] font-medium text-white/70">Next step</p>
-            <p className="text-[11px] text-white/30">{topRecommendation.category}</p>
+            <p className="text-[13px] font-medium text-portal-ink-2">Next step</p>
+            <p className="text-xs text-portal-ink-2">{topRecommendation.category}</p>
           </div>
           <span className="text-[#D66829] text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
         </Link>

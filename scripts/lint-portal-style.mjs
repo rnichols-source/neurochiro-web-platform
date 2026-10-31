@@ -1,7 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-const roots = ['src/app/(doctor)', 'src/components/portal'];
+const roots = ['src/app/(doctor)', 'src/components/portal', 'src/app/(student)', 'src/components/student'];
 const skip = /workshop-kit|screening-kit/;
 const banned = [
   { name: 'text under 12px', re: /text-\[(8|9|10|11)px\]/ },

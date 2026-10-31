@@ -23,6 +23,20 @@ export async function analyzeContractAction(contractText: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Unauthorized")
 
+  const { getStudentMembership } = await import('@/lib/students/membership')
+  const { hasMemberAccess } = await import('@/lib/students/membership-pure')
+  const { aiUsesToday, recordAiUse } = await import('@/lib/students/ai-usage')
+  const { STUDENT_CONFIG } = await import('@/config/students')
+  const { aiUsageAllowed } = await import('@/lib/students/gate')
+  const membership = await getStudentMembership(user.id)
+  if (!hasMemberAccess(membership)) {
+    return { error: 'Membership is required for Contract Lab.' }
+  }
+  const used = await aiUsesToday(user.id, 'contract_lab')
+  if (!aiUsageAllowed(used, STUDENT_CONFIG.contractLabAiPerDay)) {
+    return { error: 'You can run 5 contract reviews a day. Try again tomorrow.' }
+  }
+
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
     return { error: "AI analysis is not configured. Please contact support." }
@@ -93,6 +107,7 @@ Return ONLY the JSON object, no markdown formatting or code blocks.`
 
     if (error) console.error("Error saving contract:", error)
 
+    await recordAiUse(user.id, 'contract_lab')
     revalidatePath('/student/contract-lab')
     return { success: true, analysis }
   } catch (err: any) {

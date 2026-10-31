@@ -37,27 +37,27 @@ export default function BrowsePositionsPage() {
   return (
     <div className="p-4 md:p-10 max-w-5xl mx-auto space-y-6">
       <div>
-        <Link href="/student/chiromatch" className="text-xs text-white/30 hover:text-neuro-orange transition-colors mb-4 inline-block">&larr; Back to ChiroMatch</Link>
-        <h1 className="text-2xl font-bold text-white">Available Positions</h1>
-        <p className="text-white/30 text-sm mt-1">{positions.length} position{positions.length !== 1 ? 's' : ''} in the current cycle</p>
+        <Link href="/student/chiromatch" className="text-xs text-portal-ink-2 hover:text-neuro-orange transition-colors mb-4 inline-block">&larr; Back to ChiroMatch</Link>
+        <h1 className="text-2xl font-bold text-portal-ink">Available Positions</h1>
+        <p className="text-portal-ink-2 text-sm mt-1">{positions.length} position{positions.length !== 1 ? 's' : ''} in the current cycle</p>
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-portal-ink-2" />
         <input
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search by title, clinic, or location..."
-          className="w-full pl-11 pr-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-neuro-orange"
+          className="w-full pl-11 pr-4 py-3 bg-[#f7f8fa] border border-[#e3e8ed] rounded-xl text-portal-ink text-sm placeholder:text-portal-muted focus:outline-none focus:border-neuro-orange"
         />
       </div>
 
       {/* Position Cards */}
       {filtered.length === 0 ? (
-        <div className="bg-[#162231] rounded-2xl border border-white/[0.06] p-8 text-center">
-          <p className="text-white/30 text-sm">No positions found. Check back as more doctors list positions.</p>
+        <div className="bg-white rounded-2xl border border-[#e3e8ed] p-8 text-center">
+          <p className="text-portal-ink-2 text-sm">No positions found. Check back as more doctors list positions.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -65,7 +65,7 @@ export default function BrowsePositionsPage() {
             <Link
               key={pos.id}
               href={`/student/chiromatch/positions/${pos.id}`}
-              className="block bg-[#162231] rounded-2xl border border-white/[0.06] p-5 hover:border-neuro-orange/20 transition-all group"
+              className="block bg-white rounded-2xl border border-[#e3e8ed] p-5 hover:border-neuro-orange/20 transition-all group"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
@@ -78,12 +78,12 @@ export default function BrowsePositionsPage() {
                       </div>
                     )}
                     <div>
-                      <h3 className="font-bold text-white">{pos.title}</h3>
-                      <p className="text-xs text-white/40">{pos.doctor.clinic_name} — Dr. {pos.doctor.first_name} {pos.doctor.last_name}</p>
+                      <h3 className="font-bold text-portal-ink">{pos.title}</h3>
+                      <p className="text-xs text-portal-ink-2">{pos.doctor.clinic_name} — Dr. {pos.doctor.first_name} {pos.doctor.last_name}</p>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-3 text-xs text-white/30 mt-3">
+                  <div className="flex flex-wrap gap-3 text-xs text-portal-ink-2 mt-3">
                     {pos.city && (
                       <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{pos.city}{pos.state ? `, ${pos.state}` : ''}</span>
                     )}
@@ -94,7 +94,7 @@ export default function BrowsePositionsPage() {
                       <span className="flex items-center gap-1 text-green-400"><GraduationCap className="w-3 h-3" />Mentorship</span>
                     )}
                     {pos.practice_type && (
-                      <span className="text-white/20">{pos.practice_type}</span>
+                      <span className="text-portal-ink-2">{pos.practice_type}</span>
                     )}
                   </div>
                 </div>
