@@ -86,7 +86,7 @@ export async function GET(req: Request) {
               <li>Featured placement options for maximum visibility</li>
             </ul>
             <p style="margin: 24px 0;">
-              <a href="https://neurochiro.co/host-a-seminar" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">List a Seminar</a>
+              <a href="https://neurochiro.co/seminars/host" style="display: inline-block; background: #D66829; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 15px;">List a Seminar</a>
             </p>
             <p>Our doctors are actively looking for CE opportunities, especially in nervous system techniques and functional neurology. Your events would get great visibility with exactly the right audience.</p>
             <p>Would you be interested? I'd love to walk you through it — takes about 5 minutes to list your first event.</p>

@@ -36,19 +36,19 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: /directory-search/,
+      testIgnore: [/directory-search/, /seminars\.spec/],
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
       name: 'firefox',
-      testIgnore: /directory-search/,
+      testIgnore: [/directory-search/, /seminars\.spec/],
       use: { ...devices['Desktop Firefox'] },
     },
 
     {
       name: 'webkit',
-      testIgnore: /directory-search/,
+      testIgnore: [/directory-search/, /seminars\.spec/],
       use: { ...devices['Desktop Safari'] },
     },
 
@@ -64,6 +64,25 @@ export default defineConfig({
     {
       name: 'directory-desktop',
       testMatch: /directory-search/,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 900 },
+        baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000',
+      },
+    },
+
+    {
+      name: 'seminars-mobile',
+      testMatch: /seminars\.spec/,
+      use: {
+        ...devices['iPhone 13'],
+        baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000',
+      },
+    },
+
+    {
+      name: 'seminars-desktop',
+      testMatch: /seminars\.spec/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 900 },

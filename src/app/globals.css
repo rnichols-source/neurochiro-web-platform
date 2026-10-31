@@ -120,6 +120,10 @@ html[data-cookie-bar="1"] .nc-view-toggle {
   bottom: calc(88px + env(safe-area-inset-bottom)) !important;
 }
 
+html[data-cookie-bar="1"] .nc-seminar-cta {
+  bottom: calc(72px + env(safe-area-inset-bottom));
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

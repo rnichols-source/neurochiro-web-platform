@@ -3,6 +3,8 @@ import { stripe } from "@/lib/stripe";
 import { Automations } from "@/lib/automations";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { Resend } from "resend";
+import { checkoutFromStripeSession, fulfillSeminarSession, isSeminarCheckout, refundSeminarCharge, releaseSeminarHold } from "@/lib/seminars/fulfill";
+import { supabaseSeminarStore } from "@/lib/seminars/fulfill-db";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -46,6 +48,12 @@ export async function POST(req: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as any;
+        if (isSeminarCheckout(session.metadata?.type || "")) {
+          if (session.payment_status === "paid") {
+            await fulfillSeminarSession(supabaseSeminarStore(), checkoutFromStripeSession(session));
+          }
+          break;
+        }
         const userId = session.metadata?.userId;
         const customer = session.customer as string;
 
@@ -299,7 +307,7 @@ export async function POST(req: Request) {
               try {
                 const resend = new Resend(process.env.RESEND_API_KEY || '');
                 await resend.emails.send({
-                  from: 'NeuroChiro <support@neurochirodirectory.com>',
+                  from: process.env.RESEND_FROM_SEMINARS || 'NeuroChiro Seminars <seminars@neurochiro.co>',
                   to: [hostEmail],
                   subject: `Seminar submitted: "${seminarTitle}" — under review`,
                   html: `
@@ -831,6 +839,27 @@ export async function POST(req: Request) {
         break;
       }
 
+      case "checkout.session.async_payment_succeeded": {
+        const session = event.data.object as any;
+        if (isSeminarCheckout(session.metadata?.type || "") && session.payment_status === "paid") {
+          await fulfillSeminarSession(supabaseSeminarStore(), checkoutFromStripeSession(session));
+        }
+        break;
+      }
+
+      case "checkout.session.expired": {
+        const session = event.data.object as any;
+        await releaseSeminarHold(supabaseSeminarStore(), checkoutFromStripeSession(session));
+        break;
+      }
+
+      case "charge.refunded": {
+        const charge = event.data.object as any;
+        const paymentIntent = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id;
+        await refundSeminarCharge(supabaseSeminarStore(), paymentIntent || null);
+        break;
+      }
+
       case "invoice.payment_succeeded": {
         const invoice = event.data.object as any;
         const customer = invoice.customer as string;
@@ -937,6 +966,10 @@ export async function POST(req: Request) {
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as any;
+        if (subscription.metadata?.type === "seminar_package") {
+          await supabaseSeminarStore().expirePackage(subscription.id);
+          break;
+        }
         const customer = subscription.customer as string;
 
         // Check if customer still has other active subscriptions before downgrading

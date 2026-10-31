@@ -65,7 +65,7 @@ export default function BentoGrid() {
             </div>
 
             <Link 
-              href="/seminars" 
+              href="/seminars?when=next-3-months" 
               className="flex items-center gap-2 text-neuro-navy font-bold group-hover:translate-x-1 transition-transform min-h-[44px] px-2"
               aria-label="Find upcoming clinical seminars"
             >

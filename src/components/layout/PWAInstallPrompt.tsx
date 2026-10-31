@@ -7,7 +7,7 @@ import { Share, X, Smartphone, Info } from "lucide-react";
 
 export default function PWAInstallPrompt() {
   const pathname = usePathname() || "";
-  const hideOnPatientPage = pathname === "/" || pathname.startsWith("/directory") || pathname.startsWith("/chiropractor");
+  const hideOnPatientPage = pathname === "/" || pathname.startsWith("/directory") || pathname.startsWith("/chiropractor") || pathname.startsWith("/seminars");
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isSafari, setIsSafari] = useState(false);

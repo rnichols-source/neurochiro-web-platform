@@ -1,13 +1,12 @@
 "use client";
 
-import * as React from "react";
 import { useEffect, useState } from "react";
 import {
   ArrowLeft, Loader2, ExternalLink, Globe, Instagram, Linkedin,
   Youtube, MapPin, Award, BookOpen, Mic2, Mail, ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
-import { getSeminarById } from "../../../actions";
+import { getSeminarBySlugAction } from "../../../actions";
 import Footer from "@/components/landing/Footer";
 
 interface Speaker {
@@ -33,8 +32,7 @@ function speakerSlug(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
-export default function SpeakerPage({ params }: { params: Promise<{ id: string; slug: string }> }) {
-  const { id, slug } = React.use(params);
+export default function SpeakerPage({ slug, speakerParam }: { slug: string; speakerParam: string }) {
   const [speaker, setSpeaker] = useState<Speaker | null>(null);
   const [seminar, setSeminar] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -43,11 +41,11 @@ export default function SpeakerPage({ params }: { params: Promise<{ id: string; 
   useEffect(() => {
     async function load() {
       try {
-        const data = await getSeminarById(id);
+        const data = await getSeminarBySlugAction(slug);
         setSeminar(data);
         const speakers = ((data as any)?.speakers || []) as Speaker[];
         setAllSpeakers(speakers);
-        const found = speakers.find(s => speakerSlug(s.name) === slug);
+        const found = speakers.find(s => speakerSlug(s.name) === speakerParam);
         setSpeaker(found || null);
       } catch (e) {
         console.error("Failed to load speaker:", e);
@@ -55,7 +53,7 @@ export default function SpeakerPage({ params }: { params: Promise<{ id: string; 
       setLoading(false);
     }
     load();
-  }, [id, slug]);
+  }, [slug, speakerParam]);
 
   if (loading) {
     return (
@@ -70,13 +68,13 @@ export default function SpeakerPage({ params }: { params: Promise<{ id: string; 
       <div className="min-h-dvh bg-neuro-cream flex flex-col items-center justify-center p-6 text-center">
         <h1 className="text-2xl font-black text-neuro-navy mb-4">Speaker Not Found</h1>
         <p className="text-gray-500 mb-6">This speaker doesn&apos;t exist or the event has been updated.</p>
-        <Link href={`/seminars/${id}`} className="px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl">Back to Event</Link>
+        <Link href={`/seminars/${slug}`} className="px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl">Back to Event</Link>
       </div>
     );
   }
 
   const bio = speaker.full_bio || speaker.bio || '';
-  const otherSpeakers = allSpeakers.filter(s => speakerSlug(s.name) !== slug).slice(0, 6);
+  const otherSpeakers = allSpeakers.filter(s => speakerSlug(s.name) !== speakerParam).slice(0, 6);
 
   return (
     <div className="min-h-dvh bg-neuro-cream">
@@ -87,7 +85,7 @@ export default function SpeakerPage({ params }: { params: Promise<{ id: string; 
           <div className="absolute bottom-10 right-20 w-40 h-40 bg-blue-500 rounded-full blur-3xl" />
         </div>
         <div className="max-w-3xl mx-auto relative z-10">
-          <Link href={`/seminars/${id}`} className="text-xs text-gray-400 hover:text-white transition-colors mb-8 inline-flex items-center gap-1">
+          <Link href={`/seminars/${slug}`} className="text-xs text-gray-400 hover:text-white transition-colors mb-8 inline-flex items-center gap-1">
             <ArrowLeft className="w-3 h-3" /> Back to {seminar.title}
           </Link>
 
@@ -279,7 +277,7 @@ export default function SpeakerPage({ params }: { params: Promise<{ id: string; 
               {otherSpeakers.map((s, i) => (
                 <Link
                   key={i}
-                  href={`/seminars/${id}/speakers/${speakerSlug(s.name)}`}
+                  href={`/seminars/${slug}/speakers/${speakerSlug(s.name)}`}
                   className="bg-white rounded-xl border border-gray-100 p-4 hover:shadow-lg transition-shadow group text-center"
                 >
                   {s.photo_url ? (
