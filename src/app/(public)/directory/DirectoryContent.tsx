@@ -76,7 +76,7 @@ export default function DirectoryContent({
     <div
       ref={search.bindList}
       onScroll={(event) => search.setHeaderCollapsed(event.currentTarget.scrollTop > 48)}
-      className="flex-1 overflow-y-auto p-4 space-y-3"
+      className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain p-4 pb-32 space-y-3 lg:pb-4"
     >
       {search.showHero ? (
         <div className="rounded-3xl bg-[#1c1c1e] p-5 text-white">
@@ -160,10 +160,13 @@ export default function DirectoryContent({
       <div className="fixed inset-0 z-[101] flex flex-col bg-black lg:hidden">
         <div className="shrink-0 space-y-2 px-3 pb-2 pt-[env(safe-area-inset-top)]">{header}</div>
         <div className="relative min-h-0 flex-1">
-          <div className={search.view === "map" ? "absolute inset-0" : "pointer-events-none absolute inset-0 invisible"} aria-hidden={search.view !== "map"}>
+          <div
+            className={search.view === "map" ? "absolute inset-0" : "pointer-events-none invisible absolute inset-0 [&_*]:pointer-events-none"}
+            aria-hidden={search.view !== "map"}
+          >
             {map}
           </div>
-          {search.view === "list" ? list : null}
+          {search.view === "list" ? <div className="absolute inset-0 z-10 flex min-h-0 flex-col">{list}</div> : null}
         </div>
         <ViewTogglePill view={search.view} onChange={search.setView} />
       </div>
