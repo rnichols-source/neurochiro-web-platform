@@ -30,27 +30,29 @@
   line-height: 24px;
 }
 
-.portal h1,
-.portal h2,
-.portal h3,
-.portal h4,
-.portal h5,
-.portal h6 {
-  font-family: var(--font-lato), sans-serif;
-  color: #16202a;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-transform: none;
-}
+@layer base {
+  .portal h1,
+  .portal h2,
+  .portal h3,
+  .portal h4,
+  .portal h5,
+  .portal h6 {
+    font-family: var(--font-lato), sans-serif;
+    color: #16202a;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+  }
 
-.portal .portal-sidebar h1,
-.portal .portal-sidebar h2,
-.portal .portal-sidebar h3,
-.portal .portal-sidebar a,
-.portal .portal-sidebar button,
-.portal .portal-sidebar p,
-.portal .portal-sidebar span {
-  color: inherit;
+  .portal .portal-sidebar h1,
+  .portal .portal-sidebar h2,
+  .portal .portal-sidebar h3,
+  .portal .portal-sidebar a,
+  .portal .portal-sidebar button,
+  .portal .portal-sidebar p,
+  .portal .portal-sidebar span {
+    color: inherit;
+  }
 }
 
 .portal .portal-sidebar .sidebar-quiet {

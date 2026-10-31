@@ -35,9 +35,9 @@ export default function BadgesPage() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Award className="w-6 h-6 text-neuro-orange" />
-          <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Achievements</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-portal-ink tracking-tight">Achievements</h1>
         </div>
-        <p className="text-white/30 text-sm">{earnedIds.size} of {BADGE_DEFINITIONS.length} badges earned</p>
+        <p className="text-portal-ink-2 text-sm">{earnedIds.size} of {BADGE_DEFINITIONS.length} badges earned</p>
       </div>
 
       {/* Progress Bar */}

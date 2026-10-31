@@ -61,14 +61,14 @@ export default function WeeklyAdjustmentPage() {
           ].map((segment, i) => (
             <div key={i} className="flex items-start gap-4">
               <div className="w-12 text-right flex-shrink-0">
-                <span className="text-xs text-white/25 font-mono">{segment.time}</span>
+                <span className="text-sm text-white/70 font-mono">{segment.time}</span>
               </div>
               <div className="w-8 h-8 bg-white/[0.06] rounded-lg flex items-center justify-center flex-shrink-0">
                 <segment.icon className="w-4 h-4 text-neuro-orange" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white/80">{segment.title}</p>
-                <p className="text-xs text-white/30 mt-0.5">{segment.desc}</p>
+                <p className="text-sm font-semibold text-white">{segment.title}</p>
+                <p className="text-sm text-white/80 mt-0.5">{segment.desc}</p>
               </div>
             </div>
           ))}
@@ -76,10 +76,10 @@ export default function WeeklyAdjustmentPage() {
       </div>
 
       {/* Submit a Question */}
-      <div className="bg-neuro-orange/10 border border-neuro-orange/20 rounded-2xl p-6 text-center">
-        <MessageSquare className="w-8 h-8 text-neuro-orange mx-auto mb-3" />
-        <p className="text-white font-bold text-base mb-2">Got a question for the show?</p>
-        <p className="text-white/40 text-sm mb-4">DM @neurochiro on Instagram or drop it in the story question sticker. Best questions get answered live on air.</p>
+      <div className="bg-portal-accent-50 border border-portal-border rounded-2xl p-6 text-center">
+        <MessageSquare className="w-8 h-8 text-portal-accent mx-auto mb-3" />
+        <p className="text-portal-ink font-bold text-base mb-2">Got a question for the show?</p>
+        <p className="text-portal-ink-2 text-sm mb-4">DM @neurochiro on Instagram or drop it in the story question sticker. Best questions get answered live on air.</p>
         <a
           href="https://instagram.com/neurochiro"
           target="_blank"
@@ -102,7 +102,7 @@ export default function WeeklyAdjustmentPage() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-white">EP {ep.episode}: {ep.guest}</p>
-                    <p className="text-xs text-white/30">{ep.city} — {new Date(ep.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                    <p className="text-sm text-white/70">{ep.city} — {new Date(ep.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
                   </div>
                 </div>
                 {ep.youtubeUrl && (

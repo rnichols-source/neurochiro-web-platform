@@ -41,8 +41,8 @@ export default function CreateMatchPositionPage() {
         <ArrowLeft className="w-3 h-3" /> Back to ChiroMatch
       </Link>
 
-      <h1 className="text-2xl font-bold text-white mb-2">Create Match Position</h1>
-      <p className="text-white/30 text-sm mb-8">This position will be listed in the current ChiroMatch cycle for students to rank.</p>
+      <h1 className="text-2xl font-bold text-portal-ink mb-2">Create Match Position</h1>
+      <p className="text-portal-ink-2 text-sm mb-8">This position will be listed in the current ChiroMatch cycle for students to rank.</p>
 
       <form onSubmit={handleSubmit} className="bg-[#162231] rounded-2xl border border-white/[0.06] p-6 space-y-5">
         <div className="space-y-1">
