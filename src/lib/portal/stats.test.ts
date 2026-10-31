@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  collapseRecommendations,
   countFromHead,
   countIntroductions,
   countPatientRequests,
+  distinctRecommendationClicks,
   marketRank,
   patientRequestSources,
   rangeStart,
@@ -121,6 +123,36 @@ test('a head count error is null, not zero', () => {
   assert.equal(countFromHead({ count: null, error: { message: 'missing' } }), null);
   assert.equal(countFromHead({ count: 0, error: null }), 0);
   assert.equal(countFromHead({ count: 4, error: null }), 4);
+});
+
+test('request sources add up to patient requests', () => {
+  const leads = [
+    { id: '1', stage: 'new', created_at: recent, email: 'a@x.com', source: 'directory', phone: '5551112222' },
+    { id: '2', stage: 'contacted', created_at: recent, email: 'a@x.com', source: 'quiz', phone: '5551112222' },
+  ];
+  const contacts = [
+    { id: '3', stage: 'new', created_at: recent, email: 'b@x.com', source: 'dm_outreach' },
+  ];
+  const total = countPatientRequests(leads, contacts, null).total;
+  const sum = patientRequestSources(leads, contacts, null).reduce((count, row) => count + row.count, 0);
+  assert.equal(sum, total);
+  assert.equal(total, 2);
+});
+
+test('copy clicks for one person collapse to one recommendation', () => {
+  const rows = [
+    { id: '1', created_at: recent, demand_mention_id: 'mention-1', redirect_code: 'aaa', searched_city: 'Greenville' },
+    { id: '2', created_at: recent, demand_mention_id: 'mention-1', redirect_code: 'bbb', searched_city: 'Greenville' },
+    { id: '3', created_at: new Date(new Date(recent).getTime() + 5 * 60 * 1000).toISOString(), demand_mention_id: null, redirect_code: 'ccc', searched_city: 'Greenville' },
+    { id: '4', created_at: new Date(new Date(recent).getTime() + 2 * 60 * 60 * 1000).toISOString(), demand_mention_id: 'mention-2', redirect_code: 'ddd', searched_city: 'Greenville' },
+  ];
+  assert.equal(collapseRecommendations(rows).length, 2);
+  assert.equal(distinctRecommendationClicks([
+    { reply_log_id: '1' },
+    { reply_log_id: '1' },
+    { reply_log_id: '4' },
+    { reply_log_id: null },
+  ]), 2);
 });
 
 test('an errored reply_logs query is null, not zero', () => {

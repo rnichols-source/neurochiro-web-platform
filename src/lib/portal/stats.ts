@@ -14,8 +14,8 @@ export type PortalStats = {
   profileViews: number;
   viewsInRange: number | null;
   viewsTrackedSince: string | null;
-  introductions: number | null;
-  profileClicks: number | null;
+  recommendationsSent: number | null;
+  recommendationClicks: number | null;
   referralsSent: number | null;
   referralsReceived: number | null;
   requestSources: { label: string; count: number }[] | null;
@@ -286,6 +286,53 @@ export function summarizeLeads(
   const header = countPatientRequests(leads, [], rangeStart(range, now, timeZone));
   const tabs = countPatientRequests(leads, [], null);
   return { header, tabs };
+}
+
+export const RECOMMENDATION_TEMPLATES = ['doctor_comment', 'doctor_dm', 'sent_to_patient'] as const;
+
+export type RecommendationRow = {
+  id: string;
+  created_at?: string | null;
+  demand_mention_id?: string | null;
+  redirect_code?: string | null;
+  searched_city?: string | null;
+};
+
+const FIFTEEN_MINUTES = 15 * 60 * 1000;
+
+/**
+ * One recommendation per person, not one per copy click.
+ * Rows that share a mention or redirect code collapse first.
+ * Rows for the same city within 15 minutes collapse after that.
+ */
+export function collapseRecommendations(rows: RecommendationRow[]): RecommendationRow[] {
+  const kept: RecommendationRow[] = [];
+  const seen = new Set<string>();
+  const sorted = [...rows].sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || '')));
+  for (const row of sorted) {
+    const key = (row.demand_mention_id || row.redirect_code || row.id || '').trim();
+    if (key && seen.has(`key:${key}`)) continue;
+    const city = (row.searched_city || '').trim().toLowerCase();
+    const time = row.created_at ? new Date(row.created_at).getTime() : Number.NaN;
+    if (city && !Number.isNaN(time)) {
+      const near = kept.find((prev) => {
+        const prevCity = (prev.searched_city || '').trim().toLowerCase();
+        const prevTime = prev.created_at ? new Date(prev.created_at).getTime() : Number.NaN;
+        return prevCity === city && !Number.isNaN(prevTime) && Math.abs(prevTime - time) <= FIFTEEN_MINUTES;
+      });
+      if (near) {
+        if (key) seen.add(`key:${key}`);
+        continue;
+      }
+    }
+    if (key) seen.add(`key:${key}`);
+    kept.push(row);
+  }
+  return kept;
+}
+
+export function distinctRecommendationClicks(rows: { reply_log_id?: string | null }[]): number {
+  return new Set(rows.map((row) => row.reply_log_id).filter((id): id is string => Boolean(id))).size;
 }
 
 const EXCLUDED_INTRO_TEMPLATES = new Set(['waitlist_comment', 'waitlist_dm']);
