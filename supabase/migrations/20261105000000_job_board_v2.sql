@@ -90,21 +90,22 @@ create policy job_postings_public_read on public.job_postings
     and (expires_at is null or expires_at > now())
   );
 
+-- doctor_id and applicant_id are text in production. Compare as text.
 drop policy if exists job_postings_owner_select on public.job_postings;
 create policy job_postings_owner_select on public.job_postings
   for select to authenticated
-  using (doctor_id = auth.uid());
+  using (doctor_id::text = auth.uid()::text);
 
 drop policy if exists job_postings_owner_update on public.job_postings;
 create policy job_postings_owner_update on public.job_postings
   for update to authenticated
-  using (doctor_id = auth.uid())
-  with check (doctor_id = auth.uid());
+  using (doctor_id::text = auth.uid()::text)
+  with check (doctor_id::text = auth.uid()::text);
 
 drop policy if exists job_postings_owner_insert on public.job_postings;
 create policy job_postings_owner_insert on public.job_postings
   for insert to authenticated
-  with check (doctor_id = auth.uid() and coalesce(poster_type, 'member') = 'member');
+  with check (doctor_id::text = auth.uid()::text and coalesce(poster_type, 'member') = 'member');
 
 -- job_post_views: no client policies. Writes go through record_job_view.
 -- student_email_sends: no client policies.
@@ -112,7 +113,7 @@ create policy job_postings_owner_insert on public.job_postings
 drop policy if exists job_applications_applicant_read on public.job_applications;
 create policy job_applications_applicant_read on public.job_applications
   for select to authenticated
-  using (applicant_id = auth.uid() or student_user_id = auth.uid());
+  using (applicant_id::text = auth.uid()::text or student_user_id::text = auth.uid()::text);
 
 drop policy if exists job_applications_owner_read on public.job_applications;
 create policy job_applications_owner_read on public.job_applications
@@ -120,7 +121,7 @@ create policy job_applications_owner_read on public.job_applications
   using (
     exists (
       select 1 from public.job_postings p
-      where p.id = job_applications.job_id and p.doctor_id = auth.uid()
+      where p.id::text = job_applications.job_id::text and p.doctor_id::text = auth.uid()::text
     )
   );
 
@@ -148,9 +149,9 @@ create policy student_resumes_poster_read on storage.objects
     and exists (
       select 1
       from public.job_applications a
-      join public.job_postings p on p.id = a.job_id
-      where p.doctor_id = auth.uid()
-        and (storage.foldername(name))[1] = coalesce(a.student_user_id, a.applicant_id)::text
+      join public.job_postings p on p.id::text = a.job_id::text
+      where p.doctor_id::text = auth.uid()::text
+        and (storage.foldername(name))[1] = coalesce(a.student_user_id::text, a.applicant_id::text)
     )
   );
 

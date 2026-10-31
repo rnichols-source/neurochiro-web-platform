@@ -129,7 +129,7 @@ begin
   if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'shadow_requests' and policyname = 'Doctor reads own shadow requests') then
     create policy "Doctor reads own shadow requests" on public.shadow_requests
       for select to authenticated using (
-        exists (select 1 from public.doctors d where d.id = doctor_id and d.user_id = auth.uid())
+        exists (select 1 from public.doctors d where d.id = doctor_id and d.user_id::text = auth.uid()::text)
       );
   end if;
 end $$;
