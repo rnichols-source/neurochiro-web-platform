@@ -34,7 +34,7 @@ export default function MilestoneTimeline({ milestones }: MilestoneTimelineProps
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-white/25 font-semibold">
+        <p className="text-xs tracking-[0.2em] text-portal-ink-2 font-semibold">
           Milestones &middot; {completedCount}/{MILESTONES.length}
         </p>
         <div className="flex items-center gap-1.5">
@@ -42,7 +42,7 @@ export default function MilestoneTimeline({ milestones }: MilestoneTimelineProps
             <div
               key={m.key}
               className={`w-1.5 h-1.5 rounded-full ${
-                milestones[m.key as keyof MilestoneData] ? "bg-[#D66829]" : "bg-white/[0.08]"
+                milestones[m.key as keyof MilestoneData] ? "bg-[#D66829]" : "bg-[#f7f8fa]"
               }`}
             />
           ))}
@@ -59,7 +59,7 @@ export default function MilestoneTimeline({ milestones }: MilestoneTimelineProps
               key={m.key}
               href={m.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group ${
-                isNext ? "bg-white/[0.04]" : "hover:bg-white/[0.02]"
+                isNext ? "bg-[#f7f8fa]" : "hover:bg-[#f7f8fa]"
               }`}
             >
               <div
@@ -68,20 +68,20 @@ export default function MilestoneTimeline({ milestones }: MilestoneTimelineProps
                     ? "bg-[#D66829]"
                     : isNext
                     ? "border-2 border-[#D66829]"
-                    : "border border-white/[0.1]"
+                    : "border border-[#e3e8ed]"
                 }`}
               >
-                {done && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                {done && <Check className="w-3 h-3 text-portal-ink" strokeWidth={3} />}
               </div>
               <span
                 className={`text-[12px] flex-1 font-medium ${
-                  done ? "text-white/25 line-through" : isNext ? "text-white/70" : "text-white/20"
+                  done ? "text-portal-ink-2 line-through" : isNext ? "text-portal-ink-2" : "text-portal-ink-2"
                 }`}
               >
                 {m.label}
               </span>
               {isNext && (
-                <span className="text-[10px] text-[#D66829] font-semibold opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
+                <span className="text-xs text-[#D66829] font-semibold opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
               )}
             </Link>
           );

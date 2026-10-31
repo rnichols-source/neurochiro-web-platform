@@ -260,7 +260,7 @@ function MentorResults({ filtered }: { filtered: any[] }) {
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <h3 className="font-semibold text-[#16222D]">{fullName}</h3>
                     {matchScore > 0 && (
-                      <span className="text-[10px] text-[#5A6873] flex items-center gap-1">
+                      <span className="text-xs text-[#5A6873] flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: matchScore >= 60 ? "#22c55e" : "#f59e0b" }} />
                         {matchScore}%
                       </span>
@@ -288,17 +288,17 @@ function MentorResults({ filtered }: { filtered: any[] }) {
                     {/* Badges */}
                     <div className="flex flex-wrap gap-1.5 mb-3">
                       {canMessage && (
-                        <span className="text-[10px] font-medium bg-green-500/10 text-green-400 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span className="text-xs font-medium bg-green-500/10 text-green-400 px-2 py-0.5 rounded-full flex items-center gap-1">
                           <Heart className="w-2.5 h-2.5" /> Open to Students
                         </span>
                       )}
                       {mentor.is_hiring && (
-                        <span className="text-[10px] font-medium bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span className="text-xs font-medium bg-portal-surface0/10 text-blue-400 px-2 py-0.5 rounded-full flex items-center gap-1">
                           <Briefcase className="w-2.5 h-2.5" /> Hiring
                         </span>
                       )}
                       {hasSpotlight && (
-                        <span className="text-[10px] font-medium bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full">
+                        <span className="text-xs font-medium bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full">
                           Spotlight Interview
                         </span>
                       )}
@@ -308,12 +308,12 @@ function MentorResults({ filtered }: { filtered: any[] }) {
                     {mentor.specialties?.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
                         {mentor.specialties.slice(0, 4).map((spec: string) => (
-                          <span key={spec} className="text-[10px] font-medium bg-[#EFF1F2] text-[#5A6873] px-2 py-0.5 rounded-full">
+                          <span key={spec} className="text-xs font-medium bg-[#EFF1F2] text-[#5A6873] px-2 py-0.5 rounded-full">
                             {spec}
                           </span>
                         ))}
                         {mentor.specialties.length > 4 && (
-                          <span className="text-[10px] text-[#5A6873]">+{mentor.specialties.length - 4} more</span>
+                          <span className="text-xs text-[#5A6873]">+{mentor.specialties.length - 4} more</span>
                         )}
                       </div>
                     )}
@@ -345,7 +345,7 @@ function MentorResults({ filtered }: { filtered: any[] }) {
           <div className="space-y-8">
             {openToMentoring.length > 0 && (
               <div>
-                <h2 className="text-xs font-black text-green-400/60 uppercase tracking-widest mb-3">Open to Mentoring ({openToMentoring.length})</h2>
+                <h2 className="text-xs font-bold text-green-400/60 tracking-widest mb-3">Open to Mentoring ({openToMentoring.length})</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {openToMentoring.map(m => renderCard(m, true))}
                 </div>
@@ -353,8 +353,8 @@ function MentorResults({ filtered }: { filtered: any[] }) {
             )}
             {inNetwork.length > 0 && (
               <div>
-                <h2 className="text-xs font-black text-[#5A6873]/40 uppercase tracking-widest mb-3">In the Network ({inNetwork.length})</h2>
-                <p className="text-[11px] text-[#5A6873]/60 mb-3">These doctors haven't opted in to student messages yet. You can still watch their interviews and read their profiles.</p>
+                <h2 className="text-xs font-bold text-[#5A6873]/40 tracking-widest mb-3">In the Network ({inNetwork.length})</h2>
+                <p className="text-xs text-[#5A6873]/60 mb-3">These doctors haven't opted in to student messages yet. You can still watch their interviews and read their profiles.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {inNetwork.map(m => renderCard(m, false))}
                 </div>

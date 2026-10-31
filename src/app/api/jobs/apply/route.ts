@@ -40,6 +40,12 @@ export async function POST(request: NextRequest) {
     if (!profile || profile.role !== 'student') {
       return NextResponse.json({ error: 'Only students can apply to job postings.' }, { status: 403 })
     }
+    const { getStudentMembership } = await import('@/lib/students/membership')
+    const { hasMemberAccess } = await import('@/lib/students/membership-pure')
+    const membership = await getStudentMembership(user.id)
+    if (!hasMemberAccess(membership)) {
+      return NextResponse.json({ error: 'Membership is required to apply.' }, { status: 403 })
+    }
 
     // Get student details
     const { data: student } = await (admin as any).from('students')

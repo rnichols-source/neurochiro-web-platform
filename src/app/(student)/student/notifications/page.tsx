@@ -127,11 +127,11 @@ export default function StudentNotificationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-heading font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl font-heading font-bold text-portal-ink flex items-center gap-3">
             <Bell className="w-7 h-7 text-[#D66829]" />
             Notifications
           </h1>
-          <p className="text-xs text-white/35 mt-1">
+          <p className="text-xs text-portal-ink-2 mt-1">
             {unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
           </p>
         </div>
@@ -146,7 +146,7 @@ export default function StudentNotificationsPage() {
       </div>
 
       {/* Category Tabs */}
-      <div className="flex rounded-2xl overflow-x-auto border border-white/[0.08]">
+      <div className="flex rounded-2xl overflow-x-auto border border-[#e3e8ed]">
         {(Object.keys(NOTIFICATION_CATEGORIES) as CategoryKey[]).map((key) => {
           const cat = NOTIFICATION_CATEGORIES[key];
           const isActive = activeTab === key;
@@ -157,16 +157,16 @@ export default function StudentNotificationsPage() {
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`flex-1 min-w-0 py-3 px-1.5 sm:px-2 text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 sm:gap-1.5 border-r last:border-r-0 border-white/[0.08] ${
-                isActive ? "bg-[#D66829] text-white" : "bg-white/[0.04] text-white/40 hover:text-white/60"
+              className={`flex-1 min-w-0 py-3 px-1.5 sm:px-2 text-xs sm:text-xs font-bold transition-all flex items-center justify-center gap-1 sm:gap-1.5 border-r last:border-r-0 border-[#e3e8ed] ${
+                isActive ? "bg-[#D66829] text-white" : "bg-[#f7f8fa] text-white/40 hover:text-white/60"
               }`}
             >
               <Icon className="w-3.5 h-3.5 flex-shrink-0" />
               <span className="hidden sm:inline">{cat.label}</span>
               {count > 0 && (
                 <span
-                  className={`w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center ${
-                    isActive ? "bg-white/20 text-white" : "bg-white/[0.08] text-white/50"
+                  className={`w-4 h-4 rounded-full text-xs font-bold flex items-center justify-center ${
+                    isActive ? "bg-white/20 text-portal-ink" : "bg-[#f7f8fa] text-portal-ink-2"
                   }`}
                 >
                   {count}
@@ -180,11 +180,11 @@ export default function StudentNotificationsPage() {
       {/* Notification List */}
       {filtered.length === 0 ? (
         <div className="text-center py-16">
-          <Bell className="w-12 h-12 text-white/10 mx-auto mb-4" />
-          <p className="text-white/30 font-bold text-sm">
+          <Bell className="w-12 h-12 text-portal-ink-2 mx-auto mb-4" />
+          <p className="text-portal-ink-2 font-bold text-sm">
             {activeTab === "all" ? "No notifications yet" : `No ${NOTIFICATION_CATEGORIES[activeTab].label.toLowerCase()} notifications`}
           </p>
-          <p className="text-white/20 text-xs mt-1 max-w-sm mx-auto">
+          <p className="text-portal-ink-2 text-xs mt-1 max-w-sm mx-auto">
             {activeTab === "all"
               ? "Notifications appear when new jobs match your profile, mentors respond, or you hit a milestone. Complete your profile and start a course to get your first ones."
               : `You'll see ${NOTIFICATION_CATEGORIES[activeTab].label.toLowerCase()} updates here as they happen.`}
@@ -203,8 +203,8 @@ export default function StudentNotificationsPage() {
                 key={n.id}
                 className={`p-4 rounded-2xl border transition-all cursor-pointer ${
                   !n.read_at
-                    ? "bg-[#162231] border-white/[0.08] border-l-2 border-l-[#D66829] hover:bg-white/[0.04]"
-                    : "bg-[#162231] border-white/[0.08] hover:bg-white/[0.04]"
+                    ? "bg-white border-[#e3e8ed] border-l-2 border-l-[#D66829] hover:bg-[#f7f8fa]"
+                    : "bg-white border-[#e3e8ed] hover:bg-[#f7f8fa]"
                 }`}
                 onClick={() => {
                   if (!n.read_at) markRead(n.id);
@@ -214,23 +214,23 @@ export default function StudentNotificationsPage() {
                   {/* Category icon */}
                   <div
                     className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                      !n.read_at ? "bg-[#D66829]/10" : "bg-white/[0.06]"
+                      !n.read_at ? "bg-[#D66829]/10" : "bg-[#f7f8fa]"
                     }`}
                   >
                     <CatIcon
-                      className={`w-4 h-4 ${!n.read_at ? "text-[#D66829]" : "text-white/30"}`}
+                      className={`w-4 h-4 ${!n.read_at ? "text-[#D66829]" : "text-portal-ink-2"}`}
                     />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <p className="text-sm font-semibold text-white">{n.title}</p>
+                      <p className="text-sm font-semibold text-portal-ink">{n.title}</p>
                       {!n.read_at && <span className={`w-2 h-2 rounded-full ${getPriorityDot(n)}`} />}
                     </div>
-                    <p className="text-white/40 text-sm">{n.body}</p>
+                    <p className="text-portal-ink-2 text-sm">{n.body}</p>
 
                     <div className="flex items-center justify-between mt-2">
-                      <p className="text-xs text-white/30">
+                      <p className="text-xs text-portal-ink-2">
                         {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
                       </p>
                       {actionLink && actionLabel && (

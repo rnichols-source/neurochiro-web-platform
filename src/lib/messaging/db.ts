@@ -203,7 +203,7 @@ export async function getOrCreateDirect(actorId: string, otherUserId: string): P
 export async function ensureContextConversation(input: {
   participantOne: string;
   participantTwo: string;
-  contextType: 'referral' | 'job_application' | 'chiromatch';
+  contextType: 'referral' | 'job_application' | 'chiromatch' | 'shadow' | 'match';
   contextId: string;
 }): Promise<string | null> {
   assertUuid(input.participantOne);

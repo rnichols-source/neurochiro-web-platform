@@ -9,6 +9,9 @@ import { buildFeaturedCheckoutSession, buildPackageCheckoutSession, buildTicketC
 import { hostApplicationReceived, rsvpConfirmed, seminarsFrom } from "@/lib/seminars/emails";
 import { formatDateRange } from "@/lib/seminars/format";
 import { memberTicketPrice } from "@/lib/seminars/utm";
+import { STUDENT_CONFIG } from "@/config/students";
+import { getStudentMembership } from "@/lib/students/membership";
+import { hasMemberAccess } from "@/lib/students/membership-pure";
 import { getSeminarBySlug } from "@/lib/seminars/queries";
 import { supabaseSeminarStore } from "@/lib/seminars/fulfill-db";
 import { insertFlexible } from "@/lib/seminars/write";
@@ -73,7 +76,10 @@ export async function createSeminarCheckout(input: {
   if (!seminar || !seminar.upcoming) return { error: "This seminar is not open." };
   if (seminar.registrationMode !== "neurochiro") return { error: "This seminar registers on the host site." };
   const admin = createAdminClient() as unknown as { from: (table: string) => any; rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: string | null; error: { message: string } | null }> };
-  const ticket = await admin.from("seminar_ticket_types").select("id, name, price, member_price, currency, early_bird_price, early_bird_ends_at, is_active").eq("id", input.ticketTypeId).eq("seminar_id", seminar.id).maybeSingle();
+  let ticket = await admin.from("seminar_ticket_types").select("id, name, price, member_price, currency, early_bird_price, early_bird_ends_at, is_active, audience").eq("id", input.ticketTypeId).eq("seminar_id", seminar.id).maybeSingle();
+  if (ticket.error && /audience|42703|schema cache/i.test(ticket.error.message || "")) {
+    ticket = await admin.from("seminar_ticket_types").select("id, name, price, member_price, currency, early_bird_price, early_bird_ends_at, is_active").eq("id", input.ticketTypeId).eq("seminar_id", seminar.id).maybeSingle();
+  }
   if (ticket.error) {
     if (ticketingClosed(ticket.error.message || "")) return { error: "Ticketing is not open yet." };
     return { error: "That ticket is not available." };
@@ -83,9 +89,25 @@ export async function createSeminarCheckout(input: {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   let isMember = false;
+  let discountPct: number = SEMINAR_CONFIG.defaultMemberDiscountPct;
   if (user) {
     const doctor = await admin.from("doctors").select("membership_tier").eq("user_id", user.id).maybeSingle();
     isMember = doctor.data?.membership_tier === "pro";
+    if (!isMember) {
+      const studentMembership = await getStudentMembership(user.id);
+      const profile = await admin.from("profiles").select("role").eq("id", user.id).maybeSingle();
+      if ((profile.data as { role?: string } | null)?.role === "student" && hasMemberAccess(studentMembership)) {
+        isMember = true;
+        discountPct = STUDENT_CONFIG.seminars.studentDiscountPct;
+      }
+    }
+  }
+  const audience = (ticket.data as { audience?: string | null }).audience || (ticket.data.name === "Student" ? "student" : "all");
+  if (audience === "student") {
+    const profile = user ? await admin.from("profiles").select("role").eq("id", user.id).maybeSingle() : { data: null };
+    if (!user || (profile.data as { role?: string } | null)?.role !== "student") {
+      return { error: "Sign in with a student account to use this ticket." };
+    }
   }
   const priced = memberTicketPrice({
     price: Number(ticket.data.price || 0),
@@ -93,7 +115,7 @@ export async function createSeminarCheckout(input: {
     earlyBirdPrice: ticket.data.early_bird_price,
     earlyBirdEndsAt: ticket.data.early_bird_ends_at,
     isMember,
-    discountPct: SEMINAR_CONFIG.defaultMemberDiscountPct,
+    discountPct,
   });
   const email = (input.attendeeEmail || user?.email || "").trim().toLowerCase();
   if (!email.includes("@")) return { error: "Enter the email for this ticket." };

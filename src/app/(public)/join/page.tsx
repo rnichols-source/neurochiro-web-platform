@@ -64,7 +64,7 @@ export default async function JoinReferralPage({ searchParams }: Props) {
               Join as a Doctor <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
-              href={`/get-started${code ? `&ref=${code}` : ''}`}
+              href={`/get-started?role=student${code ? `&ref=${code}` : ''}`}
               className="px-8 py-4 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-colors border border-white/20"
             >
               Join as a Student

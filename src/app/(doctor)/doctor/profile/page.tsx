@@ -5,6 +5,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import PageHeader from "@/components/portal/PageHeader";
+import StudentOptIn from "@/components/doctor/StudentOptIn";
 import VerifiedBadge from "@/components/doctor/VerifiedBadge";
 import { getDoctorProfile, updateDoctorProfile, uploadAvatar, uploadGalleryImage, uploadBannerImage, uploadTeamPhoto } from "./actions";
 
@@ -433,6 +434,7 @@ function ProfileEditor() {
             </div>
           )}
 
+          <StudentOptIn />
           <section className="bg-white border border-portal-border rounded-xl p-4 mb-4">
             <h2 className="text-lg font-bold text-portal-ink">Profile photo</h2>
             <div className="mt-4 flex items-center gap-4">

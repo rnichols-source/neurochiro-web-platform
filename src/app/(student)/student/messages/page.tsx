@@ -27,7 +27,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
       </div>
 
       <div className="rounded-2xl overflow-hidden border border-[#DDE2E5] [&_*]:!border-[#DDE2E5] [&_.bg-white]:!bg-[#F7F8F9] [&_.bg-gray-50]:!bg-[#F7F8F9] [&_.text-gray-900]:!text-[#16222D] [&_.text-gray-800]:!text-[#16222D] [&_.text-gray-700]:!text-[#5A6873] [&_.text-gray-600]:!text-[#5A6873] [&_.text-gray-500]:!text-[#5A6873] [&_.text-gray-400]:!text-[#5A6873] [&_.text-neuro-navy]:!text-[#16222D] [&_.bg-gray-100]:!bg-[#F7F8F9] [&_.bg-gray-200]:!bg-[#EFF1F2] [&_.border-gray-100]:!border-[#DDE2E5] [&_.border-gray-200]:!border-[#DDE2E5] [&_.border-gray-300]:!border-[#DDE2E5] [&_input]:!bg-[#F7F8F9] [&_input]:!text-[#16222D] [&_input]:!border-[#DDE2E5] [&_input::placeholder]:!text-[#5A6873]/40 [&_.hover\\:bg-gray-50:hover]:!bg-[#F7F8F9] [&_.hover\\:bg-gray-100:hover]:!bg-[#EFF1F2]">
-        <MessagingSystem currentUserId={user.id} userRole={(profile as any)?.role || 'student'} initialOtherUserId={to} initialConversationId={c} />
+        <MessagingSystem currentUserId={user.id} userRole={(profile as any)?.role || 'student'} initialOtherUserId={to} initialConversationId={c} emptyMessage="When a doctor replies, or when a shadow day or match is confirmed, the conversation shows up here." />
       </div>
     </div>
   );

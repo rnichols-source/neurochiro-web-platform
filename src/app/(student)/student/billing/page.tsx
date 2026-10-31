@@ -1,116 +1,54 @@
-"use client";
+import Link from 'next/link';
+import PageHeader from '@/components/portal/PageHeader';
+import { STUDENT_CONFIG } from '@/config/students';
+import { getStudentPortal } from '@/lib/students/context';
+import { getStudentBilling } from '@/lib/students/membership';
+import { redirect } from 'next/navigation';
+import ManageBillingButton from './ManageBillingButton';
 
-import { CreditCard, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { getBillingData } from "./actions";
-import { useRegion } from "@/context/RegionContext";
+export default async function BillingPage() {
+  const portal = await getStudentPortal();
+  if (!portal) redirect('/login?redirect=/student/billing');
+  const membership = await getStudentBilling(portal.userId);
+  const monthly = STUDENT_CONFIG.membership.monthly.usd;
+  const annual = STUDENT_CONFIG.membership.annual.usd;
 
-export default function StudentBilling() {
-  const { region } = useRegion();
-  const [loading, setLoading] = useState(true);
-  const [billingData, setBillingData] = useState<any>(null);
-  const [isPortalLoading, setIsPortalLoading] = useState(false);
-
-  useEffect(() => {
-    getBillingData()
-      .then((data) => setBillingData(data))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const handleOpenPortal = async () => {
-    setIsPortalLoading(true);
-    try {
-      const res = await fetch("/api/stripe/create-portal-session", { method: "POST" });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else alert(data.error || "Failed to open billing portal.");
-    } catch {
-      alert("An error occurred. Please try again.");
-    } finally {
-      setIsPortalLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-dvh flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[#D66829] animate-spin" />
-      </div>
-    );
+  let title = 'No membership yet';
+  let body = `Join for $${monthly}/month or $${annual}/year. Cancel anytime.`;
+  if (membership.status === 'member' && membership.source === 'grandfathered') {
+    title = 'Your plan is active';
+    body = membership.priceLabel;
+  } else if (membership.status === 'member' && membership.source === 'comped') {
+    title = 'Your plan is active';
+    body = 'Scholarship access. You do not have a card on file.';
+  } else if (membership.status === 'member') {
+    title = 'Your plan is active';
+    body = `${membership.priceLabel}. ${membership.renewsAt ? `Renews ${new Date(membership.renewsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.` : 'Manage the card and the plan in Stripe.'}`;
+  } else if (membership.status === 'grace') {
+    title = 'You are in the grace period';
+    body = membership.renewsAt
+      ? `Full access until ${new Date(membership.renewsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}. After that, membership is $${monthly}/month or $${annual}/year.`
+      : `Full access for a short time, then $${monthly}/month or $${annual}/year.`;
+  } else if (membership.status === 'past_due') {
+    title = 'Payment failed';
+    body = 'Update your card to keep access. You still have access for 7 days from the failed payment.';
   }
-
-  if (!billingData || billingData.noCustomer) {
-    return (
-      <div className="space-y-8 p-6 md:p-8 max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-white">Billing</h1>
-        <p className="text-xs text-white/35 mt-1">Your membership includes every tool on this platform — no upgrades, no limits.</p>
-        <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-8 text-center">
-          <CreditCard className="w-10 h-10 text-white/10 mx-auto mb-4" />
-          <p className="text-lg font-bold text-white mb-2">No active subscription</p>
-          <p className="text-sm text-white/40 mb-6">Subscribe to unlock all student tools — Academy courses, Interview Playbook, Contract Lab, Financial Planner, job matching, and mentor discovery. One price, everything included.</p>
-          <Link
-            href="/pricing/students"
-            className="inline-block px-6 py-3 bg-[#D66829] text-white font-bold rounded-lg text-sm hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors"
-          >
-            View Account
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  const { subscription, invoices } = billingData;
-  const isActive = subscription?.status === "active";
 
   return (
-    <div className="space-y-8 p-6 md:p-8 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-white">Billing</h1>
-      <p className="text-xs text-white/35 mt-1">Your student account includes every tool on this platform at no cost.</p>
-
-      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-bold text-white text-lg">Student Membership</h2>
-          <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full ${isActive ? "bg-green-500/10 text-green-400" : "bg-[#D66829]/15 text-[#D66829]"}`}>
-            {subscription?.status || "Unknown"}
-          </span>
+    <div className="max-w-xl mx-auto px-4 py-8">
+      <PageHeader title="Billing" description="One student plan. The tools are included." />
+      <article className="bg-white border border-portal-border rounded-xl p-6">
+        <h2 className="text-xl font-bold text-portal-ink">{title}</h2>
+        <p className="mt-2 text-base text-portal-ink-2">{body}</p>
+        <div className="mt-5 flex flex-col gap-3">
+          {membership.status === 'member' || membership.status === 'past_due' ? <ManageBillingButton /> : null}
+          {membership.status !== 'member' ? (
+            <Link href="/student/subscribe?plan=monthly" className="min-h-11 inline-flex items-center justify-center rounded-lg bg-portal-accent px-4 text-base font-bold text-white">
+              Join for ${monthly}/month
+            </Link>
+          ) : null}
         </div>
-        {subscription?.price != null && (
-          <p className="text-2xl font-bold text-white">
-            ${subscription.price}<span className="text-sm font-normal text-white/30">/{subscription.interval === "month" ? "mo" : "yr"}</span>
-          </p>
-        )}
-        {subscription?.nextBilling && (
-          <p className="text-xs text-white/30">Next billing: {subscription.nextBilling}</p>
-        )}
-        <button
-          onClick={handleOpenPortal}
-          disabled={isPortalLoading}
-          className="px-6 py-3 bg-[#D66829] text-white font-semibold rounded-lg text-sm hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors disabled:opacity-50 flex items-center gap-2"
-        >
-          {isPortalLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-          Manage Subscription
-        </button>
-      </div>
-
-      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
-        <h2 className="font-bold text-white text-lg mb-4">Payment History</h2>
-        {invoices && invoices.length > 0 ? (
-          <div className="divide-y divide-white/[0.06]">
-            {invoices.map((inv: any) => (
-              <a key={inv.id} href={inv.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between py-3 hover:bg-white/[0.04] -mx-2 px-2 rounded-lg transition-colors">
-                <div>
-                  <p className="text-sm font-medium text-white">{inv.date}</p>
-                  <span className={`text-xs font-bold uppercase ${inv.status === "paid" ? "text-green-400" : "text-white/30"}`}>{inv.status}</span>
-                </div>
-                <span className="font-bold text-white text-sm">${inv.amount.toFixed(2)}</span>
-              </a>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-white/30 text-center py-6">No payment history</p>
-        )}
-      </div>
+      </article>
     </div>
   );
 }

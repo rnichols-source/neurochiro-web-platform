@@ -1,130 +1,64 @@
-"use client";
+import { Inter } from 'next/font/google';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { AuthProvider } from '@/context/AuthContext';
+import MemberGate, { SoonNotice } from '@/components/student/MemberGate';
+import { StudentPortalProvider } from '@/components/student/StudentPortalProvider';
+import StudentShell from '@/components/student/StudentShell';
+import { featureForPath } from '@/config/student-features';
+import { getStudentPortal, isStaffRole } from '@/lib/students/context';
+import { hasMemberAccess } from '@/lib/students/membership-pure';
 
-import Sidebar from "./Sidebar";
-import MobileBottomNav from "@/components/layout/MobileBottomNav";
-import NotificationBell from "@/components/layout/NotificationBell";
-import { AuthProvider } from "@/context/AuthContext";
-import { LayoutDashboard, MessageSquare, Bell, Briefcase, Menu } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, Suspense } from "react";
-import { createClient } from "@/lib/supabase";
-import { getUnreadSummary } from "@/app/actions/messaging-actions";
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
-const mobileNavItems = [
-  { name: "Home", href: "/student/dashboard", icon: LayoutDashboard },
-  { name: "Jobs", href: "/student/jobs", icon: Briefcase },
-  { name: "Messages", href: "/student/messages", icon: MessageSquare },
-  { name: "Alerts", href: "/student/notifications", icon: Bell },
-  { name: "Menu", href: "#", icon: Menu, isMenuTrigger: true },
-];
+const WELCOME_EXEMPT = ['/student/welcome', '/student/subscribe', '/student/billing', '/student/settings'];
 
-export default function StudentLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <Suspense fallback={<div className="min-h-dvh bg-[#0F1A24] flex items-center justify-center"><div className="w-8 h-8 border-4 border-neuro-orange border-t-transparent rounded-full animate-spin" /></div>}>
-      <StudentLayoutInner>{children}</StudentLayoutInner>
-    </Suspense>
-  );
-}
+const COPY: Record<string, string> = {
+  roadmap: 'A plain checklist from year 1 through your first 90 days in practice.',
+  mentorship: 'One live call a month with Dr. Ray and a guest doctor. Recordings stay in the library.',
+  chiromatch: 'You and a practice both say yes before anyone is introduced.',
+  academy: 'Courses on how a nervous-system practice actually runs.',
+  interview_prep: 'The questions doctors ask, and how to answer them.',
+  contract_lab: 'A second set of eyes on an associate contract before you sign.',
+  financial_planner: 'Loans, pay, and a first-year budget with your own numbers.',
+  community: 'A student directory will live here once there are people to show.',
+};
 
-function StudentLayoutInner({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [initials, setInitials] = useState("--");
-  const [subscriptionChecked, setSubscriptionChecked] = useState(false);
-  const [studentName, setStudentName] = useState("");
-  const [unreadMessages, setUnreadMessages] = useState(0);
+export default async function StudentLayout({ children }: { children: React.ReactNode }) {
+  const portal = await getStudentPortal();
+  if (!portal) redirect('/login?redirect=/student/dashboard');
+  if (portal.role === 'doctor') redirect('/doctor/dashboard');
+  if (portal.role === 'patient') redirect('/portal');
+  if (portal.role !== 'student' && !isStaffRole(portal.role)) redirect('/');
 
-  useEffect(() => {
-    const supabase = createClient();
-
-    const checkAuth = async (): Promise<void> => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/login?redirect=/student/dashboard');
-        return;
-      }
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user.id)
-        .single();
-
-      if (profile?.full_name) {
-        const parts = profile.full_name.split(" ");
-        setInitials(parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0][0] || "--");
-        setStudentName(parts[0] || '');
-      }
-      setSubscriptionChecked(true);
-
-      getUnreadSummary().then((summary) => setUnreadMessages(summary.messages));
-    };
-
-    checkAuth();
-  }, [pathname, router, searchParams]);
-
-  useEffect(() => {
-    setIsSidebarOpen(false);
-  }, [pathname]);
-
-  // Prevent flash of portal content while subscription is being checked
-  const isExemptPage = pathname === '/student/subscribe' || pathname === '/student/billing' || pathname === '/student/welcome' || pathname === '/student/settings';
-  if (!subscriptionChecked && !isExemptPage) {
-    return (
-      <div className="flex items-center justify-center h-dvh bg-[#EFF1F2]">
-        <div className="w-6 h-6 border-2 border-[#DDE2E5] border-t-[#3E6B7C] rounded-full animate-spin" />
-      </div>
-    );
+  const path = (await headers()).get('x-pathname') || '';
+  const needsWelcome = portal.role === 'student' && !portal.school && !portal.graduationYear;
+  if (path && needsWelcome && !WELCOME_EXEMPT.some((item) => path === item || path.startsWith(`${item}/`))) {
+    redirect('/student/welcome');
   }
 
-  // Students are free — no onboarding gate, no subscription check
+  const feature = path ? featureForPath(path) : null;
+  let body = children;
+  if (feature?.key === 'legacy_chiromatch' || feature?.state === 'hidden') {
+    body = (
+      <SoonNotice
+        feature="ChiroMatch"
+        description="The old ranking rounds are closed. Always-on matching is next. You and a practice will both say yes before a conversation starts."
+      />
+    );
+  } else if (feature?.state === 'coming_soon') {
+    body = <SoonNotice feature={feature.label} description={COPY[feature.key] || 'This is being finished. You will get an email when it is ready.'} />;
+  } else if (feature?.requires === 'member' && !hasMemberAccess(portal.membership)) {
+    body = <MemberGate feature={feature.label} description={COPY[feature.key] || 'This is part of student membership.'} />;
+  }
 
   return (
     <AuthProvider>
-    <div className="flex flex-col md:flex-row h-dvh bg-[#EFF1F2] overflow-hidden">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        {/* Header */}
-        <header className="h-14 bg-white/90 backdrop-blur-xl border-b border-[#DDE2E5] flex items-center justify-between px-6 md:px-10 shrink-0 sticky top-0 z-[100]">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden p-2.5 -ml-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#5A6873] hover:text-[#16222D] rounded-lg transition-colors"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-          </div>
-          <div className="flex items-center gap-3">
-            <NotificationBell />
-            <Link
-              href="/student/profile"
-              className="hidden md:flex w-8 h-8 rounded-lg bg-[#EFF1F2] items-center justify-center text-[#5A6873] font-medium text-[11px] hover:bg-[#DDE2E5] hover:text-[#16222D] transition-all"
-            >
-              {initials}
-            </Link>
-          </div>
-        </header>
-
-        <main className="flex-1 overflow-y-auto relative scroll-smooth bg-[#EFF1F2] pb-28 md:pb-0">
-          {children}
-        </main>
+      <div className={`${inter.variable} portal min-h-dvh`}>
+        <StudentPortalProvider value={portal}>
+          <StudentShell>{body}</StudentShell>
+        </StudentPortalProvider>
       </div>
-      <MobileBottomNav
-        items={mobileNavItems.map(item => item.name === 'Messages' ? { ...item, badge: unreadMessages } : item)}
-        onMenuClick={() => setIsSidebarOpen(true)}
-      />
-    </div>
     </AuthProvider>
   );
 }

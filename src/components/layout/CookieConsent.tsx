@@ -17,8 +17,10 @@ export default function CookieConsent() {
   useEffect(() => {
     if (isVisible) document.documentElement.dataset.cookieBar = "1";
     else delete document.documentElement.dataset.cookieBar;
+    document.body.style.paddingBottom = isVisible ? "5.5rem" : "";
     return () => {
       delete document.documentElement.dataset.cookieBar;
+      document.body.style.paddingBottom = "";
     };
   }, [isVisible]);
 

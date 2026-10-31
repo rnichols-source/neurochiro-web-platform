@@ -81,12 +81,12 @@ export default function RankingsPage() {
 
   return (
     <div className="p-4 md:p-10 max-w-2xl mx-auto space-y-6">
-      <Link href="/student/chiromatch" className="text-xs text-white/30 hover:text-neuro-orange transition-colors">&larr; Back to ChiroMatch</Link>
+      <Link href="/student/chiromatch" className="text-xs text-portal-ink-2 hover:text-neuro-orange transition-colors">&larr; Back to ChiroMatch</Link>
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">My Rankings</h1>
-          <p className="text-white/30 text-sm mt-1">Drag to reorder. Your #1 is your top choice.</p>
+          <h1 className="text-2xl font-bold text-portal-ink">My Rankings</h1>
+          <p className="text-portal-ink-2 text-sm mt-1">Drag to reorder. Your #1 is your top choice.</p>
         </div>
         {isRankingOpen && rankings.length > 0 && (
           <button
@@ -110,8 +110,8 @@ export default function RankingsPage() {
 
       {/* Rankings List */}
       {rankings.length === 0 ? (
-        <div className="bg-[#162231] rounded-2xl border border-white/[0.06] p-8 text-center">
-          <p className="text-white/30 text-sm mb-4">You haven&apos;t ranked any positions yet.</p>
+        <div className="bg-white rounded-2xl border border-[#e3e8ed] p-8 text-center">
+          <p className="text-portal-ink-2 text-sm mb-4">You haven&apos;t ranked any positions yet.</p>
           <Link href="/student/chiromatch/positions" className="text-neuro-orange text-sm font-bold hover:underline">
             Browse available positions &rarr;
           </Link>
@@ -126,21 +126,21 @@ export default function RankingsPage() {
               onDragEnter={() => handleDragEnter(idx)}
               onDragEnd={handleDragEnd}
               onDragOver={(e) => e.preventDefault()}
-              className="bg-[#162231] rounded-xl border border-white/[0.06] p-4 flex items-center gap-3 cursor-grab active:cursor-grabbing hover:border-neuro-orange/20 transition-colors"
+              className="bg-white rounded-xl border border-[#e3e8ed] p-4 flex items-center gap-3 cursor-grab active:cursor-grabbing hover:border-neuro-orange/20 transition-colors"
             >
-              {isRankingOpen && <GripVertical className="w-4 h-4 text-white/10 shrink-0" />}
+              {isRankingOpen && <GripVertical className="w-4 h-4 text-portal-ink-2 shrink-0" />}
               <span className="w-8 h-8 rounded-lg bg-neuro-orange/10 text-neuro-orange font-bold text-sm flex items-center justify-center shrink-0">
                 {item.rank}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-white text-sm truncate">{item.position?.title || 'Unknown Position'}</p>
-                <p className="text-xs text-white/30 truncate">
+                <p className="font-bold text-portal-ink text-sm truncate">{item.position?.title || 'Unknown Position'}</p>
+                <p className="text-xs text-portal-ink-2 truncate">
                   {item.position?.doctor.clinic_name}
                   {item.position?.city ? ` — ${item.position.city}${item.position.state ? `, ${item.position.state}` : ''}` : ''}
                 </p>
               </div>
               {isRankingOpen && (
-                <button onClick={() => handleRemove(idx)} className="p-1 text-white/10 hover:text-red-400 transition-colors shrink-0">
+                <button onClick={() => handleRemove(idx)} className="p-1 text-portal-ink-2 hover:text-red-400 transition-colors shrink-0">
                   <X className="w-4 h-4" />
                 </button>
               )}
@@ -154,21 +154,21 @@ export default function RankingsPage() {
         <div>
           <button
             onClick={() => setShowAdd(!showAdd)}
-            className="w-full py-3 border-2 border-dashed border-white/[0.08] rounded-xl text-white/20 text-sm font-bold hover:border-neuro-orange/20 hover:text-neuro-orange transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 border-2 border-dashed border-[#e3e8ed] rounded-xl text-portal-ink-2 text-sm font-bold hover:border-neuro-orange/20 hover:text-neuro-orange transition-colors flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" /> Add Position ({rankings.length}/10)
           </button>
 
           {showAdd && unranked.length > 0 && (
-            <div className="mt-2 bg-[#162231] rounded-xl border border-white/[0.06] p-3 space-y-2 max-h-64 overflow-y-auto">
+            <div className="mt-2 bg-white rounded-xl border border-[#e3e8ed] p-3 space-y-2 max-h-64 overflow-y-auto">
               {unranked.map(pos => (
                 <button
                   key={pos.id}
                   onClick={() => handleAdd(pos)}
-                  className="w-full text-left p-3 rounded-lg hover:bg-white/[0.04] transition-colors"
+                  className="w-full text-left p-3 rounded-lg hover:bg-[#f7f8fa] transition-colors"
                 >
-                  <p className="text-sm font-bold text-white">{pos.title}</p>
-                  <p className="text-xs text-white/30">{pos.doctor.clinic_name}{pos.city ? ` — ${pos.city}` : ''}</p>
+                  <p className="text-sm font-bold text-portal-ink">{pos.title}</p>
+                  <p className="text-xs text-portal-ink-2">{pos.doctor.clinic_name}{pos.city ? ` — ${pos.city}` : ''}</p>
                 </button>
               ))}
             </div>

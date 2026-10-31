@@ -349,7 +349,7 @@ export default function TechniqueComparisonGuide() {
       <div className="flex items-center gap-3 mb-2">
         <Compass className="w-7 h-7" style={{ color: "#D66829" }} />
         <h2
-          className="text-2xl font-heading font-black"
+          className="text-2xl font-heading font-bold"
           style={{ color: "#16222D" }}
         >
           Technique Explorer
@@ -427,24 +427,24 @@ export default function TechniqueComparisonGuide() {
                       {t.name}
                     </h3>
                     <span
-                      className="px-2 py-0.5 rounded-full text-[10px] font-bold text-[#16222D]"
+                      className="px-2 py-0.5 rounded-full text-xs font-bold text-[#16222D]"
                       style={{ backgroundColor: catColor }}
                     >
                       {t.category.replace("-", " ")}
                     </span>
                     {t.popularity === "Very Common" && (
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-amber-500">
+                      <span className="flex items-center gap-1 text-xs font-bold text-amber-500">
                         <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                         {t.popularity}
                       </span>
                     )}
                     {t.popularity === "Common" && (
-                      <span className="text-[10px] font-bold text-[#5A6873]">
+                      <span className="text-xs font-bold text-[#5A6873]">
                         {t.popularity}
                       </span>
                     )}
                     {(t.popularity === "Specialized" || t.popularity === "Niche") && (
-                      <span className="text-[10px] font-bold text-[#5A6873] italic">
+                      <span className="text-xs font-bold text-[#5A6873] italic">
                         {t.popularity}
                       </span>
                     )}
@@ -452,7 +452,7 @@ export default function TechniqueComparisonGuide() {
                   <p className="text-[#5A6873] text-sm leading-relaxed">
                     {t.summary}
                   </p>
-                  <div className="flex flex-wrap gap-3 mt-2 text-[11px] text-[#5A6873]">
+                  <div className="flex flex-wrap gap-3 mt-2 text-xs text-[#5A6873]">
                     <span>
                       <span className="font-bold text-[#5A6873]">Learn:</span>{" "}
                       {t.learningTime}
@@ -499,13 +499,13 @@ export default function TechniqueComparisonGuide() {
                   {/* Best For & Personality */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="bg-[#F7F8F9] rounded-xl p-4">
-                      <p className="text-[10px] font-bold text-[#D66829] uppercase tracking-wide mb-1">
+                      <p className="text-xs font-bold text-[#D66829] tracking-wide mb-1">
                         Best For
                       </p>
                       <p className="text-sm text-[#5A6873]">{t.bestFor}</p>
                     </div>
                     <div className="bg-[#F7F8F9] rounded-xl p-4">
-                      <p className="text-[10px] font-bold text-[#D66829] uppercase tracking-wide mb-1">
+                      <p className="text-xs font-bold text-[#D66829] tracking-wide mb-1">
                         Personality Fit
                       </p>
                       <p className="text-sm text-[#5A6873]">{t.personalityFit}</p>
@@ -516,7 +516,7 @@ export default function TechniqueComparisonGuide() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <p
-                        className="text-[10px] font-bold uppercase tracking-wide mb-2"
+                        className="text-xs font-bold tracking-wide mb-2"
                         style={{ color: "#22c55e" }}
                       >
                         Pros
@@ -532,7 +532,7 @@ export default function TechniqueComparisonGuide() {
                     </div>
                     <div>
                       <p
-                        className="text-[10px] font-bold uppercase tracking-wide mb-2"
+                        className="text-xs font-bold tracking-wide mb-2"
                         style={{ color: "#ef4444" }}
                       >
                         Cons
@@ -575,7 +575,7 @@ export default function TechniqueComparisonGuide() {
         <div className="flex items-center gap-3 mb-2">
           <BarChart3 className="w-7 h-7" style={{ color: "#D66829" }} />
           <h2
-            className="text-2xl font-heading font-black"
+            className="text-2xl font-heading font-bold"
             style={{ color: "#16222D" }}
           >
             Find Your Fit
@@ -696,7 +696,7 @@ export default function TechniqueComparisonGuide() {
         <div className="flex items-center gap-3 mb-2">
           <Star className="w-7 h-7" style={{ color: "#D66829" }} />
           <h2
-            className="text-2xl font-heading font-black"
+            className="text-2xl font-heading font-bold"
             style={{ color: "#16222D" }}
           >
             Your Top 3 Technique Matches
@@ -717,7 +717,7 @@ export default function TechniqueComparisonGuide() {
                 style={{ borderColor: rank === 0 ? BRAND_ORANGE : "#DDE2E5" }}
               >
                 <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-[#16222D] font-black text-sm flex-shrink-0"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-[#16222D] font-bold text-sm flex-shrink-0"
                   style={{
                     backgroundColor: rank === 0 ? BRAND_ORANGE : BRAND_NAVY,
                   }}
@@ -730,7 +730,7 @@ export default function TechniqueComparisonGuide() {
                       {item.technique.name}
                     </h3>
                     <span
-                      className="px-2 py-0.5 rounded-full text-[10px] font-bold text-[#16222D]"
+                      className="px-2 py-0.5 rounded-full text-xs font-bold text-[#16222D]"
                       style={{ backgroundColor: catColor }}
                     >
                       {item.technique.category.replace("-", " ")}
@@ -763,7 +763,7 @@ export default function TechniqueComparisonGuide() {
         {/* Pentagon radar chart */}
         <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-6 mb-8">
           <h3
-            className="text-xs font-black uppercase tracking-wide mb-4"
+            className="text-xs font-bold tracking-wide mb-4"
             style={{ color: "#16222D" }}
           >
             Your Score Profile
@@ -833,7 +833,7 @@ export default function TechniqueComparisonGuide() {
                     y={y}
                     textAnchor="middle"
                     dominantBaseline="central"
-                    className="text-[8px] font-bold"
+                    className="text-xs font-bold"
                     fill="#5A6873"
                   >
                     {axis.label}
@@ -893,7 +893,7 @@ export default function TechniqueComparisonGuide() {
         <div className="flex items-center gap-3 mb-2">
           <Filter className="w-7 h-7" style={{ color: "#D66829" }} />
           <h2
-            className="text-2xl font-heading font-black"
+            className="text-2xl font-heading font-bold"
             style={{ color: "#16222D" }}
           >
             Comparison Tool
@@ -942,13 +942,13 @@ export default function TechniqueComparisonGuide() {
           <table className="w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: "#F7F8F9" }}>
-                <th className="text-left p-4 text-[#16222D] text-xs font-bold uppercase tracking-wide w-36">
+                <th className="text-left p-4 text-[#16222D] text-xs font-bold tracking-wide w-36">
                   Field
                 </th>
                 {cols.map((t) => (
                   <th
                     key={t.id}
-                    className="text-left p-4 text-[#16222D] text-xs font-bold uppercase tracking-wide"
+                    className="text-left p-4 text-[#16222D] text-xs font-bold tracking-wide"
                   >
                     {t.name}
                   </th>
@@ -962,7 +962,7 @@ export default function TechniqueComparisonGuide() {
                   className={rIdx % 2 === 0 ? "bg-[#F7F8F9]" : ""}
                 >
                   <td
-                    className="p-4 font-bold text-xs uppercase tracking-wide text-[#D66829]"
+                    className="p-4 font-bold text-xs tracking-wide text-[#D66829]"
                   >
                     {row.label}
                   </td>
@@ -973,7 +973,7 @@ export default function TechniqueComparisonGuide() {
                       return (
                         <td key={t.id} className="p-4">
                           <span
-                            className="px-2 py-0.5 rounded-full text-[10px] font-bold text-[#16222D]"
+                            className="px-2 py-0.5 rounded-full text-xs font-bold text-[#16222D]"
                             style={{ backgroundColor: catColor }}
                           >
                             {t.category.replace("-", " ")}
@@ -998,7 +998,7 @@ export default function TechniqueComparisonGuide() {
           className="mt-6 rounded-2xl p-6 bg-[#F7F8F9] border border-[#DDE2E5]"
         >
           <h3
-            className="text-xs font-black uppercase tracking-wide mb-2 text-[#D66829]"
+            className="text-xs font-bold tracking-wide mb-2 text-[#D66829]"
           >
             Which should I choose?
           </h3>
@@ -1015,7 +1015,7 @@ export default function TechniqueComparisonGuide() {
   const renderDetailSection = (title: string, content: string) => (
     <div>
       <h4
-        className="text-[10px] font-black uppercase tracking-widest mb-1.5"
+        className="text-xs font-bold tracking-widest mb-1.5"
         style={{ color: "#D66829" }}
       >
         {title}
@@ -1026,7 +1026,7 @@ export default function TechniqueComparisonGuide() {
 
   const renderStatCard = (label: string, value: string) => (
     <div className="bg-[#F7F8F9] rounded-xl p-3">
-      <p className="text-[10px] font-bold text-[#5A6873] uppercase tracking-wide mb-0.5">
+      <p className="text-xs font-bold text-[#5A6873] tracking-wide mb-0.5">
         {label}
       </p>
       <p className="text-sm font-bold text-[#16222D]">

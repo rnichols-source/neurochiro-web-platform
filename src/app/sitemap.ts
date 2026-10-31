@@ -81,6 +81,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/nervous-system',
     '/learn',
     '/pricing',
+    '/students',
+    '/pricing/students',
     '/about',
     '/contact',
     '/careers',

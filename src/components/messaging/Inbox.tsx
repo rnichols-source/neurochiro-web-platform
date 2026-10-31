@@ -26,6 +26,7 @@ export function Inbox(props: {
   canLoadMore: boolean;
   messageHits: { id: string; conversationId: string; body: string }[];
   unreadTotal: number;
+  emptyMessage?: string;
 }) {
   const visible = props.items.filter((item) => {
     const role = ROLE[props.tab];
@@ -63,7 +64,7 @@ export function Inbox(props: {
         ) : visible.length === 0 ? (
           <div className="px-4 py-10 text-center">
             <MessageSquare className="w-6 h-6 text-gray-400 mx-auto mb-3" />
-            <p className="text-sm text-gray-600">Your inbox is where conversations live. When you accept a patient referral, your conversation with that doctor starts here automatically. You can also message any doctor in the network directly.</p>
+            <p className="text-sm text-gray-600">{props.emptyMessage || 'Your inbox is where conversations live. When you accept a patient referral, your conversation with that doctor starts here automatically. You can also message any doctor in the network directly.'}</p>
             <button type="button" onClick={props.onCompose} className="mt-3 min-h-11 px-4 rounded-full bg-[#B4501A] text-white text-sm font-bold">Start a conversation</button>
           </div>
         ) : visible.map((item) => (

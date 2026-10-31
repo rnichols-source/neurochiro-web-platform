@@ -41,12 +41,12 @@ export const PLANS = {
     id: "student",
     name: "NeuroChiro Student Membership",
     monthly: {
-      priceId: process.env.STRIPE_STUDENT_MONTHLY_PRICE_ID ?? "",
-      price: 9,
+      priceId: process.env.STRIPE_STUDENT_MEMBERSHIP_MONTHLY_PRICE_ID ?? process.env.STRIPE_STUDENT_MONTHLY_PRICE_ID ?? "",
+      price: 33,
     },
     annual: {
-      priceId: process.env.STRIPE_STUDENT_ANNUAL_PRICE_ID ?? "",
-      price: 90,
+      priceId: process.env.STRIPE_STUDENT_MEMBERSHIP_ANNUAL_PRICE_ID ?? process.env.STRIPE_STUDENT_ANNUAL_PRICE_ID ?? "",
+      price: 333,
     },
   },
   vendor: {

@@ -19,7 +19,7 @@ const CHIRO_LINKS = [
   { name: "Marketplace", href: "/marketplace" },
   { name: "Careers", href: "/jobs" },
   { name: "Store", href: "/store" },
-  { name: "Students", href: "/pricing/students" },
+  { name: "Students", href: "/students" },
   { name: "Log in", href: "/login" },
 ];
 

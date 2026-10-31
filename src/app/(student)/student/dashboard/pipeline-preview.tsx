@@ -28,8 +28,8 @@ export default function PipelinePreview({ milestones, modulesCompleted }: Pipeli
   return (
     <div>
       <div className="flex items-center justify-between mb-5">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-white/25 font-semibold">Pipeline</p>
-        <Link href="/student/career-pipeline" className="text-[10px] text-[#D66829] font-semibold hover:underline">
+        <p className="text-xs tracking-[0.2em] text-portal-ink-2 font-semibold">Pipeline</p>
+        <Link href="/student/roadmap" className="text-xs text-[#D66829] font-semibold hover:underline">
           View all
         </Link>
       </div>
@@ -48,7 +48,7 @@ export default function PipelinePreview({ milestones, modulesCompleted }: Pipeli
                   ? "bg-gradient-to-r from-[#D66829] to-[#e8834a]"
                   : active
                   ? "bg-[#D66829]/25"
-                  : "bg-white/[0.06]"
+                  : "bg-[#f7f8fa]"
               }`}
             />
           );
@@ -63,8 +63,8 @@ export default function PipelinePreview({ milestones, modulesCompleted }: Pipeli
           return (
             <span
               key={stage.id}
-              className={`flex-1 text-[9px] text-center font-medium ${
-                done ? "text-[#D66829]" : active ? "text-white/50" : "text-white/15"
+              className={`flex-1 text-xs text-center font-medium ${
+                done ? "text-[#D66829]" : active ? "text-portal-ink-2" : "text-portal-ink-2"
               }`}
             >
               {stage.label}

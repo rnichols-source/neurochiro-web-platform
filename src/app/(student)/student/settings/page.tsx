@@ -67,22 +67,22 @@ export default function StudentSettingsPage() {
     router.push("/?deleted=1");
   };
 
-  const toggleClass = (on: boolean) => `relative w-11 h-6 rounded-full transition-colors ${on ? 'bg-[#D66829]' : 'bg-white/[0.08]'}`;
+  const toggleClass = (on: boolean) => `relative w-11 h-6 rounded-full transition-colors ${on ? 'bg-[#D66829]' : 'bg-[#f7f8fa]'}`;
   const dotClass = (on: boolean) => `absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${on ? 'left-5' : 'left-0.5'}`;
 
   return (
     <div className="max-w-xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-8 sm:space-y-10">
-      <h1 className="text-2xl font-heading font-bold text-white">Settings</h1>
-      <p className="text-xs text-white/35 mt-1">Manage your email, password, notification preferences, and account.</p>
+      <h1 className="text-2xl font-heading font-bold text-portal-ink">Settings</h1>
+      <p className="text-xs text-portal-ink-2 mt-1">Manage your email, password, notification preferences, and account.</p>
 
-      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
-        <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Email</h2>
-        <p className="text-sm text-white font-medium" id="student-email">Loading...</p>
-        <p className="text-xs text-white/30 mt-1">To change your email, contact <a href="mailto:support@neurochirodirectory.com" className="text-[#D66829] hover:underline">support@neurochirodirectory.com</a></p>
+      <div className="bg-white border border-[#e3e8ed] rounded-2xl border border-[#e3e8ed] shadow-lg shadow-black/20 p-6">
+        <h2 className="text-xs font-semibold tracking-[0.15em] text-[#D66829] mb-4">Email</h2>
+        <p className="text-sm text-portal-ink font-medium" id="student-email">Loading...</p>
+        <p className="text-xs text-portal-ink-2 mt-1">To change your email, contact <a href="mailto:support@neurochirodirectory.com" className="text-[#D66829] hover:underline">support@neurochirodirectory.com</a></p>
       </div>
 
-      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
-        <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Notifications</h2>
+      <div className="bg-white border border-[#e3e8ed] rounded-2xl border border-[#e3e8ed] shadow-lg shadow-black/20 p-6">
+        <h2 className="text-xs font-semibold tracking-[0.15em] text-[#D66829] mb-4">Notifications</h2>
         <div className="space-y-4">
           {[
             { key: 'job_alerts', label: 'Job Alerts', desc: 'New job postings matching your interests' },
@@ -92,8 +92,8 @@ export default function StudentSettingsPage() {
           ].map((item) => (
             <div key={item.key} className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-white">{item.label}</p>
-                <p className="text-xs text-white/30">{item.desc}</p>
+                <p className="text-sm font-semibold text-portal-ink">{item.label}</p>
+                <p className="text-xs text-portal-ink-2">{item.desc}</p>
               </div>
               <button type="button" onClick={() => setNotifPrefs(p => ({ ...p, [item.key]: !p[item.key as keyof typeof p] }))} className={toggleClass(notifPrefs[item.key as keyof typeof notifPrefs])}>
                 <div className={dotClass(notifPrefs[item.key as keyof typeof notifPrefs])} />
@@ -106,27 +106,27 @@ export default function StudentSettingsPage() {
         </button>
       </div>
 
-      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
-        <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#D66829] mb-4">Password</h2>
+      <div className="bg-white border border-[#e3e8ed] rounded-2xl border border-[#e3e8ed] shadow-lg shadow-black/20 p-6">
+        <h2 className="text-xs font-semibold tracking-[0.15em] text-[#D66829] mb-4">Password</h2>
         {message && <p className={`text-sm font-bold mb-3 ${message.type === "success" ? "text-green-400" : "text-red-400"}`}>{message.text}</p>}
         <form onSubmit={handleUpdatePassword} className="space-y-3">
-          <input type="password" placeholder="New password (8+ characters)" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={8} className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none" />
-          <input type="password" placeholder="Confirm new password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm text-white placeholder-white/20 focus:border-[#D66829]/40 outline-none" />
+          <input type="password" placeholder="New password (8+ characters)" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={8} className="w-full px-4 py-3 bg-[#f7f8fa] border border-[#e3e8ed] rounded-lg text-base text-portal-ink placeholder:text-portal-muted focus:border-[#D66829]/40 outline-none" />
+          <input type="password" placeholder="Confirm new password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="w-full px-4 py-3 bg-[#f7f8fa] border border-[#e3e8ed] rounded-lg text-base text-portal-ink placeholder:text-portal-muted focus:border-[#D66829]/40 outline-none" />
           <button type="submit" className="w-full sm:w-auto px-5 py-3 bg-[#D66829] text-white rounded-lg font-semibold text-sm hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors">Update Password</button>
         </form>
       </div>
 
-      <div className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-red-500/20 shadow-lg shadow-black/20 p-6">
-        <h2 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-red-400 mb-2">Danger Zone</h2>
+      <div className="bg-white border border-[#e3e8ed] rounded-2xl border border-red-500/20 shadow-lg shadow-black/20 p-6">
+        <h2 className="text-xs font-semibold tracking-[0.15em] text-red-400 mb-2">Danger Zone</h2>
         {!showDeleteForm ? (
           <button onClick={() => setShowDeleteForm(true)} className="text-red-400 font-bold text-sm hover:underline">Delete my account</button>
         ) : (
           <div className="space-y-3">
             <p className="text-sm text-red-400">This will permanently delete your account and all data.</p>
             <p className="text-xs text-red-400/70">Type <strong>DELETE</strong> to confirm:</p>
-            <input type="text" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} placeholder="Type DELETE" className="w-full px-4 py-2 bg-white/[0.04] border border-red-500/20 rounded-lg text-sm text-white placeholder-white/20 outline-none" />
+            <input type="text" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} placeholder="Type DELETE" className="w-full px-4 py-2 bg-[#f7f8fa] border border-red-500/20 rounded-lg text-base text-portal-ink placeholder:text-portal-muted outline-none" />
             <div className="flex gap-3">
-              <button onClick={() => { setShowDeleteForm(false); setDeleteConfirm(""); }} className="px-4 py-2 text-white/40 text-sm font-bold">Cancel</button>
+              <button onClick={() => { setShowDeleteForm(false); setDeleteConfirm(""); }} className="px-4 py-2 text-portal-ink-2 text-sm font-bold">Cancel</button>
               <button onClick={handleDelete} disabled={deleting || deleteConfirm !== "DELETE"} className="px-4 py-2 bg-red-600 text-white text-sm font-bold rounded-lg disabled:opacity-50">
                 {deleting ? "Deleting..." : "Permanently Delete"}
               </button>

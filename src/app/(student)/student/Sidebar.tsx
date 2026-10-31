@@ -1,174 +1,67 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import {
-  LayoutDashboard, User, Briefcase,
-  MessageSquare, FileText, LogOut, X, Settings, DollarSign, Compass, ClipboardList, HelpCircle,
-  Heart, Search,
-} from "lucide-react";
-import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { X } from 'lucide-react';
+import { visibleStudentFeatures, type StudentFeature } from '@/config/student-features';
+import { useStudentPortal } from '@/components/student/StudentPortalProvider';
 
-interface SidebarProps {
-  isOpen?: boolean;
-  onClose?: () => void;
-}
-
-const navSections = [
-  {
-    label: null,
-    items: [
-      { name: "Home", href: "/student/dashboard", icon: LayoutDashboard },
-      { name: "Profile", href: "/student/profile", icon: User },
-    ],
-  },
-  {
-    label: "Find Your Job",
-    items: [
-      { name: "Jobs", href: "/student/jobs", icon: Briefcase },
-      { name: "Doctors", href: "/directory", icon: Search },
-      { name: "Mentors", href: "/student/mentors", icon: Heart },
-      { name: "Messages", href: "/student/messages", icon: MessageSquare },
-    ],
-  },
-  {
-    label: "Get Ready",
-    items: [
-      { name: "Interview Playbook", href: "/student/interview-prep", icon: ClipboardList },
-      { name: "Techniques", href: "/student/techniques", icon: Compass },
-    ],
-  },
-  {
-    label: "Protect Yourself",
-    items: [
-      { name: "Contract Lab", href: "/student/contract-lab", icon: FileText },
-      { name: "Financial Planner", href: "/student/financial-planner", icon: DollarSign },
-    ],
-  },
-  {
-    label: "Account",
-    items: [
-      { name: "Settings", href: "/student/settings", icon: Settings },
-      { name: "Help & Support", href: "/contact", icon: HelpCircle },
-    ],
-  },
+const GROUPS: { key: StudentFeature['group']; label: string | null }[] = [
+  { key: 'main', label: null },
+  { key: 'place', label: 'Find your place' },
+  { key: 'ready', label: 'Get ready' },
+  { key: 'protect', label: 'Protect yourself' },
+  { key: 'seminars', label: 'Seminars' },
+  { key: 'account', label: 'Account' },
 ];
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [userName, setUserName] = useState<string | null>(null);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        supabase.from("profiles").select("full_name").eq("id", user.id).single()
-          .then(({ data }) => {
-            setUserName(data?.full_name || null);
-          });
-      }
-    });
-  }, []);
-
-  const handleLogout = async () => {
-    if (!confirm("Are you sure you want to log out?")) return;
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    document.cookie = "nc_demo_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    router.push("/login");
-    router.refresh();
-  };
-
-  const initials = userName?.split(" ").map((n) => n[0]).join("").toUpperCase() || "--";
-
-  const Content = (
-    <div className="flex flex-col h-full bg-[#0A1018]">
-      {/* Logo */}
-      <div className="px-6 pt-7 pb-8 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
-          <img src="/logo-white.png" alt="NeuroChiro" className="w-7 h-7 object-contain opacity-80" />
-          <div className="flex flex-col">
-            <span className="text-[14px] font-heading font-bold tracking-tight text-white/90 leading-none">
-              NeuroChiro
-            </span>
-            <span className="text-[#D66829] text-[8px] font-medium uppercase tracking-[0.2em] mt-1">
-              Student
-            </span>
-          </div>
-        </Link>
-        {onClose && (
-          <button onClick={onClose} className="md:hidden p-2 text-white/30 hover:text-white rounded-lg transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        )}
-      </div>
-
-      {/* Navigation */}
-      <nav className="px-3 flex-1 overflow-y-auto space-y-5">
-        {navSections.map((section) => (
-          <div key={section.label}>
-            {section.label && (
-              <p className="px-3 mb-2 text-[10px] font-medium tracking-wide text-white/25">
-                {section.label}
-              </p>
-            )}
-            <div className="space-y-px">
-              {section.items.map((item: any) => {
-                const active = pathname === item.href || pathname?.startsWith(item.href + "/");
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={onClose}
-                    className={`flex items-center gap-3 px-3 py-[7px] rounded-lg text-[13px] transition-all duration-200 ${
-                      active
-                        ? "bg-white/[0.06] text-white"
-                        : "text-white/30 hover:text-white/60 hover:bg-white/[0.02]"
-                    }`}
-                  >
-                    <item.icon className={`w-[14px] h-[14px] ${active ? "text-[#3E6B7C]" : "text-white/20"}`} />
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </nav>
-
-      {/* User */}
-      <div className="px-3 py-4 border-t border-white/[0.06]">
-        <div className="flex items-center gap-3 px-3">
-          <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/50 font-medium text-[10px]">
-            {initials}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[12px] text-white/70 truncate">{userName || "..."}</p>
-          </div>
-          <button onClick={handleLogout} className="p-1.5 text-white/15 hover:text-red-400/80 rounded-lg transition-colors" title="Logout">
-            <LogOut className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const pathname = usePathname() || '';
+  const portal = useStudentPortal();
+  const member = portal.membership.status === 'member' || portal.membership.status === 'grace' || portal.membership.status === 'past_due';
+  const features = visibleStudentFeatures().filter((feature) => feature.state === 'live' || feature.state === 'beta' || feature.state === 'coming_soon');
 
   return (
     <>
-      <aside className="hidden md:flex w-56 h-dvh flex-col shrink-0 overflow-y-auto border-r border-white/[0.04]">
-        {Content}
-      </aside>
-
-      {isOpen && (
-        <div className="fixed inset-0 z-[200] md:hidden">
-          <div onClick={onClose} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-          <div className="relative w-56 h-full flex flex-col shadow-2xl">
-            {Content}
-          </div>
+      {isOpen ? <button type="button" className="fixed inset-0 z-[140] bg-black/40 md:hidden" aria-label="Close menu" title="Close menu" onClick={onClose} /> : null}
+      <aside className={`portal-sidebar fixed md:static z-[160] inset-y-0 left-0 w-72 shrink-0 bg-portal-sidebar text-white flex flex-col transform transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <div className="h-14 flex items-center justify-between px-4 border-b border-[#e3e8ed]">
+          <Link href="/student/dashboard" className="text-base font-bold text-portal-ink" onClick={onClose}>NeuroChiro</Link>
+          <button type="button" className="md:hidden min-h-11 min-w-11 inline-flex items-center justify-center" aria-label="Close menu" title="Close menu" onClick={onClose}>
+            <X className="w-5 h-5" />
+          </button>
         </div>
-      )}
+        <nav aria-label="Student" className="flex-1 overflow-y-auto px-3 py-4 space-y-4">
+          {GROUPS.map((group) => {
+            const items = features.filter((feature) => feature.group === group.key && feature.key !== 'ce_tracker');
+            if (!items.length) return null;
+            return (
+              <div key={group.key}>
+                {group.label ? <p className="px-3 mb-1 text-xs font-bold text-portal-ink-2">{group.label}</p> : null}
+                <ul className="space-y-1">
+                  {items.map((feature) => {
+                    const active = pathname === feature.href || pathname.startsWith(`${feature.href}/`);
+                    const locked = feature.requires === 'member' && !member;
+                    return (
+                      <li key={feature.key}>
+                        <Link
+                          href={feature.href}
+                          onClick={onClose}
+                          className={`min-h-11 flex items-center justify-between gap-2 rounded-lg px-3 text-sm font-bold ${active ? 'bg-portal-sidebar-active text-white' : 'text-white/90'}`}
+                        >
+                          <span>{feature.label}</span>
+                          {feature.state === 'coming_soon' ? <span className="text-xs font-bold text-portal-ink-2">Soon</span> : null}
+                          {locked ? <span className="text-xs font-bold text-portal-ink-2">Members</span> : null}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })}
+        </nav>
+      </aside>
     </>
   );
 }

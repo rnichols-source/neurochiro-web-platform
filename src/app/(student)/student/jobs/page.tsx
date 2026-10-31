@@ -232,7 +232,7 @@ export default function JobsPage() {
                   className="bg-[#F7F8F9] rounded-2xl p-4 hover:border-[#D66829]/20 transition-all group border border-[#DDE2E5]"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] text-[#5A6873] flex items-center gap-1">
+                    <span className="text-xs text-[#5A6873] flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getMatchColor(job.matchScore.total) }} />
                       {job.matchScore.total}%
                     </span>
@@ -240,7 +240,7 @@ export default function JobsPage() {
                   </div>
                   <h3 className="text-[#16222D] font-semibold text-sm mb-1">{job.title}</h3>
                   {job.clinic_name && <p className="text-[#5A6873] text-xs mb-2">{job.clinic_name}</p>}
-                  <div className="flex flex-wrap gap-2 text-[10px] text-[#5A6873]">
+                  <div className="flex flex-wrap gap-2 text-xs text-[#5A6873]">
                     {location && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {location}</span>}
                     {salary && <span className="font-semibold text-[#5A6873]">{salary}</span>}
                   </div>
@@ -287,7 +287,7 @@ export default function JobsPage() {
         {showFilters && (
           <div className="bg-[#F7F8F9] rounded-2xl border border-[#DDE2E5] p-4 flex flex-wrap gap-4">
             <div>
-              <label className="text-[10px] font-semibold text-[#5A6873] block mb-1.5">Employment Type</label>
+              <label className="text-xs font-semibold text-[#5A6873] block mb-1.5">Employment Type</label>
               <select
                 value={filterEmployment}
                 onChange={(e) => setFilterEmployment(e.target.value)}
@@ -323,9 +323,21 @@ export default function JobsPage() {
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center bg-[#F7F8F9] rounded-2xl border border-dashed border-[#DDE2E5]">
           <Briefcase className="w-12 h-12 text-[#5A6873]/20 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-[#16222D] mb-1">Nothing matches these filters</h3>
-          <p className="text-[#5A6873] text-sm mb-4">Clear a filter or check back. New jobs get posted every week.</p>
-          <Link href="/student/profile" className="text-sm font-bold text-[#D66829] hover:underline">Fill out your profile so we can match you better</Link>
+          <h3 className="text-xl font-semibold text-[#16222D] mb-1">
+            {jobs.length === 0
+              ? "No associateships posted yet"
+              : (search.trim() || filterEmployment !== "all" || filterMentor)
+                ? "Nothing matches these filters"
+                : "Complete your profile for better matches."}
+          </h3>
+          <p className="text-[#5A6873] text-sm mb-4">
+            {jobs.length === 0
+              ? "Check back. New posts show up here."
+              : (search.trim() || filterEmployment !== "all" || filterMentor)
+                ? "Clear a filter or check back."
+                : "Add your school, city, and graduation year so the list can rank what fits."}
+          </p>
+          <Link href="/student/welcome" className="text-sm font-bold text-[#D66829] hover:underline">Finish your profile</Link>
         </div>
       ) : (
         <div className="space-y-3">
@@ -349,7 +361,7 @@ export default function JobsPage() {
                         {job.title}
                       </h3>
                       {matchScore > 0 && (
-                        <span className="text-[10px] text-[#5A6873] flex items-center gap-1">
+                        <span className="text-xs text-[#5A6873] flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: matchColor }} />
                           {matchScore}%
                         </span>
@@ -384,7 +396,7 @@ export default function JobsPage() {
                       <div className="flex items-center gap-1 text-green-400 text-xs font-bold">
                         <CheckCircle2 className="w-3.5 h-3.5" /> Applied
                       </div>
-                      <span className="text-[10px] text-green-400/70 font-medium">{appliedStages[job.id] || "New"}</span>
+                      <span className="text-xs text-green-400/70 font-medium">{appliedStages[job.id] || "New"}</span>
                     </div>
                   ) : (
                     <Link

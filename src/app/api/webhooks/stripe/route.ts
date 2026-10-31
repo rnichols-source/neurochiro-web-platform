@@ -4,6 +4,7 @@ import { Automations } from "@/lib/automations";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { Resend } from "resend";
 import { checkoutFromStripeSession, fulfillSeminarSession, isSeminarCheckout, refundSeminarCharge, releaseSeminarHold } from "@/lib/seminars/fulfill";
+import { sendStudentWelcome } from "@/lib/students/welcome-email";
 import { supabaseSeminarStore } from "@/lib/seminars/fulfill-db";
 
 export async function POST(req: Request) {
@@ -91,6 +92,16 @@ export async function POST(req: Request) {
               .from('doctors')
               .update({ verification_status: 'verified', membership_tier: membershipTier as any, verified_at: new Date().toISOString() })
               .eq('user_id', userId);
+          }
+
+          if (metaRole === 'student') {
+            const welcomeTo = session.customer_details?.email || session.customer_email || '';
+            const welcomeName = session.customer_details?.name || '';
+            try {
+              await sendStudentWelcome(welcomeTo, welcomeName);
+            } catch (welcomeError) {
+              console.error('[WEBHOOK] Student welcome email failed');
+            }
           }
 
           // Handle metadata-driven record creation
@@ -906,11 +917,11 @@ export async function POST(req: Request) {
 
         const { data: profile } = await supabase
           .from('profiles')
-          .select('id')
+          .select('id, role')
           .eq('stripe_customer_id', customer)
           .single();
 
-        if (profile) {
+        if (profile && profile.role !== 'student') {
           await supabase
             .from('profiles')
             .update({ tier: 'free' } as any)
@@ -938,8 +949,10 @@ export async function POST(req: Request) {
           const metaTier = subscription.metadata?.tier || '';
 
           let newTier: string | null = null;
-          if (profile.role === 'student') {
-            newTier = subscription.status === 'active' ? 'student_paid' : 'free';
+          if (profile.role === 'student' || subscription.metadata?.role === 'student') {
+            if (subscription.status === 'active' || subscription.status === 'trialing') newTier = 'student_paid';
+            else if (subscription.status === 'past_due') newTier = 'student_paid';
+            else newTier = 'free';
           } else {
             // All paid doctors → pro, cancelled → free
             newTier = subscription.status === 'active' ? 'pro' : 'free';
@@ -950,6 +963,14 @@ export async function POST(req: Request) {
               .from('profiles')
               .update({ tier: newTier } as any)
               .eq('id', profile.id);
+
+            if (profile.role === 'student' || subscription.metadata?.role === 'student') {
+              if (subscription.status === 'past_due') {
+                await supabase.from('profiles').update({ student_past_due_since: new Date().toISOString() } as any).eq('id', profile.id).is('student_past_due_since', null);
+              } else if (subscription.status === 'active' || subscription.status === 'trialing') {
+                await supabase.from('profiles').update({ student_past_due_since: null } as any).eq('id', profile.id);
+              }
+            }
 
             if (profile.role === 'doctor') {
               await supabase
