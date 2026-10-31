@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { LEGACY_STORE_PRODUCT_IDS } from "./src/lib/legacy-store-ids";
 
 const nextConfig: NextConfig = {
   typescript: {
@@ -32,6 +33,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'img.youtube.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.shopify.com',
+        pathname: '/**',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
   },
@@ -43,6 +49,11 @@ const nextConfig: NextConfig = {
         destination: '/chiropractor/:path*',
         permanent: true,
       },
+      ...LEGACY_STORE_PRODUCT_IDS.map((id) => ({
+        source: `/store/${id}`,
+        destination: '/store',
+        permanent: true,
+      })),
     ];
   },
 };

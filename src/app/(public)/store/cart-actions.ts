@@ -1,74 +1,121 @@
 "use server";
 
-import { stripe } from "@/lib/stripe";
-import { STORE_PRODUCTS } from "./store-data";
+import { cookies } from "next/headers";
+import { clampQuantity } from "@/lib/shopify-catalog";
+import { addToCart, createCart, getCart, isShopifyConfigured, removeFromCart, updateCartLines } from "@/lib/shopify";
+import type { CartActionResult } from "@/lib/shopify-types";
 
-interface CartLineItem {
-  productId: string;
-  name: string;
-  retailPrice: number; // cents — ignored, looked up server-side
-  billing: "one_time" | "monthly";
+const CART_COOKIE = "nc_cart";
+const HINT_COOKIE = "nc_cart_hint";
+const THIRTY_DAYS = 60 * 60 * 24 * 30;
+
+function cookieBase() {
+  return {
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: THIRTY_DAYS,
+  };
 }
 
-export async function createCartCheckout(items: CartLineItem[]) {
-  try {
-    if (!items.length) {
-      return { error: "Cart is empty" };
-    }
+async function rememberCart(id: string) {
+  const jar = await cookies();
+  jar.set(CART_COOKIE, id, { ...cookieBase(), httpOnly: true });
+  jar.set(HINT_COOKIE, "1", { ...cookieBase(), httpOnly: false });
+}
 
-    // Server-side price lookup — never trust client prices
-    const verifiedItems = items.map((item) => {
-      const product = STORE_PRODUCTS.find((p) => p.id === item.productId);
-      if (!product) throw new Error(`Product not found: ${item.productId}`);
-      return {
-        productId: product.id,
-        name: product.name,
-        retailPrice: product.retailPrice,
-        billing: product.billing,
-      };
-    });
+async function forgetCart() {
+  const jar = await cookies();
+  jar.delete({ name: CART_COOKIE, path: "/" });
+  jar.delete({ name: HINT_COOKIE, path: "/" });
+}
 
-    const baseUrl =
-      process.env.NEXT_PUBLIC_SITE_URL || "https://neurochiro.co";
-
-    const oneTimeItems = verifiedItems.filter((i) => i.billing === "one_time");
-    const recurringItems = verifiedItems.filter((i) => i.billing === "monthly");
-
-    const checkoutItems = recurringItems.length > 0 && oneTimeItems.length > 0
-      ? oneTimeItems
-      : verifiedItems;
-
-    const hasRecurring = checkoutItems.some((i) => i.billing === "monthly");
-    const mode = hasRecurring ? ("subscription" as const) : ("payment" as const);
-
-    const lineItems = checkoutItems.map((item) => ({
-      price_data: {
-        currency: "usd" as const,
-        product_data: { name: item.name },
-        unit_amount: item.retailPrice,
-        ...(item.billing === "monthly" && {
-          recurring: { interval: "month" as const },
-        }),
-      },
-      quantity: 1,
-    }));
-
-    const allProductIds = checkoutItems.map((i) => i.productId).join(",");
-
-    const session = await stripe.checkout.sessions.create({
-      mode,
-      line_items: lineItems,
-      metadata: {
-        type: "store_cart",
-        productIds: allProductIds,
-      },
-      ...(mode === "payment" && { customer_creation: "always" as const }),
-      success_url: `${baseUrl}/store/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/store`,
-    });
-
-    return { url: session.url };
-  } catch (err: any) {
-    return { error: err.message || "Something went wrong" };
+export async function getCartAction(): Promise<CartActionResult> {
+  if (!isShopifyConfigured()) return { ok: true, cart: null };
+  const jar = await cookies();
+  const id = jar.get(CART_COOKIE)?.value;
+  if (!id) return { ok: true, cart: null };
+  const result = await getCart(id);
+  if (!result.ok) return { ok: false, cart: null, error: "The cart is taking a moment. Try again." };
+  if (!result.cart) {
+    await forgetCart();
+    return { ok: true, cart: null };
   }
+  return { ok: true, cart: result.cart };
+}
+
+export async function addLine(merchandiseId: string, quantity: number): Promise<CartActionResult> {
+  if (!isShopifyConfigured()) {
+    return { ok: false, cart: null, error: "The NeuroChiro merch store is restocking. Check back soon." };
+  }
+  if (!/^gid:\/\/shopify\/ProductVariant\/\d+$/.test(merchandiseId)) {
+    return { ok: false, cart: null, error: "Choose a product option first." };
+  }
+  const qty = clampQuantity(quantity);
+  const jar = await cookies();
+  const existing = jar.get(CART_COOKIE)?.value;
+
+  if (existing) {
+    const updated = await addToCart(existing, [{ merchandiseId, quantity: qty }]);
+    if (updated.ok && updated.userErrors.length === 0 && updated.cart) {
+      await rememberCart(updated.cart.id);
+      return { ok: true, cart: updated.cart };
+    }
+    if (updated.ok && updated.userErrors.length > 0) {
+      return { ok: false, cart: updated.cart, error: updated.userErrors.join(" ") };
+    }
+    if (updated.ok && !updated.cart) await forgetCart();
+    else if (!updated.ok) return { ok: false, cart: null, error: "Could not add that item. Try again." };
+  }
+
+  const created = await createCart([{ merchandiseId, quantity: qty }]);
+  if (!created.ok) return { ok: false, cart: null, error: "Could not add that item. Try again." };
+  if (created.userErrors.length > 0 || !created.cart) {
+    return {
+      ok: false,
+      cart: created.cart,
+      error: created.userErrors.join(" ") || "Could not add that item. Try again.",
+    };
+  }
+  await rememberCart(created.cart.id);
+  return { ok: true, cart: created.cart };
+}
+
+export async function updateLine(lineId: string, quantity: number): Promise<CartActionResult> {
+  if (!isShopifyConfigured()) return { ok: false, cart: null, error: "The cart is unavailable." };
+  if (!lineId.startsWith("gid://shopify/CartLine/")) {
+    return { ok: false, cart: null, error: "That cart item is no longer available." };
+  }
+  const jar = await cookies();
+  const id = jar.get(CART_COOKIE)?.value;
+  if (!id) return { ok: true, cart: null };
+  const qty = clampQuantity(quantity);
+  const updated = await updateCartLines(id, [{ id: lineId, quantity: qty }]);
+  if (!updated.ok) return { ok: false, cart: null, error: "Could not update the cart. Try again." };
+  if (updated.userErrors.length > 0) return { ok: false, cart: updated.cart, error: updated.userErrors.join(" ") };
+  if (!updated.cart) {
+    await forgetCart();
+    return { ok: true, cart: null };
+  }
+  await rememberCart(updated.cart.id);
+  return { ok: true, cart: updated.cart };
+}
+
+export async function removeLine(lineId: string): Promise<CartActionResult> {
+  if (!isShopifyConfigured()) return { ok: false, cart: null, error: "The cart is unavailable." };
+  if (!lineId.startsWith("gid://shopify/CartLine/")) {
+    return { ok: false, cart: null, error: "That cart item is no longer available." };
+  }
+  const jar = await cookies();
+  const id = jar.get(CART_COOKIE)?.value;
+  if (!id) return { ok: true, cart: null };
+  const updated = await removeFromCart(id, [lineId]);
+  if (!updated.ok) return { ok: false, cart: null, error: "Could not update the cart. Try again." };
+  if (updated.userErrors.length > 0) return { ok: false, cart: updated.cart, error: updated.userErrors.join(" ") };
+  if (!updated.cart) {
+    await forgetCart();
+    return { ok: true, cart: null };
+  }
+  await rememberCart(updated.cart.id);
+  return { ok: true, cart: updated.cart };
 }
