@@ -10,7 +10,7 @@ const getSupabase = () => createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
-const SERPAPI_KEY = process.env.SERPAPI_KEY || 'f31e69bc5e63289df5d58b401940d838d5c76608f971728da4f59913d7971553';
+const SERPAPI_KEY = process.env.SERPAPI_KEY;
 
 // States and their major cities to search
 const STATE_CITIES: Record<string, string[]> = {

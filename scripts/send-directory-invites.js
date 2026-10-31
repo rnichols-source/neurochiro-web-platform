@@ -3,7 +3,12 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 // Use the key from your .env or the one we just verified
-const resend = new Resend(process.env.RESEND_API_KEY || 're_9iYj94hq_3u5RpG6HeUqKKfvg3SpsnBi4');
+const resendKey = process.env.RESEND_API_KEY;
+if (!resendKey) {
+  console.error('Missing RESEND_API_KEY');
+  process.exit(1);
+}
+const resend = new Resend(resendKey);
 
 const args = process.argv.slice(2);
 const getArg = (name) => args.find(a => a.startsWith(name + '='))?.split('=')[1];

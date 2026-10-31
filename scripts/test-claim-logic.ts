@@ -7,9 +7,13 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+const seedPassword = process.env.SEED_PASSWORD;
 if (!supabaseUrl || !supabaseKey) {
-  console.log("⚠️ SUPABASE CREDENTIALS MISSING. RUNNING IN MOCK MODE.");
+  console.log("SUPABASE CREDENTIALS MISSING. RUNNING IN MOCK MODE.");
   simulateMock();
+} else if (!seedPassword) {
+  console.error("Missing SEED_PASSWORD");
+  process.exit(1);
 } else {
   runRealTest();
 }
@@ -95,7 +99,7 @@ async function runRealTest() {
     
     const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
       email: testEmail,
-      password: 'password123',
+      password: seedPassword!,
       email_confirm: true,
       user_metadata: {
         full_name: 'Dr. Test Doctor',

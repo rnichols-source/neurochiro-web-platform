@@ -3,7 +3,12 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_9iYj94hq_3u5RpG6HeUqKKfvg3SpsnBi4');
+const resendKey = process.env.RESEND_API_KEY;
+if (!resendKey) {
+  console.error('Missing RESEND_API_KEY');
+  process.exit(1);
+}
+const resend = new Resend(resendKey);
 
 const SEGMENT_FILE = path.resolve(__dirname, 'segment_a_active_members.json');
 const LOG_FILE = path.resolve(__dirname, 'bulk_invite_results.json');
