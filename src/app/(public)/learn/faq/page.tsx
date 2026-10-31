@@ -3,29 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, HelpCircle, Wallet, ShieldCheck, Zap, Info } from "lucide-react";
 import Link from "next/link";
-
-const faqs = [
-  {
-    question: "What does chiropractic actually do?",
-    answer: "Chiropractic care focuses on the relationship between your spine and your nervous system. By making specific adjustments to the spine, we remove interference in your neural pathways, allowing your brain and body to communicate effectively and support your body's natural ability to heal."
-  },
-  {
-    question: "How long does it take to see results?",
-    answer: "Every nervous system is different. Some patients feel immediate shifts in regulation, while others take several weeks of consistent care to notice changes in their physiology. Long-term, sustainable change is a process of repetition, not a single event."
-  },
-  {
-    question: "Why do chiropractors recommend multiple visits?",
-    answer: "Think of it like training at the gym or learning a language. Your nervous system has 'learned' certain stressful patterns over years. Overriding those patterns and establishing new, regulated ones requires consistent input over time to ensure the changes stick."
-  },
-  {
-    question: "Is chiropractic safe?",
-    answer: "Yes. Chiropractic is widely recognized as one of the safest drug-free, non-invasive therapies available for the treatment of neuromusculoskeletal complaints. Our doctors use precise, gentle techniques tailored to your specific clinical scans."
-  },
-  {
-    question: "How do I know if a chiropractor is right for me?",
-    answer: "If you are looking for a doctor who focuses on the 'why' behind your health challenges and uses objective data to track your nervous system function, a NeuroChiro doctor is likely a great fit."
-  }
-];
+import { allFaqs as faqs } from "@/lib/content/faq";
 
 export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -76,7 +54,7 @@ export default function FAQPage() {
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">
                  <Info className="w-3 h-3" /> Financial Transparency
               </div>
-              <h2 className="text-4xl font-heading font-black text-neuro-navy leading-tight">Why Many NeuroChiro Offices Are "Cash-Based"</h2>
+              <h2 className="text-4xl font-heading font-black text-neuro-navy leading-tight">Why Many NeuroChiro Offices Are “Cash-Based”</h2>
               <p className="text-gray-600 text-lg leading-relaxed">
                 You may notice that many high-quality, nervous-system focused clinics do not accept traditional health insurance for clinical care. This is a deliberate choice made to prioritize <strong>quality of care</strong> over <strong>billing restrictions</strong>.
               </p>
@@ -86,7 +64,7 @@ export default function FAQPage() {
                     <h4 className="font-bold text-neuro-navy flex items-center gap-2">
                        <Zap className="w-4 h-4 text-neuro-orange" /> No Limitations
                     </h4>
-                    <p className="text-sm text-gray-500">Insurance companies often dictate how long a doctor can spend with you and what treatments are "covered," regardless of what your nervous system actually needs.</p>
+                    <p className="text-sm text-gray-500">Insurance companies often dictate how long a doctor can spend with you and what treatments are “covered,” regardless of what your nervous system actually needs.</p>
                  </div>
                  <div className="space-y-4">
                     <h4 className="font-bold text-neuro-navy flex items-center gap-2">
@@ -98,7 +76,7 @@ export default function FAQPage() {
 
               <div className="p-8 bg-neuro-cream rounded-3xl border border-gray-100">
                  <p className="text-neuro-navy font-bold text-sm leading-relaxed">
-                    While our doctors are out-of-network with insurance, many provide "Superbills" that you can submit to your insurance for potential reimbursement, and most accept HSA/FSA funds.
+                    While our doctors are out-of-network with insurance, many provide “Superbills” that you can submit to your insurance for potential reimbursement, and most accept HSA/FSA funds.
                  </p>
               </div>
            </div>

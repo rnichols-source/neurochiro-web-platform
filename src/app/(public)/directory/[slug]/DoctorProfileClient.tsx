@@ -365,14 +365,14 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 <ContactGateCTA variant="hero" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
               ) : (
                 <>
+                  <a href="#appointment-form" onClick={() => trackConversion('inquiry')} style={{ padding: "14px 28px", background: "#B4501A", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", minHeight: 44 }}>
+                    <Calendar style={{ width: 16, height: 16 }} /> Request appointment
+                  </a>
                   {bookingUrl ? (
-                    <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent('booking_click'); trackConversion('book'); }} style={{ padding: "14px 28px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", boxShadow: "0 8px 30px rgba(214,104,41,0.3)" }}>
-                      <Calendar style={{ width: 16, height: 16 }} /> Book Online
+                    <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent('booking_click'); trackConversion('book'); }} style={{ padding: "14px 28px", background: "transparent", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", border: "1px solid rgba(255,255,255,0.35)", minHeight: 44 }}>
+                      <Calendar style={{ width: 16, height: 16 }} /> Book on their website
                     </a>
                   ) : null}
-                  <a href="#appointment-form" style={{ padding: "14px 28px", background: bookingUrl ? "rgba(255,255,255,0.1)" : "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", boxShadow: bookingUrl ? "none" : "0 8px 30px rgba(214,104,41,0.3)", border: bookingUrl ? "1px solid rgba(255,255,255,0.15)" : "none" }}>
-                    <Calendar style={{ width: 16, height: 16 }} /> {bookingUrl ? "Request a time" : "Book Consultation"}
-                  </a>
                   {doctor.phone && (
                     <a href={`tel:${doctor.phone}`} onClick={() => { trackEvent('phone_tap'); trackConversion('call'); }} style={{ padding: "14px 28px", background: "rgba(255,255,255,0.1)", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", border: "1px solid rgba(255,255,255,0.15)" }}>
                       <Phone style={{ width: 16, height: 16 }} /> Call
@@ -1148,19 +1148,19 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             </button>
           ) : (
             <>
-              {bookingUrl ? (
-                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('book')} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Book online with ${name}`}>
-                  <Calendar className="w-4 h-4" /> Book
-                </a>
-              ) : null}
-              <button onClick={() => { trackConversion('inquiry'); document.getElementById('appointment-form')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label="Request appointment">
-                <Calendar className="w-4 h-4" /> {bookingUrl ? "Request" : "Request Appointment"}
+              <button onClick={() => { trackConversion('inquiry'); document.getElementById('appointment-form')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex-1 py-3 bg-neuro-orange-ink text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label="Request appointment">
+                <Calendar className="w-4 h-4" /> Request
               </button>
               {doctor.phone && (
                 <a href={`tel:${doctor.phone}`} onClick={() => trackConversion('call')} className="py-3 px-5 bg-white/10 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Call ${name}`}>
                   <Phone className="w-4 h-4" /> Call
                 </a>
               )}
+              {bookingUrl ? (
+                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('book')} className="flex-1 py-3 border border-white/30 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Book on the website for ${name}`}>
+                  Book
+                </a>
+              ) : null}
             </>
           )}
         </div>

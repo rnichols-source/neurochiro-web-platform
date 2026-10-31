@@ -4,6 +4,7 @@ import { REGIONS } from '@/lib/regions';
 import { EMPTY_METROS, cityToSlug } from '@/lib/city-data';
 import { getProducts } from '@/lib/shopify';
 import { EUROPEAN_ISO, toDirectoryCountry } from '@/lib/directory-countries';
+import { excludeDemo } from '@/lib/directory/exclude-demo';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,11 +15,11 @@ async function fetchPublishedDoctors(supabase: ReturnType<typeof createServerSup
   const doctors: { slug: string; created_at: string | null }[] = [];
 
   for (let from = 0; ; from += pageSize) {
-    const { data, error } = await supabase
+    const { data, error } = await excludeDemo(supabase
       .from('doctors')
       .select('slug, created_at')
       .eq('verification_status', 'verified')
-      .not('slug', 'is', null)
+      .not('slug', 'is', null))
       .order('created_at', { ascending: true })
       .range(from, from + pageSize - 1);
 
@@ -42,10 +43,10 @@ async function directoryRegionCounts(supabase: ReturnType<typeof createServerSup
   const pageSize = 1000;
 
   for (let from = 0; ; from += pageSize) {
-    const { data, error } = await supabase
+    const { data, error } = await excludeDemo(supabase
       .from('doctors')
       .select('country')
-      .in('verification_status', ['verified', 'pending'])
+      .in('verification_status', ['verified', 'pending']))
       .range(from, from + pageSize - 1);
 
     if (error || !data?.length) break;
@@ -117,10 +118,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // City pages: every city with a doctor + empty metros
   const doctorCitySlugs = new Set<string>();
-  const allDoctors = (await supabase
+  const allDoctors = (await excludeDemo(supabase
     .from('doctors')
     .select('city, state')
-    .eq('verification_status', 'verified')).data || [];
+    .eq('verification_status', 'verified'))).data || [];
   for (const d of allDoctors) {
     if (d.city && d.state && d.state.length === 2) {
       doctorCitySlugs.add(cityToSlug(d.city, d.state));

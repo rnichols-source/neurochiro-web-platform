@@ -1,302 +1,294 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, User, Stethoscope, GraduationCap, Zap, MapPin, BookOpen, Crown, Users, Briefcase, Store, ShoppingBag, Calendar, Sparkles, Bell, Heart } from "lucide-react";
-
+import { AnimatePresence, motion } from "framer-motion";
+import { Menu, X, ChevronDown, User } from "lucide-react";
 import RegionSwitcher from "./RegionSwitcher";
 import { CartButton } from "@/components/store/CartButton";
-import GetStartedModal from "./GetStartedModal";
 import NotificationBell from "./NotificationBell";
 import { createClient } from "@/lib/supabase";
 
+const PATIENT_LINKS = [
+  { name: "Find a doctor", href: "/directory" },
+  { name: "Learn", href: "/learn" },
+  { name: "Take the quiz", href: "/quiz" },
+];
+
+const CHIRO_LINKS = [
+  { name: "Membership", href: "/pro?source=nav" },
+  { name: "Seminars", href: "/seminars" },
+  { name: "Marketplace", href: "/marketplace" },
+  { name: "Careers", href: "/jobs" },
+  { name: "Store", href: "/store" },
+];
+
+const MOBILE_PATIENT_LINKS = [
+  { name: "Find a doctor", href: "/directory" },
+  { name: "Take the 60-second quiz", href: "/quiz" },
+  { name: "What is nervous system chiropractic?", href: "/learn/foundations" },
+  { name: "FAQ", href: "/learn/faq" },
+  { name: "Join the patient list", href: "/list?source=nav" },
+];
+
+type SessionUser = { id: string };
+
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isGetStartedOpen, setIsGetStartedOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [menuPath, setMenuPath] = useState<string | null>(null);
+  const [chiroPath, setChiroPath] = useState<string | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const pathname = usePathname();
-  const supabase = createClient();
+  const chiroRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Handle scroll effect for glass-morphism
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Check auth status
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    checkUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      setUser(session?.user ?? null);
+    const supabase = createClient();
+    let active = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (active) setUser(data.user ? { id: data.user.id } : null);
     });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ? { id: session.user.id } : null);
+    });
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
-    return () => subscription.unsubscribe();
-  }, [supabase]);
+  if (menuPath && menuPath !== pathname) setMenuPath(null);
+  if (chiroPath && chiroPath !== pathname) setChiroPath(null);
+  const mobileMenuOpen = menuPath === pathname;
+  const chiroOpen = chiroPath === pathname;
 
-  // Close mobile menu on route change
   useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
+    if (!chiroOpen) return;
+    const onPointer = (event: MouseEvent) => {
+      if (chiroRef.current && !chiroRef.current.contains(event.target as Node)) setChiroPath(null);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setChiroPath(null);
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [chiroOpen]);
 
-  const navLinks = [
-    { name: "Find a Doctor", href: "/directory", icon: MapPin },
-    { name: "Seminars", href: "/seminars", icon: Calendar },
-    { name: "Why NeuroChiro?", href: "/why-neurochiro", icon: Zap },
-    { name: "About", href: "/about", icon: Users },
-    { name: "Store", href: "/store", icon: ShoppingBag },
-    { name: "Marketplace", href: "/marketplace", icon: Store },
-    { name: "Careers", href: "/careers", icon: Briefcase },
-  ];
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const root = menuRef.current;
+    const focusable = () =>
+      Array.from(root?.querySelectorAll<HTMLElement>("a, button, input, [tabindex]:not([tabindex='-1'])") || []);
+    const nodes = focusable();
+    nodes[0]?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuPath(null);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const items = focusable();
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [mobileMenuOpen]);
 
-  // Determine if we should use white text based on scroll state and current page
-  // Always use white text on dark navy navbar
-  const useWhiteText = true;
+  const signOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.replace("/");
+  };
 
-  // Hide navbar on mobile for directory page (full-screen Apple Maps experience)
-  const isDirectoryPage = pathname === '/directory';
+  const isDirectoryPage = pathname === "/directory";
+  const linkClass = "inline-flex min-h-11 items-center text-sm font-bold text-gray-300 hover:text-white";
 
   return (
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
-          isDirectoryPage ? 'lg:block hidden' : ''
-        } ${
-          isScrolled
-            ? "bg-neuro-navy/95 backdrop-blur-md border-b border-white/10 py-4 shadow-xl"
-            : "bg-neuro-navy py-5"
-        }`}
+          isDirectoryPage ? "hidden lg:block" : ""
+        } ${isScrolled ? "border-b border-white/10 bg-neuro-navy/95 py-3 shadow-xl backdrop-blur-md" : "bg-neuro-navy py-4"}`}
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-8 flex items-center justify-between">
-          
-          {/* Logo */}
-          <div>
-            <Link href="/" className="flex items-center gap-3 group">
-              <Image 
-                src={useWhiteText ? "/logo-white.png" : "/logo.png"} 
-                alt="NeuroChiro Logo" 
-                width={40}
-                height={40}
-                className="object-contain group-hover:scale-105 transition-transform"
-                priority
-              />
-              <span className={`font-heading font-black text-xl tracking-tight transition-colors ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`}>
-                NEURO<span className="text-neuro-orange">CHIRO</span>
-              </span>
-            </Link>
-          </div>
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 md:px-8">
+          <Link href="/" className="flex min-h-11 items-center gap-3">
+            <Image src="/logo-white.png" alt="NeuroChiro" width={40} height={40} className="object-contain" priority />
+            <span className="font-heading text-xl font-black tracking-tight text-white">
+              NEURO<span className="text-neuro-orange-light">CHIRO</span>
+            </span>
+          </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={`text-xs font-bold tracking-wide transition-colors whitespace-nowrap hover:text-neuro-orange ${
-                  pathname === link.href
-                    ? "text-neuro-orange"
-                    : useWhiteText ? "text-gray-300" : "text-neuro-navy/80"
-                }`}
-              >
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
+            {PATIENT_LINKS.map((link) => (
+              <Link key={link.href} href={link.href} className={`${linkClass} px-2 ${pathname === link.href ? "text-white" : ""}`}>
                 {link.name}
               </Link>
             ))}
-
-            {/* Dropdown: Join the Network */}
-            <div className="relative group">
-              <button className={`text-xs font-bold tracking-wide transition-colors flex items-center gap-1 whitespace-nowrap hover:text-neuro-orange ${useWhiteText ? "text-gray-300" : "text-neuro-navy/80"}`}>
-                Join <ChevronDown className="w-4 h-4" />
+            <div className="relative" ref={chiroRef}>
+              <button
+                type="button"
+                className={`${linkClass} gap-1 px-2`}
+                aria-expanded={chiroOpen}
+                aria-controls="chiro-menu"
+                onClick={() => setChiroPath(chiroOpen ? null : pathname)}
+              >
+                For chiropractors
+                <ChevronDown className={`h-4 w-4 transition-transform ${chiroOpen ? "rotate-180" : ""}`} aria-hidden />
               </button>
-              <div className="absolute top-full right-0 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all">
-                <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 w-64 overflow-hidden">
-                  <Link href="/get-started" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors">
-                    <div className="p-2 bg-neuro-orange/10 rounded-lg text-neuro-orange"><Stethoscope className="w-4 h-4" /></div>
-                    <div>
-                      <p className="text-sm font-bold text-neuro-navy">I&apos;m a Doctor</p>
-                      <p className="text-xs text-gray-500">Join Network</p>
-                    </div>
-                  </Link>
-                  <Link href="/get-started" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">
-                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600"><GraduationCap className="w-4 h-4" /></div>
-                    <div>
-                      <p className="text-sm font-bold text-blue-900">I&apos;m a Student</p>
-                      <p className="text-xs text-gray-500">Career tools, jobs &amp; more</p>
-                    </div>
-                  </Link>
-                  <Link href="/get-started" className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1">
-                    <div className="p-2 bg-red-50 rounded-lg text-red-500"><Heart className="w-4 h-4" /></div>
-                    <div>
-                      <p className="text-sm font-bold text-red-900">I&apos;m a Patient</p>
-                      <p className="text-xs text-gray-500">Track health &amp; find specialists</p>
-                    </div>
-                  </Link>
+              {chiroOpen && (
+                <div id="chiro-menu" className="absolute right-0 top-full z-[120] mt-2 w-64 rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl">
+                  {CHIRO_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="flex min-h-11 items-center rounded-xl px-3 text-sm font-bold text-neuro-navy hover:bg-gray-50"
+                      onClick={() => setChiroPath(null)}
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
           </nav>
 
-          {/* Auth Actions */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden items-center gap-2 lg:flex">
             <CartButton />
             <RegionSwitcher />
-            
             {user ? (
-              <div className="flex items-center gap-4">
-                <Link
-                  href="/dashboard"
-                  className={`text-sm font-bold transition-colors hover:text-neuro-orange ${useWhiteText ? "text-white" : "text-neuro-navy"}`}
-                >
+              <>
+                <Link href="/dashboard" className="inline-flex min-h-11 items-center px-2 text-sm font-bold text-white hover:text-neuro-orange-light">
                   Dashboard
                 </Link>
                 <NotificationBell />
-                <div className="relative group/user">
-                  <Link 
-                    href="/dashboard" 
-                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
-                      useWhiteText ? 'border-white/20 hover:border-white bg-white/10' : 'border-gray-200 hover:border-neuro-navy bg-gray-50'
-                    }`}
-                  >
-                    <User className={`w-5 h-5 ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`} />
-                  </Link>
-                  {/* Dropdown for Logged In User */}
-                  <div className="absolute top-full right-0 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover/user:opacity-100 group-hover/user:translate-y-0 group-hover/user:pointer-events-auto transition-all z-[110]">
-                    <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 w-52 overflow-hidden">
-                      <Link 
-                        href="/dashboard" 
-                        className="flex items-center gap-3 p-4 hover:bg-gray-50 rounded-xl transition-all text-sm font-bold text-neuro-navy active:scale-95"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-neuro-orange/10 flex items-center justify-center text-neuro-orange">
-                          <Zap className="w-4 h-4" />
-                        </div>
-                        My Dashboard
-                      </Link>
-                      <button 
-                        onClick={async () => {
-                          await supabase.auth.signOut();
-                          window.location.replace('/');
-                        }}
-                        className="w-full flex items-center gap-3 p-4 hover:bg-red-50 rounded-xl transition-all text-sm font-bold text-red-600 border-t border-gray-50 mt-1 active:scale-95"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
-                          <X className="w-4 h-4" />
-                        </div>
-                        Sign Out
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <>
-                <Link 
-                  href="/login" 
-                  className={`text-sm font-bold transition-colors hover:text-neuro-orange ${useWhiteText ? "text-white" : "text-neuro-navy"}`}
-                >
-                  Log In
-                </Link>
-                <button 
-                  onClick={() => setIsGetStartedOpen(true)}
-                  className="px-6 py-2.5 bg-neuro-orange hover:bg-neuro-orange-light active:scale-95 text-white font-black text-xs uppercase tracking-widest rounded-full shadow-lg shadow-neuro-orange/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2"
-                >
-                  <Sparkles className="w-3.5 h-3.5" /> Join Network
+                <button type="button" onClick={signOut} className="inline-flex min-h-11 items-center px-2 text-sm font-bold text-white">
+                  Sign out
                 </button>
               </>
+            ) : (
+              <Link href="/login" className="inline-flex min-h-11 items-center px-2 text-sm font-bold text-white">
+                Log in
+              </Link>
             )}
+            <Link href="/directory" className="inline-flex h-11 items-center rounded-full bg-neuro-orange-ink px-4 text-sm font-bold text-white">
+              Find a doctor
+            </Link>
           </div>
 
-          {/* Mobile Menu Toggle */}
           <div className="flex items-center lg:hidden">
             <CartButton />
             <button
               type="button"
               aria-label="Open menu"
               aria-expanded={mobileMenuOpen}
-              className={`p-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`}
-              onClick={() => setMobileMenuOpen(true)}
+              aria-controls="site-menu"
+              className="relative z-10 flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-white"
+              onClick={() => setMenuPath(pathname)}
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="h-6 w-6" />
             </button>
           </div>
         </div>
       </header>
 
-      <GetStartedModal 
-        isOpen={isGetStartedOpen} 
-        onClose={() => setIsGetStartedOpen(false)} 
-      />
-
-      {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div 
+          <motion.div
+            ref={menuRef}
+            id="site-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu"
             initial={{ opacity: 0, x: "100%" }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[300] bg-neuro-navy text-white flex flex-col"
+            className="fixed inset-0 z-[300] flex flex-col bg-neuro-navy text-white"
           >
-            <div className="p-6 flex justify-between items-center border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <Image src="/logo-white.png" alt="NeuroChiro" width={32} height={32} className="object-contain" />
-                <span className="font-heading font-black text-xl tracking-tight">
-                  NEURO<span className="text-neuro-orange">CHIRO</span>
+            <div className="flex items-center justify-between border-b border-white/10 p-4">
+              <Link href="/" className="flex items-center gap-3">
+                <Image src="/logo-white.png" alt="" width={32} height={32} className="object-contain" />
+                <span className="font-heading text-xl font-black tracking-tight">
+                  NEURO<span className="text-neuro-orange-light">CHIRO</span>
                 </span>
-              </div>
-              <button onClick={() => setMobileMenuOpen(false)} className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto p-8 space-y-8">
-              <div className="space-y-4">
-                <p className="text-xs font-black uppercase tracking-widest text-gray-500">Explore</p>
-                {navLinks.map((link) => (
-                  <Link key={link.name} href={link.href} className="flex items-center gap-4 text-2xl font-bold">
-                    <link.icon className="w-6 h-6 text-neuro-orange" /> {link.name}
-                  </Link>
-                ))}
-              </div>
-
-              <div className="space-y-4 pt-8 border-t border-white/10">
-                <p className="text-xs font-black uppercase tracking-widest text-gray-500">Join Now</p>
-                <Link href="/get-started" className="flex items-center gap-4 text-xl font-bold text-gray-300">
-                  <Stethoscope className="w-5 h-5 text-neuro-orange" /> I&apos;m a Doctor
-                </Link>
-                <Link href="/get-started" className="flex items-center gap-4 text-xl font-bold text-gray-300">
-                  <GraduationCap className="w-5 h-5 text-blue-500" /> I&apos;m a Student
-                </Link>
-                <Link href="/get-started" className="flex items-center gap-4 text-xl font-bold text-gray-300">
-                  <Heart className="w-5 h-5 text-red-500" /> I&apos;m a Patient
-                </Link>
-              </div>
-            </div>
-
-            <div className="p-8 bg-white/5 border-t border-white/10 space-y-4 text-center">
-              <div className="flex justify-center mb-4">
-                <RegionSwitcher />
-              </div>
-              <button 
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setIsGetStartedOpen(true);
-                }}
-                className="w-full py-4 bg-neuro-orange text-white font-black uppercase tracking-widest text-sm rounded-xl shadow-lg"
+              </Link>
+              <button
+                type="button"
+                aria-label="Close menu"
+                onClick={() => setMenuPath(null)}
+                className="flex min-h-11 min-w-11 items-center justify-center rounded-full bg-white/10"
               >
-                Join Now
+                <X className="h-6 w-6" />
               </button>
-              <Link href="/login" className="w-full py-4 bg-white/10 text-white font-bold rounded-xl flex items-center justify-center gap-2">
-                <User className="w-5 h-5" /> Log In to Dashboard
+            </div>
+
+            <div className="flex-1 space-y-8 overflow-y-auto p-6">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-300">For patients</p>
+                <div className="mt-2">
+                  {MOBILE_PATIENT_LINKS.map((link) => (
+                    <Link key={link.href} href={link.href} className="flex min-h-11 items-center text-base font-bold text-white">
+                      {link.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-300">For chiropractors</p>
+                <div className="mt-2">
+                  {CHIRO_LINKS.map((link) => (
+                    <Link key={link.href} href={link.href} className="flex min-h-11 items-center text-base font-bold text-gray-300">
+                      {link.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 border-t border-white/10 p-6">
+              <RegionSwitcher labeled />
+              {user ? (
+                <div className="flex gap-2">
+                  <Link href="/dashboard" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-white/10 text-sm font-bold">
+                    Dashboard
+                  </Link>
+                  <button type="button" onClick={signOut} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-white/10 text-sm font-bold">
+                    Sign out
+                  </button>
+                </div>
+              ) : (
+                <Link href="/login" className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white/10 text-sm font-bold">
+                  <User className="h-5 w-5" aria-hidden /> Log in
+                </Link>
+              )}
+              <Link href="/directory" className="flex h-[52px] items-center justify-center rounded-xl bg-neuro-orange-ink text-base font-bold text-white">
+                Find a doctor
               </Link>
             </div>
           </motion.div>

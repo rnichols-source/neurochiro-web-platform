@@ -36,19 +36,19 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: [/directory-search/, /seminars/],
+      testIgnore: [/directory-search/, /seminars/, /homepage/],
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
       name: 'firefox',
-      testIgnore: [/directory-search/, /seminars/],
+      testIgnore: [/directory-search/, /seminars/, /homepage/],
       use: { ...devices['Desktop Firefox'] },
     },
 
     {
       name: 'webkit',
-      testIgnore: [/directory-search/, /seminars/],
+      testIgnore: [/directory-search/, /seminars/, /homepage/],
       use: { ...devices['Desktop Safari'] },
     },
 
@@ -90,6 +90,32 @@ export default defineConfig({
         viewport: { width: 1440, height: 900 },
         baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000',
         launchOptions: { args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] },
+      },
+    },
+
+    {
+      name: 'homepage-iphone',
+      testMatch: /homepage/,
+      use: {
+        ...devices['iPhone 13'],
+        baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000',
+      },
+    },
+    {
+      name: 'homepage-pixel',
+      testMatch: /homepage/,
+      use: {
+        ...devices['Pixel 5'],
+        baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000',
+      },
+    },
+    {
+      name: 'homepage-desktop',
+      testMatch: /homepage/,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 900 },
+        baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000',
       },
     },
 

@@ -13,7 +13,6 @@ export const metadata = {
 
 export default function SpotlightPage() {
   const featured = getLatestEpisode();
-  const otherEpisodes = spotlightEpisodes.filter((ep) => ep.id !== featured.id);
 
   return (
     <div className="min-h-dvh bg-neuro-cream">
@@ -84,16 +83,17 @@ export default function SpotlightPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {spotlightEpisodes.map((episode) => (
             <SpotlightModal key={episode.id} episode={episode}>
-              <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group">
+              <div id={`ep-${episode.episodeNumber}`} className="scroll-mt-28 bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl motion-safe:hover:scale-[1.02] transition-all duration-300 cursor-pointer group">
                 {/* Thumbnail */}
                 <div className="relative aspect-video bg-gray-100 overflow-hidden">
                   <Image
                     src={episode.thumbnail}
                     alt={episode.doctorName}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(min-width: 1024px) 320px, (min-width: 768px) 50vw, 100vw"
+                    className="object-cover motion-safe:group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity">
                     <div className="w-14 h-14 rounded-full bg-neuro-orange flex items-center justify-center shadow-lg">
                       <Play className="w-6 h-6 text-white ml-1" />
                     </div>

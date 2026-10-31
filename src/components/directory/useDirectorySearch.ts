@@ -320,10 +320,19 @@ export function useDirectorySearch(options: {
     void runSearch({ country: prev.country, location: prev.location, source: "typed", coords: null });
   };
 
+  const dropNearParam = () => {
+    if (searchParams.get("near") !== "1") return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("near");
+    const next = params.toString();
+    router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+  };
+
   const useMyLocation = () => {
     if (!navigator.geolocation) {
       setGeoMessage("Location is off. Type your city or ZIP instead");
       inputRef.current?.focus();
+      dropNearParam();
       return;
     }
     setLocating(true);
@@ -339,6 +348,11 @@ export function useDirectorySearch(options: {
           const state = String(data.principalSubdivisionCode || "").split("-").pop() || "";
           label = state ? `${city}, ${state}` : city;
         } catch { /* keep the generic label */ }
+        try {
+          localStorage.setItem("nc_user_lat", String(lat));
+          localStorage.setItem("nc_user_lng", String(lng));
+          localStorage.setItem("nc_last_location", label);
+        } catch { /* private mode */ }
         const next = { lat, lng };
         setCoords(next);
         setGpsLabel(label);
@@ -352,10 +366,19 @@ export function useDirectorySearch(options: {
         setLocating(false);
         setGeoMessage("Location is off. Type your city or ZIP instead");
         inputRef.current?.focus();
+        dropNearParam();
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
   };
+
+  const nearOnMount = useRef(searchParams.get("near") === "1");
+  const startNearMe = useMyLocation;
+  useEffect(() => {
+    if (nearOnMount.current) startNearMe();
+    // Mount only. URL sync drops `near` after a successful location update.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const applyFilters = (next: SearchFilters) => {
     setFilters(next);

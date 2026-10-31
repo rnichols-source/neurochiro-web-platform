@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
-import { EUROPEAN_ISO, countryMeta, toDirectoryCountry } from '@/lib/directory-countries';
+import { EUROPEAN_ISO } from '@/lib/directory-countries';
+import { excludeDemo } from '@/lib/directory/exclude-demo';
+import { countryChipPayload, getPublicDirectoryCounts } from '@/lib/directory/public-counts';
 
 export const revalidate = 300;
 
@@ -10,10 +12,10 @@ export async function GET(request: NextRequest) {
 
   if (request.nextUrl.searchParams.get('cities') === '1') {
     const iso = country === 'UK' ? 'GB' : country;
-    let query = supabase
+    let query = excludeDemo(supabase
       .from('doctors')
       .select('city, state, country')
-      .in('verification_status', ['verified', 'pending']);
+      .in('verification_status', ['verified', 'pending']));
     if (country === 'EU') query = query.in('country', EUROPEAN_ISO);
     else if (country === 'US' || !country) query = query.or('country.is.null,country.eq.US');
     else if (country !== 'ALL') query = query.eq('country', iso);
@@ -31,28 +33,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ cities });
   }
 
-  const { data } = await supabase
-    .from('doctors')
-    .select('country')
-    .in('verification_status', ['verified', 'pending']);
-
-  const counts = new Map<string, number>();
-  for (const row of data || []) {
-    const code = toDirectoryCountry(row.country || 'US');
-    counts.set(code, (counts.get(code) || 0) + 1);
-    if (EUROPEAN_ISO.includes((row.country || '').toUpperCase()) || row.country === 'GB') {
-      counts.set('EU', (counts.get('EU') || 0) + 1);
-    }
-    counts.set('ALL', (counts.get('ALL') || 0) + 1);
-  }
-
-  const countries = [...counts.entries()]
-    .filter(([, count]) => count > 0)
-    .map(([code, count]) => {
-      const meta = countryMeta(code);
-      return { code, label: meta.label, flag: meta.flag, count };
-    })
-    .sort((a, b) => b.count - a.count);
-
-  return NextResponse.json(countries);
+  const counts = await getPublicDirectoryCounts();
+  return NextResponse.json(countryChipPayload(counts));
 }

@@ -6,6 +6,7 @@ import { Metadata } from "next";
 import SchemaMarkup from "@/components/seo/SchemaMarkup";
 import { addressForSchema } from "@/lib/profile-display";
 import { getApprovedStories } from "@/app/actions/patient-stories";
+import { isDemoSlug } from "@/lib/directory/exclude-demo";
 
 export const revalidate = 60; // ISR: cache for 60 seconds
 
@@ -16,6 +17,9 @@ interface Props {
 // 1. DYNAMIC SEO METADATA
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
+  if (isDemoSlug(resolvedParams.slug)) {
+    return { title: "Doctor Profile Not Found | NeuroChiro" };
+  }
   const { doctor } = await getDoctorBySlug(resolvedParams.slug);
 
   if (!doctor) {
@@ -66,9 +70,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function DoctorProfilePage({ params }: Props) {
   const resolvedParams = await params;
+  if (isDemoSlug(resolvedParams.slug)) notFound();
   const { doctor } = await getDoctorBySlug(resolvedParams.slug);
 
-  if (!doctor) {
+  if (!doctor || isDemoSlug(doctor.slug)) {
     // Check for slug redirect (old slug → new slug)
     const supabase = createAdminClient();
     const { data: redir } = await (supabase as any)
