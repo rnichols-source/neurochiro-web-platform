@@ -31,6 +31,7 @@ test.describe('doctor portal smoke', () => {
   });
 
   for (const viewport of [
+    { width: 375, height: 812 },
     { width: 390, height: 844 },
     { width: 1440, height: 900 },
   ]) {
@@ -60,6 +61,40 @@ test.describe('doctor portal smoke', () => {
       expect(dash).toBe(leads);
       expect(errors.join('\n')).not.toMatch(/announcements/i);
       expect(errors.filter((line) => !/favicon|404/.test(line))).toEqual([]);
+    });
+  }
+
+  for (const viewport of [
+    { width: 375, height: 812 },
+    { width: 390, height: 844 },
+    { width: 1440, height: 900 },
+  ]) {
+    test(`message box, notifications, and seminar copy at ${viewport.width}`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.goto('/doctor/messages');
+      const thread = page.locator('button.border-l-4').first();
+      await expect(thread).toBeVisible();
+      await thread.click();
+      const composer = page.locator('[data-composer]');
+      await expect(composer).toBeVisible();
+      const box = await composer.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.y).toBeGreaterThanOrEqual(0);
+      expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height + 1);
+      const covered = await composer.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        return element.contains(hit);
+      });
+      expect(covered).toBe(true);
+
+      await page.goto('/doctor/dashboard');
+      await page.locator('[data-portal-bell]').first().click();
+      await page.getByRole('link', { name: 'View all notifications' }).click();
+      await expect(page).toHaveURL(/\/doctor\/notifications/);
+
+      await page.goto('/doctor/seminars');
+      await expect(page.getByText('% match')).toHaveCount(0);
     });
   }
 });
