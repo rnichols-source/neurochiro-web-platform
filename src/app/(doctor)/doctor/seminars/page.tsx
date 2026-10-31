@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { X, Calendar, Loader2, Pencil, Trash2, Star } from "lucide-react";
+import { X, Calendar, Loader2, Pencil, Trash2, ChevronDown } from "lucide-react";
 import {
   getDoctorSeminars,
   createSeminarAction,
@@ -16,7 +16,9 @@ import SeminarRecommendations from "./recommendations";
 import PageHeader from "@/components/portal/PageHeader";
 import EmptyState from "@/components/portal/EmptyState";
 import StatusPill from "@/components/portal/StatusPill";
+import StatList from "@/components/portal/StatList";
 import { SEMINAR_CONFIG } from "@/config/seminars";
+import { seminarStatRows } from "@/lib/portal/seminar-recommendations";
 
 export default function SeminarsPage() {
   return (
@@ -183,35 +185,26 @@ function SeminarsPageInner() {
         </article>
       </div>
 
-      <details className="bg-white border border-portal-border rounded-xl px-4 py-3">
-        <summary className="cursor-pointer text-sm font-bold text-portal-ink">How hosting works</summary>
-        <p className="mt-2 text-sm text-portal-ink-2">Create a seminar, share the link, and see who registered.</p>
+      <details className="group bg-white border border-portal-border rounded-xl">
+        <summary className="flex w-full min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-bold text-portal-ink [&::-webkit-details-marker]:hidden">
+          <span>How hosting works</span>
+          <ChevronDown className="h-4 w-4 shrink-0 text-portal-ink transition-transform group-open:rotate-180" aria-hidden />
+        </summary>
+        <ol className="list-decimal space-y-2 px-8 pb-4 text-sm text-portal-ink-2">
+          <li>Create your seminar (title, dates, city, price, CE hours).</li>
+          <li>
+            Pick a package. {SEMINAR_CONFIG.packages.single.name} is ${SEMINAR_CONFIG.packages.single.priceUsd}.{" "}
+            {SEMINAR_CONFIG.packages.annual.name} is ${SEMINAR_CONFIG.packages.annual.priceUsd} for up to {SEMINAR_CONFIG.packages.annual.seminars} seminars a year.{" "}
+            {SEMINAR_CONFIG.featuredAddon.name} is ${SEMINAR_CONFIG.featuredAddon.priceUsd}.
+          </li>
+          <li>We review it and email you when it&apos;s live.</li>
+          <li>Share your link and see who registered, with CSV export.</li>
+        </ol>
       </details>
 
-      {/* Analytics */}
-      {analytics && analytics.totalSeminars > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <p className="text-2xl font-bold text-neuro-navy">{analytics.totalSeminars}</p>
-            <p className="text-xs font-bold text-gray-400 tracking-widest">Events</p>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <p className="text-2xl font-bold text-neuro-navy">{analytics.totalAttendees}</p>
-            <p className="text-xs font-bold text-gray-400 tracking-widest">Attendees</p>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <div className="flex items-center justify-center gap-1">
-              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-              <p className="text-2xl font-bold text-neuro-navy">{analytics.avgRating || '—'}</p>
-            </div>
-            <p className="text-xs font-bold text-gray-400 tracking-widest">{analytics.reviewCount} Reviews</p>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <p className="text-2xl font-bold text-blue-600">{analytics.totalCEDelivered}</p>
-            <p className="text-xs font-bold text-gray-400 tracking-widest">CE Delivered</p>
-          </div>
-        </div>
-      )}
+      {analytics && analytics.totalSeminars > 0 ? (
+        <StatList title="Your hosting" rows={seminarStatRows(analytics)} />
+      ) : null}
 
       {/* Recommendations */}
       <div className="mb-6">

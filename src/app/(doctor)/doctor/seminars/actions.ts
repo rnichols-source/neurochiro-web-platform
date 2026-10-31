@@ -5,6 +5,12 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { revalidatePath } from 'next/cache'
 import { stripe } from '@/lib/stripe'
 import { STUDENT_CONFIG } from '@/config/students'
+import {
+  filterUpcomingRecommendations,
+  recommendationChips,
+  type DoctorFocus,
+  type SeminarRecommendationRow,
+} from '@/lib/portal/seminar-recommendations'
 
 
 export async function getDoctorSeminars() {
@@ -398,62 +404,45 @@ export async function getRecommendedSeminars() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  // Get doctor's specialties and location
   const { data: doctor } = await (supabase as any).from('doctors')
     .select('specialties, city, state')
     .eq('user_id', user.id)
     .single();
 
-  // Get upcoming approved seminars
   const sb = supabase as any;
   const { data: seminars } = await sb
     .from('seminars')
-    .select('id, title, dates, city, country, description, tags, target_audience, price, ce_hours, host_id')
+    .select('id, title, dates, city, country, location, description, tags, ce_hours, host_id, is_past')
     .eq('is_approved', true)
     .neq('host_id', user.id)
     .order('dates', { ascending: true })
-    .limit(20);
+    .limit(40);
 
   if (!seminars || seminars.length === 0) return [];
 
-  // Get CE hours earned by this doctor
-  const { data: certs } = await sb
-    .from('ce_certificates')
-    .select('ce_hours')
-    .eq('user_id', user.id);
+  const focus: DoctorFocus = {
+    city: doctor?.city,
+    state: doctor?.state,
+    specialties: Array.isArray(doctor?.specialties) ? doctor.specialties : [],
+  };
 
-  const ceEarned = (certs || []).reduce((sum: number, c: any) => sum + (c.ce_hours || 0), 0);
-
-  // Score each seminar
-  const specialties = doctor?.specialties || [];
-  const scored = seminars.map((sem: any) => {
-    let score = 0;
-
-    // Location match (30%)
-    if (doctor?.state && sem.city) {
-      const semLocation = `${sem.city} ${sem.country || ''}`.toLowerCase();
-      if (doctor.city && semLocation.includes(doctor.city.toLowerCase())) score += 30;
-      else if (semLocation.includes(doctor.state.toLowerCase())) score += 15;
+  const scored = (seminars as Array<SeminarRecommendationRow & { id?: string }>).map((sem) => {
+    const haystack = `${sem.title || ''} ${sem.description || ''} ${(sem.tags || []).join(' ')}`.toLowerCase();
+    const place = `${sem.city || ''} ${sem.location || ''} ${sem.country || ''}`.toLowerCase();
+    let relevance = 0;
+    if (focus.city && (sem.city || '').toLowerCase() === focus.city.toLowerCase()) relevance += 30;
+    else if (focus.state && place.includes(focus.state.toLowerCase())) relevance += 15;
+    for (const specialty of focus.specialties || []) {
+      if (specialty && haystack.includes(specialty.toLowerCase())) relevance += 10;
     }
-
-    // Specialty/tag alignment (40%)
-    const semText = `${sem.title} ${sem.description || ''} ${(sem.tags || []).join(' ')}`.toLowerCase();
-    let matches = 0;
-    for (const sp of specialties) {
-      if (semText.includes(sp.toLowerCase())) matches++;
-    }
-    if (specialties.length > 0) score += Math.min((matches / specialties.length) * 40, 40);
-
-    // CE value (20%) — higher CE hours = more valuable
-    if (sem.ce_hours && sem.ce_hours > 0) score += Math.min(sem.ce_hours * 3, 20);
-
-    // Targets doctors (10%)
-    if (sem.target_audience && sem.target_audience.some((t: string) => t.toLowerCase().includes('doctor'))) score += 10;
-
-    return { ...sem, matchScore: Math.round(score) };
+    if (sem.ce_hours && sem.ce_hours > 0) relevance += Math.min(sem.ce_hours, 20);
+    return { ...sem, relevance };
   });
 
-  return scored.sort((a: any, b: any) => b.matchScore - a.matchScore).slice(0, 5);
+  return filterUpcomingRecommendations(scored, Date.now()).map((sem) => ({
+    ...sem,
+    chips: recommendationChips(sem, focus),
+  }));
 }
 
 // Enhanced analytics with review data
