@@ -8,30 +8,35 @@ import Link from "next/link";
 // UPDATE THIS when you ship new features.
 // Users who dismiss it won't see it again until you change the id.
 // ============================================================
-const CURRENT_UPDATE = {
-  id: "2026-04-23-spotlight-launch",
-  title: "NeuroChiro Highlight is LIVE",
-  description: "Watch EP 01 featuring Dr. Jordan Wolff — a second-generation chiropractor from NYC adjusted from birth. New episodes dropping regularly.",
-  cta: "Watch Now",
-  ctaLink: "/spotlight",
+type PortalUpdate = {
+  id: string;
+  title: string;
+  description: string;
+  cta: string;
+  ctaLink: string;
+  expiresAt: string | null;
 };
+
+// Set CURRENT_UPDATE to announce something. Leave it null to show nothing.
+const CURRENT_UPDATE: PortalUpdate | null = null;
 
 export default function WhatsNew() {
   const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
+    if (!CURRENT_UPDATE) return;
+    if (CURRENT_UPDATE.expiresAt && new Date(CURRENT_UPDATE.expiresAt).getTime() < Date.now()) return;
     const stored = localStorage.getItem("neurochiro_dismissed_update");
-    if (stored !== CURRENT_UPDATE.id) {
-      setDismissed(false);
-    }
+    if (stored !== CURRENT_UPDATE.id) setDismissed(false);
   }, []);
 
   function handleDismiss() {
+    if (!CURRENT_UPDATE) return;
     localStorage.setItem("neurochiro_dismissed_update", CURRENT_UPDATE.id);
     setDismissed(true);
   }
 
-  if (dismissed) return null;
+  if (!CURRENT_UPDATE || dismissed) return null;
 
   return (
     <div className="bg-gradient-to-r from-neuro-orange/10 to-neuro-orange/5 border border-neuro-orange/20 rounded-2xl p-5 relative">

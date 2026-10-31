@@ -119,7 +119,7 @@ export default function DoctorOnboardingPage() {
         {step === 1 && (
           <div className="text-center space-y-6">
             <Camera className="w-12 h-12 text-neuro-orange mx-auto" />
-            <h1 className="text-2xl font-heading font-black text-white">Add Your Photo</h1>
+            <h1 className="text-2xl font-heading font-bold text-white">Add Your Photo</h1>
             <p className="text-white/40">Profiles with photos get 5x more views from patients.</p>
 
             <div className="flex flex-col items-center gap-4">
@@ -128,7 +128,7 @@ export default function DoctorOnboardingPage() {
               ) : (
                 <label className="w-32 h-32 rounded-2xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center cursor-pointer hover:border-neuro-orange/40 transition-colors">
                   <Camera className="w-8 h-8 text-white/20 mb-1" />
-                  <span className="text-[10px] text-white/20">Upload</span>
+                  <span className="text-xs text-white/20">Upload</span>
                   <input type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
                 </label>
               )}
@@ -151,7 +151,7 @@ export default function DoctorOnboardingPage() {
           <div className="space-y-6">
             <div className="text-center">
               <FileText className="w-12 h-12 text-neuro-orange mx-auto mb-4" />
-              <h1 className="text-2xl font-heading font-black text-white">Write Your Bio</h1>
+              <h1 className="text-2xl font-heading font-bold text-white">Write Your Bio</h1>
               <p className="text-white/40">Tell patients about your practice and approach.</p>
             </div>
 
@@ -188,7 +188,7 @@ export default function DoctorOnboardingPage() {
           <div className="space-y-6">
             <div className="text-center">
               <Tag className="w-12 h-12 text-neuro-orange mx-auto mb-4" />
-              <h1 className="text-2xl font-heading font-black text-white">Select Your Specialties</h1>
+              <h1 className="text-2xl font-heading font-bold text-white">Select Your Specialties</h1>
               <p className="text-white/40">Choose at least one. This helps patients find you.</p>
             </div>
 
@@ -227,7 +227,7 @@ export default function DoctorOnboardingPage() {
               <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="w-10 h-10 text-green-400" />
               </div>
-              <h1 className="text-3xl font-heading font-black text-white">You&apos;re Live!</h1>
+              <h1 className="text-3xl font-heading font-bold text-white">You&apos;re Live!</h1>
               <p className="text-white/50 mt-2">Your profile is now visible to patients searching for nervous system chiropractors.</p>
             </div>
 
@@ -238,7 +238,7 @@ export default function DoctorOnboardingPage() {
                   {photoPreview ? (
                     <img src={photoPreview} alt="" className="w-14 h-14 rounded-xl object-cover" />
                   ) : (
-                    <div className="w-14 h-14 rounded-xl bg-neuro-orange/20 flex items-center justify-center text-neuro-orange font-black text-xl">
+                    <div className="w-14 h-14 rounded-xl bg-neuro-orange/20 flex items-center justify-center text-neuro-orange font-bold text-xl">
                       {(clinicName?.[0] || 'N').toUpperCase()}
                     </div>
                   )}

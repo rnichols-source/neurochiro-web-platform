@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, X, Calendar, Loader2, Pencil, Trash2, Star, Users, Award, BarChart3 } from "lucide-react";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { X, Calendar, Loader2, Pencil, Trash2, Star } from "lucide-react";
 import {
   getDoctorSeminars,
   createSeminarAction,
@@ -11,11 +12,33 @@ import {
   getEnhancedSeminarAnalytics,
 } from "./actions";
 import SeminarRecommendations from "./recommendations";
+import PageHeader from "@/components/portal/PageHeader";
+import EmptyState from "@/components/portal/EmptyState";
+import StatusPill from "@/components/portal/StatusPill";
+import { SEMINAR_CONFIG } from "@/config/seminars";
 
 export default function SeminarsPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-96"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>}>
+      <SeminarsPageInner />
+    </Suspense>
+  );
+}
+
+function eventDateNeedsCheck(seminar: { dates?: string | null; start_time?: string | null }) {
+  const cutoff = Date.UTC(2020, 0, 1);
+  return [seminar.dates, seminar.start_time].some((value) => {
+    if (!value) return false;
+    const time = new Date(value).getTime();
+    return Number.isFinite(time) && time < cutoff;
+  });
+}
+
+function SeminarsPageInner() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [seminars, setSeminars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [editSeminar, setEditSeminar] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
   const [selectedSeminarId, setSelectedSeminarId] = useState<string | null>(null);
@@ -33,6 +56,12 @@ export default function SeminarsPage() {
 
   useEffect(() => { loadData(); }, []);
 
+  const showCreateModal = searchParams.get("create") === "1";
+
+  function closeCreate() {
+    if (showCreateModal) router.replace("/doctor/seminars");
+  }
+
   function getSeminarStatus(seminar: any): { label: string; color: string } {
     if (!seminar.is_approved) return { label: "In review", color: "bg-amber-100 text-amber-800" };
     if (seminar.is_approved && seminar.dates) {
@@ -48,7 +77,7 @@ export default function SeminarsPage() {
     setSubmitting(true);
     const formData = new FormData(e.currentTarget);
     await createSeminarAction(formData);
-    setShowCreateModal(false);
+    closeCreate();
     setSubmitting(false);
     loadData();
   }
@@ -110,7 +139,7 @@ export default function SeminarsPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50"
+          className="w-full py-2.5 bg-portal-info-bg text-white rounded-lg hover:bg-portal-info-bg transition-colors text-sm font-medium disabled:opacity-50"
         >
           {submitting ? "Saving..." : defaults ? "Update Seminar" : "Create Seminar"}
         </button>
@@ -127,43 +156,57 @@ export default function SeminarsPage() {
   }
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-heading font-black text-neuro-navy">Seminars</h1>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-        >
-          <Plus className="w-4 h-4" /> Create Seminar
-        </button>
+    <div className="space-y-6">
+      <PageHeader
+        title="Your seminars"
+        description="Create one, share the link, and see who registered."
+        primary={{ label: "Create seminar", href: "/doctor/seminars?create=1" }}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <article className="bg-white border border-portal-border rounded-xl p-4">
+          <h2 className="text-lg font-bold text-portal-ink">{SEMINAR_CONFIG.packages.single.name}</h2>
+          <p className="mt-1 text-2xl font-bold text-portal-ink">${SEMINAR_CONFIG.packages.single.priceUsd}</p>
+          <p className="mt-1 text-sm text-portal-ink-2">One seminar.</p>
+        </article>
+        <article className="bg-white border border-portal-border rounded-xl p-4">
+          <h2 className="text-lg font-bold text-portal-ink">{SEMINAR_CONFIG.packages.annual.name}</h2>
+          <p className="mt-1 text-2xl font-bold text-portal-ink">${SEMINAR_CONFIG.packages.annual.priceUsd}</p>
+          <p className="mt-1 text-sm text-portal-ink-2">Up to {SEMINAR_CONFIG.packages.annual.seminars} seminars a year.</p>
+        </article>
+        <article className="bg-white border border-portal-border rounded-xl p-4">
+          <h2 className="text-lg font-bold text-portal-ink">{SEMINAR_CONFIG.featuredAddon.name}</h2>
+          <p className="mt-1 text-2xl font-bold text-portal-ink">${SEMINAR_CONFIG.featuredAddon.priceUsd}</p>
+          <p className="mt-1 text-sm text-portal-ink-2">{SEMINAR_CONFIG.featuredAddon.days} days of featured placement.</p>
+        </article>
       </div>
+
+      <details className="bg-white border border-portal-border rounded-xl px-4 py-3">
+        <summary className="cursor-pointer text-sm font-bold text-portal-ink">How hosting works</summary>
+        <p className="mt-2 text-sm text-portal-ink-2">Create a seminar, share the link, and see who registered.</p>
+      </details>
 
       {/* Analytics */}
       {analytics && analytics.totalSeminars > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <p className="text-2xl font-black text-neuro-navy">{analytics.totalSeminars}</p>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Events</p>
+            <p className="text-2xl font-bold text-neuro-navy">{analytics.totalSeminars}</p>
+            <p className="text-xs font-bold text-gray-400 tracking-widest">Events</p>
           </div>
           <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <p className="text-2xl font-black text-neuro-navy">{analytics.totalAttendees}</p>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Attendees</p>
+            <p className="text-2xl font-bold text-neuro-navy">{analytics.totalAttendees}</p>
+            <p className="text-xs font-bold text-gray-400 tracking-widest">Attendees</p>
           </div>
           <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
             <div className="flex items-center justify-center gap-1">
               <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-              <p className="text-2xl font-black text-neuro-navy">{analytics.avgRating || '—'}</p>
+              <p className="text-2xl font-bold text-neuro-navy">{analytics.avgRating || '—'}</p>
             </div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{analytics.reviewCount} Reviews</p>
+            <p className="text-xs font-bold text-gray-400 tracking-widest">{analytics.reviewCount} Reviews</p>
           </div>
           <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <p className="text-2xl font-black text-blue-600">{analytics.totalCEDelivered}</p>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">CE Delivered</p>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <p className="text-2xl font-black text-green-600">{Math.round((analytics.totalSeminars * 25) + (analytics.avgRating * 50) + (analytics.totalAttendees * 10))}</p>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Authority Score</p>
+            <p className="text-2xl font-bold text-blue-600">{analytics.totalCEDelivered}</p>
+            <p className="text-xs font-bold text-gray-400 tracking-widest">CE Delivered</p>
           </div>
         </div>
       )}
@@ -175,10 +218,12 @@ export default function SeminarsPage() {
 
       {/* Seminar List */}
       {seminars.length === 0 ? (
-        <div className="text-center py-16 text-gray-500">
-          <Calendar className="w-10 h-10 mx-auto mb-3 text-gray-300" />
-          <p>No seminars yet.</p>
-        </div>
+        <EmptyState
+          icon={Calendar}
+          title="No seminars yet"
+          sentence="Create one, share the link, and see who registered."
+          action={{ label: "Create seminar", href: "/doctor/seminars?create=1" }}
+        />
       ) : (
         <div className="space-y-4">
           {seminars.map((sem) => {
@@ -188,10 +233,11 @@ export default function SeminarsPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-semibold text-gray-900">{sem.title}</h3>
+                      <h3 className="font-semibold text-portal-ink">{sem.title}</h3>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${status.color}`}>
                         {status.label}
                       </span>
+                      {eventDateNeedsCheck(sem) && <StatusPill label="Check this date" tone="follow" />}
                     </div>
                     {sem.description && (
                       <p className="text-gray-500 text-sm line-clamp-1 mt-1">{sem.description}</p>
@@ -211,14 +257,20 @@ export default function SeminarsPage() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <button
+                      type="button"
                       onClick={() => setEditSeminar(sem)}
                       className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600"
+                      aria-label="Edit seminar"
+                      title="Edit seminar"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDelete(sem.id)}
                       className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-600"
+                      aria-label="Delete seminar"
+                      title="Delete seminar"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -240,7 +292,7 @@ export default function SeminarsPage() {
           <div className="bg-white rounded-xl w-full max-w-lg shadow-xl">
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <h2 className="text-lg font-semibold">Create Seminar</h2>
-              <button onClick={() => setShowCreateModal(false)} className="p-1 hover:bg-gray-100 rounded">
+              <button type="button" onClick={closeCreate} className="p-1 hover:bg-gray-100 rounded" aria-label="Close" title="Close">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -255,7 +307,7 @@ export default function SeminarsPage() {
           <div className="bg-white rounded-xl w-full max-w-lg shadow-xl">
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <h2 className="text-lg font-semibold">Edit Seminar</h2>
-              <button onClick={() => setEditSeminar(null)} className="p-1 hover:bg-gray-100 rounded">
+              <button type="button" onClick={() => setEditSeminar(null)} className="p-1 hover:bg-gray-100 rounded" aria-label="Close" title="Close">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -284,7 +336,7 @@ function RegistrantList({ seminarId }: { seminarId: string }) {
 
   return (
     <div className="border-t border-gray-100 p-4">
-      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Registrants</p>
+      <p className="text-xs font-bold text-gray-400 tracking-wide mb-3">Registrants</p>
       <div className="space-y-2">
         {registrants.map((r) => (
           <div key={r.id} className="flex items-center justify-between text-sm">

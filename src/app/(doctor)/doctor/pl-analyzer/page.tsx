@@ -33,6 +33,8 @@ import {
   type PLLineItem,
   type PLCategory,
 } from "./pl-data";
+import PageHeader from "@/components/portal/PageHeader";
+import ExampleBanner from "@/components/portal/ExampleBanner";
 
 // =============================================================================
 // Types
@@ -502,8 +504,11 @@ function PLAnalyzerContent() {
     }>
   >([]);
   const [tooltipItem, setTooltipItem] = useState<string | null>(null);
+  const [exampleId, setExampleId] = useState<string | null>(null);
+  const [showExamples, setShowExamples] = useState(false);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const draftBeforeExample = useRef<Record<string, number> | null>(null);
   const valuesRef = useRef(values);
   valuesRef.current = values;
 
@@ -548,6 +553,9 @@ function PLAnalyzerContent() {
 
   // ---- Load from Supabase (localStorage fallback) ----
   useEffect(() => {
+    setExampleId(null);
+    setShowExamples(false);
+    draftBeforeExample.current = null;
     const key = `pl_draft_${month}`;
     loadToolData(key).then((cloud) => {
       if (cloud) {
@@ -568,6 +576,7 @@ function PLAnalyzerContent() {
 
   // ---- Auto-save to Supabase + localStorage (debounced) ----
   useEffect(() => {
+    if (exampleId) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       const key = `pl_draft_${month}`;
@@ -578,7 +587,7 @@ function PLAnalyzerContent() {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [values, month]);
+  }, [values, month, exampleId]);
 
   // ---- Computed values ----
   const incomeSection = PL_SECTIONS.find((s) => s.type === "income")!;
@@ -729,7 +738,23 @@ function PLAnalyzerContent() {
   }, []);
 
   const applyScalingExample = useCallback((example: (typeof SCALING_EXAMPLES)[0]) => {
+    if (!exampleId) draftBeforeExample.current = { ...valuesRef.current };
+    setExampleId(example.id);
+    setShowExamples(false);
     setValues(example.lineItems);
+  }, [exampleId]);
+
+  const clearExample = useCallback(() => {
+    const draft = draftBeforeExample.current;
+    draftBeforeExample.current = null;
+    setExampleId(null);
+    setShowExamples(false);
+    setValues(draft || {});
+  }, []);
+
+  const keepExample = useCallback(() => {
+    draftBeforeExample.current = null;
+    setExampleId(null);
   }, []);
 
   const toggleCategory = useCallback((id: string) => {
@@ -844,25 +869,25 @@ function PLAnalyzerContent() {
         {/* Summary bar */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
           <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-4">
-            <div className="text-[11px] text-gray-400 font-semibold uppercase mb-1">
+            <div className="text-xs text-gray-400 font-semibold uppercase mb-1">
               Total Income
             </div>
             <div className="text-xl font-extrabold text-green-600">{fmtMoney(totalIncome)}</div>
           </div>
           <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-4">
-            <div className="text-[11px] text-gray-400 font-semibold uppercase mb-1">
+            <div className="text-xs text-gray-400 font-semibold uppercase mb-1">
               Gross Profit
             </div>
             <div className="text-xl font-extrabold text-blue-600">{fmtMoney(grossProfit)}</div>
           </div>
           <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-4">
-            <div className="text-[11px] text-gray-400 font-semibold uppercase mb-1">
+            <div className="text-xs text-gray-400 font-semibold uppercase mb-1">
               Total Expenses
             </div>
             <div className="text-xl font-extrabold text-red-500">{fmtMoney(totalExpenses)}</div>
           </div>
           <div className="bg-white/[0.06] border border-white/[0.1] rounded-xl p-4">
-            <div className="text-[11px] text-gray-400 font-semibold uppercase mb-1">
+            <div className="text-xs text-gray-400 font-semibold uppercase mb-1">
               Net Income
             </div>
             <div
@@ -895,23 +920,33 @@ function PLAnalyzerContent() {
           </button>
         </div>
 
-        {/* Scaling examples */}
-        <div className="mb-6 no-print">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-2">
-            Load Example
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-            {SCALING_EXAMPLES.map((ex) => (
-              <button
-                key={ex.id}
-                onClick={() => applyScalingExample(ex)}
-                className="text-left p-3 rounded-lg border border-white/[0.1] hover:border-[#e97325] hover:bg-orange-50 transition-all"
-              >
-                <div className="text-xs font-bold text-white">{ex.title}</div>
-                <div className="text-[11px] text-gray-400">{ex.subtitle}</div>
-              </button>
-            ))}
-          </div>
+        <div className="mb-6 no-print space-y-3">
+          {exampleId ? <ExampleBanner onClear={clearExample} onKeep={keepExample} /> : null}
+          {!showExamples && !exampleId ? (
+            <button
+              type="button"
+              onClick={() => setShowExamples(true)}
+              className="min-h-11 px-4 rounded-lg bg-portal-accent text-white text-sm font-bold"
+            >
+              Load an example practice
+            </button>
+          ) : null}
+          {showExamples ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+              {SCALING_EXAMPLES.map((ex) => (
+                <button
+                  key={ex.id}
+                  type="button"
+                  onClick={() => applyScalingExample(ex)}
+                  className="text-left p-3 rounded-lg border border-portal-border bg-white hover:border-portal-accent transition-all"
+                >
+                  <div className="text-sm font-bold text-portal-ink">Example</div>
+                  <div className="text-sm font-bold text-portal-ink">{ex.title}</div>
+                  <div className="text-sm text-portal-ink-2">{ex.subtitle}</div>
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         {/* Entry form sections */}
@@ -935,7 +970,7 @@ function PLAnalyzerContent() {
                 className={`${headerBg} px-4 py-2 rounded-t-lg mb-1`}
                 style={{ borderLeft: `4px solid ${borderColor}` }}
               >
-                <span className="text-sm font-extrabold uppercase tracking-wide" style={{ color: borderColor }}>
+                <span className="text-sm font-extrabold tracking-wide" style={{ color: borderColor }}>
                   {section.label}
                 </span>
               </div>
@@ -960,7 +995,7 @@ function PLAnalyzerContent() {
                         ) : (
                           <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
                         )}
-                        <span className="text-[11px] text-gray-400 font-mono">{cat.code}</span>
+                        <span className="text-xs text-gray-400 font-mono">{cat.code}</span>
                         <span className="text-sm font-bold text-white">{cat.label}</span>
                       </div>
                       <div className="flex items-center gap-4">
@@ -995,7 +1030,7 @@ function PLAnalyzerContent() {
                           return (
                             <div key={item.id} className="px-4 py-2 border-t border-white/[0.06]">
                               <div className="flex items-center gap-3">
-                                <span className="text-[11px] text-gray-400 font-mono w-8">
+                                <span className="text-xs text-gray-400 font-mono w-8">
                                   {item.code}
                                 </span>
                                 <span className="text-sm text-white flex-1">
@@ -1034,7 +1069,7 @@ function PLAnalyzerContent() {
                                 {!showPct && <span className="w-12" />}
                               </div>
                               {showPct && (
-                                <div className="ml-11 mt-0.5 text-[10px] text-gray-400">
+                                <div className="ml-11 mt-0.5 text-xs text-gray-400">
                                   Benchmark: {item.minPct}% - {item.maxPct}%
                                 </div>
                               )}
@@ -1124,7 +1159,7 @@ function PLAnalyzerContent() {
                   Practice Health Score
                 </h3>
                 <HealthGauge score={healthScore} size={220} />
-                <div className="grid grid-cols-4 gap-2 mt-4 text-center text-[11px]">
+                <div className="grid grid-cols-4 gap-2 mt-4 text-center text-xs">
                   <div>
                     <div className="font-bold text-white">Profit</div>
                     <div className="text-gray-400">40 pts max</div>
@@ -1185,7 +1220,7 @@ function PLAnalyzerContent() {
                           <div className="text-sm font-semibold text-white">
                             {g.category.label}
                           </div>
-                          <div className="text-[11px] text-gray-400">
+                          <div className="text-xs text-gray-400">
                             {fmtMoney(g.catTotal)} | Benchmark: {g.category.minPct}%-{g.category.maxPct}%
                           </div>
                         </div>
@@ -1200,7 +1235,7 @@ function PLAnalyzerContent() {
                           {fmtPct(g.catPct)}
                         </div>
                         {g.gap > 0 && (
-                          <div className="text-[11px] text-red-500">+{fmtPct(g.gap)} over</div>
+                          <div className="text-xs text-red-500">+{fmtPct(g.gap)} over</div>
                         )}
                       </div>
                     </div>
@@ -1255,7 +1290,7 @@ function PLAnalyzerContent() {
                           <div className="text-sm font-semibold text-white">
                             {w.item.label}
                           </div>
-                          <div className="text-[11px] text-gray-400">
+                          <div className="text-xs text-gray-400">
                             Reduce from {fmtPct(w.actualPct)} to {fmtPct(w.item.midPct)}
                           </div>
                         </div>
@@ -1400,12 +1435,12 @@ function PLAnalyzerContent() {
                             {fmtPct(ct.pcts[ct.pcts.length - 1])}
                           </span>
                           {ct.trend > 1 && (
-                            <span className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded-full font-bold">
+                            <span className="text-xs bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded-full font-bold">
                               <TrendingUp className="w-3 h-3 inline" />
                             </span>
                           )}
                           {ct.trend < -1 && (
-                            <span className="text-[10px] bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full font-bold">
+                            <span className="text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full font-bold">
                               <TrendingDown className="w-3 h-3 inline" />
                             </span>
                           )}
@@ -1460,19 +1495,19 @@ function PLAnalyzerContent() {
                 <h3 className="text-base font-bold text-white mb-3">Executive Summary</h3>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                   <div>
-                    <div className="text-[11px] text-gray-400 uppercase">Health Score</div>
+                    <div className="text-xs text-gray-400 uppercase">Health Score</div>
                     <div className="text-lg font-extrabold text-white">
                       {healthScore}/100 ({scoreLabel})
                     </div>
                   </div>
                   <div>
-                    <div className="text-[11px] text-gray-400 uppercase">Total Income</div>
+                    <div className="text-xs text-gray-400 uppercase">Total Income</div>
                     <div className="text-lg font-extrabold text-green-600">
                       {fmtMoney(totalIncome)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[11px] text-gray-400 uppercase">Net Income</div>
+                    <div className="text-xs text-gray-400 uppercase">Net Income</div>
                     <div
                       className={`text-lg font-extrabold ${netIncome >= 0 ? "text-green-600" : "text-red-500"}`}
                     >
@@ -1480,7 +1515,7 @@ function PLAnalyzerContent() {
                     </div>
                   </div>
                   <div>
-                    <div className="text-[11px] text-gray-400 uppercase">Profit Margin</div>
+                    <div className="text-xs text-gray-400 uppercase">Profit Margin</div>
                     <div
                       className={`text-lg font-extrabold ${profitMargin >= 35 ? "text-green-600" : profitMargin >= 25 ? "text-yellow-500" : "text-red-500"}`}
                     >
@@ -1502,7 +1537,7 @@ function PLAnalyzerContent() {
                 </h3>
                 {PL_SECTIONS.map((section) => (
                   <div key={section.id} className="mb-4">
-                    <div className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2 pb-1 border-b border-white/[0.06]">
+                    <div className="text-xs font-bold tracking-wider text-gray-400 mb-2 pb-1 border-b border-white/[0.06]">
                       {section.label}
                     </div>
                     {section.categories.map((cat) => {
@@ -1522,7 +1557,7 @@ function PLAnalyzerContent() {
                                 className="flex justify-between py-1 text-sm"
                               >
                                 <span className="text-gray-300">
-                                  <span className="text-gray-400 text-[11px] font-mono mr-2">
+                                  <span className="text-gray-400 text-xs font-mono mr-2">
                                     {item.code}
                                   </span>
                                   {item.label}
@@ -1561,7 +1596,7 @@ function PLAnalyzerContent() {
                           <span>Total COGS</span>
                           <span className="text-amber-700">{fmtMoney(totalCOGS)}</span>
                         </div>
-                        <div className="flex justify-between py-2 text-sm font-extrabold bg-blue-50 px-3 rounded-lg">
+                        <div className="flex justify-between py-2 text-sm font-extrabold bg-portal-info-bg px-3 rounded-lg">
                           <span>Gross Profit</span>
                           <span className="text-blue-600">{fmtMoney(grossProfit)}</span>
                         </div>
@@ -1719,14 +1754,8 @@ function PLAnalyzerContent() {
 
       <div className="max-w-[900px] mx-auto px-4 py-6">
         {/* Page header */}
-        <div className="text-center mb-6 no-print">
-          <div className="inline-flex items-center gap-3">
-            <DollarSign className="w-8 h-8 text-[#e97325]" />
-            <h1 className="text-2xl font-extrabold text-white">P&amp;L Analyzer</h1>
-          </div>
-          <p className="text-sm text-gray-400 mt-1 max-w-md mx-auto">
-            Enter your numbers from QuickBooks and see exactly where your money is going.
-          </p>
+        <div className="no-print">
+          <PageHeader title="P&L analyzer" description="Enter your numbers from QuickBooks and see exactly where your money is going." />
         </div>
 
         {/* Tab navigation */}

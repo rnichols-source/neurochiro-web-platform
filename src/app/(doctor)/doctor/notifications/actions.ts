@@ -19,7 +19,7 @@ export async function getNotifications() {
     return []
   }
 
-  return data || []
+  return (data || []).filter((row) => row.type !== 'portal_login')
 }
 
 export async function markNotificationRead(notificationId: string) {

@@ -5,6 +5,9 @@ import { Search, X, MapPin, GraduationCap, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { searchStudents } from "./actions";
 import UpgradeGate from "@/components/doctor/UpgradeGate";
+import PageHeader from "@/components/portal/PageHeader";
+import EmptyState from "@/components/portal/EmptyState";
+import HiringTabs from "../jobs/HiringTabs";
 
 export default function StudentsPage() {
   return (
@@ -43,11 +46,9 @@ function StudentsContent() {
   }, [searchTerm]);
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-heading font-black text-neuro-navy">Students</h1>
-        <a href="/doctor/jobs" className="px-4 py-2 bg-neuro-orange text-white text-xs font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">Post a Job</a>
-      </div>
+    <div className="space-y-6">
+      <HiringTabs />
+      <PageHeader title="Students" description="Browse students looking for a practice." primary={{ label: "Post a job", href: "/doctor/jobs" }} />
 
       {/* Search + Filters */}
       <div className="space-y-3">
@@ -84,10 +85,7 @@ function StudentsContent() {
           <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
         </div>
       ) : students.length === 0 ? (
-        <div className="text-center py-16 text-gray-500">
-          <GraduationCap className="w-10 h-10 mx-auto mb-3 text-gray-300" />
-          <p>No students found.</p>
-        </div>
+        <EmptyState icon={GraduationCap} title="No students found" sentence="Try another search, or check back when more students join." />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {students.map((student) => (
@@ -135,7 +133,7 @@ function StudentsContent() {
           <div className="bg-white rounded-xl w-full max-w-md shadow-xl">
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <h2 className="text-lg font-semibold">{selectedStudent.name}</h2>
-              <button onClick={() => setSelectedStudent(null)} className="p-1 hover:bg-gray-100 rounded">
+              <button type="button" onClick={() => setSelectedStudent(null)} className="p-1 hover:bg-gray-100 rounded" aria-label="Close" title="Close">
                 <X className="w-5 h-5" />
               </button>
             </div>

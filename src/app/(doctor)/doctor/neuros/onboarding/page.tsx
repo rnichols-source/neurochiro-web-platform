@@ -153,7 +153,7 @@ export default function NeurOSOnboarding() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-black text-[#1E2D3B] mb-2">Practice Setup</h1>
+      <h1 className="text-2xl font-bold text-[#1E2D3B] mb-2">Practice Setup</h1>
       <p className="text-sm text-gray-500 mb-6">Configure NeurOS for your practice. This information is used across all your tools.</p>
 
       {/* Step tabs */}
@@ -178,46 +178,46 @@ export default function NeurOSOnboarding() {
         <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
           <h2 className="text-lg font-bold text-[#1E2D3B]">Practice Information</h2>
           <div>
-            <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Practice Name *</label>
+            <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Practice Name *</label>
             <input value={config.practice_name} onChange={e => updateField("practice_name", e.target.value)}
               className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none" placeholder="e.g., AlignLife Chiropractic" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Phone</label>
+              <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Phone</label>
               <input value={config.phone} onChange={e => updateField("phone", e.target.value)}
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none" placeholder="(555) 123-4567" />
             </div>
             <div>
-              <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">NPI Number</label>
+              <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">NPI Number</label>
               <input value={config.provider_npi} onChange={e => updateField("provider_npi", e.target.value)}
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none" placeholder="1234567890" />
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Street Address</label>
+            <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Street Address</label>
             <input value={config.address} onChange={e => updateField("address", e.target.value)}
               className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none" placeholder="123 Main St" />
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">City</label>
+              <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">City</label>
               <input value={config.city} onChange={e => updateField("city", e.target.value)}
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none" />
             </div>
             <div>
-              <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">State</label>
+              <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">State</label>
               <input value={config.state} onChange={e => updateField("state", e.target.value)}
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none" />
             </div>
             <div>
-              <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">ZIP</label>
+              <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">ZIP</label>
               <input value={config.zip} onChange={e => updateField("zip", e.target.value)}
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none" />
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Default Visit Fee (Cash)</label>
+            <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Default Visit Fee (Cash)</label>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-sm text-gray-400">$</span>
               <input type="number" value={config.default_visit_fee / 100} onChange={e => updateField("default_visit_fee", Math.round(parseFloat(e.target.value || "0") * 100))}
@@ -296,14 +296,14 @@ export default function NeurOSOnboarding() {
           <h2 className="text-lg font-bold text-[#1E2D3B]">Practice Branding</h2>
           <p className="text-sm text-gray-500">Your logo and colors appear on care plans, scan reports, and all patient-facing documents.</p>
           <div>
-            <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Practice Logo URL</label>
+            <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Practice Logo URL</label>
             <input value={config.practice_logo_url} onChange={e => updateField("practice_logo_url", e.target.value)}
               className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none" placeholder="https://your-site.com/logo.png" />
             <p className="text-xs text-gray-400 mt-1">Enter a direct URL to your logo image, or upload one during your onboarding call.</p>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Primary Color</label>
+              <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Primary Color</label>
               <div className="flex items-center gap-2 mt-1">
                 <input type="color" value={config.practice_colors.primary} onChange={e => updateField("practice_colors", { ...config.practice_colors, primary: e.target.value })}
                   className="w-10 h-10 rounded-lg border-2 border-gray-200 cursor-pointer" />
@@ -312,7 +312,7 @@ export default function NeurOSOnboarding() {
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Secondary Color</label>
+              <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Secondary Color</label>
               <div className="flex items-center gap-2 mt-1">
                 <input type="color" value={config.practice_colors.secondary} onChange={e => updateField("practice_colors", { ...config.practice_colors, secondary: e.target.value })}
                   className="w-10 h-10 rounded-lg border-2 border-gray-200 cursor-pointer" />
@@ -321,7 +321,7 @@ export default function NeurOSOnboarding() {
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Accent Color</label>
+              <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Accent Color</label>
               <div className="flex items-center gap-2 mt-1">
                 <input type="color" value={config.practice_colors.accent} onChange={e => updateField("practice_colors", { ...config.practice_colors, accent: e.target.value })}
                   className="w-10 h-10 rounded-lg border-2 border-gray-200 cursor-pointer" />
@@ -351,7 +351,7 @@ export default function NeurOSOnboarding() {
             <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Check className="w-8 h-8 text-green-600" />
             </div>
-            <h2 className="text-xl font-black text-[#1E2D3B]">Your NeurOS Is Ready</h2>
+            <h2 className="text-xl font-bold text-[#1E2D3B]">Your NeurOS Is Ready</h2>
             <p className="text-sm text-gray-500 mt-2 max-w-md mx-auto">Your practice is configured. You can always update these settings later from Practice Setup.</p>
           </div>
 
@@ -382,7 +382,7 @@ export default function NeurOSOnboarding() {
           </button>
         ) : (
           <button onClick={handleComplete} disabled={saving}
-            className="flex items-center gap-2 px-8 py-3 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50">
+            className="flex items-center gap-2 px-8 py-3 bg-portal-info-bg rounded-xl text-sm font-bold text-white hover:bg-portal-info-bg disabled:opacity-50">
             {saving ? "Saving..." : "Launch NeurOS"} <ArrowRight className="w-4 h-4" />
           </button>
         )}

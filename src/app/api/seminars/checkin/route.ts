@@ -1,7 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
+import { parseSeminarDates, timezoneForCity } from '@/lib/seminars/dates';
+import { checkinWindow } from '@/lib/seminars/checkin-window';
 import crypto from 'crypto';
+
+function windowResponse(seminar: Record<string, unknown> | null) {
+  const parsed = parseSeminarDates(String(seminar?.dates || ''));
+  const decision = checkinWindow({
+    now: new Date(),
+    startsAt: (seminar?.starts_at as string) || null,
+    endsAt: (seminar?.ends_at as string) || null,
+    startDate: parsed?.start || null,
+    endDate: parsed?.end || null,
+    startTime: (seminar?.start_time as string) || null,
+    timeZone: (seminar?.timezone as string) || timezoneForCity(seminar?.city as string, seminar?.country as string),
+    city: (seminar?.city as string) || null,
+    country: (seminar?.country as string) || null,
+  });
+  if (decision.ok) return null;
+  const error = decision.reason === 'too_early'
+    ? 'Check-in opens 2 hours before the seminar starts.'
+    : 'Check-in is closed. This seminar has ended.';
+  return NextResponse.json({ error }, { status: 403 });
+}
+
+async function loadSeminar(admin: any, id: string) {
+  const full = await admin
+    .from('seminars')
+    .select('title, ce_hours, starts_at, ends_at, dates, start_time, timezone, city, country')
+    .eq('id', id)
+    .maybeSingle();
+  if (!full.error) return full.data;
+  const basic = await admin.from('seminars').select('title, ce_hours, dates, start_time, city, country').eq('id', id).maybeSingle();
+  return basic.data;
+}
+
+async function markCheckedIn(admin: any, registrationId: string) {
+  const updated = await admin
+    .from('seminar_registrations')
+    .update({ ce_completed: true, checked_in_at: new Date().toISOString() })
+    .eq('id', registrationId)
+    .eq('ce_completed', false)
+    .select('id');
+  if (updated.error) throw updated.error;
+  return Array.isArray(updated.data) ? updated.data : [];
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,9 +72,11 @@ export async function POST(request: NextRequest) {
         if (resolvedId && byToken.data.seminar_id !== resolvedId) {
           return NextResponse.json({ error: "That check-in code is for a different seminar" }, { status: 403 });
         }
-        if (byToken.data.ce_completed) return NextResponse.json({ error: "Already checked in", alreadyCheckedIn: true });
-        await admin.from("seminar_registrations").update({ ce_completed: true, checked_in_at: new Date().toISOString() }).eq("id", byToken.data.id);
-        const { data: seminar } = await admin.from("seminars").select("title, ce_hours").eq("id", byToken.data.seminar_id).single();
+        const seminar = await loadSeminar(admin, byToken.data.seminar_id);
+        const closed = windowResponse(seminar);
+        if (closed) return closed;
+        const rows = await markCheckedIn(admin, byToken.data.id);
+        if (!rows.length) return NextResponse.json({ error: "Already checked in", alreadyCheckedIn: true });
         return NextResponse.json({ success: true, ceHours: seminar?.ce_hours || 0, seminarTitle: seminar?.title });
       }
     }
@@ -38,7 +84,6 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     if (!resolvedId) return NextResponse.json({ error: 'Missing seminar ID' }, { status: 400 });
 
-    // Verify registration exists
     const { data: registration } = await admin
       .from('seminar_registrations')
       .select('id, ce_completed')
@@ -50,27 +95,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'You must be registered for this seminar to check in' }, { status: 403 });
     }
 
-    if (registration.ce_completed) {
+    const seminar = await loadSeminar(admin, resolvedId);
+    const closed = windowResponse(seminar);
+    if (closed) return closed;
+
+    const rows = await markCheckedIn(admin, registration.id);
+    if (!rows.length) {
       return NextResponse.json({ error: 'Already checked in', alreadyCheckedIn: true }, { status: 200 });
     }
 
-    // Mark as checked in
-    await admin
-      .from('seminar_registrations')
-      .update({ ce_completed: true, checked_in_at: new Date().toISOString() })
-      .eq('id', registration.id);
-
-    // Get seminar CE hours
-    const { data: seminar } = await admin
-      .from('seminars')
-      .select('title, ce_hours')
-      .eq('id', resolvedId)
-      .single();
-
     const ceHours = seminar?.ce_hours || 0;
 
-    // Generate CE certificate if seminar has CE hours
     if (ceHours > 0) {
+      const existing = await admin
+        .from('ce_certificates')
+        .select('id, certificate_number')
+        .eq('registration_id', registration.id)
+        .limit(1);
+      if (!existing.error && Array.isArray(existing.data) && existing.data.length > 0) {
+        return NextResponse.json({
+          success: true,
+          ceHours,
+          certificateNumber: existing.data[0].certificate_number,
+          seminarTitle: seminar?.title,
+        });
+      }
+
       const certNumber = `NC-CE-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
 
       await admin.from('ce_certificates').insert({

@@ -8,7 +8,7 @@ interface Props {
 }
 
 const STAGE_COLORS = {
-  new: { bg: "bg-blue-500", label: "New" },
+  new: { bg: "bg-portal-info-bg", label: "New" },
   contacted: { bg: "bg-amber-500", label: "Contacted" },
   scheduled: { bg: "bg-violet-500", label: "Scheduled" },
   converted: { bg: "bg-emerald-500", label: "Converted" },
@@ -24,7 +24,7 @@ export default function LeadPipelineWidget({ stages }: Props) {
           <Users className="w-5 h-5 text-neuro-orange" />
           <h3 className="text-sm font-bold text-white">Patient Leads</h3>
         </div>
-        <Link href="/doctor/leads" className="text-[10px] font-bold text-neuro-orange hover:underline flex items-center gap-1">
+        <Link href="/doctor/leads" className="text-xs font-bold text-neuro-orange hover:underline flex items-center gap-1">
           View All <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
@@ -48,7 +48,7 @@ export default function LeadPipelineWidget({ stages }: Props) {
                   <div className={`w-2 h-2 rounded-full ${config.bg}`} />
                   <span className="text-lg font-bold text-white">{stages[key]}</span>
                 </div>
-                <p className="text-[10px] text-white/30">{config.label}</p>
+                <p className="text-xs text-white/30">{config.label}</p>
               </div>
             ))}
           </div>

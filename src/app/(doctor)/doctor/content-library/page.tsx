@@ -18,7 +18,7 @@ interface ContentItem {
 }
 
 const CATEGORY_META = {
-  handout: { label: "Patient Handouts", icon: FileText, color: "text-blue-500 bg-blue-50" },
+  handout: { label: "Patient Handouts", icon: FileText, color: "text-blue-500 bg-portal-info-bg" },
   template: { label: "Text/Email Templates", icon: Mail, color: "text-green-500 bg-green-50" },
   social: { label: "Social Media", icon: Share2, color: "text-purple-500 bg-purple-50" },
   sequence: { label: "Email Sequences", icon: Layers, color: "text-orange-500 bg-orange-50" },
@@ -122,7 +122,7 @@ function ContentLibraryContent() {
     <div className="p-4 md:p-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-heading font-black text-neuro-navy flex items-center gap-3">
+        <h1 className="text-2xl font-heading font-bold text-neuro-navy flex items-center gap-3">
           <Sparkles className="w-7 h-7 text-neuro-orange" /> Content Library
         </h1>
         <p className="text-gray-500 text-sm mt-1">Pre-written patient education content. Find it, copy it, send it. Done.</p>
@@ -219,18 +219,18 @@ function ContentLibraryContent() {
                     <div className="flex items-center gap-2">
                       <h3 className={`font-bold text-sm ${locked ? "text-gray-400" : "text-neuro-navy"}`}>{item.title}</h3>
                       {isNew && !locked && (
-                        <span className="text-[9px] font-black uppercase tracking-widest text-neuro-orange bg-neuro-orange/10 px-1.5 py-0.5 rounded">New</span>
+                        <span className="text-xs font-bold tracking-widest text-neuro-orange bg-neuro-orange/10 px-1.5 py-0.5 rounded">New</span>
                       )}
                     </div>
                     <p className={`text-xs mt-0.5 ${locked ? "text-gray-300" : "text-gray-500"}`}>{item.description}</p>
                     <div className="flex gap-1.5 mt-2">
                       {item.tags.slice(0, 3).map(tag => (
-                        <span key={tag} className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded">{tag}</span>
+                        <span key={tag} className="text-xs font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded">{tag}</span>
                       ))}
                     </div>
                   </div>
                   {locked && (
-                    <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded flex-shrink-0">PRO</span>
+                    <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded flex-shrink-0">PRO</span>
                   )}
                 </button>
 

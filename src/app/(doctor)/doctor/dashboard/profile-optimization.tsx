@@ -24,7 +24,7 @@ export default function ProfileOptimization() {
       <div className="space-y-2">
         {suggestions.map((s, i) => (
           <div key={i} className="flex items-start gap-2 text-sm">
-            <span className="w-5 h-5 rounded-full bg-[#D66829]/10 text-[#D66829] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
+            <span className="w-5 h-5 rounded-full bg-[#D66829]/10 text-[#D66829] text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
             <p className="text-white/50">{s}</p>
           </div>
         ))}

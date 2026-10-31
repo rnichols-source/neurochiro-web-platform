@@ -22,7 +22,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
   return (
     <div className="p-4 lg:p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-heading font-black text-white uppercase tracking-tight">Direct Messages</h1>
+        <h1 className="text-3xl font-heading font-bold text-white tracking-tight">Direct Messages</h1>
         <p className="text-gray-400 mt-2">Connect with students, doctors, and the NeuroChiro team securely.</p>
       </div>
 

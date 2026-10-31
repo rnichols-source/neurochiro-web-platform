@@ -40,7 +40,7 @@ export default function CarePlanCloserPage() {
     <div className="space-y-8 max-w-3xl">
       {/* Header */}
       <div>
-        <p className="text-[10px] uppercase tracking-[0.2em] text-neuro-orange font-semibold mb-1">Add-On</p>
+        <p className="text-xs tracking-[0.2em] text-neuro-orange font-semibold mb-1">Add-On</p>
         <h1 className="text-2xl font-bold text-white">Care Plan Closer</h1>
         <p className="text-white/40 text-sm mt-2 leading-relaxed max-w-xl">
           Stop winging your report of findings. We build your care plans, pricing, and presentation scripts so you close more cases with confidence.
@@ -51,7 +51,7 @@ export default function CarePlanCloserPage() {
       <div className="bg-gradient-to-r from-neuro-orange/15 to-neuro-orange/5 border border-neuro-orange/30 rounded-2xl p-6 md:p-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <p className="text-neuro-orange text-[10px] font-black uppercase tracking-[0.2em] mb-2">Done for You</p>
+            <p className="text-neuro-orange text-xs font-bold tracking-[0.2em] mb-2">Done for You</p>
             <h2 className="text-xl font-bold text-white mb-2">Dr. Ray Builds Your Care Plans</h2>
             <p className="text-white/50 text-sm leading-relaxed">
               Two 45-minute calls. Your specific plans, pricing, and scripts. Built and ready to use with patients.
@@ -71,7 +71,7 @@ export default function CarePlanCloserPage() {
             href={BOOKING_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-8 py-4 bg-neuro-orange text-white font-black rounded-xl text-sm uppercase tracking-wider shadow-lg shadow-neuro-orange/20 hover:bg-neuro-orange/90 transition-all flex items-center justify-center gap-2 whitespace-nowrap flex-shrink-0"
+            className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl text-sm tracking-wider shadow-lg shadow-neuro-orange/20 hover:bg-neuro-orange/90 transition-all flex items-center justify-center gap-2 whitespace-nowrap flex-shrink-0"
           >
             <Calendar className="w-4 h-4" />
             Book Setup Calls
@@ -85,7 +85,7 @@ export default function CarePlanCloserPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {HOW_IT_WORKS.map((item) => (
             <div key={item.step} className="p-4 rounded-xl bg-white/[0.03]">
-              <div className="w-8 h-8 rounded-lg bg-neuro-orange/20 flex items-center justify-center text-neuro-orange font-black text-sm mb-3">
+              <div className="w-8 h-8 rounded-lg bg-neuro-orange/20 flex items-center justify-center text-neuro-orange font-bold text-sm mb-3">
                 {item.step}
               </div>
               <p className="text-sm font-semibold text-white mb-1">{item.title}</p>

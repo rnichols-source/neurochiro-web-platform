@@ -13,16 +13,18 @@ export async function getCEHistory() {
   // Get all certificates
   const { data: certificates } = await admin
     .from('ce_certificates')
-    .select('id, seminar_id, ce_hours, certificate_number, issued_at')
+    .select('id, seminar_id, user_id, registration_id, ce_hours, certificate_number, issued_at')
     .eq('user_id', user.id)
     .order('issued_at', { ascending: false });
 
-  if (!certificates || certificates.length === 0) {
+  const uniqueCertificates = dedupeCertificates(certificates || []);
+
+  if (uniqueCertificates.length === 0) {
     return { totalHours: 0, thisYearHours: 0, certificates: [], bySeminar: [] };
   }
 
   // Get seminar titles
-  const seminarIds = [...new Set(certificates.map((c: any) => c.seminar_id))];
+  const seminarIds = [...new Set(uniqueCertificates.map((c: any) => c.seminar_id))];
   const { data: seminars } = await admin
     .from('seminars')
     .select('id, title, dates, city')
@@ -31,12 +33,12 @@ export async function getCEHistory() {
   const seminarMap: Map<string, any> = new Map((seminars || []).map((s: any) => [s.id, s]));
 
   const currentYear = new Date().getFullYear();
-  const totalHours = certificates.reduce((sum: number, c: any) => sum + (c.ce_hours || 0), 0);
-  const thisYearHours = certificates
+  const totalHours = uniqueCertificates.reduce((sum: number, c: any) => sum + (c.ce_hours || 0), 0);
+  const thisYearHours = uniqueCertificates
     .filter((c: any) => new Date(c.issued_at).getFullYear() === currentYear)
     .reduce((sum: number, c: any) => sum + (c.ce_hours || 0), 0);
 
-  const enriched = certificates.map((c: any) => {
+  const enriched = uniqueCertificates.map((c: any) => {
     const sem = seminarMap.get(c.seminar_id);
     return {
       ...c,
@@ -47,4 +49,18 @@ export async function getCEHistory() {
   });
 
   return { totalHours, thisYearHours, certificates: enriched };
+}
+
+function dedupeCertificates(certificates: any[]) {
+  const seen = new Set<string>();
+  const unique = [];
+  for (const cert of certificates) {
+    const key = cert.registration_id
+      ? `registration:${cert.registration_id}`
+      : `seminar:${cert.seminar_id || ''}:${cert.user_id || ''}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(cert);
+  }
+  return unique;
 }

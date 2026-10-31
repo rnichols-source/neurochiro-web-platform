@@ -31,13 +31,25 @@ export type Announcement = {
   link?: string;
 };
 
-export default function NotificationBell() {
+export default function NotificationBell({
+  unreadOverride,
+  includeAnnouncements = true,
+  variant = 'dark',
+}: {
+  unreadOverride?: number;
+  includeAnnouncements?: boolean;
+  variant?: 'light' | 'dark';
+} = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(unreadOverride || 0);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
+
+  useEffect(() => {
+    if (typeof unreadOverride === 'number') setUnreadCount(unreadOverride);
+  }, [unreadOverride]);
 
   const fetchNotifications = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -52,8 +64,17 @@ export default function NotificationBell() {
       .limit(20);
 
     if (notifs) {
-      setNotifications(notifs);
-      setUnreadCount(notifs.filter((n: Notification) => !n.read_at).length);
+      const visible = notifs.filter((n: Notification) => n.type !== 'portal_login');
+      setNotifications(visible);
+      if (typeof unreadOverride !== 'number') {
+        setUnreadCount(visible.filter((n: Notification) => !n.read_at).length);
+      }
+    }
+
+    if (!includeAnnouncements) {
+      setAnnouncements([]);
+      setLoading(false);
+      return;
     }
 
     // Fetch global announcements not dismissed
@@ -90,9 +111,11 @@ export default function NotificationBell() {
     const activeAnncs = anncsResult.data?.filter((a: Announcement) => !dismissedIds.includes(a.id)) || [];
 
     setAnnouncements(activeAnncs);
-    setUnreadCount(prev => prev + activeAnncs.length);
+    if (typeof unreadOverride !== 'number') {
+      setUnreadCount(prev => prev + activeAnncs.length);
+    }
     setLoading(false);
-  }, [supabase]);
+  }, [supabase, includeAnnouncements, unreadOverride]);
 
   useEffect(() => {
     let cancelled = false;
@@ -191,14 +214,17 @@ export default function NotificationBell() {
 
   return (
     <div className="relative">
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-full hover:bg-white/10 transition-colors group"
+        className={`relative min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg ${variant === 'light' ? 'text-portal-ink hover:bg-portal-surface' : 'text-white/80 hover:bg-white/10'}`}
+        aria-label="Notifications"
+        title="Notifications"
+        data-portal-bell={unreadCount}
       >
-        <Bell className={`w-5 h-5 transition-colors ${isOpen ? 'text-neuro-orange' : 'text-gray-400 group-hover:text-white'}`} />
+        <Bell className={`w-5 h-5 ${isOpen ? 'text-neuro-orange' : ''}`} />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-neuro-orange text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-neuro-navy animate-pulse">
-            {unreadCount > 9 ? '9+' : unreadCount}
+          <span className="absolute top-1 right-1 min-w-5 h-5 px-1 bg-portal-accent text-white text-xs font-bold flex items-center justify-center rounded-full">
+            {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>

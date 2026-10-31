@@ -134,11 +134,11 @@ function ScreeningsContent() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-neuro-orange/10 text-neuro-orange text-xs font-bold rounded-full mb-3 uppercase tracking-wider">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-neuro-orange/10 text-neuro-orange text-xs font-bold rounded-full mb-3 tracking-wider">
           <Target className="w-3.5 h-3.5" />
           Premium Tool
         </div>
-        <h1 className="text-3xl font-black text-white mb-2">{kit.title}</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">{kit.title}</h1>
         <p className="text-white/40 max-w-lg mx-auto">{kit.subtitle}</p>
       </div>
 
@@ -146,19 +146,19 @@ function ScreeningsContent() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div className="bg-[#162231] rounded-xl border border-white/[0.06] p-4 text-center">
           <div className="text-xs text-white/30 font-semibold uppercase mb-1">Screened/Event</div>
-          <div className="text-xl font-black text-white">{kit.expectedResults.screenedPerEvent}</div>
+          <div className="text-xl font-bold text-white">{kit.expectedResults.screenedPerEvent}</div>
         </div>
         <div className="bg-[#162231] rounded-xl border border-white/[0.06] p-4 text-center">
           <div className="text-xs text-white/30 font-semibold uppercase mb-1">Sign-Up Rate</div>
-          <div className="text-xl font-black text-green-600">{kit.expectedResults.signUpRate}</div>
+          <div className="text-xl font-bold text-green-600">{kit.expectedResults.signUpRate}</div>
         </div>
         <div className="bg-[#162231] rounded-xl border border-white/[0.06] p-4 text-center">
           <div className="text-xs text-white/30 font-semibold uppercase mb-1">Show Rate</div>
-          <div className="text-xl font-black text-white">{kit.expectedResults.showRate}</div>
+          <div className="text-xl font-bold text-white">{kit.expectedResults.showRate}</div>
         </div>
         <div className="bg-[#162231] rounded-xl border border-white/[0.06] p-4 text-center">
           <div className="text-xs text-white/30 font-semibold uppercase mb-1">Case Accept</div>
-          <div className="text-xl font-black text-neuro-orange">{kit.expectedResults.caseAcceptance}</div>
+          <div className="text-xl font-bold text-neuro-orange">{kit.expectedResults.caseAcceptance}</div>
         </div>
       </div>
 
@@ -173,7 +173,7 @@ function ScreeningsContent() {
       {!isPurchased && !checking && (
         <div className="bg-gradient-to-r from-neuro-navy to-[#2d3f5e] rounded-xl p-6 text-white text-center mb-8">
           <Lock className="w-8 h-8 text-neuro-orange mx-auto mb-3" />
-          <h3 className="text-lg font-black mb-2">Unlock the Screening Event Mastery Kit</h3>
+          <h3 className="text-lg font-bold mb-2">Unlock the Screening Event Mastery Kit</h3>
           <p className="text-white/30 text-sm mb-4 max-w-md mx-auto">
             Get the complete screening system with the 3-Build Philosophy, every script, printable forms, network builder, vendor connect, and follow-up sequences.
           </p>
@@ -263,7 +263,7 @@ function ScreeningsContent() {
                               <span className="flex-1 text-sm font-semibold text-white">
                                 {item.title}
                               </span>
-                              <span className="text-[10px] uppercase tracking-wider text-white/30 font-bold px-2 py-0.5 bg-gray-50 rounded">
+                              <span className="text-xs tracking-wider text-white/30 font-bold px-2 py-0.5 bg-gray-50 rounded">
                                 {item.type}
                               </span>
                               {itemExpanded ? (

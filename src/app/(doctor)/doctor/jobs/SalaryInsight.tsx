@@ -32,7 +32,7 @@ export default function SalaryInsight({ salaryMin, salaryMax, roleType }: Props)
 
   return (
     <div className={`rounded-xl p-3 border flex items-center gap-2 text-sm ${
-      isAbove ? 'bg-green-50 border-green-200' : isBelow ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'
+      isAbove ? 'bg-green-50 border-green-200' : isBelow ? 'bg-amber-50 border-amber-200' : 'bg-portal-info-bg border-blue-200'
     }`}>
       {isAbove ? (
         <TrendingUp className="w-4 h-4 text-green-600 shrink-0" />

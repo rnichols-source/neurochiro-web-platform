@@ -27,7 +27,7 @@ export default function CompetitiveIntelWidget(props: Props) {
 
       <div className="flex items-center gap-4 mb-4">
         <div className="w-16 h-16 rounded-2xl bg-neuro-orange/10 border border-neuro-orange/20 flex flex-col items-center justify-center">
-          <span className="text-2xl font-black text-neuro-orange">#{props.cityRank}</span>
+          <span className="text-2xl font-bold text-neuro-orange">#{props.cityRank}</span>
         </div>
         <div>
           <p className="text-sm text-white font-bold">in {props.city}, {props.state}</p>

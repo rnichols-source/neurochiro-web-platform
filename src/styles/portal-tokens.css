@@ -1,0 +1,54 @@
+/* Doctor portal tokens. Utilities are named portal-* so public pages stay on the site theme. */
+@theme {
+  --color-portal-accent: #d66829;
+  --color-portal-accent-50: #fdf1ea;
+  --color-portal-ink: #16202a;
+  --color-portal-ink-2: #3d4a57;
+  --color-portal-muted: #6b7785;
+  --color-portal-line: #cfd6dd;
+  --color-portal-border: #e3e8ed;
+  --color-portal-surface: #f1f4f6;
+  --color-portal-canvas: #f7f8fa;
+  --color-portal-sidebar: #14212e;
+  --color-portal-sidebar-active: #1c2c3b;
+  --color-portal-success: #1f8a4c;
+  --color-portal-success-bg: #e8f5ee;
+  --color-portal-warning: #a86400;
+  --color-portal-warning-bg: #fdf3e2;
+  --color-portal-danger: #c0362c;
+  --color-portal-danger-bg: #fbeceb;
+  --color-portal-info: #2a5d8f;
+  --color-portal-info-bg: #eaf1f8;
+  --font-portal: var(--font-inter), var(--font-lato), sans-serif;
+}
+
+.portal {
+  background: #f7f8fa;
+  color: #16202a;
+  font-family: var(--font-inter), var(--font-lato), sans-serif;
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.portal h1,
+.portal h2,
+.portal h3,
+.portal h4,
+.portal h5,
+.portal h6 {
+  font-family: var(--font-lato), sans-serif;
+  color: #16202a;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.portal .portal-sidebar h1,
+.portal .portal-sidebar h2,
+.portal .portal-sidebar h3,
+.portal .portal-sidebar a,
+.portal .portal-sidebar button,
+.portal .portal-sidebar p,
+.portal .portal-sidebar span {
+  color: inherit;
+}

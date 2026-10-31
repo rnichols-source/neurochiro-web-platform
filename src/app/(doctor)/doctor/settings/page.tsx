@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import { deleteAccount } from "@/app/actions/account";
 import { useRouter } from "next/navigation";
+import PageHeader from "@/components/portal/PageHeader";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -89,18 +90,18 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-xl mx-auto py-8 px-6 space-y-10">
-      <h1 className="text-2xl font-heading font-black text-neuro-navy">Settings</h1>
+      <PageHeader title="Settings" description="Notifications, password, and account." />
 
       {/* Email */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Email</h2>
+        <h2 className="text-sm font-bold text-gray-400 tracking-wide mb-4">Email</h2>
         <p className="text-sm text-neuro-navy font-medium" id="current-email">Loading...</p>
         <p className="text-xs text-gray-400 mt-1">To change your email, contact <a href="mailto:support@neurochirodirectory.com" className="text-neuro-orange hover:underline">support@neurochirodirectory.com</a></p>
       </div>
 
       {/* Notification Preferences */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Notifications</h2>
+        <h2 className="text-sm font-bold text-gray-400 tracking-wide mb-4">Notifications</h2>
         <div className="space-y-4">
           {[
             { key: 'appointment_requests', label: 'Appointment Requests', desc: 'When a patient requests an appointment' },
@@ -134,7 +135,7 @@ export default function SettingsPage() {
 
       {/* Password */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-4">Password</h2>
+        <h2 className="text-sm font-bold text-gray-400 tracking-wide mb-4">Password</h2>
         {message && (
           <p className={`text-sm font-bold mb-3 ${message.type === "success" ? "text-green-600" : "text-red-600"}`}>{message.text}</p>
         )}
@@ -147,7 +148,7 @@ export default function SettingsPage() {
 
       {/* Danger Zone */}
       <div className="bg-white rounded-2xl border border-red-100 p-6">
-        <h2 className="text-sm font-bold text-red-500 uppercase tracking-wide mb-2">Danger Zone</h2>
+        <h2 className="text-sm font-bold text-red-500 tracking-wide mb-2">Danger Zone</h2>
         {!showDeleteForm ? (
           <button onClick={() => setShowDeleteForm(true)} className="text-red-500 font-bold text-sm hover:underline">
             Delete my account

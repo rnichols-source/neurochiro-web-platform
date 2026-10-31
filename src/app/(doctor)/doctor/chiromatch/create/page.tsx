@@ -46,28 +46,28 @@ export default function CreateMatchPositionPage() {
 
       <form onSubmit={handleSubmit} className="bg-[#162231] rounded-2xl border border-white/[0.06] p-6 space-y-5">
         <div className="space-y-1">
-          <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Position Title</label>
+          <label className="text-xs font-bold text-white/30 tracking-widest">Position Title</label>
           <input name="title" required placeholder="e.g., Associate Doctor — Full Time" className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-neuro-orange" />
         </div>
 
         <div className="space-y-1">
-          <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Description</label>
+          <label className="text-xs font-bold text-white/30 tracking-widest">Description</label>
           <textarea name="description" rows={4} placeholder="Describe the role, your practice philosophy, and what makes this opportunity unique..." className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm resize-none focus:outline-none focus:border-neuro-orange" />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">City</label>
+            <label className="text-xs font-bold text-white/30 tracking-widest">City</label>
             <input name="city" className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-neuro-orange" />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">State</label>
+            <label className="text-xs font-bold text-white/30 tracking-widest">State</label>
             <input name="state" placeholder="e.g., GA" className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-neuro-orange" />
           </div>
         </div>
 
         <div className="space-y-1">
-          <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Practice Type</label>
+          <label className="text-xs font-bold text-white/30 tracking-widest">Practice Type</label>
           <select name="practice_type" className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-neuro-orange">
             <option value="">Select</option>
             {PRACTICE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
@@ -75,7 +75,7 @@ export default function CreateMatchPositionPage() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Compensation Type</label>
+          <label className="text-xs font-bold text-white/30 tracking-widest">Compensation Type</label>
           <select name="compensation_type" className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-neuro-orange">
             <option value="salary">Salary</option>
             <option value="production">Production-Based</option>
@@ -85,22 +85,22 @@ export default function CreateMatchPositionPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Salary Min</label>
+            <label className="text-xs font-bold text-white/30 tracking-widest">Salary Min</label>
             <input name="salary_min" type="number" placeholder="60000" className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-neuro-orange" />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Salary Max</label>
+            <label className="text-xs font-bold text-white/30 tracking-widest">Salary Max</label>
             <input name="salary_max" type="number" placeholder="95000" className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-neuro-orange" />
           </div>
         </div>
 
         <div className="space-y-1">
-          <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Benefits (comma-separated)</label>
+          <label className="text-xs font-bold text-white/30 tracking-widest">Benefits (comma-separated)</label>
           <input name="benefits" placeholder="Health Insurance, CE Allowance, PTO, Malpractice Coverage" className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-neuro-orange" />
         </div>
 
         <div className="space-y-1">
-          <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Requirements (comma-separated)</label>
+          <label className="text-xs font-bold text-white/30 tracking-widest">Requirements (comma-separated)</label>
           <input name="requirements" placeholder="DC License, Technique proficiency, 1+ year experience" className="w-full p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-neuro-orange" />
         </div>
 

@@ -62,69 +62,7 @@ export async function getDoctorDashboardStats() {
     const isFounder = isFounderRole(userRole);
     const isAdmin = ['admin', 'super_admin', 'founder', 'regional_admin'].includes(userRole);
 
-    // Vendor Offers (shown to everyone)
-    const vendorOffers = [
-      {
-        vendor: "NeuralPulse Technologies",
-        title: "20% off Neuro scanning equipment",
-        code: "NEUROPRO20",
-        link: "/marketplace"
-      },
-      {
-        vendor: "ChiroFlow EHR",
-        title: "3 months free practice software",
-        code: "FLOW3FREE",
-        link: "/marketplace"
-      },
-      {
-        vendor: "GrowthSpine Marketing",
-        title: "$500 off onboarding",
-        code: "GROW500",
-        link: "/marketplace"
-      }
-    ];
-
-    // Discord notification — doctor portal login (once per day per doctor)
-    try {
-      const discordUrl = process.env.DISCORD_WEBHOOK_URL;
-      if (discordUrl) {
-        const today = new Date().toISOString().slice(0, 10);
-        const cacheKey = `portal_login_${user.id}_${today}`;
-        // Use a simple in-memory check via admin table or just send it
-        // To avoid spam, check if we already notified today for this user
-        const { data: existing } = await (admin as any)
-          .from('notifications')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('type', 'portal_login')
-          .gte('created_at', `${today}T00:00:00`)
-          .limit(1);
-
-        if (!existing || existing.length === 0) {
-          // Record that we notified
-          await (admin as any).from('notifications').insert({
-            user_id: user.id,
-            title: 'Portal login',
-            body: `${profile?.full_name || user.email} logged into the doctor portal`,
-            type: 'portal_login',
-            priority: 'info',
-          });
-
-          // Send Discord notification
-          const docName = profile?.full_name || user.email || 'Unknown';
-          const docCity = doctor?.city ? `${doctor.city}, ${doctor.state || ''}` : '';
-          await fetch(discordUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              content: `🩺 **DOCTOR PORTAL LOGIN**\n\n**${docName}**${docCity ? ` — ${docCity}` : ''}\n${doctor?.clinic_name || ''}\nProfile: ${completeness}% complete`,
-            }),
-          }).catch(() => {});
-        }
-      }
-    } catch {
-      // Don't let notification errors break the dashboard
-    }
+    const vendorOffers: { vendor: string; title: string; code: string; link: string }[] = [];
 
     return {
       profile: {
@@ -429,7 +367,7 @@ export async function getPracticeHealthScore(): Promise<PracticeHealthResult | n
       admin.from('match_positions').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id),
       createAdminClient().from('job_postings').select('id', { count: 'exact', head: true }).eq('doctor_id', docId),
       admin.from('seminar_reviews').select('id', { count: 'exact', head: true }),
-      createAdminClient().from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('read', false),
+      createAdminClient().from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).is('read_at', null).neq('type', 'portal_login'),
     ])
 
     const ceHours = (ceRes.data || []).reduce((s: number, c: any) => s + (c.ce_hours || 0), 0)
@@ -488,7 +426,7 @@ export async function getCompetitiveIntelligence() {
       .eq('verification_status', 'verified')
       .order('profile_views', { ascending: false })
 
-    if (!cityDoctors || cityDoctors.length === 0) return null
+    if (!cityDoctors || cityDoctors.length < 3) return null
 
     const myViews = doc.profile_views || 0
     const rank = cityDoctors.filter(d => (d.profile_views || 0) > myViews).length + 1
@@ -525,7 +463,7 @@ export async function getSmartActionItems() {
     const items: { id: string; priority: 'high' | 'medium' | 'low'; title: string; description: string; href: string; icon: string }[] = []
 
     // Unread messages
-    const { count: unreadCount } = await createAdminClient().from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('read', false)
+    const { count: unreadCount } = await createAdminClient().from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).is('read_at', null).neq('type', 'portal_login')
     if (unreadCount && unreadCount > 0) {
       items.push({ id: 'unread', priority: 'high', title: `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`, description: 'Review your recent notifications', href: '/doctor/notifications', icon: 'Bell' })
     }
@@ -652,70 +590,5 @@ export async function acknowledgeContactRequest(requestId: string, action: 'call
 // ── Routing stats for doctor dashboard ──────────────────────────────────────
 
 export async function getMyRoutingStats() {
-  try {
-    const supabase = createServerSupabase()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return null
-
-    const admin = createAdminClient()
-
-    // Get doctor record
-    const { data: doc } = await admin
-      .from('doctors')
-      .select('id')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!doc) return null
-
-    const now = new Date()
-    const sevenAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
-    const thirtyAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
-
-    // Last 7 days detailed (for the list)
-    const { data: recent } = await (admin as any)
-      .from('reply_logs')
-      .select('searched_city, searched_state, created_at')
-      .eq('doctor_id', doc.id)
-      .not('template_id', 'in', '("waitlist_comment","waitlist_dm")')
-      .gte('created_at', sevenAgo)
-      .order('created_at', { ascending: false })
-      .range(0, 19) // intentional bound — show at most 20 recent
-
-    // Last 30 days count
-    const { count: last30Count } = await (admin as any)
-      .from('reply_logs')
-      .select('id', { count: 'exact', head: true })
-      .eq('doctor_id', doc.id)
-      .not('template_id', 'in', '("waitlist_comment","waitlist_dm")')
-      .gte('created_at', thirtyAgo)
-
-    // All time count
-    const { count: allTimeCount } = await (admin as any)
-      .from('reply_logs')
-      .select('id', { count: 'exact', head: true })
-      .eq('doctor_id', doc.id)
-      .not('template_id', 'in', '("waitlist_comment","waitlist_dm")')
-
-    // Click count (profile clicks attributed to this doctor)
-    const { count: clickCount } = await (admin as any)
-      .from('link_clicks')
-      .select('id', { count: 'exact', head: true })
-      .eq('doctor_id', doc.id)
-      .eq('destination', 'profile')
-
-    return {
-      last7: (recent || []).map((r: any) => ({
-        city: r.searched_city || 'Unknown',
-        state: (r.searched_state || '').toUpperCase(),
-        date: new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      })),
-      last30Count: last30Count || 0,
-      allTimeCount: allTimeCount || 0,
-      clickCount: clickCount || 0,
-    }
-  } catch (err) {
-    console.error('[ROUTING_STATS]', err)
-    return null
-  }
+  return null;
 }

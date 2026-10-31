@@ -386,6 +386,8 @@ export default function MessagingSystem({
             setSelectedConversation(tempConv);
           }
         }
+      } else if (fetched && fetched.length > 0 && window.matchMedia('(min-width: 768px)').matches) {
+        setSelectedConversation(fetched[0]);
       }
     });
 
@@ -813,7 +815,9 @@ export default function MessagingSystem({
                 setSelectedConversation(null);
                 setShowMoreMenu(false);
               }}
-              className="p-1 -ml-1 text-gray-500 hover:text-gray-800"
+              className="min-h-11 min-w-11 inline-flex items-center justify-center text-gray-500 hover:text-gray-800"
+              aria-label="Back to conversations"
+              title="Back to conversations"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -1150,8 +1154,10 @@ export default function MessagingSystem({
           <button
             onClick={handleSendMessage}
             disabled={!newMessage.trim()}
-            className="p-2.5 rounded-xl text-white transition-all disabled:opacity-40 shrink-0 hover:opacity-90 active:scale-95"
+            className="min-h-11 min-w-11 rounded-xl text-white transition-all disabled:opacity-40 shrink-0 hover:opacity-90"
             style={{ backgroundColor: "#e97325" }}
+            aria-label="Send message"
+            title="Send message"
           >
             <Send className="w-4 h-4" />
           </button>
@@ -1169,13 +1175,12 @@ export default function MessagingSystem({
         <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
           <MessageSquare className="w-7 h-7 text-gray-400" />
         </div>
-        <h3 className="text-lg font-bold text-gray-800 mb-1">Your Messages</h3>
-        <p className="text-gray-400 text-sm max-w-xs mb-4">
-          Message any doctor in the network to ask about their practice, associateships, or mentorship.
+        <h3 className="text-lg font-bold text-gray-800 mb-1">{conversations.length === 0 ? 'Messages' : 'Select a conversation'}</h3>
+        <p className="text-gray-500 text-sm max-w-xs mb-4">
+          {conversations.length === 0
+            ? 'No conversations yet. When a patient or doctor messages you, it shows up here.'
+            : 'Choose a conversation from the list.'}
         </p>
-        <a href="/directory" className="text-sm font-bold text-[#D66829] hover:underline">
-          Browse doctors to message &rarr;
-        </a>
       </div>
     );
   }

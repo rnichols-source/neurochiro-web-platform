@@ -19,7 +19,7 @@ export default function SeminarRecommendations() {
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       <div className="p-5 border-b border-gray-50 flex items-center gap-2">
         <Sparkles className="w-5 h-5 text-neuro-orange" />
-        <h2 className="font-heading font-black text-neuro-navy">Recommended For You</h2>
+        <h2 className="font-heading font-bold text-neuro-navy">Recommended For You</h2>
       </div>
       <div className="divide-y divide-gray-50">
         {seminars.slice(0, 3).map((sem) => (
@@ -38,7 +38,7 @@ export default function SeminarRecommendations() {
                 </div>
               </div>
               {sem.matchScore > 0 && (
-                <span className="px-2 py-0.5 bg-green-50 text-green-700 text-[10px] font-bold rounded border border-green-200 shrink-0">
+                <span className="px-2 py-0.5 bg-green-50 text-green-700 text-xs font-bold rounded border border-green-200 shrink-0">
                   {sem.matchScore}% match
                 </span>
               )}
