@@ -9,6 +9,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import { createClient } from "@/lib/supabase";
+import { getUnreadSummary } from "@/app/actions/messaging-actions";
 
 const mobileNavItems = [
   { name: "Home", href: "/student/dashboard", icon: LayoutDashboard },
@@ -66,10 +67,7 @@ function StudentLayoutInner({
       }
       setSubscriptionChecked(true);
 
-      // Unread message count
-      supabase.from('messages').select('id', { count: 'exact', head: true })
-        .eq('recipient_id', user.id).is('read_at', null)
-        .then(({ count }: any) => setUnreadMessages(count || 0));
+      getUnreadSummary().then((summary) => setUnreadMessages(summary.messages));
     };
 
     checkAuth();

@@ -5,8 +5,8 @@ import { isFounderRole } from "@/lib/founder";
 
 export const dynamic = 'force-dynamic';
 
-export default async function InboxPage({ searchParams }: { searchParams: Promise<{ to?: string }> }) {
-  const { to } = await searchParams;
+export default async function InboxPage({ searchParams }: { searchParams: Promise<{ to?: string; c?: string }> }) {
+  const { to, c } = await searchParams;
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -36,7 +36,7 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
       </div>
       
       <div className="flex-1 min-h-0">
-        <MessagingSystem currentUserId={user.id} userRole="admin" initialOtherUserId={to} />
+        <MessagingSystem currentUserId={user.id} userRole="admin" initialOtherUserId={to} initialConversationId={c} />
       </div>
     </div>
   );

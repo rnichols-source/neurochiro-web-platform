@@ -339,6 +339,15 @@ async function loadParty(admin: any, doctorId: string) {
   } | null;
 }
 
+async function noteReferralThread(id: string, event: 'sent' | 'accepted' | 'declined' | 'booked'): Promise<string | null> {
+  try {
+    const { ensureReferralThread } = await import('@/lib/messaging/referral-thread');
+    return await ensureReferralThread(id, event);
+  } catch {
+    return null;
+  }
+}
+
 function doctorName(row: { first_name?: string | null; last_name?: string | null } | null): string {
   return `Dr. ${row?.first_name || ''} ${row?.last_name || ''}`.trim();
 }
@@ -389,14 +398,17 @@ export async function submitReferral(input: {
   if (inserted.error || !inserted.data) return { success: false, error: 'Could not send that referral.' };
 
   const id = inserted.data.id as string;
+  const threadId = await noteReferralThread(id, 'sent');
   const to = await emailForUser(admin, receiver.user_id);
+  const referrerName = `Dr. ${me.firstName} ${me.lastName}`.trim();
   await sendOnce(admin, id, 'sent', v2, to, () => sentToReceiverEmail({
     id,
-    referrerName: `Dr. ${me.firstName} ${me.lastName}`.trim(),
+    referrerName,
     patientFirst: first,
     patientInitial: initial,
     reason,
     urgency: input.urgency,
+    messageUrl: threadId ? `https://neurochiro.co/doctor/messages?c=${threadId}` : null,
   }));
   if (receiver.user_id) {
     await admin.from('notifications').insert({
@@ -457,6 +469,7 @@ export async function acceptReferral(id: string): Promise<{ success: boolean; er
       await ctx.admin.from('doctor_referrals').update({ patient_intro_sent_at: new Date().toISOString() }).eq('id', id);
     }
   }
+  await noteReferralThread(id, 'accepted');
   return { success: true };
 }
 
@@ -480,6 +493,7 @@ export async function declineReferral(id: string, reason: string): Promise<{ suc
     patientInitial: ctx.row.patient_last_initial,
     reason: reason.trim(),
   }));
+  await noteReferralThread(id, 'declined');
   return { success: true };
 }
 
@@ -518,6 +532,7 @@ export async function markScheduled(id: string, scheduledFor: string | null, not
     patientInitial: ctx.row.patient_last_initial,
     note: note.trim() || null,
   }));
+  await noteReferralThread(id, 'booked');
   return { success: true };
 }
 

@@ -64,7 +64,7 @@ export default function NotificationBell({
       .limit(20);
 
     if (notifs) {
-      const visible = notifs.filter((n: Notification) => n.type !== 'portal_login');
+      const visible = notifs.filter((n: Notification) => n.type !== 'portal_login' && n.type !== 'message');
       setNotifications(visible);
       if (typeof unreadOverride !== 'number') {
         setUnreadCount(visible.filter((n: Notification) => !n.read_at).length);

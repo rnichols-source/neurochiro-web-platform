@@ -5,6 +5,7 @@ import { resolveStateCode } from '@/lib/resolve-state';
 import { getThresholds } from '@/lib/thresholds';
 import { EUROPEAN_ISO, countryHint, toDirectoryCountry } from '@/lib/directory-countries';
 import { excludeDemo } from '@/lib/directory/exclude-demo';
+import { hiddenTestUserIds } from '@/lib/profiles/test-users';
 // city-data import removed — using resolve-city.ts shared resolver
 
 const STATE_MAP: Record<string, string> = {
@@ -148,11 +149,12 @@ async function lookupPostalCode(supabase: any, code: string, country: string): P
 const SELECT_FIELDS = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, address, photo_url, phone, accepting_new_patients, offers_telehealth, accepts_walkins, languages, hours, booking_url, created_at';
 
 /** Country-aware doctors query. `US` includes legacy null country. `EU` is the European set. `ALL` is worldwide. */
-function doctorsQuery(sb: any, regionOrCountry: string) {
+function doctorsQuery(sb: any, regionOrCountry: string, hiddenUserIds: string[] = []) {
   let q = excludeDemo(sb
     .from('doctors')
     .select(SELECT_FIELDS)
     .in('verification_status', ['verified', 'pending']))
+  if (hiddenUserIds.length) q = q.not('user_id', 'in', `(${hiddenUserIds.join(',')})`)
   const code = (regionOrCountry || 'US').toUpperCase()
   if (code === 'ALL') return q
   if (code === 'EU') return q.in('country', EUROPEAN_ISO)
@@ -218,9 +220,10 @@ export async function searchDirectory(request: NextRequest) {
   const sort = requestedSort === 'tier' ? 'distance' : requestedSort;
 
   const supabase = createAdminClient();
+  const hiddenUserIds = await hiddenTestUserIds();
 
   try {
-    let dbQuery = doctorsQuery(supabase, searchRegion);
+    let dbQuery = doctorsQuery(supabase, searchRegion, hiddenUserIds);
 
     // Pre-filter by bounding box when radius is set (much faster than post-filtering all docs)
     if (hasUserCoords && radius > 0) {
@@ -455,7 +458,7 @@ export async function searchDirectory(request: NextRequest) {
       const locationTerm = rawLocation || (splitFromQuery ? `${splitFromQuery.city}, ${splitFromQuery.stateCode}` : '');
       if (rawQuery && locationTerm) {
         const locSplit = splitCityState(locationTerm, searchCountry);
-        let locQuery = doctorsQuery(supabase, searchRegion);
+        let locQuery = doctorsQuery(supabase, searchRegion, hiddenUserIds);
         if (newPatientsFilter) locQuery = locQuery.eq('accepting_new_patients', true);
         if (locSplit) {
           if (locSplit.city) locQuery = locQuery.or(`city.ilike.%${locSplit.city}%,address.ilike.%${locSplit.city}%`);
@@ -473,7 +476,7 @@ export async function searchDirectory(request: NextRequest) {
       if (!fallbackData.length) {
         const stateCode = splitFromQuery?.stateCode || splitFromLocation?.stateCode || resolveStateCode(rawLocation || rawQuery, searchCountry);
         if (stateCode) {
-          let stateFallbackQuery = doctorsQuery(supabase, searchRegion).eq('state', stateCode);
+          let stateFallbackQuery = doctorsQuery(supabase, searchRegion, hiddenUserIds).eq('state', stateCode);
           if (newPatientsFilter) stateFallbackQuery = stateFallbackQuery.eq('accepting_new_patients', true);
           const { data: stateFallback } = await stateFallbackQuery.limit(20);
           if (stateFallback?.length) { fallbackData = stateFallback; fallbackHint = `Showing doctors in ${stateCode}`; }
@@ -484,7 +487,7 @@ export async function searchDirectory(request: NextRequest) {
       if (!fallbackData.length) {
         const cityTerm = splitFromQuery?.city || rawQuery || rawLocation;
         if (cityTerm) {
-          let cityFallbackQuery = doctorsQuery(supabase, searchRegion)
+          let cityFallbackQuery = doctorsQuery(supabase, searchRegion, hiddenUserIds)
             .or(`city.ilike.%${cityTerm}%,address.ilike.%${cityTerm}%`);
           if (newPatientsFilter) cityFallbackQuery = cityFallbackQuery.eq('accepting_new_patients', true);
           const { data: cityFallback } = await cityFallbackQuery.limit(20);
@@ -510,7 +513,7 @@ export async function searchDirectory(request: NextRequest) {
 
       // Step 3: Only if NO location was specified — try specialty or nationwide
       if (!fallbackData.length && !rawLocation && rawQuery) {
-        let specFallbackQuery = doctorsQuery(supabase, searchRegion)
+        let specFallbackQuery = doctorsQuery(supabase, searchRegion, hiddenUserIds)
           .or(`bio.ilike.%${rawQuery}%,clinic_name.ilike.%${rawQuery}%`);
         if (newPatientsFilter) specFallbackQuery = specFallbackQuery.eq('accepting_new_patients', true);
         const { data: specFallback } = await specFallbackQuery.limit(20);

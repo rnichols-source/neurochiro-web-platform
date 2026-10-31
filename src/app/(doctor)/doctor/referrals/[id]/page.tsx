@@ -4,6 +4,7 @@ import PageHeader from '@/components/portal/PageHeader';
 import StatusPill from '@/components/portal/StatusPill';
 import { getPortalContext } from '@/lib/portal/context';
 import { getReferral, listAttachments, markViewed } from '@/lib/referrals/data';
+import { ensureReferralThread, referralThreadId } from '@/lib/messaging/referral-thread';
 import { canSeePatientContact, patientLabel, statusLabel } from '@/lib/referrals/pure';
 import ReferralActions from './ReferralActions';
 
@@ -23,6 +24,8 @@ export default async function ReferralDetail({ params }: { params: Promise<{ id:
     status: row.status,
   });
   const files = await listAttachments(id);
+  const threadEvent = row.status === 'declined' ? 'declined' : row.status === 'scheduled' ? 'booked' : row.status === 'accepted' || row.status === 'patient_contacted' ? 'accepted' : 'sent';
+  const threadId = await referralThreadId(id) || await ensureReferralThread(id, threadEvent);
   const steps = [
     { label: 'Sent', at: row.created_at },
     { label: 'Seen', at: row.viewed_at || null },
@@ -62,6 +65,11 @@ export default async function ReferralDetail({ params }: { params: Promise<{ id:
             <li key={file.id}><a className="text-portal-accent font-bold" href={`/doctor/referrals/${id}?file=${file.id}`}>{file.fileName}</a></li>
           ))}
         </ul>
+      ) : null}
+      {threadId ? (
+        <Link href={`/doctor/messages?c=${threadId}`} className="inline-flex min-h-11 items-center text-sm font-bold text-portal-accent">
+          Message {row.other_name || 'the doctor'}
+        </Link>
       ) : null}
       <ReferralActions
         id={row.id}

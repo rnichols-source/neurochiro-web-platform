@@ -6,6 +6,7 @@ import { PORTAL_FEATURES } from '@/config/portal-features';
 import { effectiveState, navFor, type PortalNavContext } from '@/lib/portal/features';
 import { getMembership } from '@/lib/portal/membership-load';
 import { getPortalShellData } from '@/app/(doctor)/doctor/portal-actions';
+import { countUnread } from '@/lib/messaging/db';
 import type { PortalContextValue } from '@/lib/portal/types';
 
 export type PortalContext = PortalContextValue;
@@ -31,12 +32,7 @@ export const getPortalContext = cache(async (): Promise<PortalContext | null> =>
 
   const membership = await getMembership(user.id);
   const admin = createAdminClient() as any;
-  const { count } = await admin
-    .from('notifications')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .is('read_at', null)
-    .neq('type', 'portal_login');
+  const unread = await countUnread(user.id);
 
   let hasPurchase = false;
   const purchases = await admin.from('course_purchases').select('id').eq('user_id', user.id).limit(1);
@@ -68,8 +64,8 @@ export const getPortalContext = cache(async (): Promise<PortalContext | null> =>
     neurosTier: shell.doctor?.neuros_tier || null,
     hasPurchase,
     chiroMatchOpen,
-    unreadMessages: shell.unreadMessages,
-    unreadNotifications: count || 0,
+    unreadMessages: unread.messages,
+    unreadNotifications: unread.notificationsExcludingMessages,
     unreadReferrals,
   };
 
@@ -83,8 +79,8 @@ export const getPortalContext = cache(async (): Promise<PortalContext | null> =>
     initials: shell.initials,
     doctor: shell.doctor,
     membership,
-    unreadNotifications: count || 0,
-    unreadMessages: shell.unreadMessages,
+    unreadNotifications: unread.notificationsExcludingMessages,
+    unreadMessages: unread.messages,
     unreadReferrals,
     hasPurchase,
     chiroMatchOpen,

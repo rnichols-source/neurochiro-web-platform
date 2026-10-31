@@ -1,614 +1,242 @@
 'use server'
 
-import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { Automations } from '@/lib/automations'
+import {
+  countUnread,
+  currentUserId,
+  getInbox,
+  getThreadMessages,
+  listBlocked,
+  personForNewMessage,
+  markRead,
+  removeMessage,
+  reportAsRecipient,
+  savePrefs,
+  searchDirectoryUsers,
+  searchOwnMessages,
+  setBlock,
+  setMute,
+} from '@/lib/messaging/db'
+import { validateBody } from '@/lib/messaging/validate'
+import { sendUserMessage } from '@/lib/messaging/send'
+import { assertUuid, UuidError } from '@/lib/messaging/ids'
 
-const MAX_MESSAGE_LENGTH = 2000
-const MAX_NEW_CONVERSATIONS_PER_DAY = 20
-const MAX_MESSAGES_PER_DAY = 100
-const MAX_MESSAGES_PER_CONVERSATION_PER_MINUTE = 5
-
-// ── Auth helper ─────────────────────────────────────────────────────────────
-
-async function getAuthUser() {
-  const supabase = createServerSupabase()
-  const { data: { user } } = await supabase.auth.getUser()
-  return user
+function denied(result: { ok: false; code: string; userMessage: string }) {
+  return { ok: false as const, code: result.code, userMessage: result.userMessage, error: result.userMessage }
 }
 
-async function getUserProfile(userId: string) {
-  const admin = createAdminClient()
-  const { data } = await admin
-    .from('profiles')
-    .select('id, full_name, role, email')
-    .eq('id', userId)
-    .single()
-  return data
-}
-
-async function getUserDoctorRecord(userId: string) {
-  const admin = createAdminClient()
-  const { data } = await (admin as any)
-    .from('doctors')
-    .select('id, verification_status, membership_tier, is_founding_member, accepts_student_messages')
-    .eq('user_id', userId)
-    .maybeSingle()
-  return data as { id: string; verification_status: string; membership_tier: string; is_founding_member: boolean; accepts_student_messages: boolean } | null
-}
-
-// ── Check if user is blocked ────────────────────────────────────────────────
-
-async function isBlocked(userId1: string, userId2: string): Promise<boolean> {
-  const admin = createAdminClient()
-  const { data } = await (admin as any)
-    .from('user_blocks')
-    .select('id')
-    .or(`and(blocker_id.eq.${userId1},blocked_id.eq.${userId2}),and(blocker_id.eq.${userId2},blocked_id.eq.${userId1})`)
-    .limit(1) // intentional bound
-    .maybeSingle()
-  return !!data
-}
-
-// ── Rate limiting ───────────────────────────────────────────────────────────
-
-async function checkRateLimits(userId: string, conversationId?: string): Promise<string | null> {
-  const admin = createAdminClient()
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-  const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString()
-
-  // Messages per day
-  const { count: dayCount } = await admin
-    .from('messages')
-    .select('id', { count: 'exact', head: true })
-    .eq('sender_id', userId)
-    .gte('created_at', oneDayAgo)
-
-  if ((dayCount || 0) >= MAX_MESSAGES_PER_DAY) {
-    return 'Daily message limit reached. Please try again tomorrow.'
-  }
-
-  // Messages per conversation per minute
-  if (conversationId) {
-    const { count: minuteCount } = await admin
-      .from('messages')
-      .select('id', { count: 'exact', head: true })
-      .eq('sender_id', userId)
-      .eq('conversation_id', conversationId)
-      .gte('created_at', oneMinuteAgo)
-
-    if ((minuteCount || 0) >= MAX_MESSAGES_PER_CONVERSATION_PER_MINUTE) {
-      return 'Slow down. Please wait a moment before sending another message.'
-    }
-  }
-
-  return null
-}
-
-async function checkConversationRateLimit(userId: string): Promise<string | null> {
-  const admin = createAdminClient()
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-
-  const { count } = await admin
-    .from('conversations')
-    .select('id', { count: 'exact', head: true })
-    .eq('participant_one_id', userId)
-    .gte('created_at', oneDayAgo)
-
-  if ((count || 0) >= MAX_NEW_CONVERSATIONS_PER_DAY) {
-    return 'Daily new conversation limit reached. Please try again tomorrow.'
-  }
-
-  return null
-}
-
-// ── Access control ──────────────────────────────────────────────────────────
-
-async function canInitiateWith(senderId: string, recipientId: string): Promise<{ allowed: boolean; reason?: string }> {
-  const [sender, recipient] = await Promise.all([
-    getUserProfile(senderId),
-    getUserProfile(recipientId),
-  ])
-
-  if (!sender || !recipient) return { allowed: false, reason: 'User not found' }
-
-  const isAdmin = ['admin', 'super_admin', 'founder'].includes(sender.role || '')
-  if (isAdmin) return { allowed: true }
-
-  // Patients cannot initiate
-  if (sender.role === 'patient') return { allowed: false, reason: 'Patient accounts cannot send messages' }
-
-  // Cannot message patients
-  if (recipient.role === 'patient') return { allowed: false, reason: 'Cannot message patient accounts' }
-
-  // Check blocks
-  if (await isBlocked(senderId, recipientId)) return { allowed: false, reason: 'This user is not available for messaging' }
-
-  // Doctor to doctor: both must be verified+pro (or founding)
-  if (sender.role === 'doctor' && recipient.role === 'doctor') {
-    const senderDoc = await getUserDoctorRecord(senderId)
-    if (!senderDoc) return { allowed: false, reason: 'Doctor profile not found' }
-    const isPaid = senderDoc.membership_tier === 'pro' || senderDoc.is_founding_member
-    if (!isPaid) return { allowed: false, reason: 'Pro membership required to message other doctors' }
-    return { allowed: true }
-  }
-
-  // Doctor to student: open
-  if (sender.role === 'doctor' && recipient.role === 'student') return { allowed: true }
-
-  // Student to student: open
-  if (sender.role === 'student' && recipient.role === 'student') return { allowed: true }
-
-  // Student to doctor: gated on accepts_student_messages
-  if (sender.role === 'student' && recipient.role === 'doctor') {
-    const recipientDoc = await getUserDoctorRecord(recipientId)
-    if (!recipientDoc?.accepts_student_messages) {
-      return { allowed: false, reason: 'This doctor is not accepting student messages' }
-    }
-    return { allowed: true }
-  }
-
-  return { allowed: false, reason: 'Not allowed' }
-}
-
-// ── 1. Send a message ───────────────────────────────────────────────────────
-
-export async function sendMessage(recipientId: string, body: string, existingConversationId?: string) {
-  const user = await getAuthUser()
-  if (!user) return { error: 'Not authenticated' }
-  if (!body.trim() || body.length > MAX_MESSAGE_LENGTH) return { error: `Message must be 1-${MAX_MESSAGE_LENGTH} characters` }
-  if (recipientId === user.id) return { error: 'Cannot message yourself' }
-
-  const admin = createAdminClient()
-
-  // Check blocks
-  if (await isBlocked(user.id, recipientId)) {
-    return { error: 'This user is not available for messaging' }
-  }
-
-  let conversationId = existingConversationId
-
-  if (!conversationId) {
-    // Check for existing conversation
-    const { data: existing } = await admin
-      .from('conversations')
-      .select('id')
-      .or(`and(participant_one_id.eq.${user.id},participant_two_id.eq.${recipientId}),and(participant_one_id.eq.${recipientId},participant_two_id.eq.${user.id})`)
-      .limit(1) // intentional bound
-      .maybeSingle()
-
-    if (existing) {
-      conversationId = existing.id
-    } else {
-      // New conversation: check access rules and rate limit
-      const access = await canInitiateWith(user.id, recipientId)
-      if (!access.allowed) return { error: access.reason || 'Not allowed' }
-
-      // Check cancelled members cannot initiate new conversations
-      const senderProfile = await getUserProfile(user.id)
-      if (senderProfile?.role === 'doctor') {
-        const senderDoc = await getUserDoctorRecord(user.id)
-        const isActive = senderDoc && (senderDoc.membership_tier === 'pro' || senderDoc.is_founding_member)
-        const isAdmin = ['admin', 'super_admin', 'founder'].includes(senderProfile.role || '')
-        if (!isActive && !isAdmin) {
-          return { error: 'Active membership required to start new conversations' }
-        }
-      }
-
-      const convLimit = await checkConversationRateLimit(user.id)
-      if (convLimit) return { error: convLimit }
-
-      const { data: newConv, error: convError } = await admin
-        .from('conversations')
-        .insert({
-          participant_one_id: user.id,
-          participant_two_id: recipientId,
-          context_type: 'direct',
-        })
-        .select('id')
-        .single()
-
-      if (convError || !newConv) return { error: 'Failed to create conversation' }
-      conversationId = newConv.id
-    }
-  }
-
-  // Rate limit on messages
-  const msgLimit = await checkRateLimits(user.id, conversationId)
-  if (msgLimit) return { error: msgLimit }
-
-  // Insert message
-  const { data: msg, error: msgError } = await admin
-    .from('messages')
-    .insert({
-      conversation_id: conversationId,
-      sender_id: user.id,
-      recipient_id: recipientId,
-      body: body.trim(),
-      message_type: 'user',
-    })
-    .select()
-    .single()
-
-  if (msgError) return { error: 'Failed to send message' }
-
-  // Update last_message_at
-  await admin
-    .from('conversations')
-    .update({ last_message_at: new Date().toISOString() })
-    .eq('id', conversationId)
-
-  // Get sender name for notification
-  const sender = await getUserProfile(user.id)
-  const recipient = await getUserProfile(recipientId)
-
-  if (sender && recipient) {
-    await Automations.onMessageSent(
-      user.id,
-      sender.full_name || 'A member',
+export async function sendMessage(recipientId: string, body: string, existingConversationId?: string, clientMessageId?: string) {
+  const userId = await currentUserId()
+  if (!userId) return { ok: false as const, code: 'auth', userMessage: 'Not authenticated', error: 'Not authenticated' }
+  try {
+    const result = await sendUserMessage(userId, {
       recipientId,
-      recipient.role || 'doctor'
-    )
+      body,
+      conversationId: existingConversationId || null,
+      clientMessageId: clientMessageId || null,
+    })
+    if (!result.ok) return denied(result)
+    return {
+      ok: true as const,
+      success: true,
+      conversationId: result.conversationId,
+      message: result.message,
+      error: undefined,
+    }
+  } catch (err) {
+    if (err instanceof UuidError) return { ok: false as const, code: 'invalid_id', userMessage: 'That message cannot be sent.', error: 'That message cannot be sent.' }
+    throw err
   }
-
-  return { success: true, conversationId, message: msg }
 }
-
-// ── 2. Mark messages as read ────────────────────────────────────────────────
 
 export async function markMessagesRead(conversationId: string) {
-  const user = await getAuthUser()
-  if (!user) return
-
-  const admin = createAdminClient()
-  await admin
-    .from('messages')
-    .update({ read_at: new Date().toISOString() })
-    .eq('conversation_id', conversationId)
-    .eq('recipient_id', user.id)
-    .is('read_at', null)
-
-  // Clear the email log for this conversation so next unread can trigger a new email
-  await (admin as any)
-    .from('message_email_log')
-    .delete()
-    .eq('user_id', user.id)
-    .eq('conversation_id', conversationId)
+  const userId = await currentUserId()
+  if (!userId) return
+  try {
+    await markRead(userId, conversationId)
+  } catch (err) {
+    if (err instanceof UuidError) return
+    throw err
+  }
 }
-
-// ── 3. Search users for compose ─────────────────────────────────────────────
 
 export async function searchUsersForMessage(query: string) {
-  const user = await getAuthUser()
-  if (!user) return []
-  if (query.length < 2) return []
-
-  const admin = createAdminClient()
-  const sender = await getUserProfile(user.id)
-  if (!sender) return []
-
-  const isAdmin = ['admin', 'super_admin', 'founder'].includes(sender.role || '')
-  const isDoctor = sender.role === 'doctor'
-  const isStudent = sender.role === 'student'
-
-  // Build role filter based on who the sender can message
-  let roleFilter: string[] = []
-  if (isAdmin) {
-    roleFilter = ['doctor', 'student', 'admin', 'founder', 'super_admin']
-  } else if (isDoctor) {
-    roleFilter = ['doctor', 'student']
-  } else if (isStudent) {
-    roleFilter = ['doctor', 'student']
-  } else {
-    return [] // patients cannot initiate
-  }
-
-  const { data: profiles } = await admin
-    .from('profiles')
-    .select('id, full_name, role')
-    .neq('id', user.id)
-    .ilike('full_name', `%${query}%`)
-    .in('role', roleFilter)
-    .limit(20) // intentional bound — filter down after
-
-  if (!profiles) return []
-
-  // For students searching doctors, filter to those with accepts_student_messages
-  if (isStudent) {
-    const doctorProfiles = profiles.filter((p: any) => p.role === 'doctor')
-    const studentProfiles = profiles.filter((p: any) => p.role !== 'doctor')
-
-    if (doctorProfiles.length > 0) {
-      const doctorUserIds = doctorProfiles.map((p: any) => p.id)
-      const { data: doctors } = await admin
-        .from('doctors')
-        .select('user_id, accepts_student_messages')
-        .in('user_id', doctorUserIds)
-        .eq('accepts_student_messages', true)
-
-      const allowedDoctorIds = new Set((doctors || []).map((d: any) => d.user_id))
-      const filteredDoctors = doctorProfiles.filter((p: any) => allowedDoctorIds.has(p.id))
-      return [...filteredDoctors, ...studentProfiles].slice(0, 8)
-    }
-
-    return studentProfiles.slice(0, 8)
-  }
-
-  // For doctors, filter to verified+pro doctors only (for doctor targets)
-  if (isDoctor) {
-    const doctorProfiles = profiles.filter((p: any) => p.role === 'doctor')
-    const otherProfiles = profiles.filter((p: any) => p.role !== 'doctor')
-
-    if (doctorProfiles.length > 0) {
-      const doctorUserIds = doctorProfiles.map((p: any) => p.id)
-      const { data: doctors } = await admin
-        .from('doctors')
-        .select('user_id')
-        .in('user_id', doctorUserIds)
-        .eq('verification_status', 'verified')
-        .eq('membership_tier', 'pro')
-
-      const verifiedIds = new Set((doctors || []).map((d: any) => d.user_id))
-      // Also include founding members
-      const { data: founders } = await admin
-        .from('doctors')
-        .select('user_id')
-        .in('user_id', doctorUserIds)
-        .eq('is_founding_member', true)
-
-      for (const f of (founders || [])) verifiedIds.add(f.user_id)
-
-      const filteredDoctors = doctorProfiles.filter((p: any) => verifiedIds.has(p.id))
-      return [...filteredDoctors, ...otherProfiles].slice(0, 8)
-    }
-
-    return otherProfiles.slice(0, 8)
-  }
-
-  return profiles.slice(0, 8)
+  const userId = await currentUserId()
+  if (!userId) return []
+  return searchDirectoryUsers(userId, query)
 }
 
-// ── 4. Delete message (soft delete) ─────────────────────────────────────────
+export async function lookupMessagePerson(otherUserId: string) {
+  const userId = await currentUserId()
+  if (!userId) return null
+  try {
+    return await personForNewMessage(userId, otherUserId)
+  } catch (err) {
+    if (err instanceof UuidError) return null
+    throw err
+  }
+}
+
+export async function searchMyMessages(query: string) {
+  const userId = await currentUserId()
+  if (!userId) return []
+  return searchOwnMessages(userId, query)
+}
+
+export async function getInboxPage(before?: string | null) {
+  const userId = await currentUserId()
+  if (!userId) return { rows: [], unreadMessages: 0, notificationsExcludingMessages: 0 }
+  const [rows, unread] = await Promise.all([
+    getInbox(userId, 30, before || null),
+    countUnread(userId),
+  ])
+  return {
+    rows,
+    unreadMessages: unread.messages,
+    notificationsExcludingMessages: unread.notificationsExcludingMessages,
+  }
+}
+
+export async function getThreadPage(conversationId: string, cursor?: { createdAt: string; id: string } | null, after?: string | null) {
+  const userId = await currentUserId()
+  if (!userId) return null
+  try {
+    return await getThreadMessages(userId, conversationId, { before: cursor || null, after: after || null })
+  } catch (err) {
+    if (err instanceof UuidError) return null
+    throw err
+  }
+}
+
+export async function getUnreadSummary() {
+  const userId = await currentUserId()
+  if (!userId) return { messages: 0, notificationsExcludingMessages: 0 }
+  return countUnread(userId)
+}
+
+export async function getUnreadMessageCount(): Promise<number> {
+  const summary = await getUnreadSummary()
+  return summary.messages
+}
 
 export async function deleteMessage(messageId: string) {
-  const user = await getAuthUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const admin = createAdminClient()
-
-  // Verify sender owns this message
-  const { data: msg } = await admin
-    .from('messages')
-    .select('id, sender_id')
-    .eq('id', messageId)
-    .single()
-
-  if (!msg || msg.sender_id !== user.id) return { error: 'Cannot delete this message' }
-
-  await admin
-    .from('messages')
-    .update({ deleted_at: new Date().toISOString(), body: '' })
-    .eq('id', messageId)
-
-  return { success: true }
+  const userId = await currentUserId()
+  if (!userId) return { ok: false as const, error: 'Not authenticated', code: 'auth', userMessage: 'Not authenticated' }
+  return removeMessage(userId, messageId)
 }
 
-// ── 5. Block/unblock user ───────────────────────────────────────────────────
-
 export async function blockUser(blockedId: string) {
-  const user = await getAuthUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const admin = createAdminClient()
-  const { error } = await (admin as any)
-    .from('user_blocks')
-    .upsert({ blocker_id: user.id, blocked_id: blockedId }, { onConflict: 'blocker_id,blocked_id' })
-
-  if (error) return { error: 'Failed to block user' }
-  return { success: true }
+  const userId = await currentUserId()
+  if (!userId) return { ok: false as const, error: 'Not authenticated', code: 'auth', userMessage: 'Not authenticated' }
+  return setBlock(userId, blockedId, true)
 }
 
 export async function unblockUser(blockedId: string) {
-  const user = await getAuthUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const admin = createAdminClient()
-  await (admin as any)
-    .from('user_blocks')
-    .delete()
-    .eq('blocker_id', user.id)
-    .eq('blocked_id', blockedId)
-
-  return { success: true }
+  const userId = await currentUserId()
+  if (!userId) return { ok: false as const, error: 'Not authenticated', code: 'auth', userMessage: 'Not authenticated' }
+  return setBlock(userId, blockedId, false)
 }
 
-// ── 6. Mute/unmute conversation ─────────────────────────────────────────────
-
 export async function muteConversation(conversationId: string) {
-  const user = await getAuthUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const admin = createAdminClient()
-  await (admin as any)
-    .from('conversation_mutes')
-    .upsert({ user_id: user.id, conversation_id: conversationId }, { onConflict: 'user_id,conversation_id' })
-
-  return { success: true }
+  const userId = await currentUserId()
+  if (!userId) return { ok: false as const, error: 'Not authenticated', code: 'auth', userMessage: 'Not authenticated' }
+  return setMute(userId, conversationId, true)
 }
 
 export async function unmuteConversation(conversationId: string) {
-  const user = await getAuthUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const admin = createAdminClient()
-  await (admin as any)
-    .from('conversation_mutes')
-    .delete()
-    .eq('user_id', user.id)
-    .eq('conversation_id', conversationId)
-
-  return { success: true }
+  const userId = await currentUserId()
+  if (!userId) return { ok: false as const, error: 'Not authenticated', code: 'auth', userMessage: 'Not authenticated' }
+  return setMute(userId, conversationId, false)
 }
-
-// ── 7. Report message ───────────────────────────────────────────────────────
 
 export async function reportMessage(messageId: string, reason: string) {
-  const user = await getAuthUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const admin = createAdminClient()
-  const { error } = await (admin as any)
-    .from('message_reports')
-    .insert({ reporter_id: user.id, message_id: messageId, reason })
-
-  if (error) return { error: 'Failed to report message' }
-  return { success: true }
+  const userId = await currentUserId()
+  if (!userId) return { ok: false as const, error: 'Not authenticated', code: 'auth', userMessage: 'Not authenticated' }
+  return reportAsRecipient(userId, messageId, reason)
 }
 
-// ── 8. Get message reports (admin only) ────────────────────────────────────
+export async function listBlockedPeople() {
+  const userId = await currentUserId()
+  if (!userId) return []
+  return listBlocked(userId)
+}
+
+export async function saveNotificationPrefs(input: {
+  appointment_requests?: boolean
+  referrals?: boolean
+  messages?: boolean
+  system_updates?: boolean
+}) {
+  const userId = await currentUserId()
+  if (!userId) return { ok: false as const, error: 'Not authenticated' }
+  return savePrefs(userId, input)
+}
+
+async function requireAdmin() {
+  const userId = await currentUserId()
+  if (!userId) return null
+  const admin = createAdminClient() as any
+  const { data } = await admin.from('profiles').select('id, role, email, full_name').eq('id', userId).maybeSingle()
+  if (!data || !['admin', 'super_admin', 'founder'].includes(data.role || '')) return null
+  return data as { id: string; role: string; email: string | null; full_name: string | null }
+}
 
 export async function getMessageReports() {
-  const user = await getAuthUser()
-  if (!user) return []
-
-  const profile = await getUserProfile(user.id)
-  if (!profile || !['admin', 'super_admin', 'founder'].includes(profile.role || '')) return []
-
-  const admin = createAdminClient()
-  const { data } = await (admin as any)
+  const profile = await requireAdmin()
+  if (!profile) return []
+  const admin = createAdminClient() as any
+  const { data } = await admin
     .from('message_reports')
     .select('id, reason, created_at, reviewed_at, reporter_id, message_id')
     .order('created_at', { ascending: false })
-    .range(0, 99) // intentional bound — admin review list
-
+    .range(0, 99)
   if (!data || data.length === 0) return []
-
-  // Fetch reporter names and message details
-  const reporterIds: string[] = Array.from(new Set<string>(data.map((r: any) => String(r.reporter_id))))
-  const messageIds: string[] = Array.from(new Set<string>(data.map((r: any) => String(r.message_id))))
-
+  const reporterIds: string[] = Array.from(new Set<string>(data.map((row: any) => String(row.reporter_id))))
+  const messageIds: string[] = Array.from(new Set<string>(data.map((row: any) => String(row.message_id))))
   const [{ data: reporters }, { data: msgs }] = await Promise.all([
     admin.from('profiles').select('id, full_name').in('id', reporterIds),
     admin.from('messages').select('id, body, sender_id, created_at').in('id', messageIds),
   ])
-
-  const reporterMap = new Map((reporters || []).map((r: any) => [r.id, r.full_name]))
-  const msgMap = new Map((msgs || []).map((m: any) => [m.id, m]))
-
-  // Get sender names
-  const senderIds = [...new Set((msgs || []).map((m: any) => m.sender_id))]
-  const { data: senders } = await admin.from('profiles').select('id, full_name').in('id', senderIds.length > 0 ? senderIds : ['none'])
-  const senderMap = new Map((senders || []).map((s: any) => [s.id, s.full_name]))
-
-  return data.map((r: any) => {
-    const msg = msgMap.get(r.message_id)
+  const reporterMap = new Map((reporters || []).map((row: any) => [row.id, row.full_name]))
+  const msgMap = new Map((msgs || []).map((row: any) => [row.id, row]))
+  const senderIds = [...new Set((msgs || []).map((row: any) => row.sender_id).filter(Boolean))]
+  const { data: senders } = await admin.from('profiles').select('id, full_name').in('id', senderIds.length > 0 ? senderIds : ['00000000-0000-4000-8000-000000000000'])
+  const senderMap = new Map((senders || []).map((row: any) => [row.id, row.full_name]))
+  return data.map((row: any) => {
+    const msg = msgMap.get(row.message_id) as any
     return {
-      id: r.id,
-      reporterName: reporterMap.get(r.reporter_id) || 'Unknown',
-      reason: r.reason,
+      id: row.id,
+      reporterName: reporterMap.get(row.reporter_id) || 'Unknown',
+      reason: row.reason,
       messageBody: msg?.body || '[deleted]',
       messageSenderName: senderMap.get(msg?.sender_id) || 'Unknown',
       messageDate: msg?.created_at,
-      reportDate: r.created_at,
-      reviewed: !!r.reviewed_at,
+      reportDate: row.created_at,
+      reviewed: !!row.reviewed_at,
     }
   })
 }
 
 export async function markReportReviewed(reportId: string) {
-  const user = await getAuthUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const profile = await getUserProfile(user.id)
-  if (!profile || !['admin', 'super_admin', 'founder'].includes(profile.role || '')) {
-    return { error: 'Admin access required' }
+  const profile = await requireAdmin()
+  if (!profile) return { error: 'Admin access required' }
+  try {
+    assertUuid(reportId)
+  } catch (err) {
+    if (err instanceof UuidError) return { error: 'Invalid report' }
+    throw err
   }
-
-  const admin = createAdminClient()
-  await (admin as any)
-    .from('message_reports')
-    .update({ reviewed_at: new Date().toISOString(), reviewed_by: user.id })
-    .eq('id', reportId)
-
+  const admin = createAdminClient() as any
+  await admin.from('message_reports').update({ reviewed_at: new Date().toISOString(), reviewed_by: profile.id }).eq('id', reportId)
   return { success: true }
 }
 
-// ── 9. Get unread message count (for nav badge) ─────────────────────────────
-
-export async function getUnreadMessageCount(): Promise<number> {
-  const user = await getAuthUser()
-  if (!user) return 0
-
-  const admin = createAdminClient()
-  const { count } = await admin
-    .from('messages')
-    .select('id', { count: 'exact', head: true })
-    .eq('recipient_id', user.id)
-    .is('read_at', null)
-    .is('deleted_at', null)
-
-  return count || 0
+async function findBroadcastConversation(db: any, a: string, b: string): Promise<string | null> {
+  const first = await db.from('conversations').select('id').eq('participant_one_id', a).eq('participant_two_id', b).eq('context_type', 'broadcast').limit(1).maybeSingle()
+  if (first.data?.id) return first.data.id as string
+  const second = await db.from('conversations').select('id').eq('participant_one_id', b).eq('participant_two_id', a).eq('context_type', 'broadcast').limit(1).maybeSingle()
+  return (second.data?.id as string) || null
 }
-
-// ── 9. Create context-attached conversation ─────────────────────────────────
-
-export async function createContextConversation(
-  otherUserId: string,
-  contextType: 'referral' | 'job_application' | 'chiromatch',
-  contextId: string,
-  systemMessage: string
-) {
-  const user = await getAuthUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const admin = createAdminClient()
-
-  // Check for existing conversation with same context
-  const { data: existing } = await admin
-    .from('conversations')
-    .select('id')
-    .eq('context_type', contextType)
-    .eq('context_id', contextId)
-    .limit(1) // intentional bound
-    .maybeSingle()
-
-  if (existing) return { success: true, conversationId: existing.id }
-
-  // Create conversation
-  const { data: conv, error: convError } = await admin
-    .from('conversations')
-    .insert({
-      participant_one_id: user.id,
-      participant_two_id: otherUserId,
-      context_type: contextType,
-      context_id: contextId,
-    })
-    .select('id')
-    .single()
-
-  if (convError || !conv) return { error: 'Failed to create conversation' }
-
-  // Insert system message
-  await admin
-    .from('messages')
-    .insert({
-      conversation_id: conv.id,
-      sender_id: user.id,
-      recipient_id: otherUserId,
-      body: systemMessage,
-      message_type: 'system',
-    })
-
-  // Update last_message_at
-  await admin
-    .from('conversations')
-    .update({ last_message_at: new Date().toISOString() })
-    .eq('id', conv.id)
-
-  return { success: true, conversationId: conv.id }
-}
-
-// ── 10. Broadcast (admin only) ──────────────────────────────────────────────
 
 export async function sendBroadcast(
   subject: string,
@@ -616,164 +244,103 @@ export async function sendBroadcast(
   segment: 'all_pro' | 'all_students' | 'founding_members' | string,
   dryRun: boolean = false
 ) {
-  const user = await getAuthUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const admin = createAdminClient()
-  const profile = await getUserProfile(user.id)
-  if (!profile || !['admin', 'super_admin', 'founder'].includes(profile.role || '')) {
-    return { error: 'Admin access required' }
-  }
-
-  // Build recipient list based on segment
+  const profile = await requireAdmin()
+  if (!profile) return { error: 'Admin access required' }
+  const admin = createAdminClient() as any
   let recipients: { id: string; full_name: string | null }[] = []
 
   if (segment === 'all_pro') {
-    const { data: doctors } = await admin
-      .from('doctors')
-      .select('user_id')
-      .eq('verification_status', 'verified')
-      .eq('membership_tier', 'pro')
-      .not('user_id', 'is', null)
-    const userIds = (doctors || []).map((d: any) => d.user_id).filter(Boolean)
+    const { data: doctors } = await admin.from('doctors').select('user_id').eq('verification_status', 'verified').eq('membership_tier', 'pro').not('user_id', 'is', null)
+    const userIds = (doctors || []).map((row: any) => row.user_id).filter(Boolean)
     if (userIds.length > 0) {
-      const { data: profiles } = await admin
-        .from('profiles')
-        .select('id, full_name')
-        .in('id', userIds)
+      const { data: profiles } = await admin.from('profiles').select('id, full_name').in('id', userIds)
       recipients = profiles || []
     }
   } else if (segment === 'all_students') {
-    const { data: profiles } = await admin
-      .from('profiles')
-      .select('id, full_name')
-      .eq('role', 'student')
+    const { data: profiles } = await admin.from('profiles').select('id, full_name').eq('role', 'student')
     recipients = profiles || []
   } else if (segment === 'founding_members') {
-    const { data: doctors } = await admin
-      .from('doctors')
-      .select('user_id')
-      .eq('is_founding_member', true)
-      .not('user_id', 'is', null)
-    const userIds = (doctors || []).map((d: any) => d.user_id).filter(Boolean)
+    const { data: doctors } = await admin.from('doctors').select('user_id').eq('is_founding_member', true).not('user_id', 'is', null)
+    const userIds = (doctors || []).map((row: any) => row.user_id).filter(Boolean)
     if (userIds.length > 0) {
-      const { data: profiles } = await admin
-        .from('profiles')
-        .select('id, full_name')
-        .in('id', userIds)
+      const { data: profiles } = await admin.from('profiles').select('id, full_name').in('id', userIds)
       recipients = profiles || []
     }
   } else if (segment.startsWith('country:')) {
     const country = segment.split(':')[1]
-    const { data: doctors } = await admin
-      .from('doctors')
-      .select('user_id')
-      .eq('country', country)
-      .eq('verification_status', 'verified')
-      .not('user_id', 'is', null)
-    const userIds = (doctors || []).map((d: any) => d.user_id).filter(Boolean)
+    const { data: doctors } = await admin.from('doctors').select('user_id').eq('country', country).eq('verification_status', 'verified').not('user_id', 'is', null)
+    const userIds = (doctors || []).map((row: any) => row.user_id).filter(Boolean)
     if (userIds.length > 0) {
-      const { data: profiles } = await admin
-        .from('profiles')
-        .select('id, full_name')
-        .in('id', userIds)
+      const { data: profiles } = await admin.from('profiles').select('id, full_name').in('id', userIds)
       recipients = profiles || []
     }
   } else if (segment.startsWith('state:')) {
     const state = segment.split(':')[1]
-    const { data: doctors } = await admin
-      .from('doctors')
-      .select('user_id')
-      .eq('state', state)
-      .eq('verification_status', 'verified')
-      .not('user_id', 'is', null)
-    const userIds = (doctors || []).map((d: any) => d.user_id).filter(Boolean)
+    const { data: doctors } = await admin.from('doctors').select('user_id').eq('state', state).eq('verification_status', 'verified').not('user_id', 'is', null)
+    const userIds = (doctors || []).map((row: any) => row.user_id).filter(Boolean)
     if (userIds.length > 0) {
-      const { data: profiles } = await admin
-        .from('profiles')
-        .select('id, full_name')
-        .in('id', userIds)
+      const { data: profiles } = await admin.from('profiles').select('id, full_name').in('id', userIds)
       recipients = profiles || []
     }
   } else if (segment.startsWith('user:')) {
-    // Single user (for testing)
     const targetId = segment.split(':')[1]
-    const { data: p } = await admin.from('profiles').select('id, full_name').eq('id', targetId).single()
-    if (p) recipients = [p]
+    try {
+      assertUuid(targetId)
+    } catch (err) {
+      if (err instanceof UuidError) return { error: 'Invalid user' }
+      throw err
+    }
+    const { data: person } = await admin.from('profiles').select('id, full_name').eq('id', targetId).maybeSingle()
+    if (person) recipients = [person]
   }
 
-  // Filter out self
-  recipients = recipients.filter(r => r.id !== user.id)
-
+  recipients = recipients.filter((row) => row.id !== profile.id)
   if (recipients.length === 0) return { error: 'No recipients found for this segment' }
-
   if (dryRun) {
     return {
       success: true,
       dryRun: true,
       recipientCount: recipients.length,
-      recipients: recipients.map(r => ({ id: r.id, name: r.full_name })),
+      recipients: recipients.map((row) => ({ id: row.id, name: row.full_name })),
       subject,
       bodyPreview: body.slice(0, 200),
     }
   }
 
-  // Create individual conversations + messages (rate limited, 10/sec)
+  const validated = validateBody(body)
+  if (!validated.ok) return { error: validated.userMessage }
   let created = 0
   for (const recipient of recipients) {
-    // Check for existing broadcast conversation
-    const { data: existing } = await admin
-      .from('conversations')
-      .select('id')
-      .or(`and(participant_one_id.eq.${user.id},participant_two_id.eq.${recipient.id}),and(participant_one_id.eq.${recipient.id},participant_two_id.eq.${user.id})`)
-      .eq('context_type', 'broadcast')
-      .limit(1) // intentional bound
-      .maybeSingle()
-
-    let convId: string
-    if (existing) {
-      convId = existing.id
-    } else {
-      const { data: conv } = await admin
-        .from('conversations')
-        .insert({
-          participant_one_id: user.id,
-          participant_two_id: recipient.id,
-          context_type: 'broadcast',
-        })
-        .select('id')
-        .single()
+    let convId = await findBroadcastConversation(admin, profile.id, recipient.id)
+    if (!convId) {
+      const { data: conv } = await admin.from('conversations').insert({
+        participant_one_id: profile.id,
+        participant_two_id: recipient.id,
+        context_type: 'broadcast',
+      }).select('id').single()
       if (!conv) continue
       convId = conv.id
     }
-
-    await admin.from('messages').insert({
+    const inserted = await admin.from('messages').insert({
       conversation_id: convId,
-      sender_id: user.id,
+      sender_id: profile.id,
       recipient_id: recipient.id,
-      body,
+      body: validated.body,
       message_type: 'user',
     })
-
-    await admin
-      .from('conversations')
-      .update({ last_message_at: new Date().toISOString() })
-      .eq('id', convId)
-
-    // In-app notification
+    if (inserted.error) continue
+    await admin.from('conversations').update({ last_message_at: new Date().toISOString() }).eq('id', convId)
     await admin.from('notifications').insert({
       user_id: recipient.id,
-      title: `Message from Dr. Ray`,
-      body: body.slice(0, 100) + (body.length > 100 ? '...' : ''),
+      title: 'Message from Dr. Ray',
+      body: 'You have a new message from Dr. Ray.',
       type: 'message',
-      link: '/doctor/messages',
+      link: `/doctor/messages?c=${convId}`,
       priority: 'info',
     })
-
     created++
   }
 
-  // Log broadcast
   await admin.from('audit_logs').insert({
     category: 'COMMUNICATION',
     event: `In-Platform Broadcast: ${subject}`,
@@ -783,6 +350,5 @@ export async function sendBroadcast(
     severity: 'Medium',
     metadata: { recipients: created, segment, subject },
   })
-
   return { success: true, recipientCount: created }
 }

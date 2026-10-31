@@ -5,6 +5,7 @@ import { boundingBox, isValidCoord } from '@/lib/geo';
 import { getThresholds } from '@/lib/thresholds';
 import { deriveMembership } from '@/lib/portal/membership';
 import { interpretLocation, referralDistance, shouldResolvePlace, type Place } from '@/lib/referrals/pure';
+import { hiddenTestUserIds } from '@/lib/profiles/test-users';
 
 export type ReferableDoctor = {
   id: string;
@@ -164,7 +165,9 @@ export async function searchReferableDoctors(input: {
   const merged = new Map<string, DoctorRow>();
   for (const row of [...locationRows, ...nameRows]) merged.set(row.id, row);
   const stripeIds = await stripeSet(admin, [...merged.values()].map((row) => row.user_id).filter(Boolean) as string[]);
+  const hidden = new Set(await hiddenTestUserIds());
   const doctors = [...merged.values()]
+    .filter((row) => !row.user_id || !hidden.has(row.user_id))
     .filter((row) => paid(row, stripeIds))
     .map((row) => toDoctor(row, origin))
     .filter((row) => row.distanceMiles == null || row.distanceMiles <= radius)

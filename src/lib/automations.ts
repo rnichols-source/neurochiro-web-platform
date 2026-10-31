@@ -2,6 +2,9 @@ import 'server-only';
 import { Resend } from 'resend';
 import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { messageThreadUrl, settingsUrl, shouldSendUnreadEmail, unreadEmailHtml } from '@/lib/messaging/email';
+import { getNotificationPrefs } from '@/lib/messaging/prefs';
+import { recordThreadNotification } from '@/lib/messaging/thread-notification';
 
 /**
  * LAZY RESEND LOADER
@@ -233,6 +236,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
   try {
     const supabaseAdmin = getSupabaseAdmin();
     let prefs = null;
+    let unified = { messages: true, referrals: true, emailEnabled: true };
     if (supabaseAdmin && payload.userId) {
       const { data } = await supabaseAdmin
         .from('notification_preferences')
@@ -240,9 +244,10 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         .eq('user_id', payload.userId)
         .single();
       prefs = data;
+      unified = await getNotificationPrefs(payload.userId);
     }
 
-    const emailEnabled = prefs?.email_enabled ?? true;
+    const emailEnabled = unified.emailEnabled;
     const smsEnabled = prefs?.sms_enabled ?? false;
 
     switch (eventType) {
@@ -624,7 +629,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
           await insertNotification(payload.userId, 'New Referral Received! 📍', `Dr. ${payload.referrerName} sent you a new patient referral: ${payload.patientName}.`, 'referral', '/doctor/messages', 'urgent');
         }
 
-        if (prefs?.referral_alerts ?? true) {
+        if (unified.referrals) {
           if (emailEnabled && payload.doctorEmail) {
             await sendPremiumEmail({
               to: payload.doctorEmail,
@@ -921,21 +926,19 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         if (supabaseAdmin && emailEnabled) {
           const { recipient_id, sender_id } = payload;
           const MESSAGE_EMAIL_DAILY_CAP = 10;
-
-          // 1. Check if the message is still unread
           const { data: unreadMsg } = await supabaseAdmin
             .from('messages')
             .select('id, conversation_id, body')
             .eq('sender_id', sender_id)
             .eq('recipient_id', recipient_id)
             .is('read_at', null)
+            .is('deleted_at', null)
             .order('created_at', { ascending: false })
-            .limit(1) // intentional bound
+            .limit(1)
             .maybeSingle();
 
-          if (!unreadMsg) break; // Message was read within the 15-min window
+          if (!unreadMsg?.conversation_id) break;
 
-          // 2. Check per-conversation dedup: don't re-email for same conversation until read
           const { data: existingLog } = await (supabaseAdmin as any)
             .from('message_email_log')
             .select('id, sent_at')
@@ -943,9 +946,6 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             .eq('conversation_id', unreadMsg.conversation_id)
             .maybeSingle();
 
-          if (existingLog) break; // Already emailed about this conversation's unread messages
-
-          // 3. Check daily cap
           const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
           const { count: dailyCount } = await (supabaseAdmin as any)
             .from('message_email_log')
@@ -953,32 +953,41 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             .eq('user_id', recipient_id)
             .gte('sent_at', oneDayAgo);
 
-          if ((dailyCount || 0) >= MESSAGE_EMAIL_DAILY_CAP) {
-            console.log(`[MSG_EMAIL] Daily cap (${MESSAGE_EMAIL_DAILY_CAP}) reached for user ${recipient_id}, skipping`);
-            break;
-          }
+          const mute = await (supabaseAdmin as any)
+            .from('conversation_mutes')
+            .select('id')
+            .eq('user_id', recipient_id)
+            .eq('conversation_id', unreadMsg.conversation_id)
+            .limit(1);
+          const recipientPrefs = await getNotificationPrefs(recipient_id);
+          if (!shouldSendUnreadEmail({
+            prefsMessages: recipientPrefs.messages,
+            muted: Boolean(mute.data?.length),
+            alreadyLogged: Boolean(existingLog),
+            stillUnread: true,
+            dailyCount: dailyCount || 0,
+            dailyCap: MESSAGE_EMAIL_DAILY_CAP,
+          })) break;
 
-          // 4. Send the email
           const { data: recipient } = await supabaseAdmin.from('profiles').select('email, full_name, role').eq('id', recipient_id).single();
           const { data: sender } = await supabaseAdmin.from('profiles').select('full_name').eq('id', sender_id).single();
-
           if (recipient?.email) {
-            const messagesUrl = recipient.role === 'student' ? 'https://neurochiro.co/student/messages'
-              : recipient.role === 'admin' || recipient.role === 'super_admin' || recipient.role === 'founder' ? 'https://neurochiro.co/admin/inbox'
-              : 'https://neurochiro.co/doctor/messages';
-
-            const preview = (unreadMsg.body || '').slice(0, 200) + ((unreadMsg.body || '').length > 200 ? '...' : '');
-
+            const preview = (unreadMsg.body || '').slice(0, 200);
+            const ctaUrl = messageThreadUrl(recipient.role, unreadMsg.conversation_id);
             await sendPremiumEmail({
               to: recipient.email,
-              subject: `New Message from ${sender?.full_name || 'a member'}`,
-              title: 'New Message',
-              body: `<p>Hi ${recipient.full_name || 'Member'}, you have an unread message from <strong>${sender?.full_name || 'someone in the network'}</strong>.</p><p style="color:#6B7280;font-style:italic;border-left:3px solid #D66829;padding-left:12px;margin:16px 0;">${preview}</p><p>Log in to reply.</p>`,
-              ctaText: 'View Message',
-              ctaUrl: messagesUrl
+              subject: `New message from ${(sender?.full_name || 'a member').replace(/[\r\n]/g, ' ')}`,
+              title: 'New message',
+              body: unreadEmailHtml({
+                recipientName: recipient.full_name || 'Member',
+                senderName: sender?.full_name || 'a member',
+                preview,
+                ctaUrl,
+                settingsUrl: settingsUrl(recipient.role),
+              }),
+              ctaText: 'View message',
+              ctaUrl,
             });
-
-            // 5. Log the send to prevent re-emailing for this conversation
             await (supabaseAdmin as any)
               .from('message_email_log')
               .upsert(
@@ -1182,21 +1191,10 @@ export const Automations = {
   onSubscriptionCanceled: async (data: any) => {
     await enqueue('subscription_canceled', { stripeData: data });
   },
-  onMessageSent: async (senderId: string, senderName: string, recipientId: string, recipientRole: string) => {
-    const messagesLink = recipientRole === 'student' ? '/student/messages'
-      : recipientRole === 'admin' || recipientRole === 'super_admin' || recipientRole === 'founder' ? '/admin/inbox'
-      : '/doctor/messages';
-    // In-app notification — type 'message' (not 'system')
-    await insertNotification(
-      recipientId,
-      `Message from ${senderName}`,
-      `You have a new message from ${senderName}.`,
-      'message',
-      messagesLink,
-      'info'
-    );
-    // Delayed email (15 min) — only sent if still unread
-    await enqueue('unread_message_email', { userId: recipientId, recipient_id: recipientId, sender_id: senderId }, 15);
+  onMessageSent: async (senderId: string, senderName: string, recipientId: string, recipientRole: string, conversationId?: string) => {
+    if (!conversationId) return;
+    await recordThreadNotification({ senderId, senderName, recipientId, recipientRole, conversationId });
+    await enqueue('unread_message_email', { userId: recipientId, recipient_id: recipientId, sender_id: senderId, conversation_id: conversationId }, 15);
   },
   retryAutomation: async (queueId: string) => {
     const supabaseAdmin = getSupabaseAdmin();
