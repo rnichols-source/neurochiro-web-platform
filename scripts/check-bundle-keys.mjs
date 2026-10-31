@@ -69,7 +69,7 @@ async function previewText(pageUrl) {
   const html = await page.text();
   const origin = new URL(pageUrl).origin;
   const srcs = new Set();
-  for (const match of html.matchAll(/(?:src|href)="([^"]*\/_next\/static\/chunks\/[^"]+\.js)"/g)) {
+  for (const match of html.matchAll(/(?:src|href)="([^"]*\/_next\/static\/[^"]+\.js)"/g)) {
     const src = match[1];
     srcs.add(src.startsWith('http') ? src : `${origin}${src.startsWith('/') ? '' : '/'}${src}`);
   }
