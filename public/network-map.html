@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <title>NeuroChiro Network Map</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
-    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous" />
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; }
@@ -55,10 +55,22 @@
     var selectedDoctorId = null;
     var pendingFeatures = null;
     var layersReady = false;
+    var patientMobile = window.innerWidth < 1024;
+    var pendingUser = null;
+    window.__ncMapFeatureCount = 0;
+
+    function escapeHtml(value) {
+        return String(value == null ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
 
     var map = new maplibregl.Map({
         container: 'map',
-        style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+        style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
         center: [-98, 38],
         zoom: 4,
         maxPitch: 60,
@@ -77,10 +89,10 @@
 
     // ── Popup helper ──
     function createPopupHtml(props) {
-        var name = props.name || 'Specialist';
-        var clinic = props.clinic || '';
-        var loc = [props.city || '', props.state || ''].filter(Boolean).join(', ');
-        var slug = props.slug || '';
+        var name = escapeHtml(props.name || 'Specialist');
+        var clinic = escapeHtml(props.clinic || '');
+        var loc = escapeHtml([props.city || '', props.state || ''].filter(Boolean).join(', '));
+        var slug = escapeHtml(props.slug || '');
         var html = '<div class="popup-card">';
         html += '<div class="doctor-name">' + name + '</div>';
         if (clinic) html += '<div class="clinic-name">' + clinic + '</div>';
@@ -90,36 +102,98 @@
         return html;
     }
 
+    function paintSelection(id) {
+        if (!map.getLayer('doctor-dots')) return;
+        var radius = id
+            ? ['case', ['==', ['get', 'doctorId'], String(id)], 16, 12]
+            : 12;
+        var stroke = id
+            ? ['case', ['==', ['get', 'doctorId'], String(id)], 4, 2]
+            : 2;
+        map.setPaintProperty('doctor-dots', 'circle-radius', radius);
+        map.setPaintProperty('doctor-dots', 'circle-stroke-width', stroke);
+    }
+
     // ── Setup GL layers (called once on map load) ──
     function setupLayers() {
-        // Simple GeoJSON source — no clustering (157 docs is fine without it)
         map.addSource('doctors', {
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features: [] },
+            cluster: true,
+            clusterRadius: 50,
+            clusterMaxZoom: 14
+        });
+        map.addSource('user', {
             type: 'geojson',
             data: { type: 'FeatureCollection', features: [] }
         });
 
-        // Doctor dots — scale with zoom to prevent overlap at low zoom
+        map.addLayer({
+            id: 'clusters',
+            type: 'circle',
+            source: 'doctors',
+            filter: ['has', 'point_count'],
+            paint: {
+                'circle-color': '#D66829',
+                'circle-radius': ['step', ['get', 'point_count'], 18, 10, 22, 50, 28],
+                'circle-stroke-width': 3,
+                'circle-stroke-color': '#ffffff'
+            }
+        });
+        try {
+            map.addLayer({
+                id: 'cluster-count',
+                type: 'symbol',
+                source: 'doctors',
+                filter: ['has', 'point_count'],
+                layout: {
+                    'text-field': '{point_count_abbreviated}',
+                    'text-size': 13,
+                    'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular']
+                },
+                paint: { 'text-color': '#ffffff' }
+            });
+        } catch (err) {
+            console.error('[MAP] cluster labels skipped', err);
+        }
+
+        // Visual pin is at least 24px across. The hit layer below is 44px.
         map.addLayer({
             id: 'doctor-dots',
             type: 'circle',
             source: 'doctors',
+            filter: ['!', ['has', 'point_count']],
             paint: {
                 'circle-color': '#D66829',
-                'circle-radius': [
-                    'interpolate', ['linear'], ['zoom'],
-                    3, 4,     // zoom 3 → 4px
-                    6, 6,     // zoom 6 → 6px
-                    10, 8,    // zoom 10 → 8px
-                    14, 10    // zoom 14 → 10px
-                ],
-                'circle-stroke-width': [
-                    'interpolate', ['linear'], ['zoom'],
-                    3, 1.5,
-                    10, 2.5
-                ],
-                'circle-stroke-color': '#ffffff',
-                'circle-opacity': 1,
-                'circle-stroke-opacity': 1
+                'circle-radius': 12,
+                'circle-stroke-width': 2,
+                'circle-stroke-color': '#ffffff'
+            }
+        });
+        map.addLayer({
+            id: 'doctor-hit',
+            type: 'circle',
+            source: 'doctors',
+            filter: ['!', ['has', 'point_count']],
+            paint: {
+                'circle-radius': 22,
+                'circle-color': '#D66829',
+                'circle-opacity': 0
+            }
+        });
+        if (pendingUser) {
+            map.getSource('user').setData({ type: 'FeatureCollection', features: pendingUser });
+            pendingUser = null;
+        }
+        map.addLayer({
+            id: 'user-dot',
+            type: 'circle',
+            source: 'user',
+            paint: {
+                'circle-radius': 8,
+                'circle-color': '#3B82F6',
+                'circle-stroke-width': 3,
+                'circle-stroke-color': '#ffffff'
             }
         });
 
@@ -128,24 +202,19 @@
 
         // ── Interactions ──
 
-        // Click doctor dot → popup + notify parent
-        map.on('click', 'doctor-dots', function(e) {
-            if (!e.features || !e.features.length) return;
-            var feature = e.features[0];
+        function openDoctor(feature) {
             var coords = feature.geometry.coordinates.slice();
-            var props = feature.properties;
-
+            var props = feature.properties || {};
             selectedDoctorId = props.doctorId;
-
-            if (activePopup) activePopup.remove();
-            activePopup = new maplibregl.Popup({ offset: 14, closeButton: true, closeOnClick: true, maxWidth: '280px', focusAfterOpen: false })
-                .setLngLat(coords)
-                .setHTML(createPopupHtml(props))
-                .addTo(map);
-            activePopup.on('close', function() { activePopup = null; });
-
-            map.flyTo({ center: coords, zoom: Math.max(map.getZoom(), 12), duration: 600 });
-
+            paintSelection(selectedDoctorId);
+            if (!patientMobile) {
+                if (activePopup) activePopup.remove();
+                activePopup = new maplibregl.Popup({ offset: 14, closeButton: true, closeOnClick: true, maxWidth: '280px', focusAfterOpen: false })
+                    .setLngLat(coords)
+                    .setHTML(createPopupHtml(props))
+                    .addTo(map);
+                activePopup.on('close', function() { activePopup = null; });
+            }
             window.parent.postMessage({
                 type: 'marker-click',
                 data: {
@@ -158,36 +227,70 @@
                     photo_url: props.photo_url || ''
                 }
             }, window.location.origin);
+        }
+
+        map.on('click', 'doctor-hit', function(e) {
+            if (!e.features || !e.features.length) return;
+            openDoctor(e.features[0]);
+        });
+        map.on('click', 'clusters', function(e) {
+            var features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+            if (!features.length) return;
+            var clusterId = features[0].properties.cluster_id;
+            var center = features[0].geometry.coordinates;
+            map.getSource('doctors').getClusterExpansionZoom(clusterId, function(err, zoom) {
+                if (err) return;
+                map.easeTo({ center: center, zoom: zoom });
+            });
         });
 
-        // Click empty space → deselect
         map.on('click', function(e) {
-            var hits = map.queryRenderedFeatures(e.point, { layers: ['doctor-dots'] });
+            var hits = map.queryRenderedFeatures(e.point, { layers: ['doctor-hit', 'clusters'] });
             if (hits.length === 0 && selectedDoctorId) {
                 selectedDoctorId = null;
+                paintSelection(null);
                 if (activePopup) { activePopup.remove(); activePopup = null; }
                 window.parent.postMessage({ type: 'marker-deselect' }, window.location.origin);
             }
         });
 
-        // Cursor
-        ['doctor-dots'].forEach(function(layer) {
+        ['doctor-hit', 'clusters'].forEach(function(layer) {
             map.on('mouseenter', layer, function() { map.getCanvas().style.cursor = 'pointer'; });
             map.on('mouseleave', layer, function() { map.getCanvas().style.cursor = ''; });
+        });
+
+        map.on('moveend', function(e) {
+            if (!e.originalEvent) return;
+            var b = map.getBounds();
+            window.parent.postMessage({
+                type: 'map-move',
+                bounds: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
+                zoom: map.getZoom()
+            }, window.location.origin);
         });
     }
 
     // ── Data management ──
     function setFeatures(features) {
-        console.log('[MAP] setFeatures called with', features.length, 'features');
-        pendingFeatures = features;
+        pendingFeatures = features || [];
+        window.__ncMapFeatureCount = pendingFeatures.length;
+        console.log('[MAP] setFeatures called with', pendingFeatures.length, 'features');
         if (!layersReady) {
             console.log('[MAP] Layers not ready, features queued');
             return;
         }
-        if (features.length === 0) {
+        if (pendingFeatures.length === 0) {
+            if (activePopup) { activePopup.remove(); activePopup = null; }
             window.parent.postMessage({ type: 'map-empty' }, window.location.origin);
         }
+        features = pendingFeatures.map(function(f, i) {
+            return {
+                type: 'Feature',
+                id: (f.properties && f.properties.doctorId) || String(i),
+                geometry: f.geometry,
+                properties: f.properties || {}
+            };
+        });
         try {
             var source = map.getSource('doctors');
             if (source) {
@@ -222,10 +325,12 @@
                 var coords = f.geometry.coordinates;
                 map.flyTo({ center: coords, zoom: Math.max(map.getZoom(), 13), duration: 800, essential: true });
 
-                if (activePopup) activePopup.remove();
-                activePopup = new maplibregl.Popup({ offset: 14, closeButton: true, closeOnClick: true, maxWidth: '280px', focusAfterOpen: false })
-                    .setLngLat(coords).setHTML(createPopupHtml(f.properties)).addTo(map);
-                activePopup.on('close', function() { activePopup = null; });
+                if (!patientMobile) {
+                    if (activePopup) activePopup.remove();
+                    activePopup = new maplibregl.Popup({ offset: 14, closeButton: true, closeOnClick: true, maxWidth: '280px', focusAfterOpen: false })
+                        .setLngLat(coords).setHTML(createPopupHtml(f.properties)).addTo(map);
+                    activePopup.on('close', function() { activePopup = null; });
+                }
 
                 window.parent.postMessage({ type: 'marker-click', data: f.properties }, window.location.origin);
                 return;
@@ -283,10 +388,10 @@
         reportReady();
 
         // Push any features that arrived before map was ready
-        if (pendingFeatures && pendingFeatures.length > 0) {
+        if (pendingFeatures) {
             console.log('[MAP] Flushing', pendingFeatures.length, 'pending features');
             setFeatures(pendingFeatures);
-            fitToFeatures(pendingFeatures);
+            if (pendingFeatures.length > 0) fitToFeatures(pendingFeatures);
         }
 
         // Data is sent by parent via postMessage — no self-loading
@@ -305,19 +410,38 @@
             case 'force-raw-markers':
                 var features = d.data || [];
                 console.log('[MAP] Received force-raw-markers with', features.length, 'features');
-                if (features.length > 0) {
-                    setFeatures(features);
-                    fitToFeatures(features);
-                }
+                setFeatures(features);
+                if (features.length > 0) fitToFeatures(features);
                 break;
 
             case 'update-markers':
                 var updatedFeatures = d.data || [];
                 console.log('[MAP] Received update-markers with', updatedFeatures.length, 'features');
-                if (updatedFeatures.length > 0) {
-                    setFeatures(updatedFeatures);
-                    // No fitToFeatures — keep current view
+                setFeatures(updatedFeatures);
+                break;
+
+            case 'set-mobile':
+                patientMobile = !!d.mobile;
+                if (patientMobile && activePopup) { activePopup.remove(); activePopup = null; }
+                break;
+
+            case 'set-user-location':
+                var userSource = map.getSource('user');
+                var userFeatures = [];
+                if (d.lat != null && d.lng != null && !isNaN(Number(d.lat)) && !isNaN(Number(d.lng))) {
+                    userFeatures.push({
+                        type: 'Feature',
+                        geometry: { type: 'Point', coordinates: [Number(d.lng), Number(d.lat)] },
+                        properties: {}
+                    });
                 }
+                if (userSource) userSource.setData({ type: 'FeatureCollection', features: userFeatures });
+                else pendingUser = userFeatures;
+                break;
+
+            case 'highlight-marker':
+                selectedDoctorId = d.doctorId || null;
+                paintSelection(selectedDoctorId);
                 break;
 
             case 'set-view':

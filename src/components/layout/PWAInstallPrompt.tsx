@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Share, X, Download, Smartphone, Info } from "lucide-react";
+import { Share, X, Smartphone, Info } from "lucide-react";
 
 export default function PWAInstallPrompt() {
+  const pathname = usePathname() || "";
+  const hideOnPatientPage = pathname === "/" || pathname.startsWith("/directory") || pathname.startsWith("/chiropractor");
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isSafari, setIsSafari] = useState(false);
@@ -38,7 +41,7 @@ export default function PWAInstallPrompt() {
       
       // Logic to show prompt (e.g., after 5 seconds)
       const hasSeenPrompt = localStorage.getItem('nc_pwa_prompt_seen');
-      if (!isStandaloneMode && !hasSeenPrompt) {
+      if (!isStandaloneMode && !hasSeenPrompt && !hideOnPatientPage) {
         setTimeout(() => setShowPrompt(true), 5000);
       }
     };
@@ -47,14 +50,14 @@ export default function PWAInstallPrompt() {
 
     // If it's a device where we can't capture the event (iOS or Safari MacOS)
     // we show the instructions anyway because we can't trigger the native prompt
-    if ((isIOSDevice || isSafariBrowser) && !isStandaloneMode && !localStorage.getItem('nc_pwa_prompt_seen')) {
+    if ((isIOSDevice || isSafariBrowser) && !isStandaloneMode && !localStorage.getItem('nc_pwa_prompt_seen') && !hideOnPatientPage) {
       setTimeout(() => setShowPrompt(true), 5000);
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []); // Run once on mount
+  }, [hideOnPatientPage]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
@@ -86,7 +89,7 @@ export default function PWAInstallPrompt() {
     localStorage.setItem('nc_pwa_prompt_seen', 'true');
   };
 
-  if (isStandalone) return null;
+  if (isStandalone || hideOnPatientPage) return null;
 
   return (
     <AnimatePresence>

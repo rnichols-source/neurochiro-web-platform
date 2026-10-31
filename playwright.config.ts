@@ -36,17 +36,39 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      testIgnore: /directory-search/,
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
       name: 'firefox',
+      testIgnore: /directory-search/,
       use: { ...devices['Desktop Firefox'] },
     },
 
     {
       name: 'webkit',
+      testIgnore: /directory-search/,
       use: { ...devices['Desktop Safari'] },
+    },
+
+    {
+      name: 'directory-mobile',
+      testMatch: /directory-search/,
+      use: {
+        ...devices['iPhone 13'],
+        baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000',
+      },
+    },
+
+    {
+      name: 'directory-desktop',
+      testMatch: /directory-search/,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 900 },
+        baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000',
+      },
     },
 
     /* Test against mobile viewports. */

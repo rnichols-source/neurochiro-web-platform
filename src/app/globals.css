@@ -114,3 +114,17 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #D66829; 
 }
+
+/* The directory map/list pill sits above the slim cookie bar. */
+html[data-cookie-bar="1"] .nc-view-toggle {
+  bottom: calc(88px + env(safe-area-inset-bottom)) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

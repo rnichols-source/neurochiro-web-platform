@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase-admin';
 import { haversineDistance, boundingBox, isValidCoord } from '@/lib/geo';
 import { resolveStateCode } from '@/lib/resolve-state';
 import { getThresholds } from '@/lib/thresholds';
+import { EUROPEAN_ISO, countryHint, toDirectoryCountry } from '@/lib/directory-countries';
 // city-data import removed — using resolve-city.ts shared resolver
 
 export const revalidate = 60;
@@ -147,37 +148,57 @@ async function lookupPostalCode(supabase: any, code: string, country: string): P
 
 const SELECT_FIELDS = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, address, photo_url, phone, accepting_new_patients, offers_telehealth, accepts_walkins, languages, hours, booking_url, created_at';
 
-// Map region codes to ISO country codes for doctor filtering
-const REGION_TO_COUNTRY: Record<string, string> = {
-  'US': 'US', 'CA': 'CA', 'UK': 'GB', 'GB': 'GB', 'NZ': 'NZ', 'AU': 'AU',
-}
-
-/** Country-aware doctors query: filters verified/pending + correct country */
-function doctorsQuery(sb: any, countryCode: string) {
+/** Country-aware doctors query. `US` includes legacy null country. `EU` is the European set. `ALL` is worldwide. */
+function doctorsQuery(sb: any, regionOrCountry: string) {
   let q = sb
     .from('doctors')
     .select(SELECT_FIELDS)
     .in('verification_status', ['verified', 'pending'])
-  // US includes NULL country (legacy data)
-  if (countryCode === 'US') {
-    q = q.or('country.is.null,country.eq.US')
-  } else {
-    q = q.eq('country', countryCode)
-  }
-  return q
+  const code = (regionOrCountry || 'US').toUpperCase()
+  if (code === 'ALL') return q
+  if (code === 'EU') return q.in('country', EUROPEAN_ISO)
+  if (code === 'US') return q.or('country.is.null,country.eq.US')
+  const iso = code === 'UK' ? 'GB' : code
+  return q.eq('country', iso)
 }
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const rawQuery = sanitize(searchParams.get('q') || '');
   const rawLocation = sanitize(searchParams.get('location') || '');
-  const region = searchParams.get('region') || '';
+  const regionParam = (searchParams.get('country') || searchParams.get('region') || 'US').toUpperCase();
+  let searchRegion = regionParam === 'GB' ? 'UK' : regionParam;
   const limit = Math.min(parseInt(searchParams.get('limit') || '200'), 500);
 
-  // Location coordinates for distance calculation
-  const userLat = parseFloat(searchParams.get('lat') || '0');
-  const userLng = parseFloat(searchParams.get('lng') || '0');
-  const hasUserCoords = isValidCoord(userLat, userLng);
+  // Coordinates are only trusted when the client says this search is the GPS label.
+  const locSrc = searchParams.get('loc_src') || '';
+  const gpsLabel = (searchParams.get('gps_label') || '').trim();
+  let userLat = parseFloat(searchParams.get('lat') || '0');
+  let userLng = parseFloat(searchParams.get('lng') || '0');
+  let hasUserCoords = isValidCoord(userLat, userLng);
+  const locationIsGps = locSrc === 'gps' && (!rawLocation || rawLocation === gpsLabel);
+  if (!locationIsGps) {
+    userLat = 0;
+    userLng = 0;
+    hasUserCoords = false;
+  }
+
+  const hint = countryHint(rawLocation || rawQuery);
+  let resolvedCountry: string | null = null;
+  if (hint) {
+    const hintedRegion = toDirectoryCountry(hint);
+    const inScope =
+      searchRegion === 'ALL' ||
+      searchRegion === hintedRegion ||
+      (searchRegion === 'EU' && EUROPEAN_ISO.includes(hint)) ||
+      (searchRegion === 'UK' && hint === 'GB') ||
+      (searchRegion === 'US' && hint === 'US');
+    if (!inScope) {
+      resolvedCountry = hintedRegion;
+      searchRegion = hintedRegion;
+    }
+  }
+  const searchCountry = hint || (searchRegion === 'UK' ? 'GB' : searchRegion === 'EU' ? 'DE' : searchRegion === 'ALL' ? 'US' : searchRegion);
 
   // Radius filter (miles) — only applies when user coords are known
   const radius = parseInt(searchParams.get('radius') || '0') || 0;
@@ -197,16 +218,8 @@ export async function GET(request: NextRequest) {
 
   const supabase = createAdminClient();
 
-  // Resolve region to country code for filtering
-  const searchCountry = REGION_TO_COUNTRY[region] || 'US'
-
   try {
-    let dbQuery = doctorsQuery(supabase, searchCountry);
-
-    // region_code filter only for legacy region-based routing (US sub-regions)
-    if (region && region !== 'ALL' && searchCountry === 'US') {
-      dbQuery = dbQuery.eq('region_code', region);
-    }
+    let dbQuery = doctorsQuery(supabase, searchRegion);
 
     // Pre-filter by bounding box when radius is set (much faster than post-filtering all docs)
     if (hasUserCoords && radius > 0) {
@@ -231,9 +244,31 @@ export async function GET(request: NextRequest) {
       dbQuery = dbQuery.overlaps('specialties', specialtiesFilter);
     }
 
+    const boundsParam = searchParams.get('bounds') || '';
+    const boundsParts = boundsParam.split(',').map(Number);
+    if (boundsParts.length === 4 && boundsParts.every((n) => Number.isFinite(n))) {
+      const [minLng, minLat, maxLng, maxLat] = boundsParts;
+      const areaQuery = dbQuery
+        .gte('longitude', minLng).lte('longitude', maxLng)
+        .gte('latitude', minLat).lte('latitude', maxLat);
+      const { data: areaData, error: areaError } = await areaQuery.limit(limit);
+      const centerLat = (minLat + maxLat) / 2;
+      const centerLng = (minLng + maxLng) / 2;
+      const areaDoctors = sortResults(enrichWithDistance(areaData || [], centerLat, centerLng, true), sort);
+      return NextResponse.json({
+        doctors: areaDoctors,
+        total: areaDoctors.length,
+        isFallback: false,
+        error: !!areaError,
+        locationLabel: 'Doctors in this area',
+        resolvedCountry,
+        center: { lat: centerLat, lng: centerLng },
+      });
+    }
+
     // Postal code detection — handles US ZIP, CA FSA, UK outward, NZ postcode
     const locationInput = rawLocation || '';
-    const postalMatch = extractPostalCode(locationInput, region) || extractPostalCode(rawQuery, region);
+    const postalMatch = extractPostalCode(locationInput, searchRegion) || extractPostalCode(rawQuery, searchRegion);
     let zipResolved: { city: string; state: string; lat: number; lng: number } | null = null;
     let locationLabel = '';
 
@@ -279,6 +314,7 @@ export async function GET(request: NextRequest) {
       // names internally and won't misresolve them.
       if (locationTerm) {
         const { resolveLocation } = await import('@/lib/resolve-city');
+        // searchCountry is an ISO code (EU searches are biased to DE). Do not geocode that as the US.
         const cityRes = await resolveLocation(locationTerm, searchCountry);
         if (cityRes.resolved) {
           searchLat = cityRes.resolved.lat;
@@ -418,7 +454,7 @@ export async function GET(request: NextRequest) {
       const locationTerm = rawLocation || (splitFromQuery ? `${splitFromQuery.city}, ${splitFromQuery.stateCode}` : '');
       if (rawQuery && locationTerm) {
         const locSplit = splitCityState(locationTerm, searchCountry);
-        let locQuery = doctorsQuery(supabase, searchCountry);
+        let locQuery = doctorsQuery(supabase, searchRegion);
         if (newPatientsFilter) locQuery = locQuery.eq('accepting_new_patients', true);
         if (locSplit) {
           if (locSplit.city) locQuery = locQuery.or(`city.ilike.%${locSplit.city}%,address.ilike.%${locSplit.city}%`);
@@ -436,7 +472,7 @@ export async function GET(request: NextRequest) {
       if (!fallbackData.length) {
         const stateCode = splitFromQuery?.stateCode || splitFromLocation?.stateCode || resolveStateCode(rawLocation || rawQuery, searchCountry);
         if (stateCode) {
-          let stateFallbackQuery = doctorsQuery(supabase, searchCountry).eq('state', stateCode);
+          let stateFallbackQuery = doctorsQuery(supabase, searchRegion).eq('state', stateCode);
           if (newPatientsFilter) stateFallbackQuery = stateFallbackQuery.eq('accepting_new_patients', true);
           const { data: stateFallback } = await stateFallbackQuery.limit(20);
           if (stateFallback?.length) { fallbackData = stateFallback; fallbackHint = `Showing doctors in ${stateCode}`; }
@@ -447,7 +483,7 @@ export async function GET(request: NextRequest) {
       if (!fallbackData.length) {
         const cityTerm = splitFromQuery?.city || rawQuery || rawLocation;
         if (cityTerm) {
-          let cityFallbackQuery = doctorsQuery(supabase, searchCountry)
+          let cityFallbackQuery = doctorsQuery(supabase, searchRegion)
             .or(`city.ilike.%${cityTerm}%,address.ilike.%${cityTerm}%`);
           if (newPatientsFilter) cityFallbackQuery = cityFallbackQuery.eq('accepting_new_patients', true);
           const { data: cityFallback } = await cityFallbackQuery.limit(20);
@@ -461,16 +497,19 @@ export async function GET(request: NextRequest) {
         // Location was resolved but no doctors found — return empty with location label
         return NextResponse.json({
           doctors: [],
+          nearest: [],
           total: 0,
           isFallback: false,
           error: false,
           locationLabel: locationLabel || `No doctors found near ${rawLocation || rawQuery}`,
+          resolvedCountry,
+          center: hasSearchCoords ? { lat: searchLat, lng: searchLng } : null,
         });
       }
 
       // Step 3: Only if NO location was specified — try specialty or nationwide
       if (!fallbackData.length && !rawLocation && rawQuery) {
-        let specFallbackQuery = doctorsQuery(supabase, searchCountry)
+        let specFallbackQuery = doctorsQuery(supabase, searchRegion)
           .or(`bio.ilike.%${rawQuery}%,clinic_name.ilike.%${rawQuery}%`);
         if (newPatientsFilter) specFallbackQuery = specFallbackQuery.eq('accepting_new_patients', true);
         const { data: specFallback } = await specFallbackQuery.limit(20);
@@ -486,41 +525,43 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         doctors: sorted,
+        nearest: [],
         total: sorted.length,
         isFallback: true,
         error: !!error,
         searchedFor: rawQuery || rawLocation || '',
         fallbackHint: fallbackHint,
+        resolvedCountry,
+        unknownPlace: sorted.length === 0 && !!(rawLocation || rawQuery),
+        locationLabel: locationLabel || fallbackHint || undefined,
       });
     }
 
     // Enrich with distance using resolved coordinates (user geolocation or city lookup)
     let enriched = enrichWithDistance(data, searchLat, searchLng, hasSearchCoords);
+    let nearest: any[] = [];
 
-    // Apply radius: default directory_default mi for location searches, expand progressively
+    // A chosen radius is exact. Otherwise expand only until a few doctors appear.
     const t = await getThresholds();
-    if (hasSearchCoords) {
-      const defaultRadius = radius > 0 ? radius : t.directory_default;
+    if (hasSearchCoords && radius > 0) {
+      const within = enriched.filter((d: any) => d.distance_miles != null && d.distance_miles <= radius + 0.1);
+      if (within.length === 0) {
+        nearest = sortResults(enriched, 'distance').filter((d: any) => d.distance_miles != null).slice(0, 3);
+        enriched = [];
+      } else {
+        enriched = within;
+      }
+    } else if (hasSearchCoords) {
+      const defaultRadius = t.directory_default;
       const nearby = enriched.filter((d: any) => d.distance_miles != null && d.distance_miles <= defaultRadius);
-
       if (nearby.length >= 3) {
         enriched = nearby;
       } else {
-        // Progressive expansion
         for (const expandedRadius of [t.directory_expansion_1, t.directory_expansion_2]) {
           const expanded = enriched.filter((d: any) => d.distance_miles != null && d.distance_miles <= expandedRadius);
           if (expanded.length >= 3) { enriched = expanded; break; }
         }
-        // If still under 3, keep all results with distance
-        if (enriched.filter((d: any) => d.distance_miles != null).length < 3) {
-          // Keep all, they'll be sorted by distance
-        }
       }
-    }
-
-    // Exact radius filter (bounding box was approximate)
-    if (hasUserCoords && radius > 0) {
-      enriched = enriched.filter((d: any) => d.distance_miles == null || d.distance_miles <= radius + 0.1);
     }
 
     // Sort
@@ -540,13 +581,19 @@ export async function GET(request: NextRequest) {
       }).then(() => {}).catch(() => {});
     }
 
+    const unknownPlace = !!(rawLocation || rawQuery) && !hasSearchCoords && !postalMatch && sorted.length === 0;
+
     return NextResponse.json({
       doctors: sorted,
-      total: count || sorted.length,
+      nearest,
+      total: sorted.length,
       isFallback: false,
       error: false,
       locationLabel: locationLabel || undefined,
-      _resultCount: resultCount, // for empty-result tracking on client
+      resolvedCountry,
+      unknownPlace,
+      center: hasSearchCoords ? { lat: searchLat, lng: searchLng } : null,
+      _resultCount: resultCount,
     }, {
       headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' }
     });

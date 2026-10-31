@@ -24,6 +24,7 @@ export interface RegionConfig {
     postalCode: string;
     state: string;
   };
+  searchPlaceholder: string;
   mapDefaults: {
     center: [number, number];
     zoom: number;
@@ -55,6 +56,7 @@ export const REGIONS: Record<RegionCode, RegionConfig> = {
       postalCode: "Zip Code",
       state: "State",
     },
+    searchPlaceholder: "City, ZIP or postcode",
     mapDefaults: {
       center: [-98.5795, 39.8283], // Geometric center of US
       zoom: 4,
@@ -84,6 +86,7 @@ export const REGIONS: Record<RegionCode, RegionConfig> = {
       postalCode: "Postcode",
       state: "State / Territory",
     },
+    searchPlaceholder: "Suburb or postcode",
     mapDefaults: {
       center: [133.7751, -25.2744], // Center of Australia
       zoom: 4,
@@ -99,6 +102,7 @@ export const REGIONS: Record<RegionCode, RegionConfig> = {
       student: { foundation: { monthly: "12", annual: "120" }, professional: { monthly: "35", annual: "350" }, accelerator: { monthly: "79", annual: "790" } },
     },
     terminology: { postalCode: "Postal Code", state: "Province" },
+    searchPlaceholder: "City or postal code",
     mapDefaults: { center: [-96.8, 56.1], zoom: 3 },
   },
   UK: {
@@ -111,6 +115,7 @@ export const REGIONS: Record<RegionCode, RegionConfig> = {
       student: { foundation: { monthly: "7", annual: "70" }, professional: { monthly: "25", annual: "250" }, accelerator: { monthly: "59", annual: "590" } },
     },
     terminology: { postalCode: "Postcode", state: "County" },
+    searchPlaceholder: "City or postcode",
     mapDefaults: { center: [-3.4, 55.4], zoom: 5 },
   },
   NZ: {
@@ -123,6 +128,7 @@ export const REGIONS: Record<RegionCode, RegionConfig> = {
       student: { foundation: { monthly: "15", annual: "150" }, professional: { monthly: "55", annual: "550" }, accelerator: { monthly: "119", annual: "1190" } },
     },
     terminology: { postalCode: "Postcode", state: "Region" },
+    searchPlaceholder: "City or postcode",
     mapDefaults: { center: [174.8, -41.3], zoom: 5 },
   },
   EU: {
@@ -135,6 +141,7 @@ export const REGIONS: Record<RegionCode, RegionConfig> = {
       student: { foundation: { monthly: "9", annual: "90" }, professional: { monthly: "30", annual: "300" }, accelerator: { monthly: "69", annual: "690" } },
     },
     terminology: { postalCode: "Postal Code", state: "Region" },
+    searchPlaceholder: "City or postal code",
     mapDefaults: { center: [10.5, 51.1], zoom: 4 },
   },
   ALL: {
@@ -147,6 +154,7 @@ export const REGIONS: Record<RegionCode, RegionConfig> = {
       student: { foundation: { monthly: "9", annual: "90" }, professional: { monthly: "35", annual: "350" }, accelerator: { monthly: "79", annual: "790" } },
     },
     terminology: { postalCode: "Postal Code", state: "Region" },
+    searchPlaceholder: "City or postal code",
     mapDefaults: { center: [0, 20], zoom: 2 },
   },
 };

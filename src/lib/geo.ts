@@ -40,10 +40,12 @@ export function boundingBox(lat: number, lng: number, radiusMiles: number): [num
 /**
  * Format distance for display
  */
-export function formatDistance(miles: number): string {
-  if (miles < 0.1) return '< 0.1 mi';
-  if (miles < 10) return `${miles.toFixed(1)} mi`;
-  return `${Math.round(miles)} mi`;
+export function formatDistance(miles: number, unit: "mi" | "km" = "mi"): string {
+  const value = unit === "km" ? miles * 1.60934 : miles;
+  const suffix = unit === "km" ? "km" : "mi";
+  if (value < 0.1) return `< 0.1 ${suffix}`;
+  if (value < 10) return `${value.toFixed(1)} ${suffix}`;
+  return `${Math.round(value)} ${suffix}`;
 }
 
 /**

@@ -19,16 +19,21 @@ export async function getDoctors(options: {
   try {
     // DATA MINIMIZATION: Only fetch essential columns for the LIST view
     // Removed: email, website_url, instagram_url, facebook_url, address (private-ish)
-    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, phone, photo_url, created_at, accepting_new_patients';
+    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, phone, photo_url, created_at, accepting_new_patients, booking_url, offers_telehealth, accepts_walkins';
     
     let query = supabase
       .from('doctors')
       .select(selectFields, { count: 'exact' })
-      .in('verification_status', ['verified', 'pending'])
-      .or('country.is.null,country.eq.US');
+      .in('verification_status', ['verified', 'pending']);
 
-    if (regionCode && regionCode !== 'ALL') {
-      query = query.eq('region_code', regionCode);
+    const region = (regionCode || '').toUpperCase();
+    if (region === 'EU') {
+      query = query.in('country', ['GB','IE','FR','DE','ES','IT','NL','BE','PT','AT','CH','SE','NO','DK','FI','PL','CZ','GR','HU','RO','BG','HR','SK','SI','LT','LV','EE','LU','MT','CY','IS']);
+    } else if (region === 'US') {
+      query = query.or('country.is.null,country.eq.US');
+    } else if (region && region !== 'ALL') {
+      const iso = region === 'UK' ? 'GB' : region;
+      query = query.eq('country', iso);
     }
 
     if (searchQuery && searchQuery.trim()) {
@@ -97,23 +102,7 @@ export async function getDoctors(options: {
       });
     }
 
-    // FALLBACK: If specific search/region returns nothing, return a subset of verified doctors
-    if ((!data || data.length === 0) && (regionCode || searchQuery)) {
-       const { data: fallbackData, count: fallbackCount } = await supabase
-         .from('doctors')
-         .select(selectFields, { count: 'exact' })
-         .eq('verification_status', 'verified')
-         .limit(limit);
-       
-       if (fallbackData && fallbackData.length > 0) {
-         return {
-           doctors: fallbackData as unknown as Doctor[],
-           total: fallbackCount || fallbackData.length,
-           error: false,
-           isFallback: true
-         };
-       }
-    }
+    // A region page with no doctors stays empty. A nationwide fill used to show US doctors on /au.
     
     return {
       doctors: (data || []) as unknown as Doctor[],

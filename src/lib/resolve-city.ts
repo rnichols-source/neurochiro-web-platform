@@ -397,7 +397,15 @@ async function setCachedGeocode(supabase: any, key: string, result: NominatimRes
 }
 
 const ISO_TO_NOMINATIM: Record<string, string> = {
-  'US': 'us', 'CA': 'ca', 'GB': 'gb', 'NZ': 'nz', 'AU': 'au',
+  'US': 'us', 'CA': 'ca', 'GB': 'gb', 'UK': 'gb', 'NZ': 'nz', 'AU': 'au', 'EU': 'de',
+}
+
+function nominatimCountry(country: string): string {
+  const code = (country || 'US').toUpperCase()
+  if (ISO_TO_NOMINATIM[code]) return ISO_TO_NOMINATIM[code]
+  // A real ISO country must not fall back to the United States.
+  if (/^[A-Z]{2}$/.test(code)) return code.toLowerCase()
+  return 'us'
 }
 
 // Tracks whether Nominatim failed recently to avoid hammering a down service
@@ -405,7 +413,7 @@ let nominatimCircuitOpen = false
 let nominatimCircuitResetAt = 0
 
 async function nominatimGeocode(query: string, country: string = 'US'): Promise<NominatimResult | null> {
-  const cc = ISO_TO_NOMINATIM[country] || 'us'
+  const cc = nominatimCountry(country)
   const key = `${query.toLowerCase().trim()}|${cc}`
 
   // 1. In-memory cache (fastest)
@@ -430,7 +438,7 @@ async function nominatimGeocode(query: string, country: string = 'US'): Promise<
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=${cc}&addressdetails=1`,
       {
-        headers: { 'User-Agent': 'NeuroChiro/1.0 (support@neurochirodirectory.com)' },
+        headers: { 'User-Agent': 'NeuroChiro/1.0 (https://www.neurochiro.co)' },
         signal: AbortSignal.timeout(5000),
       }
     )
