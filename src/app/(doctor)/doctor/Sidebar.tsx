@@ -10,6 +10,7 @@ import {
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase";
+import { getPortalShellData } from "./portal-actions";
 import NotificationBell from "@/components/layout/NotificationBell";
 
 interface SidebarProps {
@@ -93,39 +94,27 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [showPracticeTools, setShowPracticeTools] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        supabase.from("profiles").select("full_name").eq("id", user.id).single()
-          .then(({ data }) => setUserName(data?.full_name || null));
-        supabase.from("notifications").select("*", { count: "exact", head: true })
-          .eq("user_id", user.id).is("read_at", null)
-          .then(({ count }) => setUnreadNotifs(count || 0));
-        supabase.from("messages").select("id", { count: "exact", head: true })
-          .eq("recipient_id", user.id).is("read_at", null)
-          .then(({ count }: any) => setUnreadMessages(count || 0));
-        supabase.from("doctors").select("membership_tier, is_founding_member, neuros_tier, created_at").eq("user_id", user.id).single()
-          .then(({ data }: any) => {
-            if (data?.neuros_tier === 'neuros' || data?.neuros_tier === 'neuros_founding') {
-              setMemberTier("neuros");
-            } else if (data?.is_founding_member) {
-              setMemberTier("pro");
-            } else if (data?.membership_tier) {
-              setMemberTier(data.membership_tier);
-            } else {
-              supabase.from("profiles").select("tier").eq("id", user.id).single()
-                .then(({ data: p }) => {
-                  const t = p?.tier || "basic";
-                  setMemberTier(t === "standard" ? "basic" : t);
-                });
-            }
-
-            // Show practice tools for legacy Pro doctors or founding members
-            const isLegacy = data?.created_at && new Date(data.created_at) < new Date(LEGACY_CUTOFF);
-            const isPro = data?.membership_tier === "pro" || data?.is_founding_member;
-            setShowPracticeTools((isLegacy && isPro) || data?.is_founding_member);
-          });
+    getPortalShellData().then((shell) => {
+      if (!shell) return;
+      setUserName(shell.fullName);
+      setUnreadNotifs(shell.unreadNotifications);
+      setUnreadMessages(shell.unreadMessages);
+      const data = shell.doctor;
+      if (data?.neuros_tier === 'neuros' || data?.neuros_tier === 'neuros_founding') {
+        setMemberTier("neuros");
+      } else if (data?.is_founding_member) {
+        setMemberTier("pro");
+      } else if (data?.membership_tier) {
+        setMemberTier(data.membership_tier);
+      } else {
+        const tier = shell.profileTier || "basic";
+        setMemberTier(tier === "standard" ? "basic" : tier);
       }
+
+      // Show practice tools for legacy Pro doctors or founding members
+      const isLegacy = data?.created_at && new Date(data.created_at) < new Date(LEGACY_CUTOFF);
+      const isPro = data?.membership_tier === "pro" || data?.is_founding_member;
+      setShowPracticeTools(Boolean((isLegacy && isPro) || data?.is_founding_member));
     });
   }, []);
 

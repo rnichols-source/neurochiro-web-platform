@@ -10,6 +10,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
+import { getPortalShellData } from "./portal-actions";
 
 const mobileNavItems = [
   { name: "Home", href: "/doctor/dashboard", icon: LayoutDashboard },
@@ -37,21 +38,9 @@ export default function DoctorLayout({
   const CALENDLY_URL = "https://calendly.com/drray-neurochirodirectory/neurochiro-onboarding-call";
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return;
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name, tier')
-        .eq('id', user.id)
-        .single();
-
-      const { data: doctor } = await supabase
-        .from('doctors')
-        .select('membership_tier, trial_ends_at, is_founding_member, is_approved, onboarding_call_status')
-        .eq('user_id', user.id)
-        .single() as any;
+    getPortalShellData().then((shell) => {
+      if (!shell) return;
+      const doctor = shell.doctor;
 
       // Onboarding call gate — founding members and approved doctors skip
       const isFounder = doctor?.is_founding_member || false;
@@ -60,27 +49,19 @@ export default function DoctorLayout({
 
       if (!isFounder && !isApproved && callStatus !== 'completed') {
         setOnboardingCallStatus(callStatus);
+      } else {
+        setOnboardingCallStatus(null);
       }
 
       setTierInfo({
-        tier: doctor?.membership_tier || profile?.tier || 'free',
+        tier: doctor?.membership_tier || shell.profileTier || 'free',
         isFounder,
       });
 
       setSubscriptionChecked(true);
-      setDoctorName(profile?.full_name?.split(' ')[0] || '');
-
-      const { count } = await supabase
-        .from('notifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .is('read_at', null);
-      setUnreadCount(count || 0);
-
-      if (profile?.full_name) {
-        const parts = profile.full_name.split(" ");
-        setInitials(parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0][0] || "--");
-      }
+      setDoctorName(shell.fullName?.split(' ')[0] || '');
+      setUnreadCount(shell.unreadNotifications);
+      setInitials(shell.initials);
     });
   }, [pathname]);
 

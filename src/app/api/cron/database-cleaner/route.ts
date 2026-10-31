@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase-admin';
+import { createClient } from '@supabase/supabase-js';
+import { getSupabaseSecretKey } from '@/lib/supabase-secret';
+import { SUPABASE_URL } from '@/lib/supabase-env';
 
 export const maxDuration = 300;
 
-const getSupabase = () => createAdminClient();
+const getSupabase = () => createClient(
+  SUPABASE_URL,
+  getSupabaseSecretKey(),
+  { auth: { autoRefreshToken: false, persistSession: false } }
+);
 
 /**
  * DATABASE CLEANER — Runs every Sunday at 3 AM EST

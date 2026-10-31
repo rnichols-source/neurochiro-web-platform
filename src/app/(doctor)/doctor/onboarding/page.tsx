@@ -66,9 +66,6 @@ export default function DoctorOnboardingPage() {
     // Update doctor photo via fetch to avoid RLS
     await fetch('/api/activity', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventType: 'page_view' }) }).catch(() => {});
 
-    // Use admin client via server action pattern
-    const { createAdminClient } = await import('@/lib/supabase-admin');
-    // Can't call admin from client — use profile avatar instead
     await supabase.from('profiles').update({ avatar_url: urlData.publicUrl } as any).eq('id', user.id);
 
     setLoading(false);

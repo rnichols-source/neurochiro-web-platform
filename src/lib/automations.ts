@@ -63,7 +63,8 @@ const sendDiscordNotification = async (message: string) => {
 // so existing callers can skip the write instead of crashing mid-email.
 const getSupabaseAdmin = () => {
   try {
-    return createAdminClient();
+    // Untyped on purpose. Callers query tables the generated Database type does not list.
+    return createAdminClient() as any;
   } catch {
     return null;
   }
@@ -1015,7 +1016,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                 .limit(3);
 
               if (students && students.length > 0 && doc.phone) {
-                const studentNames = students.map(s => `${s.name} (${s.school.split(' ')[0]})`).join(', ');
+                const studentNames = students.map((s: any) => `${s.name} (${s.school.split(' ')[0]})`).join(', ');
                 const primaryInterest = students[0].interests[0] || "Neuro-Chiropractic";
                 
                 const message = `Dr. ${doc.full_name.split(' ').pop()}, 3 new 90%+ readiness candidates entered the 'Graduating Soon' window. ${students[0].name} is a perfect match for your ${primaryInterest} focus. View & Invite: neurochiro.co/doctor/students`;

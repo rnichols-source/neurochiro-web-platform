@@ -18,7 +18,7 @@ import {
 } from "./actions";
 import { formatDistanceToNow } from "date-fns";
 import { getOrCreateReferralCode, getReferralStats } from "@/app/actions/referral-program";
-import { createClient } from "@/lib/supabase";
+import { getPortalShellData } from "../portal-actions";
 import WhatsNew from "@/components/common/WhatsNew";
 import PracticeHealthGauge from "./practice-health";
 import ActionItems from "./action-items";
@@ -78,14 +78,8 @@ export default function DoctorDashboard() {
       setLoading(false);
     });
 
-    // Get live views count
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        supabase.from("doctors").select("profile_views").eq("user_id", user.id).single().then(({ data }) => {
-          if (data) setViews(data.profile_views || 0);
-        });
-      }
+    getPortalShellData().then((shell) => {
+      if (shell?.doctor) setViews(shell.doctor.profile_views || 0);
     });
   }, []);
 
