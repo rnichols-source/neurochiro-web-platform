@@ -62,7 +62,7 @@ export default function HeroSearch({
   };
 
   return (
-    <div className="mx-auto w-full max-w-xl text-center lg:mx-0 lg:max-w-none lg:text-left">
+    <div className="mx-auto w-full min-w-0 max-w-xl text-center lg:mx-0 lg:max-w-none lg:text-left">
       {eyebrow && (
         <p className="mb-3 inline-flex max-w-full items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-left text-xs font-bold leading-snug text-gray-300">
           <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400" aria-hidden />

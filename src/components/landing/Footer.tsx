@@ -112,9 +112,9 @@ export default function Footer() {
           <Link href="/terms" className="inline-flex min-h-11 items-center hover:text-white">Terms</Link>
         </div>
       </div>
-      <p className="mx-auto mt-2 max-w-6xl text-[11px] text-gray-500">
+      <p className="mx-auto mt-2 max-w-6xl text-xs text-gray-300">
         Postal code data from{" "}
-        <a href="https://www.geonames.org" className="underline hover:text-gray-300" target="_blank" rel="noopener noreferrer">
+        <a href="https://www.geonames.org" className="underline hover:text-white" target="_blank" rel="noopener noreferrer">
           GeoNames
         </a>{" "}
         (geonames.org), CC BY 4.0.

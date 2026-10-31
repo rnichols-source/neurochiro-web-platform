@@ -68,7 +68,6 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
         prefetch={false}
         onClick={() => { trackConversion(doc.id, "profile_view"); onNavigate?.(); }}
         className="relative z-10 flex items-start gap-3 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neuro-orange"
-        aria-label={`View profile for ${name}`}
       >
         <div className="w-14 h-14 rounded-xl bg-neuro-navy overflow-hidden flex items-center justify-center shrink-0">
           {doc.photo_url && !cardPhotoError ? (

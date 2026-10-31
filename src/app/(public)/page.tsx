@@ -138,7 +138,7 @@ export default async function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <main>
         <section className="bg-neuro-navy px-4 pb-8 pt-20 sm:px-6 lg:pt-24 lg:pb-14">
-          <div className="mx-auto grid max-w-6xl items-start gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,420px)]">
+          <div className="mx-auto grid w-full min-w-0 max-w-6xl grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,420px)]">
             <HeroSearch counts={counts} faces={faces}>
               <HeroHeading />
             </HeroSearch>

@@ -138,7 +138,7 @@ export default function Navbar() {
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 md:px-8">
           <Link href="/" className="flex min-h-11 items-center gap-3">
-            <Image src="/logo-white.png" alt="NeuroChiro" width={40} height={40} className="object-contain" priority />
+            <Image src="/logo-white.png" alt="" width={40} height={40} className="object-contain" priority />
             <span className="font-heading text-xl font-black tracking-tight text-white">
               NEURO<span className="text-neuro-orange-light">CHIRO</span>
             </span>
