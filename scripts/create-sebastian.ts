@@ -4,6 +4,11 @@ dotenv.config({ path: '.env' });
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const seedPassword = process.env.SEED_PASSWORD || '';
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !seedPassword) {
+  console.error("Missing NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, or SEED_PASSWORD");
+  process.exit(1);
+}
 
 async function createSebastianAccount() {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
@@ -17,7 +22,7 @@ async function createSebastianAccount() {
     console.log("Creating new auth user...");
     const { data, error } = await supabase.auth.admin.createUser({
         email,
-        password: 'NeuroChiroAU2026!',
+        password: seedPassword,
         email_confirm: true,
         user_metadata: { full_name: fullName }
     });

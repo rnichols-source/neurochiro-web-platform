@@ -1,5 +1,8 @@
+import 'server-only'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/types/supabase'
+import { SUPABASE_URL } from '@/lib/supabase-env'
+import { getSupabaseSecretKey } from '@/lib/supabase-secret'
 
 /**
  * ⚠️  SUPABASE DEFAULT ROW LIMIT IS 1000.
@@ -18,8 +21,8 @@ import { Database } from '@/types/supabase'
  */
 
 export const createAdminClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = SUPABASE_URL;
+  const supabaseServiceKey = getSupabaseSecretKey();
 
   if (!supabaseUrl || !supabaseServiceKey) {
     throw new Error("Missing Supabase admin environment variables.");

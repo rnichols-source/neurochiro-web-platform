@@ -1,4 +1,6 @@
 import { ImageResponse } from "@vercel/og";
+import { SUPABASE_URL } from "@/lib/supabase-env";
+import { getSupabaseSecretKey } from "@/lib/supabase-secret";
 import { parseSeminarDates, timezoneForCity } from "@/lib/seminars/dates";
 import { countryCode, currencyForCountry, formatDateRange, formatSeminarLocation, priceLabel } from "@/lib/seminars/format";
 import { isUuid, seminarSlug } from "@/lib/seminars/slug";
@@ -8,8 +10,13 @@ export const runtime = "edge";
 const PUBLIC_COLUMNS = "id,title,dates,city,country,price,ce_hours,is_approved,image_url,hero_image_url";
 
 async function load(slug: string) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = SUPABASE_URL;
+  let key: string | null = null;
+  try {
+    key = getSupabaseSecretKey();
+  } catch {
+    key = null;
+  }
   if (!url || !key) return null;
   const response = await fetch(`${url}/rest/v1/seminars?is_approved=eq.true&select=${PUBLIC_COLUMNS}&limit=200`, {
     headers: { apikey: key, Authorization: `Bearer ${key}` },

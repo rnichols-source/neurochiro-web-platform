@@ -31,7 +31,7 @@ Before the application goes live, the database schema and RLS policies must be a
    - `checkout.session.completed`
    - `invoice.payment_failed`
    - `customer.subscription.deleted`
-4. Copy the **Signing Secret** (`whsec_...`) and add it to your Vercel environment variables as `STRIPE_WEBHOOK_SECRET`.
+4. Copy the **Signing Secret** (the signing secret) and add it to your Vercel environment variables as `STRIPE_WEBHOOK_SECRET`.
 
 ## 5. Deployment Steps (Vercel)
 

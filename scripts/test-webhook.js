@@ -19,7 +19,7 @@ async function simulateWebhook() {
     console.log("🚀 Sending mock Stripe webhook to http://localhost:3000/api/webhooks/stripe...");
     const response = await axios.post('http://localhost:3000/api/webhooks/stripe', mockEvent, {
       headers: {
-        'Stripe-Signature': 't=123,v1=mock_sig', // The endpoint currently uses "whsec_mock" if not set
+        'Stripe-Signature': 't=123,v1=mock_sig', // Set STRIPE_WEBHOOK_SECRET in the environment. This mock signature is not a secret.
       }
     });
     console.log("✅ Response:", response.data);

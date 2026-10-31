@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
+import { isMissingRelation } from "@/lib/missing-table";
 import { Megaphone, Info, Zap, AlertTriangle, ChevronRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
@@ -16,7 +17,7 @@ export default function AnnouncementsFeed({ audience }: { audience: string }) {
       const supabase = createClient();
       const now = new Date().toISOString();
       
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('announcements')
         .select('*')
         .or(`audience_type.eq.all,audience_type.eq.${audience}`)
@@ -24,8 +25,9 @@ export default function AnnouncementsFeed({ audience }: { audience: string }) {
         .or(`expires_at.is.null,expires_at.gt.${now}`)
         .order('priority', { ascending: false })
         .order('created_at', { ascending: false });
-      
-      if (data) setAnnouncements(data);
+
+      if (isMissingRelation(error) || !data) setAnnouncements([]);
+      else setAnnouncements(data);
       setLoading(false);
     }
     fetchAnnouncements();

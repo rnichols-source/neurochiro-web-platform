@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Loader2, Eye, MousePointer, Phone, Globe } from "lucide-react";
 import { ROIData } from "@/types/analytics";
 import { getDoctorROIData } from "../dashboard/actions";
-import { createClient } from "@/lib/supabase";
+import { getPortalShellData } from "../portal-actions";
 
 export default function DoctorAnalytics() {
   return (
@@ -27,12 +27,8 @@ function DoctorAnalyticsContent() {
       .then((data) => { if (data) setRoiData(data as ROIData); })
       .finally(() => setLoading(false));
 
-    // Fetch profile views directly as backup
-    const supabase = createClient();
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return;
-      const { data } = await supabase.from('doctors').select('profile_views').eq('user_id', user.id).single();
-      if (data?.profile_views) setClientViews(data.profile_views);
+    getPortalShellData().then((shell) => {
+      if (shell?.doctor) setClientViews(shell.doctor.profile_views || 0);
     });
   }, [period]);
 

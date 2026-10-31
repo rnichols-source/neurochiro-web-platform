@@ -1,6 +1,7 @@
+import 'server-only';
 import { Resend } from 'resend';
-import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
+import { createAdminClient } from '@/lib/supabase-admin';
 
 /**
  * LAZY RESEND LOADER
@@ -58,15 +59,15 @@ const sendDiscordNotification = async (message: string) => {
   }
 };
 
-// Admin client for backend operations
+// Admin client for backend operations. Returns null when the secret key is unset
+// so existing callers can skip the write instead of crashing mid-email.
 const getSupabaseAdmin = () => {
-  if (typeof window !== 'undefined') return null;
-
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!url || !key) return null;
-  return createClient(url, key);
+  try {
+    // Untyped on purpose. Callers query tables the generated Database type does not list.
+    return createAdminClient() as any;
+  } catch {
+    return null;
+  }
 };
 
 /**
@@ -1015,7 +1016,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                 .limit(3);
 
               if (students && students.length > 0 && doc.phone) {
-                const studentNames = students.map(s => `${s.name} (${s.school.split(' ')[0]})`).join(', ');
+                const studentNames = students.map((s: any) => `${s.name} (${s.school.split(' ')[0]})`).join(', ');
                 const primaryInterest = students[0].interests[0] || "Neuro-Chiropractic";
                 
                 const message = `Dr. ${doc.full_name.split(' ').pop()}, 3 new 90%+ readiness candidates entered the 'Graduating Soon' window. ${students[0].name} is a perfect match for your ${primaryInterest} focus. View & Invite: neurochiro.co/doctor/students`;

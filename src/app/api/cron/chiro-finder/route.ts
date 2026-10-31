@@ -1,16 +1,18 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getSupabaseSecretKey } from '@/lib/supabase-secret';
+import { SUPABASE_URL } from '@/lib/supabase-env';
 import { wrapEmail } from '@/lib/email-template';
 
 export const maxDuration = 300;
 
 const getSupabase = () => createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  SUPABASE_URL,
+  getSupabaseSecretKey(),
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
-const SERPAPI_KEY = process.env.SERPAPI_KEY || 'f31e69bc5e63289df5d58b401940d838d5c76608f971728da4f59913d7971553';
+const SERPAPI_KEY = process.env.SERPAPI_KEY;
 
 // States and their major cities to search
 const STATE_CITIES: Record<string, string[]> = {

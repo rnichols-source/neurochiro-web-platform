@@ -1,14 +1,16 @@
 import { wrapEmail } from '@/lib/email-template';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getSupabaseSecretKey } from '@/lib/supabase-secret';
+import { SUPABASE_URL } from '@/lib/supabase-env';
 import { Resend } from 'resend';
 import { getNudgeTarget } from '@/lib/profile-completeness';
 
 export const maxDuration = 300;
 
 const getSupabase = () => createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  SUPABASE_URL,
+  getSupabaseSecretKey(),
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 

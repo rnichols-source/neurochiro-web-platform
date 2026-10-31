@@ -11,8 +11,13 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+const seedPassword = process.env.SEED_PASSWORD;
 if (!supabaseUrl || !supabaseKey) {
-  console.error("Missing Supabase credentials in .env", { supabaseUrl: !!supabaseUrl, supabaseKey: !!supabaseKey });
+  console.error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+  process.exit(1);
+}
+if (!seedPassword) {
+  console.error("Missing SEED_PASSWORD");
   process.exit(1);
 }
 
@@ -20,9 +25,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function seedUsers() {
   const users = [
-    { email: 'drray@neurochirodirectory.com', password: 'password123', role: 'founder' },
-    { email: 'doctor@test.com', password: 'password123', role: 'doctor' },
-    { email: 'student@test.com', password: 'password123', role: 'student' },
+    { email: 'drray@neurochirodirectory.com', password: seedPassword, role: 'founder' },
+    { email: 'doctor@test.com', password: seedPassword, role: 'doctor' },
+    { email: 'student@test.com', password: seedPassword, role: 'student' },
   ];
 
   for (const user of users) {

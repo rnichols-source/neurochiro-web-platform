@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Bell, X, Check, ExternalLink, Settings, Info, AlertTriangle, Zap, Megaphone, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase";
+import { isMissingRelation } from "@/lib/missing-table";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 
@@ -59,7 +60,7 @@ export default function NotificationBell() {
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
     const role = profile?.role || 'patient';
 
-    const { data: anncs } = await supabase
+    const anncsResult = await supabase
       .from('announcements')
       .select('*')
       .or(`audience_type.eq.all,audience_type.eq.${role}`)
@@ -67,39 +68,78 @@ export default function NotificationBell() {
       .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString())
       .order('created_at', { ascending: false });
 
+    if (isMissingRelation(anncsResult.error)) {
+      setAnnouncements([]);
+      setLoading(false);
+      return;
+    }
+
     // Filter out dismissed announcements
-    const { data: dismissals } = await supabase
+    const dismissalsResult = await supabase
       .from('announcement_dismissals')
       .select('announcement_id')
       .eq('user_id', user.id);
-    
-    const dismissedIds = dismissals?.map((d: any) => d.announcement_id) || [];
-    const activeAnncs = anncs?.filter((a: Announcement) => !dismissedIds.includes(a.id)) || [];
-    
+
+    if (isMissingRelation(dismissalsResult.error)) {
+      setAnnouncements([]);
+      setLoading(false);
+      return;
+    }
+
+    const dismissedIds = dismissalsResult.data?.map((d: any) => d.announcement_id) || [];
+    const activeAnncs = anncsResult.data?.filter((a: Announcement) => !dismissedIds.includes(a.id)) || [];
+
     setAnnouncements(activeAnncs);
     setUnreadCount(prev => prev + activeAnncs.length);
     setLoading(false);
   }, [supabase]);
 
   useEffect(() => {
-    fetchNotifications();
+    let cancelled = false;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let poll: ReturnType<typeof setInterval> | null = null;
 
-    // Subscribe to real-time notifications
-    const channel = supabase
-      .channel('realtime_notifications')
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'notifications' 
-      }, (payload: any) => {
-        setNotifications(prev => [payload.new as Notification, ...prev]);
-        setUnreadCount(prev => prev + 1);
-        // Play sound or show toast if needed
-      })
-      .subscribe();
+    const stopPoll = () => {
+      if (!poll) return;
+      clearInterval(poll);
+      poll = null;
+    };
+
+    async function start() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled || !user) {
+        setLoading(false);
+        return;
+      }
+      await fetchNotifications();
+      if (cancelled) return;
+
+      channel = supabase
+        .channel(`realtime_notifications_${user.id}`)
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        }, (payload: any) => {
+          setNotifications(prev => [payload.new as Notification, ...prev]);
+          setUnreadCount(prev => prev + 1);
+        })
+        .subscribe((status) => {
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            if (!poll) poll = setInterval(() => { fetchNotifications(); }, 60_000);
+            return;
+          }
+          if (status === 'SUBSCRIBED') stopPoll();
+        });
+    }
+
+    start();
 
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      stopPoll();
+      if (channel) supabase.removeChannel(channel);
     };
   }, [fetchNotifications, supabase]);
 
