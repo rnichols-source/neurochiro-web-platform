@@ -497,3 +497,8 @@ commit;
 -- where id in ('00000000-0000-0000-0000-000000000000');
 -- select id, tool from public.doctor_tool_data where id in ('00000000-0000-0000-0000-000000000000');
 -- commit;
+
+-- F13. Optional. Add notifications to the realtime publication so the bell
+-- can subscribe. The app already polls every 60 seconds when the channel errors.
+-- NOT RUN — Raymond reviews and runs.
+-- alter publication supabase_realtime add table public.notifications;
