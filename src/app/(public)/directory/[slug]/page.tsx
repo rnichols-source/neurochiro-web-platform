@@ -7,6 +7,7 @@ import SchemaMarkup from "@/components/seo/SchemaMarkup";
 import { addressForSchema } from "@/lib/profile-display";
 import { getApprovedStories } from "@/app/actions/patient-stories";
 import { isDemoSlug } from "@/lib/directory/exclude-demo";
+import { trackProfileView } from "@/lib/portal/track-view";
 
 export const revalidate = 60; // ISR: cache for 60 seconds
 
@@ -95,6 +96,7 @@ export default async function DoctorProfilePage({ params }: Props) {
 
   // 🛡️ Track View (Background)
   await incrementDoctorViews(resolvedParams.slug);
+  await trackProfileView({ id: doctor.id, user_id: doctor.user_id });
 
   // Fetch doctor's seminars, jobs, city data, and nearby doctors in parallel
   const [seminars, jobs, cityDoctorCount, nearbyDoctors, citySearchVolume, stories] = await Promise.all([

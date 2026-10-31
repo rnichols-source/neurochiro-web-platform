@@ -7,6 +7,7 @@ import { getPortalContext } from '@/lib/portal/context';
 import { greeting, firstName } from '@/lib/portal/greeting';
 import { getDoctorTimezone } from '@/lib/doctor-timezone';
 import { getDoctorPortalStats } from '@/lib/portal/stats-load';
+import { displayCount, monthlyViewsDisplay, PATIENT_REQUESTS_HINT } from '@/lib/portal/stats';
 import { getFeature } from '@/lib/portal/features';
 import { redirect } from 'next/navigation';
 import SetupChecklist from './setup-checklist';
@@ -33,11 +34,21 @@ async function DashboardBody() {
       range: 'month',
       city: doctor.city,
       profileViews: doctor.profile_views,
+      timeZone,
     }),
     getSetupFields(doctor.id),
     getAttention(doctor.id, ctx.userId),
     getViewSeries(doctor.id),
   ]);
+  const monthViews = monthlyViewsDisplay({
+    viewsInRange: stats.viewsInRange,
+    viewsTrackedSince: stats.viewsTrackedSince,
+    profileViews: stats.profileViews,
+    timeZone,
+  });
+  const requestCount = displayCount(stats.patientRequests ? stats.patientRequests.total : null, PATIENT_REQUESTS_HINT);
+  const sentCount = displayCount(stats.referralsSent, 'Referrals sent: patients you sent to another doctor this month.');
+  const receivedCount = displayCount(stats.referralsReceived, 'Referrals received: patients other doctors sent you this month.');
   const lives = getFeature('lives');
   const showLives = lives && lives.state !== 'hidden' && lives.state !== 'coming_soon';
   const plan = ctx.membership.isFounder
@@ -45,7 +56,7 @@ async function DashboardBody() {
     : ctx.membership.priceLabel || (ctx.membership.source === 'comped' ? 'Included' : 'Free');
 
   return (
-    <div className="space-y-6" data-patient-requests={stats.patientRequests.total}>
+    <div className="space-y-6" data-patient-requests={stats.patientRequests?.total ?? ''}>
       <PageHeader
         title={hello}
         description="Here's what needs you today."
@@ -74,10 +85,10 @@ async function DashboardBody() {
           <StatList
             title="This month"
             rows={[
-              { label: 'Profile views', value: (stats.viewsInRange ?? stats.profileViews).toLocaleString(), hint: 'Profile views: people who opened your public profile. The all-time total is on the chart. This number is views in the current month when that log exists.' },
-              { label: 'New leads', value: String(stats.patientRequests.total), hint: 'Patient requests: people who asked to book with you through NeuroChiro this month.' },
-              { label: 'Referrals sent', value: String(stats.referralsSent), hint: 'Referrals sent: patients you sent to another doctor this month.' },
-              { label: 'Referrals received', value: String(stats.referralsReceived), hint: 'Referrals received: patients other doctors sent you this month.' },
+              { label: 'Profile views', value: monthViews.value, hint: monthViews.hint },
+              { label: 'Patient requests', value: requestCount.value, hint: requestCount.hint },
+              { label: 'Referrals sent', value: sentCount.value, hint: sentCount.hint },
+              { label: 'Referrals received', value: receivedCount.value, hint: receivedCount.hint },
             ]}
           />
           <Card>
@@ -85,7 +96,7 @@ async function DashboardBody() {
             <p className="text-sm text-portal-ink-2 mt-1">Your plan: {plan}</p>
             <ul className="mt-3 space-y-2 text-sm text-portal-ink-2">
               <li>Network profile, so patients can find you on neurochiro.co.</li>
-              <li>{stats.patientRequests.total} new lead{stats.patientRequests.total === 1 ? '' : 's'} this month.</li>
+              <li>{requestCount.value} patient request{stats.patientRequests?.total === 1 ? '' : 's'} this month.</li>
               {showLives ? <li>The Weekly Adjustment. Thursday at 8 PM ET.</li> : null}
               <li>Spotlight interview. We will reach out to schedule.</li>
               <li>Content rotation. We will reach out to schedule.</li>

@@ -6,6 +6,7 @@ import { logPortalEvent } from '@/lib/leads/send'
 import { outcomePatch, stageToAckAction } from '@/lib/leads/outcomes'
 import { isMissingColumn, updateContactRequest } from '@/lib/leads/schema'
 import { parseLegacyNote } from '@/lib/leads/validate'
+import { dedupePatientRequests, pipelineTab } from '@/lib/portal/stats'
 
 async function getDoctorId(userId: string): Promise<string | null> {
   const { data } = await createAdminClient().from('doctors').select('id').eq('user_id', userId).single();
@@ -60,14 +61,14 @@ export async function getLeadPipeline() {
     };
   });
 
-  // Merge and sort by created_at descending
-  const leads = [...rawLeads.map((l: any) => ({ ...l, _type: 'lead' })), ...contactLeads]
+  // Merge, then keep one row per person (same phone or email, furthest stage).
+  const merged = [...rawLeads.map((l: any) => ({ ...l, _type: 'lead' })), ...contactLeads]
     .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const leads = dedupePatientRequests(merged);
 
   const stageCounts = { new: 0, contacted: 0, scheduled: 0, converted: 0 };
   for (const l of leads) {
-    const s = (l as any).stage || 'new';
-    if (s in stageCounts) stageCounts[s as keyof typeof stageCounts]++;
+    stageCounts[pipelineTab((l as any).stage)]++;
   }
 
   const total = leads.length;

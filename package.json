@@ -9,7 +9,7 @@
     "postbuild": "next-sitemap",
     "start": "next start",
     "lint": "node scripts/lint-portal-style.mjs && eslint .",
-    "test:portal": "node --experimental-strip-types --test src/lib/portal/membership.test.ts src/lib/portal/stats.test.ts src/lib/portal/weekly-show.test.ts src/lib/chiromatch-status.test.ts src/lib/referrals/pure.test.ts src/lib/referrals/emails.test.ts",
+    "test:portal": "node --experimental-strip-types --test src/lib/portal/*.test.ts src/lib/chiromatch-status.test.ts src/lib/referrals/pure.test.ts src/lib/referrals/emails.test.ts",
     "test:e2e": "playwright test",
     "test:leads": "node --experimental-strip-types --test src/lib/doctor-timezone.test.ts src/lib/leads/escalation.test.ts",
     "test:seminars": "node --experimental-strip-types --test src/lib/seminars/seminars.test.ts src/lib/seminars/checkin-window.test.ts",
