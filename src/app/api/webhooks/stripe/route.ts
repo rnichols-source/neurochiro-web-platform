@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { Resend } from "resend";
 import { checkoutFromStripeSession, fulfillSeminarSession, isSeminarCheckout, refundSeminarCharge, releaseSeminarHold } from "@/lib/seminars/fulfill";
 import { sendStudentWelcome } from "@/lib/students/welcome-email";
+import { fulfillJobCheckout } from "@/lib/jobs/fulfill";
 import { supabaseSeminarStore } from "@/lib/seminars/fulfill-db";
 
 export async function POST(req: Request) {
@@ -53,6 +54,11 @@ export async function POST(req: Request) {
           if (session.payment_status === "paid") {
             await fulfillSeminarSession(supabaseSeminarStore(), checkoutFromStripeSession(session));
           }
+          break;
+        }
+        const jobMeta = session.metadata?.type;
+        if (jobMeta === "job_feature" || jobMeta === "job_post_nonmember") {
+          await fulfillJobCheckout(supabase, session);
           break;
         }
         const userId = session.metadata?.userId;

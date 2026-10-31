@@ -1,15 +1,25 @@
 "use server";
 
 import { createServerSupabase } from '@/lib/supabase-server';
+import { createAdminClient } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
+import { canPostFree, insertMemberPost } from '@/lib/jobs/posting';
+import { LIMIT_MESSAGE, stageLabel, toApplicationStage } from '@/lib/jobs/posting-pure';
+import { ensureContextConversation } from '@/lib/messaging/db';
+import { missingSchema } from '@/lib/students/schema';
 
 /** Verify the current user owns the job that an application belongs to */
 async function verifyApplicationOwnership(supabase: any, userId: string, applicationId: string) {
-  const { data } = await supabase
+  const canonical = await (supabase as any)
+    .from('job_applications')
+    .select('job_id, job:job_postings!inner(doctor_id)')
+    .eq('id', applicationId)
+    .maybeSingle();
+  const data = canonical.data || (await supabase
     .from('applications')
     .select('job_id, job:job_postings!inner(doctor_id)')
     .eq('id', applicationId)
-    .single();
+    .maybeSingle()).data;
   if (!data || (data as any).job?.doctor_id !== userId) {
     throw new Error("Forbidden: You don't own this application's job");
   }
@@ -74,28 +84,32 @@ export async function createJobPosting(formData: any) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { data, error } = await supabase
-    .from('job_postings')
-    .insert({
-      doctor_id: user.id,
-      title: formData.title,
-      description: formData.description,
-      type: formData.type || 'Associate',
-      salary_min: formData.salary_min,
-      salary_max: formData.salary_max,
-      benefits: formData.benefits || [],
-      requirements: formData.requirements || [],
-      category: formData.category || null,
-      employment_type: formData.employment_type || null,
-      apply_method: formData.apply_method || 'neurochiro',
-      apply_url: formData.apply_url || null,
-      expires_at: null,
-      status: 'Active'
-    })
-    .select()
-    .single();
+  const decision = await canPostFree(user.id);
+  if (!decision.ok && decision.reason === 'limit') throw new Error(LIMIT_MESSAGE);
+  if (!decision.ok) throw new Error('Outside clinics post at /jobs/post.');
 
-  if (error) {
+  const posted = await insertMemberPost({
+    doctorUserId: user.id,
+    title: formData.title,
+    description: formData.description || '',
+    type: formData.type || 'Associate',
+    employmentType: formData.employment_type,
+    salaryMin: formData.salary_min,
+    salaryMax: formData.salary_max,
+  });
+  if ('error' in posted) throw new Error(posted.error);
+
+  await (createAdminClient() as any).from('job_postings').update({
+    benefits: formData.benefits || [],
+    requirements: formData.requirements || [],
+    category: formData.category || null,
+    apply_method: formData.apply_method || 'neurochiro',
+    apply_url: formData.apply_url || null,
+    employment_type: formData.employment_type || null,
+  }).eq('id', posted.jobId);
+
+  const { data, error } = await supabase.from('job_postings').select('*').eq('id', posted.jobId).single();
+  if (error || !data) {
     console.error("Error creating job posting:", error);
     throw new Error("Failed to create job posting");
   }
@@ -261,31 +275,68 @@ export async function getApplications(jobId?: string) {
   }));
 
   // 4. Transform public applications
-  const publicResults = (publicApps || []).map((app: any) => ({
+  const publicResults = await Promise.all((publicApps || []).map(async (app: any) => ({
     id: app.id,
     jobId: app.job_id,
     jobTitle: app.job?.title || 'Job Listing',
-    candidateId: app.applicant_id || null,
+    candidateId: app.student_user_id || app.applicant_id || null,
     name: app.applicant_name || 'Anonymous Applicant',
     email: app.applicant_email || '',
     phone: app.applicant_phone || '',
     message: app.message || '',
     school: null,
     gradYear: null,
-    stage: app.stage === 'new' || !app.stage ? 'New' : app.stage.charAt(0).toUpperCase() + app.stage.slice(1),
+    stage: stageLabel(app.stage),
     rating: 0,
     doctorNotes: '',
     stageHistory: [],
     skills: [],
-    resumeUrl: null,
+    resumeUrl: await signResume(app.resume_url),
     appliedAt: app.created_at,
     source: 'public' as const,
-  }));
+  })));
 
-  // 5. Merge and sort by date (newest first)
-  return [...studentResults, ...publicResults].sort((a, b) =>
+  const seen = new Set(
+    publicResults
+      .filter((app) => app.candidateId)
+      .map((app) => `${app.jobId}:${app.candidateId}`),
+  );
+  const legacyOnly = studentResults.filter((app) => !app.candidateId || !seen.has(`${app.jobId}:${app.candidateId}`));
+
+  return [...publicResults, ...legacyOnly].sort((a, b) =>
     new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime()
   );
+}
+
+async function signResume(url: string | null | undefined): Promise<string | null> {
+  if (!url) return null;
+  if (!url.startsWith('student-resumes/')) return url;
+  const path = url.slice('student-resumes/'.length);
+  const admin = createAdminClient();
+  const signed = await admin.storage.from('student-resumes').createSignedUrl(path, 60 * 10);
+  return signed.data?.signedUrl || null;
+}
+
+export async function openJobApplicationThread(applicationId: string) {
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Unauthorized' };
+  await verifyApplicationOwnership(supabase, user.id, applicationId);
+  const admin = createAdminClient();
+  let app = await (admin as any).from('job_applications').select('applicant_id, student_user_id').eq('id', applicationId).maybeSingle();
+  if (app.error && missingSchema(app.error)) {
+    app = await (admin as any).from('applications').select('candidate_id').eq('id', applicationId).maybeSingle();
+  }
+  const other = app.data?.student_user_id || app.data?.applicant_id || app.data?.candidate_id;
+  if (!other) return { error: 'This applicant does not have an account yet.' };
+  const conversationId = await ensureContextConversation({
+    participantOne: user.id,
+    participantTwo: other,
+    contextType: 'job_application',
+    contextId: applicationId,
+  });
+  if (!conversationId) return { error: 'Could not open the conversation.' };
+  return { conversationId };
 }
 
 export async function updateApplicationStage(applicationId: string, stage: string) {
@@ -294,14 +345,28 @@ export async function updateApplicationStage(applicationId: string, stage: strin
   if (!user) throw new Error("Unauthorized");
   await verifyApplicationOwnership(supabase, user.id, applicationId);
 
-  const { data, error } = await supabase
-    .from('applications')
-    .update({ stage, updated_at: new Date().toISOString() })
+  const mapped = toApplicationStage(stage);
+  const canonical = await (supabase as any)
+    .from('job_applications')
+    .update({ stage: mapped, updated_at: new Date().toISOString() })
     .eq('id', applicationId)
     .select()
-    .single();
+    .maybeSingle();
 
-  if (error) {
+  let data = canonical.data;
+  let error = canonical.error;
+  if ((!data && !error) || (error && missingSchema(error))) {
+    const legacy = await supabase
+      .from('applications')
+      .update({ stage, updated_at: new Date().toISOString() })
+      .eq('id', applicationId)
+      .select()
+      .single();
+    data = legacy.data;
+    error = legacy.error;
+  }
+
+  if (error || !data) {
     console.error("Error updating application stage:", error);
     throw new Error("Failed to update stage");
   }
@@ -322,11 +387,14 @@ export async function updateApplicationStage(applicationId: string, stage: strin
 
   // If stage is 'Interview', we can trigger an automation
   if (stage === 'Interview') {
-    const { data: candidateProfile } = await supabase
+    const personId = (data as { candidate_id?: string; student_user_id?: string; applicant_id?: string }).candidate_id
+      || (data as { student_user_id?: string }).student_user_id
+      || (data as { applicant_id?: string }).applicant_id;
+    const { data: candidateProfile } = personId ? await supabase
         .from('profiles')
         .select('email, full_name')
-        .eq('id', data.candidate_id)
-        .single();
+        .eq('id', personId)
+        .single() : { data: null };
 
     if (candidateProfile?.email) {
         // Trigger Resend email logic here

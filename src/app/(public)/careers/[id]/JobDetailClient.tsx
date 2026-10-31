@@ -3,9 +3,17 @@
 import { useState } from "react";
 import { MapPin, Briefcase, DollarSign, Clock, ExternalLink, CheckCircle } from "lucide-react";
 import Link from "next/link";
-import { applyToJob } from "../actions";
+import { applyAsMember } from "@/app/(public)/jobs/apply-actions";
 
-export default function JobDetailClient({ job }: { job: any }) {
+export default function JobDetailClient({
+  job,
+  applyMode = "guest",
+  prefill,
+}: {
+  job: any;
+  applyMode?: "guest" | "join" | "member";
+  prefill?: { name?: string; email?: string };
+}) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -24,26 +32,16 @@ export default function JobDetailClient({ job }: { job: any }) {
     e.preventDefault();
     setSubmitting(true);
     setError("");
-    const fd = new FormData(e.currentTarget);
-    try {
-      await applyToJob(job.id, {
-        name: fd.get("name") as string,
-        email: fd.get("email") as string,
-        phone: (fd.get("phone") as string) || undefined,
-        message: (fd.get("message") as string) || undefined,
-      });
-      setSubmitted(true);
-    } catch (err: any) {
-      setError(err?.message?.includes("already applied") ? "You've already applied for this position." : "Failed to submit. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
+    const result = await applyAsMember(job.id, new FormData(e.currentTarget));
+    if (result.error) setError(result.error);
+    else setSubmitted(true);
+    setSubmitting(false);
   }
 
   return (
     <div className="min-h-dvh bg-neuro-cream pt-24 pb-20">
       <div className="max-w-3xl mx-auto px-6 space-y-8 pt-8">
-        <Link href="/careers" className="text-sm text-neuro-orange font-bold hover:underline">&larr; Back to Careers</Link>
+        <Link href="/jobs" className="text-sm text-neuro-orange font-bold hover:underline">&larr; Back to associateships</Link>
 
         <div className="bg-white rounded-2xl border border-gray-100 p-8 space-y-6">
           <div>
@@ -103,13 +101,23 @@ export default function JobDetailClient({ job }: { job: any }) {
             <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
             <h2 className="text-xl font-bold text-neuro-navy mb-2">You&apos;re in the running!</h2>
             <p className="text-sm text-gray-500 mb-4">Your application has been sent directly to the clinic. They&apos;ll reach out if it&apos;s a fit.</p>
-            <Link href="/careers" className="inline-flex items-center gap-2 px-6 py-2.5 bg-neuro-navy text-white font-bold rounded-xl text-xs hover:bg-neuro-navy/90 transition-colors">
-              Browse More Positions
+            <Link href="/jobs" className="inline-flex items-center gap-2 px-6 py-2.5 bg-neuro-navy text-white font-bold rounded-xl text-sm hover:bg-neuro-navy/90 transition-colors min-h-11">
+              Browse more associateships
+            </Link>
+          </div>
+        ) : applyMode !== "member" ? (
+          <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+            <h2 className="text-xl font-bold text-neuro-navy mb-2">
+              {applyMode === "join" ? "Membership is required to apply" : "Join as a student to apply"}
+            </h2>
+            <p className="text-base text-gray-600 mb-4">Students can browse associateships free. Applying takes a $33/month membership.</p>
+            <Link href={applyMode === "join" ? "/student/subscribe" : "/get-started?role=student"} className="inline-flex items-center justify-center min-h-11 px-6 bg-neuro-orange text-white font-bold rounded-xl">
+              {applyMode === "join" ? "Join for $33/month" : "Join as a student"}
             </Link>
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-gray-100 p-8">
-            <h2 className="text-xl font-bold text-neuro-navy mb-1">Apply for this Position</h2>
+            <h2 className="text-xl font-bold text-neuro-navy mb-1">Apply for this position</h2>
             <p className="text-sm text-gray-400 mb-5">Takes less than 60 seconds. The clinic will be notified immediately.</p>
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4">
@@ -119,11 +127,11 @@ export default function JobDetailClient({ job }: { job: any }) {
             <form onSubmit={handleApply} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                <input name="name" required placeholder="Dr. Jane Smith" className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 focus:border-neuro-orange/40" />
+                <input name="name" required defaultValue={prefill?.name || ""} placeholder="Your name" className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 focus:border-neuro-orange/40" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                <input name="email" type="email" required placeholder="jane@example.com" className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 focus:border-neuro-orange/40" />
+                <input name="email" type="email" readOnly defaultValue={prefill?.email || ""} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-base bg-gray-50" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone <span className="text-gray-400 font-normal">(optional)</span></label>
@@ -133,7 +141,9 @@ export default function JobDetailClient({ job }: { job: any }) {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Why are you a great fit? <span className="text-gray-400 font-normal">(optional)</span></label>
                 <textarea name="message" rows={3} placeholder="Share what excites you about this role..." className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neuro-orange/20 focus:border-neuro-orange/40" />
               </div>
-              <button type="submit" disabled={submitting} className="w-full py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm hover:bg-neuro-orange/90 transition-colors disabled:opacity-50 active:scale-[0.98]">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Resume <span className="text-gray-400 font-normal">(optional, PDF, 5 MB)</span></label>
+              <input name="resume" type="file" accept=".pdf,.doc,.docx,application/pdf" className="w-full text-base" />
+              <button type="submit" disabled={submitting} className="w-full py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm hover:bg-neuro-orange/90 transition-colors disabled:opacity-50 min-h-11">
                 {submitting ? "Submitting..." : "Submit Application"}
               </button>
               <p className="text-[11px] text-gray-400 text-center">Your info is shared only with this clinic. No spam, ever.</p>

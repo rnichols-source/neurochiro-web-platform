@@ -14,7 +14,8 @@
     "test:leads": "node --experimental-strip-types --test src/lib/doctor-timezone.test.ts src/lib/leads/escalation.test.ts",
     "test:seminars": "node --experimental-strip-types --test src/lib/seminars/seminars.test.ts src/lib/seminars/checkin-window.test.ts",
     "test:messaging": "node --experimental-strip-types --test src/lib/messaging/access.test.ts src/lib/messaging/validate.test.ts src/lib/messaging/send.test.ts src/lib/messaging/email.test.ts src/lib/messaging/notify.test.ts src/lib/messaging/realtime.test.ts",
-    "test:students": "node --experimental-strip-types --test src/lib/auth/role-allowlist.test.ts src/lib/students/membership-pure.test.ts src/lib/students/seminar-price.test.ts src/lib/students/gate.test.ts"
+    "test:students": "node --experimental-strip-types --test src/lib/auth/role-allowlist.test.ts src/lib/students/membership-pure.test.ts src/lib/students/seminar-price.test.ts src/lib/students/gate.test.ts",
+    "test:jobs": "node --experimental-strip-types --test src/lib/jobs/posting-pure.test.ts src/lib/jobs/redirects.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",

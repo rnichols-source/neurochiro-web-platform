@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { LEGACY_STORE_PRODUCT_IDS } from "./src/lib/legacy-store-ids";
+import { JOB_REDIRECTS } from "./src/lib/jobs/redirects";
 
 const nextConfig: NextConfig = {
   typescript: {
@@ -51,6 +52,7 @@ const nextConfig: NextConfig = {
       },
       { source: '/student/career-pipeline', destination: '/student/dashboard', permanent: false },
       { source: '/student/mentors', destination: '/student/doctors', permanent: false },
+      ...JOB_REDIRECTS,
       ...LEGACY_STORE_PRODUCT_IDS.map((id) => ({
         source: `/store/${id}`,
         destination: '/store',

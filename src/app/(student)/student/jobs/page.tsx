@@ -100,8 +100,10 @@ export default function JobsPage() {
   const [filterEmployment, setFilterEmployment] = useState<string>("all");
   const [filterMentor, setFilterMentor] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [tab, setTab] = useState<"board" | "applied">("board");
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("tab") === "applied") setTab("applied");
     getPublicJobs({}).then(setJobs).catch(console.error).finally(() => setLoading(false));
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -123,11 +125,24 @@ export default function JobsPage() {
         });
       }
       // Fetch applied jobs
-      const { data } = await supabase
+      const primary = await supabase
         .from("job_applications")
-        .select("job_id")
-        .eq("applicant_id", user.id);
-      if (data) setAppliedJobIds(new Set(data.map((a) => a.job_id)));
+        .select("job_id, stage")
+        .or(`applicant_id.eq.${user.id},student_user_id.eq.${user.id}`);
+      const fallback = primary.error
+        ? await supabase.from("job_applications").select("job_id").eq("applicant_id", user.id)
+        : primary;
+      const appliedRows = (fallback.data || []) as { job_id: string; stage?: string | null }[];
+      if (appliedRows.length) {
+        setAppliedJobIds(new Set(appliedRows.map((a) => a.job_id)));
+        setAppliedStages((prev) => {
+          const next = { ...prev };
+          appliedRows.forEach((row: { job_id: string; stage?: string | null }) => {
+            next[row.job_id] = row.stage || prev[row.job_id] || "new";
+          });
+          return next;
+        });
+      }
       const { data: apps } = await supabase
         .from("applications")
         .select("job_id, stage")
@@ -177,6 +192,8 @@ export default function JobsPage() {
     return result;
   }, [jobsWithScores, search, sortBy, filterEmployment, filterMentor]);
 
+  const visible = tab === "applied" ? filtered.filter((job) => appliedJobIds.has(job.id)) : filtered;
+
   const topMatches = useMemo(() => {
     return jobsWithScores
       .filter((j) => j.matchScore.total >= 50 && !appliedJobIds.has(j.id))
@@ -208,7 +225,11 @@ export default function JobsPage() {
             <Briefcase className="w-7 h-7 text-[#D66829]" />
             Jobs
           </h1>
-          <p className="text-xs text-[#5A6873] mt-1">Open positions from doctors in the network</p>
+          <p className="text-sm text-[#5A6873] mt-1">Open associateships. Membership is required to apply.</p>
+        </div>
+        <div className="flex gap-2">
+          <button type="button" onClick={() => setTab("board")} className={`min-h-11 rounded-lg px-3 text-sm ${tab === "board" ? "bg-[#14212E] text-white" : "bg-white border border-[#e3e8ed]"}`}>Board</button>
+          <button type="button" onClick={() => setTab("applied")} className={`min-h-11 rounded-lg px-3 text-sm ${tab === "applied" ? "bg-[#14212E] text-white" : "bg-white border border-[#e3e8ed]"}`}>Applied</button>
         </div>
       </header>
 
@@ -341,7 +362,7 @@ export default function JobsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((job) => {
+          {visible.map((job) => {
             const salary = fmtSalary(job.salary_min, job.salary_max);
             const location = [job.city || job.clinic_city, job.state || job.clinic_state].filter(Boolean).join(", ");
             const hasApplied = appliedJobIds.has(job.id);
