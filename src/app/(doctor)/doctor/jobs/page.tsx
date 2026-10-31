@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PageHeader from "@/components/portal/PageHeader";
+import { jobDateLine } from "@/lib/portal/jobs";
 import HiringTabs from "./HiringTabs";
 import {
   X,
@@ -426,11 +427,12 @@ function JobsPageInner() {
         <div className="space-y-4">
           {jobs.map((job) => {
             const count = job.applications?.[0]?.count ?? 0;
-            const isOpen = job.status === "Active";
+            const dates = jobDateLine(job, new Date());
+            const isOpen = dates.pill === "Open";
             return (
               <div
                 key={job.id}
-                className={`bg-white border rounded-lg p-5 hover:shadow-sm transition-shadow ${selectedJobId === job.id ? "ring-2 ring-blue-500" : "border-gray-200"}`}
+                className={`bg-white border rounded-lg p-5 hover:shadow-sm transition-shadow ${selectedJobId === job.id ? "ring-2 ring-portal-accent" : "border-gray-200"}`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <button
@@ -444,7 +446,7 @@ function JobsPageInner() {
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full font-medium ${isOpen ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
                       >
-                        {isOpen ? "Open" : "Closed"}
+                        {dates.pill}
                       </span>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -464,7 +466,7 @@ function JobsPageInner() {
                       {typeof job.view_count === "number" ? `${job.view_count} views · ` : ""}
                       {count} applications
                       {job.featured_until ? ` · Featured until ${new Date(job.featured_until).toLocaleDateString()}` : ""}
-                      {job.expires_at ? ` · Expires ${new Date(job.expires_at).toLocaleDateString()}` : ""}
+                      {dates.expiry ? ` · ${dates.expiry}` : ""}
                     </p>
                   </button>
                   {isOpen ? (
