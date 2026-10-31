@@ -31,8 +31,7 @@ export const PORTAL_FEATURES: PortalFeature[] = [
   { key: 'chiromatch', label: 'ChiroMatch', href: '/doctor/chiromatch', group: 'grow', subtitle: 'Match with graduating students', state: 'coming_soon', requires: 'pro', comingSoonBlurb: 'ChiroMatch opens when a cycle is running. You will be able to rank graduating students from here.', icon: 'Shuffle' },
   // RAYMOND: confirm the show is running; else coming_soon
   { key: 'lives', label: 'The Weekly Adjustment', href: '/doctor/lives', group: 'grow', subtitle: 'Live show every Thursday 8 PM ET', state: 'beta', icon: 'Video' },
-  // RAYMOND: stays beta until supabase/migrations/20261102000000_referrals_v2.sql has been run, then set state to 'live'.
-  { key: 'referrals', label: 'Referrals', href: '/doctor/referrals', group: 'grow', subtitle: 'Refer a patient to another doctor', state: 'beta', requires: 'pro', icon: 'Users' },
+  { key: 'referrals', label: 'Referrals', href: '/doctor/referrals', group: 'grow', subtitle: 'Refer a patient to another doctor', state: 'live', requires: 'pro', icon: 'Users' },
   { key: 'community', label: 'Community', href: '/doctor/community', group: 'grow', subtitle: 'Private doctor community', state: 'coming_soon', comingSoonBlurb: 'A private place for doctors in the network. We will tell you when it opens.', icon: 'Users' },
   { key: 'marketplace', label: 'Marketplace', href: '/doctor/marketplace', group: 'grow', subtitle: 'Vetted vendors with member deals', state: 'beta', icon: 'ShoppingBag' },
   { key: 'practice_tools', label: 'Practice tools', href: '/doctor/tools', group: 'tools', subtitle: 'Care plan, scan reports, KPIs, P&L, CE, billing guide', state: 'live', requires: 'practice_tools', icon: 'Wrench' },
@@ -46,6 +45,5 @@ export const PORTAL_FEATURES: PortalFeature[] = [
   { key: 'help', label: 'Help', href: '/doctor/help', group: 'account', subtitle: 'Ask us anything', state: 'live', icon: 'CircleHelp' },
 ];
 
-// RAYMOND: flip to 'live' after supabase/migrations/20261103000000_messaging_hardening.sql has been run.
-// Beta turns on the inbox, search, and idempotent send paths. The send safety checks stay on either way.
-export const messagingV2: FeatureState = 'beta';
+// Messaging hardening migration has been run. Send safety checks stay on either way.
+export const messagingV2: FeatureState = 'live';
