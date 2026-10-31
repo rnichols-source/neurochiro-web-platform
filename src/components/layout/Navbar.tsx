@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown, User, Stethoscope, GraduationCap, Zap, MapPin, BookOpen, Crown, Users, Briefcase, Store, ShoppingBag, Calendar, Sparkles, Bell, Heart } from "lucide-react";
 
 import RegionSwitcher from "./RegionSwitcher";
+import { CartButton } from "@/components/store/CartButton";
 import GetStartedModal from "./GetStartedModal";
 import NotificationBell from "./NotificationBell";
 import { createClient } from "@/lib/supabase";
@@ -147,6 +148,7 @@ export default function Navbar() {
 
           {/* Auth Actions */}
           <div className="hidden lg:flex items-center gap-4">
+            <CartButton />
             <RegionSwitcher />
             
             {user ? (
@@ -214,12 +216,15 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Menu Toggle */}
-          <button 
-            className={`lg:hidden p-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`}
-            onClick={() => setMobileMenuOpen(true)}
-          >
-            <Menu className="w-6 h-6" />
-          </button>
+          <div className="flex items-center lg:hidden">
+            <CartButton />
+            <button 
+              className={`p-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg ${useWhiteText ? 'text-white' : 'text-neuro-navy'}`}
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+          </div>
         </div>
       </header>
 

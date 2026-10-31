@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import Navbar from "@/components/layout/Navbar";
-import { CartProvider } from "./store/cart-context";
-import { CartDrawer } from "./store/cart-drawer";
+import { ShopifyCartProvider } from "@/components/store/ShopifyCartProvider";
+import { CartDrawer } from "@/components/store/CartDrawer";
 import ActivityTracker from "@/components/common/ActivityTracker";
+import { isShopifyConfigured } from "@/lib/shopify";
 
 export default function PublicLayout({
   children,
@@ -10,7 +11,7 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <CartProvider>
+    <ShopifyCartProvider configured={isShopifyConfigured()}>
       <Navbar />
       <div className="min-h-dvh">
         {children}
@@ -19,6 +20,6 @@ export default function PublicLayout({
       <Suspense fallback={null}>
         <ActivityTracker />
       </Suspense>
-    </CartProvider>
+    </ShopifyCartProvider>
   );
 }

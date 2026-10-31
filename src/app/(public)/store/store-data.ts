@@ -1,3 +1,4 @@
+// Legacy digital products. Still used by /account/purchases and /store/success. Do not render on /store.
 // ============================================================================
 // Store Data — Public Product Catalog with Retail + Member Pricing
 // ============================================================================

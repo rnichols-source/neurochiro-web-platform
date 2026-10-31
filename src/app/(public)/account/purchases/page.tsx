@@ -206,13 +206,13 @@ export default function MyPurchasesPage() {
               No purchases yet
             </h2>
             <p className="text-gray-400 text-sm mb-6">
-              Browse the store and find tools to grow your practice.
+              Your NeuroChiro tools will show up here once purchased.
             </p>
             <Link
               href="/store"
               className="inline-flex items-center gap-2 px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors"
             >
-              Browse the Store <ArrowRight className="w-4 h-4" />
+              Shop NeuroChiro merch <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         ) : (
@@ -283,7 +283,7 @@ export default function MyPurchasesPage() {
             className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-neuro-navy transition-colors font-semibold"
           >
             <ShoppingBag className="w-4 h-4" />
-            Continue Shopping
+            Shop NeuroChiro merch
           </Link>
         </div>
       </div>

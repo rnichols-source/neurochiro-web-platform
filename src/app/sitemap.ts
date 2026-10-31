@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { REGIONS } from '@/lib/regions';
 import { EMPTY_METROS, cityToSlug } from '@/lib/city-data';
+import { getProducts } from '@/lib/shopify';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,6 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/careers',
     '/login',
     '/register',
+    '/store',
   ].map((route) => ({
     url: `${BASE_URL}${route}`,
     lastModified: new Date().toISOString(),
@@ -108,5 +110,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }));
 
-  return [...routes, ...regionalRoutes, ...doctorRoutes, ...seminarRoutes, ...cityRoutes];
+  let productRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const catalog = await getProducts({ first: 100 });
+    if (catalog.ok) {
+      productRoutes = catalog.products.map((product) => ({
+        url: `${BASE_URL}/store/${product.handle}`,
+        lastModified: product.createdAt || new Date().toISOString(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      }));
+    }
+  } catch {
+    console.error('[sitemap] shopify products skipped');
+  }
+
+  return [...routes, ...productRoutes, ...regionalRoutes, ...doctorRoutes, ...seminarRoutes, ...cityRoutes];
 }
