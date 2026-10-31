@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  countFromHead,
   countIntroductions,
   countPatientRequests,
   marketRank,
@@ -114,6 +115,12 @@ test('summarizeLeads header totals stay at or under the all-time tab totals', ()
   assert.equal(summary.header.total, 1);
   assert.equal(summary.header.contacted, 1);
   assert.equal(summary.tabs.total, 2);
+});
+
+test('a head count error is null, not zero', () => {
+  assert.equal(countFromHead({ count: null, error: { message: 'missing' } }), null);
+  assert.equal(countFromHead({ count: 0, error: null }), 0);
+  assert.equal(countFromHead({ count: 4, error: null }), 4);
 });
 
 test('an errored reply_logs query is null, not zero', () => {

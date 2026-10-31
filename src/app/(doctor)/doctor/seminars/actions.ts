@@ -5,42 +5,14 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { revalidatePath } from 'next/cache'
 import { stripe } from '@/lib/stripe'
 import { STUDENT_CONFIG } from '@/config/students'
-import {
-  filterUpcomingRecommendations,
-  recommendationChips,
-  type DoctorFocus,
-  type SeminarRecommendationRow,
-} from '@/lib/portal/seminar-recommendations'
+import { loadDoctorSeminars, loadEnhancedSeminarAnalytics, loadRecommendedSeminars } from './load'
 
 
 export async function getDoctorSeminars() {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
-
-  // Use admin client: doctor dashboard needs payment_status (not granted to authenticated)
-  const admin = createAdminClient()
-  const { data, error } = await admin
-    .from('seminars')
-    .select(`
-      id, host_id, title, description, dates, location, city, country,
-      venue_name, venue_address, start_time, end_time, event_type,
-      instructor_name, instructor_bio, registration_link, price, ce_hours,
-      categories, tags, target_audience, image_url, hero_image_url,
-      gallery_images, schedule, speakers, faq, listing_tier,
-      is_past, is_approved, payment_status, page_views, clicks,
-      created_at, updated_at,
-      registrations:seminar_registrations(count)
-    `)
-    .eq('host_id', user.id)
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    console.error("Error fetching doctor seminars:", error)
-    return []
-  }
-
-  return data
+  return loadDoctorSeminars(user.id)
 }
 
 export async function getSeminarAnalytics() {
@@ -409,40 +381,11 @@ export async function getRecommendedSeminars() {
     .eq('user_id', user.id)
     .single();
 
-  const sb = supabase as any;
-  const { data: seminars } = await sb
-    .from('seminars')
-    .select('id, title, dates, city, country, location, description, tags, ce_hours, host_id, is_past')
-    .eq('is_approved', true)
-    .neq('host_id', user.id)
-    .order('dates', { ascending: true })
-    .limit(40);
-
-  if (!seminars || seminars.length === 0) return [];
-
-  const focus: DoctorFocus = {
+  return loadRecommendedSeminars(user.id, {
     city: doctor?.city,
     state: doctor?.state,
     specialties: Array.isArray(doctor?.specialties) ? doctor.specialties : [],
-  };
-
-  const scored = (seminars as Array<SeminarRecommendationRow & { id?: string }>).map((sem) => {
-    const haystack = `${sem.title || ''} ${sem.description || ''} ${(sem.tags || []).join(' ')}`.toLowerCase();
-    const place = `${sem.city || ''} ${sem.location || ''} ${sem.country || ''}`.toLowerCase();
-    let relevance = 0;
-    if (focus.city && (sem.city || '').toLowerCase() === focus.city.toLowerCase()) relevance += 30;
-    else if (focus.state && place.includes(focus.state.toLowerCase())) relevance += 15;
-    for (const specialty of focus.specialties || []) {
-      if (specialty && haystack.includes(specialty.toLowerCase())) relevance += 10;
-    }
-    if (sem.ce_hours && sem.ce_hours > 0) relevance += Math.min(sem.ce_hours, 20);
-    return { ...sem, relevance };
   });
-
-  return filterUpcomingRecommendations(scored, Date.now()).map((sem) => ({
-    ...sem,
-    chips: recommendationChips(sem, focus),
-  }));
 }
 
 // Enhanced analytics with review data
@@ -450,49 +393,5 @@ export async function getEnhancedSeminarAnalytics() {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-
-  const sb = supabase as any;
-
-  // Get all hosted seminars
-  const { data: seminars } = await supabase
-    .from('seminars')
-    .select('id, title')
-    .eq('host_id', user.id);
-
-  if (!seminars || seminars.length === 0) return { totalSeminars: 0, totalAttendees: 0, avgRating: 0, reviewCount: 0, totalCEDelivered: 0 };
-
-  const seminarIds = seminars.map(s => s.id);
-
-  // Get all registrations
-  const { count: attendeeCount } = await supabase
-    .from('seminar_registrations')
-    .select('id', { count: 'exact', head: true })
-    .in('seminar_id', seminarIds);
-
-  // Get reviews
-  const { data: reviews } = await sb
-    .from('seminar_reviews')
-    .select('rating')
-    .in('seminar_id', seminarIds);
-
-  const reviewCount = reviews?.length || 0;
-  const avgRating = reviewCount > 0
-    ? Number((reviews.reduce((s: number, r: any) => s + r.rating, 0) / reviewCount).toFixed(1))
-    : 0;
-
-  // Get total CE hours delivered
-  const { data: certs } = await sb
-    .from('ce_certificates')
-    .select('ce_hours')
-    .in('seminar_id', seminarIds);
-
-  const totalCEDelivered = (certs || []).reduce((sum: number, c: any) => sum + (c.ce_hours || 0), 0);
-
-  return {
-    totalSeminars: seminars.length,
-    totalAttendees: attendeeCount || 0,
-    avgRating,
-    reviewCount,
-    totalCEDelivered,
-  };
+  return loadEnhancedSeminarAnalytics(user.id);
 }

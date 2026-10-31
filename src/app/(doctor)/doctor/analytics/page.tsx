@@ -7,12 +7,14 @@ import { getPortalContext } from '@/lib/portal/context';
 import { getDoctorPortalStats } from '@/lib/portal/stats-load';
 import { getDoctorTimezone } from '@/lib/doctor-timezone';
 import { displayCount, PATIENT_REQUESTS_HINT, UNAVAILABLE_HINT } from '@/lib/portal/stats';
+import { portalTimer } from '@/lib/portal/timing';
 
 export default async function DoctorAnalytics() {
   const ctx = await getPortalContext();
   if (!ctx?.doctor) redirect('/login');
 
   const timeZone = getDoctorTimezone(ctx.doctor.state, ctx.doctor.country, 'America/New_York') || 'America/New_York';
+  const done = portalTimer('results');
   const stats = await getDoctorPortalStats({
     doctorId: ctx.doctor.id,
     userId: ctx.userId,
@@ -21,6 +23,7 @@ export default async function DoctorAnalytics() {
     profileViews: ctx.doctor.profile_views,
     timeZone,
   });
+  done();
   const viewsKnown = stats.viewsTrackedSince != null && stats.viewsInRange != null;
   const profileViews = viewsKnown ? stats.viewsInRange : null;
   const patientRequests = stats.patientRequests?.total ?? null;

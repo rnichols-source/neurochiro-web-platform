@@ -301,6 +301,11 @@ export function countIntroductions(
   }).length;
 }
 
+export function countFromHead(result: { count?: number | null; error?: unknown }): number | null {
+  if (result.error) return null;
+  return result.count ?? 0;
+}
+
 export function countDatedRows(
   result: { data: { created_at?: string | null }[] | null; error: unknown },
   start: Date | null,

@@ -5,16 +5,17 @@ import { MapPin, Calendar, Award } from "lucide-react";
 import Link from "next/link";
 import { getRecommendedSeminars } from "./actions";
 
-export default function SeminarRecommendations() {
-  const [seminars, setSeminars] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function SeminarRecommendations({ initial }: { initial?: any[] }) {
+  const [seminars, setSeminars] = useState<any[]>(initial || []);
+  const [loading, setLoading] = useState(initial == null);
 
   useEffect(() => {
+    if (initial) return;
     getRecommendedSeminars().then((data) => {
       setSeminars(data);
       setLoading(false);
     });
-  }, []);
+  }, [initial]);
 
   if (loading) return null;
 

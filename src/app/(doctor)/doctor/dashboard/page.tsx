@@ -7,6 +7,7 @@ import { getPortalContext } from '@/lib/portal/context';
 import { greeting, firstName } from '@/lib/portal/greeting';
 import { getDoctorTimezone } from '@/lib/doctor-timezone';
 import { getDoctorPortalStats } from '@/lib/portal/stats-load';
+import { portalTimer } from '@/lib/portal/timing';
 import { displayCount, monthlyViewsDisplay, PATIENT_REQUESTS_HINT } from '@/lib/portal/stats';
 import { getFeature } from '@/lib/portal/features';
 import { redirect } from 'next/navigation';
@@ -28,6 +29,7 @@ async function DashboardBody() {
   const timeZone = getDoctorTimezone(doctor.state, doctor.country, 'America/New_York') || 'America/New_York';
   const hello = `${greeting(new Date(), timeZone)}, Dr. ${firstName(ctx.fullName)}`;
   const profilePath = doctor.slug ? `/directory/${doctor.slug}` : '/doctor/profile';
+  const done = portalTimer('dashboard');
   const [stats, fields, attention, points, spotlight] = await Promise.all([
     getDoctorPortalStats({
       doctorId: doctor.id,
@@ -38,10 +40,11 @@ async function DashboardBody() {
       timeZone,
     }),
     getSetupFields(doctor.id),
-    getAttention(doctor.id, ctx.userId),
+    getAttention(doctor.id, ctx.unreadMessages),
     getViewSeries(doctor.id),
     getSpotlight(doctor.id),
   ]);
+  done();
   const monthViews = monthlyViewsDisplay({
     viewsInRange: stats.viewsInRange,
     viewsTrackedSince: stats.viewsTrackedSince,

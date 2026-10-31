@@ -1,6 +1,6 @@
-import { PORTAL_FEATURES, type FeatureState, type PortalFeature } from '@/config/portal-features';
-import type { Membership } from '@/lib/portal/membership';
-import { billingNavSubtitle } from '@/lib/portal/billing-view';
+import { PORTAL_FEATURES, type FeatureState, type PortalFeature } from '../../config/portal-features.ts';
+import type { Membership } from './membership.ts';
+import { billingNavSubtitle } from './billing-view.ts';
 
 export type PortalNavContext = {
   membership: Membership;

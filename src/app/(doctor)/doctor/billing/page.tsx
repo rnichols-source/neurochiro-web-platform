@@ -6,12 +6,15 @@ import { getPortalContext } from '@/lib/portal/context';
 import { PRO_PRICE_LABEL } from '@/lib/portal/membership';
 import { billingView } from '@/lib/portal/billing-view';
 import { redirect } from 'next/navigation';
+import { portalTimer } from '@/lib/portal/timing';
 
 export default async function BillingPage() {
   const ctx = await getPortalContext();
   if (!ctx) redirect('/login');
   const membership = ctx.membership;
+  const done = portalTimer('billing');
   const billing = await getBillingData();
+  done();
   const view = billingView(membership, billing);
   const renews = billing && 'subscription' in billing ? billing.subscription?.nextBilling : null;
   const description =
